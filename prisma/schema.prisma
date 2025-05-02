@@ -14,14 +14,22 @@ datasource db {
 }
 
 model User {
-  id        String         @id @default(cuid())
-  email     String         @unique
-  password  String?
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  id        String      @id @default(cuid())
+  email     String      @unique
+  name      String?
+  image     String?
+  role      String      @default("CLIENT") // Enum: CLIENT, TRAINER, ADMIN
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  profile   UserProfile?
+  trainer   User?        @relation("TrainerClients", fields: [trainerId], references: [id])
+  trainerId String?      
+  clients   User[]       @relation("TrainerClients")
 
   sessions  UserSession[]
 }
+
 
 model UserSession {
   id         String   @id @default(cuid())
@@ -33,4 +41,49 @@ model UserSession {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model UserProfile {
+  id             String     @id @default(cuid())
+  userId         String     @unique
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  firstName      String?
+  lastName       String?
+  phone          String?
+  birthday       DateTime?
+  sex            String?       // Enum: MALE, FEMALE, OTHER
+  avatarUrl      String?
+
+  activityLevel  String? // Enum: SEDENTARY, LIGHT, MODERATE, ACTIVE, ATHLETE
+  goal           String? // Enum: LOSE_FAT, MAINTAIN, BUILD_MUSCLE
+  bio            String?
+
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  bodyMeasures   UserBodyMeasure[]
+}
+
+model UserBodyMeasure {
+  id             String     @id @default(cuid())
+  userProfileId  String
+  userProfile    UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+
+  measuredAt     DateTime   @default(now())
+
+  weight         Float?     // kg
+  height         Float?     // cm
+  chest          Float?
+  waist          Float?
+  hips           Float?
+  neck           Float?
+  biceps         Float?
+  thigh          Float?
+  calf           Float?
+  bodyFat        Float?     // %
+
+  notes          String?    // e.g., “after leg day”, “fasted”, etc.
+
+  @@index([userProfileId])
 }
