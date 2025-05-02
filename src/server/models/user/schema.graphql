@@ -1,0 +1,27 @@
+enum UserRole {
+	TRAINER
+	CLIENT
+}
+
+type User {
+	id: ID!
+}
+
+type UserProfile {
+	id: ID!
+	firstName: String!
+	lastName: String!
+}
+
+type UserSession {
+	id: ID!
+}
+
+type Query {
+	user: User
+}
+
+type Mutation {
+	# REMOVE THIS
+	createUser: User!
+}
