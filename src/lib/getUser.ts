@@ -34,9 +34,11 @@ export async function getCurrentUser(): Promise<
 	// Get full user data from database
 	const user = await prisma.user.findUnique({
 		where: { email: session.user.email },
-		select: {
-			id: true,
-			email: true,
+		include: {
+			clients: true,
+			profile: true,
+			sessions: true,
+			trainer: true,
 		},
 	});
 

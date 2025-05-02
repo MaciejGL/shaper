@@ -23,14 +23,17 @@ export const authOptions = {
 							},
 							orderBy: { createdAt: 'desc' },
 						},
+						profile: true,
 					},
 				});
+
+				console.log(user);
 
 				if (!user || user.sessions.length === 0) return null;
 
 				await prisma.userSession.delete({ where: { id: user.sessions[0].id } });
 
-				return { id: user.id, email: user.email } as UserWithSession['user'];
+				return user as UserWithSession['user'];
 			},
 		}),
 	],
