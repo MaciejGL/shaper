@@ -23,11 +23,8 @@ export const authOptions = {
 							},
 							orderBy: { createdAt: 'desc' },
 						},
-						profile: true,
 					},
 				});
-
-				console.log(user);
 
 				if (!user || user.sessions.length === 0) return null;
 

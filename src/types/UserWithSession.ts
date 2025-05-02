@@ -1,46 +1,18 @@
 import { Session } from 'next-auth';
+import { User as PrismaUser } from '@prisma/client';
+import { UserSession as PrismaUserSession } from '@prisma/client';
+import { UserProfile as PrismaUserProfile } from '@prisma/client';
 
 export type UserWithSession = {
-	user: User;
-	session: Session;
+	user?: User | null;
+	session?: Session | null;
 };
 
-export type User = {
-	id: string;
-	email: string;
-	phone?: string;
-	name?: string;
-	role: UserRole;
-	image?: string;
-	birthday?: Date;
-	sex?: string;
-	avatarUrl?: string;
-	activityLevel?: string;
-	goal?: string;
-	bio?: string;
-
-	createdAt: Date;
-	updatedAt: Date;
-
-	measures?: UserBodyMeasure[];
-};
-
-export type UserBodyMeasure = {
-	id: string;
-	weight?: number;
-	height?: number;
-	chest?: number;
-	waist?: number;
-	hips?: number;
-	neck?: number;
-	biceps?: number;
-	thigh?: number;
-	calf?: number;
-	bodyFat?: number;
-	notes?: string;
-
-	createdAt: Date;
-	updatedAt: Date;
+type User = PrismaUser & {
+	profile?: PrismaUserProfile | null;
+	trainer?: PrismaUser | null;
+	clients?: PrismaUser[] | null;
+	sessions?: PrismaUserSession[] | null;
 };
 
 export enum UserRole {

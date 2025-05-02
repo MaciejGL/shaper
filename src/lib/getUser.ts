@@ -2,6 +2,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from './auth';
 import { prisma } from './db';
 import { redirect } from 'next/navigation';
+import { UserWithSession } from '@/types/UserWithSession';
 
 export type User = {
 	id: string;
@@ -18,12 +19,7 @@ export type Session = {
  * @returns Promise with the user and session or null if not authenticated
  */
 export async function getCurrentUser(): Promise<
-	| {
-			user: User;
-			session: Session;
-	  }
-	| null
-	| undefined
+	UserWithSession | null | undefined
 > {
 	const session = await getServerSession(authOptions);
 
@@ -34,11 +30,12 @@ export async function getCurrentUser(): Promise<
 	// Get full user data from database
 	const user = await prisma.user.findUnique({
 		where: { email: session.user.email },
+
 		include: {
-			clients: true,
 			profile: true,
-			sessions: true,
 			trainer: true,
+			clients: true,
+			sessions: true,
 		},
 	});
 
@@ -48,7 +45,7 @@ export async function getCurrentUser(): Promise<
 
 	return {
 		user,
-		session: session as Session,
+		session,
 	};
 }
 
