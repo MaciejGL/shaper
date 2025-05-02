@@ -29,6 +29,7 @@ export const Navbar = ({ user }: { user?: UserWithSession | null }) => {
 function NavbarUser({ user }: { user?: UserWithSession | null }) {
 	const pathname = usePathname();
 	const isActiveLink = (path: string) => pathname === path;
+
 	if (!user && isActiveLink('/login')) {
 		return null;
 	}
@@ -49,11 +50,11 @@ function NavbarUser({ user }: { user?: UserWithSession | null }) {
 		);
 	}
 
-	if (user?.user.role === 'TRAINER') {
+	if (user?.user?.role === 'TRAINER') {
 		return <TrainerNavbar />;
 	}
 
-	if (user?.user.role === 'CLIENT') {
+	if (user?.user?.role === 'CLIENT') {
 		return <ClientNavbar />;
 	}
 
@@ -75,8 +76,8 @@ const Link = ({
 			<NextLink
 				href={href}
 				className={cn({
-					'pointer-events-none opacity-50': disabled,
-					'text-zinc-500': isActive,
+					'pointer-events-none opacity-30': disabled,
+					'bg-primary text-primary-foreground': isActive,
 				})}
 				{...props}
 			/>
