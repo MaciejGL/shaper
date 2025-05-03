@@ -1,5 +1,5 @@
 import { useQuery, useInfiniteQuery, UseQueryOptions, UseInfiniteQueryOptions, InfiniteData } from '@tanstack/react-query';
-import { fetchData } from '../lib/graphql';
+import { fetchData } from '@/lib/graphql';
 export type Maybe<T> = T | undefined | null;
 export type InputMaybe<T> = T | undefined | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };

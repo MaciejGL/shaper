@@ -1,21 +1,22 @@
 import type { CodegenConfig } from '@graphql-codegen/cli';
 
 const config: CodegenConfig = {
+	overwrite: true,
 	schema: './src/server/models/**/*.graphql',
+	documents: [
+		'./src/app/**/*.{ts,tsx}',
+		'./src/components/**/*.{ts,tsx}',
+		'./src/(app|components)/**/*.graphql',
+	],
 
 	generates: {
 		'./src/generated/graphql-client.ts': {
-			documents: [
-				'./src/app/**/*.{ts,tsx}',
-				'./src/components/**/*.{ts,tsx}',
-				'./src/(app|components)/**/*.graphql',
-			],
 			config: {
 				typesPrefix: 'GQL',
 				maybeValue: 'T | undefined | null',
 				inputMaybeValue: 'T | undefined | null',
 				reactQueryVersion: 5,
-				fetcher: '../lib/graphql#fetchData',
+				fetcher: '@/lib/graphql#fetchData',
 				addInfiniteQuery: true,
 				exposeQueryKeys: true,
 				exposeMutationKeys: true,
@@ -24,6 +25,7 @@ const config: CodegenConfig = {
 					DateTime: 'string',
 					Date: 'string',
 				},
+				fragmentMasking: false,
 			},
 			plugins: ['typescript', 'typescript-operations', 'typescript-react-query'],
 		},
@@ -33,7 +35,8 @@ const config: CodegenConfig = {
 				typesPrefix: 'GQL',
 				entireFieldWrapperValue: 'T | (() => Promise<T>) | (() => T)',
 				maybeValue: 'T | undefined | null',
-				fetcher: '../lib/graphql#fetchData',
+				fetcher: '@/lib/graphql#fetchData',
+				fragmentMasking: false,
 			},
 			plugins: ['typescript', 'typescript-resolvers'],
 		},

@@ -16,15 +16,22 @@ const eslintConfig = [
 		rules: {
 			'no-var': 'off',
 		},
-		ignorePatterns: [
-			// Ignore dotfiles
+	},
+	{
+		files: ['src/generated/**/*.{ts,tsx}'],
+		rules: {
+			'@typescript-eslint/no-empty-object-type': 'off',
+			'@typescript-eslint/no-explicit-any': 'off',
+		},
+	},
+
+	{
+		ignores: [
 			'.*.js',
 			'tailwind.config.ts',
 			'postcss.config.js',
 			'next.config.js',
 			'scripts/**',
-			// ignore if generated in the name
-			'*generated*.*',
 		],
 	},
 ];
