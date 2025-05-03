@@ -6,7 +6,6 @@ import User from './model';
 
 export const Query = {
 	user: async () => {
-		console.log('user query');
 		const userSession = await getCurrentUser();
 		if (!userSession) {
 			throw new Error('User not found');

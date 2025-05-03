@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 		data: { userId: user.id, otp, expiresAt },
 	});
 
-	console.log('OTP:', otp); // Replace with real email service later
+	console.info('OTP:', otp); // Replace with real email service later
 
 	return NextResponse.json({ success: true });
 }
