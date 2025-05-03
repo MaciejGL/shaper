@@ -16,6 +16,16 @@ const eslintConfig = [
 		rules: {
 			'no-var': 'off',
 		},
+		ignorePatterns: [
+			// Ignore dotfiles
+			'.*.js',
+			'tailwind.config.ts',
+			'postcss.config.js',
+			'next.config.js',
+			'scripts/**',
+			// ignore if generated in the name
+			'*generated*.*',
+		],
 	},
 ];
 
