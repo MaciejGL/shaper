@@ -8,6 +8,11 @@ const yoga = createYoga({
 	schema: schema,
 	logging: 'debug',
 });
+// Handler wrapper for Next.js API routes
+export async function GET(request: Request) {
+	return yoga.handleRequest(request, {});
+}
 
-// Export handlers for Next.js API routes
-export { yoga as GET, yoga as POST };
+export async function POST(request: Request) {
+	return yoga.handleRequest(request, {});
+}
