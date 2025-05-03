@@ -26,6 +26,8 @@ model User {
   trainer   User?        @relation("TrainerClients", fields: [trainerId], references: [id])
   trainerId String?      
   clients   User[]       @relation("TrainerClients")
+  sentRequests     CoachingRequest[] @relation("SentRequests")
+  receivedRequests CoachingRequest[] @relation("ReceivedRequests")
 
   sessions  UserSession[]
 }
@@ -74,16 +76,40 @@ model UserBodyMeasure {
 
   weight         Float?     // kg
   height         Float?     // cm
+
+  // Chest and waist are typically measured as a single value
   chest          Float?
   waist          Float?
   hips           Float?
   neck           Float?
-  biceps         Float?
-  thigh          Float?
-  calf           Float?
+
+  // Add left/right for body parts that are commonly measured separately
+  bicepsLeft     Float?
+  bicepsRight    Float?
+  thighLeft      Float?
+  thighRight     Float?
+  calfLeft       Float?
+  calfRight      Float?
+
   bodyFat        Float?     // %
 
   notes          String?    // e.g., “after leg day”, “fasted”, etc.
 
   @@index([userProfileId])
+}
+
+model CoachingRequest {
+  id           String   @id @default(cuid())
+  senderId     String
+  recipientId  String
+  status       String   @default("PENDING") // Enum: PENDING, APPROVED, REJECTED, CANCELLED
+  message      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  sender       User     @relation("SentRequests", fields: [senderId], references: [id])
+  recipient    User     @relation("ReceivedRequests", fields: [recipientId], references: [id])
+
+  @@index([senderId])
+  @@index([recipientId])
 }

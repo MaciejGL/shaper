@@ -4,8 +4,8 @@ import { UserSession as PrismaUserSession } from '@prisma/client';
 import { UserProfile as PrismaUserProfile } from '@prisma/client';
 
 export type UserWithSession = {
-	user?: User | null;
-	session?: Session | null;
+	user: User;
+	session: Session;
 };
 
 type User = PrismaUser & {

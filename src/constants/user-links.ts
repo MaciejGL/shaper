@@ -1,8 +1,9 @@
 export const TRAINER_LINKS = {
 	dashboard: { href: '/trainer/dashboard', label: 'Dashboard', disabled: false },
-	clients: { href: '/trainer/clients', label: 'Clients', disabled: true },
+	clients: { href: '/trainer/clients', label: 'Clients', disabled: false },
 	trainings: { href: '/trainer/trainings', label: 'Trainings', disabled: true },
-	profile: { href: '/trainer/profile', label: 'Profile', disabled: true },
+	exercises: { href: '/trainer/exercises', label: 'Exercises', disabled: true },
+	account: { href: '/trainer/account', label: 'Account', disabled: true },
 };
 
 export const CLIENT_LINKS = {

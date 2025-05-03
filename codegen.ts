@@ -10,7 +10,9 @@ const config: CodegenConfig = {
 	generates: {
 		'./src/generated/graphql.ts': {
 			config: {
+				wrapEntireFieldDefinitions: true,
 				typesPrefix: 'GQL',
+				entireFieldWrapperValue: 'T | (() => Promise<T>) | (() => T)',
 				maybeValue: 'T | undefined | null',
 				inputMaybeValue: 'T | undefined | null',
 				reactQueryVersion: 5,

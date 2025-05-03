@@ -1,3 +1,3 @@
 export default async function Page() {
-	return <div>TRAINER DASHBOARD</div>;
+	return <div>TRAINER ACCOUNT</div>;
 }

@@ -1,6 +1,7 @@
 import { GQLUser, GQLUserRole } from '@/generated/graphql';
+import { getCurrentUser } from '@/lib/getUser';
 import { User as PrismaUser } from '@prisma/client';
-
+import { prisma } from '@/lib/db';
 export default class User implements GQLUser {
 	constructor(protected data: PrismaUser) {}
 
@@ -33,12 +34,42 @@ export default class User implements GQLUser {
 	}
 
 	// Placeholder for relations, implement as needed
-	get clients() {
-		return []; // TODO: Fetch related clients if needed
+	async clients() {
+		const user = await getCurrentUser();
+		// Restrict access to clients for only trainer requests
+		if (user?.user?.id !== this.data.id) {
+			return [];
+		}
+
+		const clients = await prisma.user.findMany({
+			where: {
+				role: GQLUserRole.Client,
+				trainerId: this.data.id,
+			},
+		});
+
+		return clients.map(client => new User(client));
 	}
 
-	get trainer() {
-		return null; // TODO: Fetch related trainer if needed
+	async trainer() {
+		const user = await getCurrentUser();
+		// Restrict access to trainer for only clients
+		if (user?.user?.id !== this.data.id) {
+			return null;
+		}
+
+		const trainer = await prisma.user.findFirst({
+			where: {
+				role: GQLUserRole.Trainer,
+				clients: {
+					some: {
+						id: this.data.id,
+					},
+				},
+			},
+		});
+
+		return trainer ? new User(trainer) : null;
 	}
 
 	get profile() {

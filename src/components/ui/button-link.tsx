@@ -15,6 +15,7 @@ function ButtonLink({
 	VariantProps<typeof buttonVariants> & {
 		className?: string;
 		children: React.ReactNode;
+		disabled?: boolean;
 	}) {
 	return (
 		<Link className={cn(buttonVariants({ variant, size, className }))} {...props}>

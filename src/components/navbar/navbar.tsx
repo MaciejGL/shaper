@@ -15,11 +15,24 @@ import NextLink from 'next/link';
 import { usePathname } from 'next/navigation';
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links';
 import { cn } from '@/lib/utils';
+import { SidebarTrigger } from '../ui/sidebar';
 
-export const Navbar = ({ user }: { user?: UserWithSession | null }) => {
+export const Navbar = ({
+	user,
+	withSidebar,
+}: {
+	user?: UserWithSession | null;
+	withSidebar?: boolean;
+}) => {
 	return (
-		<div className="border-b border-zinc-200 py-3 px-4 flex justify-between items-center">
-			<h1 className="text-xl">Shaper</h1>
+		<div
+			className={cn(
+				'py-3 px-4 flex justify-between items-center',
+				withSidebar && 'pl-0'
+			)}
+		>
+			{withSidebar && <SidebarTrigger />}
+			{!withSidebar && <h1 className="text-xl">Shaper</h1>}
 
 			<NavbarUser user={user} />
 		</div>
@@ -95,10 +108,10 @@ function TrainerNavbar() {
 					</NavigationMenuTrigger>
 					<NavigationMenuContent>
 						<Link
-							href={TRAINER_LINKS.profile.href}
-							disabled={TRAINER_LINKS.profile.disabled}
+							href={TRAINER_LINKS.account.href}
+							disabled={TRAINER_LINKS.account.disabled}
 						>
-							{TRAINER_LINKS.profile.label}
+							{TRAINER_LINKS.account.label}
 						</Link>
 						<LogoutButton />
 					</NavigationMenuContent>
