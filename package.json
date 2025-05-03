@@ -3,7 +3,7 @@
 	"version": "0.1.0",
 	"private": true,
 	"scripts": {
-		"dev": "concurrently \"next dev --turbopack\" \"npm run codegen\"",
+		"dev": "PORT=${PORT:=4000} concurrently \"next dev --turbopack\" \"npm run codegen\"",
 		"build": "prisma generate && next build",
 		"start": "next start",
 		"lint": "next lint",
@@ -44,6 +44,7 @@
 		"@graphql-codegen/typescript-resolvers": "^4.5.0",
 		"@parcel/watcher": "^2.5.1",
 		"@tailwindcss/postcss": "^4",
+		"@tanstack/react-query-devtools": "^5.75.1",
 		"@types/graphql": "^14.5.0",
 		"@types/node": "^20",
 		"@types/react": "^19",

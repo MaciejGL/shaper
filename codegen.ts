@@ -11,7 +11,7 @@ const config: CodegenConfig = {
 		'./src/generated/graphql.ts': {
 			config: {
 				typesPrefix: 'GQL',
-				maybeValue: 'T | undefined',
+				maybeValue: 'T | undefined | null',
 				inputMaybeValue: 'T | undefined | null',
 				reactQueryVersion: 5,
 				fetcher: '../lib/graphql#fetchData',

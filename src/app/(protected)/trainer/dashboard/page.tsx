@@ -1,12 +1,13 @@
 import { requireAuth } from '@/lib/getUser';
+import { Test } from './components/test';
 
 export default async function DashboardPage() {
-	const session = await requireAuth();
+	await requireAuth();
 
 	return (
 		<div>
-			Dashboard
-			<pre>{JSON.stringify(session, null, 2)}</pre>
+			TRAINER DASHBOARD
+			<Test />
 		</div>
 	);
 }

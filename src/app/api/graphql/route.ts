@@ -6,6 +6,7 @@ const schema = await createSchema();
 const yoga = createYoga({
 	graphqlEndpoint: '/api/graphql',
 	schema: schema,
+	logging: 'debug',
 });
 
 // Export handlers for Next.js API routes

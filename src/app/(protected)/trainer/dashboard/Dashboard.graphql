@@ -1,7 +1,9 @@
 query user {
 	user {
 		id
+		email
+		name
+		image
+		role
 	}
-}
-type Mutation {
 }

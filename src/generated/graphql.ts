@@ -1,6 +1,6 @@
 import { useQuery, useInfiniteQuery, UseQueryOptions, UseInfiniteQueryOptions, InfiniteData } from '@tanstack/react-query';
 import { fetchData } from '../lib/graphql';
-export type Maybe<T> = T | undefined;
+export type Maybe<T> = T | undefined | null;
 export type InputMaybe<T> = T | undefined | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
@@ -16,6 +16,11 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type GQLMutation = {
+  __typename?: 'Mutation';
+  _dummy?: Maybe<Scalars['Boolean']['output']>;
+};
+
 export type GQLQuery = {
   __typename?: 'Query';
   user?: Maybe<GQLUser>;
@@ -23,30 +28,74 @@ export type GQLQuery = {
 
 export type GQLUser = {
   __typename?: 'User';
+  clients: Array<GQLUser>;
+  createdAt: Scalars['String']['output'];
+  email: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  image?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  profile?: Maybe<GQLUserProfile>;
+  role: GQLUserRole;
+  sessions: Array<GQLUserSession>;
+  trainer?: Maybe<GQLUser>;
+  updatedAt: Scalars['String']['output'];
+};
+
+export type GQLUserBodyMeasure = {
+  __typename?: 'UserBodyMeasure';
+  biceps?: Maybe<Scalars['Float']['output']>;
+  bodyFat?: Maybe<Scalars['Float']['output']>;
+  calf?: Maybe<Scalars['Float']['output']>;
+  chest?: Maybe<Scalars['Float']['output']>;
+  height?: Maybe<Scalars['Float']['output']>;
+  hips?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  measuredAt: Scalars['String']['output'];
+  neck?: Maybe<Scalars['Float']['output']>;
+  notes?: Maybe<Scalars['String']['output']>;
+  thigh?: Maybe<Scalars['Float']['output']>;
+  userProfile: GQLUserProfile;
+  waist?: Maybe<Scalars['Float']['output']>;
+  weight?: Maybe<Scalars['Float']['output']>;
 };
 
 export type GQLUserProfile = {
   __typename?: 'UserProfile';
-  firstName: Scalars['String']['output'];
+  activityLevel?: Maybe<Scalars['String']['output']>;
+  avatarUrl?: Maybe<Scalars['String']['output']>;
+  bio?: Maybe<Scalars['String']['output']>;
+  birthday?: Maybe<Scalars['String']['output']>;
+  bodyMeasures: Array<GQLUserBodyMeasure>;
+  createdAt: Scalars['String']['output'];
+  firstName?: Maybe<Scalars['String']['output']>;
+  goal?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
-  lastName: Scalars['String']['output'];
+  lastName?: Maybe<Scalars['String']['output']>;
+  phone?: Maybe<Scalars['String']['output']>;
+  sex?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['String']['output'];
+  user: GQLUser;
 };
 
 export enum GQLUserRole {
+  Admin = 'ADMIN',
   Client = 'CLIENT',
   Trainer = 'TRAINER'
 }
 
 export type GQLUserSession = {
   __typename?: 'UserSession';
+  createdAt: Scalars['String']['output'];
+  expiresAt: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  otp: Scalars['String']['output'];
+  user: GQLUser;
 };
 
 export type GQLUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string } | undefined };
+export type GQLUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } | undefined | null };
 
 
 
@@ -54,6 +103,10 @@ export const UserDocument = `
     query user {
   user {
     id
+    email
+    name
+    image
+    role
   }
 }
     `;
