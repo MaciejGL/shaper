@@ -1,0 +1,342 @@
+import { GraphQLResolveInfo } from 'graphql';
+export type Maybe<T> = T | undefined | null;
+export type InputMaybe<T> = T | undefined | null;
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type EntireFieldWrapper<T> = T | (() => Promise<T>) | (() => T);
+export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
+/** All built-in and custom scalars, mapped to their actual values */
+export type Scalars = {
+  ID: { input: string; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
+};
+
+export type GQLCoachingRequest = {
+  __typename?: 'CoachingRequest';
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  message?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  recipient: EntireFieldWrapper<GQLUser>;
+  sender: EntireFieldWrapper<GQLUser>;
+  status: EntireFieldWrapper<GQLCoachingRequestStatus>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
+export enum GQLCoachingRequestStatus {
+  Accepted = 'ACCEPTED',
+  Cancelled = 'CANCELLED',
+  Pending = 'PENDING',
+  Rejected = 'REJECTED'
+}
+
+export type GQLMutation = {
+  __typename?: 'Mutation';
+  _dummy?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
+  acceptCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
+  cancelCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
+  createCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
+  rejectCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
+};
+
+
+export type GQLMutationAcceptCoachingRequestArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationCancelCoachingRequestArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationCreateCoachingRequestArgs = {
+  message?: InputMaybe<Scalars['String']['input']>;
+  recipientId: Scalars['ID']['input'];
+  senderId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRejectCoachingRequestArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type GQLQuery = {
+  __typename?: 'Query';
+  coachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
+  coachingRequests: EntireFieldWrapper<Array<GQLCoachingRequest>>;
+  user?: EntireFieldWrapper<Maybe<GQLUser>>;
+};
+
+
+export type GQLQueryCoachingRequestArgs = {
+  id: Scalars['ID']['input'];
+};
+
+export type GQLUser = {
+  __typename?: 'User';
+  clients: EntireFieldWrapper<Array<GQLUser>>;
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  email: EntireFieldWrapper<Scalars['String']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  image?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  name?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
+  role: EntireFieldWrapper<GQLUserRole>;
+  sessions: EntireFieldWrapper<Array<GQLUserSession>>;
+  trainer?: EntireFieldWrapper<Maybe<GQLUser>>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
+export type GQLUserBodyMeasure = {
+  __typename?: 'UserBodyMeasure';
+  biceps?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  bodyFat?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  calf?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  chest?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  height?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  hips?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  measuredAt: EntireFieldWrapper<Scalars['String']['output']>;
+  neck?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  notes?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  thigh?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  userProfile: EntireFieldWrapper<GQLUserProfile>;
+  waist?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+};
+
+export type GQLUserProfile = {
+  __typename?: 'UserProfile';
+  activityLevel?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  avatarUrl?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  bio?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  birthday?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  bodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  firstName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  goal?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  lastName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  phone?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  sex?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  user: EntireFieldWrapper<GQLUser>;
+};
+
+export enum GQLUserRole {
+  Admin = 'ADMIN',
+  Client = 'CLIENT',
+  Trainer = 'TRAINER'
+}
+
+export type GQLUserSession = {
+  __typename?: 'UserSession';
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  expiresAt: EntireFieldWrapper<Scalars['String']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  otp: EntireFieldWrapper<Scalars['String']['output']>;
+  user: EntireFieldWrapper<GQLUser>;
+};
+
+
+
+export type ResolverTypeWrapper<T> = Promise<T> | T;
+
+
+export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
+  resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
+};
+export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
+
+export type ResolverFn<TResult, TParent, TContext, TArgs> = (
+  parent: TParent,
+  args: TArgs,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => Promise<TResult> | TResult;
+
+export type SubscriptionSubscribeFn<TResult, TParent, TContext, TArgs> = (
+  parent: TParent,
+  args: TArgs,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => AsyncIterable<TResult> | Promise<AsyncIterable<TResult>>;
+
+export type SubscriptionResolveFn<TResult, TParent, TContext, TArgs> = (
+  parent: TParent,
+  args: TArgs,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => TResult | Promise<TResult>;
+
+export interface SubscriptionSubscriberObject<TResult, TKey extends string, TParent, TContext, TArgs> {
+  subscribe: SubscriptionSubscribeFn<{ [key in TKey]: TResult }, TParent, TContext, TArgs>;
+  resolve?: SubscriptionResolveFn<TResult, { [key in TKey]: TResult }, TContext, TArgs>;
+}
+
+export interface SubscriptionResolverObject<TResult, TParent, TContext, TArgs> {
+  subscribe: SubscriptionSubscribeFn<any, TParent, TContext, TArgs>;
+  resolve: SubscriptionResolveFn<TResult, any, TContext, TArgs>;
+}
+
+export type SubscriptionObject<TResult, TKey extends string, TParent, TContext, TArgs> =
+  | SubscriptionSubscriberObject<TResult, TKey, TParent, TContext, TArgs>
+  | SubscriptionResolverObject<TResult, TParent, TContext, TArgs>;
+
+export type SubscriptionResolver<TResult, TKey extends string, TParent = {}, TContext = {}, TArgs = {}> =
+  | ((...args: any[]) => SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>)
+  | SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>;
+
+export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
+  parent: TParent,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
+
+export type IsTypeOfResolverFn<T = {}, TContext = {}> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
+
+export type NextResolverFn<T> = () => Promise<T>;
+
+export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs = {}> = (
+  next: NextResolverFn<TResult>,
+  parent: TParent,
+  args: TArgs,
+  context: TContext,
+  info: GraphQLResolveInfo
+) => TResult | Promise<TResult>;
+
+
+
+/** Mapping between all available schema types and the resolvers types */
+export type GQLResolversTypes = {
+  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
+  CoachingRequest: ResolverTypeWrapper<GQLCoachingRequest>;
+  CoachingRequestStatus: GQLCoachingRequestStatus;
+  Float: ResolverTypeWrapper<Scalars['Float']['output']>;
+  ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  Mutation: ResolverTypeWrapper<{}>;
+  Query: ResolverTypeWrapper<{}>;
+  String: ResolverTypeWrapper<Scalars['String']['output']>;
+  User: ResolverTypeWrapper<GQLUser>;
+  UserBodyMeasure: ResolverTypeWrapper<GQLUserBodyMeasure>;
+  UserProfile: ResolverTypeWrapper<GQLUserProfile>;
+  UserRole: GQLUserRole;
+  UserSession: ResolverTypeWrapper<GQLUserSession>;
+};
+
+/** Mapping between all available schema types and the resolvers parents */
+export type GQLResolversParentTypes = {
+  Boolean: Scalars['Boolean']['output'];
+  CoachingRequest: GQLCoachingRequest;
+  Float: Scalars['Float']['output'];
+  ID: Scalars['ID']['output'];
+  Mutation: {};
+  Query: {};
+  String: Scalars['String']['output'];
+  User: GQLUser;
+  UserBodyMeasure: GQLUserBodyMeasure;
+  UserProfile: GQLUserProfile;
+  UserSession: GQLUserSession;
+};
+
+export type GQLCoachingRequestResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['CoachingRequest'] = GQLResolversParentTypes['CoachingRequest']> = {
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  message?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  recipient?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
+  sender?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
+  status?: Resolver<GQLResolversTypes['CoachingRequestStatus'], ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLMutationResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['Mutation'] = GQLResolversParentTypes['Mutation']> = {
+  _dummy?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType>;
+  acceptCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationAcceptCoachingRequestArgs, 'id'>>;
+  cancelCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationCancelCoachingRequestArgs, 'id'>>;
+  createCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationCreateCoachingRequestArgs, 'recipientId' | 'senderId'>>;
+  rejectCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
+};
+
+export type GQLQueryResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['Query'] = GQLResolversParentTypes['Query']> = {
+  coachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLQueryCoachingRequestArgs, 'id'>>;
+  coachingRequests?: Resolver<Array<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType>;
+  user?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
+};
+
+export type GQLUserResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['User'] = GQLResolversParentTypes['User']> = {
+  clients?: Resolver<Array<GQLResolversTypes['User']>, ParentType, ContextType>;
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  image?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  profile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType>;
+  role?: Resolver<GQLResolversTypes['UserRole'], ParentType, ContextType>;
+  sessions?: Resolver<Array<GQLResolversTypes['UserSession']>, ParentType, ContextType>;
+  trainer?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLUserBodyMeasureResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['UserBodyMeasure'] = GQLResolversParentTypes['UserBodyMeasure']> = {
+  biceps?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  bodyFat?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  calf?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  chest?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  height?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  hips?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  measuredAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  neck?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  notes?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  thigh?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  userProfile?: Resolver<GQLResolversTypes['UserProfile'], ParentType, ContextType>;
+  waist?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLUserProfileResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['UserProfile'] = GQLResolversParentTypes['UserProfile']> = {
+  activityLevel?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  avatarUrl?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  bio?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  birthday?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  bodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  firstName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  goal?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  lastName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  phone?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  sex?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  user?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLUserSessionResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['UserSession'] = GQLResolversParentTypes['UserSession']> = {
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  expiresAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  otp?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  user?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLResolvers<ContextType = any> = {
+  CoachingRequest?: GQLCoachingRequestResolvers<ContextType>;
+  Mutation?: GQLMutationResolvers<ContextType>;
+  Query?: GQLQueryResolvers<ContextType>;
+  User?: GQLUserResolvers<ContextType>;
+  UserBodyMeasure?: GQLUserBodyMeasureResolvers<ContextType>;
+  UserProfile?: GQLUserProfileResolvers<ContextType>;
+  UserSession?: GQLUserSessionResolvers<ContextType>;
+};
+

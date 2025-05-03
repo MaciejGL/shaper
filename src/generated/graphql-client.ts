@@ -7,7 +7,6 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
-export type EntireFieldWrapper<T> = T | (() => Promise<T>) | (() => T);
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string; }
@@ -19,13 +18,13 @@ export type Scalars = {
 
 export type GQLCoachingRequest = {
   __typename?: 'CoachingRequest';
-  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
-  id: EntireFieldWrapper<Scalars['ID']['output']>;
-  message?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  recipient: EntireFieldWrapper<GQLUser>;
-  sender: EntireFieldWrapper<GQLUser>;
-  status: EntireFieldWrapper<GQLCoachingRequestStatus>;
-  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  message?: Maybe<Scalars['String']['output']>;
+  recipient: GQLUser;
+  sender: GQLUser;
+  status: GQLCoachingRequestStatus;
+  updatedAt: Scalars['String']['output'];
 };
 
 export enum GQLCoachingRequestStatus {
@@ -37,11 +36,11 @@ export enum GQLCoachingRequestStatus {
 
 export type GQLMutation = {
   __typename?: 'Mutation';
-  _dummy?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
-  acceptCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
-  cancelCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
-  createCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
-  rejectCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
+  _dummy?: Maybe<Scalars['Boolean']['output']>;
+  acceptCoachingRequest: GQLCoachingRequest;
+  cancelCoachingRequest: GQLCoachingRequest;
+  createCoachingRequest: GQLCoachingRequest;
+  rejectCoachingRequest: GQLCoachingRequest;
 };
 
 
@@ -68,9 +67,9 @@ export type GQLMutationRejectCoachingRequestArgs = {
 
 export type GQLQuery = {
   __typename?: 'Query';
-  coachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
-  coachingRequests: EntireFieldWrapper<Array<GQLCoachingRequest>>;
-  user?: EntireFieldWrapper<Maybe<GQLUser>>;
+  coachingRequest?: Maybe<GQLCoachingRequest>;
+  coachingRequests: Array<GQLCoachingRequest>;
+  user?: Maybe<GQLUser>;
 };
 
 
@@ -80,53 +79,53 @@ export type GQLQueryCoachingRequestArgs = {
 
 export type GQLUser = {
   __typename?: 'User';
-  clients: EntireFieldWrapper<Array<GQLUser>>;
-  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
-  email: EntireFieldWrapper<Scalars['String']['output']>;
-  id: EntireFieldWrapper<Scalars['ID']['output']>;
-  image?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  name?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
-  role: EntireFieldWrapper<GQLUserRole>;
-  sessions: EntireFieldWrapper<Array<GQLUserSession>>;
-  trainer?: EntireFieldWrapper<Maybe<GQLUser>>;
-  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  clients: Array<GQLUser>;
+  createdAt: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  image?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  profile?: Maybe<GQLUserProfile>;
+  role: GQLUserRole;
+  sessions: Array<GQLUserSession>;
+  trainer?: Maybe<GQLUser>;
+  updatedAt: Scalars['String']['output'];
 };
 
 export type GQLUserBodyMeasure = {
   __typename?: 'UserBodyMeasure';
-  biceps?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
-  bodyFat?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
-  calf?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
-  chest?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
-  height?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
-  hips?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
-  id: EntireFieldWrapper<Scalars['ID']['output']>;
-  measuredAt: EntireFieldWrapper<Scalars['String']['output']>;
-  neck?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
-  notes?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  thigh?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
-  userProfile: EntireFieldWrapper<GQLUserProfile>;
-  waist?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
-  weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  biceps?: Maybe<Scalars['Float']['output']>;
+  bodyFat?: Maybe<Scalars['Float']['output']>;
+  calf?: Maybe<Scalars['Float']['output']>;
+  chest?: Maybe<Scalars['Float']['output']>;
+  height?: Maybe<Scalars['Float']['output']>;
+  hips?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  measuredAt: Scalars['String']['output'];
+  neck?: Maybe<Scalars['Float']['output']>;
+  notes?: Maybe<Scalars['String']['output']>;
+  thigh?: Maybe<Scalars['Float']['output']>;
+  userProfile: GQLUserProfile;
+  waist?: Maybe<Scalars['Float']['output']>;
+  weight?: Maybe<Scalars['Float']['output']>;
 };
 
 export type GQLUserProfile = {
   __typename?: 'UserProfile';
-  activityLevel?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  avatarUrl?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  bio?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  birthday?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  bodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
-  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
-  firstName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  goal?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  id: EntireFieldWrapper<Scalars['ID']['output']>;
-  lastName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  phone?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  sex?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
-  user: EntireFieldWrapper<GQLUser>;
+  activityLevel?: Maybe<Scalars['String']['output']>;
+  avatarUrl?: Maybe<Scalars['String']['output']>;
+  bio?: Maybe<Scalars['String']['output']>;
+  birthday?: Maybe<Scalars['String']['output']>;
+  bodyMeasures: Array<GQLUserBodyMeasure>;
+  createdAt: Scalars['String']['output'];
+  firstName?: Maybe<Scalars['String']['output']>;
+  goal?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  lastName?: Maybe<Scalars['String']['output']>;
+  phone?: Maybe<Scalars['String']['output']>;
+  sex?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['String']['output'];
+  user: GQLUser;
 };
 
 export enum GQLUserRole {
@@ -137,11 +136,11 @@ export enum GQLUserRole {
 
 export type GQLUserSession = {
   __typename?: 'UserSession';
-  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
-  expiresAt: EntireFieldWrapper<Scalars['String']['output']>;
-  id: EntireFieldWrapper<Scalars['ID']['output']>;
-  otp: EntireFieldWrapper<Scalars['String']['output']>;
-  user: EntireFieldWrapper<GQLUser>;
+  createdAt: Scalars['String']['output'];
+  expiresAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  otp: Scalars['String']['output'];
+  user: GQLUser;
 };
 
 export type GQLUserQueryVariables = Exact<{ [key: string]: never; }>;

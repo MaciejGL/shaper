@@ -1,4 +1,4 @@
-import { GQLUser, GQLUserRole } from '@/generated/graphql';
+import { GQLUser, GQLUserRole } from '@/generated/graphql-server';
 import { getCurrentUser } from '@/lib/getUser';
 import { User as PrismaUser } from '@prisma/client';
 import { prisma } from '@/lib/db';

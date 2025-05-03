@@ -6,7 +6,7 @@ import {
 	CardTitle,
 	CardDescription,
 } from '@/components/ui/card';
-import { GQLUser, GQLUserProfile } from '@/generated/graphql';
+import { GQLUser, GQLUserProfile } from '@/generated/graphql-client';
 import { PlusIcon } from 'lucide-react';
 
 export default async function Page() {

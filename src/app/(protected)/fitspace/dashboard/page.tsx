@@ -1,4 +1,4 @@
-import { GQLUserRole } from '@/generated/graphql';
+import { GQLUserRole } from '@/generated/graphql-client';
 import { requireAuth } from '@/lib/getUser';
 
 export default async function DashboardPage() {

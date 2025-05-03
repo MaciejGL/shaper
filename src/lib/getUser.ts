@@ -3,7 +3,7 @@ import { authOptions } from './auth';
 import { prisma } from './db';
 import { redirect } from 'next/navigation';
 import { UserWithSession } from '@/types/UserWithSession';
-import { GQLUserRole } from '@/generated/graphql';
+import { GQLUserRole } from '@/generated/graphql-server';
 
 export type User = {
 	id: string;

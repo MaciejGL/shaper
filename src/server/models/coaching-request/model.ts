@@ -1,7 +1,7 @@
 import {
 	GQLCoachingRequest,
 	GQLCoachingRequestStatus,
-} from '@/generated/graphql';
+} from '@/generated/graphql-server';
 import { prisma } from '@/lib/db';
 import { CoachingRequest as PrismaCoachingRequest } from '@prisma/client';
 import User from '../user/model';
