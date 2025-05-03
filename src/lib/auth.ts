@@ -37,7 +37,7 @@ export const authOptions = {
 	session: { strategy: 'jwt' },
 	secret: process.env.NEXTAUTH_SECRET,
 	pages: {
-		signIn: '/dashboard',
+		signIn: '/fitspace/dashboard',
 		signOut: '/login',
 	},
 } satisfies NextAuthOptions;

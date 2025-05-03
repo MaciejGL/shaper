@@ -54,7 +54,7 @@ export const useLoginForm = () => {
 				email,
 				otp,
 				redirect: false,
-				callbackUrl: '/dashboard',
+				callbackUrl: '/fitspace/dashboard',
 			});
 
 			if (result?.error) {
