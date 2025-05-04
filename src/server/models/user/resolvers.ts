@@ -1,10 +1,12 @@
-// export const Query: GQLQueryResolvers = {}
-
 import { prisma } from '@/lib/db';
 import { getCurrentUser } from '@/lib/getUser';
 import User from './model';
+import {
+	GQLMutationResolvers,
+	GQLQueryResolvers,
+} from '@/generated/graphql-server';
 
-export const Query = {
+export const Query: GQLQueryResolvers = {
 	user: async () => {
 		const userSession = await getCurrentUser();
 		if (!userSession) {
@@ -13,12 +15,6 @@ export const Query = {
 
 		const user = await prisma.user.findUnique({
 			where: { id: userSession?.user?.id },
-			include: {
-				profile: true,
-				trainer: true,
-				clients: true,
-				sessions: true,
-			},
 		});
 
 		if (!user) {
@@ -29,4 +25,4 @@ export const Query = {
 	},
 };
 
-export const Mutation = {};
+export const Mutation: GQLMutationResolvers = {};

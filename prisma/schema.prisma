@@ -56,6 +56,10 @@ model UserProfile {
   birthday       DateTime?
   sex            String?       // Enum: MALE, FEMALE, OTHER
   avatarUrl      String?
+  height         Float?     // cm
+  weight         Float?     // kg
+  fitnessLevel   String?    // Enum: BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
+  allergies      String?
 
   activityLevel  String? // Enum: SEDENTARY, LIGHT, MODERATE, ACTIVE, ATHLETE
   goal           String? // Enum: LOSE_FAT, MAINTAIN, BUILD_MUSCLE

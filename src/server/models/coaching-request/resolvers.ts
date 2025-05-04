@@ -7,9 +7,14 @@ import {
 	rejectCoachingRequest,
 	upsertCoachingRequest,
 } from './factory';
+import {
+	GQLMutationResolvers,
+	GQLQueryResolvers,
+	GQLUserRole,
+} from '@/generated/graphql-server';
 
-export const Query = {
-	coachingRequest: async ({ id }: { id: string }) => {
+export const Query: GQLQueryResolvers = {
+	coachingRequest: async (_, { id }) => {
 		const user = await getCurrentUserOrThrow();
 
 		return getCoachingRequest({ id, user });
@@ -21,33 +26,31 @@ export const Query = {
 	},
 };
 
-export const Mutation = {
-	createCoachingRequest: async ({
-		recipientId,
-		message,
-	}: {
-		recipientId: string;
-		message: string;
-	}) => {
+export const Mutation: GQLMutationResolvers = {
+	createCoachingRequest: async (_, args) => {
 		const { user } = await getCurrentUserOrThrow();
 
 		return upsertCoachingRequest({
 			senderId: user.id,
-			recipientId,
-			message,
+			recipientEmail: args.recipientEmail,
+			message: args.message,
 		});
 	},
-	acceptCoachingRequest: async ({ id }: { id: string }) => {
+	acceptCoachingRequest: async (_, { id }) => {
 		const { user } = await getCurrentUserOrThrow();
 
-		return acceptCoachingRequest({ id, recipientId: user.id });
+		return acceptCoachingRequest({
+			id,
+			recipientId: user.id,
+			recipientRole: user.role as GQLUserRole,
+		});
 	},
-	cancelCoachingRequest: async ({ id }: { id: string }) => {
+	cancelCoachingRequest: async (_, { id }) => {
 		const { user } = await getCurrentUserOrThrow();
 
 		return cancelCoachingRequest({ id, senderId: user.id });
 	},
-	rejectCoachingRequest: async ({ id }: { id: string }) => {
+	rejectCoachingRequest: async (_, { id }) => {
 		const { user } = await getCurrentUserOrThrow();
 
 		return rejectCoachingRequest({ id, recipientId: user.id });

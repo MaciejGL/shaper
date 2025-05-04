@@ -1,0 +1,114 @@
+enum UserRole {
+	TRAINER
+	CLIENT
+	ADMIN # Added ADMIN to match Prisma enum
+}
+
+enum FitnessLevel {
+	BEGINNER
+	INTERMEDIATE
+	ADVANCED
+	EXPERT
+}
+
+enum ActivityLevel {
+	SEDENTARY
+	LIGHT
+	MODERATE
+	ACTIVE
+	ATHLETE
+}
+
+enum Goal {
+	LOSE_FAT
+	MAINTAIN
+	BUILD_MUSCLE
+}
+
+type User {
+	id: ID!
+	email: String!
+	name: String
+	image: String
+	role: UserRole!
+	createdAt: String!
+	updatedAt: String!
+
+	profile: UserProfile
+	trainer: User
+	clients: [User!]!
+	sessions: [UserSession!]!
+}
+
+type UserProfile {
+	id: ID!
+	firstName: String
+	lastName: String
+	phone: String
+	birthday: String
+	sex: String
+	avatarUrl: String
+	height: Float
+	weight: Float
+	fitnessLevel: FitnessLevel
+	allergies: String
+	email: String
+	activityLevel: ActivityLevel
+	goal: Goal
+	bio: String
+
+	createdAt: String!
+	updatedAt: String!
+
+	bodyMeasures: [UserBodyMeasure!]!
+}
+
+type UserSession {
+	id: ID!
+	user: User!
+	otp: String!
+	expiresAt: String!
+	createdAt: String!
+}
+
+type UserBodyMeasure {
+	id: ID!
+	userProfile: UserProfile!
+	measuredAt: String!
+	weight: Float
+	height: Float
+	chest: Float
+	waist: Float
+	hips: Float
+	neck: Float
+	biceps: Float
+	thigh: Float
+	calf: Float
+	bodyFat: Float
+	notes: String
+}
+
+type Query {
+	profile: UserProfile
+}
+
+input UpdateProfileInput {
+	firstName: String
+	lastName: String
+	phone: String
+	email: String
+	birthday: String
+	sex: String
+	avatarUrl: String
+	height: Float
+	weight: Float
+	fitnessLevel: FitnessLevel
+	allergies: String
+	activityLevel: ActivityLevel
+	goal: Goal
+	bio: String
+}
+
+type Mutation {
+	updateProfile(input: UpdateProfileInput!): UserProfile
+}

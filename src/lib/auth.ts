@@ -18,7 +18,6 @@ export const authOptions = {
 					include: {
 						sessions: {
 							where: {
-								otp,
 								expiresAt: { gt: new Date() },
 							},
 							orderBy: { createdAt: 'desc' },
@@ -33,9 +32,39 @@ export const authOptions = {
 				return user as UserWithSession['user'];
 			},
 		}),
+		CredentialsProvider({
+			id: 'account-swap',
+			name: 'Account Swap',
+			credentials: {
+				email: {
+					label: 'Email',
+					type: 'email',
+				},
+			},
+			async authorize(credentials) {
+				const { email } = credentials ?? {};
+				if (process.env.NODE_ENV !== 'production') {
+					const user = await prisma.user.findUnique({
+						where: { email },
+						include: {
+							sessions: {
+								where: {
+									expiresAt: { gt: new Date() },
+								},
+								orderBy: { createdAt: 'desc' },
+							},
+						},
+					});
+					return user;
+				} else {
+					return null;
+				}
+			},
+		}),
 	],
 	session: { strategy: 'jwt' },
 	secret: process.env.NEXTAUTH_SECRET,
+
 	pages: {
 		signIn: '/fitspace/dashboard',
 		signOut: '/login',

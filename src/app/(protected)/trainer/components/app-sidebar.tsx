@@ -56,10 +56,10 @@ export function AppSidebar() {
 
 	const footerItems = [
 		{
-			title: TRAINER_LINKS.account.label,
-			url: TRAINER_LINKS.account.href,
+			title: TRAINER_LINKS.profile.label,
+			url: TRAINER_LINKS.profile.href,
 			icon: UserRoundCogIcon,
-			disabled: TRAINER_LINKS.account.disabled,
+			disabled: TRAINER_LINKS.profile.disabled,
 		},
 	];
 

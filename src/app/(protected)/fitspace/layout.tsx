@@ -14,9 +14,7 @@ export default async function ProtectedLayout({
 
 	return (
 		<SidebarProvider>
-			<Main user={user} withSidebar>
-				{children}
-			</Main>
+			<Main user={user}>{children}</Main>
 		</SidebarProvider>
 	);
 }

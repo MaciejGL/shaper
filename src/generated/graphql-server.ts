@@ -17,6 +17,14 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export enum GQLActivityLevel {
+  Active = 'ACTIVE',
+  Athlete = 'ATHLETE',
+  Light = 'LIGHT',
+  Moderate = 'MODERATE',
+  Sedentary = 'SEDENTARY'
+}
+
 export type GQLCoachingRequest = {
   __typename?: 'CoachingRequest';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -35,13 +43,26 @@ export enum GQLCoachingRequestStatus {
   Rejected = 'REJECTED'
 }
 
+export enum GQLFitnessLevel {
+  Advanced = 'ADVANCED',
+  Beginner = 'BEGINNER',
+  Expert = 'EXPERT',
+  Intermediate = 'INTERMEDIATE'
+}
+
+export enum GQLGoal {
+  BuildMuscle = 'BUILD_MUSCLE',
+  LoseFat = 'LOSE_FAT',
+  Maintain = 'MAINTAIN'
+}
+
 export type GQLMutation = {
   __typename?: 'Mutation';
-  _dummy?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
-  acceptCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
-  cancelCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
+  acceptCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
+  cancelCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   createCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
-  rejectCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
+  rejectCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
+  updateProfile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
 };
 
 
@@ -57,8 +78,7 @@ export type GQLMutationCancelCoachingRequestArgs = {
 
 export type GQLMutationCreateCoachingRequestArgs = {
   message?: InputMaybe<Scalars['String']['input']>;
-  recipientId: Scalars['ID']['input'];
-  senderId: Scalars['ID']['input'];
+  recipientEmail: Scalars['String']['input'];
 };
 
 
@@ -66,16 +86,39 @@ export type GQLMutationRejectCoachingRequestArgs = {
   id: Scalars['ID']['input'];
 };
 
+
+export type GQLMutationUpdateProfileArgs = {
+  input: GQLUpdateProfileInput;
+};
+
 export type GQLQuery = {
   __typename?: 'Query';
   coachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   coachingRequests: EntireFieldWrapper<Array<GQLCoachingRequest>>;
+  profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
   user?: EntireFieldWrapper<Maybe<GQLUser>>;
 };
 
 
 export type GQLQueryCoachingRequestArgs = {
   id: Scalars['ID']['input'];
+};
+
+export type GQLUpdateProfileInput = {
+  activityLevel?: InputMaybe<GQLActivityLevel>;
+  allergies?: InputMaybe<Scalars['String']['input']>;
+  avatarUrl?: InputMaybe<Scalars['String']['input']>;
+  bio?: InputMaybe<Scalars['String']['input']>;
+  birthday?: InputMaybe<Scalars['String']['input']>;
+  email?: InputMaybe<Scalars['String']['input']>;
+  firstName?: InputMaybe<Scalars['String']['input']>;
+  fitnessLevel?: InputMaybe<GQLFitnessLevel>;
+  goal?: InputMaybe<GQLGoal>;
+  height?: InputMaybe<Scalars['Float']['input']>;
+  lastName?: InputMaybe<Scalars['String']['input']>;
+  phone?: InputMaybe<Scalars['String']['input']>;
+  sex?: InputMaybe<Scalars['String']['input']>;
+  weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type GQLUser = {
@@ -113,20 +156,24 @@ export type GQLUserBodyMeasure = {
 
 export type GQLUserProfile = {
   __typename?: 'UserProfile';
-  activityLevel?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  activityLevel?: EntireFieldWrapper<Maybe<GQLActivityLevel>>;
+  allergies?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   avatarUrl?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   bio?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   birthday?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   bodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  email?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   firstName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  goal?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  fitnessLevel?: EntireFieldWrapper<Maybe<GQLFitnessLevel>>;
+  goal?: EntireFieldWrapper<Maybe<GQLGoal>>;
+  height?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   lastName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   phone?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   sex?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
-  user: EntireFieldWrapper<GQLUser>;
+  weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
 };
 
 export enum GQLUserRole {
@@ -215,14 +262,18 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type GQLResolversTypes = {
+  ActivityLevel: GQLActivityLevel;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   CoachingRequest: ResolverTypeWrapper<GQLCoachingRequest>;
   CoachingRequestStatus: GQLCoachingRequestStatus;
+  FitnessLevel: GQLFitnessLevel;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
+  Goal: GQLGoal;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  UpdateProfileInput: GQLUpdateProfileInput;
   User: ResolverTypeWrapper<GQLUser>;
   UserBodyMeasure: ResolverTypeWrapper<GQLUserBodyMeasure>;
   UserProfile: ResolverTypeWrapper<GQLUserProfile>;
@@ -239,6 +290,7 @@ export type GQLResolversParentTypes = {
   Mutation: {};
   Query: {};
   String: Scalars['String']['output'];
+  UpdateProfileInput: GQLUpdateProfileInput;
   User: GQLUser;
   UserBodyMeasure: GQLUserBodyMeasure;
   UserProfile: GQLUserProfile;
@@ -257,16 +309,17 @@ export type GQLCoachingRequestResolvers<ContextType = any, ParentType extends GQ
 };
 
 export type GQLMutationResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['Mutation'] = GQLResolversParentTypes['Mutation']> = {
-  _dummy?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType>;
-  acceptCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationAcceptCoachingRequestArgs, 'id'>>;
-  cancelCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationCancelCoachingRequestArgs, 'id'>>;
-  createCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationCreateCoachingRequestArgs, 'recipientId' | 'senderId'>>;
-  rejectCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
+  acceptCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationAcceptCoachingRequestArgs, 'id'>>;
+  cancelCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationCancelCoachingRequestArgs, 'id'>>;
+  createCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationCreateCoachingRequestArgs, 'recipientEmail'>>;
+  rejectCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
+  updateProfile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType, RequireFields<GQLMutationUpdateProfileArgs, 'input'>>;
 };
 
 export type GQLQueryResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['Query'] = GQLResolversParentTypes['Query']> = {
   coachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLQueryCoachingRequestArgs, 'id'>>;
   coachingRequests?: Resolver<Array<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType>;
+  profile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType>;
   user?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
 };
 
@@ -304,20 +357,24 @@ export type GQLUserBodyMeasureResolvers<ContextType = any, ParentType extends GQ
 };
 
 export type GQLUserProfileResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['UserProfile'] = GQLResolversParentTypes['UserProfile']> = {
-  activityLevel?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  activityLevel?: Resolver<Maybe<GQLResolversTypes['ActivityLevel']>, ParentType, ContextType>;
+  allergies?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   avatarUrl?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   bio?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   birthday?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   bodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   firstName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  goal?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  fitnessLevel?: Resolver<Maybe<GQLResolversTypes['FitnessLevel']>, ParentType, ContextType>;
+  goal?: Resolver<Maybe<GQLResolversTypes['Goal']>, ParentType, ContextType>;
+  height?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   lastName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   phone?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   sex?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  user?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
+  weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

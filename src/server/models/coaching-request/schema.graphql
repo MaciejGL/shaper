@@ -22,11 +22,10 @@ type Query {
 
 type Mutation {
 	createCoachingRequest(
-		senderId: ID!
-		recipientId: ID!
+		recipientEmail: String!
 		message: String
 	): CoachingRequest!
-	acceptCoachingRequest(id: ID!): CoachingRequest!
-	rejectCoachingRequest(id: ID!): CoachingRequest!
-	cancelCoachingRequest(id: ID!): CoachingRequest!
+	acceptCoachingRequest(id: ID!): CoachingRequest
+	rejectCoachingRequest(id: ID!): CoachingRequest
+	cancelCoachingRequest(id: ID!): CoachingRequest
 }

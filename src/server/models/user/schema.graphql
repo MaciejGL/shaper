@@ -1,7 +1,7 @@
 enum UserRole {
 	TRAINER
 	CLIENT
-	ADMIN # Added ADMIN to match Prisma enum
+	ADMIN
 }
 
 type User {
@@ -17,23 +17,6 @@ type User {
 	trainer: User
 	clients: [User!]!
 	sessions: [UserSession!]!
-}
-
-type UserProfile {
-	id: ID!
-	firstName: String
-	lastName: String
-	phone: String
-	birthday: String
-	sex: String
-	avatarUrl: String
-	activityLevel: String
-	goal: String
-	bio: String
-	createdAt: String!
-	updatedAt: String!
-	bodyMeasures: [UserBodyMeasure!]!
-	user: User!
 }
 
 type UserSession {
@@ -63,8 +46,4 @@ type UserBodyMeasure {
 
 type Query {
 	user: User
-}
-
-type Mutation {
-	_dummy: Boolean
 }

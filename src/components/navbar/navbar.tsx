@@ -16,6 +16,7 @@ import { usePathname } from 'next/navigation';
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links';
 import { cn } from '@/lib/utils';
 import { SidebarTrigger } from '../ui/sidebar';
+import { SwapAccountButton } from './swap-account';
 
 export const Navbar = ({
 	user,
@@ -64,11 +65,11 @@ function NavbarUser({ user }: { user?: UserWithSession | null }) {
 	}
 
 	if (user?.user?.role === 'TRAINER') {
-		return <TrainerNavbar />;
+		return <TrainerNavbar user={user} />;
 	}
 
 	if (user?.user?.role === 'CLIENT') {
-		return <ClientNavbar />;
+		return <ClientNavbar user={user} />;
 	}
 
 	return null;
@@ -98,20 +99,23 @@ const Link = ({
 	);
 };
 
-function TrainerNavbar() {
+function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
 	return (
 		<NavigationMenu>
 			<NavigationMenuList>
+				<NavigationMenuItem>
+					<SwapAccountButton user={user} />
+				</NavigationMenuItem>
 				<NavigationMenuItem>
 					<NavigationMenuTrigger withChevron={false}>
 						<UserIcon className="w-4 h-4" />
 					</NavigationMenuTrigger>
 					<NavigationMenuContent>
 						<Link
-							href={TRAINER_LINKS.account.href}
-							disabled={TRAINER_LINKS.account.disabled}
+							href={TRAINER_LINKS.profile.href}
+							disabled={TRAINER_LINKS.profile.disabled}
 						>
-							{TRAINER_LINKS.account.label}
+							{TRAINER_LINKS.profile.label}
 						</Link>
 						<LogoutButton />
 					</NavigationMenuContent>
@@ -146,10 +150,13 @@ function TrainerNavbar() {
 	);
 }
 
-function ClientNavbar() {
+function ClientNavbar({ user }: { user?: UserWithSession | null }) {
 	return (
 		<NavigationMenu>
 			<NavigationMenuList>
+				<NavigationMenuItem>
+					<SwapAccountButton user={user} />
+				</NavigationMenuItem>
 				<NavigationMenuItem>
 					<NavigationMenuTrigger withChevron={false}>
 						<UserIcon className="w-4 h-4" />

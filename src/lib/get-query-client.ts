@@ -3,6 +3,7 @@ import {
 	defaultShouldDehydrateQuery,
 	isServer,
 } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 function makeQueryClient() {
 	return new QueryClient({
@@ -14,6 +15,12 @@ function makeQueryClient() {
 				// include pending queries in dehydration
 				shouldDehydrateQuery: query =>
 					defaultShouldDehydrateQuery(query) || query.state.status === 'pending',
+			},
+			mutations: {
+				onError: error => {
+					console.error(error);
+					toast.error(error.message);
+				},
 			},
 		},
 	});
