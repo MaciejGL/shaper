@@ -25,7 +25,7 @@ export const Main = async ({
         className,
       )}
     >
-      <Navbar user={user} withSidebar={withSidebar} />
+      {user && <Navbar user={user} withSidebar={withSidebar} />}
       <div className={cn('pr-1 pb-1', !withSidebar && 'px-0 pb-0')}>
         <div
           className={cn(
