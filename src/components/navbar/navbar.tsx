@@ -1,25 +1,36 @@
 'use client'
 
-import { LogInIcon, MenuIcon, UserIcon } from 'lucide-react'
-import NextLink from 'next/link'
+import {
+  LayoutDashboardIcon,
+  LogInIcon,
+  LogOutIcon,
+  MenuIcon,
+  NotebookTextIcon,
+  UserRoundCogIcon,
+  Users2Icon,
+} from 'lucide-react'
+import { signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
 import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
+import { Divider } from '../divider'
 import { ModeToggle } from '../mode-toggle'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { Button } from '../ui/button'
+import { ButtonLink } from '../ui/button-link'
 import {
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from '../ui/navigation-menu'
-import { NavigationMenu } from '../ui/navigation-menu'
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTrigger,
+} from '../ui/drawer'
 import { SidebarTrigger } from '../ui/sidebar'
 
-import { LogoutButton } from './logout-button'
+import { NavLink } from './nav-link'
 import { SwapAccountButton } from './swap-account'
 
 export const Navbar = ({
@@ -32,7 +43,7 @@ export const Navbar = ({
   return (
     <div
       className={cn(
-        'py-3 px-4 flex justify-between items-center',
+        'py-3 px-4 flex justify-between items-center bg-background',
         withSidebar && 'pl-0',
       )}
     >
@@ -54,17 +65,9 @@ function NavbarUser({ user }: { user?: UserWithSession | null }) {
 
   if (!user) {
     return (
-      <NavigationMenu>
-        <NavigationMenuList>
-          <NavigationMenuItem>
-            <Link href="/login" passHref>
-              <NavigationMenuLink>
-                <LogInIcon className="w-4 h-4" />
-              </NavigationMenuLink>
-            </Link>
-          </NavigationMenuItem>
-        </NavigationMenuList>
-      </NavigationMenu>
+      <ButtonLink href="/login">
+        <LogInIcon className="w-4 h-4" />
+      </ButtonLink>
     )
   }
 
@@ -79,124 +82,111 @@ function NavbarUser({ user }: { user?: UserWithSession | null }) {
   return null
 }
 
-const Link = ({
-  href,
-  disabled,
-  ...props
-}: { href: string; disabled?: boolean } & React.ComponentProps<
-  typeof NextLink
->) => {
-  const pathname = usePathname()
-  const isActive = href === pathname
-
-  return (
-    <NavigationMenuLink asChild active={isActive}>
-      <NextLink
-        href={href}
-        className={cn({
-          'pointer-events-none opacity-30': disabled,
-          'bg-primary text-primary-foreground': isActive,
-        })}
-        {...props}
-      />
-    </NavigationMenuLink>
-  )
-}
-
 function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
   return (
-    <NavigationMenu>
-      <NavigationMenuList>
-        <NavigationMenuItem>
+    <Drawer direction="right">
+      <DrawerTrigger>
+        <Button variant="ghost" iconOnly={<MenuIcon />} />
+      </DrawerTrigger>
+      <DrawerContent dialogTitle="Trainer Menu">
+        <DrawerHeader>
+          <ModeToggle />
+          <div className="flex flex-col items-center gap-2">
+            <Avatar className="size-20 aspect-square">
+              <AvatarImage src="/avatar-male.png" />
+              <AvatarFallback>{user?.user.email.slice(0, 2)}</AvatarFallback>
+            </Avatar>
+            <div>{user?.user.email}</div>
+          </div>
+        </DrawerHeader>
+        <div className="border-b w-full my-4" />
+        <div className="flex flex-col gap-2 p-4">
+          <NavLink
+            href={TRAINER_LINKS.dashboard.href}
+            icon={<LayoutDashboardIcon className="h-5 w-5" />}
+            label={TRAINER_LINKS.dashboard.label}
+          />
+
+          <NavLink
+            href={TRAINER_LINKS.clients.href}
+            icon={<Users2Icon className="h-5 w-5" />}
+            label={TRAINER_LINKS.clients.label}
+          />
+          <NavLink
+            href={TRAINER_LINKS.trainings.href}
+            icon={<NotebookTextIcon className="h-5 w-5" />}
+            label={TRAINER_LINKS.trainings.label}
+          />
+        </div>
+        <div className="border-b w-full my-4" />
+        <div className="flex flex-col gap-2 p-4">
+          <NavLink
+            href={TRAINER_LINKS.profile.href}
+            icon={<UserRoundCogIcon className="h-5 w-5" />}
+            label={TRAINER_LINKS.profile.label}
+          />
+          <NavLink
+            href="#"
+            onClick={() => signOut()}
+            icon={<LogOutIcon className="h-5 w-5" />}
+            label="Logout"
+          />
+        </div>
+        <DrawerFooter>
           <SwapAccountButton user={user} />
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger withChevron={false}>
-            <UserIcon className="w-4 h-4" />
-          </NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <Link
-              href={TRAINER_LINKS.profile.href}
-              disabled={TRAINER_LINKS.profile.disabled}
-            >
-              {TRAINER_LINKS.profile.label}
-            </Link>
-            <LogoutButton />
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger withChevron={false}>
-            <MenuIcon className="w-4 h-4" />
-          </NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <Link
-              href={TRAINER_LINKS.dashboard.href}
-              disabled={TRAINER_LINKS.dashboard.disabled}
-            >
-              {TRAINER_LINKS.dashboard.label}
-            </Link>
-            <Link
-              href={TRAINER_LINKS.clients.href}
-              disabled={TRAINER_LINKS.clients.disabled}
-            >
-              {TRAINER_LINKS.clients.label}
-            </Link>
-            <Link
-              href={TRAINER_LINKS.trainings.href}
-              disabled={TRAINER_LINKS.trainings.disabled}
-            >
-              {TRAINER_LINKS.trainings.label}
-            </Link>
-            <ModeToggle />
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-      </NavigationMenuList>
-    </NavigationMenu>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }
 
 function ClientNavbar({ user }: { user?: UserWithSession | null }) {
   return (
-    <NavigationMenu>
-      <NavigationMenuList>
-        <NavigationMenuItem>
+    <Drawer direction="right">
+      <DrawerTrigger>
+        <MenuIcon className="w-4 h-4" />
+      </DrawerTrigger>
+      <DrawerContent dialogTitle="Fitspace Menu">
+        <DrawerHeader>
+          <Header user={user} />
+        </DrawerHeader>
+        <Divider />
+        <div className="flex flex-col gap-2 p-4">
+          <NavLink
+            href={CLIENT_LINKS.dashboard.href}
+            icon={<LayoutDashboardIcon className="h-5 w-5" />}
+            label={CLIENT_LINKS.dashboard.label}
+          />
+          <NavLink
+            href={CLIENT_LINKS.profile.href}
+            icon={<UserRoundCogIcon className="h-5 w-5" />}
+            label={CLIENT_LINKS.profile.label}
+          />
+          <NavLink
+            href="#"
+            onClick={() => signOut()}
+            icon={<LogOutIcon className="h-5 w-5" />}
+            label="Logout"
+          />
+        </div>
+        <DrawerFooter>
           <SwapAccountButton user={user} />
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger withChevron={false}>
-            <UserIcon className="w-4 h-4" />
-          </NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <Link
-              href={CLIENT_LINKS.profile.href}
-              disabled={CLIENT_LINKS.profile.disabled}
-            >
-              {CLIENT_LINKS.profile.label}
-            </Link>
-            <LogoutButton />
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger withChevron={false}>
-            <MenuIcon className="w-4 h-4" />
-          </NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <Link
-              href={CLIENT_LINKS.dashboard.href}
-              disabled={CLIENT_LINKS.dashboard.disabled}
-            >
-              {CLIENT_LINKS.dashboard.label}
-            </Link>
-            <Link
-              href={CLIENT_LINKS.trainings.href}
-              disabled={CLIENT_LINKS.trainings.disabled}
-            >
-              {CLIENT_LINKS.trainings.label}
-            </Link>
-            <ModeToggle />
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-      </NavigationMenuList>
-    </NavigationMenu>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
+function Header({ user }: { user?: UserWithSession | null }) {
+  return (
+    <>
+      <ModeToggle />
+      <div className="flex flex-col items-center gap-2">
+        <Avatar className="size-20 aspect-square">
+          <AvatarImage src="/avatar-male.png" />
+          <AvatarFallback>{user?.user.email.slice(0, 2)}</AvatarFallback>
+        </Avatar>
+      </div>
+    </>
   )
 }

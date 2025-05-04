@@ -1,15 +1,14 @@
-'use client';
+'use client'
 
-import { signOut } from 'next-auth/react';
-import { NavigationMenuLink } from '../ui/navigation-menu';
+import { signOut } from 'next-auth/react'
 
 export const LogoutButton = () => {
-	const handleLogout = async () => {
-		await signOut();
-	};
-	return (
-		<NavigationMenuLink onClick={() => handleLogout()} className="cursor-pointer">
-			Logout
-		</NavigationMenuLink>
-	);
-};
+  const handleLogout = async () => {
+    await signOut()
+  }
+  return (
+    <button onClick={() => handleLogout()} className="cursor-pointer">
+      Logout
+    </button>
+  )
+}

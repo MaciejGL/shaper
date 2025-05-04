@@ -1,64 +1,81 @@
 import type { Config } from 'tailwindcss'
-import plugin from 'tailwindcss/plugin'
 
-export type { Config }
-
-const config: Partial<Config> = {
+const config = {
+  darkMode: 'class',
+  content: [
+    './pages/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './app/**/*.{ts,tsx}',
+    './src/**/*.{ts,tsx}',
+    '*.{js,ts,jsx,tsx,mdx}',
+  ],
+  prefix: '',
   theme: {
+    container: {
+      center: true,
+      padding: '2rem',
+      screens: {
+        '2xl': '1400px',
+      },
+    },
     extend: {
-      // backgroundColor: backgrounds,
-      // fill: backgrounds,
-      // stroke,
-      // borderColor: stroke,
-      // ringColor: stroke,
-      // outlineColor: stroke,
-      // divideColor: stroke,
-      // textDecorationColor: stroke,
-
-      colors: {},
-
+      colors: {
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
+      },
       borderRadius: {
-        sm: '0.25rem',
-        md: '0.375rem',
-        lg: '0.5rem',
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
       },
-      textUnderlineOffset: {
-        3: '3px',
-        6: '6px',
+      keyframes: {
+        'accordion-down': {
+          from: { height: '0' },
+          to: { height: 'var(--radix-accordion-content-height)' },
+        },
+        'accordion-up': {
+          from: { height: 'var(--radix-accordion-content-height)' },
+          to: { height: '0' },
+        },
       },
-
-      listStyleImage: {
-        dot: `url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="13.5504" r="1.6" fill="%23141E29"/></svg>')`,
-        'dot-gold': `url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="13.5504" r="3" fill="%23D7B180"/></svg>')`,
+      animation: {
+        'accordion-down': 'accordion-down 0.2s ease-out',
+        'accordion-up': 'accordion-up 0.2s ease-out',
       },
     },
   },
-  plugins: [
-    plugin(({ addBase, addVariant, addUtilities }) => {
-      addUtilities({
-        '.flex-center': {
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        },
-        '.hide-scrollbar': {
-          scrollbarWidth: 'none',
-          '-ms-overflow-style': 'none',
-          '&::-webkit-scrollbar': {
-            display: 'none',
-          },
-        },
-      })
-
-      addVariant('not-last', '&:not(:last-child)')
-      addVariant('not-first', '&:not(:first-child)')
-      addVariant('hover', '&:is(:hover, [data-state=hover])')
-      addVariant('focus-visible', '&:is(:focus-visible, [data-state=focus])')
-      addVariant('pressed', '&:is(:active, [data-state=pressed])')
-      addVariant('disabled', '&:is(:disabled, [data-state=disabled])')
-      addVariant('hover-supported', '@media (hover: hover)')
-    }),
-  ],
-}
+  plugins: [require('tailwindcss-animate')],
+} satisfies Config
 
 export default config

@@ -23,19 +23,20 @@ export const Main = ({
 }: MainProps) => {
   const pathname = usePathname()
   const isFitspace = pathname.includes('fitspace')
+  const isTrainer = pathname.includes('trainer')
   return (
     <main
       className={cn(
-        'min-h-screen grid grid-rows-[auto_1fr] w-full bg-secondary',
+        'min-h-screen grid grid-rows-[auto_1fr] w-full bg-background',
         className,
       )}
     >
       <Navbar user={user} withSidebar={withSidebar} />
-      <div className={cn('pr-2 pb-2', isFitspace && 'px-0 pb-0')}>
+      <div className={cn('pr-1 pb-1', isFitspace && 'px-0 pb-0')}>
         <div
           className={cn(
-            'w-full h-full p-2 md:p-4 lg:p-8 bg-secondary rounded-md shadow-xs',
-            isFitspace && 'rounded-none shadow-none bg-zinc-100',
+            'w-full h-full p-2 md:p-4 lg:p-8 dark:bg-zinc-900 bg-zinc-50',
+            isTrainer && 'rounded-sm',
           )}
         >
           {children}
