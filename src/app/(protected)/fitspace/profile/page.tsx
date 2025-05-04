@@ -84,22 +84,17 @@ export default function ProfilePage() {
 	};
 
 	const handleSave = async () => {
-		// Here you would save the data to your backend
-		console.log('profile', profile);
 		const input = {
 			...profile,
 			height: profile.height ? parseFloat(profile.height.toString()) : null,
 			weight: profile.weight ? parseFloat(profile.weight.toString()) : null,
 			birthday: profile.birthday ? new Date(profile.birthday).toISOString() : null,
 		};
-		console.log('input', input);
 		await updateProfile({
 			input,
 		});
 
 		setIsEditing(false);
-
-		// Show success message
 	};
 
 	return (

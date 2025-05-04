@@ -32,8 +32,6 @@ export default class UserProfile implements GQLUserProfile {
 			},
 		});
 
-		console.log('user', user);
-
 		return user?.email;
 	}
 
