@@ -42,6 +42,15 @@ export enum GQLCoachingRequestStatus {
   Rejected = 'REJECTED'
 }
 
+export type GQLCreateNotificationInput = {
+  createdBy?: InputMaybe<Scalars['ID']['input']>;
+  link?: InputMaybe<Scalars['String']['input']>;
+  message: Scalars['String']['input'];
+  relatedItemId?: InputMaybe<Scalars['String']['input']>;
+  type: GQLNotificationType;
+  userId: Scalars['ID']['input'];
+};
+
 export enum GQLFitnessLevel {
   Advanced = 'ADVANCED',
   Beginner = 'BEGINNER',
@@ -60,7 +69,12 @@ export type GQLMutation = {
   acceptCoachingRequest?: Maybe<GQLCoachingRequest>;
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   createCoachingRequest: GQLCoachingRequest;
+  createNotification: GQLNotification;
+  deleteNotification: Scalars['Boolean']['output'];
+  markAllNotificationsRead: Array<GQLNotification>;
+  markNotificationRead: GQLNotification;
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
+  updateNotification: GQLNotification;
   updateProfile?: Maybe<GQLUserProfile>;
 };
 
@@ -81,8 +95,33 @@ export type GQLMutationCreateCoachingRequestArgs = {
 };
 
 
+export type GQLMutationCreateNotificationArgs = {
+  input: GQLCreateNotificationInput;
+};
+
+
+export type GQLMutationDeleteNotificationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationMarkAllNotificationsReadArgs = {
+  userId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationMarkNotificationReadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationRejectCoachingRequestArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationUpdateNotificationArgs = {
+  input: GQLUpdateNotificationInput;
 };
 
 
@@ -90,10 +129,34 @@ export type GQLMutationUpdateProfileArgs = {
   input: GQLUpdateProfileInput;
 };
 
+export type GQLNotification = {
+  __typename?: 'Notification';
+  createdAt: Scalars['String']['output'];
+  createdBy?: Maybe<Scalars['ID']['output']>;
+  creator?: Maybe<GQLUser>;
+  id: Scalars['ID']['output'];
+  link?: Maybe<Scalars['String']['output']>;
+  message: Scalars['String']['output'];
+  read: Scalars['Boolean']['output'];
+  relatedItemId?: Maybe<Scalars['String']['output']>;
+  type: GQLNotificationType;
+};
+
+export enum GQLNotificationType {
+  CoachingRequest = 'COACHING_REQUEST',
+  CoachingRequestAccepted = 'COACHING_REQUEST_ACCEPTED',
+  CoachingRequestRejected = 'COACHING_REQUEST_REJECTED',
+  Message = 'MESSAGE',
+  Reminder = 'REMINDER',
+  System = 'SYSTEM'
+}
+
 export type GQLQuery = {
   __typename?: 'Query';
   coachingRequest?: Maybe<GQLCoachingRequest>;
   coachingRequests: Array<GQLCoachingRequest>;
+  notification?: Maybe<GQLNotification>;
+  notifications: Array<GQLNotification>;
   profile?: Maybe<GQLUserProfile>;
   user?: Maybe<GQLUser>;
 };
@@ -101,6 +164,28 @@ export type GQLQuery = {
 
 export type GQLQueryCoachingRequestArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryNotificationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryNotificationsArgs = {
+  read?: InputMaybe<Scalars['Boolean']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  type?: InputMaybe<GQLNotificationType>;
+  userId: Scalars['ID']['input'];
+};
+
+export type GQLUpdateNotificationInput = {
+  id: Scalars['ID']['input'];
+  link?: InputMaybe<Scalars['String']['input']>;
+  message?: InputMaybe<Scalars['String']['input']>;
+  read?: InputMaybe<Scalars['Boolean']['input']>;
+  type?: InputMaybe<GQLNotificationType>;
 };
 
 export type GQLUpdateProfileInput = {
@@ -124,10 +209,12 @@ export type GQLUser = {
   __typename?: 'User';
   clients: Array<GQLUser>;
   createdAt: Scalars['String']['output'];
+  createdNotifications: Array<GQLNotification>;
   email: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   image?: Maybe<Scalars['String']['output']>;
   name?: Maybe<Scalars['String']['output']>;
+  notifications: Array<GQLNotification>;
   profile?: Maybe<GQLUserProfile>;
   role: GQLUserRole;
   sessions: Array<GQLUserSession>;
@@ -227,6 +314,13 @@ export type GQLMyCoachingRequestsQueryVariables = Exact<{ [key: string]: never; 
 
 export type GQLMyCoachingRequestsQuery = { __typename?: 'Query', coachingRequests: Array<{ __typename?: 'CoachingRequest', id: string, message?: string | undefined | null, createdAt: string, updatedAt: string, status: GQLCoachingRequestStatus, recipient: { __typename?: 'User', id: string, name?: string | undefined | null, email: string }, sender: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } }> };
 
+export type GQLMyCoachingRequestQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLMyCoachingRequestQuery = { __typename?: 'Query', coachingRequest?: { __typename?: 'CoachingRequest', id: string, message?: string | undefined | null, createdAt: string, updatedAt: string, status: GQLCoachingRequestStatus, recipient: { __typename?: 'User', id: string, name?: string | undefined | null, email: string }, sender: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } } | undefined | null };
+
 export type GQLAcceptCoachingRequestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -247,6 +341,31 @@ export type GQLCancelCoachingRequestMutationVariables = Exact<{
 
 
 export type GQLCancelCoachingRequestMutation = { __typename?: 'Mutation', cancelCoachingRequest?: { __typename?: 'CoachingRequest', id: string } | undefined | null };
+
+export type GQLNotificationsQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+  read?: InputMaybe<Scalars['Boolean']['input']>;
+  type?: InputMaybe<GQLNotificationType>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLNotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'Notification', id: string, message: string, createdAt: string, type: GQLNotificationType, read: boolean, link?: string | undefined | null, createdBy?: string | undefined | null, relatedItemId?: string | undefined | null }> };
+
+export type GQLMarkNotificationAsReadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLMarkNotificationAsReadMutation = { __typename?: 'Mutation', markNotificationRead: { __typename?: 'Notification', id: string } };
+
+export type GQLMarkAllNotificationsAsReadMutationVariables = Exact<{
+  userId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLMarkAllNotificationsAsReadMutation = { __typename?: 'Mutation', markAllNotificationsRead: Array<{ __typename?: 'Notification', id: string }> };
 
 
 export const ProfileFragmentFragmentDoc = `
@@ -601,6 +720,70 @@ useInfiniteMyCoachingRequestsQuery.getKey = (variables?: GQLMyCoachingRequestsQu
 
 useMyCoachingRequestsQuery.fetcher = (variables?: GQLMyCoachingRequestsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMyCoachingRequestsQuery, GQLMyCoachingRequestsQueryVariables>(MyCoachingRequestsDocument, variables, options);
 
+export const MyCoachingRequestDocument = `
+    query MyCoachingRequest($id: ID!) {
+  coachingRequest(id: $id) {
+    id
+    message
+    createdAt
+    updatedAt
+    status
+    recipient {
+      id
+      name
+      email
+    }
+    sender {
+      id
+      name
+      email
+    }
+  }
+}
+    `;
+
+export const useMyCoachingRequestQuery = <
+      TData = GQLMyCoachingRequestQuery,
+      TError = unknown
+    >(
+      variables: GQLMyCoachingRequestQueryVariables,
+      options?: Omit<UseQueryOptions<GQLMyCoachingRequestQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLMyCoachingRequestQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLMyCoachingRequestQuery, TError, TData>(
+      {
+    queryKey: ['MyCoachingRequest', variables],
+    queryFn: fetchData<GQLMyCoachingRequestQuery, GQLMyCoachingRequestQueryVariables>(MyCoachingRequestDocument, variables),
+    ...options
+  }
+    )};
+
+useMyCoachingRequestQuery.getKey = (variables: GQLMyCoachingRequestQueryVariables) => ['MyCoachingRequest', variables];
+
+export const useInfiniteMyCoachingRequestQuery = <
+      TData = InfiniteData<GQLMyCoachingRequestQuery>,
+      TError = unknown
+    >(
+      variables: GQLMyCoachingRequestQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLMyCoachingRequestQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLMyCoachingRequestQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLMyCoachingRequestQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['MyCoachingRequest.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLMyCoachingRequestQuery, GQLMyCoachingRequestQueryVariables>(MyCoachingRequestDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteMyCoachingRequestQuery.getKey = (variables: GQLMyCoachingRequestQueryVariables) => ['MyCoachingRequest.infinite', variables];
+
+
+useMyCoachingRequestQuery.fetcher = (variables: GQLMyCoachingRequestQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMyCoachingRequestQuery, GQLMyCoachingRequestQueryVariables>(MyCoachingRequestDocument, variables, options);
+
 export const AcceptCoachingRequestDocument = `
     mutation AcceptCoachingRequest($id: ID!) {
   acceptCoachingRequest(id: $id) {
@@ -678,3 +861,118 @@ useCancelCoachingRequestMutation.getKey = () => ['CancelCoachingRequest'];
 
 
 useCancelCoachingRequestMutation.fetcher = (variables: GQLCancelCoachingRequestMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCancelCoachingRequestMutation, GQLCancelCoachingRequestMutationVariables>(CancelCoachingRequestDocument, variables, options);
+
+export const NotificationsDocument = `
+    query Notifications($userId: ID!, $read: Boolean, $type: NotificationType, $skip: Int, $take: Int) {
+  notifications(
+    userId: $userId
+    read: $read
+    type: $type
+    skip: $skip
+    take: $take
+  ) {
+    id
+    message
+    createdAt
+    type
+    read
+    link
+    createdBy
+    relatedItemId
+  }
+}
+    `;
+
+export const useNotificationsQuery = <
+      TData = GQLNotificationsQuery,
+      TError = unknown
+    >(
+      variables: GQLNotificationsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLNotificationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLNotificationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLNotificationsQuery, TError, TData>(
+      {
+    queryKey: ['Notifications', variables],
+    queryFn: fetchData<GQLNotificationsQuery, GQLNotificationsQueryVariables>(NotificationsDocument, variables),
+    ...options
+  }
+    )};
+
+useNotificationsQuery.getKey = (variables: GQLNotificationsQueryVariables) => ['Notifications', variables];
+
+export const useInfiniteNotificationsQuery = <
+      TData = InfiniteData<GQLNotificationsQuery>,
+      TError = unknown
+    >(
+      variables: GQLNotificationsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLNotificationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLNotificationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLNotificationsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['Notifications.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLNotificationsQuery, GQLNotificationsQueryVariables>(NotificationsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteNotificationsQuery.getKey = (variables: GQLNotificationsQueryVariables) => ['Notifications.infinite', variables];
+
+
+useNotificationsQuery.fetcher = (variables: GQLNotificationsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLNotificationsQuery, GQLNotificationsQueryVariables>(NotificationsDocument, variables, options);
+
+export const MarkNotificationAsReadDocument = `
+    mutation MarkNotificationAsRead($id: ID!) {
+  markNotificationRead(id: $id) {
+    id
+  }
+}
+    `;
+
+export const useMarkNotificationAsReadMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLMarkNotificationAsReadMutation, TError, GQLMarkNotificationAsReadMutationVariables, TContext>) => {
+    
+    return useMutation<GQLMarkNotificationAsReadMutation, TError, GQLMarkNotificationAsReadMutationVariables, TContext>(
+      {
+    mutationKey: ['MarkNotificationAsRead'],
+    mutationFn: (variables?: GQLMarkNotificationAsReadMutationVariables) => fetchData<GQLMarkNotificationAsReadMutation, GQLMarkNotificationAsReadMutationVariables>(MarkNotificationAsReadDocument, variables)(),
+    ...options
+  }
+    )};
+
+useMarkNotificationAsReadMutation.getKey = () => ['MarkNotificationAsRead'];
+
+
+useMarkNotificationAsReadMutation.fetcher = (variables: GQLMarkNotificationAsReadMutationVariables, options?: RequestInit['headers']) => fetchData<GQLMarkNotificationAsReadMutation, GQLMarkNotificationAsReadMutationVariables>(MarkNotificationAsReadDocument, variables, options);
+
+export const MarkAllNotificationsAsReadDocument = `
+    mutation MarkAllNotificationsAsRead($userId: ID!) {
+  markAllNotificationsRead(userId: $userId) {
+    id
+  }
+}
+    `;
+
+export const useMarkAllNotificationsAsReadMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLMarkAllNotificationsAsReadMutation, TError, GQLMarkAllNotificationsAsReadMutationVariables, TContext>) => {
+    
+    return useMutation<GQLMarkAllNotificationsAsReadMutation, TError, GQLMarkAllNotificationsAsReadMutationVariables, TContext>(
+      {
+    mutationKey: ['MarkAllNotificationsAsRead'],
+    mutationFn: (variables?: GQLMarkAllNotificationsAsReadMutationVariables) => fetchData<GQLMarkAllNotificationsAsReadMutation, GQLMarkAllNotificationsAsReadMutationVariables>(MarkAllNotificationsAsReadDocument, variables)(),
+    ...options
+  }
+    )};
+
+useMarkAllNotificationsAsReadMutation.getKey = () => ['MarkAllNotificationsAsRead'];
+
+
+useMarkAllNotificationsAsReadMutation.fetcher = (variables: GQLMarkAllNotificationsAsReadMutationVariables, options?: RequestInit['headers']) => fetchData<GQLMarkAllNotificationsAsReadMutation, GQLMarkAllNotificationsAsReadMutationVariables>(MarkAllNotificationsAsReadDocument, variables, options);

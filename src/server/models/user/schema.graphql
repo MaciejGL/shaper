@@ -1,49 +1,51 @@
 enum UserRole {
-	TRAINER
-	CLIENT
-	ADMIN
+  TRAINER
+  CLIENT
+  ADMIN
 }
 
 type User {
-	id: ID!
-	email: String!
-	name: String
-	image: String
-	role: UserRole!
-	createdAt: String!
-	updatedAt: String!
+  id: ID!
+  email: String!
+  name: String
+  image: String
+  role: UserRole!
+  createdAt: String!
+  updatedAt: String!
 
-	profile: UserProfile
-	trainer: User
-	clients: [User!]!
-	sessions: [UserSession!]!
+  profile: UserProfile
+  trainer: User
+  clients: [User!]!
+  sessions: [UserSession!]!
+  notifications: [Notification!]!
+  createdNotifications: [Notification!]!
 }
 
 type UserSession {
-	id: ID!
-	user: User!
-	otp: String!
-	expiresAt: String!
-	createdAt: String!
+  id: ID!
+  user: User!
+  otp: String!
+  expiresAt: String!
+  createdAt: String!
 }
 
 type UserBodyMeasure {
-	id: ID!
-	userProfile: UserProfile!
-	measuredAt: String!
-	weight: Float
-	height: Float
-	chest: Float
-	waist: Float
-	hips: Float
-	neck: Float
-	biceps: Float
-	thigh: Float
-	calf: Float
-	bodyFat: Float
-	notes: String
+  id: ID!
+  userProfile: UserProfile!
+  measuredAt: String!
+  weight: Float
+  height: Float
+  chest: Float
+  waist: Float
+  hips: Float
+  neck: Float
+  biceps: Float
+  thigh: Float
+  calf: Float
+  bodyFat: Float
+  notes: String
 }
 
 type Query {
-	user: User
+  user: User
 }

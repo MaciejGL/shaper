@@ -1,37 +1,57 @@
 query MyCoachingRequests {
-	coachingRequests {
-		id
-		message
-		createdAt
-		updatedAt
-		status
-		recipient {
-			id
-			name
-			email
-		}
-		sender {
-			id
-			name
-			email
-		}
-	}
+  coachingRequests {
+    id
+    message
+    createdAt
+    updatedAt
+    status
+    recipient {
+      id
+      name
+      email
+    }
+    sender {
+      id
+      name
+      email
+    }
+  }
+}
+
+query MyCoachingRequest($id: ID!) {
+  coachingRequest(id: $id) {
+    id
+    message
+    createdAt
+    updatedAt
+    status
+    recipient {
+      id
+      name
+      email
+    }
+    sender {
+      id
+      name
+      email
+    }
+  }
 }
 
 mutation AcceptCoachingRequest($id: ID!) {
-	acceptCoachingRequest(id: $id) {
-		id
-	}
+  acceptCoachingRequest(id: $id) {
+    id
+  }
 }
 
 mutation RejectCoachingRequest($id: ID!) {
-	rejectCoachingRequest(id: $id) {
-		id
-	}
+  rejectCoachingRequest(id: $id) {
+    id
+  }
 }
 
 mutation CancelCoachingRequest($id: ID!) {
-	cancelCoachingRequest(id: $id) {
-		id
-	}
+  cancelCoachingRequest(id: $id) {
+    id
+  }
 }

@@ -13,6 +13,7 @@ import { signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
+import { useNotificationsQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
@@ -31,6 +32,7 @@ import {
 import { SidebarTrigger } from '../ui/sidebar'
 
 import { NavLink } from './nav-link'
+import { NotificationBell } from './notification-bell'
 import { SwapAccountButton } from './swap-account'
 
 export const Navbar = ({
@@ -40,6 +42,17 @@ export const Navbar = ({
   user?: UserWithSession | null
   withSidebar?: boolean
 }) => {
+  const { data: notifications } = useNotificationsQuery(
+    {
+      userId: user!.user.id!,
+      skip: 0,
+      take: 10,
+    },
+    {
+      enabled: !!user?.user?.id,
+      refetchInterval: 10000,
+    },
+  )
   return (
     <div
       className={cn(
@@ -48,9 +61,20 @@ export const Navbar = ({
       )}
     >
       {withSidebar && <SidebarTrigger />}
-      {!withSidebar && <h1 className="text-xl">Shaper</h1>}
-
-      <NavbarUser user={user} />
+      {!withSidebar && (
+        <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 text-transparent bg-clip-text">
+          Shaper
+        </span>
+      )}
+      <div className="flex items-center gap-2">
+        {user && (
+          <NotificationBell
+            notifications={notifications?.notifications}
+            user={user?.user}
+          />
+        )}
+        <NavbarUser user={user} />
+      </div>
     </div>
   )
 }
@@ -85,7 +109,7 @@ function NavbarUser({ user }: { user?: UserWithSession | null }) {
 function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
   return (
     <Drawer direction="right">
-      <DrawerTrigger>
+      <DrawerTrigger asChild>
         <Button variant="ghost" iconOnly={<MenuIcon />} />
       </DrawerTrigger>
       <DrawerContent dialogTitle="Trainer Menu">
@@ -143,8 +167,8 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
 function ClientNavbar({ user }: { user?: UserWithSession | null }) {
   return (
     <Drawer direction="right">
-      <DrawerTrigger>
-        <MenuIcon className="w-4 h-4" />
+      <DrawerTrigger asChild>
+        <Button variant="ghost" iconOnly={<MenuIcon />} />
       </DrawerTrigger>
       <DrawerContent dialogTitle="Fitspace Menu">
         <DrawerHeader>

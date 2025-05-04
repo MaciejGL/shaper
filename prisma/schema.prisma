@@ -28,6 +28,8 @@ model User {
   clients   User[]       @relation("TrainerClients")
   sentRequests     CoachingRequest[] @relation("SentRequests")
   receivedRequests CoachingRequest[] @relation("ReceivedRequests")
+  notifications Notification[]
+  createdNotifications Notification[] @relation("NotificationCreator")
 
   sessions  UserSession[]
 }
@@ -116,4 +118,24 @@ model CoachingRequest {
 
   @@index([senderId])
   @@index([recipientId])
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  createdBy  String?  
+  creator    User?    @relation("NotificationCreator", fields: [createdBy], references: [id])
+  message    String
+  type       String
+  read       Boolean  @default(false)
+  link       String?
+  metadata   Json?
+  relatedItemId String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdBy])
+  @@index([userId, read])
+  @@index([userId, createdAt])
 }

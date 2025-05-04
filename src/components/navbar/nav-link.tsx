@@ -20,8 +20,8 @@ interface NavItemProps {
 export const navLinkVariants = cva('w-full justify-start gap-3 px-3 py-6', {
   variants: {
     isActive: {
-      true: 'bg-muted',
-      false: 'hover:bg-muted/50',
+      true: 'bg-violet-50',
+      false: 'hover:bg-violet-100',
     },
   },
 })

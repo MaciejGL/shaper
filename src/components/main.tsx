@@ -1,6 +1,3 @@
-'use client'
-
-import { usePathname } from 'next/navigation'
 import { ReactNode } from 'react'
 
 import { cn } from '@/lib/utils'
@@ -15,15 +12,12 @@ interface MainProps {
   withSidebar?: boolean
 }
 
-export const Main = ({
+export const Main = async ({
   children,
   className,
   user,
   withSidebar = false,
 }: MainProps) => {
-  const pathname = usePathname()
-  const isFitspace = pathname.includes('fitspace')
-  const isTrainer = pathname.includes('trainer')
   return (
     <main
       className={cn(
@@ -32,11 +26,11 @@ export const Main = ({
       )}
     >
       <Navbar user={user} withSidebar={withSidebar} />
-      <div className={cn('pr-1 pb-1', isFitspace && 'px-0 pb-0')}>
+      <div className={cn('pr-1 pb-1', !withSidebar && 'px-0 pb-0')}>
         <div
           className={cn(
             'w-full h-full p-2 md:p-4 lg:p-8 dark:bg-zinc-900 bg-zinc-50',
-            isTrainer && 'rounded-sm',
+            withSidebar && 'rounded-sm',
           )}
         >
           {children}

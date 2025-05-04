@@ -43,6 +43,15 @@ export enum GQLCoachingRequestStatus {
   Rejected = 'REJECTED'
 }
 
+export type GQLCreateNotificationInput = {
+  createdBy?: InputMaybe<Scalars['ID']['input']>;
+  link?: InputMaybe<Scalars['String']['input']>;
+  message: Scalars['String']['input'];
+  relatedItemId?: InputMaybe<Scalars['String']['input']>;
+  type: GQLNotificationType;
+  userId: Scalars['ID']['input'];
+};
+
 export enum GQLFitnessLevel {
   Advanced = 'ADVANCED',
   Beginner = 'BEGINNER',
@@ -61,7 +70,12 @@ export type GQLMutation = {
   acceptCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   cancelCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   createCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
+  createNotification: EntireFieldWrapper<GQLNotification>;
+  deleteNotification: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  markAllNotificationsRead: EntireFieldWrapper<Array<GQLNotification>>;
+  markNotificationRead: EntireFieldWrapper<GQLNotification>;
   rejectCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
+  updateNotification: EntireFieldWrapper<GQLNotification>;
   updateProfile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
 };
 
@@ -82,8 +96,33 @@ export type GQLMutationCreateCoachingRequestArgs = {
 };
 
 
+export type GQLMutationCreateNotificationArgs = {
+  input: GQLCreateNotificationInput;
+};
+
+
+export type GQLMutationDeleteNotificationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationMarkAllNotificationsReadArgs = {
+  userId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationMarkNotificationReadArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationRejectCoachingRequestArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationUpdateNotificationArgs = {
+  input: GQLUpdateNotificationInput;
 };
 
 
@@ -91,10 +130,34 @@ export type GQLMutationUpdateProfileArgs = {
   input: GQLUpdateProfileInput;
 };
 
+export type GQLNotification = {
+  __typename?: 'Notification';
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  createdBy?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
+  creator?: EntireFieldWrapper<Maybe<GQLUser>>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  link?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  message: EntireFieldWrapper<Scalars['String']['output']>;
+  read: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  relatedItemId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  type: EntireFieldWrapper<GQLNotificationType>;
+};
+
+export enum GQLNotificationType {
+  CoachingRequest = 'COACHING_REQUEST',
+  CoachingRequestAccepted = 'COACHING_REQUEST_ACCEPTED',
+  CoachingRequestRejected = 'COACHING_REQUEST_REJECTED',
+  Message = 'MESSAGE',
+  Reminder = 'REMINDER',
+  System = 'SYSTEM'
+}
+
 export type GQLQuery = {
   __typename?: 'Query';
   coachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   coachingRequests: EntireFieldWrapper<Array<GQLCoachingRequest>>;
+  notification?: EntireFieldWrapper<Maybe<GQLNotification>>;
+  notifications: EntireFieldWrapper<Array<GQLNotification>>;
   profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
   user?: EntireFieldWrapper<Maybe<GQLUser>>;
 };
@@ -102,6 +165,28 @@ export type GQLQuery = {
 
 export type GQLQueryCoachingRequestArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryNotificationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryNotificationsArgs = {
+  read?: InputMaybe<Scalars['Boolean']['input']>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+  type?: InputMaybe<GQLNotificationType>;
+  userId: Scalars['ID']['input'];
+};
+
+export type GQLUpdateNotificationInput = {
+  id: Scalars['ID']['input'];
+  link?: InputMaybe<Scalars['String']['input']>;
+  message?: InputMaybe<Scalars['String']['input']>;
+  read?: InputMaybe<Scalars['Boolean']['input']>;
+  type?: InputMaybe<GQLNotificationType>;
 };
 
 export type GQLUpdateProfileInput = {
@@ -125,10 +210,12 @@ export type GQLUser = {
   __typename?: 'User';
   clients: EntireFieldWrapper<Array<GQLUser>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  createdNotifications: EntireFieldWrapper<Array<GQLNotification>>;
   email: EntireFieldWrapper<Scalars['String']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   image?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   name?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  notifications: EntireFieldWrapper<Array<GQLNotification>>;
   profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
   role: EntireFieldWrapper<GQLUserRole>;
   sessions: EntireFieldWrapper<Array<GQLUserSession>>;
@@ -266,13 +353,18 @@ export type GQLResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   CoachingRequest: ResolverTypeWrapper<GQLCoachingRequest>;
   CoachingRequestStatus: GQLCoachingRequestStatus;
+  CreateNotificationInput: GQLCreateNotificationInput;
   FitnessLevel: GQLFitnessLevel;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   Goal: GQLGoal;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   Mutation: ResolverTypeWrapper<{}>;
+  Notification: ResolverTypeWrapper<GQLNotification>;
+  NotificationType: GQLNotificationType;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
+  UpdateNotificationInput: GQLUpdateNotificationInput;
   UpdateProfileInput: GQLUpdateProfileInput;
   User: ResolverTypeWrapper<GQLUser>;
   UserBodyMeasure: ResolverTypeWrapper<GQLUserBodyMeasure>;
@@ -285,11 +377,15 @@ export type GQLResolversTypes = {
 export type GQLResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   CoachingRequest: GQLCoachingRequest;
+  CreateNotificationInput: GQLCreateNotificationInput;
   Float: Scalars['Float']['output'];
   ID: Scalars['ID']['output'];
+  Int: Scalars['Int']['output'];
   Mutation: {};
+  Notification: GQLNotification;
   Query: {};
   String: Scalars['String']['output'];
+  UpdateNotificationInput: GQLUpdateNotificationInput;
   UpdateProfileInput: GQLUpdateProfileInput;
   User: GQLUser;
   UserBodyMeasure: GQLUserBodyMeasure;
@@ -312,13 +408,33 @@ export type GQLMutationResolvers<ContextType = any, ParentType extends GQLResolv
   acceptCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationAcceptCoachingRequestArgs, 'id'>>;
   cancelCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationCancelCoachingRequestArgs, 'id'>>;
   createCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationCreateCoachingRequestArgs, 'recipientEmail'>>;
+  createNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationCreateNotificationArgs, 'input'>>;
+  deleteNotification?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteNotificationArgs, 'id'>>;
+  markAllNotificationsRead?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLMutationMarkAllNotificationsReadArgs, 'userId'>>;
+  markNotificationRead?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationMarkNotificationReadArgs, 'id'>>;
   rejectCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
+  updateNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationUpdateNotificationArgs, 'input'>>;
   updateProfile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType, RequireFields<GQLMutationUpdateProfileArgs, 'input'>>;
+};
+
+export type GQLNotificationResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['Notification'] = GQLResolversParentTypes['Notification']> = {
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  createdBy?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
+  creator?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  link?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  message?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  read?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  relatedItemId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  type?: Resolver<GQLResolversTypes['NotificationType'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLQueryResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['Query'] = GQLResolversParentTypes['Query']> = {
   coachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLQueryCoachingRequestArgs, 'id'>>;
   coachingRequests?: Resolver<Array<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType>;
+  notification?: Resolver<Maybe<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLQueryNotificationArgs, 'id'>>;
+  notifications?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLQueryNotificationsArgs, 'userId'>>;
   profile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType>;
   user?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
 };
@@ -326,10 +442,12 @@ export type GQLQueryResolvers<ContextType = any, ParentType extends GQLResolvers
 export type GQLUserResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['User'] = GQLResolversParentTypes['User']> = {
   clients?: Resolver<Array<GQLResolversTypes['User']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  createdNotifications?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType>;
   email?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   image?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   name?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  notifications?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType>;
   role?: Resolver<GQLResolversTypes['UserRole'], ParentType, ContextType>;
   sessions?: Resolver<Array<GQLResolversTypes['UserSession']>, ParentType, ContextType>;
@@ -390,6 +508,7 @@ export type GQLUserSessionResolvers<ContextType = any, ParentType extends GQLRes
 export type GQLResolvers<ContextType = any> = {
   CoachingRequest?: GQLCoachingRequestResolvers<ContextType>;
   Mutation?: GQLMutationResolvers<ContextType>;
+  Notification?: GQLNotificationResolvers<ContextType>;
   Query?: GQLQueryResolvers<ContextType>;
   User?: GQLUserResolvers<ContextType>;
   UserBodyMeasure?: GQLUserBodyMeasureResolvers<ContextType>;

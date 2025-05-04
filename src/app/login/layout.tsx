@@ -1,5 +1,7 @@
-import { Main } from '@/components/main';
-
 export default function Layout({ children }: { children: React.ReactNode }) {
-	return <Main className="bg-zinc-100">{children}</Main>;
+  return (
+    <main className="min-h-screen grid grid-rows-1 w-full bg-zinc-100">
+      {children}
+    </main>
+  )
 }

@@ -1,0 +1,36 @@
+query Notifications(
+  $userId: ID!
+  $read: Boolean
+  $type: NotificationType
+  $skip: Int
+  $take: Int
+) {
+  notifications(
+    userId: $userId
+    read: $read
+    type: $type
+    skip: $skip
+    take: $take
+  ) {
+    id
+    message
+    createdAt
+    type
+    read
+    link
+    createdBy
+    relatedItemId
+  }
+}
+
+mutation MarkNotificationAsRead($id: ID!) {
+  markNotificationRead(id: $id) {
+    id
+  }
+}
+
+mutation MarkAllNotificationsAsRead($userId: ID!) {
+  markAllNotificationsRead(userId: $userId) {
+    id
+  }
+}

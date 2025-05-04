@@ -7,6 +7,7 @@ import type * as React from 'react'
 import { getQueryClient } from '@/lib/get-query-client'
 
 import { ThemeProvider } from './theme-provider'
+import { SidebarProvider } from './ui/sidebar'
 import { Toaster } from './ui/sonner'
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -20,7 +21,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         enableSystem
         disableTransitionOnChange
       >
-        {children}
+        <SidebarProvider>{children}</SidebarProvider>
       </ThemeProvider>
       <ReactQueryDevtools />
       <Toaster />
