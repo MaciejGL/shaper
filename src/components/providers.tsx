@@ -1,19 +1,29 @@
-'use client';
-import { getQueryClient } from '@/lib/get-query-client';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+'use client'
 
-import type * as React from 'react';
-import { Toaster } from './ui/sonner';
+import { QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import type * as React from 'react'
+
+import { getQueryClient } from '@/lib/get-query-client'
+
+import { ThemeProvider } from './theme-provider'
+import { Toaster } from './ui/sonner'
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-	const queryClient = getQueryClient();
+  const queryClient = getQueryClient()
 
-	return (
-		<QueryClientProvider client={queryClient}>
-			{children}
-			<ReactQueryDevtools />
-			<Toaster />
-		</QueryClientProvider>
-	);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        {children}
+      </ThemeProvider>
+      <ReactQueryDevtools />
+      <Toaster />
+    </QueryClientProvider>
+  )
 }
