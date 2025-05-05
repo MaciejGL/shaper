@@ -1,6 +1,7 @@
 'use client'
 
 import {
+  ChevronRight,
   DumbbellIcon,
   HomeIcon,
   NotebookTextIcon,
@@ -68,7 +69,11 @@ export function AppSidebar() {
   ]
 
   return (
-    <Sidebar variant="inset" collapsible="icon">
+    <Sidebar
+      variant="inset"
+      collapsible="icon"
+      className="border-r border-zinc-100 dark:border-zinc-800"
+    >
       <SidebarContent className="mt-16">
         <SidebarGroupContent>
           <SidebarMenu>
@@ -100,6 +105,7 @@ function SidebarItem({ item }: { item: SidebarItem }) {
         <Link href={item.url} className={navLinkVariants({ isActive })}>
           <item.icon />
           <span className="font-medium">{item.title}</span>
+          {isActive && <ChevronRight className="ml-auto h-4 w-4 opacity-60" />}
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>

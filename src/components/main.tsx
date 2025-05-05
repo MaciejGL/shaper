@@ -21,20 +21,18 @@ export const Main = async ({
   return (
     <main
       className={cn(
-        'min-h-screen grid grid-rows-[auto_1fr] w-full bg-background',
+        'min-h-screen flex flex-col w-full bg-background',
         className,
       )}
     >
       {user && <Navbar user={user} withSidebar={withSidebar} />}
-      <div className={cn('pr-1 pb-1', !withSidebar && 'px-0 pb-0')}>
-        <div
-          className={cn(
-            'w-full h-full p-2 md:p-4 lg:p-8 dark:bg-zinc-900 bg-zinc-50',
-            withSidebar && 'rounded-sm',
-          )}
-        >
-          {children}
-        </div>
+
+      <div
+        className={cn(
+          'w-full h-full p-2 md:p-4 lg:p-8 dark:bg-zinc-900 bg-zinc-50',
+        )}
+      >
+        {children}
       </div>
     </main>
   )

@@ -50,14 +50,13 @@ export const Navbar = ({
     },
     {
       enabled: !!user?.user?.id,
-      refetchInterval: 10000,
+      refetchInterval: 100000,
     },
   )
   return (
     <div
       className={cn(
-        'py-3 px-4 flex justify-between items-center bg-background',
-        withSidebar && 'pl-0',
+        'sticky top-0 py-3 px-4 flex justify-between items-center bg-background shadow-[2px_1px_3px_0px_rgba(0,0,0,0.1)]',
       )}
     >
       {withSidebar && <SidebarTrigger />}

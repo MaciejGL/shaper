@@ -18,13 +18,12 @@ interface NavItemProps {
 }
 
 export const navLinkVariants = cva(
-  'w-full justify-start gap-3 px-3 py-6 transition-colors',
+  'w-full justify-start gap-3 px-3 py-4 transition-colors',
   {
     variants: {
       isActive: {
-        true: 'bg-violet-50 dark:bg-zinc-900 text-violet-500 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-zinc-800',
-        false:
-          'hover:bg-violet-100 dark:hover:bg-zinc-800 text-zinc-500 dark:text-zinc-100',
+        true: 'hover:bg-accent/90 text-accent-foreground',
+        false: 'hover:bg-accent/90 hover:text-accent-foreground',
       },
     },
   },

@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import plugin from 'tailwindcss/plugin'
 
 const config = {
   darkMode: 'class',
@@ -75,7 +76,47 @@ const config = {
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@savvywombat/tailwindcss-grid-areas'),
+    require('@tailwindcss/container-queries'),
+    plugin(({ addUtilities, addVariant, theme }) => {
+      addUtilities({
+        '.masked-placeholder-text': {
+          borderRadius: theme('borderRadius.sm'),
+          animation: theme('animation.pulse'),
+          color: 'transparent',
+          '& *': {
+            color: 'transparent !important',
+          },
+          userSelect: 'none',
+          backgroundColor: 'hsl(var(--muted))',
+          boxDecorationBreak: 'clone',
+        },
+      })
+      addUtilities({
+        '.flex-center': {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        },
+        '.hide-scrollbar': {
+          scrollbarWidth: 'none',
+          '-ms-overflow-style': 'none',
+          '&::-webkit-scrollbar': {
+            display: 'none',
+          },
+        },
+      })
+      addVariant('not-last', '&:not(:last-child)')
+      addVariant('not-first', '&:not(:first-child)')
+      addVariant('hover', '&:is(:hover, [data-state=hover])')
+      addVariant('focus-visible', '&:is(:focus-visible, [data-state=focus])')
+      addVariant('pressed', '&:is(:active, [data-state=pressed])')
+      addVariant('disabled', '&:is(:disabled, [data-state=disabled])')
+      addVariant('hover-supported', '@media (hover: hover)')
+    }),
+  ],
 } satisfies Config
 
 export default config

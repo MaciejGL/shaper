@@ -44,6 +44,12 @@ importers:
       '@radix-ui/react-tooltip':
         specifier: ^1.2.4
         version: 1.2.4(@types/react-dom@19.1.3(@types/react@19.1.2))(@types/react@19.1.2)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@savvywombat/tailwindcss-grid-areas':
+        specifier: ^4.0.0
+        version: 4.0.0(tailwindcss@4.1.5)
+      '@tailwindcss/container-queries':
+        specifier: ^0.1.1
+        version: 0.1.1(tailwindcss@4.1.5)
       '@tanstack/react-query':
         specifier: ^5.75.0
         version: 5.75.0(react@19.1.0)
@@ -1741,6 +1747,12 @@ packages:
   '@rushstack/eslint-patch@1.11.0':
     resolution: {integrity: sha512-zxnHvoMQVqewTJr/W4pKjF0bMGiKJv1WX7bSrkl46Hg0QjESbzBROWK0Wg4RphzSOS5Jiy7eFimmM3UgMrMZbQ==}
 
+  '@savvywombat/tailwindcss-grid-areas@4.0.0':
+    resolution: {integrity: sha512-gjEGTltsGfy+AJQqhkuQKQGp/SB0XzXT3ZNmrOfuwPGF5DLg5GsN5XHiaYhudMvmBwRp+9k6wrZhHBM0lhEgJA==}
+    engines: {node: '>=16.20.2'}
+    peerDependencies:
+      tailwindcss: ^3.0.1
+
   '@storybook/csf@0.0.1':
     resolution: {integrity: sha512-USTLkZze5gkel8MYCujSRBVIrUQ3YPBrLOx7GNk/0wttvVtlzWXAq9eLbQ4p/NicGxP+3T7KPEMVV//g+yubpw==}
 
@@ -1749,6 +1761,11 @@ packages:
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
+
+  '@tailwindcss/container-queries@0.1.1':
+    resolution: {integrity: sha512-p18dswChx6WnTSaJCSGx6lTmrGzNNvm2FtXmiO6AuA1V4U5REyoqwmT6kgAsIMdjo07QdAfYXHJ4hnMtfHzWgA==}
+    peerDependencies:
+      tailwindcss: '>=3.2.0'
 
   '@tailwindcss/node@4.1.5':
     resolution: {integrity: sha512-CBhSWo0vLnWhXIvpD0qsPephiaUYfHUX3U9anwDaHZAeuGpTiB3XmsxPAN6qX7bFhipyGBqOa1QYQVVhkOUGxg==}
@@ -6435,6 +6452,10 @@ snapshots:
 
   '@rushstack/eslint-patch@1.11.0': {}
 
+  '@savvywombat/tailwindcss-grid-areas@4.0.0(tailwindcss@4.1.5)':
+    dependencies:
+      tailwindcss: 4.1.5
+
   '@storybook/csf@0.0.1':
     dependencies:
       lodash: 4.17.21
@@ -6444,6 +6465,10 @@ snapshots:
   '@swc/helpers@0.5.15':
     dependencies:
       tslib: 2.8.1
+
+  '@tailwindcss/container-queries@0.1.1(tailwindcss@4.1.5)':
+    dependencies:
+      tailwindcss: 4.1.5
 
   '@tailwindcss/node@4.1.5':
     dependencies:

@@ -18,7 +18,7 @@ export const OtpForm: React.FC<OtpFormProps> = ({
   handleLogin,
 }) => (
   <form
-    className="flex flex-col items-center gap-2"
+    className="flex flex-col items-center gap-4"
     onSubmit={(e) => {
       e.preventDefault()
       handleLogin()
