@@ -21,13 +21,15 @@ export function NotificationItem({ notification }: NotificationItemProps) {
     <div
       className={cn(
         'flex gap-3 p-3 w-full transition-colors',
-        notification.read ? 'bg-white' : 'bg-violet-50',
+        notification.read
+          ? 'bg-white dark:bg-zinc-700'
+          : 'bg-violet-50 dark:bg-zinc-800 bg-gradient-to-r from-violet-700 to-fuchsia-700',
         'hover:bg-slate-50',
       )}
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h4 className="text-sm font-medium text-slate-900 truncate">
+          <h4 className="text-sm font-medium text-slate-900 dark:text-zinc-100 truncate">
             {getNotificationTitle(notification)}
           </h4>
           {!notification.read && (
@@ -35,12 +37,12 @@ export function NotificationItem({ notification }: NotificationItemProps) {
           )}
         </div>
 
-        <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">
+        <p className="text-xs text-slate-600 dark:text-zinc-400 mt-0.5 line-clamp-2">
           {notification.message}
         </p>
 
         {notification.createdAt && (
-          <div className="flex items-center mt-1.5 text-xs text-slate-500">
+          <div className="flex items-center mt-1.5 text-xs text-slate-500 dark:text-zinc-400">
             <Clock className="h-3 w-3 mr-1" />
             <span>{formatTime(new Date(notification.createdAt))}</span>
           </div>
@@ -65,7 +67,7 @@ function getNotificationTitle(
     case GQLNotificationType.Reminder:
       return 'Reminder'
     case GQLNotificationType.System:
-      return 'Shaper Team'
+      return 'Fitspace Team'
     default:
       return null
   }

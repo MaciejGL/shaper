@@ -129,7 +129,7 @@ export function NotificationBell({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-80 p-0 overflow-hidden">
-          <DropdownMenuLabel className="flex items-center justify-between py-3 px-4 border-b">
+          <DropdownMenuLabel className="bg-violet-50 dark:bg-zinc-800 flex items-center justify-between py-3 px-4 border-b">
             <span className="font-semibold">Notifications</span>
             {notifications.length > 0 && (
               <Button

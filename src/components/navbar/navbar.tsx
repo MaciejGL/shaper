@@ -63,7 +63,7 @@ export const Navbar = ({
       {withSidebar && <SidebarTrigger />}
       {!withSidebar && (
         <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 text-transparent bg-clip-text">
-          Shaper
+          Fitspace
         </span>
       )}
       <div className="flex items-center gap-2">
