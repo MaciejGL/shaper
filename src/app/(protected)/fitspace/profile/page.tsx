@@ -1,145 +1,67 @@
-'use client';
-import { useEffect, useState } from 'react';
-import { Header } from './components/header';
-import { Bio } from './components/bio';
-import { GoalsAndHealth } from './components/goals-and-health';
-import { PhysicalStats } from './components/physical-stats';
-import { PersonalInfo } from './components/personal-info';
-import {
-	GQLProfileQuery,
-	useProfileQuery,
-	useUpdateProfileMutation,
-} from '@/generated/graphql-client';
-import { toast } from 'sonner';
-import { CheckIcon, XIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { PenIcon } from 'lucide-react';
+'use client'
 
-export type Profile = Pick<
-	NonNullable<GQLProfileQuery['profile']>,
-	| 'firstName'
-	| 'lastName'
-	| 'phone'
-	| 'email'
-	| 'birthday'
-	| 'sex'
-	| 'avatarUrl'
-	| 'height'
-	| 'weight'
-	| 'fitnessLevel'
-	| 'activityLevel'
-	| 'goal'
-	| 'allergies'
-	| 'bio'
->;
+import { CheckIcon, XIcon } from 'lucide-react'
+import { PenIcon } from 'lucide-react'
+
+import { Bio } from '@/components/profile/bio'
+import { GoalsAndHealth } from '@/components/profile/goals-and-health'
+import { Header } from '@/components/profile/header'
+import { PersonalInfo } from '@/components/profile/personal-info'
+import { PhysicalStats } from '@/components/profile/physical-stats'
+import { useProfile } from '@/components/profile/use-profile.hook'
+import { Button } from '@/components/ui/button'
 
 export default function ProfilePage() {
-	const [isEditing, setIsEditing] = useState(false);
-	const { data, refetch } = useProfileQuery();
-	const { mutateAsync: updateProfile, isPending: isSaving } =
-		useUpdateProfileMutation({
-			onSuccess: () => {
-				setIsEditing(false);
-				toast.success('Profile updated successfully');
-				refetch();
-			},
-		});
+  const { profile, isEditing, handleChange, handleSave, toggleEdit, isSaving } =
+    useProfile()
 
-	const [profile, setProfile] = useState<Profile>({});
+  return (
+    <div className="container max-w-3xl mx-auto mb-16">
+      <Header profile={profile} isEditing={isEditing} />
+      <PersonalInfo
+        isEditing={isEditing}
+        profile={profile}
+        handleChange={handleChange}
+      />
 
-	useEffect(() => {
-		const profileData = data?.profile;
-		if (profileData) {
-			setProfile({
-				firstName: profileData.firstName,
-				lastName: profileData.lastName,
-				phone: profileData.phone,
-				email: profileData.email,
-				birthday: profileData.birthday,
-				sex: profileData.sex,
-				avatarUrl: profileData.avatarUrl,
-				height: profileData.height,
-				weight: profileData.weight,
-				fitnessLevel: profileData.fitnessLevel,
-				activityLevel: profileData.activityLevel,
-				goal: profileData.goal,
-				allergies: profileData.allergies,
-				bio: profileData.bio,
-			});
-		}
-	}, [data]);
+      <PhysicalStats
+        isEditing={isEditing}
+        profile={profile}
+        handleChange={handleChange}
+      />
 
-	const handleChange = (
-		field: keyof NonNullable<GQLProfileQuery['profile']>,
-		value: string
-	) => {
-		setProfile(prev => ({
-			...prev,
-			[field]: value,
-		}));
-	};
+      <GoalsAndHealth
+        isEditing={isEditing}
+        profile={profile}
+        handleChange={handleChange}
+      />
 
-	const toggleEdit = () => {
-		setIsEditing(!isEditing);
-	};
+      {/* Bio */}
+      <Bio
+        isEditing={isEditing}
+        profile={profile}
+        handleChange={handleChange}
+      />
 
-	const handleSave = async () => {
-		const input = {
-			...profile,
-			height: profile.height ? parseFloat(profile.height.toString()) : null,
-			weight: profile.weight ? parseFloat(profile.weight.toString()) : null,
-			birthday: profile.birthday ? new Date(profile.birthday).toISOString() : null,
-		};
-		await updateProfile({
-			input,
-		});
-
-		setIsEditing(false);
-	};
-
-	return (
-		<div className="container max-w-3xl mx-auto mb-16">
-			<Header profile={profile} isEditing={isEditing} />
-			<PersonalInfo
-				isEditing={isEditing}
-				profile={profile}
-				handleChange={handleChange}
-			/>
-
-			<PhysicalStats
-				isEditing={isEditing}
-				profile={profile}
-				handleChange={handleChange}
-			/>
-
-			<GoalsAndHealth
-				isEditing={isEditing}
-				profile={profile}
-				handleChange={handleChange}
-			/>
-
-			{/* Bio */}
-			<Bio isEditing={isEditing} profile={profile} handleChange={handleChange} />
-
-			{!isEditing ? (
-				<Button onClick={toggleEdit} className="fixed bottom-4 right-4">
-					<PenIcon /> Edit
-				</Button>
-			) : (
-				<div className="fixed bottom-4 right-4 flex gap-2">
-					<Button
-						onClick={toggleEdit}
-						variant="outline"
-						size="icon"
-						disabled={isSaving}
-					>
-						<XIcon />
-					</Button>
-					<Button onClick={handleSave} disabled={isSaving}>
-						<CheckIcon /> Save changes
-					</Button>
-				</div>
-			)}
-		</div>
-	);
+      {!isEditing ? (
+        <Button onClick={toggleEdit} className="fixed bottom-4 right-4">
+          <PenIcon /> Edit
+        </Button>
+      ) : (
+        <div className="fixed bottom-4 right-4 flex gap-2">
+          <Button
+            onClick={toggleEdit}
+            variant="outline"
+            size="icon"
+            disabled={isSaving}
+          >
+            <XIcon />
+          </Button>
+          <Button onClick={handleSave} disabled={isSaving}>
+            <CheckIcon /> Save changes
+          </Button>
+        </div>
+      )}
+    </div>
+  )
 }

@@ -2,105 +2,18 @@
 
 import { CheckIcon, XIcon } from 'lucide-react'
 import { PenIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
-import { toast } from 'sonner'
 
+import { Bio } from '@/components/profile/bio'
+import { GoalsAndHealth } from '@/components/profile/goals-and-health'
+import { Header } from '@/components/profile/header'
+import { PersonalInfo } from '@/components/profile/personal-info'
+import { PhysicalStats } from '@/components/profile/physical-stats'
+import { useProfile } from '@/components/profile/use-profile.hook'
 import { Button } from '@/components/ui/button'
-import {
-  GQLProfileQuery,
-  useProfileQuery,
-  useUpdateProfileMutation,
-} from '@/generated/graphql-client'
-
-import { Bio } from './components/bio'
-import { GoalsAndHealth } from './components/goals-and-health'
-import { Header } from './components/header'
-import { PersonalInfo } from './components/personal-info'
-import { PhysicalStats } from './components/physical-stats'
-
-export type Profile = Pick<
-  NonNullable<GQLProfileQuery['profile']>,
-  | 'firstName'
-  | 'lastName'
-  | 'phone'
-  | 'email'
-  | 'birthday'
-  | 'sex'
-  | 'avatarUrl'
-  | 'height'
-  | 'weight'
-  | 'fitnessLevel'
-  | 'activityLevel'
-  | 'goal'
-  | 'allergies'
-  | 'bio'
->
 
 export default function ProfilePage() {
-  const [isEditing, setIsEditing] = useState(false)
-  const { data, refetch } = useProfileQuery()
-  const { mutateAsync: updateProfile, isPending: isSaving } =
-    useUpdateProfileMutation({
-      onSuccess: () => {
-        setIsEditing(false)
-        toast.success('Profile updated successfully')
-        refetch()
-      },
-    })
-
-  const [profile, setProfile] = useState<Profile>({})
-
-  useEffect(() => {
-    const profileData = data?.profile
-    if (profileData) {
-      setProfile({
-        firstName: profileData.firstName,
-        lastName: profileData.lastName,
-        phone: profileData.phone,
-        email: profileData.email,
-        birthday: profileData.birthday,
-        sex: profileData.sex,
-        avatarUrl: profileData.avatarUrl,
-        height: profileData.height,
-        weight: profileData.weight,
-        fitnessLevel: profileData.fitnessLevel,
-        activityLevel: profileData.activityLevel,
-        goal: profileData.goal,
-        allergies: profileData.allergies,
-        bio: profileData.bio,
-      })
-    }
-  }, [data])
-
-  const handleChange = (
-    field: keyof NonNullable<GQLProfileQuery['profile']>,
-    value: string,
-  ) => {
-    setProfile((prev) => ({
-      ...prev,
-      [field]: value,
-    }))
-  }
-
-  const toggleEdit = () => {
-    setIsEditing(!isEditing)
-  }
-
-  const handleSave = async () => {
-    const input = {
-      ...profile,
-      height: profile.height ? parseFloat(profile.height.toString()) : null,
-      weight: profile.weight ? parseFloat(profile.weight.toString()) : null,
-      birthday: profile.birthday
-        ? new Date(profile.birthday).toISOString()
-        : null,
-    }
-    await updateProfile({
-      input,
-    })
-
-    setIsEditing(false)
-  }
+  const { profile, isEditing, handleChange, handleSave, toggleEdit, isSaving } =
+    useProfile()
 
   return (
     <div className="container max-w-3xl mx-auto mb-16">
