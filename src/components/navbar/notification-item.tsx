@@ -23,21 +23,21 @@ export function NotificationItem({ notification }: NotificationItemProps) {
         'flex gap-3 p-3 w-full transition-colors',
         notification.read
           ? 'bg-white dark:bg-zinc-700'
-          : 'bg-violet-50 dark:bg-zinc-800 bg-gradient-to-r from-violet-700 to-fuchsia-700',
-        'hover:bg-slate-50',
+          : 'bg-zinc-100 dark:bg-zinc-800',
+        'hover:bg-zinc-200 dark:hover:bg-zinc-700',
       )}
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <h4 className="text-sm font-medium text-slate-900 dark:text-zinc-100 truncate">
+          <h4 className="text-sm font-medium text-zinc-900 dark:text-zinc-100 truncate">
             {getNotificationTitle(notification)}
           </h4>
           {!notification.read && (
-            <span className="flex-shrink-0 h-2 w-2 rounded-full bg-violet-500" />
+            <span className="flex-shrink-0 h-2 w-2 rounded-full bg-orange-500" />
           )}
         </div>
 
-        <p className="text-xs text-slate-600 dark:text-zinc-400 mt-0.5 line-clamp-2">
+        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5 line-clamp-2">
           {notification.message}
         </p>
 

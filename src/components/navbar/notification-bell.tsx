@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bell } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -18,6 +19,7 @@ import {
   GQLNotificationType,
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
+  useNotificationsQuery,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 import type { UserWithSession } from '@/types/UserWithSession'
@@ -36,6 +38,7 @@ const useNotifications = (
 ) => {
   const [showBadge, setShowBadge] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const queryClient = useQueryClient()
 
   const { mutateAsync: markNotificationAsRead } =
     useMarkNotificationAsReadMutation()
@@ -54,6 +57,9 @@ const useNotifications = (
 
   const onNotificationClick = async (id: string) => {
     await markNotificationAsRead({ id })
+    queryClient.invalidateQueries({
+      queryKey: useNotificationsQuery.getKey({ userId: user.id }),
+    })
   }
 
   const onClearAll = async () => {
@@ -107,7 +113,7 @@ export function NotificationBell({
             size="icon"
             className="relative h-9 w-9 rounded-full"
           >
-            <Bell className="h-5 w-5" />
+            <Bell className="size-5" />
             <AnimatePresence>
               {showBadge && (
                 <motion.div
@@ -116,9 +122,9 @@ export function NotificationBell({
                   exit={{ scale: 0 }}
                   className="absolute -top-1 -right-1 flex items-center justify-center"
                 >
-                  <span className="relative flex h-5 w-5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-5 w-5 bg-violet-600 text-white text-[10px] font-medium items-center justify-center">
+                  <span className="relative flex size-4">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-4 bg-accent text-white text-[10px] font-medium items-center justify-center">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   </span>
@@ -129,7 +135,7 @@ export function NotificationBell({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-80 p-0 overflow-hidden">
-          <DropdownMenuLabel className="bg-violet-50 dark:bg-zinc-800 flex items-center justify-between py-3 px-4 border-b">
+          <DropdownMenuLabel className="bg-zinc-100 dark:bg-zinc-800 flex items-center justify-between py-3 px-4 border-b">
             <span className="font-semibold">Notifications</span>
             {notifications.length > 0 && (
               <Button
@@ -151,13 +157,13 @@ export function NotificationBell({
           >
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center p-4">
-                <div className="bg-slate-100 rounded-full p-3 mb-3">
-                  <Bell className="h-6 w-6 text-slate-400" />
+                <div className="bg-zinc-200 dark:bg-zinc-700 rounded-full p-3 mb-3">
+                  <Bell className="h-6 w-6 text-zinc-400 dark:text-zinc-500" />
                 </div>
-                <p className="text-sm font-medium text-slate-700">
+                <p className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
                   No notifications
                 </p>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
                   You're all caught up!
                 </p>
               </div>
@@ -167,7 +173,7 @@ export function NotificationBell({
                   <>
                     <DropdownMenuItem
                       key={notification.id}
-                      className="p-0 focus:bg-slate-50 cursor-pointer"
+                      className="p-0 focus:bg-zinc-200 dark:focus:bg-zinc-700 cursor-pointer"
                       onClick={(e) => {
                         handleOpenInvitation(notification, e)
                         onNotificationClick(notification.id)

@@ -10,6 +10,8 @@ import {
   Users2Icon,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
+import { useTheme } from 'next-themes'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
@@ -42,6 +44,7 @@ export const Navbar = ({
   user?: UserWithSession | null
   withSidebar?: boolean
 }) => {
+  const { theme } = useTheme()
   const { data: notifications } = useNotificationsQuery(
     {
       userId: user!.user.id!,
@@ -56,14 +59,19 @@ export const Navbar = ({
   return (
     <div
       className={cn(
-        'sticky top-0 py-3 px-4 flex justify-between items-center bg-background shadow-[2px_1px_3px_0px_rgba(0,0,0,0.1)]',
+        'sticky z-[1] top-0 py-3 px-4 flex justify-between items-center bg-background shadow-[2px_1px_3px_0px_rgba(0,0,0,0.1)]',
       )}
     >
       {withSidebar && <SidebarTrigger />}
       {!withSidebar && (
-        <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-600 text-transparent bg-clip-text">
-          Fitspace
-        </span>
+        <Image
+          src={
+            theme === 'dark' ? '/icons/logo-light.svg' : '/icons/logo-dark.svg'
+          }
+          alt="Fitspace"
+          width={36}
+          height={36}
+        />
       )}
       <div className="flex items-center gap-2">
         {user && (

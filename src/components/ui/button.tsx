@@ -47,6 +47,7 @@ function Button({
   iconStart,
   iconEnd,
   iconOnly,
+  disabled,
   ...props
 }: React.ComponentProps<'button'> &
   VariantProps<typeof buttonVariants> & {
@@ -69,6 +70,7 @@ function Button({
           className,
         }),
       )}
+      disabled={disabled || loading}
       {...props}
     >
       {iconStart && <span>{iconStart}</span>}

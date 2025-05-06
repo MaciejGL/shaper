@@ -58,39 +58,30 @@ export async function upsertCoachingRequest({
       recipient: { email: recipientEmail },
       senderId,
     },
-  })
-
-  const sender = await prisma.user.findUnique({
-    where: { id: senderId },
     include: {
-      profile: {
+      recipient: {
         select: {
-          firstName: true,
-          lastName: true,
+          profile: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
       },
     },
   })
 
-  const getNotificationMessage = () => {
-    const senderRole = sender?.role
-    const senderName =
-      sender?.profile?.firstName && sender?.profile?.lastName
-        ? `${sender?.profile?.firstName} ${sender?.profile?.lastName}`
-        : 'Someone'
-    if (senderRole === GQLUserRole.Trainer) {
-      return `${senderName} has invited you to start a new training journey with personalized workout plans.`
-    }
-    return `${senderName} wants to start a new training journey with you.`
-  }
-
   if (existingCoachingRequest) {
-    if (
-      existingCoachingRequest.status === GQLCoachingRequestStatus.Accepted ||
-      existingCoachingRequest.status === GQLCoachingRequestStatus.Rejected
-    ) {
+    if (existingCoachingRequest.status === GQLCoachingRequestStatus.Accepted) {
       throw new GraphQLError(
-        `This request has already been ${existingCoachingRequest.status === GQLCoachingRequestStatus.Accepted ? 'accepted' : 'rejected'}.`,
+        `You already have been connected with this person.`,
+      )
+    }
+
+    if (existingCoachingRequest.status === GQLCoachingRequestStatus.Rejected) {
+      throw new GraphQLError(
+        `Your request has been rejected by this person. You can't send another request to them. They will need to send you a new request.`,
       )
     }
 
@@ -144,9 +135,23 @@ export async function upsertCoachingRequest({
         },
       })
 
+      const sender = await prisma.user.findUnique({
+        where: { id: senderId },
+        include: {
+          profile: true,
+        },
+      })
+
+      const senderName =
+        sender?.profile?.firstName &&
+        sender?.profile?.lastName &&
+        `${sender?.profile?.firstName} ${sender?.profile?.lastName}`
+
       await createNotification({
         userId: recipient.id,
-        message: getNotificationMessage(),
+        message: `You have a new coaching request${
+          senderName ? ` from ${senderName}.` : '.'
+        }`,
         type: GQLNotificationType.CoachingRequest,
         createdBy: senderId,
         relatedItemId: coachingRequest.id,
