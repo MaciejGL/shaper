@@ -14,128 +14,281 @@ datasource db {
 }
 
 model User {
-  id        String      @id @default(cuid())
-  email     String      @unique
+  id        String   @id @default(cuid())
+  email     String   @unique
   name      String?
   image     String?
-  role      String      @default("CLIENT") // Enum: CLIENT, TRAINER, ADMIN
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  role      String   @default("CLIENT") // Enum: CLIENT, TRAINER, ADMIN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  profile   UserProfile?
-  trainer   User?        @relation("TrainerClients", fields: [trainerId], references: [id])
-  trainerId String?      
-  clients   User[]       @relation("TrainerClients")
-  sentRequests     CoachingRequest[] @relation("SentRequests")
-  receivedRequests CoachingRequest[] @relation("ReceivedRequests")
-  notifications Notification[]
-  createdNotifications Notification[] @relation("NotificationCreator")
+  profile              UserProfile?
+  trainer              User?             @relation("TrainerClients", fields: [trainerId], references: [id])
+  trainerId            String?
+  clients              User[]            @relation("TrainerClients")
+  sentRequests         CoachingRequest[] @relation("SentRequests")
+  receivedRequests     CoachingRequest[] @relation("ReceivedRequests")
+  notifications        Notification[]
+  createdNotifications Notification[]    @relation("NotificationCreator")
 
-  sessions  UserSession[]
+  sessions      UserSession[]
+  assignedPlans TrainingPlan[] @relation("AssignedPlans")
+  createdPlans  TrainingPlan[] @relation("CreatedPlans")
+  exerciseLogs  ExerciseLog[]
+  BaseExercise  BaseExercise[]
+  exerciseSubstitutions UserExerciseSubstitution[]
+
 }
 
-
 model UserSession {
-  id         String   @id @default(cuid())
-  userId     String
-  otp        String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model UserProfile {
-  id             String     @id @default(cuid())
-  userId         String     @unique
-  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  firstName      String?
-  lastName       String?
-  phone          String?
-  birthday       DateTime?
-  sex            String?       // Enum: MALE, FEMALE, OTHER
-  avatarUrl      String?
-  height         Float?     // cm
-  weight         Float?     // kg
-  fitnessLevel   String?    // Enum: BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
-  allergies      String?
+  firstName    String?
+  lastName     String?
+  phone        String?
+  birthday     DateTime?
+  sex          String? // Enum: MALE, FEMALE, OTHER
+  avatarUrl    String?
+  height       Float? // cm
+  weight       Float? // kg
+  fitnessLevel String? // Enum: BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
+  allergies    String?
 
-  activityLevel  String? // Enum: SEDENTARY, LIGHT, MODERATE, ACTIVE, ATHLETE
-  goal           String? // Enum: LOSE_FAT, MAINTAIN, BUILD_MUSCLE
-  bio            String?
+  activityLevel String? // Enum: SEDENTARY, LIGHT, MODERATE, ACTIVE, ATHLETE
+  goal          String? // Enum: LOSE_FAT, MAINTAIN, BUILD_MUSCLE
+  bio           String?
 
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  bodyMeasures   UserBodyMeasure[]
+  bodyMeasures UserBodyMeasure[]
 }
 
 model UserBodyMeasure {
-  id             String     @id @default(cuid())
-  userProfileId  String
-  userProfile    UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  id            String      @id @default(cuid())
+  userProfileId String
+  userProfile   UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
 
-  measuredAt     DateTime   @default(now())
+  measuredAt DateTime @default(now())
 
-  weight         Float?     // kg
-  height         Float?     // cm
+  weight Float? // kg
+  height Float? // cm
 
   // Chest and waist are typically measured as a single value
-  chest          Float?
-  waist          Float?
-  hips           Float?
-  neck           Float?
+  chest Float?
+  waist Float?
+  hips  Float?
+  neck  Float?
 
   // Add left/right for body parts that are commonly measured separately
-  bicepsLeft     Float?
-  bicepsRight    Float?
-  thighLeft      Float?
-  thighRight     Float?
-  calfLeft       Float?
-  calfRight      Float?
+  bicepsLeft  Float?
+  bicepsRight Float?
+  thighLeft   Float?
+  thighRight  Float?
+  calfLeft    Float?
+  calfRight   Float?
 
-  bodyFat        Float?     // %
+  bodyFat Float? // %
 
-  notes          String?    // e.g., “after leg day”, “fasted”, etc.
+  notes String? // e.g., “after leg day”, “fasted”, etc.
 
   @@index([userProfileId])
 }
 
 model CoachingRequest {
-  id           String   @id @default(cuid())
-  senderId     String
-  recipientId  String
-  status       String   @default("PENDING") // Enum: PENDING, APPROVED, REJECTED, CANCELLED
-  message      String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id          String   @id @default(cuid())
+  senderId    String
+  recipientId String
+  status      String   @default("PENDING") // Enum: PENDING, APPROVED, REJECTED, CANCELLED
+  message     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  sender       User     @relation("SentRequests", fields: [senderId], references: [id])
-  recipient    User     @relation("ReceivedRequests", fields: [recipientId], references: [id])
+  sender    User @relation("SentRequests", fields: [senderId], references: [id])
+  recipient User @relation("ReceivedRequests", fields: [recipientId], references: [id])
 
   @@index([senderId])
   @@index([recipientId])
 }
 
 model Notification {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  createdBy  String?  
-  creator    User?    @relation("NotificationCreator", fields: [createdBy], references: [id])
-  message    String
-  type       String
-  read       Boolean  @default(false)
-  link       String?
-  metadata   Json?
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  createdBy     String?
+  creator       User?    @relation("NotificationCreator", fields: [createdBy], references: [id])
+  message       String
+  type          String
+  read          Boolean  @default(false)
+  link          String?
+  metadata      Json?
   relatedItemId String?
-  createdAt  DateTime @default(now())
+  createdAt     DateTime @default(now())
 
   @@index([userId])
   @@index([createdBy])
   @@index([userId, read])
   @@index([userId, createdAt])
+}
+
+model TrainingPlan {
+  id          String         @id @default(cuid())
+  title       String
+  description String?
+  createdById String
+  isPublic    Boolean        @default(false)
+  isTemplate  Boolean        @default(false)
+  templateId  String?
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  createdBy   User           @relation("CreatedPlans", fields: [createdById], references: [id])
+  assignedTo  User[]         @relation("AssignedPlans")
+  weeks       TrainingWeek[]
+  template    TrainingPlan?  @relation("Template", fields: [templateId], references: [id])
+  templates   TrainingPlan[] @relation("Template")
+}
+
+model TrainingWeek {
+  id         String        @id @default(cuid())
+  planId     String
+  weekNumber Int
+  completedAt DateTime?
+
+  plan       TrainingPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  days       TrainingDay[]
+}
+
+model TrainingDay {
+  id        String             @id @default(cuid())
+  weekId    String
+  dayOfWeek Int // 0 = Sunday, 1 = Monday, etc.
+  completedAt DateTime?
+
+  week      TrainingWeek       @relation(fields: [weekId], references: [id], onDelete: Cascade)
+  exercises TrainingExercise[]
+}
+
+model ExerciseLog {
+  id          String   @id @default(cuid())
+  performedAt DateTime @default(now())
+  setsCompleted Int?
+  repsPerSet    Int[] // e.g., [12, 10, 10]
+  weightPerSet  Float[] // e.g., [40.0, 40.0, 37.5]
+  notes         String? // "Felt strong today"
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userId      String
+  user     User             @relation(fields: [userId], references: [id])
+  exerciseId  String
+  exercise TrainingExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+}
+
+model TrainingExercise {
+  id     String        @id @default(cuid())
+  name         String // can override base
+  sets         Int
+  reps         Int
+  restSeconds  Int?
+  tempo        String?
+  instructions String?
+  order        Int
+
+  baseId String? // 👈 link to the base exercise
+  base   BaseExercise? @relation(fields: [baseId], references: [id])
+  dayId  String
+  day  TrainingDay   @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  logs ExerciseLog[]
+  substitutionOptions ExerciseSubstitutionOption[] @relation("OriginalExercise") // Options for this exercise
+  substitutionsFor   ExerciseSubstitutionOption[] @relation("SubstituteExercise") // Used as an option elsewhere
+  userExerciseOverrides  UserExerciseSubstitution[] @relation("UserExerciseOriginal")
+  userExerciseSelections UserExerciseSubstitution[] @relation("UserExerciseSelected")
+
+}
+
+model BaseExercise {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  videoUrl    String?
+  equipment   String? // e.g., BARBELL, DUMBBELL, MACHINE
+
+  createdById String? // null = system/public
+  createdBy   User?   @relation(fields: [createdById], references: [id])
+  isPublic    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  muscleGroups MuscleGroup[] @relation("ExerciseMuscleGroups")
+  trainingExercises TrainingExercise[]
+}
+
+model ExerciseSubstitutionOption {
+  id           String   @id @default(cuid())
+  originalId   String
+  substituteId String
+
+  original     TrainingExercise @relation("OriginalExercise", fields: [originalId], references: [id])
+  substitute   TrainingExercise @relation("SubstituteExercise", fields: [substituteId], references: [id])
+
+  reason       String?
+}
+
+model UserExerciseSubstitution {
+  id         String   @id @default(cuid())
+  userId     String
+  exerciseId String
+  selectedId String
+
+  user       User             @relation(fields: [userId], references: [id])
+  exercise   TrainingExercise @relation("UserExerciseOriginal", fields: [exerciseId], references: [id])
+  selected   TrainingExercise @relation("UserExerciseSelected", fields: [selectedId], references: [id])
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, exerciseId]) // One override per exercise per user
+}
+
+
+model MuscleGroup {
+  id        String   @id @default(cuid())
+  name      String   @unique         // "Biceps brachii"
+  alias     String?                  // "Biceps"
+  groupSlug String                   // e.g. "arms"
+  isPrimary Boolean @default(true)  // Used for grouping in filters
+
+  createdAt DateTime @default(now())
+  category MuscleGroupCategory @relation(fields: [categoryId], references: [id])
+  categoryId String
+
+  exercises BaseExercise[] @relation("ExerciseMuscleGroups")
+}
+
+model MuscleGroupCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique   // e.g. "Shoulders", "Chest", "Back"
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  muscles   MuscleGroup[]
 }

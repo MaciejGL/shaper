@@ -1,19 +1,20 @@
 query GetClients {
-	user {
-		clients {
-			id
-			email
-			name
-			image
-			role
-			updatedAt
-			createdAt
-		}
-	}
+  user {
+    clients {
+      id
+      email
+      firstName
+      lastName
+      image
+      role
+      updatedAt
+      createdAt
+    }
+  }
 }
 
 mutation CreateCoachingRequest($recipientEmail: String!, $message: String) {
-	createCoachingRequest(recipientEmail: $recipientEmail, message: $message) {
-		id
-	}
+  createCoachingRequest(recipientEmail: $recipientEmail, message: $message) {
+    id
+  }
 }

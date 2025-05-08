@@ -160,6 +160,7 @@ export type GQLQuery = {
   notifications: EntireFieldWrapper<Array<GQLNotification>>;
   profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
   user?: EntireFieldWrapper<Maybe<GQLUser>>;
+  userPublic?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
 };
 
 
@@ -179,6 +180,11 @@ export type GQLQueryNotificationsArgs = {
   take?: InputMaybe<Scalars['Int']['input']>;
   type?: InputMaybe<GQLNotificationType>;
   userId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryUserPublicArgs = {
+  id: Scalars['ID']['input'];
 };
 
 export type GQLUpdateNotificationInput = {
@@ -208,7 +214,7 @@ export type GQLUpdateProfileInput = {
 
 export type GQLUser = {
   __typename?: 'User';
-  clients: EntireFieldWrapper<Array<GQLUser>>;
+  clients: EntireFieldWrapper<Array<GQLUserPublic>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   createdNotifications: EntireFieldWrapper<Array<GQLNotification>>;
   email: EntireFieldWrapper<Scalars['String']['output']>;
@@ -219,7 +225,7 @@ export type GQLUser = {
   profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
   role: EntireFieldWrapper<GQLUserRole>;
   sessions: EntireFieldWrapper<Array<GQLUserSession>>;
-  trainer?: EntireFieldWrapper<Maybe<GQLUser>>;
+  trainer?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
@@ -261,6 +267,18 @@ export type GQLUserProfile = {
   sex?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
   weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+};
+
+export type GQLUserPublic = {
+  __typename?: 'UserPublic';
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  email: EntireFieldWrapper<Scalars['String']['output']>;
+  firstName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  image?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  lastName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  role: EntireFieldWrapper<GQLUserRole>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
 export enum GQLUserRole {
@@ -369,6 +387,7 @@ export type GQLResolversTypes = {
   User: ResolverTypeWrapper<GQLUser>;
   UserBodyMeasure: ResolverTypeWrapper<GQLUserBodyMeasure>;
   UserProfile: ResolverTypeWrapper<GQLUserProfile>;
+  UserPublic: ResolverTypeWrapper<GQLUserPublic>;
   UserRole: GQLUserRole;
   UserSession: ResolverTypeWrapper<GQLUserSession>;
 };
@@ -390,6 +409,7 @@ export type GQLResolversParentTypes = {
   User: GQLUser;
   UserBodyMeasure: GQLUserBodyMeasure;
   UserProfile: GQLUserProfile;
+  UserPublic: GQLUserPublic;
   UserSession: GQLUserSession;
 };
 
@@ -437,10 +457,11 @@ export type GQLQueryResolvers<ContextType = any, ParentType extends GQLResolvers
   notifications?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLQueryNotificationsArgs, 'userId'>>;
   profile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType>;
   user?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
+  userPublic?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType, RequireFields<GQLQueryUserPublicArgs, 'id'>>;
 };
 
 export type GQLUserResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['User'] = GQLResolversParentTypes['User']> = {
-  clients?: Resolver<Array<GQLResolversTypes['User']>, ParentType, ContextType>;
+  clients?: Resolver<Array<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   createdNotifications?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType>;
   email?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -451,7 +472,7 @@ export type GQLUserResolvers<ContextType = any, ParentType extends GQLResolversP
   profile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType>;
   role?: Resolver<GQLResolversTypes['UserRole'], ParentType, ContextType>;
   sessions?: Resolver<Array<GQLResolversTypes['UserSession']>, ParentType, ContextType>;
-  trainer?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
+  trainer?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -496,6 +517,18 @@ export type GQLUserProfileResolvers<ContextType = any, ParentType extends GQLRes
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLUserPublicResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['UserPublic'] = GQLResolversParentTypes['UserPublic']> = {
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  firstName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  image?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  lastName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  role?: Resolver<GQLResolversTypes['UserRole'], ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLUserSessionResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['UserSession'] = GQLResolversParentTypes['UserSession']> = {
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   expiresAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -513,6 +546,7 @@ export type GQLResolvers<ContextType = any> = {
   User?: GQLUserResolvers<ContextType>;
   UserBodyMeasure?: GQLUserBodyMeasureResolvers<ContextType>;
   UserProfile?: GQLUserProfileResolvers<ContextType>;
+  UserPublic?: GQLUserPublicResolvers<ContextType>;
   UserSession?: GQLUserSessionResolvers<ContextType>;
 };
 

@@ -5,6 +5,8 @@ import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/getUser'
 
 import Notification from '../notification/model'
+import UserProfile from '../user-profile/model'
+import UserPublic from '../user-public/model'
 
 export default class User implements GQLUser {
   constructor(protected data: PrismaUser) {}
@@ -50,9 +52,12 @@ export default class User implements GQLUser {
         role: GQLUserRole.Client,
         trainerId: this.data.id,
       },
+      include: {
+        profile: true,
+      },
     })
 
-    return clients.map((client) => new User(client))
+    return clients.map((client) => new UserPublic(client))
   }
 
   async trainer() {
@@ -71,17 +76,28 @@ export default class User implements GQLUser {
           },
         },
       },
+      include: {
+        profile: true,
+      },
     })
 
-    return trainer ? new User(trainer) : null
+    return trainer ? new UserPublic(trainer) : null
   }
 
-  get profile() {
-    return null // TODO: Fetch related profile if needed
+  async profile() {
+    const profile = await prisma.userProfile.findFirst({
+      where: {
+        userId: this.data.id,
+      },
+    })
+    return profile ? new UserProfile(profile) : null
   }
 
-  get sessions() {
-    return [] // TODO: Fetch related sessions if needed
+  async sessions() {
+    const sessions = await prisma.userSession.findMany({
+      where: { userId: this.data.id },
+    })
+    return sessions.map((s) => new UserSession(s))
   }
 
   async notifications() {

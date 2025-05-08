@@ -159,6 +159,7 @@ export type GQLQuery = {
   notifications: Array<GQLNotification>;
   profile?: Maybe<GQLUserProfile>;
   user?: Maybe<GQLUser>;
+  userPublic?: Maybe<GQLUserPublic>;
 };
 
 
@@ -178,6 +179,11 @@ export type GQLQueryNotificationsArgs = {
   take?: InputMaybe<Scalars['Int']['input']>;
   type?: InputMaybe<GQLNotificationType>;
   userId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryUserPublicArgs = {
+  id: Scalars['ID']['input'];
 };
 
 export type GQLUpdateNotificationInput = {
@@ -207,7 +213,7 @@ export type GQLUpdateProfileInput = {
 
 export type GQLUser = {
   __typename?: 'User';
-  clients: Array<GQLUser>;
+  clients: Array<GQLUserPublic>;
   createdAt: Scalars['String']['output'];
   createdNotifications: Array<GQLNotification>;
   email: Scalars['String']['output'];
@@ -218,7 +224,7 @@ export type GQLUser = {
   profile?: Maybe<GQLUserProfile>;
   role: GQLUserRole;
   sessions: Array<GQLUserSession>;
-  trainer?: Maybe<GQLUser>;
+  trainer?: Maybe<GQLUserPublic>;
   updatedAt: Scalars['String']['output'];
 };
 
@@ -262,6 +268,18 @@ export type GQLUserProfile = {
   weight?: Maybe<Scalars['Float']['output']>;
 };
 
+export type GQLUserPublic = {
+  __typename?: 'UserPublic';
+  createdAt: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  firstName?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  image?: Maybe<Scalars['String']['output']>;
+  lastName?: Maybe<Scalars['String']['output']>;
+  role: GQLUserRole;
+  updatedAt: Scalars['String']['output'];
+};
+
 export enum GQLUserRole {
   Admin = 'ADMIN',
   Client = 'CLIENT',
@@ -294,7 +312,7 @@ export type GQLUpdateProfileMutation = { __typename?: 'Mutation', updateProfile?
 export type GQLGetClientsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetClientsQuery = { __typename?: 'Query', user?: { __typename?: 'User', clients: Array<{ __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, updatedAt: string, createdAt: string }> } | undefined | null };
+export type GQLGetClientsQuery = { __typename?: 'Query', user?: { __typename?: 'User', clients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, updatedAt: string, createdAt: string }> } | undefined | null };
 
 export type GQLCreateCoachingRequestMutationVariables = Exact<{
   recipientEmail: Scalars['String']['input'];
@@ -307,7 +325,7 @@ export type GQLCreateCoachingRequestMutation = { __typename?: 'Mutation', create
 export type GQLUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goal?: GQLGoal | undefined | null, bio?: string | undefined | null, createdAt: string, updatedAt: string, bodyMeasures: Array<{ __typename?: 'UserBodyMeasure', id: string, weight?: number | undefined | null, height?: number | undefined | null, chest?: number | undefined | null, waist?: number | undefined | null, hips?: number | undefined | null, neck?: number | undefined | null, biceps?: number | undefined | null, thigh?: number | undefined | null, calf?: number | undefined | null, bodyFat?: number | undefined | null, notes?: string | undefined | null }> } | undefined | null, trainer?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string } | undefined | null, clients: Array<{ __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string }>, sessions: Array<{ __typename?: 'UserSession', id: string, createdAt: string, expiresAt: string }> } | undefined | null };
+export type GQLUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goal?: GQLGoal | undefined | null, bio?: string | undefined | null, createdAt: string, updatedAt: string, bodyMeasures: Array<{ __typename?: 'UserBodyMeasure', id: string, weight?: number | undefined | null, height?: number | undefined | null, chest?: number | undefined | null, waist?: number | undefined | null, hips?: number | undefined | null, neck?: number | undefined | null, biceps?: number | undefined | null, thigh?: number | undefined | null, calf?: number | undefined | null, bodyFat?: number | undefined | null, notes?: string | undefined | null }> } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string } | undefined | null, clients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string }>, sessions: Array<{ __typename?: 'UserSession', id: string, createdAt: string, expiresAt: string }> } | undefined | null };
 
 export type GQLMyCoachingRequestsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -471,7 +489,8 @@ export const GetClientsDocument = `
     clients {
       id
       email
-      name
+      firstName
+      lastName
       image
       role
       updatedAt
@@ -590,7 +609,8 @@ export const UserDocument = `
     trainer {
       id
       email
-      name
+      firstName
+      lastName
       image
       role
       createdAt
@@ -599,7 +619,8 @@ export const UserDocument = `
     clients {
       id
       email
-      name
+      firstName
+      lastName
       image
       role
       createdAt

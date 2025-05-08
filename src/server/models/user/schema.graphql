@@ -14,8 +14,8 @@ type User {
   updatedAt: String!
 
   profile: UserProfile
-  trainer: User
-  clients: [User!]!
+  trainer: UserPublic
+  clients: [UserPublic!]!
   sessions: [UserSession!]!
   notifications: [Notification!]!
   createdNotifications: [Notification!]!

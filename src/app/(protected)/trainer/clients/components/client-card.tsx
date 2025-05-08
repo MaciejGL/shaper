@@ -1,57 +1,25 @@
 import { Calendar, ChevronRight, Clock, Dumbbell } from 'lucide-react'
 import Image from 'next/image'
 
-import { Badge } from '@/components/ui/badge'
+// import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Progress } from '@/components/ui/progress'
-import { GQLUser, GQLUserProfile } from '@/generated/graphql-client'
 
-interface ClientCardProps {
-  client: Pick<
-    GQLUser,
-    'id' | 'email'
-    // | 'plan'
-    // | 'startDate'
-    // | 'nextSession'
-    // | 'progress'
-    // | 'status'
-    // | 'lastActive'
-  > &
-    Pick<GQLUserProfile, 'sex' | 'firstName' | 'lastName' | 'avatarUrl'> & {
-      // TODO: Add these fields
-      status: string
-      plan: string
-      startDate: string
-      nextSession: string
-      progress: number
-      lastActive: string
-    }
-  //   client: {
-  //     id: string
-  //     name: string
-  //     email: string
-  //     image: string
-  //     plan: string
-  //     startDate: string
-  //     nextSession: string
-  //     progress: number
-  //     status: string
-  //     lastActive: string
-  //   }
-}
+// import { Progress } from '@/components/ui/progress'
 
-export default function ClientCard({ client }: ClientCardProps) {
+import { Client } from './clients-tabs'
+
+export default function ClientCard({ client }: { client: Client }) {
   // Format date to be more readable
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-  }
+  // const formatDate = (dateString: string) => {
+  //   const date = new Date(dateString)
+  //   return date.toLocaleDateString('en-US', {
+  //     month: 'short',
+  //     day: 'numeric',
+  //     year: 'numeric',
+  //   })
+  // }
 
   return (
     <Card className="overflow-hidden py-0">
@@ -61,7 +29,7 @@ export default function ClientCard({ client }: ClientCardProps) {
             <div className="flex items-center space-x-3">
               <div className="relative h-10 w-10 rounded-full overflow-hidden">
                 <Image
-                  src={client.avatarUrl || '/avatar-male.png'}
+                  src={client.image || '/avatar-male.png'}
                   alt={`${client.firstName} ${client.lastName}`}
                   fill
                   className="object-cover"
@@ -74,12 +42,6 @@ export default function ClientCard({ client }: ClientCardProps) {
                 <p className="text-xs text-muted-foreground">{client.email}</p>
               </div>
             </div>
-            <Badge
-              variant={client.status === 'active' ? 'default' : 'secondary'}
-              className="capitalize"
-            >
-              {client.status}
-            </Badge>
           </div>
         </div>
       </CardHeader>
@@ -88,26 +50,26 @@ export default function ClientCard({ client }: ClientCardProps) {
           <div className="flex items-center text-sm">
             <Dumbbell className="h-4 w-4 mr-2 text-muted-foreground" />
             <span className="font-medium">Current Plan:</span>
-            <span className="ml-1">{client.plan}</span>
+            {/* <span className="ml-1">{client.plan}</span> */}
           </div>
           <div className="flex items-center text-sm">
             <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
             <span className="font-medium">Next Session:</span>
-            <span className="ml-1">{formatDate(client.nextSession)}</span>
+            {/* <span className="ml-1">{formatDate(client.nextSession)}</span> */}
           </div>
           <div className="flex items-center text-sm">
             <Clock className="h-4 w-4 mr-2 text-muted-foreground" />
             <span className="font-medium">Last Active:</span>
-            <span className="ml-1">{client.lastActive}</span>
+            {/* <span className="ml-1">{client.lastActive}</span> */}
           </div>
         </div>
 
         <div className="space-y-1">
           <div className="flex justify-between text-sm">
             <span className="font-medium">Progress</span>
-            <span>{client.progress}%</span>
+            {/* <span>{client.progress}%</span> */}
           </div>
-          <Progress value={client.progress} className="h-2" />
+          {/* <Progress value={client.progress} className="h-2" /> */}
         </div>
       </CardContent>
       <CardFooter className="p-4 pt-0 flex justify-between">
