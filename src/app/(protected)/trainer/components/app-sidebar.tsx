@@ -21,10 +21,22 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
 import { TRAINER_LINKS } from '@/constants/user-links'
+import { useGetClientsQuery } from '@/generated/graphql-client'
 
 type SidebarItem = {
+  title: string
+  url: string
+  icon: React.ElementType
+  disabled?: boolean
+  subItems?: SidebarSubItem[]
+}
+
+type SidebarSubItem = {
   title: string
   url: string
   icon: React.ElementType
@@ -32,6 +44,7 @@ type SidebarItem = {
 }
 
 export function AppSidebar() {
+  const { data: clients } = useGetClientsQuery()
   const items: SidebarItem[] = [
     {
       title: TRAINER_LINKS.dashboard.label,
@@ -44,6 +57,12 @@ export function AppSidebar() {
       url: TRAINER_LINKS.clients.href,
       icon: Users2Icon,
       disabled: TRAINER_LINKS.clients.disabled,
+      subItems: clients?.user?.clients.map((client) => ({
+        title: `${client.firstName} ${client.lastName}`,
+        url: TRAINER_LINKS.clients.href + `/${client.id}`,
+        icon: UserRoundCogIcon,
+        disabled: false,
+      })),
     },
     {
       title: TRAINER_LINKS.trainings.label,
@@ -108,6 +127,22 @@ function SidebarItem({ item }: { item: SidebarItem }) {
           {isActive && <ChevronRight className="ml-auto h-4 w-4 opacity-60" />}
         </Link>
       </SidebarMenuButton>
+      <SidebarMenuSub>
+        {item.subItems?.map((subItem) => (
+          <SidebarMenuSubItem key={subItem.title}>
+            <SidebarMenuSubButton asChild>
+              <Link
+                href={subItem.url}
+                className={navLinkVariants({
+                  isActive: subItem.url === pathname,
+                })}
+              >
+                <span className="">{subItem.title}</span>
+              </Link>
+            </SidebarMenuSubButton>
+          </SidebarMenuSubItem>
+        ))}
+      </SidebarMenuSub>
     </SidebarMenuItem>
   )
 }

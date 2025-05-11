@@ -1,0 +1,15 @@
+query GetClientById($id: ID!) {
+  userPublic(id: $id) {
+    id
+    firstName
+    lastName
+    email
+    phone
+    image
+    sex
+    birthday
+    goal
+    currentWeight
+    height
+  }
+}

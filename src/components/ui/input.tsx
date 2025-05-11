@@ -6,7 +6,7 @@ type InputProps = React.ComponentProps<'input'> & {
   iconStart?: React.ReactNode
   iconEnd?: React.ReactNode
   label?: string
-  id?: string
+  id: string
   error?: string
 }
 

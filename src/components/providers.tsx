@@ -2,6 +2,7 @@
 
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import type * as React from 'react'
 
 import { getQueryClient } from '@/lib/get-query-client'
@@ -16,7 +17,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" enableSystem disableTransitionOnChange>
-        <SidebarProvider>{children}</SidebarProvider>
+        <NuqsAdapter>
+          <SidebarProvider>{children}</SidebarProvider>
+        </NuqsAdapter>
       </ThemeProvider>
       <ReactQueryDevtools />
       <Toaster />

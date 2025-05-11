@@ -1,10 +1,13 @@
 'use client'
 
+import { useQueryState } from 'nuqs'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   GQLGetClientsQuery,
   useGetClientsQuery,
 } from '@/generated/graphql-client'
+import { smartSearch } from '@/lib/smart-search'
 
 import ClientCard from './client-card'
 
@@ -12,10 +15,17 @@ export type Client = NonNullable<GQLGetClientsQuery['user']>['clients'][number]
 
 export function ClientsTabs() {
   const { data } = useGetClientsQuery()
-  console.log(data)
+  const [search] = useQueryState('search')
+
   const clients = data?.user?.clients ?? []
 
   if (!data) return null
+
+  const filteredClients = smartSearch<Client>(clients, search, [
+    'firstName',
+    'lastName',
+    'email',
+  ])
 
   return (
     <Tabs defaultValue="all" className="w-full">
@@ -27,9 +37,14 @@ export function ClientsTabs() {
 
       <TabsContent value="all" className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
-          {clients.map((client) => (
+          {filteredClients.map((client) => (
             <ClientCard key={client.id} client={client} />
           ))}
+          {filteredClients.length === 0 && (
+            <div className="bg-foreground/20 p-4 rounded-md col-span-full text-center text-sm">
+              No clients found
+            </div>
+          )}
         </div>
       </TabsContent>
 

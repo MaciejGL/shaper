@@ -3,10 +3,16 @@ type UserPublic {
   email: String!
   firstName: String
   lastName: String
+  phone: String
   image: String
   role: UserRole!
   createdAt: String!
   updatedAt: String!
+  sex: String
+  birthday: String
+  goal: String
+  currentWeight: Float
+  height: Float
 }
 
 type Query {

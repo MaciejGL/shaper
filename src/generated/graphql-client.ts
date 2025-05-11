@@ -270,13 +270,19 @@ export type GQLUserProfile = {
 
 export type GQLUserPublic = {
   __typename?: 'UserPublic';
+  birthday?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
+  currentWeight?: Maybe<Scalars['Float']['output']>;
   email: Scalars['String']['output'];
   firstName?: Maybe<Scalars['String']['output']>;
+  goal?: Maybe<Scalars['String']['output']>;
+  height?: Maybe<Scalars['Float']['output']>;
   id: Scalars['ID']['output'];
   image?: Maybe<Scalars['String']['output']>;
   lastName?: Maybe<Scalars['String']['output']>;
+  phone?: Maybe<Scalars['String']['output']>;
   role: GQLUserRole;
+  sex?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
 
@@ -321,6 +327,13 @@ export type GQLCreateCoachingRequestMutationVariables = Exact<{
 
 
 export type GQLCreateCoachingRequestMutation = { __typename?: 'Mutation', createCoachingRequest: { __typename?: 'CoachingRequest', id: string } };
+
+export type GQLGetClientByIdQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goal?: string | undefined | null, currentWeight?: number | undefined | null, height?: number | undefined | null } | undefined | null };
 
 export type GQLUserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -567,6 +580,66 @@ useCreateCoachingRequestMutation.getKey = () => ['CreateCoachingRequest'];
 
 
 useCreateCoachingRequestMutation.fetcher = (variables: GQLCreateCoachingRequestMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateCoachingRequestMutation, GQLCreateCoachingRequestMutationVariables>(CreateCoachingRequestDocument, variables, options);
+
+export const GetClientByIdDocument = `
+    query GetClientById($id: ID!) {
+  userPublic(id: $id) {
+    id
+    firstName
+    lastName
+    email
+    phone
+    image
+    sex
+    birthday
+    goal
+    currentWeight
+    height
+  }
+}
+    `;
+
+export const useGetClientByIdQuery = <
+      TData = GQLGetClientByIdQuery,
+      TError = unknown
+    >(
+      variables: GQLGetClientByIdQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetClientByIdQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetClientByIdQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetClientByIdQuery, TError, TData>(
+      {
+    queryKey: ['GetClientById', variables],
+    queryFn: fetchData<GQLGetClientByIdQuery, GQLGetClientByIdQueryVariables>(GetClientByIdDocument, variables),
+    ...options
+  }
+    )};
+
+useGetClientByIdQuery.getKey = (variables: GQLGetClientByIdQueryVariables) => ['GetClientById', variables];
+
+export const useInfiniteGetClientByIdQuery = <
+      TData = InfiniteData<GQLGetClientByIdQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetClientByIdQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetClientByIdQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetClientByIdQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetClientByIdQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetClientById.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetClientByIdQuery, GQLGetClientByIdQueryVariables>(GetClientByIdDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetClientByIdQuery.getKey = (variables: GQLGetClientByIdQueryVariables) => ['GetClientById.infinite', variables];
+
+
+useGetClientByIdQuery.fetcher = (variables: GQLGetClientByIdQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetClientByIdQuery, GQLGetClientByIdQueryVariables>(GetClientByIdDocument, variables, options);
 
 export const UserDocument = `
     query user {

@@ -271,13 +271,19 @@ export type GQLUserProfile = {
 
 export type GQLUserPublic = {
   __typename?: 'UserPublic';
+  birthday?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  currentWeight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   email: EntireFieldWrapper<Scalars['String']['output']>;
   firstName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  goal?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  height?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   image?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   lastName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  phone?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   role: EntireFieldWrapper<GQLUserRole>;
+  sex?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
@@ -518,13 +524,19 @@ export type GQLUserProfileResolvers<ContextType = any, ParentType extends GQLRes
 };
 
 export type GQLUserPublicResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['UserPublic'] = GQLResolversParentTypes['UserPublic']> = {
+  birthday?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  currentWeight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   email?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   firstName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  goal?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  height?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   image?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   lastName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  phone?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   role?: Resolver<GQLResolversTypes['UserRole'], ParentType, ContextType>;
+  sex?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

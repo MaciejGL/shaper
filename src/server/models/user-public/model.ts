@@ -41,6 +41,27 @@ export default class UserPublic implements GQLUserPublic {
     }
   }
 
+  get sex() {
+    return this.data.profile?.sex
+  }
+
+  get birthday() {
+    if (!this.data.profile?.birthday) return null
+    return new Date(this.data.profile?.birthday).toISOString()
+  }
+
+  get goal() {
+    return this.data.profile?.goal
+  }
+
+  get currentWeight() {
+    return this.data.profile?.weight
+  }
+
+  get height() {
+    return this.data.profile?.height
+  }
+
   get createdAt() {
     return this.data.createdAt.toISOString()
   }
