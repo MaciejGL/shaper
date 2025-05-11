@@ -2,6 +2,7 @@
 
 import { Calendar, Edit, Users } from 'lucide-react'
 
+import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Badge } from '@/components/ui/badge'
 import { ButtonLink } from '@/components/ui/button-link'
 import {
@@ -39,44 +40,46 @@ const mockPlans = [
 
 export function TrainingPlansList() {
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-      {mockPlans.map((plan) => (
-        <Card key={plan.id}>
-          <CardHeader>
-            <div className="flex justify-between items-start">
-              <CardTitle>{plan.title}</CardTitle>
-              <div className="flex gap-1">
-                {plan.isTemplate && <Badge variant="outline">Template</Badge>}
-                {plan.isPublic && <Badge>Public</Badge>}
+    <AnimatedPageTransition id="training-plans-list">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {mockPlans.map((plan) => (
+          <Card key={plan.id}>
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <CardTitle>{plan.title}</CardTitle>
+                <div className="flex gap-1">
+                  {plan.isTemplate && <Badge variant="outline">Template</Badge>}
+                  {plan.isPublic && <Badge>Public</Badge>}
+                </div>
               </div>
-            </div>
-            <CardDescription>{plan.description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center text-sm text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>{plan.weekCount} weeks</span>
-              {plan.assignedCount > 0 && (
-                <>
-                  <span className="mx-2">•</span>
-                  <Users className="mr-1 h-4 w-4" />
-                  <span>Assigned to {plan.assignedCount} clients</span>
-                </>
-              )}
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-end">
-            <ButtonLink
-              variant="outline"
-              size="sm"
-              href={`/trainings/${plan.id}`}
-              iconStart={<Edit className="h-4 w-4" />}
-            >
-              Edit
-            </ButtonLink>
-          </CardFooter>
-        </Card>
-      ))}
-    </div>
+              <CardDescription>{plan.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Calendar className="h-4 w-4" />
+                <span>{plan.weekCount} weeks</span>
+                {plan.assignedCount > 0 && (
+                  <>
+                    <span className="mx-2">•</span>
+                    <Users className="mr-1 h-4 w-4" />
+                    <span>Assigned to {plan.assignedCount} clients</span>
+                  </>
+                )}
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <ButtonLink
+                variant="outline"
+                size="sm"
+                href={`/trainings/${plan.id}`}
+                iconStart={<Edit className="h-4 w-4" />}
+              >
+                Edit
+              </ButtonLink>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </AnimatedPageTransition>
   )
 }

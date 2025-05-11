@@ -3,6 +3,7 @@
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -113,7 +114,7 @@ export function CreateTrainingPlanForm() {
   }
 
   return (
-    <>
+    <AnimatedPageTransition id="create-training-plan-form">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold tracking-tight">
           Create New Training Plan
@@ -154,41 +155,51 @@ export function CreateTrainingPlanForm() {
           </TabsList>
 
           <TabsContent value="details" className="py-4">
-            <PlanDetailsForm
-              data={formData.details}
-              updateData={(details) => updateFormData({ details })}
-            />
+            <AnimatedPageTransition id="plan-details">
+              <PlanDetailsForm
+                data={formData.details}
+                updateData={(details) => updateFormData({ details })}
+              />
+            </AnimatedPageTransition>
           </TabsContent>
 
           <TabsContent value="weeks" className="py-4">
-            <WeeksSetup
-              weeks={formData.weeks}
-              updateWeeks={(weeks) => updateFormData({ weeks })}
-            />
+            <AnimatedPageTransition id="weeks">
+              <WeeksSetup
+                weeks={formData.weeks}
+                updateWeeks={(weeks) => updateFormData({ weeks })}
+              />
+            </AnimatedPageTransition>
           </TabsContent>
 
           <TabsContent value="days" className="py-4">
-            <DaysSetup
-              weeks={formData.weeks}
-              activeWeek={activeWeek}
-              setActiveWeek={setActiveWeek}
-              updateWeeks={(weeks) => updateFormData({ weeks })}
-            />
+            <AnimatedPageTransition id="days">
+              <DaysSetup
+                weeks={formData.weeks}
+                activeWeek={activeWeek}
+                setActiveWeek={setActiveWeek}
+                updateWeeks={(weeks) => updateFormData({ weeks })}
+              />
+            </AnimatedPageTransition>
           </TabsContent>
 
           <TabsContent value="exercises" className="py-4">
-            <ExercisesSetup
-              weeks={formData.weeks}
-              activeWeek={activeWeek}
-              setActiveWeek={setActiveWeek}
-              activeDay={activeDay}
-              setActiveDay={setActiveDay}
-              updateWeeks={(weeks) => updateFormData({ weeks })}
-            />
+            <AnimatedPageTransition id="exercises">
+              <ExercisesSetup
+                weeks={formData.weeks}
+                activeWeek={activeWeek}
+                setActiveWeek={setActiveWeek}
+                activeDay={activeDay}
+                setActiveDay={setActiveDay}
+                updateWeeks={(weeks) => updateFormData({ weeks })}
+              />
+            </AnimatedPageTransition>
           </TabsContent>
 
           <TabsContent value="review" className="py-4">
-            <ReviewPlan formData={formData} />
+            <AnimatedPageTransition id="review">
+              <ReviewPlan formData={formData} />
+            </AnimatedPageTransition>
           </TabsContent>
         </Tabs>
 
@@ -215,6 +226,6 @@ export function CreateTrainingPlanForm() {
           )}
         </div>
       </Card>
-    </>
+    </AnimatedPageTransition>
   )
 }

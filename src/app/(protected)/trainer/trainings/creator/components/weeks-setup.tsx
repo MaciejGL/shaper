@@ -1,9 +1,14 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Copy, Edit, PlusCircle, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
+import {
+  AnimatedGrid,
+  AnimatedGridItem,
+  useIsFirstRender,
+} from '@/components/animated-grid'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -16,7 +21,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { cn } from '@/lib/utils'
 
 import type { TrainingPlanFormData } from './types'
 
@@ -40,9 +44,10 @@ export function WeeksSetup({ weeks, updateWeeks }: WeeksSetupProps) {
     weeks,
     updateWeeks,
   })
+  const isFirstRender = useIsFirstRender()
 
   return (
-    <div className="@container/weeks space-y-6">
+    <div className="@container/section space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Training Weeks</h2>
       </div>
@@ -55,36 +60,30 @@ export function WeeksSetup({ weeks, updateWeeks }: WeeksSetupProps) {
         saveWeekEdit={saveWeekEdit}
       />
 
-      <div
-        className={cn(
-          'grid grid-cols-1 gap-4 auto-rows-fr',
-          '@2xl/weeks:grid-cols-2 @2xl/weeks:gap-6 @5xl/weeks:grid-cols-3',
-        )}
-      >
-        <AnimatePresence mode="popLayout">
-          {weeks.map((week, index) => (
-            <WeekCard
-              key={week.id}
-              week={week}
-              weeks={weeks}
-              cloneWeek={cloneWeek}
-              openEditWeekDialog={openEditWeekDialog}
-              removeWeek={removeWeek}
-              index={index}
-            />
-          ))}
-          <motion.div layout className="size-full">
-            <Button
-              variant="ghost"
-              onClick={addWeek}
-              iconStart={<PlusCircle />}
-              className="size-full shadow-sm"
-            >
-              Add Week
-            </Button>
-          </motion.div>
-        </AnimatePresence>
-      </div>
+      <AnimatedGrid layoutId="weeks">
+        {weeks.map((week, index) => (
+          <WeekCard
+            key={week.id}
+            week={week}
+            weeks={weeks}
+            cloneWeek={cloneWeek}
+            openEditWeekDialog={openEditWeekDialog}
+            removeWeek={removeWeek}
+            index={index}
+            isFirstRender={isFirstRender}
+          />
+        ))}
+        <motion.div layout className="size-full">
+          <Button
+            variant="ghost"
+            onClick={addWeek}
+            iconStart={<PlusCircle />}
+            className="size-full shadow-sm"
+          >
+            Add Week
+          </Button>
+        </motion.div>
+      </AnimatedGrid>
     </div>
   )
 }
@@ -147,6 +146,7 @@ type WeekCardProps = Pick<
   weeks: TrainingPlanFormData['weeks']
   week: TrainingPlanFormData['weeks'][number]
   index: number
+  isFirstRender: boolean
 }
 
 function WeekCard({
@@ -156,21 +156,13 @@ function WeekCard({
   openEditWeekDialog,
   removeWeek,
   index,
+  isFirstRender,
 }: WeekCardProps) {
   return (
-    <motion.div
-      key={week.id}
-      layout
+    <AnimatedGridItem
+      id={week.id}
       layoutId={`week-${week.id}`}
-      initial={{ opacity: 0, scale: 0 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0, transition: { duration: 0.1 } }}
-      transition={{
-        layout: { type: 'spring', bounce: 0.2, duration: 0.4 },
-        duration: 0.25,
-        scale: { type: 'spring', visualDuration: 0.25, bounce: 0.1 },
-      }}
-      className="h-full"
+      isFirstRender={isFirstRender}
     >
       <Card className="h-full">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -209,7 +201,7 @@ function WeekCard({
           )}
         </CardContent>
       </Card>
-    </motion.div>
+    </AnimatedGridItem>
   )
 }
 

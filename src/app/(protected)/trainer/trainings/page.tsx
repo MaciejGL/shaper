@@ -4,7 +4,7 @@ import { ButtonLink } from '@/components/ui/button-link'
 
 import { TrainingPlansList } from './components/training-plans-list'
 
-export default async function Page() {
+export default function Page() {
   return (
     <div className="container py-6 space-y-6">
       <div className="flex items-center justify-between">
