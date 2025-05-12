@@ -3,6 +3,8 @@ import { TrainingWeek as PrismaTrainingWeek } from '@prisma/client'
 import { GQLTrainingWeek } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 
+import TrainingDay from '../training-day/model'
+
 export default class TrainingWeek implements GQLTrainingWeek {
   constructor(protected data: PrismaTrainingWeek) {}
 

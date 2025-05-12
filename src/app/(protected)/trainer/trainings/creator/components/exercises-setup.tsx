@@ -94,9 +94,9 @@ export function ExercisesSetup({
   const [newExercise, setNewExercise] = useState({
     name: '',
     sets: [
-      { id: `set-${Date.now()}-1`, setNumber: 1, reps: 10, weight: 0 },
-      { id: `set-${Date.now()}-2`, setNumber: 2, reps: 10, weight: 0 },
-      { id: `set-${Date.now()}-3`, setNumber: 3, reps: 10, weight: 0 },
+      { id: `set-${Date.now()}-1`, order: 1, reps: 10, weight: 0 },
+      { id: `set-${Date.now()}-2`, order: 2, reps: 10, weight: 0 },
+      { id: `set-${Date.now()}-3`, order: 3, reps: 10, weight: 0 },
     ],
     restSeconds: 60,
     tempo: '',
@@ -112,14 +112,14 @@ export function ExercisesSetup({
   }
 
   const addSet = () => {
-    const nextSetNumber = newExercise.sets.length + 1
+    const nextorder = newExercise.sets.length + 1
     setNewExercise({
       ...newExercise,
       sets: [
         ...newExercise.sets,
         {
-          id: `set-${Date.now()}-${nextSetNumber}`,
-          setNumber: nextSetNumber,
+          id: `set-${Date.now()}-${nextorder}`,
+          order: nextorder,
           reps: newExercise.sets[0]?.reps || 10,
           weight: newExercise.sets[0]?.weight || 0,
         },
@@ -133,7 +133,7 @@ export function ExercisesSetup({
     const newSets = newExercise.sets.filter((_, index) => index !== setIndex)
     // Renumber the sets
     newSets.forEach((set, index) => {
-      set.setNumber = index + 1
+      set.order = index + 1
     })
 
     setNewExercise({
@@ -163,9 +163,9 @@ export function ExercisesSetup({
     setNewExercise({
       name: '',
       sets: [
-        { id: `set-${Date.now()}-1`, setNumber: 1, reps: 10, weight: 0 },
-        { id: `set-${Date.now()}-2`, setNumber: 2, reps: 10, weight: 0 },
-        { id: `set-${Date.now()}-3`, setNumber: 3, reps: 10, weight: 0 },
+        { id: `set-${Date.now()}-1`, order: 1, reps: 10, weight: 0 },
+        { id: `set-${Date.now()}-2`, order: 2, reps: 10, weight: 0 },
+        { id: `set-${Date.now()}-3`, order: 3, reps: 10, weight: 0 },
       ],
       restSeconds: 60,
       tempo: '',
@@ -451,7 +451,7 @@ export function ExercisesSetup({
                       {newExercise.sets.map((set, index) => (
                         <div key={set.id} className="flex items-center gap-2">
                           <div className="font-medium w-16">
-                            Set {set.setNumber}
+                            Set {set.order}
                           </div>
                           <div className="flex-1 flex items-center gap-2">
                             <div className="flex-1">
@@ -623,9 +623,7 @@ export function ExercisesSetup({
                       <div className="grid grid-cols-3 gap-2 text-sm">
                         {exercise.sets.map((set) => (
                           <div key={set.id} className="border rounded p-1.5">
-                            <div className="font-medium">
-                              Set {set.setNumber}
-                            </div>
+                            <div className="font-medium">Set {set.order}</div>
                             <div className="text-xs text-muted-foreground">
                               {set.reps} reps{' '}
                               {set.weight ? `@ ${set.weight}kg` : ''}

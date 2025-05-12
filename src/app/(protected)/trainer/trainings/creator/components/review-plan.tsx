@@ -81,7 +81,7 @@ export function ReviewPlan({ formData }: ReviewPlanProps) {
                               <div className="text-sm">
                                 {exercise.sets.map((set, idx) => (
                                   <span key={set.id} className="mr-3">
-                                    Set {set.setNumber}: {set.reps} reps{' '}
+                                    Set {set.order}: {set.reps} reps{' '}
                                     {set.weight ? `@ ${set.weight}kg` : ''}
                                     {idx < exercise.sets.length - 1 ? '' : ''}
                                   </span>
