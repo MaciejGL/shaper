@@ -51,6 +51,39 @@ export type GQLCreateNotificationInput = {
   userId: Scalars['ID']['input'];
 };
 
+export type GQLExerciseLog = {
+  __typename?: 'ExerciseLog';
+  createdAt: Scalars['String']['output'];
+  exerciseId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  notes?: Maybe<Scalars['String']['output']>;
+  performedAt: Scalars['String']['output'];
+  setsLogs: Array<GQLExerciseSetLog>;
+  updatedAt: Scalars['String']['output'];
+};
+
+export type GQLExerciseSet = {
+  __typename?: 'ExerciseSet';
+  createdAt: Scalars['String']['output'];
+  exerciseId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  logs: Array<GQLExerciseSetLog>;
+  order: Scalars['Int']['output'];
+  reps: Scalars['Int']['output'];
+  updatedAt: Scalars['String']['output'];
+  weight?: Maybe<Scalars['Float']['output']>;
+};
+
+export type GQLExerciseSetLog = {
+  __typename?: 'ExerciseSetLog';
+  createdAt: Scalars['String']['output'];
+  exerciseSetId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  reps: Scalars['Int']['output'];
+  updatedAt: Scalars['String']['output'];
+  weight: Scalars['Float']['output'];
+};
+
 export enum GQLFitnessLevel {
   Advanced = 'ADVANCED',
   Beginner = 'BEGINNER',
@@ -184,6 +217,58 @@ export type GQLQueryNotificationsArgs = {
 
 export type GQLQueryUserPublicArgs = {
   id: Scalars['ID']['input'];
+};
+
+export type GQLTrainingDay = {
+  __typename?: 'TrainingDay';
+  completedAt?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  dayOfWeek: Scalars['Int']['output'];
+  exercises: Array<GQLTrainingExercise>;
+  id: Scalars['ID']['output'];
+  trainingWeekId: Scalars['ID']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export type GQLTrainingExercise = {
+  __typename?: 'TrainingExercise';
+  createdAt: Scalars['String']['output'];
+  dayId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  instructions?: Maybe<Scalars['String']['output']>;
+  logs: Array<GQLExerciseLog>;
+  name: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+  restSeconds?: Maybe<Scalars['Int']['output']>;
+  sets: Array<GQLExerciseSet>;
+  tempo?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['String']['output'];
+};
+
+export type GQLTrainingPlan = {
+  __typename?: 'TrainingPlan';
+  assignedTo?: Maybe<GQLUserPublic>;
+  completedAt?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  createdBy?: Maybe<GQLUserPublic>;
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  isPublic: Scalars['Boolean']['output'];
+  isTemplate: Scalars['Boolean']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+  weeks: Array<GQLTrainingWeek>;
+};
+
+export type GQLTrainingWeek = {
+  __typename?: 'TrainingWeek';
+  completedAt?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  days: Array<GQLTrainingDay>;
+  id: Scalars['ID']['output'];
+  trainingPlanId: Scalars['ID']['output'];
+  updatedAt: Scalars['String']['output'];
+  weekNumber: Scalars['Int']['output'];
 };
 
 export type GQLUpdateNotificationInput = {

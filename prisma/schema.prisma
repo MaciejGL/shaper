@@ -31,13 +31,12 @@ model User {
   notifications        Notification[]
   createdNotifications Notification[]    @relation("NotificationCreator")
 
-  sessions      UserSession[]
-  assignedPlans TrainingPlan[] @relation("AssignedPlans")
-  createdPlans  TrainingPlan[] @relation("CreatedPlans")
-  exerciseLogs  ExerciseLog[]
-  BaseExercise  BaseExercise[]
+  sessions              UserSession[]
+  assignedPlans         TrainingPlan[]             @relation("AssignedPlans")
+  createdPlans          TrainingPlan[]             @relation("CreatedPlans")
+  exerciseLogs          ExerciseLog[]
+  BaseExercise          BaseExercise[]
   exerciseSubstitutions UserExerciseSubstitution[]
-
 }
 
 model UserSession {
@@ -146,82 +145,124 @@ model Notification {
 }
 
 model TrainingPlan {
-  id          String         @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
   description String?
   createdById String
-  isPublic    Boolean        @default(false)
-  isTemplate  Boolean        @default(false)
+  isPublic    Boolean   @default(false)
+  isTemplate  Boolean   @default(false)
   templateId  String?
   completedAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  createdBy   User           @relation("CreatedPlans", fields: [createdById], references: [id])
-  assignedTo  User[]         @relation("AssignedPlans")
-  weeks       TrainingWeek[]
-  template    TrainingPlan?  @relation("Template", fields: [templateId], references: [id])
-  templates   TrainingPlan[] @relation("Template")
+
+  createdBy    User           @relation("CreatedPlans", fields: [createdById], references: [id])
+  assignedTo   User?          @relation("AssignedPlans", fields: [assignedToId], references: [id])
+  assignedToId String?
+  weeks        TrainingWeek[]
+  template     TrainingPlan?  @relation("Template", fields: [templateId], references: [id])
+  templates    TrainingPlan[] @relation("Template")
 }
 
 model TrainingWeek {
-  id         String        @id @default(cuid())
-  planId     String
-  weekNumber Int
+  id          String    @id @default(cuid())
+  planId      String
+  weekNumber  Int
   completedAt DateTime?
 
-  plan       TrainingPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
-  days       TrainingDay[]
+  plan TrainingPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  days TrainingDay[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model TrainingDay {
-  id        String             @id @default(cuid())
-  weekId    String
-  dayOfWeek Int // 0 = Sunday, 1 = Monday, etc.
+  id          String    @id @default(cuid())
+  weekId      String
+  dayOfWeek   Int // 0 = Sunday, 1 = Monday, etc.
   completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   week      TrainingWeek       @relation(fields: [weekId], references: [id], onDelete: Cascade)
   exercises TrainingExercise[]
 }
 
-model ExerciseLog {
-  id          String   @id @default(cuid())
-  performedAt DateTime @default(now())
-  setsCompleted Int?
-  repsPerSet    Int[] // e.g., [12, 10, 10]
-  weightPerSet  Float[] // e.g., [40.0, 40.0, 37.5]
-  notes         String? // "Felt strong today"
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  userId      String
-  user     User             @relation(fields: [userId], references: [id])
-  exerciseId  String
-  exercise TrainingExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-}
-
 model TrainingExercise {
-  id     String        @id @default(cuid())
-  name         String // can override base
-  sets         Int
-  reps         Int
+  id   String @id @default(cuid())
+  name String // can override base
+
   restSeconds  Int?
   tempo        String?
   instructions String?
   order        Int
 
-  baseId String? // 👈 link to the base exercise
-  base   BaseExercise? @relation(fields: [baseId], references: [id])
-  dayId  String
-  day  TrainingDay   @relation(fields: [dayId], references: [id], onDelete: Cascade)
-  logs ExerciseLog[]
-  substitutionOptions ExerciseSubstitutionOption[] @relation("OriginalExercise") // Options for this exercise
-  substitutionsFor   ExerciseSubstitutionOption[] @relation("SubstituteExercise") // Used as an option elsewhere
-  userExerciseOverrides  UserExerciseSubstitution[] @relation("UserExerciseOriginal")
-  userExerciseSelections UserExerciseSubstitution[] @relation("UserExerciseSelected")
+  sets                   ExerciseSet[]
+  baseId                 String? // 👈 link to the base exercise
+  base                   BaseExercise?                @relation(fields: [baseId], references: [id])
+  dayId                  String
+  day                    TrainingDay                  @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  logs                   ExerciseLog[]
+  substitutionOptions    ExerciseSubstitutionOption[] @relation("OriginalExercise") // Options for this exercise
+  substitutionsFor       ExerciseSubstitutionOption[] @relation("SubstituteExercise") // Used as an option elsewhere
+  userExerciseOverrides  UserExerciseSubstitution[]   @relation("UserExerciseOriginal")
+  userExerciseSelections UserExerciseSubstitution[]   @relation("UserExerciseSelected")
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([dayId])
+  @@index([baseId])
+}
+
+model ExerciseSet {
+  id         String           @id @default(cuid())
+  order      Int
+  reps       Int
+  weight     Float?
+  exerciseId String
+  exercise   TrainingExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  logs ExerciseSetLog[]
+
+  @@index([exerciseId])
+}
+
+model ExerciseLog {
+  id          String   @id @default(cuid())
+  performedAt DateTime @default(now())
+  notes       String?
+
+  userId     String
+  user       User             @relation(fields: [userId], references: [id])
+  exerciseId String
+  exercise   TrainingExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  setsLogs ExerciseSetLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ExerciseSetLog {
+  id String @id @default(cuid())
+
+  reps   Int
+  weight Float
+
+  exerciseLogId String
+  exerciseLog   ExerciseLog @relation(fields: [exerciseLogId], references: [id], onDelete: Cascade)
+  exerciseSetId String
+  exerciseSet   ExerciseSet @relation(fields: [exerciseSetId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model BaseExercise {
@@ -238,47 +279,46 @@ model BaseExercise {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  muscleGroups MuscleGroup[] @relation("ExerciseMuscleGroups")
+  muscleGroups      MuscleGroup[]      @relation("ExerciseMuscleGroups")
   trainingExercises TrainingExercise[]
 }
 
 model ExerciseSubstitutionOption {
-  id           String   @id @default(cuid())
+  id           String @id @default(cuid())
   originalId   String
   substituteId String
 
-  original     TrainingExercise @relation("OriginalExercise", fields: [originalId], references: [id])
-  substitute   TrainingExercise @relation("SubstituteExercise", fields: [substituteId], references: [id])
+  original   TrainingExercise @relation("OriginalExercise", fields: [originalId], references: [id])
+  substitute TrainingExercise @relation("SubstituteExercise", fields: [substituteId], references: [id])
 
-  reason       String?
+  reason String?
 }
 
 model UserExerciseSubstitution {
-  id         String   @id @default(cuid())
+  id         String @id @default(cuid())
   userId     String
   exerciseId String
   selectedId String
 
-  user       User             @relation(fields: [userId], references: [id])
-  exercise   TrainingExercise @relation("UserExerciseOriginal", fields: [exerciseId], references: [id])
-  selected   TrainingExercise @relation("UserExerciseSelected", fields: [selectedId], references: [id])
+  user     User             @relation(fields: [userId], references: [id])
+  exercise TrainingExercise @relation("UserExerciseOriginal", fields: [exerciseId], references: [id])
+  selected TrainingExercise @relation("UserExerciseSelected", fields: [selectedId], references: [id])
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, exerciseId]) // One override per exercise per user
 }
 
-
 model MuscleGroup {
-  id        String   @id @default(cuid())
-  name      String   @unique         // "Biceps brachii"
-  alias     String?                  // "Biceps"
-  groupSlug String                   // e.g. "arms"
-  isPrimary Boolean @default(true)  // Used for grouping in filters
+  id        String  @id @default(cuid())
+  name      String  @unique // "Biceps brachii"
+  alias     String? // "Biceps"
+  groupSlug String // e.g. "arms"
+  isPrimary Boolean @default(true) // Used for grouping in filters
 
-  createdAt DateTime @default(now())
-  category MuscleGroupCategory @relation(fields: [categoryId], references: [id])
+  createdAt  DateTime            @default(now())
+  category   MuscleGroupCategory @relation(fields: [categoryId], references: [id])
   categoryId String
 
   exercises BaseExercise[] @relation("ExerciseMuscleGroups")
@@ -286,9 +326,9 @@ model MuscleGroup {
 
 model MuscleGroupCategory {
   id        String   @id @default(cuid())
-  name      String   @unique   // e.g. "Shoulders", "Chest", "Back"
+  name      String   @unique // e.g. "Shoulders", "Chest", "Back"
   slug      String   @unique
   createdAt DateTime @default(now())
 
-  muscles   MuscleGroup[]
+  muscles MuscleGroup[]
 }

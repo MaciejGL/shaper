@@ -1,0 +1,9 @@
+type ExerciseLog {
+  id: ID!
+  performedAt: String!
+  notes: String
+  exerciseId: ID!
+  setsLogs: [ExerciseSetLog!]!
+  createdAt: String!
+  updatedAt: String!
+}

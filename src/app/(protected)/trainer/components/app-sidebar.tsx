@@ -28,6 +28,8 @@ import {
 import { TRAINER_LINKS } from '@/constants/user-links'
 import { useGetClientsQuery } from '@/generated/graphql-client'
 
+import { fullBodyTrainingPlan } from '../trainings/creator/components/dummy-data'
+
 type SidebarItem = {
   title: string
   url: string
@@ -45,6 +47,11 @@ type SidebarSubItem = {
 
 export function AppSidebar() {
   const { data: clients } = useGetClientsQuery()
+  const { data: trainings } = {
+    data: [fullBodyTrainingPlan, fullBodyTrainingPlan],
+  }
+  // const { data: trainings } = useGetTrainingsQuery()
+
   const items: SidebarItem[] = [
     {
       title: TRAINER_LINKS.dashboard.label,
@@ -69,6 +76,19 @@ export function AppSidebar() {
       url: TRAINER_LINKS.trainings.href,
       icon: NotebookTextIcon,
       disabled: TRAINER_LINKS.trainings.disabled,
+      subItems: [
+        {
+          title: 'Creator',
+          url: TRAINER_LINKS.trainings.href + '/creator',
+          icon: UserRoundCogIcon,
+        },
+        ...trainings?.map((training) => ({
+          title: training.details.title,
+          url:
+            TRAINER_LINKS.trainings.href + `/creator?templateId=${training.id}`,
+          icon: NotebookTextIcon,
+        })),
+      ],
     },
     {
       title: TRAINER_LINKS.exercises.label,

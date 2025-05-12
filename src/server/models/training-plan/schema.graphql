@@ -1,0 +1,16 @@
+type TrainingPlan {
+  id: ID!
+  title: String!
+  description: String
+  createdAt: String!
+  updatedAt: String!
+  isPublic: Boolean!
+  isTemplate: Boolean!
+  createdBy: UserPublic
+  assignedTo: UserPublic
+  completedAt: String
+  weeks: [TrainingWeek!]!
+
+  createdAt: String!
+  updatedAt: String!
+}

@@ -1,6 +1,7 @@
 'use client'
 
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
@@ -9,6 +10,7 @@ import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { DaysSetup } from './days-setup'
+import { fullBodyTrainingPlan } from './dummy-data'
 import { ExercisesSetup } from './exercises-setup'
 import { PlanDetailsForm } from './plan-details-form'
 import { ReviewPlan } from './review-plan'
@@ -16,6 +18,7 @@ import { TrainingPlanFormData } from './types'
 import { WeeksSetup } from './weeks-setup'
 
 const initialFormData: TrainingPlanFormData = {
+  id: Math.random().toString(),
   details: {
     title: '',
     description: '',
@@ -56,8 +59,15 @@ const getInitialFormData = () => {
 }
 
 export function CreateTrainingPlanForm() {
-  const [formData, setFormData] =
-    useState<TrainingPlanFormData>(getInitialFormData())
+  const searchParams = useSearchParams()
+  const templateId = searchParams.get('templateId')
+  const data = [fullBodyTrainingPlan, fullBodyTrainingPlan].find(
+    (training) => training.id === templateId,
+  )
+  console.log(data)
+  const [formData, setFormData] = useState<TrainingPlanFormData>(
+    data || getInitialFormData(),
+  )
   const [isDirty, setIsDirty] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [activeWeek, setActiveWeek] = useState(0)

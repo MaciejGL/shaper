@@ -1,4 +1,5 @@
 export type TrainingPlanFormData = {
+  id: string
   details: TrainingDetails
   weeks: TrainingWeek[]
 }
@@ -38,7 +39,7 @@ export type TrainingExercise = {
 
 export type TrainingSet = {
   id: string
-  setNumber: number
+  order: number
   reps: number
   weight: number
 }

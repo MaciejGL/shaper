@@ -1,0 +1,10 @@
+type TrainingWeek {
+  id: ID!
+  weekNumber: Int!
+  completedAt: String
+  trainingPlanId: ID!
+  days: [TrainingDay!]!
+
+  createdAt: String!
+  updatedAt: String!
+}
