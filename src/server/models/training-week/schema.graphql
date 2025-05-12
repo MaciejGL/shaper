@@ -1,9 +1,9 @@
-type TrainingDay {
+type TrainingWeek {
   id: ID!
-  dayOfWeek: Int!
+  weekNumber: Int!
   completedAt: String
-  trainingWeekId: ID!
-  exercises: [TrainingExercise!]!
+  trainingPlanId: ID!
+  days: [TrainingDay!]!
 
   createdAt: String!
   updatedAt: String!

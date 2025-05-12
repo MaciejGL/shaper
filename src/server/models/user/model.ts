@@ -97,7 +97,13 @@ export default class User implements GQLUser {
     const sessions = await prisma.userSession.findMany({
       where: { userId: this.data.id },
     })
-    return sessions.map((s) => new UserSession(s))
+    return sessions.map((s) => ({
+      id: s.id,
+      user: this,
+      otp: s.otp,
+      expiresAt: s.expiresAt.toISOString(),
+      createdAt: s.createdAt.toISOString(),
+    }))
   }
 
   async notifications() {
