@@ -42,6 +42,12 @@ export enum GQLCoachingRequestStatus {
   Rejected = 'REJECTED'
 }
 
+export type GQLCreateExerciseSetInput = {
+  order: Scalars['Int']['input'];
+  reps: Scalars['Int']['input'];
+  weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
 export type GQLCreateNotificationInput = {
   createdBy?: InputMaybe<Scalars['ID']['input']>;
   link?: InputMaybe<Scalars['String']['input']>;
@@ -49,6 +55,37 @@ export type GQLCreateNotificationInput = {
   relatedItemId?: InputMaybe<Scalars['String']['input']>;
   type: GQLNotificationType;
   userId: Scalars['ID']['input'];
+};
+
+export type GQLCreateTrainingDayInput = {
+  dayOfWeek: Scalars['Int']['input'];
+  exercises?: InputMaybe<Array<GQLCreateTrainingExerciseInput>>;
+  isRestDay: Scalars['Boolean']['input'];
+  workoutType?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GQLCreateTrainingExerciseInput = {
+  instructions?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  order: Scalars['Int']['input'];
+  restSeconds?: InputMaybe<Scalars['Int']['input']>;
+  sets?: InputMaybe<Array<GQLCreateExerciseSetInput>>;
+  tempo?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GQLCreateTrainingPlanInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  isTemplate?: InputMaybe<Scalars['Boolean']['input']>;
+  title: Scalars['String']['input'];
+  weeks?: InputMaybe<Array<GQLCreateTrainingWeekInput>>;
+};
+
+export type GQLCreateTrainingWeekInput = {
+  days?: InputMaybe<Array<GQLCreateTrainingDayInput>>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  weekNumber: Scalars['Int']['input'];
 };
 
 export type GQLExerciseLog = {
@@ -103,7 +140,9 @@ export type GQLMutation = {
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   createCoachingRequest: GQLCoachingRequest;
   createNotification: GQLNotification;
+  createTrainingPlan: Scalars['Boolean']['output'];
   deleteNotification: Scalars['Boolean']['output'];
+  deleteTrainingPlan: Scalars['Boolean']['output'];
   markAllNotificationsRead: Array<GQLNotification>;
   markNotificationRead: GQLNotification;
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
@@ -133,7 +172,17 @@ export type GQLMutationCreateNotificationArgs = {
 };
 
 
+export type GQLMutationCreateTrainingPlanArgs = {
+  input: GQLCreateTrainingPlanInput;
+};
+
+
 export type GQLMutationDeleteNotificationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDeleteTrainingPlanArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -228,6 +277,7 @@ export type GQLTrainingDay = {
   id: Scalars['ID']['output'];
   trainingWeekId: Scalars['ID']['output'];
   updatedAt: Scalars['String']['output'];
+  workoutType?: Maybe<Scalars['String']['output']>;
 };
 
 export type GQLTrainingExercise = {
@@ -386,6 +436,28 @@ export type GQLUserSession = {
   user: GQLUser;
 };
 
+export enum GQLWorkoutType {
+  Abs = 'Abs',
+  Arms = 'Arms',
+  Back = 'Back',
+  Biceps = 'Biceps',
+  Calves = 'Calves',
+  Cardio = 'Cardio',
+  Chest = 'Chest',
+  Custom = 'Custom',
+  FullBody = 'FullBody',
+  Glutes = 'Glutes',
+  Hams = 'Hams',
+  Legs = 'Legs',
+  LowerBody = 'LowerBody',
+  Mobility = 'Mobility',
+  Pull = 'Pull',
+  Push = 'Push',
+  Quads = 'Quads',
+  Triceps = 'Triceps',
+  UpperBody = 'UpperBody'
+}
+
 export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goal?: GQLGoal | undefined | null, bio?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null };
 
 export type GQLProfileQueryVariables = Exact<{ [key: string]: never; }>;
@@ -424,6 +496,20 @@ export type GQLUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GQLUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goal?: GQLGoal | undefined | null, bio?: string | undefined | null, createdAt: string, updatedAt: string, bodyMeasures: Array<{ __typename?: 'UserBodyMeasure', id: string, weight?: number | undefined | null, height?: number | undefined | null, chest?: number | undefined | null, waist?: number | undefined | null, hips?: number | undefined | null, neck?: number | undefined | null, biceps?: number | undefined | null, thigh?: number | undefined | null, calf?: number | undefined | null, bodyFat?: number | undefined | null, notes?: string | undefined | null }> } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string } | undefined | null, clients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string }>, sessions: Array<{ __typename?: 'UserSession', id: string, createdAt: string, expiresAt: string }> } | undefined | null };
+
+export type GQLCreateTrainingPlanMutationVariables = Exact<{
+  input: GQLCreateTrainingPlanInput;
+}>;
+
+
+export type GQLCreateTrainingPlanMutation = { __typename?: 'Mutation', createTrainingPlan: boolean };
+
+export type GQLDeleteTrainingPlanMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLDeleteTrainingPlanMutation = { __typename?: 'Mutation', deleteTrainingPlan: boolean };
 
 export type GQLMyCoachingRequestsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -834,6 +920,54 @@ useInfiniteUserQuery.getKey = (variables?: GQLUserQueryVariables) => variables =
 
 
 useUserQuery.fetcher = (variables?: GQLUserQueryVariables, options?: RequestInit['headers']) => fetchData<GQLUserQuery, GQLUserQueryVariables>(UserDocument, variables, options);
+
+export const CreateTrainingPlanDocument = `
+    mutation CreateTrainingPlan($input: CreateTrainingPlanInput!) {
+  createTrainingPlan(input: $input)
+}
+    `;
+
+export const useCreateTrainingPlanMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateTrainingPlanMutation, TError, GQLCreateTrainingPlanMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateTrainingPlanMutation, TError, GQLCreateTrainingPlanMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateTrainingPlan'],
+    mutationFn: (variables?: GQLCreateTrainingPlanMutationVariables) => fetchData<GQLCreateTrainingPlanMutation, GQLCreateTrainingPlanMutationVariables>(CreateTrainingPlanDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateTrainingPlanMutation.getKey = () => ['CreateTrainingPlan'];
+
+
+useCreateTrainingPlanMutation.fetcher = (variables: GQLCreateTrainingPlanMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateTrainingPlanMutation, GQLCreateTrainingPlanMutationVariables>(CreateTrainingPlanDocument, variables, options);
+
+export const DeleteTrainingPlanDocument = `
+    mutation DeleteTrainingPlan($id: ID!) {
+  deleteTrainingPlan(id: $id)
+}
+    `;
+
+export const useDeleteTrainingPlanMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDeleteTrainingPlanMutation, TError, GQLDeleteTrainingPlanMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDeleteTrainingPlanMutation, TError, GQLDeleteTrainingPlanMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteTrainingPlan'],
+    mutationFn: (variables?: GQLDeleteTrainingPlanMutationVariables) => fetchData<GQLDeleteTrainingPlanMutation, GQLDeleteTrainingPlanMutationVariables>(DeleteTrainingPlanDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDeleteTrainingPlanMutation.getKey = () => ['DeleteTrainingPlan'];
+
+
+useDeleteTrainingPlanMutation.fetcher = (variables: GQLDeleteTrainingPlanMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteTrainingPlanMutation, GQLDeleteTrainingPlanMutationVariables>(DeleteTrainingPlanDocument, variables, options);
 
 export const MyCoachingRequestsDocument = `
     query MyCoachingRequests {

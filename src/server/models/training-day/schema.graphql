@@ -4,7 +4,32 @@ type TrainingDay {
   completedAt: String
   trainingWeekId: ID!
   exercises: [TrainingExercise!]!
+  workoutType: String
 
   createdAt: String!
   updatedAt: String!
+}
+
+enum WorkoutType {
+  Push
+  Pull
+  Legs
+  UpperBody
+  LowerBody
+  FullBody
+  Cardio
+  Mobility
+  # Split
+  Back
+  Arms
+  Biceps
+  Triceps
+  Quads
+  Hams
+  Calves
+  Glutes
+  Abs
+  Chest
+
+  Custom
 }

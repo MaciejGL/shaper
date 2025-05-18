@@ -1,5 +1,6 @@
+import { GQLWorkoutType } from '@/generated/graphql-client'
+
 export type TrainingPlanFormData = {
-  id: string
   details: TrainingDetails
   weeks: TrainingWeek[]
 }
@@ -12,7 +13,6 @@ export type TrainingDetails = {
 }
 
 export type TrainingWeek = {
-  id: string
   weekNumber: number
   name: string
   description: string
@@ -20,15 +20,13 @@ export type TrainingWeek = {
 }
 
 export type TrainingDay = {
-  id: string
   dayOfWeek: number
   isRestDay: boolean
-  workoutType?: WorkoutType
+  workoutType?: GQLWorkoutType
   exercises: TrainingExercise[]
 }
 
 export type TrainingExercise = {
-  id: string
   name: string
   sets: TrainingSet[]
   restSeconds: number
@@ -38,7 +36,6 @@ export type TrainingExercise = {
 }
 
 export type TrainingSet = {
-  id: string
   order: number
   reps: number
   weight: number

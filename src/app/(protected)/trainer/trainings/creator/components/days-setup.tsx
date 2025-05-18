@@ -15,9 +15,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
+import { GQLWorkoutType } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
-import type { TrainingPlanFormData, WorkoutType } from './types'
+import type { TrainingPlanFormData } from './types'
 import {
   absWorkoutTypes,
   cardioWorkoutTypes,
@@ -56,7 +57,7 @@ export function DaysSetup({
     updateWeeks(newWeeks)
   }
 
-  const updateWorkoutType = (dayIndex: number, type: WorkoutType) => {
+  const updateWorkoutType = (dayIndex: number, type: GQLWorkoutType) => {
     const newWeeks = [...weeks]
     newWeeks[activeWeek].days[dayIndex].workoutType = type
     updateWeeks(newWeeks)
@@ -84,7 +85,7 @@ export function DaysSetup({
       >
         {weeks[activeWeek].days.map((day, dayIndex) => (
           <DayCard
-            key={day.id}
+            key={day.dayOfWeek}
             day={day}
             dayIndex={dayIndex}
             toggleRestDay={toggleRestDay}
@@ -105,10 +106,10 @@ function DayCard({
   day: TrainingPlanFormData['weeks'][number]['days'][number]
   dayIndex: number
   toggleRestDay: (dayIndex: number) => void
-  updateWorkoutType: (dayIndex: number, type: WorkoutType) => void
+  updateWorkoutType: (dayIndex: number, type: GQLWorkoutType) => void
 }) {
   return (
-    <Card key={day.id} className="h-full">
+    <Card className="h-full">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">{dayNames[day.dayOfWeek]}</CardTitle>
       </CardHeader>
@@ -141,14 +142,14 @@ function WorkoutTypeSelect({
 }: {
   dayIndex: number
   day: TrainingPlanFormData['weeks'][number]['days'][number]
-  updateWorkoutType: (dayIndex: number, value: WorkoutType) => void
+  updateWorkoutType: (dayIndex: number, value: GQLWorkoutType) => void
 }) {
   return (
     <div className="space-y-2">
       <Label htmlFor={`workout-type-${dayIndex}`}>Workout Type</Label>
       <Select
         value={day.workoutType || ''}
-        onValueChange={(value: WorkoutType) =>
+        onValueChange={(value: GQLWorkoutType) =>
           updateWorkoutType(dayIndex, value)
         }
       >

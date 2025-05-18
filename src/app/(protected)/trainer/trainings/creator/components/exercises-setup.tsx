@@ -94,9 +94,9 @@ export function ExercisesSetup({
   const [newExercise, setNewExercise] = useState({
     name: '',
     sets: [
-      { id: `set-${Date.now()}-1`, order: 1, reps: 10, weight: 0 },
-      { id: `set-${Date.now()}-2`, order: 2, reps: 10, weight: 0 },
-      { id: `set-${Date.now()}-3`, order: 3, reps: 10, weight: 0 },
+      { order: 1, reps: 10, weight: 0 },
+      { order: 2, reps: 10, weight: 0 },
+      { order: 3, reps: 10, weight: 0 },
     ],
     restSeconds: 60,
     tempo: '',
@@ -118,7 +118,6 @@ export function ExercisesSetup({
       sets: [
         ...newExercise.sets,
         {
-          id: `set-${Date.now()}-${nextorder}`,
           order: nextorder,
           reps: newExercise.sets[0]?.reps || 10,
           weight: newExercise.sets[0]?.weight || 0,
@@ -163,9 +162,9 @@ export function ExercisesSetup({
     setNewExercise({
       name: '',
       sets: [
-        { id: `set-${Date.now()}-1`, order: 1, reps: 10, weight: 0 },
-        { id: `set-${Date.now()}-2`, order: 2, reps: 10, weight: 0 },
-        { id: `set-${Date.now()}-3`, order: 3, reps: 10, weight: 0 },
+        { order: 1, reps: 10, weight: 0 },
+        { order: 2, reps: 10, weight: 0 },
+        { order: 3, reps: 10, weight: 0 },
       ],
       restSeconds: 60,
       tempo: '',
@@ -182,7 +181,7 @@ export function ExercisesSetup({
 
       const exercise = currentDay.exercises[exerciseIndex]
       setEditingExerciseIndex(exerciseIndex)
-      setSelectedExercise(exercise.id || null)
+      setSelectedExercise(exercise.order.toString() || null)
       setNewExercise({
         name: exercise.name,
         sets: exercise.sets,
@@ -207,10 +206,6 @@ export function ExercisesSetup({
       : null
 
     const exerciseData = {
-      id:
-        editingExerciseIndex !== null
-          ? currentDay.exercises[editingExerciseIndex].id
-          : `exercise-${Date.now()}`,
       baseId: baseExercise?.id,
       name: baseExercise?.name || newExercise.name,
       sets: newExercise.sets,
@@ -293,7 +288,7 @@ export function ExercisesSetup({
         <RadioGroupTabs
           title="Select Week"
           items={weeks.map((week, index) => ({
-            id: `exercise-week-${index}`,
+            id: `week-${index}`,
             value: index.toString(),
             label: `Week ${index + 1}`,
           }))}
@@ -304,7 +299,7 @@ export function ExercisesSetup({
         <RadioGroupTabs
           title="Select Day"
           items={days.map((day) => ({
-            id: `exercise-day-${day.id}`,
+            id: `day-${day.dayOfWeek}`,
             value: day.dayOfWeek.toString(),
             label: dayNames[day.dayOfWeek],
             disabled: day.isRestDay,
@@ -449,20 +444,23 @@ export function ExercisesSetup({
 
                     <div className="space-y-2">
                       {newExercise.sets.map((set, index) => (
-                        <div key={set.id} className="flex items-center gap-2">
+                        <div
+                          key={set.order}
+                          className="flex items-center gap-2"
+                        >
                           <div className="font-medium w-16">
                             Set {set.order}
                           </div>
                           <div className="flex-1 flex items-center gap-2">
                             <div className="flex-1">
                               <Label
-                                htmlFor={`reps-${set.id}`}
+                                htmlFor={`reps-${set.order}`}
                                 className="text-xs"
                               >
                                 Reps
                               </Label>
                               <Input
-                                id={`reps-${set.id}`}
+                                id={`reps-${set.order}`}
                                 type="number"
                                 min="1"
                                 value={set.reps}
@@ -477,13 +475,13 @@ export function ExercisesSetup({
                             </div>
                             <div className="flex-1">
                               <Label
-                                htmlFor={`weight-${set.id}`}
+                                htmlFor={`weight-${set.order}`}
                                 className="text-xs"
                               >
                                 Weight
                               </Label>
                               <Input
-                                id={`weight-${set.id}`}
+                                id={`weight-${set.order}`}
                                 type="number"
                                 min="0"
                                 step="2.5"
@@ -583,7 +581,7 @@ export function ExercisesSetup({
           {currentDay.exercises.length > 0 ? (
             <div className="space-y-2">
               {currentDay.exercises.map((exercise, index) => (
-                <Card key={exercise.id} className="relative">
+                <Card key={exercise.order} className="relative">
                   <div className="absolute left-2 top-1/2 -translate-y-1/2 flex flex-col space-y-1">
                     <Button
                       variant="ghost"
@@ -622,7 +620,7 @@ export function ExercisesSetup({
                     <div className="space-y-2">
                       <div className="grid grid-cols-3 gap-2 text-sm">
                         {exercise.sets.map((set) => (
-                          <div key={set.id} className="border rounded p-1.5">
+                          <div key={set.order} className="border rounded p-1.5">
                             <div className="font-medium">Set {set.order}</div>
                             <div className="text-xs text-muted-foreground">
                               {set.reps} reps{' '}

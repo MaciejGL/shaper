@@ -43,6 +43,12 @@ export enum GQLCoachingRequestStatus {
   Rejected = 'REJECTED'
 }
 
+export type GQLCreateExerciseSetInput = {
+  order: Scalars['Int']['input'];
+  reps: Scalars['Int']['input'];
+  weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
 export type GQLCreateNotificationInput = {
   createdBy?: InputMaybe<Scalars['ID']['input']>;
   link?: InputMaybe<Scalars['String']['input']>;
@@ -50,6 +56,37 @@ export type GQLCreateNotificationInput = {
   relatedItemId?: InputMaybe<Scalars['String']['input']>;
   type: GQLNotificationType;
   userId: Scalars['ID']['input'];
+};
+
+export type GQLCreateTrainingDayInput = {
+  dayOfWeek: Scalars['Int']['input'];
+  exercises?: InputMaybe<Array<GQLCreateTrainingExerciseInput>>;
+  isRestDay: Scalars['Boolean']['input'];
+  workoutType?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GQLCreateTrainingExerciseInput = {
+  instructions?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  order: Scalars['Int']['input'];
+  restSeconds?: InputMaybe<Scalars['Int']['input']>;
+  sets?: InputMaybe<Array<GQLCreateExerciseSetInput>>;
+  tempo?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GQLCreateTrainingPlanInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  isTemplate?: InputMaybe<Scalars['Boolean']['input']>;
+  title: Scalars['String']['input'];
+  weeks?: InputMaybe<Array<GQLCreateTrainingWeekInput>>;
+};
+
+export type GQLCreateTrainingWeekInput = {
+  days?: InputMaybe<Array<GQLCreateTrainingDayInput>>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  weekNumber: Scalars['Int']['input'];
 };
 
 export type GQLExerciseLog = {
@@ -104,7 +141,9 @@ export type GQLMutation = {
   cancelCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   createCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
   createNotification: EntireFieldWrapper<GQLNotification>;
+  createTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteNotification: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  deleteTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   markAllNotificationsRead: EntireFieldWrapper<Array<GQLNotification>>;
   markNotificationRead: EntireFieldWrapper<GQLNotification>;
   rejectCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
@@ -134,7 +173,17 @@ export type GQLMutationCreateNotificationArgs = {
 };
 
 
+export type GQLMutationCreateTrainingPlanArgs = {
+  input: GQLCreateTrainingPlanInput;
+};
+
+
 export type GQLMutationDeleteNotificationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDeleteTrainingPlanArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -229,6 +278,7 @@ export type GQLTrainingDay = {
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   trainingWeekId: EntireFieldWrapper<Scalars['ID']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  workoutType?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
 };
 
 export type GQLTrainingExercise = {
@@ -387,6 +437,28 @@ export type GQLUserSession = {
   user: EntireFieldWrapper<GQLUser>;
 };
 
+export enum GQLWorkoutType {
+  Abs = 'Abs',
+  Arms = 'Arms',
+  Back = 'Back',
+  Biceps = 'Biceps',
+  Calves = 'Calves',
+  Cardio = 'Cardio',
+  Chest = 'Chest',
+  Custom = 'Custom',
+  FullBody = 'FullBody',
+  Glutes = 'Glutes',
+  Hams = 'Hams',
+  Legs = 'Legs',
+  LowerBody = 'LowerBody',
+  Mobility = 'Mobility',
+  Pull = 'Pull',
+  Push = 'Push',
+  Quads = 'Quads',
+  Triceps = 'Triceps',
+  UpperBody = 'UpperBody'
+}
+
 
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -462,7 +534,12 @@ export type GQLResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   CoachingRequest: ResolverTypeWrapper<GQLCoachingRequest>;
   CoachingRequestStatus: GQLCoachingRequestStatus;
+  CreateExerciseSetInput: GQLCreateExerciseSetInput;
   CreateNotificationInput: GQLCreateNotificationInput;
+  CreateTrainingDayInput: GQLCreateTrainingDayInput;
+  CreateTrainingExerciseInput: GQLCreateTrainingExerciseInput;
+  CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
+  CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
   ExerciseLog: ResolverTypeWrapper<GQLExerciseLog>;
   ExerciseSet: ResolverTypeWrapper<GQLExerciseSet>;
   ExerciseSetLog: ResolverTypeWrapper<GQLExerciseSetLog>;
@@ -488,13 +565,19 @@ export type GQLResolversTypes = {
   UserPublic: ResolverTypeWrapper<GQLUserPublic>;
   UserRole: GQLUserRole;
   UserSession: ResolverTypeWrapper<GQLUserSession>;
+  WorkoutType: GQLWorkoutType;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type GQLResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   CoachingRequest: GQLCoachingRequest;
+  CreateExerciseSetInput: GQLCreateExerciseSetInput;
   CreateNotificationInput: GQLCreateNotificationInput;
+  CreateTrainingDayInput: GQLCreateTrainingDayInput;
+  CreateTrainingExerciseInput: GQLCreateTrainingExerciseInput;
+  CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
+  CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
   ExerciseLog: GQLExerciseLog;
   ExerciseSet: GQLExerciseSet;
   ExerciseSetLog: GQLExerciseSetLog;
@@ -567,7 +650,9 @@ export type GQLMutationResolvers<ContextType = any, ParentType extends GQLResolv
   cancelCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationCancelCoachingRequestArgs, 'id'>>;
   createCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationCreateCoachingRequestArgs, 'recipientEmail'>>;
   createNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationCreateNotificationArgs, 'input'>>;
+  createTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCreateTrainingPlanArgs, 'input'>>;
   deleteNotification?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteNotificationArgs, 'id'>>;
+  deleteTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteTrainingPlanArgs, 'id'>>;
   markAllNotificationsRead?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLMutationMarkAllNotificationsReadArgs, 'userId'>>;
   markNotificationRead?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationMarkNotificationReadArgs, 'id'>>;
   rejectCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
@@ -606,6 +691,7 @@ export type GQLTrainingDayResolvers<ContextType = any, ParentType extends GQLRes
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   trainingWeekId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  workoutType?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

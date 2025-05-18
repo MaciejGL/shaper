@@ -1,13 +1,18 @@
 'use client'
 
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
-import { useSearchParams } from 'next/navigation'
+// import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  useCreateTrainingPlanMutation,
+  useDeleteTrainingPlanMutation,
+} from '@/generated/graphql-client'
 
 import { DaysSetup } from './days-setup'
 import { fullBodyTrainingPlan } from './dummy-data'
@@ -18,7 +23,6 @@ import { TrainingPlanFormData } from './types'
 import { WeeksSetup } from './weeks-setup'
 
 const initialFormData: TrainingPlanFormData = {
-  id: Math.random().toString(),
   details: {
     title: '',
     description: '',
@@ -27,12 +31,10 @@ const initialFormData: TrainingPlanFormData = {
   },
   weeks: [
     {
-      id: 'week-1',
       weekNumber: 1,
       name: 'Week 1',
       description: '',
       days: Array.from({ length: 7 }, (_, i) => ({
-        id: `week-1-day-${i}`,
         dayOfWeek: i,
         isRestDay: [0, 6].includes(i), // Default rest days on Sunday and Saturday
         exercises: [],
@@ -59,12 +61,10 @@ const getInitialFormData = () => {
 }
 
 export function CreateTrainingPlanForm() {
-  const searchParams = useSearchParams()
-  const templateId = searchParams.get('templateId')
-  const data = [fullBodyTrainingPlan, fullBodyTrainingPlan].find(
-    (training) => training.id === templateId,
-  )
-  console.log(data)
+  // const searchParams = useSearchParams()
+  // const templateId = searchParams.get('templateId')
+  const data = fullBodyTrainingPlan
+
   const [formData, setFormData] = useState<TrainingPlanFormData>(
     data || getInitialFormData(),
   )
@@ -72,6 +72,22 @@ export function CreateTrainingPlanForm() {
   const [currentStep, setCurrentStep] = useState(0)
   const [activeWeek, setActiveWeek] = useState(0)
   const [activeDay, setActiveDay] = useState(1) // Monday by default
+
+  const { mutateAsync, isPending } = useCreateTrainingPlanMutation({
+    onError: () => {
+      toast.error('Failed to create training plan')
+    },
+    onSuccess: () => {
+      toast.success('Training plan created successfully')
+    },
+  })
+
+  const { mutateAsync: deleteTrainingPlan, isPending: isDeleting } =
+    useDeleteTrainingPlanMutation({
+      onError: () => {
+        toast.error('Failed to delete training plan')
+      },
+    })
 
   // Load draft from localStorage on initial render
   useEffect(() => {
@@ -119,10 +135,21 @@ export function CreateTrainingPlanForm() {
     // Here you would submit the form data to your API
     console.log('Submitting form data:', formData)
     // Clear the draft after successful submission
-    clearDraft()
+    // clearDraft()
     // Redirect to the training plans page after successful submission
+    await mutateAsync({
+      input: {
+        isPublic: formData.details.isPublic,
+        isTemplate: formData.details.isTemplate,
+        title: formData.details.title,
+        description: formData.details.description,
+        weeks: formData.weeks,
+      },
+    })
   }
-
+  const handleDelete = async () => {
+    await deleteTrainingPlan({ id: 'cmaod14o30004uhht6c7ldfx2' })
+  }
   return (
     <AnimatedPageTransition id="create-training-plan-form">
       <div className="flex justify-between items-center mb-6">
@@ -133,13 +160,26 @@ export function CreateTrainingPlanForm() {
           {isDirty && (
             <p className="text-sm text-muted-foreground">Unsaved changes</p>
           )}
-          <Button variant="ghost" onClick={clearDraft} className="ml-2">
+          <Button
+            variant="destructive"
+            onClick={handleDelete}
+            loading={isDeleting}
+          >
+            Delete
+          </Button>
+          <Button
+            variant="ghost"
+            onClick={clearDraft}
+            className="ml-2"
+            disabled={isPending}
+          >
             Clear Draft
           </Button>
           <Button
             variant="ghost"
             onClick={handleSubmit}
             iconStart={<Save className="h-4 w-4" />}
+            loading={isPending}
           >
             Save Plan
           </Button>

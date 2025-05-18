@@ -1,4 +1,4 @@
-import { WorkoutType } from './types'
+import { GQLWorkoutType } from '@/generated/graphql-client'
 
 export const dayNames = [
   'Monday',
@@ -10,32 +10,32 @@ export const dayNames = [
   'Sunday',
 ]
 
-export const workoutTypes: WorkoutType[] = [
-  WorkoutType.Push,
-  WorkoutType.Pull,
-  WorkoutType.Legs,
-  WorkoutType.UpperBody,
-  WorkoutType.LowerBody,
-  WorkoutType.FullBody,
-  WorkoutType.Cardio,
-  WorkoutType.Mobility,
-  WorkoutType.Glutes,
+export const workoutTypes: GQLWorkoutType[] = [
+  GQLWorkoutType.Push,
+  GQLWorkoutType.Pull,
+  GQLWorkoutType.Legs,
+  GQLWorkoutType.UpperBody,
+  GQLWorkoutType.LowerBody,
+  GQLWorkoutType.FullBody,
+  GQLWorkoutType.Cardio,
+  GQLWorkoutType.Mobility,
+  GQLWorkoutType.Glutes,
 ]
 
-export const cardioWorkoutTypes: WorkoutType[] = [WorkoutType.Cardio]
+export const cardioWorkoutTypes: GQLWorkoutType[] = [GQLWorkoutType.Cardio]
 
-export const mobilityWorkoutTypes: WorkoutType[] = [WorkoutType.Mobility]
+export const mobilityWorkoutTypes: GQLWorkoutType[] = [GQLWorkoutType.Mobility]
 
-export const absWorkoutTypes: WorkoutType[] = [WorkoutType.Abs]
+export const absWorkoutTypes: GQLWorkoutType[] = [GQLWorkoutType.Abs]
 
-export const splitWorkoutTypes: WorkoutType[] = [
-  WorkoutType.Back,
-  WorkoutType.Arms,
-  WorkoutType.Chest,
-  WorkoutType.Quads,
-  WorkoutType.Hams,
-  WorkoutType.Calves,
-  WorkoutType.Biceps,
-  WorkoutType.Triceps,
-  WorkoutType.Glutes,
+export const splitWorkoutTypes: GQLWorkoutType[] = [
+  GQLWorkoutType.Back,
+  GQLWorkoutType.Arms,
+  GQLWorkoutType.Chest,
+  GQLWorkoutType.Quads,
+  GQLWorkoutType.Hams,
+  GQLWorkoutType.Calves,
+  GQLWorkoutType.Biceps,
+  GQLWorkoutType.Triceps,
+  GQLWorkoutType.Glutes,
 ]

@@ -63,7 +63,7 @@ export function WeeksSetup({ weeks, updateWeeks }: WeeksSetupProps) {
       <AnimatedGrid layoutId="weeks">
         {weeks.map((week, index) => (
           <WeekCard
-            key={week.id}
+            key={week.weekNumber}
             week={week}
             weeks={weeks}
             cloneWeek={cloneWeek}
@@ -160,8 +160,8 @@ function WeekCard({
 }: WeekCardProps) {
   return (
     <AnimatedGridItem
-      id={week.id}
-      layoutId={`week-${week.id}`}
+      id={week.weekNumber.toString()}
+      layoutId={`week-${week.weekNumber}`}
       isFirstRender={isFirstRender}
     >
       <Card className="h-full">
@@ -219,12 +219,10 @@ const useWeeksSetup = ({
   const addWeek = () => {
     const newWeekNumber = weeks.length + 1
     const newWeek = {
-      id: `week-${newWeekNumber}`,
       weekNumber: newWeekNumber,
       name: `Week ${newWeekNumber}`,
       description: '',
       days: Array.from({ length: 7 }, (_, i) => ({
-        id: `week-${newWeekNumber}-day-${i}`,
         dayOfWeek: i,
         isRestDay: [0, 6].includes(i), // Default rest days on Sunday and Saturday
         exercises: [],
@@ -241,12 +239,11 @@ const useWeeksSetup = ({
     // Renumber the weeks
     newWeeks.forEach((week, index) => {
       week.weekNumber = index + 1
-      week.id = `week-${index + 1}`
       if (!week.name || week.name === `Week ${weekIndex + 1}`) {
         week.name = `Week ${index + 1}`
       }
       week.days.forEach((day) => {
-        day.id = `week-${index + 1}-day-${day.dayOfWeek}`
+        day.dayOfWeek = index + 1
       })
     })
 
@@ -254,7 +251,9 @@ const useWeeksSetup = ({
   }
 
   const cloneWeek = (index: number) => {
-    const sourceWeekIndex = weeks.findIndex((w) => w.id === weeks[index].id)
+    const sourceWeekIndex = weeks.findIndex(
+      (w) => w.weekNumber === weeks[index].weekNumber,
+    )
 
     if (sourceWeekIndex === -1) return
 
@@ -263,7 +262,6 @@ const useWeeksSetup = ({
     const newWeekNumber = weeks.length + 1
 
     // Update IDs and week number
-    newWeek.id = `week-${newWeekNumber}`
     newWeek.weekNumber = newWeekNumber
     newWeek.name = `Week ${newWeekNumber} (Copy of ${sourceWeek.name})`
     newWeek.days.forEach(
@@ -271,7 +269,7 @@ const useWeeksSetup = ({
         day: TrainingPlanFormData['weeks'][number]['days'][number],
         i: number,
       ) => {
-        day.id = `week-${newWeekNumber}-day-${i}`
+        day.dayOfWeek = i
       },
     )
 

@@ -1,0 +1,7 @@
+mutation CreateTrainingPlan($input: CreateTrainingPlanInput!) {
+  createTrainingPlan(input: $input)
+}
+
+mutation DeleteTrainingPlan($id: ID!) {
+  deleteTrainingPlan(id: $id)
+}

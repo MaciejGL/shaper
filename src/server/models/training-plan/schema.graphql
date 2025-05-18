@@ -12,3 +12,45 @@ type TrainingPlan {
   createdAt: String!
   updatedAt: String!
 }
+
+input CreateExerciseSetInput {
+  order: Int!
+  reps: Int!
+  weight: Float
+}
+
+input CreateTrainingExerciseInput {
+  name: String!
+  restSeconds: Int
+  tempo: String
+  instructions: String
+  order: Int!
+  sets: [CreateExerciseSetInput!]
+}
+
+input CreateTrainingDayInput {
+  dayOfWeek: Int!
+  isRestDay: Boolean!
+  workoutType: String
+  exercises: [CreateTrainingExerciseInput!]
+}
+
+input CreateTrainingWeekInput {
+  weekNumber: Int!
+  name: String!
+  description: String
+  days: [CreateTrainingDayInput!]
+}
+
+input CreateTrainingPlanInput {
+  title: String!
+  description: String
+  isPublic: Boolean
+  isTemplate: Boolean
+  weeks: [CreateTrainingWeekInput!]
+}
+
+type Mutation {
+  createTrainingPlan(input: CreateTrainingPlanInput!): Boolean!
+  deleteTrainingPlan(id: ID!): Boolean!
+}

@@ -1,7 +1,8 @@
-import { TrainingPlanFormData, WorkoutType } from './types'
+import { GQLWorkoutType } from '@/generated/graphql-client'
+
+import { TrainingPlanFormData } from './types'
 
 export const fullBodyTrainingPlan: TrainingPlanFormData = {
-  id: 'full-body-training-plan',
   details: {
     title: '4-Week Full Body Strength Program',
     description:
@@ -11,31 +12,27 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
   },
   weeks: [
     {
-      id: 'week-1',
       weekNumber: 1,
       name: 'Week 1 - Foundation',
       description:
         'Focus on proper form and establishing baseline weights. Use moderate weights to prepare the body for progressive overload.',
       days: [
         {
-          id: 'week-1-day-0',
           dayOfWeek: 0, // Sunday
           isRestDay: true,
           exercises: [],
         },
         {
-          id: 'week-1-day-1',
           dayOfWeek: 1, // Monday
           isRestDay: false,
-          workoutType: WorkoutType.FullBody,
+          workoutType: GQLWorkoutType.FullBody,
           exercises: [
             {
-              id: 'week-1-day-1-ex-1',
               name: 'Barbell Squat',
               sets: [
-                { id: 'set-1', order: 1, reps: 8, weight: 60 },
-                { id: 'set-2', order: 2, reps: 8, weight: 60 },
-                { id: 'set-3', order: 3, reps: 8, weight: 60 },
+                { order: 1, reps: 8, weight: 60 },
+                { order: 2, reps: 8, weight: 60 },
+                { order: 3, reps: 8, weight: 60 },
               ],
               restSeconds: 120,
               tempo: '3-0-1-0',
@@ -43,12 +40,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 1,
             },
             {
-              id: 'week-1-day-1-ex-2',
               name: 'Bench Press',
               sets: [
-                { id: 'set-1', order: 1, reps: 8, weight: 50 },
-                { id: 'set-2', order: 2, reps: 8, weight: 50 },
-                { id: 'set-3', order: 3, reps: 8, weight: 50 },
+                { order: 1, reps: 8, weight: 50 },
+                { order: 2, reps: 8, weight: 50 },
+                { order: 3, reps: 8, weight: 50 },
               ],
               restSeconds: 120,
               tempo: '2-0-1-0',
@@ -56,12 +52,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 2,
             },
             {
-              id: 'week-1-day-1-ex-3',
               name: 'Bent Over Row',
               sets: [
-                { id: 'set-1', order: 1, reps: 10, weight: 40 },
-                { id: 'set-2', order: 2, reps: 10, weight: 40 },
-                { id: 'set-3', order: 3, reps: 10, weight: 40 },
+                { order: 1, reps: 10, weight: 40 },
+                { order: 2, reps: 10, weight: 40 },
+                { order: 3, reps: 10, weight: 40 },
               ],
               restSeconds: 90,
               tempo: '2-0-1-0',
@@ -69,12 +64,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 3,
             },
             {
-              id: 'week-1-day-1-ex-4',
               name: 'Overhead Press',
               sets: [
-                { id: 'set-1', order: 1, reps: 8, weight: 30 },
-                { id: 'set-2', order: 2, reps: 8, weight: 30 },
-                { id: 'set-3', order: 3, reps: 8, weight: 30 },
+                { order: 1, reps: 8, weight: 30 },
+                { order: 2, reps: 8, weight: 30 },
+                { order: 3, reps: 8, weight: 30 },
               ],
               restSeconds: 90,
               tempo: '2-0-1-0',
@@ -82,12 +76,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 4,
             },
             {
-              id: 'week-1-day-1-ex-5',
               name: 'Romanian Deadlift',
               sets: [
-                { id: 'set-1', order: 1, reps: 10, weight: 50 },
-                { id: 'set-2', order: 2, reps: 10, weight: 50 },
-                { id: 'set-3', order: 3, reps: 10, weight: 50 },
+                { order: 1, reps: 10, weight: 50 },
+                { order: 2, reps: 10, weight: 50 },
+                { order: 3, reps: 10, weight: 50 },
               ],
               restSeconds: 120,
               tempo: '3-0-1-0',
@@ -97,25 +90,22 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
           ],
         },
         {
-          id: 'week-1-day-2',
           dayOfWeek: 2, // Tuesday
           isRestDay: true,
           exercises: [],
         },
         {
-          id: 'week-1-day-3',
           dayOfWeek: 3, // Wednesday
           isRestDay: false,
-          workoutType: WorkoutType.FullBody,
+          workoutType: GQLWorkoutType.FullBody,
           exercises: [
             // Similar structure to Monday but with slightly different exercises
             {
-              id: 'week-1-day-3-ex-1',
               name: 'Front Squat',
               sets: [
-                { id: 'set-1', order: 1, reps: 8, weight: 50 },
-                { id: 'set-2', order: 2, reps: 8, weight: 50 },
-                { id: 'set-3', order: 3, reps: 8, weight: 50 },
+                { order: 1, reps: 8, weight: 50 },
+                { order: 2, reps: 8, weight: 50 },
+                { order: 3, reps: 8, weight: 50 },
               ],
               restSeconds: 120,
               tempo: '3-0-1-0',
@@ -123,12 +113,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 1,
             },
             {
-              id: 'week-1-day-3-ex-2',
               name: 'Incline Bench Press',
               sets: [
-                { id: 'set-1', order: 1, reps: 8, weight: 40 },
-                { id: 'set-2', order: 2, reps: 8, weight: 40 },
-                { id: 'set-3', order: 3, reps: 8, weight: 40 },
+                { order: 1, reps: 8, weight: 40 },
+                { order: 2, reps: 8, weight: 40 },
+                { order: 3, reps: 8, weight: 40 },
               ],
               restSeconds: 120,
               tempo: '2-0-1-0',
@@ -136,12 +125,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 2,
             },
             {
-              id: 'week-1-day-3-ex-3',
               name: 'Pull-ups',
               sets: [
-                { id: 'set-1', order: 1, reps: 8, weight: 0 },
-                { id: 'set-2', order: 2, reps: 8, weight: 0 },
-                { id: 'set-3', order: 3, reps: 8, weight: 0 },
+                { order: 1, reps: 8, weight: 0 },
+                { order: 2, reps: 8, weight: 0 },
+                { order: 3, reps: 8, weight: 0 },
               ],
               restSeconds: 90,
               tempo: '2-0-1-0',
@@ -150,12 +138,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 3,
             },
             {
-              id: 'week-1-day-3-ex-4',
               name: 'Dumbbell Shoulder Press',
               sets: [
-                { id: 'set-1', order: 1, reps: 10, weight: 20 },
-                { id: 'set-2', order: 2, reps: 10, weight: 20 },
-                { id: 'set-3', order: 3, reps: 10, weight: 20 },
+                { order: 1, reps: 10, weight: 20 },
+                { order: 2, reps: 10, weight: 20 },
+                { order: 3, reps: 10, weight: 20 },
               ],
               restSeconds: 90,
               tempo: '2-0-1-0',
@@ -163,12 +150,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 4,
             },
             {
-              id: 'week-1-day-3-ex-5',
               name: 'Bulgarian Split Squat',
               sets: [
-                { id: 'set-1', order: 1, reps: 10, weight: 20 },
-                { id: 'set-2', order: 2, reps: 10, weight: 20 },
-                { id: 'set-3', order: 3, reps: 10, weight: 20 },
+                { order: 1, reps: 10, weight: 20 },
+                { order: 2, reps: 10, weight: 20 },
+                { order: 3, reps: 10, weight: 20 },
               ],
               restSeconds: 90,
               tempo: '2-0-1-0',
@@ -178,25 +164,22 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
           ],
         },
         {
-          id: 'week-1-day-4',
           dayOfWeek: 4, // Thursday
           isRestDay: true,
           exercises: [],
         },
         {
-          id: 'week-1-day-5',
           dayOfWeek: 5, // Friday
           isRestDay: false,
-          workoutType: WorkoutType.FullBody,
+          workoutType: GQLWorkoutType.FullBody,
           exercises: [
             // Similar structure to Monday but with different variations
             {
-              id: 'week-1-day-5-ex-1',
               name: 'Deadlift',
               sets: [
-                { id: 'set-1', order: 1, reps: 6, weight: 80 },
-                { id: 'set-2', order: 2, reps: 6, weight: 80 },
-                { id: 'set-3', order: 3, reps: 6, weight: 80 },
+                { order: 1, reps: 6, weight: 80 },
+                { order: 2, reps: 6, weight: 80 },
+                { order: 3, reps: 6, weight: 80 },
               ],
               restSeconds: 180,
               tempo: '2-0-1-0',
@@ -204,12 +187,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 1,
             },
             {
-              id: 'week-1-day-5-ex-2',
               name: 'Push-ups',
               sets: [
-                { id: 'set-1', order: 1, reps: 12, weight: 0 },
-                { id: 'set-2', order: 2, reps: 12, weight: 0 },
-                { id: 'set-3', order: 3, reps: 12, weight: 0 },
+                { order: 1, reps: 12, weight: 0 },
+                { order: 2, reps: 12, weight: 0 },
+                { order: 3, reps: 12, weight: 0 },
               ],
               restSeconds: 90,
               tempo: '2-0-1-0',
@@ -217,12 +199,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 2,
             },
             {
-              id: 'week-1-day-5-ex-3',
               name: 'Lat Pulldown',
               sets: [
-                { id: 'set-1', order: 1, reps: 12, weight: 50 },
-                { id: 'set-2', order: 2, reps: 12, weight: 50 },
-                { id: 'set-3', order: 3, reps: 12, weight: 50 },
+                { order: 1, reps: 12, weight: 50 },
+                { order: 2, reps: 12, weight: 50 },
+                { order: 3, reps: 12, weight: 50 },
               ],
               restSeconds: 90,
               tempo: '2-0-1-0',
@@ -230,12 +211,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 3,
             },
             {
-              id: 'week-1-day-5-ex-4',
               name: 'Lateral Raises',
               sets: [
-                { id: 'set-1', order: 1, reps: 12, weight: 10 },
-                { id: 'set-2', order: 2, reps: 12, weight: 10 },
-                { id: 'set-3', order: 3, reps: 12, weight: 10 },
+                { order: 1, reps: 12, weight: 10 },
+                { order: 2, reps: 12, weight: 10 },
+                { order: 3, reps: 12, weight: 10 },
               ],
               restSeconds: 60,
               tempo: '2-0-1-0',
@@ -244,12 +224,11 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
               order: 4,
             },
             {
-              id: 'week-1-day-5-ex-5',
               name: 'Plank',
               sets: [
-                { id: 'set-1', order: 1, reps: 1, weight: 0 },
-                { id: 'set-2', order: 2, reps: 1, weight: 0 },
-                { id: 'set-3', order: 3, reps: 1, weight: 0 },
+                { order: 1, reps: 1, weight: 0 },
+                { order: 2, reps: 1, weight: 0 },
+                { order: 3, reps: 1, weight: 0 },
               ],
               restSeconds: 60,
               tempo: '0-30-0-0',
@@ -259,7 +238,6 @@ export const fullBodyTrainingPlan: TrainingPlanFormData = {
           ],
         },
         {
-          id: 'week-1-day-6',
           dayOfWeek: 6, // Saturday
           isRestDay: true,
           exercises: [],

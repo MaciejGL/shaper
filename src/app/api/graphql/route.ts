@@ -1,18 +1,31 @@
-import { createYoga } from 'graphql-yoga';
-import { createSchema } from './schema';
+import { createYoga } from 'graphql-yoga'
 
-const schema = await createSchema();
+import { getCurrentUser } from '@/lib/getUser'
+
+import { createSchema } from './schema'
+
+export type GraphQLContext = {
+  user: Awaited<ReturnType<typeof getCurrentUser>>
+}
+
+const schema = await createSchema()
 
 const yoga = createYoga({
-	graphqlEndpoint: '/api/graphql',
-	schema: schema,
-	logging: 'debug',
-});
+  graphqlEndpoint: '/api/graphql',
+  schema: schema,
+  logging: 'debug',
+  async context() {
+    const userSession = await getCurrentUser()
+    return {
+      user: userSession,
+    }
+  },
+})
 // Handler wrapper for Next.js API routes
 export async function GET(request: Request) {
-	return yoga.handleRequest(request, {});
+  return yoga.handleRequest(request, {})
 }
 
 export async function POST(request: Request) {
-	return yoga.handleRequest(request, {});
+  return yoga.handleRequest(request, {})
 }

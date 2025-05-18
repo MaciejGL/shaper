@@ -36,7 +36,10 @@ export function ReviewPlan({ formData }: ReviewPlanProps) {
 
       <Accordion type="multiple" className="w-full">
         {formData.weeks.map((week) => (
-          <AccordionItem key={week.id} value={week.id}>
+          <AccordionItem
+            key={week.weekNumber}
+            value={week.weekNumber.toString()}
+          >
             <AccordionTrigger>
               <div className="flex justify-between w-full pr-4">
                 <span>{week.name}</span>
@@ -52,7 +55,7 @@ export function ReviewPlan({ formData }: ReviewPlanProps) {
               <div className="space-y-4 pt-2">
                 {week.days.map((day) => (
                   <div
-                    key={day.id}
+                    key={day.dayOfWeek}
                     className={cn(
                       'border rounded-md p-4',
                       day.isRestDay && 'bg-muted/50',
@@ -72,7 +75,7 @@ export function ReviewPlan({ formData }: ReviewPlanProps) {
                         {day.exercises.length > 0 ? (
                           day.exercises.map((exercise, index) => (
                             <div
-                              key={exercise.id}
+                              key={`exercise-${exercise.order}`}
                               className="pl-4 border-l-2 border-muted"
                             >
                               <div className="font-medium">
@@ -80,7 +83,10 @@ export function ReviewPlan({ formData }: ReviewPlanProps) {
                               </div>
                               <div className="text-sm">
                                 {exercise.sets.map((set, idx) => (
-                                  <span key={set.id} className="mr-3">
+                                  <span
+                                    key={`set-${set.order}`}
+                                    className="mr-3"
+                                  >
                                     Set {set.order}: {set.reps} reps{' '}
                                     {set.weight ? `@ ${set.weight}kg` : ''}
                                     {idx < exercise.sets.length - 1 ? '' : ''}
