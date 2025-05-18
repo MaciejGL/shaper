@@ -1,8 +1,6 @@
 import { GQLWorkoutType } from '@/generated/graphql-client'
 
-import { TrainingPlanFormData } from './types'
-
-export const fullBodyTrainingPlan: TrainingPlanFormData = {
+export const fullBodyTrainingPlan = {
   details: {
     title: '4-Week Full Body Strength Program',
     description:

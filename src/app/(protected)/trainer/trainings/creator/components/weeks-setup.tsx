@@ -22,7 +22,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
-import type { TrainingPlanFormData } from './types'
+import type { TrainingPlanFormData, TrainingWeek } from './types'
 
 type WeeksSetupProps = {
   weeks: TrainingPlanFormData['weeks']
@@ -123,7 +123,7 @@ function WeekDialog({
             <Label htmlFor="week-description">Description (optional)</Label>
             <Textarea
               id="week-description"
-              value={weekForm.description}
+              value={weekForm.description ?? undefined}
               onChange={(e) =>
                 setWeekForm({ ...weekForm, description: e.target.value })
               }
@@ -214,15 +214,24 @@ const useWeeksSetup = ({
 }) => {
   const [editingWeekIndex, setEditingWeekIndex] = useState<number | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [weekForm, setWeekForm] = useState({ name: '', description: '' })
+  const [weekForm, setWeekForm] = useState<
+    Pick<TrainingWeek, 'id' | 'weekNumber' | 'name' | 'description'>
+  >({
+    id: '',
+    weekNumber: 0,
+    name: '',
+    description: undefined,
+  })
 
   const addWeek = () => {
     const newWeekNumber = weeks.length + 1
     const newWeek = {
+      id: '',
       weekNumber: newWeekNumber,
       name: `Week ${newWeekNumber}`,
       description: '',
       days: Array.from({ length: 7 }, (_, i) => ({
+        id: '',
         dayOfWeek: i,
         isRestDay: [0, 6].includes(i), // Default rest days on Sunday and Saturday
         exercises: [],
@@ -281,6 +290,8 @@ const useWeeksSetup = ({
   const openEditWeekDialog = (weekIndex: number) => {
     setEditingWeekIndex(weekIndex)
     setWeekForm({
+      id: weeks[weekIndex].id,
+      weekNumber: weeks[weekIndex].weekNumber,
       name: weeks[weekIndex].name,
       description: weeks[weekIndex].description,
     })

@@ -31,7 +31,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
-import type { TrainingPlanFormData } from './types'
+import type { TrainingExercise, TrainingPlanFormData } from './types'
 import { dayNames } from './utils'
 
 type ExercisesSetupProps = {
@@ -91,16 +91,18 @@ export function ExercisesSetup({
   const [editingExerciseIndex, setEditingExerciseIndex] = useState<
     number | null
   >(null)
-  const [newExercise, setNewExercise] = useState({
+  const [newExercise, setNewExercise] = useState<TrainingExercise>({
+    id: '',
     name: '',
     sets: [
-      { order: 1, reps: 10, weight: 0 },
-      { order: 2, reps: 10, weight: 0 },
-      { order: 3, reps: 10, weight: 0 },
+      { id: '', order: 1, reps: 10, weight: 0 },
+      { id: '', order: 2, reps: 10, weight: 0 },
+      { id: '', order: 3, reps: 10, weight: 0 },
     ],
     restSeconds: 60,
     tempo: '',
     instructions: '',
+    order: 0,
   })
 
   const filteredExercises = mockBaseExercises.filter((ex) =>
@@ -118,6 +120,7 @@ export function ExercisesSetup({
       sets: [
         ...newExercise.sets,
         {
+          id: '',
           order: nextorder,
           reps: newExercise.sets[0]?.reps || 10,
           weight: newExercise.sets[0]?.weight || 0,
@@ -160,15 +163,17 @@ export function ExercisesSetup({
   const resetExerciseForm = () => {
     setSelectedExercise(null)
     setNewExercise({
+      id: '',
       name: '',
       sets: [
-        { order: 1, reps: 10, weight: 0 },
-        { order: 2, reps: 10, weight: 0 },
-        { order: 3, reps: 10, weight: 0 },
+        { id: '', order: 1, reps: 10, weight: 0 },
+        { id: '', order: 2, reps: 10, weight: 0 },
+        { id: '', order: 3, reps: 10, weight: 0 },
       ],
       restSeconds: 60,
       tempo: '',
       instructions: '',
+      order: 0,
     })
     setEditingExerciseIndex(null)
   }
@@ -183,10 +188,12 @@ export function ExercisesSetup({
       setEditingExerciseIndex(exerciseIndex)
       setSelectedExercise(exercise.order.toString() || null)
       setNewExercise({
+        id: exercise.id,
         name: exercise.name,
         sets: exercise.sets,
         restSeconds: exercise.restSeconds || 60,
         tempo: exercise.tempo || '',
+        order: exercise.order,
         instructions: exercise.instructions || '',
       })
     } else {
@@ -206,6 +213,7 @@ export function ExercisesSetup({
       : null
 
     const exerciseData = {
+      id: '',
       baseId: baseExercise?.id,
       name: baseExercise?.name || newExercise.name,
       sets: newExercise.sets,
@@ -518,7 +526,7 @@ export function ExercisesSetup({
                         type="number"
                         min="0"
                         step="5"
-                        value={newExercise.restSeconds}
+                        value={newExercise.restSeconds || 0}
                         onChange={(e) =>
                           setNewExercise({
                             ...newExercise,
@@ -532,7 +540,7 @@ export function ExercisesSetup({
                       <Input
                         id="tempo"
                         placeholder="e.g., 3-1-3"
-                        value={newExercise.tempo}
+                        value={newExercise.tempo ?? undefined}
                         onChange={(e) =>
                           setNewExercise({
                             ...newExercise,
@@ -550,7 +558,7 @@ export function ExercisesSetup({
                     <Textarea
                       id="instructions"
                       placeholder="Add any specific instructions for this exercise"
-                      value={newExercise.instructions}
+                      value={newExercise.instructions ?? undefined}
                       onChange={(e) =>
                         setNewExercise({
                           ...newExercise,
