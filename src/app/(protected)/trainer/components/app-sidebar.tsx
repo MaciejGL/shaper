@@ -5,6 +5,7 @@ import {
   DumbbellIcon,
   HomeIcon,
   NotebookTextIcon,
+  PlusCircleIcon,
   UserRoundCogIcon,
   Users2Icon,
 } from 'lucide-react'
@@ -26,9 +27,10 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
 import { TRAINER_LINKS } from '@/constants/user-links'
-import { useGetClientsQuery } from '@/generated/graphql-client'
-
-import { fullBodyTrainingPlan } from '../trainings/creator/components/dummy-data'
+import {
+  useGetClientsQuery,
+  useGetTemplatesQuery,
+} from '@/generated/graphql-client'
 
 type SidebarItem = {
   title: string
@@ -47,11 +49,9 @@ type SidebarSubItem = {
 
 export function AppSidebar() {
   const { data: clients } = useGetClientsQuery()
-  const { data: trainings } = {
-    data: [fullBodyTrainingPlan, fullBodyTrainingPlan],
-  }
-  // const { data: trainings } = useGetTrainingsQuery()
+  const { data: templatesData } = useGetTemplatesQuery()
 
+  const templates = templatesData?.getTemplates || []
   const items: SidebarItem[] = [
     {
       title: TRAINER_LINKS.dashboard.label,
@@ -78,14 +78,13 @@ export function AppSidebar() {
       disabled: TRAINER_LINKS.trainings.disabled,
       subItems: [
         {
-          title: 'Creator',
-          url: TRAINER_LINKS.trainings.href + '/creator',
-          icon: UserRoundCogIcon,
+          title: 'Create',
+          url: TRAINER_LINKS.trainings.href + '/creator/new',
+          icon: PlusCircleIcon,
         },
-        ...trainings?.map((training) => ({
-          title: training.details.title,
-          url:
-            TRAINER_LINKS.trainings.href + `/creator?templateId=${training.id}`,
+        ...templates.map((template) => ({
+          title: template.title,
+          url: TRAINER_LINKS.trainings.href + `/creator/${template.id}`,
           icon: NotebookTextIcon,
         })),
       ],
@@ -157,7 +156,11 @@ function SidebarItem({ item }: { item: SidebarItem }) {
                   isActive: subItem.url === pathname,
                 })}
               >
-                <span className="">{subItem.title}</span>
+                <subItem.icon />
+                <span className="truncate">{subItem.title}</span>
+                {subItem.url === pathname && (
+                  <ChevronRight className="ml-auto h-4 w-4 opacity-60" />
+                )}
               </Link>
             </SidebarMenuSubButton>
           </SidebarMenuSubItem>

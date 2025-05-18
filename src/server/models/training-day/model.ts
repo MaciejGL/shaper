@@ -1,4 +1,8 @@
-import { TrainingDay as PrismaTrainingDay } from '@prisma/client'
+import {
+  ExerciseSet as PrismaExerciseSet,
+  TrainingDay as PrismaTrainingDay,
+  TrainingExercise as PrismaTrainingExercise,
+} from '@prisma/client'
 
 import { GQLTrainingDay } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
@@ -6,7 +10,13 @@ import { prisma } from '@/lib/db'
 import TrainingExercise from '../training-exercise/model'
 
 export default class TrainingDay implements GQLTrainingDay {
-  constructor(protected data: PrismaTrainingDay) {}
+  constructor(
+    protected data: PrismaTrainingDay & {
+      exercises?: (PrismaTrainingExercise & {
+        sets?: PrismaExerciseSet[]
+      })[]
+    },
+  ) {}
 
   get id() {
     return this.data.id
@@ -14,6 +24,10 @@ export default class TrainingDay implements GQLTrainingDay {
 
   get dayOfWeek() {
     return this.data.dayOfWeek
+  }
+
+  get isRestDay() {
+    return this.data.isRestDay
   }
 
   get trainingWeekId() {
@@ -29,12 +43,15 @@ export default class TrainingDay implements GQLTrainingDay {
   }
 
   async exercises() {
-    const exercises = await prisma.trainingExercise.findMany({
-      where: {
-        dayId: this.id,
-      },
-    })
+    let exercises = this.data.exercises
 
+    if (!exercises) {
+      exercises = await prisma.trainingExercise.findMany({
+        where: {
+          dayId: this.id,
+        },
+      })
+    }
     return exercises.map((exercise) => new TrainingExercise(exercise))
   }
 

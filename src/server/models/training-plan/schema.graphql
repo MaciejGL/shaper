@@ -50,7 +50,56 @@ input CreateTrainingPlanInput {
   weeks: [CreateTrainingWeekInput!]
 }
 
+input UpdateTrainingPlanInput {
+  id: ID!
+  title: String
+  description: String
+  isPublic: Boolean
+  isTemplate: Boolean
+  weeks: [UpdateTrainingWeekInput!]
+}
+
+input UpdateTrainingWeekInput {
+  id: ID!
+  weekNumber: Int!
+  name: String
+  description: String
+  days: [UpdateTrainingDayInput!]
+}
+
+input UpdateTrainingDayInput {
+  id: ID!
+  dayOfWeek: Int!
+  isRestDay: Boolean
+  workoutType: String
+  exercises: [UpdateTrainingExerciseInput!]
+}
+
+input UpdateTrainingExerciseInput {
+  id: ID!
+  name: String
+  order: Int!
+  restSeconds: Int
+  tempo: String
+  instructions: String
+  sets: [UpdateExerciseSetInput!]
+}
+
+input UpdateExerciseSetInput {
+  id: ID!
+  order: Int!
+  reps: Int!
+  weight: Float
+}
+
+type Query {
+  getTemplates: [TrainingPlan!]!
+  getTrainingPlanById(id: ID!): TrainingPlan!
+}
+
 type Mutation {
   createTrainingPlan(input: CreateTrainingPlanInput!): Boolean!
+  updateTrainingPlan(input: UpdateTrainingPlanInput!): Boolean!
   deleteTrainingPlan(id: ID!): Boolean!
+  duplicateTrainingPlan(id: ID!): ID!
 }

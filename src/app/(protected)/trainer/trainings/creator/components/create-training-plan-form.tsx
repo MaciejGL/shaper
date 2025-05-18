@@ -1,7 +1,15 @@
 'use client'
 
-import { ChevronLeft, ChevronRight, Save } from 'lucide-react'
-// import { useSearchParams } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  RefreshCcwIcon,
+  Save,
+  Trash2,
+} from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -12,10 +20,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   useCreateTrainingPlanMutation,
   useDeleteTrainingPlanMutation,
+  useDuplicateTrainingPlanMutation,
+  useGetTemplateTrainingPlanByIdQuery,
+  useUpdateTrainingPlanMutation,
 } from '@/generated/graphql-client'
 
 import { DaysSetup } from './days-setup'
-import { fullBodyTrainingPlan } from './dummy-data'
 import { ExercisesSetup } from './exercises-setup'
 import { PlanDetailsForm } from './plan-details-form'
 import { ReviewPlan } from './review-plan'
@@ -31,10 +41,12 @@ const initialFormData: TrainingPlanFormData = {
   },
   weeks: [
     {
+      id: 'cmaod14o30004uhht6c7ldfx23',
       weekNumber: 1,
       name: 'Week 1',
       description: '',
       days: Array.from({ length: 7 }, (_, i) => ({
+        id: 'cmaod14o30004uhht6c7ldfx2' + i,
         dayOfWeek: i,
         isRestDay: [0, 6].includes(i), // Default rest days on Sunday and Saturday
         exercises: [],
@@ -45,72 +57,96 @@ const initialFormData: TrainingPlanFormData = {
 
 const steps = ['details', 'weeks', 'days', 'exercises', 'review']
 
-const getInitialFormData = () => {
-  // Initialize state with localStorage data if available
-  if (typeof window !== 'undefined') {
-    const savedDraft = localStorage.getItem('trainingPlanDraft')
-    if (savedDraft) {
-      try {
-        return JSON.parse(savedDraft)
-      } catch (error) {
-        console.error('Failed to parse saved draft', error)
-      }
-    }
-  }
-  return initialFormData
-}
+export function CreateTrainingPlanForm({
+  trainingId,
+}: {
+  trainingId?: string
+}) {
+  const router = useRouter()
+  const { data: templateTrainingPlan, isLoading: isLoadingInitialData } =
+    useGetTemplateTrainingPlanByIdQuery(
+      { id: trainingId! },
+      {
+        enabled: !!trainingId,
+        refetchOnMount: 'always',
+        select: (data) => {
+          return {
+            details: {
+              title: data.getTrainingPlanById.title,
+              description: data.getTrainingPlanById.description,
+              isPublic: data.getTrainingPlanById.isPublic,
+              isTemplate: data.getTrainingPlanById.isTemplate,
+            },
+            weeks: data.getTrainingPlanById.weeks,
+          }
+        },
+      },
+    )
 
-export function CreateTrainingPlanForm() {
-  // const searchParams = useSearchParams()
-  // const templateId = searchParams.get('templateId')
-  const data = fullBodyTrainingPlan
-
+  const queryClient = useQueryClient()
   const [formData, setFormData] = useState<TrainingPlanFormData>(
-    data || getInitialFormData(),
+    templateTrainingPlan || initialFormData,
   )
   const [isDirty, setIsDirty] = useState(false)
+
+  useEffect(() => {
+    if (templateTrainingPlan) {
+      setFormData(templateTrainingPlan)
+      setIsDirty(false) // Reset dirty state when new data is loaded
+    }
+  }, [templateTrainingPlan])
+
   const [currentStep, setCurrentStep] = useState(0)
   const [activeWeek, setActiveWeek] = useState(0)
   const [activeDay, setActiveDay] = useState(1) // Monday by default
-
   const { mutateAsync, isPending } = useCreateTrainingPlanMutation({
     onError: () => {
       toast.error('Failed to create training plan')
     },
     onSuccess: () => {
       toast.success('Training plan created successfully')
+      queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
     },
   })
+
+  const { mutateAsync: updateTrainingPlan, isPending: isUpdating } =
+    useUpdateTrainingPlanMutation({
+      onError: () => {
+        toast.error('Failed to update training plan')
+      },
+      onSuccess: () => {
+        toast.success('Training plan updated successfully')
+        queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
+      },
+    })
 
   const { mutateAsync: deleteTrainingPlan, isPending: isDeleting } =
     useDeleteTrainingPlanMutation({
       onError: () => {
         toast.error('Failed to delete training plan')
       },
+      onSuccess: () => {
+        toast.success('Training plan deleted successfully')
+        queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
+        router.replace('/trainer/trainings/creator/new')
+      },
     })
 
-  // Load draft from localStorage on initial render
-  useEffect(() => {
-    const savedDraft = localStorage.getItem('trainingPlanDraft')
-    if (savedDraft) {
-      try {
-        const parsedDraft = JSON.parse(savedDraft)
-        setFormData(parsedDraft)
-      } catch (error) {
-        console.error('Failed to parse saved draft', error)
-      }
-    }
-  }, [])
-
-  // Save draft to localStorage whenever formData changes
-  useEffect(() => {
-    localStorage.setItem('trainingPlanDraft', JSON.stringify(formData))
-  }, [formData])
+  const { mutateAsync: duplicateTrainingPlan, isPending: isDuplicating } =
+    useDuplicateTrainingPlanMutation({
+      onError: () => {
+        toast.error('Failed to duplicate training plan')
+      },
+      onSuccess: (data) => {
+        toast.success('Training plan duplicated successfully')
+        queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
+        router.push(`/trainer/trainings/creator/${data.duplicateTrainingPlan}`)
+      },
+    })
 
   // Clear draft from localStorage
   const clearDraft = () => {
-    localStorage.removeItem('trainingPlanDraft')
-    setFormData(initialFormData)
+    setFormData(templateTrainingPlan || initialFormData)
     setIsDirty(false)
   }
 
@@ -132,24 +168,42 @@ export function CreateTrainingPlanForm() {
   }
 
   const handleSubmit = async () => {
-    // Here you would submit the form data to your API
-    console.log('Submitting form data:', formData)
-    // Clear the draft after successful submission
-    // clearDraft()
-    // Redirect to the training plans page after successful submission
-    await mutateAsync({
-      input: {
-        isPublic: formData.details.isPublic,
-        isTemplate: formData.details.isTemplate,
-        title: formData.details.title,
-        description: formData.details.description,
-        weeks: formData.weeks,
-      },
-    })
+    if (trainingId) {
+      await updateTrainingPlan({
+        input: {
+          id: trainingId,
+          isPublic: formData.details.isPublic,
+          isTemplate: formData.details.isTemplate,
+          title: formData.details.title,
+          description: formData.details.description,
+          weeks: formData.weeks,
+        },
+      })
+    } else {
+      await mutateAsync({
+        input: {
+          isPublic: formData.details.isPublic,
+          isTemplate: formData.details.isTemplate,
+          title: formData.details.title,
+          description: formData.details.description,
+          weeks: formData.weeks,
+        },
+      })
+      router.refresh()
+      clearDraft()
+    }
   }
   const handleDelete = async () => {
-    await deleteTrainingPlan({ id: 'cmaod14o30004uhht6c7ldfx2' })
+    if (trainingId) {
+      await deleteTrainingPlan({ id: trainingId })
+      router.replace('/trainer/trainings/creator/new')
+    }
   }
+
+  if (isLoadingInitialData) {
+    return <div>Loading...</div>
+  }
+
   return (
     <AnimatedPageTransition id="create-training-plan-form">
       <div className="flex justify-between items-center mb-6">
@@ -160,26 +214,43 @@ export function CreateTrainingPlanForm() {
           {isDirty && (
             <p className="text-sm text-muted-foreground">Unsaved changes</p>
           )}
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            loading={isDeleting}
-          >
-            Delete
-          </Button>
+          {trainingId && (
+            <Button
+              variant="ghost"
+              onClick={handleDelete}
+              loading={isDeleting}
+              disabled={isDuplicating || isDeleting || isPending}
+              iconOnly={<Trash2 />}
+            >
+              Delete
+            </Button>
+          )}
           <Button
             variant="ghost"
             onClick={clearDraft}
             className="ml-2"
-            disabled={isPending}
-          >
-            Clear Draft
-          </Button>
+            disabled={
+              isPending || isUpdating || isDuplicating || isDeleting || !isDirty
+            }
+            iconOnly={<RefreshCcwIcon />}
+          />
+          {trainingId && (
+            <Button
+              variant="ghost"
+              onClick={() => duplicateTrainingPlan({ id: trainingId! })}
+              iconOnly={<Copy />}
+              disabled={isDuplicating || isDeleting || isPending}
+              loading={isDuplicating}
+            >
+              Duplicate
+            </Button>
+          )}
           <Button
             variant="ghost"
             onClick={handleSubmit}
-            iconStart={<Save className="h-4 w-4" />}
-            loading={isPending}
+            iconStart={<Save />}
+            loading={isPending || isUpdating}
+            disabled={isDuplicating || isDeleting || isPending}
           >
             Save Plan
           </Button>

@@ -3,8 +3,9 @@ type ExerciseSet {
   order: Int!
   reps: Int!
   weight: Float
-  exerciseId: ID!
+
   logs: [ExerciseSetLog!]!
+  exerciseId: ID!
 
   createdAt: String!
   updatedAt: String!

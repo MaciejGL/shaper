@@ -20,15 +20,15 @@ export function PlanDetailsForm({ data, updateData }: PlanDetailsProps) {
         id="title"
         label="Title"
         placeholder="e.g., 12-Week Strength Program"
-        value={data.title}
-        onChange={(e) => updateData({ title: e.target.value })}
+        value={data?.title ?? ''}
+        onChange={(e) => updateData({ ...data, title: e.target.value })}
       />
 
       <Textarea
         id="description"
         label="Description"
         placeholder="Describe the goals and focus of this training plan"
-        value={data.description}
+        value={data.description ?? ''}
         onChange={(e) => updateData({ ...data, description: e.target.value })}
       />
 

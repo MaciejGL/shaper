@@ -1,45 +1,46 @@
-import { GQLWorkoutType } from '@/generated/graphql-client'
+import {
+  GQLExerciseSet,
+  GQLTrainingDay,
+  GQLTrainingExercise,
+  GQLTrainingPlan,
+  GQLTrainingWeek,
+} from '@/generated/graphql-client'
 
 export type TrainingPlanFormData = {
   details: TrainingDetails
   weeks: TrainingWeek[]
 }
 
-export type TrainingDetails = {
-  title: string
-  description?: string
-  isPublic?: boolean
-  isTemplate?: boolean
-}
+export type TrainingDetails = Pick<
+  GQLTrainingPlan,
+  'title' | 'description' | 'isPublic' | 'isTemplate'
+>
 
-export type TrainingWeek = {
-  weekNumber: number
-  name: string
-  description: string
+export type TrainingWeek = Pick<
+  GQLTrainingWeek,
+  'weekNumber' | 'name' | 'description' | 'id'
+> & {
   days: TrainingDay[]
 }
 
-export type TrainingDay = {
-  dayOfWeek: number
-  isRestDay: boolean
-  workoutType?: GQLWorkoutType
+export type TrainingDay = Pick<
+  GQLTrainingDay,
+  'dayOfWeek' | 'isRestDay' | 'workoutType' | 'id'
+> & {
   exercises: TrainingExercise[]
 }
 
-export type TrainingExercise = {
-  name: string
+export type TrainingExercise = Pick<
+  GQLTrainingExercise,
+  'name' | 'restSeconds' | 'tempo' | 'instructions' | 'order' | 'id'
+> & {
   sets: TrainingSet[]
-  restSeconds: number
-  tempo?: string
-  instructions?: string
-  order: number
 }
 
-export type TrainingSet = {
-  order: number
-  reps: number
-  weight: number
-}
+export type TrainingSet = Pick<
+  GQLExerciseSet,
+  'order' | 'reps' | 'weight' | 'id'
+>
 
 export enum WorkoutType {
   Push = 'Push',

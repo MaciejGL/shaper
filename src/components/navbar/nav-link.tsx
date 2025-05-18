@@ -22,7 +22,7 @@ export const navLinkVariants = cva(
   {
     variants: {
       isActive: {
-        true: 'hover:bg-accent/90 text-accent-foreground',
+        true: 'hover:bg-accent/90 text-accent-foreground bg-accent',
         false: 'hover:bg-accent/90 hover:text-accent-foreground',
       },
     },

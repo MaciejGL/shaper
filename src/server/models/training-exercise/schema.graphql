@@ -1,17 +1,16 @@
 type TrainingExercise {
   id: ID!
   name: String!
-
   restSeconds: Int
   tempo: String
   instructions: String
   order: Int!
 
   sets: [ExerciseSet!]!
+  logs: [ExerciseLog!]!
 
   # baseExercise: BaseExercise
   dayId: ID!
-  logs: [ExerciseLog!]!
 
   createdAt: String!
   updatedAt: String!

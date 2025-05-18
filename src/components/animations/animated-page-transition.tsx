@@ -111,14 +111,14 @@ const variants = {
       maskPosition: '200% 0',
     },
     transition: {
-      duration: 0.6, // Increased duration for smoother animation
+      duration: 0.3, // Increased duration for smoother animation
       ease: [0.4, 0, 0.2, 1],
       maskPosition: {
-        duration: 0.5, // Match the main duration
+        duration: 0.2, // Match the main duration
         ease: [0.4, 0, 0.2, 1], // Add easing to mask position
       },
       opacity: {
-        duration: 0.5, // Match the main duration
+        duration: 0.2, // Match the main duration
         ease: [0.4, 0, 0.2, 1], // Add easing to opacity
       },
     },

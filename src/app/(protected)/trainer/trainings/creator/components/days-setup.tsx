@@ -77,7 +77,6 @@ export function DaysSetup({
       />
       <AnimatedPageTransition
         id={`days-${activeWeek}`}
-        variant="fade"
         className={cn(
           'grid grid-cols-1 gap-4 auto-rows-fr',
           '@2xl/section:grid-cols-2 @2xl/section:gap-6 @5xl/section:grid-cols-3',

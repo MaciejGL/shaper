@@ -11,7 +11,7 @@ export default function Page() {
         <h1 className="text-3xl font-bold tracking-tight">Training Plans</h1>
         <div className="flex gap-2">
           <ButtonLink
-            href="/trainer/trainings/creator"
+            href="/trainer/trainings/creator/new"
             iconStart={<PlusCircle className="mr-2 h-4 w-4" />}
           >
             Create New Plan
