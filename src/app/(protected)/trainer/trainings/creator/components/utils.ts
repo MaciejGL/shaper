@@ -10,32 +10,51 @@ export const dayNames = [
   'Sunday',
 ]
 
-export const workoutTypes: GQLWorkoutType[] = [
-  GQLWorkoutType.Push,
-  GQLWorkoutType.Pull,
-  GQLWorkoutType.Legs,
-  GQLWorkoutType.UpperBody,
-  GQLWorkoutType.LowerBody,
-  GQLWorkoutType.FullBody,
-  GQLWorkoutType.Cardio,
-  GQLWorkoutType.Mobility,
-  GQLWorkoutType.Glutes,
-]
+export type WorkoutTypeGroup = {
+  label: string
+  types: GQLWorkoutType[]
+}
 
-export const cardioWorkoutTypes: GQLWorkoutType[] = [GQLWorkoutType.Cardio]
-
-export const mobilityWorkoutTypes: GQLWorkoutType[] = [GQLWorkoutType.Mobility]
-
-export const absWorkoutTypes: GQLWorkoutType[] = [GQLWorkoutType.Abs]
-
-export const splitWorkoutTypes: GQLWorkoutType[] = [
-  GQLWorkoutType.Back,
-  GQLWorkoutType.Arms,
-  GQLWorkoutType.Chest,
-  GQLWorkoutType.Quads,
-  GQLWorkoutType.Hams,
-  GQLWorkoutType.Calves,
-  GQLWorkoutType.Biceps,
-  GQLWorkoutType.Triceps,
-  GQLWorkoutType.Glutes,
+export const workoutTypeGroups: WorkoutTypeGroup[] = [
+  {
+    label: 'Classic',
+    types: [
+      GQLWorkoutType.FullBody,
+      GQLWorkoutType.UpperBody,
+      GQLWorkoutType.LowerBody,
+      GQLWorkoutType.Push,
+      GQLWorkoutType.Pull,
+      GQLWorkoutType.Legs,
+    ],
+  },
+  {
+    label: 'Split',
+    types: [
+      GQLWorkoutType.Back,
+      GQLWorkoutType.Arms,
+      GQLWorkoutType.Chest,
+      GQLWorkoutType.Quads,
+      GQLWorkoutType.Hams,
+      GQLWorkoutType.Calves,
+      GQLWorkoutType.Biceps,
+      GQLWorkoutType.Triceps,
+      GQLWorkoutType.Glutes,
+    ],
+  },
+  {
+    label: 'Cardio',
+    types: [GQLWorkoutType.Cardio, GQLWorkoutType.Liss, GQLWorkoutType.Hiit],
+  },
+  {
+    label: 'Mobility',
+    types: [GQLWorkoutType.Mobility, GQLWorkoutType.Stretching],
+  },
+  {
+    label: 'Core',
+    types: [GQLWorkoutType.Abs, GQLWorkoutType.Core],
+  },
+  {
+    label: 'Other',
+    types: [GQLWorkoutType.Custom],
+  },
 ]

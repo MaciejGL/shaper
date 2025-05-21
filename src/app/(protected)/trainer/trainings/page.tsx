@@ -6,7 +6,7 @@ import { TrainingPlansList } from './components/training-plans-list'
 
 export default function Page() {
   return (
-    <div className="container py-6 space-y-6">
+    <div className="container py-6 h-full space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Training Plans</h1>
         <div className="flex gap-2">

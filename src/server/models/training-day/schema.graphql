@@ -19,8 +19,14 @@ enum WorkoutType {
   UpperBody
   LowerBody
   FullBody
+
+  HIIT
+  LISS
   Cardio
+
   Mobility
+  Stretching
+
   # Split
   Back
   Arms
@@ -30,8 +36,10 @@ enum WorkoutType {
   Hams
   Calves
   Glutes
-  Abs
   Chest
+
+  Abs
+  Core
 
   Custom
 }
