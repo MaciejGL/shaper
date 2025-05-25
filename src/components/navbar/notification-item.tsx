@@ -37,7 +37,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
           )}
         </div>
 
-        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5 line-clamp-2">
+        <p className="text-xs text-zinc-600 dark:text-zinc-400 mt-0.5 line-clamp-4">
           {notification.message}
         </p>
 
@@ -68,6 +68,8 @@ function getNotificationTitle(
       return 'Reminder'
     case GQLNotificationType.System:
       return 'Fitspace Team'
+    case GQLNotificationType.NewTrainingPlanAssigned:
+      return 'New Training Plan'
     default:
       return null
   }

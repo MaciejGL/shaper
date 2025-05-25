@@ -33,7 +33,7 @@ type UserProfile {
   allergies: String
   email: String
   activityLevel: ActivityLevel
-  goal: Goal
+  goals: [Goal!]!
   bio: String
 
   createdAt: String!

@@ -51,14 +51,13 @@ function PlanDetailsOptions({ data, updateData }: PlanDetailsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <SwitchOption
-        id="isTemplate"
-        label="Template"
-        description="Save as a template for future plans"
-        checked={data.isTemplate}
-        onCheckedChange={() =>
-          updateData({ ...data, isTemplate: !data.isTemplate })
-        }
+        id="isDraft"
+        label="Draft"
+        description="Plan is in draft mode, can't be assigned to clients"
+        checked={data.isDraft}
+        onCheckedChange={() => updateData({ ...data, isDraft: !data.isDraft })}
       />
+
       <SwitchOption
         id="isPublic"
         label="Public"

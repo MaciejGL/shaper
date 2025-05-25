@@ -8,8 +8,20 @@ query GetClientById($id: ID!) {
     image
     sex
     birthday
-    goal
+    goals
     currentWeight
     height
+  }
+
+  getClientTrainingPlans(clientId: $id) {
+    id
+    title
+    description
+    weekCount
+    startDate
+    endDate
+    active
+    progress
+    nextSession
   }
 }

@@ -14,6 +14,7 @@ export function ModeToggle() {
       variant="ghost"
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
       iconOnly={theme === 'light' ? <Sun /> : <Moon />}
+      size="icon-md"
     />
   )
 }

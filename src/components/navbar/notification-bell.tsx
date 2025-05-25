@@ -123,8 +123,8 @@ export function NotificationBell({
                   className="absolute -top-1 -right-1 flex items-center justify-center"
                 >
                   <span className="relative flex size-4">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
-                    <span className="relative inline-flex rounded-full size-4 bg-accent text-white text-[10px] font-medium items-center justify-center">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-4 bg-primary text-white text-[10px] font-medium items-center justify-center">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   </span>

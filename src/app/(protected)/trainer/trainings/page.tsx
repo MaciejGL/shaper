@@ -1,10 +1,18 @@
 import { PlusCircle } from 'lucide-react'
 
 import { ButtonLink } from '@/components/ui/button-link'
+import {
+  GQLGetTemplatesQuery,
+  GetTemplatesDocument,
+} from '@/generated/graphql-client'
+import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
 import { TrainingPlansList } from './components/training-plans-list'
 
-export default function Page() {
+export default async function Page() {
+  const { data } =
+    await gqlServerFetch<GQLGetTemplatesQuery>(GetTemplatesDocument)
+
   return (
     <div className="container py-6 h-full space-y-6">
       <div className="flex items-center justify-between">
@@ -19,7 +27,7 @@ export default function Page() {
         </div>
       </div>
 
-      <TrainingPlansList />
+      <TrainingPlansList plans={data?.getTemplates || []} />
     </div>
   )
 }

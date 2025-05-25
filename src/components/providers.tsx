@@ -7,6 +7,7 @@ import type * as React from 'react'
 
 import { getQueryClient } from '@/lib/get-query-client'
 
+import { ConfirmationModalProvider } from './confirmation-modal'
 import { ThemeProvider } from './theme-provider'
 import { SidebarProvider } from './ui/sidebar'
 import { Toaster } from './ui/sonner'
@@ -18,7 +19,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" enableSystem disableTransitionOnChange>
         <NuqsAdapter>
-          <SidebarProvider>{children}</SidebarProvider>
+          <ConfirmationModalProvider>
+            <SidebarProvider>{children}</SidebarProvider>
+          </ConfirmationModalProvider>
         </NuqsAdapter>
       </ThemeProvider>
       <ReactQueryDevtools />

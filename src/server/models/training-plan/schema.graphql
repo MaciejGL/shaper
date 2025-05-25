@@ -2,12 +2,23 @@ type TrainingPlan {
   id: ID!
   title: String!
   description: String
+  completedAt: String
+
   isPublic: Boolean!
   isTemplate: Boolean!
+  isDraft: Boolean!
+  active: Boolean!
+  startDate: String
+  endDate: String
+  progress: Float
+  nextSession: String
+
   createdBy: UserPublic
   assignedTo: UserPublic
-  completedAt: String
   weeks: [TrainingWeek!]!
+
+  weekCount: Int!
+  assignedCount: Int!
 
   createdAt: String!
   updatedAt: String!
@@ -46,7 +57,7 @@ input CreateTrainingPlanInput {
   title: String!
   description: String
   isPublic: Boolean
-  isTemplate: Boolean
+  isDraft: Boolean
   weeks: [CreateTrainingWeekInput!]
 }
 
@@ -55,7 +66,7 @@ input UpdateTrainingPlanInput {
   title: String
   description: String
   isPublic: Boolean
-  isTemplate: Boolean
+  isDraft: Boolean
   weeks: [UpdateTrainingWeekInput!]
 }
 
@@ -93,8 +104,15 @@ input UpdateExerciseSetInput {
 }
 
 type Query {
-  getTemplates: [TrainingPlan!]!
+  getTemplates(draft: Boolean): [TrainingPlan!]!
   getTrainingPlanById(id: ID!): TrainingPlan!
+  getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!
+}
+
+input AssignTrainingPlanToClientInput {
+  planId: ID!
+  clientId: ID!
+  startDate: String
 }
 
 type Mutation {
@@ -102,4 +120,6 @@ type Mutation {
   updateTrainingPlan(input: UpdateTrainingPlanInput!): Boolean!
   deleteTrainingPlan(id: ID!): Boolean!
   duplicateTrainingPlan(id: ID!): ID!
+  assignTrainingPlanToClient(input: AssignTrainingPlanToClientInput!): Boolean!
+  removeTrainingPlanFromClient(planId: ID!, clientId: ID!): Boolean!
 }

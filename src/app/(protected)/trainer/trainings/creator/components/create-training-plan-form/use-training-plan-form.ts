@@ -18,7 +18,7 @@ const initialFormData: TrainingPlanFormData = {
     title: '',
     description: '',
     isPublic: false,
-    isTemplate: false,
+    isDraft: true,
   },
   weeks: [
     {
@@ -58,6 +58,7 @@ export const useTrainingPlanForm = (trainingId?: string) => {
             description: data.getTrainingPlanById.description,
             isPublic: data.getTrainingPlanById.isPublic,
             isTemplate: data.getTrainingPlanById.isTemplate,
+            isDraft: data.getTrainingPlanById.isDraft,
           },
           weeks: data.getTrainingPlanById.weeks,
         }),
@@ -125,7 +126,7 @@ export const useTrainingPlanForm = (trainingId?: string) => {
         input: {
           id: trainingId,
           isPublic: formData.details.isPublic,
-          isTemplate: formData.details.isTemplate,
+          isDraft: formData.details.isDraft,
           title: formData.details.title,
           description: formData.details.description,
           weeks: formData.weeks,
@@ -135,7 +136,7 @@ export const useTrainingPlanForm = (trainingId?: string) => {
       await createTrainingPlan({
         input: {
           isPublic: formData.details.isPublic,
-          isTemplate: formData.details.isTemplate,
+          isDraft: formData.details.isDraft,
           title: formData.details.title,
           description: formData.details.description,
           weeks: formData.weeks,

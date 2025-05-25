@@ -31,6 +31,8 @@ model User {
   notifications        Notification[]
   createdNotifications Notification[]    @relation("NotificationCreator")
 
+  createdNotes Note[] @relation("CreatedNotes")
+
   sessions              UserSession[]
   assignedPlans         TrainingPlan[]             @relation("AssignedPlans")
   createdPlans          TrainingPlan[]             @relation("CreatedPlans")
@@ -68,7 +70,7 @@ model UserProfile {
   allergies    String?
 
   activityLevel String? // Enum: SEDENTARY, LIGHT, MODERATE, ACTIVE, ATHLETE
-  goal          String? // Enum: LOSE_FAT, MAINTAIN, BUILD_MUSCLE
+  goals         String[] // Enum: LOSE_FAT, MAINTAIN, BUILD_MUSCLE
   bio           String?
 
   createdAt DateTime @default(now())
@@ -151,8 +153,13 @@ model TrainingPlan {
   createdById String
   isPublic    Boolean   @default(false)
   isTemplate  Boolean   @default(false)
+  isDraft     Boolean   @default(true)
   templateId  String?
   completedAt DateTime?
+
+  active    Boolean   @default(false)
+  startDate DateTime?
+  endDate   DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -186,8 +193,8 @@ model TrainingDay {
   dayOfWeek   Int // 0 = Sunday, 1 = Monday, etc.
   completedAt DateTime?
   workoutType String?
-  isRestDay   Boolean @default(false)
-  
+  isRestDay   Boolean   @default(false)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -335,4 +342,22 @@ model MuscleGroupCategory {
   createdAt DateTime @default(now())
 
   muscles MuscleGroup[]
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  text      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Who created the note
+  createdById String
+  createdBy   User   @relation("CreatedNotes", fields: [createdById], references: [id])
+
+  // Optional relation to a user (e.g., trainer notes about a client)
+  relatedToId String?
+  metadata Json? // For any additional structured data
+
+  @@index([createdById])
+  @@index([relatedToId])
 }

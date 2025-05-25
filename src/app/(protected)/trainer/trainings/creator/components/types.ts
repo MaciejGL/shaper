@@ -13,7 +13,7 @@ export type TrainingPlanFormData = {
 
 export type TrainingDetails = Pick<
   GQLTrainingPlan,
-  'title' | 'description' | 'isPublic' | 'isTemplate'
+  'title' | 'description' | 'isPublic' | 'isDraft'
 >
 
 export type TrainingWeek = Pick<

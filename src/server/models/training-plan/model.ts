@@ -45,6 +45,32 @@ export default class TrainingPlan implements GQLTrainingPlan {
     return this.data.isTemplate
   }
 
+  get isDraft() {
+    return this.data.isDraft
+  }
+
+  get active() {
+    return this.data.active
+  }
+
+  get startDate() {
+    return this.data.startDate?.toISOString()
+  }
+
+  get endDate() {
+    return this.data.endDate?.toISOString()
+  }
+
+  get nextSession() {
+    // TODO: Implement this
+    return null
+  }
+
+  get progress() {
+    // TODO: Implement this
+    return 0
+  }
+
   async createdBy() {
     const user = await prisma.user.findUnique({
       where: {
@@ -75,6 +101,26 @@ export default class TrainingPlan implements GQLTrainingPlan {
     }
 
     return new UserPublic(user)
+  }
+
+  async weekCount() {
+    return prisma.trainingWeek.count({
+      where: {
+        planId: this.data.id,
+      },
+    })
+  }
+
+  async assignedCount() {
+    return prisma.user.count({
+      where: {
+        assignedPlans: {
+          some: {
+            id: this.data.id,
+          },
+        },
+      },
+    })
   }
 
   get completedAt() {

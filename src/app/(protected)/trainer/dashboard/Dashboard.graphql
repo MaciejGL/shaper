@@ -17,7 +17,7 @@ query user {
       sex
       avatarUrl
       activityLevel
-      goal
+      goals
       bio
       createdAt
       updatedAt

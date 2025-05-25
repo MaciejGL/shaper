@@ -3,7 +3,7 @@ import {
   UserProfile as PrismaUserProfile,
 } from '@prisma/client'
 
-import { GQLUserPublic, GQLUserRole } from '@/generated/graphql-server'
+import { GQLGoal, GQLUserPublic, GQLUserRole } from '@/generated/graphql-server'
 
 export default class UserPublic implements GQLUserPublic {
   constructor(
@@ -50,8 +50,13 @@ export default class UserPublic implements GQLUserPublic {
     return new Date(this.data.profile?.birthday).toISOString()
   }
 
-  get goal() {
-    return this.data.profile?.goal
+  get goals() {
+    const goals: GQLGoal[] = []
+    this.data.profile?.goals.forEach((goal) => {
+      goals.push(goal as GQLGoal)
+    })
+
+    return goals
   }
 
   get currentWeight() {

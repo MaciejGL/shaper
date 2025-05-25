@@ -10,9 +10,14 @@ type UserPublic {
   updatedAt: String!
   sex: String
   birthday: String
-  goal: String
+  goals: [Goal!]!
   currentWeight: Float
   height: Float
+}
+
+type Note {
+  id: ID!
+  text: String!
 }
 
 type Query {

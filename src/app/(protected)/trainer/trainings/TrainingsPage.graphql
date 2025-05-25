@@ -4,6 +4,7 @@ fragment TrainingTemplate on TrainingPlan {
   description
   isPublic
   isTemplate
+  isDraft
 
   weeks {
     id
@@ -36,10 +37,15 @@ fragment TrainingTemplate on TrainingPlan {
   }
 }
 
-query GetTemplates {
-  getTemplates {
+query GetTemplates($draft: Boolean) {
+  getTemplates(draft: $draft) {
     id
     title
+    description
+    isPublic
+    isDraft
+    weekCount
+    assignedCount
   }
 }
 
@@ -63,4 +69,12 @@ mutation DeleteTrainingPlan($id: ID!) {
 
 mutation DuplicateTrainingPlan($id: ID!) {
   duplicateTrainingPlan(id: $id)
+}
+
+mutation AssignTrainingPlanToClient($input: AssignTrainingPlanToClientInput!) {
+  assignTrainingPlanToClient(input: $input)
+}
+
+mutation RemoveTrainingPlanFromClient($planId: ID!, $clientId: ID!) {
+  removeTrainingPlanFromClient(planId: $planId, clientId: $clientId)
 }
