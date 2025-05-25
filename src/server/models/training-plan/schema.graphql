@@ -1,0 +1,125 @@
+type TrainingPlan {
+  id: ID!
+  title: String!
+  description: String
+  completedAt: String
+
+  isPublic: Boolean!
+  isTemplate: Boolean!
+  isDraft: Boolean!
+  active: Boolean!
+  startDate: String
+  endDate: String
+  progress: Float
+  nextSession: String
+
+  createdBy: UserPublic
+  assignedTo: UserPublic
+  weeks: [TrainingWeek!]!
+
+  weekCount: Int!
+  assignedCount: Int!
+
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateExerciseSetInput {
+  order: Int!
+  reps: Int!
+  weight: Float
+}
+
+input CreateTrainingExerciseInput {
+  name: String!
+  restSeconds: Int
+  tempo: String
+  instructions: String
+  order: Int!
+  sets: [CreateExerciseSetInput!]
+}
+
+input CreateTrainingDayInput {
+  dayOfWeek: Int!
+  isRestDay: Boolean!
+  workoutType: String
+  exercises: [CreateTrainingExerciseInput!]
+}
+
+input CreateTrainingWeekInput {
+  weekNumber: Int!
+  name: String!
+  description: String
+  days: [CreateTrainingDayInput!]
+}
+
+input CreateTrainingPlanInput {
+  title: String!
+  description: String
+  isPublic: Boolean
+  isDraft: Boolean
+  weeks: [CreateTrainingWeekInput!]
+}
+
+input UpdateTrainingPlanInput {
+  id: ID!
+  title: String
+  description: String
+  isPublic: Boolean
+  isDraft: Boolean
+  weeks: [UpdateTrainingWeekInput!]
+}
+
+input UpdateTrainingWeekInput {
+  id: ID!
+  weekNumber: Int!
+  name: String
+  description: String
+  days: [UpdateTrainingDayInput!]
+}
+
+input UpdateTrainingDayInput {
+  id: ID!
+  dayOfWeek: Int!
+  isRestDay: Boolean
+  workoutType: String
+  exercises: [UpdateTrainingExerciseInput!]
+}
+
+input UpdateTrainingExerciseInput {
+  id: ID!
+  name: String
+  order: Int!
+  restSeconds: Int
+  tempo: String
+  instructions: String
+  sets: [UpdateExerciseSetInput!]
+}
+
+input UpdateExerciseSetInput {
+  id: ID!
+  order: Int!
+  reps: Int!
+  weight: Float
+}
+
+type Query {
+  getTemplates(draft: Boolean): [TrainingPlan!]!
+  getTrainingPlanById(id: ID!): TrainingPlan!
+  getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!
+}
+
+input AssignTrainingPlanToClientInput {
+  planId: ID!
+  clientId: ID!
+  startDate: String
+}
+
+type Mutation {
+  createTrainingPlan(input: CreateTrainingPlanInput!): Boolean!
+  updateTrainingPlan(input: UpdateTrainingPlanInput!): Boolean!
+  deleteTrainingPlan(id: ID!): Boolean!
+  duplicateTrainingPlan(id: ID!): ID!
+  assignTrainingPlanToClient(input: AssignTrainingPlanToClientInput!): Boolean!
+  removeTrainingPlanFromClient(planId: ID!, clientId: ID!): Boolean!
+}

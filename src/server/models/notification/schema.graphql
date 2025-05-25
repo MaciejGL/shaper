@@ -1,0 +1,57 @@
+enum NotificationType {
+  COACHING_REQUEST
+  COACHING_REQUEST_ACCEPTED
+  COACHING_REQUEST_REJECTED
+  NEW_TRAINING_PLAN_ASSIGNED
+  REMINDER
+  SYSTEM
+  MESSAGE
+}
+
+type Notification {
+  id: ID!
+  createdBy: ID
+  creator: User
+  message: String!
+  type: NotificationType!
+  read: Boolean!
+  link: String
+  relatedItemId: String
+  createdAt: String!
+}
+
+input CreateNotificationInput {
+  userId: ID!
+  createdBy: ID
+  message: String!
+  type: NotificationType!
+  link: String
+  relatedItemId: String
+}
+
+input UpdateNotificationInput {
+  id: ID!
+  read: Boolean
+  message: String
+  type: NotificationType
+  link: String
+}
+
+type Query {
+  notifications(
+    userId: ID!
+    read: Boolean
+    type: NotificationType
+    skip: Int
+    take: Int
+  ): [Notification!]!
+  notification(id: ID!): Notification
+}
+
+type Mutation {
+  createNotification(input: CreateNotificationInput!): Notification!
+  updateNotification(input: UpdateNotificationInput!): Notification!
+  markNotificationRead(id: ID!): Notification!
+  markAllNotificationsRead(userId: ID!): [Notification!]!
+  deleteNotification(id: ID!): Boolean!
+}

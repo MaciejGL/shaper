@@ -1,0 +1,12 @@
+type ExerciseSet {
+  id: ID!
+  order: Int!
+  reps: Int!
+  weight: Float
+
+  logs: [ExerciseSetLog!]!
+  exerciseId: ID!
+
+  createdAt: String!
+  updatedAt: String!
+}

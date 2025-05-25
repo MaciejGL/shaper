@@ -1,0 +1,65 @@
+query user {
+  user {
+    id
+    email
+    name
+    image
+    role
+    createdAt
+    updatedAt
+
+    profile {
+      id
+      firstName
+      lastName
+      phone
+      birthday
+      sex
+      avatarUrl
+      activityLevel
+      goals
+      bio
+      createdAt
+      updatedAt
+      bodyMeasures {
+        id
+        weight
+        height
+        chest
+        waist
+        hips
+        neck
+        biceps
+        thigh
+        calf
+        bodyFat
+        notes
+      }
+    }
+    trainer {
+      id
+      email
+      firstName
+      lastName
+      image
+      role
+      createdAt
+      updatedAt
+    }
+    clients {
+      id
+      email
+      firstName
+      lastName
+      image
+      role
+      createdAt
+      updatedAt
+    }
+    sessions {
+      id
+      createdAt
+      expiresAt
+    }
+  }
+}

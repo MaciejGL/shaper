@@ -1,0 +1,97 @@
+enum FitnessLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum ActivityLevel {
+  SEDENTARY
+  LIGHT
+  MODERATE
+  ACTIVE
+  ATHLETE
+}
+
+enum Goal {
+  LOSE_WEIGHT
+  MAINTAIN
+  GAIN_MUSCLE
+  IMPROVE_HEALTH
+  BODY_RECOMPOSITION
+  INCREASE_STRENGTH
+  INCREASE_ENDURANCE
+}
+
+type UserProfile {
+  id: ID!
+  firstName: String
+  lastName: String
+  phone: String
+  birthday: String
+  sex: String
+  avatarUrl: String
+  height: Float
+  weight: Float
+  fitnessLevel: FitnessLevel
+  allergies: String
+  email: String
+  activityLevel: ActivityLevel
+  goals: [Goal!]!
+  bio: String
+
+  createdAt: String!
+  updatedAt: String!
+
+  bodyMeasures: [UserBodyMeasure!]!
+}
+
+type UserSession {
+  id: ID!
+  user: User!
+  otp: String!
+  expiresAt: String!
+  createdAt: String!
+}
+
+type UserBodyMeasure {
+  id: ID!
+  userProfile: UserProfile!
+  measuredAt: String!
+  weight: Float
+  height: Float
+  chest: Float
+  waist: Float
+  hips: Float
+  neck: Float
+  biceps: Float
+  thigh: Float
+  calf: Float
+  bodyFat: Float
+  notes: String
+}
+
+type Query {
+  profile: UserProfile
+}
+
+input UpdateProfileInput {
+  firstName: String
+  lastName: String
+  phone: String
+  email: String
+  birthday: String
+  sex: String
+  avatarUrl: String
+  height: Float
+  weight: Float
+  fitnessLevel: FitnessLevel
+  allergies: String
+  activityLevel: ActivityLevel
+  goals: [Goal!]
+  bio: String
+}
+
+type Mutation {
+  updateProfile(input: UpdateProfileInput!): UserProfile
+}

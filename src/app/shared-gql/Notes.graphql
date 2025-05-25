@@ -1,0 +1,35 @@
+query GetNotes($relatedTo: ID) {
+  notes(relatedTo: $relatedTo) {
+    id
+    text
+    createdAt
+    updatedAt
+  }
+}
+
+query GetNote($id: ID!, $relatedTo: ID) {
+  note(id: $id, relatedTo: $relatedTo) {
+    id
+    text
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateNote($input: CreateNoteInput!) {
+  createNote(input: $input) {
+    id
+    text
+  }
+}
+
+mutation UpdateNote($input: UpdateNoteInput!) {
+  updateNote(input: $input) {
+    id
+    text
+  }
+}
+
+mutation DeleteNote($id: ID!) {
+  deleteNote(id: $id)
+}

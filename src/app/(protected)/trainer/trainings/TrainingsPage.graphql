@@ -1,0 +1,80 @@
+fragment TrainingTemplate on TrainingPlan {
+  id
+  title
+  description
+  isPublic
+  isTemplate
+  isDraft
+
+  weeks {
+    id
+    weekNumber
+    name
+    description
+
+    days {
+      id
+      dayOfWeek
+      isRestDay
+      workoutType
+
+      exercises {
+        id
+        name
+        restSeconds
+        tempo
+        instructions
+        order
+
+        sets {
+          id
+          order
+          reps
+          weight
+        }
+      }
+    }
+  }
+}
+
+query GetTemplates($draft: Boolean) {
+  getTemplates(draft: $draft) {
+    id
+    title
+    description
+    isPublic
+    isDraft
+    weekCount
+    assignedCount
+  }
+}
+
+query GetTemplateTrainingPlanById($id: ID!) {
+  getTrainingPlanById(id: $id) {
+    ...TrainingTemplate
+  }
+}
+
+mutation CreateTrainingPlan($input: CreateTrainingPlanInput!) {
+  createTrainingPlan(input: $input)
+}
+
+mutation UpdateTrainingPlan($input: UpdateTrainingPlanInput!) {
+  updateTrainingPlan(input: $input)
+}
+
+mutation DeleteTrainingPlan($id: ID!) {
+  deleteTrainingPlan(id: $id)
+}
+
+mutation DuplicateTrainingPlan($id: ID!) {
+  duplicateTrainingPlan(id: $id)
+}
+
+mutation AssignTrainingPlanToClient($input: AssignTrainingPlanToClientInput!) {
+  assignTrainingPlanToClient(input: $input)
+}
+
+mutation RemoveTrainingPlanFromClient($planId: ID!, $clientId: ID!) {
+  removeTrainingPlanFromClient(planId: $planId, clientId: $clientId)
+}

@@ -1,0 +1,45 @@
+type TrainingDay {
+  id: ID!
+  dayOfWeek: Int!
+  completedAt: String
+  workoutType: String
+  isRestDay: Boolean!
+
+  exercises: [TrainingExercise!]!
+
+  trainingWeekId: ID!
+  createdAt: String!
+  updatedAt: String!
+}
+
+enum WorkoutType {
+  Push
+  Pull
+  Legs
+  UpperBody
+  LowerBody
+  FullBody
+
+  HIIT
+  LISS
+  Cardio
+
+  Mobility
+  Stretching
+
+  # Split
+  Back
+  Arms
+  Biceps
+  Triceps
+  Quads
+  Hams
+  Calves
+  Glutes
+  Chest
+
+  Abs
+  Core
+
+  Custom
+}

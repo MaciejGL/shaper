@@ -1,0 +1,31 @@
+fragment ProfileFragment on UserProfile {
+  id
+  firstName
+  lastName
+  phone
+  birthday
+  sex
+  avatarUrl
+  height
+  weight
+  fitnessLevel
+  allergies
+  activityLevel
+  goals
+  bio
+  createdAt
+  updatedAt
+  email
+}
+
+query Profile {
+  profile {
+    ...ProfileFragment
+  }
+}
+
+mutation UpdateProfile($input: UpdateProfileInput!) {
+  updateProfile(input: $input) {
+    id
+  }
+}

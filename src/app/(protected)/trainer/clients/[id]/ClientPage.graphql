@@ -1,0 +1,28 @@
+query GetClientById($id: ID!) {
+  userPublic(id: $id) {
+    id
+    firstName
+    lastName
+    email
+    phone
+    image
+    sex
+    birthday
+    goals
+    currentWeight
+    height
+    allergies
+  }
+
+  getClientTrainingPlans(clientId: $id) {
+    id
+    title
+    description
+    weekCount
+    startDate
+    endDate
+    active
+    progress
+    nextSession
+  }
+}

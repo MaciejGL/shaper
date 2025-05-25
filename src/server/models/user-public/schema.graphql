@@ -1,0 +1,26 @@
+type UserPublic {
+  id: ID!
+  email: String!
+  firstName: String
+  lastName: String
+  phone: String
+  image: String
+  role: UserRole!
+  createdAt: String!
+  updatedAt: String!
+  sex: String
+  birthday: String
+  goals: [Goal!]!
+  currentWeight: Float
+  height: Float
+  allergies: String
+}
+
+type Note {
+  id: ID!
+  text: String!
+}
+
+type Query {
+  userPublic(id: ID!): UserPublic
+}
