@@ -1,3 +1,4 @@
+import { isArray } from 'lodash'
 import { useCallback, useEffect } from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -19,7 +20,22 @@ export function useProfile() {
       },
     })
 
-  const [profile, setProfile] = useState<Profile>({})
+  const [profile, setProfile] = useState<Profile>({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    email: '',
+    birthday: '',
+    sex: '',
+    avatarUrl: '',
+    height: null,
+    weight: null,
+    fitnessLevel: null,
+    activityLevel: null,
+    goals: [],
+    allergies: '',
+    bio: '',
+  })
 
   useEffect(() => {
     const profileData = data?.profile
@@ -36,7 +52,7 @@ export function useProfile() {
         weight: profileData.weight,
         fitnessLevel: profileData.fitnessLevel,
         activityLevel: profileData.activityLevel,
-        goal: profileData.goal,
+        goals: isArray(profileData.goals) ? profileData.goals : [],
         allergies: profileData.allergies,
         bio: profileData.bio,
       })
@@ -44,7 +60,10 @@ export function useProfile() {
   }, [data])
 
   const handleChange = useCallback(
-    (field: keyof NonNullable<GQLProfileQuery['profile']>, value: string) => {
+    (
+      field: keyof NonNullable<GQLProfileQuery['profile']>,
+      value: string | string[],
+    ) => {
       setProfile((prev) => ({
         ...prev,
         [field]: value,

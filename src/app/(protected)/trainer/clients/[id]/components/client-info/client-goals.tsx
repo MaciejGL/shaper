@@ -1,6 +1,8 @@
 import { Badge } from '@/components/ui/badge'
+import { GQLGoal } from '@/generated/graphql-client'
+import { translateGoal } from '@/utils/goals'
 
-export function ClientGoals({ goals }: { goals: string[] }) {
+export function ClientGoals({ goals }: { goals: GQLGoal[] }) {
   if (!goals || goals.length === 0) {
     return (
       <div className="pt-2">
@@ -13,13 +15,13 @@ export function ClientGoals({ goals }: { goals: string[] }) {
   return (
     <div className="pt-2">
       <h4 className="font-medium mb-2">Goals</h4>
-      <ul className="space-y-1 text-sm">
+      <div className="flex flex-wrap gap-2">
         {goals.map((goal) => (
-          <li key={goal}>
-            <Badge variant="outline">{goal}</Badge>
-          </li>
+          <Badge key={goal} variant="outline">
+            {translateGoal(goal)}
+          </Badge>
         ))}
-      </ul>
+      </div>
     </div>
   )
 }

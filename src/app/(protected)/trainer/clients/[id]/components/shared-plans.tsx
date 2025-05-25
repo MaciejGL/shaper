@@ -84,7 +84,6 @@ export function TrainingCard({
   const invalidateQuery = useInvalidateQuery()
   const params = useParams<{ id: string }>()
   const { openModal } = useConfirmationModalContext()
-  // const queryClient = useQueryClient()
   const { mutateAsync: removeTrainingPlanFromClient, isPending } =
     useRemoveTrainingPlanFromClientMutation({
       onSuccess: () => {

@@ -140,8 +140,12 @@ export enum GQLFitnessLevel {
 }
 
 export enum GQLGoal {
-  BuildMuscle = 'BUILD_MUSCLE',
-  LoseFat = 'LOSE_FAT',
+  BodyRecomposition = 'BODY_RECOMPOSITION',
+  GainMuscle = 'GAIN_MUSCLE',
+  ImproveHealth = 'IMPROVE_HEALTH',
+  IncreaseEndurance = 'INCREASE_ENDURANCE',
+  IncreaseStrength = 'INCREASE_STRENGTH',
+  LoseWeight = 'LOSE_WEIGHT',
   Maintain = 'MAINTAIN'
 }
 
@@ -456,7 +460,7 @@ export type GQLUpdateProfileInput = {
   email?: InputMaybe<Scalars['String']['input']>;
   firstName?: InputMaybe<Scalars['String']['input']>;
   fitnessLevel?: InputMaybe<GQLFitnessLevel>;
-  goal?: InputMaybe<GQLGoal>;
+  goals?: InputMaybe<Array<GQLGoal>>;
   height?: InputMaybe<Scalars['Float']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
   phone?: InputMaybe<Scalars['String']['input']>;
@@ -558,6 +562,7 @@ export type GQLUserProfile = {
 
 export type GQLUserPublic = {
   __typename?: 'UserPublic';
+  allergies?: Maybe<Scalars['String']['output']>;
   birthday?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
   currentWeight?: Maybe<Scalars['Float']['output']>;
@@ -647,7 +652,7 @@ export type GQLGetClientByIdQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goals: Array<GQLGoal>, currentWeight?: number | undefined | null, height?: number | undefined | null } | undefined | null, getClientTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null }> };
+export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goals: Array<GQLGoal>, currentWeight?: number | undefined | null, height?: number | undefined | null, allergies?: string | undefined | null } | undefined | null, getClientTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null }> };
 
 export type GQLUserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1040,6 +1045,7 @@ export const GetClientByIdDocument = `
     goals
     currentWeight
     height
+    allergies
   }
   getClientTrainingPlans(clientId: $id) {
     id

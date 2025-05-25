@@ -13,6 +13,7 @@ type UserPublic {
   goals: [Goal!]!
   currentWeight: Float
   height: Float
+  allergies: String
 }
 
 type Note {

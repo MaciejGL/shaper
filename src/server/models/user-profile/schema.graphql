@@ -14,9 +14,13 @@ enum ActivityLevel {
 }
 
 enum Goal {
-  LOSE_FAT
+  LOSE_WEIGHT
   MAINTAIN
-  BUILD_MUSCLE
+  GAIN_MUSCLE
+  IMPROVE_HEALTH
+  BODY_RECOMPOSITION
+  INCREASE_STRENGTH
+  INCREASE_ENDURANCE
 }
 
 type UserProfile {
@@ -84,7 +88,7 @@ input UpdateProfileInput {
   fitnessLevel: FitnessLevel
   allergies: String
   activityLevel: ActivityLevel
-  goal: Goal
+  goals: [Goal!]
   bio: String
 }
 

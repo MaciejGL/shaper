@@ -52,7 +52,7 @@ export default function ProfilePage() {
           <Button
             onClick={toggleEdit}
             variant="outline"
-            size="icon"
+            size="icon-md"
             disabled={isSaving}
           >
             <XIcon />

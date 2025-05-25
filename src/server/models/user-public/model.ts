@@ -59,6 +59,10 @@ export default class UserPublic implements GQLUserPublic {
     return goals
   }
 
+  get allergies() {
+    return this.data.profile?.allergies
+  }
+
   get currentWeight() {
     return this.data.profile?.weight
   }

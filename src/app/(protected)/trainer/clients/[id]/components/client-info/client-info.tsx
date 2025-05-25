@@ -1,6 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { GQLGetClientByIdQuery } from '@/generated/graphql-client'
 
+import { ClientAllergies } from './client-allergies'
 import { ClientCardHeader } from './client-card-header'
 import { ClientCurrentPlan } from './client-current-plan'
 import { ClientGoals } from './client-goals'
@@ -23,6 +24,7 @@ export function ClientInfo({
       <CardContent className="space-y-4">
         <ClientCurrentPlan activePlan={activePlan} />
         <ClientGoals goals={client.goals} />
+        <ClientAllergies allergies={client.allergies} />
       </CardContent>
     </Card>
   )

@@ -11,6 +11,7 @@ query GetClientById($id: ID!) {
     goals
     currentWeight
     height
+    allergies
   }
 
   getClientTrainingPlans(clientId: $id) {

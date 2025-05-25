@@ -13,7 +13,7 @@ export type Profile = Pick<
   | 'weight'
   | 'fitnessLevel'
   | 'activityLevel'
-  | 'goal'
+  | 'goals'
   | 'allergies'
   | 'bio'
 >

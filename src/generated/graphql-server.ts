@@ -141,8 +141,12 @@ export enum GQLFitnessLevel {
 }
 
 export enum GQLGoal {
-  BuildMuscle = 'BUILD_MUSCLE',
-  LoseFat = 'LOSE_FAT',
+  BodyRecomposition = 'BODY_RECOMPOSITION',
+  GainMuscle = 'GAIN_MUSCLE',
+  ImproveHealth = 'IMPROVE_HEALTH',
+  IncreaseEndurance = 'INCREASE_ENDURANCE',
+  IncreaseStrength = 'INCREASE_STRENGTH',
+  LoseWeight = 'LOSE_WEIGHT',
   Maintain = 'MAINTAIN'
 }
 
@@ -457,7 +461,7 @@ export type GQLUpdateProfileInput = {
   email?: InputMaybe<Scalars['String']['input']>;
   firstName?: InputMaybe<Scalars['String']['input']>;
   fitnessLevel?: InputMaybe<GQLFitnessLevel>;
-  goal?: InputMaybe<GQLGoal>;
+  goals?: InputMaybe<Array<GQLGoal>>;
   height?: InputMaybe<Scalars['Float']['input']>;
   lastName?: InputMaybe<Scalars['String']['input']>;
   phone?: InputMaybe<Scalars['String']['input']>;
@@ -559,6 +563,7 @@ export type GQLUserProfile = {
 
 export type GQLUserPublic = {
   __typename?: 'UserPublic';
+  allergies?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   birthday?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   currentWeight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
@@ -1001,6 +1006,7 @@ export type GQLUserProfileResolvers<ContextType = any, ParentType extends GQLRes
 };
 
 export type GQLUserPublicResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['UserPublic'] = GQLResolversParentTypes['UserPublic']> = {
+  allergies?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   birthday?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   currentWeight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
