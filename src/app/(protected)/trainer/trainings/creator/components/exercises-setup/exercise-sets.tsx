@@ -70,7 +70,7 @@ export function ExerciseSets({
             <Button
               type="button"
               variant="ghost"
-              size="icon"
+              size="icon-md"
               onClick={() => onRemoveSet(index)}
               disabled={sets.length <= 1}
             >

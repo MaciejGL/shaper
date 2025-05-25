@@ -22,7 +22,7 @@ export function Header({ profile, isEditing }: HeaderProps) {
         </Avatar>
         {isEditing && (
           <Button
-            size="icon"
+            size="icon-md"
             className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary shadow-md"
           >
             <CameraIcon className="w-4 h-4" />

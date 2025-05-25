@@ -37,21 +37,21 @@ export function WeekCard({
           <div className="flex gap-1">
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-md"
               onClick={() => cloneWeek(index)}
             >
               <Copy className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-md"
               onClick={() => openEditWeekDialog(index)}
             >
               <Edit className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
-              size="icon"
+              size="icon-md"
               onClick={() => removeWeek(index)}
               disabled={weeks.length <= 1}
             >

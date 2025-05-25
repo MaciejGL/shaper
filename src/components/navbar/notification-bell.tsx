@@ -110,7 +110,7 @@ export function NotificationBell({
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            size="icon"
+            size="icon-md"
             className="relative h-9 w-9 rounded-full"
           >
             <Bell className="size-5" />

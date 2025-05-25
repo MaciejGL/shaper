@@ -21,7 +21,7 @@ export function ReviewPlan({ formData }: ReviewPlanProps) {
     <div className="space-y-6">
       <PlanHeader
         title={formData.details.title}
-        isTemplate={formData.details.isTemplate}
+        isDraft={formData.details.isDraft}
         isPublic={formData.details.isPublic}
         description={formData.details.description ?? ''}
       />
@@ -37,14 +37,14 @@ export function ReviewPlan({ formData }: ReviewPlanProps) {
 
 type PlanHeaderProps = {
   title: string
-  isTemplate: boolean
+  isDraft: boolean
   isPublic: boolean
   description?: string
 }
 
 function PlanHeader({
   title,
-  isTemplate,
+  isDraft,
   isPublic,
   description,
 }: PlanHeaderProps) {
@@ -52,7 +52,7 @@ function PlanHeader({
     <div className="space-y-2">
       <h2 className="text-2xl font-bold">{title}</h2>
       <div className="flex gap-2">
-        {isTemplate && <Badge variant="outline">Template</Badge>}
+        {isDraft && <Badge variant="outline">Draft</Badge>}
         {isPublic && <Badge>Public</Badge>}
       </div>
       {description && <p className="text-muted-foreground">{description}</p>}

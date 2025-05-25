@@ -265,7 +265,7 @@ function SidebarTrigger({
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
       variant="ghost"
-      size="icon"
+      size="icon-md"
       className={cn(
         'opacity-60 hover:opacity-100 transition-opacity',
         className,

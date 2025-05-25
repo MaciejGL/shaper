@@ -26,7 +26,7 @@ export function ExerciseCard({
       <div className="absolute left-2 top-1/2 -translate-y-1/2 flex flex-col space-y-1">
         <Button
           variant="ghost"
-          size="icon"
+          size="icon-md"
           className="h-6 w-6"
           onClick={() => onMove(index, 'up')}
           disabled={index === 0}
@@ -38,10 +38,18 @@ export function ExerciseCard({
         <div className="flex justify-between items-start">
           <CardTitle className="text-base">{exercise.name}</CardTitle>
           <div className="flex gap-1">
-            <Button variant="ghost" size="icon" onClick={() => onEdit(index)}>
+            <Button
+              variant="ghost"
+              size="icon-md"
+              onClick={() => onEdit(index)}
+            >
               <Edit className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => onRemove(index)}>
+            <Button
+              variant="ghost"
+              size="icon-md"
+              onClick={() => onRemove(index)}
+            >
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
