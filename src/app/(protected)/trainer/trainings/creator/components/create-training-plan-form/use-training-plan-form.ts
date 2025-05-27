@@ -139,7 +139,22 @@ export const useTrainingPlanForm = (trainingId?: string) => {
           isDraft: formData.details.isDraft,
           title: formData.details.title,
           description: formData.details.description,
-          weeks: formData.weeks,
+          weeks: formData.weeks.map((week) => ({
+            ...week,
+            id: undefined,
+            days: week.days.map((day) => ({
+              ...day,
+              id: undefined,
+              exercises: day.exercises.map((exercise) => ({
+                ...exercise,
+                id: undefined,
+                sets: exercise.sets.map((set) => ({
+                  ...set,
+                  id: undefined,
+                })),
+              })),
+            })),
+          })),
         },
       })
       router.refresh()

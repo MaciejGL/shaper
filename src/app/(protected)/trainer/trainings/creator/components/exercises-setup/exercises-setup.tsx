@@ -37,7 +37,6 @@ export function ExercisesSetup({
     setExerciseFormOpen,
     handleSaveExercise,
     handleRemoveExercise,
-    handleMoveExercise,
     handleEditExercise,
     handleCloseExerciseForm,
   } = useExercisesSetup({
@@ -111,7 +110,6 @@ export function ExercisesSetup({
                   index={index}
                   onEdit={handleEditExercise}
                   onRemove={handleRemoveExercise}
-                  onMove={handleMoveExercise}
                 />
               ))}
             </div>
