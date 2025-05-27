@@ -32,12 +32,25 @@ export async function getTrainingPlanById(
     },
     include: {
       weeks: {
+        orderBy: {
+          weekNumber: 'asc',
+        },
         include: {
           days: {
+            orderBy: {
+              dayOfWeek: 'asc',
+            },
             include: {
               exercises: {
+                orderBy: {
+                  order: 'asc',
+                },
                 include: {
-                  sets: true,
+                  sets: {
+                    orderBy: {
+                      order: 'asc',
+                    },
+                  },
                 },
               },
             },

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useMemo } from 'react'
 
 import { Divider } from '@/components/divider'
 import { navLinkVariants } from '@/components/navbar/nav-link'
@@ -31,6 +32,7 @@ import {
   useGetClientsQuery,
   useGetTemplatesQuery,
 } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
 
 type SidebarItem = {
   title: string
@@ -47,55 +49,103 @@ type SidebarSubItem = {
   disabled?: boolean
 }
 
-export function AppSidebar() {
-  const { data: clients } = useGetClientsQuery()
-  const { data: templatesData } = useGetTemplatesQuery()
+// Define placeholder data types
+const placeholderClients = {
+  user: {
+    clients: Array(2).fill({
+      id: 'placeholder' + Math.random(),
+      firstName: 'Loading...',
+      lastName: 'Loading...',
+      email: 'Loading...',
+      image: null,
+      role: 'CLIENT',
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    }),
+  },
+}
 
-  const templates = templatesData?.getTemplates || []
-  const items: SidebarItem[] = [
-    {
-      title: TRAINER_LINKS.dashboard.label,
-      url: TRAINER_LINKS.dashboard.href,
-      icon: HomeIcon,
-      disabled: TRAINER_LINKS.dashboard.disabled,
-    },
-    {
-      title: TRAINER_LINKS.clients.label,
-      url: TRAINER_LINKS.clients.href,
-      icon: Users2Icon,
-      disabled: TRAINER_LINKS.clients.disabled,
-      subItems: clients?.user?.clients.map((client) => ({
-        title: `${client.firstName} ${client.lastName}`,
-        url: TRAINER_LINKS.clients.href + `/${client.id}`,
-        icon: UserRoundCogIcon,
-        disabled: false,
-      })),
-    },
-    {
-      title: TRAINER_LINKS.trainings.label,
-      url: TRAINER_LINKS.trainings.href,
-      icon: NotebookTextIcon,
-      disabled: TRAINER_LINKS.trainings.disabled,
-      subItems: [
-        {
-          title: 'Create',
-          url: TRAINER_LINKS.trainings.href + '/creator/new',
-          icon: PlusCircleIcon,
-        },
-        ...templates.map((template) => ({
-          title: template.title,
-          url: TRAINER_LINKS.trainings.href + `/creator/${template.id}`,
-          icon: NotebookTextIcon,
+const placeholderTemplates = {
+  getTemplates: Array(2).fill({
+    id: 'placeholder' + Math.random(),
+    title: 'Loading...',
+    description: null,
+    isPublic: false,
+    isDraft: false,
+    weekCount: 0,
+    assignedCount: 0,
+  }),
+}
+
+export function AppSidebar() {
+  const { data: clients, isPlaceholderData: isPlaceholderClients } =
+    useGetClientsQuery(undefined, {
+      placeholderData: placeholderClients,
+    })
+
+  const { data: templatesData, isPlaceholderData: isPlaceholderTemplates } =
+    useGetTemplatesQuery(undefined, {
+      placeholderData: placeholderTemplates,
+    })
+
+  const templates = useMemo(
+    () => templatesData?.getTemplates || [],
+    [templatesData],
+  )
+
+  const items: SidebarItem[] = useMemo(
+    () => [
+      // Dashboard item
+      {
+        title: TRAINER_LINKS.dashboard.label,
+        url: TRAINER_LINKS.dashboard.href,
+        icon: HomeIcon,
+        disabled: TRAINER_LINKS.dashboard.disabled,
+      },
+      // Clients item
+      {
+        title: TRAINER_LINKS.clients.label,
+        url: TRAINER_LINKS.clients.href,
+        icon: Users2Icon,
+        disabled: TRAINER_LINKS.clients.disabled,
+        subItems: clients?.user?.clients.map((client) => ({
+          title: `${client.firstName} ${client.lastName}`,
+          url: TRAINER_LINKS.clients.href + `/${client.id}`,
+          icon: UserRoundCogIcon,
+          disabled: false,
         })),
-      ],
-    },
-    {
-      title: TRAINER_LINKS.exercises.label,
-      url: TRAINER_LINKS.exercises.href,
-      icon: DumbbellIcon,
-      disabled: TRAINER_LINKS.exercises.disabled,
-    },
-  ]
+      },
+      // Trainings item
+      {
+        title: TRAINER_LINKS.trainings.label,
+        url: TRAINER_LINKS.trainings.href,
+        icon: NotebookTextIcon,
+        disabled: TRAINER_LINKS.trainings.disabled,
+        subItems: [
+          {
+            title: 'Create',
+            url: TRAINER_LINKS.trainings.href + '/creator/new',
+            icon: PlusCircleIcon,
+            disabled: false,
+          },
+          ...templates.map((template) => ({
+            title: template.title,
+            url: TRAINER_LINKS.trainings.href + `/creator/${template.id}`,
+            icon: NotebookTextIcon,
+            disabled: false,
+          })),
+        ],
+      },
+      // Exercises item
+      {
+        title: TRAINER_LINKS.exercises.label,
+        url: TRAINER_LINKS.exercises.href,
+        icon: DumbbellIcon,
+        disabled: TRAINER_LINKS.exercises.disabled,
+      },
+    ],
+    [clients, templates],
+  )
 
   const footerItems = [
     {
@@ -115,8 +165,12 @@ export function AppSidebar() {
       <SidebarContent className="mt-16">
         <SidebarGroupContent>
           <SidebarMenu>
-            {items.map((item) => (
-              <SidebarItem key={item.title} item={item} />
+            {items.map((item, index) => (
+              <SidebarItem
+                key={item.title + index}
+                item={item}
+                isLoading={isPlaceholderClients || isPlaceholderTemplates}
+              />
             ))}
           </SidebarMenu>
         </SidebarGroupContent>
@@ -124,8 +178,12 @@ export function AppSidebar() {
       <SidebarFooter>
         <SidebarMenu>
           <Divider className="mb-2" />
-          {footerItems.map((item) => (
-            <SidebarItem key={item.title} item={item} />
+          {footerItems.map((item, index) => (
+            <SidebarItem
+              key={item.title + index}
+              item={item}
+              isLoading={false}
+            />
           ))}
         </SidebarMenu>
       </SidebarFooter>
@@ -133,28 +191,37 @@ export function AppSidebar() {
   )
 }
 
-function SidebarItem({ item }: { item: SidebarItem }) {
+function SidebarItem({
+  item,
+  isLoading,
+}: {
+  item: SidebarItem
+  isLoading: boolean
+}) {
   const pathname = usePathname()
   const isActive = item.url === pathname
 
   return (
     <SidebarMenuItem key={item.title}>
       <SidebarMenuButton asChild disabled={item.disabled}>
-        <Link href={item.url} className={navLinkVariants({ isActive })}>
+        <Link href={item.url} className={cn(navLinkVariants({ isActive }))}>
           <item.icon />
           <span className="font-medium">{item.title}</span>
           {isActive && <ChevronRight className="ml-auto h-4 w-4 opacity-60" />}
         </Link>
       </SidebarMenuButton>
       <SidebarMenuSub>
-        {item.subItems?.map((subItem) => (
-          <SidebarMenuSubItem key={subItem.title}>
+        {item.subItems?.map((subItem, index) => (
+          <SidebarMenuSubItem key={subItem.title + index}>
             <SidebarMenuSubButton asChild>
               <Link
                 href={subItem.url}
-                className={navLinkVariants({
-                  isActive: subItem.url === pathname,
-                })}
+                className={cn(
+                  navLinkVariants({
+                    isActive: subItem.url === pathname,
+                  }),
+                  isLoading && 'masked-placeholder-text',
+                )}
               >
                 <subItem.icon />
                 <span className="truncate">{subItem.title}</span>

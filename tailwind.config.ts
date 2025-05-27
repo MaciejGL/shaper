@@ -81,19 +81,19 @@ const config = {
     require('@savvywombat/tailwindcss-grid-areas'),
     require('@tailwindcss/container-queries'),
     plugin(({ addUtilities, addVariant, theme }) => {
-      addUtilities({
-        '.masked-placeholder-text': {
-          borderRadius: theme('borderRadius.sm'),
-          animation: theme('animation.pulse'),
-          color: 'transparent',
-          '& *': {
-            color: 'transparent !important',
-          },
-          userSelect: 'none',
-          backgroundColor: 'hsl(var(--muted))',
-          boxDecorationBreak: 'clone',
-        },
-      })
+      // addUtilities({
+      //   '.masked-placeholder-text': {
+      //     borderRadius: theme('borderRadius.sm'),
+      //     animation: theme('animation.pulse'),
+      //     color: 'transparent',
+      //     '& *': {
+      //       color: 'transparent !important',
+      //     },
+      //     userSelect: 'none',
+      //     backgroundColor: 'hsl(var(--muted))',
+      //     boxDecorationBreak: 'clone',
+      //   },
+      // })
       addUtilities({
         '.flex-center': {
           display: 'flex',

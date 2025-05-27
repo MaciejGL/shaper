@@ -18,7 +18,7 @@ interface NavItemProps {
 }
 
 export const navLinkVariants = cva(
-  'w-full justify-start gap-3 px-3 py-4 transition-colors',
+  'w-full justify-start gap-3 transition-colors',
   {
     variants: {
       isActive: {

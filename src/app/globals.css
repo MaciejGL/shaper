@@ -122,13 +122,14 @@
 }
 
 @utility masked-placeholder-text {
-  animation: pulse 1s infinite;
+  animation: pulse 2s infinite;
   color: transparent;
   & * {
     color: transparent !important;
   }
   user-select: none;
-  background-color: hsl(var(--muted-foreground));
+  background-color: var(--sidebar-ring);
+  border-radius: var(--radius-xs);
 }
 
 @utility flex-center {
