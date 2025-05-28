@@ -1,0 +1,7 @@
+type MuscleGroupCategory {
+  id: ID!
+  name: String!
+  slug: String!
+  createdAt: String!
+  muscles: [MuscleGroup!]!
+}

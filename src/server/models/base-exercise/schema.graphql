@@ -1,0 +1,12 @@
+type BaseExercise {
+  id: ID!
+  name: String!
+  description: String
+  videoUrl: String
+  equipment: String
+  muscleGroups: [MuscleGroup!]!
+  isPublic: Boolean!
+  createdBy: UserPublic
+  createdAt: String!
+  updatedAt: String!
+}

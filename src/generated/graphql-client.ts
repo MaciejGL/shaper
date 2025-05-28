@@ -30,6 +30,20 @@ export type GQLAssignTrainingPlanToClientInput = {
   startDate?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type GQLBaseExercise = {
+  __typename?: 'BaseExercise';
+  createdAt: Scalars['String']['output'];
+  createdBy?: Maybe<GQLUserPublic>;
+  description?: Maybe<Scalars['String']['output']>;
+  equipment?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  isPublic: Scalars['Boolean']['output'];
+  muscleGroups: Array<GQLMuscleGroup>;
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+  videoUrl?: Maybe<Scalars['String']['output']>;
+};
+
 export type GQLCoachingRequest = {
   __typename?: 'CoachingRequest';
   createdAt: Scalars['String']['output'];
@@ -148,6 +162,27 @@ export enum GQLGoal {
   LoseWeight = 'LOSE_WEIGHT',
   Maintain = 'MAINTAIN'
 }
+
+export type GQLMuscleGroup = {
+  __typename?: 'MuscleGroup';
+  alias?: Maybe<Scalars['String']['output']>;
+  category: GQLMuscleGroupCategory;
+  createdAt: Scalars['String']['output'];
+  exercises: Array<GQLBaseExercise>;
+  groupSlug: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isPrimary: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+};
+
+export type GQLMuscleGroupCategory = {
+  __typename?: 'MuscleGroupCategory';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  muscles: Array<GQLMuscleGroup>;
+  name: Scalars['String']['output'];
+  slug: Scalars['String']['output'];
+};
 
 export type GQLMutation = {
   __typename?: 'Mutation';

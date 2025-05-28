@@ -31,6 +31,20 @@ export type GQLAssignTrainingPlanToClientInput = {
   startDate?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type GQLBaseExercise = {
+  __typename?: 'BaseExercise';
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  createdBy?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
+  description?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  equipment?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  isPublic: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  muscleGroups: EntireFieldWrapper<Array<GQLMuscleGroup>>;
+  name: EntireFieldWrapper<Scalars['String']['output']>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  videoUrl?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+};
+
 export type GQLCoachingRequest = {
   __typename?: 'CoachingRequest';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -149,6 +163,27 @@ export enum GQLGoal {
   LoseWeight = 'LOSE_WEIGHT',
   Maintain = 'MAINTAIN'
 }
+
+export type GQLMuscleGroup = {
+  __typename?: 'MuscleGroup';
+  alias?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  category: EntireFieldWrapper<GQLMuscleGroupCategory>;
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  exercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
+  groupSlug: EntireFieldWrapper<Scalars['String']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  isPrimary: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  name: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
+export type GQLMuscleGroupCategory = {
+  __typename?: 'MuscleGroupCategory';
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  muscles: EntireFieldWrapper<Array<GQLMuscleGroup>>;
+  name: EntireFieldWrapper<Scalars['String']['output']>;
+  slug: EntireFieldWrapper<Scalars['String']['output']>;
+};
 
 export type GQLMutation = {
   __typename?: 'Mutation';
@@ -694,6 +729,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type GQLResolversTypes = {
   ActivityLevel: GQLActivityLevel;
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
+  BaseExercise: ResolverTypeWrapper<GQLBaseExercise>;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   CoachingRequest: ResolverTypeWrapper<GQLCoachingRequest>;
   CoachingRequestStatus: GQLCoachingRequestStatus;
@@ -712,6 +748,8 @@ export type GQLResolversTypes = {
   Goal: GQLGoal;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  MuscleGroup: ResolverTypeWrapper<GQLMuscleGroup>;
+  MuscleGroupCategory: ResolverTypeWrapper<GQLMuscleGroupCategory>;
   Mutation: ResolverTypeWrapper<{}>;
   Note: ResolverTypeWrapper<GQLNote>;
   Notification: ResolverTypeWrapper<GQLNotification>;
@@ -742,6 +780,7 @@ export type GQLResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type GQLResolversParentTypes = {
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
+  BaseExercise: GQLBaseExercise;
   Boolean: Scalars['Boolean']['output'];
   CoachingRequest: GQLCoachingRequest;
   CreateExerciseSetInput: GQLCreateExerciseSetInput;
@@ -757,6 +796,8 @@ export type GQLResolversParentTypes = {
   Float: Scalars['Float']['output'];
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
+  MuscleGroup: GQLMuscleGroup;
+  MuscleGroupCategory: GQLMuscleGroupCategory;
   Mutation: {};
   Note: GQLNote;
   Notification: GQLNotification;
@@ -779,6 +820,20 @@ export type GQLResolversParentTypes = {
   UserProfile: GQLUserProfile;
   UserPublic: GQLUserPublic;
   UserSession: GQLUserSession;
+};
+
+export type GQLBaseExerciseResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['BaseExercise'] = GQLResolversParentTypes['BaseExercise']> = {
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  createdBy?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
+  description?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  equipment?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  isPublic?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  muscleGroups?: Resolver<Array<GQLResolversTypes['MuscleGroup']>, ParentType, ContextType>;
+  name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  videoUrl?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLCoachingRequestResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['CoachingRequest'] = GQLResolversParentTypes['CoachingRequest']> = {
@@ -822,6 +877,27 @@ export type GQLExerciseSetLogResolvers<ContextType = any, ParentType extends GQL
   reps?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weight?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLMuscleGroupResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['MuscleGroup'] = GQLResolversParentTypes['MuscleGroup']> = {
+  alias?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  category?: Resolver<GQLResolversTypes['MuscleGroupCategory'], ParentType, ContextType>;
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  exercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType>;
+  groupSlug?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  isPrimary?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLMuscleGroupCategoryResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['MuscleGroupCategory'] = GQLResolversParentTypes['MuscleGroupCategory']> = {
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  muscles?: Resolver<Array<GQLResolversTypes['MuscleGroup']>, ParentType, ContextType>;
+  name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  slug?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1034,10 +1110,13 @@ export type GQLUserSessionResolvers<ContextType = any, ParentType extends GQLRes
 };
 
 export type GQLResolvers<ContextType = any> = {
+  BaseExercise?: GQLBaseExerciseResolvers<ContextType>;
   CoachingRequest?: GQLCoachingRequestResolvers<ContextType>;
   ExerciseLog?: GQLExerciseLogResolvers<ContextType>;
   ExerciseSet?: GQLExerciseSetResolvers<ContextType>;
   ExerciseSetLog?: GQLExerciseSetLogResolvers<ContextType>;
+  MuscleGroup?: GQLMuscleGroupResolvers<ContextType>;
+  MuscleGroupCategory?: GQLMuscleGroupCategoryResolvers<ContextType>;
   Mutation?: GQLMutationResolvers<ContextType>;
   Note?: GQLNoteResolvers<ContextType>;
   Notification?: GQLNotificationResolvers<ContextType>;
