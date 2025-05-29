@@ -1,6 +1,6 @@
 'use client'
 
-import { Edit, Lock, MoreHorizontal, Trash2, Users } from 'lucide-react'
+import { Edit, MoreHorizontal, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -22,6 +22,7 @@ import {
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
+import { translateEquipment } from '@/utils/translate-equipment'
 
 import { CreateExerciseDialog } from './create-exercise-dialog'
 
@@ -75,35 +76,37 @@ export function ExerciseCard({
                 {exercise.name}
               </CardTitle>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  disabled={isLoading}
-                  variant="ghost"
-                  size="icon-xs"
-                  iconOnly={<MoreHorizontal />}
-                />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
-                  <Edit className="size-4 mr-2" />
-                  Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleDelete}
-                  className="text-destructive"
-                  disabled={isDeletingExercise}
-                  loading={isDeletingExercise}
-                >
-                  <Trash2 className="size-4 mr-2" />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {!exercise.isPublic && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    disabled={isLoading}
+                    variant="ghost"
+                    size="icon-xs"
+                    iconOnly={<MoreHorizontal />}
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+                    <Edit className="size-4 mr-2" />
+                    Edit
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleDelete}
+                    className="text-destructive"
+                    disabled={isDeletingExercise}
+                    loading={isDeletingExercise}
+                  >
+                    <Trash2 className="size-4 mr-2" />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </CardHeader>
 
-        <CardContent className="flex-1 flex flex-col gap-2">
+        <CardContent className="flex-1 flex flex-col justify-between gap-2">
           {exercise.description && (
             <p
               className={cn(
@@ -115,43 +118,24 @@ export function ExerciseCard({
             </p>
           )}
 
-          <div className="flex flex-wrap gap-1">
-            {exercise.equipment && (
-              <Badge
-                variant="outline"
-                className="capitalize"
-                isLoading={isLoading}
-              >
-                {exercise.equipment.toLowerCase()}
-              </Badge>
-            )}
-            {exercise.isPublic ? (
-              <Badge
-                variant="secondary"
-                className="flex items-center gap-1"
-                isLoading={isLoading}
-              >
-                <Users className="h-3 w-3" />
-                Public
-              </Badge>
-            ) : (
-              <Badge
-                variant="outline"
-                className="flex items-center gap-1"
-                isLoading={isLoading}
-              >
-                <Lock className="h-3 w-3" />
-                Private
-              </Badge>
-            )}
-            {exercise.videoUrl && (
-              <Badge variant="outline" isLoading={isLoading}>
-                Video
-              </Badge>
-            )}
-          </div>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap gap-1">
+              {exercise.equipment && (
+                <Badge
+                  variant="outline"
+                  className="capitalize"
+                  isLoading={isLoading}
+                >
+                  {translateEquipment(exercise.equipment)}
+                </Badge>
+              )}
 
-          <div className="mt-auto">
+              {exercise.videoUrl && (
+                <Badge variant="outline" isLoading={isLoading}>
+                  Video
+                </Badge>
+              )}
+            </div>
             <div className="flex flex-wrap gap-1">
               {exercise.muscleGroups.slice(0, 3).map((muscle) => (
                 <Badge key={muscle.id} variant="default" isLoading={isLoading}>
@@ -168,12 +152,14 @@ export function ExerciseCard({
         </CardContent>
       </Card>
 
-      <CreateExerciseDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        exercise={exercise}
-        categories={categories}
-      />
+      {!exercise.isPublic && (
+        <CreateExerciseDialog
+          open={isEditDialogOpen}
+          onOpenChange={setIsEditDialogOpen}
+          exercise={exercise}
+          categories={categories}
+        />
+      )}
     </AnimatedGridItem>
   )
 }
