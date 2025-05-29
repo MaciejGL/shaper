@@ -48,5 +48,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  return yoga.handleRequest(request, {})
+  const response = await yoga.handleRequest(request, {})
+  response.headers.set('Access-Control-Allow-Origin', 'https://fit-space.app')
+  response.headers.set('Access-Control-Allow-Credentials', 'true')
+  return response
 }
