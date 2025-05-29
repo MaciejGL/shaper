@@ -76,6 +76,7 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
+  --masked-placeholder-text: oklch(0.92 0.004 286.32);
 }
 
 .dark {
@@ -110,6 +111,7 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
+  --masked-placeholder-text: oklch(0.274 0.006 286.033);
 }
 
 @layer base {
@@ -122,13 +124,14 @@
 }
 
 @utility masked-placeholder-text {
-  animation: pulse 1s infinite;
-  color: transparent;
+  animation: pulse 2s infinite;
+  color: transparent !important;
   & * {
     color: transparent !important;
   }
   user-select: none;
-  background-color: hsl(var(--muted-foreground));
+  background-color: var(--masked-placeholder-text);
+  border-radius: var(--radius-xs);
 }
 
 @utility flex-center {

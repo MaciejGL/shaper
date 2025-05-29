@@ -22,7 +22,7 @@ const loaderVariants = cva('flex justify-center items-center h-full', {
 export function Loader({ size = 'md' }: LoaderProps) {
   return (
     <div className={cn(loaderVariants({ size }))}>
-      <Loader2Icon className="animate-spin" />
+      <Loader2Icon className="animate-spin text-muted-foreground" />
     </div>
   )
 }

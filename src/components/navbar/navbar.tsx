@@ -10,8 +10,7 @@ import {
   Users2Icon,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
-import { useTheme } from 'next-themes'
-import Image from 'next/image'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
@@ -19,6 +18,7 @@ import { useNotificationsQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
+import { AnimatedLogo, AnimatedLogoText } from '../animated-logo'
 import { Divider } from '../divider'
 import { ModeToggle } from '../mode-toggle'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
@@ -44,7 +44,6 @@ export const Navbar = ({
   user?: UserWithSession | null
   withSidebar?: boolean
 }) => {
-  const { theme } = useTheme()
   const { data: notifications } = useNotificationsQuery(
     {
       userId: user!.user.id!,
@@ -56,23 +55,25 @@ export const Navbar = ({
       refetchInterval: 100000,
     },
   )
+  const linkToDashboard =
+    user?.user?.role === 'TRAINER'
+      ? TRAINER_LINKS.dashboard.href
+      : CLIENT_LINKS.dashboard.href
   return (
     <div
       className={cn(
         'sticky z-[1] top-0 py-3 px-4 flex justify-between items-center bg-background shadow-[2px_1px_3px_0px_rgba(0,0,0,0.1)]',
       )}
     >
-      {withSidebar && <SidebarTrigger />}
-      {!withSidebar && (
-        <Image
-          src={
-            theme === 'dark' ? '/icons/logo-light.svg' : '/icons/logo-dark.svg'
-          }
-          alt="Fitspace"
-          width={36}
-          height={36}
-        />
-      )}
+      <div className="flex items-center gap-2">
+        {withSidebar && <SidebarTrigger />}
+        <Link href={linkToDashboard}>
+          <div className="flex items-center">
+            <AnimatedLogo infinite={false} size={32} />
+            <AnimatedLogoText />
+          </div>
+        </Link>
+      </div>
       <div className="flex items-center gap-2">
         {user && (
           <NotificationBell

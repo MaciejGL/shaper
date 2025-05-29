@@ -1,0 +1,12 @@
+type MuscleGroupCategory {
+  id: ID!
+  name: String!
+  slug: String!
+  createdAt: String!
+  muscles: [MuscleGroup!]!
+}
+
+type Query {
+  muscleGroupCategories: [MuscleGroupCategory!]!
+  muscleGroupCategory(id: ID!): MuscleGroupCategory!
+}

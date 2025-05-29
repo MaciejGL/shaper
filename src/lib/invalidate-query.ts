@@ -1,14 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query'
 
 import { Exact } from '@/generated/graphql-client'
-import { Scalars } from '@/generated/graphql-client'
 
-type QueryKey = (
-  | string
-  | Exact<{
-      id: Scalars['ID']['input']
-    }>
-)[]
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type QueryKey = (string | Exact<any>)[]
 
 type InvalidateQueryParams =
   | { queryKey: QueryKey; queryKeys?: never }

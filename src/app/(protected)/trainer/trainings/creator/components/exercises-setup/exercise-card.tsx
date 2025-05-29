@@ -1,4 +1,4 @@
-import { Edit, GaugeIcon, GripVertical, TimerIcon, Trash2 } from 'lucide-react'
+import { Edit, GaugeIcon, TimerIcon, Trash2 } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -11,7 +11,6 @@ type ExerciseCardProps = {
   index: number
   onEdit: (index: number) => void
   onRemove: (index: number) => void
-  onMove: (index: number, direction: 'up' | 'down') => void
 }
 
 export function ExerciseCard({
@@ -19,22 +18,10 @@ export function ExerciseCard({
   index,
   onEdit,
   onRemove,
-  onMove,
 }: ExerciseCardProps) {
   return (
-    <Card className="relative">
-      <div className="absolute left-2 top-1/2 -translate-y-1/2 flex flex-col space-y-1">
-        <Button
-          variant="ghost"
-          size="icon-md"
-          className="h-6 w-6"
-          onClick={() => onMove(index, 'up')}
-          disabled={index === 0}
-        >
-          <GripVertical className="h-4 w-4" />
-        </Button>
-      </div>
-      <CardHeader className="pb-2 pl-10">
+    <Card>
+      <CardHeader>
         <div className="flex justify-between items-start">
           <CardTitle className="text-base">{exercise.name}</CardTitle>
           <div className="flex gap-1">
@@ -42,20 +29,18 @@ export function ExerciseCard({
               variant="ghost"
               size="icon-md"
               onClick={() => onEdit(index)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
+              iconOnly={<Edit />}
+            />
             <Button
               variant="ghost"
               size="icon-md"
               onClick={() => onRemove(index)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+              iconOnly={<Trash2 />}
+            />
           </div>
         </div>
       </CardHeader>
-      <CardContent className="pl-10">
+      <CardContent>
         <div className="space-y-2">
           <div className="grid grid-cols-3 gap-2 text-sm">
             {exercise.sets.map((set) => (

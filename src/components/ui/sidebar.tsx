@@ -264,10 +264,10 @@ function SidebarTrigger({
     <Button
       data-sidebar="trigger"
       data-slot="sidebar-trigger"
-      variant="ghost"
+      variant="link"
       size="icon-md"
       className={cn(
-        'opacity-60 hover:opacity-100 transition-opacity',
+        'opacity-60 hover:opacity-100 transition-opacity -ml-4',
         className,
       )}
       onClick={(event) => {

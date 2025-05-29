@@ -62,7 +62,7 @@ function Button({
     iconOnly?: React.ReactNode
   }) {
   const Comp = asChild ? Slot : 'button'
-
+  const defaultSize = size || iconOnly ? 'icon-md' : 'md'
   return (
     <Comp
       data-slot="button"
@@ -70,7 +70,7 @@ function Button({
       className={cn(
         buttonVariants({
           variant,
-          size: size,
+          size: defaultSize,
           className,
         }),
       )}

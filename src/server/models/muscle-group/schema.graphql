@@ -1,0 +1,10 @@
+type MuscleGroup {
+  id: ID!
+  name: String!
+  alias: String
+  groupSlug: String!
+  isPrimary: Boolean!
+  createdAt: String!
+  category: MuscleGroupCategory!
+  exercises: [BaseExercise!]!
+}
