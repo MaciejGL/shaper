@@ -14,10 +14,9 @@ const yoga = createYoga({
   graphqlEndpoint: '/api/graphql',
   schema: schema,
   cors: {
-    origin: 'https://fit-space.app',
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: ['https://fit-space.app'],
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'credentials'],
   },
   logging: 'debug',
   async context() {
@@ -27,7 +26,7 @@ const yoga = createYoga({
     }
   },
 })
-// Handler wrapper for Next.js API routes
+
 export async function GET(request: Request) {
   return yoga.handleRequest(request, {})
 }
