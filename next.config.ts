@@ -12,7 +12,10 @@ const nextConfig: NextConfig = {
           },
           { key: 'Access-Control-Allow-Credentials', value: 'true' },
           { key: 'Access-Control-Allow-Methods', value: 'GET, POST, OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type' },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization, credentials',
+          },
         ],
       },
       {
@@ -29,7 +32,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Access-Control-Allow-Headers',
-            value: 'X-Requested-With, Content-Type, Authorization',
+            value: 'X-Requested-With, Content-Type, Authorization, credentials',
           },
           {
             key: 'Access-Control-Allow-Credentials',
