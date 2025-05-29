@@ -1,0 +1,134 @@
+'use client'
+
+import { motion } from 'framer-motion'
+
+import { cn } from '@/lib/utils'
+
+export function AnimatedLogo({
+  infinite = true,
+  size = 200,
+  forceColor = 'text-primary',
+}: {
+  infinite?: boolean
+  size?: number
+  forceColor?: string
+}) {
+  // Animation variants for the paths
+  const containerVariants = {
+    initial: {},
+    animate: {
+      transition: {
+        staggerChildren: 0.1, // Faster stagger for spring effect
+        delayChildren: 0.05, // Quick start
+      },
+    },
+  }
+
+  const pathVariants = {
+    initial: {
+      scale: 0.9, // Start from slightly smaller size
+    },
+    animate: (custom: number) => ({
+      fillOpacity: 1,
+      scale: [0.9, 1.05, 0.9], // Pulse between 0.9 and 1.05
+      transition: {
+        // Continuous pulse animation
+        scale: {
+          duration: 1, // One complete pulse cycle takes 2 seconds
+          repeat: infinite ? Infinity : 0, // Repeat indefinitely
+          repeatType: 'reverse', // Smoothly reverse the animation
+          ease: 'easeInOut', // Smooth easing
+          delay: custom * 0.1, // Stagger the pulse effect
+        },
+        // Fade in quickly
+        fillOpacity: {
+          duration: 0.3,
+          delay: custom * 0.15,
+          ease: 'easeOut',
+        },
+      },
+    }),
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center gap-6">
+      <motion.svg
+        width={size}
+        height={size}
+        viewBox="0 0 100 100"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        variants={containerVariants}
+        initial="initial"
+        animate="animate"
+      >
+        <motion.g style={{ transformOrigin: '50px 50px' }}>
+          <motion.path
+            d="M50 95C44.0905 95 38.2389 93.836 32.7792 91.5746C27.3196 89.3131 22.3588 85.9984 18.1802 81.8198C14.0016 77.6412 10.6869 72.6804 8.42542 67.2208C6.16396 61.7611 5 55.9095 5 50L10.9999 50C10.9999 55.1216 12.0087 60.193 13.9686 64.9247C15.9285 69.6564 18.8013 73.9557 22.4228 77.5772C26.0443 81.1987 30.3436 84.0715 35.0753 86.0314C39.807 87.9913 44.8784 89.0001 50 89.0001L50 95Z"
+            fill="currentColor"
+            variants={pathVariants}
+            custom={0} // Outer layer
+            className={forceColor}
+          />
+          <motion.path
+            d="M50 83C41.2479 83 32.8542 79.5232 26.6655 73.3345C20.4768 67.1458 17 58.7521 17 50C17 41.2479 20.4768 32.8542 26.6655 26.6655C32.8542 20.4768 41.2479 17 50 17L50 22.9985C42.8388 22.9985 35.9708 25.8433 30.9071 30.9071C25.8433 35.9708 22.9985 42.8388 22.9985 50C22.9985 57.1612 25.8433 64.0292 30.9071 69.0929C35.9708 74.1567 42.8388 77.0015 50 77.0015L50 83Z"
+            fill="currentColor"
+            variants={pathVariants}
+            custom={1} // Middle layer
+            className={forceColor}
+          />
+          <motion.path
+            d="M50 71C45.8466 71 41.7865 69.7684 38.333 67.4609C34.8796 65.1534 32.188 61.8736 30.5985 58.0364C29.0091 54.1991 28.5932 49.9767 29.4035 45.9031C30.2138 41.8295 32.2139 38.0877 35.1508 35.1508C38.0877 32.2139 41.8295 30.2138 45.9031 29.4035C49.9767 28.5932 54.1991 29.0091 58.0364 30.5985C61.8736 32.188 65.1534 34.8796 67.4609 38.333C69.7684 41.7865 71 45.8466 71 50L50 50L50 71Z"
+            fill="currentColor"
+            variants={pathVariants}
+            custom={2} // Inner layer
+            className={forceColor}
+          />
+        </motion.g>
+      </motion.svg>
+    </div>
+  )
+}
+
+export function AnimatedLogoText({ className }: { className?: string }) {
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={{
+        visible: {
+          transition: {
+            staggerChildren: 0.1,
+          },
+        },
+      }}
+      className={cn('text-md font-medium', className)}
+    >
+      {'Fitspace'.split('').map((letter, index) => (
+        <motion.span
+          key={index}
+          variants={{
+            hidden: {
+              opacity: 0,
+              y: -20,
+              scale: 0.8,
+            },
+            visible: {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              transition: {
+                type: 'spring',
+                stiffness: 200,
+                damping: 15,
+              },
+            },
+          }}
+          className="inline-block"
+        >
+          {letter}
+        </motion.span>
+      ))}
+    </motion.div>
+  )
+}

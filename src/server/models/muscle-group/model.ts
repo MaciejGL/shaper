@@ -1,10 +1,10 @@
 import { MuscleGroup as PrismaMuscleGroup } from '@prisma/client'
 
 import { GQLMuscleGroup } from '@/generated/graphql-server'
-import MuscleGroupCategory from '../muscle-group-category/model'
 import { prisma } from '@/lib/db'
-import BaseExercise from '../base-exercise/model'
 
+import BaseExercise from '../base-exercise/model'
+import MuscleGroupCategory from '../muscle-group-category/model'
 
 export default class MuscleGroup implements GQLMuscleGroup {
   constructor(protected data: PrismaMuscleGroup) {}
@@ -13,11 +13,10 @@ export default class MuscleGroup implements GQLMuscleGroup {
     return this.data.id
   }
 
-  
   get name() {
     return this.data.name
   }
-  
+
   get alias() {
     return this.data.alias
   }
@@ -50,6 +49,13 @@ export default class MuscleGroup implements GQLMuscleGroup {
         muscleGroups: {
           some: {
             id: this.data.id,
+          },
+        },
+      },
+      include: {
+        muscleGroups: {
+          include: {
+            category: true,
           },
         },
       },

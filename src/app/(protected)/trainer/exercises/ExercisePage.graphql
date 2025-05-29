@@ -1,0 +1,101 @@
+query MuscleGroupCategories {
+  muscleGroupCategories {
+    id
+    name
+    slug
+    muscles {
+      id
+      name
+      alias
+      groupSlug
+      isPrimary
+    }
+  }
+}
+
+query TrainerExercises($where: ExerciseWhereInput) {
+  userExercises(where: $where) {
+    id
+    name
+    description
+    videoUrl
+    equipment
+    isPublic
+    muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+  }
+
+  publicExercises(where: $where) {
+    id
+    name
+    description
+    videoUrl
+    equipment
+    isPublic
+    muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+  }
+}
+
+query PublicExercises($where: ExerciseWhereInput) {
+  publicExercises(where: $where) {
+    id
+    name
+    description
+    videoUrl
+    equipment
+    isPublic
+    muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+    # muscleGroupCategories {
+    #   id
+    #   name
+    #   slug
+    # }
+  }
+}
+
+query Exercise($id: ID!) {
+  exercise(id: $id) {
+    id
+    name
+    description
+    videoUrl
+    equipment
+    isPublic
+    muscleGroups {
+      id
+      name
+      alias
+    }
+    # muscleGroupCategories {
+    #   id
+    #   name
+    #   slug
+    # }
+  }
+}
+
+mutation CreateExercise($input: CreateExerciseInput!) {
+  createExercise(input: $input)
+}
+
+mutation UpdateExercise($id: ID!, $input: UpdateExerciseInput!) {
+  updateExercise(id: $id, input: $input)
+}
+
+mutation DeleteExercise($id: ID!) {
+  deleteExercise(id: $id)
+}

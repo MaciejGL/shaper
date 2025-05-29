@@ -35,9 +35,10 @@ export type GQLBaseExercise = {
   createdAt: Scalars['String']['output'];
   createdBy?: Maybe<GQLUserPublic>;
   description?: Maybe<Scalars['String']['output']>;
-  equipment?: Maybe<Scalars['String']['output']>;
+  equipment?: Maybe<GQLEquipment>;
   id: Scalars['ID']['output'];
   isPublic: Scalars['Boolean']['output'];
+  muscleGroupCategories: Array<GQLMuscleGroupCategory>;
   muscleGroups: Array<GQLMuscleGroup>;
   name: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
@@ -61,6 +62,14 @@ export enum GQLCoachingRequestStatus {
   Pending = 'PENDING',
   Rejected = 'REJECTED'
 }
+
+export type GQLCreateExerciseInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  equipment?: InputMaybe<GQLEquipment>;
+  muscleGroups: Array<Scalars['ID']['input']>;
+  name: Scalars['String']['input'];
+  videoUrl?: InputMaybe<Scalars['String']['input']>;
+};
 
 export type GQLCreateExerciseSetInput = {
   order: Scalars['Int']['input'];
@@ -113,6 +122,19 @@ export type GQLCreateTrainingWeekInput = {
   weekNumber: Scalars['Int']['input'];
 };
 
+export enum GQLEquipment {
+  Band = 'BAND',
+  Barbell = 'BARBELL',
+  Bodyweight = 'BODYWEIGHT',
+  Cable = 'CABLE',
+  Dumbbell = 'DUMBBELL',
+  Machine = 'MACHINE',
+  MedicineBall = 'MEDICINE_BALL',
+  Other = 'OTHER',
+  TrapBar = 'TRAP_BAR',
+  Wheel = 'WHEEL'
+}
+
 export type GQLExerciseLog = {
   __typename?: 'ExerciseLog';
   createdAt: Scalars['String']['output'];
@@ -144,6 +166,11 @@ export type GQLExerciseSetLog = {
   reps: Scalars['Int']['output'];
   updatedAt: Scalars['String']['output'];
   weight: Scalars['Float']['output'];
+};
+
+export type GQLExerciseWhereInput = {
+  equipment?: InputMaybe<GQLEquipment>;
+  muscleGroups?: InputMaybe<Array<Scalars['ID']['input']>>;
 };
 
 export enum GQLFitnessLevel {
@@ -190,9 +217,11 @@ export type GQLMutation = {
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   createCoachingRequest: GQLCoachingRequest;
+  createExercise: Scalars['Boolean']['output'];
   createNote: GQLNote;
   createNotification: GQLNotification;
   createTrainingPlan: Scalars['Boolean']['output'];
+  deleteExercise: Scalars['Boolean']['output'];
   deleteNote: Scalars['Boolean']['output'];
   deleteNotification: Scalars['Boolean']['output'];
   deleteTrainingPlan: Scalars['Boolean']['output'];
@@ -201,6 +230,7 @@ export type GQLMutation = {
   markNotificationRead: GQLNotification;
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
   removeTrainingPlanFromClient: Scalars['Boolean']['output'];
+  updateExercise: Scalars['Boolean']['output'];
   updateNote: GQLNote;
   updateNotification: GQLNotification;
   updateProfile?: Maybe<GQLUserProfile>;
@@ -229,6 +259,11 @@ export type GQLMutationCreateCoachingRequestArgs = {
 };
 
 
+export type GQLMutationCreateExerciseArgs = {
+  input: GQLCreateExerciseInput;
+};
+
+
 export type GQLMutationCreateNoteArgs = {
   input: GQLCreateNoteInput;
 };
@@ -241,6 +276,11 @@ export type GQLMutationCreateNotificationArgs = {
 
 export type GQLMutationCreateTrainingPlanArgs = {
   input: GQLCreateTrainingPlanInput;
+};
+
+
+export type GQLMutationDeleteExerciseArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -282,6 +322,12 @@ export type GQLMutationRejectCoachingRequestArgs = {
 export type GQLMutationRemoveTrainingPlanFromClientArgs = {
   clientId: Scalars['ID']['input'];
   planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationUpdateExerciseArgs = {
+  id: Scalars['ID']['input'];
+  input: GQLUpdateExerciseInput;
 };
 
 
@@ -340,20 +386,30 @@ export type GQLQuery = {
   __typename?: 'Query';
   coachingRequest?: Maybe<GQLCoachingRequest>;
   coachingRequests: Array<GQLCoachingRequest>;
+  exercise?: Maybe<GQLBaseExercise>;
   getClientTrainingPlans: Array<GQLTrainingPlan>;
   getTemplates: Array<GQLTrainingPlan>;
   getTrainingPlanById: GQLTrainingPlan;
+  muscleGroupCategories: Array<GQLMuscleGroupCategory>;
+  muscleGroupCategory: GQLMuscleGroupCategory;
   note?: Maybe<GQLNote>;
   notes: Array<GQLNote>;
   notification?: Maybe<GQLNotification>;
   notifications: Array<GQLNotification>;
   profile?: Maybe<GQLUserProfile>;
+  publicExercises: Array<GQLBaseExercise>;
   user?: Maybe<GQLUser>;
+  userExercises: Array<GQLBaseExercise>;
   userPublic?: Maybe<GQLUserPublic>;
 };
 
 
 export type GQLQueryCoachingRequestArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryExerciseArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -369,6 +425,11 @@ export type GQLQueryGetTemplatesArgs = {
 
 
 export type GQLQueryGetTrainingPlanByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryMuscleGroupCategoryArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -395,6 +456,16 @@ export type GQLQueryNotificationsArgs = {
   take?: InputMaybe<Scalars['Int']['input']>;
   type?: InputMaybe<GQLNotificationType>;
   userId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryPublicExercisesArgs = {
+  where?: InputMaybe<GQLExerciseWhereInput>;
+};
+
+
+export type GQLQueryUserExercisesArgs = {
+  where?: InputMaybe<GQLExerciseWhereInput>;
 };
 
 
@@ -464,6 +535,14 @@ export type GQLTrainingWeek = {
   trainingPlanId: Scalars['ID']['output'];
   updatedAt: Scalars['String']['output'];
   weekNumber: Scalars['Int']['output'];
+};
+
+export type GQLUpdateExerciseInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  equipment?: InputMaybe<GQLEquipment>;
+  muscleGroups: Array<Scalars['ID']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GQLUpdateExerciseSetInput = {
@@ -693,6 +772,54 @@ export type GQLUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GQLUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, createdAt: string, updatedAt: string, bodyMeasures: Array<{ __typename?: 'UserBodyMeasure', id: string, weight?: number | undefined | null, height?: number | undefined | null, chest?: number | undefined | null, waist?: number | undefined | null, hips?: number | undefined | null, neck?: number | undefined | null, biceps?: number | undefined | null, thigh?: number | undefined | null, calf?: number | undefined | null, bodyFat?: number | undefined | null, notes?: string | undefined | null }> } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string } | undefined | null, clients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string }>, sessions: Array<{ __typename?: 'UserSession', id: string, createdAt: string, expiresAt: string }> } | undefined | null };
+
+export type GQLMuscleGroupCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLMuscleGroupCategoriesQuery = { __typename?: 'Query', muscleGroupCategories: Array<{ __typename?: 'MuscleGroupCategory', id: string, name: string, slug: string, muscles: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string, isPrimary: boolean }> }> };
+
+export type GQLTrainerExercisesQueryVariables = Exact<{
+  where?: InputMaybe<GQLExerciseWhereInput>;
+}>;
+
+
+export type GQLTrainerExercisesQuery = { __typename?: 'Query', userExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }> }>, publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }> }> };
+
+export type GQLPublicExercisesQueryVariables = Exact<{
+  where?: InputMaybe<GQLExerciseWhereInput>;
+}>;
+
+
+export type GQLPublicExercisesQuery = { __typename?: 'Query', publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }> }> };
+
+export type GQLExerciseQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLExerciseQuery = { __typename?: 'Query', exercise?: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }> } | undefined | null };
+
+export type GQLCreateExerciseMutationVariables = Exact<{
+  input: GQLCreateExerciseInput;
+}>;
+
+
+export type GQLCreateExerciseMutation = { __typename?: 'Mutation', createExercise: boolean };
+
+export type GQLUpdateExerciseMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: GQLUpdateExerciseInput;
+}>;
+
+
+export type GQLUpdateExerciseMutation = { __typename?: 'Mutation', updateExercise: boolean };
+
+export type GQLDeleteExerciseMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLDeleteExerciseMutation = { __typename?: 'Mutation', deleteExercise: boolean };
 
 export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, instructions?: string | undefined | null, order: number, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps: number, weight?: number | undefined | null }> }> }> }> };
 
@@ -1246,6 +1373,333 @@ useInfiniteUserQuery.getKey = (variables?: GQLUserQueryVariables) => variables =
 
 
 useUserQuery.fetcher = (variables?: GQLUserQueryVariables, options?: RequestInit['headers']) => fetchData<GQLUserQuery, GQLUserQueryVariables>(UserDocument, variables, options);
+
+export const MuscleGroupCategoriesDocument = `
+    query MuscleGroupCategories {
+  muscleGroupCategories {
+    id
+    name
+    slug
+    muscles {
+      id
+      name
+      alias
+      groupSlug
+      isPrimary
+    }
+  }
+}
+    `;
+
+export const useMuscleGroupCategoriesQuery = <
+      TData = GQLMuscleGroupCategoriesQuery,
+      TError = unknown
+    >(
+      variables?: GQLMuscleGroupCategoriesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLMuscleGroupCategoriesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLMuscleGroupCategoriesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLMuscleGroupCategoriesQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['MuscleGroupCategories'] : ['MuscleGroupCategories', variables],
+    queryFn: fetchData<GQLMuscleGroupCategoriesQuery, GQLMuscleGroupCategoriesQueryVariables>(MuscleGroupCategoriesDocument, variables),
+    ...options
+  }
+    )};
+
+useMuscleGroupCategoriesQuery.getKey = (variables?: GQLMuscleGroupCategoriesQueryVariables) => variables === undefined ? ['MuscleGroupCategories'] : ['MuscleGroupCategories', variables];
+
+export const useInfiniteMuscleGroupCategoriesQuery = <
+      TData = InfiniteData<GQLMuscleGroupCategoriesQuery>,
+      TError = unknown
+    >(
+      variables: GQLMuscleGroupCategoriesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLMuscleGroupCategoriesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLMuscleGroupCategoriesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLMuscleGroupCategoriesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['MuscleGroupCategories.infinite'] : ['MuscleGroupCategories.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLMuscleGroupCategoriesQuery, GQLMuscleGroupCategoriesQueryVariables>(MuscleGroupCategoriesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteMuscleGroupCategoriesQuery.getKey = (variables?: GQLMuscleGroupCategoriesQueryVariables) => variables === undefined ? ['MuscleGroupCategories.infinite'] : ['MuscleGroupCategories.infinite', variables];
+
+
+useMuscleGroupCategoriesQuery.fetcher = (variables?: GQLMuscleGroupCategoriesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMuscleGroupCategoriesQuery, GQLMuscleGroupCategoriesQueryVariables>(MuscleGroupCategoriesDocument, variables, options);
+
+export const TrainerExercisesDocument = `
+    query TrainerExercises($where: ExerciseWhereInput) {
+  userExercises(where: $where) {
+    id
+    name
+    description
+    videoUrl
+    equipment
+    isPublic
+    muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+  }
+  publicExercises(where: $where) {
+    id
+    name
+    description
+    videoUrl
+    equipment
+    isPublic
+    muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+  }
+}
+    `;
+
+export const useTrainerExercisesQuery = <
+      TData = GQLTrainerExercisesQuery,
+      TError = unknown
+    >(
+      variables?: GQLTrainerExercisesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLTrainerExercisesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLTrainerExercisesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLTrainerExercisesQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['TrainerExercises'] : ['TrainerExercises', variables],
+    queryFn: fetchData<GQLTrainerExercisesQuery, GQLTrainerExercisesQueryVariables>(TrainerExercisesDocument, variables),
+    ...options
+  }
+    )};
+
+useTrainerExercisesQuery.getKey = (variables?: GQLTrainerExercisesQueryVariables) => variables === undefined ? ['TrainerExercises'] : ['TrainerExercises', variables];
+
+export const useInfiniteTrainerExercisesQuery = <
+      TData = InfiniteData<GQLTrainerExercisesQuery>,
+      TError = unknown
+    >(
+      variables: GQLTrainerExercisesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLTrainerExercisesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLTrainerExercisesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLTrainerExercisesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['TrainerExercises.infinite'] : ['TrainerExercises.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLTrainerExercisesQuery, GQLTrainerExercisesQueryVariables>(TrainerExercisesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteTrainerExercisesQuery.getKey = (variables?: GQLTrainerExercisesQueryVariables) => variables === undefined ? ['TrainerExercises.infinite'] : ['TrainerExercises.infinite', variables];
+
+
+useTrainerExercisesQuery.fetcher = (variables?: GQLTrainerExercisesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLTrainerExercisesQuery, GQLTrainerExercisesQueryVariables>(TrainerExercisesDocument, variables, options);
+
+export const PublicExercisesDocument = `
+    query PublicExercises($where: ExerciseWhereInput) {
+  publicExercises(where: $where) {
+    id
+    name
+    description
+    videoUrl
+    equipment
+    isPublic
+    muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+  }
+}
+    `;
+
+export const usePublicExercisesQuery = <
+      TData = GQLPublicExercisesQuery,
+      TError = unknown
+    >(
+      variables?: GQLPublicExercisesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLPublicExercisesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLPublicExercisesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLPublicExercisesQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['PublicExercises'] : ['PublicExercises', variables],
+    queryFn: fetchData<GQLPublicExercisesQuery, GQLPublicExercisesQueryVariables>(PublicExercisesDocument, variables),
+    ...options
+  }
+    )};
+
+usePublicExercisesQuery.getKey = (variables?: GQLPublicExercisesQueryVariables) => variables === undefined ? ['PublicExercises'] : ['PublicExercises', variables];
+
+export const useInfinitePublicExercisesQuery = <
+      TData = InfiniteData<GQLPublicExercisesQuery>,
+      TError = unknown
+    >(
+      variables: GQLPublicExercisesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLPublicExercisesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLPublicExercisesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLPublicExercisesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['PublicExercises.infinite'] : ['PublicExercises.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLPublicExercisesQuery, GQLPublicExercisesQueryVariables>(PublicExercisesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfinitePublicExercisesQuery.getKey = (variables?: GQLPublicExercisesQueryVariables) => variables === undefined ? ['PublicExercises.infinite'] : ['PublicExercises.infinite', variables];
+
+
+usePublicExercisesQuery.fetcher = (variables?: GQLPublicExercisesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLPublicExercisesQuery, GQLPublicExercisesQueryVariables>(PublicExercisesDocument, variables, options);
+
+export const ExerciseDocument = `
+    query Exercise($id: ID!) {
+  exercise(id: $id) {
+    id
+    name
+    description
+    videoUrl
+    equipment
+    isPublic
+    muscleGroups {
+      id
+      name
+      alias
+    }
+  }
+}
+    `;
+
+export const useExerciseQuery = <
+      TData = GQLExerciseQuery,
+      TError = unknown
+    >(
+      variables: GQLExerciseQueryVariables,
+      options?: Omit<UseQueryOptions<GQLExerciseQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLExerciseQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLExerciseQuery, TError, TData>(
+      {
+    queryKey: ['Exercise', variables],
+    queryFn: fetchData<GQLExerciseQuery, GQLExerciseQueryVariables>(ExerciseDocument, variables),
+    ...options
+  }
+    )};
+
+useExerciseQuery.getKey = (variables: GQLExerciseQueryVariables) => ['Exercise', variables];
+
+export const useInfiniteExerciseQuery = <
+      TData = InfiniteData<GQLExerciseQuery>,
+      TError = unknown
+    >(
+      variables: GQLExerciseQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLExerciseQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLExerciseQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLExerciseQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['Exercise.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLExerciseQuery, GQLExerciseQueryVariables>(ExerciseDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteExerciseQuery.getKey = (variables: GQLExerciseQueryVariables) => ['Exercise.infinite', variables];
+
+
+useExerciseQuery.fetcher = (variables: GQLExerciseQueryVariables, options?: RequestInit['headers']) => fetchData<GQLExerciseQuery, GQLExerciseQueryVariables>(ExerciseDocument, variables, options);
+
+export const CreateExerciseDocument = `
+    mutation CreateExercise($input: CreateExerciseInput!) {
+  createExercise(input: $input)
+}
+    `;
+
+export const useCreateExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateExerciseMutation, TError, GQLCreateExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateExerciseMutation, TError, GQLCreateExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateExercise'],
+    mutationFn: (variables?: GQLCreateExerciseMutationVariables) => fetchData<GQLCreateExerciseMutation, GQLCreateExerciseMutationVariables>(CreateExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateExerciseMutation.getKey = () => ['CreateExercise'];
+
+
+useCreateExerciseMutation.fetcher = (variables: GQLCreateExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateExerciseMutation, GQLCreateExerciseMutationVariables>(CreateExerciseDocument, variables, options);
+
+export const UpdateExerciseDocument = `
+    mutation UpdateExercise($id: ID!, $input: UpdateExerciseInput!) {
+  updateExercise(id: $id, input: $input)
+}
+    `;
+
+export const useUpdateExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateExerciseMutation, TError, GQLUpdateExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateExerciseMutation, TError, GQLUpdateExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateExercise'],
+    mutationFn: (variables?: GQLUpdateExerciseMutationVariables) => fetchData<GQLUpdateExerciseMutation, GQLUpdateExerciseMutationVariables>(UpdateExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateExerciseMutation.getKey = () => ['UpdateExercise'];
+
+
+useUpdateExerciseMutation.fetcher = (variables: GQLUpdateExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateExerciseMutation, GQLUpdateExerciseMutationVariables>(UpdateExerciseDocument, variables, options);
+
+export const DeleteExerciseDocument = `
+    mutation DeleteExercise($id: ID!) {
+  deleteExercise(id: $id)
+}
+    `;
+
+export const useDeleteExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDeleteExerciseMutation, TError, GQLDeleteExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDeleteExerciseMutation, TError, GQLDeleteExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteExercise'],
+    mutationFn: (variables?: GQLDeleteExerciseMutationVariables) => fetchData<GQLDeleteExerciseMutation, GQLDeleteExerciseMutationVariables>(DeleteExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDeleteExerciseMutation.getKey = () => ['DeleteExercise'];
+
+
+useDeleteExerciseMutation.fetcher = (variables: GQLDeleteExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteExerciseMutation, GQLDeleteExerciseMutationVariables>(DeleteExerciseDocument, variables, options);
 
 export const GetTemplatesDocument = `
     query GetTemplates($draft: Boolean) {

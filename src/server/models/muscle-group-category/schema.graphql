@@ -5,3 +5,8 @@ type MuscleGroupCategory {
   createdAt: String!
   muscles: [MuscleGroup!]!
 }
+
+type Query {
+  muscleGroupCategories: [MuscleGroupCategory!]!
+  muscleGroupCategory(id: ID!): MuscleGroupCategory!
+}

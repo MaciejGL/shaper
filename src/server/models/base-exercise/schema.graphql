@@ -3,10 +3,57 @@ type BaseExercise {
   name: String!
   description: String
   videoUrl: String
-  equipment: String
+  equipment: Equipment
   muscleGroups: [MuscleGroup!]!
+  muscleGroupCategories: [MuscleGroupCategory!]!
   isPublic: Boolean!
   createdBy: UserPublic
   createdAt: String!
   updatedAt: String!
+}
+
+enum Equipment {
+  BARBELL
+  DUMBBELL
+  MACHINE
+  CABLE
+  BODYWEIGHT
+  BAND
+  MEDICINE_BALL
+  WHEEL
+  TRAP_BAR
+  OTHER
+}
+
+input ExerciseWhereInput {
+  equipment: Equipment
+  muscleGroups: [ID!]
+}
+
+type Query {
+  userExercises(where: ExerciseWhereInput): [BaseExercise!]!
+  publicExercises(where: ExerciseWhereInput): [BaseExercise!]!
+  exercise(id: ID!): BaseExercise
+}
+
+type Mutation {
+  createExercise(input: CreateExerciseInput!): Boolean!
+  updateExercise(id: ID!, input: UpdateExerciseInput!): Boolean!
+  deleteExercise(id: ID!): Boolean!
+}
+
+input CreateExerciseInput {
+  name: String!
+  description: String
+  videoUrl: String
+  equipment: Equipment
+  muscleGroups: [ID!]!
+}
+
+input UpdateExerciseInput {
+  name: String
+  description: String
+  videoUrl: String
+  equipment: Equipment
+  muscleGroups: [ID!]!
 }
