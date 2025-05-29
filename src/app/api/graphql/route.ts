@@ -13,6 +13,12 @@ const schema = await createSchema()
 const yoga = createYoga({
   graphqlEndpoint: '/api/graphql',
   schema: schema,
+  cors: {
+    origin: 'https://fit-space.app',
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  },
   logging: 'debug',
   async context() {
     const userSession = await getCurrentUser()

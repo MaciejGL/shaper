@@ -42,7 +42,7 @@ export function ExerciseTabContent({
   })
 
   return (
-    <div className="space-y-4 mt-4">
+    <div className="space-y-4 mt-6">
       <h3 className="text-xl font-bold">My Exercises</h3>
       {isLoading ? (
         <LoadingExercises />
@@ -53,7 +53,7 @@ export function ExerciseTabContent({
         />
       )}
 
-      <h3 className="text-xl font-bold">Public Exercises</h3>
+      <h3 className="text-xl font-bold mt-6">Public Exercises</h3>
       {isLoading ? (
         <LoadingExercises />
       ) : (
