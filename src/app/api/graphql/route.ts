@@ -1,4 +1,5 @@
 import { createYoga } from 'graphql-yoga'
+import { NextResponse } from 'next/server'
 
 import { getCurrentUser } from '@/lib/getUser'
 
@@ -26,6 +27,21 @@ const yoga = createYoga({
     }
   },
 })
+
+export async function OPTIONS() {
+  return NextResponse.json(
+    {},
+    {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': 'https://fit-space.app',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Credentials': 'true',
+      },
+    },
+  )
+}
 
 export async function GET(request: Request) {
   return yoga.handleRequest(request, {})
