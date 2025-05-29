@@ -15,7 +15,7 @@ const yoga = createYoga({
   graphqlEndpoint: '/api/graphql',
   schema: schema,
   cors: {
-    origin: ['https://fit-space.app'],
+    origin: 'https://fit-space.app',
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'credentials'],
   },
