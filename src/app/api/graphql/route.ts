@@ -1,4 +1,5 @@
 import { createYoga } from 'graphql-yoga'
+import { NextResponse } from 'next/server'
 
 import { getCurrentUser } from '@/lib/getUser'
 
@@ -14,7 +15,7 @@ const yoga = createYoga({
   graphqlEndpoint: '/api/graphql',
   schema: schema,
   cors: {
-    origin: ['https://fit-space.app'],
+    origin: 'https://fit-space.app',
     credentials: true,
     allowedHeaders: ['Content-Type', 'Authorization', 'credentials'],
   },
@@ -27,10 +28,28 @@ const yoga = createYoga({
   },
 })
 
+export async function OPTIONS() {
+  return NextResponse.json(
+    {},
+    {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': 'https://fit-space.app',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Credentials': 'true',
+      },
+    },
+  )
+}
+
 export async function GET(request: Request) {
   return yoga.handleRequest(request, {})
 }
 
 export async function POST(request: Request) {
-  return yoga.handleRequest(request, {})
+  const response = await yoga.handleRequest(request, {})
+  response.headers.set('Access-Control-Allow-Origin', 'https://fit-space.app')
+  response.headers.set('Access-Control-Allow-Credentials', 'true')
+  return response
 }
