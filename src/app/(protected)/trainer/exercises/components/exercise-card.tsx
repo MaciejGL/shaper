@@ -56,7 +56,7 @@ export function ExerciseCard({
     await deleteExercise({ id: exercise.id })
     setIsEditDialogOpen(false)
   }
-
+  // asda
   return (
     <AnimatedGridItem
       id={exercise.id}
