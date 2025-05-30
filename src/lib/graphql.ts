@@ -32,7 +32,6 @@ export const gqlFetch = async <TData, TVariables = object>(
   const headers = {
     ...options?.headers,
     'Content-Type': 'application/json',
-    credentials: 'include',
   }
 
   const queryMatch = query.match(/(query|mutation)\s+(\w+)/i)

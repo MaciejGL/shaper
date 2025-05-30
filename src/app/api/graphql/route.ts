@@ -10,9 +10,9 @@ export type GraphQLContext = {
 }
 
 const allowedOrigins = [
-  'https://fit-space.app/',
-  'https://www.fit-space.app/',
-  'http://localhost:4000/',
+  'https://fit-space.app',
+  'https://www.fit-space.app',
+  'http://localhost:4000',
 ]
 const schema = await createSchema()
 
