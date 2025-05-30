@@ -25,8 +25,15 @@ const yoga = createYoga<{
   logging: 'debug',
   graphqlEndpoint: '/api/graphql',
   cors: {
-    origin: ['*'],
+    origin: ['https://fit-space.app', 'https://www.fit-space.app'],
     credentials: true,
+    allowedHeaders: [
+      'X-Custom-Header',
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'X-Requested-With',
+    ],
   },
   async context() {
     const userSession = await getCurrentUser()
