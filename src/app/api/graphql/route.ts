@@ -18,30 +18,6 @@ export const config = {
   },
 }
 
-// const yoga = createYoga({
-//   graphqlEndpoint: '/api/graphql',
-//   schema: schema,
-//   logging: 'debug',
-//   async context() {
-//     const userSession = await getCurrentUser()
-//     return {
-//       user: userSession,
-//     }
-//   },
-//   cors: {
-//     origin: '*',
-//     credentials: true,
-//     allowedHeaders: [
-//       'X-Custom-Header',
-//       'Content-Type',
-//       'Authorization',
-//       'Accept',
-//       'X-Requested-With',
-//     ],
-//     methods: ['POST', 'GET', 'OPTIONS'],
-//   },
-// })
-
 const yoga = createYoga<{
   req: NextRequest
 }>({
@@ -49,7 +25,7 @@ const yoga = createYoga<{
   logging: 'debug',
   graphqlEndpoint: '/api/graphql',
   cors: {
-    origin: ['https://fit-space.app', 'https://www.fit-space.app'],
+    origin: ['*'],
     credentials: true,
   },
   async context() {
