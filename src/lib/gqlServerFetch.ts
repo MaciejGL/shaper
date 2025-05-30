@@ -1,6 +1,6 @@
-import { cookies } from 'next/headers';
+import { cookies } from 'next/headers'
 
-import { type GqlFetchOptions, gqlFetch } from './graphql';
+import { type GqlFetchOptions, gqlFetch } from './graphql'
 
 /**
  *
@@ -23,30 +23,29 @@ import { type GqlFetchOptions, gqlFetch } from './graphql';
  * ```
  */
 export const gqlServerFetch = async <TData, TVariables = object>(
-	query: string,
-	variables?: TVariables,
-	options?: GqlFetchOptions
+  query: string,
+  variables?: TVariables,
+  options?: GqlFetchOptions,
 ) => {
-	try {
-		const response = await gqlFetch<TData, TVariables>(query, variables, {
-			...options,
-			headers: {
-				cookie: (await cookies()).toString(),
-				...options?.headers,
-				'Content-Type': 'application/json',
-				credentials: 'include',
-			},
-		});
+  try {
+    const response = await gqlFetch<TData, TVariables>(query, variables, {
+      ...options,
+      headers: {
+        cookie: (await cookies()).toString(),
+        ...options?.headers,
+        'Content-Type': 'application/json',
+      },
+    })
 
-		return {
-			data: response,
-			error: null,
-		};
-	} catch (error) {
-		console.error(error);
-		return {
-			data: null,
-			error: error instanceof Error ? error.message : String(error),
-		};
-	}
-};
+    return {
+      data: response,
+      error: null,
+    }
+  } catch (error) {
+    console.error(error)
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : String(error),
+    }
+  }
+}
