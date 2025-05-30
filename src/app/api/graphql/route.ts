@@ -1,5 +1,4 @@
 import { createYoga } from 'graphql-yoga'
-import { NextResponse } from 'next/server'
 
 import { getCurrentUser } from '@/lib/getUser'
 
@@ -14,11 +13,6 @@ const schema = await createSchema()
 const yoga = createYoga({
   graphqlEndpoint: '/api/graphql',
   schema: schema,
-  cors: {
-    origin: 'https://fit-space.app',
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'credentials'],
-  },
   logging: 'debug',
   async context() {
     const userSession = await getCurrentUser()
@@ -27,29 +21,11 @@ const yoga = createYoga({
     }
   },
 })
-
-export async function OPTIONS() {
-  return NextResponse.json(
-    {},
-    {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': 'https://fit-space.app',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Credentials': 'true',
-      },
-    },
-  )
-}
-
+// Handler wrapper for Next.js API routes
 export async function GET(request: Request) {
   return yoga.handleRequest(request, {})
 }
 
 export async function POST(request: Request) {
-  const response = await yoga.handleRequest(request, {})
-  response.headers.set('Access-Control-Allow-Origin', 'https://fit-space.app')
-  response.headers.set('Access-Control-Allow-Credentials', 'true')
-  return response
+  return yoga.handleRequest(request, {})
 }
