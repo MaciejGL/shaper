@@ -61,18 +61,21 @@ const yoga = createYoga<{
   fetchAPI: { Request, Response, Headers },
 })
 
-export const GET = yoga.handleRequest
-export const POST = yoga.handleRequest
-
 // // Handler wrapper for Next.js API routes
-// export async function GET(request: Request) {
-//   return yoga.handleRequest(request, {})
-// }
+export async function GET(request: NextRequest) {
+  return yoga.handleRequest(request, {
+    req: request,
+  })
+}
 
-// export async function POST(request: Request) {
-//   return yoga.handleRequest(request, {})
-// }
+export async function POST(request: NextRequest) {
+  return yoga.handleRequest(request, {
+    req: request,
+  })
+}
 
-// export async function OPTIONS(request: Request) {
-//   return yoga.handleRequest(request, {})
-// }
+export async function OPTIONS(request: NextRequest) {
+  return yoga.handleRequest(request, {
+    req: request,
+  })
+}
