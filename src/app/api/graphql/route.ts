@@ -57,8 +57,20 @@ export async function POST(request: NextRequest) {
   })
 }
 
+const allowedOrigins = ['https://fit-space.app', 'https://www.fit-space.app']
+
 export async function OPTIONS(request: NextRequest) {
-  return yoga.handleRequest(request, {
-    req: request,
+  const origin = request.headers.get('origin') ?? ''
+  const isAllowed = allowedOrigins.includes(origin)
+
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': isAllowed ? origin : '',
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+      'Access-Control-Allow-Headers':
+        'Content-Type, Authorization, Accept, X-Requested-With',
+      'Access-Control-Allow-Credentials': 'true',
+    },
   })
 }
