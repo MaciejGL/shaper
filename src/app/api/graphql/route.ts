@@ -9,6 +9,11 @@ export type GraphQLContext = {
   user: Awaited<ReturnType<typeof getCurrentUser>>
 }
 
+const allowedOrigins = [
+  'https://fit-space.app',
+  'https://www.fit-space.app',
+  'http://localhost:4000',
+]
 const schema = await createSchema()
 
 export const config = {
@@ -25,7 +30,7 @@ const yoga = createYoga<{
   logging: 'debug',
   graphqlEndpoint: '/api/graphql',
   cors: {
-    origin: ['https://fit-space.app', 'https://www.fit-space.app'],
+    origin: allowedOrigins,
     credentials: true,
     allowedHeaders: [
       'X-Custom-Header',
@@ -46,18 +51,40 @@ const yoga = createYoga<{
 
 // // Handler wrapper for Next.js API routes
 export async function GET(request: NextRequest) {
-  return yoga.handleRequest(request, {
+  const response = await yoga.handleRequest(request, {
     req: request,
+  })
+
+  const origin = request.headers.get('origin') ?? ''
+  const isAllowed = allowedOrigins.includes(origin)
+
+  return new Response(await response.text(), {
+    status: response.status,
+    headers: {
+      ...Object.fromEntries(response.headers.entries()),
+      'Access-Control-Allow-Origin': isAllowed ? origin : '',
+      'Access-Control-Allow-Credentials': 'true',
+    },
   })
 }
 
 export async function POST(request: NextRequest) {
-  return yoga.handleRequest(request, {
+  const response = await yoga.handleRequest(request, {
     req: request,
   })
-}
 
-const allowedOrigins = ['https://fit-space.app', 'https://www.fit-space.app']
+  const origin = request.headers.get('origin') ?? ''
+  const isAllowed = allowedOrigins.includes(origin)
+
+  return new Response(await response.text(), {
+    status: response.status,
+    headers: {
+      ...Object.fromEntries(response.headers.entries()),
+      'Access-Control-Allow-Origin': isAllowed ? origin : '',
+      'Access-Control-Allow-Credentials': 'true',
+    },
+  })
+}
 
 export async function OPTIONS(request: NextRequest) {
   const origin = request.headers.get('origin') ?? ''
