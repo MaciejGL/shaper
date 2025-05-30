@@ -61,7 +61,8 @@ const yoga = createYoga<{
   fetchAPI: { Request, Response, Headers },
 })
 
-export { yoga as GET, yoga as POST }
+export const GET = yoga.handleRequest
+export const POST = yoga.handleRequest
 
 // // Handler wrapper for Next.js API routes
 // export async function GET(request: Request) {
