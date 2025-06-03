@@ -22,6 +22,8 @@ enum Equipment {
   MEDICINE_BALL
   WHEEL
   TRAP_BAR
+  KETTLEBELL
+  SMITH_MACHINE
   OTHER
 }
 

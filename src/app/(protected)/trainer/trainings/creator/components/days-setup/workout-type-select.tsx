@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import type { GQLWorkoutType } from '@/generated/graphql-client'
 
 import { TrainingPlanFormData } from '../types'
@@ -19,21 +20,20 @@ import { workoutTypeGroups } from '../utils'
 type WorkoutTypeSelectProps = {
   dayIndex: number
   day: TrainingPlanFormData['weeks'][number]['days'][number]
-  updateWorkoutType: (dayIndex: number, value: GQLWorkoutType) => void
 }
 
-export function WorkoutTypeSelect({
-  dayIndex,
-  day,
-  updateWorkoutType,
-}: WorkoutTypeSelectProps) {
+export function WorkoutTypeSelect({ dayIndex, day }: WorkoutTypeSelectProps) {
+  const { updateDay, activeWeek } = useTrainingPlan()
   return (
     <div className="space-y-2">
       <Label htmlFor={`workout-type-${dayIndex}`}>Workout Type</Label>
       <Select
         value={day.workoutType || ''}
         onValueChange={(value: GQLWorkoutType) =>
-          updateWorkoutType(dayIndex, value)
+          updateDay(activeWeek, dayIndex, {
+            ...day,
+            workoutType: value,
+          })
         }
       >
         <SelectTrigger id={`workout-type-${dayIndex}`} className="w-full">

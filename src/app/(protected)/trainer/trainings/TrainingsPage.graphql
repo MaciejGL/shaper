@@ -23,6 +23,7 @@ fragment TrainingTemplate on TrainingPlan {
         name
         restSeconds
         tempo
+        warmupSets
         instructions
         order
 
@@ -30,7 +31,10 @@ fragment TrainingTemplate on TrainingPlan {
           id
           order
           reps
+          minReps
+          maxReps
           weight
+          rpe
         }
       }
     }
@@ -56,7 +60,10 @@ query GetTemplateTrainingPlanById($id: ID!) {
 }
 
 mutation CreateTrainingPlan($input: CreateTrainingPlanInput!) {
-  createTrainingPlan(input: $input)
+  createTrainingPlan(input: $input) {
+    id
+    success
+  }
 }
 
 mutation UpdateTrainingPlan($input: UpdateTrainingPlanInput!) {

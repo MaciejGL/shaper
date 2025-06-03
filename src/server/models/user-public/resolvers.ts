@@ -12,6 +12,7 @@ export const Query: GQLQueryResolvers = {
       where: { id },
       include: {
         profile: true,
+        assignedPlans: true,
       },
     })
 

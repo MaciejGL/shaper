@@ -3,8 +3,9 @@
 import {
   ChevronRight,
   DumbbellIcon,
-  HomeIcon,
-  NotebookTextIcon,
+  FileIcon,
+  FilesIcon,
+  LayoutDashboardIcon,
   PlusCircleIcon,
   UserRoundCogIcon,
   Users2Icon,
@@ -34,7 +35,7 @@ import {
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
-type SidebarItem = {
+type SidebarItemType = {
   title: string
   url: string
   icon: React.ElementType
@@ -93,13 +94,13 @@ export function AppSidebar() {
     [templatesData],
   )
 
-  const items: SidebarItem[] = useMemo(
+  const items: SidebarItemType[] = useMemo(
     () => [
       // Dashboard item
       {
         title: TRAINER_LINKS.dashboard.label,
         url: TRAINER_LINKS.dashboard.href,
-        icon: HomeIcon,
+        icon: LayoutDashboardIcon,
         disabled: TRAINER_LINKS.dashboard.disabled,
       },
       // Clients item
@@ -119,7 +120,7 @@ export function AppSidebar() {
       {
         title: TRAINER_LINKS.trainings.label,
         url: TRAINER_LINKS.trainings.href,
-        icon: NotebookTextIcon,
+        icon: FilesIcon,
         disabled: TRAINER_LINKS.trainings.disabled,
         subItems: [
           {
@@ -131,7 +132,7 @@ export function AppSidebar() {
           ...templates.map((template) => ({
             title: template.title,
             url: TRAINER_LINKS.trainings.href + `/creator/${template.id}`,
-            icon: NotebookTextIcon,
+            icon: FileIcon,
             disabled: false,
           })),
         ],
@@ -157,11 +158,7 @@ export function AppSidebar() {
   ]
 
   return (
-    <Sidebar
-      variant="inset"
-      collapsible="icon"
-      className="border-r border-zinc-100 dark:border-zinc-800"
-    >
+    <Sidebar variant="inset" collapsible="icon">
       <SidebarContent className="mt-16">
         <SidebarGroupContent>
           <SidebarMenu>
@@ -195,7 +192,7 @@ function SidebarItem({
   item,
   isLoading,
 }: {
-  item: SidebarItem
+  item: SidebarItemType
   isLoading: boolean
 }) {
   const pathname = usePathname()
@@ -204,10 +201,10 @@ function SidebarItem({
   return (
     <SidebarMenuItem key={item.title}>
       <SidebarMenuButton asChild disabled={item.disabled}>
-        <Link href={item.url} className={cn(navLinkVariants({ isActive }))}>
+        <Link href={item.url} className="inline-flex py-4">
           <item.icon />
-          <span className="font-medium">{item.title}</span>
-          {isActive && <ChevronRight className="ml-auto h-4 w-4 opacity-60" />}
+          <span className="font-medium text-md">{item.title}</span>
+          {isActive && <ChevronRight className="ml-auto size-4 opacity-60" />}
         </Link>
       </SidebarMenuButton>
       <SidebarMenuSub>

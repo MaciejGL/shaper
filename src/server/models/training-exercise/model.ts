@@ -32,6 +32,10 @@ export default class TrainingExercise implements GQLTrainingExercise {
     return this.data.tempo
   }
 
+  get warmupSets() {
+    return this.data.warmupSets
+  }
+
   get instructions() {
     return this.data.instructions
   }

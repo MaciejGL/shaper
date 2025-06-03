@@ -102,7 +102,7 @@ export async function createTrainingPlan(
 
   const { title, isPublic, isDraft, description, weeks } = args.input
 
-  await prisma.trainingPlan.create({
+  const trainingPlan = await prisma.trainingPlan.create({
     data: {
       title,
       description,
@@ -127,11 +127,15 @@ export async function createTrainingPlan(
                   tempo: exercise.tempo,
                   instructions: exercise.instructions,
                   order: exercise.order,
+                  warmupSets: exercise.warmupSets,
                   sets: {
                     create: exercise.sets?.map((set) => ({
                       order: set.order,
-                      reps: set.reps,
+                      reps: set.reps ?? set.maxReps ?? set.minReps ?? null,
+                      minReps: set.minReps ?? set.reps ?? null,
+                      maxReps: set.maxReps ?? set.reps ?? null,
                       weight: set.weight ?? null,
+                      rpe: set.rpe ?? null,
                     })),
                   },
                 })),
@@ -143,7 +147,10 @@ export async function createTrainingPlan(
     },
   })
 
-  return true
+  return {
+    id: trainingPlan.id,
+    success: true,
+  }
 }
 
 export async function updateTrainingPlan(
@@ -152,52 +159,59 @@ export async function updateTrainingPlan(
   const { input } = args
 
   const user = await getCurrentUserOrThrow()
-  await prisma.$transaction(async (tx) => {
-    await tx.trainingWeek.deleteMany({
-      where: { planId: input.id },
-    })
+  await prisma.$transaction(
+    async (tx) => {
+      await tx.trainingWeek.deleteMany({
+        where: { planId: input.id },
+      })
 
-    await tx.trainingPlan.update({
-      where: { id: input.id, createdById: user.user.id },
-      data: {
-        title: input.title ?? undefined,
-        description: input.description ?? undefined,
-        isPublic: input.isPublic ?? false,
-        isDraft: input.isDraft ?? false,
-        isTemplate: true,
-        weeks: {
-          create: input.weeks?.map((week) => ({
-            weekNumber: week.weekNumber,
-            name: week.name ?? '', // fallback if needed
-            description: week.description ?? undefined,
-            days: {
-              create: week.days?.map((day) => ({
-                dayOfWeek: day.dayOfWeek,
-                isRestDay: day.isRestDay ?? false,
-                workoutType: day.workoutType ?? undefined,
-                exercises: {
-                  create: day.exercises?.map((exercise) => ({
-                    name: exercise.name ?? '',
-                    restSeconds: exercise.restSeconds ?? undefined,
-                    tempo: exercise.tempo ?? undefined,
-                    instructions: exercise.instructions ?? undefined,
-                    order: exercise.order,
-                    sets: {
-                      create: exercise.sets?.map((set) => ({
-                        order: set.order,
-                        reps: set.reps,
-                        weight: set.weight ?? null,
-                      })),
-                    },
-                  })),
-                },
-              })),
-            },
-          })),
+      await tx.trainingPlan.update({
+        where: { id: input.id, createdById: user.user.id },
+        data: {
+          title: input.title ?? undefined,
+          description: input.description ?? undefined,
+          isPublic: input.isPublic ?? false,
+          isDraft: input.isDraft ?? false,
+          isTemplate: true,
+          weeks: {
+            create: input.weeks?.map((week) => ({
+              weekNumber: week.weekNumber,
+              name: week.name ?? '', // fallback if needed
+              description: week.description ?? undefined,
+              days: {
+                create: week.days?.map((day) => ({
+                  dayOfWeek: day.dayOfWeek,
+                  isRestDay: day.isRestDay ?? false,
+                  workoutType: day.workoutType ?? undefined,
+                  exercises: {
+                    create: day.exercises?.map((exercise) => ({
+                      name: exercise.name ?? '',
+                      restSeconds: exercise.restSeconds ?? undefined,
+                      tempo: exercise.tempo ?? undefined,
+                      instructions: exercise.instructions ?? undefined,
+                      order: exercise.order,
+                      warmupSets: exercise.warmupSets ?? undefined,
+                      sets: {
+                        create: exercise.sets?.map((set) => ({
+                          order: set.order,
+                          reps: set.reps ?? null,
+                          minReps: set.minReps ?? null,
+                          maxReps: set.maxReps ?? null,
+                          weight: set.weight ?? null,
+                          rpe: set.rpe ?? null,
+                        })),
+                      },
+                    })),
+                  },
+                })),
+              },
+            })),
+          },
         },
-      },
-    })
-  })
+      })
+    },
+    { timeout: 15000 },
+  )
 
   return true
 }

@@ -44,7 +44,7 @@ export function MuscleGroupSelector({
   return (
     <div className="space-y-2">
       <Label className="text-sm font-medium">Select Muscle Groups</Label>
-      <div className="space-y-2 border rounded-lg p-2">
+      <div className="space-y-2 border rounded-lg p-2 dark:bg-input/30">
         {categories?.map((category) => (
           <div key={category.id} className="space-y-1">
             <p className="font-medium text-sm">{category.name}</p>

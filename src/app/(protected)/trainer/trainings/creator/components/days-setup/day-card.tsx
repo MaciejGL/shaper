@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
-import { GQLWorkoutType } from '@/generated/graphql-client'
+import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
+import { cn } from '@/lib/utils'
 
 import { TrainingPlanFormData } from '../types'
 import { dayNames } from '../utils'
@@ -11,37 +12,39 @@ import { WorkoutTypeSelect } from './workout-type-select'
 type DayCardProps = {
   day: TrainingPlanFormData['weeks'][number]['days'][number]
   dayIndex: number
-  toggleRestDay: (dayIndex: number) => void
-  updateWorkoutType: (dayIndex: number, type: GQLWorkoutType) => void
 }
 
-export function DayCard({
-  day,
-  dayIndex,
-  toggleRestDay,
-  updateWorkoutType,
-}: DayCardProps) {
+export function DayCard({ day, dayIndex }: DayCardProps) {
+  const { updateDay, activeWeek } = useTrainingPlan()
+
+  const handleRestDayChange = (bool: boolean) => {
+    updateDay(activeWeek, dayIndex, {
+      ...day,
+      isRestDay: bool,
+    })
+  }
+
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{dayNames[day.dayOfWeek]}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label htmlFor={`rest-day-${dayIndex}`}>Rest Day</Label>
+    <Card className="h-full bg-card-on-card">
+      <CardHeader className="flex items-baseline justify-between">
+        <CardTitle
+          className={cn('text-lg', day.isRestDay && 'text-muted-foreground')}
+        >
+          {dayNames[day.dayOfWeek]}
+        </CardTitle>
+        <div className="flex items-center gap-2">
+          <Label htmlFor={`rest-day-${dayIndex}`}>Active Day</Label>
           <Switch
             id={`rest-day-${dayIndex}`}
-            checked={day.isRestDay}
-            onCheckedChange={() => toggleRestDay(dayIndex)}
+            checked={!day.isRestDay}
+            onCheckedChange={(value) => handleRestDayChange(!value)}
           />
         </div>
-
-        {!day.isRestDay && (
-          <WorkoutTypeSelect
-            dayIndex={dayIndex}
-            day={day}
-            updateWorkoutType={updateWorkoutType}
-          />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {!day.isRestDay && <WorkoutTypeSelect dayIndex={dayIndex} day={day} />}
+        {day.isRestDay && (
+          <p className="text-sm text-muted-foreground">Rest Day</p>
         )}
       </CardContent>
     </Card>

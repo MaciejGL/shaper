@@ -63,7 +63,8 @@ function Button({
     iconOnly?: React.ReactNode
   }) {
   const Comp = asChild ? Slot : 'button'
-  const defaultSize = size || iconOnly ? 'icon-md' : 'md'
+  const defaultSize = iconOnly ? 'icon-md' : size || 'md'
+
   return (
     <Comp
       data-slot="button"

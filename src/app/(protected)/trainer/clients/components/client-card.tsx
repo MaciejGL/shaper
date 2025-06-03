@@ -1,28 +1,16 @@
 import { Calendar, ChevronRight, Clock, Dumbbell } from 'lucide-react'
 import Image from 'next/image'
 
-// import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 // import { Progress } from '@/components/ui/progress'
 
 import { Client } from './clients-tabs'
 
 export default function ClientCard({ client }: { client: Client }) {
-  // Format date to be more readable
-  // const formatDate = (dateString: string) => {
-  //   const date = new Date(dateString)
-  //   return date.toLocaleDateString('en-US', {
-  //     month: 'short',
-  //     day: 'numeric',
-  //     year: 'numeric',
-  //   })
-  // }
-
   return (
-    <Card className="overflow-hidden py-0">
+    <Card className="overflow-hidden py-0 gap-0">
       <CardHeader className="p-0">
         <div className="bg-primary/10 p-4">
           <div className="flex items-center justify-between">
@@ -42,6 +30,14 @@ export default function ClientCard({ client }: { client: Client }) {
                 <p className="text-xs text-muted-foreground">{client.email}</p>
               </div>
             </div>
+            <ButtonLink
+              size="icon-sm"
+              variant="ghost"
+              href={`/trainer/clients/${client.id}`}
+              iconOnly={<ChevronRight />}
+            >
+              View Profile
+            </ButtonLink>
           </div>
         </div>
       </CardHeader>
@@ -72,15 +68,6 @@ export default function ClientCard({ client }: { client: Client }) {
           {/* <Progress value={client.progress} className="h-2" /> */}
         </div>
       </CardContent>
-      <CardFooter className="p-4 pt-0 flex justify-between">
-        <Button variant="outline" size="sm">
-          Message
-        </Button>
-        <ButtonLink size="sm" href={`/trainer/clients/${client.id}`}>
-          View Profile
-          <ChevronRight className="ml-1 h-4 w-4" />
-        </ButtonLink>
-      </CardFooter>
     </Card>
   )
 }

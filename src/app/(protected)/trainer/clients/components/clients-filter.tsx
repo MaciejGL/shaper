@@ -4,7 +4,6 @@ import { Search } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 import { AddClientModal } from './add-new-client'
@@ -29,12 +28,7 @@ export function ClientsFilter() {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            Filter
-          </Button>
-          <AddClientModal />
-        </div>
+        <AddClientModal />
       </div>
     </AnimatedPageTransition>
   )

@@ -208,6 +208,7 @@ model TrainingExercise {
 
   restSeconds  Int?
   tempo        String?
+  warmupSets   Int?
   instructions String?
   order        Int
 
@@ -232,8 +233,11 @@ model TrainingExercise {
 model ExerciseSet {
   id         String           @id @default(cuid())
   order      Int
-  reps       Int
+  reps       Int?
+  minReps    Int?
+  maxReps    Int?
   weight     Float?
+  rpe        Int?
   exerciseId String
   exercise   TrainingExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
@@ -266,7 +270,7 @@ model ExerciseSetLog {
 
   reps   Int
   weight Float
-
+  rpe    Int?
   exerciseLogId String
   exerciseLog   ExerciseLog @relation(fields: [exerciseLogId], references: [id], onDelete: Cascade)
   exerciseSetId String

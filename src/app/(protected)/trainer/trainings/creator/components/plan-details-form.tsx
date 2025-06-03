@@ -34,6 +34,7 @@ function PlanDetailsHeader({ data, updateData }: PlanDetailsProps) {
         placeholder="e.g., 12-Week Strength Program"
         value={data?.title ?? ''}
         onChange={(e) => updateData({ ...data, title: e.target.value })}
+        className="max-w-lg"
       />
 
       <Textarea
@@ -42,6 +43,7 @@ function PlanDetailsHeader({ data, updateData }: PlanDetailsProps) {
         placeholder="Describe the goals and focus of this training plan"
         value={data.description ?? ''}
         onChange={(e) => updateData({ ...data, description: e.target.value })}
+        className="min-h-44 max-w-xl"
       />
     </div>
   )
@@ -49,7 +51,7 @@ function PlanDetailsHeader({ data, updateData }: PlanDetailsProps) {
 
 function PlanDetailsOptions({ data, updateData }: PlanDetailsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 max-w-lg gap-6">
       <SwitchOption
         id="isDraft"
         label="Draft"
@@ -58,15 +60,13 @@ function PlanDetailsOptions({ data, updateData }: PlanDetailsProps) {
         onCheckedChange={() => updateData({ ...data, isDraft: !data.isDraft })}
       />
 
-      <SwitchOption
+      {/* <SwitchOption
         id="isPublic"
         label="Public"
         description="Make this plan visible to all clients"
         checked={data.isPublic}
-        onCheckedChange={() =>
-          updateData({ ...data, isPublic: !data.isPublic })
-        }
-      />
+        onCheckedChange={(v) => updateData({ ...data, isPublic: v })}
+      /> */}
     </div>
   )
 }
@@ -76,7 +76,7 @@ type SwitchOptionProps = {
   label: string
   description: string
   checked: boolean
-  onCheckedChange: () => void
+  onCheckedChange: (value: boolean) => void
 }
 
 function SwitchOption({
@@ -89,7 +89,7 @@ function SwitchOption({
   return (
     <Label
       htmlFor={id}
-      className="flex flex-row items-center justify-between rounded-lg border p-4"
+      className="flex flex-row items-center justify-between rounded-lg border p-4 bg-card-on-card"
     >
       <div className="space-y-0.5">
         <p className="text-base">{label}</p>

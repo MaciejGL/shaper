@@ -20,8 +20,21 @@ export default class ExerciseSet implements GQLExerciseSet {
     return this.data.reps
   }
 
+  get minReps() {
+    console.log('minReps', this.data.minReps)
+    return this.data.minReps
+  }
+
+  get maxReps() {
+    return this.data.maxReps
+  }
+
   get weight() {
     return this.data.weight
+  }
+
+  get rpe() {
+    return this.data.rpe
   }
 
   get exerciseId() {

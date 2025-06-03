@@ -56,7 +56,7 @@ export function ExerciseCard({
     await deleteExercise({ id: exercise.id })
     setIsEditDialogOpen(false)
   }
-  // asda
+
   return (
     <AnimatedGridItem
       id={exercise.id}
@@ -69,7 +69,7 @@ export function ExerciseCard({
             <div className="flex-1">
               <CardTitle
                 className={cn(
-                  'text-lg line-clamp-1',
+                  'line-clamp-1',
                   isLoading && 'masked-placeholder-text',
                 )}
               >
@@ -138,7 +138,11 @@ export function ExerciseCard({
             </div>
             <div className="flex flex-wrap gap-1">
               {exercise.muscleGroups.slice(0, 3).map((muscle) => (
-                <Badge key={muscle.id} variant="default" isLoading={isLoading}>
+                <Badge
+                  key={muscle.id}
+                  variant="secondary"
+                  isLoading={isLoading}
+                >
                   {muscle.alias ?? muscle.name}
                 </Badge>
               ))}

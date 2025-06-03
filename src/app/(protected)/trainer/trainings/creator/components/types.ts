@@ -32,14 +32,20 @@ export type TrainingDay = Pick<
 
 export type TrainingExercise = Pick<
   GQLTrainingExercise,
-  'name' | 'restSeconds' | 'tempo' | 'instructions' | 'order' | 'id'
+  | 'name'
+  | 'restSeconds'
+  | 'tempo'
+  | 'instructions'
+  | 'order'
+  | 'id'
+  | 'warmupSets'
 > & {
   sets: TrainingSet[]
 }
 
 export type TrainingSet = Pick<
   GQLExerciseSet,
-  'order' | 'reps' | 'weight' | 'id'
+  'order' | 'reps' | 'weight' | 'rpe' | 'id' | 'minReps' | 'maxReps'
 >
 
 export enum WorkoutType {

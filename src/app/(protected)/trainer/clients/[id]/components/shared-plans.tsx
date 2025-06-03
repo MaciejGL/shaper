@@ -109,7 +109,7 @@ export function TrainingCard({
   }
 
   return (
-    <Card>
+    <Card className="bg-card-foreground/5">
       <CardHeader>
         <div className="flex justify-between items-start">
           <CardTitle>{plan.title}</CardTitle>
@@ -144,7 +144,7 @@ export function TrainingCard({
             <Calendar className="size-4" />
             <span>{plan.weekCount} weeks</span>
           </Badge>
-          {!plan.active && <Badge variant="default">Active</Badge>}
+          {plan.active && <Badge variant="primary">Active</Badge>}
         </div>
       </CardFooter>
     </Card>

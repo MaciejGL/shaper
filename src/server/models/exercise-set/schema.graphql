@@ -1,8 +1,11 @@
 type ExerciseSet {
   id: ID!
   order: Int!
-  reps: Int!
+  reps: Int
+  minReps: Int
+  maxReps: Int
   weight: Float
+  rpe: Int
 
   logs: [ExerciseSetLog!]!
   exerciseId: ID!

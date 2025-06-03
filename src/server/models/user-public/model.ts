@@ -1,13 +1,19 @@
 import {
+  TrainingPlan as PrismaTrainingPlan,
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
 } from '@prisma/client'
 
 import { GQLGoal, GQLUserPublic, GQLUserRole } from '@/generated/graphql-server'
 
+import TrainingPlan from '../training-plan/model'
+
 export default class UserPublic implements GQLUserPublic {
   constructor(
-    protected data: PrismaUser & { profile?: PrismaUserProfile | null },
+    protected data: PrismaUser & {
+      profile?: PrismaUserProfile | null
+      assignedPlans?: PrismaTrainingPlan[]
+    },
   ) {}
 
   get id() {
@@ -69,6 +75,13 @@ export default class UserPublic implements GQLUserPublic {
 
   get height() {
     return this.data.profile?.height
+  }
+
+  get activePlan() {
+    const plan = this.data.assignedPlans?.at(0)
+    if (!plan) return null
+
+    return new TrainingPlan(plan)
   }
 
   get createdAt() {

@@ -24,7 +24,7 @@ export default function PlanAssignment({
   )
 
   return (
-    <div className="flex flex-col gap-6 h-full">
+    <div className="flex flex-col h-full">
       {activePlan ? (
         <ActivePlanCard
           activePlan={activePlan}

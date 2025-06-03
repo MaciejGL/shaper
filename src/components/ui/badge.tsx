@@ -9,12 +9,13 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          'border-transparent bg-accent text-accent-foreground [a&]:hover:bg-accent/90',
         primary:
           'border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
-        secondary:
+        secondary: cn(
           'border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90',
+          ' dark:bg-background/50 dark:text-foreground',
+        ),
+
         destructive:
           'border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
         outline:
@@ -27,7 +28,7 @@ const badgeVariants = cva(
       },
     },
     defaultVariants: {
-      variant: 'default',
+      variant: 'primary',
       size: 'md',
     },
   },
@@ -51,7 +52,7 @@ function Badge({
     <Comp
       data-slot="badge"
       className={cn(
-        badgeVariants({ variant: isLoading ? 'default' : variant, size }),
+        badgeVariants({ variant: isLoading ? 'primary' : variant, size }),
         isLoading && 'masked-placeholder-text',
         className,
       )}

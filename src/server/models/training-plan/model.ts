@@ -67,8 +67,7 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   get progress() {
-    // TODO: Implement this
-    return 0
+    return this.calculateProgress()
   }
 
   async createdBy() {
@@ -147,9 +146,33 @@ export default class TrainingPlan implements GQLTrainingPlan {
         where: {
           planId: this.data.id,
         },
+        include: {
+          days: true,
+        },
       })
     }
 
     return weeks.map((week) => new TrainingWeek(week))
+  }
+
+  private calculateProgress() {
+    const totalDays =
+      this.data.weeks?.reduce(
+        (acc, week) => acc + (week.days?.length ?? 0),
+        0,
+      ) ?? 0
+    const completedDays =
+      this.data.weeks?.reduce(
+        (acc, week) =>
+          acc + (week.days?.filter((day) => day.completedAt).length ?? 0),
+        0,
+      ) ?? 0
+
+    // Prevent division by zero, which would return NaN and break GraphQL Float
+    if (totalDays === 0) {
+      return 0
+    }
+
+    return (completedDays / totalDays) * 100
   }
 }

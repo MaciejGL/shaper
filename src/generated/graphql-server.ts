@@ -73,8 +73,11 @@ export type GQLCreateExerciseInput = {
 };
 
 export type GQLCreateExerciseSetInput = {
+  maxReps?: InputMaybe<Scalars['Int']['input']>;
+  minReps?: InputMaybe<Scalars['Int']['input']>;
   order: Scalars['Int']['input'];
-  reps: Scalars['Int']['input'];
+  reps?: InputMaybe<Scalars['Int']['input']>;
+  rpe?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
@@ -106,6 +109,7 @@ export type GQLCreateTrainingExerciseInput = {
   restSeconds?: InputMaybe<Scalars['Int']['input']>;
   sets?: InputMaybe<Array<GQLCreateExerciseSetInput>>;
   tempo?: InputMaybe<Scalars['String']['input']>;
+  warmupSets?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type GQLCreateTrainingPlanInput = {
@@ -114,6 +118,12 @@ export type GQLCreateTrainingPlanInput = {
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   title: Scalars['String']['input'];
   weeks?: InputMaybe<Array<GQLCreateTrainingWeekInput>>;
+};
+
+export type GQLCreateTrainingPlanPayload = {
+  __typename?: 'CreateTrainingPlanPayload';
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  success: EntireFieldWrapper<Scalars['Boolean']['output']>;
 };
 
 export type GQLCreateTrainingWeekInput = {
@@ -129,9 +139,11 @@ export enum GQLEquipment {
   Bodyweight = 'BODYWEIGHT',
   Cable = 'CABLE',
   Dumbbell = 'DUMBBELL',
+  Kettlebell = 'KETTLEBELL',
   Machine = 'MACHINE',
   MedicineBall = 'MEDICINE_BALL',
   Other = 'OTHER',
+  SmithMachine = 'SMITH_MACHINE',
   TrapBar = 'TRAP_BAR',
   Wheel = 'WHEEL'
 }
@@ -153,8 +165,11 @@ export type GQLExerciseSet = {
   exerciseId: EntireFieldWrapper<Scalars['ID']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   logs: EntireFieldWrapper<Array<GQLExerciseSetLog>>;
+  maxReps?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  minReps?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   order: EntireFieldWrapper<Scalars['Int']['output']>;
-  reps: EntireFieldWrapper<Scalars['Int']['output']>;
+  reps?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  rpe?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
   weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
 };
@@ -165,6 +180,7 @@ export type GQLExerciseSetLog = {
   exerciseSetId: EntireFieldWrapper<Scalars['ID']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   reps: EntireFieldWrapper<Scalars['Int']['output']>;
+  rpe?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
   weight: EntireFieldWrapper<Scalars['Float']['output']>;
 };
@@ -221,7 +237,7 @@ export type GQLMutation = {
   createExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   createNote: EntireFieldWrapper<GQLNote>;
   createNotification: EntireFieldWrapper<GQLNotification>;
-  createTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  createTrainingPlan: EntireFieldWrapper<GQLCreateTrainingPlanPayload>;
   deleteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteNote: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteNotification: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -500,6 +516,7 @@ export type GQLTrainingExercise = {
   sets: EntireFieldWrapper<Array<GQLExerciseSet>>;
   tempo?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  warmupSets?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
 };
 
 export type GQLTrainingPlan = {
@@ -548,8 +565,11 @@ export type GQLUpdateExerciseInput = {
 
 export type GQLUpdateExerciseSetInput = {
   id: Scalars['ID']['input'];
+  maxReps?: InputMaybe<Scalars['Int']['input']>;
+  minReps?: InputMaybe<Scalars['Int']['input']>;
   order: Scalars['Int']['input'];
-  reps: Scalars['Int']['input'];
+  reps?: InputMaybe<Scalars['Int']['input']>;
+  rpe?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
@@ -599,6 +619,7 @@ export type GQLUpdateTrainingExerciseInput = {
   restSeconds?: InputMaybe<Scalars['Int']['input']>;
   sets?: InputMaybe<Array<GQLUpdateExerciseSetInput>>;
   tempo?: InputMaybe<Scalars['String']['input']>;
+  warmupSets?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type GQLUpdateTrainingPlanInput = {
@@ -677,6 +698,7 @@ export type GQLUserProfile = {
 
 export type GQLUserPublic = {
   __typename?: 'UserPublic';
+  activePlan?: EntireFieldWrapper<Maybe<GQLTrainingPlan>>;
   allergies?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   birthday?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -819,6 +841,7 @@ export type GQLResolversTypes = {
   CreateTrainingDayInput: GQLCreateTrainingDayInput;
   CreateTrainingExerciseInput: GQLCreateTrainingExerciseInput;
   CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
+  CreateTrainingPlanPayload: ResolverTypeWrapper<GQLCreateTrainingPlanPayload>;
   CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
   Equipment: GQLEquipment;
   ExerciseLog: ResolverTypeWrapper<GQLExerciseLog>;
@@ -873,6 +896,7 @@ export type GQLResolversParentTypes = {
   CreateTrainingDayInput: GQLCreateTrainingDayInput;
   CreateTrainingExerciseInput: GQLCreateTrainingExerciseInput;
   CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
+  CreateTrainingPlanPayload: GQLCreateTrainingPlanPayload;
   CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
   ExerciseLog: GQLExerciseLog;
   ExerciseSet: GQLExerciseSet;
@@ -934,6 +958,12 @@ export type GQLCoachingRequestResolvers<ContextType = any, ParentType extends GQ
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLCreateTrainingPlanPayloadResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['CreateTrainingPlanPayload'] = GQLResolversParentTypes['CreateTrainingPlanPayload']> = {
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLExerciseLogResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['ExerciseLog'] = GQLResolversParentTypes['ExerciseLog']> = {
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   exerciseId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
@@ -950,8 +980,11 @@ export type GQLExerciseSetResolvers<ContextType = any, ParentType extends GQLRes
   exerciseId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   logs?: Resolver<Array<GQLResolversTypes['ExerciseSetLog']>, ParentType, ContextType>;
+  maxReps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  minReps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   order?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  reps?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  reps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  rpe?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -962,6 +995,7 @@ export type GQLExerciseSetLogResolvers<ContextType = any, ParentType extends GQL
   exerciseSetId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   reps?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  rpe?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weight?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -996,7 +1030,7 @@ export type GQLMutationResolvers<ContextType = any, ParentType extends GQLResolv
   createExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCreateExerciseArgs, 'input'>>;
   createNote?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationCreateNoteArgs, 'input'>>;
   createNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationCreateNotificationArgs, 'input'>>;
-  createTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCreateTrainingPlanArgs, 'input'>>;
+  createTrainingPlan?: Resolver<GQLResolversTypes['CreateTrainingPlanPayload'], ParentType, ContextType, RequireFields<GQLMutationCreateTrainingPlanArgs, 'input'>>;
   deleteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteExerciseArgs, 'id'>>;
   deleteNote?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteNoteArgs, 'id'>>;
   deleteNotification?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteNotificationArgs, 'id'>>;
@@ -1080,6 +1114,7 @@ export type GQLTrainingExerciseResolvers<ContextType = any, ParentType extends G
   sets?: Resolver<Array<GQLResolversTypes['ExerciseSet']>, ParentType, ContextType>;
   tempo?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  warmupSets?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1177,6 +1212,7 @@ export type GQLUserProfileResolvers<ContextType = any, ParentType extends GQLRes
 };
 
 export type GQLUserPublicResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['UserPublic'] = GQLResolversParentTypes['UserPublic']> = {
+  activePlan?: Resolver<Maybe<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType>;
   allergies?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   birthday?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -1207,6 +1243,7 @@ export type GQLUserSessionResolvers<ContextType = any, ParentType extends GQLRes
 export type GQLResolvers<ContextType = any> = {
   BaseExercise?: GQLBaseExerciseResolvers<ContextType>;
   CoachingRequest?: GQLCoachingRequestResolvers<ContextType>;
+  CreateTrainingPlanPayload?: GQLCreateTrainingPlanPayloadResolvers<ContextType>;
   ExerciseLog?: GQLExerciseLogResolvers<ContextType>;
   ExerciseSet?: GQLExerciseSetResolvers<ContextType>;
   ExerciseSetLog?: GQLExerciseSetLogResolvers<ContextType>;

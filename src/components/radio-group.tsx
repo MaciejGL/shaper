@@ -15,6 +15,9 @@ type RadioGroupProps = {
   items: RadioGroupItem[]
   onValueChange: (value: string) => void
   value: string
+  hideTitle?: boolean
+  classNameItem?: string
+  className?: string
 }
 
 export function RadioGroupTabs({
@@ -22,14 +25,19 @@ export function RadioGroupTabs({
   items,
   onValueChange,
   value,
+  hideTitle,
+  className,
+  classNameItem,
 }: RadioGroupProps) {
   return (
-    <div>
-      <Label className="mb-2 block">{title}</Label>
+    <div className="w-full">
+      <Label className={cn('mb-2 block', hideTitle && 'sr-only')}>
+        {title}
+      </Label>
       <RadioGroup
         value={value.toString()}
         onValueChange={onValueChange}
-        className="flex flex-wrap gap-2"
+        className={cn('flex flex-wrap gap-2', className)}
       >
         {items.map((item) => (
           <div key={item.id} className="flex items-center">
@@ -51,6 +59,7 @@ export function RadioGroupTabs({
                     'opacity-50 cursor-default pointer-events-none bg-muted':
                       item.disabled,
                   },
+                  classNameItem,
                 )}
               >
                 {item.label}

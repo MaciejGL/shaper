@@ -67,7 +67,6 @@ export function CreateExerciseDialog({
     muscleGroups: exercise?.muscleGroups.map((mg) => ({ id: mg.id })) ?? [],
   })
   const invalidateQuery = useInvalidateQuery()
-
   const { mutateAsync: createExercise, isPending: isCreatingExercise } =
     useCreateExerciseMutation({
       onSuccess: () => {
@@ -128,18 +127,20 @@ export function CreateExerciseDialog({
     setFormData((prev) => ({ ...prev, muscleGroups }))
   }
 
+  const title = exercise?.id ? 'Edit Exercise' : 'Create New Exercise'
+  const description = exercise?.id
+    ? 'Edit the exercise details'
+    : 'Add a new exercise to your library that you can reuse across training plans.'
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        dialogTitle="Create New Exercise"
+        dialogTitle={title}
         className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto"
       >
         <DialogHeader>
-          <DialogTitle>Create New Exercise</DialogTitle>
-          <DialogDescription>
-            Add a new exercise to your library that you can reuse across
-            training plans.
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">

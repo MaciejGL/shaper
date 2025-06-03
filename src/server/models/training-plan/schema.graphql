@@ -26,7 +26,10 @@ type TrainingPlan {
 
 input CreateExerciseSetInput {
   order: Int!
-  reps: Int!
+  reps: Int
+  minReps: Int
+  maxReps: Int
+  rpe: Int
   weight: Float
 }
 
@@ -36,6 +39,7 @@ input CreateTrainingExerciseInput {
   tempo: String
   instructions: String
   order: Int!
+  warmupSets: Int
   sets: [CreateExerciseSetInput!]
 }
 
@@ -93,13 +97,17 @@ input UpdateTrainingExerciseInput {
   restSeconds: Int
   tempo: String
   instructions: String
+  warmupSets: Int
   sets: [UpdateExerciseSetInput!]
 }
 
 input UpdateExerciseSetInput {
   id: ID!
   order: Int!
-  reps: Int!
+  reps: Int
+  minReps: Int
+  maxReps: Int
+  rpe: Int
   weight: Float
 }
 
@@ -115,8 +123,15 @@ input AssignTrainingPlanToClientInput {
   startDate: String
 }
 
+type CreateTrainingPlanPayload {
+  id: ID!
+  success: Boolean!
+}
+
 type Mutation {
-  createTrainingPlan(input: CreateTrainingPlanInput!): Boolean!
+  createTrainingPlan(
+    input: CreateTrainingPlanInput!
+  ): CreateTrainingPlanPayload!
   updateTrainingPlan(input: UpdateTrainingPlanInput!): Boolean!
   deleteTrainingPlan(id: ID!): Boolean!
   duplicateTrainingPlan(id: ID!): ID!

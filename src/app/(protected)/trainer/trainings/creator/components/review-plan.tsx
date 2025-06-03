@@ -93,14 +93,26 @@ type WeekDetailsProps = {
 }
 
 function WeekDetails({ week }: WeekDetailsProps) {
+  const workingDaysWithoutExercises = week.days.filter(
+    (d) => !d.isRestDay && d.exercises.length === 0,
+  ).length
+
   return (
     <AccordionItem key={week.weekNumber} value={week.weekNumber.toString()}>
       <AccordionTrigger>
         <div className="flex justify-between w-full pr-4">
           <span>{week.name}</span>
-          <span className="text-sm text-muted-foreground">
-            {week.days.filter((d) => !d.isRestDay).length} training days
-          </span>
+          <div className="flex gap-2">
+            {workingDaysWithoutExercises > 0 ? (
+              <span className="text-sm text-red-800">
+                {workingDaysWithoutExercises} empty day
+                {workingDaysWithoutExercises > 1 ? 's' : ''}
+              </span>
+            ) : null}
+            <span className="text-sm text-muted-foreground">
+              {week.days.filter((d) => !d.isRestDay).length} training days
+            </span>
+          </div>
         </div>
       </AccordionTrigger>
       <AccordionContent>

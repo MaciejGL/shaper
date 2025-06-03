@@ -30,6 +30,10 @@ export default class TrainingDay implements GQLTrainingDay {
     return this.data.isRestDay
   }
 
+  get workoutType() {
+    return this.data.workoutType
+  }
+
   get trainingWeekId() {
     return this.data.weekId
   }

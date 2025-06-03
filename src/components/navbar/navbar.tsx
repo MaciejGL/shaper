@@ -62,7 +62,7 @@ export const Navbar = ({
   return (
     <div
       className={cn(
-        'sticky z-[1] top-0 py-3 px-4 flex justify-between items-center bg-background shadow-[2px_1px_3px_0px_rgba(0,0,0,0.1)]',
+        'py-3 px-4 flex justify-between items-center bg-transparent',
       )}
     >
       <div className="flex items-center gap-2">

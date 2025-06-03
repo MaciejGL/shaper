@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, UploadCloudIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 
@@ -8,12 +8,16 @@ type FormNavigationProps = {
   currentStep: number
   onBack: () => void
   onNext: () => void
+  onSave: () => void
+  isSaving: boolean
 }
 
 export function FormNavigation({
   currentStep,
   onBack,
   onNext,
+  onSave,
+  isSaving,
 }: FormNavigationProps) {
   return (
     <div className="flex mt-6">
@@ -22,18 +26,31 @@ export function FormNavigation({
           variant="outline"
           onClick={onBack}
           disabled={currentStep === 0}
-          iconStart={<ChevronLeft className="h-4 w-4" />}
+          iconStart={<ChevronLeft />}
+          className="capitalize"
         >
-          Back
+          {STEPS[currentStep - 1]}
         </Button>
       )}
       {currentStep < STEPS.length - 1 && (
         <Button
           onClick={onNext}
-          iconEnd={<ChevronRight className="h-4 w-4" />}
-          className="ml-auto"
+          iconEnd={<ChevronRight />}
+          className="ml-auto capitalize"
         >
-          Next
+          {STEPS[currentStep + 1]}
+        </Button>
+      )}
+      {currentStep === STEPS.length - 1 && (
+        <Button
+          variant="default"
+          iconStart={<UploadCloudIcon />}
+          className="ml-auto"
+          onClick={onSave}
+          disabled={isSaving}
+          loading={isSaving}
+        >
+          Save Plan
         </Button>
       )}
     </div>

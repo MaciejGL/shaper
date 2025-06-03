@@ -54,6 +54,7 @@ export default class User implements GQLUser {
       },
       include: {
         profile: true,
+        assignedPlans: true,
       },
     })
 
