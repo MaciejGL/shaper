@@ -58,6 +58,7 @@ export const useExerciseHandlers = (
       setWeeks((prev) => {
         const newWeeks = [...prev]
         const newDays = [...newWeeks[weekIndex].days]
+
         newDays[dayIndex] = {
           ...newDays[dayIndex],
           exercises: [
@@ -67,7 +68,7 @@ export const useExerciseHandlers = (
               name: '',
               instructions: '',
               sets: exercise.sets || [],
-              order: newDays[dayIndex].exercises.length,
+              order: newDays[dayIndex].exercises.length || 1,
               ...exercise,
             },
           ],

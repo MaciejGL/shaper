@@ -39,6 +39,8 @@ export type TrainingExercise = Pick<
   | 'order'
   | 'id'
   | 'warmupSets'
+  | 'baseId'
+  | 'videoUrl'
 > & {
   sets: TrainingSet[]
 }

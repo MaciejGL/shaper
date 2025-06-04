@@ -3,7 +3,10 @@
 import { useState } from 'react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useMuscleGroupCategoriesQuery } from '@/generated/graphql-client'
+import {
+  useExercisesBasicInfoQuery,
+  useMuscleGroupCategoriesQuery,
+} from '@/generated/graphql-client'
 
 import { CreateExerciseDialog } from './components/create-exercise-dialog'
 import { ExerciseSearch } from './components/exercise-search'
@@ -14,6 +17,7 @@ export default function TrainerExercisesPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
   const { data: muscleGroupCategories } = useMuscleGroupCategoriesQuery()
+  const { data: exercisesBasicInfo } = useExercisesBasicInfoQuery()
 
   const categories = muscleGroupCategories?.muscleGroupCategories
 
@@ -57,6 +61,7 @@ export default function TrainerExercisesPage() {
           open={isCreateDialogOpen}
           onOpenChange={setIsCreateDialogOpen}
           categories={categories}
+          exercises={exercisesBasicInfo}
         />
       </div>
     </div>

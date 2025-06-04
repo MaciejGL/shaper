@@ -1,4 +1,3 @@
-import { GaugeIcon, TimerIcon } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -15,11 +14,10 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import { GQLTrainerExercisesQuery } from '@/generated/graphql-client'
-import { formatTempoInput, handleTempoKeyDown } from '@/lib/format-tempo'
 
 import type { TrainingExercise } from '../types'
 
-import { ExerciseSets } from './exercise-sets'
+// import { ExerciseSets } from './exercise-sets'
 import { ExerciseSearch } from './exercises-search'
 
 const initialExercise: TrainingExercise = {
@@ -29,7 +27,7 @@ const initialExercise: TrainingExercise = {
   restSeconds: 60,
   tempo: '',
   instructions: '',
-  order: 0,
+  order: 1,
 }
 
 type ExerciseFormProps = {
@@ -75,6 +73,8 @@ export function ExerciseForm({
           name: exercise.name,
           id: exercise.id,
           instructions: exercise.description,
+          videoUrl: exercise.videoUrl,
+          baseId: exercise.id,
           order: currentDay.exercises.length + 1,
         }))
       }
@@ -128,66 +128,6 @@ export function ExerciseForm({
               }
               placeholder="e.g., Single-Arm Dumbbell Row"
             />
-          </div>
-
-          <ExerciseSets sets={exercise.sets} exerciseIndex={exercise.order} />
-
-          <div className="flex gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="rest">Rest (s)</Label>
-              <Input
-                id="rest"
-                type="number"
-                min="0"
-                step="15"
-                className="min-w-24 max-w-min"
-                iconStart={<TimerIcon />}
-                value={exercise.restSeconds ?? undefined}
-                onChange={(e) =>
-                  setExercise({
-                    ...exercise,
-                    restSeconds:
-                      e.target.value === ''
-                        ? undefined
-                        : Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="warmup">Warmup sets</Label>
-              <Input
-                id="warmup"
-                type="number"
-                min="0"
-                step="1"
-                value={exercise.warmupSets ?? undefined}
-                onChange={(e) =>
-                  setExercise({
-                    ...exercise,
-                    warmupSets:
-                      e.target.value === ''
-                        ? undefined
-                        : Number(e.target.value),
-                  })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="tempo">Tempo (optional)</Label>
-              <Input
-                id="tempo"
-                placeholder="3-1-3"
-                value={exercise.tempo ?? undefined}
-                className="min-w-24 max-w-min"
-                iconStart={<GaugeIcon />}
-                onChange={(e) => {
-                  const formattedValue = formatTempoInput(e)
-                  setExercise({ ...exercise, tempo: formattedValue })
-                }}
-                onKeyDown={handleTempoKeyDown}
-              />
-            </div>
           </div>
 
           <div className="space-y-2">

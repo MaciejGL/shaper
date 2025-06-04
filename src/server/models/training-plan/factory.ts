@@ -46,6 +46,11 @@ export async function getTrainingPlanById(
                   order: 'asc',
                 },
                 include: {
+                  base: {
+                    select: {
+                      videoUrl: true,
+                    },
+                  },
                   sets: {
                     orderBy: {
                       order: 'asc',
@@ -128,6 +133,7 @@ export async function createTrainingPlan(
                   instructions: exercise.instructions,
                   order: exercise.order,
                   warmupSets: exercise.warmupSets,
+                  baseId: exercise.baseId ?? undefined,
                   sets: {
                     create: exercise.sets?.map((set) => ({
                       order: set.order,
@@ -191,6 +197,7 @@ export async function updateTrainingPlan(
                       instructions: exercise.instructions ?? undefined,
                       order: exercise.order,
                       warmupSets: exercise.warmupSets ?? undefined,
+                      baseId: exercise.baseId ?? undefined,
                       sets: {
                         create: exercise.sets?.map((set) => ({
                           order: set.order,

@@ -1,4 +1,5 @@
 import {
+  BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
   TrainingDay as PrismaTrainingDay,
   TrainingExercise as PrismaTrainingExercise,
@@ -19,6 +20,7 @@ export default class TrainingPlan implements GQLTrainingPlan {
         days?: (PrismaTrainingDay & {
           exercises?: (PrismaTrainingExercise & {
             sets?: PrismaExerciseSet[]
+            base?: Pick<PrismaBaseExercise, 'videoUrl'>
           })[]
         })[]
       })[]

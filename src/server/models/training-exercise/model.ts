@@ -1,4 +1,5 @@
 import {
+  BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
   TrainingExercise as PrismaTrainingExercise,
 } from '@prisma/client'
@@ -13,6 +14,7 @@ export default class TrainingExercise implements GQLTrainingExercise {
   constructor(
     protected data: PrismaTrainingExercise & {
       sets?: PrismaExerciseSet[]
+      base?: Pick<PrismaBaseExercise, 'videoUrl'>
     },
   ) {}
 
@@ -46,6 +48,19 @@ export default class TrainingExercise implements GQLTrainingExercise {
 
   get dayId() {
     return this.data.dayId
+  }
+
+  get baseId() {
+    return this.data.baseId
+  }
+
+  async videoUrl() {
+    console.log(this.data)
+    if (!this.data.base) {
+      return null
+    }
+
+    return this.data.base.videoUrl
   }
 
   async sets() {

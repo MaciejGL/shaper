@@ -13,6 +13,18 @@ query MuscleGroupCategories {
   }
 }
 
+query ExercisesBasicInfo {
+  userExercises {
+    id
+    name
+  }
+
+  publicExercises {
+    id
+    name
+  }
+}
+
 query TrainerExercises($where: ExerciseWhereInput) {
   userExercises(where: $where) {
     id
@@ -21,6 +33,7 @@ query TrainerExercises($where: ExerciseWhereInput) {
     videoUrl
     equipment
     isPublic
+    videoUrl
     muscleGroups {
       id
       name

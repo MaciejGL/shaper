@@ -21,7 +21,6 @@ export default class ExerciseSet implements GQLExerciseSet {
   }
 
   get minReps() {
-    console.log('minReps', this.data.minReps)
     return this.data.minReps
   }
 

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { VideoPreview } from '@/components/video-preview'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import { formatTempoInput, handleTempoKeyDown } from '@/lib/format-tempo'
 
@@ -33,6 +34,7 @@ export function ExerciseCard({
             {exercise.order}. {exercise.name}
           </CardTitle>
           <div className="flex gap-1">
+            {exercise.videoUrl && <VideoPreview url={exercise.videoUrl} />}
             <Button
               variant="ghost"
               size="icon-md"
@@ -114,21 +116,20 @@ export function ExerciseCard({
         </div>
         <div className="w-full grid grid-cols-1 @4xl/section:grid-cols-[1fr_300px] gap-4">
           <ExerciseSets sets={exercise.sets} exerciseIndex={exerciseIndex} />
-          {exercise.instructions && (
-            <Textarea
-              id="instructions"
-              className="text-sm text-foreground bg-muted p-2 rounded-md h-full min-h-24"
-              value={exercise.instructions}
-              onChange={(e) =>
-                updateExercise(activeWeek, activeDay, exerciseIndex, {
-                  ...exercise,
-                  instructions: e.target.value,
-                })
-              }
-            >
-              {exercise.instructions}
-            </Textarea>
-          )}
+
+          <Textarea
+            id="instructions"
+            className="text-sm text-foreground bg-muted p-2 rounded-md h-full min-h-24"
+            value={exercise.instructions ?? ''}
+            onChange={(e) =>
+              updateExercise(activeWeek, activeDay, exerciseIndex, {
+                ...exercise,
+                instructions: e.target.value,
+              })
+            }
+          >
+            {exercise.instructions}
+          </Textarea>
         </div>
       </CardContent>
     </Card>

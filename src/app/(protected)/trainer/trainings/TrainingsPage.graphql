@@ -26,6 +26,7 @@ fragment TrainingTemplate on TrainingPlan {
         warmupSets
         instructions
         order
+        videoUrl
 
         sets {
           id

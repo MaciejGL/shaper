@@ -102,12 +102,14 @@ export type GQLCreateTrainingDayInput = {
 };
 
 export type GQLCreateTrainingExerciseInput = {
+  baseId?: InputMaybe<Scalars['ID']['input']>;
   instructions?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   order: Scalars['Int']['input'];
   restSeconds?: InputMaybe<Scalars['Int']['input']>;
   sets?: InputMaybe<Array<GQLCreateExerciseSetInput>>;
   tempo?: InputMaybe<Scalars['String']['input']>;
+  videoUrl?: InputMaybe<Scalars['String']['input']>;
   warmupSets?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -504,6 +506,7 @@ export type GQLTrainingDay = {
 
 export type GQLTrainingExercise = {
   __typename?: 'TrainingExercise';
+  baseId?: Maybe<Scalars['ID']['output']>;
   createdAt: Scalars['String']['output'];
   dayId: Scalars['ID']['output'];
   id: Scalars['ID']['output'];
@@ -515,6 +518,7 @@ export type GQLTrainingExercise = {
   sets: Array<GQLExerciseSet>;
   tempo?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
+  videoUrl?: Maybe<Scalars['String']['output']>;
   warmupSets?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -611,6 +615,7 @@ export type GQLUpdateTrainingDayInput = {
 };
 
 export type GQLUpdateTrainingExerciseInput = {
+  baseId?: InputMaybe<Scalars['ID']['input']>;
   id: Scalars['ID']['input'];
   instructions?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -618,6 +623,7 @@ export type GQLUpdateTrainingExerciseInput = {
   restSeconds?: InputMaybe<Scalars['Int']['input']>;
   sets?: InputMaybe<Array<GQLUpdateExerciseSetInput>>;
   tempo?: InputMaybe<Scalars['String']['input']>;
+  videoUrl?: InputMaybe<Scalars['String']['input']>;
   warmupSets?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -800,6 +806,11 @@ export type GQLMuscleGroupCategoriesQueryVariables = Exact<{ [key: string]: neve
 
 export type GQLMuscleGroupCategoriesQuery = { __typename?: 'Query', muscleGroupCategories: Array<{ __typename?: 'MuscleGroupCategory', id: string, name: string, slug: string, muscles: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string, isPrimary: boolean }> }> };
 
+export type GQLExercisesBasicInfoQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLExercisesBasicInfoQuery = { __typename?: 'Query', userExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string }>, publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string }> };
+
 export type GQLTrainerExercisesQueryVariables = Exact<{
   where?: InputMaybe<GQLExerciseWhereInput>;
 }>;
@@ -843,7 +854,7 @@ export type GQLDeleteExerciseMutationVariables = Exact<{
 
 export type GQLDeleteExerciseMutation = { __typename?: 'Mutation', deleteExercise: boolean };
 
-export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, order: number, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> };
+export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, order: number, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> };
 
 export type GQLGetTemplatesQueryVariables = Exact<{
   draft?: InputMaybe<Scalars['Boolean']['input']>;
@@ -857,7 +868,7 @@ export type GQLGetTemplateTrainingPlanByIdQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetTemplateTrainingPlanByIdQuery = { __typename?: 'Query', getTrainingPlanById: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, order: number, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
+export type GQLGetTemplateTrainingPlanByIdQuery = { __typename?: 'Query', getTrainingPlanById: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, order: number, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
 
 export type GQLCreateTrainingPlanMutationVariables = Exact<{
   input: GQLCreateTrainingPlanInput;
@@ -1044,6 +1055,7 @@ export const TrainingTemplateFragmentDoc = `
         warmupSets
         instructions
         order
+        videoUrl
         sets {
           id
           order
@@ -1466,6 +1478,61 @@ useInfiniteMuscleGroupCategoriesQuery.getKey = (variables?: GQLMuscleGroupCatego
 
 useMuscleGroupCategoriesQuery.fetcher = (variables?: GQLMuscleGroupCategoriesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMuscleGroupCategoriesQuery, GQLMuscleGroupCategoriesQueryVariables>(MuscleGroupCategoriesDocument, variables, options);
 
+export const ExercisesBasicInfoDocument = `
+    query ExercisesBasicInfo {
+  userExercises {
+    id
+    name
+  }
+  publicExercises {
+    id
+    name
+  }
+}
+    `;
+
+export const useExercisesBasicInfoQuery = <
+      TData = GQLExercisesBasicInfoQuery,
+      TError = unknown
+    >(
+      variables?: GQLExercisesBasicInfoQueryVariables,
+      options?: Omit<UseQueryOptions<GQLExercisesBasicInfoQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLExercisesBasicInfoQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLExercisesBasicInfoQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['ExercisesBasicInfo'] : ['ExercisesBasicInfo', variables],
+    queryFn: fetchData<GQLExercisesBasicInfoQuery, GQLExercisesBasicInfoQueryVariables>(ExercisesBasicInfoDocument, variables),
+    ...options
+  }
+    )};
+
+useExercisesBasicInfoQuery.getKey = (variables?: GQLExercisesBasicInfoQueryVariables) => variables === undefined ? ['ExercisesBasicInfo'] : ['ExercisesBasicInfo', variables];
+
+export const useInfiniteExercisesBasicInfoQuery = <
+      TData = InfiniteData<GQLExercisesBasicInfoQuery>,
+      TError = unknown
+    >(
+      variables: GQLExercisesBasicInfoQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLExercisesBasicInfoQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLExercisesBasicInfoQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLExercisesBasicInfoQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['ExercisesBasicInfo.infinite'] : ['ExercisesBasicInfo.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLExercisesBasicInfoQuery, GQLExercisesBasicInfoQueryVariables>(ExercisesBasicInfoDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteExercisesBasicInfoQuery.getKey = (variables?: GQLExercisesBasicInfoQueryVariables) => variables === undefined ? ['ExercisesBasicInfo.infinite'] : ['ExercisesBasicInfo.infinite', variables];
+
+
+useExercisesBasicInfoQuery.fetcher = (variables?: GQLExercisesBasicInfoQueryVariables, options?: RequestInit['headers']) => fetchData<GQLExercisesBasicInfoQuery, GQLExercisesBasicInfoQueryVariables>(ExercisesBasicInfoDocument, variables, options);
+
 export const TrainerExercisesDocument = `
     query TrainerExercises($where: ExerciseWhereInput) {
   userExercises(where: $where) {
@@ -1475,6 +1542,7 @@ export const TrainerExercisesDocument = `
     videoUrl
     equipment
     isPublic
+    videoUrl
     muscleGroups {
       id
       name

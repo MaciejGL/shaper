@@ -1,5 +1,10 @@
 'use client'
 
+import { AnimatePresence } from 'framer-motion'
+import { ClockIcon, GaugeIcon, TextIcon } from 'lucide-react'
+import { useState } from 'react'
+
+import { AnimateHeightItem } from '@/components/animations/animated-container'
 import {
   Accordion,
   AccordionContent,
@@ -7,6 +12,8 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { VideoPreview } from '@/components/video-preview'
 import { cn } from '@/lib/utils'
 
 import type { TrainingPlanFormData } from './types'
@@ -66,24 +73,80 @@ type ExerciseDetailsProps = {
 }
 
 function ExerciseDetails({ exercise, index }: ExerciseDetailsProps) {
+  const [showInstructions, setShowInstructions] = useState(false)
+  const { name, sets, restSeconds, tempo, instructions, videoUrl } = exercise
   return (
-    <div className="pl-4 border-l-2 border-muted">
-      <div className="font-medium">
-        {index + 1}. {exercise.name}
+    <div className="px-4 py-2 border-l-2">
+      <div className="flex justify-between flex-wrap gap-2">
+        <div className="font-medium shrink-0">
+          {index + 1}. {name}
+        </div>
+        <div className="text-sm text-muted-foreground flex gap-2">
+          <Badge variant="outline">
+            <ClockIcon className="size-3" />
+            {restSeconds && `${restSeconds}s rest`}
+          </Badge>
+          {tempo && (
+            <Badge variant="outline">
+              <GaugeIcon className="size-3" />
+              {`Tempo: ${tempo}`}
+            </Badge>
+          )}
+          {instructions && (
+            <Button
+              variant="outline"
+              iconOnly={<TextIcon />}
+              onClick={() => setShowInstructions(!showInstructions)}
+            >
+              Instructions
+            </Button>
+          )}
+          {videoUrl && <VideoPreview url={videoUrl} variant="outline" />}
+        </div>
       </div>
-      <div className="text-sm">
-        {exercise.sets.map((set, idx) => (
-          <span key={`set-${set.order}`} className="mr-3">
-            Set {set.order}: {set.reps} reps{' '}
-            {set.weight ? `@ ${set.weight}kg` : ''}
-            {idx < exercise.sets.length - 1 ? '' : ''}
-          </span>
-        ))}
+      <div className="mt-2 overflow-x-auto">
+        <table className=" border-collapse">
+          <thead>
+            <tr className="border-b">
+              <th className="text-xs font-medium text-center py-2 px-4">Set</th>
+              <th className="text-xs font-medium text-center py-2 px-4">
+                Reps
+              </th>
+              <th className="text-xs font-medium text-center py-2 px-4">
+                Weight
+              </th>
+              <th className="text-xs font-medium text-center py-2 px-4">RPE</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sets.map((set) => (
+              <tr key={`set-${set.order}`} className="border-b last:border-b-0">
+                <td className="text-sm text-center py-2">{set.order}</td>
+                <td className="text-sm text-center py-2">
+                  {set.minReps && set.maxReps
+                    ? `${set.minReps}-${set.maxReps}`
+                    : set.reps}
+                </td>
+                <td className="text-sm text-center py-2">
+                  {set.weight ? `${set.weight} kg` : '-'}
+                </td>
+                <td className="text-sm text-center py-2">
+                  {set.rpe ? `${set.rpe}` : '-'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
-      <div className="text-sm text-muted-foreground">
-        {exercise.restSeconds && `${exercise.restSeconds}s rest`}
-        {exercise.tempo && ` • Tempo: ${exercise.tempo}`}
-      </div>
+      <AnimatePresence>
+        {showInstructions && (
+          <AnimateHeightItem id="instructions" isFirstRender={false}>
+            <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+              {instructions}
+            </p>
+          </AnimateHeightItem>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -119,7 +182,7 @@ function WeekDetails({ week }: WeekDetailsProps) {
         {week.description && (
           <p className="text-muted-foreground mb-4">{week.description}</p>
         )}
-        <div className="space-y-4 pt-2">
+        <div className="flex flex-col gap-4">
           {week.days.map((day) => (
             <DayDetails key={day.dayOfWeek} day={day} />
           ))}
@@ -135,9 +198,7 @@ type DayDetailsProps = {
 
 function DayDetails({ day }: DayDetailsProps) {
   return (
-    <div
-      className={cn('border rounded-md p-4', day.isRestDay && 'bg-muted/50')}
-    >
+    <div className={cn('border rounded-md p-4', day.isRestDay && 'opacity-50')}>
       <div className="flex justify-between items-center mb-2">
         <h4 className="font-medium">{dayNames[day.dayOfWeek]}</h4>
         {day.isRestDay ? (
@@ -148,11 +209,11 @@ function DayDetails({ day }: DayDetailsProps) {
       </div>
 
       {!day.isRestDay && (
-        <div className="space-y-2">
+        <div className="space-y-4">
           {day.exercises.length > 0 ? (
             day.exercises.map((exercise, index) => (
               <ExerciseDetails
-                key={`exercise-${exercise.order}`}
+                key={`exercise-${exercise.id}`}
                 exercise={exercise}
                 index={index}
               />

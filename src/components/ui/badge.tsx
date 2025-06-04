@@ -52,7 +52,7 @@ function Badge({
     <Comp
       data-slot="badge"
       className={cn(
-        badgeVariants({ variant: isLoading ? 'primary' : variant, size }),
+        badgeVariants({ variant: isLoading ? 'secondary' : variant, size }),
         isLoading && 'masked-placeholder-text',
         className,
       )}

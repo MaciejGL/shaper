@@ -23,7 +23,7 @@ export function Input({
   ...props
 }: InputProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       {label && (
         <Label htmlFor={id} className="text-sm font-medium">
           {label}
@@ -48,7 +48,7 @@ export function Input({
             'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
             { 'pl-10': iconStart, 'pr-10': iconEnd },
             { 'h-7': size === 'sm', 'h-9': size === 'md' },
-            'data-[error]:border-destructive',
+            'data-[error]:border-destructive data-[error]:ring-destructive/20 dark:data-[error]:ring-destructive/40 data-[error]:focus-visible:ring-destructive/20 dark:data-[error]:focus-visible:ring-destructive/40',
             className,
           )}
           {...props}

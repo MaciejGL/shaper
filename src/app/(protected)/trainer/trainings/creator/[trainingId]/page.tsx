@@ -11,7 +11,7 @@ export default function CreateTrainingPlanPage() {
   return (
     <div className="container h-full">
       <TrainingPlanProvider trainingId={trainingId}>
-        <CreateTrainingPlanForm trainingId={trainingId} />
+        <CreateTrainingPlanForm />
       </TrainingPlanProvider>
     </div>
   )

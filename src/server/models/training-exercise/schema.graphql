@@ -10,8 +10,10 @@ type TrainingExercise {
   sets: [ExerciseSet!]!
   logs: [ExerciseLog!]!
 
-  # baseExercise: BaseExercise
+  videoUrl: String
+
   dayId: ID!
+  baseId: ID
 
   createdAt: String!
   updatedAt: String!

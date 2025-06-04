@@ -156,3 +156,8 @@
     display: none;
   }
 }
+
+@utility container {
+  width: 100%;
+  max-width: 80rem;
+}
