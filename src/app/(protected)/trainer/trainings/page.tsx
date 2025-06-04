@@ -11,6 +11,8 @@ import { DashboardHeader } from '../components/dashboard-header'
 
 import { TrainingPlansList } from './components/training-plans-list'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Page() {
   const { data } =
     await gqlServerFetch<GQLGetTemplatesQuery>(GetTemplatesDocument)
