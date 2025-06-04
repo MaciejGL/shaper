@@ -242,7 +242,6 @@ function ExerciseList({
   exercises: TrainingExercise[]
   onEdit: (index: number) => void
 }) {
-  console.log(exercises.at(-1))
   return (
     <div className="space-y-8">
       {exercises.map((exercise, index) => (

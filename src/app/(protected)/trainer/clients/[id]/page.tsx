@@ -1,6 +1,5 @@
 'use client'
 
-import { UserRoundCogIcon } from 'lucide-react'
 import { use } from 'react'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'

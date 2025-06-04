@@ -55,7 +55,6 @@ export default class TrainingExercise implements GQLTrainingExercise {
   }
 
   async videoUrl() {
-    console.log(this.data)
     if (!this.data.base) {
       return null
     }
