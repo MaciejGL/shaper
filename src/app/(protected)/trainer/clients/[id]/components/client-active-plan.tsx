@@ -21,9 +21,9 @@ export function ClientActivePlan({
   hasAssignedPlans: boolean
 }) {
   return (
-    <Card>
+    <Card borderless>
       <CardHeader>
-        <CardTitle>Active Plan</CardTitle>
+        <CardTitle className="text-2xl font-semibold">Active Plan</CardTitle>
       </CardHeader>
       <CardContent className="h-full">
         {activePlan ? (

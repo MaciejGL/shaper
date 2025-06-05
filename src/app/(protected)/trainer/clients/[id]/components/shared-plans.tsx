@@ -1,6 +1,7 @@
 import {
   Calendar,
   LucideFilePlus2,
+  LucideList,
   MoreVertical,
   Trash2Icon,
 } from 'lucide-react'
@@ -11,7 +12,14 @@ import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { CardDescription, CardTitle } from '@/components/ui/card'
+import { CardTitle } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,26 +49,51 @@ export function SharedPlansWithClient({
   activePlan,
 }: SharedPlansWithClientProps) {
   return (
-    <Card className="@container/shared-plans">
+    <Card className="@container/shared-plans" borderless>
       <CardHeader className="flex justify-between items-center">
-        <CardTitle>Assigned Plans</CardTitle>
-        <AssignPlanDialog
-          clientName={clientName}
-          clientId={clientId}
-          activePlan={activePlan}
-          trigger={
-            <Button
-              variant="outline"
-              size="icon-sm"
-              iconOnly={<LucideFilePlus2 />}
-            />
-          }
-        />
+        <CardTitle className="text-2xl font-semibold">Assigned Plans</CardTitle>
+        <div className="flex gap-2">
+          <AssignPlanDialog
+            clientName={clientName}
+            clientId={clientId}
+            activePlan={activePlan}
+            trigger={
+              <Button
+                variant="outline"
+                size="icon-sm"
+                iconOnly={<LucideFilePlus2 />}
+              />
+            }
+          />
+          {plans.length > 3 && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon-sm"
+                  iconOnly={<LucideList />}
+                />
+              </DialogTrigger>
+              <DialogContent dialogTitle="Assigned Plans">
+                <DialogTitle>Assigned Plans</DialogTitle>
+                <DialogDescription className="grid gap-6">
+                  {plans.map((plan) => (
+                    <TrainingCard
+                      key={plan.id}
+                      plan={plan}
+                      clientName={clientName}
+                    />
+                  ))}
+                </DialogDescription>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         {plans.length > 0 ? (
           <div className="grid gap-6 @3xl/shared-plans:grid-cols-2">
-            {plans.map((plan) => (
+            {plans.slice(0, 3).map((plan) => (
               <TrainingCard key={plan.id} plan={plan} clientName={clientName} />
             ))}
           </div>
@@ -109,7 +142,7 @@ export function TrainingCard({
   }
 
   return (
-    <Card variant="gradient">
+    <Card>
       <CardHeader>
         <div className="flex justify-between items-start">
           <CardTitle>{plan.title}</CardTitle>
@@ -133,11 +166,6 @@ export function TrainingCard({
           </DropdownMenu>
         </div>
       </CardHeader>
-      <CardContent>
-        <CardDescription>
-          <p className="line-clamp-2">{plan.description}</p>
-        </CardDescription>
-      </CardContent>
       <CardFooter>
         <div className="flex gap-2">
           <Badge variant="outline">

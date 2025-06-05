@@ -13,7 +13,7 @@ type ClientInfoProps = {
 
 export function ClientInfo({ client, clientName }: ClientInfoProps) {
   return (
-    <Card className="lg:col-spans-1">
+    <Card className="lg:col-spans-1" variant="gradient">
       <ClientCardHeader client={client} clientName={clientName} />
 
       <CardContent className="space-y-4">

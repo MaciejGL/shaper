@@ -90,7 +90,6 @@ export function ExerciseLogs({ plan }: ExerciseLogsProps) {
         </TabsList>
 
         <TabsContent value="recent" className="space-y-4">
-          <h3 className="text-lg font-semibold">Recent Exercise Sessions</h3>
           {recentExercises.length === 0 ? (
             <Card>
               <CardContent className="pt-6">
@@ -155,7 +154,6 @@ export function ExerciseLogs({ plan }: ExerciseLogsProps) {
         </TabsContent>
 
         <TabsContent value="progress" className="space-y-4">
-          <h3 className="text-lg font-semibold">Exercise Progress Tracking</h3>
           {uniqueExercises.length === 0 ? (
             <Card>
               <CardContent className="pt-6">

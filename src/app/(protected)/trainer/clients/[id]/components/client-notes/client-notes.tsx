@@ -111,10 +111,10 @@ export function ClientNotes({ clientId }: { clientId: string }) {
   }
 
   return (
-    <Card>
+    <Card borderless>
       <CardHeader className="gap-0">
         <div className="flex justify-between">
-          <CardTitle>Notes</CardTitle>
+          <CardTitle className="text-2xl font-semibold">Notes</CardTitle>
           <Button
             variant="outline"
             size="icon-xs"

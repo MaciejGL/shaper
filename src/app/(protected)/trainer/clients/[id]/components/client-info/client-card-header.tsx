@@ -29,7 +29,7 @@ export function ClientCardHeader({
           className="object-cover"
         />
       </div>
-      <CardTitle className="text-xl">{clientName}</CardTitle>
+      <CardTitle className="text-lg">{clientName}</CardTitle>
       <CardDescription>{client.email}</CardDescription>
       <CardDescription>{client.phone}</CardDescription>
       <CardDescription className="flex flex-wrap justify-center gap-4">

@@ -20,12 +20,20 @@ function Card({
   className,
   children,
   variant,
+  borderless = false,
   ...props
-}: React.ComponentProps<'div'> & { variant?: 'default' | 'gradient' }) {
+}: React.ComponentProps<'div'> & {
+  variant?: 'default' | 'gradient'
+  borderless?: boolean
+}) {
   return (
     <div
       data-slot="card"
-      className={cn(cardVariants({ variant }), className)}
+      className={cn(
+        cardVariants({ variant }),
+        className,
+        borderless && 'border-0',
+      )}
       {...props}
     >
       {children}

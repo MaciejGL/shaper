@@ -24,7 +24,7 @@ export function WeeklyProgress({ plan }: WeeklyProgressProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">Weekly Breakdown</h3>
+        <h3 className="text-lg font-medium">Weekly Breakdown</h3>
         <Badge variant="outline">
           {plan.weeks.filter((w) => w.completedAt).length} of {plan.weekCount}{' '}
           weeks completed
@@ -44,7 +44,7 @@ export function WeeklyProgress({ plan }: WeeklyProgressProps) {
         </TabsList>
 
         {plan.weeks.map((week) => (
-          <TabsContent key={week.id} value={week.id} className="mt-6">
+          <TabsContent key={week.id} value={week.id} className="mt-1">
             <div className="space-y-3">
               {week.days.map((day) => (
                 <DayCard key={day.id} day={day} />
