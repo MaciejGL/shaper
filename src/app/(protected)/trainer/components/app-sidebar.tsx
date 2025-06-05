@@ -15,7 +15,6 @@ import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
 
 import { Divider } from '@/components/divider'
-import { navLinkVariants } from '@/components/navbar/nav-link'
 import {
   Sidebar,
   SidebarContent,
@@ -200,10 +199,10 @@ function SidebarItem({
 
   return (
     <SidebarMenuItem key={item.title}>
-      <SidebarMenuButton asChild disabled={item.disabled}>
+      <SidebarMenuButton asChild disabled={item.disabled} size="md">
         <Link href={item.url} className="inline-flex py-4">
           <item.icon />
-          <span className="font-medium text-md">{item.title}</span>
+          <span>{item.title}</span>
           {isActive && <ChevronRight className="ml-auto size-4 opacity-60" />}
         </Link>
       </SidebarMenuButton>
@@ -213,15 +212,10 @@ function SidebarItem({
             <SidebarMenuSubButton asChild>
               <Link
                 href={subItem.url}
-                className={cn(
-                  navLinkVariants({
-                    isActive: subItem.url === pathname,
-                  }),
-                  isLoading && 'masked-placeholder-text',
-                )}
+                className={cn('', isLoading && 'masked-placeholder-text')}
               >
                 <subItem.icon />
-                <span className="truncate">{subItem.title}</span>
+                <span>{subItem.title}</span>
                 {subItem.url === pathname && (
                   <ChevronRight className="ml-auto h-4 w-4 opacity-60" />
                 )}

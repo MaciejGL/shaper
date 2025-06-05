@@ -30,15 +30,15 @@ export const Main = async ({
     >
       {user && <Navbar user={user} withSidebar={withSidebar} />}
       <div
-        className={cn('w-full h-[calc(100%+0.5rem)] overflow-hidden', {
-          'p-2 -mt-2': isTrainer,
+        className={cn('w-full h-[calc(100%+0.5rem)] !overflow-hidden', {
+          'md:p-2 -mt-2': isTrainer,
         })}
       >
         <div
           className={cn(
             'w-full h-full p-2 md:p-4 lg:p-8 bg-background overflow-y-auto',
             {
-              'rounded-md shadow-sm': isTrainer,
+              'md:rounded-md shadow-sm': isTrainer,
               'pb-32': !isTrainer,
             },
           )}

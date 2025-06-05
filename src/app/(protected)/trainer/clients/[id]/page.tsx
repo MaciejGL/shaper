@@ -39,7 +39,7 @@ export default function ClientDetailPage({
       />
 
       <AnimatedPageTransition id="client-detail-page">
-        <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_4fr] gap-10">
+        <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_4fr] gap-12">
           <ClientInfo
             client={client}
             clientName={clientName}

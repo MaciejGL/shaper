@@ -1,5 +1,4 @@
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Card } from '@/components/ui/card'
+import { CardContent, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { GQLGetClientByIdQuery } from '@/generated/graphql-client'
 
@@ -21,11 +20,10 @@ export function ClientActivePlan({
   hasAssignedPlans: boolean
 }) {
   return (
-    <Card borderless>
-      <CardHeader>
-        <CardTitle className="text-2xl font-semibold">Active Plan</CardTitle>
-      </CardHeader>
-      <CardContent className="h-full">
+    <div>
+      <CardTitle className="text-2xl font-semibold mb-4">Active Plan</CardTitle>
+
+      <CardContent className="h-full p-0">
         {activePlan ? (
           <Tabs defaultValue="active-plan" className="h-full">
             <TabsList className="grid w-full grid-cols-2">
@@ -54,6 +52,6 @@ export function ClientActivePlan({
           />
         )}
       </CardContent>
-    </Card>
+    </div>
   )
 }

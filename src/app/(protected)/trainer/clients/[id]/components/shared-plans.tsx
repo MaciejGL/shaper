@@ -49,9 +49,11 @@ export function SharedPlansWithClient({
   activePlan,
 }: SharedPlansWithClientProps) {
   return (
-    <Card className="@container/shared-plans" borderless>
-      <CardHeader className="flex justify-between items-center">
-        <CardTitle className="text-2xl font-semibold">Assigned Plans</CardTitle>
+    <div className="@container/shared-plans">
+      <div className="flex justify-between items-center mb-2">
+        <CardTitle className="text-2xl font-semibold ">
+          Assigned Plans
+        </CardTitle>
         <div className="flex gap-2">
           <AssignPlanDialog
             clientName={clientName}
@@ -89,8 +91,8 @@ export function SharedPlansWithClient({
             </Dialog>
           )}
         </div>
-      </CardHeader>
-      <CardContent>
+      </div>
+      <CardContent className="p-0">
         {plans.length > 0 ? (
           <div className="grid gap-6 @3xl/shared-plans:grid-cols-2">
             {plans.slice(0, 3).map((plan) => (
@@ -103,7 +105,7 @@ export function SharedPlansWithClient({
           </div>
         )}
       </CardContent>
-    </Card>
+    </div>
   )
 }
 

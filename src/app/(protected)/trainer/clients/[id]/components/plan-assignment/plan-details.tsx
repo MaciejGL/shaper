@@ -5,7 +5,6 @@ import { Activity, Calendar, Clock, Target } from 'lucide-react'
 
 import { CollapsibleText } from '@/components/collapsible-text'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { GQLGetClientByIdQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
@@ -35,7 +34,7 @@ export function PlanDetails({ assignedPlan }: PlanAssignmentProps) {
     <div className="space-y-6">
       <p className="text-lg font-semibold">{assignedPlan.title}</p>
       <div className="space-y-4">
-        <CollapsibleText text={assignedPlan.description} />
+        <CollapsibleText maxLines={2} text={assignedPlan.description} />
 
         <div className="flex flex-wrap gap-2">
           <Badge className={getDifficultyColor(assignedPlan.difficulty)}>
@@ -47,8 +46,7 @@ export function PlanDetails({ assignedPlan }: PlanAssignmentProps) {
           </Badge>
         </div>
 
-        <Separator />
-        <div>
+        <div className="bg-muted/50 rounded-lg p-4 border">
           <div className="grid grid-cols-2 @xl/client-detail-page:grid-cols-4 gap-4">
             {assignedPlan.startDate && (
               <div className="flex items-center gap-2">
