@@ -25,4 +25,52 @@ query GetClientById($id: ID!) {
     progress
     nextSession
   }
+
+  getClientActivePlan(clientId: $id) {
+    id
+    title
+    description
+    weekCount
+    startDate
+    endDate
+    active
+    progress
+    nextSession
+    difficulty
+    totalWorkouts
+    currentWeekNumber
+    completedWorkoutsDays
+    adherence
+    weeks {
+      id
+      name
+      completedAt
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        workoutType
+        completedAt
+        exercises {
+          id
+          name
+          sets {
+            id
+            order
+            reps
+            minReps
+            maxReps
+            weight
+            rpe
+            logs {
+              id
+              reps
+              weight
+              rpe
+            }
+          }
+        }
+      }
+    }
+  }
 }

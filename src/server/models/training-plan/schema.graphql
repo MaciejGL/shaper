@@ -58,6 +58,7 @@ type Query {
   getTemplates(draft: Boolean): [TrainingPlan!]!
   getTrainingPlanById(id: ID!): TrainingPlan!
   getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!
+  getClientActivePlan(clientId: ID!): TrainingPlan
   getMyPlansOverview: MyPlansPayload!
 }
 

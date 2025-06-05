@@ -11,6 +11,7 @@ import {
   deletePlan,
   deleteTrainingPlan,
   duplicateTrainingPlan,
+  getClientActivePlan,
   getClientTrainingPlans,
   getMyPlansOverview,
   getTemplates,
@@ -29,6 +30,9 @@ export const Query: GQLQueryResolvers = {
   },
   getClientTrainingPlans: async (_, args) => {
     return getClientTrainingPlans(args)
+  },
+  getClientActivePlan: async (_, args) => {
+    return getClientActivePlan(args)
   },
   getMyPlansOverview: async () => {
     return getMyPlansOverview()

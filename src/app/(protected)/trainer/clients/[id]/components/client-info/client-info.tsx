@@ -8,7 +8,7 @@ import { ClientGoals } from './client-goals'
 type ClientInfoProps = {
   client: NonNullable<GQLGetClientByIdQuery['userPublic']>
   clientName: string
-  activePlan?: GQLGetClientByIdQuery['getClientTrainingPlans'][number] | null
+  activePlan?: GQLGetClientByIdQuery['getClientActivePlan'] | null
 }
 
 export function ClientInfo({ client, clientName }: ClientInfoProps) {

@@ -109,7 +109,7 @@ export function TrainingCard({
   }
 
   return (
-    <Card className="bg-card-foreground/5">
+    <Card variant="gradient">
       <CardHeader>
         <div className="flex justify-between items-start">
           <CardTitle>{plan.title}</CardTitle>

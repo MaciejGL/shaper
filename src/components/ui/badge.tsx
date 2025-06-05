@@ -27,7 +27,7 @@ const badgeVariants = cva(
           'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
       },
       size: {
-        sm: 'text-xs px-1 py-0.5',
+        sm: 'text-xs px-1.5 py-0.5',
         md: 'text-xs px-2 py-0.5',
         lg: 'text-sm px-3 py-1',
       },

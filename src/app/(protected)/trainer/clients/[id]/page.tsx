@@ -8,7 +8,7 @@ import { useGetClientByIdQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../components/dashboard-header'
 
-import { ClientDetails } from './components/client-details'
+import { ClientActivePlan } from './components/client-active-plan'
 import { ClientInfo } from './components/client-info/client-info'
 import { ClientNotes } from './components/client-notes/client-notes'
 import { SharedPlansWithClient } from './components/shared-plans'
@@ -27,7 +27,7 @@ export default function ClientDetailPage({
 
   if (!client) return null
 
-  const activePlan = data?.getClientTrainingPlans.find((plan) => plan.active)
+  const activePlan = data?.getClientActivePlan
   const clientName = `${client.firstName} ${client.lastName}`
   const hasAssignedPlans = data?.getClientTrainingPlans.length > 0
 
@@ -46,20 +46,22 @@ export default function ClientDetailPage({
             activePlan={activePlan}
           />
 
-          <ClientDetails
-            client={client}
-            clientName={clientName}
-            activePlan={activePlan}
-            hasAssignedPlans={hasAssignedPlans}
-          />
-
-          <ClientNotes clientId={client.id} />
           <SharedPlansWithClient
             plans={data?.getClientTrainingPlans}
             clientName={clientName}
             clientId={client.id}
             activePlan={activePlan}
           />
+          <div className="@3xl/client-detail-page:col-span-2">
+            <ClientActivePlan
+              client={client}
+              clientName={clientName}
+              activePlan={activePlan}
+              hasAssignedPlans={hasAssignedPlans}
+            />
+          </div>
+
+          <ClientNotes clientId={client.id} />
         </div>
       </AnimatedPageTransition>
     </div>

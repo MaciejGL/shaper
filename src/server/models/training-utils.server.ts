@@ -75,7 +75,10 @@ export async function duplicatePlan({
                     create: exercise.sets.map((set) => ({
                       order: set.order,
                       reps: set.reps,
+                      minReps: set.minReps,
+                      maxReps: set.maxReps,
                       weight: set.weight,
+                      rpe: set.rpe,
                     })),
                   },
                 })),

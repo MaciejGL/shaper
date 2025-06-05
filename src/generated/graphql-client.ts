@@ -445,6 +445,7 @@ export type GQLQuery = {
   coachingRequest?: Maybe<GQLCoachingRequest>;
   coachingRequests: Array<GQLCoachingRequest>;
   exercise?: Maybe<GQLBaseExercise>;
+  getClientActivePlan?: Maybe<GQLTrainingPlan>;
   getClientTrainingPlans: Array<GQLTrainingPlan>;
   getMyPlansOverview: GQLMyPlansPayload;
   getTemplates: Array<GQLTrainingPlan>;
@@ -471,6 +472,11 @@ export type GQLQueryCoachingRequestArgs = {
 
 export type GQLQueryExerciseArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetClientActivePlanArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -896,7 +902,7 @@ export type GQLGetClientByIdQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goals: Array<GQLGoal>, currentWeight?: number | undefined | null, height?: number | undefined | null, allergies?: string | undefined | null } | undefined | null, getClientTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null }> };
+export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goals: Array<GQLGoal>, currentWeight?: number | undefined | null, height?: number | undefined | null, allergies?: string | undefined | null } | undefined | null, getClientTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null }>, getClientActivePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null, difficulty: GQLDifficulty, totalWorkouts: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, name: string, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: string | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, logs: Array<{ __typename?: 'ExerciseSetLog', id: string, reps: number, weight: number, rpe?: number | undefined | null }> }> }> }> }> } | undefined | null };
 
 export type GQLUserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1630,6 +1636,53 @@ export const GetClientByIdDocument = `
     active
     progress
     nextSession
+  }
+  getClientActivePlan(clientId: $id) {
+    id
+    title
+    description
+    weekCount
+    startDate
+    endDate
+    active
+    progress
+    nextSession
+    difficulty
+    totalWorkouts
+    currentWeekNumber
+    completedWorkoutsDays
+    adherence
+    weeks {
+      id
+      name
+      completedAt
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        workoutType
+        completedAt
+        exercises {
+          id
+          name
+          sets {
+            id
+            order
+            reps
+            minReps
+            maxReps
+            weight
+            rpe
+            logs {
+              id
+              reps
+              weight
+              rpe
+            }
+          }
+        }
+      }
+    }
   }
 }
     `;

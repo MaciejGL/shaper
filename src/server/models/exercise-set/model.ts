@@ -1,4 +1,7 @@
-import { ExerciseSet as PrismaExerciseSet } from '@prisma/client'
+import {
+  ExerciseSet as PrismaExerciseSet,
+  ExerciseSetLog as PrismaExerciseSetLog,
+} from '@prisma/client'
 
 import { GQLExerciseSet } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
@@ -6,7 +9,11 @@ import { prisma } from '@/lib/db'
 import ExerciseSetLog from '../exercise-set-log/model'
 
 export default class ExerciseSet implements GQLExerciseSet {
-  constructor(protected data: PrismaExerciseSet) {}
+  constructor(
+    protected data: PrismaExerciseSet & {
+      logs?: PrismaExerciseSetLog[]
+    },
+  ) {}
 
   get id() {
     return this.data.id
@@ -41,6 +48,10 @@ export default class ExerciseSet implements GQLExerciseSet {
   }
 
   async logs() {
+    if (this.data.logs) {
+      return this.data.logs.map((log) => new ExerciseSetLog(log))
+    }
+
     const logs = await prisma.exerciseSetLog.findMany({
       where: {
         exerciseSetId: this.id,

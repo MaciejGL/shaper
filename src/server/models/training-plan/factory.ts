@@ -6,6 +6,7 @@ import {
   GQLMutationClosePlanArgs,
   GQLMutationDeletePlanArgs,
   GQLMutationPausePlanArgs,
+  GQLQueryGetClientActivePlanArgs,
 } from '@/generated/graphql-client'
 import {
   GQLMutationAssignTrainingPlanToClientArgs,
@@ -100,10 +101,61 @@ export async function getClientTrainingPlans(
   const { clientId } = args
   const user = await getCurrentUserOrThrow()
   const plans = await prisma.trainingPlan.findMany({
-    where: { assignedToId: clientId, createdById: user.user.id },
+    where: {
+      assignedToId: clientId,
+      createdById: user.user.id,
+      startDate: null,
+    },
   })
 
   return plans.map((plan) => new TrainingPlan(plan))
+}
+
+export async function getClientActivePlan(
+  args: GQLQueryGetClientActivePlanArgs,
+) {
+  const { clientId } = args
+  const user = await getCurrentUserOrThrow()
+  const plan = await prisma.trainingPlan.findFirst({
+    where: {
+      assignedToId: clientId,
+      createdById: user.user.id,
+      startDate: { not: null },
+      active: true,
+    },
+    include: {
+      weeks: {
+        orderBy: {
+          weekNumber: 'asc',
+        },
+        include: {
+          days: {
+            orderBy: {
+              dayOfWeek: 'asc',
+            },
+            include: {
+              exercises: {
+                orderBy: {
+                  order: 'asc',
+                },
+                include: {
+                  sets: {
+                    include: {
+                      logs: true,
+                    },
+                    orderBy: {
+                      order: 'asc',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  return plan ? new TrainingPlan(plan) : null
 }
 
 export async function getMyPlansOverview() {
