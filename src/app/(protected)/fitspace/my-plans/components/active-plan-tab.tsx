@@ -1,12 +1,6 @@
 import { formatDate } from 'date-fns'
 import { BicepsFlexed, ListMinus, Target } from 'lucide-react'
-import {
-  Calendar,
-  Clock,
-  MessageCircle,
-  MoreHorizontalIcon,
-  X,
-} from 'lucide-react'
+import { Calendar, Clock, MoreHorizontalIcon, X } from 'lucide-react'
 import { Pause } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { parseAsStringEnum } from 'nuqs'
@@ -29,6 +23,8 @@ import { cn } from '@/lib/utils'
 
 import { PlanAction, PlanTab } from '../page'
 import { ActivePlan } from '../page'
+
+import { ProgressOverviewItem } from './progress-overview-item'
 
 export function ActivePlanTab({
   plan,
@@ -57,7 +53,7 @@ export function ActivePlanTab({
               <PlanActions handlePlanAction={handlePlanAction} plan={plan} />
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
             <ProgressOverview
               currentWeekNumber={plan.currentWeekNumber}
               completedWorkoutsDays={plan.completedWorkoutsDays}
@@ -71,6 +67,7 @@ export function ActivePlanTab({
               totalWorkouts={plan.totalWorkouts}
             />
             <ActionButtons />
+
             <PlanDetails startDate={plan.startDate} endDate={plan.endDate} />
 
             <CollapsibleText text={plan.description} />
@@ -148,28 +145,19 @@ function ProgressOverview({
 }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div className="text-center p-3 bg-secondary rounded-lg">
-        <div className="text-lg font-bold text-primary">
-          {currentWeekNumber ?? 1}
-        </div>
-        <div className="text-xs text-muted-foreground">Current Week</div>
-      </div>
-      <div className="text-center p-3 bg-secondary rounded-lg">
-        <div className="text-lg font-bold text-primary">
-          {completedWorkoutsDays}
-        </div>
-        <div className="text-xs text-muted-foreground">Workouts Done</div>
-      </div>
-      <div className="text-center p-3 bg-secondary rounded-lg">
-        <div className="text-lg font-bold text-primary">{adherence}%</div>
-        <div className="text-xs text-muted-foreground">Adherence</div>
-      </div>
-      <div className="text-center p-3 bg-secondary rounded-lg">
-        <div className="text-lg font-bold text-primary">
-          {Math.round(totalWorkouts / weekCount)}x
-        </div>
-        <div className="text-xs text-muted-foreground">Per Week</div>
-      </div>
+      <ProgressOverviewItem
+        value={currentWeekNumber ?? 1}
+        label="Current Week"
+      />
+      <ProgressOverviewItem
+        value={completedWorkoutsDays}
+        label="Workouts Done"
+      />
+      <ProgressOverviewItem value={adherence} label="Adherence" />
+      <ProgressOverviewItem
+        value={Math.round(totalWorkouts / weekCount)}
+        label="Per Week"
+      />
     </div>
   )
 }
@@ -197,10 +185,10 @@ function ProgressBar({
 function ActionButtons() {
   return (
     <div className="flex gap-2 pt-2">
-      <Button className="flex-1" iconEnd={<BicepsFlexed />}>
+      <Button size="lg" className="flex-1" iconEnd={<BicepsFlexed />}>
         Continue Plan
       </Button>
-      <Button variant="outline" size="icon-lg" iconOnly={<MessageCircle />} />
+      {/* <Button variant="outline" size="icon-lg" iconOnly={<MessageCircle />} /> */}
     </div>
   )
 }
@@ -218,7 +206,7 @@ function PlanDetails({
   const endDateFormatted = endDate ? formatDate(endDate, 'MMM d, yyyy') : null
 
   return (
-    <div className="flex items-center justify-between text-sm text-muted-foreground pt-2 border-t">
+    <div className="flex items-center justify-between text-sm text-muted-foreground pt-6 border-t">
       <div className="flex items-center gap-1">
         <Calendar className="h-4 w-4" />
         {startDateFormatted && <span>Started {startDateFormatted}</span>}

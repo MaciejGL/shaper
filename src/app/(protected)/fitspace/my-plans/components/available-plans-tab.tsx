@@ -18,6 +18,7 @@ import { AvailablePlan, PlanAction } from '../page'
 
 import { CompletionStats } from './completion-stats'
 import { PlanAuthor } from './plan-author'
+import { ProgressOverviewItem } from './progress-overview-item'
 
 export function AvailablePlansTab({
   availablePlans,
@@ -64,7 +65,7 @@ function PlanCard({
   } = plan
 
   return (
-    <Card key={id} className="hover:shadow-md transition-shadow">
+    <Card key={id} variant="gradient">
       <CardHeader>
         <PlanHeader
           loading={loading}
@@ -168,20 +169,12 @@ function PlanStats({
 }) {
   return (
     <div className="grid grid-cols-3 gap-2 text-center">
-      <div className="p-2 bg-muted/50 rounded-lg">
-        <div className="text-sm font-medium">{weekCount}</div>
-        <div className="text-xs text-muted-foreground">Weeks</div>
-      </div>
-      <div className="p-2 bg-muted/50 rounded-lg">
-        <div className="text-sm font-medium">
-          {Math.round(totalWorkouts / weekCount)}x
-        </div>
-        <div className="text-xs text-muted-foreground">Per Week</div>
-      </div>
-      <div className="p-2 bg-muted/50 rounded-lg">
-        <div className="text-sm font-medium">{totalWorkouts}</div>
-        <div className="text-xs text-muted-foreground">Workouts</div>
-      </div>
+      <ProgressOverviewItem value={weekCount} label="Weeks" />
+      <ProgressOverviewItem
+        value={Math.round(totalWorkouts / weekCount)}
+        label="Per Week"
+      />
+      <ProgressOverviewItem value={totalWorkouts} label="Workouts" />
     </div>
   )
 }
