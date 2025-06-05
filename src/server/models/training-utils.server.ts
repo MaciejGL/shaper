@@ -53,6 +53,7 @@ export async function duplicatePlan({
       isTemplate: asTemplate,
       isDraft: asTemplate ? false : plan.isDraft,
       createdById: plan.createdById,
+      assignedToId: plan.assignedToId,
       weeks: {
         create: plan.weeks.map((week) => ({
           weekNumber: week.weekNumber,

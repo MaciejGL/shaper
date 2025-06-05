@@ -3,6 +3,7 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { getCurrentUserOrThrow } from '@/lib/getUser'
 
 import UserPublic from './model'
 
@@ -21,6 +22,31 @@ export const Query: GQLQueryResolvers = {
     }
 
     return new UserPublic(user)
+  },
+  myTrainer: async () => {
+    const user = await getCurrentUserOrThrow()
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    if (!user.user.trainerId) {
+      return null
+    }
+
+    const trainer = await prisma.user.findUnique({
+      where: {
+        id: user.user.trainerId,
+      },
+      include: {
+        profile: true,
+      },
+    })
+
+    if (!trainer) {
+      throw new Error('Trainer not found')
+    }
+
+    return new UserPublic(trainer)
   },
 }
 

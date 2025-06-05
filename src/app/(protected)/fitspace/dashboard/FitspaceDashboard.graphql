@@ -1,0 +1,19 @@
+query FitspaceDashboard {
+  myTrainer {
+    id
+    firstName
+    lastName
+    image
+    sex
+    averageRating
+    yearsOfExperience
+  }
+
+  # nextWorkoutDay {
+  #   id
+  #   workoutType
+  #   isRestDay
+  #   date
+  #   muscleGroups
+  # }
+}

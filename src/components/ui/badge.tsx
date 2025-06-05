@@ -16,6 +16,11 @@ const badgeVariants = cva(
           ' dark:bg-background/50 dark:text-foreground',
         ),
 
+        warning: cn(
+          ' border-transparent bg-amber-500/70 text-black [a&]:hover:bg-amber-500/90 focus-visible:ring-amber-500/20 dark:focus-visible:ring-amber-500/40 dark:bg-amber-500/60',
+          'dark:bg-amber-500/60',
+        ),
+
         destructive:
           'border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60',
         outline:

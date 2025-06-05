@@ -84,6 +84,16 @@ export default class UserPublic implements GQLUserPublic {
     return new TrainingPlan(plan)
   }
 
+  get averageRating() {
+    // TODO: Implement average rating
+    return 4.3
+  }
+
+  get yearsOfExperience() {
+    // TODO: Implement years of experience
+    return 8
+  }
+
   get createdAt() {
     return this.data.createdAt.toISOString()
   }

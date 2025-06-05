@@ -116,12 +116,13 @@
   --sidebar-ring: oklch(0.552 0.016 285.938);
   --masked-placeholder-text: oklch(0.274 0.006 286.033);
 }
-
+/* 
 @theme {
   --shadow-sm:
-    rgba(60, 64, 67, 0.3) 0px 1px 2px 0px,
-    rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
-}
+    0 1px 1px hsl(0deg 0% 0% / 0.075), 0 2px 2px hsl(0deg 0% 0% / 0.075),
+    0 4px 4px hsl(0deg 0% 0% / 0.075), 0 8px 8px hsl(0deg 0% 0% / 0.075),
+    0 16px 16px hsl(0deg 0% 0% / 0.075);
+} */
 
 @layer base {
   * {
@@ -160,4 +161,9 @@
 @utility container {
   width: 100%;
   max-width: 80rem;
+}
+
+@utility container-fitspace {
+  width: 100%;
+  max-width: 60rem;
 }

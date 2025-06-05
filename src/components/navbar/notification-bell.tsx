@@ -3,7 +3,8 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bell } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 
 import { TrainingInvitationModal } from '@/components/invitation-modal'
 import { Button } from '@/components/ui/button'
@@ -39,7 +40,7 @@ const useNotifications = (
   const [showBadge, setShowBadge] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
-
+  const router = useRouter()
   const { mutateAsync: markNotificationAsRead } =
     useMarkNotificationAsReadMutation()
   const { mutateAsync: markAllNotificationsAsRead } =
@@ -55,11 +56,18 @@ const useNotifications = (
     }
   }, [unreadCount, isOpen])
 
-  const onNotificationClick = async (id: string) => {
-    await markNotificationAsRead({ id })
+  const onNotificationClick = async (notification: NotificationNavbar) => {
+    await markNotificationAsRead({ id: notification.id })
     queryClient.invalidateQueries({
       queryKey: useNotificationsQuery.getKey({ userId: user.id }),
     })
+
+    if (
+      notification.type === GQLNotificationType.NewTrainingPlanAssigned &&
+      notification.relatedItemId
+    ) {
+      router.push(`/fitspace/my-plans?tab=available`)
+    }
   }
 
   const onClearAll = async () => {
@@ -170,18 +178,18 @@ export function NotificationBell({
             ) : (
               <DropdownMenuGroup>
                 {notifications.map((notification) => (
-                  <>
+                  <React.Fragment key={notification.id}>
                     <DropdownMenuItem
                       key={notification.id}
                       className="p-0 focus:bg-zinc-200 dark:focus:bg-zinc-700 cursor-pointer"
                       onClick={(e) => {
                         handleOpenInvitation(notification, e)
-                        onNotificationClick(notification.id)
+                        onNotificationClick(notification)
                       }}
                     >
                       <NotificationItem notification={notification} />
                     </DropdownMenuItem>
-                  </>
+                  </React.Fragment>
                 ))}
               </DropdownMenuGroup>
             )}

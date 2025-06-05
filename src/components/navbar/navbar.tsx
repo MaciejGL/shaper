@@ -32,6 +32,7 @@ import {
   DrawerTrigger,
 } from '../ui/drawer'
 import { SidebarTrigger } from '../ui/sidebar'
+import { UserAvatar } from '../user-avatar'
 
 import { NavLink } from './nav-link'
 import { NotificationBell } from './notification-bell'
@@ -124,10 +125,12 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
         <DrawerHeader>
           <ModeToggle />
           <div className="flex flex-col items-center gap-2">
-            <Avatar className="size-20 aspect-square">
-              <AvatarImage src="/avatar-male.png" />
-              <AvatarFallback>{user?.user.email.slice(0, 2)}</AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              imageUrl={user?.user.profile?.avatarUrl}
+              firstName={user?.user.profile?.firstName ?? ''}
+              lastName={user?.user.profile?.lastName ?? ''}
+              sex={user?.user.profile?.sex}
+            />
             <div>{user?.user.email}</div>
           </div>
         </DrawerHeader>

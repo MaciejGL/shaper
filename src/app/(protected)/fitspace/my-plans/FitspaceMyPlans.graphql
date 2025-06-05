@@ -1,0 +1,85 @@
+query FitspaceMyPlans {
+  getMyPlansOverview {
+    activePlan {
+      id
+      title
+      description
+      difficulty
+      totalWorkouts
+      rating
+      totalReviews
+      weekCount
+      currentWeekNumber
+      completedWorkoutsDays
+      adherence
+      startDate
+      endDate
+      updatedAt
+    }
+    availablePlans {
+      id
+      title
+      description
+      difficulty
+      totalWorkouts
+      rating
+      totalReviews
+      weekCount
+      currentWeekNumber
+      completedWorkoutsDays
+      adherence
+      startDate
+      endDate
+      updatedAt
+
+      createdBy {
+        id
+        firstName
+        lastName
+        image
+        sex
+      }
+    }
+    completedPlans {
+      id
+      title
+      description
+      difficulty
+      totalWorkouts
+      rating
+      totalReviews
+      weekCount
+      currentWeekNumber
+      completedWorkoutsDays
+      adherence
+      startDate
+      endDate
+      completedAt
+      updatedAt
+
+      createdBy {
+        id
+        firstName
+        lastName
+        image
+        sex
+      }
+    }
+  }
+}
+
+mutation ActivatePlan($planId: ID!, $startDate: String!, $resume: Boolean!) {
+  activatePlan(planId: $planId, startDate: $startDate, resume: $resume)
+}
+
+mutation PausePlan($planId: ID!) {
+  pausePlan(planId: $planId)
+}
+
+mutation ClosePlan($planId: ID!) {
+  closePlan(planId: $planId)
+}
+
+mutation DeletePlan($planId: ID!) {
+  deletePlan(planId: $planId)
+}

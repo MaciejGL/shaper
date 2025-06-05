@@ -4,13 +4,18 @@ import {
 } from '@/generated/graphql-server'
 
 import {
+  activatePlan,
   assignTrainingPlanToClient,
+  closePlan,
   createTrainingPlan,
+  deletePlan,
   deleteTrainingPlan,
   duplicateTrainingPlan,
   getClientTrainingPlans,
+  getMyPlansOverview,
   getTemplates,
   getTrainingPlanById,
+  pausePlan,
   removeTrainingPlanFromClient,
   updateTrainingPlan,
 } from './factory'
@@ -24,6 +29,9 @@ export const Query: GQLQueryResolvers = {
   },
   getClientTrainingPlans: async (_, args) => {
     return getClientTrainingPlans(args)
+  },
+  getMyPlansOverview: async () => {
+    return getMyPlansOverview()
   },
 }
 
@@ -45,5 +53,17 @@ export const Mutation: GQLMutationResolvers = {
   },
   removeTrainingPlanFromClient: async (_, args) => {
     return removeTrainingPlanFromClient(args)
+  },
+  activatePlan: async (_, args) => {
+    return activatePlan(args)
+  },
+  pausePlan: async (_, args) => {
+    return pausePlan(args)
+  },
+  closePlan: async (_, args) => {
+    return closePlan(args)
+  },
+  deletePlan: async (_, args) => {
+    return deletePlan(args)
   },
 }

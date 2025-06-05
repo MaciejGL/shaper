@@ -2,6 +2,12 @@ import { prisma } from '@lib/db'
 import { Prisma } from '@prisma/client'
 
 import {
+  GQLMutationActivatePlanArgs,
+  GQLMutationClosePlanArgs,
+  GQLMutationDeletePlanArgs,
+  GQLMutationPausePlanArgs,
+} from '@/generated/graphql-client'
+import {
   GQLMutationAssignTrainingPlanToClientArgs,
   GQLMutationCreateTrainingPlanArgs,
   GQLMutationDeleteTrainingPlanArgs,
@@ -98,6 +104,61 @@ export async function getClientTrainingPlans(
   })
 
   return plans.map((plan) => new TrainingPlan(plan))
+}
+
+export async function getMyPlansOverview() {
+  const user = await getCurrentUserOrThrow()
+  const plans = await prisma.trainingPlan.findMany({
+    where: { assignedToId: user.user.id },
+    include: {
+      createdBy: {
+        include: {
+          profile: true,
+        },
+      },
+      weeks: {
+        orderBy: {
+          weekNumber: 'asc',
+        },
+        include: {
+          days: {
+            orderBy: {
+              dayOfWeek: 'asc',
+            },
+            include: {
+              exercises: {
+                orderBy: {
+                  order: 'asc',
+                },
+                include: {
+                  sets: {
+                    orderBy: {
+                      order: 'asc',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  const activePlan = plans.find(
+    (plan) => plan.assignedToId === user.user.id && plan.active,
+  )
+
+  const availablePlans = plans.filter(
+    (plan) => plan.completedAt === null && plan.active === false,
+  )
+  const completedPlans = plans.filter((plan) => plan.completedAt !== null)
+
+  return {
+    activePlan: activePlan ? new TrainingPlan(activePlan) : null,
+    availablePlans: availablePlans.map((plan) => new TrainingPlan(plan)),
+    completedPlans: completedPlans.map((plan) => new TrainingPlan(plan)),
+  }
 }
 
 export async function createTrainingPlan(
@@ -298,7 +359,7 @@ export async function assignTrainingPlanToClient(
     createdBy: user.user.id,
     userId: clientId,
     relatedItemId: duplicated.id,
-    message: `New training plan ${plan.title} has been assigned to you${senderName ? ` by ${senderName}` : ''}.`,
+    message: `New training plan "${plan.title}" has been assigned to you${senderName ? ` by ${senderName}` : ''}.`,
     type: GQLNotificationType.NewTrainingPlanAssigned,
   })
 
@@ -318,6 +379,96 @@ export async function removeTrainingPlanFromClient(
       isTemplate: false,
       createdById: user.user.id,
     },
+  })
+
+  return true
+}
+
+export async function activatePlan(args: GQLMutationActivatePlanArgs) {
+  const { planId, startDate, resume } = args
+
+  const [user, fullPlan] = await Promise.all([
+    getCurrentUserOrThrow(),
+    resume ? null : getFullPlanById(planId),
+  ])
+  if (resume) {
+    await prisma.trainingPlan.update({
+      where: { id: planId, assignedToId: user.user.id },
+      data: { active: true },
+    })
+
+    return true
+  }
+
+  if (!fullPlan || fullPlan.assignedToId !== user.user.id) {
+    throw new Error('Training plan not found or unauthorized')
+  }
+
+  await prisma.$transaction(
+    async (tx) => {
+      // First deactivate all other plans for this user
+      await tx.trainingPlan.updateMany({
+        where: {
+          assignedToId: user.user.id,
+          active: true,
+          id: { not: planId }, // Don't update the plan we want to activate
+        },
+        data: { active: false },
+      })
+
+      const duplicated = await duplicatePlan({
+        plan: fullPlan,
+        asTemplate: false,
+      })
+
+      // Then activate the new plan
+      await tx.trainingPlan.update({
+        where: {
+          id: duplicated.id,
+          assignedToId: user.user.id, // Ensure the plan belongs to the user
+        },
+        data: { active: true, startDate },
+      })
+    },
+    { timeout: 15000, maxWait: 15000 },
+  )
+
+  return true
+}
+
+export async function pausePlan(args: GQLMutationPausePlanArgs) {
+  const { planId } = args
+
+  const user = await getCurrentUserOrThrow()
+
+  await prisma.trainingPlan.update({
+    where: { id: planId, assignedToId: user.user.id },
+    data: { active: false },
+  })
+
+  return true
+}
+
+export async function closePlan(args: GQLMutationClosePlanArgs) {
+  const { planId } = args
+
+  const user = await getCurrentUserOrThrow()
+
+  await prisma.trainingPlan.update({
+    where: { id: planId, assignedToId: user.user.id },
+    data: { completedAt: new Date(), active: false },
+  })
+
+  return true
+}
+
+export async function deletePlan(args: GQLMutationDeletePlanArgs) {
+  const { planId } = args
+
+  const user = await getCurrentUserOrThrow()
+
+  await prisma.trainingPlan.delete({
+    where: { id: planId, assignedToId: user.user.id, isTemplate: false },
   })
 
   return true

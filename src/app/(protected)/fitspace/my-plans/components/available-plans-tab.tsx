@@ -1,0 +1,207 @@
+import { formatDate } from 'date-fns'
+import { MoreHorizontalIcon, SparklesIcon, Trash } from 'lucide-react'
+
+import { CollapsibleText } from '@/components/collapsible-text'
+import { RatingStars } from '@/components/rating-stars'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { DropdownMenu } from '@/components/ui/dropdown-menu'
+import { cn } from '@/lib/utils'
+
+import { AvailablePlan, PlanAction } from '../page'
+
+import { CompletionStats } from './completion-stats'
+import { PlanAuthor } from './plan-author'
+
+export function AvailablePlansTab({
+  availablePlans,
+  handlePlanAction,
+  loading,
+}: {
+  availablePlans: AvailablePlan[]
+  handlePlanAction: (action: PlanAction, plan: AvailablePlan) => void
+  loading: boolean
+}) {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      {availablePlans.map((plan) => (
+        <PlanCard
+          key={plan.id}
+          plan={plan}
+          handlePlanAction={handlePlanAction}
+          loading={loading}
+        />
+      ))}
+    </div>
+  )
+}
+
+function PlanCard({
+  plan,
+  handlePlanAction,
+  loading,
+}: {
+  plan: AvailablePlan
+  handlePlanAction: (action: PlanAction, plan: AvailablePlan) => void
+  loading: boolean
+}) {
+  const {
+    id,
+    rating,
+    totalReviews,
+    weekCount,
+    totalWorkouts,
+    createdBy,
+    description,
+    adherence,
+    completedWorkoutsDays,
+  } = plan
+
+  return (
+    <Card key={id} className="hover:shadow-md transition-shadow">
+      <CardHeader>
+        <PlanHeader
+          loading={loading}
+          handlePlanAction={handlePlanAction}
+          plan={plan}
+        />
+        <PlanAuthor createdBy={createdBy} />
+        <PlanRating rating={rating} totalReviews={totalReviews} />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <PlanStats weekCount={weekCount} totalWorkouts={totalWorkouts} />
+        <CompletionStats
+          adherence={adherence}
+          completedWorkoutsDays={completedWorkoutsDays}
+          totalWorkouts={totalWorkouts}
+        />
+        <CollapsibleText text={description} />
+        <Actions handlePlanAction={handlePlanAction} plan={plan} />
+      </CardContent>
+    </Card>
+  )
+}
+
+function PlanHeader({
+  loading,
+  handlePlanAction,
+  plan,
+}: {
+  loading: boolean
+  handlePlanAction: (action: PlanAction, plan: AvailablePlan) => void
+  plan: AvailablePlan
+}) {
+  const { startDate, updatedAt, title, difficulty } = plan
+  const pausedAt = startDate
+    ? `${formatDate(new Date(updatedAt), 'MMM d, yyyy')}`
+    : ''
+  return (
+    <div className="flex justify-between items-start gap-2 mb-2">
+      <div>
+        <CardTitle
+          className={cn('text-lg mb-w', loading && 'masked-placeholder-text')}
+        >
+          {title}
+        </CardTitle>
+        <div className="flex gap-2">
+          <Badge variant="outline" isLoading={loading}>
+            {difficulty}
+          </Badge>
+          {startDate && <Badge variant="warning">Pasued {pausedAt}</Badge>}
+        </div>
+      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon-lg"
+            iconOnly={<MoreHorizontalIcon />}
+            disabled={loading}
+          />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onClick={() => handlePlanAction('activate', plan)}>
+            <SparklesIcon className="size-4 mr-2" />
+            Activate Plan
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handlePlanAction('delete', plan)}>
+            <Trash className="size-4 mr-2" />
+            Delete Plan
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  )
+}
+
+function PlanRating({
+  rating,
+  totalReviews,
+}: {
+  rating?: number | null
+  totalReviews: number
+}) {
+  if (typeof rating !== 'number') return null
+
+  return (
+    <div className="flex items-center gap-2">
+      <RatingStars rating={rating ?? 0} size="sm" />
+      <span className="text-xs text-muted-foreground">
+        ({totalReviews} reviews)
+      </span>
+    </div>
+  )
+}
+
+function PlanStats({
+  weekCount,
+  totalWorkouts,
+}: {
+  weekCount: number
+  totalWorkouts: number
+}) {
+  return (
+    <div className="grid grid-cols-3 gap-2 text-center">
+      <div className="p-2 bg-muted/50 rounded-lg">
+        <div className="text-sm font-medium">{weekCount}</div>
+        <div className="text-xs text-muted-foreground">Weeks</div>
+      </div>
+      <div className="p-2 bg-muted/50 rounded-lg">
+        <div className="text-sm font-medium">
+          {Math.round(totalWorkouts / weekCount)}x
+        </div>
+        <div className="text-xs text-muted-foreground">Per Week</div>
+      </div>
+      <div className="p-2 bg-muted/50 rounded-lg">
+        <div className="text-sm font-medium">{totalWorkouts}</div>
+        <div className="text-xs text-muted-foreground">Workouts</div>
+      </div>
+    </div>
+  )
+}
+
+function Actions({
+  handlePlanAction,
+  plan,
+}: {
+  handlePlanAction: (action: PlanAction, plan: AvailablePlan) => void
+  plan: AvailablePlan
+}) {
+  return (
+    <div className="flex gap-2 pt-2">
+      <Button
+        className="flex-1"
+        onClick={() => handlePlanAction('activate', plan)}
+        iconStart={<SparklesIcon />}
+      >
+        Activate Plan
+      </Button>
+    </div>
+  )
+}

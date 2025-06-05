@@ -24,7 +24,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           </ConfirmationModalProvider>
         </NuqsAdapter>
       </ThemeProvider>
-      <ReactQueryDevtools />
+      {process.env.NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS === 'true' && (
+        <ReactQueryDevtools />
+      )}
       <Toaster />
     </QueryClientProvider>
   )

@@ -13,15 +13,78 @@ type TrainingPlan {
   progress: Float
   nextSession: String
 
+  rating: Float
+  reviews: [Review!]!
+  totalReviews: Int!
+
   createdBy: UserPublic
   assignedTo: UserPublic
   weeks: [TrainingWeek!]!
 
   weekCount: Int!
   assignedCount: Int!
+  currentWeekNumber: Int
+  completedWorkoutsDays: Int!
+  adherence: Float!
+  totalWorkouts: Int!
+  difficulty: Difficulty!
 
   createdAt: String!
   updatedAt: String!
+}
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+type Review {
+  id: ID!
+  rating: Int!
+  comment: String!
+  createdBy: UserPublic
+  createdAt: String!
+  updatedAt: String!
+}
+
+type MyPlansPayload {
+  activePlan: TrainingPlan
+  availablePlans: [TrainingPlan!]!
+  completedPlans: [TrainingPlan!]!
+}
+
+type Query {
+  getTemplates(draft: Boolean): [TrainingPlan!]!
+  getTrainingPlanById(id: ID!): TrainingPlan!
+  getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!
+  getMyPlansOverview: MyPlansPayload!
+}
+
+type CreateTrainingPlanPayload {
+  id: ID!
+  success: Boolean!
+}
+
+type Mutation {
+  createTrainingPlan(
+    input: CreateTrainingPlanInput!
+  ): CreateTrainingPlanPayload!
+  updateTrainingPlan(input: UpdateTrainingPlanInput!): Boolean!
+  deleteTrainingPlan(id: ID!): Boolean!
+  duplicateTrainingPlan(id: ID!): ID!
+  assignTrainingPlanToClient(input: AssignTrainingPlanToClientInput!): Boolean!
+  removeTrainingPlanFromClient(planId: ID!, clientId: ID!): Boolean!
+  activatePlan(planId: ID!, startDate: String!, resume: Boolean!): Boolean!
+  pausePlan(planId: ID!): Boolean!
+  closePlan(planId: ID!): Boolean!
+  deletePlan(planId: ID!): Boolean!
+}
+
+input AssignTrainingPlanToClientInput {
+  planId: ID!
+  clientId: ID!
+  startDate: String
 }
 
 input CreateExerciseSetInput {
@@ -113,32 +176,4 @@ input UpdateExerciseSetInput {
   maxReps: Int
   rpe: Int
   weight: Float
-}
-
-type Query {
-  getTemplates(draft: Boolean): [TrainingPlan!]!
-  getTrainingPlanById(id: ID!): TrainingPlan!
-  getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!
-}
-
-input AssignTrainingPlanToClientInput {
-  planId: ID!
-  clientId: ID!
-  startDate: String
-}
-
-type CreateTrainingPlanPayload {
-  id: ID!
-  success: Boolean!
-}
-
-type Mutation {
-  createTrainingPlan(
-    input: CreateTrainingPlanInput!
-  ): CreateTrainingPlanPayload!
-  updateTrainingPlan(input: UpdateTrainingPlanInput!): Boolean!
-  deleteTrainingPlan(id: ID!): Boolean!
-  duplicateTrainingPlan(id: ID!): ID!
-  assignTrainingPlanToClient(input: AssignTrainingPlanToClientInput!): Boolean!
-  removeTrainingPlanFromClient(planId: ID!, clientId: ID!): Boolean!
 }

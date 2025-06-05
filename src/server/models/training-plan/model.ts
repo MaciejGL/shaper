@@ -5,9 +5,11 @@ import {
   TrainingExercise as PrismaTrainingExercise,
   TrainingPlan as PrismaTrainingPlan,
   TrainingWeek as PrismaTrainingWeek,
+  User as PrismaUser,
 } from '@prisma/client'
+import { getWeekYear } from 'date-fns'
 
-import { GQLTrainingPlan } from '@/generated/graphql-server'
+import { GQLDifficulty, GQLTrainingPlan } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 
 import TrainingWeek from '../training-week/model'
@@ -16,6 +18,7 @@ import UserPublic from '../user-public/model'
 export default class TrainingPlan implements GQLTrainingPlan {
   constructor(
     protected data: PrismaTrainingPlan & {
+      createdBy?: PrismaUser
       weeks?: (PrismaTrainingWeek & {
         days?: (PrismaTrainingDay & {
           exercises?: (PrismaTrainingExercise & {
@@ -60,7 +63,15 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   get endDate() {
-    return this.data.endDate?.toISOString()
+    if (!this.data.startDate) {
+      return null
+    }
+
+    const weeks = this.data.weeks ?? []
+    const endDate = new Date(this.data.startDate)
+    endDate.setDate(endDate.getDate() + weeks.length * 7 - 1)
+
+    return endDate.toISOString()
   }
 
   get nextSession() {
@@ -73,17 +84,11 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   async createdBy() {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: this.data.createdById,
-      },
-    })
-
-    if (!user) {
+    if (!this.data.createdBy) {
       return null
     }
 
-    return new UserPublic(user)
+    return new UserPublic(this.data.createdBy)
   }
 
   async assignedTo() {
@@ -122,6 +127,100 @@ export default class TrainingPlan implements GQLTrainingPlan {
         },
       },
     })
+  }
+  get currentWeekNumber() {
+    // we need to get when training has Started first, then check how many weeks have passed. Then find week that we expect to match that week number
+
+    const startDate = this.data.startDate
+    if (!startDate) {
+      return null
+    }
+    const startDateWeek = getWeekYear(startDate)
+    const currentWeek = getWeekYear(new Date())
+
+    const weeksPassed = currentWeek - startDateWeek
+    const currentWeekNumber = weeksPassed + 1
+
+    return currentWeekNumber
+  }
+
+  get completedWorkoutsDays() {
+    const weeks = this.data.weeks ?? []
+    const completedWorkoutsDays = weeks.reduce(
+      (acc, week) =>
+        acc + (week.days?.filter((day) => day.completedAt).length ?? 0),
+      0,
+    )
+    return completedWorkoutsDays
+  }
+
+  get adherence() {
+    const weeks = this.data.weeks ?? []
+    const adherence = weeks.reduce(
+      (acc, week) => acc + (week.completedAt ? 1 : 0),
+      0,
+    )
+    return adherence
+  }
+
+  get totalWorkouts() {
+    const weeks = this.data.weeks ?? []
+    const totalWorkoutDays =
+      weeks?.reduce(
+        (acc, week) =>
+          acc + (week.days?.filter((day) => !day.isRestDay)?.length ?? 0),
+        0,
+      ) ?? 0
+
+    return totalWorkoutDays
+  }
+
+  get difficulty() {
+    // TODO: Implement this
+    return GQLDifficulty.Beginner
+  }
+
+  async rating() {
+    // TODO: Implement this
+    const reviews = await this.reviews()
+    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0)
+    return totalRating / reviews.length
+  }
+
+  get totalReviews() {
+    // TODO: Implement this
+    return 3
+  }
+
+  async reviews() {
+    // TODO: Implement this
+    const createdBy = await this.createdBy()
+    return [
+      {
+        id: '1',
+        rating: 5,
+        comment: 'This plan is great!',
+        createdBy: createdBy,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        rating: 4,
+        comment: 'This plan is good!',
+        createdBy: createdBy,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: '3',
+        rating: 3,
+        comment: 'This plan is okay.',
+        createdBy: createdBy,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ]
   }
 
   get completedAt() {
