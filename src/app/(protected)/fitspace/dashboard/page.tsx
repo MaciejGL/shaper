@@ -13,7 +13,7 @@ import {
 } from './components/dashbaord-stats'
 import { Header } from './components/header'
 import { QuickActions } from './components/quick-actions'
-import { TodaysSession, TodaysSessionProps } from './components/todays-session'
+import { TodaysSession } from './components/todays-session'
 import { Trainer } from './components/trainer'
 
 const dashboardStats: DashboardStatsProps = {
@@ -71,16 +71,6 @@ const dashboardStats: DashboardStatsProps = {
       totalDays: 14,
       percentageCompleted: 85,
     },
-  },
-}
-
-const nextWorkoutDay: TodaysSessionProps = {
-  nextWorkoutDay: {
-    id: '1',
-    date: '2025-06-04',
-    workoutType: 'Push',
-    isRestDay: false,
-    muscleGroups: [{ name: 'Chest' }, { name: 'Triceps' }, { name: 'Biceps' }],
   },
 }
 

@@ -46,7 +46,7 @@ query FitspaceGetWorkout($trainingId: ID!) {
             instructions
             order
             videoUrl
-
+            completedAt
             sets {
               id
               order
@@ -55,7 +55,8 @@ query FitspaceGetWorkout($trainingId: ID!) {
               maxReps
               weight
               rpe
-              logs {
+              completedAt
+              log {
                 id
                 weight
                 rpe
@@ -66,5 +67,18 @@ query FitspaceGetWorkout($trainingId: ID!) {
         }
       }
     }
+  }
+}
+
+mutation FitspaceMarkSetAsCompleted($setId: ID!, $completed: Boolean!) {
+  markSetAsCompleted(setId: $setId, completed: $completed)
+}
+
+mutation FitspaceUpdateSetLog($input: LogSetInput!) {
+  updateSetLog(input: $input) {
+    id
+    reps
+    weight
+    rpe
   }
 }

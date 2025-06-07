@@ -11,7 +11,7 @@ import ExerciseSetLog from '../exercise-set-log/model'
 export default class ExerciseSet implements GQLExerciseSet {
   constructor(
     protected data: PrismaExerciseSet & {
-      logs?: PrismaExerciseSetLog[]
+      log?: PrismaExerciseSetLog
     },
   ) {}
 
@@ -47,18 +47,24 @@ export default class ExerciseSet implements GQLExerciseSet {
     return this.data.exerciseId
   }
 
-  async logs() {
-    if (this.data.logs) {
-      return this.data.logs.map((log) => new ExerciseSetLog(log))
+  get completedAt() {
+    return this.data.completedAt?.toISOString() ?? null
+  }
+
+  async log() {
+    if (this.data.log) {
+      return new ExerciseSetLog(this.data.log)
     }
 
-    const logs = await prisma.exerciseSetLog.findMany({
+    const log = await prisma.exerciseSetLog.findFirst({
       where: {
-        exerciseSetId: this.id,
+        ExerciseSet: {
+          id: this.id,
+        },
       },
     })
 
-    return logs.map((log) => new ExerciseSetLog(log))
+    return log ? new ExerciseSetLog(log) : null
   }
 
   get createdAt() {

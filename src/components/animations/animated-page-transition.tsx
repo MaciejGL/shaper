@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { AnimatePresenceProps, motion } from 'framer-motion'
 import { AnimatePresence } from 'framer-motion'
 
 const variants = {
@@ -140,21 +140,69 @@ const variants = {
       duration: 0.1,
     },
   },
+  slideFromLeft: {
+    initial: {
+      x: '100%',
+      opacity: 0.5,
+      scale: 0.95,
+    },
+    animate: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: {
+      x: '-100%',
+      opacity: 0.5,
+      scale: 0.95,
+    },
+    transition: {
+      duration: 0.4,
+      ease: [0.32, 0.72, 0, 1],
+      opacity: { duration: 0.3 },
+      scale: { duration: 0.3 },
+    },
+  },
+  slideFromRight: {
+    initial: {
+      x: '-100%',
+      opacity: 0.5,
+      scale: 0.95,
+    },
+    animate: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: {
+      x: '100%',
+      opacity: 0.5,
+      scale: 0.95,
+    },
+    transition: {
+      duration: 0.4,
+      ease: [0.32, 0.72, 0, 1],
+      opacity: { duration: 0.3 },
+      scale: { duration: 0.3 },
+    },
+  },
 }
 
 export function AnimatedPageTransition({
   children,
   className,
   variant = 'reveal',
+  mode = 'wait',
   id,
 }: {
   children: React.ReactNode
   className?: string
   variant?: keyof typeof variants
+  mode?: AnimatePresenceProps['mode']
   id: string
 }) {
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode={mode}>
       <motion.div key={id} {...variants[variant]} className={className}>
         {children}
       </motion.div>

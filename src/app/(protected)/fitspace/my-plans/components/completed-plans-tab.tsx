@@ -136,7 +136,7 @@ function YourPlanRating({ plan }: { plan: CompletedPlan }) {
 
   const handlePlanRating = (rating: number, review?: string) => {
     // TODO: Implement plan rating
-    console.log(rating, review)
+    console.info(rating, review)
   }
 
   return (

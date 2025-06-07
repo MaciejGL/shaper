@@ -28,3 +28,21 @@ export const getExpectedDayDate = (
 
   return expectedDate
 }
+
+export const getWeekRange = (week: WorkoutWeek, plan: WorkoutPlan) => {
+  if (!plan.startDate) return null
+
+  const trainingStartDate = new Date(plan.startDate)
+  const currentWeekIndex = plan.weeks.findIndex((w) => w.id === week.id)
+  if (currentWeekIndex === -1) return null
+
+  // Calculate the start date of the current week
+  const weekStart = new Date(trainingStartDate)
+  weekStart.setDate(trainingStartDate.getDate() + currentWeekIndex * 7)
+
+  // Calculate the end date of the week (6 days after start)
+  const weekEnd = new Date(weekStart)
+  weekEnd.setDate(weekStart.getDate() + 6)
+
+  return { weekStart, weekEnd }
+}

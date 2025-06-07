@@ -62,7 +62,7 @@ query GetClientById($id: ID!) {
             maxReps
             weight
             rpe
-            logs {
+            log {
               id
               reps
               weight

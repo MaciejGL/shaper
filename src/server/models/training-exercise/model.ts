@@ -62,6 +62,10 @@ export default class TrainingExercise implements GQLTrainingExercise {
     return this.data.base.videoUrl
   }
 
+  get completedAt() {
+    return this.data.completedAt?.toISOString()
+  }
+
   async sets() {
     let sets = this.data.sets
 

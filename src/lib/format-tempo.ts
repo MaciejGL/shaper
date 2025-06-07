@@ -40,3 +40,17 @@ export const formatTempoInput = (
 
   return formattedValue
 }
+
+export const formatNumberInput = (
+  e: React.ChangeEvent<HTMLInputElement>,
+): string => {
+  const rawValue = e.target.value
+  // Remove any non-digit characters
+  return rawValue.replace(/\D/g, '')
+}
+
+/**
+ * Handles keydown event to prevent non-numeric input
+ * @param e - React keyboard event for input element
+ * @param maxLength - Optional maximum length of the input
+ */

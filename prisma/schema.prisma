@@ -170,6 +170,8 @@ model TrainingPlan {
   weeks        TrainingWeek[]
   template     TrainingPlan?  @relation("Template", fields: [templateId], references: [id])
   templates    TrainingPlan[] @relation("Template")
+
+  @@index([completedAt])
 }
 
 model TrainingWeek {
@@ -185,6 +187,8 @@ model TrainingWeek {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([completedAt])
 }
 
 model TrainingDay {
@@ -200,6 +204,8 @@ model TrainingDay {
 
   week      TrainingWeek       @relation(fields: [weekId], references: [id], onDelete: Cascade)
   exercises TrainingExercise[]
+
+  @@index([completedAt])
 }
 
 model TrainingExercise {
@@ -211,6 +217,7 @@ model TrainingExercise {
   warmupSets   Int?
   instructions String?
   order        Int
+  completedAt  DateTime?
 
   sets                   ExerciseSet[]
   baseId                 String? // 👈 link to the base exercise
@@ -228,6 +235,7 @@ model TrainingExercise {
 
   @@index([dayId])
   @@index([baseId])
+  @@index([completedAt])
 }
 
 model ExerciseSet {
@@ -241,12 +249,15 @@ model ExerciseSet {
   exerciseId String
   exercise   TrainingExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  logs ExerciseSetLog[]
+  log   ExerciseSetLog? @relation(fields: [logId], references: [id], onDelete: Cascade)
+  logId String?         @unique // ⬅️ enforces only one log per set
 
   @@index([exerciseId])
+  @@index([completedAt])
 }
 
 model ExerciseLog {
@@ -259,8 +270,6 @@ model ExerciseLog {
   exerciseId String
   exercise   TrainingExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
-  setsLogs ExerciseSetLog[]
-
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -268,16 +277,13 @@ model ExerciseLog {
 model ExerciseSetLog {
   id String @id @default(cuid())
 
-  reps   Int
-  weight Float
+  reps   Int?
+  weight Float?
   rpe    Int?
-  exerciseLogId String
-  exerciseLog   ExerciseLog @relation(fields: [exerciseLogId], references: [id], onDelete: Cascade)
-  exerciseSetId String
-  exerciseSet   ExerciseSet @relation(fields: [exerciseSetId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  ExerciseSet ExerciseSet?
 }
 
 model BaseExercise {
@@ -360,7 +366,7 @@ model Note {
 
   // Optional relation to a user (e.g., trainer notes about a client)
   relatedToId String?
-  metadata Json? // For any additional structured data
+  metadata    Json? // For any additional structured data
 
   @@index([createdById])
   @@index([relatedToId])

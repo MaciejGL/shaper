@@ -143,7 +143,7 @@ export async function getClientActivePlan(
                 include: {
                   sets: {
                     include: {
-                      logs: true,
+                      log: true,
                     },
                     orderBy: {
                       order: 'asc',
@@ -232,12 +232,12 @@ export async function getWorkout(args: GQLQueryGetWorkoutArgs) {
   const planWeekOfYear = getWeekYear(planStartDate)
 
   const weeksFormStartOfYearUntilFirstDayOfPlan = weekOfYear - planWeekOfYear
-  const expectedWeek = weeksFormStartOfYearUntilFirstDayOfPlan + 1
+  const expectedWeek = weeksFormStartOfYearUntilFirstDayOfPlan
 
   const currentDayOfWeek = currentDate.getDay()
 
   const expectedUnfinishedWeek = plan.weeks.findIndex(
-    (week, index) => week.completedAt === null && index >= expectedWeek,
+    (week, index) => week.completedAt === null && index > expectedWeek,
   )
   const firstUncompletedWeekIndex = plan.weeks.findIndex(
     (week) => week.completedAt === null,
@@ -248,12 +248,10 @@ export async function getWorkout(args: GQLQueryGetWorkoutArgs) {
 
   const navigation = {
     currentWeekIndex: expectedUnfinishedWeek,
-    currentDayIndex: currentDayOfWeek,
+    currentDayIndex: currentDayOfWeek - 1,
     firstUncompletedWeekIndex,
     firstUncompletedDayIndex,
   }
-
-  console.log({ navigation })
 
   return {
     navigation,
@@ -298,9 +296,8 @@ export async function createTrainingPlan(
                   sets: {
                     create: exercise.sets?.map((set) => ({
                       order: set.order,
-                      reps: set.reps ?? set.maxReps ?? set.minReps ?? null,
-                      minReps: set.minReps ?? set.reps ?? null,
-                      maxReps: set.maxReps ?? set.reps ?? null,
+                      minReps: set.minReps ?? null,
+                      maxReps: set.maxReps ?? null,
                       weight: set.weight ?? null,
                       rpe: set.rpe ?? null,
                     })),

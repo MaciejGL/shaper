@@ -8,7 +8,7 @@ import {
   useFitspaceGetWorkoutQuery,
 } from '@/generated/graphql-client'
 
-import { Exercise } from './exercise'
+import { Exercises } from './exercises'
 import { Navigation } from './navigation'
 
 export type WorkoutPlan = NonNullable<
@@ -18,7 +18,7 @@ export type WorkoutWeek = NonNullable<WorkoutPlan>['weeks'][number]
 export type WorkoutDay = NonNullable<WorkoutWeek>['days'][number]
 export type WorkoutExercise = NonNullable<WorkoutDay>['exercises'][number]
 export type WorkoutSet = NonNullable<WorkoutExercise>['sets'][number]
-export type WorkoutSetLog = NonNullable<WorkoutSet>['logs'][number]
+export type WorkoutSetLog = NonNullable<WorkoutSet>['log']
 
 export type Navigation = NonNullable<
   GQLFitspaceGetWorkoutQuery['getWorkout']
@@ -48,12 +48,23 @@ export function WorkoutPageClient({
     },
   )
 
-  console.log({ plan, navigation, data, isLoading })
+  console.log(data)
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (!data?.getWorkout && !isLoading) {
+    return <div>Error</div>
+  }
 
   return (
-    <WorkoutProvider plan={plan} navigation={navigation}>
+    <WorkoutProvider
+      plan={data?.getWorkout?.plan}
+      navigation={data?.getWorkout?.navigation}
+    >
       <Navigation />
-      <Exercise />
+      <Exercises />
     </WorkoutProvider>
   )
 }

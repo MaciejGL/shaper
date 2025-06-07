@@ -6,6 +6,7 @@ type TrainingExercise {
   warmupSets: Int
   instructions: String
   order: Int!
+  completedAt: String
 
   sets: [ExerciseSet!]!
   logs: [ExerciseLog!]!

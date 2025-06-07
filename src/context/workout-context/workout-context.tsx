@@ -5,6 +5,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -90,6 +91,10 @@ export function WorkoutProvider({
     ],
   )
 
+  console.log(
+    value.plan.weeks[1].days[0].exercises[0].completedAt,
+    activeWeek.days[0].exercises[0].completedAt,
+  )
   return (
     <WorkoutContext.Provider value={value}>{children}</WorkoutContext.Provider>
   )

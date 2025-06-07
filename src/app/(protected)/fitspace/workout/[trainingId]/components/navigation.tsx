@@ -1,7 +1,11 @@
 import { formatDate } from 'date-fns'
+import { BadgeCheckIcon, BicepsFlexedIcon, ChevronLeft } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
+import { useQueryState } from 'nuqs'
 import { useMemo } from 'react'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/components/utils'
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -36,6 +40,7 @@ export function Navigation() {
 
 function Day({ day }: { day: WorkoutDay }) {
   const { setActiveDay, plan, activeWeek, activeDay } = useWorkout()
+  const [, setActiveExerciseId] = useQueryState('exercise')
 
   const expectedDate = useMemo(
     () => getExpectedDayDate(day, plan, activeWeek),
@@ -44,17 +49,20 @@ function Day({ day }: { day: WorkoutDay }) {
 
   const isSelected = activeDay.id === day.id
 
+  const handleClick = () => {
+    setActiveExerciseId(day.exercises.at(0)?.id ?? '')
+    setActiveDay(day)
+  }
+
   return (
     <div>
       <button
         data-selected={isSelected}
         className={cn(
-          'size-12 shrink-0 rounded-md flex-center flex-col text-primary-foreground transition-all bg-primary/50 dark:bg-primary/20 dark:text-primary cursor-pointer',
-          'data-[selected=true]:bg-primary dark:data-[selected=true]:bg-primary dark:data-[selected=true]:text-primary-foreground',
+          'size-12 shrink-0 rounded-md flex-center flex-col text-primary transition-all bg-secondary dark:bg-secondary dark:text-primary cursor-pointer shadow-sm hover:bg-secondary/80',
+          'data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground dark:data-[selected=true]:bg-primary dark:data-[selected=true]:text-primary-foreground',
         )}
-        onClick={() => {
-          setActiveDay(day)
-        }}
+        onClick={handleClick}
       >
         <span className="text-xs">
           {getDayName(day.dayOfWeek, { short: true })}
@@ -91,25 +99,71 @@ function DaySelector() {
 function WeekSelector() {
   const { plan, activeWeek, setActiveWeek } = useWorkout()
   const weeks = plan.weeks
+  const currentWeekIndex = weeks.findIndex((week) => week.id === activeWeek.id)
+
+  const handleWeekChange = (type: 'prev' | 'next') => {
+    if (type === 'prev') {
+      setActiveWeek(weeks[currentWeekIndex - 1].id)
+    } else {
+      setActiveWeek(weeks[currentWeekIndex + 1].id)
+    }
+  }
+
+  const hasPrevWeek = currentWeekIndex > 0
+  const hasNextWeek = currentWeekIndex < weeks.length - 1
+
   return (
-    <Select
-      onValueChange={setActiveWeek}
-      defaultValue={activeWeek?.id}
-      value={activeWeek?.id}
-    >
-      <SelectTrigger size="sm" className="none">
-        <SelectValue
-          defaultValue={activeWeek?.id}
-          placeholder="Select a workout"
-        />
-      </SelectTrigger>
-      <SelectContent>
-        {weeks.map((week) => (
-          <SelectItem key={week.id} value={week.id}>
-            {week.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <div className="flex justify-between gap-2">
+      <Button
+        iconOnly={<ChevronLeft />}
+        disabled={!hasPrevWeek}
+        size="icon-sm"
+        variant="outline"
+        onClick={() => handleWeekChange('prev')}
+      />
+      <Select
+        onValueChange={setActiveWeek}
+        defaultValue={activeWeek?.id}
+        value={activeWeek?.id}
+      >
+        <SelectTrigger
+          size="sm"
+          variant="ghost"
+          className="[&_svg]:data-[icon=mark]:size-3.5"
+        >
+          <SelectValue
+            defaultValue={activeWeek?.id}
+            placeholder="Select a workout"
+          />
+        </SelectTrigger>
+        <SelectContent>
+          {weeks.map((week, index) => (
+            <SelectItem key={week.id} value={week.id}>
+              {week.name}
+              {week.completedAt ? (
+                <BadgeCheckIcon
+                  data-icon="mark"
+                  className="text-green-500 size-3"
+                />
+              ) : index === currentWeekIndex ? (
+                <BicepsFlexedIcon
+                  data-icon="mark"
+                  className="text-primary/80 size-3"
+                />
+              ) : (
+                ''
+              )}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Button
+        iconOnly={<ChevronRight />}
+        size="icon-sm"
+        variant="outline"
+        onClick={() => handleWeekChange('next')}
+        disabled={!hasNextWeek}
+      />
+    </div>
   )
 }

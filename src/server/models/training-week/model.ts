@@ -17,7 +17,7 @@ export default class TrainingWeek implements GQLTrainingWeek {
       days?: (PrismaTrainingDay & {
         exercises?: (PrismaTrainingExercise & {
           sets?: PrismaExerciseSet[]
-          base?: Pick<PrismaBaseExercise, 'videoUrl'>
+          base?: PrismaBaseExercise
         })[]
       })[]
     },

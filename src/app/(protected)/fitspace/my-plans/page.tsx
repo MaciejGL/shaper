@@ -2,6 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { DumbbellIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -46,6 +47,7 @@ export default function MyPlansPage() {
       PlanTab.Completed,
     ]),
   )
+  const router = useRouter()
 
   const queryClient = useQueryClient()
   const invalidateQueries = () =>
@@ -56,6 +58,7 @@ export default function MyPlansPage() {
         invalidateQueries()
         toast.success('Plan activated')
         setTab(PlanTab.Active)
+        router.refresh()
       },
     })
   const { mutateAsync: pausePlan, isPending: isPausingPlan } =

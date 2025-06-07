@@ -163,16 +163,16 @@ export type GQLExerciseLog = {
   id: Scalars['ID']['output'];
   notes?: Maybe<Scalars['String']['output']>;
   performedAt: Scalars['String']['output'];
-  setsLogs: Array<GQLExerciseSetLog>;
   updatedAt: Scalars['String']['output'];
 };
 
 export type GQLExerciseSet = {
   __typename?: 'ExerciseSet';
+  completedAt?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
   exerciseId: Scalars['ID']['output'];
   id: Scalars['ID']['output'];
-  logs: Array<GQLExerciseSetLog>;
+  log?: Maybe<GQLExerciseSetLog>;
   maxReps?: Maybe<Scalars['Int']['output']>;
   minReps?: Maybe<Scalars['Int']['output']>;
   order: Scalars['Int']['output'];
@@ -187,10 +187,10 @@ export type GQLExerciseSetLog = {
   createdAt: Scalars['String']['output'];
   exerciseSetId: Scalars['ID']['output'];
   id: Scalars['ID']['output'];
-  reps: Scalars['Int']['output'];
+  reps?: Maybe<Scalars['Int']['output']>;
   rpe?: Maybe<Scalars['Int']['output']>;
   updatedAt: Scalars['String']['output'];
-  weight: Scalars['Float']['output'];
+  weight?: Maybe<Scalars['Float']['output']>;
 };
 
 export type GQLExerciseWhereInput = {
@@ -220,6 +220,12 @@ export enum GQLGoal {
   LoseWeight = 'LOSE_WEIGHT',
   Maintain = 'MAINTAIN'
 }
+
+export type GQLLogSetInput = {
+  loggedReps?: InputMaybe<Scalars['Int']['input']>;
+  loggedWeight?: InputMaybe<Scalars['Float']['input']>;
+  setId: Scalars['ID']['input'];
+};
 
 export type GQLMuscleGroup = {
   __typename?: 'MuscleGroup';
@@ -262,6 +268,7 @@ export type GQLMutation = {
   duplicateTrainingPlan: Scalars['ID']['output'];
   markAllNotificationsRead: Array<GQLNotification>;
   markNotificationRead: GQLNotification;
+  markSetAsCompleted?: Maybe<Scalars['Boolean']['output']>;
   pausePlan: Scalars['Boolean']['output'];
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
   removeTrainingPlanFromClient: Scalars['Boolean']['output'];
@@ -269,6 +276,7 @@ export type GQLMutation = {
   updateNote: GQLNote;
   updateNotification: GQLNotification;
   updateProfile?: Maybe<GQLUserProfile>;
+  updateSetLog?: Maybe<GQLExerciseSetLog>;
   updateTrainingPlan: Scalars['Boolean']['output'];
 };
 
@@ -366,6 +374,12 @@ export type GQLMutationMarkNotificationReadArgs = {
 };
 
 
+export type GQLMutationMarkSetAsCompletedArgs = {
+  completed: Scalars['Boolean']['input'];
+  setId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationPausePlanArgs = {
   planId: Scalars['ID']['input'];
 };
@@ -400,6 +414,11 @@ export type GQLMutationUpdateNotificationArgs = {
 
 export type GQLMutationUpdateProfileArgs = {
   input: GQLUpdateProfileInput;
+};
+
+
+export type GQLMutationUpdateSetLogArgs = {
+  input: GQLLogSetInput;
 };
 
 
@@ -577,6 +596,7 @@ export type GQLTrainingDay = {
 export type GQLTrainingExercise = {
   __typename?: 'TrainingExercise';
   baseId?: Maybe<Scalars['ID']['output']>;
+  completedAt?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
   dayId: Scalars['ID']['output'];
   id: Scalars['ID']['output'];
@@ -914,7 +934,22 @@ export type GQLFitspaceGetWorkoutQueryVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceGetWorkoutQuery = { __typename?: 'Query', getWorkout?: { __typename?: 'GetWorkoutPayload', navigation: { __typename?: 'WorkoutNavigation', currentWeekIndex: number, currentDayIndex: number, firstUncompletedWeekIndex: number, firstUncompletedDayIndex: number }, plan: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, order: number, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, logs: Array<{ __typename?: 'ExerciseSetLog', id: string, weight: number, rpe?: number | undefined | null, reps: number }> }> }> }> }> } } | undefined | null };
+export type GQLFitspaceGetWorkoutQuery = { __typename?: 'Query', getWorkout?: { __typename?: 'GetWorkoutPayload', navigation: { __typename?: 'WorkoutNavigation', currentWeekIndex: number, currentDayIndex: number, firstUncompletedWeekIndex: number, firstUncompletedDayIndex: number }, plan: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null } | undefined | null }> }> }> }> } } | undefined | null };
+
+export type GQLFitspaceMarkSetAsCompletedMutationVariables = Exact<{
+  setId: Scalars['ID']['input'];
+  completed: Scalars['Boolean']['input'];
+}>;
+
+
+export type GQLFitspaceMarkSetAsCompletedMutation = { __typename?: 'Mutation', markSetAsCompleted?: boolean | undefined | null };
+
+export type GQLFitspaceUpdateSetLogMutationVariables = Exact<{
+  input: GQLLogSetInput;
+}>;
+
+
+export type GQLFitspaceUpdateSetLogMutation = { __typename?: 'Mutation', updateSetLog?: { __typename?: 'ExerciseSetLog', id: string, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null } | undefined | null };
 
 export type GQLGetClientsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -934,7 +969,7 @@ export type GQLGetClientByIdQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goals: Array<GQLGoal>, currentWeight?: number | undefined | null, height?: number | undefined | null, allergies?: string | undefined | null } | undefined | null, getClientTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null }>, getClientActivePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null, difficulty: GQLDifficulty, totalWorkouts: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, name: string, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, logs: Array<{ __typename?: 'ExerciseSetLog', id: string, reps: number, weight: number, rpe?: number | undefined | null }> }> }> }> }> } | undefined | null };
+export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goals: Array<GQLGoal>, currentWeight?: number | undefined | null, height?: number | undefined | null, allergies?: string | undefined | null } | undefined | null, getClientTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null }>, getClientActivePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null, difficulty: GQLDifficulty, totalWorkouts: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, name: string, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null } | undefined | null }> }> }> }> } | undefined | null };
 
 export type GQLUserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1640,6 +1675,7 @@ export const FitspaceGetWorkoutDocument = `
             instructions
             order
             videoUrl
+            completedAt
             sets {
               id
               order
@@ -1648,7 +1684,8 @@ export const FitspaceGetWorkoutDocument = `
               maxReps
               weight
               rpe
-              logs {
+              completedAt
+              log {
                 id
                 weight
                 rpe
@@ -1704,6 +1741,59 @@ useInfiniteFitspaceGetWorkoutQuery.getKey = (variables: GQLFitspaceGetWorkoutQue
 
 
 useFitspaceGetWorkoutQuery.fetcher = (variables: GQLFitspaceGetWorkoutQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetWorkoutQuery, GQLFitspaceGetWorkoutQueryVariables>(FitspaceGetWorkoutDocument, variables, options);
+
+export const FitspaceMarkSetAsCompletedDocument = `
+    mutation FitspaceMarkSetAsCompleted($setId: ID!, $completed: Boolean!) {
+  markSetAsCompleted(setId: $setId, completed: $completed)
+}
+    `;
+
+export const useFitspaceMarkSetAsCompletedMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceMarkSetAsCompletedMutation, TError, GQLFitspaceMarkSetAsCompletedMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceMarkSetAsCompletedMutation, TError, GQLFitspaceMarkSetAsCompletedMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceMarkSetAsCompleted'],
+    mutationFn: (variables?: GQLFitspaceMarkSetAsCompletedMutationVariables) => fetchData<GQLFitspaceMarkSetAsCompletedMutation, GQLFitspaceMarkSetAsCompletedMutationVariables>(FitspaceMarkSetAsCompletedDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceMarkSetAsCompletedMutation.getKey = () => ['FitspaceMarkSetAsCompleted'];
+
+
+useFitspaceMarkSetAsCompletedMutation.fetcher = (variables: GQLFitspaceMarkSetAsCompletedMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceMarkSetAsCompletedMutation, GQLFitspaceMarkSetAsCompletedMutationVariables>(FitspaceMarkSetAsCompletedDocument, variables, options);
+
+export const FitspaceUpdateSetLogDocument = `
+    mutation FitspaceUpdateSetLog($input: LogSetInput!) {
+  updateSetLog(input: $input) {
+    id
+    reps
+    weight
+    rpe
+  }
+}
+    `;
+
+export const useFitspaceUpdateSetLogMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceUpdateSetLogMutation, TError, GQLFitspaceUpdateSetLogMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceUpdateSetLogMutation, TError, GQLFitspaceUpdateSetLogMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceUpdateSetLog'],
+    mutationFn: (variables?: GQLFitspaceUpdateSetLogMutationVariables) => fetchData<GQLFitspaceUpdateSetLogMutation, GQLFitspaceUpdateSetLogMutationVariables>(FitspaceUpdateSetLogDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceUpdateSetLogMutation.getKey = () => ['FitspaceUpdateSetLog'];
+
+
+useFitspaceUpdateSetLogMutation.fetcher = (variables: GQLFitspaceUpdateSetLogMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceUpdateSetLogMutation, GQLFitspaceUpdateSetLogMutationVariables>(FitspaceUpdateSetLogDocument, variables, options);
 
 export const GetClientsDocument = `
     query GetClients {
@@ -1860,7 +1950,7 @@ export const GetClientByIdDocument = `
             maxReps
             weight
             rpe
-            logs {
+            log {
               id
               reps
               weight

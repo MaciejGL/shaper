@@ -23,7 +23,7 @@ export default class TrainingPlan implements GQLTrainingPlan {
         days?: (PrismaTrainingDay & {
           exercises?: (PrismaTrainingExercise & {
             sets?: PrismaExerciseSet[]
-            base?: Pick<PrismaBaseExercise, 'videoUrl'>
+            base?: PrismaBaseExercise
           })[]
         })[]
       })[]

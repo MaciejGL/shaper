@@ -65,7 +65,7 @@ function Button({
   ...props
 }: ButtonProps) {
   const Comp = asChild ? Slot : 'button'
-  const defaultSize = iconOnly ? 'icon-md' : size || 'md'
+  const defaultSize = iconOnly ? size || 'icon-md' : size || 'md'
 
   return (
     <Comp

@@ -7,7 +7,8 @@ type ExerciseSet {
   weight: Float
   rpe: Int
 
-  logs: [ExerciseSetLog!]!
+  completedAt: String
+  log: ExerciseSetLog
   exerciseId: ID!
 
   createdAt: String!

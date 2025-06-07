@@ -3,7 +3,6 @@ type ExerciseLog {
   performedAt: String!
   notes: String
   exerciseId: ID!
-  setsLogs: [ExerciseSetLog!]!
   createdAt: String!
   updatedAt: String!
 }
