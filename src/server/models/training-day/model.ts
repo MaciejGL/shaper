@@ -5,7 +5,7 @@ import {
   TrainingExercise as PrismaTrainingExercise,
 } from '@prisma/client'
 
-import { GQLTrainingDay } from '@/generated/graphql-server'
+import { GQLTrainingDay, GQLWorkoutType } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 
 import TrainingExercise from '../training-exercise/model'
@@ -33,7 +33,7 @@ export default class TrainingDay implements GQLTrainingDay {
   }
 
   get workoutType() {
-    return this.data.workoutType
+    return this.data.workoutType as GQLWorkoutType
   }
 
   get trainingWeekId() {

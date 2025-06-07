@@ -1,0 +1,70 @@
+query FitspaceGetCurrentWorkoutId {
+  getMyPlansOverview {
+    activePlan {
+      id
+    }
+  }
+}
+
+query FitspaceGetWorkout($trainingId: ID!) {
+  getWorkout(trainingId: $trainingId) {
+    navigation {
+      currentWeekIndex
+      currentDayIndex
+      firstUncompletedWeekIndex
+      firstUncompletedDayIndex
+    }
+    plan {
+      id
+      title
+      description
+      isPublic
+      isTemplate
+      isDraft
+      startDate
+
+      weeks {
+        id
+        weekNumber
+        name
+        description
+        completedAt
+
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          workoutType
+          completedAt
+
+          exercises {
+            id
+            name
+            restSeconds
+            tempo
+            warmupSets
+            instructions
+            order
+            videoUrl
+
+            sets {
+              id
+              order
+              reps
+              minReps
+              maxReps
+              weight
+              rpe
+              logs {
+                id
+                weight
+                rpe
+                reps
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

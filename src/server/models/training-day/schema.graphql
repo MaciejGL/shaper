@@ -2,7 +2,7 @@ type TrainingDay {
   id: ID!
   dayOfWeek: Int!
   completedAt: String
-  workoutType: String
+  workoutType: WorkoutType
   isRestDay: Boolean!
 
   exercises: [TrainingExercise!]!

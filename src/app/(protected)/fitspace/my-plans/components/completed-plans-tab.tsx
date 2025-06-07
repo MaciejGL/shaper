@@ -21,6 +21,7 @@ import { CompletedPlan, PlanAction } from '../page'
 import { CompletionStats } from './completion-stats'
 import { PlanAuthor } from './plan-author'
 import { PlanRatingModal } from './plan-rating-modal'
+import { ProgressOverviewItem } from './progress-overview-item'
 
 export function CompletedPlansTab({
   completedPlans,
@@ -74,17 +75,22 @@ export function CompletedPlansTab({
                   strengthGain: '+15%',
                   adherence: '94%',
                 }).map(([key, value]) => (
-                  <div
+                  <ProgressOverviewItem
                     key={key}
-                    className="text-center p-3 bg-muted/50 rounded-lg"
-                  >
-                    <div className="text-lg font-bold text-primary">
-                      {value}
-                    </div>
-                    <div className="text-xs text-muted-foreground capitalize">
-                      {key.replace(/([A-Z])/g, ' $1').trim()}
-                    </div>
-                  </div>
+                    value={value}
+                    label={key.replace(/([A-Z])/g, ' $1').trim()}
+                  />
+                  // <div
+                  //   key={key}
+                  //   className="text-center p-3 bg-muted/50 rounded-lg"
+                  // >
+                  //   <div className="text-lg font-bold text-primary">
+                  //     {value}
+                  //   </div>
+                  //   <div className="text-xs text-muted-foreground capitalize">
+                  //     {key.replace(/([A-Z])/g, ' $1').trim()}
+                  //   </div>
+                  // </div>
                 ))}
               </div>
               {/* Completion Stats */}

@@ -14,7 +14,7 @@ export function CollapsibleText({
   const [fullHeight, setFullHeight] = useState(0)
   const [isExpanded, setIsExpanded] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const isSmallerThanMaxLines = fullHeight < maxLines * 20
+  const isSmallerThanMaxLines = fullHeight <= maxLines * 20
   const initialHeight = isSmallerThanMaxLines ? fullHeight : maxLines * 20
 
   useEffect(() => {
@@ -50,7 +50,7 @@ export function CollapsibleText({
               duration: 0.15,
             }}
             className={cn(
-              'text-sm text-muted-foreground whitespace-pre-wrap overflow-hidden',
+              'text-sm text-foreground whitespace-pre-wrap overflow-hidden',
             )}
           >
             {text}
@@ -69,7 +69,7 @@ export function CollapsibleText({
               height: `${initialHeight}px`,
             }}
             className={cn(
-              'text-sm text-muted-foreground whitespace-pre-wrap overflow-hidden',
+              'text-sm text-foreground whitespace-pre-wrap overflow-hidden',
             )}
           >
             {text}

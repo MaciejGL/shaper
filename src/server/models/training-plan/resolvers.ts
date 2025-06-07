@@ -16,6 +16,7 @@ import {
   getMyPlansOverview,
   getTemplates,
   getTrainingPlanById,
+  getWorkout,
   pausePlan,
   removeTrainingPlanFromClient,
   updateTrainingPlan,
@@ -36,6 +37,9 @@ export const Query: GQLQueryResolvers = {
   },
   getMyPlansOverview: async () => {
     return getMyPlansOverview()
+  },
+  getWorkout: async (_, args) => {
+    return getWorkout(args)
   },
 }
 

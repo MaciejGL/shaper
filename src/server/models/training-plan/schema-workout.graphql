@@ -1,0 +1,15 @@
+type WorkoutNavigation {
+  currentWeekIndex: Int!
+  currentDayIndex: Int!
+  firstUncompletedWeekIndex: Int!
+  firstUncompletedDayIndex: Int!
+}
+
+type GetWorkoutPayload {
+  plan: TrainingPlan!
+  navigation: WorkoutNavigation!
+}
+
+type Query {
+  getWorkout(trainingId: ID!): GetWorkoutPayload
+}

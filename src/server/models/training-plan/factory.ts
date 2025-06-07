@@ -1,5 +1,6 @@
 import { prisma } from '@lib/db'
 import { Prisma } from '@prisma/client'
+import { getWeekYear } from 'date-fns'
 
 import {
   GQLMutationActivatePlanArgs,
@@ -7,6 +8,7 @@ import {
   GQLMutationDeletePlanArgs,
   GQLMutationPausePlanArgs,
   GQLQueryGetClientActivePlanArgs,
+  GQLQueryGetWorkoutArgs,
 } from '@/generated/graphql-client'
 import {
   GQLMutationAssignTrainingPlanToClientArgs,
@@ -210,6 +212,52 @@ export async function getMyPlansOverview() {
     activePlan: activePlan ? new TrainingPlan(activePlan) : null,
     availablePlans: availablePlans.map((plan) => new TrainingPlan(plan)),
     completedPlans: completedPlans.map((plan) => new TrainingPlan(plan)),
+  }
+}
+
+export async function getWorkout(args: GQLQueryGetWorkoutArgs) {
+  const { trainingId } = args
+  const user = await getCurrentUserOrThrow()
+  const plan = await getFullPlanById(trainingId)
+
+  if (!plan || plan.assignedToId !== user.user.id) {
+    throw new Error('Training plan not found or unauthorized')
+  }
+  const currentDate = new Date()
+  if (!plan.startDate) {
+    throw new Error('Training plan has no start date')
+  }
+  const weekOfYear = getWeekYear(currentDate)
+  const planStartDate = new Date(plan.startDate)
+  const planWeekOfYear = getWeekYear(planStartDate)
+
+  const weeksFormStartOfYearUntilFirstDayOfPlan = weekOfYear - planWeekOfYear
+  const expectedWeek = weeksFormStartOfYearUntilFirstDayOfPlan + 1
+
+  const currentDayOfWeek = currentDate.getDay()
+
+  const expectedUnfinishedWeek = plan.weeks.findIndex(
+    (week, index) => week.completedAt === null && index >= expectedWeek,
+  )
+  const firstUncompletedWeekIndex = plan.weeks.findIndex(
+    (week) => week.completedAt === null,
+  )
+  const firstUncompletedDayIndex = plan.weeks[
+    firstUncompletedWeekIndex
+  ].days.findIndex((day) => day.completedAt === null && day.isRestDay === false)
+
+  const navigation = {
+    currentWeekIndex: expectedUnfinishedWeek,
+    currentDayIndex: currentDayOfWeek,
+    firstUncompletedWeekIndex,
+    firstUncompletedDayIndex,
+  }
+
+  console.log({ navigation })
+
+  return {
+    navigation,
+    plan: new TrainingPlan(plan),
   }
 }
 

@@ -60,6 +60,7 @@ export const Navbar = ({
     user?.user?.role === 'TRAINER'
       ? TRAINER_LINKS.dashboard.href
       : CLIENT_LINKS.dashboard.href
+
   return (
     <div
       className={cn(

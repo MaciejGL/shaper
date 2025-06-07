@@ -1,32 +1,28 @@
 'use client'
 
-import {
-  BicepsFlexedIcon,
-  Calendar,
-  Dumbbell,
-  Home,
-  TrendingUp,
-} from 'lucide-react'
+import { Calendar, Dumbbell, Home, SearchIcon, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 import { cn } from '@/lib/utils'
 
-const navItems = [
-  { href: '/fitspace/dashboard', icon: Home, label: 'Home' },
-  { href: '/fitspace/my-plans', icon: Calendar, label: 'Plans' },
-  { href: '/fitspace/session', icon: Dumbbell, label: 'Session' },
-  { href: '/fitspace/progress', icon: TrendingUp, label: 'Progress' },
-  {
-    href: '/fitspace/marketplace?tab=trainers',
-    icon: BicepsFlexedIcon,
-    label: 'Marketplace',
-  },
-]
-
-export function MobileNav() {
+export function MobileNav({ activePlanId }: { activePlanId?: string }) {
   const pathname = usePathname()
-
+  const navItems = [
+    { href: '/fitspace/dashboard', icon: Home, label: 'Home' },
+    { href: '/fitspace/my-plans', icon: Calendar, label: 'Plans' },
+    {
+      href: `/fitspace/workout/${activePlanId || 'quick-start'}`,
+      icon: Dumbbell,
+      label: 'Workout',
+    },
+    { href: '/fitspace/progress', icon: TrendingUp, label: 'Progress' },
+    {
+      href: '/fitspace/marketplace?tab=trainers',
+      icon: SearchIcon,
+      label: 'Explore',
+    },
+  ]
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
       <div className="flex items-center justify-around py-2 px-4 max-w-md mx-auto">
