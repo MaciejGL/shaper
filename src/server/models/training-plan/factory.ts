@@ -1,6 +1,6 @@
 import { prisma } from '@lib/db'
 import { Prisma } from '@prisma/client'
-import { getWeekYear } from 'date-fns'
+import { getDay, getWeek, isAfter } from 'date-fns'
 
 import {
   GQLMutationActivatePlanArgs,
@@ -227,18 +227,27 @@ export async function getWorkout(args: GQLQueryGetWorkoutArgs) {
   if (!plan.startDate) {
     throw new Error('Training plan has no start date')
   }
-  const weekOfYear = getWeekYear(currentDate)
+
+  if (!isAfter(currentDate, plan.startDate)) {
+    return {
+      navigation: {
+        currentWeekIndex: 0,
+        currentDayIndex: 0,
+        firstUncompletedWeekIndex: 0,
+        firstUncompletedDayIndex: 0,
+      },
+      plan: new TrainingPlan(plan),
+    }
+  }
+
+  const weekOfYear = getWeek(currentDate, { weekStartsOn: 1 })
   const planStartDate = new Date(plan.startDate)
-  const planWeekOfYear = getWeekYear(planStartDate)
+  const planWeekOfYear = getWeek(planStartDate, { weekStartsOn: 1 })
 
-  const weeksFormStartOfYearUntilFirstDayOfPlan = weekOfYear - planWeekOfYear
-  const expectedWeek = weeksFormStartOfYearUntilFirstDayOfPlan
+  const currentWeekIndex = weekOfYear - planWeekOfYear
+  const currentDayIndex =
+    getDay(currentDate) === 0 ? 6 : getDay(currentDate) - 1
 
-  const currentDayOfWeek = currentDate.getDay()
-
-  const expectedUnfinishedWeek = plan.weeks.findIndex(
-    (week, index) => week.completedAt === null && index > expectedWeek,
-  )
   const firstUncompletedWeekIndex = plan.weeks.findIndex(
     (week) => week.completedAt === null,
   )
@@ -247,8 +256,8 @@ export async function getWorkout(args: GQLQueryGetWorkoutArgs) {
   ].days.findIndex((day) => day.completedAt === null && day.isRestDay === false)
 
   const navigation = {
-    currentWeekIndex: expectedUnfinishedWeek,
-    currentDayIndex: currentDayOfWeek - 1,
+    currentWeekIndex,
+    currentDayIndex,
     firstUncompletedWeekIndex,
     firstUncompletedDayIndex,
   }

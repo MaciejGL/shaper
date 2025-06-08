@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 
@@ -20,12 +21,12 @@ type Navigation = NonNullable<
 >['navigation']
 
 type WorkoutContextType = {
-  plan: Plan
-  navigation: Navigation
-  activeWeek: Plan['weeks'][number]
-  activeDay: Plan['weeks'][number]['days'][number]
-  defaultWeek: Plan['weeks'][number]
-  defaultDay: Plan['weeks'][number]['days'][number]
+  plan?: Plan
+  navigation?: Navigation
+  activeWeek?: Plan['weeks'][number]
+  activeDay?: Plan['weeks'][number]['days'][number]
+  defaultWeek?: Plan['weeks'][number]
+  defaultDay?: Plan['weeks'][number]['days'][number]
   setActiveWeek: (weekId: string) => void
   setActiveDay: (day: Plan['weeks'][number]['days'][number]) => void
 }
@@ -36,34 +37,53 @@ export function WorkoutProvider({
   navigation,
 }: {
   children: ReactNode
-  plan: NonNullable<GQLFitspaceGetWorkoutQuery['getWorkout']>['plan']
-  navigation: NonNullable<
+  plan?: NonNullable<GQLFitspaceGetWorkoutQuery['getWorkout']>['plan']
+  navigation?: NonNullable<
     GQLFitspaceGetWorkoutQuery['getWorkout']
   >['navigation']
 }) {
   const defaultWeek = useMemo(
-    () => plan.weeks[navigation.currentWeekIndex],
-    [plan.weeks, navigation.currentWeekIndex],
+    () => plan?.weeks[navigation?.currentWeekIndex ?? 0],
+    [plan?.weeks, navigation?.currentWeekIndex],
   )
   const defaultDay = useMemo(
-    () => defaultWeek?.days[navigation.currentDayIndex],
-    [defaultWeek?.days, navigation.currentDayIndex],
+    () => defaultWeek?.days[navigation?.currentDayIndex ?? 0],
+    [defaultWeek?.days, navigation?.currentDayIndex],
   )
-  const [activeWeek, setActiveWeek] =
-    useState<Plan['weeks'][number]>(defaultWeek)
-  const [activeDay, setActiveDay] =
-    useState<Plan['weeks'][number]['days'][number]>(defaultDay)
+  const activeWeekIndexRef = useRef(navigation?.currentWeekIndex ?? 0)
+  const activeDayIndexRef = useRef(navigation?.currentDayIndex ?? 0)
+  const [activeWeek, setActiveWeek] = useState<
+    Plan['weeks'][number] | undefined
+  >(defaultWeek)
+  const [activeDay, setActiveDay] = useState<
+    Plan['weeks'][number]['days'][number] | undefined
+  >(defaultDay)
+
+  useEffect(() => {
+    const defaultWeek = activeWeek ?? plan?.weeks[activeWeekIndexRef.current]
+    const defaultDay = activeDay ?? defaultWeek?.days[activeDayIndexRef.current]
+
+    setActiveWeek(defaultWeek)
+    setActiveDay(defaultDay)
+  }, [plan, navigation, activeWeek, activeDay])
 
   const handleSetActiveWeek = useCallback(
     (weekId: string) => {
-      const week = plan.weeks.find((week) => week.id === weekId)
+      const week = plan?.weeks.find((week) => week.id === weekId)
       if (week) {
         setActiveWeek(week)
+        setActiveDay(week.days[activeDay?.dayOfWeek ?? 0])
 
-        setActiveDay(week.days[activeDay.dayOfWeek])
+        activeWeekIndexRef.current = navigation?.currentWeekIndex ?? 0
+        activeDayIndexRef.current = navigation?.currentDayIndex ?? 0
       }
     },
-    [plan.weeks, activeDay.dayOfWeek],
+    [
+      plan?.weeks,
+      activeDay?.dayOfWeek,
+      navigation?.currentWeekIndex,
+      navigation?.currentDayIndex,
+    ],
   )
 
   const value = useMemo(
@@ -91,10 +111,6 @@ export function WorkoutProvider({
     ],
   )
 
-  console.log(
-    value.plan.weeks[1].days[0].exercises[0].completedAt,
-    activeWeek.days[0].exercises[0].completedAt,
-  )
   return (
     <WorkoutContext.Provider value={value}>{children}</WorkoutContext.Provider>
   )

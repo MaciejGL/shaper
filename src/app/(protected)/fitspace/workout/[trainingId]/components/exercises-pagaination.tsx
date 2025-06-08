@@ -14,7 +14,7 @@ export function ExercisesPagination({
   const [activeExerciseId] = useQueryState('exercise')
   const { activeDay } = useWorkout()
 
-  const exercises = activeDay.exercises
+  const exercises = activeDay?.exercises ?? []
   const currentExerciseIndex = exercises.findIndex(
     (exercise) => exercise.id === activeExerciseId,
   )

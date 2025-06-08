@@ -47,7 +47,7 @@ function Day({ day }: { day: WorkoutDay }) {
     [plan, activeWeek, day],
   )
 
-  const isSelected = activeDay.id === day.id
+  const isSelected = activeDay?.id === day.id
 
   const handleClick = () => {
     setActiveExerciseId(day.exercises.at(0)?.id ?? '')
@@ -86,6 +86,7 @@ function Day({ day }: { day: WorkoutDay }) {
 
 function DaySelector() {
   const { activeWeek } = useWorkout()
+  if (!activeWeek) return null
   const days = activeWeek.days
   return (
     <div className="flex gap-[4px] w-full justify-center mt-2">
@@ -97,18 +98,27 @@ function DaySelector() {
 }
 
 function WeekSelector() {
-  const { plan, activeWeek, setActiveWeek } = useWorkout()
+  const { plan, activeWeek, setActiveWeek, activeDay, setActiveDay } =
+    useWorkout()
+  if (!plan || !activeWeek) return null
   const weeks = plan.weeks
-  const currentWeekIndex = weeks.findIndex((week) => week.id === activeWeek.id)
 
   const handleWeekChange = (type: 'prev' | 'next') => {
+    const currentWeekIndex = weeks.findIndex(
+      (week) => week.id === activeWeek.id,
+    )
+    const activeDayOfWeek = activeDay?.dayOfWeek ?? 0
+
     if (type === 'prev') {
       setActiveWeek(weeks[currentWeekIndex - 1].id)
+      setActiveDay(weeks[currentWeekIndex - 1].days[activeDayOfWeek])
     } else {
       setActiveWeek(weeks[currentWeekIndex + 1].id)
+      setActiveDay(weeks[currentWeekIndex + 1].days[activeDayOfWeek])
     }
   }
 
+  const currentWeekIndex = weeks.findIndex((week) => week.id === activeWeek.id)
   const hasPrevWeek = currentWeekIndex > 0
   const hasNextWeek = currentWeekIndex < weeks.length - 1
 

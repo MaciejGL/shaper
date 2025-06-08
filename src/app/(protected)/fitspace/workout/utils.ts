@@ -1,3 +1,5 @@
+import { getDay } from 'date-fns'
+
 import {
   WorkoutDay,
   WorkoutPlan,
@@ -6,10 +8,10 @@ import {
 
 export const getExpectedDayDate = (
   day: WorkoutDay,
-  plan: WorkoutPlan,
-  activeWeek: WorkoutWeek,
+  plan?: WorkoutPlan,
+  activeWeek?: WorkoutWeek,
 ) => {
-  if (!plan.startDate) return null
+  if (!plan?.startDate || !activeWeek) return null
 
   const trainingStartDate = new Date(plan.startDate)
   const currentWeekIndex = plan.weeks.findIndex(
@@ -22,7 +24,7 @@ export const getExpectedDayDate = (
   weekStartDate.setDate(trainingStartDate.getDate() + currentWeekIndex * 7)
 
   // Calculate the date for the specific day of the week
-  const dayOffset = day.dayOfWeek - trainingStartDate.getDay()
+  const dayOffset = day.dayOfWeek - getDay(trainingStartDate) + 1
   const expectedDate = new Date(weekStartDate)
   expectedDate.setDate(weekStartDate.getDate() + dayOffset)
 

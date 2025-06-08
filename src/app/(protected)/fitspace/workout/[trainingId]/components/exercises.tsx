@@ -1,6 +1,6 @@
 import { BadgeCheckIcon, ChevronDownIcon } from 'lucide-react'
-import { parseAsString, useQueryState } from 'nuqs'
-import React, { startTransition, useMemo, useState } from 'react'
+import { useQueryState } from 'nuqs'
+import React, { startTransition, useEffect, useState } from 'react'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
@@ -24,24 +24,29 @@ import { WorkoutDay } from './workout-page.client'
 
 export function Exercises() {
   const { activeDay } = useWorkout()
-  const [activeExerciseId, setActiveExerciseId] = useQueryState(
-    'exercise',
-    parseAsString.withDefault(activeDay.exercises.at(0)?.id ?? ''),
-  )
+  const [activeExerciseId, setActiveExerciseId] = useQueryState('exercise')
   const [animationVariant, setAnimationVariant] = useState<
     'slideFromLeft' | 'slideFromRight'
   >('slideFromLeft')
 
-  const exercises = activeDay.exercises
-  const completedExercises = exercises.filter(
+  const selectedExercise = activeDay?.exercises.find(
+    (exercise) => exercise.id === activeExerciseId,
+  )
+
+  useEffect(() => {
+    if (activeDay) {
+      setActiveExerciseId(activeDay.exercises.at(0)?.id ?? '')
+    }
+  }, [activeDay, setActiveExerciseId])
+
+  if (!activeDay) return null
+
+  const completedExercises = activeDay.exercises.filter(
     (exercise) => exercise.completedAt,
   ).length
-  const progressPercentage = (completedExercises / exercises.length) * 100
 
-  const selectedExercise = useMemo(
-    () => exercises.find((exercise) => exercise.id === activeExerciseId),
-    [exercises, activeExerciseId],
-  )
+  const progressPercentage =
+    (completedExercises / activeDay.exercises.length) * 100
 
   const handlePaginationClick = (exerciseId: string, type: 'prev' | 'next') => {
     startTransition(() => {
@@ -52,15 +57,15 @@ export function Exercises() {
     })
   }
 
-  console.log(completedExercises, exercises.length)
+  const exercises = activeDay.exercises
   return (
-    <AnimatedPageTransition id={activeDay.id} variant="rotate" mode="wait">
+    <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
       {!activeDay.isRestDay && (
         <div className="flex flex-col py-4 space-y-2 w-full">
           <div className="flex justify-between gap-2">
             <ExerciseDropdown
               activeDay={activeDay}
-              activeExerciseId={activeExerciseId}
+              activeExerciseId={activeExerciseId ?? ''}
               setActiveExerciseId={setActiveExerciseId}
             />
             <ExercisesCompleted
@@ -69,7 +74,7 @@ export function Exercises() {
             />
           </div>
           {exercises.length > 0 && (
-            <div className="flex items-center gap-2 w-full">
+            <div className="flex items-center flex-wrap gap-2 w-full">
               <Progress value={progressPercentage} className="" />
             </div>
           )}
@@ -124,7 +129,7 @@ function ExerciseDropdown({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
-        {activeDay.exercises.map((exercise) => (
+        {activeDay.exercises.map((exercise, index) => (
           <React.Fragment key={exercise.id}>
             <DropdownMenuItem
               key={exercise.id}
@@ -133,7 +138,7 @@ function ExerciseDropdown({
             >
               <div className="text-sm flex justify-between w-full">
                 <div className="text-sm">
-                  {exercise.order}. {exercise.name}
+                  {index + 1}. {exercise.name}
                 </div>
 
                 {exercise.completedAt ? (
@@ -163,7 +168,7 @@ function ExercisesCompleted({
       className="self-end text-muted-foreground"
     >
       {completedExercises}/{totalExercises} completed{' '}
-      {completedExercises !== totalExercises ? (
+      {completedExercises === totalExercises ? (
         <BadgeCheckIcon className="text-green-500" />
       ) : (
         ''

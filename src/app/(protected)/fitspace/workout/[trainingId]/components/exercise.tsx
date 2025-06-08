@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { VideoPreview } from '@/components/video-preview'
 import {
   useFitspaceGetWorkoutQuery,
@@ -68,10 +69,8 @@ function ExerciseHeader({ exercise }: { exercise: WorkoutExercise }) {
                 <DialogHeader>
                   <DialogTitle>{exercise.name}</DialogTitle>
                 </DialogHeader>
-                <DialogDescription>
-                  <div className="whitespace-pre-wrap">
-                    {exercise.instructions}
-                  </div>
+                <DialogDescription className="whitespace-pre-wrap">
+                  {exercise.instructions}
                 </DialogDescription>
               </DialogContent>
             </Dialog>
@@ -218,19 +217,13 @@ function ExerciseSet({ set }: { set: WorkoutExercise['sets'][number] }) {
           onClick={() => setIsExpanded((prev) => !prev)}
         />
 
-        {/* <Button
-          variant={isCompleted ? 'outline' : 'ghost'}
-          iconOnly=}
-          onClick={handleMarkAsCompleted}
-          loading={isMarkingSet}
-          disabled={isCompleted}
-        /> */}
-        {
+        <Label>
           <Checkbox
             checked={isCompleted}
             onCheckedChange={handleMarkAsCompleted}
+            className="cursor-pointer"
           />
-        }
+        </Label>
       </div>
 
       {isExpanded && (
