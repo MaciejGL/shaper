@@ -1,39 +1,32 @@
-import { notFound } from 'next/navigation'
+'use client'
 
-import {
-  FitspaceGetWorkoutDocument,
-  GQLFitspaceGetWorkoutQuery,
-} from '@/generated/graphql-client'
-import { gqlServerFetch } from '@/lib/gqlServerFetch'
+import { useParams } from 'next/navigation'
+
+import { Loader } from '@/components/loader'
+import { useFitspaceGetWorkoutQuery } from '@/generated/graphql-client'
 
 import { WorkoutPageClient } from './components/workout-page.client'
 
-export default async function WorkoutPage({
-  params,
-}: {
-  params: Promise<{ trainingId: string }>
-}) {
-  const { trainingId } = await params
-
-  if (!trainingId) {
-    return notFound()
-  }
-
-  const { data } = await gqlServerFetch<GQLFitspaceGetWorkoutQuery>(
-    FitspaceGetWorkoutDocument,
+export default function WorkoutPage() {
+  const params = useParams<{ trainingId: string }>()
+  const trainingId = params.trainingId
+  const { data, isLoading } = useFitspaceGetWorkoutQuery(
     {
       trainingId,
     },
+    {
+      enabled: !!trainingId,
+    },
   )
 
-  if (!data?.getWorkout) {
-    return notFound()
+  if (isLoading) {
+    return <Loader />
   }
 
-  return (
+  return data?.getWorkout ? (
     <WorkoutPageClient
       plan={data.getWorkout.plan}
       navigation={data.getWorkout.navigation}
     />
-  )
+  ) : null
 }
