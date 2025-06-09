@@ -19,12 +19,12 @@ export function TodaysWorkout({
     !plan ||
     !plan.weeks ||
     !plan.weeks[navigation.currentWeekIndex] ||
-    !plan.weeks[navigation.currentWeekIndex].days
+    !plan.weeks[navigation.currentWeekIndex]?.days
   ) {
     return null
   }
   const day =
-    plan.weeks[navigation.currentWeekIndex].days[navigation.currentDayIndex]
+    plan.weeks[navigation.currentWeekIndex]?.days[navigation.currentDayIndex]
 
   if (!day) {
     return null
