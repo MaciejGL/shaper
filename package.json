@@ -19,6 +19,7 @@
     "@graphql-tools/schema": "^10.0.23",
     "@graphql-typed-document-node/core": "^3.2.0",
     "@hookform/resolvers": "^5.0.1",
+    "@number-flow/react": "^0.5.10",
     "@prisma/client": "^6.7.0",
     "@prisma/extension-accelerate": "^2.0.1",
     "@radix-ui/react-accordion": "^1.2.10",

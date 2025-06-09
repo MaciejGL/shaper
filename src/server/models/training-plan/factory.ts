@@ -218,7 +218,18 @@ export async function getMyPlansOverview() {
 export async function getWorkout(args: GQLQueryGetWorkoutArgs) {
   const { trainingId } = args
   const user = await getCurrentUserOrThrow()
-  const plan = await getFullPlanById(trainingId)
+  let id = trainingId
+  if (!id) {
+    const plan = await prisma.trainingPlan.findFirst({
+      where: { assignedToId: user.user.id, active: true },
+    })
+    id = plan?.id
+  }
+  if (!id) {
+    throw new Error('Training plan not found')
+  }
+
+  const plan = await getFullPlanById(id)
 
   if (!plan || plan.assignedToId !== user.user.id) {
     throw new Error('Training plan not found or unauthorized')

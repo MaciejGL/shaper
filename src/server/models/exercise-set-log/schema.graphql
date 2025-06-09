@@ -3,7 +3,6 @@ type ExerciseSetLog {
   reps: Int
   weight: Float
   rpe: Int
-  exerciseSetId: ID!
 
   createdAt: String!
   updatedAt: String!

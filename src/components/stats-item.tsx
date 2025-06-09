@@ -1,11 +1,11 @@
-import { AnimateNumber } from '@/components/animate-number'
+import { AnimateNumber } from './animate-number'
 
-export function ProgressOverviewItem({
+export function StatsItem({
   value,
   icon,
   label,
 }: {
-  value: number | string
+  value: number | string | React.ReactNode
   icon?: React.ReactNode
   label: string
 }) {
@@ -16,7 +16,13 @@ export function ProgressOverviewItem({
           <div>{icon}</div>
           <div className="flex flex-col items-start">
             {typeof value === 'number' ? (
-              <AnimateNumber value={value} />
+              <div className="text-lg text-left font-bold text-primary">
+                <AnimateNumber value={value} />
+              </div>
+            ) : typeof value === 'string' ? (
+              <div className="text-lg text-left font-bold text-primary">
+                {value}
+              </div>
             ) : (
               <div className="text-lg text-left font-bold text-primary">
                 {value}

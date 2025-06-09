@@ -10,7 +10,7 @@ const cardVariants = cva(
       variant: {
         default: '',
         gradient:
-          'bg-gradient-to-br from-primary/10 via-primary/5 to-background',
+          'border-zinc-200 dark:border-zinc-800 shadow-lg bg-gradient-to-br from-white via-white  to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800',
       },
     },
   },

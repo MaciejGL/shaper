@@ -62,7 +62,9 @@ export function WorkoutPageClient({
       navigation={data?.getWorkout?.navigation}
     >
       <Navigation />
-      <Exercises />
+      <div className="max-w-sm mx-auto">
+        <Exercises />
+      </div>
     </WorkoutProvider>
   )
 }

@@ -11,5 +11,5 @@ type GetWorkoutPayload {
 }
 
 type Query {
-  getWorkout(trainingId: ID!): GetWorkoutPayload
+  getWorkout(trainingId: ID): GetWorkoutPayload
 }

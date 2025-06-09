@@ -48,6 +48,17 @@ export default class TrainingDay implements GQLTrainingDay {
     return this.data.completedAt.toISOString()
   }
 
+  get startedAt() {
+    const firstCompletedSet = this.data.exercises
+      ?.at(0)
+      ?.sets?.at(0)?.completedAt
+    if (!firstCompletedSet) {
+      return null
+    }
+
+    return firstCompletedSet.toISOString()
+  }
+
   async exercises() {
     let exercises = this.data.exercises
 

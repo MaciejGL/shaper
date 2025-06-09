@@ -186,7 +186,6 @@ export type GQLExerciseSet = {
 export type GQLExerciseSetLog = {
   __typename?: 'ExerciseSetLog';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
-  exerciseSetId: EntireFieldWrapper<Scalars['ID']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   reps?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   rpe?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
@@ -523,7 +522,7 @@ export type GQLQueryGetTrainingPlanByIdArgs = {
 
 
 export type GQLQueryGetWorkoutArgs = {
-  trainingId: Scalars['ID']['input'];
+  trainingId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -589,6 +588,7 @@ export type GQLTrainingDay = {
   exercises: EntireFieldWrapper<Array<GQLTrainingExercise>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   isRestDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  startedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainingWeekId: EntireFieldWrapper<Scalars['ID']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
   workoutType?: EntireFieldWrapper<Maybe<GQLWorkoutType>>;
@@ -1117,7 +1117,6 @@ export type GQLExerciseSetResolvers<ContextType = any, ParentType extends GQLRes
 
 export type GQLExerciseSetLogResolvers<ContextType = any, ParentType extends GQLResolversParentTypes['ExerciseSetLog'] = GQLResolversParentTypes['ExerciseSetLog']> = {
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  exerciseSetId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   reps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   rpe?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
@@ -1222,7 +1221,7 @@ export type GQLQueryResolvers<ContextType = any, ParentType extends GQLResolvers
   getMyPlansOverview?: Resolver<GQLResolversTypes['MyPlansPayload'], ParentType, ContextType>;
   getTemplates?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetTemplatesArgs>>;
   getTrainingPlanById?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLQueryGetTrainingPlanByIdArgs, 'id'>>;
-  getWorkout?: Resolver<Maybe<GQLResolversTypes['GetWorkoutPayload']>, ParentType, ContextType, RequireFields<GQLQueryGetWorkoutArgs, 'trainingId'>>;
+  getWorkout?: Resolver<Maybe<GQLResolversTypes['GetWorkoutPayload']>, ParentType, ContextType, Partial<GQLQueryGetWorkoutArgs>>;
   muscleGroupCategories?: Resolver<Array<GQLResolversTypes['MuscleGroupCategory']>, ParentType, ContextType>;
   muscleGroupCategory?: Resolver<GQLResolversTypes['MuscleGroupCategory'], ParentType, ContextType, RequireFields<GQLQueryMuscleGroupCategoryArgs, 'id'>>;
   myTrainer?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
@@ -1254,6 +1253,7 @@ export type GQLTrainingDayResolvers<ContextType = any, ParentType extends GQLRes
   exercises?: Resolver<Array<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   isRestDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  startedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainingWeekId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   workoutType?: Resolver<Maybe<GQLResolversTypes['WorkoutType']>, ParentType, ContextType>;

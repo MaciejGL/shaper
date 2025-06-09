@@ -14,7 +14,6 @@ export const markSetAsCompleted = async (
 
   // 1. Mark set as incomplete with all the related data
   if (!completed) {
-    console.log('marking set as incomplete')
     await prisma.exerciseSet.update({
       where: { id: setId },
       data: {
@@ -45,7 +44,6 @@ export const markSetAsCompleted = async (
     return true
   }
 
-  console.log('marking set as completed')
   // 1. Mark set as completed
   const updatedSet = await prisma.exerciseSet.update({
     where: { id: setId },
@@ -66,13 +64,11 @@ export const markSetAsCompleted = async (
   })
 
   if (incompleteSets === 0) {
-    console.log('all sets in exercise are completed')
     await prisma.trainingExercise.update({
       where: { id: exerciseId },
       data: { completedAt: new Date() },
     })
   } else {
-    console.log('not all sets in exercise are completed')
     return null
   }
 
@@ -96,13 +92,11 @@ export const markSetAsCompleted = async (
 
   const allExercisesCompleted = day.exercises.every((ex) => ex.completedAt)
   if (allExercisesCompleted) {
-    console.log('all exercises in day are completed')
     await prisma.trainingDay.update({
       where: { id: day.id },
       data: { completedAt: new Date() },
     })
   } else {
-    console.log('not all exercises in day are completed')
     return null
   }
 
@@ -120,13 +114,11 @@ export const markSetAsCompleted = async (
 
   const allDaysCompleted = week.days.every((d) => d.completedAt)
   if (allDaysCompleted) {
-    console.log('all days in week are completed')
     await prisma.trainingWeek.update({
       where: { id: week.id },
       data: { completedAt: new Date() },
     })
   } else {
-    console.log('not all days in week are completed')
     return null
   }
 
@@ -143,7 +135,6 @@ export const markSetAsCompleted = async (
 
   const allWeeksCompleted = plan.weeks.every((w) => w.completedAt)
   if (allWeeksCompleted) {
-    console.log('all weeks in plan are completed')
     await prisma.trainingPlan.update({
       where: { id: plan.id },
       data: { completedAt: new Date() },
@@ -155,7 +146,6 @@ export const markSetAsCompleted = async (
 
 export const updateSetLog = async (args: GQLMutationUpdateSetLogArgs) => {
   const { setId, loggedReps, loggedWeight } = args.input
-  console.log('updating set log', args.input)
   const set = await prisma.exerciseSet.update({
     where: { id: setId },
     data: {
@@ -177,10 +167,7 @@ export const updateSetLog = async (args: GQLMutationUpdateSetLogArgs) => {
     },
   })
 
-  console.log('set', set)
-
   if (!set.log) return null
 
-  console.log('set.log', set.log)
   return new ExerciseSetLog(set.log)
 }

@@ -8,8 +8,11 @@ import { cn } from '@/lib/utils'
 function Progress({
   className,
   value = 0,
+  duration = 1000,
   ...props
-}: React.ComponentProps<typeof ProgressPrimitive.Root>) {
+}: React.ComponentProps<typeof ProgressPrimitive.Root> & {
+  duration?: number
+}) {
   const fallbackValue = value ?? 0
   return (
     <ProgressPrimitive.Root
@@ -33,7 +36,10 @@ function Progress({
           'bg-green-600': fallbackValue >= 80,
           'bg-green-700': fallbackValue >= 90,
         })}
-        style={{ transform: `translateX(-${100 - fallbackValue}%)` }}
+        style={{
+          transitionDuration: `${duration}ms`,
+          transform: `translateX(-${100 - fallbackValue}%)`,
+        }}
       />
     </ProgressPrimitive.Root>
   )

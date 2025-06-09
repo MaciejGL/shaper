@@ -1,10 +1,19 @@
 import { motion } from 'framer-motion'
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { BadgeCheckIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import { cn } from '@/lib/utils'
+
+import { Summary } from './summary'
 
 export function ExercisesPagination({
   onClick,
@@ -13,7 +22,7 @@ export function ExercisesPagination({
 }) {
   const [activeExerciseId] = useQueryState('exercise')
   const { activeDay } = useWorkout()
-
+  const [summaryOpen, setSummaryOpen] = useState(false)
   const exercises = activeDay?.exercises ?? []
   const currentExerciseIndex = exercises.findIndex(
     (exercise) => exercise.id === activeExerciseId,
@@ -37,16 +46,34 @@ export function ExercisesPagination({
         currentExerciseIndex={currentExerciseIndex}
         pagesNumber={exercises.length}
       />
-      <Button
-        variant="secondary"
-        size="sm"
-        iconEnd={<ChevronRightIcon />}
-        onClick={() => onClick(nextExercise?.id, 'next')}
-        disabled={!nextExercise}
-        className={cn(!nextExercise && 'invisible')}
-      >
-        Next
-      </Button>
+      {nextExercise ? (
+        <Button
+          variant="secondary"
+          size="sm"
+          iconEnd={<ChevronRightIcon />}
+          onClick={() => onClick(nextExercise?.id, 'next')}
+          disabled={!nextExercise}
+          className={cn(!nextExercise && 'invisible')}
+        >
+          Next
+        </Button>
+      ) : (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm">Enough?</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem onClick={() => setSummaryOpen(true)}>
+              <BadgeCheckIcon /> View Results
+            </DropdownMenuItem>
+
+            {/* <DropdownMenuItem>
+              <PlusIcon /> Add more exercises
+            </DropdownMenuItem> */}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+      <Summary onOpenChange={setSummaryOpen} open={summaryOpen} />
     </div>
   )
 }

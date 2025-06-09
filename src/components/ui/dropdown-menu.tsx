@@ -28,7 +28,8 @@ function DropdownMenuTrigger({
     <DropdownMenuPrimitive.Trigger
       data-slot="dropdown-menu-trigger"
       className={cn(
-        'cursor-pointer hover:underline hover:text-primary hover:underline-offset-4 transition-all duration-200',
+        !props.asChild &&
+          'cursor-pointer hover:underline hover:text-primary hover:underline-offset-4 transition-all duration-200',
         className,
       )}
       {...props}

@@ -1,4 +1,4 @@
-import { BadgeCheckIcon, ChevronDownIcon } from 'lucide-react'
+import { BadgeCheckIcon, LayoutListIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import React, { startTransition, useEffect, useState } from 'react'
 
@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Progress } from '@/components/ui/progress'
 import { useWorkout } from '@/context/workout-context/workout-context'
-import { formatWorkoutType } from '@/lib/workout-type-to-label'
+import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { Exercise } from './exercise'
 import { ExercisesPagination } from './exercises-pagaination'
@@ -37,7 +37,9 @@ export function Exercises() {
     if (activeDay) {
       setActiveExerciseId(activeDay.exercises.at(0)?.id ?? '')
     }
-  }, [activeDay, setActiveExerciseId])
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Change only when day changes with fallback to first exercise. Otherwise it does update on logs.
+  }, [activeDay?.id, setActiveExerciseId])
 
   if (!activeDay) return null
 
@@ -45,8 +47,15 @@ export function Exercises() {
     (exercise) => exercise.completedAt,
   ).length
 
-  const progressPercentage =
-    (completedExercises / activeDay.exercises.length) * 100
+  const completedSets = activeDay.exercises.reduce((acc, exercise) => {
+    return acc + exercise.sets.filter((set) => set.completedAt).length
+  }, 0)
+
+  const totalSets = activeDay.exercises.reduce((acc, exercise) => {
+    return acc + exercise.sets.length
+  }, 0)
+
+  const progressPercentage = (completedSets / totalSets) * 100
 
   const handlePaginationClick = (exerciseId: string, type: 'prev' | 'next') => {
     startTransition(() => {
@@ -58,6 +67,7 @@ export function Exercises() {
   }
 
   const exercises = activeDay.exercises
+
   return (
     <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
       {!activeDay.isRestDay && (
@@ -124,7 +134,11 @@ function ExerciseDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="secondary" size="sm" iconEnd={<ChevronDownIcon />}>
+        <Button
+          variant="secondary"
+          size="sm"
+          iconEnd={<LayoutListIcon className="text-muted-foreground" />}
+        >
           {formatWorkoutType(activeDay.workoutType)}
         </Button>
       </DropdownMenuTrigger>
@@ -136,7 +150,7 @@ function ExerciseDropdown({
               disabled={exercise.id === activeExerciseId}
               onClick={() => setActiveExerciseId(exercise.id)}
             >
-              <div className="text-sm flex justify-between w-full">
+              <div className="text-sm flex justify-between w-full gap-4">
                 <div className="text-sm">
                   {index + 1}. {exercise.name}
                 </div>

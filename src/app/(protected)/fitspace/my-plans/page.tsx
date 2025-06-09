@@ -19,7 +19,7 @@ import {
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
-import { ActivePlanTab } from './components/active-plan-tab'
+import { ActivePlanTab } from './components/active-plan-tab/active-plan-tab'
 import { AvailablePlansTab } from './components/available-plans-tab'
 import { CompletedPlansTab } from './components/completed-plans-tab'
 import { PlanActionDialog } from './components/plan-action-dialog'
@@ -31,6 +31,9 @@ export type CompletedPlan =
   GQLFitspaceMyPlansQuery['getMyPlansOverview']['completedPlans'][number]
 export type ActivePlan =
   GQLFitspaceMyPlansQuery['getMyPlansOverview']['activePlan']
+export type WorkoutNavigation = NonNullable<
+  NonNullable<GQLFitspaceMyPlansQuery['getWorkout']>['navigation']
+>
 
 export enum PlanTab {
   Active = 'active',
@@ -86,6 +89,7 @@ export default function MyPlansPage() {
   const activePlan = data?.getMyPlansOverview?.activePlan
   const availablePlans = data?.getMyPlansOverview?.availablePlans
   const completedPlans = data?.getMyPlansOverview?.completedPlans
+  const navigation = data?.getWorkout?.navigation
 
   const [dialogState, setDialogState] = useState<{
     isOpen: boolean
@@ -164,6 +168,7 @@ export default function MyPlansPage() {
         <TabsContent value={PlanTab.Active} className="mt-6 space-y-4">
           <ActivePlanTab
             plan={activePlan}
+            navigation={navigation}
             handlePlanAction={handlePlanAction}
             loading={isLoadingPlans}
           />

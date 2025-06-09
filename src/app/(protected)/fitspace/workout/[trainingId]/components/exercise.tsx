@@ -1,9 +1,5 @@
 import { debounce } from 'lodash'
-import {
-  ListCollapseIcon,
-  MoreHorizontal,
-  NotebookTextIcon,
-} from 'lucide-react'
+import { ListCollapseIcon, NotebookTextIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
@@ -22,12 +18,14 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { VideoPreview } from '@/components/video-preview'
+import { useWorkout } from '@/context/workout-context/workout-context'
 import {
   useFitspaceGetWorkoutQuery,
   useFitspaceMarkSetAsCompletedMutation,
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
+import { cn } from '@/lib/utils'
 
 // import { formatNumberInput } from '@/lib/format-tempo'
 
@@ -38,15 +36,34 @@ interface ExerciseProps {
 }
 
 export function Exercise({ exercise }: ExerciseProps) {
+  const [isExpanded, setIsExpanded] = useState(false)
+  const { getPastLogs } = useWorkout()
+  const previousLogs = getPastLogs(exercise)
   return (
     <div>
-      <ExerciseHeader exercise={exercise} />
-      <ExerciseSets sets={exercise.sets} />
+      <ExerciseHeader
+        exercise={exercise}
+        setIsExpanded={setIsExpanded}
+        hasLogs={previousLogs.length > 0}
+      />
+      <ExerciseSets
+        exercise={exercise}
+        isExpanded={isExpanded}
+        previousLogs={previousLogs}
+      />
     </div>
   )
 }
 
-function ExerciseHeader({ exercise }: { exercise: WorkoutExercise }) {
+function ExerciseHeader({
+  exercise,
+  setIsExpanded,
+  hasLogs,
+}: {
+  exercise: WorkoutExercise
+  setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>
+  hasLogs: boolean
+}) {
   return (
     <div>
       <h3 className={`text-md font-medium`}>{exercise.name}</h3>
@@ -59,6 +76,13 @@ function ExerciseHeader({ exercise }: { exercise: WorkoutExercise }) {
         <div className="flex gap-2">
           {exercise.videoUrl && (
             <VideoPreview variant="secondary" url={exercise.videoUrl} />
+          )}
+          {hasLogs && (
+            <Button
+              variant="secondary"
+              iconOnly={<ListCollapseIcon />}
+              onClick={() => setIsExpanded((prev) => !prev)}
+            />
           )}
           {exercise.instructions && (
             <Dialog>
@@ -75,36 +99,65 @@ function ExerciseHeader({ exercise }: { exercise: WorkoutExercise }) {
               </DialogContent>
             </Dialog>
           )}
-          <Button variant="secondary" iconOnly={<MoreHorizontal />} />
+          {/* <Button variant="secondary" iconOnly={<MoreHorizontal />} /> */}
         </div>
       </div>
     </div>
   )
 }
 
-function ExerciseSets({ sets }: { sets: WorkoutExercise['sets'] }) {
+const sharedLayoutStyles = cn(
+  'w-full py-1 px-2.5 grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-3 items-center',
+)
+
+function ExerciseSets({
+  exercise,
+  isExpanded,
+  previousLogs,
+}: {
+  exercise: WorkoutExercise
+  isExpanded: boolean
+  previousLogs: (WorkoutExercise & {
+    performedOnWeekNumber: number
+    performedOnDayNumber: number
+  })[]
+}) {
   return (
     <div className="flex flex-col mt-4">
-      <div className="w-full py-1 px-2.5 grid grid-cols-[auto_1fr_1fr_1fr_auto_auto] gap-3 items-center text-xs text-muted-foreground">
+      <div className={cn(sharedLayoutStyles, 'text-xs text-muted-foreground')}>
         <div className="min-w-2.5"></div>
-        <div>Reps</div>
-        <div>Weight</div>
-        <div>RPE</div>
+        <div className="text-center">Reps</div>
+        <div className="text-center">Weight</div>
+        <div className="text-center">RPE</div>
 
-        <div className="w-9"></div>
-        <div className="w-9"></div>
+        <div className="w-4"></div>
       </div>
       <div className="flex flex-col gap-2">
-        {sets.map((set) => (
-          <ExerciseSet key={set.id} set={set} />
+        {exercise.sets.map((set) => (
+          <ExerciseSet
+            key={set.id}
+            set={set}
+            previousLogs={previousLogs}
+            isExpanded={isExpanded}
+          />
         ))}
       </div>
     </div>
   )
 }
 
-function ExerciseSet({ set }: { set: WorkoutExercise['sets'][number] }) {
-  const [isExpanded, setIsExpanded] = useState(false)
+function ExerciseSet({
+  set,
+  previousLogs,
+  isExpanded,
+}: {
+  set: WorkoutExercise['sets'][number]
+  previousLogs: (WorkoutExercise & {
+    performedOnWeekNumber: number
+    performedOnDayNumber: number
+  })[]
+  isExpanded: boolean
+}) {
   const { trainingId } = useParams<{ trainingId: string }>()
   const [reps, setReps] = useState('')
   const [weight, setWeight] = useState('')
@@ -185,13 +238,28 @@ function ExerciseSet({ set }: { set: WorkoutExercise['sets'][number] }) {
 
   return (
     <AnimateChangeInHeight>
-      <div className="relative z-0 w-full py-1 px-2.5 rounded-t-md bg-muted dark:bg-card/50 pb-2 -mb-2 grid grid-cols-[auto_1fr_1fr_1fr_auto_auto] gap-3 items-center">
+      <div
+        className={cn(
+          sharedLayoutStyles,
+          'rounded-t-md bg-muted dark:bg-card/50 pb-2 -mb-2',
+        )}
+      >
         <div className="min-w-2.5"></div>
-        <div className="text-xs text-muted-foreground">{repRange}</div>
+        <div className="text-xs text-muted-foreground text-center">
+          {repRange}
+        </div>
+        <div className="text-xs text-muted-foreground text-center">
+          {set.weight}
+        </div>
+        <div />
+        <div className="w-4" />
       </div>
 
       <div
-        className={`relative z-10 w-full py-1 px-2.5 rounded-md border dark:border-0 border-border bg-background dark:bg-card text-primary grid grid-cols-[auto_1fr_1fr_1fr_auto_auto] gap-3 items-center`}
+        className={cn(
+          sharedLayoutStyles,
+          'rounded-md border dark:border-0 border-border bg-background dark:bg-card text-primary',
+        )}
       >
         <div className="min-w-2.5">{set.order}.</div>
 
@@ -209,33 +277,42 @@ function ExerciseSet({ set }: { set: WorkoutExercise['sets'][number] }) {
           variant="ghost"
         />
 
-        <div className="text-sm text-muted-foreground">{set.rpe}</div>
-
-        <Button
-          variant="ghost"
-          iconOnly={<ListCollapseIcon />}
-          onClick={() => setIsExpanded((prev) => !prev)}
-        />
+        <div className="text-sm text-muted-foreground text-center">
+          {set.rpe}
+        </div>
 
         <Label>
           <Checkbox
             checked={isCompleted}
             onCheckedChange={handleMarkAsCompleted}
             className="cursor-pointer"
+            disabled={isMarkingSet}
           />
         </Label>
       </div>
 
-      {isExpanded && (
-        <div className="w-full bg-muted/50 p-2 -mt-2 rounded-b-md grid grid-cols-[auto_1fr_1fr_1fr_auto_auto] gap-3 items-center">
-          <div className="min-w-2.5"></div>
-          <div className="text-sm text-muted-foreground">Logged</div>
-          <div className="text-sm text-muted-foreground">{weight || '-'}</div>
-          <div className="text-sm text-muted-foreground">{reps || '-'}</div>
-          <div className="w-9"></div>
-          <div className="w-9"></div>
-        </div>
-      )}
+      {isExpanded &&
+        previousLogs.map((exercise) => {
+          const thisSet = exercise.sets[set.order - 1]
+          return (
+            <div
+              key={thisSet.id}
+              className="w-full bg-muted/50 p-2 -mt-2 rounded-b-md grid grid-cols-[auto_1fr_1fr_1fr_auto_auto] gap-3 items-center"
+            >
+              <div className="min-w-2.5 text-xs">
+                Week {exercise.performedOnWeekNumber}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {thisSet.log?.reps || '-'}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {thisSet.log?.weight || '-'}
+              </div>
+              <div className="text-sm text-muted-foreground"></div>
+              <div className="w-4"></div>
+            </div>
+          )
+        })}
     </AnimateChangeInHeight>
   )
 }

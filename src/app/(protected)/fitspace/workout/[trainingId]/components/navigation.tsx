@@ -1,5 +1,5 @@
 import { formatDate } from 'date-fns'
-import { BadgeCheckIcon, BicepsFlexedIcon, ChevronLeft } from 'lucide-react'
+import { BadgeCheckIcon, ChevronLeft } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { useMemo } from 'react'
@@ -30,7 +30,7 @@ export function Navigation() {
         'p-2 md:p-4 lg:p-8',
       )}
     >
-      <div className="mx-auto max-w-max">
+      <div className="mx-auto max-w-sm">
         <WeekSelector />
         <DaySelector />
       </div>
@@ -39,7 +39,8 @@ export function Navigation() {
 }
 
 function Day({ day }: { day: WorkoutDay }) {
-  const { setActiveDay, plan, activeWeek, activeDay } = useWorkout()
+  const { plan, activeWeek, activeDay } = useWorkout()
+  const [, setActiveDayId] = useQueryState('day')
   const [, setActiveExerciseId] = useQueryState('exercise')
 
   const expectedDate = useMemo(
@@ -51,7 +52,7 @@ function Day({ day }: { day: WorkoutDay }) {
 
   const handleClick = () => {
     setActiveExerciseId(day.exercises.at(0)?.id ?? '')
-    setActiveDay(day)
+    setActiveDayId(day.id)
   }
 
   return (
@@ -89,7 +90,7 @@ function DaySelector() {
   if (!activeWeek) return null
   const days = activeWeek.days
   return (
-    <div className="flex gap-[4px] w-full justify-center mt-2">
+    <div className="flex gap-[4px] w-full justify-between mt-2">
       {days.map((day) => (
         <Day key={day.id} day={day} />
       ))}
@@ -98,8 +99,15 @@ function DaySelector() {
 }
 
 function WeekSelector() {
-  const { plan, activeWeek, setActiveWeek, activeDay, setActiveDay } =
-    useWorkout()
+  const {
+    plan,
+    activeWeek,
+    activeDay,
+    setActiveWeekId: setActiveWeekIdContext,
+    navigation,
+  } = useWorkout()
+  const [activeWeekId, setActiveWeekId] = useQueryState('week')
+  const [, setActiveDayId] = useQueryState('day')
   if (!plan || !activeWeek) return null
   const weeks = plan.weeks
 
@@ -110,11 +118,11 @@ function WeekSelector() {
     const activeDayOfWeek = activeDay?.dayOfWeek ?? 0
 
     if (type === 'prev') {
-      setActiveWeek(weeks[currentWeekIndex - 1].id)
-      setActiveDay(weeks[currentWeekIndex - 1].days[activeDayOfWeek])
-    } else {
-      setActiveWeek(weeks[currentWeekIndex + 1].id)
-      setActiveDay(weeks[currentWeekIndex + 1].days[activeDayOfWeek])
+      setActiveWeekId(weeks[currentWeekIndex - 1].id)
+      setActiveDayId(weeks[currentWeekIndex - 1].days[activeDayOfWeek].id)
+    } else if (type === 'next') {
+      setActiveWeekId(weeks[currentWeekIndex + 1].id)
+      setActiveDayId(weeks[currentWeekIndex + 1].days[activeDayOfWeek].id)
     }
   }
 
@@ -132,9 +140,9 @@ function WeekSelector() {
         onClick={() => handleWeekChange('prev')}
       />
       <Select
-        onValueChange={setActiveWeek}
-        defaultValue={activeWeek?.id}
-        value={activeWeek?.id}
+        onValueChange={(value) => setActiveWeekIdContext(value)}
+        defaultValue={activeWeekId ?? undefined}
+        value={activeWeekId ?? undefined}
       >
         <SelectTrigger
           size="sm"
@@ -155,11 +163,8 @@ function WeekSelector() {
                   data-icon="mark"
                   className="text-green-500 size-3"
                 />
-              ) : index === currentWeekIndex ? (
-                <BicepsFlexedIcon
-                  data-icon="mark"
-                  className="text-primary/80 size-3"
-                />
+              ) : index === navigation?.currentWeekIndex ? (
+                '(current)'
               ) : (
                 ''
               )}

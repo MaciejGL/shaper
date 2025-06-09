@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryState } from 'nuqs'
 import {
   ReactNode,
   createContext,
@@ -7,28 +8,32 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
-  useState,
 } from 'react'
 
+import { WorkoutExercise } from '@/app/(protected)/fitspace/workout/[trainingId]/components/workout-page.client'
 import { GQLFitspaceGetWorkoutQuery } from '@/generated/graphql-client'
+
+import { getPreviousLogsByExercise } from './utils'
 
 const WorkoutContext = createContext<WorkoutContextType | null>(null)
 
-type Plan = NonNullable<GQLFitspaceGetWorkoutQuery['getWorkout']>['plan']
+export type WorkoutContextPlan = NonNullable<
+  GQLFitspaceGetWorkoutQuery['getWorkout']
+>['plan']
 type Navigation = NonNullable<
   GQLFitspaceGetWorkoutQuery['getWorkout']
 >['navigation']
 
 type WorkoutContextType = {
-  plan?: Plan
+  plan?: WorkoutContextPlan
   navigation?: Navigation
-  activeWeek?: Plan['weeks'][number]
-  activeDay?: Plan['weeks'][number]['days'][number]
-  defaultWeek?: Plan['weeks'][number]
-  defaultDay?: Plan['weeks'][number]['days'][number]
-  setActiveWeek: (weekId: string) => void
-  setActiveDay: (day: Plan['weeks'][number]['days'][number]) => void
+  activeWeek?: WorkoutContextPlan['weeks'][number]
+  activeDay?: WorkoutContextPlan['weeks'][number]['days'][number]
+  setActiveWeekId: (weekId: string) => void
+  setActiveDayId: (dayId: string) => void
+  getPastLogs: (
+    exercise: WorkoutExercise,
+  ) => ReturnType<typeof getPreviousLogsByExercise>
 }
 
 export function WorkoutProvider({
@@ -42,72 +47,73 @@ export function WorkoutProvider({
     GQLFitspaceGetWorkoutQuery['getWorkout']
   >['navigation']
 }) {
-  const defaultWeek = useMemo(
-    () => plan?.weeks[navigation?.currentWeekIndex ?? 0],
-    [plan?.weeks, navigation?.currentWeekIndex],
-  )
-  const defaultDay = useMemo(
-    () => defaultWeek?.days[navigation?.currentDayIndex ?? 0],
-    [defaultWeek?.days, navigation?.currentDayIndex],
-  )
-  const activeWeekIndexRef = useRef(navigation?.currentWeekIndex ?? 0)
-  const activeDayIndexRef = useRef(navigation?.currentDayIndex ?? 0)
-  const [activeWeek, setActiveWeek] = useState<
-    Plan['weeks'][number] | undefined
-  >(defaultWeek)
-  const [activeDay, setActiveDay] = useState<
-    Plan['weeks'][number]['days'][number] | undefined
-  >(defaultDay)
+  const [activeWeekId, setActiveWeekId] = useQueryState('week')
+  const [activeDayId, setActiveDayId] = useQueryState('day')
 
   useEffect(() => {
-    const defaultWeek = activeWeek ?? plan?.weeks[activeWeekIndexRef.current]
-    const defaultDay = activeDay ?? defaultWeek?.days[activeDayIndexRef.current]
+    if (!activeWeekId || !activeDayId) {
+      const defaultWeek = plan?.weeks[navigation?.currentWeekIndex ?? 0]
+      const defaultDay = defaultWeek?.days[navigation?.currentDayIndex ?? 0]
 
-    setActiveWeek(defaultWeek)
-    setActiveDay(defaultDay)
-  }, [plan, navigation, activeWeek, activeDay])
+      setActiveWeekId(defaultWeek?.id ?? '')
+      setActiveDayId(defaultDay?.id ?? '')
+    }
+  }, [
+    plan,
+    navigation,
+    activeWeekId,
+    activeDayId,
+    setActiveWeekId,
+    setActiveDayId,
+  ])
 
   const handleSetActiveWeek = useCallback(
     (weekId: string) => {
-      const week = plan?.weeks.find((week) => week.id === weekId)
-      if (week) {
-        setActiveWeek(week)
-        setActiveDay(week.days[activeDay?.dayOfWeek ?? 0])
+      const activeWeekIndex = plan?.weeks.findIndex(
+        (week) => week.id === activeWeekId,
+      )
+      const activeDayIndex = plan?.weeks[activeWeekIndex ?? 0].days.findIndex(
+        (day) => day.id === activeDayId,
+      )
 
-        activeWeekIndexRef.current = navigation?.currentWeekIndex ?? 0
-        activeDayIndexRef.current = navigation?.currentDayIndex ?? 0
+      const newWeekIndex = plan?.weeks.findIndex((week) => week.id === weekId)
+
+      const newWeekId = plan?.weeks[newWeekIndex ?? 0].id
+      const newDayId =
+        plan?.weeks[newWeekIndex ?? 0].days[activeDayIndex ?? 0].id
+      if (newWeekId && newDayId) {
+        setActiveWeekId(newWeekId)
+        setActiveDayId(newDayId)
       }
     },
-    [
-      plan?.weeks,
-      activeDay?.dayOfWeek,
-      navigation?.currentWeekIndex,
-      navigation?.currentDayIndex,
-    ],
+    [plan?.weeks, activeDayId, activeWeekId, setActiveWeekId, setActiveDayId],
+  )
+  const getPastLogs = useCallback(
+    (exercise: WorkoutExercise) =>
+      getPreviousLogsByExercise(exercise, plan, activeWeekId),
+    [plan, activeWeekId],
   )
 
   const value = useMemo(
     () => ({
       plan,
       navigation,
-      activeWeek,
-      activeDay,
-      // Default
-      defaultWeek,
-      defaultDay,
-      // Actions
-      setActiveWeek: handleSetActiveWeek,
-      setActiveDay,
+      activeWeek: plan?.weeks.find((week) => week.id === activeWeekId),
+      activeDay: plan?.weeks
+        .find((week) => week.id === activeWeekId)
+        ?.days.find((day) => day.id === activeDayId),
+      setActiveWeekId: handleSetActiveWeek,
+      setActiveDayId,
+      getPastLogs,
     }),
     [
       plan,
       navigation,
-      activeWeek,
-      activeDay,
-      setActiveDay,
-      defaultWeek,
-      defaultDay,
+      activeWeekId,
+      activeDayId,
       handleSetActiveWeek,
+      setActiveDayId,
+      getPastLogs,
     ],
   )
 

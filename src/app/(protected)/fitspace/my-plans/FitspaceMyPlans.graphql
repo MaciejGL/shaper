@@ -15,6 +15,29 @@ query FitspaceMyPlans {
       startDate
       endDate
       updatedAt
+
+      weeks {
+        id
+        weekNumber
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          workoutType
+          completedAt
+          exercises {
+            id
+            restSeconds
+            videoUrl
+            instructions
+            name
+            warmupSets
+            sets {
+              id
+            }
+          }
+        }
+      }
     }
     availablePlans {
       id
@@ -64,6 +87,15 @@ query FitspaceMyPlans {
         image
         sex
       }
+    }
+  }
+
+  getWorkout {
+    navigation {
+      currentWeekIndex
+      currentDayIndex
+      firstUncompletedWeekIndex
+      firstUncompletedDayIndex
     }
   }
 }
