@@ -15,7 +15,7 @@ import { DialogHeader } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { WeekPicker } from '@/components/week-picker'
 
-import { ActivePlan, AvailablePlan, CompletedPlan, PlanAction } from '../page'
+import { ActivePlan, AvailablePlan, CompletedPlan, PlanAction } from '../types'
 
 interface PlanActionDialogProps {
   isOpen: boolean

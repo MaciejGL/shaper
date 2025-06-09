@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-import { CompletedPlan, PlanAction } from '../page'
+import { CompletedPlan, PlanAction } from '../types'
 
 import { CompletionStats } from './completion-stats'
 import { PlanAuthor } from './plan-author'

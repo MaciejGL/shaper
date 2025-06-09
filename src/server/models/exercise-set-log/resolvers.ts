@@ -12,7 +12,6 @@ export const Mutation: GQLMutationResolvers = {
     return updateSetLog(input)
   },
   markSetAsCompleted: async (_, args) => {
-    console.log(args)
     return markSetAsCompleted(args)
   },
 }

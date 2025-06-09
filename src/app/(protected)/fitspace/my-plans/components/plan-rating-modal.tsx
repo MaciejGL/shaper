@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 
-import { CompletedPlan } from '../page'
+import { CompletedPlan } from '../types'
 
 import { PlanAuthor } from './plan-author'
 

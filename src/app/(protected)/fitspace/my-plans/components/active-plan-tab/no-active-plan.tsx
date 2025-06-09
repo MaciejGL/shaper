@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { CardContent } from '@/components/ui/card'
 import { Card } from '@/components/ui/card'
 
-import { PlanTab } from '../../page'
+import { PlanTab } from '../../types'
 
 export function NoActivePlan() {
   const [, setTab] = useQueryState(

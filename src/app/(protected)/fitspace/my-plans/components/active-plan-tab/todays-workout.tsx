@@ -6,8 +6,7 @@ import { ButtonLink } from '@/components/ui/button-link'
 import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
-import { WorkoutNavigation } from '../../page'
-import { ActivePlan } from '../../page'
+import { ActivePlan, WorkoutNavigation } from '../../types'
 
 export function TodaysWorkout({
   plan,

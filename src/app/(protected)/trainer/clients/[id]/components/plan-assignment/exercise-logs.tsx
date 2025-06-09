@@ -55,12 +55,9 @@ export function ExerciseLogs({ plan }: ExerciseLogsProps) {
     // Calculate average weight progression
     const getAverageWeight = (exercise: Exercise) => {
       const weights = exercise.sets
-        .flatMap((set) =>
-          set.logs.length > 0
-            ? set.logs.map((log) => log.weight)
-            : [set.weight],
-        )
+        .map((set) => set.log?.weight)
         .filter((w): w is number => w !== null && w !== undefined && w > 0)
+
       return weights.length > 0
         ? weights.reduce((a, b) => a + b, 0) / weights.length
         : 0
@@ -128,12 +125,12 @@ export function ExerciseLogs({ plan }: ExerciseLogsProps) {
                             Set {set.order}
                           </span>
                           <div className="flex items-center gap-4 text-sm">
-                            {set.logs.length > 0 ? (
+                            {set.log ? (
                               <>
-                                <span>{set.logs[0].reps} reps</span>
-                                <span>{set.logs[0].weight} kg</span>
+                                <span>{set.log.reps} reps</span>
+                                <span>{set.log.weight} kg</span>
                                 <Badge variant="outline" className="text-xs">
-                                  RPE {set.logs[0].rpe}
+                                  RPE {set.log.rpe}
                                 </Badge>
                               </>
                             ) : (

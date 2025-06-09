@@ -1,6 +1,6 @@
 import { UserAvatar } from '@/components/user-avatar'
 
-import { AvailablePlan } from '../page'
+import { AvailablePlan } from '../types'
 
 export function PlanAuthor({
   createdBy,

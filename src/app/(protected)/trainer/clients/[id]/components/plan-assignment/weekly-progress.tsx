@@ -156,10 +156,8 @@ const ExerciseCard = ({
     GQLGetClientByIdQuery['getClientActivePlan']
   >['weeks'][number]['days'][number]['exercises'][number]
 }) => {
-  const hasLogs = exercise.sets.some((set) => set.logs.length > 0)
-  const completedSets = exercise.sets.filter(
-    (set) => set.logs.length > 0,
-  ).length
+  const hasLogs = exercise.sets.some((set) => set.log)
+  const completedSets = exercise.sets.filter((set) => set.completedAt).length
 
   return (
     <div className="space-y-3">
@@ -193,8 +191,8 @@ const ExerciseCard = ({
 
         {/* Sets Data */}
         {exercise.sets.map((set) => {
-          const isCompleted = set.logs.length > 0
-          const log = set.logs[0]
+          const isCompleted = set.completedAt
+          const log = set.log
 
           return (
             <div

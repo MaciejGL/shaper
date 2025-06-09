@@ -2,8 +2,7 @@ import { CollapsibleText } from '@/components/collapsible-text'
 import { Loader } from '@/components/loader'
 import { Card, CardContent } from '@/components/ui/card'
 
-import { PlanAction, WorkoutNavigation } from '../../page'
-import { ActivePlan } from '../../page'
+import { ActivePlan, PlanAction, WorkoutNavigation } from '../../types'
 
 import { Header } from './header'
 import { NoActivePlan } from './no-active-plan'

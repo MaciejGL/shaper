@@ -14,7 +14,7 @@ import {
 import { DropdownMenu } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-import { AvailablePlan, PlanAction } from '../page'
+import { AvailablePlan, PlanAction } from '../types'
 
 import { CompletionStats } from './completion-stats'
 import { PlanAuthor } from './plan-author'

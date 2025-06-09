@@ -9,7 +9,6 @@ import { toast } from 'sonner'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  GQLFitspaceMyPlansQuery,
   useActivatePlanMutation,
   useClosePlanMutation,
   useDeletePlanMutation,
@@ -23,23 +22,13 @@ import { ActivePlanTab } from './components/active-plan-tab/active-plan-tab'
 import { AvailablePlansTab } from './components/available-plans-tab'
 import { CompletedPlansTab } from './components/completed-plans-tab'
 import { PlanActionDialog } from './components/plan-action-dialog'
-
-export type PlanAction = 'activate' | 'pause' | 'close' | 'delete'
-export type AvailablePlan =
-  GQLFitspaceMyPlansQuery['getMyPlansOverview']['availablePlans'][number]
-export type CompletedPlan =
-  GQLFitspaceMyPlansQuery['getMyPlansOverview']['completedPlans'][number]
-export type ActivePlan =
-  GQLFitspaceMyPlansQuery['getMyPlansOverview']['activePlan']
-export type WorkoutNavigation = NonNullable<
-  NonNullable<GQLFitspaceMyPlansQuery['getWorkout']>['navigation']
->
-
-export enum PlanTab {
-  Active = 'active',
-  Available = 'available',
-  Completed = 'completed',
-}
+import {
+  ActivePlan,
+  AvailablePlan,
+  CompletedPlan,
+  PlanAction,
+  PlanTab,
+} from './types'
 
 export default function MyPlansPage() {
   const [tab, setTab] = useQueryState<PlanTab>(

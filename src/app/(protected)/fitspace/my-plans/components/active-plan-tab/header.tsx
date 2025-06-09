@@ -13,8 +13,7 @@ import {
 import { DropdownMenu } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-import { ActivePlan } from '../../page'
-import { PlanAction } from '../../page'
+import { ActivePlan, PlanAction } from '../../types'
 
 export function Header({
   plan,
