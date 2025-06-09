@@ -3,26 +3,32 @@
 import { Calendar, Dumbbell, Home, SearchIcon, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useMemo } from 'react'
 
 import { cn } from '@/lib/utils'
 
 export function MobileNav({ activePlanId }: { activePlanId?: string }) {
   const pathname = usePathname()
-  const navItems = [
-    { href: '/fitspace/dashboard', icon: Home, label: 'Home' },
-    { href: '/fitspace/my-plans', icon: Calendar, label: 'Plans' },
-    {
-      href: `/fitspace/workout/${activePlanId || 'quick-workout'}`,
-      icon: Dumbbell,
-      label: 'Workout',
-    },
-    { href: '/fitspace/progress', icon: TrendingUp, label: 'Progress' },
-    {
-      href: '/fitspace/marketplace?tab=trainers',
-      icon: SearchIcon,
-      label: 'Explore',
-    },
-  ]
+  const navItems = useMemo(
+    () => [
+      { href: '/fitspace/dashboard', icon: Home, label: 'Home' },
+      { href: '/fitspace/my-plans', icon: Calendar, label: 'Plans' },
+      {
+        href: `/fitspace/workout/${activePlanId || 'quick-workout'}`,
+        icon: Dumbbell,
+        label: 'Workout',
+      },
+      { href: '/fitspace/progress', icon: TrendingUp, label: 'Progress' },
+      {
+        href: '/fitspace/marketplace?tab=trainers',
+        icon: SearchIcon,
+        label: 'Explore',
+      },
+    ],
+    [activePlanId],
+  )
+
+  console.info(activePlanId, navItems[2].href)
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
       <div className="flex items-center justify-around py-2 px-4 max-w-md mx-auto">
