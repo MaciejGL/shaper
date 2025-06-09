@@ -133,7 +133,7 @@ export async function duplicatePlan({
   // const exerciseIdMap: Record<string, string> = []
 
   // 2. Insert weeks
-  const weeksData = plan.weeks.map((week, i) => ({
+  const weeksData = plan.weeks.map((week) => ({
     planId: duplicatedPlan.id,
     weekNumber: week.weekNumber,
     name: week.name,
