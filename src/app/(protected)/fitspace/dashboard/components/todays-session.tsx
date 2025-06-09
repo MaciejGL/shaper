@@ -40,7 +40,7 @@ export function TodaysSession({ nextWorkoutDay }: TodaysSessionProps) {
                 Activate plan
               </ButtonLink>
               <ButtonLink
-                href="/fitspace/sessions/quick-start"
+                href="/fitspace/sessions/quick-workout"
                 variant="default"
               >
                 Start quick session

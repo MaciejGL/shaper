@@ -12,7 +12,7 @@ export function MobileNav({ activePlanId }: { activePlanId?: string }) {
     { href: '/fitspace/dashboard', icon: Home, label: 'Home' },
     { href: '/fitspace/my-plans', icon: Calendar, label: 'Plans' },
     {
-      href: `/fitspace/workout/${activePlanId || 'quick-start'}`,
+      href: `/fitspace/workout/${activePlanId || 'quick-workout'}`,
       icon: Dumbbell,
       label: 'Workout',
     },

@@ -15,11 +15,16 @@ export function TodaysWorkout({
   plan: NonNullable<ActivePlan>
   navigation: WorkoutNavigation
 }) {
-  if (!plan) {
+  if (
+    !plan ||
+    !plan.weeks ||
+    !plan.weeks[navigation.currentWeekIndex] ||
+    !plan.weeks[navigation.currentWeekIndex].days
+  ) {
     return null
   }
-  const week = plan.weeks[navigation.currentWeekIndex]
-  const day = week.days[navigation.currentDayIndex]
+  const day =
+    plan.weeks[navigation.currentWeekIndex].days[navigation.currentDayIndex]
 
   if (!day) {
     return null

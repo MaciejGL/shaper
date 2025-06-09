@@ -65,7 +65,7 @@ export function QuickActions() {
                 Set Goals
               </Button>
               <ButtonLink
-                href="/fitspace/sessions/quick-start"
+                href="/fitspace/sessions/quick-workout"
                 variant="outline"
                 className="w-full justify-start"
                 size="sm"

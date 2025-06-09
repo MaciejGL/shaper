@@ -16,6 +16,6 @@ export default async function SessionPage() {
       `/fitspace/workout/${data.getMyPlansOverview.activePlan.id}`,
     )
   } else {
-    return redirect('/fitspace/workout/quick-start')
+    return redirect('/fitspace/workout/quick-workout')
   }
 }
