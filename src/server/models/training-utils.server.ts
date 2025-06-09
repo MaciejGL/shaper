@@ -13,7 +13,7 @@ type FullTrainingPlan = PrismaTrainingPlan & {
     days: (PrismaTrainingDay & {
       exercises: (PrismaTrainingExercise & {
         sets: PrismaExerciseSet[]
-        base: PrismaBaseExercise
+        base?: PrismaBaseExercise | null
       })[]
     })[]
   })[]
