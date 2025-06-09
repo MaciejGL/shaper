@@ -456,8 +456,10 @@ export async function duplicateTrainingPlan(
   }
 
   const duplicated = await duplicatePlan({ plan, asTemplate: true })
-
-  return duplicated.id
+  if (!duplicated) {
+    throw new Error('Failed to duplicate plan')
+  }
+  return duplicated?.id
 }
 
 export async function deleteTrainingPlan(
@@ -505,6 +507,10 @@ export async function assignTrainingPlanToClient(
   }
 
   const duplicated = await duplicatePlan({ plan, asTemplate: false })
+
+  if (!duplicated) {
+    throw new Error('Failed to assign plan')
+  }
 
   await prisma.trainingPlan.update({
     where: { id: duplicated.id },
@@ -599,6 +605,10 @@ export async function activatePlan(
           plan: fullPlan,
           asTemplate: false,
         })
+
+        if (!duplicated) {
+          throw new Error('Failed to duplicate plan')
+        }
 
         // Then activate the new plan
         await tx.trainingPlan.update({
