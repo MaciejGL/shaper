@@ -226,17 +226,17 @@ export async function getWorkout(args: GQLQueryGetWorkoutArgs) {
     id = plan?.id
   }
   if (!id) {
-    throw new Error('Training plan not found')
+    return null
   }
 
   const plan = await getFullPlanById(id)
 
   if (!plan || plan.assignedToId !== user.user.id) {
-    throw new Error('Training plan not found or unauthorized')
+    return null
   }
   const currentDate = new Date()
   if (!plan.startDate) {
-    throw new Error('Training plan has no start date')
+    return null
   }
 
   if (!isAfter(currentDate, plan.startDate)) {
