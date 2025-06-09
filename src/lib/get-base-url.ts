@@ -1,19 +1,19 @@
 export function getBaseUrl() {
   if (typeof window !== 'undefined') {
-    // Running on the client — safe to use window
+    // Running on the client — use window origin
     return window.location.origin
   }
 
-  // Running on the server
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL // ✅ Preferred
+  // Running on the server — use production URL or fallback
+  if (process.env.NEXT_PUBLIC_URL) {
+    return process.env.NEXT_PUBLIC_URL
   }
 
-  if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}` // ✅ Safe fallback for preview
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
   }
 
-  return 'http://localhost:4000' // dev fallback
+  return 'http://localhost:4000'
 }
 
 export const isProd =
