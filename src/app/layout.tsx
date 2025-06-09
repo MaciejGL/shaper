@@ -42,6 +42,30 @@ export const metadata: Metadata = {
     ],
     apple: '/favicons/apple-touch-icon.png',
   },
+  themeColor: '#000000',
+  manifest: '/manifest.json',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Fitspace',
+    description: 'Your personal fitness coach',
+    images: ['/favicons/android-chrome-192x192.png'],
+  },
+  openGraph: {
+    title: 'Fitspace',
+    description: 'Your personal fitness coach',
+    images: ['/favicons/android-chrome-192x192.png'],
+  },
+  alternates: {
+    canonical: 'https://fit-space.app',
+  },
+  metadataBase: new URL('https://fit-space.app'),
+  applicationName: 'Fitspace',
   appleWebApp: {
     title: 'Fitspace',
     statusBarStyle: 'black-translucent',

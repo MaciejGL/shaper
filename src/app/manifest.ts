@@ -9,6 +9,8 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     background_color: '#000000',
     theme_color: '#000000',
+    orientation: 'portrait',
+    categories: ['health', 'fitness', 'workout', 'exercise'],
     icons: [
       {
         src: '/favicons/android-chrome-192x192.png',
