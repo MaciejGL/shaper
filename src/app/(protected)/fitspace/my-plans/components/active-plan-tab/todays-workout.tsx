@@ -6,27 +6,16 @@ import { ButtonLink } from '@/components/ui/button-link'
 import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
-import { ActivePlan, WorkoutNavigation } from '../../types'
+import { ActivePlan } from '../../types'
 
 export function TodaysWorkout({
-  plan,
-  navigation,
+  todaysWorkout,
+  planId,
 }: {
-  plan: NonNullable<ActivePlan>
-  navigation: WorkoutNavigation
+  todaysWorkout: NonNullable<ActivePlan>['weeks'][number]['days'][number]
+  planId: string
 }) {
-  if (
-    !plan ||
-    !plan.weeks ||
-    !plan.weeks[navigation.currentWeekIndex] ||
-    !plan.weeks[navigation.currentWeekIndex]?.days
-  ) {
-    return null
-  }
-  const day =
-    plan.weeks[navigation.currentWeekIndex]?.days[navigation.currentDayIndex]
-
-  if (!day) {
+  if (!todaysWorkout || !planId) {
     return null
   }
 
@@ -35,13 +24,17 @@ export function TodaysWorkout({
       <div className="flex items-baseline justify-between">
         <p className="text-lg font-semibold">Today's workout</p>
         <ButtonLink
-          href={`/fitspace/workout/${plan.id}`}
+          href={`/fitspace/workout/${planId}`}
           iconEnd={<ArrowRight />}
         >
           Start workout
         </ButtonLink>
       </div>
-      {day.isRestDay ? <RestDay /> : <WorkoutDay day={day} />}
+      {todaysWorkout.isRestDay ? (
+        <RestDay />
+      ) : (
+        <WorkoutDay day={todaysWorkout} />
+      )}
     </div>
   )
 }

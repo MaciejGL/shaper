@@ -1,3 +1,5 @@
+import { useMemo } from 'react'
+
 import { CollapsibleText } from '@/components/collapsible-text'
 import { Loader } from '@/components/loader'
 import { Card, CardContent } from '@/components/ui/card'
@@ -21,6 +23,26 @@ export function ActivePlanTab({
   handlePlanAction: (action: PlanAction, plan: ActivePlan) => void
   loading: boolean
 }) {
+  const todaysWorkout = useMemo(() => {
+    if (
+      !plan ||
+      !navigation ||
+      !plan.weeks ||
+      !plan.weeks[navigation.currentWeekIndex] ||
+      !plan.weeks[navigation.currentWeekIndex]?.days
+    ) {
+      return null
+    }
+    const day =
+      plan.weeks[navigation.currentWeekIndex]?.days[navigation.currentDayIndex]
+
+    if (!day) {
+      return null
+    }
+
+    return day
+  }, [plan, navigation])
+
   if (loading) {
     return (
       <div className="flex-center min-h-[500px]">
@@ -52,7 +74,9 @@ export function ActivePlanTab({
               </div>
             </div>
 
-            <TodaysWorkout plan={plan} navigation={navigation} />
+            {todaysWorkout && (
+              <TodaysWorkout todaysWorkout={todaysWorkout} planId={plan.id} />
+            )}
             <div className="block md:hidden">
               <CollapsibleText text={plan.description} />
             </div>
