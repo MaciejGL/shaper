@@ -1,102 +1,86 @@
-import { getServerSession } from 'next-auth';
-import { authOptions } from './auth';
-import { prisma } from './db';
-import { redirect } from 'next/navigation';
-import { UserWithSession } from '@/types/UserWithSession';
-import { GQLUserRole } from '@/generated/graphql-server';
+import { getServerSession } from 'next-auth'
+import { redirect } from 'next/navigation'
+
+import { GQLUserRole } from '@/generated/graphql-server'
+import { UserWithSession } from '@/types/UserWithSession'
+
+import { authOptions } from './auth'
+import { createLoaders } from './loaders/get-user.loader'
 
 export type User = {
-	id: string;
-	email: string;
-};
+  id: string
+  email: string
+}
 
 export type Session = {
-	user: User;
-	expires: string;
-};
+  user: User
+  expires: string
+}
 
 /**
  * Get the current authenticated user and session
  * @returns Promise with the user and session or null if not authenticated
  */
 export async function getCurrentUser(): Promise<
-	UserWithSession | null | undefined
+  UserWithSession | null | undefined
 > {
-	const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions)
 
-	if (!session?.user?.email) {
-		return null;
-	}
+  if (!session?.user?.email) {
+    return null
+  }
+  // Get full user data from database
+  const loaders = createLoaders()
+  const user = await loaders.userByEmail.load(session.user.email)
 
-	// Get full user data from database
-	const user = await prisma.user.findUnique({
-		where: { email: session.user.email },
+  if (!user) {
+    return null
+  }
 
-		include: {
-			profile: true,
-			trainer: true,
-			clients: true,
-			sessions: true,
-		},
-	});
-
-	if (!user) {
-		return null;
-	}
-
-	return {
-		user,
-		session,
-	};
+  return {
+    user,
+    session,
+  }
 }
 /**
  * Get the current authenticated user and session
  * @returns Promise with the user and session or null if not authenticated
  */
 export async function getCurrentUserOrThrow(): Promise<UserWithSession> {
-	const session = await getServerSession(authOptions);
+  const session = await getServerSession(authOptions)
 
-	if (!session?.user?.email) {
-		throw new Error('User not authenticated');
-	}
+  if (!session?.user?.email) {
+    throw new Error('User not authenticated')
+  }
 
-	// Get full user data from database
-	const user = await prisma.user.findUnique({
-		where: { email: session.user.email },
+  const loaders = createLoaders()
+  const user = await loaders.userByEmail.load(session.user.email)
 
-		include: {
-			profile: true,
-			trainer: true,
-			clients: true,
-			sessions: true,
-		},
-	});
+  if (!user?.id) {
+    throw new Error('User not found')
+  }
 
-	if (!user?.id) {
-		throw new Error('User not found');
-	}
-
-	return {
-		user,
-		session,
-	};
+  return {
+    user,
+    session,
+  }
 }
 
 // Helper function to use in API routes or server components to require authentication
 export async function requireAuth(authLevel?: GQLUserRole) {
-	const userSession = await getCurrentUser();
+  const userSession = await getCurrentUser()
 
-	if (!userSession) {
-		redirect('/login');
-	}
+  if (!userSession) {
+    redirect('/login')
+  }
 
-	if (authLevel && userSession.user?.role !== authLevel) {
-		if (userSession.user?.role === GQLUserRole.Trainer) {
-			redirect('/trainer/dashboard');
-		} else if (userSession.user?.role === GQLUserRole.Client) {
-			redirect('/fitspace/dashboard');
-		}
-	}
+  if (authLevel && userSession.user?.role !== authLevel) {
+    if (userSession.user?.role === GQLUserRole.Trainer) {
+      redirect('/trainer/dashboard')
+    } else if (userSession.user?.role === GQLUserRole.Client) {
+      redirect('/fitspace/dashboard')
+    }
+  }
 
-	return userSession;
+  return userSession
 }
