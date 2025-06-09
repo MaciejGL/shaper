@@ -18,7 +18,7 @@ export default async function RequestOtpPage() {
     }
   }
   return (
-    <div className="flex items-center justify-center h-full bg-zinc-100 dark:bg-gradient-to-b from-zinc-900 to-black">
+    <div className="flex items-center justify-center h-full bg-zinc-100 dark:bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900">
       <LoginCard />
     </div>
   )
