@@ -8,6 +8,8 @@ import {
   TrainingWeek as PrismaTrainingWeek,
 } from '@prisma/client'
 
+import { createId } from '@/lib/create-id'
+
 type FullTrainingPlan = PrismaTrainingPlan & {
   weeks: (PrismaTrainingWeek & {
     days: (PrismaTrainingDay & {
@@ -62,147 +64,119 @@ export async function duplicatePlan({
   plan: FullTrainingPlan
   asTemplate: boolean
 }) {
-  // return prisma.trainingPlan.create({
-  //   data: {
-  //     title: asTemplate ? `${plan.title} (Copy)` : plan.title,
-  //     description: plan.description,
-  //     isPublic: false,
-  //     isTemplate: asTemplate,
-  //     isDraft: asTemplate ? false : plan.isDraft,
-  //     createdById: plan.createdById,
-  //     assignedToId: plan.assignedToId,
-  //     weeks: {
-  //       create: plan.weeks.map((week) => ({
-  //         weekNumber: week.weekNumber,
-  //         name: week.name,
-  //         description: week.description,
-  //         days: {
-  //           create: week.days.map((day) => ({
-  //             dayOfWeek: day.dayOfWeek,
-  //             isRestDay: day.isRestDay,
-  //             workoutType: day.workoutType,
-  //             exercises: {
-  //               create: day.exercises.map((exercise) => ({
-  //                 name: exercise.name,
-  //                 restSeconds: exercise.restSeconds,
-  //                 tempo: exercise.tempo,
-  //                 instructions: exercise.instructions,
-  //                 order: exercise.order,
-  //                 warmupSets: exercise.warmupSets,
-  //                 base: {
-  //                   connect: exercise.baseId
-  //                     ? {
-  //                         id: exercise.baseId,
-  //                       }
-  //                     : undefined,
-  //                 },
-  //                 sets: {
-  //                   create: exercise.sets.map((set) => ({
-  //                     order: set.order,
-  //                     reps: set.reps,
-  //                     minReps: set.minReps,
-  //                     maxReps: set.maxReps,
-  //                     weight: set.weight,
-  //                     rpe: set.rpe,
-  //                   })),
-  //                 },
-  //               })),
-  //             },
-  //           })),
-  //         },
-  //       })),
-  //     },
-  //   },
-  // })
+  return prisma.$transaction(async (tx) => {
+    const newPlanId = createId()
 
-  // 1. Create the training plan root
-  const duplicatedPlan = await prisma.trainingPlan.create({
-    data: {
-      title: asTemplate ? `${plan.title} (Copy)` : plan.title,
-      description: plan.description,
-      isPublic: false,
-      isTemplate: asTemplate,
-      isDraft: asTemplate ? false : plan.isDraft,
-      createdById: plan.createdById,
-      assignedToId: plan.assignedToId,
-    },
+    await tx.trainingPlan.create({
+      data: {
+        id: newPlanId,
+        title: asTemplate ? `${plan.title} (Copy)` : plan.title,
+        description: plan.description,
+        isPublic: false,
+        isTemplate: asTemplate,
+        isDraft: asTemplate ? false : plan.isDraft,
+        createdById: plan.createdById,
+        assignedToId: plan.assignedToId,
+      },
+    })
+
+    const weeks = plan.weeks.map((week) => ({
+      ...week,
+      id: createId(),
+      planId: newPlanId,
+    }))
+
+    const days = plan.weeks.flatMap((week, wIndex) =>
+      week.days.map((day) => ({
+        ...day,
+        id: createId(),
+        weekId: weeks[wIndex].id,
+      })),
+    )
+
+    const exercises = plan.weeks.flatMap((week, wIndex) =>
+      week.days.flatMap((day) =>
+        day.exercises.map((ex) => ({
+          ...ex,
+          id: createId(),
+          dayId: days.find(
+            (d) =>
+              d.dayOfWeek === day.dayOfWeek && d.weekId === weeks[wIndex].id,
+          )!.id,
+        })),
+      ),
+    )
+
+    const sets = plan.weeks.flatMap((week, wIndex) =>
+      week.days.flatMap((day) =>
+        day.exercises.flatMap((exercise) =>
+          exercise.sets.map((set) => ({
+            ...set,
+            id: createId(),
+            exerciseId: exercises.find(
+              (ex) =>
+                ex.order === exercise.order &&
+                ex.dayId ===
+                  days.find(
+                    (d) =>
+                      d.dayOfWeek === day.dayOfWeek &&
+                      d.weekId === weeks[wIndex].id,
+                  )?.id,
+            )!.id,
+          })),
+        ),
+      ),
+    )
+
+    await tx.trainingWeek.createMany({
+      data: weeks.map((w) => ({
+        id: w.id,
+        name: w.name,
+        weekNumber: w.weekNumber,
+        description: w.description,
+        planId: w.planId,
+      })),
+    })
+
+    await tx.trainingDay.createMany({
+      data: days.map((d) => ({
+        id: d.id,
+        dayOfWeek: d.dayOfWeek,
+        isRestDay: d.isRestDay,
+        workoutType: d.workoutType,
+        weekId: d.weekId,
+      })),
+    })
+
+    await tx.trainingExercise.createMany({
+      data: exercises.map((ex) => ({
+        id: ex.id,
+        name: ex.name,
+        restSeconds: ex.restSeconds,
+        tempo: ex.tempo,
+        instructions: ex.instructions,
+        order: ex.order,
+        warmupSets: ex.warmupSets,
+        dayId: ex.dayId,
+        baseId: ex.baseId ?? null,
+      })),
+    })
+
+    await tx.exerciseSet.createMany({
+      data: sets.map((s) => ({
+        id: s.id,
+        order: s.order,
+        reps: s.reps,
+        minReps: s.minReps,
+        maxReps: s.maxReps,
+        weight: s.weight,
+        rpe: s.rpe,
+        exerciseId: s.exerciseId,
+      })),
+    })
+
+    return await tx.trainingPlan.findUnique({
+      where: { id: newPlanId },
+    })
   })
-
-  // const weekIdMap: Record<string, string> = {}
-  // const dayIdMap: Record<string, string> = {}
-  // const exerciseIdMap: Record<string, string> = []
-
-  // 2. Insert weeks
-  const weeksData = plan.weeks.map((week) => ({
-    planId: duplicatedPlan.id,
-    weekNumber: week.weekNumber,
-    name: week.name,
-    description: week.description,
-  }))
-
-  // const insertedWeeks =
-  await prisma.trainingWeek.createMany({
-    data: weeksData,
-    skipDuplicates: true,
-  })
-
-  // 3. Fetch inserted weeks to get IDs
-  const newWeeks = await prisma.trainingWeek.findMany({
-    where: { planId: duplicatedPlan.id },
-    orderBy: { weekNumber: 'asc' },
-  })
-
-  // 4. Prepare and insert days, exercises, sets using `createMany`
-  const daysData = []
-  const exercisesData = []
-  const setsData = []
-
-  for (let i = 0; i < plan.weeks.length; i++) {
-    const oldWeek = plan.weeks[i]
-    const newWeek = newWeeks[i]
-
-    for (const day of oldWeek.days) {
-      const newDayId = crypto.randomUUID()
-      daysData.push({
-        id: newDayId,
-        weekId: newWeek.id,
-        dayOfWeek: day.dayOfWeek,
-        isRestDay: day.isRestDay,
-        workoutType: day.workoutType,
-      })
-
-      for (const exercise of day.exercises) {
-        const newExerciseId = crypto.randomUUID()
-        exercisesData.push({
-          id: newExerciseId,
-          dayId: newDayId,
-          name: exercise.name,
-          restSeconds: exercise.restSeconds,
-          tempo: exercise.tempo,
-          instructions: exercise.instructions,
-          order: exercise.order,
-          warmupSets: exercise.warmupSets,
-          baseId: exercise.baseId ?? null,
-        })
-
-        for (const set of exercise.sets) {
-          setsData.push({
-            exerciseId: newExerciseId,
-            order: set.order,
-            reps: set.reps,
-            minReps: set.minReps,
-            maxReps: set.maxReps,
-            weight: set.weight,
-            rpe: set.rpe,
-          })
-        }
-      }
-    }
-  }
-
-  await prisma.trainingDay.createMany({ data: daysData })
-  await prisma.trainingExercise.createMany({ data: exercisesData })
-  await prisma.exerciseSet.createMany({ data: setsData })
-
-  return duplicatedPlan
 }

@@ -15,7 +15,7 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   email     String   @unique
   name      String?
   image     String?
@@ -43,7 +43,7 @@ model User {
 }
 
 model UserSession {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   userId    String
   otp       String
   expiresAt DateTime
@@ -55,7 +55,7 @@ model UserSession {
 }
 
 model UserProfile {
-  id     String @id @default(cuid())
+  id     String @id @default(uuid())
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -81,7 +81,7 @@ model UserProfile {
 }
 
 model UserBodyMeasure {
-  id            String      @id @default(cuid())
+  id            String      @id @default(uuid())
   userProfileId String
   userProfile   UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
 
@@ -112,7 +112,7 @@ model UserBodyMeasure {
 }
 
 model CoachingRequest {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   senderId    String
   recipientId String
   status      String   @default("PENDING") // Enum: PENDING, APPROVED, REJECTED, CANCELLED
@@ -128,7 +128,7 @@ model CoachingRequest {
 }
 
 model Notification {
-  id            String   @id @default(cuid())
+  id            String   @id @default(uuid())
   userId        String
   user          User     @relation(fields: [userId], references: [id])
   createdBy     String?
@@ -148,7 +148,7 @@ model Notification {
 }
 
 model TrainingPlan {
-  id          String    @id @default(cuid())
+  id          String    @id @default(uuid())
   title       String
   description String?
   createdById String
@@ -176,7 +176,7 @@ model TrainingPlan {
 }
 
 model TrainingWeek {
-  id          String    @id @default(cuid())
+  id          String    @id @default(uuid())
   planId      String
   weekNumber  Int
   name        String
@@ -193,7 +193,7 @@ model TrainingWeek {
 }
 
 model TrainingDay {
-  id          String    @id @default(cuid())
+  id          String    @id @default(uuid())
   weekId      String
   dayOfWeek   Int // 0 = Sunday, 1 = Monday, etc.
   completedAt DateTime?
@@ -210,7 +210,7 @@ model TrainingDay {
 }
 
 model TrainingExercise {
-  id   String @id @default(cuid())
+  id   String @id @default(uuid())
   name String // can override base
 
   restSeconds  Int?
@@ -240,7 +240,7 @@ model TrainingExercise {
 }
 
 model ExerciseSet {
-  id         String           @id @default(cuid())
+  id         String           @id @default(uuid())
   order      Int
   reps       Int?
   minReps    Int?
@@ -262,7 +262,7 @@ model ExerciseSet {
 }
 
 model ExerciseLog {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   performedAt DateTime @default(now())
   notes       String?
 
@@ -276,7 +276,7 @@ model ExerciseLog {
 }
 
 model ExerciseSetLog {
-  id String @id @default(cuid())
+  id String @id @default(uuid())
 
   reps   Int?
   weight Float?
@@ -288,7 +288,7 @@ model ExerciseSetLog {
 }
 
 model BaseExercise {
-  id          String  @id @default(cuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
   videoUrl    String?
@@ -306,7 +306,7 @@ model BaseExercise {
 }
 
 model ExerciseSubstitutionOption {
-  id           String @id @default(cuid())
+  id           String @id @default(uuid())
   originalId   String
   substituteId String
 
@@ -317,7 +317,7 @@ model ExerciseSubstitutionOption {
 }
 
 model UserExerciseSubstitution {
-  id         String @id @default(cuid())
+  id         String @id @default(uuid())
   userId     String
   exerciseId String
   selectedId String
@@ -333,7 +333,7 @@ model UserExerciseSubstitution {
 }
 
 model MuscleGroup {
-  id        String  @id @default(cuid())
+  id        String  @id @default(uuid())
   name      String  @unique // "Biceps brachii"
   alias     String? // "Biceps"
   groupSlug String // e.g. "arms"
@@ -347,7 +347,7 @@ model MuscleGroup {
 }
 
 model MuscleGroupCategory {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   name      String   @unique // e.g. "Shoulders", "Chest", "Back"
   slug      String   @unique
   createdAt DateTime @default(now())
@@ -356,7 +356,7 @@ model MuscleGroupCategory {
 }
 
 model Note {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   text      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
