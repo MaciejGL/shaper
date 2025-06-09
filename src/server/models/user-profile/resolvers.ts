@@ -3,13 +3,13 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
-import { getCurrentUser } from '@/lib/getUser'
+import { GQLContext } from '@/types/gql-context'
 
 import UserProfile from './model'
 
-export const Query: GQLQueryResolvers = {
-  profile: async () => {
-    const userSession = await getCurrentUser()
+export const Query: GQLQueryResolvers<GQLContext> = {
+  profile: async (_, __, context) => {
+    const userSession = context.user
     if (!userSession) {
       throw new Error('User not found')
     }
@@ -26,9 +26,9 @@ export const Query: GQLQueryResolvers = {
   },
 }
 
-export const Mutation: GQLMutationResolvers = {
-  updateProfile: async (_, { input }) => {
-    const userSession = await getCurrentUser()
+export const Mutation: GQLMutationResolvers<GQLContext> = {
+  updateProfile: async (_, { input }, context) => {
+    const userSession = context.user
     if (!userSession) {
       throw new Error('User not found')
     }

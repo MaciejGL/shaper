@@ -5,17 +5,20 @@ import {
   GQLMutationResolvers,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
-import { getCurrentUserOrThrow } from '@/lib/getUser'
+import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from './model'
 
-export const Query: GQLQueryResolvers = {
-  userExercises: async (_, { where }) => {
-    const { user } = await getCurrentUserOrThrow()
+export const Query: GQLQueryResolvers<GQLContext> = {
+  userExercises: async (_, { where }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
 
     const whereClause: Prisma.BaseExerciseWhereInput = {
       createdBy: {
-        id: user.id,
+        id: user.user.id,
       },
     }
 
@@ -101,9 +104,13 @@ export const Query: GQLQueryResolvers = {
   },
 }
 
-export const Mutation: GQLMutationResolvers = {
-  createExercise: async (_, { input }) => {
-    const { user } = await getCurrentUserOrThrow()
+export const Mutation: GQLMutationResolvers<GQLContext> = {
+  createExercise: async (_, { input }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
     const muscleGroups = await prisma.muscleGroup.findMany({
       where: {
         id: { in: input.muscleGroups },
@@ -120,7 +127,7 @@ export const Mutation: GQLMutationResolvers = {
         },
         createdBy: {
           connect: {
-            id: user.id,
+            id: user.user.id,
           },
         },
       },

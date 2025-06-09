@@ -9,6 +9,8 @@ import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
 import { MobileNav } from './components/mobile-nav'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ProtectedLayout({
   children,
 }: {
@@ -21,7 +23,7 @@ export default async function ProtectedLayout({
     ),
   ])
 
-  await requireAuth(GQLUserRole.Client)
+  requireAuth(GQLUserRole.Client, user)
 
   return (
     <Main user={user}>

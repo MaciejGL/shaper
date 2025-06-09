@@ -3,7 +3,6 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
-import { getCurrentUserOrThrow } from '@/lib/getUser'
 
 import UserPublic from './model'
 
@@ -23,8 +22,8 @@ export const Query: GQLQueryResolvers = {
 
     return new UserPublic(user)
   },
-  myTrainer: async () => {
-    const user = await getCurrentUserOrThrow()
+  myTrainer: async (_, __, context) => {
+    const user = context.user
     if (!user) {
       throw new Error('User not found')
     }

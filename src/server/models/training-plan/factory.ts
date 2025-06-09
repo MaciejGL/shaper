@@ -22,7 +22,7 @@ import {
   GQLQueryGetTemplatesArgs,
   GQLQueryGetTrainingPlanByIdArgs,
 } from '@/generated/graphql-server'
-import { getCurrentUser, getCurrentUserOrThrow } from '@/lib/getUser'
+import { GQLContext } from '@/types/gql-context'
 
 import { createNotification } from '../notification/factory'
 import { duplicatePlan, getFullPlanById } from '../training-utils.server'
@@ -31,9 +31,13 @@ import TrainingPlan from './model'
 
 export async function getTrainingPlanById(
   args: GQLQueryGetTrainingPlanByIdArgs,
+  context: GQLContext,
 ) {
   const { id } = args
-  const user = await getCurrentUserOrThrow()
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
   const trainingPlan = await prisma.trainingPlan.findUnique({
     where: {
       id,
@@ -79,8 +83,14 @@ export async function getTrainingPlanById(
   return new TrainingPlan(trainingPlan)
 }
 
-export async function getTemplates(args: GQLQueryGetTemplatesArgs) {
-  const user = await getCurrentUserOrThrow()
+export async function getTemplates(
+  args: GQLQueryGetTemplatesArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
 
   const where: Prisma.TrainingPlanWhereInput = {
     isTemplate: true,
@@ -99,9 +109,13 @@ export async function getTemplates(args: GQLQueryGetTemplatesArgs) {
 
 export async function getClientTrainingPlans(
   args: GQLQueryGetClientTrainingPlansArgs,
+  context: GQLContext,
 ) {
   const { clientId } = args
-  const user = await getCurrentUserOrThrow()
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
   const plans = await prisma.trainingPlan.findMany({
     where: {
       assignedToId: clientId,
@@ -115,9 +129,13 @@ export async function getClientTrainingPlans(
 
 export async function getClientActivePlan(
   args: GQLQueryGetClientActivePlanArgs,
+  context: GQLContext,
 ) {
   const { clientId } = args
-  const user = await getCurrentUserOrThrow()
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
   const plan = await prisma.trainingPlan.findFirst({
     where: {
       assignedToId: clientId,
@@ -160,8 +178,11 @@ export async function getClientActivePlan(
   return plan ? new TrainingPlan(plan) : null
 }
 
-export async function getMyPlansOverview() {
-  const user = await getCurrentUserOrThrow()
+export async function getMyPlansOverview(context: GQLContext) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
   const plans = await prisma.trainingPlan.findMany({
     where: { assignedToId: user.user.id },
     include: {
@@ -215,9 +236,15 @@ export async function getMyPlansOverview() {
   }
 }
 
-export async function getWorkout(args: GQLQueryGetWorkoutArgs) {
+export async function getWorkout(
+  args: GQLQueryGetWorkoutArgs,
+  context: GQLContext,
+) {
   const { trainingId } = args
-  const user = await getCurrentUserOrThrow()
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
   let id = trainingId
   if (!id) {
     const plan = await prisma.trainingPlan.findFirst({
@@ -281,8 +308,12 @@ export async function getWorkout(args: GQLQueryGetWorkoutArgs) {
 
 export async function createTrainingPlan(
   args: GQLMutationCreateTrainingPlanArgs,
+  context: GQLContext,
 ) {
-  const user = await getCurrentUserOrThrow()
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
 
   const { title, isPublic, isDraft, description, weeks } = args.input
 
@@ -339,10 +370,14 @@ export async function createTrainingPlan(
 
 export async function updateTrainingPlan(
   args: GQLMutationUpdateTrainingPlanArgs,
+  context: GQLContext,
 ) {
   const { input } = args
 
-  const user = await getCurrentUserOrThrow()
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
   await prisma.$transaction(
     async (tx) => {
       await tx.trainingWeek.deleteMany({
@@ -403,11 +438,14 @@ export async function updateTrainingPlan(
 
 export async function duplicateTrainingPlan(
   args: GQLMutationDuplicateTrainingPlanArgs,
+  context: GQLContext,
 ) {
-  const [user, plan] = await Promise.all([
-    getCurrentUserOrThrow(),
-    getFullPlanById(args.id),
-  ])
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const plan = await getFullPlanById(args.id)
 
   if (!plan || plan.createdById !== user.user.id) {
     throw new Error('Training plan not found or unauthorized')
@@ -420,8 +458,12 @@ export async function duplicateTrainingPlan(
 
 export async function deleteTrainingPlan(
   args: GQLMutationDeleteTrainingPlanArgs,
+  context: GQLContext,
 ) {
-  const user = await getCurrentUserOrThrow()
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
 
   const { id } = args
 
@@ -444,13 +486,15 @@ export async function deleteTrainingPlan(
 
 export async function assignTrainingPlanToClient(
   args: GQLMutationAssignTrainingPlanToClientArgs,
+  context: GQLContext,
 ) {
   const { clientId, planId, startDate } = args.input
 
-  const [user, plan] = await Promise.all([
-    getCurrentUser(),
-    getFullPlanById(planId),
-  ])
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+  const plan = await getFullPlanById(planId)
 
   if (!plan || plan.createdById !== user?.user.id) {
     throw new Error('Training plan not found or unauthorized')
@@ -485,8 +529,12 @@ export async function assignTrainingPlanToClient(
 
 export async function removeTrainingPlanFromClient(
   args: GQLMutationRemoveTrainingPlanFromClientArgs,
+  context: GQLContext,
 ) {
-  const user = await getCurrentUserOrThrow()
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
   const { planId, clientId } = args
 
   await prisma.trainingPlan.delete({
@@ -501,13 +549,19 @@ export async function removeTrainingPlanFromClient(
   return true
 }
 
-export async function activatePlan(args: GQLMutationActivatePlanArgs) {
+export async function activatePlan(
+  args: GQLMutationActivatePlanArgs,
+  context: GQLContext,
+) {
   const { planId, startDate, resume } = args
 
-  const [user, fullPlan] = await Promise.all([
-    getCurrentUserOrThrow(),
-    resume ? null : getFullPlanById(planId),
-  ])
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const fullPlan = resume ? null : await getFullPlanById(planId)
+
   if (resume) {
     await prisma.trainingPlan.update({
       where: { id: planId, assignedToId: user.user.id },
@@ -553,10 +607,16 @@ export async function activatePlan(args: GQLMutationActivatePlanArgs) {
   return true
 }
 
-export async function pausePlan(args: GQLMutationPausePlanArgs) {
+export async function pausePlan(
+  args: GQLMutationPausePlanArgs,
+  context: GQLContext,
+) {
   const { planId } = args
 
-  const user = await getCurrentUserOrThrow()
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
 
   await prisma.trainingPlan.update({
     where: { id: planId, assignedToId: user.user.id },
@@ -566,10 +626,16 @@ export async function pausePlan(args: GQLMutationPausePlanArgs) {
   return true
 }
 
-export async function closePlan(args: GQLMutationClosePlanArgs) {
+export async function closePlan(
+  args: GQLMutationClosePlanArgs,
+  context: GQLContext,
+) {
   const { planId } = args
 
-  const user = await getCurrentUserOrThrow()
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
 
   await prisma.trainingPlan.update({
     where: { id: planId, assignedToId: user.user.id },
@@ -579,10 +645,16 @@ export async function closePlan(args: GQLMutationClosePlanArgs) {
   return true
 }
 
-export async function deletePlan(args: GQLMutationDeletePlanArgs) {
+export async function deletePlan(
+  args: GQLMutationDeletePlanArgs,
+  context: GQLContext,
+) {
   const { planId } = args
 
-  const user = await getCurrentUserOrThrow()
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
 
   await prisma.trainingPlan.delete({
     where: { id: planId, assignedToId: user.user.id, isTemplate: false },

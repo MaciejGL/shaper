@@ -2,6 +2,7 @@ import {
   GQLMutationResolvers,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
+import { GQLContext } from '@/types/gql-context'
 
 import {
   activatePlan,
@@ -22,56 +23,56 @@ import {
   updateTrainingPlan,
 } from './factory'
 
-export const Query: GQLQueryResolvers = {
-  getTrainingPlanById: async (_, args) => {
-    return getTrainingPlanById(args)
+export const Query: GQLQueryResolvers<GQLContext> = {
+  getTrainingPlanById: async (_, args, context) => {
+    return getTrainingPlanById(args, context)
   },
-  getTemplates: async (_, args) => {
-    return getTemplates(args)
+  getTemplates: async (_, args, context) => {
+    return getTemplates(args, context)
   },
-  getClientTrainingPlans: async (_, args) => {
-    return getClientTrainingPlans(args)
+  getClientTrainingPlans: async (_, args, context) => {
+    return getClientTrainingPlans(args, context)
   },
-  getClientActivePlan: async (_, args) => {
-    return getClientActivePlan(args)
+  getClientActivePlan: async (_, args, context) => {
+    return getClientActivePlan(args, context)
   },
-  getMyPlansOverview: async () => {
-    return getMyPlansOverview()
+  getMyPlansOverview: async (_, __, context) => {
+    return getMyPlansOverview(context)
   },
-  getWorkout: async (_, args) => {
-    return getWorkout(args)
+  getWorkout: async (_, args, context) => {
+    return getWorkout(args, context)
   },
 }
 
-export const Mutation: GQLMutationResolvers = {
-  createTrainingPlan: async (_, args) => {
-    return createTrainingPlan(args)
+export const Mutation: GQLMutationResolvers<GQLContext> = {
+  createTrainingPlan: async (_, args, context) => {
+    return createTrainingPlan(args, context)
   },
-  updateTrainingPlan: async (_, args) => {
-    return updateTrainingPlan(args)
+  updateTrainingPlan: async (_, args, context) => {
+    return updateTrainingPlan(args, context)
   },
-  duplicateTrainingPlan: async (_, args) => {
-    return duplicateTrainingPlan(args)
+  duplicateTrainingPlan: async (_, args, context) => {
+    return duplicateTrainingPlan(args, context)
   },
-  deleteTrainingPlan: async (_, args) => {
-    return deleteTrainingPlan(args)
+  deleteTrainingPlan: async (_, args, context) => {
+    return deleteTrainingPlan(args, context)
   },
-  assignTrainingPlanToClient: async (_, args) => {
-    return assignTrainingPlanToClient(args)
+  assignTrainingPlanToClient: async (_, args, context) => {
+    return assignTrainingPlanToClient(args, context)
   },
-  removeTrainingPlanFromClient: async (_, args) => {
-    return removeTrainingPlanFromClient(args)
+  removeTrainingPlanFromClient: async (_, args, context) => {
+    return removeTrainingPlanFromClient(args, context)
   },
-  activatePlan: async (_, args) => {
-    return activatePlan(args)
+  activatePlan: async (_, args, context) => {
+    return activatePlan(args, context)
   },
-  pausePlan: async (_, args) => {
-    return pausePlan(args)
+  pausePlan: async (_, args, context) => {
+    return pausePlan(args, context)
   },
-  closePlan: async (_, args) => {
-    return closePlan(args)
+  closePlan: async (_, args, context) => {
+    return closePlan(args, context)
   },
-  deletePlan: async (_, args) => {
-    return deletePlan(args)
+  deletePlan: async (_, args, context) => {
+    return deletePlan(args, context)
   },
 }

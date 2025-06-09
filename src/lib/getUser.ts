@@ -5,7 +5,7 @@ import { GQLUserRole } from '@/generated/graphql-server'
 import { UserWithSession } from '@/types/UserWithSession'
 
 import { authOptions } from './auth'
-import { createLoaders } from './loaders/get-user.loader'
+import { createUserLoaders } from './loaders/user.loader'
 
 export type User = {
   id: string
@@ -30,8 +30,8 @@ export async function getCurrentUser(): Promise<
     return null
   }
   // Get full user data from database
-  const loaders = createLoaders()
-  const user = await loaders.userByEmail.load(session.user.email)
+  const loaders = createUserLoaders()
+  const user = await loaders.getCurrentUser.load(session.user.email)
 
   if (!user) {
     return null
@@ -53,8 +53,8 @@ export async function getCurrentUserOrThrow(): Promise<UserWithSession> {
     throw new Error('User not authenticated')
   }
 
-  const loaders = createLoaders()
-  const user = await loaders.userByEmail.load(session.user.email)
+  const loaders = createUserLoaders()
+  const user = await loaders.getCurrentUser.load(session.user.email)
 
   if (!user?.id) {
     throw new Error('User not found')
@@ -67,9 +67,10 @@ export async function getCurrentUserOrThrow(): Promise<UserWithSession> {
 }
 
 // Helper function to use in API routes or server components to require authentication
-export async function requireAuth(authLevel?: GQLUserRole) {
-  const userSession = await getCurrentUser()
-
+export function requireAuth(
+  authLevel: GQLUserRole,
+  userSession?: UserWithSession | null,
+) {
   if (!userSession) {
     redirect('/login')
   }

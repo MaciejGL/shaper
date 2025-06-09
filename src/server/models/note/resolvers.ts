@@ -4,13 +4,16 @@ import {
   GQLMutationResolvers,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
-import { getCurrentUserOrThrow } from '@/lib/getUser'
+import { GQLContext } from '@/types/gql-context'
 
 import Note from './model'
 
-export const Query: GQLQueryResolvers = {
-  note: async (_, { id, relatedTo }) => {
-    const user = await getCurrentUserOrThrow()
+export const Query: GQLQueryResolvers<GQLContext> = {
+  note: async (_, { id, relatedTo }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
 
     const note = await prisma.note.findUnique({
       where: {
@@ -23,8 +26,11 @@ export const Query: GQLQueryResolvers = {
     return note ? new Note(note) : null
   },
 
-  notes: async (_, { relatedTo }) => {
-    const user = await getCurrentUserOrThrow()
+  notes: async (_, { relatedTo }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
 
     const notes = await prisma.note.findMany({
       where: { relatedToId: relatedTo, createdById: user.user.id },
@@ -35,9 +41,12 @@ export const Query: GQLQueryResolvers = {
   },
 }
 
-export const Mutation: GQLMutationResolvers = {
-  createNote: async (_, { input }) => {
-    const user = await getCurrentUserOrThrow()
+export const Mutation: GQLMutationResolvers<GQLContext> = {
+  createNote: async (_, { input }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
 
     const { note, relatedTo } = input
 
@@ -58,8 +67,11 @@ export const Mutation: GQLMutationResolvers = {
 
     return new Note(newNote)
   },
-  deleteNote: async (_, { id }) => {
-    const user = await getCurrentUserOrThrow()
+  deleteNote: async (_, { id }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
 
     await prisma.note.delete({
       where: { id, createdById: user.user.id },

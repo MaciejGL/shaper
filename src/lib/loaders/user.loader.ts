@@ -2,8 +2,8 @@ import DataLoader from 'dataloader'
 
 import { prisma } from '@/lib/db'
 
-export const createLoaders = () => ({
-  userByEmail: new DataLoader(async (emails: readonly string[]) => {
+export const createUserLoaders = () => ({
+  getCurrentUser: new DataLoader(async (emails: readonly string[]) => {
     const users = await prisma.user.findMany({
       where: { email: { in: emails as string[] } },
       include: {

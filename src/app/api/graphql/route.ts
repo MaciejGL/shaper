@@ -1,13 +1,8 @@
 import { createYoga } from 'graphql-yoga'
 import { NextRequest } from 'next/server'
 
-import { getCurrentUser } from '@/lib/getUser'
-
+import { createContext } from './create-context'
 import { createSchema } from './schema'
-
-export type GraphQLContext = {
-  user: Awaited<ReturnType<typeof getCurrentUser>>
-}
 
 const schema = await createSchema()
 
@@ -28,12 +23,7 @@ const yoga = createYoga<{
     origin: ['https://fit-space.app', 'https://www.fit-space.app'],
     credentials: true,
   },
-  async context() {
-    const userSession = await getCurrentUser()
-    return {
-      user: userSession,
-    }
-  },
+  context: async () => createContext(),
   fetchAPI: { Request, Response, Headers },
 })
 

@@ -4,7 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/db'
 import { UserWithSession } from '@/types/UserWithSession'
 
-import { createLoaders } from './loaders/get-user.loader'
+import { createUserLoaders } from './loaders/user.loader'
 
 export const authOptions = {
   providers: [
@@ -15,7 +15,7 @@ export const authOptions = {
       async authorize(credentials) {
         const { email, otp } = credentials ?? {}
         if (!email || !otp) return null
-        const loaders = createLoaders()
+        const loaders = createUserLoaders()
         const user = await loaders.authSession.load(email)
 
         if (!user || user.sessions.length === 0) return null
@@ -38,7 +38,7 @@ export const authOptions = {
         const { email } = credentials ?? {}
         if (process.env.NODE_ENV !== 'production') {
           if (!email) return null
-          const loaders = createLoaders()
+          const loaders = createUserLoaders()
           const user = await loaders.authSession.load(email)
           return user
         } else {
