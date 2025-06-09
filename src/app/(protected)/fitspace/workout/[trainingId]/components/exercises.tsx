@@ -1,18 +1,10 @@
-import { BadgeCheckIcon, LayoutListIcon } from 'lucide-react'
+import { BadgeCheckIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import React, { startTransition, useEffect, useState } from 'react'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Progress } from '@/components/ui/progress'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
@@ -20,7 +12,6 @@ import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 import { Exercise } from './exercise'
 import { ExercisesPagination } from './exercises-pagaination'
 import { RestDay } from './rest-day'
-import { WorkoutDay } from './workout-page.client'
 
 export function Exercises() {
   const { activeDay } = useWorkout()
@@ -72,12 +63,10 @@ export function Exercises() {
     <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
       {!activeDay.isRestDay && (
         <div className="flex flex-col py-4 space-y-2 w-full">
-          <div className="flex justify-between gap-2">
-            <ExerciseDropdown
-              activeDay={activeDay}
-              activeExerciseId={activeExerciseId ?? ''}
-              setActiveExerciseId={setActiveExerciseId}
-            />
+          <div className="flex justify-between items-end gap-2">
+            <p className="text-sm text-muted-foreground">
+              {formatWorkoutType(activeDay.workoutType)}
+            </p>
             <ExercisesCompleted
               completedExercises={completedExercises}
               totalExercises={exercises.length}
@@ -119,52 +108,6 @@ export function Exercises() {
         </div>
       )}
     </AnimatedPageTransition>
-  )
-}
-
-function ExerciseDropdown({
-  activeDay,
-  activeExerciseId,
-  setActiveExerciseId,
-}: {
-  activeDay: WorkoutDay
-  activeExerciseId: string
-  setActiveExerciseId: (exerciseId: string) => void
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="secondary"
-          size="sm"
-          iconEnd={<LayoutListIcon className="text-muted-foreground" />}
-        >
-          {formatWorkoutType(activeDay.workoutType)}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
-        {activeDay.exercises.map((exercise, index) => (
-          <React.Fragment key={exercise.id}>
-            <DropdownMenuItem
-              key={exercise.id}
-              disabled={exercise.id === activeExerciseId}
-              onClick={() => setActiveExerciseId(exercise.id)}
-            >
-              <div className="text-sm flex justify-between w-full gap-4">
-                <div className="text-sm">
-                  {index + 1}. {exercise.name}
-                </div>
-
-                {exercise.completedAt ? (
-                  <BadgeCheckIcon className="self-start ml-auto mt-0.5 text-green-500" />
-                ) : null}
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="last:hidden mx-2" />
-          </React.Fragment>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
   )
 }
 

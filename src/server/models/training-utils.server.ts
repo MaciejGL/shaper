@@ -43,6 +43,9 @@ export async function getFullPlanById(id: string) {
                   base: true,
                   logs: true,
                   sets: {
+                    include: {
+                      log: true,
+                    },
                     orderBy: {
                       order: 'asc',
                     },

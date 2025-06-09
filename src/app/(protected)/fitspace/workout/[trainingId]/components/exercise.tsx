@@ -1,7 +1,13 @@
 import { debounce } from 'lodash'
-import { ListCollapseIcon, NotebookTextIcon } from 'lucide-react'
+import {
+  BadgeCheckIcon,
+  ChevronDown,
+  ListCollapseIcon,
+  NotebookTextIcon,
+} from 'lucide-react'
 import { useParams } from 'next/navigation'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useQueryState } from 'nuqs'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +21,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { VideoPreview } from '@/components/video-preview'
@@ -39,8 +52,9 @@ export function Exercise({ exercise }: ExerciseProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const { getPastLogs } = useWorkout()
   const previousLogs = getPastLogs(exercise)
+
   return (
-    <div>
+    <div className="pt-4">
       <ExerciseHeader
         exercise={exercise}
         setIsExpanded={setIsExpanded}
@@ -64,9 +78,43 @@ function ExerciseHeader({
   setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>
   hasLogs: boolean
 }) {
+  const [activeExerciseId, setActiveExerciseId] = useQueryState('exercise')
+  const { activeDay } = useWorkout()
   return (
     <div>
-      <h3 className={`text-md font-medium`}>{exercise.name}</h3>
+      <DropdownMenu>
+        <DropdownMenuTrigger className="group/dropdown">
+          <div className="text-sm flex items-start gap-2 pr-2">
+            <h3 className={`text-lg font-medium text-left pb-1`}>
+              {exercise.name}
+            </h3>
+            <ChevronDown
+              className={cn(
+                'text-muted-foreground size-4 mt-2 group-hover/dropdown:text-primary transition-all duration-200 shrink-0',
+              )}
+            />
+          </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start">
+          {activeDay?.exercises.map((exercise, index) => (
+            <React.Fragment key={exercise.id}>
+              <DropdownMenuItem
+                key={exercise.id}
+                disabled={exercise.id === activeExerciseId}
+                onClick={() => setActiveExerciseId(exercise.id)}
+              >
+                <div className="text-sm flex justify-between w-full gap-4">
+                  {index + 1}. {exercise.name}
+                  {exercise.completedAt ? (
+                    <BadgeCheckIcon className="self-start ml-auto mt-0.5 text-green-500" />
+                  ) : null}
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="last:hidden mx-2" />
+            </React.Fragment>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
       <div className="flex items-start justify-between gap-4 mt-2">
         <div>
           <Badge variant="outline" size="sm">
@@ -123,7 +171,7 @@ function ExerciseSets({
   })[]
 }) {
   return (
-    <div className="flex flex-col mt-4">
+    <div className="flex flex-col mt-4 py-4">
       <div className={cn(sharedLayoutStyles, 'text-xs text-muted-foreground')}>
         <div className="min-w-2.5"></div>
         <div className="text-center">Reps</div>

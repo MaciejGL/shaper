@@ -1,6 +1,7 @@
 import { prisma } from '@lib/db'
 import { Prisma } from '@prisma/client'
 import { getDay, getWeek, isAfter } from 'date-fns'
+import { enGB } from 'date-fns/locale'
 
 import {
   GQLMutationActivatePlanArgs,
@@ -282,9 +283,12 @@ export async function getWorkout(
     }
   }
 
-  const weekOfYear = getWeek(currentDate, { weekStartsOn: 1 })
+  const weekOfYear = getWeek(currentDate, { weekStartsOn: 1, locale: enGB })
   const planStartDate = new Date(plan.startDate)
-  const planWeekOfYear = getWeek(planStartDate, { weekStartsOn: 1 })
+  const planWeekOfYear = getWeek(planStartDate, {
+    weekStartsOn: 1,
+    locale: enGB,
+  })
 
   const currentWeekIndex = weekOfYear - planWeekOfYear
   const currentDayIndex =
