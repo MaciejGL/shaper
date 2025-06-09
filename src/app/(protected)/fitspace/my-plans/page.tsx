@@ -42,8 +42,10 @@ export default function MyPlansPage() {
   const router = useRouter()
 
   const queryClient = useQueryClient()
-  const invalidateQueries = () =>
+  const invalidateQueries = () => {
     queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] })
+    queryClient.invalidateQueries({ queryKey: ['FitspaceGetCurrentWorkoutId'] })
+  }
   const { mutateAsync: activatePlan, isPending: isActivatingPlan } =
     useActivatePlanMutation({
       onSuccess: () => {
