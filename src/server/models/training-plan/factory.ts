@@ -582,35 +582,41 @@ export async function activatePlan(
     throw new Error('Training plan not found or unauthorized')
   }
 
-  await prisma.$transaction(
-    async (tx) => {
-      // First deactivate all other plans for this user
-      await tx.trainingPlan.updateMany({
-        where: {
-          assignedToId: user.user.id,
-          active: true,
-          id: { not: planId }, // Don't update the plan we want to activate
-        },
-        data: { active: false },
-      })
+  try {
+    await prisma.$transaction(
+      async (tx) => {
+        // First deactivate all other plans for this user
+        await tx.trainingPlan.updateMany({
+          where: {
+            assignedToId: user.user.id,
+            active: true,
+            id: { not: planId }, // Don't update the plan we want to activate
+          },
+          data: { active: false },
+        })
 
-      const duplicated = await duplicatePlan({
-        plan: fullPlan,
-        asTemplate: false,
-      })
+        const duplicated = await duplicatePlan({
+          plan: fullPlan,
+          asTemplate: false,
+        })
 
-      // Then activate the new plan
-      await tx.trainingPlan.update({
-        where: {
-          id: duplicated.id,
-          assignedToId: user.user.id, // Ensure the plan belongs to the user
-        },
-        data: { active: true, startDate },
-      })
-    },
-    { timeout: 15000, maxWait: 15000 },
-  )
-
+        // Then activate the new plan
+        await tx.trainingPlan.update({
+          where: {
+            id: duplicated.id,
+            assignedToId: user.user.id, // Ensure the plan belongs to the user
+          },
+          data: { active: true, startDate },
+        })
+      },
+      { timeout: 15000, maxWait: 15000 },
+    )
+  } catch (error) {
+    // await prisma.trainingPlan.delete({
+    //   where: { id: duplicated.id },
+    // })
+    throw 'Failed to activate plan.'
+  }
   return true
 }
 
