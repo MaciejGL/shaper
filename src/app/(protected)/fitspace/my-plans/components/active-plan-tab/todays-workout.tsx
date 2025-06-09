@@ -19,8 +19,6 @@ export function TodaysWorkout({
     return null
   }
 
-  console.info('TodaysWorkout', todaysWorkout)
-
   return (
     <div>
       <div className="flex items-baseline justify-between">

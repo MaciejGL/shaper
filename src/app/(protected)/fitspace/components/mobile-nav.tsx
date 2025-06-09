@@ -8,7 +8,7 @@ import { useMemo } from 'react'
 import { useFitspaceGetCurrentWorkoutIdQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
-export function MobileNav({ activePlanId }: { activePlanId?: string }) {
+export function MobileNav() {
   const { data } = useFitspaceGetCurrentWorkoutIdQuery()
   const pathname = usePathname()
   const navItems = useMemo(
@@ -30,7 +30,6 @@ export function MobileNav({ activePlanId }: { activePlanId?: string }) {
     [data?.getMyPlansOverview.activePlan?.id],
   )
 
-  console.info(activePlanId, navItems[2].href)
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
       <div className="flex items-center justify-around py-2 px-4 max-w-md mx-auto">

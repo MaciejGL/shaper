@@ -51,8 +51,6 @@ export function ActivePlanTab({
     )
   }
 
-  console.info('ActivePlanTab', todaysWorkout)
-
   return (
     <div>
       {plan && navigation ? (
