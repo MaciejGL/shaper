@@ -1,6 +1,7 @@
 import {
   BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
+  ExerciseSetLog as PrismaExerciseSetLog,
   TrainingExercise as PrismaTrainingExercise,
 } from '@prisma/client'
 
@@ -13,7 +14,9 @@ import ExerciseSet from '../exercise-set/model'
 export default class TrainingExercise implements GQLTrainingExercise {
   constructor(
     protected data: PrismaTrainingExercise & {
-      sets?: PrismaExerciseSet[]
+      sets?: (PrismaExerciseSet & {
+        log?: PrismaExerciseSetLog
+      })[]
       base?: Pick<PrismaBaseExercise, 'videoUrl'>
     },
   ) {}

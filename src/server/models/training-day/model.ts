@@ -1,6 +1,7 @@
 import {
   BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
+  ExerciseSetLog as PrismaExerciseSetLog,
   TrainingDay as PrismaTrainingDay,
   TrainingExercise as PrismaTrainingExercise,
 } from '@prisma/client'
@@ -14,7 +15,9 @@ export default class TrainingDay implements GQLTrainingDay {
   constructor(
     protected data: PrismaTrainingDay & {
       exercises?: (PrismaTrainingExercise & {
-        sets?: PrismaExerciseSet[]
+        sets?: (PrismaExerciseSet & {
+          log?: PrismaExerciseSetLog
+        })[]
         base?: PrismaBaseExercise
       })[]
     },

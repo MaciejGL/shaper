@@ -4,7 +4,6 @@ import {
 } from '@prisma/client'
 
 import { GQLExerciseSet } from '@/generated/graphql-server'
-import { prisma } from '@/lib/db'
 
 import ExerciseSetLog from '../exercise-set-log/model'
 
@@ -52,19 +51,13 @@ export default class ExerciseSet implements GQLExerciseSet {
   }
 
   async log() {
-    if (this.data.log) {
-      return new ExerciseSetLog(this.data.log)
+    const log = this.data.log
+
+    if (!log) {
+      return null
     }
 
-    const log = await prisma.exerciseSetLog.findFirst({
-      where: {
-        ExerciseSet: {
-          id: this.id,
-        },
-      },
-    })
-
-    return log ? new ExerciseSetLog(log) : null
+    return new ExerciseSetLog(log)
   }
 
   get createdAt() {

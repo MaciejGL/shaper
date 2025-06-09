@@ -1,5 +1,10 @@
 import {
+  ExerciseSet as PrismaExerciseSet,
+  ExerciseSetLog as PrismaExerciseSetLog,
+  TrainingDay as PrismaTrainingDay,
+  TrainingExercise as PrismaTrainingExercise,
   TrainingPlan as PrismaTrainingPlan,
+  TrainingWeek as PrismaTrainingWeek,
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
 } from '@prisma/client'
@@ -12,7 +17,17 @@ export default class UserPublic implements GQLUserPublic {
   constructor(
     protected data: PrismaUser & {
       profile?: PrismaUserProfile | null
-      assignedPlans?: PrismaTrainingPlan[]
+      assignedPlans?: (PrismaTrainingPlan & {
+        weeks?: (PrismaTrainingWeek & {
+          days?: (PrismaTrainingDay & {
+            exercises?: (PrismaTrainingExercise & {
+              sets?: (PrismaExerciseSet & {
+                log?: PrismaExerciseSetLog
+              })[]
+            })[]
+          })[]
+        })[]
+      })[]
     },
   ) {}
 
