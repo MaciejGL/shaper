@@ -280,7 +280,13 @@ function ExerciseSet({
     if (key === 'reps') {
       setReps(e.target.value.replace(/[^0-9]/g, ''))
     } else {
-      setWeight(e.target.value.replace(/[^0-9.]/g, ''))
+      const raw = e.target.value
+      const sanitized = raw
+        .replace(',', '.') // Replace comma with dot
+        .replace(/[^0-9.]/g, '') // Remove anything not digit or dot
+        .replace(/(\..*)\./g, '$1') // Prevent more than one dot
+
+      setWeight(sanitized)
     }
   }
 

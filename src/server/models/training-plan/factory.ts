@@ -626,9 +626,7 @@ export async function activatePlan(
       { timeout: 15000, maxWait: 15000 },
     )
   } catch (error) {
-    // await prisma.trainingPlan.delete({
-    //   where: { id: duplicated.id },
-    // })
+    console.error(error)
     throw 'Failed to activate plan.'
   }
   return true

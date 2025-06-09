@@ -8,8 +8,6 @@ import {
   TrainingWeek as PrismaTrainingWeek,
 } from '@prisma/client'
 
-import { createId } from '@/lib/create-id'
-
 type FullTrainingPlan = PrismaTrainingPlan & {
   weeks: (PrismaTrainingWeek & {
     days: (PrismaTrainingDay & {
@@ -67,119 +65,86 @@ export async function duplicatePlan({
   plan: FullTrainingPlan
   asTemplate: boolean
 }) {
-  return prisma.$transaction(async (tx) => {
-    const newPlanId = createId()
+  return prisma.$transaction(
+    async (tx) => {
+      const uuid = () => crypto.randomUUID()
+      const newPlanId = uuid()
 
-    await tx.trainingPlan.create({
-      data: {
-        id: newPlanId,
-        title: asTemplate ? `${plan.title} (Copy)` : plan.title,
-        description: plan.description,
-        isPublic: false,
-        isTemplate: asTemplate,
-        isDraft: asTemplate ? false : plan.isDraft,
-        createdById: plan.createdById,
-        assignedToId: plan.assignedToId,
-      },
-    })
+      await tx.trainingPlan.create({
+        data: {
+          id: newPlanId,
+          title: asTemplate ? `${plan.title} (Copy)` : plan.title,
+          description: plan.description,
+          isPublic: false,
+          isTemplate: asTemplate,
+          isDraft: asTemplate ? false : plan.isDraft,
+          createdById: plan.createdById,
+          assignedToId: plan.assignedToId,
+        },
+      })
 
-    const weeks = plan.weeks.map((week) => ({
-      ...week,
-      id: createId(),
-      planId: newPlanId,
-    }))
+      for (const week of plan.weeks) {
+        const newWeekId = uuid()
+        await tx.trainingWeek.create({
+          data: {
+            id: newWeekId,
+            name: week.name,
+            weekNumber: week.weekNumber,
+            description: week.description,
+            planId: newPlanId,
+          },
+        })
 
-    const days = plan.weeks.flatMap((week, wIndex) =>
-      week.days.map((day) => ({
-        ...day,
-        id: createId(),
-        weekId: weeks[wIndex].id,
-      })),
-    )
+        for (const day of week.days) {
+          const newDayId = uuid()
+          await tx.trainingDay.create({
+            data: {
+              id: newDayId,
+              dayOfWeek: day.dayOfWeek,
+              isRestDay: day.isRestDay,
+              workoutType: day.workoutType,
+              weekId: newWeekId,
+            },
+          })
 
-    const exercises = plan.weeks.flatMap((week, wIndex) =>
-      week.days.flatMap((day) =>
-        day.exercises.map((ex) => ({
-          ...ex,
-          id: createId(),
-          dayId: days.find(
-            (d) =>
-              d.dayOfWeek === day.dayOfWeek && d.weekId === weeks[wIndex].id,
-          )!.id,
-        })),
-      ),
-    )
+          for (const exercise of day.exercises) {
+            const newExerciseId = uuid()
+            await tx.trainingExercise.create({
+              data: {
+                id: newExerciseId,
+                name: exercise.name,
+                restSeconds: exercise.restSeconds,
+                tempo: exercise.tempo,
+                instructions: exercise.instructions,
+                order: exercise.order,
+                warmupSets: exercise.warmupSets,
+                dayId: newDayId,
+                baseId: exercise.baseId ?? null,
+              },
+            })
 
-    const sets = plan.weeks.flatMap((week, wIndex) =>
-      week.days.flatMap((day) =>
-        day.exercises.flatMap((exercise) =>
-          exercise.sets.map((set) => ({
-            ...set,
-            id: createId(),
-            exerciseId: exercises.find(
-              (ex) =>
-                ex.order === exercise.order &&
-                ex.dayId ===
-                  days.find(
-                    (d) =>
-                      d.dayOfWeek === day.dayOfWeek &&
-                      d.weekId === weeks[wIndex].id,
-                  )?.id,
-            )!.id,
-          })),
-        ),
-      ),
-    )
+            for (const set of exercise.sets) {
+              await tx.exerciseSet.create({
+                data: {
+                  id: uuid(),
+                  order: set.order,
+                  reps: set.reps,
+                  minReps: set.minReps,
+                  maxReps: set.maxReps,
+                  weight: set.weight,
+                  rpe: set.rpe,
+                  exerciseId: newExerciseId,
+                },
+              })
+            }
+          }
+        }
+      }
 
-    await tx.trainingWeek.createMany({
-      data: weeks.map((w) => ({
-        id: w.id,
-        name: w.name,
-        weekNumber: w.weekNumber,
-        description: w.description,
-        planId: w.planId,
-      })),
-    })
-
-    await tx.trainingDay.createMany({
-      data: days.map((d) => ({
-        id: d.id,
-        dayOfWeek: d.dayOfWeek,
-        isRestDay: d.isRestDay,
-        workoutType: d.workoutType,
-        weekId: d.weekId,
-      })),
-    })
-
-    await tx.trainingExercise.createMany({
-      data: exercises.map((ex) => ({
-        id: ex.id,
-        name: ex.name,
-        restSeconds: ex.restSeconds,
-        tempo: ex.tempo,
-        instructions: ex.instructions,
-        order: ex.order,
-        warmupSets: ex.warmupSets,
-        dayId: ex.dayId,
-        baseId: ex.baseId ?? null,
-      })),
-    })
-
-    await tx.exerciseSet.createMany({
-      data: sets.map((s) => ({
-        id: s.id,
-        order: s.order,
-        reps: s.reps,
-        minReps: s.minReps,
-        maxReps: s.maxReps,
-        weight: s.weight,
-        rpe: s.rpe,
-        exerciseId: s.exerciseId,
-      })),
-    })
-
-    return await tx.trainingPlan.findUnique({
-      where: { id: newPlanId },
-    })
-  })
+      return await tx.trainingPlan.findUnique({
+        where: { id: newPlanId },
+      })
+    },
+    { timeout: 15000, maxWait: 15000 },
+  )
 }
