@@ -18,6 +18,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       where: { userId: userSession?.user?.id },
       include: {
         user: true,
+        bodyMeasures: true,
       },
     })
 

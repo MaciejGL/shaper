@@ -61,7 +61,7 @@ export default class UserProfile implements GQLUserProfile {
     let bodyMeasures = this.data.bodyMeasures ?? null
     if (!bodyMeasures) {
       console.warn(
-        `[UserProfile] No body measures found for user ${this.id}. Loading from database.`,
+        `[UserProfile] No body measures (Weight) found for user ${this.id}. Loading from database.`,
       )
       bodyMeasures = await prisma.userBodyMeasure.findMany({
         where: {
@@ -81,7 +81,7 @@ export default class UserProfile implements GQLUserProfile {
     let bodyMeasures = this.data.bodyMeasures ?? null
     if (!bodyMeasures) {
       console.warn(
-        `[UserProfile] No body measures found for user ${this.id}. Loading from database.`,
+        `[UserProfile] No body measures (Body Measures) found for user ${this.id}. Loading from database.`,
       )
       bodyMeasures = await prisma.userBodyMeasure.findMany({
         where: {
