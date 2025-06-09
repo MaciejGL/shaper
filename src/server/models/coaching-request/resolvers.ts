@@ -21,7 +21,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    return getCoachingRequest({ id, user })
+    return getCoachingRequest({ id, user, context })
   },
   coachingRequests: async (_, __, context) => {
     const user = context.user
@@ -29,7 +29,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    return getCoachingRequests({ user })
+    return getCoachingRequests({ user, context })
   },
 }
 
@@ -44,6 +44,7 @@ export const Mutation: GQLMutationResolvers = {
       senderId: user.user.id,
       recipientEmail: args.recipientEmail,
       message: args.message,
+      context,
     })
   },
   acceptCoachingRequest: async (_, { id }, context) => {
@@ -56,6 +57,7 @@ export const Mutation: GQLMutationResolvers = {
       id,
       recipientId: user.user.id,
       recipientRole: user.user.role as GQLUserRole,
+      context,
     })
   },
   cancelCoachingRequest: async (_, { id }, context) => {
@@ -64,7 +66,7 @@ export const Mutation: GQLMutationResolvers = {
       throw new Error('User not found')
     }
 
-    return cancelCoachingRequest({ id, senderId: user.user.id })
+    return cancelCoachingRequest({ id, senderId: user.user.id, context })
   },
   rejectCoachingRequest: async (_, { id }, context) => {
     const user = context.user
@@ -72,6 +74,6 @@ export const Mutation: GQLMutationResolvers = {
       throw new Error('User not found')
     }
 
-    return rejectCoachingRequest({ id, recipientId: user.user.id })
+    return rejectCoachingRequest({ id, recipientId: user.user.id, context })
   },
 }

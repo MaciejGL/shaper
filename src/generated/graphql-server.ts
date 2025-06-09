@@ -479,6 +479,7 @@ export type GQLQuery = {
   getWorkout?: EntireFieldWrapper<Maybe<GQLGetWorkoutPayload>>;
   muscleGroupCategories: EntireFieldWrapper<Array<GQLMuscleGroupCategory>>;
   muscleGroupCategory: EntireFieldWrapper<GQLMuscleGroupCategory>;
+  myClients: EntireFieldWrapper<Array<GQLUserPublic>>;
   myTrainer?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
   note?: EntireFieldWrapper<Maybe<GQLNote>>;
   notes: EntireFieldWrapper<Array<GQLNote>>;
@@ -1225,6 +1226,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getWorkout?: Resolver<Maybe<GQLResolversTypes['GetWorkoutPayload']>, ParentType, ContextType, Partial<GQLQueryGetWorkoutArgs>>;
   muscleGroupCategories?: Resolver<Array<GQLResolversTypes['MuscleGroupCategory']>, ParentType, ContextType>;
   muscleGroupCategory?: Resolver<GQLResolversTypes['MuscleGroupCategory'], ParentType, ContextType, RequireFields<GQLQueryMuscleGroupCategoryArgs, 'id'>>;
+  myClients?: Resolver<Array<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
   myTrainer?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
   note?: Resolver<Maybe<GQLResolversTypes['Note']>, ParentType, ContextType, RequireFields<GQLQueryNoteArgs, 'id'>>;
   notes?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType, Partial<GQLQueryNotesArgs>>;

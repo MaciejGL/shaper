@@ -34,4 +34,12 @@ export const createUserLoaders = () => ({
     const map = new Map(user.map((u) => [u.email, u]))
     return emails.map((email) => map.get(email) ?? null)
   }),
+
+  userById: new DataLoader(async (ids: readonly string[]) => {
+    const users = await prisma.user.findMany({
+      where: { id: { in: ids as string[] } },
+    })
+    const map = new Map(users.map((u) => [u.id, u]))
+    return ids.map((id) => map.get(id) ?? null)
+  }),
 })

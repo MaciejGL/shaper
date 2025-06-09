@@ -477,6 +477,7 @@ export type GQLQuery = {
   getWorkout?: Maybe<GQLGetWorkoutPayload>;
   muscleGroupCategories: Array<GQLMuscleGroupCategory>;
   muscleGroupCategory: GQLMuscleGroupCategory;
+  myClients: Array<GQLUserPublic>;
   myTrainer?: Maybe<GQLUserPublic>;
   note?: Maybe<GQLNote>;
   notes: Array<GQLNote>;
@@ -954,7 +955,7 @@ export type GQLFitspaceUpdateSetLogMutation = { __typename?: 'Mutation', updateS
 export type GQLGetClientsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetClientsQuery = { __typename?: 'Query', user?: { __typename?: 'User', clients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, updatedAt: string, createdAt: string, activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null } | undefined | null }> } | undefined | null };
+export type GQLGetClientsQuery = { __typename?: 'Query', myClients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, updatedAt: string, createdAt: string, activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null } | undefined | null }> };
 
 export type GQLCreateCoachingRequestMutationVariables = Exact<{
   recipientEmail: Scalars['String']['input'];
@@ -1829,23 +1830,21 @@ useFitspaceUpdateSetLogMutation.fetcher = (variables: GQLFitspaceUpdateSetLogMut
 
 export const GetClientsDocument = `
     query GetClients {
-  user {
-    clients {
+  myClients {
+    id
+    email
+    firstName
+    lastName
+    image
+    role
+    updatedAt
+    createdAt
+    activePlan {
       id
-      email
-      firstName
-      lastName
-      image
-      role
-      updatedAt
-      createdAt
-      activePlan {
-        id
-        title
-        description
-        weekCount
-        startDate
-      }
+      title
+      description
+      weekCount
+      startDate
     }
   }
 }

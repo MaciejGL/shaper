@@ -16,6 +16,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     const userProfile = await prisma.userProfile.findUnique({
       where: { userId: userSession?.user?.id },
+      include: {
+        user: true,
+      },
     })
 
     if (!userProfile) {
@@ -61,6 +64,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
             email: emailToUpdate,
           },
         },
+      },
+      include: {
+        user: true,
       },
     })
 

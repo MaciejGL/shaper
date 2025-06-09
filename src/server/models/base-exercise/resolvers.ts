@@ -52,9 +52,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       return []
     }
 
-    return exercises.map((exercise) => new BaseExercise(exercise))
+    return exercises.map((exercise) => new BaseExercise(exercise, context))
   },
-  publicExercises: async (_, { where }) => {
+  publicExercises: async (_, { where }, context) => {
     const whereClause: Prisma.BaseExerciseWhereInput = {
       createdBy: null,
       isPublic: true,
@@ -86,9 +86,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       },
     })
 
-    return exercises.map((exercise) => new BaseExercise(exercise))
+    return exercises.map((exercise) => new BaseExercise(exercise, context))
   },
-  exercise: async (_, { id }) => {
+  exercise: async (_, { id }, context) => {
     const exercise = await prisma.baseExercise.findUnique({
       where: { id },
       include: {
@@ -100,7 +100,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       },
     })
 
-    return exercise ? new BaseExercise(exercise) : null
+    return exercise ? new BaseExercise(exercise, context) : null
   },
 }
 

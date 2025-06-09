@@ -1,15 +1,29 @@
-import { User as PrismaUser } from '@prisma/client'
+import {
+  Notification as PrismaNotification,
+  User as PrismaUser,
+  UserProfile as PrismaUserProfile,
+  UserSession as PrismaUserSession,
+} from '@prisma/client'
 
 import { GQLUser, GQLUserRole } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
-import { getCurrentUser } from '@/lib/getUser'
+import { GQLContext } from '@/types/gql-context'
 
 import Notification from '../notification/model'
 import UserProfile from '../user-profile/model'
 import UserPublic from '../user-public/model'
 
 export default class User implements GQLUser {
-  constructor(protected data: PrismaUser) {}
+  constructor(
+    protected data: PrismaUser & {
+      profile?: PrismaUserProfile | null
+      sessions?: PrismaUserSession[] | null
+      clients?: PrismaUser[] | null
+      trainer?: PrismaUser | null
+      notifications?: PrismaNotification[] | null
+    },
+    protected context: GQLContext,
+  ) {}
 
   get id() {
     return this.data.id
@@ -41,63 +55,85 @@ export default class User implements GQLUser {
 
   // Placeholder for relations, implement as needed
   async clients() {
-    const user = await getCurrentUser()
-    // Restrict access to clients for only trainer requests
-    if (user?.user?.id !== this.data.id) {
+    let clients = this.data.clients ?? null
+    if (!clients) {
+      console.warn(
+        `[User] No clients found for user ${this.id}. Loading from database.`,
+      )
+      clients = await prisma.user.findMany({
+        where: {
+          role: GQLUserRole.Client,
+          trainerId: this.data.id,
+        },
+      })
+    }
+
+    if (!clients) {
       return []
     }
 
-    const clients = await prisma.user.findMany({
-      where: {
-        role: GQLUserRole.Client,
-        trainerId: this.data.id,
-      },
-      include: {
-        profile: true,
-        assignedPlans: true,
-      },
-    })
-
-    return clients.map((client) => new UserPublic(client))
+    return clients.map((client) => new UserPublic(client, this.context))
   }
 
   async trainer() {
-    const user = await getCurrentUser()
-    // Restrict access to trainer for only clients
-    if (user?.user?.id !== this.data.id) {
+    let trainer = this.data.trainer ?? null
+    if (!trainer) {
+      console.warn(
+        `[User] No trainer found for user ${this.id}. Loading from database.`,
+      )
+      trainer = await prisma.user.findFirst({
+        where: {
+          role: GQLUserRole.Trainer,
+          clients: {
+            some: { id: this.data.id },
+          },
+        },
+      })
+    }
+
+    if (!trainer) {
       return null
     }
 
-    const trainer = await prisma.user.findFirst({
-      where: {
-        role: GQLUserRole.Trainer,
-        clients: {
-          some: {
-            id: this.data.id,
-          },
-        },
-      },
-      include: {
-        profile: true,
-      },
-    })
-
-    return trainer ? new UserPublic(trainer) : null
+    return new UserPublic(trainer, this.context)
   }
 
   async profile() {
-    const profile = await prisma.userProfile.findFirst({
-      where: {
-        userId: this.data.id,
-      },
-    })
+    let profile = this.data.profile ?? null
+    if (!profile) {
+      console.warn(
+        `[User] No profile found for user ${this.id}. Loading from database.`,
+      )
+
+      profile = await prisma.userProfile.findFirst({
+        where: {
+          userId: this.data.id,
+        },
+        include: {
+          user: true,
+          bodyMeasures: true,
+        },
+      })
+    }
+
     return profile ? new UserProfile(profile) : null
   }
 
   async sessions() {
-    const sessions = await prisma.userSession.findMany({
-      where: { userId: this.data.id },
-    })
+    let sessions = this.data.sessions ?? null
+    if (!sessions) {
+      console.warn(
+        `[User] No sessions found for user ${this.id}. Loading from database.`,
+      )
+      sessions = await prisma.userSession.findMany({
+        where: { userId: this.data.id },
+      })
+    }
+
+    if (!sessions) {
+      return []
+    }
+
     return sessions.map((s) => ({
       id: s.id,
       user: this,
@@ -108,16 +144,42 @@ export default class User implements GQLUser {
   }
 
   async notifications() {
-    const notifications = await prisma.notification.findMany({
-      where: { userId: this.data.id },
-    })
-    return notifications.map((n) => new Notification(n))
+    let notifications = this.data.notifications ?? null
+    if (!notifications) {
+      console.warn(
+        `[User] No notifications found for user ${this.id}. Loading from database.`,
+      )
+      notifications = await prisma.notification.findMany({
+        where: { userId: this.data.id },
+      })
+    }
+
+    if (!notifications) {
+      return []
+    }
+
+    return notifications
+      .filter((n) => n.userId === this.data.id)
+      .map((n) => new Notification(n, this.context))
   }
 
   async createdNotifications() {
-    const notifications = await prisma.notification.findMany({
-      where: { createdBy: this.data.id },
-    })
-    return notifications.map((n) => new Notification(n))
+    let notifications = this.data.notifications ?? null
+    if (!notifications) {
+      console.warn(
+        `[User] No notifications found for user ${this.id}. Loading from database.`,
+      )
+      notifications = await prisma.notification.findMany({
+        where: { createdBy: this.data.id },
+      })
+    }
+
+    if (!notifications) {
+      return []
+    }
+
+    return notifications
+      .filter((n) => n.createdBy === this.data.id)
+      .map((n) => new Notification(n, this.context))
   }
 }

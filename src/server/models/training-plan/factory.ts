@@ -80,7 +80,7 @@ export async function getTrainingPlanById(
   if (!trainingPlan) {
     throw new Error('Training plan not found')
   }
-  return new TrainingPlan(trainingPlan)
+  return new TrainingPlan(trainingPlan, context)
 }
 
 export async function getTemplates(
@@ -104,7 +104,7 @@ export async function getTemplates(
   const templates = await prisma.trainingPlan.findMany({
     where,
   })
-  return templates.map((template) => new TrainingPlan(template))
+  return templates.map((template) => new TrainingPlan(template, context))
 }
 
 export async function getClientTrainingPlans(
@@ -124,7 +124,7 @@ export async function getClientTrainingPlans(
     },
   })
 
-  return plans.map((plan) => new TrainingPlan(plan))
+  return plans.map((plan) => new TrainingPlan(plan, context))
 }
 
 export async function getClientActivePlan(
@@ -175,7 +175,7 @@ export async function getClientActivePlan(
       },
     },
   })
-  return plan ? new TrainingPlan(plan) : null
+  return plan ? new TrainingPlan(plan, context) : null
 }
 
 export async function getMyPlansOverview(context: GQLContext) {
@@ -230,9 +230,13 @@ export async function getMyPlansOverview(context: GQLContext) {
   const completedPlans = plans.filter((plan) => plan.completedAt !== null)
 
   return {
-    activePlan: activePlan ? new TrainingPlan(activePlan) : null,
-    availablePlans: availablePlans.map((plan) => new TrainingPlan(plan)),
-    completedPlans: completedPlans.map((plan) => new TrainingPlan(plan)),
+    activePlan: activePlan ? new TrainingPlan(activePlan, context) : null,
+    availablePlans: availablePlans.map(
+      (plan) => new TrainingPlan(plan, context),
+    ),
+    completedPlans: completedPlans.map(
+      (plan) => new TrainingPlan(plan, context),
+    ),
   }
 }
 
@@ -274,7 +278,7 @@ export async function getWorkout(
         firstUncompletedWeekIndex: 0,
         firstUncompletedDayIndex: 0,
       },
-      plan: new TrainingPlan(plan),
+      plan: new TrainingPlan(plan, context),
     }
   }
 
@@ -302,7 +306,7 @@ export async function getWorkout(
 
   return {
     navigation,
-    plan: new TrainingPlan(plan),
+    plan: new TrainingPlan(plan, context),
   }
 }
 
@@ -516,13 +520,16 @@ export async function assignTrainingPlanToClient(
     user.user.profile?.lastName &&
     `${user.user.profile.firstName} ${user.user.profile.lastName}`
 
-  await createNotification({
-    createdBy: user.user.id,
-    userId: clientId,
-    relatedItemId: duplicated.id,
-    message: `New training plan "${plan.title}" has been assigned to you${senderName ? ` by ${senderName}` : ''}.`,
-    type: GQLNotificationType.NewTrainingPlanAssigned,
-  })
+  await createNotification(
+    {
+      createdBy: user.user.id,
+      userId: clientId,
+      relatedItemId: duplicated.id,
+      message: `New training plan "${plan.title}" has been assigned to you${senderName ? ` by ${senderName}` : ''}.`,
+      type: GQLNotificationType.NewTrainingPlanAssigned,
+    },
+    context,
+  )
 
   return true
 }

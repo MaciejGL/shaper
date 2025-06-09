@@ -65,6 +65,9 @@ export default class TrainingWeek implements GQLTrainingWeek {
   async days() {
     let days = this.data.days
     if (!days || days.length === 0) {
+      console.warn(
+        `[TrainingWeek] No days found for week ${this.id}. Loading from database.`,
+      )
       days = await prisma.trainingDay.findMany({
         where: {
           weekId: this.id,

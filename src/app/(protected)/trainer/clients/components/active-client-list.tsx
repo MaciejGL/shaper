@@ -37,7 +37,7 @@ export function ActiveClientList() {
         <AddNewClientButton />
       </div>
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3 mt-2">
-        {data?.user?.clients.map((client) => (
+        {data?.myClients.map((client) => (
           <ClientCard key={client.id} client={client} />
         ))}
       </div>

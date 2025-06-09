@@ -15,14 +15,18 @@ import {
 } from './factory'
 
 export const Query: GQLQueryResolvers<GQLContext> = {
-  notifications: (_, args) => getNotifications(args),
-  notification: (_, args) => getNotificationById(args),
+  notifications: (_, args, context) => getNotifications(args, context),
+  notification: (_, args, context) => getNotificationById(args, context),
 }
 
 export const Mutation: GQLMutationResolvers<GQLContext> = {
-  createNotification: (_, { input }) => createNotification(input),
-  updateNotification: (_, { input }) => updateNotification(input),
-  markNotificationRead: (_, { id }) => markNotificationRead(id),
-  markAllNotificationsRead: (_, { userId }) => markAllNotificationsRead(userId),
+  createNotification: (_, { input }, context) =>
+    createNotification(input, context),
+  updateNotification: (_, { input }, context) =>
+    updateNotification(input, context),
+  markNotificationRead: (_, { id }, context) =>
+    markNotificationRead(id, context),
+  markAllNotificationsRead: (_, { userId }, context) =>
+    markAllNotificationsRead(userId, context),
   deleteNotification: (_, { id }) => deleteNotification(id),
 }

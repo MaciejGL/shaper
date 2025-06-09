@@ -7,7 +7,7 @@ import { prisma } from '@/lib/db'
 import UserPublic from './model'
 
 export const Query: GQLQueryResolvers = {
-  userPublic: async (_, { id }) => {
+  userPublic: async (_, { id }, context) => {
     const user = await prisma.user.findUnique({
       where: { id },
       include: {
@@ -20,7 +20,7 @@ export const Query: GQLQueryResolvers = {
       throw new Error('User not found')
     }
 
-    return new UserPublic(user)
+    return new UserPublic(user, context)
   },
   myTrainer: async (_, __, context) => {
     const user = context.user
@@ -45,7 +45,7 @@ export const Query: GQLQueryResolvers = {
       throw new Error('Trainer not found')
     }
 
-    return new UserPublic(trainer)
+    return new UserPublic(trainer, context)
   },
 }
 

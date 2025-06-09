@@ -51,18 +51,16 @@ type SidebarSubItem = {
 
 // Define placeholder data types
 const placeholderClients = {
-  user: {
-    clients: Array(2).fill({
-      id: 'placeholder' + Math.random(),
-      firstName: 'Loading...',
-      lastName: 'Loading...',
-      email: 'Loading...',
-      image: null,
-      role: 'CLIENT',
-      updatedAt: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-    }),
-  },
+  myClients: Array(2).fill({
+    id: 'placeholder' + Math.random(),
+    firstName: 'Loading...',
+    lastName: 'Loading...',
+    email: 'Loading...',
+    image: null,
+    role: 'CLIENT',
+    updatedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+  }),
 }
 
 const placeholderTemplates = {
@@ -108,7 +106,7 @@ export function AppSidebar() {
         url: TRAINER_LINKS.clients.href,
         icon: Users2Icon,
         disabled: TRAINER_LINKS.clients.disabled,
-        subItems: clients?.user?.clients.map((client) => ({
+        subItems: clients?.myClients.map((client) => ({
           title: `${client.firstName} ${client.lastName}`,
           url: TRAINER_LINKS.clients.href + `/${client.id}`,
           icon: UserRoundCogIcon,

@@ -73,6 +73,9 @@ export default class TrainingExercise implements GQLTrainingExercise {
     let sets = this.data.sets
 
     if (!sets) {
+      console.warn(
+        `[TrainingExercise] No sets found for exercise ${this.id}. Loading from database.`,
+      )
       sets = await prisma.exerciseSet.findMany({
         where: {
           exerciseId: this.id,

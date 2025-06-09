@@ -11,7 +11,7 @@ import {
 import { getWeekYear } from 'date-fns'
 
 import { GQLDifficulty, GQLTrainingPlan } from '@/generated/graphql-server'
-import { prisma } from '@/lib/db'
+import { GQLContext } from '@/types/gql-context'
 
 import TrainingWeek from '../training-week/model'
 import UserPublic from '../user-public/model'
@@ -31,6 +31,7 @@ export default class TrainingPlan implements GQLTrainingPlan {
         })[]
       })[]
     },
+    protected context: GQLContext,
   ) {}
 
   get id() {
@@ -91,45 +92,23 @@ export default class TrainingPlan implements GQLTrainingPlan {
       return null
     }
 
-    return new UserPublic(this.data.createdBy)
+    return new UserPublic(this.data.createdBy, this.context)
   }
 
   async assignedTo() {
-    if (!this.data.assignedToId) {
-      return null
-    }
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: this.data.assignedToId,
-      },
-    })
-
-    if (!user) {
-      return null
-    }
-
-    return new UserPublic(user)
+    if (!this.data.assignedToId) return null
+    const user = await this.context.loaders.user.userById.load(
+      this.data.assignedToId,
+    )
+    return user ? new UserPublic(user, this.context) : null
   }
 
   async weekCount() {
-    return prisma.trainingWeek.count({
-      where: {
-        planId: this.data.id,
-      },
-    })
+    return this.context.loaders.plan.weekCountByPlanId.load(this.data.id)
   }
 
   async assignedCount() {
-    return prisma.user.count({
-      where: {
-        assignedPlans: {
-          some: {
-            id: this.data.id,
-          },
-        },
-      },
-    })
+    return this.context.loaders.plan.assignedCountByPlanId.load(this.data.id)
   }
   get currentWeekNumber() {
     // we need to get when training has Started first, then check how many weeks have passed. Then find week that we expect to match that week number
@@ -243,19 +222,9 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   async weeks() {
-    let weeks = this.data.weeks
-
-    if (!weeks) {
-      weeks = await prisma.trainingWeek.findMany({
-        where: {
-          planId: this.data.id,
-        },
-        include: {
-          days: true,
-        },
-      })
-    }
-
+    const weeks =
+      this.data.weeks ??
+      (await this.context.loaders.plan.weeksByPlanId.load(this.data.id))
     return weeks.map((week) => new TrainingWeek(week))
   }
 

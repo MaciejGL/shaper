@@ -66,6 +66,9 @@ export default class TrainingDay implements GQLTrainingDay {
     let exercises = this.data.exercises
 
     if (!exercises) {
+      console.warn(
+        `[TrainingDay] No exercises found for day ${this.id}. Loading from database.`,
+      )
       exercises = await prisma.trainingExercise.findMany({
         where: {
           dayId: this.id,

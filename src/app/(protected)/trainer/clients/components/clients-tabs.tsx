@@ -12,13 +12,13 @@ import { smartSearch } from '@/lib/smart-search'
 
 import ClientCard from './client-card'
 
-export type Client = NonNullable<GQLGetClientsQuery['user']>['clients'][number]
+export type Client = NonNullable<GQLGetClientsQuery['myClients']>[number]
 
 export function ClientsTabs() {
   const { data } = useGetClientsQuery()
   const [search] = useQueryState('search')
 
-  const clients = data?.user?.clients ?? []
+  const clients = data?.myClients ?? []
 
   if (!data) return null
 

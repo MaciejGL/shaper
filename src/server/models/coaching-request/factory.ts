@@ -7,6 +7,7 @@ import {
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 import { UserWithSession } from '@/types/UserWithSession'
+import { GQLContext } from '@/types/gql-context'
 
 import { createNotification } from '../notification/factory'
 
@@ -15,9 +16,11 @@ import CoachingRequest from './model'
 export async function getCoachingRequest({
   id,
   user,
+  context,
 }: {
   id: string
   user: UserWithSession
+  context: GQLContext
 }) {
   const coachingRequest = await prisma.coachingRequest.findUnique({
     where: {
@@ -26,10 +29,16 @@ export async function getCoachingRequest({
     },
   })
 
-  return coachingRequest ? new CoachingRequest(coachingRequest) : null
+  return coachingRequest ? new CoachingRequest(coachingRequest, context) : null
 }
 
-export async function getCoachingRequests({ user }: { user: UserWithSession }) {
+export async function getCoachingRequests({
+  user,
+  context,
+}: {
+  user: UserWithSession
+  context: GQLContext
+}) {
   const coachingRequests = await prisma.coachingRequest.findMany({
     where: {
       OR: [{ senderId: user?.user?.id }, { recipientId: user?.user?.id }],
@@ -40,7 +49,7 @@ export async function getCoachingRequests({ user }: { user: UserWithSession }) {
   })
 
   return coachingRequests.map((coachingRequest) => {
-    return new CoachingRequest(coachingRequest)
+    return new CoachingRequest(coachingRequest, context)
   })
 }
 
@@ -48,10 +57,12 @@ export async function upsertCoachingRequest({
   senderId,
   recipientEmail,
   message,
+  context,
 }: {
   senderId: string
   recipientEmail: string
   message?: string | null
+  context: GQLContext
 }) {
   const existingCoachingRequest = await prisma.coachingRequest.findFirst({
     where: {
@@ -100,7 +111,7 @@ export async function upsertCoachingRequest({
         },
       })
 
-      return new CoachingRequest(updatedCoachingRequest)
+      return new CoachingRequest(updatedCoachingRequest, context)
     } catch (error) {
       console.error(
         `[CoachingRequest] Error updating coaching request: ${error}`,
@@ -147,16 +158,19 @@ export async function upsertCoachingRequest({
         sender?.profile?.lastName &&
         `${sender?.profile?.firstName} ${sender?.profile?.lastName}`
 
-      await createNotification({
-        userId: recipient.id,
-        message: `You have a new coaching request${
-          senderName ? ` from ${senderName}.` : '.'
-        }`,
-        type: GQLNotificationType.CoachingRequest,
-        createdBy: senderId,
-        relatedItemId: coachingRequest.id,
-      })
-      return new CoachingRequest(coachingRequest)
+      await createNotification(
+        {
+          userId: recipient.id,
+          message: `You have a new coaching request${
+            senderName ? ` from ${senderName}.` : '.'
+          }`,
+          type: GQLNotificationType.CoachingRequest,
+          createdBy: senderId,
+          relatedItemId: coachingRequest.id,
+        },
+        context,
+      )
+      return new CoachingRequest(coachingRequest, context)
     } catch (error) {
       console.error(
         `[CoachingRequest] Error creating coaching request: ${error}`,
@@ -172,10 +186,12 @@ export async function acceptCoachingRequest({
   id,
   recipientId,
   recipientRole,
+  context,
 }: {
   id: string
   recipientId: string
   recipientRole: GQLUserRole
+  context: GQLContext
 }) {
   try {
     const coachingRequest = await prisma.coachingRequest.update({
@@ -234,15 +250,20 @@ export async function acceptCoachingRequest({
       })
     }
 
-    await createNotification({
-      userId: coachingRequest.senderId,
-      message: `${coachingRequest.sender?.name ?? 'Someone'} has accepted your request to start coaching.`,
-      type: GQLNotificationType.CoachingRequestAccepted,
-      createdBy: recipientId,
-      relatedItemId: coachingRequest.id,
-    })
+    await createNotification(
+      {
+        userId: coachingRequest.senderId,
+        message: `${coachingRequest.sender?.name ?? 'Someone'} has accepted your request to start coaching.`,
+        type: GQLNotificationType.CoachingRequestAccepted,
+        createdBy: recipientId,
+        relatedItemId: coachingRequest.id,
+      },
+      context,
+    )
 
-    return coachingRequest ? new CoachingRequest(coachingRequest) : null
+    return coachingRequest
+      ? new CoachingRequest(coachingRequest, context)
+      : null
   } catch (error) {
     console.error(
       `[CoachingRequest] Error accepting coaching request: ${error}`,
@@ -256,9 +277,11 @@ export async function acceptCoachingRequest({
 export async function cancelCoachingRequest({
   id,
   senderId,
+  context,
 }: {
   id: string
   senderId: string
+  context: GQLContext
 }) {
   try {
     const coachingRequest = await prisma.coachingRequest.update({
@@ -266,7 +289,9 @@ export async function cancelCoachingRequest({
       data: { status: GQLCoachingRequestStatus.Cancelled },
     })
 
-    return coachingRequest ? new CoachingRequest(coachingRequest) : null
+    return coachingRequest
+      ? new CoachingRequest(coachingRequest, context)
+      : null
   } catch (error) {
     console.error(
       `[CoachingRequest] Error cancelling coaching request: ${error}`,
@@ -280,9 +305,11 @@ export async function cancelCoachingRequest({
 export async function rejectCoachingRequest({
   id,
   recipientId,
+  context,
 }: {
   id: string
   recipientId: string
+  context: GQLContext
 }) {
   try {
     const coachingRequest = await prisma.coachingRequest.update({
@@ -297,15 +324,20 @@ export async function rejectCoachingRequest({
       data: { status: GQLCoachingRequestStatus.Rejected },
     })
 
-    await createNotification({
-      userId: coachingRequest.senderId,
-      message: `${coachingRequest.sender?.name ?? 'Someone'} has rejected your request to start coaching.`,
-      type: GQLNotificationType.CoachingRequestRejected,
-      createdBy: recipientId,
-      relatedItemId: coachingRequest.id,
-    })
+    await createNotification(
+      {
+        userId: coachingRequest.senderId,
+        message: `${coachingRequest.sender?.name ?? 'Someone'} has rejected your request to start coaching.`,
+        type: GQLNotificationType.CoachingRequestRejected,
+        createdBy: recipientId,
+        relatedItemId: coachingRequest.id,
+      },
+      context,
+    )
 
-    return coachingRequest ? new CoachingRequest(coachingRequest) : null
+    return coachingRequest
+      ? new CoachingRequest(coachingRequest, context)
+      : null
   } catch (error) {
     console.error(
       `[CoachingRequest] Error rejecting coaching request: ${error}`,

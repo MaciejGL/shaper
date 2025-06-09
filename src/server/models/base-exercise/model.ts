@@ -6,6 +6,7 @@ import {
 
 import { GQLBaseExercise, GQLEquipment } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { GQLContext } from '@/types/gql-context'
 
 import MuscleGroupCategory from '../muscle-group-category/model'
 import MuscleGroup from '../muscle-group/model'
@@ -18,6 +19,7 @@ export default class BaseExercise implements GQLBaseExercise {
         category: PrismaMuscleGroupCategory
       })[]
     },
+    protected context: GQLContext,
   ) {}
 
   get id() {
@@ -43,9 +45,13 @@ export default class BaseExercise implements GQLBaseExercise {
   async muscleGroups() {
     if (this.data.muscleGroups.length) {
       return this.data.muscleGroups.map((muscleGroup) => {
-        return new MuscleGroup(muscleGroup)
+        return new MuscleGroup(muscleGroup, this.context)
       })
     }
+
+    console.warn(
+      `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
+    )
 
     const muscleGroups = await prisma.muscleGroup.findMany({
       where: {
@@ -64,15 +70,21 @@ export default class BaseExercise implements GQLBaseExercise {
       return []
     }
 
-    return muscleGroups.map((muscleGroup) => new MuscleGroup(muscleGroup))
+    return muscleGroups.map(
+      (muscleGroup) => new MuscleGroup(muscleGroup, this.context),
+    )
   }
 
   async muscleGroupCategories() {
     if (this.data.muscleGroups.length) {
       return this.data.muscleGroups.map((muscleGroup) => {
-        return new MuscleGroupCategory(muscleGroup.category)
+        return new MuscleGroupCategory(muscleGroup.category, this.context)
       })
     }
+
+    console.warn(
+      `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
+    )
 
     const muscleGroups = await prisma.muscleGroup.findMany({
       where: {
@@ -93,7 +105,8 @@ export default class BaseExercise implements GQLBaseExercise {
     }
 
     return muscleGroups.map(
-      (muscleGroup) => new MuscleGroupCategory(muscleGroup.category),
+      (muscleGroup) =>
+        new MuscleGroupCategory(muscleGroup.category, this.context),
     )
   }
 
@@ -116,7 +129,7 @@ export default class BaseExercise implements GQLBaseExercise {
       return null
     }
 
-    return new UserPublic(user)
+    return new UserPublic(user, this.context)
   }
 
   get createdAt() {

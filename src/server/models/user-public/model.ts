@@ -10,6 +10,7 @@ import {
 } from '@prisma/client'
 
 import { GQLGoal, GQLUserPublic, GQLUserRole } from '@/generated/graphql-server'
+import { GQLContext } from '@/types/gql-context'
 
 import TrainingPlan from '../training-plan/model'
 
@@ -29,6 +30,7 @@ export default class UserPublic implements GQLUserPublic {
         })[]
       })[]
     },
+    protected context: GQLContext,
   ) {}
 
   get id() {
@@ -96,7 +98,7 @@ export default class UserPublic implements GQLUserPublic {
     const plan = this.data.assignedPlans?.at(0)
     if (!plan) return null
 
-    return new TrainingPlan(plan)
+    return new TrainingPlan(plan, this.context)
   }
 
   get averageRating() {

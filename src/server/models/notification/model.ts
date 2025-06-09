@@ -5,11 +5,15 @@ import {
   GQLNotificationType,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { GQLContext } from '@/types/gql-context'
 
 import User from '../user/model'
 
 export default class Notification implements GQLNotification {
-  constructor(protected data: PrismaNotification) {}
+  constructor(
+    protected data: PrismaNotification,
+    protected context: GQLContext,
+  ) {}
 
   // Scalar fields
   get id() {
@@ -47,10 +51,15 @@ export default class Notification implements GQLNotification {
 
   async creator() {
     if (!this.data.createdBy) return null
+
+    console.warn(
+      `[Notification] No creator found for notification ${this.id}. Loading from database.`,
+    )
+
     const creator = await prisma.user.findUnique({
       where: { id: this.data.createdBy },
     })
     if (!creator) return null
-    return new User(creator)
+    return new User(creator, this.context)
   }
 }

@@ -1,22 +1,25 @@
 import { MuscleGroupCategory as PrismaMuscleGroupCategory } from '@prisma/client'
 
 import { GQLMuscleGroupCategory } from '@/generated/graphql-server'
-import MuscleGroup from '../muscle-group/model'
 import { prisma } from '@/lib/db'
+import { GQLContext } from '@/types/gql-context'
 
+import MuscleGroup from '../muscle-group/model'
 
 export default class MuscleGroupCategory implements GQLMuscleGroupCategory {
-  constructor(protected data: PrismaMuscleGroupCategory) {}
+  constructor(
+    protected data: PrismaMuscleGroupCategory,
+    protected context: GQLContext,
+  ) {}
 
   get id() {
     return this.data.id
   }
 
-  
   get name() {
     return this.data.name
   }
-  
+
   get slug() {
     return this.data.slug
   }
@@ -28,7 +31,7 @@ export default class MuscleGroupCategory implements GQLMuscleGroupCategory {
       },
     })
 
-    return muscles.map((muscle) => new MuscleGroup(muscle))
+    return muscles.map((muscle) => new MuscleGroup(muscle, this.context))
   }
 
   get createdAt() {

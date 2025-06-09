@@ -8,11 +8,13 @@ import {
 import MuscleGroupCategory from './model'
 
 export const Query: GQLQueryResolvers = {
-  muscleGroupCategories: async () => {
+  muscleGroupCategories: async (_, __, context) => {
     const categories = await prisma.muscleGroupCategory.findMany()
-    return categories.map((category) => new MuscleGroupCategory(category))
+    return categories.map(
+      (category) => new MuscleGroupCategory(category, context),
+    )
   },
-  muscleGroupCategory: async (_, { id }) => {
+  muscleGroupCategory: async (_, { id }, context) => {
     const category = await prisma.muscleGroupCategory.findUnique({
       where: { id },
     })
@@ -21,7 +23,7 @@ export const Query: GQLQueryResolvers = {
       throw new Error('Muscle group category not found')
     }
 
-    return new MuscleGroupCategory(category)
+    return new MuscleGroupCategory(category, context)
   },
 }
 
