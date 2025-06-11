@@ -5,18 +5,16 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
 
-import { useFitspaceGetCurrentWorkoutIdQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
-export function MobileNav() {
-  const { data } = useFitspaceGetCurrentWorkoutIdQuery()
+export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
   const pathname = usePathname()
   const navItems = useMemo(
     () => [
       { href: '/fitspace/dashboard', icon: Home, label: 'Home' },
       { href: '/fitspace/my-plans', icon: Calendar, label: 'Plans' },
       {
-        href: `/fitspace/workout/${data?.getMyPlansOverview.activePlan?.id || 'quick-workout'}`,
+        href: `/fitspace/workout/${currentWorkoutId || 'quick-workout'}`,
         icon: Dumbbell,
         label: 'Workout',
       },
@@ -27,7 +25,7 @@ export function MobileNav() {
         label: 'Explore',
       },
     ],
-    [data?.getMyPlansOverview.activePlan?.id],
+    [currentWorkoutId],
   )
 
   return (

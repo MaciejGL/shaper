@@ -146,10 +146,10 @@ function ExerciseHeader({
               {restDuration} rest
             </Badge>
           )}
-          {!exercise.tempo && (
+          {exercise.tempo && (
             <Badge variant="secondary" size="md">
               <GaugeIcon />
-              3-2-3
+              {exercise.tempo}
             </Badge>
           )}
         </div>
