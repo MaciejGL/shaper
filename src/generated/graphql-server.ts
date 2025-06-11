@@ -268,6 +268,7 @@ export type GQLMutation = {
   deleteTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   duplicateTrainingPlan: EntireFieldWrapper<Scalars['ID']['output']>;
   markAllNotificationsRead: EntireFieldWrapper<Array<GQLNotification>>;
+  markExerciseAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   markNotificationRead: EntireFieldWrapper<GQLNotification>;
   markSetAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   pausePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -367,6 +368,12 @@ export type GQLMutationDuplicateTrainingPlanArgs = {
 
 export type GQLMutationMarkAllNotificationsReadArgs = {
   userId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationMarkExerciseAsCompletedArgs = {
+  completed: Scalars['Boolean']['input'];
+  exerciseId: Scalars['ID']['input'];
 };
 
 
@@ -1172,6 +1179,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   deleteTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteTrainingPlanArgs, 'id'>>;
   duplicateTrainingPlan?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingPlanArgs, 'id'>>;
   markAllNotificationsRead?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLMutationMarkAllNotificationsReadArgs, 'userId'>>;
+  markExerciseAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkExerciseAsCompletedArgs, 'completed' | 'exerciseId'>>;
   markNotificationRead?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationMarkNotificationReadArgs, 'id'>>;
   markSetAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkSetAsCompletedArgs, 'completed' | 'setId'>>;
   pausePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationPausePlanArgs, 'planId'>>;

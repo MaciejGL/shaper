@@ -3,7 +3,11 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 
-import { markSetAsCompleted, updateSetLog } from './factory'
+import {
+  markExerciseAsCompleted,
+  markSetAsCompleted,
+  updateSetLog,
+} from './factory'
 
 export const Query: GQLQueryResolvers = {}
 
@@ -13,5 +17,8 @@ export const Mutation: GQLMutationResolvers = {
   },
   markSetAsCompleted: async (_, args) => {
     return markSetAsCompleted(args)
+  },
+  markExerciseAsCompleted: async (_, args) => {
+    return markExerciseAsCompleted(args)
   },
 }

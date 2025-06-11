@@ -266,6 +266,7 @@ export type GQLMutation = {
   deleteTrainingPlan: Scalars['Boolean']['output'];
   duplicateTrainingPlan: Scalars['ID']['output'];
   markAllNotificationsRead: Array<GQLNotification>;
+  markExerciseAsCompleted?: Maybe<Scalars['Boolean']['output']>;
   markNotificationRead: GQLNotification;
   markSetAsCompleted?: Maybe<Scalars['Boolean']['output']>;
   pausePlan: Scalars['Boolean']['output'];
@@ -365,6 +366,12 @@ export type GQLMutationDuplicateTrainingPlanArgs = {
 
 export type GQLMutationMarkAllNotificationsReadArgs = {
   userId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationMarkExerciseAsCompletedArgs = {
+  completed: Scalars['Boolean']['input'];
+  exerciseId: Scalars['ID']['input'];
 };
 
 
@@ -944,6 +951,14 @@ export type GQLFitspaceMarkSetAsCompletedMutationVariables = Exact<{
 
 
 export type GQLFitspaceMarkSetAsCompletedMutation = { __typename?: 'Mutation', markSetAsCompleted?: boolean | undefined | null };
+
+export type GQLFitspaceMarkExerciseAsCompletedMutationVariables = Exact<{
+  exerciseId: Scalars['ID']['input'];
+  completed: Scalars['Boolean']['input'];
+}>;
+
+
+export type GQLFitspaceMarkExerciseAsCompletedMutation = { __typename?: 'Mutation', markExerciseAsCompleted?: boolean | undefined | null };
 
 export type GQLFitspaceUpdateSetLogMutationVariables = Exact<{
   input: GQLLogSetInput;
@@ -1798,6 +1813,30 @@ useFitspaceMarkSetAsCompletedMutation.getKey = () => ['FitspaceMarkSetAsComplete
 
 
 useFitspaceMarkSetAsCompletedMutation.fetcher = (variables: GQLFitspaceMarkSetAsCompletedMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceMarkSetAsCompletedMutation, GQLFitspaceMarkSetAsCompletedMutationVariables>(FitspaceMarkSetAsCompletedDocument, variables, options);
+
+export const FitspaceMarkExerciseAsCompletedDocument = `
+    mutation FitspaceMarkExerciseAsCompleted($exerciseId: ID!, $completed: Boolean!) {
+  markExerciseAsCompleted(exerciseId: $exerciseId, completed: $completed)
+}
+    `;
+
+export const useFitspaceMarkExerciseAsCompletedMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceMarkExerciseAsCompletedMutation, TError, GQLFitspaceMarkExerciseAsCompletedMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceMarkExerciseAsCompletedMutation, TError, GQLFitspaceMarkExerciseAsCompletedMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceMarkExerciseAsCompleted'],
+    mutationFn: (variables?: GQLFitspaceMarkExerciseAsCompletedMutationVariables) => fetchData<GQLFitspaceMarkExerciseAsCompletedMutation, GQLFitspaceMarkExerciseAsCompletedMutationVariables>(FitspaceMarkExerciseAsCompletedDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceMarkExerciseAsCompletedMutation.getKey = () => ['FitspaceMarkExerciseAsCompleted'];
+
+
+useFitspaceMarkExerciseAsCompletedMutation.fetcher = (variables: GQLFitspaceMarkExerciseAsCompletedMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceMarkExerciseAsCompletedMutation, GQLFitspaceMarkExerciseAsCompletedMutationVariables>(FitspaceMarkExerciseAsCompletedDocument, variables, options);
 
 export const FitspaceUpdateSetLogDocument = `
     mutation FitspaceUpdateSetLog($input: LogSetInput!) {

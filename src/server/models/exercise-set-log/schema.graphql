@@ -16,5 +16,6 @@ input LogSetInput {
 
 type Mutation {
   markSetAsCompleted(setId: ID!, completed: Boolean!): Boolean
+  markExerciseAsCompleted(exerciseId: ID!, completed: Boolean!): Boolean
   updateSetLog(input: LogSetInput!): ExerciseSetLog
 }

@@ -75,6 +75,12 @@ query FitspaceGetWorkout($trainingId: ID!) {
 mutation FitspaceMarkSetAsCompleted($setId: ID!, $completed: Boolean!) {
   markSetAsCompleted(setId: $setId, completed: $completed)
 }
+mutation FitspaceMarkExerciseAsCompleted(
+  $exerciseId: ID!
+  $completed: Boolean!
+) {
+  markExerciseAsCompleted(exerciseId: $exerciseId, completed: $completed)
+}
 
 mutation FitspaceUpdateSetLog($input: LogSetInput!) {
   updateSetLog(input: $input) {

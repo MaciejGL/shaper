@@ -1,9 +1,13 @@
 import { debounce } from 'lodash'
 import {
   BadgeCheckIcon,
+  Check,
   ChevronDown,
+  FlameIcon,
+  GaugeIcon,
   ListCollapseIcon,
   NotebookTextIcon,
+  TimerIcon,
 } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
@@ -34,13 +38,13 @@ import { VideoPreview } from '@/components/video-preview'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
   useFitspaceGetWorkoutQuery,
+  useFitspaceMarkExerciseAsCompletedMutation,
   useFitspaceMarkSetAsCompletedMutation,
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
+import { convertSecondsToTimeString } from '@/lib/convert-seconds-time-to-string'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
-
-// import { formatNumberInput } from '@/lib/format-tempo'
 
 import { WorkoutExercise } from './workout-page.client'
 
@@ -52,6 +56,37 @@ export function Exercise({ exercise }: ExerciseProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const { getPastLogs } = useWorkout()
   const previousLogs = getPastLogs(exercise)
+  const invalidateQuery = useInvalidateQuery()
+  const { trainingId } = useParams<{ trainingId: string }>()
+  const { mutateAsync: markExerciseAsCompleted } =
+    useFitspaceMarkExerciseAsCompletedMutation({
+      onSuccess: () => {
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutQuery.getKey({
+            trainingId: trainingId,
+          }),
+        })
+      },
+    })
+  const [isExerciseCompleted, setIsExerciseCompleted] = useState(
+    Boolean(exercise.completedAt),
+  )
+
+  useEffect(() => {
+    setIsExerciseCompleted(Boolean(exercise.completedAt))
+  }, [exercise.completedAt])
+
+  const handleMarkAsCompleted = async (checked: boolean) => {
+    setIsExerciseCompleted(checked)
+    try {
+      await markExerciseAsCompleted({
+        exerciseId: exercise.id,
+        completed: checked,
+      })
+    } catch (error) {
+      setIsExerciseCompleted(!checked)
+    }
+  }
 
   return (
     <div className="pt-4">
@@ -59,11 +94,14 @@ export function Exercise({ exercise }: ExerciseProps) {
         exercise={exercise}
         setIsExpanded={setIsExpanded}
         hasLogs={previousLogs.length > 0}
+        isCompleted={isExerciseCompleted}
+        handleMarkAsCompleted={handleMarkAsCompleted}
       />
       <ExerciseSets
         exercise={exercise}
         isExpanded={isExpanded}
         previousLogs={previousLogs}
+        isExerciseCompleted={isExerciseCompleted}
       />
     </div>
   )
@@ -73,53 +111,47 @@ function ExerciseHeader({
   exercise,
   setIsExpanded,
   hasLogs,
+  isCompleted,
+  handleMarkAsCompleted,
 }: {
   exercise: WorkoutExercise
   setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>
   hasLogs: boolean
+  isCompleted: boolean
+  handleMarkAsCompleted: (checked: boolean) => void
 }) {
   const [activeExerciseId, setActiveExerciseId] = useQueryState('exercise')
-  const { activeDay } = useWorkout()
+
+  const restDuration = exercise.restSeconds
+    ? convertSecondsToTimeString(exercise.restSeconds)
+    : null
   return (
     <div>
-      <DropdownMenu>
-        <DropdownMenuTrigger className="group/dropdown">
-          <div className="text-sm flex items-start gap-2 pr-2">
-            <h3 className={`text-lg font-medium text-left pb-1`}>
-              {exercise.name}
-            </h3>
-            <ChevronDown
-              className={cn(
-                'text-muted-foreground size-4 mt-2 group-hover/dropdown:text-primary transition-all duration-200 shrink-0',
-              )}
-            />
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          {activeDay?.exercises.map((exercise, index) => (
-            <React.Fragment key={exercise.id}>
-              <DropdownMenuItem
-                key={exercise.id}
-                disabled={exercise.id === activeExerciseId}
-                onClick={() => setActiveExerciseId(exercise.id)}
-              >
-                <div className="text-sm flex justify-between w-full gap-4">
-                  {index + 1}. {exercise.name}
-                  {exercise.completedAt ? (
-                    <BadgeCheckIcon className="self-start ml-auto mt-0.5 text-green-500" />
-                  ) : null}
-                </div>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="last:hidden mx-2" />
-            </React.Fragment>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ExerciseSelector
+        exercise={exercise}
+        activeExerciseId={activeExerciseId}
+        setActiveExerciseId={setActiveExerciseId}
+      />
       <div className="flex items-start justify-between gap-4 mt-2">
-        <div>
-          <Badge variant="outline" size="sm">
-            {exercise.warmupSets ?? 0} warmup sets
-          </Badge>
+        <div className="flex flex-wrap gap-2">
+          {exercise.warmupSets && (
+            <Badge variant="secondary" size="md">
+              <FlameIcon />
+              {exercise.warmupSets} warmup{exercise.warmupSets > 1 ? 's' : ''}
+            </Badge>
+          )}
+          {exercise.restSeconds && (
+            <Badge variant="secondary" size="md">
+              <TimerIcon />
+              {restDuration} rest
+            </Badge>
+          )}
+          {!exercise.tempo && (
+            <Badge variant="secondary" size="md">
+              <GaugeIcon />
+              3-2-3
+            </Badge>
+          )}
         </div>
         <div className="flex gap-2">
           {exercise.videoUrl && (
@@ -133,24 +165,89 @@ function ExerciseHeader({
             />
           )}
           {exercise.instructions && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="secondary" iconOnly={<NotebookTextIcon />} />
-              </DialogTrigger>
-              <DialogContent dialogTitle={exercise.name}>
-                <DialogHeader>
-                  <DialogTitle>{exercise.name}</DialogTitle>
-                </DialogHeader>
-                <DialogDescription className="whitespace-pre-wrap">
-                  {exercise.instructions}
-                </DialogDescription>
-              </DialogContent>
-            </Dialog>
+            <ExerciseInstructions exercise={exercise} />
           )}
-          {/* <Button variant="secondary" iconOnly={<MoreHorizontal />} /> */}
+          <Button
+            variant="secondary"
+            iconOnly={
+              <Check
+                className={cn(
+                  'transition-all duration-200',
+                  isCompleted ? 'text-green-500' : 'text-muted-foreground',
+                )}
+              />
+            }
+            onClick={() => handleMarkAsCompleted(!isCompleted)}
+          />
         </div>
       </div>
     </div>
+  )
+}
+
+function ExerciseSelector({
+  exercise,
+  activeExerciseId,
+  setActiveExerciseId,
+}: {
+  exercise: WorkoutExercise
+  activeExerciseId?: string | null
+  setActiveExerciseId: (exerciseId: string) => void
+}) {
+  const { activeDay } = useWorkout()
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="group/dropdown">
+        <div className="text-sm flex items-start gap-2 pr-2">
+          <h3 className={`text-lg font-medium text-left pb-1`}>
+            {exercise.name}
+          </h3>
+          <ChevronDown
+            className={cn(
+              'text-muted-foreground size-4 mt-2 group-hover/dropdown:text-primary transition-all duration-200 shrink-0',
+            )}
+          />
+        </div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start">
+        {activeDay?.exercises.map((exercise, index) => (
+          <React.Fragment key={exercise.id}>
+            <DropdownMenuItem
+              key={exercise.id}
+              disabled={exercise.id === activeExerciseId}
+              onClick={() => setActiveExerciseId(exercise.id)}
+            >
+              <div className="text-sm flex justify-between w-full gap-4">
+                {index + 1}. {exercise.name}
+                {exercise.completedAt ? (
+                  <BadgeCheckIcon className="self-start ml-auto mt-0.5 text-green-500" />
+                ) : null}
+              </div>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="last:hidden mx-2" />
+          </React.Fragment>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+function ExerciseInstructions({ exercise }: { exercise: WorkoutExercise }) {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="secondary" iconOnly={<NotebookTextIcon />} />
+      </DialogTrigger>
+      <DialogContent dialogTitle={exercise.name}>
+        <DialogHeader>
+          <DialogTitle>{exercise.name}</DialogTitle>
+        </DialogHeader>
+        <DialogDescription className="whitespace-pre-wrap">
+          {exercise.instructions}
+        </DialogDescription>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -162,6 +259,7 @@ function ExerciseSets({
   exercise,
   isExpanded,
   previousLogs,
+  isExerciseCompleted,
 }: {
   exercise: WorkoutExercise
   isExpanded: boolean
@@ -169,6 +267,7 @@ function ExerciseSets({
     performedOnWeekNumber: number
     performedOnDayNumber: number
   })[]
+  isExerciseCompleted: boolean
 }) {
   return (
     <div className="flex flex-col mt-4 py-4">
@@ -178,7 +277,7 @@ function ExerciseSets({
         <div className="text-center">Weight</div>
         <div className="text-center">RPE</div>
 
-        <div className="w-4"></div>
+        <div className="w-4" />
       </div>
       <div className="flex flex-col gap-2">
         {exercise.sets.map((set) => (
@@ -187,6 +286,7 @@ function ExerciseSets({
             set={set}
             previousLogs={previousLogs}
             isExpanded={isExpanded}
+            isExerciseCompleted={isExerciseCompleted}
           />
         ))}
       </div>
@@ -198,6 +298,7 @@ function ExerciseSet({
   set,
   previousLogs,
   isExpanded,
+  isExerciseCompleted,
 }: {
   set: WorkoutExercise['sets'][number]
   previousLogs: (WorkoutExercise & {
@@ -205,6 +306,7 @@ function ExerciseSet({
     performedOnDayNumber: number
   })[]
   isExpanded: boolean
+  isExerciseCompleted: boolean
 }) {
   const { trainingId } = useParams<{ trainingId: string }>()
   const [reps, setReps] = useState('')
@@ -238,6 +340,10 @@ function ExerciseSet({
     }
   }, [set.log])
 
+  useEffect(() => {
+    setIsCompleted(Boolean(set.completedAt))
+  }, [set.completedAt])
+
   const debouncedUpdate = useMemo(
     () =>
       debounce(async (repsValue: string, weightValue: string) => {
@@ -245,8 +351,8 @@ function ExerciseSet({
         await updateSetLog({
           input: {
             setId: set.id,
-            loggedReps: repsValue ? +repsValue : undefined,
-            loggedWeight: weightValue ? +weightValue : undefined,
+            loggedReps: repsValue ? +repsValue : null,
+            loggedWeight: weightValue ? +weightValue : null,
           },
         })
       }, 500),
@@ -276,17 +382,27 @@ function ExerciseSet({
     e: React.ChangeEvent<HTMLInputElement>,
     key: 'reps' | 'weight',
   ) => {
-    hasUserEdited.current = true
-    if (key === 'reps') {
-      setReps(e.target.value.replace(/[^0-9]/g, ''))
-    } else {
-      const raw = e.target.value
-      const sanitized = raw
-        .replace(',', '.') // Replace comma with dot
-        .replace(/[^0-9.]/g, '') // Remove anything not digit or dot
-        .replace(/(\..*)\./g, '$1') // Prevent more than one dot
+    const sanitizedValue = e.target.value
+      .replace(',', '.') // Replace comma with dot
+      .replace(/[^0-9.]/g, '') // Remove anything not digit or dot
+      .replace(/(\..*)\./g, '$1') // Prevent more than one dot
 
-      setWeight(sanitized)
+    hasUserEdited.current = true
+
+    if (key === 'reps') {
+      setReps(sanitizedValue)
+      if (sanitizedValue.length > 0 && weight.length > 0) {
+        setIsCompleted(true)
+      } else {
+        setIsCompleted(false)
+      }
+    } else {
+      setWeight(sanitizedValue)
+      if (reps.length > 0 && sanitizedValue.length > 0) {
+        setIsCompleted(true)
+      } else {
+        setIsCompleted(false)
+      }
     }
   }
 
@@ -322,6 +438,7 @@ function ExerciseSet({
           value={reps}
           onChange={(e) => handleInputChange(e, 'reps')}
           variant="ghost"
+          inputMode="decimal"
         />
 
         <Input
@@ -329,6 +446,7 @@ function ExerciseSet({
           value={weight}
           onChange={(e) => handleInputChange(e, 'weight')}
           variant="ghost"
+          inputMode="decimal"
         />
 
         <div className="text-sm text-muted-foreground text-center">
@@ -337,7 +455,8 @@ function ExerciseSet({
 
         <Label>
           <Checkbox
-            checked={isCompleted}
+            key={isCompleted.toString()}
+            checked={isExerciseCompleted || isCompleted}
             onCheckedChange={handleMarkAsCompleted}
             className="cursor-pointer"
             disabled={isMarkingSet}
