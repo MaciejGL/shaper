@@ -21,7 +21,7 @@ export function TodaysWorkout({
 
   return (
     <div>
-      <div className="flex items-baseline justify-between">
+      <div className="flex items-baseline justify-between mb-4">
         <p className="text-lg font-semibold">Today's workout</p>
         <ButtonLink
           href={`/fitspace/workout/${planId}`}

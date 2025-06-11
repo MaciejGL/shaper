@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { format } from 'date-fns'
 import { DumbbellIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
@@ -104,7 +105,7 @@ export default function MyPlansPage() {
     if (dialogState.action === 'activate' && data.startDate) {
       await activatePlan({
         planId: dialogState.plan.id,
-        startDate: data.startDate.toISOString(),
+        startDate: format(data.startDate, 'yyyy-MM-dd'),
         resume: dialogState.plan.startDate ? true : false,
       })
     } else if (dialogState.action === 'pause') {

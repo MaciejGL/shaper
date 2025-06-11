@@ -43,7 +43,7 @@ export function CompletedPlansTab({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {completedPlans.length > 0 ? (
         completedPlans.map((plan) => (
-          <Card key={plan.id}>
+          <Card key={plan.id} variant="gradient">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
@@ -80,20 +80,8 @@ export function CompletedPlansTab({
                     value={value}
                     label={key.replace(/([A-Z])/g, ' $1').trim()}
                   />
-                  // <div
-                  //   key={key}
-                  //   className="text-center p-3 bg-muted/50 rounded-lg"
-                  // >
-                  //   <div className="text-lg font-bold text-primary">
-                  //     {value}
-                  //   </div>
-                  //   <div className="text-xs text-muted-foreground capitalize">
-                  //     {key.replace(/([A-Z])/g, ' $1').trim()}
-                  //   </div>
-                  // </div>
                 ))}
               </div>
-              {/* Completion Stats */}
               <CompletionStats
                 adherence={plan.adherence}
                 completedWorkoutsDays={plan.completedWorkoutsDays}

@@ -19,10 +19,10 @@ export function NoActivePlan() {
     ]),
   )
   return (
-    <Card>
-      <CardContent className="p-8 text-center">
+    <Card variant="gradient">
+      <CardContent className="p-8 flex flex-col items-center justify-center">
         <BiggyIcon icon={Target} />
-        <h3 className="font-semibold mb-2">No Active Plans</h3>
+        <h3 className="font-semibold mb-2 mt-6">No Active Plans</h3>
         <p className="text-muted-foreground mb-4">
           You don't have any active training plans
         </p>

@@ -267,6 +267,7 @@ export async function getWorkout(
     return null
   }
   const currentDate = new Date()
+
   if (!plan.startDate) {
     return null
   }
@@ -582,7 +583,7 @@ export async function activatePlan(
   if (resume) {
     await prisma.trainingPlan.update({
       where: { id: planId, assignedToId: user.user.id },
-      data: { active: true },
+      data: { active: true, startDate: new Date(startDate) },
     })
 
     return true
@@ -620,7 +621,7 @@ export async function activatePlan(
             id: duplicated.id,
             assignedToId: user.user.id, // Ensure the plan belongs to the user
           },
-          data: { active: true, startDate },
+          data: { active: true, startDate: new Date(startDate) },
         })
       },
       { timeout: 15000, maxWait: 15000 },
