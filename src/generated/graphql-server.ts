@@ -267,10 +267,13 @@ export type GQLMutation = {
   deletePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   duplicateTrainingPlan: EntireFieldWrapper<Scalars['ID']['output']>;
+  logWorkoutProgress: EntireFieldWrapper<Scalars['ID']['output']>;
+  logWorkoutSessionEvent: EntireFieldWrapper<Scalars['ID']['output']>;
   markAllNotificationsRead: EntireFieldWrapper<Array<GQLNotification>>;
   markExerciseAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   markNotificationRead: EntireFieldWrapper<GQLNotification>;
   markSetAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
+  markWorkoutAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   pausePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   rejectCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   removeTrainingPlanFromClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -366,6 +369,18 @@ export type GQLMutationDuplicateTrainingPlanArgs = {
 };
 
 
+export type GQLMutationLogWorkoutProgressArgs = {
+  dayId: Scalars['ID']['input'];
+  tick: Scalars['Int']['input'];
+};
+
+
+export type GQLMutationLogWorkoutSessionEventArgs = {
+  dayId: Scalars['ID']['input'];
+  event: GQLWorkoutSessionEvent;
+};
+
+
 export type GQLMutationMarkAllNotificationsReadArgs = {
   userId: Scalars['ID']['input'];
 };
@@ -385,6 +400,11 @@ export type GQLMutationMarkNotificationReadArgs = {
 export type GQLMutationMarkSetAsCompletedArgs = {
   completed: Scalars['Boolean']['input'];
   setId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationMarkWorkoutAsCompletedArgs = {
+  dayId: Scalars['ID']['input'];
 };
 
 
@@ -484,6 +504,7 @@ export type GQLQuery = {
   getTemplates: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getTrainingPlanById: EntireFieldWrapper<GQLTrainingPlan>;
   getWorkout?: EntireFieldWrapper<Maybe<GQLGetWorkoutPayload>>;
+  getWorkoutInfo: EntireFieldWrapper<GQLTrainingDay>;
   muscleGroupCategories: EntireFieldWrapper<Array<GQLMuscleGroupCategory>>;
   muscleGroupCategory: EntireFieldWrapper<GQLMuscleGroupCategory>;
   myClients: EntireFieldWrapper<Array<GQLUserPublic>>;
@@ -532,6 +553,11 @@ export type GQLQueryGetTrainingPlanByIdArgs = {
 
 export type GQLQueryGetWorkoutArgs = {
   trainingId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type GQLQueryGetWorkoutInfoArgs = {
+  dayId: Scalars['ID']['input'];
 };
 
 
@@ -594,6 +620,7 @@ export type GQLTrainingDay = {
   completedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   dayOfWeek: EntireFieldWrapper<Scalars['Int']['output']>;
+  duration?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   exercises: EntireFieldWrapper<Array<GQLTrainingExercise>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   isRestDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -854,6 +881,11 @@ export type GQLWorkoutNavigation = {
   firstUncompletedWeekIndex: EntireFieldWrapper<Scalars['Int']['output']>;
 };
 
+export enum GQLWorkoutSessionEvent {
+  Complete = 'COMPLETE',
+  Progress = 'PROGRESS'
+}
+
 export enum GQLWorkoutType {
   Abs = 'Abs',
   Arms = 'Arms',
@@ -1009,6 +1041,7 @@ export type GQLResolversTypes = {
   UserRole: GQLUserRole;
   UserSession: ResolverTypeWrapper<GQLUserSession>;
   WorkoutNavigation: ResolverTypeWrapper<GQLWorkoutNavigation>;
+  WorkoutSessionEvent: GQLWorkoutSessionEvent;
   WorkoutType: GQLWorkoutType;
 };
 
@@ -1178,10 +1211,13 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   deletePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeletePlanArgs, 'planId'>>;
   deleteTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteTrainingPlanArgs, 'id'>>;
   duplicateTrainingPlan?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingPlanArgs, 'id'>>;
+  logWorkoutProgress?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutProgressArgs, 'dayId' | 'tick'>>;
+  logWorkoutSessionEvent?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutSessionEventArgs, 'dayId' | 'event'>>;
   markAllNotificationsRead?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLMutationMarkAllNotificationsReadArgs, 'userId'>>;
   markExerciseAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkExerciseAsCompletedArgs, 'completed' | 'exerciseId'>>;
   markNotificationRead?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationMarkNotificationReadArgs, 'id'>>;
   markSetAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkSetAsCompletedArgs, 'completed' | 'setId'>>;
+  markWorkoutAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkWorkoutAsCompletedArgs, 'dayId'>>;
   pausePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationPausePlanArgs, 'planId'>>;
   rejectCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
   removeTrainingPlanFromClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingPlanFromClientArgs, 'clientId' | 'planId'>>;
@@ -1232,6 +1268,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getTemplates?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetTemplatesArgs>>;
   getTrainingPlanById?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLQueryGetTrainingPlanByIdArgs, 'id'>>;
   getWorkout?: Resolver<Maybe<GQLResolversTypes['GetWorkoutPayload']>, ParentType, ContextType, Partial<GQLQueryGetWorkoutArgs>>;
+  getWorkoutInfo?: Resolver<GQLResolversTypes['TrainingDay'], ParentType, ContextType, RequireFields<GQLQueryGetWorkoutInfoArgs, 'dayId'>>;
   muscleGroupCategories?: Resolver<Array<GQLResolversTypes['MuscleGroupCategory']>, ParentType, ContextType>;
   muscleGroupCategory?: Resolver<GQLResolversTypes['MuscleGroupCategory'], ParentType, ContextType, RequireFields<GQLQueryMuscleGroupCategoryArgs, 'id'>>;
   myClients?: Resolver<Array<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
@@ -1261,6 +1298,7 @@ export type GQLTrainingDayResolvers<ContextType = GQLContext, ParentType extends
   completedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   dayOfWeek?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  duration?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   exercises?: Resolver<Array<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   isRestDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;

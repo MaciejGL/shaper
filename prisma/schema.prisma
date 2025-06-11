@@ -379,6 +379,7 @@ model WorkoutSessionEvent {
   dayId      String
   day        TrainingDay @relation(fields: [dayId], references: [id], onDelete: Cascade)
   type       String
+  totalDuration  Int  @default(0)
   timestamp  DateTime @default(now())
   createdAt  DateTime @default(now())
 

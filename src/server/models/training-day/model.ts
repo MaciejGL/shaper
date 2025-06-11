@@ -4,6 +4,7 @@ import {
   ExerciseSetLog as PrismaExerciseSetLog,
   TrainingDay as PrismaTrainingDay,
   TrainingExercise as PrismaTrainingExercise,
+  WorkoutSessionEvent as PrismaWorkoutSessionEvent,
 } from '@prisma/client'
 
 import { GQLTrainingDay, GQLWorkoutType } from '@/generated/graphql-server'
@@ -14,6 +15,7 @@ import TrainingExercise from '../training-exercise/model'
 export default class TrainingDay implements GQLTrainingDay {
   constructor(
     protected data: PrismaTrainingDay & {
+      events?: PrismaWorkoutSessionEvent[]
       exercises?: (PrismaTrainingExercise & {
         sets?: (PrismaExerciseSet & {
           log?: PrismaExerciseSetLog
@@ -76,6 +78,30 @@ export default class TrainingDay implements GQLTrainingDay {
       })
     }
     return exercises.map((exercise) => new TrainingExercise(exercise))
+  }
+
+  async duration() {
+    let events = this.data.events
+
+    if (!events) {
+      console.warn(
+        `[TrainingDay] No workout session events found for day ${this.id}. Loading from database.`,
+      )
+      events = await prisma.workoutSessionEvent.findMany({
+        where: { dayId: this.id },
+        orderBy: { timestamp: 'asc' },
+      })
+    }
+
+    const event = events.find(
+      (event) => event.type === 'PROGRESS' || event.type === 'COMPLETE',
+    )
+
+    if (!event) {
+      return 0
+    }
+
+    return event.totalDuration
   }
 
   get createdAt() {

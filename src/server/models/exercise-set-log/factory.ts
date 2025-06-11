@@ -3,7 +3,9 @@ import { prisma } from '@lib/db'
 import {
   GQLMutationMarkExerciseAsCompletedArgs,
   GQLMutationMarkSetAsCompletedArgs,
+  GQLMutationMarkWorkoutAsCompletedArgs,
   GQLMutationUpdateSetLogArgs,
+  GQLWorkoutSessionEvent,
 } from '@/generated/graphql-server'
 
 import ExerciseSetLog from './model'
@@ -61,6 +63,8 @@ const markSetAsCompletedRelatedData = async (setId: string) => {
       where: { id: day.id },
       data: { completedAt: new Date() },
     })
+
+    updateWorkoutSessionEvent(day.id, GQLWorkoutSessionEvent.Complete)
   } else {
     return null
   }
@@ -110,7 +114,7 @@ const markSetAsCompletedRelatedData = async (setId: string) => {
 }
 
 const unmarkSetCompletedRelatedData = async (setId: string) => {
-  await prisma.exerciseSet.update({
+  const set = await prisma.exerciseSet.update({
     where: { id: setId },
     data: {
       completedAt: null,
@@ -135,7 +139,16 @@ const unmarkSetCompletedRelatedData = async (setId: string) => {
         },
       },
     },
+    select: {
+      exercise: {
+        select: {
+          dayId: true,
+        },
+      },
+    },
   })
+
+  updateWorkoutSessionEvent(set.exercise.dayId, GQLWorkoutSessionEvent.Progress)
 
   return true
 }
@@ -202,7 +215,7 @@ export const markExerciseAsCompleted = async (
 ) => {
   const { exerciseId, completed } = args
   if (!completed) {
-    await prisma.trainingExercise.update({
+    const exercise = await prisma.trainingExercise.update({
       where: { id: exerciseId },
       data: {
         completedAt: null,
@@ -234,7 +247,15 @@ export const markExerciseAsCompleted = async (
           },
         },
       },
+      select: {
+        dayId: true,
+      },
     })
+
+    await updateWorkoutSessionEvent(
+      exercise.dayId,
+      GQLWorkoutSessionEvent.Progress,
+    )
 
     return true
   }
@@ -271,6 +292,8 @@ export const markExerciseAsCompleted = async (
       where: { id: day.id },
       data: { completedAt: new Date() },
     })
+
+    await updateWorkoutSessionEvent(day.id, GQLWorkoutSessionEvent.Complete)
   }
 
   const week = await prisma.trainingWeek.findUnique({
@@ -304,4 +327,76 @@ export const markExerciseAsCompleted = async (
   }
 
   return true
+}
+
+export const markWorkoutAsCompleted = async (
+  args: GQLMutationMarkWorkoutAsCompletedArgs,
+) => {
+  const { dayId } = args
+
+  const now = new Date()
+
+  await prisma.trainingDay.update({
+    where: { id: dayId },
+    data: { completedAt: now },
+  })
+
+  await updateWorkoutSessionEvent(dayId, GQLWorkoutSessionEvent.Complete)
+
+  // ✅ Cascade completion checks remain sequential
+
+  const day = await prisma.trainingDay.findUnique({
+    where: { id: dayId },
+    select: { weekId: true },
+  })
+
+  if (!day) return true
+
+  const week = await prisma.trainingWeek.findUnique({
+    where: { id: day.weekId },
+    select: { id: true, planId: true, days: { select: { completedAt: true } } },
+  })
+
+  if (!week) return true
+
+  const allDaysCompleted = week.days.every((d) => d.completedAt)
+  if (allDaysCompleted) {
+    await prisma.trainingWeek.update({
+      where: { id: week.id },
+      data: { completedAt: now },
+    })
+  }
+
+  const plan = await prisma.trainingPlan.findUnique({
+    where: { id: week.planId },
+    select: { id: true, weeks: { select: { completedAt: true } } },
+  })
+
+  if (!plan) return true
+
+  const allWeeksCompleted = plan.weeks.every((w) => w.completedAt)
+  if (allWeeksCompleted) {
+    await prisma.trainingPlan.update({
+      where: { id: plan.id },
+      data: { completedAt: now },
+    })
+  }
+
+  return true
+}
+
+const updateWorkoutSessionEvent = async (
+  dayId: string,
+  type: GQLWorkoutSessionEvent,
+) => {
+  const event = await prisma.workoutSessionEvent.findFirst({
+    where: { dayId },
+  })
+
+  if (event) {
+    await prisma.workoutSessionEvent.update({
+      where: { id: event.id },
+      data: { type },
+    })
+  }
 }

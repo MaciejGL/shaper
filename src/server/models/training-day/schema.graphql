@@ -4,6 +4,7 @@ type TrainingDay {
   workoutType: WorkoutType
   isRestDay: Boolean!
 
+  duration: Int
   startedAt: String
   completedAt: String
 
@@ -44,4 +45,18 @@ enum WorkoutType {
   Core
 
   Custom
+}
+
+enum WorkoutSessionEvent {
+  COMPLETE
+  PROGRESS
+}
+
+type Query {
+  getWorkoutInfo(dayId: ID!): TrainingDay!
+}
+
+type Mutation {
+  logWorkoutSessionEvent(dayId: ID!, event: WorkoutSessionEvent!): ID!
+  logWorkoutProgress(dayId: ID!, tick: Int!): ID!
 }

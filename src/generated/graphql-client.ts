@@ -265,10 +265,13 @@ export type GQLMutation = {
   deletePlan: Scalars['Boolean']['output'];
   deleteTrainingPlan: Scalars['Boolean']['output'];
   duplicateTrainingPlan: Scalars['ID']['output'];
+  logWorkoutProgress: Scalars['ID']['output'];
+  logWorkoutSessionEvent: Scalars['ID']['output'];
   markAllNotificationsRead: Array<GQLNotification>;
   markExerciseAsCompleted?: Maybe<Scalars['Boolean']['output']>;
   markNotificationRead: GQLNotification;
   markSetAsCompleted?: Maybe<Scalars['Boolean']['output']>;
+  markWorkoutAsCompleted?: Maybe<Scalars['Boolean']['output']>;
   pausePlan: Scalars['Boolean']['output'];
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
   removeTrainingPlanFromClient: Scalars['Boolean']['output'];
@@ -364,6 +367,18 @@ export type GQLMutationDuplicateTrainingPlanArgs = {
 };
 
 
+export type GQLMutationLogWorkoutProgressArgs = {
+  dayId: Scalars['ID']['input'];
+  tick: Scalars['Int']['input'];
+};
+
+
+export type GQLMutationLogWorkoutSessionEventArgs = {
+  dayId: Scalars['ID']['input'];
+  event: GQLWorkoutSessionEvent;
+};
+
+
 export type GQLMutationMarkAllNotificationsReadArgs = {
   userId: Scalars['ID']['input'];
 };
@@ -383,6 +398,11 @@ export type GQLMutationMarkNotificationReadArgs = {
 export type GQLMutationMarkSetAsCompletedArgs = {
   completed: Scalars['Boolean']['input'];
   setId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationMarkWorkoutAsCompletedArgs = {
+  dayId: Scalars['ID']['input'];
 };
 
 
@@ -482,6 +502,7 @@ export type GQLQuery = {
   getTemplates: Array<GQLTrainingPlan>;
   getTrainingPlanById: GQLTrainingPlan;
   getWorkout?: Maybe<GQLGetWorkoutPayload>;
+  getWorkoutInfo: GQLTrainingDay;
   muscleGroupCategories: Array<GQLMuscleGroupCategory>;
   muscleGroupCategory: GQLMuscleGroupCategory;
   myClients: Array<GQLUserPublic>;
@@ -530,6 +551,11 @@ export type GQLQueryGetTrainingPlanByIdArgs = {
 
 export type GQLQueryGetWorkoutArgs = {
   trainingId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type GQLQueryGetWorkoutInfoArgs = {
+  dayId: Scalars['ID']['input'];
 };
 
 
@@ -592,6 +618,7 @@ export type GQLTrainingDay = {
   completedAt?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
   dayOfWeek: Scalars['Int']['output'];
+  duration?: Maybe<Scalars['Int']['output']>;
   exercises: Array<GQLTrainingExercise>;
   id: Scalars['ID']['output'];
   isRestDay: Scalars['Boolean']['output'];
@@ -852,6 +879,11 @@ export type GQLWorkoutNavigation = {
   firstUncompletedWeekIndex: Scalars['Int']['output'];
 };
 
+export enum GQLWorkoutSessionEvent {
+  Complete = 'COMPLETE',
+  Progress = 'PROGRESS'
+}
+
 export enum GQLWorkoutType {
   Abs = 'Abs',
   Arms = 'Arms',
@@ -944,6 +976,13 @@ export type GQLFitspaceGetWorkoutQueryVariables = Exact<{
 
 export type GQLFitspaceGetWorkoutQuery = { __typename?: 'Query', getWorkout?: { __typename?: 'GetWorkoutPayload', navigation: { __typename?: 'WorkoutNavigation', currentWeekIndex: number, currentDayIndex: number, firstUncompletedWeekIndex: number, firstUncompletedDayIndex: number }, plan: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> }> }> }> } } | undefined | null };
 
+export type GQLFitspaceGetWorkoutInfoQueryVariables = Exact<{
+  dayId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLFitspaceGetWorkoutInfoQuery = { __typename?: 'Query', getWorkoutInfo: { __typename?: 'TrainingDay', id: string, duration?: number | undefined | null } };
+
 export type GQLFitspaceMarkSetAsCompletedMutationVariables = Exact<{
   setId: Scalars['ID']['input'];
   completed: Scalars['Boolean']['input'];
@@ -966,6 +1005,21 @@ export type GQLFitspaceUpdateSetLogMutationVariables = Exact<{
 
 
 export type GQLFitspaceUpdateSetLogMutation = { __typename?: 'Mutation', updateSetLog?: { __typename?: 'ExerciseSetLog', id: string, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null } | undefined | null };
+
+export type GQLFitspaceLogWorkoutProgressMutationVariables = Exact<{
+  dayId: Scalars['ID']['input'];
+  tick: Scalars['Int']['input'];
+}>;
+
+
+export type GQLFitspaceLogWorkoutProgressMutation = { __typename?: 'Mutation', logWorkoutProgress: string };
+
+export type GQLFitspaceMarkWorkoutAsCompletedMutationVariables = Exact<{
+  dayId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLFitspaceMarkWorkoutAsCompletedMutation = { __typename?: 'Mutation', markWorkoutAsCompleted?: boolean | undefined | null };
 
 export type GQLGetClientsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1790,6 +1844,57 @@ useInfiniteFitspaceGetWorkoutQuery.getKey = (variables: GQLFitspaceGetWorkoutQue
 
 useFitspaceGetWorkoutQuery.fetcher = (variables: GQLFitspaceGetWorkoutQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetWorkoutQuery, GQLFitspaceGetWorkoutQueryVariables>(FitspaceGetWorkoutDocument, variables, options);
 
+export const FitspaceGetWorkoutInfoDocument = `
+    query FitspaceGetWorkoutInfo($dayId: ID!) {
+  getWorkoutInfo(dayId: $dayId) {
+    id
+    duration
+  }
+}
+    `;
+
+export const useFitspaceGetWorkoutInfoQuery = <
+      TData = GQLFitspaceGetWorkoutInfoQuery,
+      TError = unknown
+    >(
+      variables: GQLFitspaceGetWorkoutInfoQueryVariables,
+      options?: Omit<UseQueryOptions<GQLFitspaceGetWorkoutInfoQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitspaceGetWorkoutInfoQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLFitspaceGetWorkoutInfoQuery, TError, TData>(
+      {
+    queryKey: ['FitspaceGetWorkoutInfo', variables],
+    queryFn: fetchData<GQLFitspaceGetWorkoutInfoQuery, GQLFitspaceGetWorkoutInfoQueryVariables>(FitspaceGetWorkoutInfoDocument, variables),
+    ...options
+  }
+    )};
+
+useFitspaceGetWorkoutInfoQuery.getKey = (variables: GQLFitspaceGetWorkoutInfoQueryVariables) => ['FitspaceGetWorkoutInfo', variables];
+
+export const useInfiniteFitspaceGetWorkoutInfoQuery = <
+      TData = InfiniteData<GQLFitspaceGetWorkoutInfoQuery>,
+      TError = unknown
+    >(
+      variables: GQLFitspaceGetWorkoutInfoQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLFitspaceGetWorkoutInfoQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitspaceGetWorkoutInfoQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLFitspaceGetWorkoutInfoQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['FitspaceGetWorkoutInfo.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLFitspaceGetWorkoutInfoQuery, GQLFitspaceGetWorkoutInfoQueryVariables>(FitspaceGetWorkoutInfoDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteFitspaceGetWorkoutInfoQuery.getKey = (variables: GQLFitspaceGetWorkoutInfoQueryVariables) => ['FitspaceGetWorkoutInfo.infinite', variables];
+
+
+useFitspaceGetWorkoutInfoQuery.fetcher = (variables: GQLFitspaceGetWorkoutInfoQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetWorkoutInfoQuery, GQLFitspaceGetWorkoutInfoQueryVariables>(FitspaceGetWorkoutInfoDocument, variables, options);
+
 export const FitspaceMarkSetAsCompletedDocument = `
     mutation FitspaceMarkSetAsCompleted($setId: ID!, $completed: Boolean!) {
   markSetAsCompleted(setId: $setId, completed: $completed)
@@ -1866,6 +1971,54 @@ useFitspaceUpdateSetLogMutation.getKey = () => ['FitspaceUpdateSetLog'];
 
 
 useFitspaceUpdateSetLogMutation.fetcher = (variables: GQLFitspaceUpdateSetLogMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceUpdateSetLogMutation, GQLFitspaceUpdateSetLogMutationVariables>(FitspaceUpdateSetLogDocument, variables, options);
+
+export const FitspaceLogWorkoutProgressDocument = `
+    mutation FitspaceLogWorkoutProgress($dayId: ID!, $tick: Int!) {
+  logWorkoutProgress(dayId: $dayId, tick: $tick)
+}
+    `;
+
+export const useFitspaceLogWorkoutProgressMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceLogWorkoutProgressMutation, TError, GQLFitspaceLogWorkoutProgressMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceLogWorkoutProgressMutation, TError, GQLFitspaceLogWorkoutProgressMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceLogWorkoutProgress'],
+    mutationFn: (variables?: GQLFitspaceLogWorkoutProgressMutationVariables) => fetchData<GQLFitspaceLogWorkoutProgressMutation, GQLFitspaceLogWorkoutProgressMutationVariables>(FitspaceLogWorkoutProgressDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceLogWorkoutProgressMutation.getKey = () => ['FitspaceLogWorkoutProgress'];
+
+
+useFitspaceLogWorkoutProgressMutation.fetcher = (variables: GQLFitspaceLogWorkoutProgressMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceLogWorkoutProgressMutation, GQLFitspaceLogWorkoutProgressMutationVariables>(FitspaceLogWorkoutProgressDocument, variables, options);
+
+export const FitspaceMarkWorkoutAsCompletedDocument = `
+    mutation FitspaceMarkWorkoutAsCompleted($dayId: ID!) {
+  markWorkoutAsCompleted(dayId: $dayId)
+}
+    `;
+
+export const useFitspaceMarkWorkoutAsCompletedMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceMarkWorkoutAsCompletedMutation, TError, GQLFitspaceMarkWorkoutAsCompletedMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceMarkWorkoutAsCompletedMutation, TError, GQLFitspaceMarkWorkoutAsCompletedMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceMarkWorkoutAsCompleted'],
+    mutationFn: (variables?: GQLFitspaceMarkWorkoutAsCompletedMutationVariables) => fetchData<GQLFitspaceMarkWorkoutAsCompletedMutation, GQLFitspaceMarkWorkoutAsCompletedMutationVariables>(FitspaceMarkWorkoutAsCompletedDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceMarkWorkoutAsCompletedMutation.getKey = () => ['FitspaceMarkWorkoutAsCompleted'];
+
+
+useFitspaceMarkWorkoutAsCompletedMutation.fetcher = (variables: GQLFitspaceMarkWorkoutAsCompletedMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceMarkWorkoutAsCompletedMutation, GQLFitspaceMarkWorkoutAsCompletedMutationVariables>(FitspaceMarkWorkoutAsCompletedDocument, variables, options);
 
 export const GetClientsDocument = `
     query GetClients {

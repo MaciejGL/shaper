@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useWorkout } from '@/context/workout-context/workout-context'
+import { useTrackWorkoutSession } from '@/hooks/use-track-workout-session'
 import { cn } from '@/lib/utils'
 
 import { getExpectedDayDate } from '../../utils'
@@ -21,6 +22,12 @@ import { getExpectedDayDate } from '../../utils'
 import { WorkoutDay } from './workout-page.client'
 
 export function Navigation() {
+  const { activeDay } = useWorkout()
+  const dayId = activeDay?.id
+  const isActive = true
+  const isCompleted = activeDay?.completedAt ? true : false
+  useTrackWorkoutSession(dayId, isActive, isCompleted)
+
   return (
     <div
       className={cn(
@@ -55,6 +62,11 @@ function Day({ day }: { day: WorkoutDay }) {
     setActiveDayId(day.id)
   }
 
+  const isDayCompleted = day.completedAt
+  const completionRate =
+    day.exercises.filter((exercise) => exercise.completedAt).length /
+    day.exercises.length
+
   return (
     <div>
       <button
@@ -73,13 +85,23 @@ function Day({ day }: { day: WorkoutDay }) {
         </span>
       </button>
       {!day.isRestDay && (
-        <div
-          className={cn(
-            'h-1 w-[66%] bg-primary rounded-full mt-1 mx-auto',
-            day.completedAt && 'bg-green-500',
-            !day.completedAt && 'bg-amber-500',
-          )}
-        />
+        <div className="relative h-1 my-1 mx-auto w-[66%] bg-secondary rounded-full">
+          <div
+            className={cn(
+              'absolute inset-0',
+              'h-1 rounded-full transition-all',
+              isDayCompleted && 'bg-green-500',
+              !day.completedAt && 'bg-amber-500',
+              completionRate > 0 && completionRate < 1 && `bg-green-500`,
+            )}
+            style={{
+              width:
+                completionRate > 0 && completionRate < 1
+                  ? `${completionRate * 100}%`
+                  : undefined,
+            }}
+          />
+        </div>
       )}
     </div>
   )

@@ -1,4 +1,4 @@
-import { differenceInMinutes, differenceInYears } from 'date-fns'
+import { differenceInYears, secondsToMinutes } from 'date-fns'
 import {
   CheckIcon,
   ClockIcon,
@@ -7,13 +7,13 @@ import {
   TrophyIcon,
   WeightIcon,
 } from 'lucide-react'
-import { Fragment, useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Fragment, useEffect, useMemo, useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
 import { StatsItem } from '@/components/stats-item'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { ButtonLink } from '@/components/ui/button-link'
 import {
   Dialog,
   DialogClose,
@@ -25,7 +25,11 @@ import {
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { useWorkout } from '@/context/workout-context/workout-context'
-import { useProfileQuery } from '@/generated/graphql-client'
+import {
+  useFitspaceGetWorkoutInfoQuery,
+  useFitspaceMarkWorkoutAsCompletedMutation,
+  useProfileQuery,
+} from '@/generated/graphql-client'
 import { calculateCaloriesBurned } from '@/lib/workout/calculate-calories-burned'
 
 export function Summary({
@@ -35,6 +39,7 @@ export function Summary({
   onOpenChange: (open: boolean) => void
   open: boolean
 }) {
+  const router = useRouter()
   const { age, weightKg, heightCm, sex } = useProfileMetrics()
   const [displayedCalories, setDisplayedCalories] = useState({
     moderate: 0,
@@ -45,28 +50,36 @@ export function Summary({
   const [displayedDuration, setDisplayedDuration] = useState(0)
   const [displayedCompletionRate, setDisplayedCompletionRate] = useState(0)
   const { activeDay } = useWorkout()
+  const {
+    mutateAsync: markWorkoutAsCompleted,
+    isPending: isMarkingWorkoutAsCompleted,
+  } = useFitspaceMarkWorkoutAsCompletedMutation()
+  const { data } = useFitspaceGetWorkoutInfoQuery(
+    {
+      dayId: activeDay!.id,
+    },
+    {
+      enabled: !!activeDay?.id,
+    },
+  )
+
   const completedExercises = activeDay?.exercises.filter(
     (exercise) => exercise.completedAt,
   )
-  const workoutStartTime = activeDay?.startedAt
-  const workoutEndTime = activeDay?.completedAt
 
-  const workoutDuration =
-    workoutEndTime && workoutStartTime
-      ? differenceInMinutes(
-          new Date(workoutEndTime),
-          new Date(workoutStartTime),
-          { roundingMethod: 'ceil' },
-        )
-      : 0
+  const workoutDuration = secondsToMinutes(data?.getWorkoutInfo?.duration ?? 0)
 
-  const caloriesBurned = calculateCaloriesBurned({
-    durationMinutes: workoutDuration,
-    weightKg: weightKg ?? 0,
-    heightCm: heightCm ?? 0,
-    age,
-    gender: sex as 'male' | 'female',
-  })
+  const caloriesBurned = useMemo(
+    () =>
+      calculateCaloriesBurned({
+        durationMinutes: workoutDuration,
+        weightKg: weightKg ?? 0,
+        heightCm: heightCm ?? 0,
+        age,
+        gender: sex as 'male' | 'female',
+      }),
+    [workoutDuration, weightKg, heightCm, age, sex],
+  )
 
   // Calculate total sets and reps
   const totalSets =
@@ -126,6 +139,18 @@ export function Summary({
     workoutDuration,
     completionRate,
   ])
+
+  const handleCompleteWorkout = async () => {
+    try {
+      if (!activeDay) {
+        return
+      }
+      await markWorkoutAsCompleted({ dayId: activeDay!.id })
+      router.push('/fitspace/my-plans?tab=active')
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -242,9 +267,13 @@ export function Summary({
               Continue
             </Button>
           </DialogClose>
-          <ButtonLink href="/fitspace/my-plans?tab=active" className="flex-1">
+          <Button
+            onClick={handleCompleteWorkout}
+            className="flex-1"
+            loading={isMarkingWorkoutAsCompleted}
+          >
             Complete Workout
-          </ButtonLink>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

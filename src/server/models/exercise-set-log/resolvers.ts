@@ -6,6 +6,7 @@ import {
 import {
   markExerciseAsCompleted,
   markSetAsCompleted,
+  markWorkoutAsCompleted,
   updateSetLog,
 } from './factory'
 
@@ -20,5 +21,8 @@ export const Mutation: GQLMutationResolvers = {
   },
   markExerciseAsCompleted: async (_, args) => {
     return markExerciseAsCompleted(args)
+  },
+  markWorkoutAsCompleted: async (_, args) => {
+    return markWorkoutAsCompleted(args)
   },
 }

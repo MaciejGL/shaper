@@ -1,6 +1,7 @@
 export const convertSecondsToTimeString = (seconds: number) => {
   const minutes = Math.floor(seconds / 60)
   const remainingSeconds = seconds % 60
+
   if (minutes && !remainingSeconds) {
     return `${minutes}m`
   }

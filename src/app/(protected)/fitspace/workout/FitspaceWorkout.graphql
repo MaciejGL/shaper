@@ -72,6 +72,13 @@ query FitspaceGetWorkout($trainingId: ID!) {
   }
 }
 
+query FitspaceGetWorkoutInfo($dayId: ID!) {
+  getWorkoutInfo(dayId: $dayId) {
+    id
+    duration
+  }
+}
+
 mutation FitspaceMarkSetAsCompleted($setId: ID!, $completed: Boolean!) {
   markSetAsCompleted(setId: $setId, completed: $completed)
 }
@@ -89,4 +96,12 @@ mutation FitspaceUpdateSetLog($input: LogSetInput!) {
     weight
     rpe
   }
+}
+
+mutation FitspaceLogWorkoutProgress($dayId: ID!, $tick: Int!) {
+  logWorkoutProgress(dayId: $dayId, tick: $tick)
+}
+
+mutation FitspaceMarkWorkoutAsCompleted($dayId: ID!) {
+  markWorkoutAsCompleted(dayId: $dayId)
 }
