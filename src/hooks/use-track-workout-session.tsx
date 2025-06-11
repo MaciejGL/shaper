@@ -3,7 +3,7 @@ import { useRef } from 'react'
 
 import { useFitspaceLogWorkoutProgressMutation } from '@/generated/graphql-client'
 
-const TICK_INTERVAL = 5
+const TICK_INTERVAL = 20
 
 export function useTrackWorkoutSession(
   dayId?: string,
