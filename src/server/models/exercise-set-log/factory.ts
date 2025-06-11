@@ -148,6 +148,7 @@ export const markSetAsCompleted = async (
   // 1. Mark set as incomplete with all the related data
   if (!completed) {
     await unmarkSetCompletedRelatedData(setId)
+    return true
   }
 
   await markSetAsCompletedRelatedData(setId)

@@ -26,6 +26,7 @@ export function TodaysWorkout({
         <ButtonLink
           href={`/fitspace/workout/${planId}`}
           iconEnd={<ArrowRight />}
+          variant={todaysWorkout.isRestDay ? 'outline' : 'default'}
         >
           Start workout
         </ButtonLink>
