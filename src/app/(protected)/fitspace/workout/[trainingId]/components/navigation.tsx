@@ -24,7 +24,9 @@ import { WorkoutDay } from './workout-page.client'
 export function Navigation() {
   const { activeDay } = useWorkout()
   const dayId = activeDay?.id
-  const isActive = true
+  const isActive = activeDay?.exercises.some((ex) =>
+    ex.sets.some((set) => set.log?.reps || set.log?.weight),
+  )
   const isCompleted = activeDay?.completedAt ? true : false
   useTrackWorkoutSession(dayId, isActive, isCompleted)
 
