@@ -9,7 +9,7 @@ import {
 import TrainingDay from './model'
 
 export const Query: GQLQueryResolvers = {
-  getWorkoutInfo: async (_, { dayId }) => {
+  getWorkoutInfo: async (_, { dayId }, context) => {
     const day = await prisma.trainingDay.findUnique({
       where: { id: dayId },
       include: {
@@ -35,7 +35,7 @@ export const Query: GQLQueryResolvers = {
       throw new Error(`Training day with id ${dayId} not found`)
     }
 
-    return new TrainingDay(day)
+    return new TrainingDay(day, context)
   },
 }
 
