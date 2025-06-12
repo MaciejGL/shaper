@@ -4,7 +4,6 @@ import { MoreHorizontalIcon } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CardHeader, CardTitle } from '@/components/ui/card'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import {
   DropdownMenuContent,
@@ -25,12 +24,12 @@ export function Header({
   handlePlanAction: (action: PlanAction, plan: NonNullable<ActivePlan>) => void
 }) {
   return (
-    <CardHeader className="pb-4">
+    <div className="pb-6">
       <div className="flex justify-between items-start">
         <PlanHeader title={plan.title} loading={loading} />
         <PlanActions handlePlanAction={handlePlanAction} plan={plan} />
       </div>
-    </CardHeader>
+    </div>
   )
 }
 
@@ -38,11 +37,11 @@ function PlanHeader({ title, loading }: { title: string; loading: boolean }) {
   return (
     <div className="flex-1">
       <div className="mb-2">
-        <CardTitle
+        <h2
           className={cn('text-lg mb-1', loading && 'masked-placeholder-text')}
         >
           {title}
-        </CardTitle>
+        </h2>
         <Badge variant="primary" isLoading={loading}>
           Active
         </Badge>
@@ -62,7 +61,7 @@ function PlanActions({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
-          variant="ghost"
+          variant="secondary"
           size="icon-lg"
           iconOnly={<MoreHorizontalIcon />}
         />

@@ -19,6 +19,7 @@ import {
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -59,7 +60,7 @@ export function Summary({
       dayId: activeDay!.id,
     },
     {
-      enabled: !!activeDay?.id,
+      enabled: !!activeDay?.id && open,
     },
   )
 
@@ -159,91 +160,97 @@ export function Summary({
         withCloseButton={false}
         dialogTitle="Workout Summary"
       >
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <TrophyIcon className="h-5 w-5 text-yellow-500" />
-            Workout Complete!
-          </DialogTitle>
-          <DialogDescription>
-            Great job! Here's your workout summary for today.
-          </DialogDescription>
-        </DialogHeader>
+        <div className="space-y-6">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TrophyIcon className="h-5 w-5 text-yellow-500" />
+              Workout Complete!
+            </DialogTitle>
+            <DialogDescription>
+              Great job! Here's your workout summary for today.
+            </DialogDescription>
+          </DialogHeader>
 
-        <div className="space-y-8">
-          {/* Completion Status */}
-          <div className="flex flex-col gap-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Progress</span>
-                <Badge
-                  variant={completionRate === 100 ? 'primary' : 'secondary'}
-                >
-                  {completionRate}% Complete
-                </Badge>
-              </div>
-              <Progress value={displayedCompletionRate} duration={1000} />
-            </div>
-          </div>
-
-          {/* Workout Stats */}
-          <div className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold">Workout Stats</h2>
-
-            <div className="grid grid-cols-2 gap-4 bg-muted rounded-lg p-4">
-              <StatsItem
-                value={displayedDuration}
-                label="Duration (min)"
-                icon={<ClockIcon className="h-4 w-4 text-yellow-600" />}
-              />
-              <StatsItem
-                value={
-                  <div className="flex items-center gap-2">
-                    <AnimateNumber value={displayedCalories.moderate} />
-                  </div>
-                }
-                label="Calories burned"
-                icon={<FlameIcon className="h-4 w-4 text-amber-600" />}
-              />
-              <StatsItem
-                value={displayedSets}
-                label="Sets completed"
-                icon={<DumbbellIcon className="h-4 w-4 text-green-600" />}
-              />
-              <StatsItem
-                value={displayedWeight}
-                label="Total volume (kg)"
-                icon={<WeightIcon className="h-4 w-4 text-blue-600" />}
-              />
-            </div>
-          </div>
-
-          {/* Exercises Completed */}
-          {completedExercises && completedExercises.length > 0 && (
+          <div className="space-y-8 mt-12">
+            {/* Completion Status */}
             <div className="flex flex-col gap-4">
-              <h2 className="text-lg font-semibold">Exercises Completed</h2>
-              <div className="space-y-2 bg-muted rounded-lg p-4">
-                <div className="space-y-2">
-                  {completedExercises.map((exercise, index) => (
-                    <Fragment key={index}>
-                      <div
-                        key={index}
-                        className="flex items-center justify-between py-2"
-                      >
-                        <div>
-                          <p className="text-sm font-medium">{exercise.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {exercise.sets?.length || 0} sets completed
-                          </p>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    Progress
+                  </span>
+                  <Badge
+                    variant={completionRate === 100 ? 'primary' : 'secondary'}
+                  >
+                    {completionRate}% Complete
+                  </Badge>
+                </div>
+                <Progress value={displayedCompletionRate} duration={1000} />
+              </div>
+            </div>
+
+            {/* Workout Stats */}
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold">Workout Stats</h2>
+
+              <div className="grid grid-cols-2 gap-4 bg-muted rounded-lg p-4">
+                <StatsItem
+                  value={displayedDuration}
+                  label="Duration (min)"
+                  icon={<ClockIcon className="h-4 w-4 text-yellow-600" />}
+                />
+                <StatsItem
+                  value={
+                    <div className="flex items-center gap-2">
+                      <AnimateNumber value={displayedCalories.moderate} />
+                    </div>
+                  }
+                  label="Calories burned"
+                  icon={<FlameIcon className="h-4 w-4 text-amber-600" />}
+                />
+                <StatsItem
+                  value={displayedSets}
+                  label="Sets completed"
+                  icon={<DumbbellIcon className="h-4 w-4 text-green-600" />}
+                />
+                <StatsItem
+                  value={displayedWeight}
+                  label="Total volume (kg)"
+                  icon={<WeightIcon className="h-4 w-4 text-blue-600" />}
+                />
+              </div>
+            </div>
+
+            {/* Exercises Completed */}
+            {completedExercises && completedExercises.length > 0 && (
+              <div className="flex flex-col gap-4">
+                <h2 className="text-lg font-semibold">Exercises Completed</h2>
+                <div className="space-y-2 bg-muted rounded-lg p-4">
+                  <div className="space-y-1">
+                    {completedExercises.map((exercise, index) => (
+                      <Fragment key={index}>
+                        <div
+                          key={index}
+                          className="flex items-center justify-between py-2"
+                        >
+                          <div>
+                            <p className="text-sm font-medium">
+                              {exercise.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {exercise.sets?.length || 0} sets completed
+                            </p>
+                          </div>
+                          <CheckIcon className="h-4 w-4 text-green-500" />
                         </div>
-                        <CheckIcon className="h-4 w-4 text-green-500" />
-                      </div>
-                      <Separator className="last:hidden" />
-                    </Fragment>
-                  ))}
+                        <Separator className="last:hidden" />
+                      </Fragment>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Motivational Message */}
           <div className="bg-primary/5 border-primary/20 rounded-lg p-4">
@@ -260,21 +267,22 @@ export function Summary({
             </div>
           </div>
         </div>
-
-        <div className="flex gap-2 pt-4">
-          <DialogClose asChild>
-            <Button variant="secondary" className="flex-1">
-              Continue
+        <DialogFooter>
+          <div className="flex gap-2 pt-4">
+            <DialogClose asChild>
+              <Button variant="secondary" className="flex-1">
+                Continue
+              </Button>
+            </DialogClose>
+            <Button
+              onClick={handleCompleteWorkout}
+              className="flex-1"
+              loading={isMarkingWorkoutAsCompleted}
+            >
+              Complete Workout
             </Button>
-          </DialogClose>
-          <Button
-            onClick={handleCompleteWorkout}
-            className="flex-1"
-            loading={isMarkingWorkoutAsCompleted}
-          >
-            Complete Workout
-          </Button>
-        </div>
+          </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

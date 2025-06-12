@@ -9,6 +9,54 @@ query FitspaceDashboard {
     yearsOfExperience
   }
 
+  getWorkout {
+    navigation {
+      currentWeekIndex
+      currentDayIndex
+      firstUncompletedWeekIndex
+      firstUncompletedDayIndex
+    }
+    plan {
+      id
+      title
+      description
+      isPublic
+      isTemplate
+      isDraft
+      startDate
+
+      weeks {
+        id
+        weekNumber
+        name
+        completedAt
+
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          workoutType
+          startedAt
+          completedAt
+          duration
+
+          exercises {
+            id
+            name
+            sets {
+              id
+            }
+            muscleGroups {
+              id
+              name
+              alias
+            }
+          }
+        }
+      }
+    }
+  }
+
   # nextWorkoutDay {
   #   id
   #   workoutType

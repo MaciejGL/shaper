@@ -2,6 +2,7 @@ import {
   BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
   ExerciseSetLog as PrismaExerciseSetLog,
+  MuscleGroup as PrismaMuscleGroup,
   TrainingDay as PrismaTrainingDay,
   TrainingExercise as PrismaTrainingExercise,
   WorkoutSessionEvent as PrismaWorkoutSessionEvent,
@@ -9,6 +10,7 @@ import {
 
 import { GQLTrainingDay, GQLWorkoutType } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { GQLContext } from '@/types/gql-context'
 
 import TrainingExercise from '../training-exercise/model'
 
@@ -20,9 +22,12 @@ export default class TrainingDay implements GQLTrainingDay {
         sets?: (PrismaExerciseSet & {
           log?: PrismaExerciseSetLog
         })[]
-        base?: PrismaBaseExercise
+        base?: PrismaBaseExercise & {
+          muscleGroups: PrismaMuscleGroup[]
+        }
       })[]
     },
+    protected context: GQLContext,
   ) {}
 
   get id() {
@@ -77,7 +82,9 @@ export default class TrainingDay implements GQLTrainingDay {
         },
       })
     }
-    return exercises.map((exercise) => new TrainingExercise(exercise))
+    return exercises.map(
+      (exercise) => new TrainingExercise(exercise, this.context),
+    )
   }
 
   async duration() {

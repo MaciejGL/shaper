@@ -1,40 +1,63 @@
-import { Activity } from 'lucide-react'
+'use client'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { secondsToMinutes } from 'date-fns'
+import {
+  Activity,
+  CalendarDaysIcon,
+  Clock4Icon,
+  TrendingDownIcon,
+  TrendingUpIcon,
+} from 'lucide-react'
+
+import { getDayName } from '@/app/(protected)/trainer/trainings/creator/components/utils'
+import { StatsItem } from '@/components/stats-item'
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { GQLFitspaceDashboardQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
 export type DashboardStatsProps = {
-  stats: {
-    streak: number
-    currentWeight: number
-    weightLastWeek: number
-    activeWorkout: {
-      name: string
-      thisWeekSessions: {
-        date: string
-        type: string
-        completed: boolean
-        isRestDay: boolean
-      }[]
-      percentageCompleted: number
-      totalCompletedDays: number
-      totalDays: number
-    }
-  }
+  plan?: NonNullable<
+    NonNullable<GQLFitspaceDashboardQuery['getWorkout']>['plan']
+  >
+  currentWeek?: NonNullable<
+    NonNullable<GQLFitspaceDashboardQuery['getWorkout']>['plan']
+  >['weeks'][number]
 }
 
-export function DashboardStats({ stats }: DashboardStatsProps) {
-  const workoutsThisWeekCompleted = stats.activeWorkout.thisWeekSessions.filter(
-    (session) => session.completed && !session.isRestDay,
-  ).length
-  const workoutsThisWeekGoal = stats.activeWorkout.thisWeekSessions.filter(
-    (session) => !session.isRestDay,
+export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
+  if (!plan || !currentWeek) {
+    return null
+  }
+
+  const workoutsThisWeekCompleted = currentWeek.days.filter(
+    (day) => day.completedAt,
   ).length
 
-  const diffWeight = stats.currentWeight - stats.weightLastWeek
+  const workoutsThisWeekGoal = currentWeek.days.filter(
+    (day) => !day.isRestDay,
+  ).length
+
+  const streak = calculateStreak({
+    currentWeekIndex: plan.weeks.findIndex(
+      (week) => week.id === currentWeek.id,
+    ),
+    currentDayIndex: plan.weeks.findIndex((week) => week.id === currentWeek.id),
+    weeks: plan.weeks,
+  })
+
+  const totalDuration = currentWeek.days.reduce(
+    (acc, day) => acc + (day.duration ?? 0),
+    0,
+  )
+
+  const weightLogLastWeek = 83
+  const weightLogCurrentWeek = 82
+
+  const diffWeight = weightLogCurrentWeek - weightLogLastWeek
+
   return (
     <div className="space-y-6">
-      <Card>
+      <div className="bg-muted rounded-lg py-4">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="h-5 w-5" />
@@ -42,37 +65,46 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="grid grid-cols-3 gap-4 py-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold ">{stats.streak}</div>
-              <div className="text-xs text-muted-foreground">Day Streak</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold ">
-                {stats.currentWeight}kg
-                {diffWeight > 0 && (
-                  <span className="text-xs text-muted-foreground">
-                    +{diffWeight}kg
-                  </span>
-                )}
-                {diffWeight < 0 && (
-                  <span className="text-xs text-muted-foreground">
-                    {diffWeight}kg
-                  </span>
-                )}
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Current Weight
-              </div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold">
-                {stats.activeWorkout.percentageCompleted}%
-              </div>
-              <div className="text-xs text-muted-foreground">
-                Workouts Completed
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <StatsItem
+              value={streak}
+              label="Day Streak"
+              icon={<CalendarDaysIcon className="size-4 text-amber-500" />}
+            />
+
+            <StatsItem
+              value={
+                <div className="text-2xl font-bold">
+                  {secondsToMinutes(totalDuration)}
+                  <span className="text-xs text-muted-foreground">min</span>
+                </div>
+              }
+              icon={<Clock4Icon className="size-4 text-blue-500" />}
+              label="Gym time"
+            />
+            <StatsItem
+              value={
+                <div className="text-2xl font-bold flex items-baseline gap-1">
+                  {weightLogCurrentWeek}
+                  {diffWeight !== 0 && (
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      <p>
+                        {diffWeight > 0 ? '+' : '-'}
+                        {Math.abs(diffWeight)}kg
+                      </p>
+                    </div>
+                  )}
+                </div>
+              }
+              icon={
+                diffWeight > 0 ? (
+                  <TrendingUpIcon className="size-4 text-green-500" />
+                ) : (
+                  <TrendingDownIcon className="size-4 text-cyan-500" />
+                )
+              }
+              label="Weight trend"
+            />
           </div>
 
           <div className="space-y-4 pt-2 border-t">
@@ -83,23 +115,23 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
               </span>
             </div>
             <div className="grid grid-cols-7 gap-1 md:gap-2">
-              {stats.activeWorkout.thisWeekSessions.map((session, index) => (
+              {currentWeek.days.map((day, index) => (
                 <div
                   key={index}
                   className={cn(
                     'rounded-md p-2',
-                    !session.isRestDay && 'border',
-                    session.completed &&
-                      !session.isRestDay &&
+                    !day.isRestDay && 'border',
+                    day.completedAt &&
+                      !day.isRestDay &&
                       'bg-primary text-primary-foreground',
-                    session.isRestDay &&
+                    day.isRestDay &&
                       'bg-muted-foreground/10 text-muted-foreground',
                   )}
                 >
                   <div className="flex-center flex-col text-xs md:text-sm text-center aspect-square">
-                    <span>{getDayOfWeek(session.date)}</span>
+                    <span>{getDayName(day.dayOfWeek, { short: true })}</span>
                     <span className="font-medium truncate max-md:hidden">
-                      {session.type.split(' ').at(0)}
+                      {day.workoutType?.split(' ').at(0)}
                     </span>
                   </div>
                 </div>
@@ -107,11 +139,56 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
             </div>
           </div>
         </CardContent>
-      </Card>
+      </div>
     </div>
   )
 }
 
-function getDayOfWeek(date: string) {
-  return new Date(date).toLocaleDateString('en-US', { weekday: 'short' })
+const calculateStreak = ({
+  currentWeekIndex,
+  currentDayIndex,
+  weeks,
+}: {
+  currentWeekIndex: number
+  currentDayIndex: number
+  weeks: NonNullable<
+    NonNullable<GQLFitspaceDashboardQuery['getWorkout']>['plan']
+  >['weeks']
+}): number => {
+  let streak = 0
+  let currentWeek = currentWeekIndex
+  let currentDay = currentDayIndex
+
+  // Start from current day and go backwards
+  while (currentWeek >= 0) {
+    const week = weeks[currentWeek]
+    if (!week) break
+
+    // For the current week, only check days up to currentDay
+    // For previous weeks, check all days
+    const daysToCheck =
+      currentWeek === currentWeekIndex
+        ? week.days.slice(0, currentDay + 1)
+        : week.days
+
+    // Check days in reverse order
+    for (let i = daysToCheck.length - 1; i >= 0; i--) {
+      const day = daysToCheck[i]
+
+      // Skip if day is not completed
+      if (!day.completedAt) {
+        return streak
+      }
+
+      // If we found a completed day, increment streak
+      streak++
+    }
+
+    // Move to previous week
+    currentWeek--
+    // For previous weeks, we check all days
+    currentDay = (weeks[currentWeek]?.days.length ?? 0) - 1
+  }
+
+  return streak
 }

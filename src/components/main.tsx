@@ -39,7 +39,7 @@ export const Main = async ({
             'w-full h-full p-2 md:p-4 lg:p-8 bg-background overflow-y-auto',
             {
               'md:rounded-md shadow-sm': isTrainer,
-              'pb-32': !isTrainer,
+              'pb-32 md:pb-32 lg:pb-32': !isTrainer,
             },
           )}
         >

@@ -207,6 +207,11 @@ export async function getMyPlansOverview(context: GQLContext) {
                   order: 'asc',
                 },
                 include: {
+                  base: {
+                    include: {
+                      muscleGroups: true,
+                    },
+                  },
                   sets: {
                     orderBy: {
                       order: 'asc',

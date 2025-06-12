@@ -639,6 +639,7 @@ export type GQLTrainingExercise = {
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   instructions?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   logs: EntireFieldWrapper<Array<GQLExerciseLog>>;
+  muscleGroups: EntireFieldWrapper<Array<GQLMuscleGroup>>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
   order: EntireFieldWrapper<Scalars['Int']['output']>;
   restSeconds?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
@@ -1317,6 +1318,7 @@ export type GQLTrainingExerciseResolvers<ContextType = GQLContext, ParentType ex
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   instructions?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   logs?: Resolver<Array<GQLResolversTypes['ExerciseLog']>, ParentType, ContextType>;
+  muscleGroups?: Resolver<Array<GQLResolversTypes['MuscleGroup']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   order?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   restSeconds?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;

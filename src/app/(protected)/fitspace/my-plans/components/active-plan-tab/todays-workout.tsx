@@ -1,8 +1,16 @@
-import { ArrowRight, ClockIcon, DumbbellIcon, HamIcon } from 'lucide-react'
+import {
+  ArrowRight,
+  CheckIcon,
+  ClockIcon,
+  DumbbellIcon,
+  HamIcon,
+} from 'lucide-react'
+import { Fragment } from 'react'
 
 import { BiggyIcon } from '@/components/biggy-icon'
 import { Badge } from '@/components/ui/badge'
 import { ButtonLink } from '@/components/ui/button-link'
+import { Separator } from '@/components/ui/separator'
 import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
@@ -28,7 +36,7 @@ export function TodaysWorkout({
           iconEnd={<ArrowRight />}
           variant={todaysWorkout.isRestDay ? 'outline' : 'default'}
         >
-          Start workout
+          {todaysWorkout.isRestDay ? 'View workout' : 'Start workout'}
         </ButtonLink>
       </div>
       {todaysWorkout.isRestDay ? (
@@ -63,7 +71,7 @@ function WorkoutDayHeader({
 
   return (
     <div className="flex flex-col gap-1">
-      <h2 className="text-xl font-semibold text-foreground">
+      <h2 className="text-2xl font-semibold text-foreground">
         {formatWorkoutType(day.workoutType)}
       </h2>
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -86,24 +94,35 @@ function WorkoutDayExercises({
   day: NonNullable<ActivePlan>['weeks'][number]['days'][number]
 }) {
   return (
-    <div className="space-y-1">
-      <p className="text-xs text-muted-foreground">Exercises</p>
-      <div className="space-y-2 bg-muted rounded-md p-4">
-        {day.exercises.map((exercise) => (
-          <div
-            key={exercise.id}
-            className="flex justify-between items-start py-1"
-          >
-            <div className="flex-1 pr-4">
-              <p className="text-foreground leading-tight text-sm">
-                {exercise.name}
-              </p>
-            </div>
-            <div className="text-sm text-muted-foreground whitespace-nowrap">
-              {exercise.sets.length} sets
-            </div>
-          </div>
-        ))}
+    <div className="flex flex-col gap-2">
+      <h2 className="text-sm font-medium">Exercises</h2>
+      <div className="space-y-2 bg-muted rounded-lg p-4">
+        <div className="space-y-2">
+          {day.exercises.map((exercise, index) => (
+            <Fragment key={index}>
+              <div key={index} className="flex items-center gap-4">
+                {exercise.completedAt && (
+                  <CheckIcon className="size-4 text-green-500" />
+                )}
+                <div className="grow">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">{exercise.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {exercise.sets?.length || 0} sets
+                    </p>
+                  </div>
+
+                  <div className="text-xs text-muted-foreground">
+                    {exercise?.muscleGroups
+                      ?.map((group) => group.alias)
+                      .join(', ')}
+                  </div>
+                </div>
+              </div>
+              <Separator className="last:hidden" />
+            </Fragment>
+          ))}
+        </div>
       </div>
     </div>
   )

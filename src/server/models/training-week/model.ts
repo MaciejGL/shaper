@@ -2,6 +2,7 @@ import {
   BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
   ExerciseSetLog as PrismaExerciseSetLog,
+  MuscleGroup as PrismaMuscleGroup,
   TrainingDay as PrismaTrainingDay,
   TrainingExercise as PrismaTrainingExercise,
   TrainingWeek as PrismaTrainingWeek,
@@ -9,6 +10,7 @@ import {
 
 import { GQLTrainingWeek } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { GQLContext } from '@/types/gql-context'
 
 import TrainingDay from '../training-day/model'
 
@@ -20,10 +22,13 @@ export default class TrainingWeek implements GQLTrainingWeek {
           sets?: (PrismaExerciseSet & {
             log?: PrismaExerciseSetLog
           })[]
-          base?: PrismaBaseExercise
+          base?: PrismaBaseExercise & {
+            muscleGroups: PrismaMuscleGroup[]
+          }
         })[]
       })[]
     },
+    protected context: GQLContext,
   ) {}
 
   get id() {
@@ -75,6 +80,6 @@ export default class TrainingWeek implements GQLTrainingWeek {
       })
     }
 
-    return days.map((day) => new TrainingDay(day))
+    return days.map((day) => new TrainingDay(day, this.context))
   }
 }

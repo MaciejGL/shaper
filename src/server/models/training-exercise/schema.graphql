@@ -7,6 +7,7 @@ type TrainingExercise {
   instructions: String
   order: Int!
   completedAt: String
+  muscleGroups: [MuscleGroup!]!
 
   sets: [ExerciseSet!]!
   logs: [ExerciseLog!]!

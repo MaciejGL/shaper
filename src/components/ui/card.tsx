@@ -4,13 +4,13 @@ import * as React from 'react'
 import { cn } from '@/lib/utils'
 
 const cardVariants = cva(
-  'bg-zinc-100 dark:bg-zinc-900 text-card-foreground flex flex-col gap-6 rounded-md py-4 border-0 relative border border-border',
+  'bg-zinc-100 dark:bg-zinc-900 text-card-foreground flex flex-col gap-6 rounded-lg py-4 border-0 relative border border-border',
   {
     variants: {
       variant: {
         default: '',
         gradient:
-          'border-zinc-200 dark:border-zinc-800 shadow-lg bg-gradient-to-br from-white via-white  to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800',
+          'border-zinc-200 dark:border-zinc-800 shadow-lg dark:shadow-lg-dark bg-gradient-to-br from-white via-white  to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800 border-0',
       },
     },
   },

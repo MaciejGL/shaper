@@ -16,7 +16,11 @@ export function ProgressOverview({
 }) {
   return (
     <div>
-      <div className="grid grid-cols-2 gap-4 bg-muted p-4 mb-6 rounded-md">
+      <ProgressBar
+        completedWorkoutsDays={completedWorkoutsDays}
+        totalWorkouts={totalWorkouts}
+      />
+      <div className="grid grid-cols-2 gap-4 bg-muted p-4 mt-6 rounded-lg">
         <StatsItem value={currentWeekNumber ?? 1} label="Current Week" />
         <StatsItem value={adherence} label="Weeks Completed" />
         <StatsItem value={completedWorkoutsDays} label="Workouts Done" />
@@ -25,10 +29,6 @@ export function ProgressOverview({
           label="Days per week"
         />
       </div>
-      <ProgressBar
-        completedWorkoutsDays={completedWorkoutsDays}
-        totalWorkouts={totalWorkouts}
-      />
     </div>
   )
 }

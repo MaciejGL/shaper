@@ -2,14 +2,17 @@ import {
   BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
   ExerciseSetLog as PrismaExerciseSetLog,
+  MuscleGroup as PrismaMuscleGroup,
   TrainingExercise as PrismaTrainingExercise,
 } from '@prisma/client'
 
 import { GQLTrainingExercise } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { GQLContext } from '@/types/gql-context'
 
 import ExerciseLog from '../exercise-log/model'
 import ExerciseSet from '../exercise-set/model'
+import MuscleGroup from '../muscle-group/model'
 
 export default class TrainingExercise implements GQLTrainingExercise {
   constructor(
@@ -17,8 +20,11 @@ export default class TrainingExercise implements GQLTrainingExercise {
       sets?: (PrismaExerciseSet & {
         log?: PrismaExerciseSetLog
       })[]
-      base?: Pick<PrismaBaseExercise, 'videoUrl'>
+      base?: PrismaBaseExercise & {
+        muscleGroups: PrismaMuscleGroup[]
+      }
     },
+    protected context: GQLContext,
   ) {}
 
   get id() {
@@ -55,6 +61,16 @@ export default class TrainingExercise implements GQLTrainingExercise {
 
   get baseId() {
     return this.data.baseId
+  }
+
+  get muscleGroups() {
+    if (!this.data.base) {
+      return []
+    }
+
+    return this.data.base.muscleGroups.map(
+      (group) => new MuscleGroup(group, this.context),
+    )
   }
 
   async videoUrl() {

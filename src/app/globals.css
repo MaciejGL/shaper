@@ -116,13 +116,23 @@
   --sidebar-ring: oklch(0.552 0.016 285.938);
   --masked-placeholder-text: oklch(0.274 0.006 286.033);
 }
-/* 
+
 @theme {
   --shadow-sm:
     0 1px 1px hsl(0deg 0% 0% / 0.075), 0 2px 2px hsl(0deg 0% 0% / 0.075),
     0 4px 4px hsl(0deg 0% 0% / 0.075), 0 8px 8px hsl(0deg 0% 0% / 0.075),
     0 16px 16px hsl(0deg 0% 0% / 0.075);
-} */
+
+  --shadow-lg:
+    0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)),
+    0 -2px 5px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)),
+    0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+
+  --shadow-lg-dark:
+    0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.3)),
+    0 0px 6px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.3)),
+    0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.3));
+}
 
 @layer base {
   * {

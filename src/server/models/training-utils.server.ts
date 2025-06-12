@@ -38,7 +38,11 @@ export async function getFullPlanById(id: string) {
                   order: 'asc',
                 },
                 include: {
-                  base: true,
+                  base: {
+                    include: {
+                      muscleGroups: true,
+                    },
+                  },
                   logs: true,
                   sets: {
                     include: {

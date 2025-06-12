@@ -32,6 +32,12 @@ query FitspaceMyPlans {
             instructions
             name
             warmupSets
+            muscleGroups {
+              id
+              name
+              alias
+            }
+            completedAt
             sets {
               id
             }

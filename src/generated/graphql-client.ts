@@ -637,6 +637,7 @@ export type GQLTrainingExercise = {
   id: Scalars['ID']['output'];
   instructions?: Maybe<Scalars['String']['output']>;
   logs: Array<GQLExerciseLog>;
+  muscleGroups: Array<GQLMuscleGroup>;
   name: Scalars['String']['output'];
   order: Scalars['Int']['output'];
   restSeconds?: Maybe<Scalars['Int']['output']>;
@@ -913,12 +914,12 @@ export enum GQLWorkoutType {
 export type GQLFitspaceDashboardQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLFitspaceDashboardQuery = { __typename?: 'Query', myTrainer?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, averageRating?: number | undefined | null, yearsOfExperience?: number | undefined | null } | undefined | null };
+export type GQLFitspaceDashboardQuery = { __typename?: 'Query', myTrainer?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, averageRating?: number | undefined | null, yearsOfExperience?: number | undefined | null } | undefined | null, getWorkout?: { __typename?: 'GetWorkoutPayload', navigation: { __typename?: 'WorkoutNavigation', currentWeekIndex: number, currentDayIndex: number, firstUncompletedWeekIndex: number, firstUncompletedDayIndex: number }, plan: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, duration?: number | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }> }> }> }> } } | undefined | null };
 
 export type GQLFitspaceMyPlansQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLFitspaceMyPlansQuery = { __typename?: 'Query', getMyPlansOverview: { __typename?: 'MyPlansPayload', activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty: GQLDifficulty, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, restSeconds?: number | undefined | null, videoUrl?: string | undefined | null, instructions?: string | undefined | null, name: string, warmupSets?: number | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string }> }> }> }> } | undefined | null, availablePlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty: GQLDifficulty, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }>, completedPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty: GQLDifficulty, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, completedAt?: string | undefined | null, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }> }, getWorkout?: { __typename?: 'GetWorkoutPayload', navigation: { __typename?: 'WorkoutNavigation', currentWeekIndex: number, currentDayIndex: number, firstUncompletedWeekIndex: number, firstUncompletedDayIndex: number } } | undefined | null };
+export type GQLFitspaceMyPlansQuery = { __typename?: 'Query', getMyPlansOverview: { __typename?: 'MyPlansPayload', activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty: GQLDifficulty, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, restSeconds?: number | undefined | null, videoUrl?: string | undefined | null, instructions?: string | undefined | null, name: string, warmupSets?: number | undefined | null, completedAt?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }>, sets: Array<{ __typename?: 'ExerciseSet', id: string }> }> }> }> } | undefined | null, availablePlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty: GQLDifficulty, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }>, completedPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty: GQLDifficulty, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, completedAt?: string | undefined | null, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }> }, getWorkout?: { __typename?: 'GetWorkoutPayload', navigation: { __typename?: 'WorkoutNavigation', currentWeekIndex: number, currentDayIndex: number, firstUncompletedWeekIndex: number, firstUncompletedDayIndex: number } } | undefined | null };
 
 export type GQLActivatePlanMutationVariables = Exact<{
   planId: Scalars['ID']['input'];
@@ -1326,6 +1327,50 @@ export const FitspaceDashboardDocument = `
     averageRating
     yearsOfExperience
   }
+  getWorkout {
+    navigation {
+      currentWeekIndex
+      currentDayIndex
+      firstUncompletedWeekIndex
+      firstUncompletedDayIndex
+    }
+    plan {
+      id
+      title
+      description
+      isPublic
+      isTemplate
+      isDraft
+      startDate
+      weeks {
+        id
+        weekNumber
+        name
+        completedAt
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          workoutType
+          startedAt
+          completedAt
+          duration
+          exercises {
+            id
+            name
+            sets {
+              id
+            }
+            muscleGroups {
+              id
+              name
+              alias
+            }
+          }
+        }
+      }
+    }
+  }
 }
     `;
 
@@ -1405,6 +1450,12 @@ export const FitspaceMyPlansDocument = `
             instructions
             name
             warmupSets
+            muscleGroups {
+              id
+              name
+              alias
+            }
+            completedAt
             sets {
               id
             }

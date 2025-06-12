@@ -1,24 +1,20 @@
-import { Calendar, DumbbellIcon } from 'lucide-react'
-import { Play } from 'lucide-react'
+import { ArrowRight, Calendar, DumbbellIcon } from 'lucide-react'
+import { Fragment } from 'react'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { GQLMuscleGroup } from '@/generated/graphql-client'
+import { Separator } from '@/components/ui/separator'
+import { GQLFitspaceDashboardQuery } from '@/generated/graphql-client'
 
 export type TodaysSessionProps = {
-  nextWorkoutDay?: {
-    id: string
-    date: string
-    workoutType: string
-    isRestDay: boolean
-    muscleGroups: Pick<GQLMuscleGroup, 'name'>[]
-  }
+  workout?: NonNullable<
+    NonNullable<GQLFitspaceDashboardQuery['getWorkout']>['plan']
+  >['weeks'][number]['days'][number]
+  planId?: string
 }
 
-export function TodaysSession({ nextWorkoutDay }: TodaysSessionProps) {
-  if (!nextWorkoutDay) {
+export function TodaysSession({ workout, planId }: TodaysSessionProps) {
+  if (!workout || !planId) {
     return (
       <Card variant="gradient" className="@container/todays-session">
         <CardHeader className="pb-3">
@@ -54,26 +50,60 @@ export function TodaysSession({ nextWorkoutDay }: TodaysSessionProps) {
 
   return (
     <Card variant="gradient">
-      <CardHeader className="pb-3">
+      <CardHeader>
         <CardTitle className="text-lg flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
+          <Calendar className="size-5" />
           Today's Workout
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <h3 className="font-semibold">{nextWorkoutDay.workoutType}</h3>
-          <div className="flex gap-2 mt-2">
-            {nextWorkoutDay.muscleGroups.map((group) => (
-              <Badge variant="outline" key={group.name}>
-                {group.name}
-              </Badge>
-            ))}
+        {workout.isRestDay ? (
+          <h3 className="font-semibold text-lg">Rest day</h3>
+        ) : (
+          <h3 className="font-semibold text-lg">{workout.workoutType}</h3>
+        )}
+
+        {workout.isRestDay && (
+          <p className="text-sm text-muted-foreground">
+            You don't have any training sessions planned for today.
+          </p>
+        )}
+
+        {workout.exercises.length > 0 && (
+          <div className="space-y-2 rounded-lg">
+            <div className="space-y-2">
+              {workout.exercises.map((exercise, index) => (
+                <Fragment key={index}>
+                  <div key={index} className="flex items-center gap-4">
+                    <div className="grow">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm">{exercise.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {exercise.sets?.length || 0} sets
+                        </p>
+                      </div>
+
+                      <div className="text-xs text-muted-foreground">
+                        {exercise?.muscleGroups
+                          ?.map((group) => group.alias)
+                          .join(', ')}
+                      </div>
+                    </div>
+                  </div>
+                  <Separator className="last:hidden" />
+                </Fragment>
+              ))}
+            </div>
           </div>
-        </div>
-        <Button className="w-full" size="lg" iconEnd={<Play />}>
-          Start Training
-        </Button>
+        )}
+
+        <ButtonLink
+          href={`/fitspace/workout/${planId}`}
+          iconEnd={<ArrowRight />}
+          variant={workout.isRestDay ? 'outline' : 'default'}
+        >
+          {workout.isRestDay ? 'View workout' : 'Start workout'}
+        </ButtonLink>
       </CardContent>
     </Card>
   )

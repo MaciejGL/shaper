@@ -2,6 +2,7 @@ import {
   BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
   ExerciseSetLog as PrismaExerciseSetLog,
+  MuscleGroup as PrismaMuscleGroup,
   TrainingDay as PrismaTrainingDay,
   TrainingExercise as PrismaTrainingExercise,
   TrainingPlan as PrismaTrainingPlan,
@@ -26,7 +27,9 @@ export default class TrainingPlan implements GQLTrainingPlan {
             sets?: (PrismaExerciseSet & {
               log?: PrismaExerciseSetLog
             })[]
-            base?: PrismaBaseExercise
+            base?: PrismaBaseExercise & {
+              muscleGroups: PrismaMuscleGroup[]
+            }
           })[]
         })[]
       })[]
@@ -225,7 +228,7 @@ export default class TrainingPlan implements GQLTrainingPlan {
     const weeks =
       this.data.weeks ??
       (await this.context.loaders.plan.weeksByPlanId.load(this.data.id))
-    return weeks.map((week) => new TrainingWeek(week))
+    return weeks.map((week) => new TrainingWeek(week, this.context))
   }
 
   private calculateProgress() {

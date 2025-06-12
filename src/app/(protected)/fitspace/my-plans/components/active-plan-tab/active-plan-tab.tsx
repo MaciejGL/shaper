@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 
 import { CollapsibleText } from '@/components/collapsible-text'
 import { Loader } from '@/components/loader'
-import { Card, CardContent } from '@/components/ui/card'
 
 import { ActivePlan, PlanAction, WorkoutNavigation } from '../../types'
 
@@ -52,37 +51,39 @@ export function ActivePlanTab({
   }
 
   return (
-    <div>
+    <div className="mb-20">
       {plan && navigation ? (
-        <Card key={plan.id} variant="gradient">
+        <div key={plan.id}>
           <Header
             plan={plan}
             loading={loading}
             handlePlanAction={handlePlanAction}
           />
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
+            <div className="bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
               <ProgressOverview
-                currentWeekNumber={navigation.currentWeekIndex}
+                currentWeekNumber={navigation.currentWeekIndex + 1}
                 completedWorkoutsDays={plan.completedWorkoutsDays}
                 adherence={plan.adherence}
                 totalWorkouts={plan.totalWorkouts}
                 weekCount={plan.weeks.length}
               />
               <div className="hidden md:block mt-6">
-                <CollapsibleText text={plan.description} />
+                <CollapsibleText text={plan.description} maxLines={10} />
               </div>
             </div>
 
             {todaysWorkout && (
-              <TodaysWorkout todaysWorkout={todaysWorkout} planId={plan.id} />
+              <div className="bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
+                <TodaysWorkout todaysWorkout={todaysWorkout} planId={plan.id} />
+              </div>
             )}
-            <div className="block md:hidden">
-              <CollapsibleText text={plan.description} />
+            <div className="block md:hidden mb-4">
+              <CollapsibleText text={plan.description} maxLines={8} />
             </div>
-          </CardContent>
+          </div>
           <PlanDetails startDate={plan.startDate} endDate={plan.endDate} />
-        </Card>
+        </div>
       ) : (
         <NoActivePlan />
       )}

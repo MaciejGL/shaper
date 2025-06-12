@@ -4,12 +4,6 @@ import { useQueryState } from 'nuqs'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import { cn } from '@/lib/utils'
 
@@ -58,20 +52,13 @@ export function ExercisesPagination({
           Next
         </Button>
       ) : (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button size="sm">Enough?</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setSummaryOpen(true)}>
-              <BadgeCheckIcon /> View Results
-            </DropdownMenuItem>
-
-            {/* <DropdownMenuItem>
-              <PlusIcon /> Add more exercises
-            </DropdownMenuItem> */}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          size="sm"
+          iconEnd={<BadgeCheckIcon />}
+          onClick={() => setSummaryOpen(true)}
+        >
+          Results
+        </Button>
       )}
       <Summary onOpenChange={setSummaryOpen} open={summaryOpen} />
     </div>
