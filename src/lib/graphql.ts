@@ -1,3 +1,5 @@
+import { cookies, headers as nextHeaders } from 'next/headers'
+
 import { getBaseUrl } from '@/lib/get-base-url'
 
 export interface GqlFetchOptions {
@@ -28,9 +30,13 @@ export const gqlFetch = async <TData, TVariables = object>(
     query,
     variables,
   })
+  const vercelJwt = (await nextHeaders()).get('x-vercel-jwt')
+  const cookie = (await cookies()).toString()
 
   const headers = {
-    ...options?.headers,
+    cookie,
+    ...(vercelJwt ? { Authorization: `Bearer ${vercelJwt}` } : {}),
+    ...(options?.headers ?? {}),
     'Content-Type': 'application/json',
   }
 
