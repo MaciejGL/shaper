@@ -29,8 +29,7 @@ export const gqlFetch = async <TData, TVariables = object>(
     query,
     variables,
   })
-  // eslint-disable-next-line no-console
-  console.log({ options })
+
   const headers = {
     ...options?.headers,
     'Content-Type': 'application/json',
@@ -42,9 +41,6 @@ export const gqlFetch = async <TData, TVariables = object>(
   const endpoint = customEndpoint
     ? `${customEndpoint}?${operationType}=${queryName}`
     : `${getBaseUrl()}/api/graphql?${operationType}=${queryName}`
-
-  // eslint-disable-next-line no-console
-  console.log({ endpoint })
 
   try {
     const res = await fetch(endpoint, {

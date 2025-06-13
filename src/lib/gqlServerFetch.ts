@@ -40,11 +40,7 @@ export const gqlServerFetch = async <TData, TVariables = object>(
 ) => {
   const endpoint = await getInternalApiUrl('/api/graphql')
   try {
-    const vercelJwt = (await headers()).get('x-vercel-jwt')
-    const cookie = (await cookies()).toString()
-
-    // eslint-disable-next-line no-console
-    console.log({ vercelJwt, cookie })
+    const cookie = await cookies().toString()
     const response = await gqlFetch<TData, TVariables>(
       query,
       variables,
@@ -52,7 +48,6 @@ export const gqlServerFetch = async <TData, TVariables = object>(
         ...options,
         headers: {
           cookie,
-          ...(vercelJwt ? { Authorization: `Bearer ${vercelJwt}` } : {}),
           ...options?.headers,
           'Content-Type': 'application/json',
         },
