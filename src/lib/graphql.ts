@@ -28,7 +28,7 @@ export const gqlFetch = async <TData, TVariables = object>(
     query,
     variables,
   })
-
+  console.info({ options })
   const headers = {
     ...options?.headers,
     'Content-Type': 'application/json',
