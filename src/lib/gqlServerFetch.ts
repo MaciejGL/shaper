@@ -24,11 +24,21 @@ import { type GqlFetchOptions, gqlFetch } from './graphql'
  * );
  * ```
  */
+
+async function getInternalApiUrl(path: string): Promise<string> {
+  const hdrs = await headers()
+  const host =
+    hdrs.get('host') ?? process.env.NEXT_PUBLIC_VERCEL_URL ?? 'localhost:4000'
+  const protocol = host.startsWith('localhost') ? 'http' : 'https'
+  return `${protocol}://${host}${path}`
+}
+
 export const gqlServerFetch = async <TData, TVariables = object>(
   query: string,
   variables?: TVariables,
   options?: GqlFetchOptions,
 ) => {
+  const endpoint = await getInternalApiUrl('/api/graphql')
   try {
     const vercelJwt = (await headers()).get('x-vercel-jwt')
     const cookie = (await cookies()).toString()
@@ -47,7 +57,7 @@ export const gqlServerFetch = async <TData, TVariables = object>(
           'Content-Type': 'application/json',
         },
       },
-      true,
+      endpoint,
     )
 
     return {
