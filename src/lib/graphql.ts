@@ -28,7 +28,8 @@ export const gqlFetch = async <TData, TVariables = object>(
     query,
     variables,
   })
-  console.info({ options })
+  // eslint-disable-next-line no-console
+  console.log({ options })
   const headers = {
     ...options?.headers,
     'Content-Type': 'application/json',
