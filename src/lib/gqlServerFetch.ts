@@ -35,15 +35,20 @@ export const gqlServerFetch = async <TData, TVariables = object>(
 
     // eslint-disable-next-line no-console
     console.log({ vercelJwt, cookie })
-    const response = await gqlFetch<TData, TVariables>(query, variables, {
-      ...options,
-      headers: {
-        cookie,
-        ...(vercelJwt ? { Authorization: `Bearer ${vercelJwt}` } : {}),
-        ...options?.headers,
-        'Content-Type': 'application/json',
+    const response = await gqlFetch<TData, TVariables>(
+      query,
+      variables,
+      {
+        ...options,
+        headers: {
+          cookie,
+          ...(vercelJwt ? { Authorization: `Bearer ${vercelJwt}` } : {}),
+          ...options?.headers,
+          'Content-Type': 'application/json',
+        },
       },
-    })
+      true,
+    )
 
     return {
       data: response,
