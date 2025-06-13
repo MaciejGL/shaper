@@ -1,4 +1,6 @@
-import { cookies } from 'next/headers'
+'use server'
+
+import { cookies, headers } from 'next/headers'
 
 import { type GqlFetchOptions, gqlFetch } from './graphql'
 
@@ -28,10 +30,13 @@ export const gqlServerFetch = async <TData, TVariables = object>(
   options?: GqlFetchOptions,
 ) => {
   try {
+    const vercelJwt = (await headers()).get('x-vercel-jwt')
+    const cookie = (await cookies()).toString()
     const response = await gqlFetch<TData, TVariables>(query, variables, {
       ...options,
       headers: {
-        cookie: (await cookies()).toString(),
+        cookie,
+        ...(vercelJwt ? { Authorization: `Bearer ${vercelJwt}` } : {}),
         ...options?.headers,
         'Content-Type': 'application/json',
       },
