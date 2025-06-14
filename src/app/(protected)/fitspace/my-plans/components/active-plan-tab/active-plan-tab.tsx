@@ -57,7 +57,7 @@ export function ActivePlanTab({
                 <TodaysWorkout todaysWorkout={currentDay} planId={plan.id} />
               </div>
             )}
-            <div className="block md:hidden mb-4">
+            <div className="block md:hidden bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
               <CollapsibleText text={plan.description} maxLines={8} />
             </div>
           </div>
