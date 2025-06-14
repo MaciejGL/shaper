@@ -8,12 +8,6 @@ query FitspaceGetCurrentWorkoutId {
 
 query FitspaceGetWorkout($trainingId: ID!) {
   getWorkout(trainingId: $trainingId) {
-    navigation {
-      currentWeekIndex
-      currentDayIndex
-      firstUncompletedWeekIndex
-      firstUncompletedDayIndex
-    }
     plan {
       id
       title
@@ -29,6 +23,7 @@ query FitspaceGetWorkout($trainingId: ID!) {
         name
         description
         completedAt
+        scheduledAt
 
         days {
           id
@@ -37,6 +32,7 @@ query FitspaceGetWorkout($trainingId: ID!) {
           workoutType
           startedAt
           completedAt
+          scheduledAt
 
           exercises {
             id

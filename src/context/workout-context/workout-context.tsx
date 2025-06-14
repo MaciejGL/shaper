@@ -12,6 +12,7 @@ import {
 
 import { WorkoutExercise } from '@/app/(protected)/fitspace/workout/[trainingId]/components/workout-page.client'
 import { GQLFitspaceGetWorkoutQuery } from '@/generated/graphql-client'
+import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
 
 import { getPreviousLogsByExercise } from './utils'
 
@@ -20,13 +21,10 @@ const WorkoutContext = createContext<WorkoutContextType | null>(null)
 export type WorkoutContextPlan = NonNullable<
   GQLFitspaceGetWorkoutQuery['getWorkout']
 >['plan']
-type Navigation = NonNullable<
-  GQLFitspaceGetWorkoutQuery['getWorkout']
->['navigation']
 
 type WorkoutContextType = {
   plan?: WorkoutContextPlan
-  navigation?: Navigation
+
   activeWeek?: WorkoutContextPlan['weeks'][number]
   activeDay?: WorkoutContextPlan['weeks'][number]['days'][number]
   setActiveWeekId: (weekId: string) => void
@@ -39,33 +37,21 @@ type WorkoutContextType = {
 export function WorkoutProvider({
   children,
   plan,
-  navigation,
 }: {
   children: ReactNode
   plan?: NonNullable<GQLFitspaceGetWorkoutQuery['getWorkout']>['plan']
-  navigation?: NonNullable<
-    GQLFitspaceGetWorkoutQuery['getWorkout']
-  >['navigation']
 }) {
   const [activeWeekId, setActiveWeekId] = useQueryState('week')
   const [activeDayId, setActiveDayId] = useQueryState('day')
 
   useEffect(() => {
     if (!activeWeekId || !activeDayId) {
-      const defaultWeek = plan?.weeks[navigation?.currentWeekIndex ?? 0]
-      const defaultDay = defaultWeek?.days[navigation?.currentDayIndex ?? 0]
+      const { currentWeek, currentDay } = getCurrentWeekAndDay(plan?.weeks)
 
-      setActiveWeekId(defaultWeek?.id ?? '')
-      setActiveDayId(defaultDay?.id ?? '')
+      setActiveWeekId(currentWeek?.id ?? '')
+      setActiveDayId(currentDay?.id ?? '')
     }
-  }, [
-    plan,
-    navigation,
-    activeWeekId,
-    activeDayId,
-    setActiveWeekId,
-    setActiveDayId,
-  ])
+  }, [plan, activeWeekId, activeDayId, setActiveWeekId, setActiveDayId])
 
   const handleSetActiveWeek = useCallback(
     (weekId: string) => {
@@ -97,7 +83,7 @@ export function WorkoutProvider({
   const value = useMemo(
     () => ({
       plan,
-      navigation,
+
       activeWeek: plan?.weeks.find((week) => week.id === activeWeekId),
       activeDay: plan?.weeks
         .find((week) => week.id === activeWeekId)
@@ -108,7 +94,6 @@ export function WorkoutProvider({
     }),
     [
       plan,
-      navigation,
       activeWeekId,
       activeDayId,
       handleSetActiveWeek,

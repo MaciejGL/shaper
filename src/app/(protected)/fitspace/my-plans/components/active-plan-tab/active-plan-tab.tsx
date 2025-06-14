@@ -1,9 +1,8 @@
-import { useMemo } from 'react'
-
 import { CollapsibleText } from '@/components/collapsible-text'
 import { Loader } from '@/components/loader'
+import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
 
-import { ActivePlan, PlanAction, WorkoutNavigation } from '../../types'
+import { ActivePlan, PlanAction } from '../../types'
 
 import { Header } from './header'
 import { NoActivePlan } from './no-active-plan'
@@ -13,34 +12,14 @@ import { TodaysWorkout } from './todays-workout'
 
 export function ActivePlanTab({
   plan,
-  navigation,
   handlePlanAction,
   loading,
 }: {
   plan: ActivePlan | null
-  navigation?: WorkoutNavigation | null
   handlePlanAction: (action: PlanAction, plan: ActivePlan) => void
   loading: boolean
 }) {
-  const todaysWorkout = useMemo(() => {
-    if (
-      !plan ||
-      !navigation ||
-      !plan.weeks ||
-      !plan.weeks[navigation.currentWeekIndex] ||
-      !plan.weeks[navigation.currentWeekIndex]?.days
-    ) {
-      return null
-    }
-    const day =
-      plan.weeks[navigation.currentWeekIndex]?.days[navigation.currentDayIndex]
-
-    if (!day) {
-      return null
-    }
-
-    return day
-  }, [plan, navigation])
+  const { currentWeek, currentDay } = getCurrentWeekAndDay(plan?.weeks)
 
   if (loading) {
     return (
@@ -52,7 +31,7 @@ export function ActivePlanTab({
 
   return (
     <div className="mb-20">
-      {plan && navigation ? (
+      {plan ? (
         <div key={plan.id}>
           <Header
             plan={plan}
@@ -62,7 +41,7 @@ export function ActivePlanTab({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
             <div className="bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
               <ProgressOverview
-                currentWeekNumber={navigation.currentWeekIndex + 1}
+                currentWeekNumber={currentWeek?.weekNumber ?? 0}
                 completedWorkoutsDays={plan.completedWorkoutsDays}
                 adherence={plan.adherence}
                 totalWorkouts={plan.totalWorkouts}
@@ -73,9 +52,9 @@ export function ActivePlanTab({
               </div>
             </div>
 
-            {todaysWorkout && (
+            {currentDay && (
               <div className="bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
-                <TodaysWorkout todaysWorkout={todaysWorkout} planId={plan.id} />
+                <TodaysWorkout todaysWorkout={currentDay} planId={plan.id} />
               </div>
             )}
             <div className="block md:hidden mb-4">

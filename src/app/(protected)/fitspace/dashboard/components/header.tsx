@@ -19,62 +19,101 @@ export function Header({ user }: HeaderProps) {
   // Split the quote into words for animation
   const words = useMemo(
     () =>
-      randomPhrase.quote
-        .split('')
-        .map((char) => (char === ' ' ? '\u00A0' : char)),
+      randomPhrase.quote.split(' ').map(
+        (word) => word.split('').map((char) => char), // array of letters
+      ),
     [randomPhrase.quote],
   )
 
-  const [visibleWords, setVisibleWords] = useState<string[]>([])
+  const [visibleLetters, setVisibleLetters] = useState<number>(0)
   const [showAuthor, setShowAuthor] = useState(false)
 
-  useEffect(() => {
-    // Reset states when component mounts or phrase changes
-    setVisibleWords([])
-    setShowAuthor(false)
+  const totalLetters = useMemo(
+    () => randomPhrase.quote.length,
+    [randomPhrase.quote],
+  )
 
-    // Animate words appearing one by one
+  useEffect(() => {
+    setVisibleLetters(0)
+    setShowAuthor(false)
     let currentIndex = 0
+    const intervalDelay = Math.max(1000 / totalLetters, 20)
+
     const interval = setInterval(() => {
-      if (currentIndex < words.length) {
-        // Update state only once per character
-        setVisibleWords(words.slice(0, currentIndex + 1))
+      if (currentIndex < totalLetters) {
+        setVisibleLetters(currentIndex + 1)
         currentIndex++
       } else {
         clearInterval(interval)
         setTimeout(() => setShowAuthor(true), 300)
       }
-    }, 50)
-
+    }, intervalDelay)
     return () => clearInterval(interval)
-  }, [randomPhrase.quote, words])
+  }, [randomPhrase.quote, totalLetters])
 
   return (
     <div>
       <h2 className="text-2xl font-bold mb-1">
-        Good {currentPartOfDay}, {user.profile?.firstName}!
+        Good {currentPartOfDay}
+        {user.profile?.firstName ? `, ${user.profile?.firstName}` : ''}!
       </h2>
       <div className={randomPhrase.author ? 'min-h-[3rem]' : 'min-h-[1.5rem]'}>
         <AnimatePresence>
-          {visibleWords.map((word, index) => (
-            <motion.span
-              key={`${word}-${index}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{
-                type: 'spring',
-                stiffness: 200,
-                damping: 20,
-                mass: 0.5,
-              }}
-              className="inline-block text-muted-foreground italic text-sm whitespace-pre-wrap"
-            >
-              {word}
-            </motion.span>
-          ))}
+          <p className="whitespace-pre-wrap leading-none">
+            {words.map((word, wordIdx) => (
+              <span
+                key={`${wordIdx}-${word}`}
+                style={{ display: 'inline-block', whiteSpace: 'pre' }} // keep words together
+              >
+                {word.map((char, charIdx) => {
+                  // Calculate the global letter index
+                  const globalIdx =
+                    words
+                      .slice(0, wordIdx)
+                      .reduce((acc, w) => acc + w.length + 1, 0) + charIdx
+                  if (globalIdx >= visibleLetters) return null
+                  return (
+                    <motion.span
+                      key={`${wordIdx}-${charIdx}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{
+                        type: 'spring',
+                        stiffness: 200,
+                        damping: 20,
+                        mass: 0.5,
+                      }}
+                      className="inline-block text-muted-foreground italic text-sm"
+                    >
+                      {char}
+                    </motion.span>
+                  )
+                })}
+                {/* Add a space after each word except the last */}
+                {wordIdx < words.length - 1 && (
+                  <motion.span
+                    key={`space-${wordIdx}-${word}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 200,
+                      damping: 20,
+                      mass: 0.5,
+                    }}
+                    className="inline-block text-muted-foreground italic text-sm"
+                  >
+                    {' '}
+                  </motion.span>
+                )}
+              </span>
+            ))}
+          </p>
           {showAuthor && randomPhrase.author && (
             <motion.p
+              key={`author-${randomPhrase.author}`}
               className="text-muted-foreground text-xs pl-4"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}

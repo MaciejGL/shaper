@@ -24,9 +24,6 @@ export default function WorkoutPage() {
   }
 
   return data?.getWorkout ? (
-    <WorkoutPageClient
-      plan={data.getWorkout.plan}
-      navigation={data.getWorkout.navigation}
-    />
+    <WorkoutPageClient plan={data.getWorkout.plan} />
   ) : null
 }

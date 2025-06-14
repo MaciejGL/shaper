@@ -10,12 +10,6 @@ query FitspaceDashboard {
   }
 
   getWorkout {
-    navigation {
-      currentWeekIndex
-      currentDayIndex
-      firstUncompletedWeekIndex
-      firstUncompletedDayIndex
-    }
     plan {
       id
       title
@@ -30,6 +24,7 @@ query FitspaceDashboard {
         weekNumber
         name
         completedAt
+        scheduledAt
 
         days {
           id
@@ -39,6 +34,7 @@ query FitspaceDashboard {
           startedAt
           completedAt
           duration
+          scheduledAt
 
           exercises {
             id
@@ -56,12 +52,4 @@ query FitspaceDashboard {
       }
     }
   }
-
-  # nextWorkoutDay {
-  #   id
-  #   workoutType
-  #   isRestDay
-  #   date
-  #   muscleGroups
-  # }
 }

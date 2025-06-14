@@ -43,6 +43,14 @@ export default class TrainingWeek implements GQLTrainingWeek {
     return this.data.completedAt.toISOString()
   }
 
+  get scheduledAt() {
+    if (!this.data.scheduledAt) {
+      return null
+    }
+
+    return this.data.scheduledAt.toISOString()
+  }
+
   get createdAt() {
     return this.data.createdAt.toISOString()
   }

@@ -81,7 +81,6 @@ export default function MyPlansPage() {
   const activePlan = data?.getMyPlansOverview?.activePlan
   const availablePlans = data?.getMyPlansOverview?.availablePlans
   const completedPlans = data?.getMyPlansOverview?.completedPlans
-  const navigation = data?.getWorkout?.navigation
 
   const [dialogState, setDialogState] = useState<{
     isOpen: boolean
@@ -160,7 +159,6 @@ export default function MyPlansPage() {
         <TabsContent value={PlanTab.Active} className="mt-6 space-y-4">
           <ActivePlanTab
             plan={activePlan}
-            navigation={navigation}
             handlePlanAction={handlePlanAction}
             loading={isLoadingPlans}
           />

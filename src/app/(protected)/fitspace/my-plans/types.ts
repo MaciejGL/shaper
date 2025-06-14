@@ -7,9 +7,6 @@ export type CompletedPlan =
   GQLFitspaceMyPlansQuery['getMyPlansOverview']['completedPlans'][number]
 export type ActivePlan =
   GQLFitspaceMyPlansQuery['getMyPlansOverview']['activePlan']
-export type WorkoutNavigation = NonNullable<
-  NonNullable<GQLFitspaceMyPlansQuery['getWorkout']>['navigation']
->
 
 export enum PlanTab {
   Active = 'active',

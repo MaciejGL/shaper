@@ -182,6 +182,7 @@ model TrainingWeek {
   name        String
   description String?
   completedAt DateTime?
+  scheduledAt   DateTime?
 
   plan TrainingPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
   days TrainingDay[]
@@ -199,6 +200,8 @@ model TrainingDay {
   completedAt DateTime?
   workoutType String?
   isRestDay   Boolean   @default(false)
+  scheduledAt DateTime?
+
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

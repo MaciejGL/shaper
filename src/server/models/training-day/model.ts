@@ -111,6 +111,14 @@ export default class TrainingDay implements GQLTrainingDay {
     return event.totalDuration
   }
 
+  get scheduledAt() {
+    if (!this.data.scheduledAt) {
+      return null
+    }
+
+    return this.data.scheduledAt.toISOString()
+  }
+
   get createdAt() {
     return this.data.createdAt.toISOString()
   }

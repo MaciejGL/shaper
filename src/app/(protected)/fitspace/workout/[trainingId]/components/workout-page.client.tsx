@@ -20,19 +20,11 @@ export type WorkoutExercise = NonNullable<WorkoutDay>['exercises'][number]
 export type WorkoutSet = NonNullable<WorkoutExercise>['sets'][number]
 export type WorkoutSetLog = NonNullable<WorkoutSet>['log']
 
-export type Navigation = NonNullable<
-  GQLFitspaceGetWorkoutQuery['getWorkout']
->['navigation']
-
 type WorkoutPageClientProps = {
   plan: WorkoutPlan
-  navigation: Navigation
 }
 
-export function WorkoutPageClient({
-  plan,
-  navigation,
-}: WorkoutPageClientProps) {
+export function WorkoutPageClient({ plan }: WorkoutPageClientProps) {
   const { trainingId } = useParams<{ trainingId: string }>()
   const { data, isLoading } = useFitspaceGetWorkoutQuery(
     {
@@ -42,7 +34,6 @@ export function WorkoutPageClient({
       initialData: {
         getWorkout: {
           plan,
-          navigation,
         },
       },
     },
@@ -57,10 +48,7 @@ export function WorkoutPageClient({
   }
 
   return (
-    <WorkoutProvider
-      plan={data?.getWorkout?.plan}
-      navigation={data?.getWorkout?.navigation}
-    >
+    <WorkoutProvider plan={data?.getWorkout?.plan}>
       <Navigation />
       <div className="max-w-sm mx-auto">
         <Exercises />

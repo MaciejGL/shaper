@@ -1,7 +1,6 @@
 import { prisma } from '@lib/db'
 import { Prisma } from '@prisma/client'
-import { getDay, getWeek, isAfter } from 'date-fns'
-import { enGB } from 'date-fns/locale'
+import { addDays, addWeeks } from 'date-fns'
 
 import {
   GQLMutationActivatePlanArgs,
@@ -271,51 +270,12 @@ export async function getWorkout(
   if (!plan || plan.assignedToId !== user.user.id) {
     return null
   }
-  const currentDate = new Date()
 
   if (!plan.startDate) {
     return null
   }
 
-  if (!isAfter(currentDate, plan.startDate)) {
-    return {
-      navigation: {
-        currentWeekIndex: 0,
-        currentDayIndex: 0,
-        firstUncompletedWeekIndex: 0,
-        firstUncompletedDayIndex: 0,
-      },
-      plan: new TrainingPlan(plan, context),
-    }
-  }
-
-  const weekOfYear = getWeek(currentDate, { weekStartsOn: 1, locale: enGB })
-  const planStartDate = new Date(plan.startDate)
-  const planWeekOfYear = getWeek(planStartDate, {
-    weekStartsOn: 1,
-    locale: enGB,
-  })
-
-  const currentWeekIndex = weekOfYear - planWeekOfYear
-  const currentDayIndex =
-    getDay(currentDate) === 0 ? 6 : getDay(currentDate) - 1
-
-  const firstUncompletedWeekIndex = plan.weeks.findIndex(
-    (week) => week.completedAt === null,
-  )
-  const firstUncompletedDayIndex = plan.weeks[
-    firstUncompletedWeekIndex
-  ].days.findIndex((day) => day.completedAt === null && day.isRestDay === false)
-
-  const navigation = {
-    currentWeekIndex,
-    currentDayIndex,
-    firstUncompletedWeekIndex,
-    firstUncompletedDayIndex,
-  }
-
   return {
-    navigation,
     plan: new TrainingPlan(plan, context),
   }
 }
@@ -620,13 +580,41 @@ export async function activatePlan(
           throw new Error('Failed to duplicate plan')
         }
 
+        const duplicatedFullPlan = await getFullPlanById(duplicated.id)
+
+        if (!duplicatedFullPlan) {
+          throw new Error('Failed to get duplicated plan')
+        }
+
         // Then activate the new plan
         await tx.trainingPlan.update({
           where: {
             id: duplicated.id,
             assignedToId: user.user.id, // Ensure the plan belongs to the user
           },
-          data: { active: true, startDate: new Date(startDate) },
+          data: {
+            active: true,
+            startDate: new Date(startDate),
+            weeks: {
+              update: duplicatedFullPlan.weeks.map((week, weekIndex) => ({
+                where: { id: week.id },
+                data: {
+                  scheduledAt: addWeeks(new Date(startDate), weekIndex),
+                  days: {
+                    update: week.days.map((day) => ({
+                      where: { id: day.id },
+                      data: {
+                        scheduledAt: addDays(
+                          addWeeks(new Date(startDate), weekIndex),
+                          day.dayOfWeek,
+                        ),
+                      },
+                    })),
+                  },
+                },
+              })),
+            },
+          },
         })
       },
       { timeout: 15000, maxWait: 15000 },

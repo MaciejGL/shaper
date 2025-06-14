@@ -208,7 +208,6 @@ export enum GQLFitnessLevel {
 
 export type GQLGetWorkoutPayload = {
   __typename?: 'GetWorkoutPayload';
-  navigation: EntireFieldWrapper<GQLWorkoutNavigation>;
   plan: EntireFieldWrapper<GQLTrainingPlan>;
 };
 
@@ -624,6 +623,7 @@ export type GQLTrainingDay = {
   exercises: EntireFieldWrapper<Array<GQLTrainingExercise>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   isRestDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  scheduledAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   startedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainingWeekId: EntireFieldWrapper<Scalars['ID']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -689,6 +689,7 @@ export type GQLTrainingWeek = {
   description?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
+  scheduledAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainingPlanId: EntireFieldWrapper<Scalars['ID']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
   weekNumber: EntireFieldWrapper<Scalars['Int']['output']>;
@@ -874,14 +875,6 @@ export type GQLUserSession = {
   user: EntireFieldWrapper<GQLUser>;
 };
 
-export type GQLWorkoutNavigation = {
-  __typename?: 'WorkoutNavigation';
-  currentDayIndex: EntireFieldWrapper<Scalars['Int']['output']>;
-  currentWeekIndex: EntireFieldWrapper<Scalars['Int']['output']>;
-  firstUncompletedDayIndex: EntireFieldWrapper<Scalars['Int']['output']>;
-  firstUncompletedWeekIndex: EntireFieldWrapper<Scalars['Int']['output']>;
-};
-
 export enum GQLWorkoutSessionEvent {
   Complete = 'COMPLETE',
   Progress = 'PROGRESS'
@@ -1041,7 +1034,6 @@ export type GQLResolversTypes = {
   UserPublic: ResolverTypeWrapper<GQLUserPublic>;
   UserRole: GQLUserRole;
   UserSession: ResolverTypeWrapper<GQLUserSession>;
-  WorkoutNavigation: ResolverTypeWrapper<GQLWorkoutNavigation>;
   WorkoutSessionEvent: GQLWorkoutSessionEvent;
   WorkoutType: GQLWorkoutType;
 };
@@ -1097,7 +1089,6 @@ export type GQLResolversParentTypes = {
   UserProfile: GQLUserProfile;
   UserPublic: GQLUserPublic;
   UserSession: GQLUserSession;
-  WorkoutNavigation: GQLWorkoutNavigation;
 };
 
 export type GQLBaseExerciseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BaseExercise'] = GQLResolversParentTypes['BaseExercise']> = {
@@ -1169,7 +1160,6 @@ export type GQLExerciseSetLogResolvers<ContextType = GQLContext, ParentType exte
 };
 
 export type GQLGetWorkoutPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetWorkoutPayload'] = GQLResolversParentTypes['GetWorkoutPayload']> = {
-  navigation?: Resolver<GQLResolversTypes['WorkoutNavigation'], ParentType, ContextType>;
   plan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -1303,6 +1293,7 @@ export type GQLTrainingDayResolvers<ContextType = GQLContext, ParentType extends
   exercises?: Resolver<Array<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   isRestDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  scheduledAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   startedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainingWeekId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -1368,6 +1359,7 @@ export type GQLTrainingWeekResolvers<ContextType = GQLContext, ParentType extend
   description?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  scheduledAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainingPlanId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weekNumber?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
@@ -1462,14 +1454,6 @@ export type GQLUserSessionResolvers<ContextType = GQLContext, ParentType extends
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type GQLWorkoutNavigationResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WorkoutNavigation'] = GQLResolversParentTypes['WorkoutNavigation']> = {
-  currentDayIndex?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  currentWeekIndex?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  firstUncompletedDayIndex?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  firstUncompletedWeekIndex?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type GQLResolvers<ContextType = GQLContext> = {
   BaseExercise?: GQLBaseExerciseResolvers<ContextType>;
   CoachingRequest?: GQLCoachingRequestResolvers<ContextType>;
@@ -1495,6 +1479,5 @@ export type GQLResolvers<ContextType = GQLContext> = {
   UserProfile?: GQLUserProfileResolvers<ContextType>;
   UserPublic?: GQLUserPublicResolvers<ContextType>;
   UserSession?: GQLUserSessionResolvers<ContextType>;
-  WorkoutNavigation?: GQLWorkoutNavigationResolvers<ContextType>;
 };
 

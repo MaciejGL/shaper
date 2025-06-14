@@ -3,11 +3,15 @@
 import { secondsToMinutes } from 'date-fns'
 import {
   Activity,
+  BadgeCheck,
   CalendarDaysIcon,
   Clock4Icon,
+  DrumstickIcon,
+  DumbbellIcon,
   TrendingDownIcon,
   TrendingUpIcon,
 } from 'lucide-react'
+import Link from 'next/link'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/components/utils'
 import { StatsItem } from '@/components/stats-item'
@@ -116,25 +120,42 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
             </div>
             <div className="grid grid-cols-7 gap-1 md:gap-2">
               {currentWeek.days.map((day, index) => (
-                <div
+                <Link
+                  href={
+                    day.isRestDay
+                      ? '#'
+                      : `/fitspace/workout/${plan.id}?week=${currentWeek.id}&day=${day.id}&exercise=${day.exercises.at(0)?.id}`
+                  }
                   key={index}
-                  className={cn(
-                    'rounded-md p-2',
-                    !day.isRestDay && 'border',
-                    day.completedAt &&
-                      !day.isRestDay &&
-                      'bg-primary text-primary-foreground',
-                    day.isRestDay &&
-                      'bg-muted-foreground/10 text-muted-foreground',
-                  )}
                 >
-                  <div className="flex-center flex-col text-xs md:text-sm text-center aspect-square">
-                    <span>{getDayName(day.dayOfWeek, { short: true })}</span>
-                    <span className="font-medium truncate max-md:hidden">
-                      {day.workoutType?.split(' ').at(0)}
-                    </span>
+                  <div
+                    className={cn(
+                      'rounded-md p-2',
+                      !day.isRestDay && 'bg-primary-foreground',
+                      day.completedAt &&
+                        !day.isRestDay &&
+                        'bg-primary text-primary-foreground',
+                      day.isRestDay &&
+                        'bg-muted-foreground/10 text-muted-foreground',
+                    )}
+                  >
+                    <div className="flex-center flex-col gap-1 text-xs md:text-sm text-center aspect-square">
+                      {day.completedAt && (
+                        <BadgeCheck className={cn('size-4 text-green-500')} />
+                      )}
+                      {!day.completedAt && !day.isRestDay && (
+                        <DumbbellIcon className={cn('size-4')} />
+                      )}
+                      {day.isRestDay && (
+                        <DrumstickIcon className="size-4 text-muted-foreground" />
+                      )}
+                      <span>{getDayName(day.dayOfWeek, { short: true })}</span>
+                      <span className="font-medium truncate max-md:hidden">
+                        {day.workoutType?.split(' ').at(0)}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

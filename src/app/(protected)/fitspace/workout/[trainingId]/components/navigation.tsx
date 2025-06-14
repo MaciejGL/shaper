@@ -1,8 +1,7 @@
-import { formatDate } from 'date-fns'
+import { formatDate, isThisISOWeek } from 'date-fns'
 import { BadgeCheckIcon, ChevronLeft } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 import { useQueryState } from 'nuqs'
-import { useMemo } from 'react'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/components/utils'
 import { Button } from '@/components/ui/button'
@@ -16,8 +15,6 @@ import {
 import { useWorkout } from '@/context/workout-context/workout-context'
 import { useTrackWorkoutSession } from '@/hooks/use-track-workout-session'
 import { cn } from '@/lib/utils'
-
-import { getExpectedDayDate } from '../../utils'
 
 import { WorkoutDay } from './workout-page.client'
 
@@ -48,14 +45,9 @@ export function Navigation() {
 }
 
 function Day({ day }: { day: WorkoutDay }) {
-  const { plan, activeWeek, activeDay } = useWorkout()
+  const { activeDay } = useWorkout()
   const [, setActiveDayId] = useQueryState('day')
   const [, setActiveExerciseId] = useQueryState('exercise')
-
-  const expectedDate = useMemo(
-    () => getExpectedDayDate(day, plan, activeWeek),
-    [plan, activeWeek, day],
-  )
 
   const isSelected = activeDay?.id === day.id
 
@@ -83,7 +75,7 @@ function Day({ day }: { day: WorkoutDay }) {
           {getDayName(day.dayOfWeek, { short: true })}
         </span>
         <span className="text-md">
-          {expectedDate && <p>{formatDate(expectedDate, 'd')}</p>}
+          {day.scheduledAt && <p>{formatDate(day.scheduledAt, 'd')}</p>}
         </span>
       </button>
       {!day.isRestDay && (
@@ -128,7 +120,6 @@ function WeekSelector() {
     activeWeek,
     activeDay,
     setActiveWeekId: setActiveWeekIdContext,
-    navigation,
   } = useWorkout()
   const [activeWeekId, setActiveWeekId] = useQueryState('week')
   const [, setActiveDayId] = useQueryState('day')
@@ -179,7 +170,7 @@ function WeekSelector() {
           />
         </SelectTrigger>
         <SelectContent>
-          {weeks.map((week, index) => (
+          {weeks.map((week) => (
             <SelectItem key={week.id} value={week.id}>
               {week.name}
               {week.completedAt ? (
@@ -187,7 +178,7 @@ function WeekSelector() {
                   data-icon="mark"
                   className="text-green-500 size-3"
                 />
-              ) : index === navigation?.currentWeekIndex ? (
+              ) : week.scheduledAt && isThisISOWeek(week.scheduledAt) ? (
                 '(current)'
               ) : (
                 ''

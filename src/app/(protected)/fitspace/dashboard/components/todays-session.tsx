@@ -63,9 +63,9 @@ export function TodaysSession({ workout, planId }: TodaysSessionProps) {
         )}
         <div className="grow">
           {workout.isRestDay && (
-            <div className="flex flex-col items-center justify-center gap-2 h-full">
+            <div className="flex flex-col items-center justify-center gap-2 h-full mb-4">
               <BiggyIcon icon={Drumstick} />
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground text-center">
                 You don't have any training sessions planned for today.
               </p>
             </div>

@@ -7,7 +7,7 @@ type TrainingDay {
   duration: Int
   startedAt: String
   completedAt: String
-
+  scheduledAt: String
   exercises: [TrainingExercise!]!
 
   trainingWeekId: ID!

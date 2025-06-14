@@ -4,6 +4,7 @@ import {
   FitspaceDashboardDocument,
   GQLFitspaceDashboardQuery,
 } from '@/generated/graphql-client'
+import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
 import { getCurrentUser } from '@/lib/getUser'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
@@ -21,15 +22,9 @@ export default async function DashboardPage() {
     return notFound()
   }
 
-  const navigation = data?.getWorkout?.navigation
-
-  const currentWeek = navigation
-    ? data?.getWorkout?.plan?.weeks[navigation?.currentWeekIndex]
-    : undefined
-
-  const currentWorkout = navigation
-    ? currentWeek?.days[navigation?.currentDayIndex]
-    : undefined
+  const { currentWeek, currentDay } = getCurrentWeekAndDay(
+    data?.getWorkout?.plan?.weeks,
+  )
 
   return (
     <div className="container-fitspace mx-auto">
@@ -38,7 +33,7 @@ export default async function DashboardPage() {
       </div>
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <TodaysSession
-          workout={currentWorkout}
+          workout={currentDay}
           planId={data?.getWorkout?.plan?.id}
         />
         {/* <Trainer trainer={data?.myTrainer} /> */}

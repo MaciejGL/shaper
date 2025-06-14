@@ -19,12 +19,14 @@ query FitspaceMyPlans {
       weeks {
         id
         weekNumber
+        scheduledAt
         days {
           id
           dayOfWeek
           isRestDay
           workoutType
           completedAt
+          scheduledAt
           exercises {
             id
             restSeconds
@@ -93,15 +95,6 @@ query FitspaceMyPlans {
         image
         sex
       }
-    }
-  }
-
-  getWorkout {
-    navigation {
-      currentWeekIndex
-      currentDayIndex
-      firstUncompletedWeekIndex
-      firstUncompletedDayIndex
     }
   }
 }
