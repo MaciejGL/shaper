@@ -43,8 +43,10 @@ const useNotifications = (
   const router = useRouter()
   const { mutateAsync: markNotificationAsRead } =
     useMarkNotificationAsReadMutation()
-  const { mutateAsync: markAllNotificationsAsRead } =
-    useMarkAllNotificationsAsReadMutation()
+  const {
+    mutateAsync: markAllNotificationsAsRead,
+    isPending: isMarkingAllNotificationsAsRead,
+  } = useMarkAllNotificationsAsReadMutation()
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
@@ -81,6 +83,7 @@ const useNotifications = (
     unreadCount,
     onNotificationClick,
     onClearAll,
+    isMarkingAllNotificationsAsRead,
   }
 }
 
@@ -97,6 +100,7 @@ export function NotificationBell({
     unreadCount,
     onNotificationClick,
     onClearAll,
+    isMarkingAllNotificationsAsRead,
   } = useNotifications(notifications, user)
 
   const handleOpenInvitation = (
@@ -143,7 +147,7 @@ export function NotificationBell({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-80 p-0 overflow-hidden">
-          <DropdownMenuLabel className="bg-zinc-100 dark:bg-zinc-800 flex items-center justify-between py-3 px-4 border-b">
+          <DropdownMenuLabel className="bg-zinc-100 dark:bg-zinc-900 flex items-center justify-between py-3 px-4 border-b">
             <span className="font-semibold">Notifications</span>
             {notifications.length > 0 && (
               <Button
@@ -151,6 +155,7 @@ export function NotificationBell({
                 size="sm"
                 className="h-8 text-xs font-normal"
                 onClick={onClearAll}
+                loading={isMarkingAllNotificationsAsRead}
               >
                 Clear all
               </Button>
@@ -181,7 +186,7 @@ export function NotificationBell({
                   <React.Fragment key={notification.id}>
                     <DropdownMenuItem
                       key={notification.id}
-                      className="p-0 focus:bg-zinc-200 dark:focus:bg-zinc-700 cursor-pointer"
+                      className="p-0 focus:bg-zinc-200 dark:focus:bg-zinc-700 cursor-pointer not-last-of-type:border-b border-border rounded-none"
                       onClick={(e) => {
                         handleOpenInvitation(notification, e)
                         onNotificationClick(notification)

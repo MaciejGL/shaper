@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { debounce } from 'lodash'
 import {
   BadgeCheckIcon,
@@ -37,6 +38,7 @@ import { Label } from '@/components/ui/label'
 import { VideoPreview } from '@/components/video-preview'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
+  GQLFitspaceGetWorkoutQuery,
   useFitspaceGetWorkoutQuery,
   useFitspaceMarkExerciseAsCompletedMutation,
   useFitspaceMarkSetAsCompletedMutation,
@@ -314,11 +316,63 @@ function ExerciseSet({
   const hasUserEdited = useRef(false)
   const [isCompleted, setIsCompleted] = useState(Boolean(set.completedAt))
   const invalidateQuery = useInvalidateQuery()
+  const queryClient = useQueryClient()
+
   const { mutateAsync: updateSetLog } = useFitspaceUpdateSetLogMutation({
-    onSuccess: () => {
+    onMutate: async (newLog) => {
+      await queryClient.cancelQueries({
+        queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+      })
+
+      const previousWorkout = queryClient.getQueryData(
+        useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+      )
+
+      queryClient.setQueryData(
+        useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+        (old: GQLFitspaceGetWorkoutQuery) => {
+          if (!old?.getWorkout?.plan) return old
+
+          const newWorkout = JSON.parse(
+            JSON.stringify(old),
+          ) as NonNullable<GQLFitspaceGetWorkoutQuery>
+          if (!newWorkout.getWorkout?.plan) return newWorkout
+
+          const updatedSet = newWorkout.getWorkout.plan.weeks
+            .flatMap((week) => week.days)
+            .flatMap((day) => day.exercises)
+            .flatMap((exercise) => exercise.sets)
+            .find((s) => s.id === newLog.input.setId)
+
+          if (updatedSet) {
+            updatedSet.log = {
+              id: updatedSet.log?.id || 'temp-id',
+              reps: newLog.input.loggedReps,
+              weight: newLog.input.loggedWeight,
+              rpe: updatedSet.log?.rpe,
+              createdAt: new Date().toISOString(),
+            }
+          }
+
+          return newWorkout
+        },
+      )
+
+      return { previousWorkout }
+    },
+    onError: (err, newLog, context) => {
+      if (context?.previousWorkout) {
+        queryClient.setQueryData(
+          useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+          context.previousWorkout,
+        )
+      }
+    },
+    onSettled: () => {
       invalidateQuery({ queryKey: ['FitspaceGetWorkout'] })
     },
   })
+
   const { mutateAsync: markSetAsCompleted, isPending: isMarkingSet } =
     useFitspaceMarkSetAsCompletedMutation({
       onSuccess: () => {

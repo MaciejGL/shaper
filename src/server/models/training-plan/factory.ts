@@ -543,12 +543,43 @@ export async function activatePlan(
     throw new Error('User not found')
   }
 
-  const fullPlan = resume ? null : await getFullPlanById(planId)
+  const fullPlan = await getFullPlanById(planId)
+
+  if (!fullPlan) {
+    throw new Error('Training plan not found')
+  }
 
   if (resume) {
+    await prisma.trainingPlan.updateMany({
+      where: { assignedToId: user.user.id, active: true, id: { not: planId } },
+      data: { active: false },
+    })
+
     await prisma.trainingPlan.update({
-      where: { id: planId, assignedToId: user.user.id },
-      data: { active: true, startDate: new Date(startDate) },
+      where: { id: fullPlan.id, assignedToId: user.user.id },
+      data: {
+        active: true,
+        startDate: new Date(startDate),
+        weeks: {
+          update: fullPlan?.weeks.map((week, weekIndex) => ({
+            where: { id: week.id },
+            data: {
+              scheduledAt: addWeeks(new Date(startDate), weekIndex),
+              days: {
+                update: week.days.map((day) => ({
+                  where: { id: day.id },
+                  data: {
+                    scheduledAt: addDays(
+                      addWeeks(new Date(startDate), weekIndex),
+                      day.dayOfWeek,
+                    ),
+                  },
+                })),
+              },
+            },
+          })),
+        },
+      },
     })
 
     return true

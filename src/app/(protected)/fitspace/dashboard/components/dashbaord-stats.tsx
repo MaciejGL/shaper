@@ -60,8 +60,8 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
   const diffWeight = weightLogCurrentWeek - weightLogLastWeek
 
   return (
-    <div className="space-y-6">
-      <div className="bg-muted rounded-lg py-4">
+    <div className="space-y-6 -mx-2 md:-mx-0">
+      <div className="bg-muted md:rounded-lg py-4">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="h-5 w-5" />
@@ -111,7 +111,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
             />
           </div>
 
-          <div className="space-y-4 pt-2 border-t">
+          <div className="space-y-4 pt-2 border-t border-border/50">
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Workouts This Week</span>
               <span className="font-medium">
@@ -132,19 +132,16 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                     className={cn(
                       'rounded-md p-2',
                       !day.isRestDay && 'bg-primary-foreground',
-                      day.completedAt &&
-                        !day.isRestDay &&
-                        'bg-primary text-primary-foreground',
                       day.isRestDay &&
                         'bg-muted-foreground/10 text-muted-foreground',
                     )}
                   >
-                    <div className="flex-center flex-col gap-1 text-xs md:text-sm text-center aspect-square">
+                    <div className="flex-center flex-col gap-1 text-xs md:text-md text-center aspect-square">
                       {day.completedAt && (
                         <BadgeCheck className={cn('size-4 text-green-500')} />
                       )}
                       {!day.completedAt && !day.isRestDay && (
-                        <DumbbellIcon className={cn('size-4')} />
+                        <DumbbellIcon className={cn('size-4 text-amber-600')} />
                       )}
                       {day.isRestDay && (
                         <DrumstickIcon className="size-4 text-muted-foreground" />
