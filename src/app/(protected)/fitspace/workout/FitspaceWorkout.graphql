@@ -33,6 +33,7 @@ query FitspaceGetWorkout($trainingId: ID!) {
           startedAt
           completedAt
           scheduledAt
+          duration
 
           exercises {
             id

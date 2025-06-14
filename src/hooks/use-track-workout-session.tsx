@@ -50,8 +50,10 @@ export function useTrackWorkoutSession(
       }
     }
 
-    document.addEventListener('visibilitychange', handleVisibility)
-    window.addEventListener('beforeunload', () => sendTick())
+    if (isActive && !isCompleted) {
+      document.addEventListener('visibilitychange', handleVisibility)
+      window.addEventListener('beforeunload', () => sendTick())
+    }
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility)

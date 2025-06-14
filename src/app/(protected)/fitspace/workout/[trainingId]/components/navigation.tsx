@@ -24,6 +24,7 @@ export function Navigation() {
   const isActive = activeDay?.exercises.some((ex) =>
     ex.sets.some((set) => set.log?.reps || set.log?.weight),
   )
+
   const isCompleted = activeDay?.completedAt ? true : false
   useTrackWorkoutSession(dayId, isActive, isCompleted)
 
