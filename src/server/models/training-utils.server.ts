@@ -33,6 +33,7 @@ export async function getFullPlanById(id: string) {
               dayOfWeek: 'asc',
             },
             include: {
+              events: true,
               exercises: {
                 orderBy: {
                   order: 'asc',

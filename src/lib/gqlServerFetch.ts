@@ -40,7 +40,8 @@ export const gqlServerFetch = async <TData, TVariables = object>(
 ) => {
   const endpoint = await getInternalApiUrl('/api/graphql')
   try {
-    const cookie = await cookies().toString()
+    const cookieStore = await cookies()
+    const cookie = cookieStore.toString()
     const response = await gqlFetch<TData, TVariables>(
       query,
       variables,

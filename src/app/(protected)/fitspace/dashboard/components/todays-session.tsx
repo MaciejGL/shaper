@@ -1,6 +1,7 @@
-import { ArrowRight, Calendar, DumbbellIcon } from 'lucide-react'
+import { ArrowRight, Calendar, Drumstick, DumbbellIcon } from 'lucide-react'
 import { Fragment } from 'react'
 
+import { BiggyIcon } from '@/components/biggy-icon'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
@@ -56,47 +57,48 @@ export function TodaysSession({ workout, planId }: TodaysSessionProps) {
           Today's Workout
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {workout.isRestDay ? (
-          <h3 className="font-semibold text-lg">Rest day</h3>
-        ) : (
+      <CardContent className="space-y-4 flex flex-col h-full">
+        {!workout.isRestDay && (
           <h3 className="font-semibold text-lg">{workout.workoutType}</h3>
         )}
+        <div className="grow">
+          {workout.isRestDay && (
+            <div className="flex flex-col items-center justify-center gap-2 h-full">
+              <BiggyIcon icon={Drumstick} />
+              <p className="text-sm text-muted-foreground">
+                You don't have any training sessions planned for today.
+              </p>
+            </div>
+          )}
 
-        {workout.isRestDay && (
-          <p className="text-sm text-muted-foreground">
-            You don't have any training sessions planned for today.
-          </p>
-        )}
+          {workout.exercises.length > 0 && (
+            <div className="space-y-2 rounded-lg">
+              <div className="space-y-2">
+                {workout.exercises.map((exercise, index) => (
+                  <Fragment key={index}>
+                    <div key={index} className="flex items-center gap-4">
+                      <div className="grow">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm">{exercise.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {exercise.sets?.length || 0} sets
+                          </p>
+                        </div>
 
-        {workout.exercises.length > 0 && (
-          <div className="space-y-2 rounded-lg">
-            <div className="space-y-2">
-              {workout.exercises.map((exercise, index) => (
-                <Fragment key={index}>
-                  <div key={index} className="flex items-center gap-4">
-                    <div className="grow">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm">{exercise.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {exercise.sets?.length || 0} sets
-                        </p>
-                      </div>
-
-                      <div className="text-xs text-muted-foreground">
-                        {exercise?.muscleGroups
-                          ?.map((group) => group.alias)
-                          .join(', ')}
+                        <div className="text-xs text-muted-foreground">
+                          {exercise?.muscleGroups
+                            ?.map((group) => group.alias)
+                            .join(', ')}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <Separator className="last:hidden" />
-                </Fragment>
-              ))}
+                    <Separator className="last:hidden" />
+                  </Fragment>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
-
+          )}
+        </div>
         <ButtonLink
           href={`/fitspace/workout/${planId}`}
           iconEnd={<ArrowRight />}
