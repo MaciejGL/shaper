@@ -24,7 +24,7 @@ export const createUserLoaders = () => ({
       include: {
         sessions: {
           where: {
-            expiresAt: { gt: new Date() },
+            expiresAt: { gte: new Date() },
           },
           orderBy: { createdAt: 'desc' },
         },
