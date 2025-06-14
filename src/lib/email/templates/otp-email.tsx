@@ -11,7 +11,7 @@ import {
 
 interface OtpEmailProps {
   code: string
-  userName?: string
+  userName?: string | null
 }
 
 export const OtpEmail = ({ code, userName }: OtpEmailProps) => (

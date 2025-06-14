@@ -10,8 +10,11 @@ const NO_REPLY_NAME = 'Fitspace'
 const FROM_EMAIL = `${NO_REPLY_NAME} <${NO_REPLY_EMAIL}>`
 
 export const sendEmail = {
-  otp: async (to: string, otp: string) => {
-    const html = await render(<OtpEmail code={otp} />)
+  otp: async (
+    to: string,
+    { otp, userName }: { otp: string; userName?: string | null },
+  ) => {
+    const html = await render(<OtpEmail code={otp} userName={userName} />)
 
     await resend.emails.send({
       from: FROM_EMAIL,
