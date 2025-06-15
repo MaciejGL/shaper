@@ -2,15 +2,21 @@ import { StatsItem } from '@/components/stats-item'
 import { Progress } from '@/components/ui/progress'
 
 export function ProgressOverview({
-  currentWeekNumber,
   completedWorkoutsDays,
+  currentWeekNumber,
+  completedWorkoutsThisWeek,
+  totalWorkoutsThisWeek,
   adherence,
+  completedWorkouts,
   totalWorkouts,
   weekCount,
 }: {
-  currentWeekNumber?: number | null
   completedWorkoutsDays: number
+  currentWeekNumber?: number | null
+  completedWorkoutsThisWeek: number
+  totalWorkoutsThisWeek: number
   adherence: number
+  completedWorkouts: number
   totalWorkouts: number
   weekCount: number
 }) {
@@ -22,11 +28,38 @@ export function ProgressOverview({
       />
       <div className="grid grid-cols-2 gap-4 bg-muted p-4 mt-6 rounded-lg">
         <StatsItem value={currentWeekNumber ?? 1} label="Current Week" />
-        <StatsItem value={adherence} label="Weeks Completed" />
-        <StatsItem value={completedWorkoutsDays} label="Workouts Done" />
         <StatsItem
-          value={Math.round(totalWorkouts / weekCount)}
-          label="Days per week"
+          value={
+            <div className="">
+              <span>{adherence}</span>
+              <span className="text-xs text-muted-foreground">
+                / {weekCount}
+              </span>
+            </div>
+          }
+          label="Weeks Completed"
+        />
+        <StatsItem
+          value={
+            <div className="">
+              <span>{completedWorkoutsThisWeek}</span>
+              <span className="text-xs text-muted-foreground">
+                / {totalWorkoutsThisWeek}
+              </span>
+            </div>
+          }
+          label="Workouts This Week"
+        />
+        <StatsItem
+          value={
+            <div className="">
+              <span>{completedWorkouts}</span>
+              <span className="text-xs text-muted-foreground">
+                / {totalWorkouts}
+              </span>
+            </div>
+          }
+          label="Total workouts"
         />
       </div>
     </div>

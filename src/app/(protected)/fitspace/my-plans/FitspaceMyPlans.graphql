@@ -78,6 +78,13 @@ query FitspaceMyPlans {
       difficulty
       totalWorkouts
       rating
+      userReview {
+        id
+        rating
+        comment
+        createdAt
+        updatedAt
+      }
       totalReviews
       weekCount
       currentWeekNumber
@@ -113,4 +120,16 @@ mutation ClosePlan($planId: ID!) {
 
 mutation DeletePlan($planId: ID!) {
   deletePlan(planId: $planId)
+}
+
+mutation CreateReview($input: CreateReviewInput!) {
+  createReview(input: $input)
+}
+
+mutation UpdateReview($input: UpdateReviewInput!) {
+  updateReview(input: $input)
+}
+
+mutation DeleteReview($input: DeleteReviewInput!) {
+  deleteReview(input: $input)
 }

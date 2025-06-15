@@ -45,6 +45,11 @@ query FitspaceGetWorkout($trainingId: ID!) {
             order
             videoUrl
             completedAt
+            muscleGroups {
+              id
+              alias
+              groupSlug
+            }
             sets {
               id
               order

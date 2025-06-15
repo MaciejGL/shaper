@@ -1,4 +1,5 @@
 import { differenceInYears, secondsToMinutes } from 'date-fns'
+import { uniq } from 'lodash'
 import {
   CheckIcon,
   ClockIcon,
@@ -70,18 +71,6 @@ export function Summary({
 
   const workoutDuration = secondsToMinutes(data?.getWorkoutInfo?.duration ?? 0)
 
-  const caloriesBurned = useMemo(
-    () =>
-      calculateCaloriesBurned({
-        durationMinutes: workoutDuration,
-        weightKg: weightKg ?? 0,
-        heightCm: heightCm ?? 0,
-        age,
-        gender: sex as 'male' | 'female',
-      }),
-    [workoutDuration, weightKg, heightCm, age, sex],
-  )
-
   // Calculate total sets and reps
   const totalSets =
     completedExercises?.reduce(
@@ -102,6 +91,27 @@ export function Summary({
         ) || 0),
       0,
     ) || 0
+
+  const muscleGroups = useMemo(() => {
+    return uniq(
+      completedExercises?.flatMap((exercise) =>
+        exercise.muscleGroups.map((group) => group.groupSlug),
+      ),
+    )
+  }, [completedExercises])
+
+  const caloriesBurned = useMemo(
+    () =>
+      calculateCaloriesBurned({
+        durationMinutes: workoutDuration,
+        weightKg: weightKg ?? 0,
+        heightCm: heightCm ?? 0,
+        age,
+        gender: sex as 'male' | 'female',
+        muscleGroups,
+      }),
+    [workoutDuration, weightKg, heightCm, age, sex, muscleGroups],
+  )
 
   const completionRate = activeDay?.exercises
     ? Math.round(
@@ -267,7 +277,7 @@ export function Summary({
             </div>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="grid grid-cols-1">
           <div className="flex gap-2 pt-4">
             <DialogClose asChild>
               <Button variant="secondary" className="flex-1">

@@ -1,5 +1,11 @@
 import { formatDate } from 'date-fns'
-import { MoreHorizontalIcon, SparklesIcon, Trash } from 'lucide-react'
+import {
+  LayoutDashboard,
+  MoreHorizontalIcon,
+  SparklesIcon,
+  Trash,
+} from 'lucide-react'
+import Link from 'next/link'
 
 import { CollapsibleText } from '@/components/collapsible-text'
 import { RatingStars } from '@/components/rating-stars'
@@ -129,8 +135,14 @@ function PlanHeader({
         <DropdownMenuContent>
           <DropdownMenuItem onClick={() => handlePlanAction('activate', plan)}>
             <SparklesIcon className="size-4 mr-2" />
-            Activate Plan
+            Activate
           </DropdownMenuItem>
+          <Link href={`/fitspace/training-preview/${plan.id}`}>
+            <DropdownMenuItem>
+              <LayoutDashboard className="size-4 mr-2" />
+              Plan Overview
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem onClick={() => handlePlanAction('delete', plan)}>
             <Trash className="size-4 mr-2" />
             Delete Plan

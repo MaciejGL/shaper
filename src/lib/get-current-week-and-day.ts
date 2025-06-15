@@ -1,18 +1,23 @@
-import { isThisISOWeek, isToday } from 'date-fns'
+import { isAfter, isThisISOWeek, isToday } from 'date-fns'
 
 import { GQLTrainingDay, GQLTrainingWeek } from '@/generated/graphql-client'
 
 type GetCurrentWeekAndDay = Pick<GQLTrainingWeek, 'scheduledAt'> & {
-  days: Pick<GQLTrainingDay, 'scheduledAt'>[]
+  days: Pick<GQLTrainingDay, 'scheduledAt' | 'isRestDay'>[]
 }
 export const getCurrentWeekAndDay = <T extends GetCurrentWeekAndDay>(
   weeks: T[] | undefined,
 ): {
   currentWeek: T | undefined
   currentDay: T['days'][number] | undefined
+  nextWorkout: T['days'][number] | undefined
 } => {
   if (!weeks) {
-    return { currentWeek: undefined, currentDay: undefined }
+    return {
+      currentWeek: undefined,
+      currentDay: undefined,
+      nextWorkout: undefined,
+    }
   }
 
   const currentWeek = weeks.find((week) => {
@@ -23,5 +28,15 @@ export const getCurrentWeekAndDay = <T extends GetCurrentWeekAndDay>(
     return day.scheduledAt && isToday(day.scheduledAt)
   })
 
-  return { currentWeek, currentDay }
+  const nextWorkout = weeks
+    ?.flatMap((week) => week.days)
+    .find((day) => {
+      return (
+        day.scheduledAt &&
+        isAfter(day.scheduledAt, new Date()) &&
+        !day.isRestDay
+      )
+    })
+
+  return { currentWeek, currentDay, nextWorkout }
 }

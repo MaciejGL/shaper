@@ -1,3 +1,4 @@
+import { format } from 'date-fns'
 import {
   ArrowRight,
   CheckIcon,
@@ -19,9 +20,11 @@ import { ActivePlan } from '../../types'
 export function TodaysWorkout({
   todaysWorkout,
   planId,
+  isNextWorkout,
 }: {
   todaysWorkout: NonNullable<ActivePlan>['weeks'][number]['days'][number]
   planId: string
+  isNextWorkout?: boolean
 }) {
   if (!todaysWorkout || !planId) {
     return null
@@ -30,14 +33,24 @@ export function TodaysWorkout({
   return (
     <div>
       <div className="flex items-baseline justify-between mb-4">
-        <p className="text-lg font-semibold">Today's workout</p>
-        <ButtonLink
-          href={`/fitspace/workout/${planId}`}
-          iconEnd={<ArrowRight />}
-          variant={todaysWorkout.isRestDay ? 'outline' : 'default'}
-        >
-          {todaysWorkout.isRestDay ? 'View workout' : 'Start workout'}
-        </ButtonLink>
+        <div>
+          <p className="text-lg font-semibold">
+            {isNextWorkout ? "Next's workout" : "Today's workout"}
+          </p>
+          {isNextWorkout && todaysWorkout.scheduledAt && (
+            <p className="text-sm text-muted-foreground">
+              {format(todaysWorkout.scheduledAt, 'EEEE, d. MMMM')}
+            </p>
+          )}
+        </div>
+        {!todaysWorkout.isRestDay && (
+          <ButtonLink
+            href={`/fitspace/workout/${planId}`}
+            iconEnd={<ArrowRight />}
+          >
+            Start
+          </ButtonLink>
+        )}
       </div>
       {todaysWorkout.isRestDay ? (
         <RestDay />
@@ -54,7 +67,7 @@ function WorkoutDay({
   day: NonNullable<ActivePlan>['weeks'][number]['days'][number]
 }) {
   return (
-    <div className="w-full space-y-6 mt-6">
+    <div className="w-full space-y-6 mt-12">
       <WorkoutDayHeader day={day} />
       <WorkoutDayExercises day={day} />
       <WorkoutDaySummary day={day} />
@@ -149,10 +162,10 @@ function WorkoutDaySummary({
 
 function RestDay() {
   return (
-    <div className="px-4 py-8 shadow-lg bg-muted rounded-lg flex flex-col items-center">
+    <div className="px-4 py-8 flex flex-col gap-4 items-center">
       <BiggyIcon icon={HamIcon} size="md" />
-      <span className="text-muted-foreground text-center max-w-[25ch]">
-        Rest, eat, sleep and recover muscles for next workout!
+      <span className="text-muted-foreground text-sm text-center max-w-[25ch]">
+        Rest and recover for next workout!
       </span>
     </div>
   )

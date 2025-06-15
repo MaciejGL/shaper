@@ -1,35 +1,18 @@
 'use client'
 
-import { useQueryClient } from '@tanstack/react-query'
-import { format } from 'date-fns'
-import { DumbbellIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
-import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  useActivatePlanMutation,
-  useClosePlanMutation,
-  useDeletePlanMutation,
-  useFitspaceMyPlansQuery,
-  usePausePlanMutation,
-} from '@/generated/graphql-client'
+import { useFitspaceMyPlansQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { ActivePlanTab } from './components/active-plan-tab/active-plan-tab'
 import { AvailablePlansTab } from './components/available-plans-tab'
 import { CompletedPlansTab } from './components/completed-plans-tab'
-import { PlanActionDialog } from './components/plan-action-dialog'
-import {
-  ActivePlan,
-  AvailablePlan,
-  CompletedPlan,
-  PlanAction,
-  PlanTab,
-} from './types'
+import { PlanActionDialog } from './components/plan-action-dialog/plan-action-dialog'
+import { usePlanAction } from './components/plan-action-dialog/use-plan-action'
+import { PlanTab } from './types'
 
 export default function MyPlansPage() {
   const [tab, setTab] = useQueryState<PlanTab>(
@@ -40,93 +23,26 @@ export default function MyPlansPage() {
       PlanTab.Completed,
     ]),
   )
-  const router = useRouter()
 
-  const queryClient = useQueryClient()
-  const invalidateQueries = () => {
-    queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] })
-    queryClient.invalidateQueries({ queryKey: ['FitspaceGetCurrentWorkoutId'] })
-  }
-  const { mutateAsync: activatePlan, isPending: isActivatingPlan } =
-    useActivatePlanMutation({
-      onSuccess: () => {
-        invalidateQueries()
-        toast.success('Plan activated')
-        setTab(PlanTab.Active)
-        router.refresh()
-      },
-    })
-  const { mutateAsync: pausePlan, isPending: isPausingPlan } =
-    usePausePlanMutation({
-      onSuccess: () => {
-        invalidateQueries()
-        toast.success('Plan paused')
-      },
-    })
-  const { mutateAsync: closePlan, isPending: isClosingPlan } =
-    useClosePlanMutation({
-      onSuccess: () => {
-        invalidateQueries()
-        toast.success('Plan closed')
-      },
-    })
-  const { mutateAsync: deletePlan, isPending: isDeletingPlan } =
-    useDeletePlanMutation({
-      onSuccess: () => {
-        invalidateQueries()
-        toast.success('Plan deleted')
-      },
-    })
+  const {
+    dialogState,
+    handlePlanAction,
+    handleConfirmAction,
+    handleCloseDialog,
+    isActivatingPlan,
+    isPausingPlan,
+    isClosingPlan,
+    isDeletingPlan,
+  } = usePlanAction()
+
   const { data, isLoading: isLoadingPlans } = useFitspaceMyPlansQuery()
   const activePlan = data?.getMyPlansOverview?.activePlan
   const availablePlans = data?.getMyPlansOverview?.availablePlans
   const completedPlans = data?.getMyPlansOverview?.completedPlans
 
-  const [dialogState, setDialogState] = useState<{
-    isOpen: boolean
-    action: PlanAction | null
-    plan: AvailablePlan | ActivePlan | CompletedPlan | null
-  }>({
-    isOpen: false,
-    action: null,
-    plan: null,
-  })
-
-  const handlePlanAction = (
-    action: PlanAction,
-    plan: AvailablePlan | ActivePlan | CompletedPlan,
-  ) => {
-    setDialogState({ isOpen: true, action, plan })
-  }
-
-  const handleConfirmAction = async (data: { startDate?: Date }) => {
-    if (!dialogState.plan) return
-    if (dialogState.action === 'activate' && data.startDate) {
-      await activatePlan({
-        planId: dialogState.plan.id,
-        startDate: format(data.startDate, 'yyyy-MM-dd'),
-        resume: dialogState.plan.startDate ? true : false,
-      })
-    } else if (dialogState.action === 'pause') {
-      await pausePlan({ planId: dialogState.plan.id })
-    } else if (dialogState.action === 'close') {
-      await closePlan({ planId: dialogState.plan.id })
-    } else if (dialogState.action === 'delete') {
-      await deletePlan({ planId: dialogState.plan.id })
-    }
-    setDialogState({ isOpen: false, action: null, plan: null })
-  }
-
-  const handleCloseDialog = () => {
-    setDialogState({ isOpen: false, action: null, plan: null })
-  }
   return (
     <div className="container-fitspace mx-auto">
-      <DashboardHeader
-        title="Training Plans"
-        description="Manage your workout plans and track your progress"
-        icon={<DumbbellIcon />}
-      />
+      <DashboardHeader title="Training Plans" />
 
       {/* Plans Tabs */}
       <Tabs

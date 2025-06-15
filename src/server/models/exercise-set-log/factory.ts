@@ -75,13 +75,15 @@ const markSetAsCompletedRelatedData = async (setId: string) => {
     select: {
       id: true,
       planId: true,
-      days: { select: { completedAt: true } },
+      days: { select: { completedAt: true, isRestDay: true } },
     },
   })
 
   if (!week) return null
 
-  const allDaysCompleted = week.days.every((d) => d.completedAt)
+  const allDaysCompleted = week.days
+    .filter((d) => !d.isRestDay)
+    .every((d) => d.completedAt)
   if (allDaysCompleted) {
     await prisma.trainingWeek.update({
       where: { id: week.id },
@@ -298,12 +300,18 @@ export const markExerciseAsCompleted = async (
 
   const week = await prisma.trainingWeek.findUnique({
     where: { id: day.weekId },
-    select: { id: true, planId: true, days: { select: { completedAt: true } } },
+    select: {
+      id: true,
+      planId: true,
+      days: { select: { completedAt: true, isRestDay: true } },
+    },
   })
 
   if (!week) return null
 
-  const allDaysCompleted = week.days.every((d) => d.completedAt)
+  const allDaysCompleted = week.days
+    .filter((d) => !d.isRestDay)
+    .every((d) => d.completedAt)
   if (allDaysCompleted) {
     await prisma.trainingWeek.update({
       where: { id: week.id },
@@ -354,12 +362,18 @@ export const markWorkoutAsCompleted = async (
 
   const week = await prisma.trainingWeek.findUnique({
     where: { id: day.weekId },
-    select: { id: true, planId: true, days: { select: { completedAt: true } } },
+    select: {
+      id: true,
+      planId: true,
+      days: { select: { completedAt: true, isRestDay: true } },
+    },
   })
 
   if (!week) return true
 
-  const allDaysCompleted = week.days.every((d) => d.completedAt)
+  const allDaysCompleted = week.days
+    .filter((d) => !d.isRestDay)
+    .every((d) => d.completedAt)
   if (allDaysCompleted) {
     await prisma.trainingWeek.update({
       where: { id: week.id },

@@ -38,35 +38,42 @@ export async function getTrainingPlanById(
   if (!user) {
     throw new Error('User not found')
   }
-  const trainingPlan = await prisma.trainingPlan.findUnique({
-    where: {
-      id,
-      OR: [{ createdById: user.user.id }, { assignedToId: user.user.id }],
-    },
-    include: {
-      weeks: {
-        orderBy: {
-          weekNumber: 'asc',
-        },
-        include: {
-          days: {
-            orderBy: {
-              dayOfWeek: 'asc',
-            },
-            include: {
-              exercises: {
-                orderBy: {
-                  order: 'asc',
-                },
-                include: {
-                  base: {
-                    select: {
-                      videoUrl: true,
-                    },
+  try {
+    const trainingPlan = await prisma.trainingPlan.findUnique({
+      where: {
+        id,
+        OR: [
+          { createdById: user.user.id },
+          { assignedToId: user.user.id },
+          { isPublic: true },
+        ],
+      },
+      include: {
+        weeks: {
+          orderBy: {
+            weekNumber: 'asc',
+          },
+          include: {
+            days: {
+              orderBy: {
+                dayOfWeek: 'asc',
+              },
+              include: {
+                exercises: {
+                  orderBy: {
+                    order: 'asc',
                   },
-                  sets: {
-                    orderBy: {
-                      order: 'asc',
+                  include: {
+                    base: {
+                      select: {
+                        videoUrl: true,
+                        muscleGroups: true,
+                      },
+                    },
+                    sets: {
+                      orderBy: {
+                        order: 'asc',
+                      },
                     },
                   },
                 },
@@ -75,12 +82,28 @@ export async function getTrainingPlanById(
           },
         },
       },
-    },
-  })
-  if (!trainingPlan) {
+    })
+
+    if (!trainingPlan) {
+      throw new Error('Training plan not found')
+    }
+
+    if (trainingPlan.isTemplate && !trainingPlan.assignedToId) {
+      const scopedTrainingPlan = {
+        ...trainingPlan,
+        weeks: trainingPlan.weeks.map((week, weekIndex) => ({
+          ...week,
+          days: weekIndex === 0 ? week.days.map((day) => day) : undefined,
+        })),
+      } as typeof trainingPlan
+      return new TrainingPlan(scopedTrainingPlan, context)
+    }
+
+    return new TrainingPlan(trainingPlan, context)
+  } catch (error) {
+    console.error(error)
     throw new Error('Training plan not found')
   }
-  return new TrainingPlan(trainingPlan, context)
 }
 
 export async function getTemplates(

@@ -19,21 +19,23 @@ export const createPlanLoaders = () => ({
   }),
 
   assignedCountByPlanId: new DataLoader(async (planIds: readonly string[]) => {
-    const counts = await prisma.user.groupBy({
-      by: ['id'],
+    const counts = await prisma.trainingPlan.groupBy({
+      by: ['templateId'],
       where: {
-        assignedPlans: {
-          some: { id: { in: planIds as string[] } },
-        },
+        templateId: { in: planIds as string[] },
+        isTemplate: false, // Only count assigned plans, not templates
       },
-      _count: true,
+      _count: {
+        templateId: true,
+      },
     })
 
-    const map = new Map(counts.map((item) => [item.id, item._count]))
+    const map = new Map(
+      counts.map((item) => [item.templateId, item._count.templateId]),
+    )
 
     return planIds.map((id) => map.get(id) ?? 0)
   }),
-
   weeksByPlanId: new DataLoader(async (planIds: readonly string[]) => {
     const allWeeks = await prisma.trainingWeek.findMany({
       where: {
@@ -44,6 +46,17 @@ export const createPlanLoaders = () => ({
 
     const grouped = planIds.map((planId) =>
       allWeeks.filter((w) => w.planId === planId),
+    )
+    return grouped
+  }),
+  reviewsByPlanId: new DataLoader(async (planIds: readonly string[]) => {
+    const reviews = await prisma.review.findMany({
+      where: { trainingPlanId: { in: planIds as string[] } },
+      include: { createdBy: { include: { profile: true } } },
+    })
+
+    const grouped = planIds.map((planId) =>
+      reviews.filter((r) => r.trainingPlanId === planId),
     )
     return grouped
   }),

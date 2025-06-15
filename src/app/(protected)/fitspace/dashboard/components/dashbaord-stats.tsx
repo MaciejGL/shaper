@@ -130,7 +130,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                 >
                   <div
                     className={cn(
-                      'rounded-md p-2',
+                      'rounded-md p-2 h-full',
                       !day.isRestDay && 'bg-primary-foreground',
                       day.isRestDay &&
                         'bg-muted-foreground/10 text-muted-foreground',
@@ -148,7 +148,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                       )}
                       <span>{getDayName(day.dayOfWeek, { short: true })}</span>
                       <span className="font-medium truncate max-md:hidden">
-                        {day.workoutType?.split(' ').at(0)}
+                        {day.workoutType?.split(' ').at(0) ?? 'Rest'}
                       </span>
                     </div>
                   </div>

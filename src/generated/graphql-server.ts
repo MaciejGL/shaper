@@ -96,6 +96,12 @@ export type GQLCreateNotificationInput = {
   userId: Scalars['ID']['input'];
 };
 
+export type GQLCreateReviewInput = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  rating: Scalars['Int']['input'];
+  trainingPlanId: Scalars['ID']['input'];
+};
+
 export type GQLCreateTrainingDayInput = {
   dayOfWeek: Scalars['Int']['input'];
   exercises?: InputMaybe<Array<GQLCreateTrainingExerciseInput>>;
@@ -134,6 +140,10 @@ export type GQLCreateTrainingWeekInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name: Scalars['String']['input'];
   weekNumber: Scalars['Int']['input'];
+};
+
+export type GQLDeleteReviewInput = {
+  reviewId: Scalars['ID']['input'];
 };
 
 export enum GQLDifficulty {
@@ -227,6 +237,13 @@ export type GQLLogSetInput = {
   setId: Scalars['ID']['input'];
 };
 
+export type GQLModerateReviewInput = {
+  flagReason?: InputMaybe<Scalars['String']['input']>;
+  flagged?: InputMaybe<Scalars['Boolean']['input']>;
+  isHidden?: InputMaybe<Scalars['Boolean']['input']>;
+  reviewId: Scalars['ID']['input'];
+};
+
 export type GQLMuscleGroup = {
   __typename?: 'MuscleGroup';
   alias?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -259,11 +276,13 @@ export type GQLMutation = {
   createExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   createNote: EntireFieldWrapper<GQLNote>;
   createNotification: EntireFieldWrapper<GQLNotification>;
+  createReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   createTrainingPlan: EntireFieldWrapper<GQLCreateTrainingPlanPayload>;
   deleteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteNote: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteNotification: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deletePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  deleteReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   duplicateTrainingPlan: EntireFieldWrapper<Scalars['ID']['output']>;
   logWorkoutProgress: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -273,6 +292,7 @@ export type GQLMutation = {
   markNotificationRead: EntireFieldWrapper<GQLNotification>;
   markSetAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   markWorkoutAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
+  moderateReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   pausePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   rejectCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   removeTrainingPlanFromClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -280,6 +300,7 @@ export type GQLMutation = {
   updateNote: EntireFieldWrapper<GQLNote>;
   updateNotification: EntireFieldWrapper<GQLNotification>;
   updateProfile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
+  updateReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateSetLog?: EntireFieldWrapper<Maybe<GQLExerciseSetLog>>;
   updateTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
 };
@@ -333,6 +354,11 @@ export type GQLMutationCreateNotificationArgs = {
 };
 
 
+export type GQLMutationCreateReviewArgs = {
+  input: GQLCreateReviewInput;
+};
+
+
 export type GQLMutationCreateTrainingPlanArgs = {
   input: GQLCreateTrainingPlanInput;
 };
@@ -355,6 +381,11 @@ export type GQLMutationDeleteNotificationArgs = {
 
 export type GQLMutationDeletePlanArgs = {
   planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDeleteReviewArgs = {
+  input: GQLDeleteReviewInput;
 };
 
 
@@ -407,6 +438,11 @@ export type GQLMutationMarkWorkoutAsCompletedArgs = {
 };
 
 
+export type GQLMutationModerateReviewArgs = {
+  input: GQLModerateReviewInput;
+};
+
+
 export type GQLMutationPausePlanArgs = {
   planId: Scalars['ID']['input'];
 };
@@ -441,6 +477,11 @@ export type GQLMutationUpdateNotificationArgs = {
 
 export type GQLMutationUpdateProfileArgs = {
   input: GQLUpdateProfileInput;
+};
+
+
+export type GQLMutationUpdateReviewArgs = {
+  input: GQLUpdateReviewInput;
 };
 
 
@@ -606,10 +647,14 @@ export type GQLQueryUserPublicArgs = {
 
 export type GQLReview = {
   __typename?: 'Review';
-  comment: EntireFieldWrapper<Scalars['String']['output']>;
+  comment?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
-  createdBy?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
+  creatorName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  flagReason?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  flagged: EntireFieldWrapper<Scalars['Boolean']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
+  isEdited: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  isHidden: EntireFieldWrapper<Scalars['Boolean']['output']>;
   rating: EntireFieldWrapper<Scalars['Int']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
@@ -665,6 +710,7 @@ export type GQLTrainingPlan = {
   difficulty: EntireFieldWrapper<GQLDifficulty>;
   endDate?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
+  isDemo: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isDraft: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isPublic: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isTemplate: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -677,6 +723,7 @@ export type GQLTrainingPlan = {
   totalReviews: EntireFieldWrapper<Scalars['Int']['output']>;
   totalWorkouts: EntireFieldWrapper<Scalars['Int']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  userReview?: EntireFieldWrapper<Maybe<GQLReview>>;
   weekCount: EntireFieldWrapper<Scalars['Int']['output']>;
   weeks: EntireFieldWrapper<Array<GQLTrainingWeek>>;
 };
@@ -741,6 +788,12 @@ export type GQLUpdateProfileInput = {
   phone?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Scalars['String']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type GQLUpdateReviewInput = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  rating?: InputMaybe<Scalars['Int']['input']>;
+  reviewId: Scalars['ID']['input'];
 };
 
 export type GQLUpdateTrainingDayInput = {
@@ -987,11 +1040,13 @@ export type GQLResolversTypes = {
   CreateExerciseSetInput: GQLCreateExerciseSetInput;
   CreateNoteInput: GQLCreateNoteInput;
   CreateNotificationInput: GQLCreateNotificationInput;
+  CreateReviewInput: GQLCreateReviewInput;
   CreateTrainingDayInput: GQLCreateTrainingDayInput;
   CreateTrainingExerciseInput: GQLCreateTrainingExerciseInput;
   CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
   CreateTrainingPlanPayload: ResolverTypeWrapper<GQLCreateTrainingPlanPayload>;
   CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
+  DeleteReviewInput: GQLDeleteReviewInput;
   Difficulty: GQLDifficulty;
   Equipment: GQLEquipment;
   ExerciseLog: ResolverTypeWrapper<GQLExerciseLog>;
@@ -1005,6 +1060,7 @@ export type GQLResolversTypes = {
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   LogSetInput: GQLLogSetInput;
+  ModerateReviewInput: GQLModerateReviewInput;
   MuscleGroup: ResolverTypeWrapper<GQLMuscleGroup>;
   MuscleGroupCategory: ResolverTypeWrapper<GQLMuscleGroupCategory>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -1024,6 +1080,7 @@ export type GQLResolversTypes = {
   UpdateNoteInput: GQLUpdateNoteInput;
   UpdateNotificationInput: GQLUpdateNotificationInput;
   UpdateProfileInput: GQLUpdateProfileInput;
+  UpdateReviewInput: GQLUpdateReviewInput;
   UpdateTrainingDayInput: GQLUpdateTrainingDayInput;
   UpdateTrainingExerciseInput: GQLUpdateTrainingExerciseInput;
   UpdateTrainingPlanInput: GQLUpdateTrainingPlanInput;
@@ -1048,11 +1105,13 @@ export type GQLResolversParentTypes = {
   CreateExerciseSetInput: GQLCreateExerciseSetInput;
   CreateNoteInput: GQLCreateNoteInput;
   CreateNotificationInput: GQLCreateNotificationInput;
+  CreateReviewInput: GQLCreateReviewInput;
   CreateTrainingDayInput: GQLCreateTrainingDayInput;
   CreateTrainingExerciseInput: GQLCreateTrainingExerciseInput;
   CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
   CreateTrainingPlanPayload: GQLCreateTrainingPlanPayload;
   CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
+  DeleteReviewInput: GQLDeleteReviewInput;
   ExerciseLog: GQLExerciseLog;
   ExerciseSet: GQLExerciseSet;
   ExerciseSetLog: GQLExerciseSetLog;
@@ -1062,6 +1121,7 @@ export type GQLResolversParentTypes = {
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
   LogSetInput: GQLLogSetInput;
+  ModerateReviewInput: GQLModerateReviewInput;
   MuscleGroup: GQLMuscleGroup;
   MuscleGroupCategory: GQLMuscleGroupCategory;
   Mutation: {};
@@ -1080,6 +1140,7 @@ export type GQLResolversParentTypes = {
   UpdateNoteInput: GQLUpdateNoteInput;
   UpdateNotificationInput: GQLUpdateNotificationInput;
   UpdateProfileInput: GQLUpdateProfileInput;
+  UpdateReviewInput: GQLUpdateReviewInput;
   UpdateTrainingDayInput: GQLUpdateTrainingDayInput;
   UpdateTrainingExerciseInput: GQLUpdateTrainingExerciseInput;
   UpdateTrainingPlanInput: GQLUpdateTrainingPlanInput;
@@ -1195,11 +1256,13 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   createExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCreateExerciseArgs, 'input'>>;
   createNote?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationCreateNoteArgs, 'input'>>;
   createNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationCreateNotificationArgs, 'input'>>;
+  createReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCreateReviewArgs, 'input'>>;
   createTrainingPlan?: Resolver<GQLResolversTypes['CreateTrainingPlanPayload'], ParentType, ContextType, RequireFields<GQLMutationCreateTrainingPlanArgs, 'input'>>;
   deleteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteExerciseArgs, 'id'>>;
   deleteNote?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteNoteArgs, 'id'>>;
   deleteNotification?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteNotificationArgs, 'id'>>;
   deletePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeletePlanArgs, 'planId'>>;
+  deleteReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteReviewArgs, 'input'>>;
   deleteTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteTrainingPlanArgs, 'id'>>;
   duplicateTrainingPlan?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingPlanArgs, 'id'>>;
   logWorkoutProgress?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutProgressArgs, 'dayId' | 'tick'>>;
@@ -1209,6 +1272,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   markNotificationRead?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationMarkNotificationReadArgs, 'id'>>;
   markSetAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkSetAsCompletedArgs, 'completed' | 'setId'>>;
   markWorkoutAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkWorkoutAsCompletedArgs, 'dayId'>>;
+  moderateReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationModerateReviewArgs, 'input'>>;
   pausePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationPausePlanArgs, 'planId'>>;
   rejectCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
   removeTrainingPlanFromClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingPlanFromClientArgs, 'clientId' | 'planId'>>;
@@ -1216,6 +1280,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateNote?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationUpdateNoteArgs, 'input'>>;
   updateNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationUpdateNotificationArgs, 'input'>>;
   updateProfile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType, RequireFields<GQLMutationUpdateProfileArgs, 'input'>>;
+  updateReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateReviewArgs, 'input'>>;
   updateSetLog?: Resolver<Maybe<GQLResolversTypes['ExerciseSetLog']>, ParentType, ContextType, RequireFields<GQLMutationUpdateSetLogArgs, 'input'>>;
   updateTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingPlanArgs, 'input'>>;
 };
@@ -1276,10 +1341,14 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
 };
 
 export type GQLReviewResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Review'] = GQLResolversParentTypes['Review']> = {
-  comment?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  comment?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  createdBy?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
+  creatorName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  flagReason?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  flagged?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  isEdited?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  isHidden?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   rating?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -1335,6 +1404,7 @@ export type GQLTrainingPlanResolvers<ContextType = GQLContext, ParentType extend
   difficulty?: Resolver<GQLResolversTypes['Difficulty'], ParentType, ContextType>;
   endDate?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  isDemo?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isDraft?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isPublic?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isTemplate?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
@@ -1347,6 +1417,7 @@ export type GQLTrainingPlanResolvers<ContextType = GQLContext, ParentType extend
   totalReviews?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   totalWorkouts?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  userReview?: Resolver<Maybe<GQLResolversTypes['Review']>, ParentType, ContextType>;
   weekCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   weeks?: Resolver<Array<GQLResolversTypes['TrainingWeek']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

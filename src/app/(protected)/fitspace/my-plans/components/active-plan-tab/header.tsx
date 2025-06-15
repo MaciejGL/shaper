@@ -1,6 +1,7 @@
-import { Pause } from 'lucide-react'
+import { LayoutDashboard, Pause } from 'lucide-react'
 import { X } from 'lucide-react'
 import { MoreHorizontalIcon } from 'lucide-react'
+import Link from 'next/link'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -26,23 +27,33 @@ export function Header({
   return (
     <div className="pb-6">
       <div className="flex justify-between items-start">
-        <PlanHeader title={plan.title} loading={loading} />
+        <PlanHeader title={plan.title} loading={loading} planId={plan.id} />
         <PlanActions handlePlanAction={handlePlanAction} plan={plan} />
       </div>
     </div>
   )
 }
 
-function PlanHeader({ title, loading }: { title: string; loading: boolean }) {
+function PlanHeader({
+  title,
+  loading,
+  planId,
+}: {
+  title: string
+  loading: boolean
+  planId: string
+}) {
   return (
     <div className="flex-1">
       <div className="mb-2">
-        <h2
-          className={cn('text-lg mb-1', loading && 'masked-placeholder-text')}
-        >
-          {title}
-        </h2>
-        <Badge variant="primary" isLoading={loading}>
+        <Link href={`/fitspace/training-preview/${planId}`}>
+          <h2
+            className={cn('text-lg mb-1', loading && 'masked-placeholder-text')}
+          >
+            {title}
+          </h2>
+        </Link>
+        <Badge variant="secondary" isLoading={loading}>
           Active
         </Badge>
       </div>
@@ -67,15 +78,18 @@ function PlanActions({
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <Link href={`/fitspace/training-preview/${plan.id}`}>
+          <DropdownMenuItem>
+            <LayoutDashboard className="size-4 mr-2" />
+            Plan Overview
+          </DropdownMenuItem>
+        </Link>
         <DropdownMenuItem onClick={() => handlePlanAction('pause', plan)}>
-          <Pause className="h-4 w-4 mr-2" />
+          <Pause className="size mr-2" />
           Pause Plan
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handlePlanAction('close', plan)}
-          className="text-red-600"
-        >
-          <X className="h-4 w-4 mr-2" />
+        <DropdownMenuItem onClick={() => handlePlanAction('close', plan)}>
+          <X className="size mr-2" />
           Close Plan
         </DropdownMenuItem>
       </DropdownMenuContent>

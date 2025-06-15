@@ -5,6 +5,7 @@ interface CalorieInput {
   age: number
   gender: 'male' | 'female'
   intensity?: 'low' | 'moderate' | 'high'
+  muscleGroups: string[]
 }
 
 /**
@@ -24,6 +25,7 @@ export function calculateCaloriesBurned({
   heightCm,
   age,
   gender,
+  muscleGroups,
 }: CalorieInput): {
   low: number
   moderate: number
@@ -44,6 +46,27 @@ export function calculateCaloriesBurned({
 
   const bmr = calculateBMR({ weightKg, heightCm, age, gender })
 
+  const muscleGroupMultiplierMap = {
+    chest: 1.01,
+    back: 1.02,
+    shoulders: 0.96,
+    arms: 0.96,
+    legs: 1.03,
+    core: 0.99,
+  } as const
+
+  const muscleGroupMultiplier = muscleGroups.reduce((acc, group) => {
+    if (
+      muscleGroupMultiplierMap[group as keyof typeof muscleGroupMultiplierMap]
+    ) {
+      return (
+        acc *
+        muscleGroupMultiplierMap[group as keyof typeof muscleGroupMultiplierMap]
+      )
+    }
+    return acc
+  }, 1)
+
   /**
    * Explanation:
    * - BMR is per day → divide by 1440 to get per minute
@@ -55,10 +78,12 @@ export function calculateCaloriesBurned({
     high: 0.08,
   }
 
-  const caloriesPerMinuteLow = (bmr / 1440) * (intensityMultiplier.low * 100)
+  const caloriesPerMinuteLow =
+    (bmr / 1440) * (intensityMultiplier.low * 100 * muscleGroupMultiplier)
   const caloriesPerMinuteModerate =
-    (bmr / 1440) * (intensityMultiplier.moderate * 100)
-  const caloriesPerMinuteHigh = (bmr / 1440) * (intensityMultiplier.high * 100)
+    (bmr / 1440) * (intensityMultiplier.moderate * 100 * muscleGroupMultiplier)
+  const caloriesPerMinuteHigh =
+    (bmr / 1440) * (intensityMultiplier.high * 100 * muscleGroupMultiplier)
 
   return {
     low: Math.round(caloriesPerMinuteLow * durationMinutes),

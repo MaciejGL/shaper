@@ -1,5 +1,6 @@
 import { CollapsibleText } from '@/components/collapsible-text'
 import { Loader } from '@/components/loader'
+import { GQLTrainingPlan } from '@/generated/graphql-client'
 import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
 
 import { ActivePlan, PlanAction } from '../../types'
@@ -16,10 +17,18 @@ export function ActivePlanTab({
   loading,
 }: {
   plan: ActivePlan | null
-  handlePlanAction: (action: PlanAction, plan: ActivePlan) => void
+  handlePlanAction: (
+    action: PlanAction,
+    plan: Pick<
+      GQLTrainingPlan,
+      'title' | 'weekCount' | 'totalWorkouts' | 'id' | 'startDate'
+    > | null,
+  ) => void
   loading: boolean
 }) {
-  const { currentWeek, currentDay } = getCurrentWeekAndDay(plan?.weeks)
+  const { currentWeek, currentDay, nextWorkout } = getCurrentWeekAndDay(
+    plan?.weeks,
+  )
 
   if (loading) {
     return (
@@ -41,13 +50,23 @@ export function ActivePlanTab({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
             <div className="bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
               <ProgressOverview
+                completedWorkouts={plan.completedWorkoutsDays}
                 currentWeekNumber={currentWeek?.weekNumber ?? 0}
+                completedWorkoutsThisWeek={
+                  currentWeek?.days.filter((day) => day.completedAt).length ?? 0
+                }
+                totalWorkoutsThisWeek={
+                  currentWeek?.days.filter((day) => !day.isRestDay).length ?? 0
+                }
                 completedWorkoutsDays={plan.completedWorkoutsDays}
                 adherence={plan.adherence}
                 totalWorkouts={plan.totalWorkouts}
                 weekCount={plan.weeks.length}
               />
               <div className="hidden md:block mt-6">
+                <p className="text-sm text-muted-foreground mb-6">
+                  Plan description
+                </p>
                 <CollapsibleText text={plan.description} maxLines={10} />
               </div>
             </div>
@@ -57,7 +76,17 @@ export function ActivePlanTab({
                 <TodaysWorkout todaysWorkout={currentDay} planId={plan.id} />
               </div>
             )}
+            {nextWorkout && (
+              <div className="bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
+                <TodaysWorkout
+                  todaysWorkout={nextWorkout}
+                  planId={plan.id}
+                  isNextWorkout
+                />
+              </div>
+            )}
             <div className="block md:hidden bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
+              <p className="text-lg font-semibold mb-6">Plan description</p>
               <CollapsibleText text={plan.description} maxLines={8} />
             </div>
           </div>

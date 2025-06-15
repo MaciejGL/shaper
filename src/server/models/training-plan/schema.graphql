@@ -12,9 +12,11 @@ type TrainingPlan {
   endDate: String
   progress: Float
   nextSession: String
+  isDemo: Boolean!
 
   rating: Float
   reviews: [Review!]!
+  userReview: Review
   totalReviews: Int!
 
   createdBy: UserPublic
@@ -37,15 +39,6 @@ enum Difficulty {
   INTERMEDIATE
   ADVANCED
   EXPERT
-}
-
-type Review {
-  id: ID!
-  rating: Int!
-  comment: String!
-  createdBy: UserPublic
-  createdAt: String!
-  updatedAt: String!
 }
 
 type MyPlansPayload {

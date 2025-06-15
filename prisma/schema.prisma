@@ -34,6 +34,7 @@ model User {
 
   createdNotes Note[] @relation("CreatedNotes")
 
+  reviews Review[]
   sessions              UserSession[]
   assignedPlans         TrainingPlan[]             @relation("AssignedPlans")
   createdPlans          TrainingPlan[]             @relation("CreatedPlans")
@@ -157,6 +158,7 @@ model TrainingPlan {
   isDraft     Boolean   @default(true)
   templateId  String?
   completedAt DateTime?
+  difficulty  String? // Enum: BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
 
   active    Boolean   @default(false)
   startDate DateTime?
@@ -171,6 +173,7 @@ model TrainingPlan {
   weeks        TrainingWeek[]
   template     TrainingPlan?  @relation("Template", fields: [templateId], references: [id])
   templates    TrainingPlan[] @relation("Template")
+  reviews Review[]  
 
   @@index([completedAt])
 }
@@ -387,4 +390,29 @@ model WorkoutSessionEvent {
   createdAt  DateTime @default(now())
 
   @@index([dayId])
+}
+
+model Review {
+  id          String   @id @default(uuid())
+  trainingPlanId String
+  trainingPlan TrainingPlan @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+
+  rating      Int      // (1-5 stars)
+  comment     String?
+  createdById String
+  createdBy   User     @relation(fields: [createdById], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Moderation fields:
+  isEdited    Boolean  @default(false) // if user edited after posting
+  isHidden    Boolean  @default(false) // for admin/moderation: hide review from public
+  flagged     Boolean  @default(false) // auto-flagged or reported as offensive
+  flagReason  String?  // optional: store why it was flagged
+
+  @@index([trainingPlanId])
+  @@index([createdById])
+  @@index([isHidden])
+  @@index([flagged])
 }

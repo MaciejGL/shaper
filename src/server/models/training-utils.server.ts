@@ -83,6 +83,7 @@ export async function duplicatePlan({
           isPublic: false,
           isTemplate: asTemplate,
           isDraft: asTemplate ? false : plan.isDraft,
+          templateId: asTemplate ? null : plan.templateId,
           createdById: plan.createdById,
           assignedToId: plan.assignedToId,
         },

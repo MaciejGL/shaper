@@ -14,6 +14,7 @@ import { getWeekYear } from 'date-fns'
 import { GQLDifficulty, GQLTrainingPlan } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
 
+import Review from '../review/model'
 import TrainingWeek from '../training-week/model'
 import UserPublic from '../user-public/model'
 
@@ -111,8 +112,21 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   async assignedCount() {
-    return this.context.loaders.plan.assignedCountByPlanId.load(this.data.id)
+    const id = this.data.isTemplate ? this.data.id : this.data.templateId
+
+    if (!id) {
+      return 0
+    }
+
+    const count = await this.context.loaders.plan.assignedCountByPlanId.load(id)
+
+    return count
   }
+
+  get isDemo() {
+    return this.data.assignedToId !== this.context.user?.user.id
+  }
+
   get currentWeekNumber() {
     // we need to get when training has Started first, then check how many weeks have passed. Then find week that we expect to match that week number
 
@@ -161,51 +175,61 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   get difficulty() {
-    // TODO: Implement this
-    return GQLDifficulty.Beginner
+    switch (this.data.difficulty) {
+      case 'Beginner':
+        return GQLDifficulty.Beginner
+      case 'Intermediate':
+        return GQLDifficulty.Intermediate
+      case 'Advanced':
+        return GQLDifficulty.Advanced
+      case 'Expert':
+        return GQLDifficulty.Expert
+      default:
+        return GQLDifficulty.Beginner
+    }
+  }
+
+  async userReview() {
+    if (!this.data.templateId) return null
+
+    const reviews = await this.context.loaders.plan.reviewsByPlanId.load(
+      this.data.templateId,
+    )
+
+    const userReview = reviews.find(
+      (r) => r.createdById === this.context.user?.user.id,
+    )
+
+    return userReview ? new Review(userReview, this.context) : null
   }
 
   async rating() {
-    // TODO: Implement this
-    const reviews = await this.reviews()
+    if (!this.data.templateId) return 0
+
+    const reviews = await this.context.loaders.plan.reviewsByPlanId.load(
+      this.data.templateId,
+    )
     const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0)
-    return totalRating / reviews.length
+
+    return totalRating / reviews.length || 0
   }
 
-  get totalReviews() {
-    // TODO: Implement this
-    return 3
+  async totalReviews() {
+    if (!this.data.templateId) return 0
+
+    const reviews = await this.context.loaders.plan.reviewsByPlanId.load(
+      this.data.templateId,
+    )
+    return reviews.length
   }
 
   async reviews() {
-    // TODO: Implement this
-    const createdBy = await this.createdBy()
-    return [
-      {
-        id: '1',
-        rating: 5,
-        comment: 'This plan is great!',
-        createdBy: createdBy,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: '2',
-        rating: 4,
-        comment: 'This plan is good!',
-        createdBy: createdBy,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      {
-        id: '3',
-        rating: 3,
-        comment: 'This plan is okay.',
-        createdBy: createdBy,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-    ]
+    if (!this.data.templateId) return []
+
+    const reviews = await this.context.loaders.plan.reviewsByPlanId.load(
+      this.data.templateId,
+    )
+    return reviews.map((review) => new Review(review, this.context))
   }
 
   get completedAt() {

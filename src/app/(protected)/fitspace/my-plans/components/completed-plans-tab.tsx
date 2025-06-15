@@ -1,6 +1,14 @@
 import { formatDate } from 'date-fns'
-import { CheckCircle, MoreHorizontal, StarIcon } from 'lucide-react'
+import {
+  CheckCircle,
+  LayoutDashboard,
+  MoreHorizontal,
+  StarIcon,
+  Trash,
+} from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 import { Loader } from '@/components/loader'
 import { RatingStars } from '@/components/rating-stars'
@@ -15,6 +23,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  useCreateReviewMutation,
+  useDeleteReviewMutation,
+  useFitspaceMyPlansQuery,
+  useUpdateReviewMutation,
+} from '@/generated/graphql-client'
+import { useInvalidateQuery } from '@/lib/invalidate-query'
 
 import { CompletedPlan, PlanAction } from '../types'
 
@@ -110,7 +125,14 @@ function PlanActionsDropdownMenu({
         <Button variant="ghost" size="icon-sm" iconOnly={<MoreHorizontal />} />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
+        <Link href={`/fitspace/training-preview/${plan.id}`}>
+          <DropdownMenuItem>
+            <LayoutDashboard className="size-4 mr-2" />
+            Plan Overview
+          </DropdownMenuItem>
+        </Link>
         <DropdownMenuItem onClick={() => handlePlanAction('delete', plan)}>
+          <Trash className="size-4 mr-2" />
           Delete Plan
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -120,20 +142,77 @@ function PlanActionsDropdownMenu({
 
 function YourPlanRating({ plan }: { plan: CompletedPlan }) {
   const [isRatingDialogOpen, setIsRatingDialogOpen] = useState(false)
-  const userRating = null
+  const userRating = plan.userReview?.rating
+  const userReview = plan.userReview?.comment
+  const invalidateQuery = useInvalidateQuery()
+  const { mutateAsync: createReview } = useCreateReviewMutation({
+    onSuccess: () => {
+      invalidateQuery({
+        queryKey: useFitspaceMyPlansQuery.getKey(),
+      })
+      toast.success('Review has been added')
+      setIsRatingDialogOpen(false)
+    },
+  })
+  const { mutateAsync: updateReview } = useUpdateReviewMutation({
+    onSuccess: () => {
+      invalidateQuery({
+        queryKey: useFitspaceMyPlansQuery.getKey(),
+      })
+      toast.success('Review has been updated')
+      setIsRatingDialogOpen(false)
+    },
+  })
+  const { mutateAsync: deleteReview } = useDeleteReviewMutation({
+    onSuccess: () => {
+      invalidateQuery({
+        queryKey: useFitspaceMyPlansQuery.getKey(),
+      })
+      toast.success('Review has been removed')
+      setIsRatingDialogOpen(false)
+    },
+  })
 
   const handlePlanRating = (rating: number, review?: string) => {
-    // TODO: Implement plan rating
-    console.info(rating, review)
+    if (userRating && plan.userReview?.id) {
+      updateReview({
+        input: {
+          reviewId: plan.userReview.id,
+          rating,
+          comment: review,
+        },
+      })
+    } else {
+      createReview({
+        input: {
+          trainingPlanId: plan.id,
+          rating,
+          comment: review,
+        },
+      })
+    }
+  }
+
+  const handleDeleteReview = () => {
+    if (plan.userReview?.id) {
+      deleteReview({
+        input: { reviewId: plan.userReview.id },
+      })
+    }
   }
 
   return (
     <div>
       {userRating ? (
-        <div className="text-left">
-          <div className="text-sm text-muted-foreground mb-1">Your Rating</div>
+        <button
+          className="text-left group/rating cursor-pointer"
+          onClick={() => setIsRatingDialogOpen(true)}
+        >
+          <div className="text-sm text-muted-foreground mb-1 group-hover/rating:underline underline-offset-4">
+            Your Rating
+          </div>
           <RatingStars rating={userRating} size="sm" />
-        </div>
+        </button>
       ) : (
         <>
           <Button
@@ -142,7 +221,6 @@ function YourPlanRating({ plan }: { plan: CompletedPlan }) {
             iconEnd={<StarIcon />}
             onClick={() => setIsRatingDialogOpen(true)}
             className="max-md:hidden"
-            disabled
           >
             Rate Plan
           </Button>
@@ -152,7 +230,6 @@ function YourPlanRating({ plan }: { plan: CompletedPlan }) {
             iconOnly={<StarIcon />}
             onClick={() => setIsRatingDialogOpen(true)}
             className="md:hidden"
-            disabled
           >
             Rate Plan
           </Button>
@@ -162,8 +239,13 @@ function YourPlanRating({ plan }: { plan: CompletedPlan }) {
         isOpen={isRatingDialogOpen}
         onClose={() => setIsRatingDialogOpen(false)}
         plan={plan}
-        existingRating={userRating ?? undefined}
+        existingRating={{
+          rating: userRating ?? 0,
+          comment: userReview ?? '',
+          createdAt: plan.userReview?.createdAt,
+        }}
         onSubmit={handlePlanRating}
+        onDelete={handleDeleteReview}
       />
     </div>
   )

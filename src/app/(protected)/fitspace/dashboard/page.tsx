@@ -1,3 +1,4 @@
+import { LayoutDashboard } from 'lucide-react'
 import { notFound } from 'next/navigation'
 
 import {
@@ -8,8 +9,9 @@ import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
 import { getCurrentUser } from '@/lib/getUser'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
+import { DashboardHeader } from '../../trainer/components/dashboard-header'
+
 import { DashboardStats } from './components/dashbaord-stats'
-import { Header } from './components/header'
 import { TodaysSession } from './components/todays-session'
 
 export default async function DashboardPage() {
@@ -28,9 +30,11 @@ export default async function DashboardPage() {
 
   return (
     <div className="container-fitspace mx-auto">
-      <div className="mt-8 mb-12">
-        <Header user={user.user} />
-      </div>
+      <DashboardHeader
+        title="Dashboard"
+        icon={<LayoutDashboard />}
+        description={`Good ${getCurrentPartOfDay()}${user.user.profile?.firstName ? `, ${user.user.profile?.firstName}` : ''}!`}
+      />
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
         <TodaysSession
           workout={currentDay}
@@ -45,4 +49,11 @@ export default async function DashboardPage() {
       </div>
     </div>
   )
+}
+
+function getCurrentPartOfDay() {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'morning'
+  if (hour < 18) return 'afternoon'
+  return 'evening'
 }

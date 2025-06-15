@@ -14,14 +14,18 @@ import {
 import { DialogHeader } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { WeekPicker } from '@/components/week-picker'
+import { GQLTrainingPlan } from '@/generated/graphql-client'
 
-import { ActivePlan, AvailablePlan, CompletedPlan, PlanAction } from '../types'
+import { PlanAction } from '../../types'
 
 interface PlanActionDialogProps {
   isOpen: boolean
   onClose: () => void
   action: PlanAction | null
-  plan: AvailablePlan | ActivePlan | CompletedPlan
+  plan: Pick<
+    GQLTrainingPlan,
+    'title' | 'weekCount' | 'totalWorkouts' | 'id' | 'startDate'
+  > | null
   onConfirm: (data: { startDate?: Date }) => void
   isLoading: boolean
 }

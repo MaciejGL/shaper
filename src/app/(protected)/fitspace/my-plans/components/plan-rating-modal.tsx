@@ -28,10 +28,11 @@ interface PlanRatingModalProps {
   plan: CompletedPlan
   existingRating?: {
     rating: number
-    review?: string
-    date?: string
+    comment?: string
+    createdAt?: string
   }
   onSubmit: (rating: number, review?: string) => void
+  onDelete?: () => void
 }
 
 export function PlanRatingModal({
@@ -40,10 +41,11 @@ export function PlanRatingModal({
   plan,
   existingRating,
   onSubmit,
+  onDelete,
 }: PlanRatingModalProps) {
   const [rating, setRating] = useState(existingRating?.rating || 0)
   const [hoveredRating, setHoveredRating] = useState(0)
-  const [review, setReview] = useState(existingRating?.review || '')
+  const [review, setReview] = useState(existingRating?.comment || '')
 
   const handleSubmit = () => {
     if (rating > 0) {
@@ -55,13 +57,13 @@ export function PlanRatingModal({
   const handleClose = () => {
     // Reset to existing values when closing without saving
     setRating(existingRating?.rating || 0)
-    setReview(existingRating?.review || '')
+    setReview(existingRating?.comment || '')
     onClose()
   }
 
   if (!plan || !plan.createdBy || !plan.completedAt) return null
 
-  const isUpdate = !!existingRating
+  const isUpdate = plan.userReview?.id
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -141,19 +143,24 @@ export function PlanRatingModal({
               className="resize-none"
             />
             <div className="text-xs text-muted-foreground">
-              Help others by sharing what you liked or what could be improved
+              Feedback will be visible only to creator.
             </div>
           </div>
 
           {/* Existing Rating Info */}
-          {isUpdate && existingRating?.date && (
+          {isUpdate && existingRating?.createdAt && (
             <div className="text-xs text-muted-foreground border-t pt-3">
-              Originally rated on {existingRating.date}
+              Originally rated on {existingRating.createdAt}
             </div>
           )}
         </div>
 
         <DialogFooter>
+          {onDelete && isUpdate && (
+            <Button variant="outline" onClick={onDelete}>
+              Remove Rating
+            </Button>
+          )}
           <Button variant="outline" onClick={handleClose}>
             Cancel
           </Button>
