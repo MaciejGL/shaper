@@ -145,33 +145,36 @@ function YourPlanRating({ plan }: { plan: CompletedPlan }) {
   const userRating = plan.userReview?.rating
   const userReview = plan.userReview?.comment
   const invalidateQuery = useInvalidateQuery()
-  const { mutateAsync: createReview } = useCreateReviewMutation({
-    onSuccess: () => {
-      invalidateQuery({
-        queryKey: useFitspaceMyPlansQuery.getKey(),
-      })
-      toast.success('Review has been added')
-      setIsRatingDialogOpen(false)
-    },
-  })
-  const { mutateAsync: updateReview } = useUpdateReviewMutation({
-    onSuccess: () => {
-      invalidateQuery({
-        queryKey: useFitspaceMyPlansQuery.getKey(),
-      })
-      toast.success('Review has been updated')
-      setIsRatingDialogOpen(false)
-    },
-  })
-  const { mutateAsync: deleteReview } = useDeleteReviewMutation({
-    onSuccess: () => {
-      invalidateQuery({
-        queryKey: useFitspaceMyPlansQuery.getKey(),
-      })
-      toast.success('Review has been removed')
-      setIsRatingDialogOpen(false)
-    },
-  })
+  const { mutateAsync: createReview, isPending: isCreatingReview } =
+    useCreateReviewMutation({
+      onSuccess: () => {
+        invalidateQuery({
+          queryKey: useFitspaceMyPlansQuery.getKey(),
+        })
+        toast.success('Review has been added')
+        setIsRatingDialogOpen(false)
+      },
+    })
+  const { mutateAsync: updateReview, isPending: isUpdatingReview } =
+    useUpdateReviewMutation({
+      onSuccess: () => {
+        invalidateQuery({
+          queryKey: useFitspaceMyPlansQuery.getKey(),
+        })
+        toast.success('Review has been updated')
+        setIsRatingDialogOpen(false)
+      },
+    })
+  const { mutateAsync: deleteReview, isPending: isDeletingReview } =
+    useDeleteReviewMutation({
+      onSuccess: () => {
+        invalidateQuery({
+          queryKey: useFitspaceMyPlansQuery.getKey(),
+        })
+        toast.success('Review has been removed')
+        setIsRatingDialogOpen(false)
+      },
+    })
 
   const handlePlanRating = (rating: number, review?: string) => {
     if (userRating && plan.userReview?.id) {
@@ -246,6 +249,8 @@ function YourPlanRating({ plan }: { plan: CompletedPlan }) {
         }}
         onSubmit={handlePlanRating}
         onDelete={handleDeleteReview}
+        isLoading={isCreatingReview || isUpdatingReview}
+        isDeletingRating={isDeletingReview}
       />
     </div>
   )

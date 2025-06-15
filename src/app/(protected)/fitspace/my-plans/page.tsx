@@ -1,5 +1,6 @@
 'use client'
 
+import { LayoutList } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -42,7 +43,7 @@ export default function MyPlansPage() {
 
   return (
     <div className="container-fitspace mx-auto">
-      <DashboardHeader title="Training Plans" />
+      <DashboardHeader title="Training Plans" icon={<LayoutList />} />
 
       {/* Plans Tabs */}
       <Tabs

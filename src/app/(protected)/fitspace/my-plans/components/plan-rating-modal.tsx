@@ -1,7 +1,7 @@
 'use client'
 
 import { formatDate } from 'date-fns'
-import { Star } from 'lucide-react'
+import { Star, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -33,6 +33,8 @@ interface PlanRatingModalProps {
   }
   onSubmit: (rating: number, review?: string) => void
   onDelete?: () => void
+  isLoading?: boolean
+  isDeletingRating?: boolean
 }
 
 export function PlanRatingModal({
@@ -42,6 +44,8 @@ export function PlanRatingModal({
   existingRating,
   onSubmit,
   onDelete,
+  isLoading,
+  isDeletingRating,
 }: PlanRatingModalProps) {
   const [rating, setRating] = useState(existingRating?.rating || 0)
   const [hoveredRating, setHoveredRating] = useState(0)
@@ -112,6 +116,7 @@ export function PlanRatingModal({
                   onMouseEnter={() => setHoveredRating(star)}
                   onMouseLeave={() => setHoveredRating(0)}
                   onClick={() => setRating(star)}
+                  disabled={isLoading || isDeletingRating}
                 >
                   <Star
                     className={cn(
@@ -141,6 +146,7 @@ export function PlanRatingModal({
               onChange={(e) => setReview(e.target.value)}
               rows={4}
               className="resize-none"
+              disabled={isLoading || isDeletingRating}
             />
             <div className="text-xs text-muted-foreground">
               Feedback will be visible only to creator.
@@ -155,16 +161,31 @@ export function PlanRatingModal({
           )}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-row">
           {onDelete && isUpdate && (
-            <Button variant="outline" onClick={onDelete}>
+            <Button
+              variant="outline"
+              onClick={onDelete}
+              iconOnly={<Trash2 />}
+              disabled={isLoading || isDeletingRating}
+              loading={isDeletingRating}
+            >
               Remove Rating
             </Button>
           )}
-          <Button variant="outline" onClick={handleClose}>
+          <div className="flex-1" />
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isLoading || isDeletingRating}
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={rating === 0}>
+          <Button
+            onClick={handleSubmit}
+            disabled={rating === 0 || isLoading || isDeletingRating}
+            loading={isLoading}
+          >
             {isUpdate ? 'Update Rating' : 'Submit Rating'}
           </Button>
         </DialogFooter>
