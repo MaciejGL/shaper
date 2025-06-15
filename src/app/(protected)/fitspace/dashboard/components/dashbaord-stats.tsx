@@ -130,7 +130,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                 >
                   <div
                     className={cn(
-                      'rounded-md p-2 h-full',
+                      'rounded-md p-2 h-full shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary',
                       !day.isRestDay && 'bg-primary-foreground',
                       day.isRestDay &&
                         'bg-muted-foreground/10 text-muted-foreground',

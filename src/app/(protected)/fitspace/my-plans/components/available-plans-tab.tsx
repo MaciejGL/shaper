@@ -9,6 +9,7 @@ import Link from 'next/link'
 
 import { CollapsibleText } from '@/components/collapsible-text'
 import { RatingStars } from '@/components/rating-stars'
+import { StatsItem } from '@/components/stats-item'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -24,7 +25,6 @@ import { AvailablePlan, PlanAction } from '../types'
 
 import { CompletionStats } from './completion-stats'
 import { PlanAuthor } from './plan-author'
-import { ProgressOverviewItem } from './progress-overview-item'
 
 export function AvailablePlansTab({
   availablePlans,
@@ -181,12 +181,12 @@ function PlanStats({
 }) {
   return (
     <div className="grid grid-cols-3 gap-2 text-center">
-      <ProgressOverviewItem value={weekCount} label="Weeks" />
-      <ProgressOverviewItem
+      <StatsItem value={weekCount} label="Weeks" />
+      <StatsItem
         value={Math.round(totalWorkouts / weekCount)}
         label="Per Week"
       />
-      <ProgressOverviewItem value={totalWorkouts} label="Workouts" />
+      <StatsItem value={totalWorkouts} label="Workouts" />
     </div>
   )
 }

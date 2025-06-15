@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 
 import { Loader } from '@/components/loader'
 import { RatingStars } from '@/components/rating-stars'
+import { StatsItem } from '@/components/stats-item'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardTitle } from '@/components/ui/card'
@@ -36,7 +37,6 @@ import { CompletedPlan, PlanAction } from '../types'
 import { CompletionStats } from './completion-stats'
 import { PlanAuthor } from './plan-author'
 import { PlanRatingModal } from './plan-rating-modal'
-import { ProgressOverviewItem } from './progress-overview-item'
 
 export function CompletedPlansTab({
   completedPlans,
@@ -90,7 +90,7 @@ export function CompletedPlansTab({
                   strengthGain: '+15%',
                   adherence: '94%',
                 }).map(([key, value]) => (
-                  <ProgressOverviewItem
+                  <StatsItem
                     key={key}
                     value={value}
                     label={key.replace(/([A-Z])/g, ' $1').trim()}

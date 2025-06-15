@@ -67,7 +67,7 @@ function Day({ day }: { day: WorkoutDay }) {
       <button
         data-selected={isSelected}
         className={cn(
-          'size-12 shrink-0 rounded-md flex-center flex-col text-primary transition-all bg-secondary dark:bg-secondary dark:text-primary cursor-pointer shadow-sm hover:bg-secondary/80',
+          'size-12 shrink-0 rounded-md flex-center flex-col text-primary transition-all bg-secondary dark:bg-secondary dark:text-primary cursor-pointer hover:bg-secondary/80 shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary',
           'data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground dark:data-[selected=true]:bg-primary dark:data-[selected=true]:text-primary-foreground',
         )}
         onClick={handleClick}

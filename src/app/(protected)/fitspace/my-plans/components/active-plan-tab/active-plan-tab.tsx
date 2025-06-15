@@ -48,7 +48,7 @@ export function ActivePlanTab({
             handlePlanAction={handlePlanAction}
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
-            <div className="bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
+            <div className="bg-muted/40 shadow-neuromorphic-light dark:shadow-neuromorphic-dark dark:bg-muted/20 p-4 rounded-lg">
               <ProgressOverview
                 completedWorkouts={plan.completedWorkoutsDays}
                 currentWeekNumber={currentWeek?.weekNumber ?? 0}
@@ -72,12 +72,12 @@ export function ActivePlanTab({
             </div>
 
             {currentDay && (
-              <div className="bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
+              <div className="bg-muted/40 shadow-neuromorphic-light dark:shadow-neuromorphic-dark dark:bg-muted/20 p-4 rounded-lg">
                 <TodaysWorkout todaysWorkout={currentDay} planId={plan.id} />
               </div>
             )}
             {nextWorkout && (
-              <div className="bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
+              <div className="bg-muted/40 shadow-neuromorphic-light dark:shadow-neuromorphic-dark dark:bg-muted/20 p-4 rounded-lg">
                 <TodaysWorkout
                   todaysWorkout={nextWorkout}
                   planId={plan.id}
@@ -85,7 +85,7 @@ export function ActivePlanTab({
                 />
               </div>
             )}
-            <div className="block md:hidden bg-muted/40 shadow-lg dark:shadow-lg-dark dark:bg-muted/20 p-4 rounded-lg">
+            <div className="block md:hidden bg-muted/40 shadow-neuromorphic-light dark:shadow-neuromorphic-dark dark:bg-muted/20 p-4 rounded-lg">
               <p className="text-lg font-semibold mb-6">Plan description</p>
               <CollapsibleText text={plan.description} maxLines={8} />
             </div>
