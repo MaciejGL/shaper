@@ -8,6 +8,7 @@ import {
   TrainingPlan as PrismaTrainingPlan,
   TrainingWeek as PrismaTrainingWeek,
   User as PrismaUser,
+  WorkoutSessionEvent as PrismaWorkoutSessionEvent,
 } from '@prisma/client'
 import { getWeekYear } from 'date-fns'
 
@@ -24,6 +25,7 @@ export default class TrainingPlan implements GQLTrainingPlan {
       createdBy?: PrismaUser
       weeks?: (PrismaTrainingWeek & {
         days?: (PrismaTrainingDay & {
+          events?: PrismaWorkoutSessionEvent
           exercises?: (PrismaTrainingExercise & {
             sets?: (PrismaExerciseSet & {
               log?: PrismaExerciseSetLog
@@ -85,6 +87,20 @@ export default class TrainingPlan implements GQLTrainingPlan {
   get nextSession() {
     // TODO: Implement this
     return null
+  }
+
+  get lastSessionActivity() {
+    const events = this.data.weeks?.flatMap((week) =>
+      week.days?.flatMap((day) => day.events),
+    )
+
+    const latestEvent = events
+      ?.sort(
+        (a, b) => (a?.timestamp.getTime() ?? 0) - (b?.timestamp.getTime() ?? 0),
+      )
+      .at(-1)
+
+    return latestEvent?.timestamp.toISOString()
   }
 
   get progress() {
@@ -273,6 +289,6 @@ export default class TrainingPlan implements GQLTrainingPlan {
       return 0
     }
 
-    return (completedDays / totalDays) * 100
+    return Math.round((completedDays / totalDays) * 100)
   }
 }

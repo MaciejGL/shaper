@@ -36,6 +36,7 @@ type Query {
   userExercises(where: ExerciseWhereInput): [BaseExercise!]!
   publicExercises(where: ExerciseWhereInput): [BaseExercise!]!
   exercise(id: ID!): BaseExercise
+  exercisesProgressByUser(userId: ID): [ExerciseProgress!]!
 }
 
 type Mutation {
@@ -58,4 +59,31 @@ input UpdateExerciseInput {
   videoUrl: String
   equipment: Equipment
   muscleGroups: [ID!]!
+}
+
+type ExerciseProgress {
+  baseExercise: BaseExercise
+  estimated1RMProgress: [OneRmEntry!]! # (date, 1RM)
+  totalVolumeProgress: [VolumeEntry!]! # (date/week, volume)
+  averageRpe: Float
+  totalSets: Int
+  lastPerformed: String
+}
+
+type OneRmEntry {
+  date: String!
+  average1RM: Float!
+  detailedLogs: [OneRmLog!]!
+}
+
+type OneRmLog {
+  estimated1RM: Float!
+  weight: Float
+  reps: Int
+}
+
+type VolumeEntry {
+  week: String!
+  totalVolume: Float!
+  totalSets: Int!
 }

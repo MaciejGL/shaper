@@ -111,7 +111,7 @@ export function ClientNotes({ clientId }: { clientId: string }) {
   }
 
   return (
-    <div>
+    <div className="shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary rounded-lg p-4">
       <div>
         <div className="flex justify-between mb-2">
           <CardTitle className="text-2xl font-semibold">Notes</CardTitle>
@@ -138,7 +138,7 @@ export function ClientNotes({ clientId }: { clientId: string }) {
           onCancelCreate={handleCancelCreate}
         />
       </div>
-      <CardContent className="p-0">
+      <CardContent className="p-0 pt-4">
         {notes.length === 0 ? (
           <div className="text-sm text-muted-foreground">
             You haven't added any notes yet.

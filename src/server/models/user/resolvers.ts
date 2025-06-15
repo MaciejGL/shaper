@@ -36,6 +36,19 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       where: { trainerId: user.user.id },
       include: {
         profile: true,
+        assignedPlans: {
+          include: {
+            weeks: {
+              include: {
+                days: {
+                  include: {
+                    events: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     })
 

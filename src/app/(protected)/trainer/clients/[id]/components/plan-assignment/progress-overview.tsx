@@ -15,11 +15,27 @@ export function ProgressOverview({ plan }: ProgressOverviewProps) {
   const getAdherenceColor = (adherence: number) => {
     if (adherence >= 80) return 'text-green-600'
     if (adherence >= 60) return 'text-yellow-600'
-    return 'text-red-600'
+    return 'text-primary'
   }
 
   const currentWeek =
     plan.weeks[plan.currentWeekNumber ? plan.currentWeekNumber - 1 : 0]
+
+  const completedWorkouts = plan.weeks.flatMap((week) =>
+    week.days.filter((day) => !day.isRestDay && day.completedAt),
+  )
+
+  const averageSessionLength =
+    plan.weeks.reduce((acc, week) => {
+      return (
+        acc +
+        week.days.reduce((acc, day) => {
+          return acc + (day?.duration ?? 0)
+        }, 0)
+      )
+    }, 0) /
+    60 /
+    completedWorkouts.length
 
   return (
     <div className="space-y-6">
@@ -33,7 +49,9 @@ export function ProgressOverview({ plan }: ProgressOverviewProps) {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{plan.progress}%</div>
+            <div className="text-2xl font-bold">
+              {Math.round(plan.progress ?? 0)}%
+            </div>
             <Progress value={plan.progress} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-2">
               Week {plan.currentWeekNumber} of {plan.weekCount}
@@ -44,7 +62,7 @@ export function ProgressOverview({ plan }: ProgressOverviewProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Workout Adherence
+              Avarage Session Length
             </CardTitle>
             <Award className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -52,9 +70,8 @@ export function ProgressOverview({ plan }: ProgressOverviewProps) {
             <div
               className={`text-2xl font-bold ${getAdherenceColor(plan.adherence)}`}
             >
-              {plan.adherence}%
+              {Math.round(averageSessionLength)} minutes
             </div>
-            <Progress value={plan.adherence} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-2">
               {plan.completedWorkoutsDays} of {plan.totalWorkouts} workouts
               completed

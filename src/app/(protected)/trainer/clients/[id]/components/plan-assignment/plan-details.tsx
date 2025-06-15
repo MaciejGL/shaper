@@ -13,40 +13,27 @@ type PlanAssignmentProps = {
 }
 
 export function PlanDetails({ assignedPlan }: PlanAssignmentProps) {
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Beginner':
-        return 'bg-green-100 text-green-800'
-      case 'Intermediate':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'Advanced':
-        return 'bg-red-100 text-red-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
   const daysToEnd = assignedPlan.endDate
     ? differenceInDays(new Date(assignedPlan.endDate), new Date())
     : 0
 
   return (
-    <div className="space-y-6">
-      <p className="text-lg font-semibold">{assignedPlan.title}</p>
-      <div className="space-y-4">
-        <CollapsibleText maxLines={2} text={assignedPlan.description} />
-
+    <div className="space-y-6 shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary rounded-lg p-4">
+      <div className="space-y-2">
+        <p className="text-lg font-semibold">{assignedPlan.title}</p>
         <div className="flex flex-wrap gap-2">
-          <Badge className={getDifficultyColor(assignedPlan.difficulty)}>
-            {assignedPlan.difficulty}
-          </Badge>
-          <Badge variant="outline">
+          <Badge variant="secondary">{assignedPlan.difficulty}</Badge>
+          <Badge variant="secondary">
             {assignedPlan.weekCount}{' '}
             {assignedPlan.weekCount === 1 ? 'week' : 'weeks'}
           </Badge>
         </div>
-
-        <div className="bg-muted/50 rounded-lg p-4 border">
+      </div>
+      <div className="max-w-2xl">
+        <CollapsibleText maxLines={6} text={assignedPlan.description} />
+      </div>
+      <div className="space-y-4">
+        <div className="bg-muted/50 rounded-lg p-4">
           <div className="grid grid-cols-2 @xl/client-detail-page:grid-cols-4 gap-4">
             {assignedPlan.startDate && (
               <div className="flex items-center gap-2">

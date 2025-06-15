@@ -18,6 +18,7 @@ type TrainingPlan {
   reviews: [Review!]!
   userReview: Review
   totalReviews: Int!
+  lastSessionActivity: String
 
   createdBy: UserPublic
   assignedTo: UserPublic

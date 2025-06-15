@@ -51,6 +51,7 @@ query GetClientById($id: ID!) {
         isRestDay
         workoutType
         completedAt
+        duration
         exercises {
           id
           name
@@ -73,5 +74,39 @@ query GetClientById($id: ID!) {
         }
       }
     }
+  }
+}
+
+query ExercisesProgressByUser($userId: ID!) {
+  exercisesProgressByUser(userId: $userId) {
+    baseExercise {
+      id
+      name
+      muscleGroups {
+        alias
+        name
+        groupSlug
+        category {
+          name
+        }
+      }
+    }
+    estimated1RMProgress {
+      date
+      average1RM
+      detailedLogs {
+        estimated1RM
+        weight
+        reps
+      }
+    }
+    totalVolumeProgress {
+      week
+      totalVolume
+      totalSets
+    }
+    averageRpe
+    totalSets
+    lastPerformed
   }
 }

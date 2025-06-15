@@ -44,7 +44,7 @@ export function WeeksSetup() {
             variant="ghost"
             onClick={addWeek}
             iconStart={<PlusCircle />}
-            className="size-full shadow-sm bg-card-on-card dark:hover:bg-card-on-card/70"
+            className="size-full shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary bg-card-on-card dark:hover:bg-card-on-card/70"
           >
             Add Week
           </Button>

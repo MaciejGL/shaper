@@ -26,21 +26,25 @@ export function ClientActivePlan({
       <CardContent className="h-full p-0">
         {activePlan ? (
           <Tabs defaultValue="active-plan" className="h-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="active-plan">Details</TabsTrigger>
               <TabsTrigger value="progress">Progress</TabsTrigger>
+              <TabsTrigger value="exercise-logs">Exercise Logs</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="active-plan" className="mt-6 gap-6 grow">
+            <TabsContent value="active-plan" className="mt-2 gap-6 grow">
               <PlanDetails assignedPlan={activePlan} />
             </TabsContent>
 
-            <TabsContent value="progress" className="mt-6">
+            <TabsContent value="progress" className="mt-2">
               <div className="space-y-6">
                 <ProgressOverview plan={activePlan} />
                 <WeeklyProgress plan={activePlan} />
-                <ExerciseLogs plan={activePlan} />
               </div>
+            </TabsContent>
+
+            <TabsContent value="exercise-logs" className="mt-2">
+              <ExerciseLogs plan={activePlan} clientId={client.id} />
             </TabsContent>
           </Tabs>
         ) : (

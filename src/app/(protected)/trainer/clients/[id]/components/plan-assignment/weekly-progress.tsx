@@ -34,11 +34,11 @@ export function WeeklyProgress({ plan }: WeeklyProgressProps) {
       <Tabs defaultValue={plan.weeks[0]?.id} className="w-full">
         <TabsList className="grid w-full grid-cols-4">
           {plan.weeks.map((week, index) => (
-            <TabsTrigger key={week.id} value={week.id} className="relative">
-              {week.name || `Week ${index + 1}`}
+            <TabsTrigger key={week.id} value={week.id}>
               {week.completedAt && (
-                <CheckCircle className="absolute -top-1 -right-1 size-3 text-green-600" />
+                <CheckCircle className="size-3 text-green-600" />
               )}
+              {week.name || `Week ${index + 1}`}
             </TabsTrigger>
           ))}
         </TabsList>

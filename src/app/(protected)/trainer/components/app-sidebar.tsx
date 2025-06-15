@@ -210,10 +210,10 @@ function SidebarItem({
             <SidebarMenuSubButton asChild>
               <Link
                 href={subItem.url}
-                className={cn('', isLoading && 'masked-placeholder-text')}
+                className={cn('w-full', isLoading && 'masked-placeholder-text')}
               >
                 <subItem.icon />
-                <span>{subItem.title}</span>
+                <span className="truncate">{subItem.title}</span>
                 {subItem.url === pathname && (
                   <ChevronRight className="ml-auto h-4 w-4 opacity-60" />
                 )}

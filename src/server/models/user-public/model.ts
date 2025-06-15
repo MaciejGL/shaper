@@ -7,6 +7,7 @@ import {
   TrainingWeek as PrismaTrainingWeek,
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
+  WorkoutSessionEvent as PrismaWorkoutSessionEvent,
 } from '@prisma/client'
 
 import { GQLGoal, GQLUserPublic, GQLUserRole } from '@/generated/graphql-server'
@@ -21,6 +22,7 @@ export default class UserPublic implements GQLUserPublic {
       assignedPlans?: (PrismaTrainingPlan & {
         weeks?: (PrismaTrainingWeek & {
           days?: (PrismaTrainingDay & {
+            events?: PrismaWorkoutSessionEvent
             exercises?: (PrismaTrainingExercise & {
               sets?: (PrismaExerciseSet & {
                 log?: PrismaExerciseSetLog

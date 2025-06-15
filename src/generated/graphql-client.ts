@@ -176,6 +176,16 @@ export type GQLExerciseLog = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type GQLExerciseProgress = {
+  __typename?: 'ExerciseProgress';
+  averageRpe?: Maybe<Scalars['Float']['output']>;
+  baseExercise?: Maybe<GQLBaseExercise>;
+  estimated1RMProgress: Array<GQLOneRmEntry>;
+  lastPerformed?: Maybe<Scalars['String']['output']>;
+  totalSets?: Maybe<Scalars['Int']['output']>;
+  totalVolumeProgress: Array<GQLVolumeEntry>;
+};
+
 export type GQLExerciseSet = {
   __typename?: 'ExerciseSet';
   completedAt?: Maybe<Scalars['String']['output']>;
@@ -531,11 +541,26 @@ export enum GQLNotificationType {
   System = 'SYSTEM'
 }
 
+export type GQLOneRmEntry = {
+  __typename?: 'OneRmEntry';
+  average1RM: Scalars['Float']['output'];
+  date: Scalars['String']['output'];
+  detailedLogs: Array<GQLOneRmLog>;
+};
+
+export type GQLOneRmLog = {
+  __typename?: 'OneRmLog';
+  estimated1RM: Scalars['Float']['output'];
+  reps?: Maybe<Scalars['Int']['output']>;
+  weight?: Maybe<Scalars['Float']['output']>;
+};
+
 export type GQLQuery = {
   __typename?: 'Query';
   coachingRequest?: Maybe<GQLCoachingRequest>;
   coachingRequests: Array<GQLCoachingRequest>;
   exercise?: Maybe<GQLBaseExercise>;
+  exercisesProgressByUser: Array<GQLExerciseProgress>;
   getClientActivePlan?: Maybe<GQLTrainingPlan>;
   getClientTrainingPlans: Array<GQLTrainingPlan>;
   getMyPlansOverview: GQLMyPlansPayload;
@@ -566,6 +591,11 @@ export type GQLQueryCoachingRequestArgs = {
 
 export type GQLQueryExerciseArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryExercisesProgressByUserArgs = {
+  userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -712,6 +742,7 @@ export type GQLTrainingPlan = {
   isDraft: Scalars['Boolean']['output'];
   isPublic: Scalars['Boolean']['output'];
   isTemplate: Scalars['Boolean']['output'];
+  lastSessionActivity?: Maybe<Scalars['String']['output']>;
   nextSession?: Maybe<Scalars['String']['output']>;
   progress?: Maybe<Scalars['Float']['output']>;
   rating?: Maybe<Scalars['Float']['output']>;
@@ -926,6 +957,13 @@ export type GQLUserSession = {
   user: GQLUser;
 };
 
+export type GQLVolumeEntry = {
+  __typename?: 'VolumeEntry';
+  totalSets: Scalars['Int']['output'];
+  totalVolume: Scalars['Float']['output'];
+  week: Scalars['String']['output'];
+};
+
 export enum GQLWorkoutSessionEvent {
   Complete = 'COMPLETE',
   Progress = 'PROGRESS'
@@ -1099,7 +1137,7 @@ export type GQLFitspaceMarkWorkoutAsCompletedMutation = { __typename?: 'Mutation
 export type GQLGetClientsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetClientsQuery = { __typename?: 'Query', myClients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, updatedAt: string, createdAt: string, activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null } | undefined | null }> };
+export type GQLGetClientsQuery = { __typename?: 'Query', myClients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, updatedAt: string, createdAt: string, activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, lastSessionActivity?: string | undefined | null, progress?: number | undefined | null } | undefined | null }> };
 
 export type GQLCreateCoachingRequestMutationVariables = Exact<{
   recipientEmail: Scalars['String']['input'];
@@ -1114,7 +1152,14 @@ export type GQLGetClientByIdQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goals: Array<GQLGoal>, currentWeight?: number | undefined | null, height?: number | undefined | null, allergies?: string | undefined | null } | undefined | null, getClientTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null }>, getClientActivePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null, difficulty: GQLDifficulty, totalWorkouts: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, name: string, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null } | undefined | null }> }> }> }> } | undefined | null };
+export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goals: Array<GQLGoal>, currentWeight?: number | undefined | null, height?: number | undefined | null, allergies?: string | undefined | null } | undefined | null, getClientTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null }>, getClientActivePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null, difficulty: GQLDifficulty, totalWorkouts: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, name: string, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, duration?: number | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null } | undefined | null }> }> }> }> } | undefined | null };
+
+export type GQLExercisesProgressByUserQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLExercisesProgressByUserQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', averageRpe?: number | undefined | null, totalSets?: number | undefined | null, lastPerformed?: string | undefined | null, baseExercise?: { __typename?: 'BaseExercise', id: string, name: string, muscleGroups: Array<{ __typename?: 'MuscleGroup', alias?: string | undefined | null, name: string, groupSlug: string, category: { __typename?: 'MuscleGroupCategory', name: string } }> } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }>, totalVolumeProgress: Array<{ __typename?: 'VolumeEntry', week: string, totalVolume: number, totalSets: number }> }> };
 
 export type GQLUserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2333,6 +2378,9 @@ export const GetClientsDocument = `
       description
       weekCount
       startDate
+      endDate
+      lastSessionActivity
+      progress
     }
   }
 }
@@ -2458,6 +2506,7 @@ export const GetClientByIdDocument = `
         isRestDay
         workoutType
         completedAt
+        duration
         exercises {
           id
           name
@@ -2525,6 +2574,84 @@ useInfiniteGetClientByIdQuery.getKey = (variables: GQLGetClientByIdQueryVariable
 
 
 useGetClientByIdQuery.fetcher = (variables: GQLGetClientByIdQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetClientByIdQuery, GQLGetClientByIdQueryVariables>(GetClientByIdDocument, variables, options);
+
+export const ExercisesProgressByUserDocument = `
+    query ExercisesProgressByUser($userId: ID!) {
+  exercisesProgressByUser(userId: $userId) {
+    baseExercise {
+      id
+      name
+      muscleGroups {
+        alias
+        name
+        groupSlug
+        category {
+          name
+        }
+      }
+    }
+    estimated1RMProgress {
+      date
+      average1RM
+      detailedLogs {
+        estimated1RM
+        weight
+        reps
+      }
+    }
+    totalVolumeProgress {
+      week
+      totalVolume
+      totalSets
+    }
+    averageRpe
+    totalSets
+    lastPerformed
+  }
+}
+    `;
+
+export const useExercisesProgressByUserQuery = <
+      TData = GQLExercisesProgressByUserQuery,
+      TError = unknown
+    >(
+      variables: GQLExercisesProgressByUserQueryVariables,
+      options?: Omit<UseQueryOptions<GQLExercisesProgressByUserQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLExercisesProgressByUserQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLExercisesProgressByUserQuery, TError, TData>(
+      {
+    queryKey: ['ExercisesProgressByUser', variables],
+    queryFn: fetchData<GQLExercisesProgressByUserQuery, GQLExercisesProgressByUserQueryVariables>(ExercisesProgressByUserDocument, variables),
+    ...options
+  }
+    )};
+
+useExercisesProgressByUserQuery.getKey = (variables: GQLExercisesProgressByUserQueryVariables) => ['ExercisesProgressByUser', variables];
+
+export const useInfiniteExercisesProgressByUserQuery = <
+      TData = InfiniteData<GQLExercisesProgressByUserQuery>,
+      TError = unknown
+    >(
+      variables: GQLExercisesProgressByUserQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLExercisesProgressByUserQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLExercisesProgressByUserQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLExercisesProgressByUserQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['ExercisesProgressByUser.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLExercisesProgressByUserQuery, GQLExercisesProgressByUserQueryVariables>(ExercisesProgressByUserDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteExercisesProgressByUserQuery.getKey = (variables: GQLExercisesProgressByUserQueryVariables) => ['ExercisesProgressByUser.infinite', variables];
+
+
+useExercisesProgressByUserQuery.fetcher = (variables: GQLExercisesProgressByUserQueryVariables, options?: RequestInit['headers']) => fetchData<GQLExercisesProgressByUserQuery, GQLExercisesProgressByUserQueryVariables>(ExercisesProgressByUserDocument, variables, options);
 
 export const UserDocument = `
     query user {
