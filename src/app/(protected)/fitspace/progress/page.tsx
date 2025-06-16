@@ -48,7 +48,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig
 
-export function ChartRadarDefault({ data }: { data: MuscleGroup[] }) {
+function ChartRadarDefault({ data }: { data: MuscleGroup[] }) {
   return (
     <Card>
       <CardHeader className="items-center pb-4">
