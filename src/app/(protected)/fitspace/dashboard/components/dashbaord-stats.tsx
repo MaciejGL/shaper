@@ -118,7 +118,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                 {workoutsThisWeekCompleted} of {workoutsThisWeekGoal} workouts
               </span>
             </div>
-            <div className="grid grid-cols-7 gap-1 md:gap-2">
+            <div className="flex flex-wrap gap-1 md:gap-2">
               {currentWeek.days.map((day, index) => (
                 <Link
                   href={
@@ -127,16 +127,17 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                       : `/fitspace/workout/${plan.id}?week=${currentWeek.id}&day=${day.id}&exercise=${day.exercises.at(0)?.id}`
                   }
                   key={index}
+                  className="shrink-0"
                 >
                   <div
                     className={cn(
-                      'rounded-md p-2 h-full shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary',
+                      'rounded-md p-2 shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary aspect-square shrink-0 min-w-[4.5rem]',
                       !day.isRestDay && 'bg-primary-foreground',
                       day.isRestDay &&
                         'bg-muted-foreground/10 text-muted-foreground',
                     )}
                   >
-                    <div className="flex-center flex-col gap-1 text-xs md:text-md text-center aspect-square">
+                    <div className="flex-center flex-col gap-1 text-xs md:text-md text-center">
                       {day.completedAt && (
                         <BadgeCheck className={cn('size-4 text-green-500')} />
                       )}
@@ -147,7 +148,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                         <DrumstickIcon className="size-4 text-muted-foreground" />
                       )}
                       <span>{getDayName(day.dayOfWeek, { short: true })}</span>
-                      <span className="font-medium truncate max-md:hidden">
+                      <span className="font-medium truncate">
                         {day.workoutType?.split(' ').at(0) ?? 'Rest'}
                       </span>
                     </div>
