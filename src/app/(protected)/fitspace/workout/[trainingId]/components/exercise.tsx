@@ -156,13 +156,15 @@ function ExerciseHeader({
         activeExerciseId={activeExerciseId}
         setActiveExerciseId={setActiveExerciseId}
       />
-      <div className="mt-2">
-        <SupersetsNavigation
-          exercise={exercise}
-          exercises={exercises}
-          onPaginationClick={onPaginationClick}
-        />
-      </div>
+      {isSuperset && (
+        <div className="mt-2">
+          <SupersetsNavigation
+            exercise={exercise}
+            exercises={exercises}
+            onPaginationClick={onPaginationClick}
+          />
+        </div>
+      )}
       <div className="flex items-start justify-between gap-4 mt-4">
         <div className="flex flex-wrap gap-2">
           {isSuperset && (
@@ -255,7 +257,7 @@ function ExerciseSelector({
           {exercise.order}. {exercise.name}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start">
+      <DropdownMenuContent align="start" className="min-w-64">
         {activeDay?.exercises.map((exercise, index) => (
           <React.Fragment key={exercise.id}>
             <DropdownMenuItem
