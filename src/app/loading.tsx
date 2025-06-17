@@ -5,7 +5,7 @@ export default function Loading() {
   return (
     <div className="h-dvh w-dvw bg-black">
       <div className="flex flex-col gap-4 items-center justify-center h-full">
-        <AnimatedLogo infinite={false} size={100} forceColor="text-white" />
+        <AnimatedLogo infinite={false} size={192} forceColor="text-white" />
       </div>
     </div>
   )
