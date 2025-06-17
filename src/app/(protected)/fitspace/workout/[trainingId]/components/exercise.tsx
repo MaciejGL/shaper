@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { debounce } from 'lodash'
 import {
+  ArrowLeftRight,
   BadgeCheckIcon,
   Check,
   ChevronDown,
@@ -141,6 +142,10 @@ function ExerciseHeader({
     ? convertSecondsToTimeString(exercise.restSeconds)
     : null
 
+  const isSuperset =
+    exercise.type === GQLExerciseType.Superset_1A ||
+    exercise.type === GQLExerciseType.Superset_1B
+
   return (
     <div>
       <ExerciseSelector
@@ -148,8 +153,7 @@ function ExerciseHeader({
         activeExerciseId={activeExerciseId}
         setActiveExerciseId={setActiveExerciseId}
       />
-      <div className="mt-4">
-        <p className="text-sm text-muted-foreground">Supersets</p>
+      <div className="mt-2">
         <SupersetsNavigation
           exercise={exercise}
           exercises={exercises}
@@ -158,6 +162,12 @@ function ExerciseHeader({
       </div>
       <div className="flex items-start justify-between gap-4 mt-4">
         <div className="flex flex-wrap gap-2">
+          {isSuperset && (
+            <Badge variant="secondary" size="md">
+              <ArrowLeftRight />
+              Superset A/B
+            </Badge>
+          )}
           {exercise.warmupSets && (
             <Badge variant="secondary" size="md">
               <FlameIcon />
@@ -206,7 +216,7 @@ function ExerciseHeader({
         </div>
       </div>
       {exercise.additionalInstructions && (
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground mt-2">
           {exercise.additionalInstructions}
         </div>
       )}
@@ -239,7 +249,7 @@ function ExerciseSelector({
             />
           }
         >
-          {exercise.name}
+          {exercise.order}. {exercise.name}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
@@ -608,13 +618,20 @@ function SupersetsNavigation({
           variant="secondary"
           size="sm"
           className={cn(
-            'w-full whitespace-normal h-auto py-2 text-xs justify-start text-left',
+            'w-full whitespace-normal h-auto py-1 justify-start text-left',
             exercise.id === exercise1B.id && 'bg-muted/50',
           )}
           onClick={() => onPaginationClick(exercise1A.id, 'prev')}
         >
           <div className="flex items-center gap-2">
-            <div className="text-lg text-muted-foreground w-4 shrink-0">A</div>
+            <div
+              className={cn(
+                'text-lg text-muted-foreground w-4 shrink-0',
+                exercise.id === exercise1A.id && 'text-primary',
+              )}
+            >
+              A
+            </div>
             <div className="text-xs text-muted-foreground">
               {exercise1A.name}
             </div>
@@ -626,13 +643,20 @@ function SupersetsNavigation({
           variant="secondary"
           size="sm"
           className={cn(
-            'w-full whitespace-normal h-auto py-2 text-xs justify-start text-left',
+            'w-full whitespace-normal h-auto py-1 justify-start text-left',
             exercise.id === exercise1A.id && 'bg-muted/50',
           )}
           onClick={() => onPaginationClick(exercise1B.id, 'next')}
         >
           <div className="flex items-center gap-2">
-            <div className="text-lg text-muted-foreground">B</div>
+            <div
+              className={cn(
+                'text-lg text-muted-foreground w-4 shrink-0',
+                exercise.id === exercise1B.id && 'text-primary',
+              )}
+            >
+              B
+            </div>
             <div className="text-xs text-muted-foreground">
               {exercise1B.name}
             </div>
