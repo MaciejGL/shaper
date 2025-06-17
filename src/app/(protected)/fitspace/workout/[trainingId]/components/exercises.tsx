@@ -99,7 +99,11 @@ export function Exercises() {
               mode="wait"
               className="w-full"
             >
-              <Exercise exercise={selectedExercise} />
+              <Exercise
+                exercise={selectedExercise}
+                exercises={exercises}
+                onPaginationClick={handlePaginationClick}
+              />
             </AnimatedPageTransition>
           </AnimateChangeInHeight>
           {exercises.length > 1 && (

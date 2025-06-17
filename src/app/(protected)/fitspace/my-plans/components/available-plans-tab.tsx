@@ -117,9 +117,11 @@ function PlanHeader({
           {title}
         </CardTitle>
         <div className="flex gap-2">
-          <Badge variant="outline" isLoading={loading}>
-            {difficulty}
-          </Badge>
+          {difficulty && (
+            <Badge variant="outline" isLoading={loading}>
+              {difficulty}
+            </Badge>
+          )}
           {startDate && <Badge variant="warning">Pasued {pausedAt}</Badge>}
         </div>
       </div>

@@ -24,7 +24,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
         'flex gap-3 p-3 w-full transition-colors',
         notification.read
           ? 'bg-white dark:bg-zinc-800'
-          : 'bg-zinc-100 dark:bg-zinc-800',
+          : 'bg-zinc-100 dark:bg-zinc-950',
         'hover:bg-zinc-200 dark:hover:bg-zinc-700',
       )}
     >
@@ -34,7 +34,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
             {getNotificationTitle(notification)}
           </h4>
           {!notification.read && (
-            <span className="flex-shrink-0 h-2 w-2 rounded-full bg-orange-500" />
+            <span className="flex-shrink-0 h-2 w-2 rounded-full bg-lime-500" />
           )}
         </div>
 

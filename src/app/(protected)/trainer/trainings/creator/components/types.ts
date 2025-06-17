@@ -1,4 +1,5 @@
 import {
+  GQLDifficulty,
   GQLExerciseSet,
   GQLTrainingDay,
   GQLTrainingExercise,
@@ -14,7 +15,9 @@ export type TrainingPlanFormData = {
 export type TrainingDetails = Pick<
   GQLTrainingPlan,
   'title' | 'description' | 'isPublic' | 'isDraft'
->
+> & {
+  difficulty?: GQLDifficulty | null
+}
 
 export type TrainingWeek = Pick<
   GQLTrainingWeek,
@@ -36,6 +39,8 @@ export type TrainingExercise = Pick<
   | 'restSeconds'
   | 'tempo'
   | 'instructions'
+  | 'additionalInstructions'
+  | 'type'
   | 'order'
   | 'id'
   | 'warmupSets'

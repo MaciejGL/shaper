@@ -88,7 +88,11 @@ export async function getTrainingPlanById(
       throw new Error('Training plan not found')
     }
 
-    if (trainingPlan.isTemplate && !trainingPlan.assignedToId) {
+    if (
+      trainingPlan.isTemplate &&
+      !trainingPlan.assignedToId &&
+      trainingPlan.createdById !== user.user.id
+    ) {
       const scopedTrainingPlan = {
         ...trainingPlan,
         weeks: trainingPlan.weeks.map((week, weekIndex) => ({
@@ -177,6 +181,7 @@ export async function getClientActivePlan(
               dayOfWeek: 'asc',
             },
             include: {
+              events: true,
               exercises: {
                 orderBy: {
                   order: 'asc',
@@ -321,6 +326,7 @@ export async function createTrainingPlan(
       isPublic: isPublic ?? false,
       isTemplate: true,
       isDraft: isDraft ?? false,
+      difficulty: args.input.difficulty ?? undefined,
       createdById: user.user.id,
       weeks: {
         create: weeks?.map((week) => ({
@@ -338,6 +344,8 @@ export async function createTrainingPlan(
                   restSeconds: exercise.restSeconds,
                   tempo: exercise.tempo,
                   instructions: exercise.instructions,
+                  additionalInstructions: exercise.additionalInstructions,
+                  type: exercise.type,
                   order: exercise.order,
                   warmupSets: exercise.warmupSets,
                   baseId: exercise.baseId ?? undefined,
@@ -388,6 +396,7 @@ export async function updateTrainingPlan(
           description: input.description ?? undefined,
           isPublic: input.isPublic ?? false,
           isDraft: input.isDraft ?? false,
+          difficulty: input.difficulty ?? undefined,
           isTemplate: true,
           weeks: {
             create: input.weeks?.map((week) => ({
@@ -405,6 +414,9 @@ export async function updateTrainingPlan(
                       restSeconds: exercise.restSeconds ?? undefined,
                       tempo: exercise.tempo ?? undefined,
                       instructions: exercise.instructions ?? undefined,
+                      additionalInstructions:
+                        exercise.additionalInstructions ?? undefined,
+                      type: exercise.type ?? undefined,
                       order: exercise.order,
                       warmupSets: exercise.warmupSets ?? undefined,
                       baseId: exercise.baseId ?? undefined,

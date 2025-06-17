@@ -42,7 +42,12 @@ export function ExerciseSets({ sets, exerciseIndex }: ExerciseSetsProps) {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <Label>Sets</Label>
-        <Button type="button" variant="outline" size="sm" onClick={onAddSet}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onAddSet()}
+        >
           <Plus className="h-4 w-4 mr-1" /> Add Set
         </Button>
       </div>
@@ -98,6 +103,11 @@ export function ExerciseSets({ sets, exerciseIndex }: ExerciseSetsProps) {
                       type="number"
                       placeholder="Max"
                       min="1"
+                      error={
+                        set.minReps && set.maxReps && set.minReps > set.maxReps
+                          ? 'Min reps must be less than max reps'
+                          : undefined
+                      }
                       value={set.maxReps || ''}
                       onChange={(e) =>
                         onUpdateSet(

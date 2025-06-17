@@ -38,6 +38,7 @@ import { Label } from '@/components/ui/label'
 import { VideoPreview } from '@/components/video-preview'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
+  GQLExerciseType,
   GQLFitspaceGetWorkoutQuery,
   useFitspaceGetWorkoutQuery,
   useFitspaceMarkExerciseAsCompletedMutation,
@@ -52,9 +53,15 @@ import { WorkoutExercise } from './workout-page.client'
 
 interface ExerciseProps {
   exercise: WorkoutExercise
+  exercises: WorkoutExercise[]
+  onPaginationClick: (exerciseId: string, type: 'prev' | 'next') => void
 }
 
-export function Exercise({ exercise }: ExerciseProps) {
+export function Exercise({
+  exercise,
+  exercises,
+  onPaginationClick,
+}: ExerciseProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const { getPastLogs } = useWorkout()
   const previousLogs = getPastLogs(exercise)
@@ -91,13 +98,15 @@ export function Exercise({ exercise }: ExerciseProps) {
   }
 
   return (
-    <div className="pt-4">
+    <div>
       <ExerciseHeader
         exercise={exercise}
+        exercises={exercises}
         setIsExpanded={setIsExpanded}
         hasLogs={previousLogs.length > 0}
         isCompleted={isExerciseCompleted}
         handleMarkAsCompleted={handleMarkAsCompleted}
+        onPaginationClick={onPaginationClick}
       />
       <ExerciseSets
         exercise={exercise}
@@ -111,22 +120,27 @@ export function Exercise({ exercise }: ExerciseProps) {
 
 function ExerciseHeader({
   exercise,
+  exercises,
   setIsExpanded,
   hasLogs,
   isCompleted,
   handleMarkAsCompleted,
+  onPaginationClick,
 }: {
   exercise: WorkoutExercise
+  exercises: WorkoutExercise[]
   setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>
   hasLogs: boolean
   isCompleted: boolean
   handleMarkAsCompleted: (checked: boolean) => void
+  onPaginationClick: (exerciseId: string, type: 'prev' | 'next') => void
 }) {
   const [activeExerciseId, setActiveExerciseId] = useQueryState('exercise')
 
   const restDuration = exercise.restSeconds
     ? convertSecondsToTimeString(exercise.restSeconds)
     : null
+
   return (
     <div>
       <ExerciseSelector
@@ -134,7 +148,15 @@ function ExerciseHeader({
         activeExerciseId={activeExerciseId}
         setActiveExerciseId={setActiveExerciseId}
       />
-      <div className="flex items-start justify-between gap-4 mt-2">
+      <div className="mt-4">
+        <p className="text-sm text-muted-foreground">Supersets</p>
+        <SupersetsNavigation
+          exercise={exercise}
+          exercises={exercises}
+          onPaginationClick={onPaginationClick}
+        />
+      </div>
+      <div className="flex items-start justify-between gap-4 mt-4">
         <div className="flex flex-wrap gap-2">
           {exercise.warmupSets && (
             <Badge variant="secondary" size="md">
@@ -183,6 +205,11 @@ function ExerciseHeader({
           />
         </div>
       </div>
+      {exercise.additionalInstructions && (
+        <div className="text-sm text-muted-foreground">
+          {exercise.additionalInstructions}
+        </div>
+      )}
     </div>
   )
 }
@@ -200,17 +227,20 @@ function ExerciseSelector({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="group/dropdown">
-        <div className="text-sm flex items-start gap-2 pr-2">
-          <h3 className={`text-lg font-medium text-left pb-1`}>
-            {exercise.name}
-          </h3>
-          <ChevronDown
-            className={cn(
-              'text-muted-foreground size-4 mt-2 group-hover/dropdown:text-primary transition-all duration-200 shrink-0',
-            )}
-          />
-        </div>
+      <DropdownMenuTrigger className="group/dropdown" asChild>
+        <Button
+          variant="secondary"
+          className="w-full justify-between"
+          iconEnd={
+            <ChevronDown
+              className={cn(
+                'text-muted-foreground size-4 group-hover/dropdown:text-primary transition-all duration-200 shrink-0',
+              )}
+            />
+          }
+        >
+          {exercise.name}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         {activeDay?.exercises.map((exercise, index) => (
@@ -541,5 +571,74 @@ function ExerciseSet({
           )
         })}
     </AnimateChangeInHeight>
+  )
+}
+
+function SupersetsNavigation({
+  exercise,
+  exercises,
+  onPaginationClick,
+}: {
+  exercise: WorkoutExercise
+  exercises: WorkoutExercise[]
+  onPaginationClick: (exerciseId: string, type: 'prev' | 'next') => void
+}) {
+  const currentExerciseIndex = exercises.findIndex((e) => e.id === exercise.id)
+  const isExercise1A = exercise.type === GQLExerciseType.Superset_1A
+  const isExercise1B = exercise.type === GQLExerciseType.Superset_1B
+  const exercise1A = isExercise1A
+    ? exercise
+    : exercises[currentExerciseIndex - 1]
+  const exercise1B = isExercise1B
+    ? exercise
+    : exercises[currentExerciseIndex + 1]
+
+  const isSuperset =
+    exercise.type === GQLExerciseType.Superset_1A ||
+    exercise.type === GQLExerciseType.Superset_1B
+
+  if (!isSuperset) {
+    return null
+  }
+
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {exercise1A && (
+        <Button
+          variant="secondary"
+          size="sm"
+          className={cn(
+            'w-full whitespace-normal h-auto py-2 text-xs justify-start text-left',
+            exercise.id === exercise1B.id && 'bg-muted/50',
+          )}
+          onClick={() => onPaginationClick(exercise1A.id, 'prev')}
+        >
+          <div className="flex items-center gap-2">
+            <div className="text-lg text-muted-foreground w-4 shrink-0">A</div>
+            <div className="text-xs text-muted-foreground">
+              {exercise1A.name}
+            </div>
+          </div>
+        </Button>
+      )}
+      {exercise1B && (
+        <Button
+          variant="secondary"
+          size="sm"
+          className={cn(
+            'w-full whitespace-normal h-auto py-2 text-xs justify-start text-left',
+            exercise.id === exercise1A.id && 'bg-muted/50',
+          )}
+          onClick={() => onPaginationClick(exercise1B.id, 'next')}
+        >
+          <div className="flex items-center gap-2">
+            <div className="text-lg text-muted-foreground">B</div>
+            <div className="text-xs text-muted-foreground">
+              {exercise1B.name}
+            </div>
+          </div>
+        </Button>
+      )}
+    </div>
   )
 }

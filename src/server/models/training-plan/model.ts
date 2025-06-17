@@ -192,16 +192,16 @@ export default class TrainingPlan implements GQLTrainingPlan {
 
   get difficulty() {
     switch (this.data.difficulty) {
-      case 'Beginner':
+      case GQLDifficulty.Beginner:
         return GQLDifficulty.Beginner
-      case 'Intermediate':
+      case GQLDifficulty.Intermediate:
         return GQLDifficulty.Intermediate
-      case 'Advanced':
+      case GQLDifficulty.Advanced:
         return GQLDifficulty.Advanced
-      case 'Expert':
+      case GQLDifficulty.Expert:
         return GQLDifficulty.Expert
       default:
-        return GQLDifficulty.Beginner
+        return null
     }
   }
 

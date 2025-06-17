@@ -42,6 +42,8 @@ query FitspaceGetWorkout($trainingId: ID!) {
             tempo
             warmupSets
             instructions
+            additionalInstructions
+            type
             order
             videoUrl
             completedAt

@@ -34,7 +34,12 @@ const selectTriggerVariants = cva(
         ghost: cn('border-none'),
       },
       size: {
-        sm: 'h-7 rounded-md gap-1.5 px-2.5 has-[>svg]:px-2.5 [&_svg]:size-4 text-xs',
+        xs: cn(
+          ' h-7 rounded-md gap-1.5 px-2.5 has-[>svg]:px-2.5 [&_svg]:size-4 text-xs',
+        ),
+        sm: cn(
+          'h-7 rounded-md gap-1.5 px-2.5 has-[>svg]:px-2.5 [&_svg]:size-4 text-xs',
+        ),
         md: 'h-9 px-4 py-2 has-[>svg]:px-3 [&_svg]:size-5',
         lg: 'h-10 text-md rounded-md px-6 has-[>svg]:px-4 [&_svg]:size-5',
       },

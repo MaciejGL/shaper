@@ -5,6 +5,8 @@ type TrainingExercise {
   tempo: String
   warmupSets: Int
   instructions: String
+  additionalInstructions: String
+  type: ExerciseType
   order: Int!
   completedAt: String
   muscleGroups: [MuscleGroup!]!

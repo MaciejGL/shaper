@@ -224,8 +224,10 @@ model TrainingExercise {
   tempo        String?
   warmupSets   Int?
   instructions String?
+  additionalInstructions String?
   order        Int
   completedAt  DateTime?
+  type         String? // Enum: SUPERSET, DROPSET, CARDIO,
 
   sets                   ExerciseSet[]
   baseId                 String? // 👈 link to the base exercise
@@ -298,8 +300,10 @@ model BaseExercise {
   id          String  @id @default(uuid())
   name        String
   description String?
+  additionalInstructions String?
   videoUrl    String?
   equipment   String? // e.g., BARBELL, DUMBBELL, MACHINE
+  type        String? // Enum: SUPERSET, DROPSET, CARDIO
 
   createdById String? // null = system/public
   createdBy   User?   @relation(fields: [createdById], references: [id])

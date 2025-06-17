@@ -2,6 +2,8 @@ type BaseExercise {
   id: ID!
   name: String!
   description: String
+  additionalInstructions: String
+  type: ExerciseType
   videoUrl: String
   equipment: Equipment
   muscleGroups: [MuscleGroup!]!
@@ -25,6 +27,13 @@ enum Equipment {
   KETTLEBELL
   SMITH_MACHINE
   OTHER
+}
+
+enum ExerciseType {
+  SUPERSET_1A
+  SUPERSET_1B
+  DROPSET
+  CARDIO
 }
 
 input ExerciseWhereInput {

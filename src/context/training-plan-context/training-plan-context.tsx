@@ -29,6 +29,7 @@ const initialFormData: TrainingPlanFormData = {
     description: '',
     isPublic: false,
     isDraft: true,
+    difficulty: undefined,
   },
   weeks: [
     {
@@ -82,6 +83,7 @@ export function TrainingPlanProvider({
             isPublic: data.getTrainingPlanById.isPublic,
             isTemplate: data.getTrainingPlanById.isTemplate,
             isDraft: data.getTrainingPlanById.isDraft,
+            difficulty: data.getTrainingPlanById.difficulty,
           },
           weeks: data.getTrainingPlanById.weeks,
         }),
@@ -143,6 +145,7 @@ export function TrainingPlanProvider({
           isDraft: details.isDraft,
           title: details.title,
           description: details.description,
+          difficulty: details.difficulty,
           weeks: weeks,
         },
       })
@@ -155,6 +158,7 @@ export function TrainingPlanProvider({
           isDraft: details.isDraft,
           title: details.title,
           description: details.description,
+          difficulty: details.difficulty,
           weeks: weeks.map((week) => ({
             ...week,
             id: undefined,

@@ -6,7 +6,10 @@ import {
   TrainingExercise as PrismaTrainingExercise,
 } from '@prisma/client'
 
-import { GQLTrainingExercise } from '@/generated/graphql-server'
+import {
+  GQLExerciseType,
+  GQLTrainingExercise,
+} from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
@@ -49,6 +52,25 @@ export default class TrainingExercise implements GQLTrainingExercise {
 
   get instructions() {
     return this.data.instructions
+  }
+
+  get additionalInstructions() {
+    return this.data.additionalInstructions
+  }
+
+  get type() {
+    switch (this.data.type) {
+      case 'SUPERSET_1A':
+        return GQLExerciseType.Superset_1A
+      case 'SUPERSET_1B':
+        return GQLExerciseType.Superset_1B
+      case 'DROPSET':
+        return GQLExerciseType.Dropset
+      case 'CARDIO':
+        return GQLExerciseType.Cardio
+      default:
+        return null
+    }
   }
 
   get order() {

@@ -4,7 +4,11 @@ import {
   MuscleGroupCategory as PrismaMuscleGroupCategory,
 } from '@prisma/client'
 
-import { GQLBaseExercise, GQLEquipment } from '@/generated/graphql-server'
+import {
+  GQLBaseExercise,
+  GQLEquipment,
+  GQLExerciseType,
+} from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
@@ -34,12 +38,31 @@ export default class BaseExercise implements GQLBaseExercise {
     return this.data.description
   }
 
+  get additionalInstructions() {
+    return this.data.additionalInstructions
+  }
+
   get videoUrl() {
     return this.data.videoUrl
   }
 
   get equipment() {
     return this.data.equipment as GQLEquipment
+  }
+
+  get type() {
+    switch (this.data.type) {
+      case 'SUPERSET_1A':
+        return GQLExerciseType.Superset_1A
+      case 'SUPERSET_1B':
+        return GQLExerciseType.Superset_1B
+      case 'DROPSET':
+        return GQLExerciseType.Dropset
+      case 'CARDIO':
+        return GQLExerciseType.Cardio
+      default:
+        return null
+    }
   }
 
   async muscleGroups() {

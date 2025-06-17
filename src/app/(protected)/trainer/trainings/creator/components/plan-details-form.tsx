@@ -3,8 +3,16 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { GQLDifficulty } from '@/generated/graphql-client'
 
 import type { TrainingPlanFormData } from './types'
 
@@ -12,6 +20,13 @@ type PlanDetailsProps = {
   data: TrainingPlanFormData['details']
   updateData: (data: TrainingPlanFormData['details']) => void
 }
+
+const DIFFICULTIES: { label: string; value: GQLDifficulty }[] = [
+  { label: 'Beginner', value: GQLDifficulty.Beginner },
+  { label: 'Intermediate', value: GQLDifficulty.Intermediate },
+  { label: 'Advanced', value: GQLDifficulty.Advanced },
+  { label: 'Expert', value: GQLDifficulty.Expert },
+]
 
 export function PlanDetailsForm({ data, updateData }: PlanDetailsProps) {
   return (
@@ -36,6 +51,24 @@ function PlanDetailsHeader({ data, updateData }: PlanDetailsProps) {
         onChange={(e) => updateData({ ...data, title: e.target.value })}
         className="max-w-lg"
       />
+
+      <Select
+        value={data.difficulty ?? ''}
+        onValueChange={(value: GQLDifficulty) =>
+          updateData({ ...data, difficulty: value })
+        }
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select difficulty" />
+        </SelectTrigger>
+        <SelectContent>
+          {DIFFICULTIES.map((difficulty) => (
+            <SelectItem key={difficulty.value} value={difficulty.value}>
+              {difficulty.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       <Textarea
         id="description"
