@@ -7,6 +7,7 @@ import {
   ChevronDown,
   FlameIcon,
   GaugeIcon,
+  InfoIcon,
   ListCollapseIcon,
   NotebookTextIcon,
   TimerIcon,
@@ -18,7 +19,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -35,7 +35,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { VideoPreview } from '@/components/video-preview'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
@@ -43,7 +47,6 @@ import {
   GQLFitspaceGetWorkoutQuery,
   useFitspaceGetWorkoutQuery,
   useFitspaceMarkExerciseAsCompletedMutation,
-  useFitspaceMarkSetAsCompletedMutation,
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
 import { convertSecondsToTimeString } from '@/lib/convert-seconds-time-to-string'
@@ -294,7 +297,7 @@ function ExerciseInstructions({ exercise }: { exercise: WorkoutExercise }) {
 }
 
 const sharedLayoutStyles = cn(
-  'w-full py-1 px-2.5 grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-3 items-center',
+  'w-full py-1 px-2.5 grid grid-cols-[auto_1fr_1fr_1fr] gap-3 items-center',
 )
 
 function ExerciseSets({
@@ -317,9 +320,27 @@ function ExerciseSets({
         <div className="min-w-2.5"></div>
         <div className="text-center">Reps</div>
         <div className="text-center">Weight</div>
-        <div className="text-center">RPE</div>
-
-        <div className="w-4" />
+        <div className="text-center">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="flex justify-center gap-1">
+                RPE <InfoIcon className="size-2.5 text-muted-foreground" />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              Suggested effort level for the set.
+              <br />
+              <br />
+              <strong>RPE (Rate of Perceived Exertion)</strong>: A subjective
+              measure of how hard an exercise feels, typically on a scale from 1
+              (very easy) to 10 (maximum effort).
+              <br />
+              <br />
+              For example, if you can do maximum 10 reps of a weight, your RPE
+              is 10.
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
       <div className="flex flex-col gap-2">
         {exercise.sets.map((set) => (
@@ -340,7 +361,6 @@ function ExerciseSet({
   set,
   previousLogs,
   isExpanded,
-  isExerciseCompleted,
 }: {
   set: WorkoutExercise['sets'][number]
   previousLogs: (WorkoutExercise & {
@@ -354,7 +374,6 @@ function ExerciseSet({
   const [reps, setReps] = useState('')
   const [weight, setWeight] = useState('')
   const hasUserEdited = useRef(false)
-  const [isCompleted, setIsCompleted] = useState(Boolean(set.completedAt))
   const invalidateQuery = useInvalidateQuery()
   const queryClient = useQueryClient()
 
@@ -413,30 +432,12 @@ function ExerciseSet({
     },
   })
 
-  const { mutateAsync: markSetAsCompleted, isPending: isMarkingSet } =
-    useFitspaceMarkSetAsCompletedMutation({
-      onSuccess: () => {
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutQuery.getKey({
-            trainingId: trainingId,
-          }),
-        })
-      },
-      onError: () => {
-        setIsCompleted(false)
-      },
-    })
-
   useEffect(() => {
     if (set.log && !hasUserEdited.current) {
       setReps(set.log.reps?.toString() ?? '')
       setWeight(set.log.weight?.toString() ?? '')
     }
   }, [set.log])
-
-  useEffect(() => {
-    setIsCompleted(Boolean(set.completedAt))
-  }, [set.completedAt])
 
   const debouncedUpdate = useMemo(
     () =>
@@ -458,15 +459,6 @@ function ExerciseSet({
     return () => debouncedUpdate.cancel()
   }, [reps, weight, debouncedUpdate])
 
-  const handleMarkAsCompleted = async (checked: boolean) => {
-    setIsCompleted(checked)
-    try {
-      await markSetAsCompleted({ setId: set.id, completed: checked })
-    } catch (error) {
-      setIsCompleted(!checked)
-    }
-  }
-
   const repRange =
     set.minReps && set.maxReps
       ? `${set.minReps}-${set.maxReps}`
@@ -485,18 +477,8 @@ function ExerciseSet({
 
     if (key === 'reps') {
       setReps(sanitizedValue)
-      if (sanitizedValue.length > 0 && weight.length > 0) {
-        setIsCompleted(true)
-      } else {
-        setIsCompleted(false)
-      }
     } else {
       setWeight(sanitizedValue)
-      if (reps.length > 0 && sanitizedValue.length > 0) {
-        setIsCompleted(true)
-      } else {
-        setIsCompleted(false)
-      }
     }
   }
 
@@ -516,7 +498,6 @@ function ExerciseSet({
           {set.weight}
         </div>
         <div />
-        <div className="w-4" />
       </div>
 
       <div
@@ -546,16 +527,6 @@ function ExerciseSet({
         <div className="text-sm text-muted-foreground text-center">
           {set.rpe}
         </div>
-
-        <Label>
-          <Checkbox
-            key={isCompleted.toString()}
-            checked={isExerciseCompleted || isCompleted}
-            onCheckedChange={handleMarkAsCompleted}
-            className="cursor-pointer"
-            disabled={isMarkingSet}
-          />
-        </Label>
       </div>
 
       {isExpanded &&
@@ -564,7 +535,7 @@ function ExerciseSet({
           return (
             <div
               key={thisSet.id}
-              className="w-full bg-muted/50 p-2 -mt-2 rounded-b-md grid grid-cols-[auto_1fr_1fr_1fr_auto_auto] gap-3 items-center"
+              className="w-full bg-muted/50 p-2 -mt-2 rounded-b-md grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-3 items-center"
             >
               <div className="min-w-2.5 text-xs">
                 Week {exercise.performedOnWeekNumber}
@@ -576,7 +547,6 @@ function ExerciseSet({
                 {thisSet.log?.weight || '-'}
               </div>
               <div className="text-sm text-muted-foreground"></div>
-              <div className="w-4"></div>
             </div>
           )
         })}
