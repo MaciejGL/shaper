@@ -22,7 +22,11 @@ export function PlanDetails({ assignedPlan }: PlanAssignmentProps) {
       <div className="space-y-2">
         <p className="text-lg font-semibold">{assignedPlan.title}</p>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary">{assignedPlan.difficulty}</Badge>
+          {assignedPlan.difficulty && (
+            <Badge variant="secondary" className="capitalize">
+              {assignedPlan.difficulty.toLowerCase()}
+            </Badge>
+          )}
           <Badge variant="secondary">
             {assignedPlan.weekCount}{' '}
             {assignedPlan.weekCount === 1 ? 'week' : 'weeks'}

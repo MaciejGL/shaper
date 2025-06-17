@@ -41,16 +41,18 @@ export function Overview({ plan }: OverviewProps) {
             icon={<Users className="size-5 text-green-500" />}
             iconPosition="top"
           />
-          <StatsItem
-            value={
-              <p className="text-lg font-bold text-primary capitalize">
-                {plan.difficulty.toLowerCase()}
-              </p>
-            }
-            label="Level"
-            icon={<Target className="size-5 text-violet-500" />}
-            iconPosition="top"
-          />
+          {plan.difficulty && (
+            <StatsItem
+              value={
+                <p className="text-lg font-bold text-primary capitalize">
+                  {plan.difficulty.toLowerCase()}
+                </p>
+              }
+              label="Level"
+              icon={<Target className="size-5 text-violet-500" />}
+              iconPosition="top"
+            />
+          )}
         </div>
       </div>
     </div>

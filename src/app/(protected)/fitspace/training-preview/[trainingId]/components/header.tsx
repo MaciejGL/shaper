@@ -66,7 +66,11 @@ export function Header({ plan, isDemo }: HeaderProps) {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  <Badge variant="secondary">{plan.difficulty}</Badge>
+                  {plan.difficulty && (
+                    <Badge variant="secondary" className="capitalize">
+                      {plan.difficulty.toLowerCase()}
+                    </Badge>
+                  )}
                   {isMyPlan && (
                     <Badge variant="secondary">
                       {plan.active ? 'Active' : 'Assigned To Account'}
