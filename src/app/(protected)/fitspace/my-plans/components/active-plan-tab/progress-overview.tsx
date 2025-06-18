@@ -6,7 +6,7 @@ export function ProgressOverview({
   currentWeekNumber,
   completedWorkoutsThisWeek,
   totalWorkoutsThisWeek,
-  adherence,
+  weeksCompleted,
   completedWorkouts,
   totalWorkouts,
   weekCount,
@@ -15,7 +15,7 @@ export function ProgressOverview({
   currentWeekNumber?: number | null
   completedWorkoutsThisWeek: number
   totalWorkoutsThisWeek: number
-  adherence: number
+  weeksCompleted: number
   completedWorkouts: number
   totalWorkouts: number
   weekCount: number
@@ -31,7 +31,7 @@ export function ProgressOverview({
         <StatsItem
           value={
             <div className="">
-              <span>{adherence}</span>
+              <span>{weeksCompleted}</span>
               <span className="text-xs text-muted-foreground">
                 / {weekCount}
               </span>

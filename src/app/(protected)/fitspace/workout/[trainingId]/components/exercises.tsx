@@ -1,10 +1,11 @@
-import { BadgeCheckIcon } from 'lucide-react'
+import { BadgeCheckIcon, Plus, TrophyIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import React, { startTransition, useEffect, useState } from 'react'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
@@ -12,6 +13,7 @@ import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 import { Exercise } from './exercise'
 import { ExercisesPagination } from './exercises-pagaination'
 import { RestDay } from './rest-day'
+import { SummaryContent } from './summary'
 
 export function Exercises() {
   const { activeDay } = useWorkout()
@@ -48,7 +50,10 @@ export function Exercises() {
 
   const progressPercentage = (completedSets / totalSets) * 100
 
-  const handlePaginationClick = (exerciseId: string, type: 'prev' | 'next') => {
+  const handlePaginationClick = (
+    exerciseId: string | null,
+    type: 'prev' | 'next',
+  ) => {
     startTransition(() => {
       setAnimationVariant(type === 'prev' ? 'slideFromRight' : 'slideFromLeft')
       setTimeout(() => {
@@ -80,9 +85,9 @@ export function Exercises() {
         </div>
       )}
 
-      {activeDay.isRestDay || !selectedExercise ? (
+      {activeDay.isRestDay ? (
         <RestDay />
-      ) : (
+      ) : selectedExercise ? (
         <div className="relative overflow-hidden">
           <AnimateChangeInHeight
             transition={{
@@ -110,8 +115,72 @@ export function Exercises() {
             <ExercisesPagination onClick={handlePaginationClick} />
           )}
         </div>
+      ) : (
+        <div className="relative overflow-hidden">
+          <AnimateChangeInHeight
+            transition={{
+              type: 'tween',
+              stiffness: 80,
+              damping: 10,
+              mass: 0.5,
+              duration: 0.05,
+            }}
+          >
+            <AnimatedPageTransition
+              id={'results'}
+              variant={animationVariant}
+              mode="wait"
+              className="w-full"
+            >
+              <Results
+                handlePaginationClick={handlePaginationClick}
+                lastExerciseId={exercises.at(-1)?.id ?? null}
+              />
+            </AnimatedPageTransition>
+          </AnimateChangeInHeight>
+        </div>
       )}
     </AnimatedPageTransition>
+  )
+}
+
+function Results({
+  handlePaginationClick,
+  lastExerciseId,
+}: {
+  handlePaginationClick: (
+    exerciseId: string | null,
+    type: 'prev' | 'next',
+  ) => void
+  lastExerciseId: string | null
+}) {
+  return (
+    <div className="flex flex-col h-full">
+      <div>
+        <h2 className="flex items-center gap-2">
+          <TrophyIcon className="h-5 w-5 text-yellow-500" />
+          Workout Complete!
+        </h2>
+        <p>Great job! Here's your workout summary for today.</p>
+      </div>
+      <div className="flex flex-col gap-2 mt-8 mb-6">
+        <p className="text-md">What's next?</p>
+        <p className="text-sm text-muted-foreground">More in the tank?</p>
+        <Button
+          variant="secondary"
+          size="lg"
+          iconStart={<Plus />}
+          className="w-full"
+        >
+          Add exercise
+        </Button>
+      </div>
+      <SummaryContent
+        open={true}
+        onContinue={() => handlePaginationClick(lastExerciseId, 'prev')}
+        continueButtonText="Back"
+      />
+    </div>
   )
 }
 

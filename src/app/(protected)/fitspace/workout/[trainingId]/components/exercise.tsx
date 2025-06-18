@@ -275,6 +275,11 @@ function ExerciseSelector({
             <DropdownMenuSeparator className="last:hidden mx-2" />
           </React.Fragment>
         ))}
+        <DropdownMenuItem onClick={() => setActiveExerciseId('summary')}>
+          <div className="text-sm flex justify-between w-full gap-4">
+            Summary
+          </div>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

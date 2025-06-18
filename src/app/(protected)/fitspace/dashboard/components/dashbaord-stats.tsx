@@ -61,7 +61,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
 
   return (
     <div className="space-y-6 -mx-2 md:-mx-0">
-      <div className="bg-muted md:rounded-lg py-4">
+      <div className="bg-muted/70 md:rounded-lg py-4">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="h-5 w-5" />

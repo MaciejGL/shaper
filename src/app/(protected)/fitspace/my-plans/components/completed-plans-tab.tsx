@@ -58,7 +58,7 @@ export function CompletedPlansTab({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {completedPlans.length > 0 ? (
         completedPlans.map((plan) => (
-          <Card key={plan.id} variant="gradient">
+          <Card key={plan.id}>
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div className="flex-1">
@@ -76,26 +76,28 @@ export function CompletedPlansTab({
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {plan.completedAt && (
-                <Badge variant="secondary">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  Completed{' '}
-                  {formatDate(new Date(plan.completedAt), 'MMM d, yyyy')}
-                </Badge>
-              )}
-              <div className="grid grid-cols-3 gap-4">
-                {Object.entries({
-                  weightChange: '-2.5kg',
-                  strengthGain: '+15%',
-                  adherence: '94%',
-                }).map(([key, value]) => (
-                  <StatsItem
-                    key={key}
-                    value={value}
-                    label={key.replace(/([A-Z])/g, ' $1').trim()}
-                  />
-                ))}
+            <CardContent className="space-y-6 flex flex-col justify-between h-full">
+              <div className="space-y-4">
+                {plan.completedAt && (
+                  <Badge variant="secondary">
+                    <CheckCircle className="h-3 w-3 mr-1" />
+                    Completed{' '}
+                    {formatDate(new Date(plan.completedAt), 'MMM d, yyyy')}
+                  </Badge>
+                )}
+                <div className="grid grid-cols-3 gap-4">
+                  {Object.entries({
+                    daysCompleted: `${plan.completedWorkoutsDays} days`,
+                    totalWorkouts: `${plan.totalWorkouts}`,
+                    adherence: `${plan.adherence}%`,
+                  }).map(([key, value]) => (
+                    <StatsItem
+                      key={key}
+                      value={value}
+                      label={key.replace(/([A-Z])/g, ' $1').trim()}
+                    />
+                  ))}
+                </div>
               </div>
               <CompletionStats
                 adherence={plan.adherence}

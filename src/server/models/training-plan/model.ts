@@ -171,10 +171,11 @@ export default class TrainingPlan implements GQLTrainingPlan {
 
   get adherence() {
     const weeks = this.data.weeks ?? []
-    const adherence = weeks.reduce(
-      (acc, week) => acc + (week.completedAt ? 1 : 0),
-      0,
-    )
+    const days = weeks
+      .flatMap((week) => week.days)
+      .filter((day) => !day?.isRestDay)
+    const completedDays = days.filter((day) => day?.completedAt)
+    const adherence = Math.round((completedDays.length / days.length) * 100)
     return adherence
   }
 

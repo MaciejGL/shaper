@@ -1,6 +1,7 @@
 import { format } from 'date-fns'
 import {
   ArrowRight,
+  BadgeCheck,
   CheckIcon,
   ClockIcon,
   DumbbellIcon,
@@ -48,7 +49,7 @@ export function TodaysWorkout({
             href={`/fitspace/workout/${planId}`}
             iconEnd={<ArrowRight />}
           >
-            Start
+            {todaysWorkout.completedAt ? 'View' : 'Start'}
           </ButtonLink>
         )}
       </div>
@@ -67,7 +68,7 @@ function WorkoutDay({
   day: NonNullable<ActivePlan>['weeks'][number]['days'][number]
 }) {
   return (
-    <div className="w-full space-y-6 mt-12">
+    <div className="w-full space-y-6 mt-6">
       <WorkoutDayHeader day={day} />
       <WorkoutDayExercises day={day} />
       <WorkoutDaySummary day={day} />
@@ -84,15 +85,18 @@ function WorkoutDayHeader({
 
   return (
     <div className="flex flex-col gap-1">
-      <h2 className="text-2xl font-semibold text-foreground">
-        {formatWorkoutType(day.workoutType)}
-      </h2>
+      <div className="flex items-center gap-2">
+        {day.completedAt && <BadgeCheck className="size-5 text-green-500" />}
+        <h2 className="text-2xl font-semibold text-foreground">
+          {formatWorkoutType(day.workoutType)}
+        </h2>
+      </div>
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Badge variant="outline" className="flex items-center gap-1">
+        <Badge variant="secondary" className="flex items-center gap-1">
           <DumbbellIcon />
           <span>{day.exercises.length} exercises</span>
         </Badge>
-        <Badge variant="outline" className="flex items-center gap-1">
+        <Badge variant="secondary" className="flex items-center gap-1">
           <ClockIcon />
           <span>~{estimatedTime}min</span>
         </Badge>
@@ -110,29 +114,33 @@ function WorkoutDayExercises({
     <div className="flex flex-col gap-2">
       <h2 className="text-sm font-medium">Exercises</h2>
       <div className="space-y-2 bg-muted rounded-lg p-4">
-        <div className="space-y-2">
+        <div className="space-y-3">
           {day.exercises.map((exercise, index) => (
             <Fragment key={index}>
               <div key={index} className="flex items-center gap-4">
-                {exercise.completedAt && (
-                  <CheckIcon className="size-4 text-green-500" />
-                )}
                 <div className="grow">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">{exercise.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {exercise.sets?.length || 0} sets
-                    </p>
+                    {!exercise.completedAt && (
+                      <p className="text-xs text-muted-foreground">
+                        {exercise.sets?.length || 0} sets
+                      </p>
+                    )}
                   </div>
 
-                  <div className="text-xs text-muted-foreground">
-                    {exercise?.muscleGroups
-                      ?.map((group) => group.alias)
-                      .join(', ')}
-                  </div>
+                  {!exercise.completedAt && (
+                    <div className="text-xs text-muted-foreground">
+                      {exercise?.muscleGroups
+                        ?.map((group) => group.alias)
+                        .join(', ')}
+                    </div>
+                  )}
                 </div>
+                {exercise.completedAt && (
+                  <CheckIcon className="size-4 text-green-500 mr-2" />
+                )}
               </div>
-              <Separator className="last:hidden" />
+              {day.exercises.length - 1 !== index && <Separator />}
             </Fragment>
           ))}
         </div>

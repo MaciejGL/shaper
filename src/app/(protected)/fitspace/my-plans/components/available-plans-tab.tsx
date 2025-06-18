@@ -71,7 +71,7 @@ function PlanCard({
   } = plan
 
   return (
-    <Card key={id} variant="gradient">
+    <Card key={id} className="space-y-4">
       <CardHeader>
         <PlanHeader
           loading={loading}
@@ -81,13 +81,15 @@ function PlanCard({
         <PlanAuthor createdBy={createdBy} />
         <PlanRating rating={rating} totalReviews={totalReviews} />
       </CardHeader>
-      <CardContent className="space-y-4">
-        <PlanStats weekCount={weekCount} totalWorkouts={totalWorkouts} />
-        <CompletionStats
-          adherence={adherence}
-          completedWorkoutsDays={completedWorkoutsDays}
-          totalWorkouts={totalWorkouts}
-        />
+      <CardContent className="space-y-8 flex flex-col justify-between h-full">
+        <div>
+          <PlanStats weekCount={weekCount} totalWorkouts={totalWorkouts} />
+          <CompletionStats
+            adherence={adherence}
+            completedWorkoutsDays={completedWorkoutsDays}
+            totalWorkouts={totalWorkouts}
+          />
+        </div>
         <CollapsibleText text={description} />
         <Actions handlePlanAction={handlePlanAction} plan={plan} />
       </CardContent>
@@ -201,7 +203,7 @@ function Actions({
   plan: AvailablePlan
 }) {
   return (
-    <div className="flex gap-2 pt-2">
+    <div className="flex gap-2 pt-2 self-end">
       <Button
         className="flex-1"
         onClick={() => handlePlanAction('activate', plan)}

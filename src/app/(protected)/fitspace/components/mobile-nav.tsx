@@ -29,7 +29,7 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
   )
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background shadow-neuromorphic-dark-secondary">
       <div className="flex items-center justify-around py-2 px-4 max-w-md mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon
@@ -42,7 +42,7 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
               className={cn(
                 'flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-[60px]',
                 isActive
-                  ? 'text-primary bg-primary/10'
+                  ? 'text-primary bg-secondary shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary'
                   : 'text-muted-foreground hover:text-foreground',
               )}
             >

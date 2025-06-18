@@ -13,18 +13,8 @@ import { Fragment, useEffect, useMemo, useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
 import { StatsItem } from '@/components/stats-item'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Progress } from '@/components/ui/progress'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
@@ -41,6 +31,28 @@ export function Summary({
   onOpenChange: (open: boolean) => void
   open: boolean
 }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        fullScreen
+        withCloseButton={false}
+        dialogTitle="Workout Summary"
+      >
+        <SummaryContent open={open} onContinue={() => onOpenChange(false)} />
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+export function SummaryContent({
+  open,
+  onContinue,
+  continueButtonText,
+}: {
+  open: boolean
+  onContinue?: () => void
+  continueButtonText?: string
+}) {
   const router = useRouter()
   const { age, weightKg, heightCm, sex } = useProfileMetrics()
   const [displayedCalories, setDisplayedCalories] = useState({
@@ -50,7 +62,6 @@ export function Summary({
   const [displayedSets, setDisplayedSets] = useState(0)
   const [displayedWeight, setDisplayedWeight] = useState(0)
   const [displayedDuration, setDisplayedDuration] = useState(0)
-  const [displayedCompletionRate, setDisplayedCompletionRate] = useState(0)
   const { activeDay } = useWorkout()
   const {
     mutateAsync: markWorkoutAsCompleted,
@@ -130,7 +141,6 @@ export function Summary({
         setDisplayedSets(totalSets)
         setDisplayedWeight(totalWeight)
         setDisplayedDuration(workoutDuration)
-        setDisplayedCompletionRate(completionRate)
       }, 1000)
       return () => clearTimeout(timer)
     } else {
@@ -139,7 +149,6 @@ export function Summary({
       setDisplayedSets(0)
       setDisplayedWeight(0)
       setDisplayedDuration(0)
-      setDisplayedCompletionRate(0)
     }
   }, [
     open,
@@ -162,139 +171,103 @@ export function Summary({
       console.error(error)
     }
   }
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        fullScreen
-        withCloseButton={false}
-        dialogTitle="Workout Summary"
-      >
-        <div className="space-y-6">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <TrophyIcon className="h-5 w-5 text-yellow-500" />
-              Workout Complete!
-            </DialogTitle>
-            <DialogDescription>
-              Great job! Here's your workout summary for today.
-            </DialogDescription>
-          </DialogHeader>
+    <div>
+      <div className="space-y-6">
+        <div className="space-y-8">
+          {/* Workout Stats */}
+          <div className="flex flex-col gap-4">
+            <h2 className="text-lg font-semibold">Workout Stats</h2>
 
-          <div className="space-y-8 mt-12">
-            {/* Completion Status */}
-            <div className="flex flex-col gap-4">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    Progress
-                  </span>
-                  <Badge
-                    variant={completionRate === 100 ? 'primary' : 'secondary'}
-                  >
-                    {completionRate}% Complete
-                  </Badge>
-                </div>
-                <Progress value={displayedCompletionRate} duration={1000} />
-              </div>
-            </div>
-
-            {/* Workout Stats */}
-            <div className="flex flex-col gap-4">
-              <h2 className="text-lg font-semibold">Workout Stats</h2>
-
-              <div className="grid grid-cols-2 gap-4 bg-muted rounded-lg p-4">
-                <StatsItem
-                  value={displayedDuration}
-                  label="Duration (min)"
-                  icon={<ClockIcon className="h-4 w-4 text-yellow-600" />}
-                />
-                <StatsItem
-                  value={
-                    <div className="flex items-center gap-2">
-                      <AnimateNumber value={displayedCalories.moderate} />
-                    </div>
-                  }
-                  label="Calories burned"
-                  icon={<FlameIcon className="h-4 w-4 text-amber-600" />}
-                />
-                <StatsItem
-                  value={displayedSets}
-                  label="Sets completed"
-                  icon={<DumbbellIcon className="h-4 w-4 text-green-600" />}
-                />
-                <StatsItem
-                  value={displayedWeight}
-                  label="Total volume (kg)"
-                  icon={<WeightIcon className="h-4 w-4 text-blue-600" />}
-                />
-              </div>
-            </div>
-
-            {/* Exercises Completed */}
-            {completedExercises && completedExercises.length > 0 && (
-              <div className="flex flex-col gap-4">
-                <h2 className="text-lg font-semibold">Exercises Completed</h2>
-                <div className="space-y-2 bg-muted rounded-lg p-4">
-                  <div className="space-y-1">
-                    {completedExercises.map((exercise, index) => (
-                      <Fragment key={index}>
-                        <div
-                          key={index}
-                          className="flex items-center justify-between py-2"
-                        >
-                          <div>
-                            <p className="text-sm font-medium">
-                              {exercise.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {exercise.sets?.length || 0} sets completed
-                            </p>
-                          </div>
-                          <CheckIcon className="h-4 w-4 text-green-500" />
-                        </div>
-                        <Separator className="last:hidden" />
-                      </Fragment>
-                    ))}
+            <div className="grid grid-cols-2 gap-4 bg-muted rounded-lg p-4">
+              <StatsItem
+                value={displayedDuration}
+                label="Duration (min)"
+                icon={<ClockIcon className="h-4 w-4 text-yellow-600" />}
+              />
+              <StatsItem
+                value={
+                  <div className="flex items-center gap-2">
+                    <AnimateNumber value={displayedCalories.moderate} />
                   </div>
-                </div>
-              </div>
-            )}
+                }
+                label="Calories burned"
+                icon={<FlameIcon className="h-4 w-4 text-amber-600" />}
+              />
+              <StatsItem
+                value={displayedSets}
+                label="Sets completed"
+                icon={<DumbbellIcon className="h-4 w-4 text-green-600" />}
+              />
+              <StatsItem
+                value={displayedWeight}
+                label="Total volume (kg)"
+                icon={<WeightIcon className="h-4 w-4 text-blue-600" />}
+              />
+            </div>
           </div>
 
-          {/* Motivational Message */}
-          <div className="bg-primary/5 border-primary/20 rounded-lg p-4">
-            <div className="text-center space-y-2">
-              <TrophyIcon className="h-8 w-8 mx-auto text-yellow-400" />
-              <p className="text-sm font-medium">
-                {completionRate === 100
-                  ? 'Perfect workout! You completed everything!'
-                  : 'Great effort! Keep pushing towards your goals!'}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Consistency is key to reaching your fitness goals.
-              </p>
+          {/* Exercises Completed */}
+          {completedExercises && completedExercises.length > 0 && (
+            <div className="flex flex-col gap-4">
+              <h2 className="text-lg font-semibold">Exercises Completed</h2>
+              <div className="space-y-2 bg-muted rounded-lg p-4">
+                <div className="space-y-1">
+                  {completedExercises.map((exercise, index) => (
+                    <Fragment key={index}>
+                      <div
+                        key={index}
+                        className="flex items-center justify-between py-2"
+                      >
+                        <div>
+                          <p className="text-sm font-medium">{exercise.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {exercise.sets?.length || 0} sets completed
+                          </p>
+                        </div>
+                        <CheckIcon className="h-4 w-4 text-green-500" />
+                      </div>
+                      <Separator className="last:hidden" />
+                    </Fragment>
+                  ))}
+                </div>
+              </div>
             </div>
+          )}
+        </div>
+
+        {/* Motivational Message */}
+        <div className="bg-primary/5 border-primary/20 rounded-lg p-4">
+          <div className="text-center space-y-2">
+            <TrophyIcon className="h-8 w-8 mx-auto text-yellow-400" />
+            <p className="text-sm font-medium">
+              {completionRate === 100
+                ? 'Perfect workout! You completed everything!'
+                : 'Great effort! Keep pushing towards your goals!'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Consistency is key to reaching your fitness goals.
+            </p>
           </div>
         </div>
-        <DialogFooter className="grid grid-cols-1">
-          <div className="flex gap-2 pt-4">
-            <DialogClose asChild>
-              <Button variant="secondary" className="flex-1">
-                Continue
-              </Button>
-            </DialogClose>
-            <Button
-              onClick={handleCompleteWorkout}
-              className="flex-1"
-              loading={isMarkingWorkoutAsCompleted}
-            >
-              Complete Workout
+      </div>
+      <div className="grid grid-cols-1">
+        <div className="flex gap-2 pt-4">
+          {onContinue && (
+            <Button variant="secondary" className="flex-1" onClick={onContinue}>
+              {continueButtonText || 'Continue'}
             </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          )}
+          <Button
+            onClick={handleCompleteWorkout}
+            className="flex-1"
+            loading={isMarkingWorkoutAsCompleted}
+          >
+            Complete Workout
+          </Button>
+        </div>
+      </div>
+    </div>
   )
 }
 

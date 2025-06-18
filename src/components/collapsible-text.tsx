@@ -50,7 +50,7 @@ export function CollapsibleText({
               duration: 0.15,
             }}
             className={cn(
-              'text-sm text-foreground whitespace-pre-wrap overflow-hidden',
+              'text-sm text-foreground- whitespace-pre-wrap overflow-hidden',
             )}
           >
             {text}

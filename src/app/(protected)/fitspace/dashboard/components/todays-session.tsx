@@ -1,11 +1,10 @@
-import { ArrowRight, Calendar, Drumstick, DumbbellIcon } from 'lucide-react'
-import { Fragment } from 'react'
+import { Calendar, DumbbellIcon } from 'lucide-react'
 
-import { BiggyIcon } from '@/components/biggy-icon'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
 import { GQLFitspaceDashboardQuery } from '@/generated/graphql-client'
+
+import { TodaysWorkout } from '../../my-plans/components/active-plan-tab/todays-workout'
 
 export type TodaysSessionProps = {
   workout?: NonNullable<
@@ -51,61 +50,12 @@ export function TodaysSession({ workout, planId }: TodaysSessionProps) {
 
   return (
     <Card variant="gradient">
-      <CardHeader>
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Calendar className="size-5" />
-          Today's Workout
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4 flex flex-col h-full">
-        {!workout.isRestDay && (
-          <h3 className="font-semibold text-lg">{workout.workoutType}</h3>
-        )}
-        <div className="grow">
-          {workout.isRestDay && (
-            <div className="flex flex-col items-center justify-center gap-2 h-full mb-4">
-              <BiggyIcon icon={Drumstick} />
-              <p className="text-sm text-muted-foreground text-center">
-                You don't have any training sessions planned for today.
-              </p>
-            </div>
-          )}
-
-          {workout.exercises.length > 0 && (
-            <div className="space-y-2 rounded-lg">
-              <div className="space-y-2">
-                {workout.exercises.map((exercise, index) => (
-                  <Fragment key={index}>
-                    <div key={index} className="flex items-center gap-4">
-                      <div className="grow">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm">{exercise.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {exercise.sets?.length || 0} sets
-                          </p>
-                        </div>
-
-                        <div className="text-xs text-muted-foreground">
-                          {exercise?.muscleGroups
-                            ?.map((group) => group.alias)
-                            .join(', ')}
-                        </div>
-                      </div>
-                    </div>
-                    <Separator className="last:hidden" />
-                  </Fragment>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        <ButtonLink
-          href={`/fitspace/workout/${planId}`}
-          iconEnd={<ArrowRight />}
-          variant={workout.isRestDay ? 'outline' : 'default'}
-        >
-          {workout.isRestDay ? 'View workout' : 'Start workout'}
-        </ButtonLink>
+      <CardContent>
+        <TodaysWorkout
+          planId={planId}
+          todaysWorkout={workout}
+          isNextWorkout={false}
+        />
       </CardContent>
     </Card>
   )

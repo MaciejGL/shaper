@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { BadgeCheckIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { useState } from 'react'
 
@@ -12,7 +12,7 @@ import { Summary } from './summary'
 export function ExercisesPagination({
   onClick,
 }: {
-  onClick: (exerciseId: string, type: 'prev' | 'next') => void
+  onClick: (exerciseId: string | null, type: 'prev' | 'next') => void
 }) {
   const [activeExerciseId] = useQueryState('exercise')
   const { activeDay } = useWorkout()
@@ -21,8 +21,15 @@ export function ExercisesPagination({
   const currentExerciseIndex = exercises.findIndex(
     (exercise) => exercise.id === activeExerciseId,
   )
-  const prevExercise = exercises[currentExerciseIndex - 1]
-  const nextExercise = exercises[currentExerciseIndex + 1]
+  const lastExercise = exercises[exercises.length - 1]
+  const prevExercise = activeExerciseId
+    ? exercises[currentExerciseIndex - 1]
+    : lastExercise
+  const nextExercise = activeExerciseId
+    ? exercises[currentExerciseIndex + 1]
+    : null
+
+  const isSummary = activeExerciseId === 'summary'
 
   return (
     <div className="grid grid-cols-[auto_1fr_auto] gap-2 w-full py-4">
@@ -30,9 +37,11 @@ export function ExercisesPagination({
         variant="secondary"
         size="sm"
         iconStart={<ChevronLeftIcon />}
-        onClick={() => onClick(prevExercise?.id, 'prev')}
-        disabled={!prevExercise}
-        className={cn(!prevExercise && 'invisible')}
+        onClick={() =>
+          onClick(isSummary ? lastExercise?.id : prevExercise?.id, 'prev')
+        }
+        disabled={!prevExercise && !isSummary}
+        className={cn(!prevExercise && !isSummary && 'invisible')}
       >
         Prev
       </Button>
@@ -40,26 +49,22 @@ export function ExercisesPagination({
         currentExerciseIndex={currentExerciseIndex}
         pagesNumber={exercises.length}
       />
-      {nextExercise ? (
-        <Button
-          variant="secondary"
-          size="sm"
-          iconEnd={<ChevronRightIcon />}
-          onClick={() => onClick(nextExercise?.id, 'next')}
-          disabled={!nextExercise}
-          className={cn(!nextExercise && 'invisible')}
-        >
-          Next
-        </Button>
-      ) : (
-        <Button
-          size="sm"
-          iconEnd={<BadgeCheckIcon />}
-          onClick={() => setSummaryOpen(true)}
-        >
-          Results
-        </Button>
-      )}
+
+      <Button
+        variant="secondary"
+        size="sm"
+        iconEnd={<ChevronRightIcon />}
+        onClick={() => {
+          if (nextExercise) {
+            onClick(nextExercise?.id, 'next')
+          } else {
+            onClick('summary', 'next')
+          }
+        }}
+      >
+        Next
+      </Button>
+
       <Summary onOpenChange={setSummaryOpen} open={summaryOpen} />
     </div>
   )

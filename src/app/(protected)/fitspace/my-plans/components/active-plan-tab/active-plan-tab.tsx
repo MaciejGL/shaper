@@ -39,7 +39,7 @@ export function ActivePlanTab({
   }
 
   return (
-    <div className="mb-20">
+    <div className="mb-4">
       {plan ? (
         <div key={plan.id}>
           <Header
@@ -59,7 +59,9 @@ export function ActivePlanTab({
                   currentWeek?.days.filter((day) => !day.isRestDay).length ?? 0
                 }
                 completedWorkoutsDays={plan.completedWorkoutsDays}
-                adherence={plan.adherence}
+                weeksCompleted={
+                  plan.weeks.filter((week) => week.completedAt).length
+                }
                 totalWorkouts={plan.totalWorkouts}
                 weekCount={plan.weeks.length}
               />
@@ -76,7 +78,7 @@ export function ActivePlanTab({
                 <TodaysWorkout todaysWorkout={currentDay} planId={plan.id} />
               </div>
             )}
-            {nextWorkout && (
+            {nextWorkout && currentDay?.isRestDay && (
               <div className="bg-muted/40 shadow-neuromorphic-light dark:shadow-neuromorphic-dark dark:bg-muted/20 p-4 rounded-lg">
                 <TodaysWorkout
                   todaysWorkout={nextWorkout}
