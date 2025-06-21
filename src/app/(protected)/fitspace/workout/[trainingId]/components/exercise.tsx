@@ -9,7 +9,6 @@ import {
   GaugeIcon,
   InfoIcon,
   MoreHorizontalIcon,
-  MoreVerticalIcon,
   NotebookTextIcon,
   PlusIcon,
   TimerIcon,
@@ -28,7 +27,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
   DropdownMenu,
@@ -161,6 +159,7 @@ function ExerciseHeader({
   isRemoving: boolean
 }) {
   const [activeExerciseId, setActiveExerciseId] = useQueryState('exercise')
+  const [isInstructionsOpen, setIsInstructionsOpen] = useState(false)
 
   const restDuration = exercise.restSeconds
     ? convertSecondsToTimeString(exercise.restSeconds)
@@ -217,27 +216,27 @@ function ExerciseHeader({
             <VideoPreview variant="secondary" url={exercise.videoUrl} />
           )}
 
-          {exercise.instructions && (
-            <ExerciseInstructions exercise={exercise} />
-          )}
-
-          <Button
-            variant="secondary"
-            iconOnly={
-              <Check
-                className={cn(
-                  'transition-all duration-200',
-                  isCompleted ? 'text-green-500' : 'text-muted-foreground',
-                )}
-              />
-            }
-            onClick={() => handleMarkAsCompleted(!isCompleted)}
-          />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" iconOnly={<MoreHorizontalIcon />} />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
+              <DropdownMenuItem
+                onClick={() => handleMarkAsCompleted(!isCompleted)}
+              >
+                <Check
+                  className={cn(
+                    'transition-all duration-200',
+                    isCompleted ? 'text-green-500' : 'text-muted-foreground',
+                  )}
+                />
+                {isCompleted ? 'Mark as incomplete' : 'Mark as completed'}
+              </DropdownMenuItem>
+              {exercise.instructions && (
+                <DropdownMenuItem onClick={() => setIsInstructionsOpen(true)}>
+                  <NotebookTextIcon /> Instructions
+                </DropdownMenuItem>
+              )}
               {exercise.isExtra && (
                 <DropdownMenuItem
                   onClick={handleRemoveExercise}
@@ -248,6 +247,19 @@ function ExerciseHeader({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Dialog
+            open={isInstructionsOpen}
+            onOpenChange={setIsInstructionsOpen}
+          >
+            <DialogContent dialogTitle={exercise.name}>
+              <DialogHeader>
+                <DialogTitle>{exercise.name}</DialogTitle>
+              </DialogHeader>
+              <DialogDescription className="whitespace-pre-wrap">
+                {exercise.instructions}
+              </DialogDescription>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       {exercise.additionalInstructions && (
@@ -284,9 +296,14 @@ function ExerciseSelector({
             />
           }
         >
-          <span className="truncate">
-            {exercise.order}. {exercise.name}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="truncate">
+              {exercise.order}. {exercise.name}{' '}
+            </span>
+            {exercise.completedAt ? (
+              <BadgeCheckIcon className="text-green-500 !size-4" />
+            ) : null}
+          </div>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-64">
@@ -314,24 +331,6 @@ function ExerciseSelector({
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
-
-function ExerciseInstructions({ exercise }: { exercise: WorkoutExercise }) {
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="secondary" iconOnly={<NotebookTextIcon />} />
-      </DialogTrigger>
-      <DialogContent dialogTitle={exercise.name}>
-        <DialogHeader>
-          <DialogTitle>{exercise.name}</DialogTitle>
-        </DialogHeader>
-        <DialogDescription className="whitespace-pre-wrap">
-          {exercise.instructions}
-        </DialogDescription>
-      </DialogContent>
-    </Dialog>
   )
 }
 
@@ -617,7 +616,7 @@ function ExerciseSet({
               <Button
                 variant="ghost"
                 size="icon-sm"
-                iconOnly={<MoreVerticalIcon />}
+                iconOnly={<MoreHorizontalIcon />}
                 loading={isRemovingSet}
                 className="self-center"
               />

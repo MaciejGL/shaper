@@ -95,6 +95,30 @@ export const removeExerciseFromWorkout = async (exerciseId: string) => {
     },
   })
 
+  const day = await prisma.trainingDay.findUnique({
+    where: {
+      id: workout.id,
+    },
+    include: {
+      exercises: true,
+    },
+  })
+
+  const allExercisesCompleted = day?.exercises.every(
+    (exercise) => exercise.completedAt,
+  )
+
+  if (allExercisesCompleted) {
+    await prisma.trainingDay.update({
+      where: { id: workout.id },
+      data: { completedAt: new Date() },
+    })
+  }
+
+  if (!day) {
+    throw new Error('Day not found')
+  }
+
   return true
 }
 
