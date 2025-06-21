@@ -9,6 +9,7 @@ import {
   GaugeIcon,
   InfoIcon,
   MoreHorizontalIcon,
+  MoreVerticalIcon,
   NotebookTextIcon,
   PlusIcon,
   TimerIcon,
@@ -407,10 +408,11 @@ function ExerciseSets({
         ))}
         <Button
           variant="secondary"
-          size="sm"
+          size={exercise.sets.length > 0 ? 'icon-sm' : 'sm'}
           iconOnly={<PlusIcon />}
           loading={isAddingSet}
           onClick={handleAddSet}
+          className={cn(exercise.sets.length > 0 && 'ml-auto')}
         />
       </div>
     </div>
@@ -610,14 +612,22 @@ function ExerciseSet({
           </div>
         </div>
         {set.isExtra && (
-          <Button
-            variant="secondary"
-            size="icon-md"
-            iconOnly={<TrashIcon />}
-            loading={isRemovingSet}
-            onClick={handleRemoveSet}
-            className="size-[44px] "
-          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                iconOnly={<MoreVerticalIcon />}
+                loading={isRemovingSet}
+                className="self-center"
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={handleRemoveSet}>
+                <TrashIcon /> Remove set
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
     </AnimateChangeInHeight>

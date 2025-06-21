@@ -1,13 +1,13 @@
-import { Check, Plus, PlusIcon, Search, XIcon } from 'lucide-react'
+import { AnimatePresence } from 'framer-motion'
+import { uniq } from 'lodash'
+import { Plus, PlusIcon, Search } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
 
 import { EnhancedBodyView } from '@/components/human-body/enhanced-body-view'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -16,14 +16,16 @@ import {
 import { Input } from '@/components/ui/input'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
-  GQLBaseExercise,
-  GQLMuscleGroup,
+  GQLEquipment,
   useFitspaceAddExerciseToWorkoutMutation,
   useFitspaceGetExercisesQuery,
   useFitspaceGetWorkoutQuery,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
-import { translateEquipment } from '@/utils/translate-equipment'
+
+import { EquipmentFilters } from './equipment-filters'
+import { ExercisesList } from './exercises-list'
+import { SelectedFilters } from './selected-filters'
 
 type AddExerciseModalProps = {
   handlePaginationClick: (
@@ -40,6 +42,7 @@ export function AddExerciseModal({
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null)
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>([])
+  const [selectedEquipment, setSelectedEquipment] = useState<GQLEquipment[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const { mutateAsync: addExercise, isPending: isAdding } =
     useFitspaceAddExerciseToWorkoutMutation({
@@ -77,12 +80,23 @@ export function AddExerciseModal({
           (group) => group.alias && selectedMuscleGroups.includes(group.alias),
         )
 
-      return matchesSearch && matchesMuscleGroup
+      const matchesEquipment =
+        selectedEquipment.length === 0 ||
+        (ex.equipment && selectedEquipment.includes(ex.equipment))
+
+      return matchesSearch && matchesMuscleGroup && matchesEquipment
     })
-  }, [allExercises, searchTerm, selectedMuscleGroups])
+  }, [allExercises, searchTerm, selectedMuscleGroups, selectedEquipment])
 
   const ALL_MUSCLE_GROUPS =
     data?.muscleGroupCategories?.flatMap((category) => category.muscles) || []
+
+  const handleClose = (boolean: boolean) => {
+    setIsOpen(boolean)
+    if (!boolean) {
+      clearAllFilters()
+    }
+  }
 
   const handleAddExercise = async () => {
     if (!activeDay?.id || !selectedExercise) {
@@ -98,7 +112,7 @@ export function AddExerciseModal({
     setSelectedExercise(null)
     setSearchTerm('')
     setSelectedMuscleGroups([])
-    setIsOpen(false)
+    handleClose(false)
   }
 
   const handleMuscleGroupToggle = (alias: string) => {
@@ -107,13 +121,45 @@ export function AddExerciseModal({
     )
   }
 
-  // const clearAllFilters = () => {
-  //   setSelectedMuscleGroups([])
-  //   setSearchTerm('')
-  // }
+  const handleEquipmentToggle = (equipment: GQLEquipment) => {
+    setSelectedEquipment((prev) =>
+      prev.includes(equipment)
+        ? prev.filter((e) => e !== equipment)
+        : [...prev, equipment],
+    )
+  }
+
+  const equipmentAvailable = useMemo(() => {
+    return uniq(filteredExercises.flatMap((ex) => ex.equipment)).filter(
+      Boolean,
+    ) as GQLEquipment[]
+  }, [filteredExercises])
+
+  const clearAllFilters = () => {
+    setSelectedMuscleGroups([])
+    setSearchTerm('')
+    setSelectedEquipment([])
+    setSelectedExercise(null)
+  }
+
+  const toggleEquipment = (equipment: GQLEquipment) => {
+    setSelectedEquipment((prev) =>
+      prev.includes(equipment)
+        ? prev.filter((e) => e !== equipment)
+        : [...prev, equipment],
+    )
+  }
+
+  const toggleMuscleGroup = (muscleGroup: string) => {
+    setSelectedMuscleGroups((prev) =>
+      prev.includes(muscleGroup)
+        ? prev.filter((g) => g !== muscleGroup)
+        : [...prev, muscleGroup],
+    )
+  }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogTrigger asChild>
         <Button
           variant="secondary"
@@ -124,35 +170,63 @@ export function AddExerciseModal({
           Add exercise
         </Button>
       </DialogTrigger>
-      <DialogContent dialogTitle="Add Exercise" fullScreen>
-        <DialogHeader>
+      <DialogContent dialogTitle="Add Exercise" fullScreen className="px-0">
+        <DialogHeader className="px-4">
           <DialogTitle>Add Exercise</DialogTitle>
-          <DialogDescription>
-            Search for an exercise. Choose from our library or exercises
-            provided by your trainer.
-          </DialogDescription>
+
+          <AnimatePresence mode="wait">
+            <SelectedFilters
+              selectedMuscleGroups={selectedMuscleGroups}
+              selectedEquipment={selectedEquipment}
+              onClearFilters={clearAllFilters}
+              onEquipmentToggle={toggleEquipment}
+              onMuscleGroupToggle={toggleMuscleGroup}
+            />
+          </AnimatePresence>
         </DialogHeader>
-        <div className="flex gap-6">
-          <div className="flex-1">
+        <div className="flex flex-col gap-6 overflow-y-auto">
+          <div>
             <div className="py-6">
-              <EnhancedBodyView
-                selectedMuscleGroups={selectedMuscleGroups}
-                onMuscleGroupClick={handleMuscleGroupToggle}
-                muscleGroups={ALL_MUSCLE_GROUPS}
+              <p className="text-md font-medium  mb-2 px-4">
+                1. Choose muscle groups
+              </p>
+              <div className="">
+                <EnhancedBodyView
+                  selectedMuscleGroups={selectedMuscleGroups}
+                  onMuscleGroupClick={handleMuscleGroupToggle}
+                  muscleGroups={ALL_MUSCLE_GROUPS}
+                />
+              </div>
+            </div>
+            <div className="px-4">
+              <p className="text-md font-medium  mb-2">2. Select equipment</p>
+              <EquipmentFilters
+                selectedEquipment={selectedEquipment}
+                onEquipmentToggle={handleEquipmentToggle}
+                equipment={equipmentAvailable}
               />
             </div>
 
-            <ExerciseSearch
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
-              selectedExercise={selectedExercise}
-              onExerciseSelect={setSelectedExercise}
-              filteredExercises={filteredExercises}
-              selectedMuscleGroups={selectedMuscleGroups}
-            />
+            <div className="px-4 mt-8">
+              <Input
+                id="exercise-search"
+                placeholder="Search exercises..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                iconStart={<Search />}
+              />
+            </div>
+            <div className="mt-2 px-4">
+              <p className="text-md font-medium  mb-2">3. Choose an exercise</p>
+              <ExercisesList
+                selectedExercise={selectedExercise}
+                onExerciseSelect={setSelectedExercise}
+                filteredExercises={filteredExercises}
+              />
+            </div>
           </div>
         </div>
-        <DialogFooter>
+        <DialogFooter className="px-4">
           <Button
             onClick={handleAddExercise}
             disabled={selectedExercise === null}
@@ -164,187 +238,5 @@ export function AddExerciseModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
-}
-
-type ExerciseSearchProps = {
-  searchTerm: string
-  onSearchChange: (term: string) => void
-  selectedExercise: string | null
-  onExerciseSelect: (id: string | null) => void
-  filteredExercises: (Pick<
-    GQLBaseExercise,
-    'id' | 'name' | 'equipment' | 'isPublic'
-  > & {
-    muscleGroups: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
-  })[]
-  selectedMuscleGroups: string[]
-}
-
-export function ExerciseSearch({
-  searchTerm,
-  onSearchChange,
-  selectedExercise,
-  onExerciseSelect,
-  filteredExercises,
-  selectedMuscleGroups,
-}: ExerciseSearchProps) {
-  return (
-    <div className="space-y-4 mt-4">
-      {selectedMuscleGroups.length > 0 && (
-        <div className="text-sm text-muted-foreground">
-          Selected muscle:{' '}
-          {selectedMuscleGroups.map((alias) => {
-            return (
-              <Badge key={alias} variant="outline">
-                {alias}
-              </Badge>
-            )
-          })}
-        </div>
-      )}
-      <div className="relative">
-        <Input
-          id="exercise-search"
-          placeholder="Search exercises..."
-          value={searchTerm}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-10"
-        />
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-      </div>
-
-      <div className="max-h-[500px] overflow-y-auto border rounded-md">
-        {filteredExercises.length > 0 ? (
-          <div className="p-2 space-y-2">
-            {filteredExercises.map((exercise) => (
-              <div
-                key={exercise.id}
-                className={`p-3 flex justify-between cursor-pointer hover:bg-accent/50 rounded-md transition-colors ${
-                  selectedExercise === exercise.id
-                    ? 'bg-muted/50'
-                    : ' bg-muted/10'
-                }`}
-                onClick={() => {
-                  if (selectedExercise === exercise.id) {
-                    onExerciseSelect(null)
-                  } else {
-                    onExerciseSelect(exercise.id)
-                  }
-                }}
-              >
-                <div className="flex-1">
-                  <div className="flex items-start justify-between gap-2 mb-1">
-                    <div className="font-medium text-sm">{exercise.name}</div>
-                    <div className="flex items-center gap-2">
-                      <Badge size="sm" variant="outline">
-                        {exercise.isPublic ? 'Public' : 'Trainer'}
-                      </Badge>
-                      {selectedExercise === exercise.id && (
-                        <div className="flex items-center">
-                          <Check className="h-4 w-4 text-green-600" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-xs text-muted-foreground flex flex-wrap gap-1">
-                    {exercise.equipment && (
-                      <Badge variant="secondary" size="sm">
-                        {translateEquipment(exercise.equipment)}
-                      </Badge>
-                    )}
-
-                    {exercise.muscleGroups.map((group) => (
-                      <Badge key={group.id} variant="secondary" size="sm">
-                        {group.alias}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="p-8 text-center text-muted-foreground">
-            No exercises found.
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-interface MuscleGroupFiltersProps {
-  muscleGroups: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
-  selectedMuscleGroups: string[]
-  onMuscleGroupToggle: (alias: string) => void // Changed parameter name for clarity
-  onClearAll: () => void
-}
-
-export function MuscleGroupFilters({
-  muscleGroups,
-  selectedMuscleGroups,
-  onMuscleGroupToggle,
-  onClearAll,
-}: MuscleGroupFiltersProps) {
-  const groupedMuscles = muscleGroups.reduce(
-    (acc, muscle) => {
-      if (!acc[muscle.groupSlug]) {
-        acc[muscle.groupSlug] = []
-      }
-      acc[muscle.groupSlug].push(muscle)
-      return acc
-    },
-    {} as Record<string, Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]>,
-  )
-
-  const isSelected = (muscleAlias: string) =>
-    selectedMuscleGroups.includes(muscleAlias)
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        {selectedMuscleGroups.length > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClearAll}
-            className="h-auto p-1 text-xs"
-          >
-            Clear all
-          </Button>
-        )}
-      </div>
-
-      <div className="space-y-3">
-        {Object.entries(groupedMuscles).map(([groupSlug, muscles]) => (
-          <div key={groupSlug} className="not-last:border-b pb-4">
-            <h4 className="text-sm font-medium capitalize mb-2">{groupSlug}</h4>
-            <div className="flex flex-wrap gap-1">
-              {muscles.map((muscle) => (
-                <Badge
-                  key={muscle.id}
-                  size="lg"
-                  variant={
-                    muscle.alias && isSelected(muscle.alias)
-                      ? 'primary'
-                      : 'secondary'
-                  }
-                  className="text-xs cursor-pointer hover:bg-secondary/80"
-                  onClick={() =>
-                    muscle.alias && onMuscleGroupToggle(muscle.alias)
-                  }
-                >
-                  {muscle.alias}
-                  {muscle.alias && isSelected(muscle.alias) && (
-                    <XIcon className="ml-1 h-3 w-3" />
-                  )}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
   )
 }

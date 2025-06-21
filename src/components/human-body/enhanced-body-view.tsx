@@ -59,20 +59,17 @@ export function EnhancedBodyView({
 
   return (
     <Tabs>
-      <TabsList className="w-full">
+      <TabsList className="mx-auto">
         <TabsTrigger value="front">Front</TabsTrigger>
         <TabsTrigger value="back">Back</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="front" className="flex flex-col items-center pt-4">
+      <TabsContent value="front" className="flex flex-col items-center">
         <FrontBodyView
           getPathProps={getPathProps}
           isRegionSelected={isRegionSelected}
           handleRegionClick={handleRegionClick}
         />
-        <div className="text-center text-sm text-muted-foreground">
-          Click muscle groups to filter exercises
-        </div>
       </TabsContent>
       <TabsContent value="back" className="flex flex-col items-center">
         <BackBodyView
@@ -80,9 +77,6 @@ export function EnhancedBodyView({
           isRegionSelected={isRegionSelected}
           handleRegionClick={handleRegionClick}
         />
-        <div className="text-center text-sm text-muted-foreground">
-          Click muscle groups to filter exercises
-        </div>
       </TabsContent>
     </Tabs>
   )

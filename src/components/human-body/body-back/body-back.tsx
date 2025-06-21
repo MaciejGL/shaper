@@ -49,7 +49,7 @@ export function BackBodyView({
       muscleY: 95,
       labelX: LEFT_LABEL_OFFSET ? LEFT_LABEL_OFFSET + 20 : 20,
       labelY: 80 + Y_OFFSET,
-      aliases: ['rear delts'],
+      aliases: ['rear delts', 'side delts', 'front delts'],
       side: 'left',
     },
     Lats: {
