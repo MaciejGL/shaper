@@ -1,19 +1,19 @@
-import { BadgeCheckIcon, Plus, TrophyIcon } from 'lucide-react'
+import { BadgeCheckIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import React, { startTransition, useEffect, useState } from 'react'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
+import { AddExerciseModal } from './add-exercise-modal'
 import { Exercise } from './exercise'
 import { ExercisesPagination } from './exercises-pagaination'
 import { RestDay } from './rest-day'
-import { SummaryContent } from './summary'
+import { Summary } from './summary'
 
 export function Exercises() {
   const { activeDay } = useWorkout()
@@ -157,25 +157,14 @@ function Results({
   return (
     <div className="flex flex-col h-full">
       <div>
-        <h2 className="flex items-center gap-2">
-          <TrophyIcon className="h-5 w-5 text-yellow-500" />
-          Workout Complete!
-        </h2>
-        <p>Great job! Here's your workout summary for today.</p>
+        <h2 className="flex items-center gap-2 text-2xl">Workout Summary</h2>
       </div>
       <div className="flex flex-col gap-2 mt-8 mb-6">
         <p className="text-md">What's next?</p>
         <p className="text-sm text-muted-foreground">More in the tank?</p>
-        <Button
-          variant="secondary"
-          size="lg"
-          iconStart={<Plus />}
-          className="w-full"
-        >
-          Add exercise
-        </Button>
+        <AddExerciseModal />
       </div>
-      <SummaryContent
+      <Summary
         open={true}
         onContinue={() => handlePaginationClick(lastExerciseId, 'prev')}
         continueButtonText="Back"

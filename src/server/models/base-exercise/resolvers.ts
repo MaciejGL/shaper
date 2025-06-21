@@ -90,6 +90,56 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     return exercises.map((exercise) => new BaseExercise(exercise, context))
   },
+  getExercises: async (_, __, context) => {
+    const user = context.user
+    const trainerId = user?.user.trainerId
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    const [publicExercises, trainerExercises] = await Promise.all([
+      prisma.baseExercise.findMany({
+        where: {
+          createdBy: null,
+          isPublic: true,
+        },
+        include: {
+          muscleGroups: {
+            include: {
+              category: true,
+            },
+          },
+        },
+      }),
+
+      trainerId &&
+        prisma.baseExercise.findMany({
+          where: {
+            createdBy: {
+              id: trainerId,
+            },
+          },
+          include: {
+            muscleGroups: {
+              include: {
+                category: true,
+              },
+            },
+          },
+        }),
+    ])
+
+    return {
+      publicExercises: publicExercises.map(
+        (exercise) => new BaseExercise(exercise, context),
+      ),
+      trainerExercises: trainerExercises
+        ? trainerExercises.map(
+            (exercise) => new BaseExercise(exercise, context),
+          )
+        : [],
+    }
+  },
   exercise: async (_, { id }, context) => {
     const exercise = await prisma.baseExercise.findUnique({
       where: { id },

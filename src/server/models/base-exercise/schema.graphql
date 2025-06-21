@@ -41,11 +41,17 @@ input ExerciseWhereInput {
   muscleGroups: [ID!]
 }
 
+type GetExercisesResponse {
+  publicExercises: [BaseExercise!]!
+  trainerExercises: [BaseExercise!]!
+}
+
 type Query {
   userExercises(where: ExerciseWhereInput): [BaseExercise!]!
   publicExercises(where: ExerciseWhereInput): [BaseExercise!]!
   exercise(id: ID!): BaseExercise
   exercisesProgressByUser(userId: ID): [ExerciseProgress!]!
+  getExercises: GetExercisesResponse!
 }
 
 type Mutation {

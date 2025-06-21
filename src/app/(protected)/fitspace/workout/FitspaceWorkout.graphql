@@ -76,6 +76,47 @@ query FitspaceGetWorkout($trainingId: ID!) {
   }
 }
 
+query FitspaceGetExercises {
+  getExercises {
+    publicExercises {
+      id
+      name
+      description
+      videoUrl
+      equipment
+      isPublic
+      muscleGroups {
+        id
+        alias
+        groupSlug
+      }
+    }
+    trainerExercises {
+      id
+      name
+      description
+      videoUrl
+      equipment
+      isPublic
+      muscleGroups {
+        id
+        alias
+        groupSlug
+      }
+    }
+  }
+  muscleGroupCategories {
+    id
+    name
+    slug
+    muscles {
+      id
+      alias
+      groupSlug
+    }
+  }
+}
+
 query FitspaceGetWorkoutInfo($dayId: ID!) {
   getWorkoutInfo(dayId: $dayId) {
     id

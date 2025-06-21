@@ -1,11 +1,11 @@
 import { differenceInYears, secondsToMinutes } from 'date-fns'
 import { uniq } from 'lodash'
 import {
+  ArrowLeftIcon,
   CheckIcon,
   ClockIcon,
   DumbbellIcon,
   FlameIcon,
-  TrophyIcon,
   WeightIcon,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -14,7 +14,6 @@ import { Fragment, useEffect, useMemo, useState } from 'react'
 import { AnimateNumber } from '@/components/animate-number'
 import { StatsItem } from '@/components/stats-item'
 import { Button } from '@/components/ui/button'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
@@ -25,26 +24,6 @@ import {
 import { calculateCaloriesBurned } from '@/lib/workout/calculate-calories-burned'
 
 export function Summary({
-  onOpenChange,
-  open,
-}: {
-  onOpenChange: (open: boolean) => void
-  open: boolean
-}) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        fullScreen
-        withCloseButton={false}
-        dialogTitle="Workout Summary"
-      >
-        <SummaryContent open={open} onContinue={() => onOpenChange(false)} />
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-export function SummaryContent({
   open,
   onContinue,
   continueButtonText,
@@ -235,26 +214,16 @@ export function SummaryContent({
             </div>
           )}
         </div>
-
-        {/* Motivational Message */}
-        <div className="bg-primary/5 border-primary/20 rounded-lg p-4">
-          <div className="text-center space-y-2">
-            <TrophyIcon className="h-8 w-8 mx-auto text-yellow-400" />
-            <p className="text-sm font-medium">
-              {completionRate === 100
-                ? 'Perfect workout! You completed everything!'
-                : 'Great effort! Keep pushing towards your goals!'}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Consistency is key to reaching your fitness goals.
-            </p>
-          </div>
-        </div>
       </div>
       <div className="grid grid-cols-1">
         <div className="flex gap-2 pt-4">
           {onContinue && (
-            <Button variant="secondary" className="flex-1" onClick={onContinue}>
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={onContinue}
+              iconStart={<ArrowLeftIcon />}
+            >
               {continueButtonText || 'Continue'}
             </Button>
           )}
@@ -262,6 +231,7 @@ export function SummaryContent({
             onClick={handleCompleteWorkout}
             className="flex-1"
             loading={isMarkingWorkoutAsCompleted}
+            iconStart={<CheckIcon />}
           >
             Complete Workout
           </Button>

@@ -1,13 +1,10 @@
 import { motion } from 'framer-motion'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
-import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import { cn } from '@/lib/utils'
-
-import { Summary } from './summary'
 
 export function ExercisesPagination({
   onClick,
@@ -16,7 +13,6 @@ export function ExercisesPagination({
 }) {
   const [activeExerciseId] = useQueryState('exercise')
   const { activeDay } = useWorkout()
-  const [summaryOpen, setSummaryOpen] = useState(false)
   const exercises = activeDay?.exercises ?? []
   const currentExerciseIndex = exercises.findIndex(
     (exercise) => exercise.id === activeExerciseId,
@@ -64,8 +60,6 @@ export function ExercisesPagination({
       >
         Next
       </Button>
-
-      <Summary onOpenChange={setSummaryOpen} open={summaryOpen} />
     </div>
   )
 }
