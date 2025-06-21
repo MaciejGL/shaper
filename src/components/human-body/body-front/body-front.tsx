@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
+import { BodyViewProps } from '../types'
+
 import { Abdominals } from './abdominals'
 import { FrontBodyBackground } from './background'
 import { Biceps } from './biceps'
@@ -18,56 +20,11 @@ import { Shins } from './shins'
 import { Trapezius } from './trapezius'
 import { Unselectable } from './unselectable'
 
-interface FrontBodyViewProps {
-  selectedMuscleGroups: string[]
-  onMuscleGroupClick: (muscleGroupId: string) => void
-  muscleGroups: { id: string; alias?: string | null; groupSlug: string }[]
-  className?: string
-}
-
-export type MuscleGroupProps = {
-  getPathProps: (aliases: string[]) => {
-    className: string
-    onClick: () => void
-    style: { fillOpacity: number }
-  }
-}
-
 export function FrontBodyView({
-  selectedMuscleGroups = [],
-  onMuscleGroupClick,
-  muscleGroups = [],
-}: FrontBodyViewProps) {
-  const getMuscleGroupsByAlias = (aliases: string[]) => {
-    if (!muscleGroups || !Array.isArray(muscleGroups)) return []
-    return muscleGroups.filter(
-      (mg) => mg.alias && aliases.includes(mg.alias.toLowerCase()),
-    )
-  }
-
-  const isRegionSelected = (aliases: string[]) => {
-    const regionMuscles = getMuscleGroupsByAlias(aliases)
-    return regionMuscles.some(
-      (muscle) => muscle.alias && selectedMuscleGroups.includes(muscle.alias),
-    )
-  }
-
-  const handleRegionClick = (aliases: string[]) => {
-    const regionMuscles = getMuscleGroupsByAlias(aliases)
-    regionMuscles.forEach(
-      (muscle) => muscle.alias && onMuscleGroupClick(muscle.alias),
-    )
-  }
-
-  const getPathProps = (aliases: string[]) => ({
-    className: `cursor-pointer transition-all duration-200 ${
-      isRegionSelected(aliases)
-        ? cn('fill-amber-600')
-        : 'fill-primary/40 group-hover:fill-muted-foreground'
-    }`,
-    onClick: () => handleRegionClick(aliases),
-    style: { fillOpacity: isRegionSelected(aliases) ? 0.8 : 0.6 },
-  })
+  getPathProps,
+  isRegionSelected,
+  handleRegionClick,
+}: BodyViewProps) {
   const Y_OFFSET = 20
   const LEFT_LABEL_OFFSET = 1
   const RIGHT_LABEL_OFFSET = 195

@@ -1,8 +1,9 @@
 'use client'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { cn } from '@/lib/utils'
 
-import { BackBodyView } from './body-back'
+import { BackBodyView } from './body-back/body-back'
 import { FrontBodyView } from './body-front/body-front'
 
 interface EnhancedBodyViewProps {
@@ -25,6 +26,37 @@ export function EnhancedBodyView({
     )
   }
 
+  const getMuscleGroupsByAlias = (aliases: string[]) => {
+    if (!muscleGroups || !Array.isArray(muscleGroups)) return []
+    return muscleGroups.filter(
+      (mg) => mg.alias && aliases.includes(mg.alias.toLowerCase()),
+    )
+  }
+
+  const isRegionSelected = (aliases: string[]) => {
+    const regionMuscles = getMuscleGroupsByAlias(aliases)
+    return regionMuscles.some(
+      (muscle) => muscle.alias && selectedMuscleGroups.includes(muscle.alias),
+    )
+  }
+
+  const handleRegionClick = (aliases: string[]) => {
+    const regionMuscles = getMuscleGroupsByAlias(aliases)
+    regionMuscles.forEach(
+      (muscle) => muscle.alias && onMuscleGroupClick(muscle.alias),
+    )
+  }
+
+  const getPathProps = (aliases: string[]) => ({
+    className: `cursor-pointer transition-all duration-200 ${
+      isRegionSelected(aliases)
+        ? cn('fill-amber-600')
+        : 'fill-primary/40 group-hover:fill-muted-foreground'
+    }`,
+    onClick: () => handleRegionClick(aliases),
+    style: { fillOpacity: isRegionSelected(aliases) ? 0.8 : 0.6 },
+  })
+
   return (
     <Tabs>
       <TabsList className="w-full">
@@ -34,9 +66,9 @@ export function EnhancedBodyView({
 
       <TabsContent value="front" className="flex flex-col items-center pt-4">
         <FrontBodyView
-          selectedMuscleGroups={selectedMuscleGroups}
-          onMuscleGroupClick={onMuscleGroupClick}
-          muscleGroups={muscleGroups}
+          getPathProps={getPathProps}
+          isRegionSelected={isRegionSelected}
+          handleRegionClick={handleRegionClick}
         />
         <div className="text-center text-sm text-muted-foreground">
           Click muscle groups to filter exercises
@@ -44,9 +76,9 @@ export function EnhancedBodyView({
       </TabsContent>
       <TabsContent value="back" className="flex flex-col items-center">
         <BackBodyView
-          selectedMuscleGroups={selectedMuscleGroups}
-          onMuscleGroupClick={onMuscleGroupClick}
-          muscleGroups={muscleGroups}
+          getPathProps={getPathProps}
+          isRegionSelected={isRegionSelected}
+          handleRegionClick={handleRegionClick}
         />
         <div className="text-center text-sm text-muted-foreground">
           Click muscle groups to filter exercises

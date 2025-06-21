@@ -1,4 +1,4 @@
-import { MuscleGroupProps } from './body-front'
+import { MuscleGroupProps } from '../types'
 
 export function InnerThighs({ getPathProps }: MuscleGroupProps) {
   return (
