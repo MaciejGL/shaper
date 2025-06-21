@@ -53,10 +53,45 @@ export const addExerciseToWorkout = async (
 }
 
 export const removeExerciseFromWorkout = async (exerciseId: string) => {
+  const workout = await prisma.trainingDay.findFirst({
+    where: {
+      exercises: {
+        some: {
+          id: exerciseId,
+        },
+      },
+    },
+    include: {
+      exercises: true,
+    },
+  })
+
+  if (!workout) {
+    throw new Error('Workout not found')
+  }
+
+  const removedExercise = workout.exercises.find(
+    (exercise) => exercise.id === exerciseId,
+  )
+  if (!removedExercise) {
+    throw new Error('Exercise not found in workout')
+  }
+
   await prisma.trainingExercise.delete({
     where: {
       id: exerciseId,
       isExtra: true,
+    },
+  })
+
+  await prisma.trainingExercise.updateMany({
+    where: {
+      dayId: workout.id,
+      isExtra: true,
+      order: { gt: removedExercise.order },
+    },
+    data: {
+      order: { decrement: 1 },
     },
   })
 

@@ -23,6 +23,7 @@ import {
   useFitspaceGetWorkoutQuery,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
+import { translateEquipment } from '@/utils/translate-equipment'
 
 type AddExerciseModalProps = {
   handlePaginationClick: (
@@ -213,14 +214,16 @@ export function ExerciseSearch({
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
       </div>
 
-      <div className="max-h-[300px] overflow-y-auto border rounded-md">
+      <div className="max-h-[500px] overflow-y-auto border rounded-md">
         {filteredExercises.length > 0 ? (
-          <div className="p-2">
+          <div className="p-2 space-y-2">
             {filteredExercises.map((exercise) => (
               <div
                 key={exercise.id}
-                className={`p-3 flex justify-between cursor-pointer hover:bg-accent rounded-md transition-colors ${
-                  selectedExercise === exercise.id ? 'bg-accent' : ''
+                className={`p-3 flex justify-between cursor-pointer hover:bg-accent/50 rounded-md transition-colors ${
+                  selectedExercise === exercise.id
+                    ? 'bg-muted/50'
+                    : ' bg-muted/10'
                 }`}
                 onClick={() => {
                   if (selectedExercise === exercise.id) {
@@ -231,24 +234,33 @@ export function ExerciseSearch({
                 }}
               >
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="font-medium">{exercise.name}</div>
-                    <Badge size="sm" variant="outline">
-                      {exercise.isPublic ? 'Public' : 'Trainer'}
-                    </Badge>
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <div className="font-medium text-sm">{exercise.name}</div>
+                    <div className="flex items-center gap-2">
+                      <Badge size="sm" variant="outline">
+                        {exercise.isPublic ? 'Public' : 'Trainer'}
+                      </Badge>
+                      {selectedExercise === exercise.id && (
+                        <div className="flex items-center">
+                          <Check className="h-4 w-4 text-green-600" />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    {exercise.equipment} •{' '}
-                    {exercise.muscleGroups
-                      .map((group) => group.alias)
-                      .join(', ')}
+                  <div className="text-xs text-muted-foreground flex flex-wrap gap-1">
+                    {exercise.equipment && (
+                      <Badge variant="secondary" size="sm">
+                        {translateEquipment(exercise.equipment)}
+                      </Badge>
+                    )}
+
+                    {exercise.muscleGroups.map((group) => (
+                      <Badge key={group.id} variant="secondary" size="sm">
+                        {group.alias}
+                      </Badge>
+                    ))}
                   </div>
                 </div>
-                {selectedExercise === exercise.id && (
-                  <div className="flex items-center">
-                    <Check className="h-4 w-4 text-primary" />
-                  </div>
-                )}
               </div>
             ))}
           </div>

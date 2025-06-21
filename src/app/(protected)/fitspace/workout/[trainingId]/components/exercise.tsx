@@ -8,7 +8,7 @@ import {
   FlameIcon,
   GaugeIcon,
   InfoIcon,
-  ListCollapseIcon,
+  MoreHorizontalIcon,
   NotebookTextIcon,
   PlusIcon,
   TimerIcon,
@@ -71,7 +71,6 @@ export function Exercise({
   exercises,
   onPaginationClick,
 }: ExerciseProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
   const { getPastLogs } = useWorkout()
   const previousLogs = getPastLogs(exercise)
   const invalidateQuery = useInvalidateQuery()
@@ -128,8 +127,6 @@ export function Exercise({
       <ExerciseHeader
         exercise={exercise}
         exercises={exercises}
-        setIsExpanded={setIsExpanded}
-        hasLogs={previousLogs.length > 0}
         isCompleted={isExerciseCompleted}
         handleMarkAsCompleted={handleMarkAsCompleted}
         onPaginationClick={onPaginationClick}
@@ -138,7 +135,6 @@ export function Exercise({
       />
       <ExerciseSets
         exercise={exercise}
-        isExpanded={isExpanded}
         previousLogs={previousLogs}
         isExerciseCompleted={isExerciseCompleted}
       />
@@ -149,8 +145,6 @@ export function Exercise({
 function ExerciseHeader({
   exercise,
   exercises,
-  setIsExpanded,
-  hasLogs,
   isCompleted,
   handleMarkAsCompleted,
   onPaginationClick,
@@ -159,8 +153,6 @@ function ExerciseHeader({
 }: {
   exercise: WorkoutExercise
   exercises: WorkoutExercise[]
-  setIsExpanded: React.Dispatch<React.SetStateAction<boolean>>
-  hasLogs: boolean
   isCompleted: boolean
   handleMarkAsCompleted: (checked: boolean) => void
   onPaginationClick: (exerciseId: string, type: 'prev' | 'next') => void
@@ -223,24 +215,11 @@ function ExerciseHeader({
           {exercise.videoUrl && (
             <VideoPreview variant="secondary" url={exercise.videoUrl} />
           )}
-          {hasLogs && (
-            <Button
-              variant="secondary"
-              iconOnly={<ListCollapseIcon />}
-              onClick={() => setIsExpanded((prev) => !prev)}
-            />
-          )}
+
           {exercise.instructions && (
             <ExerciseInstructions exercise={exercise} />
           )}
-          {exercise.isExtra && (
-            <Button
-              variant="secondary"
-              iconOnly={<TrashIcon />}
-              loading={isRemoving}
-              onClick={handleRemoveExercise}
-            />
-          )}
+
           <Button
             variant="secondary"
             iconOnly={
@@ -253,6 +232,21 @@ function ExerciseHeader({
             }
             onClick={() => handleMarkAsCompleted(!isCompleted)}
           />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="secondary" iconOnly={<MoreHorizontalIcon />} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              {exercise.isExtra && (
+                <DropdownMenuItem
+                  onClick={handleRemoveExercise}
+                  loading={isRemoving}
+                >
+                  <TrashIcon /> Remove exercise
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       {exercise.additionalInstructions && (
@@ -346,12 +340,10 @@ const sharedLayoutStyles = cn(
 
 function ExerciseSets({
   exercise,
-  isExpanded,
   previousLogs,
   isExerciseCompleted,
 }: {
   exercise: WorkoutExercise
-  isExpanded: boolean
   previousLogs: (WorkoutExercise & {
     performedOnWeekNumber: number
     performedOnDayNumber: number
@@ -410,7 +402,6 @@ function ExerciseSets({
             key={set.id}
             set={set}
             previousLogs={previousLogs}
-            isExpanded={isExpanded}
             isExerciseCompleted={isExerciseCompleted}
           />
         ))}
@@ -429,14 +420,12 @@ function ExerciseSets({
 function ExerciseSet({
   set,
   previousLogs,
-  isExpanded,
 }: {
   set: WorkoutExercise['sets'][number]
   previousLogs: (WorkoutExercise & {
     performedOnWeekNumber: number
     performedOnDayNumber: number
   })[]
-  isExpanded: boolean
   isExerciseCompleted: boolean
 }) {
   const { trainingId } = useParams<{ trainingId: string }>()
@@ -566,6 +555,8 @@ function ExerciseSet({
 
   const showLabel = set.reps || set.weight || set.rpe
 
+  const lastLog = previousLogs[previousLogs.length - 1]
+  const thisSet = lastLog?.sets[set.order - 1]
   return (
     <AnimateChangeInHeight>
       {showLabel && (
@@ -586,7 +577,7 @@ function ExerciseSet({
         </div>
       )}
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-start gap-1">
         <div>
           <div
             className={cn(
@@ -601,6 +592,8 @@ function ExerciseSet({
               onChange={(e) => handleInputChange(e, 'reps')}
               variant="ghost"
               inputMode="decimal"
+              placeholder={thisSet?.log?.reps?.toString() || ''}
+              className="min-w-[96px]"
             />
             <Input
               id={`set-${set.id}-weight`}
@@ -608,32 +601,13 @@ function ExerciseSet({
               onChange={(e) => handleInputChange(e, 'weight')}
               variant="ghost"
               inputMode="decimal"
+              placeholder={thisSet?.log?.weight?.toString() || ''}
+              className="min-w-[96px]"
             />
             <div className="text-sm text-muted-foreground text-center">
               {set.rpe}
             </div>
           </div>
-          {isExpanded &&
-            previousLogs.map((exercise) => {
-              const thisSet = exercise.sets[set.order - 1]
-              return (
-                <div
-                  key={thisSet.id}
-                  className="w-full bg-muted/50 p-2 -mt-2 rounded-b-md grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-3 items-center"
-                >
-                  <div className="min-w-2.5 text-xs">
-                    Week {exercise.performedOnWeekNumber}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {thisSet.log?.reps || '-'}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {thisSet.log?.weight || '-'}
-                  </div>
-                  <div className="text-sm text-muted-foreground"></div>
-                </div>
-              )
-            })}
         </div>
         {set.isExtra && (
           <Button
@@ -642,7 +616,7 @@ function ExerciseSet({
             iconOnly={<TrashIcon />}
             loading={isRemovingSet}
             onClick={handleRemoveSet}
-            className="size-[44px]"
+            className="size-[44px] "
           />
         )}
       </div>
