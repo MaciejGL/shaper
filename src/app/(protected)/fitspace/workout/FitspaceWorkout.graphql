@@ -47,6 +47,7 @@ query FitspaceGetWorkout($trainingId: ID!) {
             order
             videoUrl
             completedAt
+            isExtra
             muscleGroups {
               id
               alias
@@ -60,6 +61,7 @@ query FitspaceGetWorkout($trainingId: ID!) {
               maxReps
               weight
               rpe
+              isExtra
               completedAt
               log {
                 id
@@ -149,4 +151,24 @@ mutation FitspaceLogWorkoutProgress($dayId: ID!, $tick: Int!) {
 
 mutation FitspaceMarkWorkoutAsCompleted($dayId: ID!) {
   markWorkoutAsCompleted(dayId: $dayId)
+}
+
+mutation FitspaceAddExerciseToWorkout($input: AddExerciseToWorkoutInput!) {
+  addExerciseToWorkout(input: $input) {
+    id
+  }
+}
+
+mutation FitspaceRemoveExerciseFromWorkout($exerciseId: ID!) {
+  removeExerciseFromWorkout(exerciseId: $exerciseId)
+}
+
+mutation FitspaceAddSet($exerciseId: ID!) {
+  addSet(exerciseId: $exerciseId) {
+    id
+  }
+}
+
+mutation FitspaceRemoveSet($setId: ID!) {
+  removeSet(setId: $setId)
 }

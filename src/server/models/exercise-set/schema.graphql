@@ -6,7 +6,7 @@ type ExerciseSet {
   maxReps: Int
   weight: Float
   rpe: Int
-
+  isExtra: Boolean!
   completedAt: String
   log: ExerciseSetLog
   exerciseId: ID!

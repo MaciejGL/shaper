@@ -162,7 +162,7 @@ function Results({
       <div className="flex flex-col gap-2 mt-8 mb-6">
         <p className="text-md">What's next?</p>
         <p className="text-sm text-muted-foreground">More in the tank?</p>
-        <AddExerciseModal />
+        <AddExerciseModal handlePaginationClick={handlePaginationClick} />
       </div>
       <Summary
         open={true}

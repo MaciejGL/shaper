@@ -10,7 +10,9 @@ import {
   InfoIcon,
   ListCollapseIcon,
   NotebookTextIcon,
+  PlusIcon,
   TimerIcon,
+  TrashIcon,
 } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
@@ -45,8 +47,11 @@ import { useWorkout } from '@/context/workout-context/workout-context'
 import {
   GQLExerciseType,
   GQLFitspaceGetWorkoutQuery,
+  useFitspaceAddSetMutation,
   useFitspaceGetWorkoutQuery,
   useFitspaceMarkExerciseAsCompletedMutation,
+  useFitspaceRemoveExerciseFromWorkoutMutation,
+  useFitspaceRemoveSetMutation,
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
 import { convertSecondsToTimeString } from '@/lib/convert-seconds-time-to-string'
@@ -81,6 +86,17 @@ export function Exercise({
         })
       },
     })
+
+  const { mutateAsync: removeExercise, isPending: isRemoving } =
+    useFitspaceRemoveExerciseFromWorkoutMutation({
+      onSuccess: () => {
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutQuery.getKey({
+            trainingId: trainingId,
+          }),
+        })
+      },
+    })
   const [isExerciseCompleted, setIsExerciseCompleted] = useState(
     Boolean(exercise.completedAt),
   )
@@ -101,6 +117,12 @@ export function Exercise({
     }
   }
 
+  const handleRemoveExercise = async () => {
+    await removeExercise({
+      exerciseId: exercise.id,
+    })
+  }
+
   return (
     <div>
       <ExerciseHeader
@@ -111,6 +133,8 @@ export function Exercise({
         isCompleted={isExerciseCompleted}
         handleMarkAsCompleted={handleMarkAsCompleted}
         onPaginationClick={onPaginationClick}
+        handleRemoveExercise={handleRemoveExercise}
+        isRemoving={isRemoving}
       />
       <ExerciseSets
         exercise={exercise}
@@ -130,6 +154,8 @@ function ExerciseHeader({
   isCompleted,
   handleMarkAsCompleted,
   onPaginationClick,
+  handleRemoveExercise,
+  isRemoving,
 }: {
   exercise: WorkoutExercise
   exercises: WorkoutExercise[]
@@ -138,6 +164,8 @@ function ExerciseHeader({
   isCompleted: boolean
   handleMarkAsCompleted: (checked: boolean) => void
   onPaginationClick: (exerciseId: string, type: 'prev' | 'next') => void
+  handleRemoveExercise: () => void
+  isRemoving: boolean
 }) {
   const [activeExerciseId, setActiveExerciseId] = useQueryState('exercise')
 
@@ -148,7 +176,6 @@ function ExerciseHeader({
   const isSuperset =
     exercise.type === GQLExerciseType.Superset_1A ||
     exercise.type === GQLExerciseType.Superset_1B
-
   return (
     <div>
       <ExerciseSelector
@@ -206,6 +233,14 @@ function ExerciseHeader({
           {exercise.instructions && (
             <ExerciseInstructions exercise={exercise} />
           )}
+          {exercise.isExtra && (
+            <Button
+              variant="secondary"
+              iconOnly={<TrashIcon />}
+              loading={isRemoving}
+              onClick={handleRemoveExercise}
+            />
+          )}
           <Button
             variant="secondary"
             iconOnly={
@@ -254,7 +289,9 @@ function ExerciseSelector({
             />
           }
         >
-          {exercise.order}. {exercise.name}
+          <span className="truncate">
+            {exercise.order}. {exercise.name}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-64">
@@ -321,13 +358,31 @@ function ExerciseSets({
   })[]
   isExerciseCompleted: boolean
 }) {
+  const { trainingId } = useParams<{ trainingId: string }>()
+  const invalidateQuery = useInvalidateQuery()
+  const { mutateAsync: addSet, isPending: isAddingSet } =
+    useFitspaceAddSetMutation({
+      onSuccess: () => {
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+        })
+      },
+    })
+  const hasRpe = exercise.sets.some((set) => set.rpe)
+
+  const handleAddSet = async () => {
+    await addSet({
+      exerciseId: exercise.id,
+    })
+  }
+
   return (
     <div className="flex flex-col mt-4 py-4">
       <div className={cn(sharedLayoutStyles, 'text-xs text-muted-foreground')}>
         <div className="min-w-2.5"></div>
         <div className="text-center">Reps</div>
         <div className="text-center">Weight</div>
-        <div className="text-center">
+        <div className={cn('text-center', !hasRpe && 'hidden')}>
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex justify-center gap-1">
@@ -359,6 +414,13 @@ function ExerciseSets({
             isExerciseCompleted={isExerciseCompleted}
           />
         ))}
+        <Button
+          variant="secondary"
+          size="sm"
+          iconOnly={<PlusIcon />}
+          loading={isAddingSet}
+          onClick={handleAddSet}
+        />
       </div>
     </div>
   )
@@ -439,6 +501,19 @@ function ExerciseSet({
     },
   })
 
+  const { mutateAsync: removeSet, isPending: isRemovingSet } =
+    useFitspaceRemoveSetMutation({
+      onSuccess: () => {
+        invalidateQuery({ queryKey: ['FitspaceGetWorkout'] })
+      },
+    })
+
+  const handleRemoveSet = async () => {
+    await removeSet({
+      setId: set.id,
+    })
+  }
+
   useEffect(() => {
     if (set.log && !hasUserEdited.current) {
       setReps(set.log.reps?.toString() ?? '')
@@ -489,74 +564,88 @@ function ExerciseSet({
     }
   }
 
+  const showLabel = set.reps || set.weight || set.rpe
+
   return (
     <AnimateChangeInHeight>
-      <div
-        className={cn(
-          sharedLayoutStyles,
-          'rounded-t-md bg-muted dark:bg-card/50 pb-2 -mb-2',
-        )}
-      >
-        <div className="min-w-2.5"></div>
-        <div className="text-xs text-muted-foreground text-center">
-          {repRange}
+      {showLabel && (
+        <div
+          className={cn(
+            sharedLayoutStyles,
+            'rounded-t-md bg-muted dark:bg-card/50 pb-2 -mb-2',
+          )}
+        >
+          <div className="min-w-2.5"></div>
+          <div className="text-xs text-muted-foreground text-center">
+            {repRange}
+          </div>
+          <div className="text-xs text-muted-foreground text-center">
+            {set.weight}
+          </div>
+          <div />
         </div>
-        <div className="text-xs text-muted-foreground text-center">
-          {set.weight}
-        </div>
-        <div />
-      </div>
+      )}
 
-      <div
-        className={cn(
-          sharedLayoutStyles,
-          'rounded-md border dark:border-0 border-border bg-background dark:bg-card text-primary',
-        )}
-      >
-        <div className="min-w-2.5">{set.order}.</div>
-
-        <Input
-          id={`set-${set.id}-reps`}
-          value={reps}
-          onChange={(e) => handleInputChange(e, 'reps')}
-          variant="ghost"
-          inputMode="decimal"
-        />
-
-        <Input
-          id={`set-${set.id}-weight`}
-          value={weight}
-          onChange={(e) => handleInputChange(e, 'weight')}
-          variant="ghost"
-          inputMode="decimal"
-        />
-
-        <div className="text-sm text-muted-foreground text-center">
-          {set.rpe}
-        </div>
-      </div>
-
-      {isExpanded &&
-        previousLogs.map((exercise) => {
-          const thisSet = exercise.sets[set.order - 1]
-          return (
-            <div
-              key={thisSet.id}
-              className="w-full bg-muted/50 p-2 -mt-2 rounded-b-md grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-3 items-center"
-            >
-              <div className="min-w-2.5 text-xs">
-                Week {exercise.performedOnWeekNumber}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {thisSet.log?.reps || '-'}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {thisSet.log?.weight || '-'}
-              </div>
-              <div className="text-sm text-muted-foreground"></div>
+      <div className="flex items-center gap-1">
+        <div>
+          <div
+            className={cn(
+              sharedLayoutStyles,
+              'rounded-md border dark:border-0 border-border bg-background dark:bg-card text-primary',
+            )}
+          >
+            <div className="min-w-2.5">{set.order}.</div>
+            <Input
+              id={`set-${set.id}-reps`}
+              value={reps}
+              onChange={(e) => handleInputChange(e, 'reps')}
+              variant="ghost"
+              inputMode="decimal"
+            />
+            <Input
+              id={`set-${set.id}-weight`}
+              value={weight}
+              onChange={(e) => handleInputChange(e, 'weight')}
+              variant="ghost"
+              inputMode="decimal"
+            />
+            <div className="text-sm text-muted-foreground text-center">
+              {set.rpe}
             </div>
-          )
-        })}
+          </div>
+          {isExpanded &&
+            previousLogs.map((exercise) => {
+              const thisSet = exercise.sets[set.order - 1]
+              return (
+                <div
+                  key={thisSet.id}
+                  className="w-full bg-muted/50 p-2 -mt-2 rounded-b-md grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-3 items-center"
+                >
+                  <div className="min-w-2.5 text-xs">
+                    Week {exercise.performedOnWeekNumber}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {thisSet.log?.reps || '-'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {thisSet.log?.weight || '-'}
+                  </div>
+                  <div className="text-sm text-muted-foreground"></div>
+                </div>
+              )
+            })}
+        </div>
+        {set.isExtra && (
+          <Button
+            variant="secondary"
+            size="icon-md"
+            iconOnly={<TrashIcon />}
+            loading={isRemovingSet}
+            onClick={handleRemoveSet}
+            className="size-[44px]"
+          />
+        )}
+      </div>
     </AnimateChangeInHeight>
   )
 }

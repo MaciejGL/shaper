@@ -14,18 +14,43 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { useWorkout } from '@/context/workout-context/workout-context'
 import {
   GQLBaseExercise,
   GQLMuscleGroup,
+  useFitspaceAddExerciseToWorkoutMutation,
   useFitspaceGetExercisesQuery,
+  useFitspaceGetWorkoutQuery,
 } from '@/generated/graphql-client'
+import { useInvalidateQuery } from '@/lib/invalidate-query'
 
-export function AddExerciseModal() {
+type AddExerciseModalProps = {
+  handlePaginationClick: (
+    exerciseId: string | null,
+    type: 'prev' | 'next',
+  ) => void
+}
+export function AddExerciseModal({
+  handlePaginationClick,
+}: AddExerciseModalProps) {
+  const invalidateQuery = useInvalidateQuery()
+  const { activeDay, plan } = useWorkout()
   const { data } = useFitspaceGetExercisesQuery()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null)
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>([])
   const [isOpen, setIsOpen] = useState(false)
+  const { mutateAsync: addExercise, isPending: isAdding } =
+    useFitspaceAddExerciseToWorkoutMutation({
+      onSuccess: async (data) => {
+        await invalidateQuery({
+          queryKey: useFitspaceGetWorkoutQuery.getKey({
+            trainingId: plan?.id ?? '',
+          }),
+        })
+        handlePaginationClick(data.addExerciseToWorkout.id, 'prev')
+      },
+    })
 
   const allExercises = useMemo(
     () => [
@@ -58,9 +83,17 @@ export function AddExerciseModal() {
   const ALL_MUSCLE_GROUPS =
     data?.muscleGroupCategories?.flatMap((category) => category.muscles) || []
 
-  const handleAddExercise = () => {
-    // Add your exercise addition logic here
-    console.log('Adding exercise:', selectedExercise)
+  const handleAddExercise = async () => {
+    if (!activeDay?.id || !selectedExercise) {
+      return
+    }
+
+    await addExercise({
+      input: {
+        workoutId: activeDay?.id,
+        exerciseId: selectedExercise,
+      },
+    })
     setSelectedExercise(null)
     setSearchTerm('')
     setSelectedMuscleGroups([])
@@ -100,32 +133,14 @@ export function AddExerciseModal() {
         </DialogHeader>
         <div className="flex gap-6">
           <div className="flex-1">
-            {/* <Tabs className="mt-4" defaultValue="body-map">
-              <TabsList className="w-full">
-                <TabsTrigger value="body-map">Body map</TabsTrigger>
-                <TabsTrigger value="muscle-groups">Muscle groups</TabsTrigger>
-              </TabsList>
-              <TabsContent value="body-map"> */}
             <div className="py-6">
               <EnhancedBodyView
                 selectedMuscleGroups={selectedMuscleGroups}
                 onMuscleGroupClick={handleMuscleGroupToggle}
                 muscleGroups={ALL_MUSCLE_GROUPS}
-                className="sticky top-4"
               />
             </div>
-            {/* </TabsContent>
-              <TabsContent value="muscle-groups">
-                <div className="rounded-lg p-4 shadow-neuromorphic-dark-secondary">
-                  <MuscleGroupFilters
-                    muscleGroups={ALL_MUSCLE_GROUPS}
-                    selectedMuscleGroups={selectedMuscleGroups}
-                    onMuscleGroupToggle={handleMuscleGroupToggle}
-                    onClearAll={clearAllFilters}
-                  />
-                </div>
-              </TabsContent>
-            </Tabs> */}
+
             <ExerciseSearch
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
@@ -140,6 +155,7 @@ export function AddExerciseModal() {
           <Button
             onClick={handleAddExercise}
             disabled={selectedExercise === null}
+            loading={isAdding}
             iconStart={<PlusIcon />}
           >
             Add Exercise

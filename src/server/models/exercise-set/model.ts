@@ -42,6 +42,10 @@ export default class ExerciseSet implements GQLExerciseSet {
     return this.data.rpe
   }
 
+  get isExtra() {
+    return this.data.isExtra
+  }
+
   get exerciseId() {
     return this.data.exerciseId
   }

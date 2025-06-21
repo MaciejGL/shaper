@@ -77,6 +77,10 @@ export default class TrainingExercise implements GQLTrainingExercise {
     return this.data.order
   }
 
+  get isExtra() {
+    return this.data.isExtra
+  }
+
   get dayId() {
     return this.data.dayId
   }

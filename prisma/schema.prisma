@@ -228,6 +228,7 @@ model TrainingExercise {
   order        Int
   completedAt  DateTime?
   type         String? // Enum: SUPERSET, DROPSET, CARDIO,
+  isExtra      Boolean @default(false)
 
   sets                   ExerciseSet[]
   baseId                 String? // 👈 link to the base exercise
@@ -256,6 +257,7 @@ model ExerciseSet {
   maxReps    Int?
   weight     Float?
   rpe        Int?
+  isExtra    Boolean @default(false)
   exerciseId String
   exercise   TrainingExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 

@@ -10,7 +10,7 @@ type TrainingExercise {
   order: Int!
   completedAt: String
   muscleGroups: [MuscleGroup!]!
-
+  isExtra: Boolean!
   sets: [ExerciseSet!]!
   logs: [ExerciseLog!]!
 
@@ -21,4 +21,16 @@ type TrainingExercise {
 
   createdAt: String!
   updatedAt: String!
+}
+
+type Mutation {
+  addExerciseToWorkout(input: AddExerciseToWorkoutInput!): TrainingExercise!
+  removeExerciseFromWorkout(exerciseId: ID!): Boolean!
+  addSet(exerciseId: ID!): ExerciseSet!
+  removeSet(setId: ID!): Boolean!
+}
+
+input AddExerciseToWorkoutInput {
+  workoutId: ID!
+  exerciseId: ID!
 }
