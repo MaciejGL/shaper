@@ -70,7 +70,7 @@ export function Exercises() {
         <div className="flex flex-col py-4 space-y-2 w-full">
           <div className="flex justify-between items-end gap-2">
             <p className="text-sm text-muted-foreground">
-              {formatWorkoutType(activeDay.workoutType)} {activeDay.duration}
+              {formatWorkoutType(activeDay.workoutType)}
             </p>
             <ExercisesCompleted
               completedExercises={completedExercises}

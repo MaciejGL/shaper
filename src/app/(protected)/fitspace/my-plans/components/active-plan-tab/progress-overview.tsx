@@ -73,13 +73,12 @@ function ProgressBar({
   completedWorkoutsDays: number
   totalWorkouts: number
 }) {
+  const progress = Math.round((completedWorkoutsDays / totalWorkouts) * 100)
   return (
     <div>
-      <p className="text-xs text-right text-muted-foreground">
-        {Math.round((completedWorkoutsDays / totalWorkouts) * 100)}%
-      </p>
+      <p className="text-xs text-right text-muted-foreground">{progress}%</p>
 
-      <Progress value={33} className="w-full" />
+      <Progress value={progress} className="w-full" />
     </div>
   )
 }

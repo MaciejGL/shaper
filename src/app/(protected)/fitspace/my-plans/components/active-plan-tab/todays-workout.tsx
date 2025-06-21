@@ -31,13 +31,27 @@ export function TodaysWorkout({
     return null
   }
 
+  const getTitle = () => {
+    if (isNextWorkout) {
+      return "Next's workout"
+    }
+
+    if (todaysWorkout.completedAt) {
+      return 'Completed'
+    }
+
+    if (todaysWorkout.isRestDay) {
+      return 'Rest day'
+    }
+
+    return "Today's workout"
+  }
+
   return (
     <div>
       <div className="flex items-baseline justify-between mb-4">
         <div>
-          <p className="text-lg font-semibold">
-            {isNextWorkout ? "Next's workout" : "Today's workout"}
-          </p>
+          <p className="text-lg font-semibold">{getTitle()}</p>
           {isNextWorkout && todaysWorkout.scheduledAt && (
             <p className="text-sm text-muted-foreground">
               {format(todaysWorkout.scheduledAt, 'EEEE, d. MMMM')}
