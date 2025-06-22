@@ -12,6 +12,20 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: 'portrait',
     categories: ['health', 'fitness', 'workout', 'exercise'],
     icons: [
+      // Regular icons for app launcher (any purpose)
+      {
+        src: '/favicons/android-chrome-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/favicons/android-chrome-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      // Maskable icons for adaptive icons (Android)
       {
         src: '/favicons/android-chrome-192x192.png',
         sizes: '192x192',
