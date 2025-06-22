@@ -126,6 +126,38 @@ query FitspaceGetWorkoutInfo($dayId: ID!) {
   }
 }
 
+mutation FitspaceGetAiExerciseSuggestions($dayId: ID!) {
+  getAiExerciseSuggestions(dayId: $dayId) {
+    exercise {
+      id
+      name
+      description
+      videoUrl
+      equipment
+      isPublic
+      muscleGroups {
+        id
+        alias
+        groupSlug
+      }
+    }
+    sets {
+      reps
+      weight
+      rpe
+    }
+    aiMeta {
+      explanation
+    }
+  }
+}
+
+mutation FitspaceAddAiExerciseToWorkout($input: AddAiExerciseToWorkoutInput!) {
+  addAiExerciseToWorkout(input: $input) {
+    id
+  }
+}
+
 mutation FitspaceMarkSetAsCompleted($setId: ID!, $completed: Boolean!) {
   markSetAsCompleted(setId: $setId, completed: $completed)
 }

@@ -37,7 +37,7 @@ export function AnimateChangeInHeight({
   return (
     <motion.div
       key="item-height-change"
-      className={cn(className, 'overflow-hidden')}
+      className={cn(className, 'overflow-hidden px-1 -mx-1')}
       style={{ height }}
       animate={{ height }}
       transition={

@@ -23,14 +23,44 @@ type TrainingExercise {
   updatedAt: String!
 }
 
+type SuggestedSets {
+  reps: Int
+  weight: Int
+  rpe: Int
+}
+
+type AiMeta {
+  explanation: String!
+}
+
+type AiExerciseSuggestion {
+  exercise: BaseExercise!
+  sets: [SuggestedSets]!
+  aiMeta: AiMeta!
+}
+
 type Mutation {
   addExerciseToWorkout(input: AddExerciseToWorkoutInput!): TrainingExercise!
+  addAiExerciseToWorkout(input: AddAiExerciseToWorkoutInput!): TrainingExercise!
   removeExerciseFromWorkout(exerciseId: ID!): Boolean!
   addSet(exerciseId: ID!): ExerciseSet!
   removeSet(setId: ID!): Boolean!
+  getAiExerciseSuggestions(dayId: ID!): [AiExerciseSuggestion!]!
 }
 
 input AddExerciseToWorkoutInput {
   workoutId: ID!
   exerciseId: ID!
+}
+
+input SuggestedSetsInput {
+  reps: Int!
+  weight: Int
+  rpe: Int
+}
+
+input AddAiExerciseToWorkoutInput {
+  dayId: ID!
+  exerciseId: ID!
+  sets: [SuggestedSetsInput]!
 }

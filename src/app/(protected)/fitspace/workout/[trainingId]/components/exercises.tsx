@@ -10,7 +10,8 @@ import { useWorkout } from '@/context/workout-context/workout-context'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { AddExerciseModal } from './add-exercise-modal'
-import { Exercise } from './exercise'
+import { AiSuggestion } from './ai-suggestion'
+import { Exercise, ExerciseSelector } from './exercise'
 import { ExercisesPagination } from './exercises-pagaination'
 import { RestDay } from './rest-day'
 import { Summary } from './summary'
@@ -88,7 +89,7 @@ export function Exercises() {
       {activeDay.isRestDay ? (
         <RestDay />
       ) : selectedExercise ? (
-        <div className="relative overflow-hidden">
+        <div className="relative">
           <AnimateChangeInHeight
             transition={{
               type: 'tween',
@@ -116,7 +117,7 @@ export function Exercises() {
           )}
         </div>
       ) : (
-        <div className="relative overflow-hidden">
+        <div className="relative">
           <AnimateChangeInHeight
             transition={{
               type: 'tween',
@@ -132,6 +133,10 @@ export function Exercises() {
               mode="wait"
               className="w-full"
             >
+              <ExerciseSelector
+                activeExerciseId={'summary'}
+                setActiveExerciseId={setActiveExerciseId}
+              />
               <Results
                 handlePaginationClick={handlePaginationClick}
                 lastExerciseId={exercises.at(-1)?.id ?? null}
@@ -156,19 +161,21 @@ function Results({
 }) {
   return (
     <div className="flex flex-col h-full">
-      <div>
-        <h2 className="flex items-center gap-2 text-2xl">Workout Summary</h2>
-      </div>
       <div className="flex flex-col gap-2 mt-8 mb-6">
-        <p className="text-md">What's next?</p>
-        <p className="text-sm text-muted-foreground">More in the tank?</p>
-        <AddExerciseModal handlePaginationClick={handlePaginationClick} />
+        <p className="text-sm text-muted-foreground">
+          More in the tank or enough for today?
+        </p>
+
+        <div className="grid grid-cols-2 gap-2 mt-2 mb-6 w-full">
+          <AddExerciseModal handlePaginationClick={handlePaginationClick} />
+          <AiSuggestion />
+        </div>
+        <Summary
+          open={true}
+          onContinue={() => handlePaginationClick(lastExerciseId, 'prev')}
+          continueButtonText="Back"
+        />
       </div>
-      <Summary
-        open={true}
-        onContinue={() => handlePaginationClick(lastExerciseId, 'prev')}
-        continueButtonText="Back"
-      />
     </div>
   )
 }

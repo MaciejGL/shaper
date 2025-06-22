@@ -4,8 +4,10 @@ import {
 } from '@/generated/graphql-server'
 
 import {
+  addAiExerciseToWorkout,
   addExerciseToWorkout,
   addSet,
+  getAiExerciseSuggestions,
   removeExerciseFromWorkout,
   removeSet,
 } from './factory'
@@ -24,5 +26,11 @@ export const Mutation: GQLMutationResolvers = {
   },
   removeSet: async (_, { setId }) => {
     return removeSet(setId)
+  },
+  getAiExerciseSuggestions: async (_, { dayId }, context) => {
+    return getAiExerciseSuggestions(dayId, context)
+  },
+  addAiExerciseToWorkout: async (_, { input }, context) => {
+    return addAiExerciseToWorkout(input, context)
   },
 }

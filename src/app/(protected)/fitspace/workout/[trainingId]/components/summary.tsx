@@ -156,7 +156,7 @@ export function Summary({
         <div className="space-y-8">
           {/* Workout Stats */}
           <div className="flex flex-col gap-4">
-            <h2 className="text-lg font-semibold">Workout Stats</h2>
+            <h2 className="text-lg font-semibold">Stats</h2>
 
             <div className="grid grid-cols-2 gap-4 bg-muted rounded-lg p-4">
               <StatsItem
@@ -228,8 +228,9 @@ export function Summary({
             </Button>
           )}
           <Button
-            onClick={handleCompleteWorkout}
+            variant="default"
             className="flex-1"
+            onClick={handleCompleteWorkout}
             loading={isMarkingWorkoutAsCompleted}
             iconStart={<CheckIcon />}
           >

@@ -1,0 +1,235 @@
+import { AnimatePresence, motion } from 'framer-motion'
+import { Check, PlusIcon, SparklesIcon } from 'lucide-react'
+import { Fragment, useEffect, useState } from 'react'
+
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { VideoPreview } from '@/components/video-preview'
+import { useWorkout } from '@/context/workout-context/workout-context'
+import {
+  useFitspaceAddAiExerciseToWorkoutMutation,
+  useFitspaceGetAiExerciseSuggestionsMutation,
+  useFitspaceGetWorkoutQuery,
+} from '@/generated/graphql-client'
+import { useInvalidateQuery } from '@/lib/invalidate-query'
+
+const AI_LOADING_TEXT = [
+  'Analyzing your workout logs',
+  'Evaluating muscle groups',
+  'Calculating optimal sets and reps',
+  'How was it today?',
+  'Generating recommendations',
+  'Nice workout by the way!',
+  'Finalizing your workout plan',
+  'Get ready for more!',
+]
+
+function useAiLoadingText() {
+  const [index, setIndex] = useState(0)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (index === AI_LOADING_TEXT.length - 1) {
+        // Keep the last item by not incrementing the index
+        setIndex(AI_LOADING_TEXT.length - 1)
+      } else {
+        setIndex((index) => index + 1)
+      }
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [index])
+  return AI_LOADING_TEXT[index]
+}
+
+export function AiSuggestion() {
+  const { activeDay, plan } = useWorkout()
+  const invalidateQueries = useInvalidateQuery()
+  const {
+    mutateAsync: getAiExerciseSuggestions,
+    isPending: isGettingAiExerciseSuggestion,
+    data: aiExerciseSuggestion,
+  } = useFitspaceGetAiExerciseSuggestionsMutation()
+
+  const {
+    mutateAsync: addAiExerciseToWorkout,
+    isPending: isAddingAiExerciseToWorkout,
+  } = useFitspaceAddAiExerciseToWorkoutMutation({
+    onSuccess: async () => {
+      if (!plan?.id) return
+      await invalidateQueries({
+        queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId: plan.id }),
+      })
+    },
+  })
+
+  const aiResults = aiExerciseSuggestion?.getAiExerciseSuggestions
+
+  const handleAddAiExerciseToWorkout = async (exerciseId: string) => {
+    if (!activeDay?.id || !aiResults) return
+    const aiResult = aiResults.find(
+      (result) => result.exercise.id === exerciseId,
+    )
+    if (!aiResult) return
+    await addAiExerciseToWorkout({
+      input: {
+        dayId: activeDay.id,
+        exerciseId: exerciseId,
+        sets: aiResult.sets.map((set) => ({
+          reps: set?.reps ?? 0,
+          weight: set?.weight,
+          rpe: set?.rpe,
+        })),
+      },
+    })
+  }
+
+  return (
+    <>
+      <div className="space-y-2">
+        <Button
+          variant="secondary"
+          iconStart={<SparklesIcon className="text-amber-500" />}
+          loading={isGettingAiExerciseSuggestion}
+          disabled={!activeDay?.id}
+          onClick={() =>
+            activeDay?.id && getAiExerciseSuggestions({ dayId: activeDay.id })
+          }
+          className="grow w-full"
+        >
+          {aiResults?.length ? 'Get new suggestions' : 'Get suggestions'}
+        </Button>
+      </div>
+      <AnimatePresence>
+        {isGettingAiExerciseSuggestion && <AiLoadingText />}
+        {aiResults &&
+          aiResults.map((aiResult) => {
+            const isAdded = activeDay?.exercises.some(
+              (exercise) => exercise.name === aiResult.exercise.name,
+            )
+            return (
+              <motion.div
+                key={aiResult.exercise.id}
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                className="shadow-neuromorphic-dark-secondary p-4 rounded-lg space-y-4 col-span-full"
+              >
+                <div className="flex gap-2 items-center justify-between">
+                  <div className="flex gap-2 items-center">
+                    <SparklesIcon className="size-4 text-amber-500" />
+                    <p className="text-lg font-medium">
+                      {aiResult?.exercise.name}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    {aiResult?.exercise.videoUrl && (
+                      <VideoPreview url={aiResult.exercise.videoUrl} />
+                    )}
+                    {isAdded ? (
+                      <Check className="size-4 text-green-500" />
+                    ) : (
+                      <Button
+                        variant="default"
+                        size="icon-md"
+                        iconOnly={<PlusIcon />}
+                        loading={isAddingAiExerciseToWorkout}
+                        disabled={isAddingAiExerciseToWorkout}
+                        onClick={() =>
+                          handleAddAiExerciseToWorkout(aiResult.exercise.id)
+                        }
+                      >
+                        {isAddingAiExerciseToWorkout
+                          ? 'Adding...'
+                          : 'Add exercise'}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="capitalize">
+                    {aiResult.exercise.equipment?.toLowerCase()}
+                  </Badge>
+                  {aiResult.exercise.muscleGroups.map((group, index) => (
+                    <Badge
+                      variant="secondary"
+                      className="capitalize"
+                      key={`${group.groupSlug}-${index}`}
+                    >
+                      {group.alias}
+                    </Badge>
+                  ))}
+                </div>
+                {!isAdded && (
+                  <div className="grid grid-cols-[40px_80px_80px_80px] gap-2 text-center bg-black/10 -mx-4 p-2">
+                    <p className="text-muted-foreground text-sm">Set</p>
+                    <p className="text-muted-foreground text-sm">Reps</p>
+                    <p className="text-muted-foreground text-sm">Weight</p>
+                    <p className="text-muted-foreground text-sm">RPE</p>
+                    {aiResult.sets.map((set, index) => (
+                      <Fragment
+                        key={`${index}-${set?.reps}-${set?.weight}-${set?.rpe}`}
+                      >
+                        <p>{index + 1}.</p>
+                        <p>{set?.reps}</p>
+                        <p>{set?.weight}</p>
+                        <p>{set?.rpe}</p>
+                      </Fragment>
+                    ))}
+                  </div>
+                )}
+
+                {!isAdded && (
+                  <div className="space-y-2">
+                    <p className="text-sm">Why:</p>
+                    <p className="text-sm text-muted-foreground">
+                      {aiResult.aiMeta.explanation}
+                    </p>
+                  </div>
+                )}
+                {!isAdded && (
+                  <div className="space-y-2">
+                    <p className="text-sm">Description:</p>
+                    <p className="text-sm text-muted-foreground">
+                      {aiResult.exercise.description}
+                    </p>
+                  </div>
+                )}
+              </motion.div>
+            )
+          })}
+      </AnimatePresence>
+    </>
+  )
+}
+
+function AiLoadingText() {
+  const loadingText = useAiLoadingText()
+  const [dots, setDots] = useState('')
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((dots) => (dots.length < 3 ? dots + '.' : ''))
+    }, 300)
+    return () => clearInterval(interval)
+  }, [])
+  return (
+    <motion.p
+      key={loadingText}
+      initial={{ opacity: 0, width: 0 }}
+      animate={{ opacity: 1, width: 'max-content' }}
+      exit={{ opacity: 0, width: 0 }}
+      transition={{ duration: 0.2, ease: 'easeInOut' }}
+      className="text-sm text-muted-foreground animate-pulse overflow-hidden whitespace-nowrap col-span-full"
+    >
+      {loadingText}
+      <motion.span
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2, ease: 'easeInOut' }}
+        className="animate-pulse"
+      >
+        {dots}
+      </motion.span>
+    </motion.p>
+  )
+}

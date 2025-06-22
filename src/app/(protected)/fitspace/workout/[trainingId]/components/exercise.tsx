@@ -119,6 +119,17 @@ export function Exercise({
     await removeExercise({
       exerciseId: exercise.id,
     })
+    const nextExercise = exercises.find((e) => e.order > exercise.order)
+    if (nextExercise) {
+      onPaginationClick(nextExercise.id, 'next')
+    } else {
+      const prevExercise = exercises.find((e) => e.order === exercise.order - 1)
+      if (prevExercise) {
+        onPaginationClick(prevExercise.id, 'prev')
+      } else {
+        onPaginationClick('summary', 'next')
+      }
+    }
   }
 
   return (
@@ -271,12 +282,12 @@ function ExerciseHeader({
   )
 }
 
-function ExerciseSelector({
+export function ExerciseSelector({
   exercise,
   activeExerciseId,
   setActiveExerciseId,
 }: {
-  exercise: WorkoutExercise
+  exercise?: WorkoutExercise
   activeExerciseId?: string | null
   setActiveExerciseId: (exerciseId: string) => void
 }) {
@@ -297,10 +308,14 @@ function ExerciseSelector({
           }
         >
           <div className="flex items-center gap-2">
-            <span className="truncate">
-              {exercise.order}. {exercise.name}{' '}
-            </span>
-            {exercise.completedAt ? (
+            {activeExerciseId === 'summary' ? (
+              <span className="truncate">Summary</span>
+            ) : (
+              <span className="truncate">
+                {exercise?.order}. {exercise?.name}{' '}
+              </span>
+            )}
+            {exercise?.completedAt ? (
               <BadgeCheckIcon className="text-green-500 !size-4" />
             ) : null}
           </div>
@@ -324,7 +339,10 @@ function ExerciseSelector({
             <DropdownMenuSeparator className="last:hidden mx-2" />
           </React.Fragment>
         ))}
-        <DropdownMenuItem onClick={() => setActiveExerciseId('summary')}>
+        <DropdownMenuItem
+          disabled={activeExerciseId === 'summary'}
+          onClick={() => setActiveExerciseId('summary')}
+        >
           <div className="text-sm flex justify-between w-full gap-4">
             Summary
           </div>
@@ -368,33 +386,41 @@ function ExerciseSets({
     })
   }
 
+  const hasExtraSets = exercise.sets.some((set) => set.isExtra)
+
   return (
     <div className="flex flex-col mt-4 py-4">
-      <div className={cn(sharedLayoutStyles, 'text-xs text-muted-foreground')}>
-        <div className="min-w-2.5"></div>
-        <div className="text-center">Reps</div>
-        <div className="text-center">Weight</div>
-        <div className={cn('text-center', !hasRpe && 'hidden')}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <div className="flex justify-center gap-1">
-                RPE <InfoIcon className="size-2.5 text-muted-foreground" />
-              </div>
-            </TooltipTrigger>
-            <TooltipContent className="max-w-xs">
-              Suggested effort level for the set.
-              <br />
-              <br />
-              <strong>RPE (Rate of Perceived Exertion)</strong>: A subjective
-              measure of how hard an exercise feels, typically on a scale from 1
-              (very easy) to 10 (maximum effort).
-              <br />
-              <br />
-              For example, if you can do maximum 10 reps of a weight, your RPE
-              is 10.
-            </TooltipContent>
-          </Tooltip>
+      <div className="flex items-center gap-1">
+        <div
+          className={cn(sharedLayoutStyles, 'text-xs text-muted-foreground')}
+        >
+          <div className="min-w-2.5"></div>
+          <div className="text-center">Reps</div>
+          <div className="text-center">Weight</div>
+          <div className={cn('text-center', !hasRpe && 'hidden')}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex justify-center gap-1">
+                  RPE <InfoIcon className="size-2.5 text-muted-foreground" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs">
+                Suggested effort level for the set.
+                <br />
+                <br />
+                <strong>RPE (Rate of Perceived Exertion)</strong>: A subjective
+                measure of how hard an exercise feels, typically on a scale from
+                1 (very easy) to 10 (maximum effort).
+                <br />
+                <br />
+                For example, if you can do maximum 10 reps of a weight, your RPE
+                is 10.
+              </TooltipContent>
+            </Tooltip>
+          </div>
         </div>
+
+        {hasExtraSets && <div className="w-8 shrink-0" />}
       </div>
       <div className="flex flex-col gap-2">
         {exercise.sets.map((set) => (
@@ -403,6 +429,7 @@ function ExerciseSets({
             set={set}
             previousLogs={previousLogs}
             isExerciseCompleted={isExerciseCompleted}
+            hasExtraSets={hasExtraSets}
           />
         ))}
         <Button
@@ -421,6 +448,7 @@ function ExerciseSets({
 function ExerciseSet({
   set,
   previousLogs,
+  hasExtraSets,
 }: {
   set: WorkoutExercise['sets'][number]
   previousLogs: (WorkoutExercise & {
@@ -428,6 +456,7 @@ function ExerciseSet({
     performedOnDayNumber: number
   })[]
   isExerciseCompleted: boolean
+  hasExtraSets: boolean
 }) {
   const { trainingId } = useParams<{ trainingId: string }>()
   const [reps, setReps] = useState('')
@@ -561,20 +590,23 @@ function ExerciseSet({
   return (
     <AnimateChangeInHeight>
       {showLabel && (
-        <div
-          className={cn(
-            sharedLayoutStyles,
-            'rounded-t-md bg-muted dark:bg-card/50 pb-2 -mb-2',
-          )}
-        >
-          <div className="min-w-2.5"></div>
-          <div className="text-xs text-muted-foreground text-center">
-            {repRange}
+        <div className="flex items-center gap-1">
+          <div
+            className={cn(
+              sharedLayoutStyles,
+              'rounded-t-md bg-muted dark:bg-card/50 pb-2 -mb-2',
+            )}
+          >
+            <div className="min-w-2.5"></div>
+            <div className="text-xs text-muted-foreground text-center">
+              {repRange}
+            </div>
+            <div className="text-xs text-muted-foreground text-center">
+              {set.weight}
+            </div>
+            <div />
           </div>
-          <div className="text-xs text-muted-foreground text-center">
-            {set.weight}
-          </div>
-          <div />
+          {hasExtraSets && <div className="w-8 shrink-0" />}
         </div>
       )}
 
@@ -610,23 +642,27 @@ function ExerciseSet({
             </div>
           </div>
         </div>
-        {set.isExtra && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                iconOnly={<MoreHorizontalIcon />}
-                loading={isRemovingSet}
-                className="self-center"
-              />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={handleRemoveSet}>
-                <TrashIcon /> Remove set
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        {hasExtraSets && !set.isExtra ? (
+          <div className="w-8 shrink-0" />
+        ) : (
+          set.isExtra && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  iconOnly={<MoreHorizontalIcon />}
+                  loading={isRemovingSet}
+                  className="self-center"
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={handleRemoveSet}>
+                  <TrashIcon /> Remove set
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )
         )}
       </div>
     </AnimateChangeInHeight>
@@ -672,7 +708,7 @@ function SupersetsNavigation({
           )}
           onClick={() => onPaginationClick(exercise1A.id, 'prev')}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <div
               className={cn(
                 'text-lg text-muted-foreground w-4 shrink-0',

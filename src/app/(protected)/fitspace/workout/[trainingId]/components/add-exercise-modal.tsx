@@ -1,6 +1,6 @@
 import { AnimatePresence } from 'framer-motion'
 import { uniq } from 'lodash'
-import { Plus, PlusIcon, Search } from 'lucide-react'
+import { PlusIcon, Search } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
 
 import { EnhancedBodyView } from '@/components/human-body/enhanced-body-view'
@@ -161,13 +161,8 @@ export function AddExerciseModal({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogTrigger asChild>
-        <Button
-          variant="secondary"
-          size="lg"
-          iconStart={<Plus />}
-          className="w-full"
-        >
-          Add exercise
+        <Button variant="secondary" iconStart={<Search />} className="grow">
+          Find exercises
         </Button>
       </DialogTrigger>
       <DialogContent dialogTitle="Add Exercise" fullScreen className="px-0">
