@@ -42,8 +42,8 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
               className={cn(
                 'flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-[60px]',
                 isActive
-                  ? 'text-primary bg-secondary shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary'
-                  : 'text-muted-foreground hover:text-foreground',
+                  ? 'border border-border dark:border-none text-primary bg-secondary shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary'
+                  : 'text-muted-foreground hover:text-foreground ',
               )}
             >
               <Icon className="h-5 w-5 mb-1" />

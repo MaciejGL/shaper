@@ -48,7 +48,10 @@ function PlanHeader({
       <div className="mb-2">
         <Link href={`/fitspace/training-preview/${planId}`}>
           <h2
-            className={cn('text-lg mb-1', loading && 'masked-placeholder-text')}
+            className={cn(
+              'text-xl font-medium mb-1',
+              loading && 'masked-placeholder-text',
+            )}
           >
             {title}
           </h2>

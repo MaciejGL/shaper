@@ -1,20 +1,23 @@
 'use client'
 
-import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import * as React from 'react'
 
-import { Button } from '@/components/ui/button'
+import { Switch } from './ui/switch'
 
 export function ModeToggle() {
   const { setTheme, theme } = useTheme()
 
   return (
-    <Button
-      variant="ghost"
-      onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      iconOnly={theme === 'light' ? <Sun /> : <Moon />}
-      size="icon-md"
-    />
+    <div className="flex items-center gap-2">
+      <Switch
+        id="mode"
+        checked={theme === 'dark'}
+        onCheckedChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      />
+      <label className="text-sm" htmlFor="mode">
+        {theme !== 'light' ? 'Dark' : 'Light'}
+      </label>
+    </div>
   )
 }

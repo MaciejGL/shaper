@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 
 const cardVariants = cva(
   cn(
-    'bg-zinc-100 dark:bg-zinc-900 text-card-foreground flex flex-col gap-6 rounded-lg py-4 relative shadow-neuromorphic-light dark:shadow-neuromorphic-dark',
+    'bg-zinc-100 dark:bg-zinc-900 text-card-foreground flex flex-col gap-6 rounded-lg py-4 relative shadow-neuromorphic-light dark:shadow-neuromorphic-dark border border-border dark:border-none',
   ),
   {
     variants: {

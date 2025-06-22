@@ -32,14 +32,11 @@ export const SwapAccountButton = ({
 
   return (
     <Button
-      variant="outline"
-      className="flex flex-row items-center gap-2"
+      variant="default"
       onClick={handleSwap}
+      iconStart={<ArrowRightLeftIcon />}
     >
-      <ArrowRightLeftIcon />
-      <span>
-        {user?.user.role === GQLUserRole.Client ? 'Trainer' : 'Client'}
-      </span>
+      {user?.user.role === GQLUserRole.Client ? 'Trainer' : 'Client'}
     </Button>
   )
 }

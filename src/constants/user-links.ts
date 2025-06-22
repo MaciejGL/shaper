@@ -14,12 +14,22 @@ export const CLIENT_LINKS = {
   dashboard: {
     href: '/fitspace/dashboard',
     label: 'Dashboard',
-    disabled: true,
   },
-  trainings: {
-    href: '/fitspace/trainings',
-    label: 'Trainings',
-    disabled: true,
+  myPlans: {
+    href: '/fitspace/my-plans',
+    label: 'Training Plans',
+  },
+  workout: {
+    href: '/fitspace/workout',
+    label: 'Workout',
+  },
+  progress: {
+    href: '/fitspace/progress',
+    label: 'Progress',
+  },
+  marketplace: {
+    href: '/fitspace/marketplace',
+    label: 'Explore',
   },
   profile: { href: '/fitspace/profile', label: 'Profile', disabled: false },
 }
