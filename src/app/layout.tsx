@@ -50,7 +50,6 @@ export const metadata: Metadata = {
     ],
     apple: '/favicons/apple-touch-icon.png',
   },
-  manifest: '/manifest.json',
   twitter: {
     card: 'summary_large_image',
     title: 'Fitspace',
