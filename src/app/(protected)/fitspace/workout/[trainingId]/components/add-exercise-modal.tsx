@@ -2,6 +2,7 @@ import { AnimatePresence } from 'framer-motion'
 import { uniq } from 'lodash'
 import { PlusIcon, Search } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 import { EnhancedBodyView } from '@/components/human-body/enhanced-body-view'
 import { Button } from '@/components/ui/button'
@@ -17,7 +18,7 @@ import { Input } from '@/components/ui/input'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
   GQLEquipment,
-  useFitspaceAddExerciseToWorkoutMutation,
+  useFitspaceAddExercisesToWorkoutMutation,
   useFitspaceGetExercisesQuery,
   useFitspaceGetWorkoutQuery,
 } from '@/generated/graphql-client'
@@ -40,19 +41,19 @@ export function AddExerciseModal({
   const { activeDay, plan } = useWorkout()
   const { data } = useFitspaceGetExercisesQuery()
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedExercise, setSelectedExercise] = useState<string | null>(null)
+  const [selectedExercises, setSelectedExercises] = useState<string[]>([])
   const [selectedMuscleGroups, setSelectedMuscleGroups] = useState<string[]>([])
   const [selectedEquipment, setSelectedEquipment] = useState<GQLEquipment[]>([])
   const [isOpen, setIsOpen] = useState(false)
-  const { mutateAsync: addExercise, isPending: isAdding } =
-    useFitspaceAddExerciseToWorkoutMutation({
+  const { mutateAsync: addExercises, isPending: isAdding } =
+    useFitspaceAddExercisesToWorkoutMutation({
       onSuccess: async (data) => {
         await invalidateQuery({
           queryKey: useFitspaceGetWorkoutQuery.getKey({
             trainingId: plan?.id ?? '',
           }),
         })
-        handlePaginationClick(data.addExerciseToWorkout.id, 'prev')
+        handlePaginationClick(data.addExercisesToWorkout[0].id, 'prev')
       },
     })
 
@@ -99,17 +100,17 @@ export function AddExerciseModal({
   }
 
   const handleAddExercise = async () => {
-    if (!activeDay?.id || !selectedExercise) {
+    if (!activeDay?.id || !selectedExercises.length) {
       return
     }
 
-    await addExercise({
+    await addExercises({
       input: {
         workoutId: activeDay?.id,
-        exerciseId: selectedExercise,
+        exerciseIds: selectedExercises,
       },
     })
-    setSelectedExercise(null)
+    setSelectedExercises([])
     setSearchTerm('')
     setSelectedMuscleGroups([])
     handleClose(false)
@@ -139,7 +140,7 @@ export function AddExerciseModal({
     setSelectedMuscleGroups([])
     setSearchTerm('')
     setSelectedEquipment([])
-    setSelectedExercise(null)
+    setSelectedExercises([])
   }
 
   const toggleEquipment = (equipment: GQLEquipment) => {
@@ -155,6 +156,25 @@ export function AddExerciseModal({
       prev.includes(muscleGroup)
         ? prev.filter((g) => g !== muscleGroup)
         : [...prev, muscleGroup],
+    )
+  }
+
+  const handleExerciseSelect = (exerciseId: string) => {
+    const isAlreadySelected = selectedExercises.includes(exerciseId)
+    if (isAlreadySelected) {
+      setSelectedExercises((prev) => prev.filter((id) => id !== exerciseId))
+      return
+    }
+
+    if (selectedExercises.length >= 3) {
+      toast.info('You can only add up to 3 exercises at a time')
+      return
+    }
+
+    setSelectedExercises((prev) =>
+      prev.includes(exerciseId)
+        ? prev.filter((id) => id !== exerciseId)
+        : [...prev, exerciseId],
     )
   }
 
@@ -214,8 +234,8 @@ export function AddExerciseModal({
             <div className="mt-2 px-4">
               <p className="text-md font-medium  mb-2">3. Choose an exercise</p>
               <ExercisesList
-                selectedExercise={selectedExercise}
-                onExerciseSelect={setSelectedExercise}
+                selectedExercises={selectedExercises}
+                onExerciseSelect={handleExerciseSelect}
                 filteredExercises={filteredExercises}
               />
             </div>
@@ -224,7 +244,7 @@ export function AddExerciseModal({
         <DialogFooter className="px-4">
           <Button
             onClick={handleAddExercise}
-            disabled={selectedExercise === null}
+            disabled={!selectedExercises.length}
             loading={isAdding}
             iconStart={<PlusIcon />}
           >

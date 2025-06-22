@@ -185,8 +185,8 @@ mutation FitspaceMarkWorkoutAsCompleted($dayId: ID!) {
   markWorkoutAsCompleted(dayId: $dayId)
 }
 
-mutation FitspaceAddExerciseToWorkout($input: AddExerciseToWorkoutInput!) {
-  addExerciseToWorkout(input: $input) {
+mutation FitspaceAddExercisesToWorkout($input: AddExercisesToWorkoutInput!) {
+  addExercisesToWorkout(input: $input) {
     id
   }
 }

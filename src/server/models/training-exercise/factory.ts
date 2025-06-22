@@ -1,4 +1,5 @@
 import { TrainingDay } from '@prisma/client'
+import { GraphQLError } from 'graphql'
 
 import { GQLAddAiExerciseToWorkoutInput } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
@@ -15,19 +16,21 @@ import ExerciseSet from '../exercise-set/model'
 import TrainingExercise from './model'
 import { ExerciseSuggestion } from './types'
 
-export const addExerciseToWorkout = async (
+export const addExercisesToWorkout = async (
   workoutId: string,
-  exerciseId: string,
+  exerciseIds: string[],
   context: GQLContext,
 ) => {
-  const baseExericse = await prisma.baseExercise.findUnique({
+  if (exerciseIds.length > 3) {
+    throw new GraphQLError('You can only add up to 3 exercises at a time')
+  }
+
+  const baseExericse = await prisma.baseExercise.findMany({
     where: {
-      id: exerciseId,
+      id: { in: exerciseIds },
     },
   })
-  if (!baseExericse) {
-    throw new Error('Exercise not found')
-  }
+
   const trainingDay = await prisma.trainingDay.findUnique({
     where: {
       id: workoutId,
@@ -41,25 +44,31 @@ export const addExerciseToWorkout = async (
     throw new Error('Training day not found')
   }
 
-  const trainingExercise = await prisma.trainingExercise.create({
-    data: {
-      baseId: baseExericse.id,
-      dayId: trainingDay.id,
-      name: baseExericse.name,
-      order: trainingDay.exercises.length + 1,
-      instructions: baseExericse.description,
-      additionalInstructions: baseExericse.additionalInstructions,
-      isExtra: true,
-      sets: {
-        create: {
-          order: 1,
+  const trainingExercises = await Promise.all(
+    baseExericse.map(async (ex, index) => {
+      return await prisma.trainingExercise.create({
+        data: {
+          baseId: ex.id,
+          dayId: trainingDay.id,
+          name: ex.name,
+          order: trainingDay.exercises.length + index + 1, // Fix order calculation
+          instructions: ex.description,
+          additionalInstructions: ex.additionalInstructions,
           isExtra: true,
+          sets: {
+            createMany: {
+              data: Array.from({ length: 3 }, (_, setIndex) => ({
+                order: setIndex + 1,
+                isExtra: true,
+              })),
+            },
+          },
         },
-      },
-    },
-  })
+      })
+    }),
+  )
 
-  return new TrainingExercise(trainingExercise, context)
+  return trainingExercises.map((ex) => new TrainingExercise(ex, context))
 }
 
 export const addAiExerciseToWorkout = async (

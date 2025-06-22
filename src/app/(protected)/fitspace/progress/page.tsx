@@ -3,6 +3,7 @@
 import { TrendingUp } from 'lucide-react'
 import { PolarAngleAxis, PolarGrid, Radar, RadarChart } from 'recharts'
 
+import { ButtonLink } from '@/components/ui/button-link'
 import {
   Card,
   CardContent,
@@ -17,6 +18,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
+import { isProd } from '@/lib/get-base-url'
 
 type MuscleGroup = {
   name: string
@@ -49,6 +51,17 @@ const chartConfig = {
 } satisfies ChartConfig
 
 function ChartRadarDefault({ data }: { data: MuscleGroup[] }) {
+  if (isProd) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full mt-16 gap-4 text-center">
+        <h1 className="text-2xl font-bold">Currently not available</h1>
+        <p className="text-sm text-muted-foreground">
+          We are working on this feature and it will be available at some point.
+        </p>
+        <ButtonLink href="/">Go to dashboard</ButtonLink>
+      </div>
+    )
+  }
   return (
     <Card>
       <CardHeader className="items-center pb-4">

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { VideoPreview } from '@/components/video-preview'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
+  GQLFitspaceGetAiExerciseSuggestionsMutation,
   useFitspaceAddAiExerciseToWorkoutMutation,
   useFitspaceGetAiExerciseSuggestionsMutation,
   useFitspaceGetWorkoutQuery,
@@ -101,104 +102,115 @@ export function AiSuggestion() {
       <AnimatePresence>
         {isGettingAiExerciseSuggestion && <AiLoadingText />}
         {aiResults &&
-          aiResults.map((aiResult) => {
-            const isAdded = activeDay?.exercises.some(
-              (exercise) => exercise.name === aiResult.exercise.name,
-            )
-            return (
-              <motion.div
-                key={aiResult.exercise.id}
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ duration: 0.2, ease: 'easeInOut' }}
-                className="shadow-neuromorphic-dark-secondary p-4 rounded-lg space-y-4 col-span-full"
-              >
-                <div className="flex gap-2 items-center justify-between">
-                  <div className="flex gap-2 items-center">
-                    <SparklesIcon className="size-4 text-amber-500" />
-                    <p className="text-lg font-medium">
-                      {aiResult?.exercise.name}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    {aiResult?.exercise.videoUrl && (
-                      <VideoPreview url={aiResult.exercise.videoUrl} />
-                    )}
-                    {isAdded ? (
-                      <Check className="size-4 text-green-500" />
-                    ) : (
-                      <Button
-                        variant="default"
-                        size="icon-md"
-                        iconOnly={<PlusIcon />}
-                        loading={isAddingAiExerciseToWorkout}
-                        disabled={isAddingAiExerciseToWorkout}
-                        onClick={() =>
-                          handleAddAiExerciseToWorkout(aiResult.exercise.id)
-                        }
-                      >
-                        {isAddingAiExerciseToWorkout
-                          ? 'Adding...'
-                          : 'Add exercise'}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge variant="secondary" className="capitalize">
-                    {aiResult.exercise.equipment?.toLowerCase()}
-                  </Badge>
-                  {aiResult.exercise.muscleGroups.map((group, index) => (
-                    <Badge
-                      variant="secondary"
-                      className="capitalize"
-                      key={`${group.groupSlug}-${index}`}
-                    >
-                      {group.alias}
-                    </Badge>
-                  ))}
-                </div>
-                {!isAdded && (
-                  <div className="grid grid-cols-[40px_80px_80px_80px] gap-2 text-center bg-black/10 -mx-4 p-2">
-                    <p className="text-muted-foreground text-sm">Set</p>
-                    <p className="text-muted-foreground text-sm">Reps</p>
-                    <p className="text-muted-foreground text-sm">Weight</p>
-                    <p className="text-muted-foreground text-sm">RPE</p>
-                    {aiResult.sets.map((set, index) => (
-                      <Fragment
-                        key={`${index}-${set?.reps}-${set?.weight}-${set?.rpe}`}
-                      >
-                        <p>{index + 1}.</p>
-                        <p>{set?.reps}</p>
-                        <p>{set?.weight}</p>
-                        <p>{set?.rpe}</p>
-                      </Fragment>
-                    ))}
-                  </div>
-                )}
-
-                {!isAdded && (
-                  <div className="space-y-2">
-                    <p className="text-sm">Why:</p>
-                    <p className="text-sm text-muted-foreground">
-                      {aiResult.aiMeta.explanation}
-                    </p>
-                  </div>
-                )}
-                {!isAdded && (
-                  <div className="space-y-2">
-                    <p className="text-sm">Description:</p>
-                    <p className="text-sm text-muted-foreground">
-                      {aiResult.exercise.description}
-                    </p>
-                  </div>
-                )}
-              </motion.div>
-            )
-          })}
+          aiResults.map((aiResult) => (
+            <AiSuggestionItem
+              key={aiResult.exercise.id}
+              aiResult={aiResult}
+              isLoading={isAddingAiExerciseToWorkout}
+              handleAddAiExerciseToWorkout={handleAddAiExerciseToWorkout}
+            />
+          ))}
       </AnimatePresence>
     </>
+  )
+}
+
+function AiSuggestionItem({
+  aiResult,
+  isLoading,
+  handleAddAiExerciseToWorkout,
+}: {
+  aiResult: GQLFitspaceGetAiExerciseSuggestionsMutation['getAiExerciseSuggestions'][number]
+  isLoading: boolean
+  handleAddAiExerciseToWorkout: (exerciseId: string) => void
+}) {
+  const { activeDay } = useWorkout()
+
+  const isAdded = activeDay?.exercises.some(
+    (exercise) => exercise.name === aiResult.exercise.name,
+  )
+  return (
+    <motion.div
+      key={aiResult.exercise.id}
+      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+      transition={{ duration: 0.2, ease: 'easeInOut' }}
+      className="shadow-neuromorphic-dark-secondary p-4 rounded-lg space-y-4 col-span-full"
+    >
+      <div className="flex gap-2 items-start justify-between">
+        <div className="flex gap-2">
+          <SparklesIcon className="size-4 text-amber-500 shrink-0 mt-1.5" />
+          <p className="text-lg font-medium">{aiResult?.exercise.name}</p>
+        </div>
+        <div className="flex gap-2 items-center">
+          {aiResult?.exercise.videoUrl && (
+            <VideoPreview url={aiResult.exercise.videoUrl} />
+          )}
+          {isAdded ? (
+            <Check className="size-4 text-green-500" />
+          ) : (
+            <Button
+              variant="default"
+              size="icon-md"
+              iconOnly={<PlusIcon />}
+              loading={isLoading}
+              disabled={isLoading}
+              onClick={() => handleAddAiExerciseToWorkout(aiResult.exercise.id)}
+            >
+              Add Exercise
+            </Button>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <Badge variant="secondary" className="capitalize">
+          {aiResult.exercise.equipment?.toLowerCase()}
+        </Badge>
+        {aiResult.exercise.muscleGroups.map((group, index) => (
+          <Badge
+            variant="secondary"
+            className="capitalize"
+            key={`${group.groupSlug}-${index}`}
+          >
+            {group.alias}
+          </Badge>
+        ))}
+      </div>
+      {!isAdded && (
+        <div className="grid grid-cols-[40px_80px_80px_80px] gap-2 text-center bg-black/10 -mx-4 p-2">
+          <p className="text-muted-foreground text-sm">Set</p>
+          <p className="text-muted-foreground text-sm">Reps</p>
+          <p className="text-muted-foreground text-sm">Weight</p>
+          <p className="text-muted-foreground text-sm">RPE</p>
+          {aiResult.sets.map((set, index) => (
+            <Fragment key={`${index}-${set?.reps}-${set?.weight}-${set?.rpe}`}>
+              <p>{index + 1}.</p>
+              <p>{set?.reps}</p>
+              <p>{set?.weight}</p>
+              <p>{set?.rpe}</p>
+            </Fragment>
+          ))}
+        </div>
+      )}
+
+      {!isAdded && (
+        <div className="space-y-2">
+          <p className="text-sm">Why:</p>
+          <p className="text-sm text-muted-foreground">
+            {aiResult.aiMeta.explanation}
+          </p>
+        </div>
+      )}
+      {!isAdded && (
+        <div className="space-y-2">
+          <p className="text-sm">Description:</p>
+          <p className="text-sm text-muted-foreground">
+            {aiResult.exercise.description}
+          </p>
+        </div>
+      )}
+    </motion.div>
   )
 }
 

@@ -32,8 +32,8 @@ export type GQLAddAiExerciseToWorkoutInput = {
   sets: Array<InputMaybe<GQLSuggestedSetsInput>>;
 };
 
-export type GQLAddExerciseToWorkoutInput = {
-  exerciseId: Scalars['ID']['input'];
+export type GQLAddExercisesToWorkoutInput = {
+  exerciseIds: Array<Scalars['ID']['input']>;
   workoutId: Scalars['ID']['input'];
 };
 
@@ -322,7 +322,7 @@ export type GQLMutation = {
   acceptCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   activatePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   addAiExerciseToWorkout: EntireFieldWrapper<GQLTrainingExercise>;
-  addExerciseToWorkout: EntireFieldWrapper<GQLTrainingExercise>;
+  addExercisesToWorkout: EntireFieldWrapper<Array<GQLTrainingExercise>>;
   addSet: EntireFieldWrapper<GQLExerciseSet>;
   assignTrainingPlanToClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   cancelCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
@@ -381,8 +381,8 @@ export type GQLMutationAddAiExerciseToWorkoutArgs = {
 };
 
 
-export type GQLMutationAddExerciseToWorkoutArgs = {
-  input: GQLAddExerciseToWorkoutInput;
+export type GQLMutationAddExercisesToWorkoutArgs = {
+  input: GQLAddExercisesToWorkoutInput;
 };
 
 
@@ -1168,7 +1168,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type GQLResolversTypes = {
   ActivityLevel: GQLActivityLevel;
   AddAiExerciseToWorkoutInput: GQLAddAiExerciseToWorkoutInput;
-  AddExerciseToWorkoutInput: GQLAddExerciseToWorkoutInput;
+  AddExercisesToWorkoutInput: GQLAddExercisesToWorkoutInput;
   AiExerciseSuggestion: ResolverTypeWrapper<GQLAiExerciseSuggestion>;
   AiMeta: ResolverTypeWrapper<GQLAiMeta>;
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
@@ -1246,7 +1246,7 @@ export type GQLResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type GQLResolversParentTypes = {
   AddAiExerciseToWorkoutInput: GQLAddAiExerciseToWorkoutInput;
-  AddExerciseToWorkoutInput: GQLAddExerciseToWorkoutInput;
+  AddExercisesToWorkoutInput: GQLAddExercisesToWorkoutInput;
   AiExerciseSuggestion: GQLAiExerciseSuggestion;
   AiMeta: GQLAiMeta;
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
@@ -1440,7 +1440,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   acceptCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationAcceptCoachingRequestArgs, 'id'>>;
   activatePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationActivatePlanArgs, 'planId' | 'resume' | 'startDate'>>;
   addAiExerciseToWorkout?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationAddAiExerciseToWorkoutArgs, 'input'>>;
-  addExerciseToWorkout?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationAddExerciseToWorkoutArgs, 'input'>>;
+  addExercisesToWorkout?: Resolver<Array<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType, RequireFields<GQLMutationAddExercisesToWorkoutArgs, 'input'>>;
   addSet?: Resolver<GQLResolversTypes['ExerciseSet'], ParentType, ContextType, RequireFields<GQLMutationAddSetArgs, 'exerciseId'>>;
   assignTrainingPlanToClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignTrainingPlanToClientArgs, 'input'>>;
   cancelCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationCancelCoachingRequestArgs, 'id'>>;

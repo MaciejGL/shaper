@@ -6,7 +6,7 @@ import { translateEquipment } from '@/utils/translate-equipment'
 
 export function ExercisesList({
   filteredExercises,
-  selectedExercise,
+  selectedExercises,
   onExerciseSelect,
 }: {
   filteredExercises: (Pick<
@@ -15,8 +15,8 @@ export function ExercisesList({
   > & {
     muscleGroups: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
   })[]
-  selectedExercise: string | null
-  onExerciseSelect: (exerciseId: string | null) => void
+  selectedExercises: string[]
+  onExerciseSelect: (exerciseId: string) => void
 }) {
   return (
     <div className="pb-10">
@@ -26,13 +26,13 @@ export function ExercisesList({
             <div
               key={exercise.id}
               className={`p-3 flex justify-between cursor-pointer hover:bg-accent/50 rounded-md transition-colors ${
-                selectedExercise === exercise.id
+                selectedExercises.includes(exercise.id)
                   ? 'bg-muted/50'
                   : ' bg-muted/50'
               }`}
               onClick={() => {
-                if (selectedExercise === exercise.id) {
-                  onExerciseSelect(null)
+                if (selectedExercises.includes(exercise.id)) {
+                  onExerciseSelect(exercise.id)
                 } else {
                   onExerciseSelect(exercise.id)
                 }
@@ -45,7 +45,7 @@ export function ExercisesList({
                     <Badge size="sm" variant="outline">
                       {exercise.isPublic ? 'Public' : 'Trainer'}
                     </Badge>
-                    {selectedExercise === exercise.id && (
+                    {selectedExercises.includes(exercise.id) && (
                       <div className="flex items-center">
                         <Check className="h-4 w-4 text-green-600" />
                       </div>

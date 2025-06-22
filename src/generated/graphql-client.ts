@@ -30,8 +30,8 @@ export type GQLAddAiExerciseToWorkoutInput = {
   sets: Array<InputMaybe<GQLSuggestedSetsInput>>;
 };
 
-export type GQLAddExerciseToWorkoutInput = {
-  exerciseId: Scalars['ID']['input'];
+export type GQLAddExercisesToWorkoutInput = {
+  exerciseIds: Array<Scalars['ID']['input']>;
   workoutId: Scalars['ID']['input'];
 };
 
@@ -320,7 +320,7 @@ export type GQLMutation = {
   acceptCoachingRequest?: Maybe<GQLCoachingRequest>;
   activatePlan: Scalars['Boolean']['output'];
   addAiExerciseToWorkout: GQLTrainingExercise;
-  addExerciseToWorkout: GQLTrainingExercise;
+  addExercisesToWorkout: Array<GQLTrainingExercise>;
   addSet: GQLExerciseSet;
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
@@ -379,8 +379,8 @@ export type GQLMutationAddAiExerciseToWorkoutArgs = {
 };
 
 
-export type GQLMutationAddExerciseToWorkoutArgs = {
-  input: GQLAddExerciseToWorkoutInput;
+export type GQLMutationAddExercisesToWorkoutArgs = {
+  input: GQLAddExercisesToWorkoutInput;
 };
 
 
@@ -1251,12 +1251,12 @@ export type GQLFitspaceMarkWorkoutAsCompletedMutationVariables = Exact<{
 
 export type GQLFitspaceMarkWorkoutAsCompletedMutation = { __typename?: 'Mutation', markWorkoutAsCompleted?: boolean | undefined | null };
 
-export type GQLFitspaceAddExerciseToWorkoutMutationVariables = Exact<{
-  input: GQLAddExerciseToWorkoutInput;
+export type GQLFitspaceAddExercisesToWorkoutMutationVariables = Exact<{
+  input: GQLAddExercisesToWorkoutInput;
 }>;
 
 
-export type GQLFitspaceAddExerciseToWorkoutMutation = { __typename?: 'Mutation', addExerciseToWorkout: { __typename?: 'TrainingExercise', id: string } };
+export type GQLFitspaceAddExercisesToWorkoutMutation = { __typename?: 'Mutation', addExercisesToWorkout: Array<{ __typename?: 'TrainingExercise', id: string }> };
 
 export type GQLFitspaceRemoveExerciseFromWorkoutMutationVariables = Exact<{
   exerciseId: Scalars['ID']['input'];
@@ -2671,31 +2671,31 @@ useFitspaceMarkWorkoutAsCompletedMutation.getKey = () => ['FitspaceMarkWorkoutAs
 
 useFitspaceMarkWorkoutAsCompletedMutation.fetcher = (variables: GQLFitspaceMarkWorkoutAsCompletedMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceMarkWorkoutAsCompletedMutation, GQLFitspaceMarkWorkoutAsCompletedMutationVariables>(FitspaceMarkWorkoutAsCompletedDocument, variables, options);
 
-export const FitspaceAddExerciseToWorkoutDocument = `
-    mutation FitspaceAddExerciseToWorkout($input: AddExerciseToWorkoutInput!) {
-  addExerciseToWorkout(input: $input) {
+export const FitspaceAddExercisesToWorkoutDocument = `
+    mutation FitspaceAddExercisesToWorkout($input: AddExercisesToWorkoutInput!) {
+  addExercisesToWorkout(input: $input) {
     id
   }
 }
     `;
 
-export const useFitspaceAddExerciseToWorkoutMutation = <
+export const useFitspaceAddExercisesToWorkoutMutation = <
       TError = unknown,
       TContext = unknown
-    >(options?: UseMutationOptions<GQLFitspaceAddExerciseToWorkoutMutation, TError, GQLFitspaceAddExerciseToWorkoutMutationVariables, TContext>) => {
+    >(options?: UseMutationOptions<GQLFitspaceAddExercisesToWorkoutMutation, TError, GQLFitspaceAddExercisesToWorkoutMutationVariables, TContext>) => {
     
-    return useMutation<GQLFitspaceAddExerciseToWorkoutMutation, TError, GQLFitspaceAddExerciseToWorkoutMutationVariables, TContext>(
+    return useMutation<GQLFitspaceAddExercisesToWorkoutMutation, TError, GQLFitspaceAddExercisesToWorkoutMutationVariables, TContext>(
       {
-    mutationKey: ['FitspaceAddExerciseToWorkout'],
-    mutationFn: (variables?: GQLFitspaceAddExerciseToWorkoutMutationVariables) => fetchData<GQLFitspaceAddExerciseToWorkoutMutation, GQLFitspaceAddExerciseToWorkoutMutationVariables>(FitspaceAddExerciseToWorkoutDocument, variables)(),
+    mutationKey: ['FitspaceAddExercisesToWorkout'],
+    mutationFn: (variables?: GQLFitspaceAddExercisesToWorkoutMutationVariables) => fetchData<GQLFitspaceAddExercisesToWorkoutMutation, GQLFitspaceAddExercisesToWorkoutMutationVariables>(FitspaceAddExercisesToWorkoutDocument, variables)(),
     ...options
   }
     )};
 
-useFitspaceAddExerciseToWorkoutMutation.getKey = () => ['FitspaceAddExerciseToWorkout'];
+useFitspaceAddExercisesToWorkoutMutation.getKey = () => ['FitspaceAddExercisesToWorkout'];
 
 
-useFitspaceAddExerciseToWorkoutMutation.fetcher = (variables: GQLFitspaceAddExerciseToWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceAddExerciseToWorkoutMutation, GQLFitspaceAddExerciseToWorkoutMutationVariables>(FitspaceAddExerciseToWorkoutDocument, variables, options);
+useFitspaceAddExercisesToWorkoutMutation.fetcher = (variables: GQLFitspaceAddExercisesToWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceAddExercisesToWorkoutMutation, GQLFitspaceAddExercisesToWorkoutMutationVariables>(FitspaceAddExercisesToWorkoutDocument, variables, options);
 
 export const FitspaceRemoveExerciseFromWorkoutDocument = `
     mutation FitspaceRemoveExerciseFromWorkout($exerciseId: ID!) {

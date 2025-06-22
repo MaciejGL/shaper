@@ -5,7 +5,7 @@ import {
 
 import {
   addAiExerciseToWorkout,
-  addExerciseToWorkout,
+  addExercisesToWorkout,
   addSet,
   getAiExerciseSuggestions,
   removeExerciseFromWorkout,
@@ -18,8 +18,8 @@ export const Mutation: GQLMutationResolvers = {
   getAiExerciseSuggestions: async (_, { dayId }, context) => {
     return getAiExerciseSuggestions(dayId, context)
   },
-  addExerciseToWorkout: async (_, { input }, context) => {
-    return addExerciseToWorkout(input.workoutId, input.exerciseId, context)
+  addExercisesToWorkout: async (_, { input }, context) => {
+    return addExercisesToWorkout(input.workoutId, input.exerciseIds, context)
   },
   removeExerciseFromWorkout: async (_, { exerciseId }) => {
     return removeExerciseFromWorkout(exerciseId)
