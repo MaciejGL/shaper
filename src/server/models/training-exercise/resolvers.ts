@@ -15,6 +15,9 @@ import {
 export const Query: GQLQueryResolvers = {}
 
 export const Mutation: GQLMutationResolvers = {
+  getAiExerciseSuggestions: async (_, { dayId }, context) => {
+    return getAiExerciseSuggestions(dayId, context)
+  },
   addExerciseToWorkout: async (_, { input }, context) => {
     return addExerciseToWorkout(input.workoutId, input.exerciseId, context)
   },
@@ -26,9 +29,6 @@ export const Mutation: GQLMutationResolvers = {
   },
   removeSet: async (_, { setId }) => {
     return removeSet(setId)
-  },
-  getAiExerciseSuggestions: async (_, { dayId }, context) => {
-    return getAiExerciseSuggestions(dayId, context)
   },
   addAiExerciseToWorkout: async (_, { input }, context) => {
     return addAiExerciseToWorkout(input, context)

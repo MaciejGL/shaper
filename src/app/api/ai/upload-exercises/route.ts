@@ -4,7 +4,7 @@ import { tmpdir } from 'os'
 import path from 'path'
 
 import { prisma } from '@/lib/db'
-import { openai } from '@/lib/open-ai'
+import { openai } from '@/lib/open-ai/open-ai'
 
 const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID!
 const VECTOR_STORE_NAME = 'exercise-base' // change if you need more than one
