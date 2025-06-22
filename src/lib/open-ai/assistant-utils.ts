@@ -36,6 +36,12 @@ export async function getLastAssistantMessage(threadId: string) {
  * Parses JSON from assistant response, handling cases where it's wrapped in backticks
  */
 export function parseAssistantJsonResponse(response: string) {
+  try {
+    const json = JSON.parse(response)
+    return json
+  } catch (err) {
+    console.error(err)
+  }
   // In case the Assistant wrapped the JSON in back-ticks, strip them:
   const jsonStart = response.indexOf('[')
   const jsonEnd = response.lastIndexOf(']')

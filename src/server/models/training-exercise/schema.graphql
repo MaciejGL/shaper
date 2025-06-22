@@ -25,7 +25,6 @@ type TrainingExercise {
 
 type SuggestedSets {
   reps: Int
-  weight: Int
   rpe: Int
 }
 
@@ -57,7 +56,6 @@ input AddExercisesToWorkoutInput {
 
 input SuggestedSetsInput {
   reps: Int!
-  weight: Int
   rpe: Int
 }
 

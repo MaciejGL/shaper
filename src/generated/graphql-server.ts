@@ -772,13 +772,11 @@ export type GQLSuggestedSets = {
   __typename?: 'SuggestedSets';
   reps?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   rpe?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
-  weight?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
 };
 
 export type GQLSuggestedSetsInput = {
   reps: Scalars['Int']['input'];
   rpe?: InputMaybe<Scalars['Int']['input']>;
-  weight?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type GQLTrainingDay = {
@@ -1569,7 +1567,6 @@ export type GQLReviewResolvers<ContextType = GQLContext, ParentType extends GQLR
 export type GQLSuggestedSetsResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SuggestedSets'] = GQLResolversParentTypes['SuggestedSets']> = {
   reps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   rpe?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
-  weight?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 

@@ -13,14 +13,14 @@ import {
   useFitspaceGetWorkoutQuery,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
+import { translateEquipment } from '@/utils/translate-equipment'
 
 const AI_LOADING_TEXT = [
-  'Analyzing your workout logs',
-  'Evaluating muscle groups',
-  'Calculating optimal sets and reps',
-  'How was it today?',
-  'Generating recommendations',
-  'Nice workout by the way!',
+  'Looking at your workout logs',
+  'Wooo! You are on fire! 🔥',
+  'Let me match you with the best exercises',
+  'I found some great exercises for you',
+  'Let me calculate the optimal sets and reps',
   'Finalizing your workout plan',
   'Get ready for more!',
 ]
@@ -76,7 +76,6 @@ export function AiSuggestion() {
         exerciseId: exerciseId,
         sets: aiResult.sets.map((set) => ({
           reps: set?.reps ?? 0,
-          weight: set?.weight,
           rpe: set?.rpe,
         })),
       },
@@ -96,7 +95,7 @@ export function AiSuggestion() {
           }
           className="grow w-full"
         >
-          {aiResults?.length ? 'Get new suggestions' : 'Get suggestions'}
+          Get suggestions
         </Button>
       </div>
       <AnimatePresence>
@@ -132,11 +131,11 @@ function AiSuggestionItem({
   return (
     <motion.div
       key={aiResult.exercise.id}
-      initial={{ opacity: 0, y: 10, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
-      className="shadow-neuromorphic-dark-secondary p-4 rounded-lg space-y-4 col-span-full"
+      className="shadow-neuromorphic-dark-secondary p-4 pb-0 rounded-lg space-y-4 col-span-full"
     >
       <div className="flex gap-2 items-start justify-between">
         <div className="flex gap-2">
@@ -164,9 +163,11 @@ function AiSuggestionItem({
         </div>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Badge variant="secondary" className="capitalize">
-          {aiResult.exercise.equipment?.toLowerCase()}
-        </Badge>
+        {aiResult.exercise.equipment && (
+          <Badge variant="secondary" className="capitalize">
+            {translateEquipment(aiResult.exercise.equipment)}
+          </Badge>
+        )}
         {aiResult.exercise.muscleGroups.map((group, index) => (
           <Badge
             variant="secondary"
@@ -178,36 +179,25 @@ function AiSuggestionItem({
         ))}
       </div>
       {!isAdded && (
-        <div className="grid grid-cols-[40px_80px_80px_80px] gap-2 text-center bg-black/10 -mx-4 p-2">
-          <p className="text-muted-foreground text-sm">Set</p>
-          <p className="text-muted-foreground text-sm">Reps</p>
-          <p className="text-muted-foreground text-sm">Weight</p>
-          <p className="text-muted-foreground text-sm">RPE</p>
-          {aiResult.sets.map((set, index) => (
-            <Fragment key={`${index}-${set?.reps}-${set?.weight}-${set?.rpe}`}>
-              <p>{index + 1}.</p>
-              <p>{set?.reps}</p>
-              <p>{set?.weight}</p>
-              <p>{set?.rpe}</p>
-            </Fragment>
-          ))}
-        </div>
-      )}
-
-      {!isAdded && (
         <div className="space-y-2">
-          <p className="text-sm">Why:</p>
           <p className="text-sm text-muted-foreground">
             {aiResult.aiMeta.explanation}
           </p>
         </div>
       )}
+
       {!isAdded && (
-        <div className="space-y-2">
-          <p className="text-sm">Description:</p>
-          <p className="text-sm text-muted-foreground">
-            {aiResult.exercise.description}
-          </p>
+        <div className="grid grid-cols-[50px_80px_80px] gap-2 text-center bg-black/10 -mx-4 p-2">
+          <p className="text-muted-foreground text-sm"></p>
+          <p className="text-muted-foreground text-sm">Reps</p>
+          <p className="text-muted-foreground text-sm">RPE</p>
+          {aiResult.sets.map((set, index) => (
+            <Fragment key={`${index}-${set?.reps}-${set?.rpe}`}>
+              <p className="text-muted-foreground text-sm">Set {index + 1}.</p>
+              <p>{set?.reps}</p>
+              <p>{set?.rpe}</p>
+            </Fragment>
+          ))}
         </div>
       )}
     </motion.div>

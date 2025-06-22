@@ -143,7 +143,6 @@ mutation FitspaceGetAiExerciseSuggestions($dayId: ID!) {
     }
     sets {
       reps
-      weight
       rpe
     }
     aiMeta {

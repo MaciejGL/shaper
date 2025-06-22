@@ -113,7 +113,6 @@ export const addAiExerciseToWorkout = async (
         createMany: {
           data: sets.map((set, index) => ({
             reps: set?.reps,
-            weight: set?.weight,
             rpe: set?.rpe,
             order: index + 1,
             isExtra: true,
@@ -302,34 +301,31 @@ export const getAiExerciseSuggestions = async (
       role: 'user',
       content: `The athlete just completed:
      ${workoutSummary}
-
      - trainerId: ${userTrainerId}
      - Prioritize exercises from file that were created by trainerId: ${userTrainerId}
      - Return *exactly* 3 additional exercise suggestions 
-     - RPE should be highest possible and reasonable for the athlete based on the workout summary
-     - Weight should be highest possible and reasonable(can be calculated based on the workout summary from similar exercises and logged weights per set)
- `,
+     - RPE should be highest possible for the athlete based on the workout logs`,
     },
   ])
 
   /* 4. Get and parse assistant response */
   const assistantReply = await getLastAssistantMessage(thread.id)
-  const suggestions: ExerciseSuggestion[] =
+  const suggestion: { exercises: ExerciseSuggestion[] } =
     parseAssistantJsonResponse(assistantReply)
+  const exercises = suggestion.exercises
 
   /* 5. Hydrate BaseExercise entities */
   const baseExercises = await prisma.baseExercise.findMany({
-    where: { id: { in: suggestions.map((s) => s.id) } },
+    where: { id: { in: exercises.map((s) => s.id) } },
     include: { muscleGroups: { include: { category: true } } },
   })
 
   const results = baseExercises.map((exercise) => {
-    const s = suggestions.find((x) => x.id === exercise.id)!
+    const s = exercises.find((x) => x.id === exercise.id)!
     return {
       exercise: new BaseExercise(exercise, context),
       sets: Array.from({ length: s.sets }).map(() => ({
         reps: s.reps,
-        weight: s.weight,
         rpe: s.rpe,
       })),
       aiMeta: { explanation: s.explanation },

@@ -770,13 +770,11 @@ export type GQLSuggestedSets = {
   __typename?: 'SuggestedSets';
   reps?: Maybe<Scalars['Int']['output']>;
   rpe?: Maybe<Scalars['Int']['output']>;
-  weight?: Maybe<Scalars['Int']['output']>;
 };
 
 export type GQLSuggestedSetsInput = {
   reps: Scalars['Int']['input'];
   rpe?: InputMaybe<Scalars['Int']['input']>;
-  weight?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type GQLTrainingDay = {
@@ -1204,7 +1202,7 @@ export type GQLFitspaceGetAiExerciseSuggestionsMutationVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceGetAiExerciseSuggestionsMutation = { __typename?: 'Mutation', getAiExerciseSuggestions: Array<{ __typename?: 'AiExerciseSuggestion', exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null } | undefined | null>, aiMeta: { __typename?: 'AiMeta', explanation: string } }> };
+export type GQLFitspaceGetAiExerciseSuggestionsMutation = { __typename?: 'Mutation', getAiExerciseSuggestions: Array<{ __typename?: 'AiExerciseSuggestion', exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null>, aiMeta: { __typename?: 'AiMeta', explanation: string } }> };
 
 export type GQLFitspaceAddAiExerciseToWorkoutMutationVariables = Exact<{
   input: GQLAddAiExerciseToWorkoutInput;
@@ -2492,7 +2490,6 @@ export const FitspaceGetAiExerciseSuggestionsDocument = `
     }
     sets {
       reps
-      weight
       rpe
     }
     aiMeta {
