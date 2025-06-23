@@ -255,7 +255,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
           />
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <div className="flex items-center justify-between gap-2 p-1">
+        <div className="flex items-center justify-between gap-2 px-1 py-4">
           <ModeToggle />
           <SwapAccountButton user={user} />
         </div>

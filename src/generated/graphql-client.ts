@@ -338,6 +338,7 @@ export type GQLMutation = {
   deleteReview: Scalars['Boolean']['output'];
   deleteTrainingPlan: Scalars['Boolean']['output'];
   duplicateTrainingPlan: Scalars['ID']['output'];
+  extendPlan: Scalars['Boolean']['output'];
   getAiExerciseSuggestions: Array<GQLAiExerciseSuggestion>;
   logWorkoutProgress: Scalars['ID']['output'];
   logWorkoutSessionEvent: Scalars['ID']['output'];
@@ -352,6 +353,7 @@ export type GQLMutation = {
   removeExerciseFromWorkout: Scalars['Boolean']['output'];
   removeSet: Scalars['Boolean']['output'];
   removeTrainingPlanFromClient: Scalars['Boolean']['output'];
+  removeWeek: Scalars['Boolean']['output'];
   updateExercise: Scalars['Boolean']['output'];
   updateNote: GQLNote;
   updateNotification: GQLNotification;
@@ -470,6 +472,12 @@ export type GQLMutationDuplicateTrainingPlanArgs = {
 };
 
 
+export type GQLMutationExtendPlanArgs = {
+  planId: Scalars['ID']['input'];
+  weeks: Array<Scalars['ID']['input']>;
+};
+
+
 export type GQLMutationGetAiExerciseSuggestionsArgs = {
   dayId: Scalars['ID']['input'];
 };
@@ -542,6 +550,12 @@ export type GQLMutationRemoveSetArgs = {
 export type GQLMutationRemoveTrainingPlanFromClientArgs = {
   clientId: Scalars['ID']['input'];
   planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveWeekArgs = {
+  planId: Scalars['ID']['input'];
+  weekId: Scalars['ID']['input'];
 };
 
 
@@ -857,6 +871,7 @@ export type GQLTrainingWeek = {
   days: Array<GQLTrainingDay>;
   description?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  isExtra: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   scheduledAt?: Maybe<Scalars['String']['output']>;
   trainingPlanId: Scalars['ID']['output'];
@@ -1099,7 +1114,7 @@ export type GQLFitspaceDashboardQuery = { __typename?: 'Query', myTrainer?: { __
 export type GQLFitspaceMyPlansQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLFitspaceMyPlansQuery = { __typename?: 'Query', getMyPlansOverview: { __typename?: 'MyPlansPayload', activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, scheduledAt?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, restSeconds?: number | undefined | null, videoUrl?: string | undefined | null, instructions?: string | undefined | null, name: string, warmupSets?: number | undefined | null, completedAt?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }>, sets: Array<{ __typename?: 'ExerciseSet', id: string }> }> }> }> } | undefined | null, availablePlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }>, completedPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, completedAt?: string | undefined | null, updatedAt: string, userReview?: { __typename?: 'Review', id: string, rating: number, comment?: string | undefined | null, createdAt: string, updatedAt: string } | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }> } };
+export type GQLFitspaceMyPlansQuery = { __typename?: 'Query', getMyPlansOverview: { __typename?: 'MyPlansPayload', activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, scheduledAt?: string | undefined | null, completedAt?: string | undefined | null, isExtra: boolean, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, restSeconds?: number | undefined | null, videoUrl?: string | undefined | null, instructions?: string | undefined | null, name: string, warmupSets?: number | undefined | null, completedAt?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }>, sets: Array<{ __typename?: 'ExerciseSet', id: string }> }> }> }> } | undefined | null, availablePlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }>, completedPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, completedAt?: string | undefined | null, updatedAt: string, userReview?: { __typename?: 'Review', id: string, rating: number, comment?: string | undefined | null, createdAt: string, updatedAt: string } | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }> } };
 
 export type GQLActivatePlanMutationVariables = Exact<{
   planId: Scalars['ID']['input'];
@@ -1151,6 +1166,22 @@ export type GQLDeleteReviewMutationVariables = Exact<{
 
 
 export type GQLDeleteReviewMutation = { __typename?: 'Mutation', deleteReview: boolean };
+
+export type GQLExtendPlanMutationVariables = Exact<{
+  planId: Scalars['ID']['input'];
+  weeks: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type GQLExtendPlanMutation = { __typename?: 'Mutation', extendPlan: boolean };
+
+export type GQLRemoveWeekMutationVariables = Exact<{
+  planId: Scalars['ID']['input'];
+  weekId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveWeekMutation = { __typename?: 'Mutation', removeWeek: boolean };
 
 export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null };
 
@@ -1700,6 +1731,7 @@ export const FitspaceMyPlansDocument = `
         weekNumber
         scheduledAt
         completedAt
+        isExtra
         days {
           id
           dayOfWeek
@@ -1994,6 +2026,54 @@ useDeleteReviewMutation.getKey = () => ['DeleteReview'];
 
 
 useDeleteReviewMutation.fetcher = (variables: GQLDeleteReviewMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteReviewMutation, GQLDeleteReviewMutationVariables>(DeleteReviewDocument, variables, options);
+
+export const ExtendPlanDocument = `
+    mutation ExtendPlan($planId: ID!, $weeks: [ID!]!) {
+  extendPlan(planId: $planId, weeks: $weeks)
+}
+    `;
+
+export const useExtendPlanMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLExtendPlanMutation, TError, GQLExtendPlanMutationVariables, TContext>) => {
+    
+    return useMutation<GQLExtendPlanMutation, TError, GQLExtendPlanMutationVariables, TContext>(
+      {
+    mutationKey: ['ExtendPlan'],
+    mutationFn: (variables?: GQLExtendPlanMutationVariables) => fetchData<GQLExtendPlanMutation, GQLExtendPlanMutationVariables>(ExtendPlanDocument, variables)(),
+    ...options
+  }
+    )};
+
+useExtendPlanMutation.getKey = () => ['ExtendPlan'];
+
+
+useExtendPlanMutation.fetcher = (variables: GQLExtendPlanMutationVariables, options?: RequestInit['headers']) => fetchData<GQLExtendPlanMutation, GQLExtendPlanMutationVariables>(ExtendPlanDocument, variables, options);
+
+export const RemoveWeekDocument = `
+    mutation RemoveWeek($planId: ID!, $weekId: ID!) {
+  removeWeek(planId: $planId, weekId: $weekId)
+}
+    `;
+
+export const useRemoveWeekMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveWeekMutation, TError, GQLRemoveWeekMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveWeekMutation, TError, GQLRemoveWeekMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveWeek'],
+    mutationFn: (variables?: GQLRemoveWeekMutationVariables) => fetchData<GQLRemoveWeekMutation, GQLRemoveWeekMutationVariables>(RemoveWeekDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveWeekMutation.getKey = () => ['RemoveWeek'];
+
+
+useRemoveWeekMutation.fetcher = (variables: GQLRemoveWeekMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveWeekMutation, GQLRemoveWeekMutationVariables>(RemoveWeekDocument, variables, options);
 
 export const ProfileDocument = `
     query Profile {

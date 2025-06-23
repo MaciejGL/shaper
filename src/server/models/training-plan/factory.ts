@@ -1,11 +1,13 @@
 import { prisma } from '@lib/db'
 import { Prisma } from '@prisma/client'
-import { addDays, addWeeks } from 'date-fns'
+import { addDays, addWeeks, differenceInCalendarDays } from 'date-fns'
+import { GraphQLError } from 'graphql'
 
 import {
   GQLMutationActivatePlanArgs,
   GQLMutationClosePlanArgs,
   GQLMutationDeletePlanArgs,
+  GQLMutationExtendPlanArgs,
   GQLMutationPausePlanArgs,
   GQLQueryGetClientActivePlanArgs,
   GQLQueryGetWorkoutArgs,
@@ -743,6 +745,130 @@ export async function deletePlan(
 
   await prisma.trainingPlan.delete({
     where: { id: planId, assignedToId: user.user.id, isTemplate: false },
+  })
+
+  return true
+}
+
+export async function extendPlan(args: GQLMutationExtendPlanArgs) {
+  const { planId, weeks } = args
+
+  const plan = await getFullPlanById(planId)
+  if (!plan) throw new GraphQLError('Training plan not found')
+
+  const toClone = plan.weeks
+    .filter((w) => weeks.includes(w.id))
+    .sort((a, b) => a.weekNumber - b.weekNumber)
+
+  if (toClone.length === 0) throw new GraphQLError('No weeks to extend')
+
+  const maxWeekNumber = Math.max(...plan.weeks.map((w) => w.weekNumber))
+  let nextWeekNumber = maxWeekNumber + 1
+  let nextWeekStart = plan.weeks
+    .sort((a, b) => a.weekNumber - b.weekNumber)
+    .at(-1)?.scheduledAt
+
+  for (const week of toClone) {
+    nextWeekStart = nextWeekStart ? addWeeks(nextWeekStart, 1) : null
+
+    const newWeek = await prisma.trainingWeek.create({
+      data: {
+        planId,
+        name: week.name,
+        description: week.description,
+        weekNumber: nextWeekNumber++,
+        scheduledAt: nextWeekStart,
+        completedAt: null,
+        isExtra: true,
+      },
+    })
+
+    for (const day of week.days) {
+      const offset =
+        week.scheduledAt && day.scheduledAt
+          ? differenceInCalendarDays(day.scheduledAt, week.scheduledAt)
+          : null
+
+      const scheduledAt =
+        offset != null && nextWeekStart ? addDays(nextWeekStart, offset) : null
+
+      const newDay = await prisma.trainingDay.create({
+        data: {
+          weekId: newWeek.id,
+          dayOfWeek: day.dayOfWeek,
+          workoutType: day.workoutType,
+          isRestDay: day.isRestDay,
+          scheduledAt,
+          completedAt: null,
+          isExtra: true,
+        },
+      })
+
+      for (const ex of day.exercises) {
+        const newExercise = await prisma.trainingExercise.create({
+          data: {
+            dayId: newDay.id,
+            name: ex.name,
+            baseId: ex.baseId,
+            restSeconds: ex.restSeconds,
+            order: ex.order,
+            isExtra: true,
+            additionalInstructions: ex.additionalInstructions,
+            completedAt: null,
+            instructions: ex.instructions,
+            tempo: ex.tempo,
+            type: ex.type,
+            warmupSets: ex.warmupSets,
+          },
+        })
+
+        for (const set of ex.sets) {
+          await prisma.exerciseSet.create({
+            data: {
+              exerciseId: newExercise.id,
+              reps: set.reps,
+              weight: set.weight,
+              rpe: set.rpe,
+              order: set.order,
+              isExtra: true,
+              maxReps: set.maxReps,
+              minReps: set.minReps,
+              completedAt: null,
+            },
+          })
+        }
+      }
+    }
+  }
+
+  return true
+}
+
+export async function removeWeek(
+  args: { planId: string; weekId: string },
+  context: GQLContext,
+) {
+  const { planId, weekId } = args
+
+  // Verify the plan exists and get the week to remove
+  const plan = await getFullPlanById(planId)
+  const isOwner =
+    plan?.createdById === context.user?.user.id ||
+    plan?.assignedToId === context.user?.user.id
+  if (!plan || !isOwner)
+    throw new GraphQLError('Training plan not found or unauthorized')
+
+  const weekToRemove = plan.weeks.find((w) => w.id === weekId)
+  if (!weekToRemove) throw new GraphQLError('Week not found')
+
+  // Only allow removal of weeks marked as isExtra for safety
+  if (!weekToRemove.isExtra) {
+    throw new GraphQLError('Only extra weeks can be removed')
+  }
+
+  // Remove the week (this will cascade delete all related entities)
+  await prisma.trainingWeek.delete({
+    where: { id: weekId },
   })
 
   return true

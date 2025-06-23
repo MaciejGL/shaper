@@ -130,11 +130,11 @@ export function AddExerciseModal({
     )
   }
 
-  const equipmentAvailable = useMemo(() => {
-    return uniq(filteredExercises.flatMap((ex) => ex.equipment)).filter(
+  const allEquipment = useMemo(() => {
+    return uniq(allExercises.flatMap((ex) => ex.equipment)).filter(
       Boolean,
     ) as GQLEquipment[]
-  }, [filteredExercises])
+  }, [allExercises])
 
   const clearAllFilters = () => {
     setSelectedMuscleGroups([])
@@ -218,7 +218,7 @@ export function AddExerciseModal({
               <EquipmentFilters
                 selectedEquipment={selectedEquipment}
                 onEquipmentToggle={handleEquipmentToggle}
-                equipment={equipmentAvailable}
+                equipment={allEquipment}
               />
             </div>
 

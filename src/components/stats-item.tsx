@@ -14,7 +14,7 @@ export function StatsItem({
   iconPosition?: 'left' | 'top'
 }) {
   return (
-    <div className="text-center p-3 bg-white dark:bg-background rounded-lg shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary">
+    <div className="text-center p-3 bg-white dark:bg-background rounded-lg shadow-neuro-light dark:shadow-neuro-dark">
       {icon ? (
         <div
           className={cn('flex items-center gap-2', {

@@ -16,7 +16,7 @@ export type TodaysSessionProps = {
 export function TodaysSession({ workout, planId }: TodaysSessionProps) {
   if (!workout || !planId) {
     return (
-      <Card variant="gradient" className="@container/todays-session">
+      <Card className="@container/todays-session">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Calendar className="h-5 w-5" />

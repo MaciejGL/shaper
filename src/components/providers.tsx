@@ -27,9 +27,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           </NavigationProvider>
         </NuqsAdapter>
       </ThemeProvider>
-      {process.env.NEXT_PUBLIC_ENABLE_QUERY_DEVTOOLS === 'true' && (
-        <ReactQueryDevtools />
-      )}
+      {process.env.NEXT_PUBLIC_DEVTOOLS === 'true' && <ReactQueryDevtools />}
       <Toaster />
     </QueryClientProvider>
   )

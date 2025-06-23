@@ -18,7 +18,7 @@ export function PlanDetails({ assignedPlan }: PlanAssignmentProps) {
     : 0
 
   return (
-    <div className="space-y-6 shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary rounded-lg p-4">
+    <div className="space-y-6 shadow-neuro-light dark:shadow-neuro-dark rounded-lg p-4">
       <div className="space-y-2">
         <p className="text-lg font-semibold">{assignedPlan.title}</p>
         <div className="flex flex-wrap gap-2">

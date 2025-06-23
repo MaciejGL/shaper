@@ -286,10 +286,12 @@ export function ExerciseSelector({
   exercise,
   activeExerciseId,
   setActiveExerciseId,
+  className,
 }: {
   exercise?: WorkoutExercise
   activeExerciseId?: string | null
   setActiveExerciseId: (exerciseId: string) => void
+  className?: string
 }) {
   const { activeDay } = useWorkout()
 
@@ -298,7 +300,7 @@ export function ExerciseSelector({
       <DropdownMenuTrigger className="group/dropdown" asChild>
         <Button
           variant="secondary"
-          className="w-full justify-between"
+          className={cn('w-full justify-between', className)}
           iconEnd={
             <ChevronDown
               className={cn(
@@ -307,7 +309,7 @@ export function ExerciseSelector({
             />
           }
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 overflow-hidden">
             {activeExerciseId === 'summary' ? (
               <span className="truncate">Summary</span>
             ) : (
@@ -422,7 +424,7 @@ function ExerciseSets({
 
         {hasExtraSets && <div className="w-8 shrink-0" />}
       </div>
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col">
         {exercise.sets.map((set) => (
           <ExerciseSet
             key={set.id}
@@ -610,12 +612,12 @@ function ExerciseSet({
         </div>
       )}
 
-      <div className="flex items-start gap-1">
+      <div className="flex items-start gap-1 pb-2">
         <div>
           <div
             className={cn(
               sharedLayoutStyles,
-              'rounded-md border dark:border-0 border-border bg-background dark:bg-card text-primary',
+              'rounded-md shadow-neuro-light dark:shadow-neuro-dark bg-background dark:bg-card text-primary',
             )}
           >
             <div className="min-w-2.5">{set.order}.</div>

@@ -85,7 +85,6 @@ function WorkoutDay({
     <div className="w-full space-y-6 mt-6">
       <WorkoutDayHeader day={day} />
       <WorkoutDayExercises day={day} />
-      <WorkoutDaySummary day={day} />
     </div>
   )
 }
@@ -127,7 +126,7 @@ function WorkoutDayExercises({
   return (
     <div className="flex flex-col gap-2">
       <h2 className="text-sm font-medium">Exercises</h2>
-      <div className="space-y-2 bg-muted rounded-lg p-4">
+      <div className="space-y-2 bg-muted/50 rounded-lg p-4  dark:shadow-neuro-dark">
         <div className="space-y-3">
           {day.exercises.map((exercise, index) => (
             <Fragment key={index}>
@@ -158,25 +157,6 @@ function WorkoutDayExercises({
             </Fragment>
           ))}
         </div>
-      </div>
-    </div>
-  )
-}
-
-function WorkoutDaySummary({
-  day,
-}: {
-  day: NonNullable<ActivePlan>['weeks'][number]['days'][number]
-}) {
-  const totalSets = day.exercises.reduce(
-    (sum, exercise) => sum + exercise.sets.length,
-    0,
-  )
-  return (
-    <div className="bg-muted rounded-md p-4">
-      <div className="flex justify-between items-center text-sm">
-        <span className="text-muted-foreground">Total sets:</span>
-        <span className="font-semibold text-foreground">{totalSets}</span>
       </div>
     </div>
   )

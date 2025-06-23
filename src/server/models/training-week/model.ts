@@ -75,6 +75,10 @@ export default class TrainingWeek implements GQLTrainingWeek {
     return this.data.description
   }
 
+  get isExtra() {
+    return this.data.isExtra
+  }
+
   async days() {
     let days = this.data.days
     if (!days || days.length === 0) {

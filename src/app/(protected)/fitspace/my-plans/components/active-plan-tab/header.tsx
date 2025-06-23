@@ -1,7 +1,8 @@
-import { LayoutDashboard, Pause } from 'lucide-react'
+import { LayoutDashboard, Pause, PencilIcon } from 'lucide-react'
 import { X } from 'lucide-react'
 import { MoreHorizontalIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,6 +15,7 @@ import { DropdownMenu } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
 import { ActivePlan, PlanAction } from '../../types'
+import { ManagePlanModal } from '../manage-plan-modal'
 
 export function Header({
   plan,
@@ -49,7 +51,7 @@ function PlanHeader({
         <Link href={`/fitspace/training-preview/${planId}`}>
           <h2
             className={cn(
-              'text-xl font-medium mb-1',
+              'text-2xl font-medium mb-1',
               loading && 'masked-placeholder-text',
             )}
           >
@@ -71,31 +73,43 @@ function PlanActions({
   handlePlanAction: (action: PlanAction, plan: NonNullable<ActivePlan>) => void
   plan: NonNullable<ActivePlan>
 }) {
+  const [extendPlanModalOpen, setExtendPlanModalOpen] = useState(false)
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="secondary"
-          size="icon-lg"
-          iconOnly={<MoreHorizontalIcon />}
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <Link href={`/fitspace/training-preview/${plan.id}`}>
-          <DropdownMenuItem>
-            <LayoutDashboard className="size-4 mr-2" />
-            Plan Overview
+    <div className="flex items-center gap-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="secondary"
+            size="icon-lg"
+            iconOnly={<MoreHorizontalIcon />}
+          />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setExtendPlanModalOpen(true)}>
+            <PencilIcon className="size-4 mr-2" />
+            Edit Plan
           </DropdownMenuItem>
-        </Link>
-        <DropdownMenuItem onClick={() => handlePlanAction('pause', plan)}>
-          <Pause className="size mr-2" />
-          Pause Plan
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handlePlanAction('close', plan)}>
-          <X className="size mr-2" />
-          Close Plan
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+          <Link href={`/fitspace/training-preview/${plan.id}`}>
+            <DropdownMenuItem>
+              <LayoutDashboard className="size-4 mr-2" />
+              Plan Overview
+            </DropdownMenuItem>
+          </Link>
+          <DropdownMenuItem onClick={() => handlePlanAction('pause', plan)}>
+            <Pause className="size mr-2" />
+            Pause Plan
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handlePlanAction('close', plan)}>
+            <X className="size mr-2" />
+            Close Plan
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <ManagePlanModal
+        plan={plan}
+        open={extendPlanModalOpen}
+        setOpen={setExtendPlanModalOpen}
+      />
+    </div>
   )
 }

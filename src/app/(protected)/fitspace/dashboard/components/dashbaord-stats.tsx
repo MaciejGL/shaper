@@ -15,7 +15,7 @@ import Link from 'next/link'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/components/utils'
 import { StatsItem } from '@/components/stats-item'
-import { CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { GQLFitspaceDashboardQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
@@ -61,7 +61,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
 
   return (
     <div className="space-y-6 -mx-2 md:-mx-0">
-      <div className="bg-muted/70 md:rounded-lg py-4">
+      <Card className="md:rounded-lg py-4">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="h-5 w-5" />
@@ -131,7 +131,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                 >
                   <div
                     className={cn(
-                      'rounded-md p-2 shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary aspect-square shrink-0 min-w-[4.5rem]',
+                      'rounded-md p-2 shadow-neuro-light dark:shadow-neuro-dark aspect-square shrink-0 min-w-[4.5rem]',
                       !day.isRestDay && 'bg-primary-foreground',
                       day.isRestDay &&
                         'bg-muted-foreground/10 text-muted-foreground',
@@ -158,7 +158,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
             </div>
           </div>
         </CardContent>
-      </div>
+      </Card>
     </div>
   )
 }

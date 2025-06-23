@@ -66,7 +66,7 @@ function Day({ day }: { day: WorkoutDay }) {
       <button
         data-selected={isSelected}
         className={cn(
-          'size-12 shrink-0 rounded-md flex-center flex-col text-primary transition-all bg-secondary dark:bg-secondary dark:text-primary cursor-pointer hover:bg-secondary/80 shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary',
+          'size-12 shrink-0 rounded-md flex-center flex-col text-primary transition-all bg-secondary dark:bg-secondary dark:text-primary cursor-pointer hover:bg-secondary/80 shadow-neuro-light dark:shadow-neuro-dark',
           'data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground dark:data-[selected=true]:bg-primary dark:data-[selected=true]:text-primary-foreground',
         )}
         onClick={handleClick}
@@ -151,7 +151,7 @@ function WeekSelector() {
         iconOnly={<ChevronLeft />}
         disabled={!hasPrevWeek}
         size="icon-sm"
-        variant="outline"
+        variant="secondary"
         onClick={() => handleWeekChange('prev')}
       />
       <Select
@@ -190,7 +190,7 @@ function WeekSelector() {
       <Button
         iconOnly={<ChevronRight />}
         size="icon-sm"
-        variant="outline"
+        variant="secondary"
         onClick={() => handleWeekChange('next')}
         disabled={!hasNextWeek}
       />

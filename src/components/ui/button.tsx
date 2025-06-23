@@ -11,7 +11,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: cn(
-          'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+          'bg-primary text-primary-foreground hover:bg-primary/90 shadow-neuro-light dark:shadow-neuro-dark',
         ),
         destructive: cn(
           'hover:bg-accent text-destructive/75 hover:text-destructive',
@@ -19,7 +19,7 @@ const buttonVariants = cva(
         outline:
           'border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
         secondary:
-          'bg-secondary hover:bg-muted/40 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary',
+          'bg-secondary hover:bg-muted/40 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 shadow-neuro-light dark:shadow-neuro-dark',
         ghost:
           'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
         link: 'text-primary underline-offset-4 hover:underline',

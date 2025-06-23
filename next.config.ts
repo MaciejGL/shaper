@@ -49,6 +49,12 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  devIndicators:
+    process.env.NEXT_PUBLIC_DEVTOOLS === 'true'
+      ? {
+          position: 'top-left',
+        }
+      : false,
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(graphql|gql)$/,

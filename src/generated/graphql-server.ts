@@ -340,6 +340,7 @@ export type GQLMutation = {
   deleteReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   duplicateTrainingPlan: EntireFieldWrapper<Scalars['ID']['output']>;
+  extendPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   getAiExerciseSuggestions: EntireFieldWrapper<Array<GQLAiExerciseSuggestion>>;
   logWorkoutProgress: EntireFieldWrapper<Scalars['ID']['output']>;
   logWorkoutSessionEvent: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -354,6 +355,7 @@ export type GQLMutation = {
   removeExerciseFromWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeSet: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeTrainingPlanFromClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  removeWeek: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateNote: EntireFieldWrapper<GQLNote>;
   updateNotification: EntireFieldWrapper<GQLNotification>;
@@ -472,6 +474,12 @@ export type GQLMutationDuplicateTrainingPlanArgs = {
 };
 
 
+export type GQLMutationExtendPlanArgs = {
+  planId: Scalars['ID']['input'];
+  weeks: Array<Scalars['ID']['input']>;
+};
+
+
 export type GQLMutationGetAiExerciseSuggestionsArgs = {
   dayId: Scalars['ID']['input'];
 };
@@ -544,6 +552,12 @@ export type GQLMutationRemoveSetArgs = {
 export type GQLMutationRemoveTrainingPlanFromClientArgs = {
   clientId: Scalars['ID']['input'];
   planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveWeekArgs = {
+  planId: Scalars['ID']['input'];
+  weekId: Scalars['ID']['input'];
 };
 
 
@@ -859,6 +873,7 @@ export type GQLTrainingWeek = {
   days: EntireFieldWrapper<Array<GQLTrainingDay>>;
   description?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
+  isExtra: EntireFieldWrapper<Scalars['Boolean']['output']>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
   scheduledAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainingPlanId: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -1456,6 +1471,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   deleteReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteReviewArgs, 'input'>>;
   deleteTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteTrainingPlanArgs, 'id'>>;
   duplicateTrainingPlan?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingPlanArgs, 'id'>>;
+  extendPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationExtendPlanArgs, 'planId' | 'weeks'>>;
   getAiExerciseSuggestions?: Resolver<Array<GQLResolversTypes['AiExerciseSuggestion']>, ParentType, ContextType, RequireFields<GQLMutationGetAiExerciseSuggestionsArgs, 'dayId'>>;
   logWorkoutProgress?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutProgressArgs, 'dayId' | 'tick'>>;
   logWorkoutSessionEvent?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutSessionEventArgs, 'dayId' | 'event'>>;
@@ -1470,6 +1486,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   removeExerciseFromWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveExerciseFromWorkoutArgs, 'exerciseId'>>;
   removeSet?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveSetArgs, 'setId'>>;
   removeTrainingPlanFromClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingPlanFromClientArgs, 'clientId' | 'planId'>>;
+  removeWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveWeekArgs, 'planId' | 'weekId'>>;
   updateExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseArgs, 'id' | 'input'>>;
   updateNote?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationUpdateNoteArgs, 'input'>>;
   updateNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationUpdateNotificationArgs, 'input'>>;
@@ -1649,6 +1666,7 @@ export type GQLTrainingWeekResolvers<ContextType = GQLContext, ParentType extend
   days?: Resolver<Array<GQLResolversTypes['TrainingDay']>, ParentType, ContextType>;
   description?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  isExtra?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   scheduledAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainingPlanId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;

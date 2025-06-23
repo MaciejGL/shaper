@@ -111,7 +111,7 @@ export function ClientNotes({ clientId }: { clientId: string }) {
   }
 
   return (
-    <div className="shadow-neuromorphic-light dark:shadow-neuromorphic-dark-secondary rounded-lg p-4">
+    <div className="shadow-neuro-light dark:shadow-neuro-dark rounded-lg p-4">
       <div>
         <div className="flex justify-between mb-2">
           <CardTitle className="text-2xl font-semibold">Notes</CardTitle>

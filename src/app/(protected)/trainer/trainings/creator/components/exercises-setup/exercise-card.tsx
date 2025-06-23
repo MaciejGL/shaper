@@ -83,7 +83,7 @@ export function ExerciseCard({
                 })
               }
             >
-              <SelectTrigger size="xs">
+              <SelectTrigger size="sm">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
@@ -102,7 +102,7 @@ export function ExerciseCard({
               id="restSeconds"
               label="Rest (s)"
               type="number"
-              size="sm"
+              size="md"
               value={exercise.restSeconds ?? ''}
               min="0"
               step="15"
@@ -122,7 +122,7 @@ export function ExerciseCard({
             <Input
               id="warmup"
               label="Warmup sets"
-              size="sm"
+              size="md"
               type="number"
               min="0"
               step="1"
@@ -143,7 +143,7 @@ export function ExerciseCard({
             <Input
               id="tempo"
               label="Tempo"
-              size="sm"
+              size="md"
               pattern="[0-9]*"
               placeholder="3-2-3"
               value={exercise.tempo ?? ''}

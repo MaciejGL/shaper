@@ -76,7 +76,7 @@ function Dots({
       {/* Sliding indicator */}
       <motion.div
         key={'indicator'}
-        className="absolute w-2 h-2 rounded-full bg-primary left-0 top-1/2 -translate-y-1/2"
+        className="absolute w-2 h-2 rounded-full bg-primary left-0 top-1/2 -translate-y-1/2 shadow-neuro-light dark:shadow-neuro-dark"
         initial={false}
         animate={{
           x: `${currentExerciseIndex * (8 + 4)}px`, // 8px (w-2) + 4px (gap-1)
@@ -98,5 +98,7 @@ function Dots({
 }
 
 function Dot() {
-  return <div className="w-2 h-2 rounded-full bg-accent" />
+  return (
+    <div className="w-2 h-2 rounded-full bg-primary/5 dark:bg-primary/30 shadow-neuro-inset-light dark:shadow-neuro-inset-dark" />
+  )
 }

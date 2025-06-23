@@ -13,6 +13,7 @@ import {
   useFitspaceGetWorkoutQuery,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
+import { cn } from '@/lib/utils'
 import { translateEquipment } from '@/utils/translate-equipment'
 
 const AI_LOADING_TEXT = [
@@ -42,45 +43,14 @@ function useAiLoadingText() {
 }
 
 export function AiSuggestion() {
-  const { activeDay, plan } = useWorkout()
-  const invalidateQueries = useInvalidateQuery()
+  const { activeDay } = useWorkout()
   const {
     mutateAsync: getAiExerciseSuggestions,
     isPending: isGettingAiExerciseSuggestion,
     data: aiExerciseSuggestion,
   } = useFitspaceGetAiExerciseSuggestionsMutation()
 
-  const {
-    mutateAsync: addAiExerciseToWorkout,
-    isPending: isAddingAiExerciseToWorkout,
-  } = useFitspaceAddAiExerciseToWorkoutMutation({
-    onSuccess: async () => {
-      if (!plan?.id) return
-      await invalidateQueries({
-        queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId: plan.id }),
-      })
-    },
-  })
-
   const aiResults = aiExerciseSuggestion?.getAiExerciseSuggestions
-
-  const handleAddAiExerciseToWorkout = async (exerciseId: string) => {
-    if (!activeDay?.id || !aiResults) return
-    const aiResult = aiResults.find(
-      (result) => result.exercise.id === exerciseId,
-    )
-    if (!aiResult) return
-    await addAiExerciseToWorkout({
-      input: {
-        dayId: activeDay.id,
-        exerciseId: exerciseId,
-        sets: aiResult.sets.map((set) => ({
-          reps: set?.reps ?? 0,
-          rpe: set?.rpe,
-        })),
-      },
-    })
-  }
 
   return (
     <>
@@ -102,12 +72,7 @@ export function AiSuggestion() {
         {isGettingAiExerciseSuggestion && <AiLoadingText />}
         {aiResults &&
           aiResults.map((aiResult) => (
-            <AiSuggestionItem
-              key={aiResult.exercise.id}
-              aiResult={aiResult}
-              isLoading={isAddingAiExerciseToWorkout}
-              handleAddAiExerciseToWorkout={handleAddAiExerciseToWorkout}
-            />
+            <AiSuggestionItem key={aiResult.exercise.id} aiResult={aiResult} />
           ))}
       </AnimatePresence>
     </>
@@ -116,14 +81,37 @@ export function AiSuggestion() {
 
 function AiSuggestionItem({
   aiResult,
-  isLoading,
-  handleAddAiExerciseToWorkout,
 }: {
   aiResult: GQLFitspaceGetAiExerciseSuggestionsMutation['getAiExerciseSuggestions'][number]
-  isLoading: boolean
-  handleAddAiExerciseToWorkout: (exerciseId: string) => void
 }) {
+  const invalidateQueries = useInvalidateQuery()
+  const { plan } = useWorkout()
+
   const { activeDay } = useWorkout()
+  const { mutateAsync: addAiExerciseToWorkout, isPending: isLoading } =
+    useFitspaceAddAiExerciseToWorkoutMutation({
+      onSuccess: async () => {
+        if (!plan?.id) return
+        await invalidateQueries({
+          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId: plan.id }),
+        })
+      },
+    })
+
+  const handleAddAiExerciseToWorkout = async (exerciseId: string) => {
+    if (!activeDay?.id || !aiResult) return
+
+    await addAiExerciseToWorkout({
+      input: {
+        dayId: activeDay.id,
+        exerciseId: exerciseId,
+        sets: aiResult.sets.map((set) => ({
+          reps: set?.reps ?? 0,
+          rpe: set?.rpe,
+        })),
+      },
+    })
+  }
 
   const isAdded = activeDay?.exercises.some(
     (exercise) => exercise.name === aiResult.exercise.name,
@@ -135,7 +123,10 @@ function AiSuggestionItem({
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
-      className="shadow-neuromorphic-dark-secondary p-4 pb-0 rounded-lg space-y-4 col-span-full"
+      className={cn(
+        'shadow-neuro-dark p-4 pb-0 rounded-lg space-y-4 col-span-full',
+        isAdded && 'pb-4',
+      )}
     >
       <div className="flex gap-2 items-start justify-between">
         <div className="flex gap-2">

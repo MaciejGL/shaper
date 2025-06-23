@@ -1,10 +1,11 @@
-import { BadgeCheckIcon } from 'lucide-react'
+import { BadgeCheckIcon, ChevronLeft } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import React, { startTransition, useEffect, useState } from 'react'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
@@ -68,9 +69,9 @@ export function Exercises() {
   return (
     <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
       {!activeDay.isRestDay && (
-        <div className="flex flex-col py-4 space-y-2 w-full">
+        <div className="flex flex-col py-2 space-y-2 w-full">
           <div className="flex justify-between items-end gap-2">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-md text-muted-foreground">
               {formatWorkoutType(activeDay.workoutType)}
             </p>
             <ExercisesCompleted
@@ -78,11 +79,7 @@ export function Exercises() {
               totalExercises={exercises.length}
             />
           </div>
-          {exercises.length > 0 && (
-            <div className="flex items-center flex-wrap gap-2 w-full">
-              <Progress value={progressPercentage} className="" />
-            </div>
-          )}
+          {exercises.length > 0 && <Progress value={progressPercentage} />}
         </div>
       )}
 
@@ -133,10 +130,23 @@ export function Exercises() {
               mode="wait"
               className="w-full"
             >
-              <ExerciseSelector
-                activeExerciseId={'summary'}
-                setActiveExerciseId={setActiveExerciseId}
-              />
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  iconStart={<ChevronLeft />}
+                  className="w-max"
+                  onClick={() => {
+                    handlePaginationClick(exercises.at(-1)?.id ?? null, 'prev')
+                  }}
+                >
+                  Exercises
+                </Button>
+                <ExerciseSelector
+                  activeExerciseId={'summary'}
+                  setActiveExerciseId={setActiveExerciseId}
+                  className="w-auto grow"
+                />
+              </div>
               <Results
                 handlePaginationClick={handlePaginationClick}
                 lastExerciseId={exercises.at(-1)?.id ?? null}
@@ -160,7 +170,7 @@ function Results({
   lastExerciseId: string | null
 }) {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full pt-4">
       <div className="flex flex-col gap-2 mt-8 mb-6">
         <p className="text-sm text-muted-foreground">
           More in the tank or enough for today?
