@@ -216,21 +216,21 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
           </div>
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <NavLink
             href={CLIENT_LINKS.dashboard.href}
             icon={<LayoutDashboardIcon className="size-4" />}
             label={CLIENT_LINKS.dashboard.label}
           />
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <NavLink
             href={CLIENT_LINKS.myPlans.href}
             icon={<LayoutListIcon className="size-4" />}
             label={CLIENT_LINKS.myPlans.label}
           />
         </DropdownMenuItem>
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <NavLink
             href={CLIENT_LINKS.workout.href}
             icon={<NotebookTextIcon className="size-4" />}
@@ -238,7 +238,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
           />
         </DropdownMenuItem>
 
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <NavLink
             href={CLIENT_LINKS.profile.href}
             icon={<UserRoundCogIcon className="size-4" />}
@@ -246,7 +246,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
           />
         </DropdownMenuItem>
 
-        <DropdownMenuItem>
+        <DropdownMenuItem asChild>
           <NavLink
             href="#"
             onClick={() => signOut()}
@@ -255,7 +255,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
           />
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <div className="flex items-center justify-between gap-2 px-1 py-4">
+        <div className="flex flex-col gap-2 px-4 py-4">
           <ModeToggle />
           <SwapAccountButton user={user} />
         </div>

@@ -36,7 +36,9 @@ export const ExercisesSetup = memo(function ExercisesSetup() {
   const weeks = formData.weeks
 
   const currentDay = useMemo(() => {
-    return weeks[activeWeek].days.find((day) => day.dayOfWeek === activeDay)
+    return weeks[activeWeek].days.find(
+      (day) => day.dayOfWeek === activeDay && !day.isRestDay,
+    )
   }, [weeks, activeWeek, activeDay])
 
   const {
@@ -50,7 +52,7 @@ export const ExercisesSetup = memo(function ExercisesSetup() {
 
   return (
     <div className="space-y-6">
-      {currentDay && !currentDay.isRestDay ? (
+      {currentDay && (
         <div className="space-y-4">
           <ExerciseListHeader
             activeWeek={activeWeek}
@@ -58,24 +60,19 @@ export const ExercisesSetup = memo(function ExercisesSetup() {
             setExerciseFormOpen={setExerciseFormOpen}
           />
 
-          {currentDay.exercises.length > 0 ? (
-            <ExerciseList
-              exercises={currentDay.exercises}
-              onEdit={handleEditExercise}
-            />
-          ) : (
-            <EmptyState setExerciseFormOpen={setExerciseFormOpen} />
-          )}
-        </div>
-      ) : (
-        <div className="text-center p-8 border rounded-lg">
-          <div className="text-muted-foreground">
-            {currentDay?.isRestDay
-              ? `${dayNames[currentDay.dayOfWeek]} is a rest day`
-              : 'Please select a training day'}
+          <div>
+            {currentDay.exercises.length > 0 ? (
+              <ExerciseList
+                exercises={currentDay.exercises}
+                onEdit={handleEditExercise}
+              />
+            ) : (
+              <EmptyState setExerciseFormOpen={setExerciseFormOpen} />
+            )}
           </div>
         </div>
       )}
+
       <ExerciseForm
         isOpen={exerciseFormOpen}
         onOpenChange={handleCloseExerciseForm}

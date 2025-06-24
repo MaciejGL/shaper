@@ -59,7 +59,7 @@ function PlanHeader({
     <div className="space-y-2">
       <h2 className="text-2xl font-bold">{title}</h2>
       <div className="flex gap-2">
-        {isDraft && <Badge variant="outline">Draft</Badge>}
+        {isDraft && <Badge variant="primary">Draft</Badge>}
         {isPublic && <Badge>Public</Badge>}
       </div>
       {description && <p className="text-muted-foreground">{description}</p>}
@@ -82,26 +82,26 @@ function ExerciseDetails({ exercise, index }: ExerciseDetailsProps) {
           {index + 1}. {name}
         </div>
         <div className="text-sm text-muted-foreground flex gap-2">
-          <Badge variant="outline">
+          <Badge variant="secondary">
             <ClockIcon className="size-3" />
             {restSeconds && `${restSeconds}s rest`}
           </Badge>
           {tempo && (
-            <Badge variant="outline">
+            <Badge variant="secondary">
               <GaugeIcon className="size-3" />
               {`Tempo: ${tempo}`}
             </Badge>
           )}
           {instructions && (
             <Button
-              variant="outline"
+              variant="secondary"
               iconOnly={<TextIcon />}
               onClick={() => setShowInstructions(!showInstructions)}
             >
               Instructions
             </Button>
           )}
-          {videoUrl && <VideoPreview url={videoUrl} variant="outline" />}
+          {videoUrl && <VideoPreview url={videoUrl} variant="secondary" />}
         </div>
       </div>
       <div className="mt-2 overflow-x-auto">
@@ -161,13 +161,17 @@ function WeekDetails({ week }: WeekDetailsProps) {
   ).length
 
   return (
-    <AccordionItem key={week.weekNumber} value={week.weekNumber.toString()}>
+    <AccordionItem
+      key={week.weekNumber}
+      value={week.weekNumber.toString()}
+      className=""
+    >
       <AccordionTrigger>
         <div className="flex justify-between w-full pr-4">
           <span>{week.name}</span>
           <div className="flex gap-2">
             {workingDaysWithoutExercises > 0 ? (
-              <span className="text-sm text-red-800">
+              <span className="text-sm text-amber-600">
                 {workingDaysWithoutExercises} empty day
                 {workingDaysWithoutExercises > 1 ? 's' : ''}
               </span>
@@ -182,7 +186,7 @@ function WeekDetails({ week }: WeekDetailsProps) {
         {week.description && (
           <p className="text-muted-foreground mb-4">{week.description}</p>
         )}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 p-[2px]">
           {week.days.map((day) => (
             <DayDetails key={day.dayOfWeek} day={day} />
           ))}
@@ -198,13 +202,18 @@ type DayDetailsProps = {
 
 function DayDetails({ day }: DayDetailsProps) {
   return (
-    <div className={cn('border rounded-md p-4', day.isRestDay && 'opacity-50')}>
+    <div
+      className={cn(
+        'rounded-md p-4 bg-card dark:bg-card/40 shadow-neuro-light dark:shadow-neuro-dark',
+        day.isRestDay && 'opacity-50',
+      )}
+    >
       <div className="flex justify-between items-center mb-2">
         <h4 className="font-medium">{dayNames[day.dayOfWeek]}</h4>
         {day.isRestDay ? (
-          <Badge variant="outline">Rest Day</Badge>
+          <Badge variant="secondary">Rest Day</Badge>
         ) : (
-          <Badge>{day.workoutType || 'Workout'}</Badge>
+          <Badge variant="secondary">{day.workoutType || 'Workout'}</Badge>
         )}
       </div>
 
@@ -219,7 +228,7 @@ function DayDetails({ day }: DayDetailsProps) {
               />
             ))
           ) : (
-            <div className="text-sm text-red-800 pl-4 border-l-2 border-red-800">
+            <div className="text-sm text-amber-600 pl-4 border-l-2 border-amber-600">
               No exercises added
             </div>
           )}

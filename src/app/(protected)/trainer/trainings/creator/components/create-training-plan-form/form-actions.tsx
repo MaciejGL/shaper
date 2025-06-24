@@ -81,7 +81,7 @@ export function FormActions({
           </DropdownMenuContent>
         </DropdownMenu>
         <Button
-          variant="outline"
+          variant="default"
           onClick={onSubmit}
           iconStart={<Save />}
           loading={isPending || isUpdating}
