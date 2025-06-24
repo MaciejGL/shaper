@@ -8,7 +8,7 @@ const SESSION_EXPIRATION_TIME = 1000 * 60 * 10 // 10 minutes
 
 export async function POST(req: Request) {
   const { email } = await req.json()
-  const otp = randomInt(100000, 999999).toString()
+  const otp = randomInt(1000, 10000).toString()
   const expiresAt = new Date(Date.now() + SESSION_EXPIRATION_TIME)
 
   let user = await prisma.user.findUnique({

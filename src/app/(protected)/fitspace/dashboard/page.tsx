@@ -35,7 +35,7 @@ export default async function DashboardPage() {
         icon={<LayoutDashboard />}
         description={`Good ${getCurrentPartOfDay()}${user.user.profile?.firstName ? `, ${user.user.profile?.firstName}` : ''}!`}
       />
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
         <TodaysSession
           workout={currentDay}
           planId={data?.getWorkout?.plan?.id}

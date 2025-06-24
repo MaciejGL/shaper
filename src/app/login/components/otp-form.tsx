@@ -25,11 +25,11 @@ export const OtpForm: React.FC<OtpFormProps> = ({
     }}
   >
     <label htmlFor="otp" className="text-sm font-medium">
-      <InputOTP maxLength={6} size={80} value={otp} onChange={onOtpChange}>
-        {[...Array(6)].map((_, index) => (
+      <InputOTP maxLength={4} size={80} value={otp} onChange={onOtpChange}>
+        {[...Array(4)].map((_, index) => (
           <React.Fragment key={index}>
             <InputOTPSlot index={index} />
-            {index === 2 && <InputOTPSeparator />}
+            {index < 3 && <InputOTPSeparator />}
           </React.Fragment>
         ))}
       </InputOTP>

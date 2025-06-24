@@ -1,18 +1,23 @@
+'use client'
+
 import { format } from 'date-fns'
+import { motion } from 'framer-motion'
 import {
   ArrowRight,
   BadgeCheck,
   CheckIcon,
+  ChevronsDownIcon,
   ClockIcon,
   DumbbellIcon,
   HamIcon,
 } from 'lucide-react'
-import { Fragment } from 'react'
+import { Fragment, useState } from 'react'
 
 import { BiggyIcon } from '@/components/biggy-icon'
 import { Badge } from '@/components/ui/badge'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Separator } from '@/components/ui/separator'
+import { cn } from '@/lib/utils'
 import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
@@ -81,10 +86,38 @@ function WorkoutDay({
 }: {
   day: NonNullable<ActivePlan>['weeks'][number]['days'][number]
 }) {
+  const [expanded, setExpanded] = useState(false)
+
   return (
-    <div className="w-full space-y-6 mt-6">
+    <div className="w-full space-y-6">
       <WorkoutDayHeader day={day} />
-      <WorkoutDayExercises day={day} />
+
+      <motion.div
+        key={day.id}
+        initial={false}
+        animate={{
+          height: expanded ? 'max-content' : 0,
+          opacity: expanded ? 1 : 0,
+        }}
+        transition={{ type: 'spring', stiffness: 100, damping: 20 }}
+        style={{ overflow: 'hidden' }}
+      >
+        <WorkoutDayExercises day={day} />
+      </motion.div>
+      <div className="flex justify-center">
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          aria-label={expanded ? 'Collapse exercises' : 'Expand exercises'}
+        >
+          <ChevronsDownIcon
+            className={cn(
+              'size-5 transition-transform',
+              expanded && 'rotate-180',
+            )}
+          />
+        </button>
+      </div>
     </div>
   )
 }
@@ -135,7 +168,7 @@ function WorkoutDayExercises({
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">{exercise.name}</p>
                     {!exercise.completedAt && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-muted-foreground whitespace-nowrap">
                         {exercise.sets?.length || 0} sets
                       </p>
                     )}
