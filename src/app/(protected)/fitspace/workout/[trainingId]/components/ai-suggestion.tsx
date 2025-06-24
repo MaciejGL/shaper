@@ -124,7 +124,7 @@ function AiSuggestionItem({
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
       className={cn(
-        'shadow-neuro-dark p-4 pb-0 rounded-lg space-y-4 col-span-full',
+        'shadow-neuro-light dark:shadow-neuro-dark bg-card p-4 pb-0 rounded-lg space-y-4 col-span-full',
         isAdded && 'pb-4',
       )}
     >
@@ -178,15 +178,15 @@ function AiSuggestionItem({
       )}
 
       {!isAdded && (
-        <div className="grid grid-cols-[50px_80px_80px] gap-2 text-center bg-black/10 -mx-4 p-2">
+        <div className="grid grid-cols-[50px_80px_80px] gap-2 text-center border-t border-border -mx-4 p-2 rounded-b-lg">
           <p className="text-muted-foreground text-sm"></p>
           <p className="text-muted-foreground text-sm">Reps</p>
           <p className="text-muted-foreground text-sm">RPE</p>
           {aiResult.sets.map((set, index) => (
             <Fragment key={`${index}-${set?.reps}-${set?.rpe}`}>
               <p className="text-muted-foreground text-sm">Set {index + 1}.</p>
-              <p>{set?.reps}</p>
-              <p>{set?.rpe}</p>
+              <p className="text-muted-foreground text-sm">{set?.reps}</p>
+              <p className="text-muted-foreground text-sm">{set?.rpe}</p>
             </Fragment>
           ))}
         </div>

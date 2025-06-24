@@ -19,13 +19,14 @@ const inputVariants = cva(
     'focus-visible:ring-ring focus-visible:inset-ring-[2px] focus-visible:-ring-offset-2',
     'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
     'data-[error]:border-destructive data-[error]:ring-destructive/20 dark:data-[error]:ring-destructive/40 data-[error]:focus-visible:ring-destructive/20 dark:data-[error]:focus-visible:ring-destructive/40',
-    'shadow-neuro-inset-light dark:shadow-neuro-inset-dark',
   ),
   {
     variants: {
       variant: {
         ghost: 'border-none bg-secondary shadow-none',
-        outline: '',
+        inset:
+          'border-input shadow-neuro-inset-light dark:shadow-neuro-inset-dark',
+        outline: 'border-input shadow-none bg-secondary',
       },
       size: {
         sm: 'h-7',
@@ -33,7 +34,7 @@ const inputVariants = cva(
       },
     },
     defaultVariants: {
-      variant: 'outline',
+      variant: 'inset',
       size: 'md',
     },
   },

@@ -50,8 +50,14 @@ export function EnhancedBodyView({
   const getPathProps = (aliases: string[]) => ({
     className: `cursor-pointer transition-all duration-200 ${
       isRegionSelected(aliases)
-        ? cn('fill-amber-600')
-        : 'fill-primary/40 group-hover:fill-muted-foreground'
+        ? cn(
+            'fill-amber-600 group-hover:fill-amber-700',
+            'dark:fill-orange-400 dark:group-hover:fill-orange-500',
+          )
+        : cn(
+            'fill-primary/10 group-hover:fill-primary/20 stroke-primary/10 group-hover:stroke-primary/20',
+            'dark:fill-secondary dark:group-hover:fill-primary/20 dark:stroke-primary/10 dark:group-hover:stroke-primary/20',
+          )
     }`,
     onClick: () => handleRegionClick(aliases),
     style: { fillOpacity: isRegionSelected(aliases) ? 0.8 : 0.6 },

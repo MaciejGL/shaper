@@ -2,6 +2,7 @@ import { Check } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { GQLBaseExercise, GQLMuscleGroup } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
 import { translateEquipment } from '@/utils/translate-equipment'
 
 export function ExercisesList({
@@ -25,11 +26,12 @@ export function ExercisesList({
           {filteredExercises.map((exercise) => (
             <div
               key={exercise.id}
-              className={`p-3 flex justify-between cursor-pointer hover:bg-accent/50 shadow-neuro-light dark:shadow-neuro-dark rounded-md transition-colors ${
+              className={cn(
+                'p-3 flex justify-between cursor-pointer hover:bg-accent/50 shadow-neuro-light dark:shadow-neuro-dark rounded-md transition-colors',
                 selectedExercises.includes(exercise.id)
-                  ? 'bg-muted/50'
-                  : ' bg-muted/50'
-              }`}
+                  ? 'bg-accent/50'
+                  : ' bg-card',
+              )}
               onClick={() => {
                 if (selectedExercises.includes(exercise.id)) {
                   onExerciseSelect(exercise.id)
