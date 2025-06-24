@@ -61,7 +61,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
 
   return (
     <div className="space-y-6 -mx-2 md:-mx-0">
-      <Card className="md:rounded-lg py-4">
+      <Card className="rounded-none md:rounded-lg py-4">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="h-5 w-5" />
@@ -131,7 +131,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                 >
                   <div
                     className={cn(
-                      'rounded-md p-2 shadow-neuro-light dark:shadow-neuro-dark aspect-square shrink-0 min-w-[4.5rem]',
+                      'rounded-md shadow-neuro-light dark:shadow-neuro-dark shrink-0 p-3 min-w-[5rem]',
                       !day.isRestDay && 'bg-primary-foreground',
                       day.isRestDay &&
                         'bg-muted-foreground/10 text-muted-foreground',

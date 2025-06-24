@@ -89,7 +89,7 @@ function WorkoutDay({
   const [expanded, setExpanded] = useState(false)
 
   return (
-    <div className="w-full space-y-6">
+    <div className="w-full space-y-4">
       <WorkoutDayHeader day={day} />
 
       <motion.div
@@ -109,10 +109,11 @@ function WorkoutDay({
           type="button"
           onClick={() => setExpanded((prev) => !prev)}
           aria-label={expanded ? 'Collapse exercises' : 'Expand exercises'}
+          className="cursor-pointer"
         >
           <ChevronsDownIcon
             className={cn(
-              'size-5 transition-transform',
+              'size-5 transition-transform text-muted-foreground',
               expanded && 'rotate-180',
             )}
           />

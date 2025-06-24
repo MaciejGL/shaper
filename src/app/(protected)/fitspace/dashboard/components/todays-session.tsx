@@ -49,7 +49,7 @@ export function TodaysSession({ workout, planId }: TodaysSessionProps) {
   }
 
   return (
-    <Card variant="gradient">
+    <Card>
       <CardContent>
         <TodaysWorkout
           planId={planId}
