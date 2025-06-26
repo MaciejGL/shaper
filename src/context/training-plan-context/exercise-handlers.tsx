@@ -17,6 +17,13 @@ export const useExerciseHandlers = (
       exerciseIndex: number,
       newExercise: PartialTrainingPlanFormDataExercise,
     ) => {
+      console.log(
+        'updateExercise',
+        weekIndex,
+        dayIndex,
+        exerciseIndex,
+        newExercise,
+      )
       if (isNil(weekIndex) || isNil(dayIndex) || isNil(exerciseIndex)) {
         console.error('[Update exercise]: Invalid fields', {
           weekIndex,

@@ -70,14 +70,14 @@ export const useSetHandlers = (
       }
       setWeeks((prev) => {
         const previousSet =
-          prev[weekIndex].days[dayIndex].exercises[exerciseIndex].sets.at(-1)
+          prev[weekIndex].days[dayIndex].exercises[exerciseIndex]?.sets?.at(-1)
         const newWeeks = [...prev]
         const newDays = [...newWeeks[weekIndex].days]
         const newExercises = [...newDays[dayIndex].exercises]
         newExercises[exerciseIndex] = {
           ...newExercises[exerciseIndex],
           sets: [
-            ...newExercises[exerciseIndex].sets,
+            ...(newExercises[exerciseIndex]?.sets ?? []),
             {
               id: createId(),
               reps: previousSet?.reps ?? null,
@@ -85,7 +85,7 @@ export const useSetHandlers = (
               rpe: previousSet?.rpe ?? null,
               minReps: previousSet?.minReps ?? null,
               maxReps: previousSet?.maxReps ?? null,
-              order: newExercises[exerciseIndex].sets.length,
+              order: newExercises[exerciseIndex]?.sets?.length ?? 1,
               ...set,
             },
           ],

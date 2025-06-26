@@ -27,7 +27,7 @@ type ExerciseCardProps = {
   onEdit: (index: number) => void
 }
 
-const EXERCISE_TYPES = {
+export const EXERCISE_TYPES = {
   [GQLExerciseType.Superset_1A]: 'Superset 1A',
   [GQLExerciseType.Superset_1B]: 'Superset 1B',
   [GQLExerciseType.Dropset]: 'Dropset',

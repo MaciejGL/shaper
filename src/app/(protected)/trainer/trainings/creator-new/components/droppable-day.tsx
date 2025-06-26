@@ -214,7 +214,7 @@ function ExerciseList({
             <div key={exercise.id}>
               <div className="mb-2">
                 <SortableExercise
-                  exercise={exercise}
+                  exerciseId={exercise.id}
                   dayOfWeek={day.dayOfWeek}
                 />
               </div>

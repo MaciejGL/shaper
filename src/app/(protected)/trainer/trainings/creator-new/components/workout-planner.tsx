@@ -225,6 +225,8 @@ export default function WorkoutPlanner() {
     }
   }
 
+  console.log(formData.weeks[0].days)
+
   return (
     <DndContext
       sensors={sensors}
