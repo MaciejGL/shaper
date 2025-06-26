@@ -1,6 +1,5 @@
 'use client'
 
-import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import {
   ReactNode,
@@ -59,7 +58,6 @@ export function TrainingPlanProvider({
 }) {
   // ## State
   const router = useRouter()
-  const queryClient = useQueryClient()
   const [isDirty, setIsDirty] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [activeWeek, setActiveWeek] = useState(0)

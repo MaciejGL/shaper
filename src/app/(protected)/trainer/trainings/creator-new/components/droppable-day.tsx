@@ -252,18 +252,23 @@ function RestDayContent() {
 
 // Main component
 export function DroppableDay({ day, trainingPlanId }: DroppableDayProps) {
-  // Always use mutations now since we have real database IDs
   const queryClient = useQueryClient()
   const { mutate: updateTrainingDayData } = useUpdateTrainingDayDataMutation()
-  const { updateDay, activeWeek } = useTrainingPlan() // Keep context for fallback only
   const { containerRef, draggedOverIndex } = useDragDropLogic(day)
 
+  // Use optimistic state - this automatically syncs with prop changes
+  const [optimisticDay, setOptimisticDay] = useState(day)
+
+  useEffect(() => {
+    setOptimisticDay(day)
+  }, [day, setOptimisticDay])
+
   const { setNodeRef } = useDroppable({
-    id: day.id,
-    disabled: day.isRestDay,
+    id: optimisticDay.id,
+    disabled: optimisticDay.isRestDay,
     data: {
       type: 'day',
-      day: day,
+      day: optimisticDay,
     },
   })
 
@@ -280,7 +285,8 @@ export function DroppableDay({ day, trainingPlanId }: DroppableDayProps) {
   }, [queryClient, trainingPlanId])
 
   const handleToggleRestDay = useCallback(() => {
-    // Always use mutation now since we have real database IDs
+    setOptimisticDay((prev) => ({ ...prev, isRestDay: !prev.isRestDay }))
+
     updateTrainingDayData(
       {
         input: {
@@ -290,24 +296,19 @@ export function DroppableDay({ day, trainingPlanId }: DroppableDayProps) {
       },
       {
         onSuccess: () => {
-          console.log('✅ Day rest status updated successfully')
           invalidateQueries()
         },
-        onError: (error) => {
-          console.error('❌ Failed to update day rest status:', error)
-          // Fallback to context approach on error
-          updateDay(activeWeek, day.dayOfWeek, {
-            ...day,
-            isRestDay: !day.isRestDay,
-          })
+        onError: () => {
+          setOptimisticDay((prev) => ({ ...prev, isRestDay: !prev.isRestDay }))
         },
       },
     )
-  }, [updateTrainingDayData, updateDay, day, activeWeek, invalidateQueries])
+  }, [updateTrainingDayData, day, setOptimisticDay, invalidateQueries])
 
   const handleUpdateWorkoutType = useCallback(
     (workoutType: GQLWorkoutType | null) => {
-      // Always use mutation now since we have real database IDs
+      setOptimisticDay((prev) => ({ ...prev, workoutType }))
+
       updateTrainingDayData(
         {
           input: {
@@ -317,21 +318,18 @@ export function DroppableDay({ day, trainingPlanId }: DroppableDayProps) {
         },
         {
           onSuccess: () => {
-            console.log('✅ Workout type updated successfully')
             invalidateQueries()
           },
-          onError: (error) => {
-            console.error('❌ Failed to update workout type:', error)
-            // Fallback to context approach on error
-            updateDay(activeWeek, day.dayOfWeek, {
-              ...day,
-              workoutType,
-            })
+          onError: () => {
+            setOptimisticDay((prev) => ({
+              ...prev,
+              workoutType: day.workoutType,
+            }))
           },
         },
       )
     },
-    [updateTrainingDayData, updateDay, day, activeWeek, invalidateQueries],
+    [updateTrainingDayData, day, setOptimisticDay, invalidateQueries],
   )
 
   return (
@@ -343,16 +341,19 @@ export function DroppableDay({ day, trainingPlanId }: DroppableDayProps) {
       className="w-[260px] bg-neutral-950/30 px-4 py-2 rounded-lg"
     >
       <DayHeader
-        day={day}
+        day={optimisticDay}
         onToggleRestDay={handleToggleRestDay}
         onUpdateWorkoutType={handleUpdateWorkoutType}
       />
 
-      <div className={cn('flex grow', day.isRestDay && 'opacity-50')}>
-        {day.isRestDay ? (
+      <div className={cn('flex grow', optimisticDay.isRestDay && 'opacity-50')}>
+        {optimisticDay.isRestDay ? (
           <RestDayContent />
         ) : (
-          <ExerciseList day={day} draggedOverIndex={draggedOverIndex} />
+          <ExerciseList
+            day={optimisticDay}
+            draggedOverIndex={draggedOverIndex}
+          />
         )}
       </div>
     </div>
