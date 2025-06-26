@@ -1,6 +1,5 @@
 import React from 'react'
 
-import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -26,11 +25,10 @@ export function WorkoutTypeSelect({ dayIndex, day }: WorkoutTypeSelectProps) {
   const { updateDay, activeWeek } = useTrainingPlan()
   return (
     <div className="space-y-2">
-      <Label htmlFor={`workout-type-${dayIndex}`}>Workout Type</Label>
       <Select
         value={day.workoutType || ''}
         onValueChange={(value: GQLWorkoutType) =>
-          updateDay(activeWeek, dayIndex, {
+          updateDay(activeWeek, day.dayOfWeek, {
             ...day,
             workoutType: value,
           })

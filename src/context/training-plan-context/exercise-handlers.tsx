@@ -64,12 +64,13 @@ export const useExerciseHandlers = (
           exercises: [
             ...newDays[dayIndex].exercises,
             {
-              id: createId(),
-              name: '',
-              instructions: '',
+              ...exercise,
+              id: createId(), // Ensure unique ID after spreading exercise
+              name: exercise.name || '',
+              instructions: exercise.instructions || '',
               sets: exercise.sets || [],
               order: newDays[dayIndex].exercises.length || 1,
-              ...exercise,
+              baseId: exercise.id, // Store original exercise ID as baseId
             },
           ],
         }
@@ -83,6 +84,7 @@ export const useExerciseHandlers = (
 
   const removeExercise = useCallback(
     (weekIndex: number, dayIndex: number, exerciseIndex: number) => {
+      console.log('removeExercise', weekIndex, dayIndex, exerciseIndex)
       if (isNil(weekIndex) || isNil(dayIndex) || isNil(exerciseIndex)) {
         console.error('[Remove exercise]: Invalid fields', {
           weekIndex,

@@ -13,6 +13,7 @@ type TrainingExercise {
   isExtra: Boolean!
   sets: [ExerciseSet!]!
   logs: [ExerciseLog!]!
+  isPublic: Boolean!
 
   videoUrl: String
 

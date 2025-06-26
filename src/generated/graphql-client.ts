@@ -817,6 +817,7 @@ export type GQLTrainingExercise = {
   id: Scalars['ID']['output'];
   instructions?: Maybe<Scalars['String']['output']>;
   isExtra: Scalars['Boolean']['output'];
+  isPublic: Scalars['Boolean']['output'];
   logs: Array<GQLExerciseLog>;
   muscleGroups: Array<GQLMuscleGroup>;
   name: Scalars['String']['output'];
