@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils'
 
 import { TrainingExercise } from '../../creator/components/types'
 
+import { InsertionIndicatorBlank } from './droppable-day'
+
 interface SortableExerciseProps {
   exercise: TrainingExercise
   dayOfWeek: number
@@ -73,20 +75,25 @@ export function SortableExercise({
           isDragging && 'border-primary/50 !bg-muted/50',
         )}
       >
-        <CardContent className="p-3 flex items-center justify-between">
-          <p className="text-sm font-medium pr-6">{exercise.name}</p>
-        </CardContent>
-      </Card>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={handleRemoveExercise}
-        className={cn(
-          'p-0 absolute top-1 right-1 z-10 transition-all duration-200 opacity-0 group-hover:opacity-100',
-          isDragging && 'opacity-0',
+        {isDragging && <InsertionIndicatorBlank isActive={true} />}
+        {!isDragging && (
+          <CardContent className="p-3 flex items-center justify-between">
+            <p className="text-sm font-medium pr-6">{exercise.name}</p>
+          </CardContent>
         )}
-        iconOnly={<X className="w-3 h-3" />}
-      />
+      </Card>
+      {!isDragging && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleRemoveExercise}
+          className={cn(
+            'p-0 absolute top-1 right-1 z-10 transition-all duration-200 opacity-0 group-hover:opacity-100',
+            isDragging && 'opacity-0',
+          )}
+          iconOnly={<X className="w-3 h-3" />}
+        />
+      )}
     </div>
   )
 }

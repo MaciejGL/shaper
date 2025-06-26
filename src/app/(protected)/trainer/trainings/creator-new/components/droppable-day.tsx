@@ -123,7 +123,7 @@ function useDragDropLogic(day: TrainingDay) {
 }
 
 // Improved insertion indicator with better visual feedback
-function InsertionIndicator({ isActive }: { isActive: boolean }) {
+export function InsertionIndicator({ isActive }: { isActive: boolean }) {
   return (
     <div
       className={cn(
@@ -146,6 +146,25 @@ function InsertionIndicator({ isActive }: { isActive: boolean }) {
             </div>
           )}
         </div>
+      </div>
+    </div>
+  )
+}
+export function InsertionIndicatorBlank({ isActive }: { isActive: boolean }) {
+  return (
+    <div
+      className={cn(
+        'transition-all duration-300 ease-out overflow-hidden',
+        isActive ? 'min-h-[120px] mb-2' : 'h-0',
+      )}
+    >
+      <div className="relative h-full">
+        <div
+          className={cn(
+            'absolute inset-0 bg-zinc-800 border-zinc-800 rounded-lg transition-all duration-300 h-full',
+            isActive ? 'opacity-100 scale-100' : '',
+          )}
+        ></div>
       </div>
     </div>
   )
