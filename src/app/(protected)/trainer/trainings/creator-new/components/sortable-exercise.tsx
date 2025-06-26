@@ -37,6 +37,7 @@ export function SortableExercise({
 
   const { formData, activeWeek, removeExercise } = useTrainingPlan()
 
+  // Improved styling with better z-index handling
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -44,10 +45,20 @@ export function SortableExercise({
   }
 
   const handleRemoveExercise = (e: React.MouseEvent<HTMLButtonElement>) => {
-    const exercises = formData.weeks[activeWeek].days[dayOfWeek].exercises
-    const exerciseIndex = exercises.findIndex((ex) => ex.id === exercise.id)
     e.stopPropagation()
-    removeExercise(activeWeek, dayOfWeek, exerciseIndex)
+
+    // More robust exercise finding and removal
+    const currentWeek = formData.weeks[activeWeek]
+    const day = currentWeek.days.find((d) => d.dayOfWeek === dayOfWeek)
+
+    if (day) {
+      const exerciseIndex = day.exercises.findIndex(
+        (ex) => ex.id === exercise.id,
+      )
+      if (exerciseIndex !== -1) {
+        removeExercise(activeWeek, dayOfWeek, exerciseIndex)
+      }
+    }
   }
 
   return (
@@ -59,8 +70,7 @@ export function SortableExercise({
         {...listeners}
         className={cn(
           'cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px]',
-          isDragging &&
-            'shadow-2xl shadow-black/30 bg-card/95 backdrop-blur-sm scale-[1.05] rotate-2 border-primary/50',
+          isDragging && 'border-primary/50 !bg-muted/50',
         )}
       >
         <CardContent className="p-3 flex items-center justify-between">

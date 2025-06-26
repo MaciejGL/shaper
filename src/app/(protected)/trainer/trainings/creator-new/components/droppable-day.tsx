@@ -97,7 +97,7 @@ function useDragDropLogic(day: TrainingDay) {
   }
 }
 
-// Insertion indicator component
+// Improved insertion indicator with better visual feedback
 function InsertionIndicator({ isActive }: { isActive: boolean }) {
   return (
     <div
@@ -109,10 +109,18 @@ function InsertionIndicator({ isActive }: { isActive: boolean }) {
       <div className="relative h-[120px]">
         <div
           className={cn(
-            'absolute inset-0 bg-neutral-950/30 rounded-lg transition-all duration-300',
+            'absolute inset-0 bg-primary/20 border-2 border-dashed border-primary/50 rounded-lg transition-all duration-300',
             isActive ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
           )}
-        />
+        >
+          {isActive && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-primary font-medium text-sm">
+                Drop exercise here
+              </span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -211,7 +219,7 @@ export function DroppableDay({ day }: DroppableDayProps) {
         setNodeRef(node)
         containerRef.current = node
       }}
-      className="w-[260px] bg-neutral-950/30 px-4 py-2 rounded-lg min-h-[400px]"
+      className="w-[260px] bg-neutral-950/30 px-4 py-2 rounded-lg"
     >
       <DayHeader day={day} onToggleRestDay={handleToggleRestDay} />
 

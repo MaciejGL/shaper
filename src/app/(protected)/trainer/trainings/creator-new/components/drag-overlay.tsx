@@ -24,7 +24,7 @@ export function DragOverlay({
 
   if (activeExercise) {
     return (
-      <Card className="p-0">
+      <Card className="cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px]">
         <CardContent className="p-2">
           <div className="font-medium text-sm space-y-1">
             <p>{activeExercise.name}</p>
@@ -45,11 +45,9 @@ export function DragOverlay({
 
   if (dayExercise) {
     return (
-      <Card className="p-0">
-        <CardContent className="p-2">
-          <div className="font-medium text-sm space-y-1">
-            <p>{dayExercise.name}</p>
-          </div>
+      <Card className="cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px]">
+        <CardContent className="p-3 flex items-center justify-between">
+          <p className="text-sm font-medium pr-6">{dayExercise.name}</p>
         </CardContent>
       </Card>
     )

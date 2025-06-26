@@ -2,12 +2,12 @@
 
 import {
   DndContext,
-  type DragEndEvent,
+  DragEndEvent,
   DragOverlay,
-  type DragStartEvent,
+  DragStartEvent,
   KeyboardSensor,
   PointerSensor,
-  closestCenter,
+  pointerWithin,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
@@ -17,15 +17,16 @@ import { useState } from 'react'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import { useTrainerExercisesQuery } from '@/generated/graphql-client'
 
-import { TrainingExercise } from '../../creator/components/types'
+import { TrainingDay, TrainingExercise } from '../../creator/components/types'
 
 import { DayGrid } from './day-grid'
 import { DragOverlay as CustomDragOverlay } from './drag-overlay'
 import { Sidebar } from './sidebar'
+import { getNewOrder } from './utils'
 import { WeekTabs } from './week-tabs'
 
 export default function WorkoutPlanner() {
-  const { formData, activeWeek, addExercise, updateDay } = useTrainingPlan()
+  const { formData, activeWeek, updateDay } = useTrainingPlan()
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -43,7 +44,7 @@ export default function WorkoutPlanner() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 0,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -55,6 +56,7 @@ export default function WorkoutPlanner() {
     setActiveId(event.active.id as string)
   }
 
+  // Improved reordering function using the new utility
   const reorderExercises = (
     dayOfWeek: number,
     exercises: TrainingExercise[],
@@ -64,9 +66,14 @@ export default function WorkoutPlanner() {
     )
     if (!day) return
 
+    // Use the new order calculation for all exercises
     const newExercises = exercises.map((exercise, index) => ({
       ...exercise,
-      order: index + 1,
+      order: getNewOrder({
+        orders: exercises.map((_, i) => i * 1024), // Create evenly spaced orders
+        sourceIndex: null,
+        destinationIndex: index,
+      }),
     }))
 
     updateDay(activeWeek, dayOfWeek, {
@@ -75,32 +82,36 @@ export default function WorkoutPlanner() {
     })
   }
 
+  // Improved insertion function using the new utility
   const insertExerciseAtPosition = (
-    targetDay: any,
-    newExercise: any,
+    targetDay: TrainingDay,
+    newExercise: Omit<TrainingExercise, 'order' | 'sets'>,
     position: number,
   ) => {
-    const newExercises = [...targetDay.exercises]
+    const currentOrders = targetDay.exercises.map((ex) => ex.order)
 
-    // Create the new exercise with unique ID
-    const exerciseToInsert = {
+    // Calculate new order using the improved utility
+    const order = getNewOrder({
+      orders: currentOrders,
+      sourceIndex: null,
+      destinationIndex: position,
+    })
+
+    // Create the new exercise with proper order
+    const exerciseToInsert: TrainingExercise = {
       ...newExercise,
       id: `${newExercise.id}-${Date.now()}`,
-      order: position + 1,
+      order,
+      sets: [],
     }
 
     // Insert at the specified position
+    const newExercises = [...targetDay.exercises]
     newExercises.splice(position, 0, exerciseToInsert)
-
-    // Update orders for all exercises
-    const reorderedExercises = newExercises.map((exercise, index) => ({
-      ...exercise,
-      order: index + 1,
-    }))
 
     updateDay(activeWeek, targetDay.dayOfWeek, {
       ...targetDay,
-      exercises: reorderedExercises,
+      exercises: newExercises,
     })
   }
 
@@ -150,15 +161,20 @@ export default function WorkoutPlanner() {
     const activeExercise = joinedExercises.find((ex) => ex.id === active.id)
     if (!activeExercise) return
 
+    // Only proceed if we have overData with a specific type - this ensures we're actually over a valid drop zone
+    if (!overData || !overData.type) {
+      return // No drop if no valid overData
+    }
+
     const currentWeek = formData.weeks[activeWeek]
     let targetDay = null
     let insertPosition = -1
 
-    // Determine target day and insertion position
-    if (overData?.type === 'day') {
+    // Only proceed if we have valid drop data with explicit types
+    if (overData.type === 'day') {
       targetDay = overData.day
       insertPosition = targetDay.exercises.length // Add to end
-    } else if (overData?.type === 'day-exercise') {
+    } else if (overData.type === 'day-exercise') {
       // Find the day that contains this exercise
       targetDay = currentWeek.days.find((day) =>
         day.exercises.some((ex) => ex.id === overData.exercise.id),
@@ -168,28 +184,19 @@ export default function WorkoutPlanner() {
           (ex) => ex.id === overData.exercise.id,
         )
       }
-    } else {
-      // Fallback: find day by ID
-      targetDay = currentWeek.days.find((day) => day.id === over.id)
-      if (targetDay) {
-        insertPosition = targetDay.exercises.length
-      }
     }
+    // Removed the else case completely - no more fallbacks!
 
-    if (targetDay && !targetDay.isRestDay) {
-      if (insertPosition >= 0) {
-        insertExerciseAtPosition(targetDay, activeExercise, insertPosition)
-      } else {
-        // Fallback to adding at the end
-        addExercise(activeWeek, targetDay.dayOfWeek, activeExercise)
-      }
+    // Only proceed if we have a valid target day, it's not a rest day, and we have a valid position
+    if (targetDay && !targetDay.isRestDay && insertPosition >= 0) {
+      insertExerciseAtPosition(targetDay, activeExercise, insertPosition)
     }
   }
 
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={pointerWithin}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
