@@ -94,7 +94,7 @@ export function TrainingPlanProvider({
   useEffect(() => {
     if (templateTrainingPlan) {
       setDetails(templateTrainingPlan.details)
-      setWeeks(templateTrainingPlan.weeks)
+      setWeeks(templateTrainingPlan.weeks as TrainingPlanFormData['weeks'])
     }
   }, [templateTrainingPlan])
 
@@ -123,16 +123,17 @@ export function TrainingPlanProvider({
     [],
   )
   const { updateDay } = useDayHandlers(setWeeks, setIsDirty)
-  const { updateExercise, addExercise, removeExercise } = useExerciseHandlers(
-    setWeeks,
-    setIsDirty,
-  )
+  const { updateExercise, addExercise, removeExercise, moveExercise } =
+    useExerciseHandlers(setWeeks, setIsDirty)
   const { updateSet, addSet, removeSet } = useSetHandlers(setWeeks, setIsDirty)
 
   // Memoize handlers to prevent unnecessary re-renders
   const clearDraft = useCallback(() => {
     setDetails(templateTrainingPlan?.details || initialFormData.details)
-    setWeeks(templateTrainingPlan?.weeks || initialFormData.weeks)
+    setWeeks(
+      (templateTrainingPlan?.weeks as TrainingPlanFormData['weeks']) ||
+        initialFormData.weeks,
+    )
     setIsDirty(false)
   }, [templateTrainingPlan])
 
@@ -235,6 +236,7 @@ export function TrainingPlanProvider({
       updateExercise,
       addExercise,
       removeExercise,
+      moveExercise,
       updateSet,
       addSet,
       removeSet,
@@ -264,6 +266,7 @@ export function TrainingPlanProvider({
       updateExercise,
       addExercise,
       removeExercise,
+      moveExercise,
       updateSet,
       addSet,
       removeSet,

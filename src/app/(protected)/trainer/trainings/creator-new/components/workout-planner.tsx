@@ -26,7 +26,7 @@ import { getNewOrder } from './utils'
 import { WeekTabs } from './week-tabs'
 
 export default function WorkoutPlanner() {
-  const { formData, activeWeek, updateDay } = useTrainingPlan()
+  const { formData, activeWeek, updateDay, moveExercise } = useTrainingPlan()
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -124,35 +124,68 @@ export default function WorkoutPlanner() {
     const activeData = active.data.current
     const overData = over.data.current
 
-    // Handle reordering exercises within a day
+    // Handle moving exercises between days or within the same day
     if (
       activeData?.type === 'day-exercise' &&
-      overData?.type === 'day-exercise'
+      (overData?.type === 'day-exercise' || overData?.type === 'day')
     ) {
       const activeExercise = activeData.exercise
-      const overExercise = overData.exercise
-
       const currentWeek = formData.weeks[activeWeek]
-      const day = currentWeek.days.find((d) =>
+
+      // Find source day and exercise index
+      const sourceDay = currentWeek.days.find((d) =>
         d.exercises.some((ex) => ex.id === activeExercise.id),
       )
 
-      if (day) {
-        const oldIndex = day.exercises.findIndex(
-          (ex) => ex.id === activeExercise.id,
-        )
-        const newIndex = day.exercises.findIndex(
-          (ex) => ex.id === overExercise.id,
-        )
+      if (!sourceDay) return
 
-        if (oldIndex !== newIndex) {
-          const reorderedExercises = arrayMove(
-            day.exercises,
-            oldIndex,
-            newIndex,
+      const sourceExerciseIndex = sourceDay.exercises.findIndex(
+        (ex) => ex.id === activeExercise.id,
+      )
+
+      let targetDay = null
+      let targetExerciseIndex = -1
+
+      if (overData?.type === 'day-exercise') {
+        // Moving to a specific position in a day
+        const overExercise = overData.exercise
+        targetDay = currentWeek.days.find((d) =>
+          d.exercises.some((ex) => ex.id === overExercise.id),
+        )
+        if (targetDay) {
+          targetExerciseIndex = targetDay.exercises.findIndex(
+            (ex) => ex.id === overExercise.id,
           )
-          reorderExercises(day.dayOfWeek, reorderedExercises)
         }
+      } else if (overData?.type === 'day') {
+        // Moving to the end of a day
+        targetDay = overData.day
+        targetExerciseIndex = targetDay.exercises.length
+      }
+
+      if (!targetDay || targetExerciseIndex === -1 || targetDay.isRestDay)
+        return
+
+      // Check if it's the same day - handle reordering
+      if (sourceDay.id === targetDay.id) {
+        if (sourceExerciseIndex !== targetExerciseIndex) {
+          const reorderedExercises = arrayMove(
+            sourceDay.exercises,
+            sourceExerciseIndex,
+            targetExerciseIndex,
+          )
+          reorderExercises(sourceDay.dayOfWeek, reorderedExercises)
+        }
+      } else {
+        // Different days - use moveExercise function
+        moveExercise(
+          activeWeek, // sourceWeekIndex
+          sourceDay.dayOfWeek, // sourceDayIndex
+          sourceExerciseIndex, // sourceExerciseIndex
+          activeWeek, // targetWeekIndex
+          targetDay.dayOfWeek, // targetDayIndex
+          targetExerciseIndex, // targetExerciseIndex
+        )
       }
       return
     }
@@ -185,7 +218,6 @@ export default function WorkoutPlanner() {
         )
       }
     }
-    // Removed the else case completely - no more fallbacks!
 
     // Only proceed if we have a valid target day, it's not a rest day, and we have a valid position
     if (targetDay && !targetDay.isRestDay && insertPosition >= 0) {

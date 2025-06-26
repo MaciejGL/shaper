@@ -64,6 +64,14 @@ export type TrainingPlanContextType = {
     dayIndex: number,
     exerciseIndex: number,
   ) => void
+  moveExercise: (
+    sourceWeekIndex: number,
+    sourceDayIndex: number,
+    sourceExerciseIndex: number,
+    targetWeekIndex: number,
+    targetDayIndex: number,
+    targetExerciseIndex: number,
+  ) => void
   updateSet: (
     weekIndex: number,
     dayIndex: number,

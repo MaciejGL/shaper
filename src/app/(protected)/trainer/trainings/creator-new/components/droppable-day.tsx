@@ -26,12 +26,20 @@ function useDragDropLogic(day: TrainingDay) {
 
   const { active, over } = useDndContext()
 
+  // Check if we're dragging a new exercise from sidebar
   const isDraggingNewExercise =
     active && active.data.current?.type !== 'day-exercise'
 
+  // Check if we're dragging an existing exercise between days
+  const isDraggingExistingExercise =
+    active && active.data.current?.type === 'day-exercise'
+
+  // Check if we're dragging any item that could be dropped on this day
+  const isDraggingAnyItem = isDraggingNewExercise || isDraggingExistingExercise
+
   // Track mouse position over the column
   useEffect(() => {
-    if (!isDraggingNewExercise) {
+    if (!isDraggingAnyItem) {
       setIsMouseOverColumn(false)
       return
     }
@@ -51,18 +59,27 @@ function useDragDropLogic(day: TrainingDay) {
 
     document.addEventListener('mousemove', handleMouseMove)
     return () => document.removeEventListener('mousemove', handleMouseMove)
-  }, [isDraggingNewExercise])
+  }, [isDraggingAnyItem])
 
   // Calculate insertion index
   useEffect(() => {
-    if (
-      !isDraggingNewExercise ||
-      !over ||
-      day.isRestDay ||
-      !isMouseOverColumn
-    ) {
+    if (!isDraggingAnyItem || !over || day.isRestDay || !isMouseOverColumn) {
       setDraggedOverIndex(null)
       return
+    }
+
+    // For existing exercises, check if we're dragging from the same day
+    if (isDraggingExistingExercise) {
+      const draggedExercise = active?.data.current?.exercise
+      const isDraggingFromSameDay = day.exercises.some(
+        (ex) => ex.id === draggedExercise?.id,
+      )
+
+      // If dragging from the same day, don't show indicators (handled by sortable)
+      if (isDraggingFromSameDay) {
+        setDraggedOverIndex(null)
+        return
+      }
     }
 
     // For empty days, show indicator at first position
@@ -88,12 +105,20 @@ function useDragDropLogic(day: TrainingDay) {
     }
 
     setDraggedOverIndex(insertIndex)
-  }, [isDraggingNewExercise, over, day, isMouseOverColumn])
+  }, [
+    isDraggingAnyItem,
+    isDraggingExistingExercise,
+    over,
+    day,
+    isMouseOverColumn,
+    active,
+  ])
 
   return {
     containerRef,
     draggedOverIndex,
     isDraggingNewExercise,
+    isDraggingExistingExercise,
   }
 }
 
