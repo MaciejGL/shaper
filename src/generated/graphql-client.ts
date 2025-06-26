@@ -326,6 +326,7 @@ export type GQLMutation = {
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   closePlan: Scalars['Boolean']['output'];
   createCoachingRequest: GQLCoachingRequest;
+  createDraftTemplate: GQLTrainingPlan;
   createExercise: Scalars['Boolean']['output'];
   createNote: GQLNote;
   createNotification: GQLNotification;
@@ -360,6 +361,7 @@ export type GQLMutation = {
   updateProfile?: Maybe<GQLUserProfile>;
   updateReview: Scalars['Boolean']['output'];
   updateSetLog?: Maybe<GQLExerciseSetLog>;
+  updateTrainingDayData: Scalars['Boolean']['output'];
   updateTrainingPlan: Scalars['Boolean']['output'];
 };
 
@@ -587,6 +589,11 @@ export type GQLMutationUpdateReviewArgs = {
 
 export type GQLMutationUpdateSetLogArgs = {
   input: GQLLogSetInput;
+};
+
+
+export type GQLMutationUpdateTrainingDayDataArgs = {
+  input: GQLUpdateTrainingDayDataInput;
 };
 
 
@@ -932,6 +939,12 @@ export type GQLUpdateReviewInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   rating?: InputMaybe<Scalars['Int']['input']>;
   reviewId: Scalars['ID']['input'];
+};
+
+export type GQLUpdateTrainingDayDataInput = {
+  dayId: Scalars['ID']['input'];
+  isRestDay?: InputMaybe<Scalars['Boolean']['input']>;
+  workoutType?: InputMaybe<GQLWorkoutType>;
 };
 
 export type GQLUpdateTrainingDayInput = {
@@ -1452,6 +1465,18 @@ export type GQLRemoveTrainingPlanFromClientMutationVariables = Exact<{
 
 
 export type GQLRemoveTrainingPlanFromClientMutation = { __typename?: 'Mutation', removeTrainingPlanFromClient: boolean };
+
+export type GQLCreateDraftTemplateMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLCreateDraftTemplateMutation = { __typename?: 'Mutation', createDraftTemplate: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null }> }> } };
+
+export type GQLUpdateTrainingDayDataMutationVariables = Exact<{
+  input: GQLUpdateTrainingDayDataInput;
+}>;
+
+
+export type GQLUpdateTrainingDayDataMutation = { __typename?: 'Mutation', updateTrainingDayData: boolean };
 
 export type GQLMyCoachingRequestsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3885,6 +3910,69 @@ useRemoveTrainingPlanFromClientMutation.getKey = () => ['RemoveTrainingPlanFromC
 
 
 useRemoveTrainingPlanFromClientMutation.fetcher = (variables: GQLRemoveTrainingPlanFromClientMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveTrainingPlanFromClientMutation, GQLRemoveTrainingPlanFromClientMutationVariables>(RemoveTrainingPlanFromClientDocument, variables, options);
+
+export const CreateDraftTemplateDocument = `
+    mutation CreateDraftTemplate {
+  createDraftTemplate {
+    id
+    title
+    description
+    weeks {
+      id
+      weekNumber
+      name
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        workoutType
+      }
+    }
+  }
+}
+    `;
+
+export const useCreateDraftTemplateMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateDraftTemplateMutation, TError, GQLCreateDraftTemplateMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateDraftTemplateMutation, TError, GQLCreateDraftTemplateMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateDraftTemplate'],
+    mutationFn: (variables?: GQLCreateDraftTemplateMutationVariables) => fetchData<GQLCreateDraftTemplateMutation, GQLCreateDraftTemplateMutationVariables>(CreateDraftTemplateDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateDraftTemplateMutation.getKey = () => ['CreateDraftTemplate'];
+
+
+useCreateDraftTemplateMutation.fetcher = (variables?: GQLCreateDraftTemplateMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateDraftTemplateMutation, GQLCreateDraftTemplateMutationVariables>(CreateDraftTemplateDocument, variables, options);
+
+export const UpdateTrainingDayDataDocument = `
+    mutation UpdateTrainingDayData($input: UpdateTrainingDayDataInput!) {
+  updateTrainingDayData(input: $input)
+}
+    `;
+
+export const useUpdateTrainingDayDataMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateTrainingDayDataMutation, TError, GQLUpdateTrainingDayDataMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateTrainingDayDataMutation, TError, GQLUpdateTrainingDayDataMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateTrainingDayData'],
+    mutationFn: (variables?: GQLUpdateTrainingDayDataMutationVariables) => fetchData<GQLUpdateTrainingDayDataMutation, GQLUpdateTrainingDayDataMutationVariables>(UpdateTrainingDayDataDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateTrainingDayDataMutation.getKey = () => ['UpdateTrainingDayData'];
+
+
+useUpdateTrainingDayDataMutation.fetcher = (variables: GQLUpdateTrainingDayDataMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateTrainingDayDataMutation, GQLUpdateTrainingDayDataMutationVariables>(UpdateTrainingDayDataDocument, variables, options);
 
 export const MyCoachingRequestsDocument = `
     query MyCoachingRequests {

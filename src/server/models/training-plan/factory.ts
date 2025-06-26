@@ -132,6 +132,9 @@ export async function getTemplates(
 
   const templates = await prisma.trainingPlan.findMany({
     where,
+    orderBy: {
+      createdAt: 'desc',
+    },
   })
   return templates.map((template) => new TrainingPlan(template, context))
 }
@@ -872,4 +875,75 @@ export async function removeWeek(
   })
 
   return true
+}
+
+export async function createDraftTemplate(context: GQLContext) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const trainingPlan = await prisma.trainingPlan.create({
+    data: {
+      title: 'Untitled Training Plan',
+      description: '',
+      isPublic: false,
+      isTemplate: true,
+      isDraft: true,
+      createdById: user.user.id,
+      weeks: {
+        create: {
+          weekNumber: 1,
+          name: 'Week 1',
+          description: '',
+          days: {
+            create: Array.from({ length: 7 }, (_, dayIndex) => ({
+              dayOfWeek: dayIndex,
+              isRestDay: false, // All days are not rest day initially
+              workoutType: null,
+              exercises: {
+                create: [], // No exercises initially
+              },
+            })),
+          },
+        },
+      },
+    },
+    include: {
+      weeks: {
+        orderBy: {
+          weekNumber: 'asc',
+        },
+        include: {
+          days: {
+            orderBy: {
+              dayOfWeek: 'asc',
+            },
+            include: {
+              exercises: {
+                orderBy: {
+                  order: 'asc',
+                },
+                include: {
+                  base: {
+                    select: {
+                      videoUrl: true,
+                      muscleGroups: true,
+                    },
+                  },
+                  sets: {
+                    orderBy: {
+                      order: 'asc',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  return new TrainingPlan(trainingPlan, context)
 }

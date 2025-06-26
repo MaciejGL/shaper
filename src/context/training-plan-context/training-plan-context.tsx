@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import {
   ReactNode,
@@ -58,6 +59,7 @@ export function TrainingPlanProvider({
 }) {
   // ## State
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [isDirty, setIsDirty] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [activeWeek, setActiveWeek] = useState(0)
@@ -89,6 +91,14 @@ export function TrainingPlanProvider({
         }),
       },
     )
+
+  // ## Create draft template immediately for new plans
+  // useEffect(() => {
+  //   if (!trainingId && !actualTrainingId && !createDraftTemplate.isPending) {
+  //     console.log('🚀 Creating draft template for new plan...')
+  //     createDraftTemplate.mutate({})
+  //   }
+  // }, [trainingId, actualTrainingId, createDraftTemplate])
 
   // ## Set initial data
   useEffect(() => {
@@ -138,10 +148,11 @@ export function TrainingPlanProvider({
   }, [templateTrainingPlan])
 
   const handleSubmit = useCallback(async () => {
-    if (trainingId) {
+    const currentTrainingId = trainingId
+    if (currentTrainingId) {
       await updateTrainingPlan({
         input: {
-          id: trainingId,
+          id: currentTrainingId,
           isPublic: details.isPublic,
           isDraft: details.isDraft,
           title: details.title,
@@ -153,6 +164,7 @@ export function TrainingPlanProvider({
       setIsDirty(false)
       router.refresh()
     } else {
+      // This should rarely happen now since we create draft templates immediately
       const res = await createTrainingPlan({
         input: {
           isPublic: details.isPublic,
@@ -211,13 +223,14 @@ export function TrainingPlanProvider({
     () => ({
       // State
       formData: { details, weeks },
+      trainingId: trainingId, // Always provide the real training ID
       isDirty,
       currentStep,
       activeWeek,
       activeDay,
 
       // Loading states
-      isLoadingInitialData,
+      isLoadingInitialData: isLoadingInitialData,
       isPending,
       isUpdating,
       isDeleting,
@@ -248,6 +261,7 @@ export function TrainingPlanProvider({
     [
       details,
       weeks,
+      trainingId,
       isDirty,
       currentStep,
       activeWeek,

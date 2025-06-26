@@ -1,0 +1,18 @@
+mutation CreateDraftTemplate {
+  createDraftTemplate {
+    id
+    title
+    description
+    weeks {
+      id
+      weekNumber
+      name
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        workoutType
+      }
+    }
+  }
+}

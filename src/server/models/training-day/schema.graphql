@@ -56,7 +56,14 @@ type Query {
   getWorkoutInfo(dayId: ID!): TrainingDay!
 }
 
+input UpdateTrainingDayDataInput {
+  dayId: ID!
+  isRestDay: Boolean
+  workoutType: WorkoutType
+}
+
 type Mutation {
   logWorkoutSessionEvent(dayId: ID!, event: WorkoutSessionEvent!): ID!
   logWorkoutProgress(dayId: ID!, tick: Int!): ID!
+  updateTrainingDayData(input: UpdateTrainingDayDataInput!): Boolean!
 }

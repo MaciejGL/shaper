@@ -67,7 +67,7 @@ export default function WorkoutPlanner() {
     if (!day) return
 
     // Use the new order calculation for all exercises
-    const newExercises = exercises.map((exercise, index) => ({
+    const newExercises = exercises?.map((exercise, index) => ({
       ...exercise,
       order: getNewOrder({
         orders: exercises.map((_, i) => i * 1024), // Create evenly spaced orders
@@ -88,7 +88,7 @@ export default function WorkoutPlanner() {
     newExercise: Omit<TrainingExercise, 'order' | 'sets'>,
     position: number,
   ) => {
-    const currentOrders = targetDay.exercises.map((ex) => ex.order)
+    const currentOrders = targetDay.exercises?.map((ex) => ex.order)
 
     // Calculate new order using the improved utility
     const order = getNewOrder({
@@ -106,7 +106,7 @@ export default function WorkoutPlanner() {
     }
 
     // Insert at the specified position
-    const newExercises = [...targetDay.exercises]
+    const newExercises = [...(targetDay.exercises || [])]
     newExercises.splice(position, 0, exerciseToInsert)
 
     updateDay(activeWeek, targetDay.dayOfWeek, {
@@ -134,12 +134,12 @@ export default function WorkoutPlanner() {
 
       // Find source day and exercise index
       const sourceDay = currentWeek.days.find((d) =>
-        d.exercises.some((ex) => ex.id === activeExercise.id),
+        d.exercises?.some((ex) => ex.id === activeExercise.id),
       )
 
       if (!sourceDay) return
 
-      const sourceExerciseIndex = sourceDay.exercises.findIndex(
+      const sourceExerciseIndex = sourceDay.exercises?.findIndex(
         (ex) => ex.id === activeExercise.id,
       )
 
@@ -150,17 +150,17 @@ export default function WorkoutPlanner() {
         // Moving to a specific position in a day
         const overExercise = overData.exercise
         targetDay = currentWeek.days.find((d) =>
-          d.exercises.some((ex) => ex.id === overExercise.id),
+          d.exercises?.some((ex) => ex.id === overExercise.id),
         )
         if (targetDay) {
-          targetExerciseIndex = targetDay.exercises.findIndex(
+          targetExerciseIndex = targetDay.exercises?.findIndex(
             (ex) => ex.id === overExercise.id,
           )
         }
       } else if (overData?.type === 'day') {
         // Moving to the end of a day
         targetDay = overData.day
-        targetExerciseIndex = targetDay.exercises.length
+        targetExerciseIndex = targetDay.exercises?.length || 0
       }
 
       if (!targetDay || targetExerciseIndex === -1 || targetDay.isRestDay)
@@ -206,14 +206,14 @@ export default function WorkoutPlanner() {
     // Only proceed if we have valid drop data with explicit types
     if (overData.type === 'day') {
       targetDay = overData.day
-      insertPosition = targetDay.exercises.length // Add to end
+      insertPosition = targetDay.exercises?.length || 0 // Add to end
     } else if (overData.type === 'day-exercise') {
       // Find the day that contains this exercise
       targetDay = currentWeek.days.find((day) =>
-        day.exercises.some((ex) => ex.id === overData.exercise.id),
+        day.exercises?.some((ex) => ex.id === overData.exercise.id),
       )
       if (targetDay) {
-        insertPosition = targetDay.exercises.findIndex(
+        insertPosition = targetDay.exercises?.findIndex(
           (ex) => ex.id === overData.exercise.id,
         )
       }
@@ -224,8 +224,6 @@ export default function WorkoutPlanner() {
       insertExerciseAtPosition(targetDay, activeExercise, insertPosition)
     }
   }
-
-  console.log(formData.weeks[0].days)
 
   return (
     <DndContext

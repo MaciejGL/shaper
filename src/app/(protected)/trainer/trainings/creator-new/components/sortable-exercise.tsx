@@ -209,19 +209,15 @@ function KanbanExerciseSets({
   const sets = exercise.sets ?? []
 
   const onAddSet = () => {
-    addSet(activeWeek, dayOfWeek, exerciseIndex, {
-      order: sets.length + 1,
-    })
+    console.log('onAddSet')
   }
 
   const onRemoveSet = (index: number) => {
-    removeSet(activeWeek, dayOfWeek, exerciseIndex, index)
+    console.log('onRemoveSet', index)
   }
 
   const onUpdateSet = (index: number, field: string, value?: number) => {
-    updateSet(activeWeek, dayOfWeek, exerciseIndex, index, {
-      [field]: value,
-    })
+    console.log('onUpdateSet', index, field, value)
   }
 
   return (

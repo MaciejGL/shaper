@@ -65,6 +65,7 @@ type Mutation {
   createTrainingPlan(
     input: CreateTrainingPlanInput!
   ): CreateTrainingPlanPayload!
+  createDraftTemplate: TrainingPlan!
   updateTrainingPlan(input: UpdateTrainingPlanInput!): Boolean!
   deleteTrainingPlan(id: ID!): Boolean!
   duplicateTrainingPlan(id: ID!): ID!

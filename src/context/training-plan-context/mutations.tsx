@@ -36,7 +36,7 @@ export const useTrainingPlanMutations = () => {
       onSuccess: () => {
         toast.success('Training plan deleted successfully')
         queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
-        router.replace('/trainer/trainings/creator/new')
+        router.replace('/trainer/trainings')
       },
     })
 
@@ -46,7 +46,9 @@ export const useTrainingPlanMutations = () => {
       onSuccess: (data) => {
         toast.success('Training plan duplicated successfully')
         queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
-        router.push(`/trainer/trainings/creator/${data.duplicateTrainingPlan}`)
+        router.push(
+          `/trainer/trainings/creator-new/${data.duplicateTrainingPlan}`,
+        )
       },
     })
 

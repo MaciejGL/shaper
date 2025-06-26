@@ -1,0 +1,3 @@
+mutation UpdateTrainingDayData($input: UpdateTrainingDayDataInput!) {
+  updateTrainingDayData(input: $input)
+}

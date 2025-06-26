@@ -19,21 +19,32 @@ import { workoutTypeGroups } from '../utils'
 type WorkoutTypeSelectProps = {
   dayIndex: number
   day: TrainingPlanFormData['weeks'][number]['days'][number]
+  onUpdate?: (workoutType: GQLWorkoutType | null) => void
 }
 
-export function WorkoutTypeSelect({ dayIndex, day }: WorkoutTypeSelectProps) {
+export function WorkoutTypeSelect({
+  dayIndex,
+  day,
+  onUpdate,
+}: WorkoutTypeSelectProps) {
   const { updateDay, activeWeek } = useTrainingPlan()
+
+  const handleValueChange = (value: GQLWorkoutType) => {
+    if (onUpdate) {
+      // Use the provided callback (for new mutation approach)
+      onUpdate(value)
+    } else {
+      // Fallback to the old context approach
+      updateDay(activeWeek, day.dayOfWeek, {
+        ...day,
+        workoutType: value,
+      })
+    }
+  }
+
   return (
     <div className="space-y-2">
-      <Select
-        value={day.workoutType || ''}
-        onValueChange={(value: GQLWorkoutType) =>
-          updateDay(activeWeek, day.dayOfWeek, {
-            ...day,
-            workoutType: value,
-          })
-        }
-      >
+      <Select value={day.workoutType || ''} onValueChange={handleValueChange}>
         <SelectTrigger id={`workout-type-${dayIndex}`} className="w-full">
           <SelectValue placeholder="Select type" />
         </SelectTrigger>

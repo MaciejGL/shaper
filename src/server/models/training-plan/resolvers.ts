@@ -8,6 +8,7 @@ import {
   activatePlan,
   assignTrainingPlanToClient,
   closePlan,
+  createDraftTemplate,
   createTrainingPlan,
   deletePlan,
   deleteTrainingPlan,
@@ -50,14 +51,17 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   createTrainingPlan: async (_, args, context) => {
     return createTrainingPlan(args, context)
   },
+  createDraftTemplate: async (_, __, context) => {
+    return createDraftTemplate(context)
+  },
   updateTrainingPlan: async (_, args, context) => {
     return updateTrainingPlan(args, context)
   },
-  duplicateTrainingPlan: async (_, args, context) => {
-    return duplicateTrainingPlan(args, context)
-  },
   deleteTrainingPlan: async (_, args, context) => {
     return deleteTrainingPlan(args, context)
+  },
+  duplicateTrainingPlan: async (_, args, context) => {
+    return duplicateTrainingPlan(args, context)
   },
   assignTrainingPlanToClient: async (_, args, context) => {
     return assignTrainingPlanToClient(args, context)

@@ -22,6 +22,7 @@ export type PartialTrainingPlanFormDataDetails = Partial<
 export type TrainingPlanContextType = {
   // State
   formData: TrainingPlanFormData
+  trainingId?: string
   isDirty: boolean
   currentStep: number
   activeWeek: number

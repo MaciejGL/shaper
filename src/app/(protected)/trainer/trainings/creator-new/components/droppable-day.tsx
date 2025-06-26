@@ -2,10 +2,15 @@
 
 import { useDndContext, useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Checkbox } from '@/components/ui/checkbox'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
+import {
+  type GQLWorkoutType,
+  useUpdateTrainingDayDataMutation,
+} from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
 import { WorkoutTypeSelect } from '../../creator/components/days-setup/workout-type-select'
@@ -16,6 +21,7 @@ import { SortableExercise } from './sortable-exercise'
 
 interface DroppableDayProps {
   day: TrainingDay
+  trainingPlanId?: string // Add this to help with query invalidation
 }
 
 // Custom hook for drag and drop logic
@@ -174,9 +180,11 @@ export function InsertionIndicatorBlank({ isActive }: { isActive: boolean }) {
 function DayHeader({
   day,
   onToggleRestDay,
+  onUpdateWorkoutType,
 }: {
   day: TrainingDay
   onToggleRestDay: () => void
+  onUpdateWorkoutType: (workoutType: GQLWorkoutType | null) => void
 }) {
   const { activeDay } = useTrainingPlan()
 
@@ -188,7 +196,13 @@ function DayHeader({
           {dayNames[day.dayOfWeek]}
         </span>
       </div>
-      {!day.isRestDay && <WorkoutTypeSelect dayIndex={activeDay} day={day} />}
+      {!day.isRestDay && (
+        <WorkoutTypeSelect
+          dayIndex={activeDay}
+          day={day}
+          onUpdate={onUpdateWorkoutType}
+        />
+      )}
     </div>
   )
 }
@@ -207,10 +221,10 @@ function ExerciseList({
 
       <div className="min-h-[120px] py-2 rounded">
         <SortableContext
-          items={day.exercises.map((ex) => ex.id)}
+          items={day.exercises?.map((ex) => ex.id)}
           strategy={verticalListSortingStrategy}
         >
-          {day.exercises.map((exercise, index) => (
+          {day.exercises?.map((exercise, index) => (
             <div key={exercise.id}>
               <div className="mb-2">
                 <SortableExercise
@@ -237,8 +251,11 @@ function RestDayContent() {
 }
 
 // Main component
-export function DroppableDay({ day }: DroppableDayProps) {
-  const { updateDay, activeWeek } = useTrainingPlan()
+export function DroppableDay({ day, trainingPlanId }: DroppableDayProps) {
+  // Always use mutations now since we have real database IDs
+  const queryClient = useQueryClient()
+  const { mutate: updateTrainingDayData } = useUpdateTrainingDayDataMutation()
+  const { updateDay, activeWeek } = useTrainingPlan() // Keep context for fallback only
   const { containerRef, draggedOverIndex } = useDragDropLogic(day)
 
   const { setNodeRef } = useDroppable({
@@ -250,12 +267,72 @@ export function DroppableDay({ day }: DroppableDayProps) {
     },
   })
 
+  const invalidateQueries = useCallback(() => {
+    if (trainingPlanId) {
+      queryClient.invalidateQueries({
+        queryKey: ['GetTemplateTrainingPlanById', { id: trainingPlanId }],
+      })
+      queryClient.invalidateQueries({
+        queryKey: ['GetTrainingPlanPreviewById', { id: trainingPlanId }],
+      })
+      queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
+    }
+  }, [queryClient, trainingPlanId])
+
   const handleToggleRestDay = useCallback(() => {
-    updateDay(activeWeek, day.dayOfWeek, {
-      ...day,
-      isRestDay: !day.isRestDay,
-    })
-  }, [updateDay, activeWeek, day])
+    // Always use mutation now since we have real database IDs
+    updateTrainingDayData(
+      {
+        input: {
+          dayId: day.id,
+          isRestDay: !day.isRestDay,
+        },
+      },
+      {
+        onSuccess: () => {
+          console.log('✅ Day rest status updated successfully')
+          invalidateQueries()
+        },
+        onError: (error) => {
+          console.error('❌ Failed to update day rest status:', error)
+          // Fallback to context approach on error
+          updateDay(activeWeek, day.dayOfWeek, {
+            ...day,
+            isRestDay: !day.isRestDay,
+          })
+        },
+      },
+    )
+  }, [updateTrainingDayData, updateDay, day, activeWeek, invalidateQueries])
+
+  const handleUpdateWorkoutType = useCallback(
+    (workoutType: GQLWorkoutType | null) => {
+      // Always use mutation now since we have real database IDs
+      updateTrainingDayData(
+        {
+          input: {
+            dayId: day.id,
+            workoutType: workoutType,
+          },
+        },
+        {
+          onSuccess: () => {
+            console.log('✅ Workout type updated successfully')
+            invalidateQueries()
+          },
+          onError: (error) => {
+            console.error('❌ Failed to update workout type:', error)
+            // Fallback to context approach on error
+            updateDay(activeWeek, day.dayOfWeek, {
+              ...day,
+              workoutType,
+            })
+          },
+        },
+      )
+    },
+    [updateTrainingDayData, updateDay, day, activeWeek, invalidateQueries],
+  )
 
   return (
     <div
@@ -265,7 +342,11 @@ export function DroppableDay({ day }: DroppableDayProps) {
       }}
       className="w-[260px] bg-neutral-950/30 px-4 py-2 rounded-lg"
     >
-      <DayHeader day={day} onToggleRestDay={handleToggleRestDay} />
+      <DayHeader
+        day={day}
+        onToggleRestDay={handleToggleRestDay}
+        onUpdateWorkoutType={handleUpdateWorkoutType}
+      />
 
       <div className={cn('flex grow', day.isRestDay && 'opacity-50')}>
         {day.isRestDay ? (
