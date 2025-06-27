@@ -122,6 +122,7 @@ export function TrainingPlanProvider({
   const { updateWeek, removeWeek, addWeek, cloneWeek } = useWeekHandlers(
     setWeeks,
     setIsDirty,
+    setActiveWeek,
   )
   const updateDetails = useCallback(
     (newDetails: Partial<TrainingPlanFormData['details']>) => {

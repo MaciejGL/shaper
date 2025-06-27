@@ -126,9 +126,12 @@ export const useSetHandlers = (
         const newExercises = [...newDays[dayIndex].exercises]
         newExercises[exerciseIndex] = {
           ...newExercises[exerciseIndex],
-          sets: newExercises[exerciseIndex].sets.filter(
-            (_, idx) => idx !== setIndex,
-          ),
+          sets: newExercises[exerciseIndex].sets
+            .filter((_, idx) => idx !== setIndex)
+            .map((set, idx) => ({
+              ...set,
+              order: idx + 1,
+            })),
         }
         newDays[dayIndex] = { ...newDays[dayIndex], exercises: newExercises }
         newWeeks[weekIndex] = { ...newWeeks[weekIndex], days: newDays }

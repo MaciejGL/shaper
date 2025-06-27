@@ -1,7 +1,10 @@
 import { isNil } from 'lodash'
 import { useCallback } from 'react'
 
-import { TrainingPlanFormData } from '@/app/(protected)/trainer/trainings/creator/components/types'
+import {
+  TrainingExercise,
+  TrainingPlanFormData,
+} from '@/app/(protected)/trainer/trainings/creator/components/types'
 import { createId } from '@/lib/create-id'
 
 import { PartialTrainingPlanFormDataExercise } from './types'
@@ -25,13 +28,26 @@ export const useExerciseHandlers = (
         })
         return
       }
+      const exerciseData: PartialTrainingPlanFormDataExercise = {
+        name: newExercise.name,
+        instructions: newExercise.instructions,
+        sets: newExercise.sets,
+        order: newExercise.order,
+        baseId: newExercise.baseId,
+        videoUrl: newExercise.videoUrl,
+        type: newExercise.type,
+        warmupSets: newExercise.warmupSets,
+        tempo: newExercise.tempo,
+        additionalInstructions: newExercise.additionalInstructions,
+        restSeconds: newExercise.restSeconds,
+      }
       setWeeks((prev) => {
         const newWeeks = [...prev]
         const newDays = [...newWeeks[weekIndex].days]
         newDays[dayIndex] = {
           ...newDays[dayIndex],
           exercises: newDays[dayIndex].exercises.map((exercise, idx) =>
-            idx === exerciseIndex ? { ...exercise, ...newExercise } : exercise,
+            idx === exerciseIndex ? { ...exercise, ...exerciseData } : exercise,
           ),
         }
         newWeeks[weekIndex] = { ...newWeeks[weekIndex], days: newDays }
@@ -61,15 +77,20 @@ export const useExerciseHandlers = (
         const newDays = [...newWeeks[weekIndex].days]
 
         const currentExercises = newDays[dayIndex].exercises
-        const newExercise = {
+        const newExercise: TrainingExercise = {
           ...exercise,
           id: createId(), // Ensure unique ID after spreading exercise
           name: exercise.name || '',
-          instructions: exercise.instructions || '',
+          instructions: exercise.instructions,
           sets: exercise.sets || [],
           order: currentExercises.length + 1, // Will be adjusted below if needed
           baseId: exercise.id, // Store original exercise ID as baseId
-          isPublic: exercise.isPublic || false,
+          additionalInstructions: exercise.additionalInstructions,
+          restSeconds: exercise.restSeconds,
+          tempo: exercise.tempo,
+          type: exercise.type,
+          warmupSets: exercise.warmupSets,
+          videoUrl: exercise.videoUrl,
         }
 
         let newExercises: typeof currentExercises

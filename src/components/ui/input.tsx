@@ -24,8 +24,7 @@ const inputVariants = cva(
     variants: {
       variant: {
         ghost: 'border-none bg-secondary shadow-none',
-        inset:
-          'border-input shadow-neuro-inset-light dark:shadow-neuro-inset-dark',
+        secondary: 'border-none shadow-none bg-primary/5',
         outline: 'border-input shadow-none bg-secondary',
       },
       size: {
@@ -34,7 +33,7 @@ const inputVariants = cva(
       },
     },
     defaultVariants: {
-      variant: 'inset',
+      variant: 'outline',
       size: 'md',
     },
   },
@@ -55,7 +54,7 @@ export function Input({
   return (
     <div className="space-y-1">
       {label && (
-        <Label htmlFor={id} className="text-sm font-medium">
+        <Label htmlFor={id} className="text-sm">
           {label}
         </Label>
       )}

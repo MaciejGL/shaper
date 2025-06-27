@@ -1,4 +1,5 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { AnimatePresence, motion } from 'framer-motion'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Checkbox } from '@/components/ui/checkbox'
@@ -46,7 +47,7 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
   )
 
   return (
-    <div className="flex items-center justify-between border-b border-neutral-800 pb-2 mb-3">
+    <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
       <div className="flex items-center gap-2">
         <Checkbox
           checked={!isRestDay}
@@ -56,13 +57,23 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
           {dayNames[day.dayOfWeek]}
         </span>
       </div>
-      {!isRestDay && (
-        <WorkoutTypeSelect
-          dayIndex={dayIndex}
-          workoutType={workoutType}
-          onValueChange={handleValueChange}
-        />
-      )}
+      <AnimatePresence>
+        {!isRestDay && (
+          <motion.div
+            key={day.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
+            <WorkoutTypeSelect
+              dayIndex={dayIndex}
+              workoutType={workoutType}
+              onValueChange={handleValueChange}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 })
@@ -84,7 +95,7 @@ export const ExerciseList = React.memo(
     )
 
     return (
-      <div className="flex-1">
+      <div className="flex-1 max-w-full">
         <InsertionIndicator isActive={draggedOverIndex === 0} />
 
         <div className="min-h-[120px] py-2 rounded">
@@ -94,7 +105,7 @@ export const ExerciseList = React.memo(
           >
             {day.exercises?.map((exercise, index) => (
               <div key={exercise.id}>
-                <div className="mb-2">
+                <div className="mb-2 w-full ">
                   <SortableExercise
                     exerciseId={exercise.id}
                     dayOfWeek={day.dayOfWeek}

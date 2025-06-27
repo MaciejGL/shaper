@@ -29,7 +29,7 @@ export function WeekTabs() {
   }))
 
   return (
-    <div className="mb-6 bg-muted p-2 rounded-lg w-max min-w-full flex items-center gap-2 justify-start">
+    <div className="mb-6 bg-card dark:bg-card-on-card shadow-xs p-2 rounded-lg w-max min-w-full flex items-center gap-2 justify-start">
       <RadioGroupTabs
         title="Select Week"
         hideTitle

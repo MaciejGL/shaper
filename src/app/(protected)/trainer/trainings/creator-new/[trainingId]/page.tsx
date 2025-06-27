@@ -9,7 +9,7 @@ export default function CreateTrainingPlanPage() {
   const { trainingId } = useParams<{ trainingId: string }>()
 
   return (
-    <div className="container h-full">
+    <div className="h-full">
       <TrainingPlanProvider trainingId={trainingId}>
         <WorkoutPlanner />
       </TrainingPlanProvider>

@@ -1,4 +1,3 @@
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { GQLTrainerExercisesQuery } from '@/generated/graphql-client'
 
@@ -24,13 +23,13 @@ export function DragOverlay({
 
   if (activeExercise) {
     return (
-      <Card className="cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px]">
+      <Card
+        className="cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px]"
+        hoverable
+      >
         <CardContent className="p-2">
           <div className="font-medium text-sm space-y-1">
             <p>{activeExercise.name}</p>
-            <Badge variant="secondary">
-              {activeExercise.isPublic ? 'Public' : 'Private'}
-            </Badge>
           </div>
         </CardContent>
       </Card>
@@ -45,7 +44,10 @@ export function DragOverlay({
 
   if (dayExercise) {
     return (
-      <Card className="cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px]">
+      <Card
+        className="cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px]"
+        hoverable
+      >
         <CardContent className="p-3 flex items-center justify-between">
           <p className="text-sm font-medium pr-6">{dayExercise.name}</p>
         </CardContent>

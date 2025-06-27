@@ -4,6 +4,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { AnimatePresence } from 'framer-motion'
 import {
+  FlameIcon,
   GaugeIcon,
   MoreHorizontal,
   Pencil,
@@ -15,11 +16,13 @@ import { useState } from 'react'
 
 import { useIsFirstRender } from '@/components/animated-grid'
 import { AnimateHeightItem } from '@/components/animations/animated-container'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
@@ -101,7 +104,9 @@ export function SortableExercise({
   }
 
   const handleRemoveExercise = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    e:
+      | React.MouseEvent<HTMLDivElement, MouseEvent>
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ) => {
     e.stopPropagation()
 
@@ -134,11 +139,44 @@ export function SortableExercise({
           'cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px]',
           isDragging && 'border-primary/50 !bg-muted/50',
         )}
+        hoverable
       >
         {isDragging && <InsertionIndicatorBlank isActive={true} />}
         {!isDragging && (
-          <CardContent className="p-3 flex items-center justify-between">
-            <p className="text-sm font-medium pr-6">{exercise.name}</p>
+          <CardContent
+            className="grow p-3 flex flex-col gap-2 justify-between overflow-hidden cursor-pointer"
+            onClick={() => setIsEditDialogOpen(true)}
+          >
+            {exercise.type && (
+              <p className="text-xs  pr-6 text-muted-foreground">
+                {EXERCISE_TYPES[exercise.type]}
+              </p>
+            )}
+            <p className="text-sm font-medium pr-6 mb-4">{exercise.name}</p>
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {exercise.warmupSets && (
+                <Badge variant="outline">
+                  <FlameIcon />
+                  {exercise.warmupSets} warmups
+                </Badge>
+              )}
+              {exercise.sets.length > 0 && (
+                <Badge variant="outline">
+                  <FlameIcon /> {exercise.sets.length} sets
+                </Badge>
+              )}
+              {exercise.restSeconds && (
+                <Badge variant="outline">
+                  <TimerIcon /> {exercise.restSeconds} rest
+                </Badge>
+              )}
+              {exercise.tempo && (
+                <Badge variant="outline">
+                  <GaugeIcon /> {exercise.tempo}
+                </Badge>
+              )}
+            </div>
           </CardContent>
         )}
       </Card>
@@ -168,11 +206,30 @@ export function SortableExercise({
         </DropdownMenu>
       )}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent dialogTitle={exercise.name}>
+        <DialogContent dialogTitle={exercise.name} className="sm:max-w-3xl">
           <DialogHeader>
             <DialogTitle>{exercise.name}</DialogTitle>
           </DialogHeader>
-          <ExerciseCard exerciseId={exerciseId} dayOfWeek={dayOfWeek} />
+          <ExerciseDialogContent
+            exerciseId={exerciseId}
+            dayOfWeek={dayOfWeek}
+          />
+
+          <DialogFooter className="flex flex-row justify-between gap-2">
+            <Button variant="destructive" onClick={handleRemoveExercise}>
+              <Trash2 className="w-3 h-3" />
+              Remove
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setIsEditDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={() => setIsEditDialogOpen(false)}>Save</Button>
+            </div>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
@@ -190,15 +247,17 @@ function KanbanExerciseSets({
   dayOfWeek,
 }: KanbanExerciseSetsProps) {
   const isFirstRender = useIsFirstRender()
-  const { addSet, activeWeek, formData } = useTrainingPlan()
+  const { addSet, removeSet, updateSet, activeWeek, formData } =
+    useTrainingPlan()
 
   // Get exercise data directly from context
-  const currentDay = formData.weeks[activeWeek]?.days.find(
+  const targetDayIndex = formData.weeks[activeWeek]?.days.findIndex(
     (day) => day.dayOfWeek === dayOfWeek,
   )
-  const exercise = currentDay?.exercises.find((ex) => ex.id === exerciseId)
+  const targetDay = formData.weeks[activeWeek]?.days[targetDayIndex]
+  const exercise = targetDay?.exercises.find((ex) => ex.id === exerciseId)
   const exerciseIndex =
-    currentDay?.exercises.findIndex((ex) => ex.id === exerciseId) ?? -1
+    targetDay?.exercises.findIndex((ex) => ex.id === exerciseId) ?? -1
 
   if (!exercise || exerciseIndex === -1) {
     console.error('[KanbanExerciseSets]: Exercise not found', exerciseId)
@@ -206,25 +265,23 @@ function KanbanExerciseSets({
   }
 
   const sets = exercise.sets ?? []
-
   const onAddSet = () => {
-    addSet(activeWeek, dayOfWeek, exerciseIndex, {
-      minReps: 8,
+    addSet(activeWeek, targetDayIndex, exerciseIndex, {
+      order: sets.length + 1,
     })
-    console.log('onAddSet')
   }
-
   const onRemoveSet = (index: number) => {
-    console.log('onRemoveSet', index)
+    removeSet(activeWeek, targetDayIndex, exerciseIndex, index)
   }
-
   const onUpdateSet = (index: number, field: string, value?: number) => {
-    console.log('onUpdateSet', index, field, value)
+    updateSet(activeWeek, targetDayIndex, exerciseIndex, index, {
+      [field]: value,
+    })
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
+    <div className="space-y-2">
+      <div className="flex justify-between items-end">
         <Label>Sets</Label>
         <Button
           type="button"
@@ -237,7 +294,7 @@ function KanbanExerciseSets({
       </div>
 
       <AnimatePresence mode="wait">
-        <div className="space-y-2">
+        <div className="space-y-2 bg-card px-6 py-2 rounded-md">
           {sets.map((set, index) => (
             <AnimateHeightItem
               id={`set-${set.order}`}
@@ -245,11 +302,21 @@ function KanbanExerciseSets({
               className="flex items-center gap-2"
               isFirstRender={isFirstRender}
             >
-              <div className="font-medium w-10">{set.order}</div>
-              <div className="flex-1 flex items-center gap-2">
-                <div className="flex-1">
+              <div
+                className={cn(
+                  'font-medium w-8',
+                  set.order === 1 && 'mt-[20px]',
+                )}
+              >
+                {set.order}
+              </div>
+              <div className="flex items-center gap-4">
+                <div>
                   {set.order === 1 && (
-                    <Label htmlFor={`reps-${set.order}`} className="text-xs">
+                    <Label
+                      htmlFor={`reps-${set.order}`}
+                      className="text-sm mb-1"
+                    >
                       Reps
                       <Tooltip>
                         <TooltipTrigger>
@@ -280,6 +347,7 @@ function KanbanExerciseSets({
                             : Number.parseInt(e.target.value),
                         )
                       }
+                      className="max-w-20"
                     />
                     -
                     <Input
@@ -302,12 +370,16 @@ function KanbanExerciseSets({
                             : Number.parseInt(e.target.value),
                         )
                       }
+                      className="max-w-20"
                     />
                   </div>
                 </div>
-                <div className="flex-1">
+                <div>
                   {set.order === 1 && (
-                    <Label htmlFor={`weight-${set.order}`} className="text-xs">
+                    <Label
+                      htmlFor={`weight-${set.order}`}
+                      className="text-sm mb-1"
+                    >
                       Weight
                     </Label>
                   )}
@@ -326,11 +398,15 @@ function KanbanExerciseSets({
                           : Number.parseFloat(e.target.value),
                       )
                     }
+                    className="max-w-32"
                   />
                 </div>
-                <div className="flex-1">
+                <div>
                   {set.order === 1 && (
-                    <Label htmlFor={`rpe-${set.order}`} className="text-xs">
+                    <Label
+                      htmlFor={`rpe-${set.order}`}
+                      className="text-sm mb-1"
+                    >
                       RPE
                     </Label>
                   )}
@@ -350,6 +426,7 @@ function KanbanExerciseSets({
                           : Number.parseFloat(e.target.value),
                       )
                     }
+                    className="max-w-20"
                   />
                 </div>
               </div>
@@ -370,12 +447,15 @@ function KanbanExerciseSets({
   )
 }
 
-type ExerciseCardProps = {
+type ExerciseDialogContentProps = {
   exerciseId: string
   dayOfWeek: number
 }
 
-export function ExerciseCard({ exerciseId, dayOfWeek }: ExerciseCardProps) {
+export function ExerciseDialogContent({
+  exerciseId,
+  dayOfWeek,
+}: ExerciseDialogContentProps) {
   const { activeWeek, updateExercise, formData } = useTrainingPlan()
 
   // Get exercise data directly from context
@@ -388,17 +468,12 @@ export function ExerciseCard({ exerciseId, dayOfWeek }: ExerciseCardProps) {
 
   // Early return if exercise not found
   if (!exercise) {
-    console.error('[ExerciseCard]: Exercise not found', exerciseId)
+    console.error('[ExerciseDialogContent]: Exercise not found', exerciseId)
     return <div>Exercise not found</div>
   }
 
   // Helper function to update exercise with proper error handling
   const handleUpdateExercise = (updates: Partial<TrainingExercise>) => {
-    if (exerciseIndex === -1) {
-      console.error('[ExerciseCard]: Exercise not found in current day')
-      return
-    }
-
     updateExercise(activeWeek, dayOfWeek, exerciseIndex, {
       ...exercise,
       ...updates,
@@ -406,17 +481,13 @@ export function ExerciseCard({ exerciseId, dayOfWeek }: ExerciseCardProps) {
   }
 
   return (
-    <div className="gap-2 bg-card-on-card">
-      <div className="flex justify-between items-start">
-        <div className="flex gap-1">
-          {exercise.videoUrl && <VideoPreview url={exercise.videoUrl} />}
-        </div>
-      </div>
-
-      <div className="space-y-4">
+    <div className="gap-2">
+      <div className="space-y-8">
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm items-end">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="exerciseType">Exercise type</Label>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="exerciseType" className="text-sm">
+              Exercise type
+            </Label>
             <Select
               value={exercise.type ?? ''}
               onValueChange={(value) =>
@@ -425,7 +496,7 @@ export function ExerciseCard({ exerciseId, dayOfWeek }: ExerciseCardProps) {
                 })
               }
             >
-              <SelectTrigger size="sm">
+              <SelectTrigger>
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
@@ -498,48 +569,57 @@ export function ExerciseCard({ exerciseId, dayOfWeek }: ExerciseCardProps) {
               className="min-w-28 max-w-min"
             />
           )}
+
+          <div className="flex gap-1">
+            {exercise.videoUrl && (
+              <VideoPreview url={exercise.videoUrl} variant="secondary" />
+            )}
+          </div>
         </div>
-        <div className="w-full grid grid-cols-1 @4xl/section:grid-cols-[1fr_400px] gap-4">
+        <div className="w-full grid grid-cols-1 @4xl/section:grid-cols-[1fr_400px] gap-8">
           {exercise.type !== GQLExerciseType.Cardio && (
             <KanbanExerciseSets exerciseId={exerciseId} dayOfWeek={dayOfWeek} />
           )}
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="instructions" className="flex flex-col items-start">
-              <p>Instructions</p>
-              <p className="text-xs text-muted-foreground">
-                Visible in instructions tab
-              </p>
-            </Label>
-            <Textarea
-              id="instructions"
-              className="text-sm text-foreground bg-muted p-2 rounded-md h-full min-h-24"
-              value={exercise.instructions ?? ''}
-              onChange={(e) =>
-                handleUpdateExercise({
-                  instructions: e.target.value,
-                })
-              }
-            />
-
-            <Label
-              htmlFor="additionalInstructions"
-              className="flex flex-col items-start mt-2"
-            >
-              <p>Additional Instructions</p>
-              <p className="text-xs text-muted-foreground">
-                Visible directly in the exercise card
-              </p>
-            </Label>
-            <Textarea
-              id="additionalInstructions"
-              className="text-sm text-foreground bg-muted p-2 rounded-md h-full min-h-12"
-              value={exercise.additionalInstructions ?? ''}
-              onChange={(e) =>
-                handleUpdateExercise({
-                  additionalInstructions: e.target.value,
-                })
-              }
-            />
+          <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-2">
+              <Label
+                htmlFor="instructions"
+                className="flex flex-col items-start text-sm"
+              >
+                <p>Instructions (Visible in exercise menu)</p>
+              </Label>
+              <Textarea
+                id="instructions"
+                className="text-sm text-foreground bg-muted p-2 rounded-md h-full min-h-24 border-none"
+                value={exercise.instructions ?? ''}
+                onChange={(e) =>
+                  handleUpdateExercise({
+                    instructions: e.target.value,
+                  })
+                }
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label
+                htmlFor="additionalInstructions"
+                className="flex flex-col items-start text-sm"
+              >
+                <p>
+                  Additional Instructions (Visible directly in the exercise
+                  view)
+                </p>
+              </Label>
+              <Textarea
+                id="additionalInstructions"
+                className="text-sm text-foreground bg-muted p-2 rounded-md h-full min-h-12 border-none"
+                value={exercise.additionalInstructions ?? ''}
+                onChange={(e) =>
+                  handleUpdateExercise({
+                    additionalInstructions: e.target.value,
+                  })
+                }
+              />
+            </div>
           </div>
         </div>
       </div>

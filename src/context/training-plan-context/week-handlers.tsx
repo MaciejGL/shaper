@@ -10,6 +10,7 @@ import { createId } from '@/lib/create-id'
 export const useWeekHandlers = (
   setWeeks: React.Dispatch<React.SetStateAction<TrainingPlanFormData['weeks']>>,
   setIsDirty: React.Dispatch<React.SetStateAction<boolean>>,
+  setActiveWeek: React.Dispatch<React.SetStateAction<number>>,
 ) => {
   const updateWeek = useCallback(
     (weekIndex: number, newWeek: Partial<TrainingPlanFormData['weeks'][0]>) => {
@@ -31,15 +32,36 @@ export const useWeekHandlers = (
         })
         return
       }
+
       setWeeks((prev) => {
         const newWeeks = renumberWeeks(
           prev.filter((_, index) => index !== weekIndex),
         )
+
+        // Handle active week selection after removal
+        setActiveWeek((currentActiveWeek) => {
+          // If we're removing the currently active week
+          if (currentActiveWeek === weekIndex) {
+            // If removing the first week, stay at 0 (if there are remaining weeks)
+            // If removing any other week, select the previous week
+            return weekIndex > 0 ? weekIndex - 1 : 0
+          }
+          // If removing a week that comes before the active week,
+          // decrement active week index to maintain the same week selection
+          else if (weekIndex < currentActiveWeek) {
+            return currentActiveWeek - 1
+          }
+          // If removing a week after the active week, no change needed
+          else {
+            return currentActiveWeek
+          }
+        })
+
         return newWeeks
       })
       setIsDirty(true)
     },
-    [setWeeks, setIsDirty],
+    [setWeeks, setIsDirty, setActiveWeek],
   )
 
   const addWeek = useCallback(() => {

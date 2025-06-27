@@ -58,7 +58,7 @@ export function CompletedPlansTab({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {completedPlans.length > 0 ? (
         completedPlans.map((plan) => (
-          <Card key={plan.id}>
+          <Card key={plan.id} variant="elevated">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div className="flex-1">

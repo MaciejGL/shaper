@@ -95,17 +95,13 @@ export function AppSidebar() {
       placeholderData: placeholderTemplates,
     })
 
-  // ## Create draft template mutation for new plans
   const { mutate: createDraftTemplate, isPending: isCreatingDraftTemplate } =
     useCreateDraftTemplateMutation({
       onSuccess: (data) => {
         const newPlan = data.createDraftTemplate
-        console.log('✅ Draft template created:', newPlan.id)
 
-        // Set the actual training ID
         queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
 
-        // Update the URL to include the new training ID
         router.push(`/trainer/trainings/creator-new/${newPlan.id}`)
       },
       onError: (error) => {
@@ -156,7 +152,7 @@ export function AppSidebar() {
           },
           ...templates.map((template) => ({
             title: template.title,
-            url: TRAINER_LINKS.trainings.href + `/creator/${template.id}`,
+            url: TRAINER_LINKS.trainings.href + `/creator-new/${template.id}`,
             icon: FileIcon,
             disabled: false,
           })),
@@ -236,7 +232,7 @@ function SidebarItem({
           <Button
             onClick={item.onClick}
             variant="variantless"
-            className="inline-flex py-4 w-full text-left justify-start pl-0"
+            className="inline-flex w-full text-left justify-start pl-0"
             disabled={item.disabled}
             loading={item.loading}
           >
@@ -268,11 +264,11 @@ function SidebarItem({
                 <Button
                   onClick={subItem.onClick}
                   variant="variantless"
-                  className="inline-flex py-4 w-full text-left justify-start pl-0"
+                  className="inline-flex w-full text-left justify-start [&_svg]:size-4 pl-2"
                   disabled={subItem.disabled}
                   loading={subItem.loading}
+                  iconStart={<subItem.icon />}
                 >
-                  <subItem.icon />
                   <span>{subItem.title}</span>
                 </Button>
               )}

@@ -12,12 +12,17 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
+import { PartialTrainingPlanFormDataExercise } from '@/context/training-plan-context/types'
 import { useTrainerExercisesQuery } from '@/generated/graphql-client'
+import { createId } from '@/lib/create-id'
 
+import { DashboardHeader } from '../../../components/dashboard-header'
+import { FormActions } from '../../creator/components/create-training-plan-form/form-actions'
 import { PlanDetailsForm } from '../../creator/components/plan-details-form'
 import { TrainingDay } from '../../creator/components/types'
 
@@ -27,8 +32,23 @@ import { Sidebar } from './sidebar'
 import { WeekTabs } from './week-tabs'
 
 export default function WorkoutPlanner() {
-  const { formData, activeWeek, addExercise, moveExercise, updateDetails } =
-    useTrainingPlan()
+  const {
+    formData,
+    activeWeek,
+    addExercise,
+    moveExercise,
+    updateDetails,
+    isDirty,
+    trainingId,
+    isPending,
+    isUpdating,
+    isDuplicating,
+    isDeleting,
+    clearDraft,
+    handleDelete,
+    handleDuplicate,
+    handleSubmit,
+  } = useTrainingPlan()
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -57,65 +77,6 @@ export default function WorkoutPlanner() {
   const handleDragStart = (event: DragStartEvent) => {
     setActiveId(event.active.id as string)
   }
-
-  // // Improved reordering function using the new utility
-  // const reorderExercises = (
-  //   dayOfWeek: number,
-  //   exercises: TrainingExercise[],
-  // ) => {
-  //   const day = formData.weeks[activeWeek].days.find(
-  //     (d) => d.dayOfWeek === dayOfWeek,
-  //   )
-  //   if (!day) return
-
-  //   // Use the new order calculation for all exercises
-  //   const newExercises = exercises?.map((exercise, index) => ({
-  //     ...exercise,
-  //     order: getNewOrder({
-  //       orders: exercises.map((_, i) => i * 1024), // Create evenly spaced orders
-  //       sourceIndex: null,
-  //       destinationIndex: index,
-  //     }),
-  //   }))
-
-  //   updateDay(activeWeek, dayOfWeek, {
-  //     ...day,
-  //     exercises: newExercises,
-  //   })
-  // }
-
-  // // Improved insertion function using the new utility
-  // const insertExerciseAtPosition = (
-  //   targetDay: TrainingDay,
-  //   newExercise: Omit<TrainingExercise, 'order' | 'sets'>,
-  //   position: number,
-  // ) => {
-  //   const currentOrders = targetDay.exercises?.map((ex) => ex.order)
-
-  //   // Calculate new order using the improved utility
-  //   const order = getNewOrder({
-  //     orders: currentOrders,
-  //     sourceIndex: null,
-  //     destinationIndex: position,
-  //   })
-
-  //   // Create the new exercise with proper order
-  //   const exerciseToInsert: TrainingExercise = {
-  //     ...newExercise,
-  //     id: `${newExercise.id}-${Date.now()}`,
-  //     order,
-  //     sets: [],
-  //   }
-
-  //   // Insert at the specified position
-  //   const newExercises = [...(targetDay.exercises || [])]
-  //   newExercises.splice(position, 0, exerciseToInsert)
-
-  //   updateDay(activeWeek, targetDay.dayOfWeek, {
-  //     ...targetDay,
-  //     exercises: newExercises,
-  //   })
-  // }
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
@@ -190,15 +151,25 @@ export default function WorkoutPlanner() {
 
     // Handle dropping new exercises from sidebar
     const newExercise = joinedExercises.find((ex) => ex.id === active.id)
+
     if (!newExercise) return
 
     // Create exercise object similar to exercise form
-    const exerciseToAdd = {
-      ...newExercise,
+    const exerciseToAdd: PartialTrainingPlanFormDataExercise = {
       baseId: newExercise.id,
+      name: newExercise.name,
+      videoUrl: newExercise.videoUrl || '',
       instructions: newExercise.description || '',
-      sets: [], // Start with empty sets, user can add them later
       order: (targetPosition || 0) + 1, // Simple ordering
+      sets: [
+        {
+          id: createId(),
+          order: 1,
+          minReps: undefined,
+          maxReps: undefined,
+          weight: undefined,
+        },
+      ], // Start with empty sets, user can add them later
     }
 
     // Use context's addExercise function - same as exercise form
@@ -206,22 +177,71 @@ export default function WorkoutPlanner() {
   }
 
   return (
-    <Tabs defaultValue="details">
-      <TabsList>
-        <TabsTrigger value="details">Details</TabsTrigger>
-        <TabsTrigger value="weeks">Weeks</TabsTrigger>
-      </TabsList>
-      <TabsContent value="details">
+    <Tabs defaultValue="details" className="h-full flex flex-col">
+      <div>
+        <div className="flex justify-between items-baseline">
+          <DashboardHeader
+            title="Training Plan Creator"
+            description={`${formData.details.title}`}
+            prevSegment={{
+              label: 'Training Plans',
+              href: '/trainer/trainings',
+            }}
+            className="mb-2 mt-0"
+          />
+        </div>
+        <div className="flex justify-between items-end">
+          <TabsList size="lg">
+            <TabsTrigger size="lg" value="details">
+              Training Informations
+            </TabsTrigger>
+            <TabsTrigger size="lg" value="weeks">
+              Workout Planner
+            </TabsTrigger>
+          </TabsList>
+          <div className="relative">
+            <AnimatePresence>
+              {isDirty && (
+                <motion.p
+                  key="unsaved-changes"
+                  initial={{ opacity: 0, x: 100 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 100 }}
+                  className="text-sm text-amber-500 text-right mb-2 absolute -top-8 right-0"
+                >
+                  Unsaved changes
+                </motion.p>
+              )}
+            </AnimatePresence>
+            <FormActions
+              isDirty={isDirty}
+              trainingId={trainingId}
+              isPending={isPending}
+              isUpdating={isUpdating}
+              isDuplicating={isDuplicating}
+              isDeleting={isDeleting}
+              onDelete={handleDelete}
+              onClearDraft={clearDraft}
+              onDuplicate={handleDuplicate}
+              onSubmit={handleSubmit}
+            />
+          </div>
+        </div>
+      </div>
+      <TabsContent
+        value="details"
+        className="flex-1 bg-card dark:bg-card-on-card rounded-lg p-4"
+      >
         <PlanDetailsForm data={formData.details} updateData={updateDetails} />
       </TabsContent>
-      <TabsContent value="weeks">
+      <TabsContent value="weeks" className="flex-1">
         <DndContext
           sensors={sensors}
           collisionDetection={pointerWithin}
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="grid grid-cols-[auto_1fr] h-full">
+          <div className="flex h-full w-full">
             <Sidebar
               searchTerm={searchTerm}
               selectedMuscleGroup={selectedMuscleGroup}
@@ -233,9 +253,11 @@ export default function WorkoutPlanner() {
               onEquipmentChange={setSelectedEquipment}
             />
 
-            <div className="flex flex-col pl-6 overflow-y-auto h-full w-max">
+            <div className="grid grid-cols-1 grid-rows-[auto_1fr] pl-6 ">
               <WeekTabs />
-              <DayGrid />
+              <div className="overflow-x-auto pr-6 hide-scrollbar ">
+                <DayGrid />
+              </div>
             </div>
           </div>
 
