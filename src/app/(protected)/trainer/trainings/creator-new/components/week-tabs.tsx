@@ -19,18 +19,21 @@ export function WeekTabs() {
   const handleWeekChange = (value: string) => {
     setActiveWeek(Number.parseInt(value))
   }
+
+  const weekItems = weeks.map((week, index) => ({
+    id: `week-${index}`,
+    value: index.toString(),
+    label: `Week ${week.weekNumber}`,
+    onRemove: () => removeWeek(index),
+    onCopy: () => cloneWeek(index),
+  }))
+
   return (
     <div className="mb-6 bg-muted p-2 rounded-lg w-max min-w-full flex items-center gap-2 justify-start">
       <RadioGroupTabs
         title="Select Week"
         hideTitle
-        items={weeks.map((week, index) => ({
-          id: `week-${index}`,
-          value: index.toString(),
-          label: `Week ${week.weekNumber}`,
-          onRemove: () => removeWeek(index),
-          onCopy: () => cloneWeek(index),
-        }))}
+        items={weekItems}
         onValueChange={handleWeekChange}
         value={activeWeek.toString()}
       />

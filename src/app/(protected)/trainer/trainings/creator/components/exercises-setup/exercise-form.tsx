@@ -28,6 +28,7 @@ const initialExercise: TrainingExercise = {
   tempo: '',
   instructions: '',
   order: 1,
+  isPublic: false,
 }
 
 type ExerciseFormProps = {

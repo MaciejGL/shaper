@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
+import { GQLWorkoutType } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
 import { TrainingPlanFormData } from '../types'
@@ -24,6 +25,13 @@ export function DayCard({ day, dayIndex }: DayCardProps) {
     })
   }
 
+  const handleValueChange = (value: GQLWorkoutType) => {
+    updateDay(activeWeek, dayIndex, {
+      ...day,
+      workoutType: value,
+    })
+  }
+
   return (
     <Card className="h-full bg-card-on-card">
       <CardHeader className="flex items-baseline justify-between">
@@ -42,7 +50,13 @@ export function DayCard({ day, dayIndex }: DayCardProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {!day.isRestDay && <WorkoutTypeSelect dayIndex={dayIndex} day={day} />}
+        {!day.isRestDay && (
+          <WorkoutTypeSelect
+            dayIndex={dayIndex}
+            workoutType={day.workoutType}
+            onValueChange={handleValueChange}
+          />
+        )}
         {day.isRestDay && (
           <p className="text-sm text-muted-foreground">Rest Day</p>
         )}

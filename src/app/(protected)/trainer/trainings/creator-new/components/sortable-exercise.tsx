@@ -53,7 +53,7 @@ import { cn } from '@/lib/utils'
 import { EXERCISE_TYPES } from '../../creator/components/exercises-setup/exercise-card'
 import { TrainingExercise } from '../../creator/components/types'
 
-import { InsertionIndicatorBlank } from './droppable-day'
+import { InsertionIndicatorBlank } from './insertion-indicators'
 
 interface SortableExerciseProps {
   exerciseId: string
@@ -190,8 +190,7 @@ function KanbanExerciseSets({
   dayOfWeek,
 }: KanbanExerciseSetsProps) {
   const isFirstRender = useIsFirstRender()
-  const { addSet, removeSet, activeWeek, updateSet, formData } =
-    useTrainingPlan()
+  const { addSet, activeWeek, formData } = useTrainingPlan()
 
   // Get exercise data directly from context
   const currentDay = formData.weeks[activeWeek]?.days.find(
@@ -209,6 +208,9 @@ function KanbanExerciseSets({
   const sets = exercise.sets ?? []
 
   const onAddSet = () => {
+    addSet(activeWeek, dayOfWeek, exerciseIndex, {
+      minReps: 8,
+    })
     console.log('onAddSet')
   }
 

@@ -59,6 +59,7 @@ export type TrainingPlanContextType = {
     weekIndex: number,
     dayIndex: number,
     exercise: PartialTrainingPlanFormDataExercise,
+    atIndex?: number,
   ) => void
   removeExercise: (
     weekIndex: number,

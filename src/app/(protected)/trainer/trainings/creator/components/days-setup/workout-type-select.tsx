@@ -10,41 +10,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import type { GQLWorkoutType } from '@/generated/graphql-client'
 
-import { TrainingPlanFormData } from '../types'
 import { workoutTypeGroups } from '../utils'
 
 type WorkoutTypeSelectProps = {
   dayIndex: number
-  day: TrainingPlanFormData['weeks'][number]['days'][number]
-  onUpdate?: (workoutType: GQLWorkoutType | null) => void
+  workoutType?: GQLWorkoutType | null
+  onValueChange: (value: GQLWorkoutType) => void
 }
 
 export function WorkoutTypeSelect({
   dayIndex,
-  day,
-  onUpdate,
+  workoutType,
+  onValueChange,
 }: WorkoutTypeSelectProps) {
-  const { updateDay, activeWeek } = useTrainingPlan()
-
-  const handleValueChange = (value: GQLWorkoutType) => {
-    if (onUpdate) {
-      // Use the provided callback (for new mutation approach)
-      onUpdate(value)
-    } else {
-      // Fallback to the old context approach
-      updateDay(activeWeek, day.dayOfWeek, {
-        ...day,
-        workoutType: value,
-      })
-    }
-  }
-
   return (
     <div className="space-y-2">
-      <Select value={day.workoutType || ''} onValueChange={handleValueChange}>
+      <Select value={workoutType || ''} onValueChange={onValueChange}>
         <SelectTrigger id={`workout-type-${dayIndex}`} className="w-full">
           <SelectValue placeholder="Select type" />
         </SelectTrigger>

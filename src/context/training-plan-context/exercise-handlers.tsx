@@ -17,13 +17,6 @@ export const useExerciseHandlers = (
       exerciseIndex: number,
       newExercise: PartialTrainingPlanFormDataExercise,
     ) => {
-      console.log(
-        'updateExercise',
-        weekIndex,
-        dayIndex,
-        exerciseIndex,
-        newExercise,
-      )
       if (isNil(weekIndex) || isNil(dayIndex) || isNil(exerciseIndex)) {
         console.error('[Update exercise]: Invalid fields', {
           weekIndex,
@@ -54,6 +47,7 @@ export const useExerciseHandlers = (
       weekIndex: number,
       dayIndex: number,
       exercise: PartialTrainingPlanFormDataExercise,
+      atIndex?: number,
     ) => {
       if (isNil(weekIndex) || isNil(dayIndex)) {
         console.error('[Add exercise]: Invalid fields', {
@@ -66,21 +60,44 @@ export const useExerciseHandlers = (
         const newWeeks = [...prev]
         const newDays = [...newWeeks[weekIndex].days]
 
+        const currentExercises = newDays[dayIndex].exercises
+        const newExercise = {
+          ...exercise,
+          id: createId(), // Ensure unique ID after spreading exercise
+          name: exercise.name || '',
+          instructions: exercise.instructions || '',
+          sets: exercise.sets || [],
+          order: currentExercises.length + 1, // Will be adjusted below if needed
+          baseId: exercise.id, // Store original exercise ID as baseId
+          isPublic: exercise.isPublic || false,
+        }
+
+        let newExercises: typeof currentExercises
+
+        // If atIndex is provided and valid, insert at that position
+        if (
+          !isNil(atIndex) &&
+          atIndex >= 0 &&
+          atIndex <= currentExercises.length
+        ) {
+          newExercises = [
+            ...currentExercises.slice(0, atIndex),
+            newExercise,
+            ...currentExercises.slice(atIndex),
+          ]
+          // Update order for all exercises after the insertion point
+          newExercises = newExercises.map((ex, idx) => ({
+            ...ex,
+            order: idx + 1,
+          }))
+        } else {
+          // Default behavior: add at the end
+          newExercises = [...currentExercises, newExercise]
+        }
+
         newDays[dayIndex] = {
           ...newDays[dayIndex],
-          exercises: [
-            ...newDays[dayIndex].exercises,
-            {
-              ...exercise,
-              id: createId(), // Ensure unique ID after spreading exercise
-              name: exercise.name || '',
-              instructions: exercise.instructions || '',
-              sets: exercise.sets || [],
-              order: newDays[dayIndex].exercises.length || 1,
-              baseId: exercise.id, // Store original exercise ID as baseId
-              isPublic: exercise.isPublic || false,
-            },
-          ],
+          exercises: newExercises,
         }
         newWeeks[weekIndex] = { ...newWeeks[weekIndex], days: newDays }
         return newWeeks
@@ -92,7 +109,6 @@ export const useExerciseHandlers = (
 
   const removeExercise = useCallback(
     (weekIndex: number, dayIndex: number, exerciseIndex: number) => {
-      console.log('removeExercise', weekIndex, dayIndex, exerciseIndex)
       if (isNil(weekIndex) || isNil(dayIndex) || isNil(exerciseIndex)) {
         console.error('[Remove exercise]: Invalid fields', {
           weekIndex,
@@ -158,18 +174,24 @@ export const useExerciseHandlers = (
           return prev
         }
 
+        // Remove exercise from source and update order
         const newSourceDays = [...newWeeks[sourceWeekIndex].days]
+        const sourceExercisesWithoutMoved = sourceDay.exercises.filter(
+          (_, idx) => idx !== sourceExerciseIndex,
+        )
         newSourceDays[sourceDayIndex] = {
           ...sourceDay,
-          exercises: sourceDay.exercises.filter(
-            (_, idx) => idx !== sourceExerciseIndex,
-          ),
+          exercises: sourceExercisesWithoutMoved.map((ex, idx) => ({
+            ...ex,
+            order: idx + 1, // Update order after removal
+          })),
         }
         newWeeks[sourceWeekIndex] = {
           ...newWeeks[sourceWeekIndex],
           days: newSourceDays,
         }
 
+        // Add exercise to target and update order
         const targetDay = newWeeks[targetWeekIndex].days[targetDayIndex]
         const newTargetDays = [...newWeeks[targetWeekIndex].days]
 
@@ -178,7 +200,10 @@ export const useExerciseHandlers = (
 
         newTargetDays[targetDayIndex] = {
           ...targetDay,
-          exercises: newTargetExercises,
+          exercises: newTargetExercises.map((ex, idx) => ({
+            ...ex,
+            order: idx + 1, // Update order after insertion
+          })),
         }
         newWeeks[targetWeekIndex] = {
           ...newWeeks[targetWeekIndex],
