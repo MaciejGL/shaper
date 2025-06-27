@@ -1,0 +1,145 @@
+query FitspaceMyPlans {
+  getMyPlansOverview {
+    activePlan {
+      id
+      title
+      description
+      difficulty
+      totalWorkouts
+      rating
+      totalReviews
+      weekCount
+      currentWeekNumber
+      completedWorkoutsDays
+      adherence
+      startDate
+      endDate
+      updatedAt
+
+      weeks {
+        id
+        weekNumber
+        scheduledAt
+        completedAt
+        isExtra
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          workoutType
+          completedAt
+          scheduledAt
+          exercises {
+            id
+            restSeconds
+            videoUrl
+            instructions
+            name
+            warmupSets
+            muscleGroups {
+              id
+              name
+              alias
+            }
+            completedAt
+            sets {
+              id
+            }
+          }
+        }
+      }
+    }
+    availablePlans {
+      id
+      title
+      description
+      difficulty
+      totalWorkouts
+      rating
+      totalReviews
+      weekCount
+      currentWeekNumber
+      completedWorkoutsDays
+      adherence
+      startDate
+      endDate
+      updatedAt
+
+      createdBy {
+        id
+        firstName
+        lastName
+        image
+        sex
+      }
+    }
+    completedPlans {
+      id
+      title
+      description
+      difficulty
+      totalWorkouts
+      rating
+      userReview {
+        id
+        rating
+        comment
+        createdAt
+        updatedAt
+      }
+      totalReviews
+      weekCount
+      currentWeekNumber
+      completedWorkoutsDays
+      adherence
+      startDate
+      endDate
+      completedAt
+      updatedAt
+
+      createdBy {
+        id
+        firstName
+        lastName
+        image
+        sex
+      }
+    }
+  }
+}
+
+mutation ActivatePlan($planId: ID!, $startDate: String!, $resume: Boolean!) {
+  activatePlan(planId: $planId, startDate: $startDate, resume: $resume)
+}
+
+mutation PausePlan($planId: ID!) {
+  pausePlan(planId: $planId)
+}
+
+mutation ClosePlan($planId: ID!) {
+  closePlan(planId: $planId)
+}
+
+mutation DeletePlan($planId: ID!) {
+  deletePlan(planId: $planId)
+}
+
+mutation CreateReview($input: CreateReviewInput!) {
+  createReview(input: $input)
+}
+
+mutation UpdateReview($input: UpdateReviewInput!) {
+  updateReview(input: $input)
+}
+
+mutation DeleteReview($input: DeleteReviewInput!) {
+  deleteReview(input: $input)
+}
+
+mutation ExtendPlan($planId: ID!, $weeks: [ID!]!) {
+  extendPlan(planId: $planId, weeks: $weeks)
+}
+
+mutation RemoveWeek($planId: ID!, $weekId: ID!) {
+  removeWeek(planId: $planId, weekId: $weekId)
+}

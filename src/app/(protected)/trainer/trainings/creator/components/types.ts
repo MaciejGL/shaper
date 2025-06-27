@@ -1,4 +1,5 @@
 import {
+  GQLDifficulty,
   GQLExerciseSet,
   GQLTrainingDay,
   GQLTrainingExercise,
@@ -14,7 +15,9 @@ export type TrainingPlanFormData = {
 export type TrainingDetails = Pick<
   GQLTrainingPlan,
   'title' | 'description' | 'isPublic' | 'isDraft'
->
+> & {
+  difficulty?: GQLDifficulty | null
+}
 
 export type TrainingWeek = Pick<
   GQLTrainingWeek,
@@ -32,14 +35,24 @@ export type TrainingDay = Pick<
 
 export type TrainingExercise = Pick<
   GQLTrainingExercise,
-  'name' | 'restSeconds' | 'tempo' | 'instructions' | 'order' | 'id'
+  | 'name'
+  | 'restSeconds'
+  | 'tempo'
+  | 'instructions'
+  | 'additionalInstructions'
+  | 'type'
+  | 'order'
+  | 'id'
+  | 'warmupSets'
+  | 'baseId'
+  | 'videoUrl'
 > & {
   sets: TrainingSet[]
 }
 
 export type TrainingSet = Pick<
   GQLExerciseSet,
-  'order' | 'reps' | 'weight' | 'id'
+  'order' | 'reps' | 'weight' | 'rpe' | 'id' | 'minReps' | 'maxReps'
 >
 
 export enum WorkoutType {

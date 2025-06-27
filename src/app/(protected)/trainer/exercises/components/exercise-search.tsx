@@ -6,12 +6,27 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
 
 import { useSearchQueries } from './hooks'
 
 export function ExerciseSearch() {
-  const { searchTerm, setSearchTerm, resetFilters, hasAnyFilter } =
-    useSearchQueries()
+  const {
+    searchTerm,
+    setSearchTerm,
+    resetFilters,
+    hasAnyFilter,
+    selectedEquipment,
+    setSelectedEquipment,
+  } = useSearchQueries()
+
   const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm)
 
   // Create a memoized debounced function that will only be recreated if setSearchTerm changes
@@ -48,6 +63,19 @@ export function ExerciseSearch() {
           className="grow"
         />
       </div>
+      <Select value={selectedEquipment} onValueChange={setSelectedEquipment}>
+        <SelectTrigger className="min-w-48">
+          <SelectValue placeholder="Equipment" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Equipment</SelectItem>
+          {EQUIPMENT_OPTIONS.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
       <div className="flex gap-2">
         <Button
           variant="ghost"

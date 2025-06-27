@@ -1,5 +1,6 @@
 'use client'
 
+import { UserPlus2Icon } from 'lucide-react'
 import type React from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -78,7 +79,7 @@ export function AddClientModal() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Add New Client</Button>
+        <Button iconStart={<UserPlus2Icon />}>Add New Client</Button>
       </DialogTrigger>
       <DialogContent dialogTitle="Add New Client" className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>

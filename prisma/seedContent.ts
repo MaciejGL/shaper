@@ -46,6 +46,7 @@ export async function seedMuscleGroups() {
         { name: 'Gluteus Maximus', alias: 'Glutes', groupSlug: 'legs' },
         { name: 'Adductors', alias: 'Inner Thigh', groupSlug: 'legs' },
         { name: 'Calves', alias: 'Calves', groupSlug: 'legs' },
+        { name: 'Shin', alias: 'Shin', groupSlug: 'legs' },
       ],
     },
     {
@@ -76,6 +77,22 @@ export async function seedMuscleGroups() {
         { name: 'Rectus Abdominis', alias: 'Abs', groupSlug: 'core' },
         { name: 'Obliques', alias: 'Obliques', groupSlug: 'core' },
         { name: 'Transverse Abdominis', alias: 'Deep Core', groupSlug: 'core' },
+      ],
+    },
+    {
+      name: 'Neck',
+      slug: 'neck',
+      muscles: [
+        {
+          name: 'Anterior',
+          alias: 'Anterior',
+          groupSlug: 'neck',
+        },
+        {
+          name: 'Posterior',
+          alias: 'Posterior',
+          groupSlug: 'neck',
+        },
       ],
     },
   ]

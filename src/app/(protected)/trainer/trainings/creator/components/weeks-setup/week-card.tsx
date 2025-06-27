@@ -31,7 +31,7 @@ export function WeekCard({
       layoutId={`week-${week.weekNumber}`}
       isFirstRender={isFirstRender}
     >
-      <Card className="h-full">
+      <Card className="h-full bg-card-on-card">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-lg">{week.name}</CardTitle>
           <div className="flex gap-1">
@@ -39,24 +39,21 @@ export function WeekCard({
               variant="ghost"
               size="icon-md"
               onClick={() => cloneWeek(index)}
-            >
-              <Copy className="h-4 w-4" />
-            </Button>
+              iconOnly={<Copy />}
+            />
             <Button
               variant="ghost"
               size="icon-md"
               onClick={() => openEditWeekDialog(index)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
+              iconOnly={<Edit />}
+            />
             <Button
               variant="ghost"
               size="icon-md"
               onClick={() => removeWeek(index)}
               disabled={weeks.length <= 1}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
+              iconOnly={<Trash2 />}
+            />
           </div>
         </CardHeader>
         <CardContent>
@@ -64,7 +61,9 @@ export function WeekCard({
             {week.days.filter((d) => !d.isRestDay).length} training days
           </div>
           {week.description && (
-            <div className="mt-2 text-sm">{week.description}</div>
+            <p className="mt-2 text-sm whitespace-pre-wrap">
+              {week.description}
+            </p>
           )}
         </CardContent>
       </Card>

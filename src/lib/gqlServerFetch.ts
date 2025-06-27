@@ -1,6 +1,8 @@
-import { cookies } from 'next/headers';
+'use server'
 
-import { type GqlFetchOptions, gqlFetch } from './graphql';
+import { cookies, headers } from 'next/headers'
+
+import { type GqlFetchOptions, gqlFetch } from './graphql'
 
 /**
  *
@@ -22,31 +24,47 @@ import { type GqlFetchOptions, gqlFetch } from './graphql';
  * );
  * ```
  */
-export const gqlServerFetch = async <TData, TVariables = object>(
-	query: string,
-	variables?: TVariables,
-	options?: GqlFetchOptions
-) => {
-	try {
-		const response = await gqlFetch<TData, TVariables>(query, variables, {
-			...options,
-			headers: {
-				cookie: (await cookies()).toString(),
-				...options?.headers,
-				'Content-Type': 'application/json',
-				credentials: 'include',
-			},
-		});
 
-		return {
-			data: response,
-			error: null,
-		};
-	} catch (error) {
-		console.error(error);
-		return {
-			data: null,
-			error: error instanceof Error ? error.message : String(error),
-		};
-	}
-};
+async function getInternalApiUrl(path: string): Promise<string> {
+  const hdrs = await headers()
+  const host =
+    hdrs.get('host') ?? process.env.NEXT_PUBLIC_VERCEL_URL ?? 'localhost:4000'
+  const protocol = host.startsWith('localhost') ? 'http' : 'https'
+  return `${protocol}://${host}${path}`
+}
+
+export const gqlServerFetch = async <TData, TVariables = object>(
+  query: string,
+  variables?: TVariables,
+  options?: GqlFetchOptions,
+) => {
+  const endpoint = await getInternalApiUrl('/api/graphql')
+  try {
+    const cookieStore = await cookies()
+    const cookie = cookieStore.toString()
+    const response = await gqlFetch<TData, TVariables>(
+      query,
+      variables,
+      {
+        ...options,
+        headers: {
+          cookie,
+          ...options?.headers,
+          'Content-Type': 'application/json',
+        },
+      },
+      endpoint,
+    )
+
+    return {
+      data: response,
+      error: null,
+    }
+  } catch (error) {
+    console.error(error)
+    return {
+      data: null,
+      error: error instanceof Error ? error.message : String(error),
+    }
+  }
+}

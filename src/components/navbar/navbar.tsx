@@ -2,6 +2,7 @@
 
 import {
   LayoutDashboardIcon,
+  LayoutListIcon,
   LogInIcon,
   LogOutIcon,
   MenuIcon,
@@ -19,9 +20,7 @@ import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
 import { AnimatedLogo, AnimatedLogoText } from '../animated-logo'
-import { Divider } from '../divider'
 import { ModeToggle } from '../mode-toggle'
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Button } from '../ui/button'
 import { ButtonLink } from '../ui/button-link'
 import {
@@ -31,7 +30,15 @@ import {
   DrawerHeader,
   DrawerTrigger,
 } from '../ui/drawer'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu'
 import { SidebarTrigger } from '../ui/sidebar'
+import { UserAvatar } from '../user-avatar'
 
 import { NavLink } from './nav-link'
 import { NotificationBell } from './notification-bell'
@@ -59,10 +66,11 @@ export const Navbar = ({
     user?.user?.role === 'TRAINER'
       ? TRAINER_LINKS.dashboard.href
       : CLIENT_LINKS.dashboard.href
+
   return (
     <div
       className={cn(
-        'sticky z-[1] top-0 py-3 px-4 flex justify-between items-center bg-background shadow-[2px_1px_3px_0px_rgba(0,0,0,0.1)]',
+        'py-3 px-4 flex justify-between items-center bg-transparent',
       )}
     >
       <div className="flex items-center gap-2">
@@ -124,10 +132,12 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
         <DrawerHeader>
           <ModeToggle />
           <div className="flex flex-col items-center gap-2">
-            <Avatar className="size-20 aspect-square">
-              <AvatarImage src="/avatar-male.png" />
-              <AvatarFallback>{user?.user.email.slice(0, 2)}</AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              imageUrl={user?.user.profile?.avatarUrl}
+              firstName={user?.user.profile?.firstName ?? ''}
+              lastName={user?.user.profile?.lastName ?? ''}
+              sex={user?.user.profile?.sex}
+            />
             <div>{user?.user.email}</div>
           </div>
         </DrawerHeader>
@@ -174,51 +184,82 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
 
 function ClientNavbar({ user }: { user?: UserWithSession | null }) {
   return (
-    <Drawer direction="right">
-      <DrawerTrigger asChild>
-        <Button variant="ghost" iconOnly={<MenuIcon />} />
-      </DrawerTrigger>
-      <DrawerContent dialogTitle="Fitspace Menu">
-        <DrawerHeader>
-          <Header user={user} />
-        </DrawerHeader>
-        <Divider />
-        <div className="flex flex-col gap-2 p-4">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          iconOnly={
+            <UserAvatar
+              className="size-6"
+              imageUrl={user?.user.profile?.avatarUrl}
+              firstName={user?.user.profile?.firstName ?? ''}
+              lastName={user?.user.profile?.lastName ?? ''}
+              sex={user?.user.profile?.sex}
+            />
+          }
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <div className="flex items-center gap-2 p-4">
+          <UserAvatar
+            className="size-12"
+            imageUrl={user?.user.profile?.avatarUrl}
+            firstName={user?.user.profile?.firstName ?? ''}
+            lastName={user?.user.profile?.lastName ?? ''}
+            sex={user?.user.profile?.sex}
+          />
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium">
+              {user?.user.profile?.firstName} {user?.user.profile?.lastName}
+            </p>
+            <p className="text-sm text-muted-foreground">{user?.user.email}</p>
+          </div>
+        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
           <NavLink
             href={CLIENT_LINKS.dashboard.href}
-            icon={<LayoutDashboardIcon className="h-5 w-5" />}
+            icon={<LayoutDashboardIcon className="size-4" />}
             label={CLIENT_LINKS.dashboard.label}
           />
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <NavLink
+            href={CLIENT_LINKS.myPlans.href}
+            icon={<LayoutListIcon className="size-4" />}
+            label={CLIENT_LINKS.myPlans.label}
+          />
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <NavLink
+            href={CLIENT_LINKS.workout.href}
+            icon={<NotebookTextIcon className="size-4" />}
+            label={CLIENT_LINKS.workout.label}
+          />
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
           <NavLink
             href={CLIENT_LINKS.profile.href}
-            icon={<UserRoundCogIcon className="h-5 w-5" />}
+            icon={<UserRoundCogIcon className="size-4" />}
             label={CLIENT_LINKS.profile.label}
           />
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
           <NavLink
             href="#"
             onClick={() => signOut()}
-            icon={<LogOutIcon className="h-5 w-5" />}
+            icon={<LogOutIcon className="size-4" />}
             label="Logout"
           />
-        </div>
-        <DrawerFooter>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <div className="flex flex-col gap-2 px-4 py-4">
+          <ModeToggle />
           <SwapAccountButton user={user} />
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
-  )
-}
-
-function Header({ user }: { user?: UserWithSession | null }) {
-  return (
-    <>
-      <ModeToggle />
-      <div className="flex flex-col items-center gap-2">
-        <Avatar className="size-20 aspect-square">
-          <AvatarImage src="/avatar-male.png" />
-          <AvatarFallback>{user?.user.email.slice(0, 2)}</AvatarFallback>
-        </Avatar>
-      </div>
-    </>
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }

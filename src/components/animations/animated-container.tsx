@@ -37,3 +37,33 @@ export function AnimatedContainer({
     </AnimatePresence>
   )
 }
+
+export function AnimateHeightItem({
+  id,
+  children,
+  className,
+  isFirstRender,
+}: {
+  id: string
+  children: React.ReactNode
+  className?: string
+  isFirstRender: boolean
+}) {
+  return (
+    <motion.div
+      key={id}
+      initial={isFirstRender ? {} : { opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{
+        type: 'spring',
+        stiffness: 200,
+        damping: 25,
+        duration: 0.25,
+      }}
+      className={cn('overflow-hidden', className)}
+    >
+      {children}
+    </motion.div>
+  )
+}

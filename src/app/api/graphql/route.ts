@@ -1,55 +1,41 @@
 import { createYoga } from 'graphql-yoga'
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 
-import { getCurrentUser } from '@/lib/getUser'
-
+import { createContext } from './create-context'
 import { createSchema } from './schema'
-
-export type GraphQLContext = {
-  user: Awaited<ReturnType<typeof getCurrentUser>>
-}
 
 const schema = await createSchema()
 
-const yoga = createYoga({
-  graphqlEndpoint: '/api/graphql',
-  schema: schema,
-  cors: {
-    origin: 'https://fit-space.app',
-    credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization', 'credentials'],
+export const config = {
+  api: {
+    // Disable body parsing (required for file uploads)
+    bodyParser: false,
   },
+}
+
+const yoga = createYoga<{
+  req: NextRequest
+}>({
+  schema,
   logging: 'debug',
-  async context() {
-    const userSession = await getCurrentUser()
-    return {
-      user: userSession,
-    }
+  graphqlEndpoint: '/api/graphql',
+  cors: {
+    origin: ['https://fit-space.app', 'https://www.fit-space.app'],
+    credentials: true,
   },
+  context: async () => createContext(),
+  fetchAPI: { Request, Response, Headers },
 })
 
-export async function OPTIONS() {
-  return NextResponse.json(
-    {},
-    {
-      status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': 'https://fit-space.app',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Credentials': 'true',
-      },
-    },
-  )
+// // Handler wrapper for Next.js API routes
+export async function GET(request: NextRequest) {
+  return yoga.handleRequest(request, {
+    req: request,
+  })
 }
 
-export async function GET(request: Request) {
-  return yoga.handleRequest(request, {})
-}
-
-export async function POST(request: Request) {
-  const response = await yoga.handleRequest(request, {})
-  response.headers.set('Access-Control-Allow-Origin', 'https://fit-space.app')
-  response.headers.set('Access-Control-Allow-Credentials', 'true')
-  return response
+export async function POST(request: NextRequest) {
+  return yoga.handleRequest(request, {
+    req: request,
+  })
 }

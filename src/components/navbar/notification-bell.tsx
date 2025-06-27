@@ -3,7 +3,8 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bell } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import React, { useEffect, useState } from 'react'
 
 import { TrainingInvitationModal } from '@/components/invitation-modal'
 import { Button } from '@/components/ui/button'
@@ -39,11 +40,13 @@ const useNotifications = (
   const [showBadge, setShowBadge] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
-
+  const router = useRouter()
   const { mutateAsync: markNotificationAsRead } =
     useMarkNotificationAsReadMutation()
-  const { mutateAsync: markAllNotificationsAsRead } =
-    useMarkAllNotificationsAsReadMutation()
+  const {
+    mutateAsync: markAllNotificationsAsRead,
+    isPending: isMarkingAllNotificationsAsRead,
+  } = useMarkAllNotificationsAsReadMutation()
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
@@ -55,11 +58,18 @@ const useNotifications = (
     }
   }, [unreadCount, isOpen])
 
-  const onNotificationClick = async (id: string) => {
-    await markNotificationAsRead({ id })
+  const onNotificationClick = async (notification: NotificationNavbar) => {
+    await markNotificationAsRead({ id: notification.id })
     queryClient.invalidateQueries({
       queryKey: useNotificationsQuery.getKey({ userId: user.id }),
     })
+
+    if (
+      notification.type === GQLNotificationType.NewTrainingPlanAssigned &&
+      notification.relatedItemId
+    ) {
+      router.push(`/fitspace/my-plans?tab=available`)
+    }
   }
 
   const onClearAll = async () => {
@@ -73,6 +83,7 @@ const useNotifications = (
     unreadCount,
     onNotificationClick,
     onClearAll,
+    isMarkingAllNotificationsAsRead,
   }
 }
 
@@ -89,6 +100,7 @@ export function NotificationBell({
     unreadCount,
     onNotificationClick,
     onClearAll,
+    isMarkingAllNotificationsAsRead,
   } = useNotifications(notifications, user)
 
   const handleOpenInvitation = (
@@ -123,8 +135,8 @@ export function NotificationBell({
                   className="absolute -top-1 -right-1 flex items-center justify-center"
                 >
                   <span className="relative flex size-4">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                    <span className="relative inline-flex rounded-full size-4 bg-primary text-white text-[10px] font-medium items-center justify-center">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-4 bg-lime-500 text-black text-[10px] font-medium items-center justify-center">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   </span>
@@ -135,7 +147,7 @@ export function NotificationBell({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-80 p-0 overflow-hidden">
-          <DropdownMenuLabel className="bg-zinc-100 dark:bg-zinc-800 flex items-center justify-between py-3 px-4 border-b">
+          <DropdownMenuLabel className="bg-zinc-100 dark:bg-zinc-900 flex items-center justify-between py-3 px-4 border-b">
             <span className="font-semibold">Notifications</span>
             {notifications.length > 0 && (
               <Button
@@ -143,6 +155,7 @@ export function NotificationBell({
                 size="sm"
                 className="h-8 text-xs font-normal"
                 onClick={onClearAll}
+                loading={isMarkingAllNotificationsAsRead}
               >
                 Clear all
               </Button>
@@ -170,18 +183,18 @@ export function NotificationBell({
             ) : (
               <DropdownMenuGroup>
                 {notifications.map((notification) => (
-                  <>
+                  <React.Fragment key={notification.id}>
                     <DropdownMenuItem
                       key={notification.id}
-                      className="p-0 focus:bg-zinc-200 dark:focus:bg-zinc-700 cursor-pointer"
+                      className="p-0 focus:bg-zinc-200 dark:focus:bg-zinc-700 cursor-pointer not-last-of-type:border-b border-border rounded-none"
                       onClick={(e) => {
                         handleOpenInvitation(notification, e)
-                        onNotificationClick(notification.id)
+                        onNotificationClick(notification)
                       }}
                     >
                       <NotificationItem notification={notification} />
                     </DropdownMenuItem>
-                  </>
+                  </React.Fragment>
                 ))}
               </DropdownMenuGroup>
             )}

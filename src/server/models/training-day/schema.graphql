@@ -1,10 +1,13 @@
 type TrainingDay {
   id: ID!
   dayOfWeek: Int!
-  completedAt: String
-  workoutType: String
+  workoutType: WorkoutType
   isRestDay: Boolean!
 
+  duration: Int
+  startedAt: String
+  completedAt: String
+  scheduledAt: String
   exercises: [TrainingExercise!]!
 
   trainingWeekId: ID!
@@ -42,4 +45,25 @@ enum WorkoutType {
   Core
 
   Custom
+}
+
+enum WorkoutSessionEvent {
+  COMPLETE
+  PROGRESS
+}
+
+type Query {
+  getWorkoutInfo(dayId: ID!): TrainingDay!
+}
+
+input UpdateTrainingDayDataInput {
+  dayId: ID!
+  isRestDay: Boolean
+  workoutType: WorkoutType
+}
+
+type Mutation {
+  logWorkoutSessionEvent(dayId: ID!, event: WorkoutSessionEvent!): ID!
+  logWorkoutProgress(dayId: ID!, tick: Int!): ID!
+  updateTrainingDayData(input: UpdateTrainingDayDataInput!): Boolean!
 }

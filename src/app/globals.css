@@ -41,21 +41,23 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-card-on-card: var(--card-on-card);
 }
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.96 0 6.35);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
+  --card-on-card: oklch(0.985 0 0 / 5%);
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
   --primary: oklch(0.21 0.006 285.885);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.967 0.001 286.375);
+  --secondary: oklch(1 0 0);
   --secondary-foreground: oklch(0.21 0.006 285.885);
-  --muted: oklch(0.967 0.001 286.375);
+  --muted: oklch(0.94 0.001 286.375);
   --muted-foreground: oklch(0.552 0.016 285.938);
   --accent: oklch(0.967 0.001 286.375);
   --accent-foreground: oklch(0.21 0.006 285.885);
@@ -77,12 +79,22 @@
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
   --masked-placeholder-text: oklch(0.92 0.004 286.32);
+
+  --shadow-neuro-light:
+    2px 2px 3px rgba(0, 0, 0, 0.12), 1px 1px 2px rgba(0, 0, 0, 0.08),
+    -1px -1px 2px rgba(255, 255, 255, 1),
+    -0.5px -0.5px 1px rgba(255, 255, 255, 0.6);
+
+  --shadow-neuro-light-inset:
+    inset 2px 2px 4px rgba(163, 177, 198, 0.3),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.8);
 }
 
 .dark {
-  --background: oklch(0.141 0.005 285.823);
+  --background: oklch(0.21 0.006 285.885);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.274 0.006 286.033);
+  --card: oklch(0.223 0.006 286.033);
+  --card-on-card: oklch(0.985 0 0 / 5%);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
@@ -103,7 +115,7 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.21 0.006 285.885);
+  --sidebar: oklch(0.141 0.005 285.823);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -112,6 +124,29 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
   --masked-placeholder-text: oklch(0.274 0.006 286.033);
+
+  --shadow-neuro-dark:
+    1px 1px 2px #0e0e0e, -0.5px -0.5px 0.5px rgb(255 255 255 / 12%);
+  --shadow-neuro-dark-inset:
+    inset 2px 2px 4px rgba(0, 0, 0, 0.4),
+    inset -1px -1px 2px rgba(255, 255, 255, 0.05);
+}
+
+@theme {
+  --shadow-sm:
+    0 1px 1px hsl(0deg 0% 0% / 0.075), 0 2px 2px hsl(0deg 0% 0% / 0.075),
+    0 4px 4px hsl(0deg 0% 0% / 0.075), 0 8px 8px hsl(0deg 0% 0% / 0.075),
+    0 16px 16px hsl(0deg 0% 0% / 0.075);
+
+  --shadow-lg:
+    0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)),
+    0 -2px 5px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)),
+    0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
+
+  --shadow-lg-dark:
+    0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.3)),
+    0 0px 6px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.3)),
+    0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.3));
 }
 
 @layer base {
@@ -120,7 +155,26 @@
   }
   body {
     @apply bg-background text-foreground;
+    overflow-y: hidden;
   }
+}
+
+@utility shadow-neuro-light {
+  box-shadow: var(--shadow-neuro-light);
+}
+
+@utility shadow-neuro-dark {
+  box-shadow: var(--shadow-neuro-dark);
+}
+
+@utility shadow-neuro-inset-light {
+  box-shadow: var(--shadow-neuro-light-inset);
+  border: 1px solid rgba(163, 177, 198, 0.3);
+}
+
+@utility shadow-neuro-inset-dark {
+  box-shadow: var(--shadow-neuro-dark-inset);
+  border: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 @utility masked-placeholder-text {
@@ -146,4 +200,40 @@
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+@utility container {
+  width: 100%;
+  max-width: 80rem;
+}
+
+@utility container-fitspace {
+  width: 100%;
+  max-width: 60rem;
+}
+
+@keyframes collapsible-slide-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+  }
+  to {
+    height: 0px;
+  }
+}
+
+@keyframes collapsible-slide-down {
+  from {
+    height: 0px;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+  }
+}
+
+@utility animate-collapsible-slide-down {
+  animation: collapsible-slide-down 0.3s ease-out;
+}
+
+@utility animate-collapsible-slide-up {
+  animation: collapsible-slide-up 0.3s ease-out;
 }

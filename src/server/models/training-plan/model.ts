@@ -1,28 +1,43 @@
 import {
+  BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
+  ExerciseSetLog as PrismaExerciseSetLog,
+  MuscleGroup as PrismaMuscleGroup,
   TrainingDay as PrismaTrainingDay,
   TrainingExercise as PrismaTrainingExercise,
   TrainingPlan as PrismaTrainingPlan,
   TrainingWeek as PrismaTrainingWeek,
+  User as PrismaUser,
+  WorkoutSessionEvent as PrismaWorkoutSessionEvent,
 } from '@prisma/client'
+import { getWeekYear } from 'date-fns'
 
-import { GQLTrainingPlan } from '@/generated/graphql-server'
-import { prisma } from '@/lib/db'
+import { GQLDifficulty, GQLTrainingPlan } from '@/generated/graphql-server'
+import { GQLContext } from '@/types/gql-context'
 
+import Review from '../review/model'
 import TrainingWeek from '../training-week/model'
 import UserPublic from '../user-public/model'
 
 export default class TrainingPlan implements GQLTrainingPlan {
   constructor(
     protected data: PrismaTrainingPlan & {
+      createdBy?: PrismaUser
       weeks?: (PrismaTrainingWeek & {
         days?: (PrismaTrainingDay & {
+          events?: PrismaWorkoutSessionEvent
           exercises?: (PrismaTrainingExercise & {
-            sets?: PrismaExerciseSet[]
+            sets?: (PrismaExerciseSet & {
+              log?: PrismaExerciseSetLog
+            })[]
+            base?: PrismaBaseExercise & {
+              muscleGroups: PrismaMuscleGroup[]
+            }
           })[]
         })[]
       })[]
     },
+    protected context: GQLContext,
   ) {}
 
   get id() {
@@ -58,7 +73,15 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   get endDate() {
-    return this.data.endDate?.toISOString()
+    if (!this.data.startDate) {
+      return null
+    }
+
+    const weeks = this.data.weeks ?? []
+    const endDate = new Date(this.data.startDate)
+    endDate.setDate(endDate.getDate() + weeks.length * 7 - 1)
+
+    return endDate.toISOString()
   }
 
   get nextSession() {
@@ -66,61 +89,164 @@ export default class TrainingPlan implements GQLTrainingPlan {
     return null
   }
 
+  get lastSessionActivity() {
+    const events = this.data.weeks?.flatMap((week) =>
+      week.days?.flatMap((day) => day.events),
+    )
+
+    const latestEvent = events
+      ?.sort(
+        (a, b) => (a?.timestamp.getTime() ?? 0) - (b?.timestamp.getTime() ?? 0),
+      )
+      .at(-1)
+
+    return latestEvent?.timestamp.toISOString()
+  }
+
   get progress() {
-    // TODO: Implement this
-    return 0
+    return this.calculateProgress()
   }
 
   async createdBy() {
-    const user = await prisma.user.findUnique({
-      where: {
-        id: this.data.createdById,
-      },
-    })
-
-    if (!user) {
+    if (!this.data.createdBy) {
       return null
     }
 
-    return new UserPublic(user)
+    return new UserPublic(this.data.createdBy, this.context)
   }
 
   async assignedTo() {
-    if (!this.data.assignedToId) {
-      return null
-    }
-
-    const user = await prisma.user.findUnique({
-      where: {
-        id: this.data.assignedToId,
-      },
-    })
-
-    if (!user) {
-      return null
-    }
-
-    return new UserPublic(user)
+    if (!this.data.assignedToId) return null
+    const user = await this.context.loaders.user.userById.load(
+      this.data.assignedToId,
+    )
+    return user ? new UserPublic(user, this.context) : null
   }
 
   async weekCount() {
-    return prisma.trainingWeek.count({
-      where: {
-        planId: this.data.id,
-      },
-    })
+    return this.context.loaders.plan.weekCountByPlanId.load(this.data.id)
   }
 
   async assignedCount() {
-    return prisma.user.count({
-      where: {
-        assignedPlans: {
-          some: {
-            id: this.data.id,
-          },
-        },
-      },
-    })
+    const id = this.data.isTemplate ? this.data.id : this.data.templateId
+
+    if (!id) {
+      return 0
+    }
+
+    const count = await this.context.loaders.plan.assignedCountByPlanId.load(id)
+
+    return count
+  }
+
+  get isDemo() {
+    return this.data.assignedToId !== this.context.user?.user.id
+  }
+
+  get currentWeekNumber() {
+    // we need to get when training has Started first, then check how many weeks have passed. Then find week that we expect to match that week number
+
+    const startDate = this.data.startDate
+    if (!startDate) {
+      return null
+    }
+    const startDateWeek = getWeekYear(startDate)
+    const currentWeek = getWeekYear(new Date())
+
+    const weeksPassed = currentWeek - startDateWeek
+    const currentWeekNumber = weeksPassed + 1
+
+    return currentWeekNumber
+  }
+
+  get completedWorkoutsDays() {
+    const weeks = this.data.weeks ?? []
+    const completedWorkoutsDays = weeks.reduce(
+      (acc, week) =>
+        acc + (week.days?.filter((day) => day.completedAt).length ?? 0),
+      0,
+    )
+    return completedWorkoutsDays
+  }
+
+  get adherence() {
+    const weeks = this.data.weeks ?? []
+    const days = weeks
+      .flatMap((week) => week.days)
+      .filter((day) => !day?.isRestDay)
+    const completedDays = days.filter((day) => day?.completedAt)
+    const adherence = Math.round((completedDays.length / days.length) * 100)
+    return adherence
+  }
+
+  get totalWorkouts() {
+    const weeks = this.data.weeks ?? []
+    const totalWorkoutDays =
+      weeks?.reduce(
+        (acc, week) =>
+          acc + (week.days?.filter((day) => !day.isRestDay)?.length ?? 0),
+        0,
+      ) ?? 0
+
+    return totalWorkoutDays
+  }
+
+  get difficulty() {
+    switch (this.data.difficulty) {
+      case GQLDifficulty.Beginner:
+        return GQLDifficulty.Beginner
+      case GQLDifficulty.Intermediate:
+        return GQLDifficulty.Intermediate
+      case GQLDifficulty.Advanced:
+        return GQLDifficulty.Advanced
+      case GQLDifficulty.Expert:
+        return GQLDifficulty.Expert
+      default:
+        return null
+    }
+  }
+
+  async userReview() {
+    if (!this.data.templateId) return null
+
+    const reviews = await this.context.loaders.plan.reviewsByPlanId.load(
+      this.data.templateId,
+    )
+
+    const userReview = reviews.find(
+      (r) => r.createdById === this.context.user?.user.id,
+    )
+
+    return userReview ? new Review(userReview, this.context) : null
+  }
+
+  async rating() {
+    if (!this.data.templateId) return 0
+
+    const reviews = await this.context.loaders.plan.reviewsByPlanId.load(
+      this.data.templateId,
+    )
+    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0)
+
+    return totalRating / reviews.length || 0
+  }
+
+  async totalReviews() {
+    if (!this.data.templateId) return 0
+
+    const reviews = await this.context.loaders.plan.reviewsByPlanId.load(
+      this.data.templateId,
+    )
+    return reviews.length
+  }
+
+  async reviews() {
+    if (!this.data.templateId) return []
+
+    const reviews = await this.context.loaders.plan.reviewsByPlanId.load(
+      this.data.templateId,
+    )
+    return reviews.map((review) => new Review(review, this.context))
   }
 
   get completedAt() {
@@ -140,16 +266,30 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   async weeks() {
-    let weeks = this.data.weeks
+    const weeks =
+      this.data.weeks ??
+      (await this.context.loaders.plan.weeksByPlanId.load(this.data.id))
+    return weeks.map((week) => new TrainingWeek(week, this.context))
+  }
 
-    if (!weeks) {
-      weeks = await prisma.trainingWeek.findMany({
-        where: {
-          planId: this.data.id,
-        },
-      })
+  private calculateProgress() {
+    const totalDays =
+      this.data.weeks?.reduce(
+        (acc, week) => acc + (week.days?.length ?? 0),
+        0,
+      ) ?? 0
+    const completedDays =
+      this.data.weeks?.reduce(
+        (acc, week) =>
+          acc + (week.days?.filter((day) => day.completedAt).length ?? 0),
+        0,
+      ) ?? 0
+
+    // Prevent division by zero, which would return NaN and break GraphQL Float
+    if (totalDays === 0) {
+      return 0
     }
 
-    return weeks.map((week) => new TrainingWeek(week))
+    return Math.round((completedDays / totalDays) * 100)
   }
 }

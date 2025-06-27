@@ -5,17 +5,15 @@ import {
   GQLUpdateNotificationInput,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { GQLContext } from '@/types/gql-context'
 
 import Notification from './model'
 
 // Fetch notifications for a user with optional filters and pagination
-export async function getNotifications({
-  userId,
-  read,
-  type,
-  skip = 0,
-  take = 20,
-}: GQLQueryNotificationsArgs) {
+export async function getNotifications(
+  { userId, read, type, skip = 0, take = 20 }: GQLQueryNotificationsArgs,
+  context: GQLContext,
+) {
   const notifications = await prisma.notification.findMany({
     where: {
       userId,
@@ -26,19 +24,23 @@ export async function getNotifications({
     skip: skip ?? 0,
     take: take ?? 20,
   })
-  return notifications.map((n) => new Notification(n))
+  return notifications.map((n) => new Notification(n, context))
 }
 
 // Fetch a single notification by ID
-export async function getNotificationById({
-  id,
-}: Pick<GQLQueryNotificationArgs, 'id'>) {
+export async function getNotificationById(
+  { id }: Pick<GQLQueryNotificationArgs, 'id'>,
+  context: GQLContext,
+) {
   const notification = await prisma.notification.findUnique({ where: { id } })
-  return notification ? new Notification(notification) : null
+  return notification ? new Notification(notification, context) : null
 }
 
 // Create a new notification
-export async function createNotification(input: GQLCreateNotificationInput) {
+export async function createNotification(
+  input: GQLCreateNotificationInput,
+  context: GQLContext,
+) {
   const notification = await prisma.notification.create({
     data: {
       userId: input.userId,
@@ -49,11 +51,14 @@ export async function createNotification(input: GQLCreateNotificationInput) {
       relatedItemId: input.relatedItemId,
     },
   })
-  return new Notification(notification)
+  return new Notification(notification, context)
 }
 
 // Update a notification
-export async function updateNotification(input: GQLUpdateNotificationInput) {
+export async function updateNotification(
+  input: GQLUpdateNotificationInput,
+  context: GQLContext,
+) {
   const notification = await prisma.notification.update({
     where: { id: input.id },
     data: {
@@ -63,20 +68,23 @@ export async function updateNotification(input: GQLUpdateNotificationInput) {
       link: input.link ?? undefined,
     },
   })
-  return new Notification(notification)
+  return new Notification(notification, context)
 }
 
 // Mark a notification as read
-export async function markNotificationRead(id: string) {
+export async function markNotificationRead(id: string, context: GQLContext) {
   const notification = await prisma.notification.update({
     where: { id },
     data: { read: true },
   })
-  return new Notification(notification)
+  return new Notification(notification, context)
 }
 
 // Mark all notifications as read for a user
-export async function markAllNotificationsRead(userId: string) {
+export async function markAllNotificationsRead(
+  userId: string,
+  context: GQLContext,
+) {
   await prisma.notification.updateMany({
     where: { userId, read: false },
     data: { read: true },
@@ -85,7 +93,7 @@ export async function markAllNotificationsRead(userId: string) {
     where: { userId },
     orderBy: { createdAt: 'desc' },
   })
-  return notifications.map((n) => new Notification(n))
+  return notifications.map((n) => new Notification(n, context))
 }
 
 // Delete a notification

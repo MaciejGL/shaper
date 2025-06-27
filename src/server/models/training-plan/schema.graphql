@@ -12,6 +12,13 @@ type TrainingPlan {
   endDate: String
   progress: Float
   nextSession: String
+  isDemo: Boolean!
+
+  rating: Float
+  reviews: [Review!]!
+  userReview: Review
+  totalReviews: Int!
+  lastSessionActivity: String
 
   createdBy: UserPublic
   assignedTo: UserPublic
@@ -19,14 +26,71 @@ type TrainingPlan {
 
   weekCount: Int!
   assignedCount: Int!
+  currentWeekNumber: Int
+  completedWorkoutsDays: Int!
+  adherence: Float!
+  totalWorkouts: Int!
+  difficulty: Difficulty
 
   createdAt: String!
   updatedAt: String!
 }
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+type MyPlansPayload {
+  activePlan: TrainingPlan
+  availablePlans: [TrainingPlan!]!
+  completedPlans: [TrainingPlan!]!
+}
+
+type Query {
+  getTemplates(draft: Boolean): [TrainingPlan!]!
+  getTrainingPlanById(id: ID!): TrainingPlan!
+  getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!
+  getClientActivePlan(clientId: ID!): TrainingPlan
+  getMyPlansOverview: MyPlansPayload!
+}
+
+type CreateTrainingPlanPayload {
+  id: ID!
+  success: Boolean!
+}
+
+type Mutation {
+  createTrainingPlan(
+    input: CreateTrainingPlanInput!
+  ): CreateTrainingPlanPayload!
+  createDraftTemplate: TrainingPlan!
+  updateTrainingPlan(input: UpdateTrainingPlanInput!): Boolean!
+  deleteTrainingPlan(id: ID!): Boolean!
+  duplicateTrainingPlan(id: ID!): ID!
+  assignTrainingPlanToClient(input: AssignTrainingPlanToClientInput!): Boolean!
+  removeTrainingPlanFromClient(planId: ID!, clientId: ID!): Boolean!
+  activatePlan(planId: ID!, startDate: String!, resume: Boolean!): Boolean!
+  pausePlan(planId: ID!): Boolean!
+  closePlan(planId: ID!): Boolean!
+  deletePlan(planId: ID!): Boolean!
+  extendPlan(planId: ID!, weeks: [ID!]!): Boolean!
+  removeWeek(planId: ID!, weekId: ID!): Boolean!
+}
+
+input AssignTrainingPlanToClientInput {
+  planId: ID!
+  clientId: ID!
+  startDate: String
+}
 
 input CreateExerciseSetInput {
   order: Int!
-  reps: Int!
+  reps: Int
+  minReps: Int
+  maxReps: Int
+  rpe: Int
   weight: Float
 }
 
@@ -35,8 +99,13 @@ input CreateTrainingExerciseInput {
   restSeconds: Int
   tempo: String
   instructions: String
+  additionalInstructions: String
+  type: ExerciseType
   order: Int!
+  warmupSets: Int
   sets: [CreateExerciseSetInput!]
+  baseId: ID
+  videoUrl: String
 }
 
 input CreateTrainingDayInput {
@@ -58,6 +127,7 @@ input CreateTrainingPlanInput {
   description: String
   isPublic: Boolean
   isDraft: Boolean
+  difficulty: Difficulty
   weeks: [CreateTrainingWeekInput!]
 }
 
@@ -67,6 +137,7 @@ input UpdateTrainingPlanInput {
   description: String
   isPublic: Boolean
   isDraft: Boolean
+  difficulty: Difficulty
   weeks: [UpdateTrainingWeekInput!]
 }
 
@@ -93,33 +164,20 @@ input UpdateTrainingExerciseInput {
   restSeconds: Int
   tempo: String
   instructions: String
+  additionalInstructions: String
+  type: ExerciseType
+  warmupSets: Int
+  baseId: ID
+  videoUrl: String
   sets: [UpdateExerciseSetInput!]
 }
 
 input UpdateExerciseSetInput {
   id: ID!
   order: Int!
-  reps: Int!
+  reps: Int
+  minReps: Int
+  maxReps: Int
+  rpe: Int
   weight: Float
-}
-
-type Query {
-  getTemplates(draft: Boolean): [TrainingPlan!]!
-  getTrainingPlanById(id: ID!): TrainingPlan!
-  getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!
-}
-
-input AssignTrainingPlanToClientInput {
-  planId: ID!
-  clientId: ID!
-  startDate: String
-}
-
-type Mutation {
-  createTrainingPlan(input: CreateTrainingPlanInput!): Boolean!
-  updateTrainingPlan(input: UpdateTrainingPlanInput!): Boolean!
-  deleteTrainingPlan(id: ID!): Boolean!
-  duplicateTrainingPlan(id: ID!): ID!
-  assignTrainingPlanToClient(input: AssignTrainingPlanToClientInput!): Boolean!
-  removeTrainingPlanFromClient(planId: ID!, clientId: ID!): Boolean!
 }

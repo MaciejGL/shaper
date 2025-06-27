@@ -49,6 +49,7 @@ export function ExerciseTabContent({
       ) : (
         <MyExercises
           exercises={userFilteredExercises}
+          categories={categories}
           setIsCreateDialogOpen={setIsCreateDialogOpen}
         />
       )}
@@ -101,9 +102,11 @@ function PublicExercises({
 
 function MyExercises({
   exercises,
+  categories,
   setIsCreateDialogOpen,
 }: {
   exercises?: GQLTrainerExercisesQuery['userExercises']
+  categories?: GQLMuscleGroupCategoriesQuery['muscleGroupCategories']
   setIsCreateDialogOpen: (open: boolean) => void
 }) {
   const { hasAnyFilter } = useSearchQueries()
@@ -116,6 +119,7 @@ function MyExercises({
           key={exercise.id}
           exercise={exercise}
           isFirstRender={isFirstRender}
+          categories={categories}
         />
       ))}
       {hasAnyFilter && exercises?.length === 0 && (

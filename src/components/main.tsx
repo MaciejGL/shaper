@@ -1,5 +1,6 @@
 import { ReactNode } from 'react'
 
+import { GQLUserRole } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 import type { UserWithSession } from '@/types/UserWithSession'
 
@@ -18,21 +19,33 @@ export const Main = async ({
   user,
   withSidebar = false,
 }: MainProps) => {
+  const isTrainer = user?.user?.role === GQLUserRole.Trainer
+
   return (
     <main
       className={cn(
-        'min-h-screen flex flex-col w-full bg-background',
+        'h-svh grid grid-cols-1 grid-rows-[auto_1fr] w-full bg-sidebar',
         className,
       )}
     >
       {user && <Navbar user={user} withSidebar={withSidebar} />}
-
       <div
-        className={cn(
-          'w-full h-full p-2 md:p-4 lg:p-8 dark:bg-zinc-900 bg-zinc-50',
-        )}
+        className={cn('w-full h-[calc(100%+0.5rem)] !overflow-hidden', {
+          'md:p-2 -mt-2': isTrainer,
+        })}
       >
-        {children}
+        <div
+          className={cn(
+            'w-full h-full p-2 md:p-4 lg:p-8 bg-background overflow-y-auto',
+            {
+              'md:rounded-md shadow-neuro-light dark:shadow-neuro-dark':
+                isTrainer,
+              'pb-24 md:pb-24 lg:pb-24': !isTrainer,
+            },
+          )}
+        >
+          {children}
+        </div>
       </div>
     </main>
   )

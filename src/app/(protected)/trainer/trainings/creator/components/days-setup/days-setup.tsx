@@ -2,46 +2,16 @@
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { RadioGroupTabs } from '@/components/radio-group'
-import type { GQLWorkoutType } from '@/generated/graphql-client'
+import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import { cn } from '@/lib/utils'
-
-import { TrainingPlanFormData } from '../types'
 
 import { DayCard } from './day-card'
 
-type DaysSetupProps = {
-  weeks: TrainingPlanFormData['weeks']
-  activeWeek: number
-  setActiveWeek: (week: number) => void
-  updateWeeks: (weeks: TrainingPlanFormData['weeks']) => void
-}
-
-export function DaysSetup({
-  weeks,
-  activeWeek,
-  setActiveWeek,
-  updateWeeks,
-}: DaysSetupProps) {
+export function DaysSetup() {
+  const { formData, activeWeek, setActiveWeek } = useTrainingPlan()
+  const weeks = formData.weeks
   const handleWeekChange = (value: string) => {
     setActiveWeek(Number.parseInt(value))
-  }
-
-  const toggleRestDay = (dayIndex: number) => {
-    const newWeeks = [...weeks]
-    const day = newWeeks[activeWeek].days[dayIndex]
-    day.isRestDay = !day.isRestDay
-
-    if (day.isRestDay) {
-      day.workoutType = undefined
-    }
-
-    updateWeeks(newWeeks)
-  }
-
-  const updateWorkoutType = (dayIndex: number, type: GQLWorkoutType) => {
-    const newWeeks = [...weeks]
-    newWeeks[activeWeek].days[dayIndex].workoutType = type
-    updateWeeks(newWeeks)
   }
 
   return (
@@ -64,13 +34,7 @@ export function DaysSetup({
         )}
       >
         {weeks[activeWeek].days.map((day, dayIndex) => (
-          <DayCard
-            key={day.dayOfWeek}
-            day={day}
-            dayIndex={dayIndex}
-            toggleRestDay={toggleRestDay}
-            updateWorkoutType={updateWorkoutType}
-          />
+          <DayCard key={day.id} day={day} dayIndex={dayIndex} />
         ))}
       </AnimatedPageTransition>
     </div>

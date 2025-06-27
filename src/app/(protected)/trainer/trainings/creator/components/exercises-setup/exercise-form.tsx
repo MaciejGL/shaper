@@ -12,81 +12,110 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
+import { GQLTrainerExercisesQuery } from '@/generated/graphql-client'
 
 import type { TrainingExercise } from '../types'
 
-import { ExerciseSets } from './exercise-sets'
+// import { ExerciseSets } from './exercise-sets'
 import { ExerciseSearch } from './exercises-search'
 
 const initialExercise: TrainingExercise = {
   id: '',
   name: '',
-  sets: [
-    { id: '', order: 1, reps: 10, weight: 0 },
-    { id: '', order: 2, reps: 10, weight: 0 },
-    { id: '', order: 3, reps: 10, weight: 0 },
-  ],
+  sets: [{ id: '', order: 1, reps: 10, weight: null }],
   restSeconds: 60,
   tempo: '',
   instructions: '',
-  order: 0,
+  order: 1,
+  isPublic: false,
 }
 
 type ExerciseFormProps = {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (exercise: TrainingExercise) => void
   editingExercise?: TrainingExercise
-  editingIndex?: number | null
+  editingExerciseIndex?: number | null
+  trainerExercises?: GQLTrainerExercisesQuery
 }
 
 export function ExerciseForm({
   isOpen,
   onOpenChange,
-  onSave,
-  editingExercise,
-  editingIndex,
+  editingExerciseIndex,
+  trainerExercises,
 }: ExerciseFormProps) {
+  const { activeWeek, activeDay, addExercise, formData, updateExercise } =
+    useTrainingPlan()
+  const currentDay = formData.weeks[activeWeek].days[activeDay]
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null)
   const [exercise, setExercise] = useState<TrainingExercise>(initialExercise)
 
   useEffect(() => {
-    if (editingExercise) {
-      setExercise(editingExercise)
+    if (editingExerciseIndex !== null && editingExerciseIndex !== undefined) {
+      const currentExercise = currentDay.exercises[editingExerciseIndex]
+      setExercise(currentExercise)
     } else {
       setExercise(initialExercise)
     }
-  }, [editingExercise])
+  }, [editingExerciseIndex, currentDay])
+
+  useEffect(() => {
+    if (selectedExercise) {
+      const exercise = [
+        ...(trainerExercises?.userExercises || []),
+        ...(trainerExercises?.publicExercises || []),
+      ].find((ex) => ex.id === selectedExercise)
+
+      if (exercise) {
+        setExercise((prev) => ({
+          ...prev,
+          name: exercise.name,
+          id: exercise.id,
+          instructions: exercise.description,
+          videoUrl: exercise.videoUrl,
+          baseId: exercise.id,
+          order: currentDay.exercises.length + 1,
+        }))
+      }
+    }
+  }, [selectedExercise, trainerExercises, currentDay])
 
   const handleSave = () => {
-    onSave(exercise)
+    if (editingExerciseIndex !== null && editingExerciseIndex !== undefined) {
+      updateExercise(activeWeek, activeDay, editingExerciseIndex, exercise)
+    } else {
+      addExercise(activeWeek, activeDay, exercise)
+    }
     setExercise(initialExercise)
     setSelectedExercise(null)
     setSearchTerm('')
+    onOpenChange(false)
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent dialogTitle="Add Exercise" className="sm:max-w-[600px]">
+      <DialogContent dialogTitle="Add Exercise" className="sm:max-w-[800px]">
         <DialogHeader>
           <DialogTitle>
-            {editingIndex !== null ? 'Edit Exercise' : 'Add Exercise'}
+            {editingExerciseIndex !== null ? 'Edit Exercise' : 'Add Exercise'}
           </DialogTitle>
           <DialogDescription>
-            {editingIndex !== null
+            {editingExerciseIndex !== null
               ? 'Edit the exercise details and sets.'
               : 'Search for an existing exercise or create a custom one.'}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {editingIndex === null && (
+          {editingExerciseIndex === null && (
             <ExerciseSearch
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
               selectedExercise={selectedExercise}
               onExerciseSelect={setSelectedExercise}
+              trainerExercises={trainerExercises}
             />
           )}
 
@@ -100,65 +129,6 @@ export function ExerciseForm({
               }
               placeholder="e.g., Single-Arm Dumbbell Row"
             />
-          </div>
-
-          <ExerciseSets
-            sets={exercise.sets}
-            onAddSet={() =>
-              setExercise({
-                ...exercise,
-                sets: [
-                  ...exercise.sets,
-                  {
-                    id: '',
-                    order: exercise.sets.length + 1,
-                    reps: exercise.sets[0]?.reps || 10,
-                    weight: exercise.sets[0]?.weight || 0,
-                  },
-                ],
-              })
-            }
-            onRemoveSet={(index) => {
-              if (exercise.sets.length <= 1) return
-              const newSets = exercise.sets.filter((_, i) => i !== index)
-              newSets.forEach((set, i) => (set.order = i + 1))
-              setExercise({ ...exercise, sets: newSets })
-            }}
-            onUpdateSet={(index, field, value) => {
-              const newSets = [...exercise.sets]
-              newSets[index] = { ...newSets[index], [field]: value }
-              setExercise({ ...exercise, sets: newSets })
-            }}
-          />
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="rest">Rest (seconds)</Label>
-              <Input
-                id="rest"
-                type="number"
-                min="0"
-                step="5"
-                value={exercise.restSeconds || 0}
-                onChange={(e) =>
-                  setExercise({
-                    ...exercise,
-                    restSeconds: Number.parseInt(e.target.value),
-                  })
-                }
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="tempo">Tempo (optional)</Label>
-              <Input
-                id="tempo"
-                placeholder="e.g., 3-1-3"
-                value={exercise.tempo ?? undefined}
-                onChange={(e) =>
-                  setExercise({ ...exercise, tempo: e.target.value })
-                }
-              />
-            </div>
           </div>
 
           <div className="space-y-2">
@@ -182,7 +152,7 @@ export function ExerciseForm({
               exercise.sets.length === 0
             }
           >
-            {editingIndex !== null ? 'Update Exercise' : 'Add Exercise'}
+            {editingExerciseIndex !== null ? 'Update Exercise' : 'Add Exercise'}
           </Button>
         </DialogFooter>
       </DialogContent>

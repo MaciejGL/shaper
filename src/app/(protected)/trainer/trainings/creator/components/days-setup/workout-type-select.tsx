@@ -1,6 +1,5 @@
 import React from 'react'
 
-import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -13,29 +12,22 @@ import {
 } from '@/components/ui/select'
 import type { GQLWorkoutType } from '@/generated/graphql-client'
 
-import { TrainingPlanFormData } from '../types'
 import { workoutTypeGroups } from '../utils'
 
 type WorkoutTypeSelectProps = {
   dayIndex: number
-  day: TrainingPlanFormData['weeks'][number]['days'][number]
-  updateWorkoutType: (dayIndex: number, value: GQLWorkoutType) => void
+  workoutType?: GQLWorkoutType | null
+  onValueChange: (value: GQLWorkoutType) => void
 }
 
 export function WorkoutTypeSelect({
   dayIndex,
-  day,
-  updateWorkoutType,
+  workoutType,
+  onValueChange,
 }: WorkoutTypeSelectProps) {
   return (
     <div className="space-y-2">
-      <Label htmlFor={`workout-type-${dayIndex}`}>Workout Type</Label>
-      <Select
-        value={day.workoutType || ''}
-        onValueChange={(value: GQLWorkoutType) =>
-          updateWorkoutType(dayIndex, value)
-        }
-      >
+      <Select value={workoutType || ''} onValueChange={onValueChange}>
         <SelectTrigger id={`workout-type-${dayIndex}`} className="w-full">
           <SelectValue placeholder="Select type" />
         </SelectTrigger>

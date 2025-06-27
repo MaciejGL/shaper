@@ -1,10 +1,14 @@
 type ExerciseSet {
   id: ID!
   order: Int!
-  reps: Int!
+  reps: Int
+  minReps: Int
+  maxReps: Int
   weight: Float
-
-  logs: [ExerciseSetLog!]!
+  rpe: Int
+  isExtra: Boolean!
+  completedAt: String
+  log: ExerciseSetLog
   exerciseId: ID!
 
   createdAt: String!

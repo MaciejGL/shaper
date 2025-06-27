@@ -27,7 +27,7 @@ export function TrainingPlansList({
     <AnimatedPageTransition id="training-plans-list">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-bold">Plans</h2>
+          <h2 className="text-xl font-bold">Plans</h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {templates.length === 0 && (
               <p className="text-sm text-muted-foreground">
@@ -41,7 +41,7 @@ export function TrainingPlansList({
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <h2 className="text-2xl font-bold">Drafts</h2>
+          <h2 className="text-xl font-bold">Drafts</h2>
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {drafts.map((plan) => (
               <TrainingCard key={plan.id} plan={plan} />
@@ -65,7 +65,7 @@ export function TrainingCard({
           <CardTitle>{plan.title}</CardTitle>
           <div className="flex gap-1">
             {plan.isDraft && <Badge variant="outline">Draft</Badge>}
-            {!plan.isPublic && <Badge>Public</Badge>}
+            {plan.isPublic && <Badge>Public</Badge>}
           </div>
         </div>
         <CardDescription>
@@ -73,19 +73,20 @@ export function TrainingCard({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center text-sm text-muted-foreground">
-          <Calendar className="h-4 w-4" />
-          <span>{plan.weekCount} weeks</span>
+        <div className="flex items-center text-sm text-muted-foreground gap-2">
+          <Badge variant="outline">
+            <Calendar className="size-4" />
+            {plan.weekCount} weeks
+          </Badge>
           {plan.assignedCount > 0 && (
-            <>
-              <span className="mx-2">•</span>
-              <Users className="mr-1 h-4 w-4" />
+            <Badge variant="outline">
+              <Users className="size-4" />
               <span>Assigned to {plan.assignedCount} clients</span>
-            </>
+            </Badge>
           )}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-end mt-auto">
         <ButtonLink
           variant="outline"
           size="sm"

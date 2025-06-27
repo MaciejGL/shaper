@@ -1,0 +1,42 @@
+type Review {
+  id: ID!
+  rating: Int!
+  comment: String
+  creatorName: String
+  isEdited: Boolean!
+  isHidden: Boolean!
+  flagged: Boolean!
+  flagReason: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateReviewInput {
+  trainingPlanId: ID!
+  rating: Int!
+  comment: String
+}
+
+input UpdateReviewInput {
+  reviewId: ID!
+  rating: Int
+  comment: String
+}
+
+input DeleteReviewInput {
+  reviewId: ID!
+}
+
+input ModerateReviewInput {
+  reviewId: ID!
+  isHidden: Boolean
+  flagged: Boolean
+  flagReason: String
+}
+
+type Mutation {
+  createReview(input: CreateReviewInput!): Boolean!
+  updateReview(input: UpdateReviewInput!): Boolean!
+  deleteReview(input: DeleteReviewInput!): Boolean!
+  moderateReview(input: ModerateReviewInput!): Boolean!
+}

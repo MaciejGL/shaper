@@ -13,6 +13,7 @@ function ButtonLink({
   children,
   iconStart,
   iconEnd,
+  iconOnly,
   ...props
 }: LinkProps &
   VariantProps<typeof buttonVariants> & {
@@ -21,14 +22,20 @@ function ButtonLink({
     disabled?: boolean
     iconStart?: React.ReactNode
     iconEnd?: React.ReactNode
+    iconOnly?: React.ReactNode
   }) {
+  const defaultSize = iconOnly ? 'icon-md' : size || 'md'
   return (
     <Link
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        'shrink-0',
+        buttonVariants({ variant, size: defaultSize, className }),
+      )}
       {...props}
     >
       {iconStart && <span className="mr-2">{iconStart}</span>}
-      {children}
+      {iconOnly && iconOnly}
+      {iconOnly ? <span className="sr-only">{children}</span> : children}
       {iconEnd && <span className="ml-2">{iconEnd}</span>}
     </Link>
   )

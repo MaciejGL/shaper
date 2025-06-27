@@ -1,9 +1,22 @@
 type ExerciseSetLog {
   id: ID!
-  reps: Int!
-  weight: Float!
-  exerciseSetId: ID!
+  reps: Int
+  weight: Float
+  rpe: Int
 
   createdAt: String!
   updatedAt: String!
+}
+
+input LogSetInput {
+  setId: ID!
+  loggedWeight: Float
+  loggedReps: Int
+}
+
+type Mutation {
+  markSetAsCompleted(setId: ID!, completed: Boolean!): Boolean
+  markExerciseAsCompleted(exerciseId: ID!, completed: Boolean!): Boolean
+  markWorkoutAsCompleted(dayId: ID!): Boolean
+  updateSetLog(input: LogSetInput!): ExerciseSetLog
 }

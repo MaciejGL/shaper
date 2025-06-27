@@ -1,5 +1,8 @@
 import {
+  BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
+  ExerciseSetLog as PrismaExerciseSetLog,
+  MuscleGroup as PrismaMuscleGroup,
   TrainingDay as PrismaTrainingDay,
   TrainingExercise as PrismaTrainingExercise,
   TrainingWeek as PrismaTrainingWeek,
@@ -7,6 +10,7 @@ import {
 
 import { GQLTrainingWeek } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { GQLContext } from '@/types/gql-context'
 
 import TrainingDay from '../training-day/model'
 
@@ -15,10 +19,16 @@ export default class TrainingWeek implements GQLTrainingWeek {
     protected data: PrismaTrainingWeek & {
       days?: (PrismaTrainingDay & {
         exercises?: (PrismaTrainingExercise & {
-          sets?: PrismaExerciseSet[]
+          sets?: (PrismaExerciseSet & {
+            log?: PrismaExerciseSetLog
+          })[]
+          base?: PrismaBaseExercise & {
+            muscleGroups: PrismaMuscleGroup[]
+          }
         })[]
       })[]
     },
+    protected context: GQLContext,
   ) {}
 
   get id() {
@@ -31,6 +41,14 @@ export default class TrainingWeek implements GQLTrainingWeek {
     }
 
     return this.data.completedAt.toISOString()
+  }
+
+  get scheduledAt() {
+    if (!this.data.scheduledAt) {
+      return null
+    }
+
+    return this.data.scheduledAt.toISOString()
   }
 
   get createdAt() {
@@ -57,9 +75,16 @@ export default class TrainingWeek implements GQLTrainingWeek {
     return this.data.description
   }
 
+  get isExtra() {
+    return this.data.isExtra
+  }
+
   async days() {
     let days = this.data.days
     if (!days || days.length === 0) {
+      console.warn(
+        `[TrainingWeek] No days found for week ${this.id}. Loading from database.`,
+      )
       days = await prisma.trainingDay.findMany({
         where: {
           weekId: this.id,
@@ -67,6 +92,6 @@ export default class TrainingWeek implements GQLTrainingWeek {
       })
     }
 
-    return days.map((day) => new TrainingDay(day))
+    return days.map((day) => new TrainingDay(day, this.context))
   }
 }

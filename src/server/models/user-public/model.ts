@@ -1,13 +1,38 @@
 import {
+  ExerciseSet as PrismaExerciseSet,
+  ExerciseSetLog as PrismaExerciseSetLog,
+  TrainingDay as PrismaTrainingDay,
+  TrainingExercise as PrismaTrainingExercise,
+  TrainingPlan as PrismaTrainingPlan,
+  TrainingWeek as PrismaTrainingWeek,
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
+  WorkoutSessionEvent as PrismaWorkoutSessionEvent,
 } from '@prisma/client'
 
 import { GQLGoal, GQLUserPublic, GQLUserRole } from '@/generated/graphql-server'
+import { GQLContext } from '@/types/gql-context'
+
+import TrainingPlan from '../training-plan/model'
 
 export default class UserPublic implements GQLUserPublic {
   constructor(
-    protected data: PrismaUser & { profile?: PrismaUserProfile | null },
+    protected data: PrismaUser & {
+      profile?: PrismaUserProfile | null
+      assignedPlans?: (PrismaTrainingPlan & {
+        weeks?: (PrismaTrainingWeek & {
+          days?: (PrismaTrainingDay & {
+            events?: PrismaWorkoutSessionEvent
+            exercises?: (PrismaTrainingExercise & {
+              sets?: (PrismaExerciseSet & {
+                log?: PrismaExerciseSetLog
+              })[]
+            })[]
+          })[]
+        })[]
+      })[]
+    },
+    protected context: GQLContext,
   ) {}
 
   get id() {
@@ -69,6 +94,23 @@ export default class UserPublic implements GQLUserPublic {
 
   get height() {
     return this.data.profile?.height
+  }
+
+  get activePlan() {
+    const plan = this.data.assignedPlans?.at(0)
+    if (!plan) return null
+
+    return new TrainingPlan(plan, this.context)
+  }
+
+  get averageRating() {
+    // TODO: Implement average rating
+    return 4.3
+  }
+
+  get yearsOfExperience() {
+    // TODO: Implement years of experience
+    return 8
   }
 
   get createdAt() {

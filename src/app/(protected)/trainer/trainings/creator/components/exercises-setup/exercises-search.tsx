@@ -1,48 +1,12 @@
 import { Check, Search } from 'lucide-react'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-
-type BaseExercise = {
-  id: string
-  name: string
-  equipment: string
-  muscleGroups: string[]
-}
-const mockBaseExercises: BaseExercise[] = [
-  {
-    id: 'ex1',
-    name: 'Barbell Bench Press',
-    equipment: 'BARBELL',
-    muscleGroups: ['Chest', 'Triceps'],
-  },
-  {
-    id: 'ex2',
-    name: 'Barbell Squat',
-    equipment: 'BARBELL',
-    muscleGroups: ['Quadriceps', 'Glutes'],
-  },
-  {
-    id: 'ex3',
-    name: 'Deadlift',
-    equipment: 'BARBELL',
-    muscleGroups: ['Back', 'Hamstrings'],
-  },
-  {
-    id: 'ex4',
-    name: 'Pull-up',
-    equipment: 'BODYWEIGHT',
-    muscleGroups: ['Back', 'Biceps'],
-  },
-  {
-    id: 'ex5',
-    name: 'Dumbbell Shoulder Press',
-    equipment: 'DUMBBELL',
-    muscleGroups: ['Shoulders', 'Triceps'],
-  },
-]
+import { GQLTrainerExercisesQuery } from '@/generated/graphql-client'
 
 type ExerciseSearchProps = {
+  trainerExercises?: GQLTrainerExercisesQuery
   searchTerm: string
   onSearchChange: (term: string) => void
   selectedExercise: string | null
@@ -50,14 +14,25 @@ type ExerciseSearchProps = {
 }
 
 export function ExerciseSearch({
+  trainerExercises,
   searchTerm,
   onSearchChange,
   selectedExercise,
   onExerciseSelect,
 }: ExerciseSearchProps) {
-  const filteredExercises = mockBaseExercises.filter((ex) =>
-    ex.name.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const filteredExercises = [
+    ...(trainerExercises?.userExercises || []),
+    ...(trainerExercises?.publicExercises || []),
+  ].filter((ex) => {
+    const searchTermLower = searchTerm.toLowerCase()
+    return (
+      ex.name.toLowerCase().includes(searchTermLower) ||
+      ex.muscleGroups.some((group) =>
+        group.alias?.toLowerCase().includes(searchTermLower),
+      ) ||
+      ex.equipment?.toLowerCase().includes(searchTermLower)
+    )
+  })
 
   return (
     <div className="space-y-4">
@@ -66,13 +41,12 @@ export function ExerciseSearch({
           id="exercise-search"
           iconStart={<Search />}
           placeholder="Search exercises..."
-          className="pl-8"
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
 
-      <div className="max-h-[200px] overflow-y-auto border rounded-md">
+      <div className="max-h-[300px] overflow-y-auto border rounded-md">
         {filteredExercises.length > 0 ? (
           filteredExercises.map((exercise) => (
             <div
@@ -89,9 +63,15 @@ export function ExerciseSearch({
               }}
             >
               <div>
-                <div className="font-medium">{exercise.name}</div>
+                <div className="flex items-center">
+                  <div className="font-medium">{exercise.name} </div>
+                  <Badge size="sm" variant="outline" className="ml-2">
+                    {exercise.isPublic ? 'Public' : 'Private'}
+                  </Badge>
+                </div>
                 <div className="text-xs text-muted-foreground">
-                  {exercise.equipment} • {exercise.muscleGroups.join(', ')}
+                  {exercise.equipment} •{' '}
+                  {exercise.muscleGroups.map((group) => group.alias).join(', ')}
                 </div>
               </div>
               {selectedExercise === exercise.id && (

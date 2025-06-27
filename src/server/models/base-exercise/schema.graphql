@@ -2,6 +2,8 @@ type BaseExercise {
   id: ID!
   name: String!
   description: String
+  additionalInstructions: String
+  type: ExerciseType
   videoUrl: String
   equipment: Equipment
   muscleGroups: [MuscleGroup!]!
@@ -22,7 +24,16 @@ enum Equipment {
   MEDICINE_BALL
   WHEEL
   TRAP_BAR
+  KETTLEBELL
+  SMITH_MACHINE
   OTHER
+}
+
+enum ExerciseType {
+  SUPERSET_1A
+  SUPERSET_1B
+  DROPSET
+  CARDIO
 }
 
 input ExerciseWhereInput {
@@ -30,10 +41,17 @@ input ExerciseWhereInput {
   muscleGroups: [ID!]
 }
 
+type GetExercisesResponse {
+  publicExercises: [BaseExercise!]!
+  trainerExercises: [BaseExercise!]!
+}
+
 type Query {
   userExercises(where: ExerciseWhereInput): [BaseExercise!]!
   publicExercises(where: ExerciseWhereInput): [BaseExercise!]!
   exercise(id: ID!): BaseExercise
+  exercisesProgressByUser(userId: ID): [ExerciseProgress!]!
+  getExercises: GetExercisesResponse!
 }
 
 type Mutation {
@@ -56,4 +74,31 @@ input UpdateExerciseInput {
   videoUrl: String
   equipment: Equipment
   muscleGroups: [ID!]!
+}
+
+type ExerciseProgress {
+  baseExercise: BaseExercise
+  estimated1RMProgress: [OneRmEntry!]! # (date, 1RM)
+  totalVolumeProgress: [VolumeEntry!]! # (date/week, volume)
+  averageRpe: Float
+  totalSets: Int
+  lastPerformed: String
+}
+
+type OneRmEntry {
+  date: String!
+  average1RM: Float!
+  detailedLogs: [OneRmLog!]!
+}
+
+type OneRmLog {
+  estimated1RM: Float!
+  weight: Float
+  reps: Int
+}
+
+type VolumeEntry {
+  week: String!
+  totalVolume: Float!
+  totalSets: Int!
 }

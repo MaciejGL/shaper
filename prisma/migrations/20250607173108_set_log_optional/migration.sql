@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "ExerciseSetLog" ALTER COLUMN "reps" DROP NOT NULL,
+ALTER COLUMN "weight" DROP NOT NULL;

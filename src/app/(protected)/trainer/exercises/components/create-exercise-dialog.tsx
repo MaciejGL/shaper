@@ -1,7 +1,7 @@
 'use client'
 
 import type React from 'react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -26,6 +26,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
 import {
   GQLEquipment,
+  GQLExercisesBasicInfoQuery,
   GQLMuscleGroupCategoriesQuery,
   GQLTrainerExercisesQuery,
   useCreateExerciseMutation,
@@ -33,6 +34,7 @@ import {
   useUpdateExerciseMutation,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
+import { cn } from '@/lib/utils'
 
 import { MuscleGroupSelector } from './muscle-group-selector'
 
@@ -41,6 +43,7 @@ interface CreateExerciseDialogProps {
   onOpenChange: (open: boolean) => void
   categories?: GQLMuscleGroupCategoriesQuery['muscleGroupCategories']
   exercise?: GQLTrainerExercisesQuery['userExercises'][number]
+  exercises?: GQLExercisesBasicInfoQuery
 }
 
 export type CreateExerciseFormData = {
@@ -58,6 +61,7 @@ export function CreateExerciseDialog({
   onOpenChange,
   categories,
   exercise,
+  exercises,
 }: CreateExerciseDialogProps) {
   const [formData, setFormData] = useState<CreateExerciseFormData>({
     name: exercise?.name ?? '',
@@ -67,7 +71,6 @@ export function CreateExerciseDialog({
     muscleGroups: exercise?.muscleGroups.map((mg) => ({ id: mg.id })) ?? [],
   })
   const invalidateQuery = useInvalidateQuery()
-
   const { mutateAsync: createExercise, isPending: isCreatingExercise } =
     useCreateExerciseMutation({
       onSuccess: () => {
@@ -128,18 +131,51 @@ export function CreateExerciseDialog({
     setFormData((prev) => ({ ...prev, muscleGroups }))
   }
 
+  const title = exercise?.id ? 'Edit Exercise' : 'Create New Exercise'
+  const description = exercise?.id
+    ? 'Edit the exercise details'
+    : 'Add a new exercise to your library that you can reuse across training plans.'
+
+  const isNameTakenError:
+    | { error: string; level: 'user' | 'public' }
+    | undefined = useMemo(() => {
+    if (
+      exercises?.userExercises?.some(
+        (e) =>
+          e.name.trim().toLowerCase() === formData.name.trim().toLowerCase(),
+      )
+    ) {
+      return {
+        error:
+          'This exercise already exists in your library. Please choose a different name.',
+        level: 'user',
+      }
+    }
+
+    if (
+      exercises?.publicExercises?.some(
+        (e) =>
+          e.name.trim().toLowerCase() === formData.name.trim().toLowerCase(),
+      )
+    ) {
+      return {
+        error: 'Similar exercise already exists in public library.',
+        level: 'public',
+      }
+    }
+
+    return undefined
+  }, [exercises, formData.name])
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        dialogTitle="Create New Exercise"
+        dialogTitle={title}
         className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto"
       >
         <DialogHeader>
-          <DialogTitle>Create New Exercise</DialogTitle>
-          <DialogDescription>
-            Add a new exercise to your library that you can reuse across
-            training plans.
-          </DialogDescription>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -153,7 +189,22 @@ export function CreateExerciseDialog({
               }
               placeholder="e.g., Barbell Bench Press"
               required
+              error={
+                isNameTakenError?.level === 'user'
+                  ? isNameTakenError.error
+                  : undefined
+              }
             />
+            {isNameTakenError && (
+              <p
+                className={cn(
+                  'text-sm text-orange-400',
+                  isNameTakenError.level === 'user' && 'text-red-500',
+                )}
+              >
+                {isNameTakenError.error}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -224,7 +275,9 @@ export function CreateExerciseDialog({
             </Button>
             <Button
               type="submit"
-              disabled={!formData.name.trim()}
+              disabled={
+                !formData.name.trim() || isNameTakenError?.level === 'user'
+              }
               loading={isCreatingExercise || isUpdatingExercise}
             >
               {exercise?.id ? 'Update Exercise' : 'Create Exercise'}

@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import type * as React from 'react'
 
+import { NavigationProvider } from '@/context/navigation-context'
 import { getQueryClient } from '@/lib/get-query-client'
 
 import { ConfirmationModalProvider } from './confirmation-modal'
@@ -19,12 +20,14 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" enableSystem disableTransitionOnChange>
         <NuqsAdapter>
-          <ConfirmationModalProvider>
-            <SidebarProvider>{children}</SidebarProvider>
-          </ConfirmationModalProvider>
+          <NavigationProvider>
+            <ConfirmationModalProvider>
+              <SidebarProvider>{children}</SidebarProvider>
+            </ConfirmationModalProvider>
+          </NavigationProvider>
         </NuqsAdapter>
       </ThemeProvider>
-      <ReactQueryDevtools />
+      {process.env.NEXT_PUBLIC_DEVTOOLS === 'true' && <ReactQueryDevtools />}
       <Toaster />
     </QueryClientProvider>
   )

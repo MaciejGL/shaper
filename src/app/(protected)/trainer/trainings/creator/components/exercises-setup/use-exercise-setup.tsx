@@ -1,101 +1,21 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
-import type { TrainingExercise, TrainingPlanFormData } from '../types'
+import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
+import { useTrainerExercisesQuery } from '@/generated/graphql-client'
 
-type UseExercisesSetupProps = {
-  weeks: TrainingPlanFormData['weeks']
-  activeWeek: number
-  activeDay: number
-  setActiveDay: (day: number) => void
-  updateWeeks: (weeks: TrainingPlanFormData['weeks']) => void
-}
-
-export function useExercisesSetup({
-  weeks,
-  activeWeek,
-  activeDay,
-  updateWeeks,
-}: UseExercisesSetupProps) {
+export function useExercisesSetup() {
+  const { formData, activeWeek, activeDay } = useTrainingPlan()
+  const weeks = formData.weeks
   const [exerciseFormOpen, setExerciseFormOpen] = useState(false)
   const [editingExerciseIndex, setEditingExerciseIndex] = useState<
     number | null
   >(null)
+  const { data: trainerExercises, isLoading: trainerExercisesLoading } =
+    useTrainerExercisesQuery()
 
-  const getCurrentDay = () => {
+  const currentDay = useMemo(() => {
     return weeks[activeWeek].days.find((day) => day.dayOfWeek === activeDay)
-  }
-
-  const handleSaveExercise = (exercise: TrainingExercise) => {
-    const currentDay = getCurrentDay()
-    if (!currentDay || currentDay.isRestDay) return
-
-    const newWeeks = [...weeks]
-    const dayIndex = newWeeks[activeWeek].days.findIndex(
-      (day) => day.dayOfWeek === activeDay,
-    )
-
-    if (editingExerciseIndex !== null) {
-      // Update existing exercise
-      newWeeks[activeWeek].days[dayIndex].exercises[editingExerciseIndex] = {
-        ...exercise,
-        order:
-          newWeeks[activeWeek].days[dayIndex].exercises[editingExerciseIndex]
-            .order,
-      }
-    } else {
-      // Add new exercise
-      newWeeks[activeWeek].days[dayIndex].exercises.push({
-        ...exercise,
-        order: newWeeks[activeWeek].days[dayIndex].exercises.length,
-      })
-    }
-
-    updateWeeks(newWeeks)
-    handleCloseExerciseForm()
-  }
-
-  const handleRemoveExercise = (exerciseIndex: number) => {
-    const newWeeks = [...weeks]
-    const dayIndex = newWeeks[activeWeek].days.findIndex(
-      (day) => day.dayOfWeek === activeDay,
-    )
-
-    // Remove exercise and reorder remaining ones
-    newWeeks[activeWeek].days[dayIndex].exercises.splice(exerciseIndex, 1)
-    newWeeks[activeWeek].days[dayIndex].exercises.forEach((ex, idx) => {
-      ex.order = idx
-    })
-
-    updateWeeks(newWeeks)
-  }
-
-  const handleMoveExercise = (
-    exerciseIndex: number,
-    direction: 'up' | 'down',
-  ) => {
-    const newWeeks = [...weeks]
-    const dayIndex = newWeeks[activeWeek].days.findIndex(
-      (day) => day.dayOfWeek === activeDay,
-    )
-    const exercises = newWeeks[activeWeek].days[dayIndex].exercises
-
-    // Check if move is possible
-    if (
-      (direction === 'up' && exerciseIndex === 0) ||
-      (direction === 'down' && exerciseIndex === exercises.length - 1)
-    ) {
-      return
-    }
-
-    // Swap exercises and update order
-    const newIndex = direction === 'up' ? exerciseIndex - 1 : exerciseIndex + 1
-    const temp = exercises[exerciseIndex]
-    exercises[exerciseIndex] = exercises[newIndex]
-    exercises[newIndex] = temp
-    exercises.forEach((ex, idx) => (ex.order = idx))
-
-    updateWeeks(newWeeks)
-  }
+  }, [weeks, activeWeek, activeDay])
 
   const handleEditExercise = (index: number) => {
     setEditingExerciseIndex(index)
@@ -111,14 +31,14 @@ export function useExercisesSetup({
     // State
     exerciseFormOpen,
     editingExerciseIndex,
-    currentDay: getCurrentDay(),
+    currentDay,
+    trainerExercises,
+    trainerExercisesLoading,
 
     // Actions
     setExerciseFormOpen,
     setEditingExerciseIndex,
-    handleSaveExercise,
-    handleRemoveExercise,
-    handleMoveExercise,
+
     handleEditExercise,
     handleCloseExerciseForm,
   }

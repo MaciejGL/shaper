@@ -29,10 +29,10 @@ export function ClientCardHeader({
           className="object-cover"
         />
       </div>
-      <CardTitle className="text-xl">{clientName}</CardTitle>
+      <CardTitle className="text-lg">{clientName}</CardTitle>
       <CardDescription>{client.email}</CardDescription>
       <CardDescription>{client.phone}</CardDescription>
-      <CardDescription className="grid grid-cols-2 gap-4">
+      <CardDescription className="flex flex-wrap justify-center gap-4">
         <div className="flex items-center gap-2">
           <WeightIcon className="h-4 w-4" />
           {client.currentWeight} kg

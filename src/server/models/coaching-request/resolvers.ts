@@ -3,7 +3,7 @@ import {
   GQLQueryResolvers,
   GQLUserRole,
 } from '@/generated/graphql-server'
-import { getCurrentUserOrThrow } from '@/lib/getUser'
+import { GQLContext } from '@/types/gql-context'
 
 import {
   acceptCoachingRequest,
@@ -14,45 +14,66 @@ import {
   upsertCoachingRequest,
 } from './factory'
 
-export const Query: GQLQueryResolvers = {
-  coachingRequest: async (_, { id }) => {
-    const user = await getCurrentUserOrThrow()
+export const Query: GQLQueryResolvers<GQLContext> = {
+  coachingRequest: async (_, { id }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
 
-    return getCoachingRequest({ id, user })
+    return getCoachingRequest({ id, user, context })
   },
-  coachingRequests: async () => {
-    const user = await getCurrentUserOrThrow()
-    return getCoachingRequests({ user })
+  coachingRequests: async (_, __, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    return getCoachingRequests({ user, context })
   },
 }
 
 export const Mutation: GQLMutationResolvers = {
-  createCoachingRequest: async (_, args) => {
-    const { user } = await getCurrentUserOrThrow()
+  createCoachingRequest: async (_, args, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
 
     return upsertCoachingRequest({
-      senderId: user.id,
+      senderId: user.user.id,
       recipientEmail: args.recipientEmail,
       message: args.message,
+      context,
     })
   },
-  acceptCoachingRequest: async (_, { id }) => {
-    const { user } = await getCurrentUserOrThrow()
+  acceptCoachingRequest: async (_, { id }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
 
     return acceptCoachingRequest({
       id,
-      recipientId: user.id,
-      recipientRole: user.role as GQLUserRole,
+      recipientId: user.user.id,
+      recipientRole: user.user.role as GQLUserRole,
+      context,
     })
   },
-  cancelCoachingRequest: async (_, { id }) => {
-    const { user } = await getCurrentUserOrThrow()
+  cancelCoachingRequest: async (_, { id }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
 
-    return cancelCoachingRequest({ id, senderId: user.id })
+    return cancelCoachingRequest({ id, senderId: user.user.id, context })
   },
-  rejectCoachingRequest: async (_, { id }) => {
-    const { user } = await getCurrentUserOrThrow()
+  rejectCoachingRequest: async (_, { id }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
 
-    return rejectCoachingRequest({ id, recipientId: user.id })
+    return rejectCoachingRequest({ id, recipientId: user.user.id, context })
   },
 }

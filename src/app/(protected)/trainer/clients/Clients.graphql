@@ -1,14 +1,22 @@
 query GetClients {
-  user {
-    clients {
+  myClients {
+    id
+    email
+    firstName
+    lastName
+    image
+    role
+    updatedAt
+    createdAt
+    activePlan {
       id
-      email
-      firstName
-      lastName
-      image
-      role
-      updatedAt
-      createdAt
+      title
+      description
+      weekCount
+      startDate
+      endDate
+      lastSessionActivity
+      progress
     }
   }
 }

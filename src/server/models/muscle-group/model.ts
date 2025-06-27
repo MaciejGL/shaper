@@ -2,12 +2,16 @@ import { MuscleGroup as PrismaMuscleGroup } from '@prisma/client'
 
 import { GQLMuscleGroup } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from '../base-exercise/model'
 import MuscleGroupCategory from '../muscle-group-category/model'
 
 export default class MuscleGroup implements GQLMuscleGroup {
-  constructor(protected data: PrismaMuscleGroup) {}
+  constructor(
+    protected data: PrismaMuscleGroup,
+    protected context: GQLContext,
+  ) {}
 
   get id() {
     return this.data.id
@@ -40,7 +44,7 @@ export default class MuscleGroup implements GQLMuscleGroup {
       throw null
     }
 
-    return new MuscleGroupCategory(category)
+    return new MuscleGroupCategory(category, this.context)
   }
 
   async exercises() {
@@ -61,7 +65,7 @@ export default class MuscleGroup implements GQLMuscleGroup {
       },
     })
 
-    return exercises.map((exercise) => new BaseExercise(exercise))
+    return exercises.map((exercise) => new BaseExercise(exercise, this.context))
   }
 
   get createdAt() {

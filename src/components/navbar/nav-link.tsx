@@ -25,6 +25,14 @@ export const navLinkVariants = cva(
         true: 'hover:bg-accent/90 text-accent-foreground bg-accent',
         false: 'hover:bg-accent/90 hover:text-accent-foreground',
       },
+      size: {
+        default: 'h-12',
+        sm: 'h-8',
+        lg: 'h-12',
+      },
+    },
+    defaultVariants: {
+      size: 'default',
     },
   },
 )

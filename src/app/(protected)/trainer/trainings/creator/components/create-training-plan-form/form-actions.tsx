@@ -1,8 +1,18 @@
-import { Copy, RefreshCcwIcon, Save, Trash2 } from 'lucide-react'
+import {
+  Copy,
+  MoreHorizontalIcon,
+  RefreshCcwIcon,
+  Save,
+  Trash2,
+} from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-
-import { useTrainingPlanForm } from './use-training-plan-form'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 type FormActionsProps = {
   isDirty: boolean
@@ -11,10 +21,10 @@ type FormActionsProps = {
   isUpdating: boolean
   isDuplicating: boolean
   isDeleting: boolean
-  onDelete: ReturnType<typeof useTrainingPlanForm>['handleDelete']
-  onClearDraft: ReturnType<typeof useTrainingPlanForm>['clearDraft']
-  onDuplicate: ReturnType<typeof useTrainingPlanForm>['handleDuplicate']
-  onSubmit: ReturnType<typeof useTrainingPlanForm>['handleSubmit']
+  onDelete: (trainingId: string) => Promise<void>
+  onClearDraft: () => void
+  onDuplicate: (trainingId: string) => Promise<void>
+  onSubmit: () => Promise<void>
 }
 
 export function FormActions({
@@ -30,50 +40,56 @@ export function FormActions({
   onSubmit,
 }: FormActionsProps) {
   return (
-    <div className="flex justify-end gap-2 items-center">
-      {isDirty && (
-        <p className="text-sm text-muted-foreground">Unsaved changes</p>
-      )}
-      {trainingId && (
+    <div>
+      <div className="flex justify-end gap-2 items-center">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" iconOnly={<MoreHorizontalIcon />} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem
+              onClick={onClearDraft}
+              disabled={
+                isPending ||
+                isUpdating ||
+                isDuplicating ||
+                isDeleting ||
+                !isDirty
+              }
+            >
+              <RefreshCcwIcon className="size-4 mr-2" />
+              Reset Changes
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => onDuplicate(trainingId!)}
+              loading={isDuplicating}
+              disabled={isDuplicating || isDeleting || isPending || !trainingId}
+            >
+              <Copy className="size-4 mr-2" />
+              Duplicate
+            </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={() => onDelete(trainingId!)}
+              loading={isDeleting}
+              disabled={isDuplicating || isDeleting || isPending || !trainingId}
+            >
+              <Trash2 className="size-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button
-          variant="ghost"
-          onClick={() => onDelete(trainingId)}
-          loading={isDeleting}
-          disabled={isDuplicating || isDeleting || isPending}
-          iconOnly={<Trash2 />}
+          variant="default"
+          onClick={onSubmit}
+          iconStart={<Save />}
+          loading={isPending || isUpdating}
+          disabled={isDuplicating || isDeleting || isPending || !isDirty}
         >
-          Delete
+          Save Plan
         </Button>
-      )}
-      <Button
-        variant="ghost"
-        onClick={onClearDraft}
-        className="ml-2"
-        disabled={
-          isPending || isUpdating || isDuplicating || isDeleting || !isDirty
-        }
-        iconOnly={<RefreshCcwIcon />}
-      />
-      {trainingId && (
-        <Button
-          variant="ghost"
-          onClick={() => onDuplicate(trainingId)}
-          iconOnly={<Copy />}
-          disabled={isDuplicating || isDeleting || isPending}
-          loading={isDuplicating}
-        >
-          Duplicate
-        </Button>
-      )}
-      <Button
-        variant="ghost"
-        onClick={onSubmit}
-        iconStart={<Save />}
-        loading={isPending || isUpdating}
-        disabled={isDuplicating || isDeleting || isPending}
-      >
-        Save Plan
-      </Button>
+      </div>
     </div>
   )
 }

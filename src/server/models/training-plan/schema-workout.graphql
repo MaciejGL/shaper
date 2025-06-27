@@ -1,0 +1,7 @@
+type GetWorkoutPayload {
+  plan: TrainingPlan!
+}
+
+type Query {
+  getWorkout(trainingId: ID): GetWorkoutPayload
+}

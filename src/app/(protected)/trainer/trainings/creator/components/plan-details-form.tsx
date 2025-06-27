@@ -3,8 +3,16 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { GQLDifficulty } from '@/generated/graphql-client'
 
 import type { TrainingPlanFormData } from './types'
 
@@ -12,6 +20,13 @@ type PlanDetailsProps = {
   data: TrainingPlanFormData['details']
   updateData: (data: TrainingPlanFormData['details']) => void
 }
+
+const DIFFICULTIES: { label: string; value: GQLDifficulty }[] = [
+  { label: 'Beginner', value: GQLDifficulty.Beginner },
+  { label: 'Intermediate', value: GQLDifficulty.Intermediate },
+  { label: 'Advanced', value: GQLDifficulty.Advanced },
+  { label: 'Expert', value: GQLDifficulty.Expert },
+]
 
 export function PlanDetailsForm({ data, updateData }: PlanDetailsProps) {
   return (
@@ -34,7 +49,26 @@ function PlanDetailsHeader({ data, updateData }: PlanDetailsProps) {
         placeholder="e.g., 12-Week Strength Program"
         value={data?.title ?? ''}
         onChange={(e) => updateData({ ...data, title: e.target.value })}
+        className="max-w-lg"
       />
+
+      <Select
+        value={data.difficulty ?? ''}
+        onValueChange={(value: GQLDifficulty) =>
+          updateData({ ...data, difficulty: value })
+        }
+      >
+        <SelectTrigger>
+          <SelectValue placeholder="Select difficulty" />
+        </SelectTrigger>
+        <SelectContent>
+          {DIFFICULTIES.map((difficulty) => (
+            <SelectItem key={difficulty.value} value={difficulty.value}>
+              {difficulty.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
 
       <Textarea
         id="description"
@@ -42,6 +76,7 @@ function PlanDetailsHeader({ data, updateData }: PlanDetailsProps) {
         placeholder="Describe the goals and focus of this training plan"
         value={data.description ?? ''}
         onChange={(e) => updateData({ ...data, description: e.target.value })}
+        className="min-h-44 max-w-xl"
       />
     </div>
   )
@@ -49,7 +84,7 @@ function PlanDetailsHeader({ data, updateData }: PlanDetailsProps) {
 
 function PlanDetailsOptions({ data, updateData }: PlanDetailsProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div className="grid grid-cols-1 max-w-lg gap-6">
       <SwitchOption
         id="isDraft"
         label="Draft"
@@ -58,15 +93,13 @@ function PlanDetailsOptions({ data, updateData }: PlanDetailsProps) {
         onCheckedChange={() => updateData({ ...data, isDraft: !data.isDraft })}
       />
 
-      <SwitchOption
+      {/* <SwitchOption
         id="isPublic"
         label="Public"
         description="Make this plan visible to all clients"
         checked={data.isPublic}
-        onCheckedChange={() =>
-          updateData({ ...data, isPublic: !data.isPublic })
-        }
-      />
+        onCheckedChange={(v) => updateData({ ...data, isPublic: v })}
+      /> */}
     </div>
   )
 }
@@ -76,7 +109,7 @@ type SwitchOptionProps = {
   label: string
   description: string
   checked: boolean
-  onCheckedChange: () => void
+  onCheckedChange: (value: boolean) => void
 }
 
 function SwitchOption({
@@ -89,7 +122,7 @@ function SwitchOption({
   return (
     <Label
       htmlFor={id}
-      className="flex flex-row items-center justify-between rounded-lg border p-4"
+      className="flex flex-row items-center justify-between rounded-lg border p-4 bg-card-on-card"
     >
       <div className="space-y-0.5">
         <p className="text-base">{label}</p>

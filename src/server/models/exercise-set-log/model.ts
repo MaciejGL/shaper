@@ -17,10 +17,6 @@ export default class ExerciseSetLog implements GQLExerciseSetLog {
     return this.data.weight
   }
 
-  get exerciseSetId() {
-    return this.data.exerciseSetId
-  }
-
   get createdAt() {
     return this.data.createdAt.toISOString()
   }

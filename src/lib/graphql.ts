@@ -23,6 +23,7 @@ export const gqlFetch = async <TData, TVariables = object>(
   query: string,
   variables?: TVariables,
   options?: GqlFetchOptions,
+  customEndpoint?: string,
 ): Promise<TData> => {
   const body = JSON.stringify({
     query,
@@ -32,13 +33,14 @@ export const gqlFetch = async <TData, TVariables = object>(
   const headers = {
     ...options?.headers,
     'Content-Type': 'application/json',
-    credentials: 'include',
   }
 
   const queryMatch = query.match(/(query|mutation)\s+(\w+)/i)
   const operationType = queryMatch ? queryMatch[1] : 'unknown'
   const queryName = queryMatch ? queryMatch[2] : 'unknown'
-  const endpoint = `${getBaseUrl()}/api/graphql?${operationType}=${queryName}`
+  const endpoint = customEndpoint
+    ? `${customEndpoint}?${operationType}=${queryName}`
+    : `${getBaseUrl()}/api/graphql?${operationType}=${queryName}`
 
   try {
     const res = await fetch(endpoint, {

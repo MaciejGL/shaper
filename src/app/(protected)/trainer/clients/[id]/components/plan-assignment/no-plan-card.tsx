@@ -18,9 +18,9 @@ export function NoPlanCard({
   hasAssignedPlans,
 }: NoPlanCardProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-12 h-full">
+    <div className="flex flex-col items-center justify-center h-full">
       <div className="text-center space-y-4">
-        <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+        <div className="w-16 h-16 bg-muted dark:bg-muted-foreground/10 rounded-full flex items-center justify-center mx-auto">
           <Target className="h-8 w-8 text-muted-foreground" />
         </div>
         <div>

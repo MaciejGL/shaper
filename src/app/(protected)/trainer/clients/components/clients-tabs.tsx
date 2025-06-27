@@ -12,13 +12,13 @@ import { smartSearch } from '@/lib/smart-search'
 
 import ClientCard from './client-card'
 
-export type Client = NonNullable<GQLGetClientsQuery['user']>['clients'][number]
+export type Client = NonNullable<GQLGetClientsQuery['myClients']>[number]
 
 export function ClientsTabs() {
   const { data } = useGetClientsQuery()
   const [search] = useQueryState('search')
 
-  const clients = data?.user?.clients ?? []
+  const clients = data?.myClients ?? []
 
   if (!data) return null
 
@@ -33,8 +33,6 @@ export function ClientsTabs() {
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="all">All Clients</TabsTrigger>
-          {/* <TabsTrigger value="active">Active</TabsTrigger>
-        <TabsTrigger value="inactive">Inactive</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
@@ -49,26 +47,6 @@ export function ClientsTabs() {
             )}
           </div>
         </TabsContent>
-
-        {/* <TabsContent value="active" className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
-        {clients
-        .filter((client) => client.status === 'active')
-        .map((client) => (
-          <ClientCard key={client.id} client={client} />
-          ))}
-          </div>
-          </TabsContent>
-          
-          <TabsContent value="inactive" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
-          {clients
-          .filter((client) => client.status === 'inactive')
-          .map((client) => (
-            <ClientCard key={client.id} client={client} />
-            ))}
-            </div>
-            </TabsContent> */}
       </Tabs>
     </AnimatedPageTransition>
   )

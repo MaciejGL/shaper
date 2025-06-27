@@ -1,6 +1,7 @@
 'use client'
 
-import { format } from 'date-fns'
+import { formatRelative } from 'date-fns'
+import { enGB } from 'date-fns/locale'
 import { Clock } from 'lucide-react'
 
 import {
@@ -22,8 +23,8 @@ export function NotificationItem({ notification }: NotificationItemProps) {
       className={cn(
         'flex gap-3 p-3 w-full transition-colors',
         notification.read
-          ? 'bg-white dark:bg-zinc-700'
-          : 'bg-zinc-100 dark:bg-zinc-800',
+          ? 'bg-white dark:bg-zinc-800'
+          : 'bg-zinc-100 dark:bg-zinc-950',
         'hover:bg-zinc-200 dark:hover:bg-zinc-700',
       )}
     >
@@ -33,7 +34,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
             {getNotificationTitle(notification)}
           </h4>
           {!notification.read && (
-            <span className="flex-shrink-0 h-2 w-2 rounded-full bg-orange-500" />
+            <span className="flex-shrink-0 h-2 w-2 rounded-full bg-lime-500" />
           )}
         </div>
 
@@ -44,7 +45,12 @@ export function NotificationItem({ notification }: NotificationItemProps) {
         {notification.createdAt && (
           <div className="flex items-center mt-1.5 text-xs text-slate-500 dark:text-zinc-400">
             <Clock className="h-3 w-3 mr-1" />
-            <span>{formatTime(new Date(notification.createdAt))}</span>
+            <span>
+              {formatRelative(new Date(notification.createdAt), new Date(), {
+                weekStartsOn: 1,
+                locale: enGB,
+              })}
+            </span>
           </div>
         )}
       </div>
@@ -72,18 +78,5 @@ function getNotificationTitle(
       return 'New Training Plan'
     default:
       return null
-  }
-}
-
-function formatTime(date: Date): string {
-  const now = new Date()
-  const diffInHours = (now.getTime() - date.getTime()) / (1000 * 60 * 60)
-
-  if (diffInHours < 24) {
-    return format(date, 'h:mm a')
-  } else if (diffInHours < 48) {
-    return 'Yesterday'
-  } else {
-    return format(date, 'MMM d')
   }
 }

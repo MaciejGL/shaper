@@ -6,6 +6,9 @@ type TrainingWeek {
   description: String
   trainingPlanId: ID!
   days: [TrainingDay!]!
+  isExtra: Boolean!
+
+  scheduledAt: String
 
   createdAt: String!
   updatedAt: String!

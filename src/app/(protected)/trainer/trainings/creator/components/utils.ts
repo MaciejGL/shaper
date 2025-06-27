@@ -1,3 +1,5 @@
+import { formatDate } from 'date-fns'
+
 import { GQLWorkoutType } from '@/generated/graphql-client'
 
 export const dayNames = [
@@ -9,6 +11,20 @@ export const dayNames = [
   'Saturday',
   'Sunday',
 ]
+export function getDayName(
+  dayOfWeek: number,
+  options: {
+    short?: boolean
+  } = {},
+): string {
+  // Create a date for Monday (1) and add days to get to target day
+  const date = new Date()
+  const currentDay = date.getDay() // 0-6 (Sunday-Saturday)
+
+  date.setDate(date.getDate() - currentDay + 1) // Set to Monday
+  date.setDate(date.getDate() + dayOfWeek) // Add days to get to target day
+  return formatDate(date, options.short ? 'EEE' : 'EEEE')
+}
 
 export type WorkoutTypeGroup = {
   label: string

@@ -38,7 +38,7 @@ export function EmailForm({
         disabled={!emailValidation(email)}
         iconEnd={<ArrowRightIcon />}
       >
-        Send code
+        Send Code
       </Button>
     </form>
   )

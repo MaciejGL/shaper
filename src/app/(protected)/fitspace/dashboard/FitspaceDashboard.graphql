@@ -1,0 +1,55 @@
+query FitspaceDashboard {
+  myTrainer {
+    id
+    firstName
+    lastName
+    image
+    sex
+    averageRating
+    yearsOfExperience
+  }
+
+  getWorkout {
+    plan {
+      id
+      title
+      description
+      isPublic
+      isTemplate
+      isDraft
+      startDate
+
+      weeks {
+        id
+        weekNumber
+        name
+        completedAt
+        scheduledAt
+
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          workoutType
+          startedAt
+          completedAt
+          duration
+          scheduledAt
+
+          exercises {
+            id
+            name
+            sets {
+              id
+            }
+            muscleGroups {
+              id
+              name
+              alias
+            }
+          }
+        }
+      }
+    }
+  }
+}

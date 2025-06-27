@@ -48,4 +48,5 @@ type UserBodyMeasure {
 
 type Query {
   user: User
+  myClients: [UserPublic!]!
 }

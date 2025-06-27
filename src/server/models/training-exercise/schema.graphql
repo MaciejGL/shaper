@@ -3,15 +3,65 @@ type TrainingExercise {
   name: String!
   restSeconds: Int
   tempo: String
+  warmupSets: Int
   instructions: String
+  additionalInstructions: String
+  type: ExerciseType
   order: Int!
-
+  completedAt: String
+  muscleGroups: [MuscleGroup!]!
+  isExtra: Boolean!
   sets: [ExerciseSet!]!
   logs: [ExerciseLog!]!
+  isPublic: Boolean!
 
-  # baseExercise: BaseExercise
+  videoUrl: String
+
   dayId: ID!
+  baseId: ID
 
   createdAt: String!
   updatedAt: String!
+}
+
+type SuggestedSets {
+  reps: Int
+  rpe: Int
+}
+
+type AiMeta {
+  explanation: String!
+}
+
+type AiExerciseSuggestion {
+  exercise: BaseExercise!
+  sets: [SuggestedSets]!
+  aiMeta: AiMeta!
+}
+
+type Mutation {
+  addExercisesToWorkout(
+    input: AddExercisesToWorkoutInput!
+  ): [TrainingExercise!]!
+  addAiExerciseToWorkout(input: AddAiExerciseToWorkoutInput!): TrainingExercise!
+  removeExerciseFromWorkout(exerciseId: ID!): Boolean!
+  addSet(exerciseId: ID!): ExerciseSet!
+  removeSet(setId: ID!): Boolean!
+  getAiExerciseSuggestions(dayId: ID!): [AiExerciseSuggestion!]!
+}
+
+input AddExercisesToWorkoutInput {
+  workoutId: ID!
+  exerciseIds: [ID!]!
+}
+
+input SuggestedSetsInput {
+  reps: Int!
+  rpe: Int
+}
+
+input AddAiExerciseToWorkoutInput {
+  dayId: ID!
+  exerciseId: ID!
+  sets: [SuggestedSetsInput]!
 }
