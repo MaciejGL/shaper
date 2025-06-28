@@ -1,4 +1,4 @@
-import { TrainingPlanFormData } from '@/app/(protected)/trainer/trainings/creator/components/types'
+import { TrainingPlanFormData } from '@/app/(protected)/trainer/trainings/creator-old/components/types'
 
 export type PartialTrainingPlanFormDataWeek = Partial<
   TrainingPlanFormData['weeks'][number]

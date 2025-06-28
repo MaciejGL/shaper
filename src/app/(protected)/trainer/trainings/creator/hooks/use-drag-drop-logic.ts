@@ -1,7 +1,7 @@
 import { useDndContext } from '@dnd-kit/core'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { TrainingDay } from '../../creator/components/types'
+import { TrainingDay } from '../../creator-old/components/types'
 import { throttle } from '../utils/throttle'
 
 export function useDragDropLogic(day: TrainingDay) {

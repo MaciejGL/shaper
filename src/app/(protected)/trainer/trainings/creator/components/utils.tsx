@@ -1,4 +1,7 @@
-import { TrainingDay, TrainingExercise } from '../../creator/components/types'
+import {
+  TrainingDay,
+  TrainingExercise,
+} from '../../creator-old/components/types'
 
 export type Entry<K, V> = {
   key: K

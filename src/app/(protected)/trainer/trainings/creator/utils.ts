@@ -1,4 +1,4 @@
-import { dayNames } from '../creator/components/utils'
+import { dayNames } from '../creator-old/components/utils'
 
 export interface Exercise {
   id: string

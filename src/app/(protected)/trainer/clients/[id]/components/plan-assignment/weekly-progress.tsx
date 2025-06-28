@@ -4,7 +4,7 @@ import { formatDate } from 'date-fns'
 import { CheckCircle, ChevronDown, Circle } from 'lucide-react'
 import { useState } from 'react'
 
-import { dayNames } from '@/app/(protected)/trainer/trainings/creator/components/utils'
+import { dayNames } from '@/app/(protected)/trainer/trainings/creator-old/components/utils'
 import { Badge } from '@/components/ui/badge'
 import { CardTitle } from '@/components/ui/card'
 import {

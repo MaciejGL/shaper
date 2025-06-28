@@ -1,13 +1,13 @@
 'use client'
 
 import { TrainingPlanProvider } from '../../../../../../context/training-plan-context/training-plan-context'
-import WorkoutPlanner from '../components/workout-planner'
+import { CreateTrainingPlanForm } from '../components/create-training-plan-form/create-training-plan-form'
 
 export default function CreateTrainingPlanPage() {
   return (
-    <div className="h-full flex flex-col">
+    <div className="container h-full">
       <TrainingPlanProvider>
-        <WorkoutPlanner />
+        <CreateTrainingPlanForm />
       </TrainingPlanProvider>
     </div>
   )

@@ -22,9 +22,9 @@ import { useTrainerExercisesQuery } from '@/generated/graphql-client'
 import { createId } from '@/lib/create-id'
 
 import { DashboardHeader } from '../../../components/dashboard-header'
-import { FormActions } from '../../creator/components/create-training-plan-form/form-actions'
-import { PlanDetailsForm } from '../../creator/components/plan-details-form'
-import { TrainingDay } from '../../creator/components/types'
+import { FormActions } from '../../creator-old/components/create-training-plan-form/form-actions'
+import { PlanDetailsForm } from '../../creator-old/components/plan-details-form'
+import { TrainingDay } from '../../creator-old/components/types'
 
 import { DayGrid } from './day-grid'
 import { DragOverlay as CustomDragOverlay } from './drag-overlay'
@@ -228,10 +228,7 @@ export default function WorkoutPlanner() {
           </div>
         </div>
       </div>
-      <TabsContent
-        value="details"
-        className="flex-1 bg-card dark:bg-card-on-card rounded-lg p-4"
-      >
+      <TabsContent value="details" className="flex-1 border-t mt-4 p-4">
         <PlanDetailsForm data={formData.details} updateData={updateDetails} />
       </TabsContent>
       <TabsContent value="weeks" className="flex-1">

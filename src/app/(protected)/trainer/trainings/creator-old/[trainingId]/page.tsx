@@ -3,15 +3,15 @@
 import { useParams } from 'next/navigation'
 
 import { TrainingPlanProvider } from '../../../../../../context/training-plan-context/training-plan-context'
-import WorkoutPlanner from '../components/workout-planner'
+import { CreateTrainingPlanForm } from '../components/create-training-plan-form/create-training-plan-form'
 
 export default function CreateTrainingPlanPage() {
   const { trainingId } = useParams<{ trainingId: string }>()
 
   return (
-    <div className="h-full">
+    <div className="container h-full">
       <TrainingPlanProvider trainingId={trainingId}>
-        <WorkoutPlanner />
+        <CreateTrainingPlanForm />
       </TrainingPlanProvider>
     </div>
   )

@@ -102,7 +102,7 @@ export function AppSidebar() {
 
         queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
 
-        router.push(`/trainer/trainings/creator-new/${newPlan.id}`)
+        router.push(`/trainer/trainings/creator/${newPlan.id}`)
       },
       onError: (error) => {
         console.error('❌ Failed to create draft template:', error)
@@ -152,7 +152,7 @@ export function AppSidebar() {
           },
           ...templates.map((template) => ({
             title: template.title,
-            url: TRAINER_LINKS.trainings.href + `/creator-new/${template.id}`,
+            url: TRAINER_LINKS.trainings.href + `/creator/${template.id}`,
             icon: FileIcon,
             disabled: false,
           })),
@@ -221,7 +221,7 @@ function SidebarItem({
 
   return (
     <SidebarMenuItem key={item.title}>
-      <SidebarMenuButton asChild disabled={item.disabled} size="md">
+      <SidebarMenuButton asChild disabled={item.disabled} size="lg">
         {item.url ? (
           <Link href={item.url} className="inline-flex py-4">
             <item.icon />
@@ -232,6 +232,7 @@ function SidebarItem({
           <Button
             onClick={item.onClick}
             variant="variantless"
+            size="lg"
             className="inline-flex w-full text-left justify-start pl-0"
             disabled={item.disabled}
             loading={item.loading}
@@ -245,7 +246,7 @@ function SidebarItem({
       <SidebarMenuSub>
         {item.subItems?.map((subItem, index) => (
           <SidebarMenuSubItem key={subItem.title + index}>
-            <SidebarMenuSubButton asChild>
+            <SidebarMenuSubButton asChild size="md">
               {subItem.url ? (
                 <Link
                   href={subItem.url}

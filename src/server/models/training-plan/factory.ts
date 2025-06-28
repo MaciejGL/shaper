@@ -388,12 +388,18 @@ export async function updateTrainingPlan(
   if (!user) {
     throw new Error('User not found')
   }
+
+  const createdAt = await prisma.trainingPlan.findUnique({
+    where: { id: input.id },
+    select: { createdAt: true },
+  })
+
   await prisma.$transaction(
     async (tx) => {
-      await tx.trainingWeek.deleteMany({
-        where: { planId: input.id },
-      })
+      // ## Smart week management: Update existing, create new, delete removed
+      // This prevents week duplication during auto-save operations
 
+      // First, update the training plan basic details
       await tx.trainingPlan.update({
         where: { id: input.id, createdById: user.user.id },
         data: {
@@ -402,47 +408,241 @@ export async function updateTrainingPlan(
           isPublic: input.isPublic ?? false,
           isDraft: input.isDraft ?? false,
           difficulty: input.difficulty ?? undefined,
-          isTemplate: true,
-          weeks: {
-            create: input.weeks?.map((week) => ({
-              weekNumber: week.weekNumber,
-              name: week.name ?? '', // fallback if needed
-              description: week.description ?? undefined,
-              days: {
-                create: week.days?.map((day) => ({
-                  dayOfWeek: day.dayOfWeek,
-                  isRestDay: day.isRestDay ?? false,
-                  workoutType: day.workoutType ?? undefined,
-                  exercises: {
-                    create: day.exercises?.map((exercise) => ({
-                      name: exercise.name ?? '',
-                      restSeconds: exercise.restSeconds ?? undefined,
-                      tempo: exercise.tempo ?? undefined,
-                      instructions: exercise.instructions ?? undefined,
-                      additionalInstructions:
-                        exercise.additionalInstructions ?? undefined,
-                      type: exercise.type ?? undefined,
-                      order: exercise.order,
-                      warmupSets: exercise.warmupSets ?? undefined,
-                      baseId: exercise.baseId ?? undefined,
-                      sets: {
-                        create: exercise.sets?.map((set) => ({
-                          order: set.order,
-                          reps: set.reps ?? null,
-                          minReps: set.minReps ?? null,
-                          maxReps: set.maxReps ?? null,
-                          weight: set.weight ?? null,
-                          rpe: set.rpe ?? null,
-                        })),
-                      },
-                    })),
-                  },
-                })),
-              },
-            })),
-          },
+          createdAt: createdAt?.createdAt ?? new Date(),
         },
       })
+
+      if (input.weeks) {
+        // Get existing weeks to determine what to update/create/delete
+        const existingWeeks = await tx.trainingWeek.findMany({
+          where: { planId: input.id },
+          include: {
+            days: {
+              include: {
+                exercises: {
+                  include: {
+                    sets: true,
+                  },
+                },
+              },
+            },
+          },
+        })
+
+        const existingWeekIds = existingWeeks.map((w) => w.id)
+        const inputWeekIds = input.weeks
+          .map((w) => w.id)
+          .filter(Boolean) as string[]
+
+        // Delete weeks that are no longer in the input
+        const weeksToDelete = existingWeekIds.filter(
+          (id) => !inputWeekIds.includes(id),
+        )
+        if (weeksToDelete.length > 0) {
+          await tx.trainingWeek.deleteMany({
+            where: { id: { in: weeksToDelete } },
+          })
+        }
+
+        // Process each week in the input
+        for (const weekInput of input.weeks) {
+          if (weekInput.id && existingWeekIds.includes(weekInput.id)) {
+            // ## Update existing week
+            await tx.trainingWeek.update({
+              where: { id: weekInput.id },
+              data: {
+                weekNumber: weekInput.weekNumber,
+                name: weekInput.name ?? '',
+                description: weekInput.description,
+              },
+            })
+
+            // Handle days for existing week
+            if (weekInput.days) {
+              const existingDays = await tx.trainingDay.findMany({
+                where: { weekId: weekInput.id },
+                include: { exercises: { include: { sets: true } } },
+              })
+
+              const existingDayIds = existingDays.map((d) => d.id)
+              const inputDayIds = weekInput.days
+                .map((d) => d.id)
+                .filter(Boolean) as string[]
+
+              // Delete days no longer in input
+              const daysToDelete = existingDayIds.filter(
+                (id) => !inputDayIds.includes(id),
+              )
+              if (daysToDelete.length > 0) {
+                await tx.trainingDay.deleteMany({
+                  where: { id: { in: daysToDelete } },
+                })
+              }
+
+              // Process each day
+              for (const dayInput of weekInput.days) {
+                if (dayInput.id && existingDayIds.includes(dayInput.id)) {
+                  // Update existing day
+                  await tx.trainingDay.update({
+                    where: { id: dayInput.id },
+                    data: {
+                      dayOfWeek: dayInput.dayOfWeek,
+                      isRestDay: dayInput.isRestDay ?? false,
+                      workoutType: dayInput.workoutType,
+                    },
+                  })
+
+                  // Handle exercises (simplified - delete and recreate for now)
+                  await tx.trainingExercise.deleteMany({
+                    where: { dayId: dayInput.id },
+                  })
+
+                  if (dayInput.exercises) {
+                    for (const exerciseInput of dayInput.exercises) {
+                      const newExercise = await tx.trainingExercise.create({
+                        data: {
+                          dayId: dayInput.id,
+                          name: exerciseInput.name ?? '',
+                          restSeconds: exerciseInput.restSeconds,
+                          tempo: exerciseInput.tempo,
+                          instructions: exerciseInput.instructions,
+                          additionalInstructions:
+                            exerciseInput.additionalInstructions,
+                          type: exerciseInput.type,
+                          order: exerciseInput.order,
+                          warmupSets: exerciseInput.warmupSets,
+                          baseId: exerciseInput.baseId,
+                        },
+                      })
+
+                      if (exerciseInput.sets) {
+                        for (const setInput of exerciseInput.sets) {
+                          await tx.exerciseSet.create({
+                            data: {
+                              exerciseId: newExercise.id,
+                              order: setInput.order,
+                              reps: setInput.reps,
+                              minReps: setInput.minReps,
+                              maxReps: setInput.maxReps,
+                              weight: setInput.weight,
+                              rpe: setInput.rpe,
+                            },
+                          })
+                        }
+                      }
+                    }
+                  }
+                } else {
+                  // Create new day
+                  const newDay = await tx.trainingDay.create({
+                    data: {
+                      weekId: weekInput.id,
+                      dayOfWeek: dayInput.dayOfWeek,
+                      isRestDay: dayInput.isRestDay ?? false,
+                      workoutType: dayInput.workoutType,
+                    },
+                  })
+
+                  if (dayInput.exercises) {
+                    for (const exerciseInput of dayInput.exercises) {
+                      const newExercise = await tx.trainingExercise.create({
+                        data: {
+                          dayId: newDay.id,
+                          name: exerciseInput.name ?? '',
+                          restSeconds: exerciseInput.restSeconds,
+                          tempo: exerciseInput.tempo,
+                          instructions: exerciseInput.instructions,
+                          additionalInstructions:
+                            exerciseInput.additionalInstructions,
+                          type: exerciseInput.type,
+                          order: exerciseInput.order,
+                          warmupSets: exerciseInput.warmupSets,
+                          baseId: exerciseInput.baseId,
+                        },
+                      })
+
+                      if (exerciseInput.sets) {
+                        for (const setInput of exerciseInput.sets) {
+                          await tx.exerciseSet.create({
+                            data: {
+                              exerciseId: newExercise.id,
+                              order: setInput.order,
+                              reps: setInput.reps,
+                              minReps: setInput.minReps,
+                              maxReps: setInput.maxReps,
+                              weight: setInput.weight,
+                              rpe: setInput.rpe,
+                            },
+                          })
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          } else {
+            // ## Create new week
+            const newWeek = await tx.trainingWeek.create({
+              data: {
+                planId: input.id,
+                weekNumber: weekInput.weekNumber,
+                name: weekInput.name ?? '',
+                description: weekInput.description,
+              },
+            })
+
+            if (weekInput.days) {
+              for (const dayInput of weekInput.days) {
+                const newDay = await tx.trainingDay.create({
+                  data: {
+                    weekId: newWeek.id,
+                    dayOfWeek: dayInput.dayOfWeek,
+                    isRestDay: dayInput.isRestDay ?? false,
+                    workoutType: dayInput.workoutType,
+                  },
+                })
+
+                if (dayInput.exercises) {
+                  for (const exerciseInput of dayInput.exercises) {
+                    const newExercise = await tx.trainingExercise.create({
+                      data: {
+                        dayId: newDay.id,
+                        name: exerciseInput.name ?? '',
+                        restSeconds: exerciseInput.restSeconds,
+                        tempo: exerciseInput.tempo,
+                        instructions: exerciseInput.instructions,
+                        additionalInstructions:
+                          exerciseInput.additionalInstructions,
+                        type: exerciseInput.type,
+                        order: exerciseInput.order,
+                        warmupSets: exerciseInput.warmupSets,
+                        baseId: exerciseInput.baseId,
+                      },
+                    })
+
+                    if (exerciseInput.sets) {
+                      for (const setInput of exerciseInput.sets) {
+                        await tx.exerciseSet.create({
+                          data: {
+                            exerciseId: newExercise.id,
+                            order: setInput.order,
+                            reps: setInput.reps,
+                            minReps: setInput.minReps,
+                            maxReps: setInput.maxReps,
+                            weight: setInput.weight,
+                            rpe: setInput.rpe,
+                          },
+                        })
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     },
     { timeout: 15000 },
   )

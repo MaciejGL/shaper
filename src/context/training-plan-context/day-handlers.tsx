@@ -1,7 +1,7 @@
 import { isNil } from 'lodash'
 import { useCallback } from 'react'
 
-import { TrainingPlanFormData } from '@/app/(protected)/trainer/trainings/creator/components/types'
+import { TrainingPlanFormData } from '@/app/(protected)/trainer/trainings/creator-old/components/types'
 
 export const useDayHandlers = (
   setWeeks: React.Dispatch<React.SetStateAction<TrainingPlanFormData['weeks']>>,

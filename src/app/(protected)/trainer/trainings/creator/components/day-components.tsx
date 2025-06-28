@@ -6,9 +6,9 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import { GQLWorkoutType } from '@/generated/graphql-client'
 
-import { WorkoutTypeSelect } from '../../creator/components/days-setup/workout-type-select'
-import { TrainingDay } from '../../creator/components/types'
-import { dayNames } from '../../creator/components/utils'
+import { WorkoutTypeSelect } from '../../creator-old/components/days-setup/workout-type-select'
+import { TrainingDay } from '../../creator-old/components/types'
+import { dayNames } from '../../creator-old/components/utils'
 
 import { InsertionIndicator } from './insertion-indicators'
 import { SortableExercise } from './sortable-exercise'

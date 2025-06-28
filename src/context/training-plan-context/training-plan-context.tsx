@@ -12,8 +12,10 @@ import {
 } from 'react'
 
 import { useGetTemplateTrainingPlanByIdQuery } from '@/generated/graphql-client'
+import { useAutoSaveOnNavigation } from '@/hooks/use-auto-save-on-navigation'
+import { useDebouncedUpdates } from '@/hooks/use-debounced-updates'
 
-import type { TrainingPlanFormData } from '../../app/(protected)/trainer/trainings/creator/components/types'
+import type { TrainingPlanFormData } from '../../app/(protected)/trainer/trainings/creator-old/components/types'
 
 import { useDayHandlers } from './day-handlers'
 import { useExerciseHandlers } from './exercise-handlers'
@@ -118,23 +120,84 @@ export function TrainingPlanProvider({
     isDuplicating,
   } = useTrainingPlanMutations()
 
-  // ## Granular update functions
-  const { updateWeek, removeWeek, addWeek, cloneWeek } = useWeekHandlers(
-    setWeeks,
-    setIsDirty,
-    setActiveWeek,
-  )
-  const updateDetails = useCallback(
+  // Auto-save function (similar to handleSubmit but without router actions)
+  const autoSave = useCallback(async () => {
+    const currentTrainingId = trainingId
+    if (currentTrainingId && !isUpdating) {
+      try {
+        await updateTrainingPlan(
+          {
+            input: {
+              id: currentTrainingId,
+              isPublic: details.isPublic,
+              isDraft: details.isDraft,
+              title: details.title,
+              description: details.description,
+              difficulty: details.difficulty,
+              weeks: weeks,
+            },
+          },
+          {
+            onSuccess: () => {
+              setIsDirty(false)
+            },
+          },
+        )
+      } catch (error) {
+        console.error('❌ Auto-save failed:', error)
+      }
+    }
+  }, [trainingId, updateTrainingPlan, details, weeks, isUpdating])
+
+  // ## Auto-save debouncing wrapper
+  const { wrapWithDebounce } = useDebouncedUpdates({
+    onSave: autoSave,
+    isSaving: isUpdating,
+    enabled: !!trainingId, // Only enable when editing existing training plan
+    debounceDelay: 5000, // Wait 5s after last update operation
+  })
+
+  // ## Granular update functions (with debounced auto-save)
+  const {
+    updateWeek: _updateWeek,
+    removeWeek: _removeWeek,
+    addWeek: _addWeek,
+    cloneWeek: _cloneWeek,
+  } = useWeekHandlers(setWeeks, setIsDirty, setActiveWeek)
+  const _updateDetails = useCallback(
     (newDetails: Partial<TrainingPlanFormData['details']>) => {
       setDetails((prev) => ({ ...prev, ...newDetails }))
       setIsDirty(true)
     },
     [],
   )
-  const { updateDay } = useDayHandlers(setWeeks, setIsDirty)
-  const { updateExercise, addExercise, removeExercise, moveExercise } =
-    useExerciseHandlers(setWeeks, setIsDirty)
-  const { updateSet, addSet, removeSet } = useSetHandlers(setWeeks, setIsDirty)
+  const { updateDay: _updateDay } = useDayHandlers(setWeeks, setIsDirty)
+  const {
+    updateExercise: _updateExercise,
+    addExercise: _addExercise,
+    removeExercise: _removeExercise,
+    moveExercise: _moveExercise,
+  } = useExerciseHandlers(setWeeks, setIsDirty)
+  const {
+    updateSet: _updateSet,
+    addSet: _addSet,
+    removeSet: _removeSet,
+  } = useSetHandlers(setWeeks, setIsDirty)
+
+  // Wrap all update methods with debounced auto-save
+  const updateDetails = wrapWithDebounce(_updateDetails)
+  const updateWeek = wrapWithDebounce(_updateWeek)
+  const removeWeek = wrapWithDebounce(_removeWeek)
+  const addWeek = wrapWithDebounce(_addWeek)
+  const cloneWeek = wrapWithDebounce(_cloneWeek)
+  const updateDay = wrapWithDebounce(_updateDay)
+  const updateExercise = wrapWithDebounce(_updateExercise)
+  const addExercise = wrapWithDebounce(_addExercise)
+  const removeExercise = wrapWithDebounce(_removeExercise)
+  const moveExercise = wrapWithDebounce(_moveExercise)
+  const updateSet = wrapWithDebounce(_updateSet)
+  const addSet = wrapWithDebounce(_addSet)
+  const removeSet = wrapWithDebounce(_removeSet)
 
   // Memoize handlers to prevent unnecessary re-renders
   const clearDraft = useCallback(() => {
@@ -145,6 +208,23 @@ export function TrainingPlanProvider({
     )
     setIsDirty(false)
   }, [templateTrainingPlan])
+
+  // ## Comprehensive Auto-Save System
+  // Two-tier approach for optimal user experience and data safety:
+
+  // ## 2. Immediate Save on Critical Actions
+  // Provides instant data protection when user navigates away or closes page
+  // Overrides debouncing for emergency situations to prevent data loss
+  useAutoSaveOnNavigation({
+    isDirty,
+    onSave: () => {
+      console.log('🚨 Emergency save triggered by navigation/page close')
+      return autoSave()
+    },
+    isSaving: isUpdating,
+    enabled: !!trainingId,
+    autoSaveDelay: 0, // Immediate save on navigation (no debounce)
+  })
 
   const handleSubmit = useCallback(async () => {
     const currentTrainingId = trainingId

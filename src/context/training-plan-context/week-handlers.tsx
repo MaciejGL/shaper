@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import {
   TrainingPlanFormData,
   TrainingWeek,
-} from '@/app/(protected)/trainer/trainings/creator/components/types'
+} from '@/app/(protected)/trainer/trainings/creator-old/components/types'
 import { createId } from '@/lib/create-id'
 
 export const useWeekHandlers = (
