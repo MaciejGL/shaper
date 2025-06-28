@@ -24,7 +24,7 @@ import { useSetHandlers } from './set-handlers'
 import type { TrainingPlanContextType } from './types'
 import { useWeekHandlers } from './week-handlers'
 
-// Initial form data (moved from use-training-plan-form.ts)
+// Initial form data
 const initialFormData: TrainingPlanFormData = {
   details: {
     title: '',
@@ -71,7 +71,7 @@ export function TrainingPlanProvider({
     initialFormData.weeks,
   )
 
-  // ## Queries and mutations (moved from use-training-plan-form.ts)
+  // ## Queries and mutations
   const { data: templateTrainingPlan, isLoading: isLoadingInitialData } =
     useGetTemplateTrainingPlanByIdQuery(
       { id: trainingId! },
@@ -91,14 +91,6 @@ export function TrainingPlanProvider({
         }),
       },
     )
-
-  // ## Create draft template immediately for new plans
-  // useEffect(() => {
-  //   if (!trainingId && !actualTrainingId && !createDraftTemplate.isPending) {
-  //     console.log('🚀 Creating draft template for new plan...')
-  //     createDraftTemplate.mutate({})
-  //   }
-  // }, [trainingId, actualTrainingId, createDraftTemplate])
 
   // ## Set initial data
   useEffect(() => {
@@ -120,7 +112,7 @@ export function TrainingPlanProvider({
     isDuplicating,
   } = useTrainingPlanMutations()
 
-  // Auto-save function (similar to handleSubmit but without router actions)
+  // Auto-save function
   const autoSave = useCallback(async () => {
     const currentTrainingId = trainingId
     if (currentTrainingId && !isUpdating) {
@@ -144,7 +136,7 @@ export function TrainingPlanProvider({
           },
         )
       } catch (error) {
-        console.error('❌ Auto-save failed:', error)
+        console.error('Auto-save failed:', error)
       }
     }
   }, [trainingId, updateTrainingPlan, details, weeks, isUpdating])
@@ -154,7 +146,7 @@ export function TrainingPlanProvider({
     onSave: autoSave,
     isSaving: isUpdating,
     enabled: !!trainingId, // Only enable when editing existing training plan
-    debounceDelay: 5000, // Wait 5s after last update operation
+    debounceDelay: 5000,
   })
 
   // ## Granular update functions (with debounced auto-save)
@@ -209,21 +201,16 @@ export function TrainingPlanProvider({
     setIsDirty(false)
   }, [templateTrainingPlan])
 
-  // ## Comprehensive Auto-Save System
-  // Two-tier approach for optimal user experience and data safety:
-
-  // ## 2. Immediate Save on Critical Actions
-  // Provides instant data protection when user navigates away or closes page
-  // Overrides debouncing for emergency situations to prevent data loss
+  // ## Auto-Save System
+  // Two-tier approach:
+  // 1. Debounced auto-save (5s after last update operation)
+  // 2. Immediate save on navigation/page close for data protection
   useAutoSaveOnNavigation({
     isDirty,
-    onSave: () => {
-      console.log('🚨 Emergency save triggered by navigation/page close')
-      return autoSave()
-    },
+    onSave: autoSave,
     isSaving: isUpdating,
     enabled: !!trainingId,
-    autoSaveDelay: 0, // Immediate save on navigation (no debounce)
+    autoSaveDelay: 0, // Immediate save on navigation
   })
 
   const handleSubmit = useCallback(async () => {
@@ -243,7 +230,6 @@ export function TrainingPlanProvider({
       setIsDirty(false)
       router.refresh()
     } else {
-      // This should rarely happen now since we create draft templates immediately
       const res = await createTrainingPlan({
         input: {
           isPublic: details.isPublic,
@@ -302,7 +288,7 @@ export function TrainingPlanProvider({
     () => ({
       // State
       formData: { details, weeks },
-      trainingId: trainingId, // Always provide the real training ID
+      trainingId: trainingId,
       isDirty,
       currentStep,
       activeWeek,

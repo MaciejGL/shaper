@@ -27,12 +27,6 @@ interface UseDebouncedUpdatesProps {
  * This hook provides a cleaner approach to debounced auto-save by tracking
  * actual data changes (via wrapped update functions) rather than DOM events.
  *
- * **Key Features:**
- * - 🎯 **Source-based Tracking**: Debounces on actual update method calls
- * - ⏰ **Clean Debouncing**: No complex DOM event management
- * - 🚫 **Predictable**: Only triggers when data actually changes
- * - 🔧 **Simple**: Wraps existing update functions transparently
- *
  * @example
  * ```tsx
  * const { wrapWithDebounce } = useDebouncedUpdates({
@@ -74,13 +68,11 @@ export function useDebouncedUpdates({
     }
 
     try {
-      console.log('🚀 Debounced auto-save triggered after update operations')
       const savePromise = Promise.resolve(onSave())
       savePromiseRef.current = savePromise
       await savePromise
-      console.log('✅ Debounced auto-save completed successfully')
     } catch (error) {
-      console.error('❌ Debounced auto-save failed:', error)
+      console.error('Debounced auto-save failed:', error)
     } finally {
       savePromiseRef.current = null
     }
@@ -90,29 +82,18 @@ export function useDebouncedUpdates({
   const triggerDebouncedSave = useCallback(() => {
     if (!enabled || isSaving) return
 
-    console.log(
-      `🎯 Update operation detected - resetting ${debounceDelay / 1000}s timer`,
-    )
-
     // Clear existing timeout to reset the debounce timer
     clearSaveTimeout()
 
     // Set a new timeout - this is the core debounce logic
     saveTimeoutRef.current = setTimeout(() => {
-      console.log(
-        `⏰ ${debounceDelay / 1000}s timer completed - triggering auto-save`,
-      )
       performSave()
     }, debounceDelay)
-
-    console.log(
-      `✅ Timer set for ${debounceDelay}ms, timeout ID:`,
-      saveTimeoutRef.current,
-    )
   }, [enabled, isSaving, debounceDelay, clearSaveTimeout, performSave])
 
   // Function to wrap update methods with debouncing
   const wrapWithDebounce = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     <T extends (...args: any[]) => any>(updateFn: T): T => {
       return ((...args: Parameters<T>) => {
         // Call the original update function

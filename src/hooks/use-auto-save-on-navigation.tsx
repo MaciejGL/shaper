@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 interface UseAutoSaveOnNavigationProps {
   /**
@@ -71,7 +71,7 @@ export function useAutoSaveOnNavigation({
   const autoSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Helper function to perform the save operation
-  const performSave = async (): Promise<void> => {
+  const performSave = useCallback(async (): Promise<void> => {
     // Don't save if there are no changes, already saving, or disabled
     if (!isDirty || isSaving || !enabled) {
       return
@@ -91,7 +91,7 @@ export function useAutoSaveOnNavigation({
     } finally {
       savePromiseRef.current = null
     }
-  }
+  }, [isDirty, isSaving, enabled, onSave])
 
   // Helper function to clear the auto-save timeout
   const clearAutoSaveTimeout = () => {
@@ -121,7 +121,7 @@ export function useAutoSaveOnNavigation({
 
     // Cleanup timeout on unmount or when dependencies change
     return clearAutoSaveTimeout
-  }, [isDirty, isSaving, enabled, autoSaveDelay])
+  }, [isDirty, isSaving, enabled, autoSaveDelay, performSave])
 
   useEffect(() => {
     if (!enabled) return
@@ -163,7 +163,7 @@ export function useAutoSaveOnNavigation({
       window.removeEventListener('beforeunload', handleBeforeUnload)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
-  }, [isDirty, isSaving, enabled])
+  }, [isDirty, isSaving, enabled, performSave])
 
   // Handle Next.js route changes by listening to pathname changes
   useEffect(() => {
@@ -179,7 +179,7 @@ export function useAutoSaveOnNavigation({
 
     // Update the previous pathname reference
     previousPathnameRef.current = pathname
-  }, [pathname, isDirty, isSaving, enabled])
+  }, [pathname, isDirty, isSaving, enabled, performSave])
 
   return {
     performSave,
