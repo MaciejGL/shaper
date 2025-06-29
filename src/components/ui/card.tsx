@@ -5,12 +5,13 @@ import { cn } from '@/lib/utils'
 
 const cardVariants = cva(
   cn(
-    'text-card-foreground flex flex-col gap-6 rounded-lg py-4 relative shadow-neuro-light dark:shadow-neuro-dark bg-zinc-50 dark:bg-zinc-900',
+    'text-card-foreground flex flex-col gap-6 rounded-lg py-4 relative shadow-xs bg-card border border-border  transition-[border] duration-200',
   ),
   {
     variants: {
       variant: {
         default: '',
+        elevated: 'shadow-neuro-light dark:shadow-neuro-dark',
         gradient:
           'border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-white via-white to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800 border-0',
       },
@@ -23,10 +24,12 @@ function Card({
   children,
   variant,
   borderless = false,
+  hoverable = false,
   ...props
 }: React.ComponentProps<'div'> & {
-  variant?: 'default' | 'gradient'
+  variant?: 'default' | 'gradient' | 'elevated'
   borderless?: boolean
+  hoverable?: boolean
 }) {
   return (
     <div
@@ -35,6 +38,7 @@ function Card({
         cardVariants({ variant }),
         className,
         borderless && 'border-0',
+        hoverable && 'hover:border-primary/50',
       )}
       {...props}
     >

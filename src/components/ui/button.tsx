@@ -11,19 +11,20 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: cn(
-          'bg-primary text-primary-foreground hover:bg-primary/90 shadow-neuro-light dark:shadow-neuro-dark',
+          'bg-primary text-primary-foreground hover:bg-primary/90 shadow-xs',
         ),
         destructive: cn(
           'hover:bg-accent text-destructive/75 hover:text-destructive',
         ),
         outline:
-          'border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+          'border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 shadow-xs',
         secondary:
-          'bg-secondary hover:bg-muted/40 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 shadow-neuro-light dark:shadow-neuro-dark',
+          'bg-secondary hover:bg-muted/40 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 shadow-xs',
         ghost:
           'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
         link: 'text-primary underline-offset-4 hover:underline',
-        variantless: 'bg-transparent text-primary hover:bg-transparent',
+        variantless:
+          'bg-transparent text-primary hover:bg-transparent shadow-none',
       },
       size: {
         variantless: 'h-auto p-0',

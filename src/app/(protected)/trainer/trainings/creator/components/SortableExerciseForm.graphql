@@ -1,0 +1,55 @@
+# Focused query for exercise form - only fetches what the form needs
+query GetExerciseFormData($exerciseId: ID!) {
+  exercise: getTrainingExercise(id: $exerciseId) {
+    id
+    name
+    instructions
+    additionalInstructions
+    type
+    restSeconds
+    warmupSets
+    tempo
+    videoUrl
+    sets {
+      id
+      order
+      minReps
+      maxReps
+      weight
+      rpe
+    }
+  }
+}
+
+# Debounced mutation for updating exercise form data
+mutation UpdateExerciseForm($input: UpdateExerciseFormInput!) {
+  updateExerciseForm(input: $input) {
+    id
+    name
+    instructions
+    additionalInstructions
+    type
+    restSeconds
+    warmupSets
+    tempo
+    videoUrl
+    sets {
+      id
+      order
+      minReps
+      maxReps
+      weight
+      rpe
+    }
+  }
+}
+
+mutation AddSetExerciseForm($input: AddSetExerciseFormInput!) {
+  addSetExerciseForm(input: $input) {
+    id
+  }
+}
+
+mutation RemoveSetExerciseForm($setId: ID!) {
+  removeSetExerciseForm(setId: $setId)
+}

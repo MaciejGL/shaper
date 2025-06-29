@@ -30,9 +30,49 @@ export type GQLAddAiExerciseToWorkoutInput = {
   sets: Array<InputMaybe<GQLSuggestedSetsInput>>;
 };
 
+export type GQLAddExerciseToDayInput = {
+  additionalInstructions?: InputMaybe<Scalars['String']['input']>;
+  baseId?: InputMaybe<Scalars['ID']['input']>;
+  dayId: Scalars['ID']['input'];
+  instructions?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  order: Scalars['Int']['input'];
+  restSeconds?: InputMaybe<Scalars['Int']['input']>;
+  tempo?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<GQLExerciseType>;
+  warmupSets?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type GQLAddExercisesToWorkoutInput = {
   exerciseIds: Array<Scalars['ID']['input']>;
   workoutId: Scalars['ID']['input'];
+};
+
+export type GQLAddSetExerciseFormInput = {
+  exerciseId: Scalars['ID']['input'];
+  set: GQLAddSetExerciseFormSetInput;
+};
+
+export type GQLAddSetExerciseFormSetInput = {
+  maxReps?: InputMaybe<Scalars['Int']['input']>;
+  minReps?: InputMaybe<Scalars['Int']['input']>;
+  rpe?: InputMaybe<Scalars['Int']['input']>;
+  weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type GQLAddSetToExerciseInput = {
+  exerciseId: Scalars['ID']['input'];
+  maxReps?: InputMaybe<Scalars['Int']['input']>;
+  minReps?: InputMaybe<Scalars['Int']['input']>;
+  order: Scalars['Int']['input'];
+  reps?: InputMaybe<Scalars['Int']['input']>;
+  rpe?: InputMaybe<Scalars['Int']['input']>;
+  weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type GQLAddTrainingWeekInput = {
+  trainingPlanId: Scalars['ID']['input'];
+  weekNumber: Scalars['Int']['input'];
 };
 
 export type GQLAiExerciseSuggestion = {
@@ -179,6 +219,11 @@ export enum GQLDifficulty {
   Intermediate = 'INTERMEDIATE'
 }
 
+export type GQLDuplicateTrainingWeekInput = {
+  trainingPlanId: Scalars['ID']['input'];
+  weekId: Scalars['ID']['input'];
+};
+
 export enum GQLEquipment {
   Band = 'BAND',
   Barbell = 'BARBELL',
@@ -294,6 +339,13 @@ export type GQLModerateReviewInput = {
   reviewId: Scalars['ID']['input'];
 };
 
+export type GQLMoveExerciseInput = {
+  dayId: Scalars['ID']['input'];
+  exerciseId: Scalars['ID']['input'];
+  newOrder: Scalars['Int']['input'];
+  targetDayId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type GQLMuscleGroup = {
   __typename?: 'MuscleGroup';
   alias?: Maybe<Scalars['String']['output']>;
@@ -320,12 +372,17 @@ export type GQLMutation = {
   acceptCoachingRequest?: Maybe<GQLCoachingRequest>;
   activatePlan: Scalars['Boolean']['output'];
   addAiExerciseToWorkout: GQLTrainingExercise;
+  addExerciseToDay: Scalars['ID']['output'];
   addExercisesToWorkout: Array<GQLTrainingExercise>;
   addSet: GQLExerciseSet;
+  addSetExerciseForm: GQLExerciseSet;
+  addSetToExercise: Scalars['ID']['output'];
+  addTrainingWeek: Scalars['ID']['output'];
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   closePlan: Scalars['Boolean']['output'];
   createCoachingRequest: GQLCoachingRequest;
+  createDraftTemplate: GQLTrainingPlan;
   createExercise: Scalars['Boolean']['output'];
   createNote: GQLNote;
   createNotification: GQLNotification;
@@ -338,6 +395,7 @@ export type GQLMutation = {
   deleteReview: Scalars['Boolean']['output'];
   deleteTrainingPlan: Scalars['Boolean']['output'];
   duplicateTrainingPlan: Scalars['ID']['output'];
+  duplicateTrainingWeek: Scalars['ID']['output'];
   extendPlan: Scalars['Boolean']['output'];
   getAiExerciseSuggestions: Array<GQLAiExerciseSuggestion>;
   logWorkoutProgress: Scalars['ID']['output'];
@@ -348,19 +406,30 @@ export type GQLMutation = {
   markSetAsCompleted?: Maybe<Scalars['Boolean']['output']>;
   markWorkoutAsCompleted?: Maybe<Scalars['Boolean']['output']>;
   moderateReview: Scalars['Boolean']['output'];
+  moveExercise: Scalars['Boolean']['output'];
   pausePlan: Scalars['Boolean']['output'];
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
+  removeExerciseFromDay: Scalars['Boolean']['output'];
   removeExerciseFromWorkout: Scalars['Boolean']['output'];
   removeSet: Scalars['Boolean']['output'];
+  removeSetExerciseForm: Scalars['Boolean']['output'];
+  removeSetFromExercise: Scalars['Boolean']['output'];
   removeTrainingPlanFromClient: Scalars['Boolean']['output'];
+  removeTrainingWeek: Scalars['Boolean']['output'];
   removeWeek: Scalars['Boolean']['output'];
   updateExercise: Scalars['Boolean']['output'];
+  updateExerciseForm: GQLTrainingExercise;
+  updateExerciseSet: Scalars['Boolean']['output'];
   updateNote: GQLNote;
   updateNotification: GQLNotification;
   updateProfile?: Maybe<GQLUserProfile>;
   updateReview: Scalars['Boolean']['output'];
   updateSetLog?: Maybe<GQLExerciseSetLog>;
+  updateTrainingDayData: Scalars['Boolean']['output'];
+  updateTrainingExercise: Scalars['Boolean']['output'];
   updateTrainingPlan: Scalars['Boolean']['output'];
+  updateTrainingPlanDetails: Scalars['Boolean']['output'];
+  updateTrainingWeekDetails: Scalars['Boolean']['output'];
 };
 
 
@@ -381,6 +450,11 @@ export type GQLMutationAddAiExerciseToWorkoutArgs = {
 };
 
 
+export type GQLMutationAddExerciseToDayArgs = {
+  input: GQLAddExerciseToDayInput;
+};
+
+
 export type GQLMutationAddExercisesToWorkoutArgs = {
   input: GQLAddExercisesToWorkoutInput;
 };
@@ -388,6 +462,21 @@ export type GQLMutationAddExercisesToWorkoutArgs = {
 
 export type GQLMutationAddSetArgs = {
   exerciseId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationAddSetExerciseFormArgs = {
+  input: GQLAddSetExerciseFormInput;
+};
+
+
+export type GQLMutationAddSetToExerciseArgs = {
+  input: GQLAddSetToExerciseInput;
+};
+
+
+export type GQLMutationAddTrainingWeekArgs = {
+  input: GQLAddTrainingWeekInput;
 };
 
 
@@ -472,6 +561,11 @@ export type GQLMutationDuplicateTrainingPlanArgs = {
 };
 
 
+export type GQLMutationDuplicateTrainingWeekArgs = {
+  input: GQLDuplicateTrainingWeekInput;
+};
+
+
 export type GQLMutationExtendPlanArgs = {
   planId: Scalars['ID']['input'];
   weeks: Array<Scalars['ID']['input']>;
@@ -527,6 +621,11 @@ export type GQLMutationModerateReviewArgs = {
 };
 
 
+export type GQLMutationMoveExerciseArgs = {
+  input: GQLMoveExerciseInput;
+};
+
+
 export type GQLMutationPausePlanArgs = {
   planId: Scalars['ID']['input'];
 };
@@ -534,6 +633,11 @@ export type GQLMutationPausePlanArgs = {
 
 export type GQLMutationRejectCoachingRequestArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveExerciseFromDayArgs = {
+  exerciseId: Scalars['ID']['input'];
 };
 
 
@@ -547,9 +651,24 @@ export type GQLMutationRemoveSetArgs = {
 };
 
 
+export type GQLMutationRemoveSetExerciseFormArgs = {
+  setId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveSetFromExerciseArgs = {
+  setId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationRemoveTrainingPlanFromClientArgs = {
   clientId: Scalars['ID']['input'];
   planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveTrainingWeekArgs = {
+  weekId: Scalars['ID']['input'];
 };
 
 
@@ -562,6 +681,16 @@ export type GQLMutationRemoveWeekArgs = {
 export type GQLMutationUpdateExerciseArgs = {
   id: Scalars['ID']['input'];
   input: GQLUpdateExerciseInput;
+};
+
+
+export type GQLMutationUpdateExerciseFormArgs = {
+  input: GQLUpdateExerciseFormInput;
+};
+
+
+export type GQLMutationUpdateExerciseSetArgs = {
+  input: GQLUpdateExerciseSetInput;
 };
 
 
@@ -590,8 +719,28 @@ export type GQLMutationUpdateSetLogArgs = {
 };
 
 
+export type GQLMutationUpdateTrainingDayDataArgs = {
+  input: GQLUpdateTrainingDayDataInput;
+};
+
+
+export type GQLMutationUpdateTrainingExerciseArgs = {
+  input: GQLUpdateTrainingExerciseInput;
+};
+
+
 export type GQLMutationUpdateTrainingPlanArgs = {
   input: GQLUpdateTrainingPlanInput;
+};
+
+
+export type GQLMutationUpdateTrainingPlanDetailsArgs = {
+  input: GQLUpdateTrainingPlanDetailsInput;
+};
+
+
+export type GQLMutationUpdateTrainingWeekDetailsArgs = {
+  input: GQLUpdateTrainingWeekDetailsInput;
 };
 
 export type GQLMyPlansPayload = {
@@ -658,6 +807,7 @@ export type GQLQuery = {
   getExercises: GQLGetExercisesResponse;
   getMyPlansOverview: GQLMyPlansPayload;
   getTemplates: Array<GQLTrainingPlan>;
+  getTrainingExercise?: Maybe<GQLTrainingExercise>;
   getTrainingPlanById: GQLTrainingPlan;
   getWorkout?: Maybe<GQLGetWorkoutPayload>;
   getWorkoutInfo: GQLTrainingDay;
@@ -704,6 +854,11 @@ export type GQLQueryGetClientTrainingPlansArgs = {
 
 export type GQLQueryGetTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type GQLQueryGetTrainingExerciseArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -817,6 +972,7 @@ export type GQLTrainingExercise = {
   id: Scalars['ID']['output'];
   instructions?: Maybe<Scalars['String']['output']>;
   isExtra: Scalars['Boolean']['output'];
+  isPublic: Scalars['Boolean']['output'];
   logs: Array<GQLExerciseLog>;
   muscleGroups: Array<GQLMuscleGroup>;
   name: Scalars['String']['output'];
@@ -879,12 +1035,33 @@ export type GQLTrainingWeek = {
   weekNumber: Scalars['Int']['output'];
 };
 
+export type GQLUpdateExerciseFormInput = {
+  additionalInstructions?: InputMaybe<Scalars['String']['input']>;
+  exerciseId: Scalars['ID']['input'];
+  instructions?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  restSeconds?: InputMaybe<Scalars['Int']['input']>;
+  sets?: InputMaybe<Array<GQLUpdateExerciseSetFormInput>>;
+  tempo?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<GQLExerciseType>;
+  warmupSets?: InputMaybe<Scalars['Int']['input']>;
+};
+
 export type GQLUpdateExerciseInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   equipment?: InputMaybe<GQLEquipment>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GQLUpdateExerciseSetFormInput = {
+  id?: InputMaybe<Scalars['ID']['input']>;
+  maxReps?: InputMaybe<Scalars['Int']['input']>;
+  minReps?: InputMaybe<Scalars['Int']['input']>;
+  order: Scalars['Int']['input'];
+  rpe?: InputMaybe<Scalars['Int']['input']>;
+  weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type GQLUpdateExerciseSetInput = {
@@ -933,6 +1110,12 @@ export type GQLUpdateReviewInput = {
   reviewId: Scalars['ID']['input'];
 };
 
+export type GQLUpdateTrainingDayDataInput = {
+  dayId: Scalars['ID']['input'];
+  isRestDay?: InputMaybe<Scalars['Boolean']['input']>;
+  workoutType?: InputMaybe<GQLWorkoutType>;
+};
+
 export type GQLUpdateTrainingDayInput = {
   dayOfWeek: Scalars['Int']['input'];
   exercises?: InputMaybe<Array<GQLUpdateTrainingExerciseInput>>;
@@ -956,6 +1139,15 @@ export type GQLUpdateTrainingExerciseInput = {
   warmupSets?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type GQLUpdateTrainingPlanDetailsInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  difficulty?: InputMaybe<GQLDifficulty>;
+  id: Scalars['ID']['input'];
+  isDraft?: InputMaybe<Scalars['Boolean']['input']>;
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
 export type GQLUpdateTrainingPlanInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   difficulty?: InputMaybe<GQLDifficulty>;
@@ -964,6 +1156,13 @@ export type GQLUpdateTrainingPlanInput = {
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
   title?: InputMaybe<Scalars['String']['input']>;
   weeks?: InputMaybe<Array<GQLUpdateTrainingWeekInput>>;
+};
+
+export type GQLUpdateTrainingWeekDetailsInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  name?: InputMaybe<Scalars['String']['input']>;
+  weekNumber?: InputMaybe<Scalars['Int']['input']>;
 };
 
 export type GQLUpdateTrainingWeekInput = {
@@ -1393,7 +1592,7 @@ export type GQLDeleteExerciseMutationVariables = Exact<{
 
 export type GQLDeleteExerciseMutation = { __typename?: 'Mutation', deleteExercise: boolean };
 
-export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> };
+export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, createdAt: string, updatedAt: string, assignedCount: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> };
 
 export type GQLGetTemplatesQueryVariables = Exact<{
   draft?: InputMaybe<Scalars['Boolean']['input']>;
@@ -1407,7 +1606,7 @@ export type GQLGetTemplateTrainingPlanByIdQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetTemplateTrainingPlanByIdQuery = { __typename?: 'Query', getTrainingPlanById: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
+export type GQLGetTemplateTrainingPlanByIdQuery = { __typename?: 'Query', getTrainingPlanById: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, createdAt: string, updatedAt: string, assignedCount: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
 
 export type GQLCreateTrainingPlanMutationVariables = Exact<{
   input: GQLCreateTrainingPlanInput;
@@ -1451,6 +1650,130 @@ export type GQLRemoveTrainingPlanFromClientMutationVariables = Exact<{
 
 
 export type GQLRemoveTrainingPlanFromClientMutation = { __typename?: 'Mutation', removeTrainingPlanFromClient: boolean };
+
+export type GQLUpdateTrainingPlanDetailsMutationVariables = Exact<{
+  input: GQLUpdateTrainingPlanDetailsInput;
+}>;
+
+
+export type GQLUpdateTrainingPlanDetailsMutation = { __typename?: 'Mutation', updateTrainingPlanDetails: boolean };
+
+export type GQLUpdateTrainingWeekDetailsMutationVariables = Exact<{
+  input: GQLUpdateTrainingWeekDetailsInput;
+}>;
+
+
+export type GQLUpdateTrainingWeekDetailsMutation = { __typename?: 'Mutation', updateTrainingWeekDetails: boolean };
+
+export type GQLDuplicateTrainingWeekMutationVariables = Exact<{
+  input: GQLDuplicateTrainingWeekInput;
+}>;
+
+
+export type GQLDuplicateTrainingWeekMutation = { __typename?: 'Mutation', duplicateTrainingWeek: string };
+
+export type GQLRemoveTrainingWeekMutationVariables = Exact<{
+  weekId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveTrainingWeekMutation = { __typename?: 'Mutation', removeTrainingWeek: boolean };
+
+export type GQLAddTrainingWeekMutationVariables = Exact<{
+  input: GQLAddTrainingWeekInput;
+}>;
+
+
+export type GQLAddTrainingWeekMutation = { __typename?: 'Mutation', addTrainingWeek: string };
+
+export type GQLUpdateTrainingDayDataMutationVariables = Exact<{
+  input: GQLUpdateTrainingDayDataInput;
+}>;
+
+
+export type GQLUpdateTrainingDayDataMutation = { __typename?: 'Mutation', updateTrainingDayData: boolean };
+
+export type GQLUpdateTrainingExerciseMutationVariables = Exact<{
+  input: GQLUpdateTrainingExerciseInput;
+}>;
+
+
+export type GQLUpdateTrainingExerciseMutation = { __typename?: 'Mutation', updateTrainingExercise: boolean };
+
+export type GQLUpdateExerciseSetMutationVariables = Exact<{
+  input: GQLUpdateExerciseSetInput;
+}>;
+
+
+export type GQLUpdateExerciseSetMutation = { __typename?: 'Mutation', updateExerciseSet: boolean };
+
+export type GQLAddExerciseToDayMutationVariables = Exact<{
+  input: GQLAddExerciseToDayInput;
+}>;
+
+
+export type GQLAddExerciseToDayMutation = { __typename?: 'Mutation', addExerciseToDay: string };
+
+export type GQLRemoveExerciseFromDayMutationVariables = Exact<{
+  exerciseId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveExerciseFromDayMutation = { __typename?: 'Mutation', removeExerciseFromDay: boolean };
+
+export type GQLMoveExerciseMutationVariables = Exact<{
+  input: GQLMoveExerciseInput;
+}>;
+
+
+export type GQLMoveExerciseMutation = { __typename?: 'Mutation', moveExercise: boolean };
+
+export type GQLAddSetToExerciseMutationVariables = Exact<{
+  input: GQLAddSetToExerciseInput;
+}>;
+
+
+export type GQLAddSetToExerciseMutation = { __typename?: 'Mutation', addSetToExercise: string };
+
+export type GQLRemoveSetFromExerciseMutationVariables = Exact<{
+  setId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveSetFromExerciseMutation = { __typename?: 'Mutation', removeSetFromExercise: boolean };
+
+export type GQLCreateDraftTemplateMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLCreateDraftTemplateMutation = { __typename?: 'Mutation', createDraftTemplate: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null }> }> } };
+
+export type GQLGetExerciseFormDataQueryVariables = Exact<{
+  exerciseId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetExerciseFormDataQuery = { __typename?: 'Query', exercise?: { __typename?: 'TrainingExercise', id: string, name: string, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, restSeconds?: number | undefined | null, warmupSets?: number | undefined | null, tempo?: string | undefined | null, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> } | undefined | null };
+
+export type GQLUpdateExerciseFormMutationVariables = Exact<{
+  input: GQLUpdateExerciseFormInput;
+}>;
+
+
+export type GQLUpdateExerciseFormMutation = { __typename?: 'Mutation', updateExerciseForm: { __typename?: 'TrainingExercise', id: string, name: string, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, restSeconds?: number | undefined | null, warmupSets?: number | undefined | null, tempo?: string | undefined | null, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> } };
+
+export type GQLAddSetExerciseFormMutationVariables = Exact<{
+  input: GQLAddSetExerciseFormInput;
+}>;
+
+
+export type GQLAddSetExerciseFormMutation = { __typename?: 'Mutation', addSetExerciseForm: { __typename?: 'ExerciseSet', id: string } };
+
+export type GQLRemoveSetExerciseFormMutationVariables = Exact<{
+  setId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveSetExerciseFormMutation = { __typename?: 'Mutation', removeSetExerciseForm: boolean };
 
 export type GQLMyCoachingRequestsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1577,6 +1900,9 @@ export const TrainingTemplateFragmentDoc = `
   isTemplate
   isDraft
   difficulty
+  createdAt
+  updatedAt
+  assignedCount
   weeks {
     id
     weekNumber
@@ -3884,6 +4210,515 @@ useRemoveTrainingPlanFromClientMutation.getKey = () => ['RemoveTrainingPlanFromC
 
 
 useRemoveTrainingPlanFromClientMutation.fetcher = (variables: GQLRemoveTrainingPlanFromClientMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveTrainingPlanFromClientMutation, GQLRemoveTrainingPlanFromClientMutationVariables>(RemoveTrainingPlanFromClientDocument, variables, options);
+
+export const UpdateTrainingPlanDetailsDocument = `
+    mutation UpdateTrainingPlanDetails($input: UpdateTrainingPlanDetailsInput!) {
+  updateTrainingPlanDetails(input: $input)
+}
+    `;
+
+export const useUpdateTrainingPlanDetailsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateTrainingPlanDetailsMutation, TError, GQLUpdateTrainingPlanDetailsMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateTrainingPlanDetailsMutation, TError, GQLUpdateTrainingPlanDetailsMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateTrainingPlanDetails'],
+    mutationFn: (variables?: GQLUpdateTrainingPlanDetailsMutationVariables) => fetchData<GQLUpdateTrainingPlanDetailsMutation, GQLUpdateTrainingPlanDetailsMutationVariables>(UpdateTrainingPlanDetailsDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateTrainingPlanDetailsMutation.getKey = () => ['UpdateTrainingPlanDetails'];
+
+
+useUpdateTrainingPlanDetailsMutation.fetcher = (variables: GQLUpdateTrainingPlanDetailsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateTrainingPlanDetailsMutation, GQLUpdateTrainingPlanDetailsMutationVariables>(UpdateTrainingPlanDetailsDocument, variables, options);
+
+export const UpdateTrainingWeekDetailsDocument = `
+    mutation UpdateTrainingWeekDetails($input: UpdateTrainingWeekDetailsInput!) {
+  updateTrainingWeekDetails(input: $input)
+}
+    `;
+
+export const useUpdateTrainingWeekDetailsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateTrainingWeekDetailsMutation, TError, GQLUpdateTrainingWeekDetailsMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateTrainingWeekDetailsMutation, TError, GQLUpdateTrainingWeekDetailsMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateTrainingWeekDetails'],
+    mutationFn: (variables?: GQLUpdateTrainingWeekDetailsMutationVariables) => fetchData<GQLUpdateTrainingWeekDetailsMutation, GQLUpdateTrainingWeekDetailsMutationVariables>(UpdateTrainingWeekDetailsDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateTrainingWeekDetailsMutation.getKey = () => ['UpdateTrainingWeekDetails'];
+
+
+useUpdateTrainingWeekDetailsMutation.fetcher = (variables: GQLUpdateTrainingWeekDetailsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateTrainingWeekDetailsMutation, GQLUpdateTrainingWeekDetailsMutationVariables>(UpdateTrainingWeekDetailsDocument, variables, options);
+
+export const DuplicateTrainingWeekDocument = `
+    mutation DuplicateTrainingWeek($input: DuplicateTrainingWeekInput!) {
+  duplicateTrainingWeek(input: $input)
+}
+    `;
+
+export const useDuplicateTrainingWeekMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDuplicateTrainingWeekMutation, TError, GQLDuplicateTrainingWeekMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDuplicateTrainingWeekMutation, TError, GQLDuplicateTrainingWeekMutationVariables, TContext>(
+      {
+    mutationKey: ['DuplicateTrainingWeek'],
+    mutationFn: (variables?: GQLDuplicateTrainingWeekMutationVariables) => fetchData<GQLDuplicateTrainingWeekMutation, GQLDuplicateTrainingWeekMutationVariables>(DuplicateTrainingWeekDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDuplicateTrainingWeekMutation.getKey = () => ['DuplicateTrainingWeek'];
+
+
+useDuplicateTrainingWeekMutation.fetcher = (variables: GQLDuplicateTrainingWeekMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDuplicateTrainingWeekMutation, GQLDuplicateTrainingWeekMutationVariables>(DuplicateTrainingWeekDocument, variables, options);
+
+export const RemoveTrainingWeekDocument = `
+    mutation RemoveTrainingWeek($weekId: ID!) {
+  removeTrainingWeek(weekId: $weekId)
+}
+    `;
+
+export const useRemoveTrainingWeekMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveTrainingWeekMutation, TError, GQLRemoveTrainingWeekMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveTrainingWeekMutation, TError, GQLRemoveTrainingWeekMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveTrainingWeek'],
+    mutationFn: (variables?: GQLRemoveTrainingWeekMutationVariables) => fetchData<GQLRemoveTrainingWeekMutation, GQLRemoveTrainingWeekMutationVariables>(RemoveTrainingWeekDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveTrainingWeekMutation.getKey = () => ['RemoveTrainingWeek'];
+
+
+useRemoveTrainingWeekMutation.fetcher = (variables: GQLRemoveTrainingWeekMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveTrainingWeekMutation, GQLRemoveTrainingWeekMutationVariables>(RemoveTrainingWeekDocument, variables, options);
+
+export const AddTrainingWeekDocument = `
+    mutation AddTrainingWeek($input: AddTrainingWeekInput!) {
+  addTrainingWeek(input: $input)
+}
+    `;
+
+export const useAddTrainingWeekMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLAddTrainingWeekMutation, TError, GQLAddTrainingWeekMutationVariables, TContext>) => {
+    
+    return useMutation<GQLAddTrainingWeekMutation, TError, GQLAddTrainingWeekMutationVariables, TContext>(
+      {
+    mutationKey: ['AddTrainingWeek'],
+    mutationFn: (variables?: GQLAddTrainingWeekMutationVariables) => fetchData<GQLAddTrainingWeekMutation, GQLAddTrainingWeekMutationVariables>(AddTrainingWeekDocument, variables)(),
+    ...options
+  }
+    )};
+
+useAddTrainingWeekMutation.getKey = () => ['AddTrainingWeek'];
+
+
+useAddTrainingWeekMutation.fetcher = (variables: GQLAddTrainingWeekMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAddTrainingWeekMutation, GQLAddTrainingWeekMutationVariables>(AddTrainingWeekDocument, variables, options);
+
+export const UpdateTrainingDayDataDocument = `
+    mutation UpdateTrainingDayData($input: UpdateTrainingDayDataInput!) {
+  updateTrainingDayData(input: $input)
+}
+    `;
+
+export const useUpdateTrainingDayDataMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateTrainingDayDataMutation, TError, GQLUpdateTrainingDayDataMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateTrainingDayDataMutation, TError, GQLUpdateTrainingDayDataMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateTrainingDayData'],
+    mutationFn: (variables?: GQLUpdateTrainingDayDataMutationVariables) => fetchData<GQLUpdateTrainingDayDataMutation, GQLUpdateTrainingDayDataMutationVariables>(UpdateTrainingDayDataDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateTrainingDayDataMutation.getKey = () => ['UpdateTrainingDayData'];
+
+
+useUpdateTrainingDayDataMutation.fetcher = (variables: GQLUpdateTrainingDayDataMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateTrainingDayDataMutation, GQLUpdateTrainingDayDataMutationVariables>(UpdateTrainingDayDataDocument, variables, options);
+
+export const UpdateTrainingExerciseDocument = `
+    mutation UpdateTrainingExercise($input: UpdateTrainingExerciseInput!) {
+  updateTrainingExercise(input: $input)
+}
+    `;
+
+export const useUpdateTrainingExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateTrainingExerciseMutation, TError, GQLUpdateTrainingExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateTrainingExerciseMutation, TError, GQLUpdateTrainingExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateTrainingExercise'],
+    mutationFn: (variables?: GQLUpdateTrainingExerciseMutationVariables) => fetchData<GQLUpdateTrainingExerciseMutation, GQLUpdateTrainingExerciseMutationVariables>(UpdateTrainingExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateTrainingExerciseMutation.getKey = () => ['UpdateTrainingExercise'];
+
+
+useUpdateTrainingExerciseMutation.fetcher = (variables: GQLUpdateTrainingExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateTrainingExerciseMutation, GQLUpdateTrainingExerciseMutationVariables>(UpdateTrainingExerciseDocument, variables, options);
+
+export const UpdateExerciseSetDocument = `
+    mutation UpdateExerciseSet($input: UpdateExerciseSetInput!) {
+  updateExerciseSet(input: $input)
+}
+    `;
+
+export const useUpdateExerciseSetMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateExerciseSetMutation, TError, GQLUpdateExerciseSetMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateExerciseSetMutation, TError, GQLUpdateExerciseSetMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateExerciseSet'],
+    mutationFn: (variables?: GQLUpdateExerciseSetMutationVariables) => fetchData<GQLUpdateExerciseSetMutation, GQLUpdateExerciseSetMutationVariables>(UpdateExerciseSetDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateExerciseSetMutation.getKey = () => ['UpdateExerciseSet'];
+
+
+useUpdateExerciseSetMutation.fetcher = (variables: GQLUpdateExerciseSetMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateExerciseSetMutation, GQLUpdateExerciseSetMutationVariables>(UpdateExerciseSetDocument, variables, options);
+
+export const AddExerciseToDayDocument = `
+    mutation AddExerciseToDay($input: AddExerciseToDayInput!) {
+  addExerciseToDay(input: $input)
+}
+    `;
+
+export const useAddExerciseToDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLAddExerciseToDayMutation, TError, GQLAddExerciseToDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLAddExerciseToDayMutation, TError, GQLAddExerciseToDayMutationVariables, TContext>(
+      {
+    mutationKey: ['AddExerciseToDay'],
+    mutationFn: (variables?: GQLAddExerciseToDayMutationVariables) => fetchData<GQLAddExerciseToDayMutation, GQLAddExerciseToDayMutationVariables>(AddExerciseToDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useAddExerciseToDayMutation.getKey = () => ['AddExerciseToDay'];
+
+
+useAddExerciseToDayMutation.fetcher = (variables: GQLAddExerciseToDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAddExerciseToDayMutation, GQLAddExerciseToDayMutationVariables>(AddExerciseToDayDocument, variables, options);
+
+export const RemoveExerciseFromDayDocument = `
+    mutation RemoveExerciseFromDay($exerciseId: ID!) {
+  removeExerciseFromDay(exerciseId: $exerciseId)
+}
+    `;
+
+export const useRemoveExerciseFromDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveExerciseFromDayMutation, TError, GQLRemoveExerciseFromDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveExerciseFromDayMutation, TError, GQLRemoveExerciseFromDayMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveExerciseFromDay'],
+    mutationFn: (variables?: GQLRemoveExerciseFromDayMutationVariables) => fetchData<GQLRemoveExerciseFromDayMutation, GQLRemoveExerciseFromDayMutationVariables>(RemoveExerciseFromDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveExerciseFromDayMutation.getKey = () => ['RemoveExerciseFromDay'];
+
+
+useRemoveExerciseFromDayMutation.fetcher = (variables: GQLRemoveExerciseFromDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveExerciseFromDayMutation, GQLRemoveExerciseFromDayMutationVariables>(RemoveExerciseFromDayDocument, variables, options);
+
+export const MoveExerciseDocument = `
+    mutation MoveExercise($input: MoveExerciseInput!) {
+  moveExercise(input: $input)
+}
+    `;
+
+export const useMoveExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLMoveExerciseMutation, TError, GQLMoveExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLMoveExerciseMutation, TError, GQLMoveExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['MoveExercise'],
+    mutationFn: (variables?: GQLMoveExerciseMutationVariables) => fetchData<GQLMoveExerciseMutation, GQLMoveExerciseMutationVariables>(MoveExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useMoveExerciseMutation.getKey = () => ['MoveExercise'];
+
+
+useMoveExerciseMutation.fetcher = (variables: GQLMoveExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLMoveExerciseMutation, GQLMoveExerciseMutationVariables>(MoveExerciseDocument, variables, options);
+
+export const AddSetToExerciseDocument = `
+    mutation AddSetToExercise($input: AddSetToExerciseInput!) {
+  addSetToExercise(input: $input)
+}
+    `;
+
+export const useAddSetToExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLAddSetToExerciseMutation, TError, GQLAddSetToExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLAddSetToExerciseMutation, TError, GQLAddSetToExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['AddSetToExercise'],
+    mutationFn: (variables?: GQLAddSetToExerciseMutationVariables) => fetchData<GQLAddSetToExerciseMutation, GQLAddSetToExerciseMutationVariables>(AddSetToExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useAddSetToExerciseMutation.getKey = () => ['AddSetToExercise'];
+
+
+useAddSetToExerciseMutation.fetcher = (variables: GQLAddSetToExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAddSetToExerciseMutation, GQLAddSetToExerciseMutationVariables>(AddSetToExerciseDocument, variables, options);
+
+export const RemoveSetFromExerciseDocument = `
+    mutation RemoveSetFromExercise($setId: ID!) {
+  removeSetFromExercise(setId: $setId)
+}
+    `;
+
+export const useRemoveSetFromExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveSetFromExerciseMutation, TError, GQLRemoveSetFromExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveSetFromExerciseMutation, TError, GQLRemoveSetFromExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveSetFromExercise'],
+    mutationFn: (variables?: GQLRemoveSetFromExerciseMutationVariables) => fetchData<GQLRemoveSetFromExerciseMutation, GQLRemoveSetFromExerciseMutationVariables>(RemoveSetFromExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveSetFromExerciseMutation.getKey = () => ['RemoveSetFromExercise'];
+
+
+useRemoveSetFromExerciseMutation.fetcher = (variables: GQLRemoveSetFromExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveSetFromExerciseMutation, GQLRemoveSetFromExerciseMutationVariables>(RemoveSetFromExerciseDocument, variables, options);
+
+export const CreateDraftTemplateDocument = `
+    mutation CreateDraftTemplate {
+  createDraftTemplate {
+    id
+    title
+    description
+    weeks {
+      id
+      weekNumber
+      name
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        workoutType
+      }
+    }
+  }
+}
+    `;
+
+export const useCreateDraftTemplateMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateDraftTemplateMutation, TError, GQLCreateDraftTemplateMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateDraftTemplateMutation, TError, GQLCreateDraftTemplateMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateDraftTemplate'],
+    mutationFn: (variables?: GQLCreateDraftTemplateMutationVariables) => fetchData<GQLCreateDraftTemplateMutation, GQLCreateDraftTemplateMutationVariables>(CreateDraftTemplateDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateDraftTemplateMutation.getKey = () => ['CreateDraftTemplate'];
+
+
+useCreateDraftTemplateMutation.fetcher = (variables?: GQLCreateDraftTemplateMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateDraftTemplateMutation, GQLCreateDraftTemplateMutationVariables>(CreateDraftTemplateDocument, variables, options);
+
+export const GetExerciseFormDataDocument = `
+    query GetExerciseFormData($exerciseId: ID!) {
+  exercise: getTrainingExercise(id: $exerciseId) {
+    id
+    name
+    instructions
+    additionalInstructions
+    type
+    restSeconds
+    warmupSets
+    tempo
+    videoUrl
+    sets {
+      id
+      order
+      minReps
+      maxReps
+      weight
+      rpe
+    }
+  }
+}
+    `;
+
+export const useGetExerciseFormDataQuery = <
+      TData = GQLGetExerciseFormDataQuery,
+      TError = unknown
+    >(
+      variables: GQLGetExerciseFormDataQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetExerciseFormDataQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetExerciseFormDataQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetExerciseFormDataQuery, TError, TData>(
+      {
+    queryKey: ['GetExerciseFormData', variables],
+    queryFn: fetchData<GQLGetExerciseFormDataQuery, GQLGetExerciseFormDataQueryVariables>(GetExerciseFormDataDocument, variables),
+    ...options
+  }
+    )};
+
+useGetExerciseFormDataQuery.getKey = (variables: GQLGetExerciseFormDataQueryVariables) => ['GetExerciseFormData', variables];
+
+export const useInfiniteGetExerciseFormDataQuery = <
+      TData = InfiniteData<GQLGetExerciseFormDataQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetExerciseFormDataQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetExerciseFormDataQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetExerciseFormDataQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetExerciseFormDataQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetExerciseFormData.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetExerciseFormDataQuery, GQLGetExerciseFormDataQueryVariables>(GetExerciseFormDataDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetExerciseFormDataQuery.getKey = (variables: GQLGetExerciseFormDataQueryVariables) => ['GetExerciseFormData.infinite', variables];
+
+
+useGetExerciseFormDataQuery.fetcher = (variables: GQLGetExerciseFormDataQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetExerciseFormDataQuery, GQLGetExerciseFormDataQueryVariables>(GetExerciseFormDataDocument, variables, options);
+
+export const UpdateExerciseFormDocument = `
+    mutation UpdateExerciseForm($input: UpdateExerciseFormInput!) {
+  updateExerciseForm(input: $input) {
+    id
+    name
+    instructions
+    additionalInstructions
+    type
+    restSeconds
+    warmupSets
+    tempo
+    videoUrl
+    sets {
+      id
+      order
+      minReps
+      maxReps
+      weight
+      rpe
+    }
+  }
+}
+    `;
+
+export const useUpdateExerciseFormMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateExerciseFormMutation, TError, GQLUpdateExerciseFormMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateExerciseFormMutation, TError, GQLUpdateExerciseFormMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateExerciseForm'],
+    mutationFn: (variables?: GQLUpdateExerciseFormMutationVariables) => fetchData<GQLUpdateExerciseFormMutation, GQLUpdateExerciseFormMutationVariables>(UpdateExerciseFormDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateExerciseFormMutation.getKey = () => ['UpdateExerciseForm'];
+
+
+useUpdateExerciseFormMutation.fetcher = (variables: GQLUpdateExerciseFormMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateExerciseFormMutation, GQLUpdateExerciseFormMutationVariables>(UpdateExerciseFormDocument, variables, options);
+
+export const AddSetExerciseFormDocument = `
+    mutation AddSetExerciseForm($input: AddSetExerciseFormInput!) {
+  addSetExerciseForm(input: $input) {
+    id
+  }
+}
+    `;
+
+export const useAddSetExerciseFormMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLAddSetExerciseFormMutation, TError, GQLAddSetExerciseFormMutationVariables, TContext>) => {
+    
+    return useMutation<GQLAddSetExerciseFormMutation, TError, GQLAddSetExerciseFormMutationVariables, TContext>(
+      {
+    mutationKey: ['AddSetExerciseForm'],
+    mutationFn: (variables?: GQLAddSetExerciseFormMutationVariables) => fetchData<GQLAddSetExerciseFormMutation, GQLAddSetExerciseFormMutationVariables>(AddSetExerciseFormDocument, variables)(),
+    ...options
+  }
+    )};
+
+useAddSetExerciseFormMutation.getKey = () => ['AddSetExerciseForm'];
+
+
+useAddSetExerciseFormMutation.fetcher = (variables: GQLAddSetExerciseFormMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAddSetExerciseFormMutation, GQLAddSetExerciseFormMutationVariables>(AddSetExerciseFormDocument, variables, options);
+
+export const RemoveSetExerciseFormDocument = `
+    mutation RemoveSetExerciseForm($setId: ID!) {
+  removeSetExerciseForm(setId: $setId)
+}
+    `;
+
+export const useRemoveSetExerciseFormMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveSetExerciseFormMutation, TError, GQLRemoveSetExerciseFormMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveSetExerciseFormMutation, TError, GQLRemoveSetExerciseFormMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveSetExerciseForm'],
+    mutationFn: (variables?: GQLRemoveSetExerciseFormMutationVariables) => fetchData<GQLRemoveSetExerciseFormMutation, GQLRemoveSetExerciseFormMutationVariables>(RemoveSetExerciseFormDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveSetExerciseFormMutation.getKey = () => ['RemoveSetExerciseForm'];
+
+
+useRemoveSetExerciseFormMutation.fetcher = (variables: GQLRemoveSetExerciseFormMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveSetExerciseFormMutation, GQLRemoveSetExerciseFormMutationVariables>(RemoveSetExerciseFormDocument, variables, options);
 
 export const MyCoachingRequestsDocument = `
     query MyCoachingRequests {

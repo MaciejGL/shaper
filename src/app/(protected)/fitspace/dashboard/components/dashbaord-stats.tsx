@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 
-import { getDayName } from '@/app/(protected)/trainer/trainings/creator/components/utils'
+import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { StatsItem } from '@/components/stats-item'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { GQLFitspaceDashboardQuery } from '@/generated/graphql-client'

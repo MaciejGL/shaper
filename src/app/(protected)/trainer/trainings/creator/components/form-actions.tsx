@@ -1,8 +1,10 @@
+import { useIsMutating } from '@tanstack/react-query'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   Copy,
+  Loader2,
   MoreHorizontalIcon,
   RefreshCcwIcon,
-  Save,
   Trash2,
 } from 'lucide-react'
 
@@ -17,44 +19,53 @@ import {
 type FormActionsProps = {
   isDirty: boolean
   trainingId?: string
-  isPending: boolean
-  isUpdating: boolean
   isDuplicating: boolean
   isDeleting: boolean
   onDelete: (trainingId: string) => Promise<void>
   onClearDraft: () => void
   onDuplicate: (trainingId: string) => Promise<void>
-  onSubmit: () => Promise<void>
 }
 
 export function FormActions({
   isDirty,
   trainingId,
-  isPending,
-  isUpdating,
+
   isDuplicating,
   isDeleting,
   onDelete,
   onClearDraft,
   onDuplicate,
-  onSubmit,
 }: FormActionsProps) {
+  const pendingMutationsCount = useIsMutating()
+
+  const isSavingChanges = pendingMutationsCount > 0
+
   return (
     <div>
-      <div className="flex justify-end gap-2 items-center">
+      <div className="flex justify-end gap-4 items-end">
+        <AnimatePresence>
+          {isSavingChanges && (
+            <motion.div
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center gap-4"
+            >
+              <Loader2 className="size-4 animate-spin" />
+              <p className="text-sm text-muted-foreground">Saving changes...</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" iconOnly={<MoreHorizontalIcon />} />
+            <Button variant="default" iconOnly={<MoreHorizontalIcon />} />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem
               onClick={onClearDraft}
               disabled={
-                isPending ||
-                isUpdating ||
-                isDuplicating ||
-                isDeleting ||
-                !isDirty
+                isSavingChanges || isDuplicating || isDeleting || !isDirty
               }
             >
               <RefreshCcwIcon className="size-4 mr-2" />
@@ -64,7 +75,9 @@ export function FormActions({
             <DropdownMenuItem
               onClick={() => onDuplicate(trainingId!)}
               loading={isDuplicating}
-              disabled={isDuplicating || isDeleting || isPending || !trainingId}
+              disabled={
+                isSavingChanges || isDuplicating || isDeleting || !trainingId
+              }
             >
               <Copy className="size-4 mr-2" />
               Duplicate
@@ -73,22 +86,15 @@ export function FormActions({
             <DropdownMenuItem
               onClick={() => onDelete(trainingId!)}
               loading={isDeleting}
-              disabled={isDuplicating || isDeleting || isPending || !trainingId}
+              disabled={
+                isSavingChanges || isDuplicating || isDeleting || !trainingId
+              }
             >
               <Trash2 className="size-4 mr-2" />
               Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button
-          variant="default"
-          onClick={onSubmit}
-          iconStart={<Save />}
-          loading={isPending || isUpdating}
-          disabled={isDuplicating || isDeleting || isPending || !isDirty}
-        >
-          Save Plan
-        </Button>
       </div>
     </div>
   )

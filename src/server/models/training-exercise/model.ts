@@ -138,6 +138,10 @@ export default class TrainingExercise implements GQLTrainingExercise {
     return logs.map((log) => new ExerciseLog(log))
   }
 
+  get isPublic() {
+    return this.data.base?.isPublic ?? false
+  }
+
   get createdAt() {
     return this.data.createdAt.toISOString()
   }

@@ -1,4 +1,4 @@
-import { TrainingPlanFormData } from '@/app/(protected)/trainer/trainings/creator/components/types'
+import { TrainingPlanFormData } from '@/app/(protected)/trainer/types'
 
 export type PartialTrainingPlanFormDataWeek = Partial<
   TrainingPlanFormData['weeks'][number]
@@ -22,20 +22,22 @@ export type PartialTrainingPlanFormDataDetails = Partial<
 export type TrainingPlanContextType = {
   // State
   formData: TrainingPlanFormData
+  trainingId?: string
   isDirty: boolean
-  currentStep: number
+
   activeWeek: number
-  activeDay: number
+
   isLoadingInitialData: boolean
-  isPending: boolean
-  isUpdating: boolean
-  isDeleting: boolean
-  isDuplicating: boolean
+  isDeletingTrainingPlan: boolean
+  isDuplicatingTrainingPlan: boolean
+
+  // Data
+  createdAt?: string
+  updatedAt?: string
+  assignedCount?: number
 
   // Actions
-  setCurrentStep: (step: number) => void
   setActiveWeek: (week: number) => void
-  setActiveDay: (day: number) => void
 
   // Granular update functions
   updateDetails: (details: PartialTrainingPlanFormDataDetails) => void
@@ -58,11 +60,20 @@ export type TrainingPlanContextType = {
     weekIndex: number,
     dayIndex: number,
     exercise: PartialTrainingPlanFormDataExercise,
+    atIndex?: number,
   ) => void
   removeExercise: (
     weekIndex: number,
     dayIndex: number,
     exerciseIndex: number,
+  ) => void
+  moveExercise: (
+    sourceWeekIndex: number,
+    sourceDayIndex: number,
+    sourceExerciseIndex: number,
+    targetWeekIndex: number,
+    targetDayIndex: number,
+    targetExerciseIndex: number,
   ) => void
   updateSet: (
     weekIndex: number,
@@ -86,7 +97,6 @@ export type TrainingPlanContextType = {
 
   // Other actions
   clearDraft: () => void
-  handleSubmit: () => Promise<void>
   handleDelete: (trainingId: string) => Promise<void>
   handleDuplicate: (trainingId: string) => Promise<void>
 }

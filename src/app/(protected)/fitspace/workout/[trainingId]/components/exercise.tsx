@@ -617,7 +617,7 @@ function ExerciseSet({
           <div
             className={cn(
               sharedLayoutStyles,
-              'rounded-md shadow-neuro-light dark:shadow-neuro-dark bg-background dark:bg-card text-primary',
+              'rounded-md shadow-neuro-light dark:shadow-neuro-dark bg-card text-primary',
             )}
           >
             <div className="min-w-2.5">{set.order}.</div>
@@ -625,8 +625,8 @@ function ExerciseSet({
               id={`set-${set.id}-reps`}
               value={reps}
               onChange={(e) => handleInputChange(e, 'reps')}
-              variant="ghost"
               inputMode="decimal"
+              variant={'secondary'}
               placeholder={thisSet?.log?.reps?.toString() || ''}
               className="min-w-[96px]"
             />
@@ -634,7 +634,7 @@ function ExerciseSet({
               id={`set-${set.id}-weight`}
               value={weight}
               onChange={(e) => handleInputChange(e, 'weight')}
-              variant="ghost"
+              variant="secondary"
               inputMode="decimal"
               placeholder={thisSet?.log?.weight?.toString() || ''}
               className="min-w-[96px]"

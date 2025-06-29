@@ -71,7 +71,7 @@ function PlanCard({
   } = plan
 
   return (
-    <Card key={id} className="space-y-4">
+    <Card key={id} className="space-y-4" variant="elevated">
       <CardHeader>
         <PlanHeader
           loading={loading}

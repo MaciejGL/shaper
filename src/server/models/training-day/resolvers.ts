@@ -81,4 +81,57 @@ export const Mutation: GQLMutationResolvers = {
 
     return dayId
   },
+  updateTrainingDayData: async (_, { input }, context) => {
+    const { dayId, isRestDay, workoutType } = input
+    const user = context.user
+
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    // Verify the user has permission to update this day
+    const day = await prisma.trainingDay.findUnique({
+      where: { id: dayId },
+      include: {
+        week: {
+          include: {
+            plan: {
+              select: {
+                createdById: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!day) {
+      throw new Error('Training day not found')
+    }
+
+    if (day.week.plan.createdById !== user.user.id) {
+      throw new Error('You do not have permission to update this training day')
+    }
+
+    // Update the day with only the provided fields
+    const updateData: {
+      isRestDay?: boolean
+      workoutType?: string | null
+    } = {}
+
+    if (isRestDay !== undefined && isRestDay !== null) {
+      updateData.isRestDay = isRestDay
+    }
+
+    if (workoutType !== undefined) {
+      updateData.workoutType = workoutType || null
+    }
+
+    await prisma.trainingDay.update({
+      where: { id: dayId },
+      data: updateData,
+    })
+
+    return true
+  },
 }

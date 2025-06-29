@@ -13,6 +13,7 @@ type TrainingExercise {
   isExtra: Boolean!
   sets: [ExerciseSet!]!
   logs: [ExerciseLog!]!
+  isPublic: Boolean!
 
   videoUrl: String
 
@@ -38,6 +39,10 @@ type AiExerciseSuggestion {
   aiMeta: AiMeta!
 }
 
+type Query {
+  getTrainingExercise(id: ID!): TrainingExercise
+}
+
 type Mutation {
   addExercisesToWorkout(
     input: AddExercisesToWorkoutInput!
@@ -47,6 +52,21 @@ type Mutation {
   addSet(exerciseId: ID!): ExerciseSet!
   removeSet(setId: ID!): Boolean!
   getAiExerciseSuggestions(dayId: ID!): [AiExerciseSuggestion!]!
+  updateExerciseForm(input: UpdateExerciseFormInput!): TrainingExercise!
+  addSetExerciseForm(input: AddSetExerciseFormInput!): ExerciseSet!
+  removeSetExerciseForm(setId: ID!): Boolean!
+}
+
+input AddSetExerciseFormInput {
+  exerciseId: ID!
+  set: AddSetExerciseFormSetInput!
+}
+
+input AddSetExerciseFormSetInput {
+  minReps: Int
+  maxReps: Int
+  weight: Float
+  rpe: Int
 }
 
 input AddExercisesToWorkoutInput {
@@ -63,4 +83,25 @@ input AddAiExerciseToWorkoutInput {
   dayId: ID!
   exerciseId: ID!
   sets: [SuggestedSetsInput]!
+}
+
+input UpdateExerciseFormInput {
+  exerciseId: ID!
+  name: String
+  instructions: String
+  additionalInstructions: String
+  type: ExerciseType
+  restSeconds: Int
+  warmupSets: Int
+  tempo: String
+  sets: [UpdateExerciseSetFormInput!]
+}
+
+input UpdateExerciseSetFormInput {
+  id: ID
+  order: Int!
+  minReps: Int
+  maxReps: Int
+  weight: Float
+  rpe: Int
 }

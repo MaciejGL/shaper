@@ -3,32 +3,16 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 import {
-  useCreateTrainingPlanMutation,
+  // Add/remove operations
   useDeleteTrainingPlanMutation,
   useDuplicateTrainingPlanMutation,
-  useUpdateTrainingPlanMutation,
+  // Granular update mutations - more efficient than full plan updates
+  // Keep the full update for fallback/final submission
 } from '@/generated/graphql-client'
 
 export const useTrainingPlanMutations = () => {
   const queryClient = useQueryClient()
   const router = useRouter()
-  const { mutateAsync: createTrainingPlan, isPending } =
-    useCreateTrainingPlanMutation({
-      onError: () => toast.error('Failed to create training plan'),
-      onSuccess: () => {
-        toast.success('Training plan created successfully')
-        queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
-      },
-    })
-
-  const { mutateAsync: updateTrainingPlan, isPending: isUpdating } =
-    useUpdateTrainingPlanMutation({
-      onError: () => toast.error('Failed to update training plan'),
-      onSuccess: () => {
-        toast.success('Training plan updated successfully')
-        queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
-      },
-    })
 
   const { mutateAsync: deleteTrainingPlan, isPending: isDeleting } =
     useDeleteTrainingPlanMutation({
@@ -36,7 +20,7 @@ export const useTrainingPlanMutations = () => {
       onSuccess: () => {
         toast.success('Training plan deleted successfully')
         queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
-        router.replace('/trainer/trainings/creator/new')
+        router.replace('/trainer/trainings')
       },
     })
 
@@ -51,12 +35,11 @@ export const useTrainingPlanMutations = () => {
     })
 
   return {
-    createTrainingPlan,
-    updateTrainingPlan,
+    // Main operations
     deleteTrainingPlan,
     duplicateTrainingPlan,
-    isPending,
-    isUpdating,
+
+    // Loading states
     isDeleting,
     isDuplicating,
   }

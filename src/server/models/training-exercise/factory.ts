@@ -1,7 +1,13 @@
 import { TrainingDay } from '@prisma/client'
+import { TrainingExercise as TrainingExerciseType } from '@prisma/client'
 import { GraphQLError } from 'graphql'
+import { isNil } from 'lodash'
 
-import { GQLAddAiExerciseToWorkoutInput } from '@/generated/graphql-server'
+import {
+  GQLAddAiExerciseToWorkoutInput,
+  GQLAddSetExerciseFormInput,
+  GQLUpdateExerciseFormInput,
+} from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 import {
   createAssistantThread,
@@ -15,6 +21,151 @@ import ExerciseSet from '../exercise-set/model'
 
 import TrainingExercise from './model'
 import { ExerciseSuggestion } from './types'
+
+// Focused function to get a single training exercise for form editing
+export const getTrainingExercise = async (
+  exerciseId: string,
+  context: GQLContext,
+) => {
+  console.log('getTrainingExercise', exerciseId)
+  const exercise = await prisma.trainingExercise.findUnique({
+    where: { id: exerciseId },
+    include: {
+      sets: {
+        orderBy: { order: 'asc' },
+      },
+    },
+  })
+
+  if (!exercise) {
+    throw new GraphQLError('Exercise not found')
+  }
+
+  // Check if user has access to this exercise
+  const trainingDay = await prisma.trainingDay.findFirst({
+    where: {
+      id: exercise.dayId,
+      week: {
+        plan: {
+          OR: [{ createdById: context.user?.user.id }],
+        },
+      },
+    },
+  })
+
+  if (!trainingDay) {
+    throw new GraphQLError('Exercise not found or access denied')
+  }
+
+  return new TrainingExercise(exercise, context)
+}
+
+// Focused function to update exercise form data
+export const updateExerciseForm = async (
+  input: GQLUpdateExerciseFormInput,
+  context: GQLContext,
+) => {
+  const { exerciseId, sets: inputSets, ...exerciseUpdates } = input
+
+  // Verify user has access to this exercise
+  const exercise = await prisma.trainingExercise.findUnique({
+    where: { id: exerciseId },
+    include: {
+      day: {
+        include: {
+          week: {
+            include: {
+              plan: true,
+            },
+          },
+        },
+      },
+      sets: true,
+    },
+  })
+
+  if (!exercise) {
+    throw new GraphQLError('Exercise not found')
+  }
+
+  if (exercise.day.week.plan.createdById !== context.user?.user.id) {
+    throw new GraphQLError('Access denied')
+  }
+
+  // Prepare data for Prisma update (filter out null values)
+  const updateData: Partial<TrainingExerciseType> = {}
+  if (exerciseUpdates.name !== undefined && exerciseUpdates.name !== null) {
+    updateData.name = exerciseUpdates.name
+  }
+  if (!isNil(exerciseUpdates.instructions)) {
+    updateData.instructions = exerciseUpdates.instructions
+  }
+  if (!isNil(exerciseUpdates.additionalInstructions)) {
+    updateData.additionalInstructions = exerciseUpdates.additionalInstructions
+  }
+  if (!isNil(exerciseUpdates.type)) {
+    updateData.type = exerciseUpdates.type
+  }
+  if (!isNil(exerciseUpdates.restSeconds)) {
+    updateData.restSeconds = exerciseUpdates.restSeconds
+  }
+  if (!isNil(exerciseUpdates.warmupSets)) {
+    updateData.warmupSets = exerciseUpdates.warmupSets
+  }
+  if (!isNil(exerciseUpdates.tempo)) {
+    updateData.tempo = exerciseUpdates.tempo
+  }
+
+  // Update exercise data
+  await prisma.trainingExercise.update({
+    where: { id: exerciseId },
+    data: updateData,
+  })
+
+  // Update sets if provided
+  if (inputSets && inputSets.length > 0) {
+    // Handle set updates/creations
+    for (const setInput of inputSets) {
+      if (setInput.id) {
+        // Update existing set
+        await prisma.exerciseSet.update({
+          where: { id: setInput.id },
+          data: {
+            order: setInput.order,
+            minReps: setInput.minReps,
+            maxReps: setInput.maxReps,
+            weight: setInput.weight,
+            rpe: setInput.rpe,
+          },
+        })
+      } else {
+        // Create new set
+        await prisma.exerciseSet.create({
+          data: {
+            exerciseId: exerciseId,
+            order: setInput.order,
+            minReps: setInput.minReps,
+            maxReps: setInput.maxReps,
+            weight: setInput.weight,
+            rpe: setInput.rpe,
+          },
+        })
+      }
+    }
+  }
+
+  // Fetch the updated exercise with sets
+  const finalExercise = await prisma.trainingExercise.findUnique({
+    where: { id: exerciseId },
+    include: {
+      sets: {
+        orderBy: { order: 'asc' },
+      },
+    },
+  })
+
+  return new TrainingExercise(finalExercise!, context)
+}
 
 export const addExercisesToWorkout = async (
   workoutId: string,
@@ -361,4 +512,83 @@ function buildWorkoutSummary(
       return `${idx + 1}. ${ex.name} [${muscles}]: ${setsText}`
     })
     .join('\n')
+}
+
+export const addSetExerciseForm = async (
+  input: GQLAddSetExerciseFormInput,
+  context: GQLContext,
+) => {
+  if (!context.user) {
+    throw new Error('You are not authorized to add sets to this exercise')
+  }
+
+  const { exerciseId, set } = input
+
+  const trainingExercise = await prisma.trainingExercise.findUnique({
+    where: { id: exerciseId },
+    include: {
+      sets: {
+        orderBy: { order: 'asc' },
+      },
+    },
+  })
+
+  if (!trainingExercise) {
+    throw new Error('Training exercise not found')
+  }
+
+  const newSet = await prisma.exerciseSet.create({
+    data: {
+      exerciseId: trainingExercise.id,
+      order: trainingExercise.sets.length + 1,
+      reps: set.minReps,
+      minReps: set.minReps,
+      maxReps: set.maxReps,
+      weight: set.weight,
+      rpe: set.rpe,
+    },
+  })
+
+  return new ExerciseSet(newSet)
+}
+
+export const removeSetExerciseForm = async (setId: string) => {
+  // Get the set with its order and exercise information
+  const set = await prisma.exerciseSet.findUnique({
+    where: { id: setId },
+    include: {
+      exercise: {
+        include: {
+          sets: {
+            orderBy: { order: 'asc' },
+          },
+        },
+      },
+    },
+  })
+
+  if (!set) {
+    throw new Error('Set not found')
+  }
+
+  const setOrder = set.order
+  const exerciseId = set.exerciseId
+
+  // Delete the set
+  await prisma.exerciseSet.delete({
+    where: { id: setId },
+  })
+
+  // Update order for remaining sets that have a higher order than the deleted set
+  await prisma.exerciseSet.updateMany({
+    where: {
+      exerciseId: exerciseId,
+      order: { gt: setOrder },
+    },
+    data: {
+      order: { decrement: 1 },
+    },
+  })
+
+  return true
 }

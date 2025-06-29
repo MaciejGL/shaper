@@ -48,7 +48,7 @@ export function ActivePlanTab({
             handlePlanAction={handlePlanAction}
           />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
-            <div className="shadow-neuro-light dark:shadow-neuro-dark p-4 rounded-lg">
+            <div className="shadow-neuro-light dark:shadow-neuro-dark p-4 rounded-lg bg-card">
               <ProgressOverview
                 completedWorkouts={plan.completedWorkoutsDays}
                 currentWeekNumber={currentWeek?.weekNumber ?? 0}
@@ -74,20 +74,25 @@ export function ActivePlanTab({
             </div>
 
             {currentDay && (
-              <div className="shadow-neuro-light dark:shadow-neuro-dark p-4 rounded-lg">
-                <TodaysWorkout todaysWorkout={currentDay} planId={plan.id} />
+              <div className="shadow-neuro-light dark:shadow-neuro-dark p-4 rounded-lg bg-card">
+                <TodaysWorkout
+                  todaysWorkout={currentDay}
+                  planId={plan.id}
+                  forceExpanded
+                />
               </div>
             )}
             {nextWorkout && currentDay?.isRestDay && (
-              <div className="shadow-neuro-light dark:shadow-neuro-dark p-4 rounded-lg">
+              <div className="shadow-neuro-light dark:shadow-neuro-dark p-4 rounded-lg bg-card">
                 <TodaysWorkout
                   todaysWorkout={nextWorkout}
                   planId={plan.id}
                   isNextWorkout
+                  forceExpanded
                 />
               </div>
             )}
-            <div className="block md:hidden shadow-neuro-light dark:shadow-neuro-dark p-4 rounded-lg">
+            <div className="block md:hidden shadow-neuro-light dark:shadow-neuro-dark p-4 rounded-lg bg-card">
               <p className="text-lg font-semibold mb-6">Plan description</p>
               <CollapsibleText text={plan.description} maxLines={8} />
             </div>

@@ -1,5 +1,14 @@
+import { CopyIcon, MoreHorizontal, XIcon } from 'lucide-react'
+
 import { cn } from '@/lib/utils'
 
+import { Button } from './ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu'
 import { Label } from './ui/label'
 import { RadioGroup, RadioGroupItem } from './ui/radio-group'
 
@@ -7,6 +16,8 @@ type RadioGroupItem = {
   id: string
   value: string
   label: string
+  onRemove?: () => void
+  onCopy?: () => void
   disabled?: boolean
 }
 
@@ -30,7 +41,7 @@ export function RadioGroupTabs({
   classNameItem,
 }: RadioGroupProps) {
   return (
-    <div className="w-full">
+    <div>
       <Label className={cn('mb-2 block', hideTitle && 'sr-only')}>
         {title}
       </Label>
@@ -58,11 +69,37 @@ export function RadioGroupTabs({
                     'hover:bg-accent': value !== item.value,
                     'opacity-50 cursor-default pointer-events-none bg-muted':
                       item.disabled,
+                    'py-1': item.onCopy || item.onRemove,
                   },
                   classNameItem,
                 )}
               >
                 {item.label}
+                {(item.onCopy || item.onRemove) && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        iconOnly={<MoreHorizontal />}
+                      />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {item.onCopy && (
+                        <DropdownMenuItem onClick={item.onCopy}>
+                          <CopyIcon />
+                          Copy
+                        </DropdownMenuItem>
+                      )}
+                      {item.onRemove && (
+                        <DropdownMenuItem onClick={item.onRemove}>
+                          <XIcon />
+                          Remove
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
               </Label>
             </div>
           </div>

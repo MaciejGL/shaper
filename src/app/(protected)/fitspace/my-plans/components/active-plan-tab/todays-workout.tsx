@@ -27,10 +27,12 @@ export function TodaysWorkout({
   todaysWorkout,
   planId,
   isNextWorkout,
+  forceExpanded,
 }: {
   todaysWorkout: NonNullable<ActivePlan>['weeks'][number]['days'][number]
   planId: string
   isNextWorkout?: boolean
+  forceExpanded?: boolean
 }) {
   if (!todaysWorkout || !planId) {
     return null
@@ -75,7 +77,7 @@ export function TodaysWorkout({
       {todaysWorkout.isRestDay ? (
         <RestDay />
       ) : (
-        <WorkoutDay day={todaysWorkout} />
+        <WorkoutDay day={todaysWorkout} forceExpanded={forceExpanded} />
       )}
     </div>
   )
@@ -83,10 +85,12 @@ export function TodaysWorkout({
 
 function WorkoutDay({
   day,
+  forceExpanded,
 }: {
   day: NonNullable<ActivePlan>['weeks'][number]['days'][number]
+  forceExpanded?: boolean
 }) {
-  const [expanded, setExpanded] = useState(false)
+  const [expanded, setExpanded] = useState(forceExpanded ?? false)
 
   return (
     <div className="w-full space-y-4">
@@ -104,21 +108,23 @@ function WorkoutDay({
       >
         <WorkoutDayExercises day={day} />
       </motion.div>
-      <div className="flex justify-center">
-        <button
-          type="button"
-          onClick={() => setExpanded((prev) => !prev)}
-          aria-label={expanded ? 'Collapse exercises' : 'Expand exercises'}
-          className="cursor-pointer"
-        >
-          <ChevronsDownIcon
-            className={cn(
-              'size-5 transition-transform text-muted-foreground',
-              expanded && 'rotate-180',
-            )}
-          />
-        </button>
-      </div>
+      {!forceExpanded && (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => setExpanded((prev) => !prev)}
+            aria-label={expanded ? 'Collapse exercises' : 'Expand exercises'}
+            className="cursor-pointer"
+          >
+            <ChevronsDownIcon
+              className={cn(
+                'size-5 transition-transform text-muted-foreground',
+                expanded && 'rotate-180',
+              )}
+            />
+          </button>
+        </div>
+      )}
     </div>
   )
 }
