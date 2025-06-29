@@ -88,10 +88,16 @@ export const ExerciseList = React.memo(
     day: TrainingDay
     draggedOverIndex: number | null
   }) => {
-    // Memoize exercise IDs to prevent SortableContext recreation
-    const exerciseIds = useMemo(
-      () => day.exercises?.map((ex) => ex.id) || [],
-      [day.exercises],
+    const { activeWeek } = useTrainingPlan()
+
+    // Memoize stable keys more efficiently
+    const exerciseKeys = useMemo(
+      () =>
+        day.exercises?.map(
+          (_, index) => `${activeWeek}-${day.dayOfWeek}-${index}`,
+        ) || [],
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      [day.exercises?.length, activeWeek, day.dayOfWeek], // Only depend on length, not full array
     )
 
     return (
@@ -100,23 +106,33 @@ export const ExerciseList = React.memo(
 
         <div className="min-h-[120px] py-2 rounded">
           <SortableContext
-            items={exerciseIds}
+            items={exerciseKeys}
             strategy={verticalListSortingStrategy}
           >
             {day.exercises?.map((exercise, index) => (
-              <div key={exercise.id}>
-                <div className="mb-2 w-full ">
-                  <SortableExercise
-                    exerciseId={exercise.id}
-                    dayOfWeek={day.dayOfWeek}
-                  />
-                </div>
+              <div
+                key={exerciseKeys[index]} // Use stable key for React key
+                className="mb-2 w-full"
+              >
+                <SortableExercise
+                  exerciseId={exercise.id}
+                  dayOfWeek={day.dayOfWeek}
+                  exerciseIndex={index}
+                />
                 <InsertionIndicator isActive={draggedOverIndex === index + 1} />
               </div>
             ))}
           </SortableContext>
         </div>
       </div>
+    )
+  },
+  (prevProps, nextProps) => {
+    // More specific comparison
+    return (
+      prevProps.day.dayOfWeek === nextProps.day.dayOfWeek &&
+      prevProps.day.exercises?.length === nextProps.day.exercises?.length &&
+      prevProps.draggedOverIndex === nextProps.draggedOverIndex
     )
   },
 )

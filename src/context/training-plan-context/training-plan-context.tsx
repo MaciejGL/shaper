@@ -7,6 +7,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 
@@ -90,14 +91,16 @@ export function TrainingPlanProvider({
         }),
       },
     )
+  const initialDataLoaded = useRef(false)
 
   // ## Set initial data
   useEffect(() => {
-    if (templateTrainingPlan) {
+    if (templateTrainingPlan && !initialDataLoaded.current) {
       setDetails(templateTrainingPlan.details)
       setWeeks(templateTrainingPlan.weeks as TrainingPlanFormData['weeks'])
+      initialDataLoaded.current = true
     }
-  }, [templateTrainingPlan])
+  }, [templateTrainingPlan, details, weeks])
 
   // ## Mutations
   const {

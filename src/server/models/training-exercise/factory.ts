@@ -27,6 +27,7 @@ export const getTrainingExercise = async (
   exerciseId: string,
   context: GQLContext,
 ) => {
+  console.log('getTrainingExercise', exerciseId)
   const exercise = await prisma.trainingExercise.findUnique({
     where: { id: exerciseId },
     include: {

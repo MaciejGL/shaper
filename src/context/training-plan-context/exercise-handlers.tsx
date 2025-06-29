@@ -230,7 +230,21 @@ export const useExerciseHandlers = ({
           },
         },
         {
-          onSuccess: () => {
+          onSuccess: (data) => {
+            setWeeks((prev) => {
+              if (atIndex) {
+                prev[weekIndex].days[dayIndex].exercises[atIndex] = {
+                  ...prev[weekIndex].days[dayIndex].exercises[atIndex],
+                  id: data.addExerciseToDay,
+                }
+              } else {
+                prev[weekIndex].days[dayIndex].exercises.push({
+                  ...newExercise,
+                  id: data.addExerciseToDay,
+                })
+              }
+              return prev
+            })
             setIsDirty(false)
             debouncedInvalidateQueries()
           },

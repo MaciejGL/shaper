@@ -77,7 +77,9 @@ export default function WorkoutPlanner() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 0,
+        distance: 8,
+        tolerance: 5,
+        delay: 50,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -114,50 +116,29 @@ export default function WorkoutPlanner() {
 
     if (overData.type === 'day') {
       targetDay = overData.day
-      // When dropping on a day, add to the end (convert to 0-based index)
       targetPosition = targetDay?.exercises?.length || 0
     } else if (overData.type === 'day-exercise') {
-      // Find the day containing the target exercise
+      // With new stable keys, we have position info directly in the data
       const currentWeek = formData.weeks[activeWeek]
       targetDay =
-        currentWeek.days.find((day) =>
-          day.exercises?.some((ex) => ex.id === overData.exercise.id),
-        ) || null
-      if (targetDay) {
-        // When dropping on an exercise, insert before it (0-based index)
-        const foundIndex = targetDay.exercises?.findIndex(
-          (ex) => ex.id === overData.exercise.id,
-        )
-        targetPosition =
-          foundIndex !== undefined && foundIndex !== -1 ? foundIndex : 0
-      }
+        currentWeek.days.find((d) => d.dayOfWeek === overData.dayIndex) || null
+      targetPosition = overData.exerciseIndex || 0
     }
 
     if (!targetDay) return
 
     // Handle moving existing exercises (from day to day)
     if (activeData?.type === 'day-exercise') {
-      const activeExercise = activeData.exercise
-      const currentWeek = formData.weeks[activeWeek]
+      // With new stable keys, we have position info directly in the data
+      const sourceWeekIndex = activeData.weekIndex
+      const sourceDayIndex = activeData.dayIndex
+      const sourceExerciseIndex = activeData.exerciseIndex
 
-      // Find source day and exercise index
-      const sourceDay = currentWeek.days.find((d) =>
-        d.exercises?.some((ex) => ex.id === activeExercise.id),
-      )
-
-      if (!sourceDay) return
-
-      const sourceExerciseIndex = sourceDay.exercises?.findIndex(
-        (ex) => ex.id === activeExercise.id,
-      )
-
-      if (sourceExerciseIndex === -1) return
-
-      // Use context's moveExercise function - it handles both same-day reordering and cross-day moves
+      // Use context's moveExercise function
       moveExercise(
-        activeWeek, // sourceWeekIndex
-        sourceDay.dayOfWeek, // sourceDayIndex
-        sourceExerciseIndex, // sourceExerciseIndex
+        sourceWeekIndex,
+        sourceDayIndex,
+        sourceExerciseIndex,
         activeWeek, // targetWeekIndex
         targetDay.dayOfWeek, // targetDayIndex
         targetPosition, // targetExerciseIndex
@@ -167,16 +148,14 @@ export default function WorkoutPlanner() {
 
     // Handle dropping new exercises from sidebar
     const newExercise = joinedExercises.find((ex) => ex.id === active.id)
-
     if (!newExercise) return
 
-    // Create exercise object similar to exercise form
     const exerciseToAdd: PartialTrainingPlanFormDataExercise = {
       baseId: newExercise.id,
       name: newExercise.name,
       videoUrl: newExercise.videoUrl || '',
       instructions: newExercise.description || '',
-      order: (targetPosition || 0) + 1, // Simple ordering
+      order: (targetPosition || 0) + 1,
       sets: [
         {
           id: createId(),
@@ -185,10 +164,9 @@ export default function WorkoutPlanner() {
           maxReps: undefined,
           weight: undefined,
         },
-      ], // Start with empty sets, user can add them later
+      ],
     }
 
-    // Use context's addExercise function - same as exercise form
     addExercise(activeWeek, targetDay.dayOfWeek, exerciseToAdd, targetPosition)
   }
 

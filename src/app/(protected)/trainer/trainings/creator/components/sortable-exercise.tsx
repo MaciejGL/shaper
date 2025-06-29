@@ -11,7 +11,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { InfoIcon, Plus, X } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import React from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -21,7 +21,10 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from '@/components/ui/dialog'
 import {
   DropdownMenu,
@@ -67,27 +70,33 @@ import { EXERCISE_TYPES } from './utils'
 interface SortableExerciseProps {
   exerciseId: string
   dayOfWeek: number
+  exerciseIndex: number
 }
 
 export const SortableExercise = React.memo(
-  function SortableExercise({ exerciseId, dayOfWeek }: SortableExerciseProps) {
+  function SortableExercise({
+    exerciseId,
+    dayOfWeek,
+    exerciseIndex,
+  }: SortableExerciseProps) {
     const { formData, activeWeek, removeExercise } = useTrainingPlan()
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-    // Use ref to persist dropdown state across re-renders
-    const isDropdownOpenRef = useRef(false)
-    const [, forceUpdate] = useState({})
+    const stableKey = `${activeWeek}-${dayOfWeek}-${exerciseIndex}`
 
-    // Force component update function to trigger re-render when needed
-    const triggerUpdate = useCallback(() => {
-      forceUpdate({})
-    }, [])
-
-    // Get exercise data directly from context
-    const currentDay = formData.weeks[activeWeek]?.days.find(
-      (day) => day.dayOfWeek === dayOfWeek,
+    // Memoize expensive computations
+    const currentDay = useMemo(
+      () =>
+        formData.weeks[activeWeek]?.days.find(
+          (day) => day.dayOfWeek === dayOfWeek,
+        ),
+      [formData.weeks, activeWeek, dayOfWeek],
     )
-    const exercise = currentDay?.exercises.find((ex) => ex.id === exerciseId)
+
+    const exercise = useMemo(
+      () => currentDay?.exercises[exerciseIndex], // Use index instead of find
+      [currentDay, exerciseIndex],
+    )
 
     const {
       attributes,
@@ -97,35 +106,25 @@ export const SortableExercise = React.memo(
       transition,
       isDragging,
     } = useSortable({
-      id: exerciseId,
+      id: stableKey,
       data: {
         type: 'day-exercise',
         exercise,
+        weekIndex: activeWeek,
+        dayIndex: dayOfWeek,
+        exerciseIndex,
       },
+      // Optimize animations
+      animateLayoutChanges: () => false, // Disable layout animations for better performance
     })
 
-    // Improved styling with better z-index handling
+    // Optimized transform with hardware acceleration
     const style = {
       transform: CSS.Transform.toString(transform),
-      transition,
+      transition: isDragging ? 'none' : transition, // Disable transitions while dragging
+      willChange: isDragging ? 'transform' : 'auto', // Hint for browser optimization
       zIndex: isDragging ? 1000 : 1,
     }
-
-    // Memoized dropdown change handler
-    const handleDropdownOpenChange = useCallback(
-      (open: boolean) => {
-        isDropdownOpenRef.current = open
-        triggerUpdate() // Force re-render to update dropdown state
-      },
-      [triggerUpdate],
-    )
-
-    // Memoized handlers to prevent unnecessary re-renders
-    const handleEditClick = useCallback(() => {
-      setIsEditDialogOpen(true)
-      isDropdownOpenRef.current = false
-      triggerUpdate()
-    }, [triggerUpdate])
 
     const handleRemoveExercise = useCallback(
       (
@@ -138,9 +137,6 @@ export const SortableExercise = React.memo(
           console.error('[SortableExercise]: Exercise not found', exerciseId)
           return
         }
-
-        // Close dropdown immediately
-        isDropdownOpenRef.current = false
 
         // Find the exercise in the current day and remove it
         const currentWeek = formData.weeks[activeWeek]
@@ -172,7 +168,7 @@ export const SortableExercise = React.memo(
     )
 
     if (!exercise) {
-      console.error('[SortableExercise]: Exercise not found', exerciseId)
+      console.warn('[SortableExercise]: Exercise not found', exerciseId)
       return null
     }
 
@@ -229,10 +225,7 @@ export const SortableExercise = React.memo(
           )}
         </Card>
         {!isDragging && (
-          <DropdownMenu
-            open={isDropdownOpenRef.current}
-            onOpenChange={handleDropdownOpenChange}
-          >
+          <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
@@ -242,7 +235,7 @@ export const SortableExercise = React.memo(
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={handleEditClick}>
+              <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
                 <Pencil className="w-3 h-3" />
                 Edit
               </DropdownMenuItem>
@@ -267,9 +260,11 @@ export const SortableExercise = React.memo(
     )
   },
   (prevProps, nextProps) => {
+    // More specific comparison to reduce re-renders
     return (
       prevProps.exerciseId === nextProps.exerciseId &&
-      prevProps.dayOfWeek === nextProps.dayOfWeek
+      prevProps.dayOfWeek === nextProps.dayOfWeek &&
+      prevProps.exerciseIndex === nextProps.exerciseIndex
     )
   },
 )
@@ -306,7 +301,7 @@ function KanbanExerciseSets({
       <div
         className={cn(
           'space-y-2 bg-card px-6 py-2 rounded-md',
-          isLoading && 'animate-pulse min-h-[120px]',
+          isLoading && 'animate-pulse min-h-[76px]',
         )}
       >
         {sets.map((set, index) => (
@@ -692,10 +687,16 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
 
   return (
     <div className="gap-2">
+      <DialogHeader className="mb-8">
+        <DialogTitle>Edit exercise</DialogTitle>
+        <DialogDescription>
+          Edit the exercise details and sets.
+        </DialogDescription>
+      </DialogHeader>
       <div className="space-y-8">
         <div className="flex flex-col gap-1">
           <Label htmlFor="exerciseName" className="text-sm">
-            Exercise name
+            Name
           </Label>
           <Input
             id="exerciseName"
@@ -712,7 +713,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm items-end">
           <div className="flex flex-col gap-1">
             <Label htmlFor="exerciseType" className="text-sm">
-              Exercise type
+              Variation
             </Label>
             <Select
               value={localData.type ?? ''}
@@ -895,7 +896,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
         >
           Remove exercise
         </Button>
-        <DialogClose>
+        <DialogClose asChild>
           <Button variant="outline" disabled={isRemovingExercise}>
             Close
           </Button>

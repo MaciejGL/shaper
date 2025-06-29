@@ -23,7 +23,7 @@ export const useWeekHandlers = ({
   setActiveWeek,
 }: {
   trainingId?: string
-  weeks: TrainingPlanFormData['weeks']
+  weeks?: TrainingPlanFormData['weeks']
   setWeeks: React.Dispatch<React.SetStateAction<TrainingPlanFormData['weeks']>>
   setIsDirty: React.Dispatch<React.SetStateAction<boolean>>
   setActiveWeek: React.Dispatch<React.SetStateAction<number>>
@@ -38,6 +38,11 @@ export const useWeekHandlers = ({
 
   const updateWeek = useCallback(
     (weekIndex: number, newWeek: Partial<TrainingPlanFormData['weeks'][0]>) => {
+      if (!weeks) {
+        console.error('[Update week]: Weeks are not loaded')
+        return
+      }
+
       const currentWeek = weeks[weekIndex]
 
       if (!currentWeek?.id) {
@@ -101,6 +106,11 @@ export const useWeekHandlers = ({
         })
         return
       }
+      if (!weeks) {
+        console.error('[Remove week]: Weeks are not loaded')
+        return
+      }
+
       const before = weeks[weekIndex]
 
       setWeeks((prev) => {
@@ -156,6 +166,11 @@ export const useWeekHandlers = ({
       console.error('[Add week]: Training ID is required')
       return
     }
+    if (!weeks) {
+      console.error('[Add week]: Weeks are not loaded')
+      return
+    }
+
     const before = [...weeks]
 
     setWeeks((prev) => {
@@ -208,6 +223,11 @@ export const useWeekHandlers = ({
     (weekIndex: number) => {
       if (!trainingId) {
         console.error('[Clone week]: Training ID is required')
+        return
+      }
+
+      if (!weeks) {
+        console.error('[Clone week]: Weeks are not loaded')
         return
       }
 
