@@ -33,13 +33,13 @@ export const LoginCard = () => {
   } = useLoginForm()
 
   return (
-    <Card className="flex flex-col gap-4 w-full max-w-md">
+    <Card variant="elevated" className="flex flex-col gap-4 w-full max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle>Login</CardTitle>
         <CardDescription>
           {!showOtp
             ? 'Enter your email to receive a one-time password to login.'
-            : 'Enter the 6-digit code sent to your email to login.'}
+            : 'Enter the 4-digit code sent to your email to login.'}
         </CardDescription>
       </CardHeader>
       <CardContent>

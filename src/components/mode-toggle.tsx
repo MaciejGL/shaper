@@ -1,5 +1,6 @@
 'use client'
 
+import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import * as React from 'react'
 
@@ -10,12 +11,20 @@ export function ModeToggle() {
 
   return (
     <div className="flex items-center gap-2">
-      <Switch
-        id="mode"
-        checked={theme === 'dark'}
-        onCheckedChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      />
-      <label className="text-sm" htmlFor="mode">
+      <div className="relative">
+        <Switch
+          id="mode"
+          checked={theme === 'dark'}
+          onCheckedChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          className="relative"
+        />
+        {/* Icons positioned over the switch */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-1">
+          <Sun className="h-3 w-3 text-primary transition-opacity duration-200 opacity-100 dark:opacity-0" />
+          <Moon className="h-3 w-3 text-primary-foreground transition-opacity duration-200 opacity-0 dark:opacity-100" />
+        </div>
+      </div>
+      <label className="text-sm cursor-pointer" htmlFor="mode">
         {theme !== 'light' ? 'Dark' : 'Light'}
       </label>
     </div>
