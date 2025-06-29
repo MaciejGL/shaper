@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { isNil } from 'lodash'
 import { useCallback } from 'react'
 
@@ -5,14 +6,28 @@ import {
   TrainingExercise,
   TrainingPlanFormData,
 } from '@/app/(protected)/trainer/trainings/creator-old/components/types'
+import {
+  useAddExerciseToDayMutation,
+  useMoveExerciseMutation,
+  useRemoveExerciseFromDayMutation,
+  useUpdateTrainingExerciseMutation,
+} from '@/generated/graphql-client'
 import { createId } from '@/lib/create-id'
 
 import { PartialTrainingPlanFormDataExercise } from './types'
 
-export const useExerciseHandlers = (
-  setWeeks: React.Dispatch<React.SetStateAction<TrainingPlanFormData['weeks']>>,
-  setIsDirty: React.Dispatch<React.SetStateAction<boolean>>,
-) => {
+export const useExerciseHandlers = ({
+  setWeeks,
+  setIsDirty,
+  weeks,
+}: {
+  setWeeks: React.Dispatch<React.SetStateAction<TrainingPlanFormData['weeks']>>
+  setIsDirty: React.Dispatch<React.SetStateAction<boolean>>
+  weeks: TrainingPlanFormData['weeks']
+}) => {
+  const queryClient = useQueryClient()
+  const { mutateAsync: updateExerciseMutation } =
+    useUpdateTrainingExerciseMutation()
   const updateExercise = useCallback(
     (
       weekIndex: number,
@@ -28,6 +43,18 @@ export const useExerciseHandlers = (
         })
         return
       }
+      const currentExercise =
+        weeks[weekIndex].days[dayIndex].exercises[exerciseIndex]
+      const beforeWeeks = [...weeks]
+      if (!currentExercise) {
+        console.error('[Update exercise]: Exercise not found', {
+          weekIndex,
+          dayIndex,
+          exerciseIndex,
+        })
+        return
+      }
+
       const exerciseData: PartialTrainingPlanFormDataExercise = {
         name: newExercise.name,
         instructions: newExercise.instructions,
@@ -40,6 +67,14 @@ export const useExerciseHandlers = (
         tempo: newExercise.tempo,
         additionalInstructions: newExercise.additionalInstructions,
         restSeconds: newExercise.restSeconds,
+      }
+      if (!exerciseData.order) {
+        console.error('[Update exercise]: Order is required', {
+          weekIndex,
+          dayIndex,
+          exerciseIndex,
+        })
+        return
       }
       setWeeks((prev) => {
         const newWeeks = [...prev]
@@ -54,9 +89,46 @@ export const useExerciseHandlers = (
         return newWeeks
       })
       setIsDirty(true)
+      updateExerciseMutation(
+        {
+          input: {
+            id: currentExercise.id,
+            order: exerciseData.order,
+            name: exerciseData.name,
+            instructions: exerciseData.instructions,
+            sets: exerciseData.sets,
+            baseId: exerciseData.baseId,
+            videoUrl: exerciseData.videoUrl,
+            additionalInstructions: exerciseData.additionalInstructions,
+            restSeconds: exerciseData.restSeconds,
+            tempo: exerciseData.tempo,
+            type: exerciseData.type,
+            warmupSets: exerciseData.warmupSets,
+          },
+        },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({
+              queryKey: ['GetTemplateTrainingPlanById'],
+            })
+          },
+          onError: () => {
+            console.error('[Update exercise]: Failed to update exercise', {
+              weekIndex,
+              dayIndex,
+              exerciseIndex,
+            })
+            setWeeks(beforeWeeks)
+            setIsDirty(true)
+          },
+        },
+      )
     },
-    [setWeeks, setIsDirty],
+    [setWeeks, setIsDirty, updateExerciseMutation, weeks, queryClient],
   )
+
+  const { mutateAsync: addExerciseToDayMutation } =
+    useAddExerciseToDayMutation()
 
   const addExercise = useCallback(
     (
@@ -72,61 +144,93 @@ export const useExerciseHandlers = (
         })
         return
       }
-      setWeeks((prev) => {
-        const newWeeks = [...prev]
-        const newDays = [...newWeeks[weekIndex].days]
+      const currentExercises = weeks[weekIndex].days[dayIndex].exercises
+      if (!currentExercises) {
+        console.error('[Add exercise]: No exercises found', {
+          weekIndex,
+          dayIndex,
+        })
+        return
+      }
+      const beforeWeeks = [...weeks]
 
-        const currentExercises = newDays[dayIndex].exercises
-        const newExercise: TrainingExercise = {
-          ...exercise,
-          id: createId(), // Ensure unique ID after spreading exercise
-          name: exercise.name || '',
-          instructions: exercise.instructions,
-          sets: exercise.sets || [],
-          order: currentExercises.length + 1, // Will be adjusted below if needed
-          baseId: exercise.id, // Store original exercise ID as baseId
-          additionalInstructions: exercise.additionalInstructions,
-          restSeconds: exercise.restSeconds,
-          tempo: exercise.tempo,
-          type: exercise.type,
-          warmupSets: exercise.warmupSets,
-          videoUrl: exercise.videoUrl,
-        }
+      const newExercises = [...currentExercises]
+      const order =
+        typeof atIndex === 'number' ? atIndex + 1 : newExercises.length + 1
 
-        let newExercises: typeof currentExercises
+      const newExercise: TrainingExercise = {
+        id: createId(),
+        name: exercise.name || '',
+        instructions: exercise.instructions,
+        sets: exercise.sets || [],
+        order: order,
+        baseId: exercise.id,
+        additionalInstructions: exercise.additionalInstructions,
+        restSeconds: exercise.restSeconds,
+        tempo: exercise.tempo,
+        type: exercise.type,
+        warmupSets: exercise.warmupSets,
+        videoUrl: exercise.videoUrl,
+      }
 
-        // If atIndex is provided and valid, insert at that position
-        if (
-          !isNil(atIndex) &&
-          atIndex >= 0 &&
-          atIndex <= currentExercises.length
-        ) {
-          newExercises = [
-            ...currentExercises.slice(0, atIndex),
-            newExercise,
-            ...currentExercises.slice(atIndex),
-          ]
-          // Update order for all exercises after the insertion point
-          newExercises = newExercises.map((ex, idx) => ({
-            ...ex,
-            order: idx + 1,
-          }))
-        } else {
-          // Default behavior: add at the end
-          newExercises = [...currentExercises, newExercise]
-        }
+      if (
+        typeof atIndex === 'number' &&
+        atIndex >= 0 &&
+        atIndex <= newExercises.length
+      ) {
+        newExercises.splice(atIndex, 0, newExercise)
+      } else {
+        newExercises.push(newExercise)
+      }
 
-        newDays[dayIndex] = {
-          ...newDays[dayIndex],
-          exercises: newExercises,
-        }
-        newWeeks[weekIndex] = { ...newWeeks[weekIndex], days: newDays }
-        return newWeeks
-      })
+      const newDays = [...weeks[weekIndex].days]
+      newDays[dayIndex] = {
+        ...newDays[dayIndex],
+        exercises: newExercises,
+      }
+      const newWeeks = [...weeks]
+      newWeeks[weekIndex] = { ...newWeeks[weekIndex], days: newDays }
+
+      setWeeks(newWeeks)
       setIsDirty(true)
+      addExerciseToDayMutation(
+        {
+          input: {
+            dayId: weeks[weekIndex].days[dayIndex].id,
+            name: newExercise.name,
+            order: newExercise.order,
+            restSeconds: newExercise.restSeconds,
+            tempo: newExercise.tempo,
+            additionalInstructions: newExercise.additionalInstructions,
+            type: newExercise.type,
+            warmupSets: newExercise.warmupSets,
+            baseId: newExercise.baseId,
+            instructions: newExercise.instructions,
+          },
+        },
+        {
+          onSuccess: () => {
+            setIsDirty(false)
+            queryClient.invalidateQueries({
+              queryKey: ['GetTemplateTrainingPlanById'],
+            })
+          },
+          onError: () => {
+            console.error('[Add exercise]: Failed to add exercise', {
+              weekIndex,
+              dayIndex,
+            })
+            setWeeks(beforeWeeks)
+            setIsDirty(true)
+          },
+        },
+      )
     },
-    [setWeeks, setIsDirty],
+    [setWeeks, setIsDirty, addExerciseToDayMutation, weeks, queryClient],
   )
+
+  const { mutateAsync: removeExerciseFromDayMutation } =
+    useRemoveExerciseFromDayMutation()
 
   const removeExercise = useCallback(
     (weekIndex: number, dayIndex: number, exerciseIndex: number) => {
@@ -139,22 +243,64 @@ export const useExerciseHandlers = (
         return
       }
 
-      setWeeks((prev) => {
-        const newWeeks = [...prev]
-        const newDays = [...newWeeks[weekIndex].days]
-        newDays[dayIndex] = {
-          ...newDays[dayIndex],
-          exercises: newDays[dayIndex].exercises.filter(
-            (_, idx) => idx !== exerciseIndex,
-          ),
-        }
-        newWeeks[weekIndex] = { ...newWeeks[weekIndex], days: newDays }
-        return newWeeks
-      })
+      const beforeWeeks = [...weeks]
+      const currentExercise =
+        weeks[weekIndex].days[dayIndex].exercises[exerciseIndex]
+      if (!currentExercise) {
+        console.error('[Remove exercise]: Exercise not found', {
+          weekIndex,
+          dayIndex,
+          exerciseIndex,
+        })
+        return
+      }
+
+      const deletedOrder = currentExercise.order
+      const newExercises = [...weeks[weekIndex].days[dayIndex].exercises]
+      newExercises.splice(exerciseIndex, 1)
+
+      // Only decrement order of exercises that came after the deleted one
+      const updatedExercises = newExercises.map((ex) => ({
+        ...ex,
+        order: ex.order > deletedOrder ? ex.order - 1 : ex.order,
+      }))
+
+      const newDays = [...weeks[weekIndex].days]
+      newDays[dayIndex] = {
+        ...newDays[dayIndex],
+        exercises: updatedExercises,
+      }
+      const newWeeks = [...weeks]
+      newWeeks[weekIndex] = { ...newWeeks[weekIndex], days: newDays }
+
+      setWeeks(newWeeks)
       setIsDirty(true)
+      removeExerciseFromDayMutation(
+        {
+          exerciseId: currentExercise.id,
+        },
+        {
+          onSuccess: () => {
+            setIsDirty(false)
+            queryClient.invalidateQueries({
+              queryKey: ['GetTemplateTrainingPlanById'],
+            })
+          },
+          onError: () => {
+            console.error('[Remove exercise]: Failed to remove exercise', {
+              weekIndex,
+              dayIndex,
+            })
+            setWeeks(beforeWeeks)
+            setIsDirty(true)
+          },
+        },
+      )
     },
-    [setWeeks, setIsDirty],
+    [setWeeks, setIsDirty, removeExerciseFromDayMutation, weeks, queryClient],
   )
+
+  const { mutateAsync: moveExerciseMutation } = useMoveExerciseMutation()
 
   const moveExercise = useCallback(
     (
@@ -184,58 +330,192 @@ export const useExerciseHandlers = (
         return
       }
 
-      setWeeks((prev) => {
-        const newWeeks = [...prev]
+      const beforeWeeks = [...weeks]
+      const sourceDay = weeks[sourceWeekIndex].days[sourceDayIndex]
+      const exerciseToMove = sourceDay.exercises[sourceExerciseIndex]
 
-        const sourceDay = newWeeks[sourceWeekIndex].days[sourceDayIndex]
-        const exerciseToMove = sourceDay.exercises[sourceExerciseIndex]
+      if (!exerciseToMove) {
+        console.error('[Move exercise]: Exercise not found')
+        return
+      }
 
-        if (!exerciseToMove) {
-          console.error('[Move exercise]: Exercise not found')
-          return prev
+      // Check if moving within the same day (reordering)
+      const isSameDay =
+        sourceWeekIndex === targetWeekIndex && sourceDayIndex === targetDayIndex
+
+      if (isSameDay) {
+        // Moving within same day - use efficient reordering
+        const currentOrder = exerciseToMove.order
+        const newOrder = targetExerciseIndex + 1
+
+        if (currentOrder === newOrder) {
+          return // No change needed
         }
 
-        // Remove exercise from source and update order
-        const newSourceDays = [...newWeeks[sourceWeekIndex].days]
-        const sourceExercisesWithoutMoved = sourceDay.exercises.filter(
-          (_, idx) => idx !== sourceExerciseIndex,
+        const newWeeks = [...weeks]
+        const newDays = [...newWeeks[sourceWeekIndex].days]
+        const newExercises = [...newDays[sourceDayIndex].exercises]
+
+        // Apply efficient reordering logic - create new objects instead of mutating
+        const reorderedExercises = newExercises.map((ex) => {
+          if (ex.id === exerciseToMove.id) {
+            // This is the exercise being moved
+            return { ...ex, order: newOrder }
+          } else if (currentOrder < newOrder) {
+            // Moving down: decrement exercises between current and new position
+            if (ex.order > currentOrder && ex.order <= newOrder) {
+              return { ...ex, order: ex.order - 1 }
+            }
+          } else {
+            // Moving up: increment exercises between new and current position
+            if (ex.order >= newOrder && ex.order < currentOrder) {
+              return { ...ex, order: ex.order + 1 }
+            }
+          }
+          return ex
+        })
+
+        // Sort exercises by order to ensure correct visual positioning
+        const sortedExercises = reorderedExercises.sort(
+          (a, b) => a.order - b.order,
         )
-        newSourceDays[sourceDayIndex] = {
-          ...sourceDay,
-          exercises: sourceExercisesWithoutMoved.map((ex, idx) => ({
-            ...ex,
-            order: idx + 1, // Update order after removal
-          })),
+
+        newDays[sourceDayIndex] = {
+          ...newDays[sourceDayIndex],
+          exercises: sortedExercises,
         }
         newWeeks[sourceWeekIndex] = {
           ...newWeeks[sourceWeekIndex],
-          days: newSourceDays,
+          days: newDays,
         }
 
-        // Add exercise to target and update order
-        const targetDay = newWeeks[targetWeekIndex].days[targetDayIndex]
-        const newTargetDays = [...newWeeks[targetWeekIndex].days]
+        setWeeks(newWeeks)
+        setIsDirty(true)
+        moveExerciseMutation(
+          {
+            input: {
+              dayId: sourceDay.id,
+              exerciseId: exerciseToMove.id,
+              newOrder: newOrder,
+            },
+          },
+          {
+            onSuccess: () => {
+              setIsDirty(false)
+              queryClient.invalidateQueries({
+                queryKey: ['GetTemplateTrainingPlanById'],
+              })
+            },
+            onError: (error) => {
+              console.error(
+                '[Move exercise]: Failed to move exercise (same day)',
+                error,
+              )
+              setWeeks(beforeWeeks)
+              setIsDirty(true)
+            },
+          },
+        )
+      } else {
+        // Moving between different days - use the enhanced backend mutation
+        const targetDay = weeks[targetWeekIndex].days[targetDayIndex]
+        const newOrder = targetExerciseIndex + 1
 
-        const newTargetExercises = [...targetDay.exercises]
-        newTargetExercises.splice(targetExerciseIndex, 0, exerciseToMove)
+        setWeeks((prev) => {
+          const newWeeks = [...prev]
 
-        newTargetDays[targetDayIndex] = {
-          ...targetDay,
-          exercises: newTargetExercises.map((ex, idx) => ({
-            ...ex,
-            order: idx + 1, // Update order after insertion
-          })),
-        }
-        newWeeks[targetWeekIndex] = {
-          ...newWeeks[targetWeekIndex],
-          days: newTargetDays,
-        }
+          // Remove from source day
+          const newSourceDays = [...newWeeks[sourceWeekIndex].days]
+          const sourceExercisesWithoutMoved = sourceDay.exercises.filter(
+            (_, idx) => idx !== sourceExerciseIndex,
+          )
+          // Only decrement order of exercises that came after the moved one
+          const updatedSourceExercises = sourceExercisesWithoutMoved.map(
+            (ex) => ({
+              ...ex,
+              order: ex.order > exerciseToMove.order ? ex.order - 1 : ex.order,
+            }),
+          )
 
-        return newWeeks
-      })
-      setIsDirty(true)
+          // Sort source day exercises by order after removal
+          const sortedSourceExercises = updatedSourceExercises.sort(
+            (a, b) => a.order - b.order,
+          )
+
+          newSourceDays[sourceDayIndex] = {
+            ...sourceDay,
+            exercises: sortedSourceExercises,
+          }
+          newWeeks[sourceWeekIndex] = {
+            ...newWeeks[sourceWeekIndex],
+            days: newSourceDays,
+          }
+
+          // Add to target day
+          const newTargetDays = [...newWeeks[targetWeekIndex].days]
+          const newTargetExercises = [...targetDay.exercises]
+
+          // Create a new exercise object with updated order (avoid mutation)
+          const movedExercise = { ...exerciseToMove, order: newOrder }
+
+          // Increment order of exercises at and after the insertion point - create new objects
+          const reorderedTargetExercises = newTargetExercises.map((ex) => {
+            if (ex.order >= newOrder) {
+              return { ...ex, order: ex.order + 1 }
+            }
+            return ex
+          })
+
+          // Add the moved exercise to the target day exercises
+          reorderedTargetExercises.push(movedExercise)
+
+          // Sort target day exercises by order to ensure correct visual positioning
+          const sortedTargetExercises = reorderedTargetExercises.sort(
+            (a, b) => a.order - b.order,
+          )
+
+          newTargetDays[targetDayIndex] = {
+            ...targetDay,
+            exercises: sortedTargetExercises,
+          }
+          newWeeks[targetWeekIndex] = {
+            ...newWeeks[targetWeekIndex],
+            days: newTargetDays,
+          }
+
+          return newWeeks
+        })
+
+        setIsDirty(true)
+        moveExerciseMutation(
+          {
+            input: {
+              dayId: sourceDay.id,
+              exerciseId: exerciseToMove.id,
+              newOrder: newOrder,
+              targetDayId: targetDay.id, // This enables cross-day moves
+            },
+          },
+          {
+            onSuccess: () => {
+              setIsDirty(false)
+              queryClient.invalidateQueries({
+                queryKey: ['GetTemplateTrainingPlanById'],
+              })
+            },
+            onError: (error) => {
+              console.error(
+                '[Move exercise]: Failed to move exercise between days',
+                error,
+              )
+              setWeeks(beforeWeeks)
+              setIsDirty(true)
+            },
+          },
+        )
+      }
     },
-    [setWeeks, setIsDirty],
+    [setWeeks, setIsDirty, moveExerciseMutation, weeks, queryClient],
   )
 
   return {

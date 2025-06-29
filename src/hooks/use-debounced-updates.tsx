@@ -43,7 +43,7 @@ export function useDebouncedUpdates({
   onSave,
   isSaving = false,
   enabled = true,
-  debounceDelay = 5000,
+  debounceDelay = 2000,
 }: UseDebouncedUpdatesProps) {
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const savePromiseRef = useRef<Promise<void> | null>(null)

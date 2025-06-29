@@ -12,7 +12,7 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
-import { AnimatePresence, motion } from 'framer-motion'
+import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -31,24 +31,38 @@ import { DragOverlay as CustomDragOverlay } from './drag-overlay'
 import { Sidebar } from './sidebar'
 import { WeekTabs } from './week-tabs'
 
+enum Tab {
+  Details = 'details',
+  Weeks = 'weeks',
+}
+
 export default function WorkoutPlanner() {
   const {
+    createdAt,
+    updatedAt,
+    assignedCount,
+
     formData,
     activeWeek,
-    addExercise,
-    moveExercise,
-    updateDetails,
     isDirty,
     trainingId,
     isPending,
     isUpdating,
     isDuplicating,
     isDeleting,
+    addExercise,
+    moveExercise,
+    updateDetails,
     clearDraft,
     handleDelete,
     handleDuplicate,
     handleSubmit,
   } = useTrainingPlan()
+
+  const [tab, setTab] = useQueryState(
+    'tab',
+    parseAsStringEnum<Tab>(Object.values(Tab)).withDefault(Tab.Details),
+  )
 
   const [activeId, setActiveId] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
@@ -82,7 +96,9 @@ export default function WorkoutPlanner() {
     const { active, over } = event
     setActiveId(null)
 
-    if (!over) return
+    if (!over) {
+      return
+    }
 
     const activeData = active.data.current
     const overData = over.data.current
@@ -101,6 +117,7 @@ export default function WorkoutPlanner() {
 
     if (overData.type === 'day') {
       targetDay = overData.day
+      // When dropping on a day, add to the end (convert to 0-based index)
       targetPosition = targetDay?.exercises?.length || 0
     } else if (overData.type === 'day-exercise') {
       // Find the day containing the target exercise
@@ -110,10 +127,12 @@ export default function WorkoutPlanner() {
           day.exercises?.some((ex) => ex.id === overData.exercise.id),
         ) || null
       if (targetDay) {
+        // When dropping on an exercise, insert before it (0-based index)
+        const foundIndex = targetDay.exercises?.findIndex(
+          (ex) => ex.id === overData.exercise.id,
+        )
         targetPosition =
-          targetDay.exercises?.findIndex(
-            (ex) => ex.id === overData.exercise.id,
-          ) || 0
+          foundIndex !== undefined && foundIndex !== -1 ? foundIndex : 0
       }
     }
 
@@ -177,7 +196,11 @@ export default function WorkoutPlanner() {
   }
 
   return (
-    <Tabs defaultValue="details" className="h-full flex flex-col">
+    <Tabs
+      defaultValue={tab}
+      onValueChange={(value) => setTab(value as Tab)}
+      className="h-full flex flex-col"
+    >
       <div>
         <div className="flex justify-between items-baseline">
           <DashboardHeader
@@ -200,19 +223,6 @@ export default function WorkoutPlanner() {
             </TabsTrigger>
           </TabsList>
           <div className="relative">
-            <AnimatePresence>
-              {isDirty && (
-                <motion.p
-                  key="unsaved-changes"
-                  initial={{ opacity: 0, x: 100 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 100 }}
-                  className="text-sm text-amber-500 text-right mb-2 absolute -top-8 right-0"
-                >
-                  Unsaved changes
-                </motion.p>
-              )}
-            </AnimatePresence>
             <FormActions
               isDirty={isDirty}
               trainingId={trainingId}
@@ -228,8 +238,14 @@ export default function WorkoutPlanner() {
           </div>
         </div>
       </div>
-      <TabsContent value="details" className="flex-1 border-t mt-4 p-4">
-        <PlanDetailsForm data={formData.details} updateData={updateDetails} />
+      <TabsContent value="details" className="">
+        <PlanDetailsForm
+          data={formData.details}
+          updateData={updateDetails}
+          createdAt={createdAt}
+          updatedAt={updatedAt}
+          assignedCount={assignedCount}
+        />
       </TabsContent>
       <TabsContent value="weeks" className="flex-1">
         <DndContext

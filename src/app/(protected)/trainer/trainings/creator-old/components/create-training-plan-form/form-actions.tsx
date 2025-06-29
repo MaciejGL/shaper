@@ -1,10 +1,4 @@
-import {
-  Copy,
-  MoreHorizontalIcon,
-  RefreshCcwIcon,
-  Save,
-  Trash2,
-} from 'lucide-react'
+import { Copy, MoreHorizontalIcon, RefreshCcwIcon, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -37,14 +31,13 @@ export function FormActions({
   onDelete,
   onClearDraft,
   onDuplicate,
-  onSubmit,
 }: FormActionsProps) {
   return (
     <div>
       <div className="flex justify-end gap-2 items-center">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" iconOnly={<MoreHorizontalIcon />} />
+            <Button variant="default" iconOnly={<MoreHorizontalIcon />} />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem
@@ -80,15 +73,6 @@ export function FormActions({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <Button
-          variant="default"
-          onClick={onSubmit}
-          iconStart={<Save />}
-          loading={isPending || isUpdating}
-          disabled={isDuplicating || isDeleting || isPending || !isDirty}
-        >
-          Save Plan
-        </Button>
       </div>
     </div>
   )

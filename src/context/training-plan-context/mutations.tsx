@@ -3,10 +3,12 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 import {
+  // Add/remove operations
   useCreateTrainingPlanMutation,
   useDeleteTrainingPlanMutation,
   useDuplicateTrainingPlanMutation,
-  useUpdateTrainingPlanMutation,
+  // Granular update mutations - more efficient than full plan updates
+  // Keep the full update for fallback/final submission
 } from '@/generated/graphql-client'
 
 export const useTrainingPlanMutations = () => {
@@ -17,14 +19,6 @@ export const useTrainingPlanMutations = () => {
       onError: () => toast.error('Failed to create training plan'),
       onSuccess: () => {
         toast.success('Training plan created successfully')
-        queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
-      },
-    })
-
-  const { mutateAsync: updateTrainingPlan, isPending: isUpdating } =
-    useUpdateTrainingPlanMutation({
-      onError: () => toast.error('Failed to update training plan'),
-      onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
       },
     })
@@ -50,12 +44,13 @@ export const useTrainingPlanMutations = () => {
     })
 
   return {
+    // Main operations
     createTrainingPlan,
-    updateTrainingPlan,
     deleteTrainingPlan,
     duplicateTrainingPlan,
+
+    // Loading states
     isPending,
-    isUpdating,
     isDeleting,
     isDuplicating,
   }

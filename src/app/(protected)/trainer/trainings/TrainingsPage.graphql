@@ -6,6 +6,9 @@ fragment TrainingTemplate on TrainingPlan {
   isTemplate
   isDraft
   difficulty
+  createdAt
+  updatedAt
+  assignedCount
 
   weeks {
     id
@@ -88,4 +91,46 @@ mutation AssignTrainingPlanToClient($input: AssignTrainingPlanToClientInput!) {
 
 mutation RemoveTrainingPlanFromClient($planId: ID!, $clientId: ID!) {
   removeTrainingPlanFromClient(planId: $planId, clientId: $clientId)
+}
+
+# Granular update mutations - more efficient than full plan updates
+mutation UpdateTrainingPlanDetails($input: UpdateTrainingPlanDetailsInput!) {
+  updateTrainingPlanDetails(input: $input)
+}
+
+mutation UpdateTrainingWeekDetails($input: UpdateTrainingWeekDetailsInput!) {
+  updateTrainingWeekDetails(input: $input)
+}
+
+mutation UpdateTrainingDayData($input: UpdateTrainingDayDataInput!) {
+  updateTrainingDayData(input: $input)
+}
+
+mutation UpdateTrainingExercise($input: UpdateTrainingExerciseInput!) {
+  updateTrainingExercise(input: $input)
+}
+
+mutation UpdateExerciseSet($input: UpdateExerciseSetInput!) {
+  updateExerciseSet(input: $input)
+}
+
+# Add/remove operations
+mutation AddExerciseToDay($input: AddExerciseToDayInput!) {
+  addExerciseToDay(input: $input)
+}
+
+mutation RemoveExerciseFromDay($exerciseId: ID!) {
+  removeExerciseFromDay(exerciseId: $exerciseId)
+}
+
+mutation MoveExercise($input: MoveExerciseInput!) {
+  moveExercise(input: $input)
+}
+
+mutation AddSetToExercise($input: AddSetToExerciseInput!) {
+  addSetToExercise(input: $input)
+}
+
+mutation RemoveSetFromExercise($setId: ID!) {
+  removeSetFromExercise(setId: $setId)
 }

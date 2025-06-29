@@ -77,6 +77,20 @@ type Mutation {
   deletePlan(planId: ID!): Boolean!
   extendPlan(planId: ID!, weeks: [ID!]!): Boolean!
   removeWeek(planId: ID!, weekId: ID!): Boolean!
+
+  # Granular update mutations - more efficient than full plan updates
+  updateTrainingPlanDetails(input: UpdateTrainingPlanDetailsInput!): Boolean!
+  updateTrainingWeekDetails(input: UpdateTrainingWeekDetailsInput!): Boolean!
+  updateTrainingDayData(input: UpdateTrainingDayDataInput!): Boolean!
+  updateTrainingExercise(input: UpdateTrainingExerciseInput!): Boolean!
+  updateExerciseSet(input: UpdateExerciseSetInput!): Boolean!
+
+  # Add/remove operations
+  addExerciseToDay(input: AddExerciseToDayInput!): ID!
+  removeExerciseFromDay(exerciseId: ID!): Boolean!
+  moveExercise(input: MoveExerciseInput!): Boolean!
+  addSetToExercise(input: AddSetToExerciseInput!): ID!
+  removeSetFromExercise(setId: ID!): Boolean!
 }
 
 input AssignTrainingPlanToClientInput {
@@ -180,4 +194,58 @@ input UpdateExerciseSetInput {
   maxReps: Int
   rpe: Int
   weight: Float
+}
+
+# New granular update input types
+input UpdateTrainingPlanDetailsInput {
+  id: ID!
+  title: String
+  description: String
+  isPublic: Boolean
+  isDraft: Boolean
+  difficulty: Difficulty
+}
+
+input UpdateTrainingWeekDetailsInput {
+  id: ID!
+  name: String
+  description: String
+  weekNumber: Int
+}
+
+input UpdateTrainingDayDataInput {
+  dayId: ID!
+  isRestDay: Boolean
+  workoutType: WorkoutType
+}
+
+# Add/remove operation input types
+input AddExerciseToDayInput {
+  dayId: ID!
+  name: String!
+  order: Int!
+  restSeconds: Int
+  tempo: String
+  instructions: String
+  additionalInstructions: String
+  type: ExerciseType
+  warmupSets: Int
+  baseId: ID
+}
+
+input AddSetToExerciseInput {
+  exerciseId: ID!
+  order: Int!
+  reps: Int
+  minReps: Int
+  maxReps: Int
+  weight: Float
+  rpe: Int
+}
+
+input MoveExerciseInput {
+  dayId: ID!
+  exerciseId: ID!
+  newOrder: Int!
+  targetDayId: ID # Optional: when provided, moves exercise to a different day
 }

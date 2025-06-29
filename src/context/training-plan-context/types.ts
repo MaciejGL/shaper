@@ -33,6 +33,11 @@ export type TrainingPlanContextType = {
   isDeleting: boolean
   isDuplicating: boolean
 
+  // Data
+  createdAt?: string
+  updatedAt?: string
+  assignedCount?: number
+
   // Actions
   setCurrentStep: (step: number) => void
   setActiveWeek: (week: number) => void

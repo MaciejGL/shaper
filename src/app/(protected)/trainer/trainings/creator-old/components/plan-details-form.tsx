@@ -1,5 +1,16 @@
 'use client'
 
+import { format, formatRelative } from 'date-fns'
+import { AlertCircle, FileText, Users } from 'lucide-react'
+
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -9,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { GQLDifficulty } from '@/generated/graphql-client'
@@ -17,6 +29,9 @@ import type { TrainingPlanFormData } from './types'
 
 type PlanDetailsProps = {
   data: TrainingPlanFormData['details']
+  createdAt?: string
+  updatedAt?: string
+  assignedCount?: number
   updateData: (data: TrainingPlanFormData['details']) => void
 }
 
@@ -27,29 +42,60 @@ const DIFFICULTIES: { label: string; value: GQLDifficulty }[] = [
   { label: 'Expert', value: GQLDifficulty.Expert },
 ]
 
-export function PlanDetailsForm({ data, updateData }: PlanDetailsProps) {
+export function PlanDetailsForm({
+  data,
+  updateData,
+  createdAt,
+  updatedAt,
+  assignedCount,
+}: PlanDetailsProps) {
   return (
-    <div className="container space-y-6">
-      <PlanDetailsHeader data={data} updateData={updateData} />
+    <div className="grid lg:grid-cols-3 gap-6">
+      <div className="lg:col-span-2 space-y-6">
+        <PlanDetailsHeader data={data} updateData={updateData} />
+      </div>
+      <div className="w-full gap-6">
+        <PlanPublicications
+          data={data}
+          updateData={updateData}
+          createdAt={createdAt}
+          updatedAt={updatedAt}
+          assignedCount={assignedCount}
+        />
+      </div>
     </div>
   )
 }
 
-function PlanDetailsHeader({ data, updateData }: PlanDetailsProps) {
+function PlanDetailsHeader({
+  data,
+  updateData,
+}: Pick<PlanDetailsProps, 'data' | 'updateData'>) {
   return (
-    <div className="flex flex-row gap-8 items-start">
-      <div className="space-y-6 flex-1 min-w-0">
-        <div className="grid grid-cols-[2fr_1fr] gap-4 items-end">
-          <Input
-            id="title"
-            label="Title"
-            placeholder="e.g., 12-Week Strength Program"
-            value={data?.title ?? ''}
-            onChange={(e) => updateData({ ...data, title: e.target.value })}
-            className="w-full"
-          />
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="difficulty">Difficulty</Label>
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <FileText className="w-5 h-5" />
+          Basic Information
+        </CardTitle>
+        <CardDescription>
+          Set up the fundamental details of your training plan
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Plan Title</Label>
+            <Input
+              id="title"
+              placeholder="e.g., Upper Body Strength Program"
+              value={data.title}
+              onChange={(e) => updateData({ ...data, title: e.target.value })}
+              className="w-full"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="difficulty">Difficulty Level</Label>
             <Select
               value={data.difficulty ?? ''}
               onValueChange={(value: GQLDifficulty) =>
@@ -69,75 +115,96 @@ function PlanDetailsHeader({ data, updateData }: PlanDetailsProps) {
             </Select>
           </div>
         </div>
-        <Textarea
-          id="description"
-          label="Description"
-          placeholder="Describe the goals and focus of this training plan"
-          value={data.description ?? ''}
-          onChange={(e) => updateData({ ...data, description: e.target.value })}
-          className="min-h-32 w-full resize-none"
-        />
-      </div>
-      <div className="w-80 flex-shrink-0">
-        <PlanDetailsOptions data={data} updateData={updateData} />
-      </div>
-    </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            placeholder="Describe the goals, target audience, and key features of this training plan..."
+            value={data.description ?? ''}
+            onChange={(e) =>
+              updateData({ ...data, description: e.target.value })
+            }
+            className="min-h-[120px] resize-none"
+          />
+          <p className="text-xs text-muted-foreground">
+            Help clients understand what this plan offers and who it's designed
+            for
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
-function PlanDetailsOptions({ data, updateData }: PlanDetailsProps) {
+function PlanPublicications({
+  data,
+  updateData,
+  createdAt,
+  updatedAt,
+  assignedCount,
+}: PlanDetailsProps) {
+  const isDraft = data.isDraft ?? false
+  const setIsDraft = (value: boolean) => updateData({ ...data, isDraft: value })
+
   return (
-    <div className="w-full gap-6 max-w-max">
-      <SwitchOption
-        id="isDraft"
-        label={!data.isDraft ? 'Active' : 'Draft'}
-        description={
-          !data.isDraft
-            ? 'Plan is available for assignment to clients'
-            : "Plan is in draft mode, can't be assigned to clients"
-        }
-        checked={!data.isDraft || data.isDraft === undefined}
-        onCheckedChange={() => updateData({ ...data, isDraft: !data.isDraft })}
-      />
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Publication Status</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <Label htmlFor="draft-toggle" className="text-sm font-medium">
+              Draft Mode
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              {isDraft
+                ? "Plan is private and can't be assigned"
+                : 'Plan is live and available to clients'}
+            </p>
+          </div>
+          <Switch
+            id="draft-toggle"
+            checked={isDraft}
+            onCheckedChange={setIsDraft}
+          />
+        </div>
 
-      {/* <SwitchOption
-        id="isPublic"
-        label="Public"
-        description="Make this plan visible to all clients"
-        checked={data.isPublic}
-        onCheckedChange={(v) => updateData({ ...data, isPublic: v })}
-      /> */}
-    </div>
-  )
-}
+        {isDraft && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="text-sm">
+              This plan is in draft mode and won't be assignable to clients
+              until published.
+            </AlertDescription>
+          </Alert>
+        )}
 
-type SwitchOptionProps = {
-  id: string
-  label: string
-  description: string
-  checked: boolean
-  onCheckedChange: (value: boolean) => void
-}
+        <Separator />
 
-function SwitchOption({
-  id,
-  label,
-  description,
-  checked,
-  onCheckedChange,
-}: SwitchOptionProps) {
-  return (
-    <Label
-      htmlFor={id}
-      className="flex flex-row items-center justify-between rounded-lg border p-4 bg-card-on-card w-full min-h-[80px]"
-    >
-      <div className="space-y-0.5 flex-1">
-        <p className="text-base">{label}</p>
-        <p className="text-sm text-muted-foreground max-w-xs leading-tight">
-          {description}
-        </p>
-      </div>
-      <Switch id={id} checked={checked} onCheckedChange={onCheckedChange} />
-    </Label>
+        <div className="space-y-3">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Created</span>
+            {createdAt && (
+              <span>{format(new Date(createdAt), 'd MMM HH:mm')}</span>
+            )}
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Last modified</span>
+            {updatedAt && (
+              <span>{formatRelative(new Date(updatedAt), new Date())}</span>
+            )}
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Assigned clients</span>
+            <span className="flex items-center gap-1">
+              <Users className="w-3 h-3" />
+              {assignedCount}
+            </span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

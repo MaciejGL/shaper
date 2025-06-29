@@ -12,12 +12,11 @@ import {
 } from 'react'
 
 import { useGetTemplateTrainingPlanByIdQuery } from '@/generated/graphql-client'
-import { useAutoSaveOnNavigation } from '@/hooks/use-auto-save-on-navigation'
-import { useDebouncedUpdates } from '@/hooks/use-debounced-updates'
 
 import type { TrainingPlanFormData } from '../../app/(protected)/trainer/trainings/creator-old/components/types'
 
 import { useDayHandlers } from './day-handlers'
+import { useDetailsHandlers } from './details-handlers'
 import { useExerciseHandlers } from './exercise-handlers'
 import { useTrainingPlanMutations } from './mutations'
 import { useSetHandlers } from './set-handlers'
@@ -87,6 +86,9 @@ export function TrainingPlanProvider({
             isDraft: data.getTrainingPlanById.isDraft,
             difficulty: data.getTrainingPlanById.difficulty,
           },
+          createdAt: data.getTrainingPlanById.createdAt,
+          updatedAt: data.getTrainingPlanById.updatedAt,
+          assignedCount: data.getTrainingPlanById.assignedCount,
           weeks: data.getTrainingPlanById.weeks,
         }),
       },
@@ -103,73 +105,29 @@ export function TrainingPlanProvider({
   // ## Mutations
   const {
     createTrainingPlan,
-    updateTrainingPlan,
     deleteTrainingPlan,
     duplicateTrainingPlan,
     isPending,
-    isUpdating,
     isDeleting,
     isDuplicating,
   } = useTrainingPlanMutations()
 
-  // Auto-save function
-  const autoSave = useCallback(async () => {
-    const currentTrainingId = trainingId
-    if (currentTrainingId && !isUpdating) {
-      try {
-        await updateTrainingPlan(
-          {
-            input: {
-              id: currentTrainingId,
-              isPublic: details.isPublic,
-              isDraft: details.isDraft,
-              title: details.title,
-              description: details.description,
-              difficulty: details.difficulty,
-              weeks: weeks,
-            },
-          },
-          {
-            onSuccess: () => {
-              setIsDirty(false)
-            },
-          },
-        )
-      } catch (error) {
-        console.error('Auto-save failed:', error)
-      }
-    }
-  }, [trainingId, updateTrainingPlan, details, weeks, isUpdating])
-
-  // ## Auto-save debouncing wrapper
-  const { wrapWithDebounce } = useDebouncedUpdates({
-    onSave: autoSave,
-    isSaving: isUpdating,
-    enabled: !!trainingId, // Only enable when editing existing training plan
-    debounceDelay: 5000,
-  })
-
   // ## Granular update functions (with debounced auto-save)
   const {
-    updateWeek: _updateWeek,
+    updateWeek,
     removeWeek: _removeWeek,
-    addWeek: _addWeek,
+    addWeek,
     cloneWeek: _cloneWeek,
-  } = useWeekHandlers(setWeeks, setIsDirty, setActiveWeek)
-  const _updateDetails = useCallback(
-    (newDetails: Partial<TrainingPlanFormData['details']>) => {
-      setDetails((prev) => ({ ...prev, ...newDetails }))
-      setIsDirty(true)
-    },
-    [],
-  )
-  const { updateDay: _updateDay } = useDayHandlers(setWeeks, setIsDirty)
-  const {
-    updateExercise: _updateExercise,
-    addExercise: _addExercise,
-    removeExercise: _removeExercise,
-    moveExercise: _moveExercise,
-  } = useExerciseHandlers(setWeeks, setIsDirty)
+  } = useWeekHandlers(weeks, setWeeks, setIsDirty, setActiveWeek)
+  const { updateDetails } = useDetailsHandlers({
+    trainingId,
+    details,
+    setDetails,
+    setIsDirty,
+  })
+  const { updateDay } = useDayHandlers(weeks, setWeeks, setIsDirty)
+  const { updateExercise, addExercise, removeExercise, moveExercise } =
+    useExerciseHandlers({ setWeeks, setIsDirty, weeks })
   const {
     updateSet: _updateSet,
     addSet: _addSet,
@@ -177,19 +135,11 @@ export function TrainingPlanProvider({
   } = useSetHandlers(setWeeks, setIsDirty)
 
   // Wrap all update methods with debounced auto-save
-  const updateDetails = wrapWithDebounce(_updateDetails)
-  const updateWeek = wrapWithDebounce(_updateWeek)
-  const removeWeek = wrapWithDebounce(_removeWeek)
-  const addWeek = wrapWithDebounce(_addWeek)
-  const cloneWeek = wrapWithDebounce(_cloneWeek)
-  const updateDay = wrapWithDebounce(_updateDay)
-  const updateExercise = wrapWithDebounce(_updateExercise)
-  const addExercise = wrapWithDebounce(_addExercise)
-  const removeExercise = wrapWithDebounce(_removeExercise)
-  const moveExercise = wrapWithDebounce(_moveExercise)
-  const updateSet = wrapWithDebounce(_updateSet)
-  const addSet = wrapWithDebounce(_addSet)
-  const removeSet = wrapWithDebounce(_removeSet)
+  const removeWeek = _removeWeek
+  const cloneWeek = _cloneWeek
+  const updateSet = _updateSet
+  const addSet = _addSet
+  const removeSet = _removeSet
 
   // Memoize handlers to prevent unnecessary re-renders
   const clearDraft = useCallback(() => {
@@ -205,31 +155,17 @@ export function TrainingPlanProvider({
   // Two-tier approach:
   // 1. Debounced auto-save (5s after last update operation)
   // 2. Immediate save on navigation/page close for data protection
-  useAutoSaveOnNavigation({
-    isDirty,
-    onSave: autoSave,
-    isSaving: isUpdating,
-    enabled: !!trainingId,
-    autoSaveDelay: 0, // Immediate save on navigation
-  })
+  // useAutoSaveOnNavigation({
+  //   isDirty,
+  //   onSave: autoSave,
+  //   isSaving: isUpdating,
+  //   enabled: !!trainingId,
+  //   autoSaveDelay: 0, // Immediate save on navigation
+  // })
 
   const handleSubmit = useCallback(async () => {
     const currentTrainingId = trainingId
-    if (currentTrainingId) {
-      await updateTrainingPlan({
-        input: {
-          id: currentTrainingId,
-          isPublic: details.isPublic,
-          isDraft: details.isDraft,
-          title: details.title,
-          description: details.description,
-          difficulty: details.difficulty,
-          weeks: weeks,
-        },
-      })
-      setIsDirty(false)
-      router.refresh()
-    } else {
+    if (!currentTrainingId) {
       const res = await createTrainingPlan({
         input: {
           isPublic: details.isPublic,
@@ -259,15 +195,7 @@ export function TrainingPlanProvider({
       setIsDirty(false)
       router.push(`/trainer/trainings/${res.createTrainingPlan.id}`)
     }
-  }, [
-    trainingId,
-    updateTrainingPlan,
-    createTrainingPlan,
-    clearDraft,
-    router,
-    details,
-    weeks,
-  ])
+  }, [trainingId, createTrainingPlan, clearDraft, router, details, weeks])
 
   const handleDelete = useCallback(
     async (trainingId: string) => {
@@ -297,9 +225,13 @@ export function TrainingPlanProvider({
       // Loading states
       isLoadingInitialData: isLoadingInitialData,
       isPending,
-      isUpdating,
       isDeleting,
       isDuplicating,
+
+      // Data
+      createdAt: templateTrainingPlan?.createdAt,
+      updatedAt: templateTrainingPlan?.updatedAt,
+      assignedCount: templateTrainingPlan?.assignedCount,
 
       // Actions
       setCurrentStep,
@@ -333,9 +265,11 @@ export function TrainingPlanProvider({
       activeDay,
       isLoadingInitialData,
       isPending,
-      isUpdating,
       isDeleting,
       isDuplicating,
+      templateTrainingPlan?.createdAt,
+      templateTrainingPlan?.updatedAt,
+      templateTrainingPlan?.assignedCount,
       updateDetails,
       updateWeek,
       removeWeek,

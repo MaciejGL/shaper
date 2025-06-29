@@ -1,27 +1,76 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { isNil } from 'lodash'
 import { useCallback } from 'react'
+import { toast } from 'sonner'
 
 import {
   TrainingPlanFormData,
   TrainingWeek,
 } from '@/app/(protected)/trainer/trainings/creator-old/components/types'
+import { useUpdateTrainingWeekDetailsMutation } from '@/generated/graphql-client'
 import { createId } from '@/lib/create-id'
 
 export const useWeekHandlers = (
+  weeks: TrainingPlanFormData['weeks'],
   setWeeks: React.Dispatch<React.SetStateAction<TrainingPlanFormData['weeks']>>,
   setIsDirty: React.Dispatch<React.SetStateAction<boolean>>,
   setActiveWeek: React.Dispatch<React.SetStateAction<number>>,
 ) => {
+  const queryClient = useQueryClient()
+  const { mutateAsync: updateTrainingWeek } =
+    useUpdateTrainingWeekDetailsMutation()
+
   const updateWeek = useCallback(
     (weekIndex: number, newWeek: Partial<TrainingPlanFormData['weeks'][0]>) => {
+      const currentWeek = weeks[weekIndex]
+
+      if (!currentWeek?.id) {
+        console.error('[Update week]: Invalid week', {
+          weekIndex,
+        })
+        return
+      }
+
+      const updatedWeek = {
+        ...currentWeek,
+        ...newWeek,
+      }
+
+      updateTrainingWeek(
+        {
+          input: {
+            id: updatedWeek.id,
+            weekNumber: updatedWeek.weekNumber,
+            name: updatedWeek.name,
+            description: updatedWeek.description,
+          },
+        },
+        {
+          onSuccess: () => {
+            setIsDirty(true)
+            queryClient.invalidateQueries({
+              queryKey: ['GetTemplateTrainingPlanById'],
+            })
+          },
+          onError: () => {
+            toast.error('Failed to update week details')
+            setWeeks((prev) => {
+              const newWeeks = [...prev]
+              newWeeks[weekIndex] = currentWeek
+              return newWeeks
+            })
+            setIsDirty(true)
+          },
+        },
+      )
       setWeeks((prev) => {
         const newWeeks = [...prev]
-        newWeeks[weekIndex] = { ...newWeeks[weekIndex], ...newWeek }
+        newWeeks[weekIndex] = updatedWeek
         return newWeeks
       })
       setIsDirty(true)
     },
-    [setWeeks, setIsDirty],
+    [setWeeks, setIsDirty, updateTrainingWeek, weeks],
   )
 
   const removeWeek = useCallback(
