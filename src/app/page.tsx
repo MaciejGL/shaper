@@ -22,7 +22,7 @@ export default function Home() {
 
         <div className="flex flex-col gap-4 w-full max-w-sm">
           <PWAInstallButton
-            variant="outline"
+            variant="secondary"
             size="lg"
             className="w-full"
             showOnMobile={true}
@@ -52,7 +52,7 @@ export default function Home() {
               Personalized training plans
             </p>
           </div>
-          <div className="text-center p-4">
+          <div className="text-center p-4 col-span-2 sm:col-span-1">
             <div className="w-12 h-12 mx-auto mb-2 bg-primary/10 rounded-full flex items-center justify-center">
               <UserCheck className="h-6 w-6 text-primary" />
             </div>

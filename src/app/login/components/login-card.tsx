@@ -33,7 +33,10 @@ export const LoginCard = () => {
   } = useLoginForm()
 
   return (
-    <Card variant="elevated" className="flex flex-col gap-4 w-full max-w-md">
+    <Card
+      variant="gradient"
+      className="flex flex-col gap-12 w-full max-w-md shadow-neuro-light dark:shadow-neuro-dark"
+    >
       <CardHeader className="space-y-1">
         <CardTitle>Login</CardTitle>
         <CardDescription>
@@ -68,7 +71,7 @@ export const LoginCard = () => {
               variant="default"
               loading={isLoading}
               onClick={handleLogin}
-              disabled={otp.length !== 6}
+              disabled={otp.length !== 4}
             >
               Login
             </Button>

@@ -1,6 +1,7 @@
 'use client'
 
 import { Download, Smartphone } from 'lucide-react'
+import { redirect } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -107,7 +108,7 @@ export function PWAInstallButton({
   }
 
   // Don't show if already installed
-  if (isInstalled) return null
+  if (isInstalled) return redirect('/login')
 
   // Show for installable PWAs or iOS devices
   if (!isInstallable && !isIOS) return null

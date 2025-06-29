@@ -26,6 +26,7 @@ const inputVariants = cva(
         ghost: 'border-none bg-secondary shadow-none',
         secondary: 'border-none shadow-none bg-primary/5',
         outline: 'border-input shadow-none bg-secondary',
+        inset: cn('  shadow-neuro-inset-light dark:shadow-neuro-inset-dark'),
       },
       size: {
         sm: 'h-7',
