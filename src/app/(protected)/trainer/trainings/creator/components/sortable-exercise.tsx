@@ -82,6 +82,7 @@ export const SortableExercise = React.memo(
     const { formData, activeWeek, removeExercise } = useTrainingPlan()
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
+    // Revert to original stable key
     const stableKey = `${activeWeek}-${dayOfWeek}-${exerciseIndex}`
 
     // Memoize expensive computations
@@ -93,6 +94,7 @@ export const SortableExercise = React.memo(
       [formData.weeks, activeWeek, dayOfWeek],
     )
 
+    // Revert to original index-based lookup
     const exercise = useMemo(
       () => currentDay?.exercises[exerciseIndex], // Use index instead of find
       [currentDay, exerciseIndex],
@@ -180,7 +182,7 @@ export const SortableExercise = React.memo(
           {...attributes}
           {...listeners}
           className={cn(
-            'cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px]',
+            'cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px] select-none',
             isDragging && 'border-primary/50 !bg-muted/50',
           )}
           hoverable
@@ -189,7 +191,9 @@ export const SortableExercise = React.memo(
           {!isDragging && (
             <CardContent
               className="grow p-3 flex flex-col gap-2 justify-between overflow-hidden cursor-pointer"
-              onClick={() => setIsEditDialogOpen(true)}
+              onClick={() => {
+                setIsEditDialogOpen(true)
+              }}
             >
               {exercise.type && (
                 <p className="text-xs  pr-6 text-muted-foreground">

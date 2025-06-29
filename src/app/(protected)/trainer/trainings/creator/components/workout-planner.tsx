@@ -78,8 +78,6 @@ export default function WorkoutPlanner() {
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
-        tolerance: 5,
-        delay: 50,
       },
     }),
     useSensor(KeyboardSensor, {

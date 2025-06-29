@@ -1,8 +1,11 @@
 import { GQLTrainerExercisesQuery } from '@/generated/graphql-client'
 
-import { TrainingPlanFormData } from '../../../types'
+import { TrainingExercise, TrainingPlanFormData } from '../../../types'
 
-import { SidebarExercsesCard } from './sidebar-exercise-card'
+import {
+  SidebarExercsesCard,
+  TrainingExerciseCard,
+} from './sidebar-exercise-card'
 
 interface DragOverlayProps {
   activeId: string | null
@@ -18,7 +21,7 @@ export function DragOverlay({ activeId, exercises, weeks }: DragOverlayProps) {
   // Check if it's a sidebar exercise first (regular database ID)
   const activeExercise = exercises.find((ex) => ex.id === activeId)
   if (activeExercise) {
-    return <SidebarExercsesCard name={activeExercise.name} />
+    return <SidebarExercsesCard exercise={activeExercise} />
   }
 
   // Handle dragging day exercises with stable key format (weekIndex-dayIndex-exerciseIndex)
@@ -35,7 +38,11 @@ export function DragOverlay({ activeId, exercises, weeks }: DragOverlayProps) {
     const dayExercise = targetDay?.exercises[exerciseIndex]
 
     if (dayExercise) {
-      return <SidebarExercsesCard name={dayExercise.name} />
+      return (
+        <TrainingExerciseCard
+          exercise={dayExercise as unknown as TrainingExercise}
+        />
+      )
     }
   }
 
