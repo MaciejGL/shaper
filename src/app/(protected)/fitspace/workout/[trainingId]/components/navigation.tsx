@@ -3,7 +3,7 @@ import { BadgeCheckIcon, ChevronLeft } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 
-import { getDayName } from '@/app/(protected)/trainer/trainings/creator-old/components/utils'
+import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { Button } from '@/components/ui/button'
 import {
   Select,

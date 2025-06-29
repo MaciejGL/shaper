@@ -1,7 +1,7 @@
 import { isNil } from 'lodash'
 import { useCallback } from 'react'
 
-import { TrainingPlanFormData } from '@/app/(protected)/trainer/trainings/creator-old/components/types'
+import { TrainingPlanFormData } from '@/app/(protected)/trainer/types'
 import { useUpdateTrainingDayDataMutation } from '@/generated/graphql-client'
 import { useDebouncedInvalidation } from '@/hooks/use-debounced-invalidation'
 

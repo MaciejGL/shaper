@@ -4,7 +4,6 @@ import { toast } from 'sonner'
 
 import {
   // Add/remove operations
-  useCreateTrainingPlanMutation,
   useDeleteTrainingPlanMutation,
   useDuplicateTrainingPlanMutation,
   // Granular update mutations - more efficient than full plan updates
@@ -14,14 +13,6 @@ import {
 export const useTrainingPlanMutations = () => {
   const queryClient = useQueryClient()
   const router = useRouter()
-  const { mutateAsync: createTrainingPlan, isPending } =
-    useCreateTrainingPlanMutation({
-      onError: () => toast.error('Failed to create training plan'),
-      onSuccess: () => {
-        toast.success('Training plan created successfully')
-        queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
-      },
-    })
 
   const { mutateAsync: deleteTrainingPlan, isPending: isDeleting } =
     useDeleteTrainingPlanMutation({
@@ -45,12 +36,10 @@ export const useTrainingPlanMutations = () => {
 
   return {
     // Main operations
-    createTrainingPlan,
     deleteTrainingPlan,
     duplicateTrainingPlan,
 
     // Loading states
-    isPending,
     isDeleting,
     isDuplicating,
   }

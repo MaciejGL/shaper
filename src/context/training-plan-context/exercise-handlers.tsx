@@ -4,7 +4,7 @@ import { useCallback } from 'react'
 import {
   TrainingExercise,
   TrainingPlanFormData,
-} from '@/app/(protected)/trainer/trainings/creator-old/components/types'
+} from '@/app/(protected)/trainer/types'
 import {
   useAddExerciseToDayMutation,
   useMoveExerciseMutation,

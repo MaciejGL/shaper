@@ -22,12 +22,12 @@ import { useTrainerExercisesQuery } from '@/generated/graphql-client'
 import { createId } from '@/lib/create-id'
 
 import { DashboardHeader } from '../../../components/dashboard-header'
-import { FormActions } from '../../creator-old/components/create-training-plan-form/form-actions'
-import { PlanDetailsForm } from '../../creator-old/components/plan-details-form'
-import { TrainingDay } from '../../creator-old/components/types'
+import { TrainingDay } from '../../../types'
 
 import { DayGrid } from './day-grid'
 import { DragOverlay as CustomDragOverlay } from './drag-overlay'
+import { FormActions } from './form-actions'
+import { PlanDetailsForm } from './plan-details-form'
 import { Sidebar } from './sidebar'
 import { WeekTabs } from './week-tabs'
 
@@ -46,17 +46,14 @@ export default function WorkoutPlanner() {
     activeWeek,
     isDirty,
     trainingId,
-    isPending,
-    isUpdating,
-    isDuplicating,
-    isDeleting,
+    isDeletingTrainingPlan,
+    isDuplicatingTrainingPlan,
     addExercise,
     moveExercise,
     updateDetails,
     clearDraft,
     handleDelete,
     handleDuplicate,
-    handleSubmit,
   } = useTrainingPlan()
 
   const [tab, setTab] = useQueryState(
@@ -204,13 +201,12 @@ export default function WorkoutPlanner() {
       <div>
         <div className="flex justify-between items-baseline">
           <DashboardHeader
-            title="Training Plan Creator"
-            description={`${formData.details.title}`}
+            title={`Workout Editor ${formData.details.title ? `- ${formData.details.title}` : ''}`}
             prevSegment={{
               label: 'Training Plans',
               href: '/trainer/trainings',
             }}
-            className="mb-2 mt-0"
+            className="mb-10 mt-0"
           />
         </div>
         <div className="flex justify-between items-end">
@@ -226,14 +222,11 @@ export default function WorkoutPlanner() {
             <FormActions
               isDirty={isDirty}
               trainingId={trainingId}
-              isPending={isPending}
-              isUpdating={isUpdating}
-              isDuplicating={isDuplicating}
-              isDeleting={isDeleting}
+              isDuplicating={isDuplicatingTrainingPlan}
+              isDeleting={isDeletingTrainingPlan}
               onDelete={handleDelete}
               onClearDraft={clearDraft}
               onDuplicate={handleDuplicate}
-              onSubmit={handleSubmit}
             />
           </div>
         </div>

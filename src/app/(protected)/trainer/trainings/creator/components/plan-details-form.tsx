@@ -25,7 +25,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { GQLDifficulty } from '@/generated/graphql-client'
 
-import type { TrainingPlanFormData } from './types'
+import type { TrainingPlanFormData } from '../../../types'
 
 type PlanDetailsProps = {
   data: TrainingPlanFormData['details']

@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import { GQLTrainerExercisesQuery } from '@/generated/graphql-client'
 
-import { TrainingPlanFormData } from '../../creator-old/components/types'
+import { TrainingPlanFormData } from '../../../types'
 
 interface DragOverlayProps {
   activeId: string | null

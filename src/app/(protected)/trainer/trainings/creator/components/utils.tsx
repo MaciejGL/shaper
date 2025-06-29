@@ -1,7 +1,6 @@
-import {
-  TrainingDay,
-  TrainingExercise,
-} from '../../creator-old/components/types'
+import { GQLExerciseType } from '@/generated/graphql-client'
+
+import { TrainingDay, TrainingExercise } from '../../../types'
 
 export type Entry<K, V> = {
   key: K
@@ -83,4 +82,11 @@ export const getNewOrder = ({
   const nextOrder = sortedOrders[destinationIndex]
 
   return (prevOrder + nextOrder) / 2
+}
+
+export const EXERCISE_TYPES = {
+  [GQLExerciseType.Superset_1A]: 'Superset 1A',
+  [GQLExerciseType.Superset_1B]: 'Superset 1B',
+  [GQLExerciseType.Dropset]: 'Dropset',
+  [GQLExerciseType.Cardio]: 'Cardio',
 }

@@ -1,7 +1,7 @@
-import { useDndContext } from '@dnd-kit/core'
+import { Over, useDndContext } from '@dnd-kit/core'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { TrainingDay } from '../../creator-old/components/types'
+import { TrainingDay } from '../../../types'
 import { throttle } from '../utils/throttle'
 
 export function useDragDropLogic(day: TrainingDay) {
@@ -18,7 +18,7 @@ export function useDragDropLogic(day: TrainingDay) {
 
   // Store throttled functions in refs so we can cancel them
   const calculateInsertionIndexRef = useRef<
-    | (((over: any, isMouseOver: boolean) => void) & { cancel: () => void })
+    | (((over: Over, isMouseOver: boolean) => void) & { cancel: () => void })
     | null
   >(null)
   const throttledMouseMoveRef = useRef<
@@ -64,55 +64,58 @@ export function useDragDropLogic(day: TrainingDay) {
       calculateInsertionIndexRef.current.cancel()
     }
 
-    const throttledFunc = throttle((over: any, isMouseOver: boolean) => {
-      if (
-        !dragInfo?.isDraggingAnyItem ||
-        !over ||
-        day.isRestDay ||
-        !isMouseOver
-      ) {
-        setDraggedOverIndex(null)
-        return
-      }
-
-      // For existing exercises, check if we're dragging from the same day
-      if (dragInfo.isDraggingExistingExercise) {
-        const draggedExercise = active?.data.current?.exercise
-        const isDraggingFromSameDay = day.exercises.some(
-          (ex) => ex.id === draggedExercise?.id,
-        )
-
-        // If dragging from the same day, don't show indicators (handled by sortable)
-        if (isDraggingFromSameDay) {
+    const throttledFunc = throttle(
+      (over: Over | null, isMouseOver: boolean) => {
+        if (
+          !dragInfo?.isDraggingAnyItem ||
+          !over ||
+          day.isRestDay ||
+          !isMouseOver
+        ) {
           setDraggedOverIndex(null)
           return
         }
-      }
 
-      // For empty days, show indicator at first position
-      if (day.exercises.length === 0) {
-        setDraggedOverIndex(0)
-        return
-      }
+        // For existing exercises, check if we're dragging from the same day
+        if (dragInfo.isDraggingExistingExercise) {
+          const draggedExercise = active?.data.current?.exercise
+          const isDraggingFromSameDay = day.exercises.some(
+            (ex) => ex.id === draggedExercise?.id,
+          )
 
-      const overData = over.data.current
-      let insertIndex = null
-
-      if (overData?.type === 'day-exercise') {
-        // Find the exercise index in this day
-        const exerciseIndex = day.exercises.findIndex(
-          (ex) => ex.id === overData.exercise.id,
-        )
-        if (exerciseIndex !== -1) {
-          insertIndex = exerciseIndex
+          // If dragging from the same day, don't show indicators (handled by sortable)
+          if (isDraggingFromSameDay) {
+            setDraggedOverIndex(null)
+            return
+          }
         }
-      } else if (over.id === day.id) {
-        // Dropping directly on the day container
-        insertIndex = day.exercises.length
-      }
 
-      setDraggedOverIndex(insertIndex)
-    }, 16) // Reduce throttle delay to ~60fps for faster response
+        // For empty days, show indicator at first position
+        if (day.exercises.length === 0) {
+          setDraggedOverIndex(0)
+          return
+        }
+
+        const overData = over.data.current
+        let insertIndex = null
+
+        if (overData?.type === 'day-exercise') {
+          // Find the exercise index in this day
+          const exerciseIndex = day.exercises.findIndex(
+            (ex) => ex.id === overData.exercise.id,
+          )
+          if (exerciseIndex !== -1) {
+            insertIndex = exerciseIndex
+          }
+        } else if (over.id === day.id) {
+          // Dropping directly on the day container
+          insertIndex = day.exercises.length
+        }
+
+        setDraggedOverIndex(insertIndex)
+      },
+      16,
+    ) // Reduce throttle delay to ~60fps for faster response
 
     calculateInsertionIndexRef.current = throttledFunc
     return throttledFunc

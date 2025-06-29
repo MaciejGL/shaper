@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import {
   TrainingPlanFormData,
   TrainingWeek,
-} from '@/app/(protected)/trainer/trainings/creator-old/components/types'
+} from '@/app/(protected)/trainer/types'
 import {
   useAddTrainingWeekMutation,
   useDuplicateTrainingWeekMutation,

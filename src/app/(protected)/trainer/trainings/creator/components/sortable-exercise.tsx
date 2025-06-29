@@ -53,10 +53,10 @@ import { GQLExerciseType } from '@/generated/graphql-client'
 import { formatTempoInput, handleTempoKeyDown } from '@/lib/format-tempo'
 import { cn } from '@/lib/utils'
 
-import { EXERCISE_TYPES } from '../../creator-old/components/exercises-setup/exercise-card'
-import { TrainingExercise } from '../../creator-old/components/types'
+import { TrainingExercise } from '../../../types'
 
 import { InsertionIndicatorBlank } from './insertion-indicators'
+import { EXERCISE_TYPES } from './utils'
 
 interface SortableExerciseProps {
   exerciseId: string

@@ -1,4 +1,4 @@
-import { TrainingPlanFormData } from '@/app/(protected)/trainer/trainings/creator-old/components/types'
+import { TrainingPlanFormData } from '@/app/(protected)/trainer/types'
 
 export type PartialTrainingPlanFormDataWeek = Partial<
   TrainingPlanFormData['weeks'][number]
@@ -24,14 +24,12 @@ export type TrainingPlanContextType = {
   formData: TrainingPlanFormData
   trainingId?: string
   isDirty: boolean
-  currentStep: number
+
   activeWeek: number
-  activeDay: number
+
   isLoadingInitialData: boolean
-  isPending: boolean
-  isUpdating: boolean
-  isDeleting: boolean
-  isDuplicating: boolean
+  isDeletingTrainingPlan: boolean
+  isDuplicatingTrainingPlan: boolean
 
   // Data
   createdAt?: string
@@ -39,9 +37,7 @@ export type TrainingPlanContextType = {
   assignedCount?: number
 
   // Actions
-  setCurrentStep: (step: number) => void
   setActiveWeek: (week: number) => void
-  setActiveDay: (day: number) => void
 
   // Granular update functions
   updateDetails: (details: PartialTrainingPlanFormDataDetails) => void
@@ -101,7 +97,6 @@ export type TrainingPlanContextType = {
 
   // Other actions
   clearDraft: () => void
-  handleSubmit: () => Promise<void>
   handleDelete: (trainingId: string) => Promise<void>
   handleDuplicate: (trainingId: string) => Promise<void>
 }

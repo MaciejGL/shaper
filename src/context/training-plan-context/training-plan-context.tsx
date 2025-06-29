@@ -1,6 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import {
   ReactNode,
   createContext,
@@ -14,7 +13,7 @@ import {
 import { useGetTemplateTrainingPlanByIdQuery } from '@/generated/graphql-client'
 import { useUnsavedChangesWarning } from '@/hooks/use-unsaved-changes-warning'
 
-import type { TrainingPlanFormData } from '../../app/(protected)/trainer/trainings/creator-old/components/types'
+import type { TrainingPlanFormData } from '../../app/(protected)/trainer/types'
 
 import { useDayHandlers } from './day-handlers'
 import { useDetailsHandlers } from './details-handlers'
@@ -59,11 +58,8 @@ export function TrainingPlanProvider({
   trainingId?: string
 }) {
   // ## State
-  const router = useRouter()
   const [isDirty, setIsDirty] = useState(false)
-  const [currentStep, setCurrentStep] = useState(0)
   const [activeWeek, setActiveWeek] = useState(0)
-  const [activeDay, setActiveDay] = useState(0)
   const [details, setDetails] = useState<TrainingPlanFormData['details']>(
     initialFormData.details,
   )
@@ -105,12 +101,10 @@ export function TrainingPlanProvider({
 
   // ## Mutations
   const {
-    createTrainingPlan,
     deleteTrainingPlan,
     duplicateTrainingPlan,
-    isPending,
-    isDeleting,
-    isDuplicating,
+    isDeleting: isDeletingTrainingPlan,
+    isDuplicating: isDuplicatingTrainingPlan,
   } = useTrainingPlanMutations()
 
   // ## Granular update functions (with debounced auto-save)
@@ -154,40 +148,6 @@ export function TrainingPlanProvider({
     enabled: !!trainingId, // Only enable for existing training plans
   })
 
-  const handleSubmit = useCallback(async () => {
-    const currentTrainingId = trainingId
-    if (!currentTrainingId) {
-      const res = await createTrainingPlan({
-        input: {
-          isPublic: details.isPublic,
-          isDraft: details.isDraft,
-          title: details.title,
-          description: details.description,
-          difficulty: details.difficulty,
-          weeks: weeks.map((week) => ({
-            ...week,
-            id: undefined,
-            days: week.days.map((day) => ({
-              ...day,
-              id: undefined,
-              exercises: day.exercises.map((exercise) => ({
-                ...exercise,
-                id: undefined,
-                sets: exercise.sets.map((set) => ({
-                  ...set,
-                  id: undefined,
-                })),
-              })),
-            })),
-          })),
-        },
-      })
-      clearDraft()
-      setIsDirty(false)
-      router.push(`/trainer/trainings/${res.createTrainingPlan.id}`)
-    }
-  }, [trainingId, createTrainingPlan, clearDraft, router, details, weeks])
-
   const handleDelete = useCallback(
     async (trainingId: string) => {
       await deleteTrainingPlan({ id: trainingId })
@@ -209,16 +169,12 @@ export function TrainingPlanProvider({
       formData: { details, weeks },
       trainingId: trainingId,
       isDirty,
-      currentStep,
       activeWeek,
-      activeDay,
+      isDeletingTrainingPlan,
+      isDuplicatingTrainingPlan,
 
       // Loading states
       isLoadingInitialData: isLoadingInitialData,
-      isPending,
-      isUpdating: false, // TODO: Track update mutation status
-      isDeleting,
-      isDuplicating,
 
       // Data
       createdAt: templateTrainingPlan?.createdAt,
@@ -226,9 +182,7 @@ export function TrainingPlanProvider({
       assignedCount: templateTrainingPlan?.assignedCount,
 
       // Actions
-      setCurrentStep,
       setActiveWeek,
-      setActiveDay,
       updateDetails,
       updateWeek,
       removeWeek,
@@ -243,7 +197,6 @@ export function TrainingPlanProvider({
       addSet,
       removeSet,
       clearDraft,
-      handleSubmit,
       handleDelete,
       handleDuplicate,
     }),
@@ -252,13 +205,10 @@ export function TrainingPlanProvider({
       weeks,
       trainingId,
       isDirty,
-      currentStep,
       activeWeek,
-      activeDay,
+      isDeletingTrainingPlan,
+      isDuplicatingTrainingPlan,
       isLoadingInitialData,
-      isPending,
-      isDeleting,
-      isDuplicating,
       templateTrainingPlan?.createdAt,
       templateTrainingPlan?.updatedAt,
       templateTrainingPlan?.assignedCount,
@@ -276,7 +226,6 @@ export function TrainingPlanProvider({
       addSet,
       removeSet,
       clearDraft,
-      handleSubmit,
       handleDelete,
       handleDuplicate,
     ],
