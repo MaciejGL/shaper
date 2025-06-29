@@ -104,7 +104,6 @@ function WorkoutDay({
           opacity: expanded ? 1 : 0,
         }}
         transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-        style={{ overflow: 'hidden' }}
       >
         <WorkoutDayExercises day={day} />
       </motion.div>
@@ -204,9 +203,9 @@ function WorkoutDayExercises({
 
 function RestDay() {
   return (
-    <div className="px-4 py-8 flex flex-col gap-4 items-center">
-      <BiggyIcon icon={HamIcon} size="md" />
-      <span className="text-muted-foreground text-sm text-center max-w-[25ch]">
+    <div className="px-4 flex flex-col gap-4 items-center">
+      <BiggyIcon icon={HamIcon} size="sm" />
+      <span className="text-sm text-center max-w-[25ch]">
         Rest and recover for next workout!
       </span>
     </div>

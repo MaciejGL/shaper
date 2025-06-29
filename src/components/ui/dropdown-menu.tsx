@@ -88,19 +88,17 @@ function DropdownMenuItem({
       )}
       {...props}
     >
-      <>
+      <div
+        className={cn(
+          'flex items-center gap-2 w-full',
+          loading && 'opacity-50',
+        )}
+      >
         {loading && (
           <Loader2 className="size-4 animate-spin absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2" />
         )}
-        <div
-          className={cn(
-            'flex items-center gap-2 w-full',
-            loading && 'opacity-50',
-          )}
-        >
-          {children}
-        </div>
-      </>
+        {children}
+      </div>
     </DropdownMenuPrimitive.Item>
   )
 }

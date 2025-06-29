@@ -226,6 +226,18 @@ function ExerciseHeader({
           {exercise.videoUrl && (
             <VideoPreview variant="secondary" url={exercise.videoUrl} />
           )}
+          <Button
+            variant="secondary"
+            onClick={() => handleMarkAsCompleted(!isCompleted)}
+            iconOnly={
+              <Check
+                className={cn(
+                  'transition-all duration-200',
+                  isCompleted ? 'text-green-500' : 'text-muted-foreground',
+                )}
+              />
+            }
+          />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -596,7 +608,7 @@ function ExerciseSet({
           <div
             className={cn(
               sharedLayoutStyles,
-              'rounded-t-md bg-muted dark:bg-card/50 pb-2 -mb-2',
+              'rounded-t-md bg-muted dark:bg-card pb-2 -mb-2',
             )}
           >
             <div className="min-w-2.5"></div>

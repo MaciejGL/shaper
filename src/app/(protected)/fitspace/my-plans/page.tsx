@@ -42,7 +42,7 @@ export default function MyPlansPage() {
   const completedPlans = data?.getMyPlansOverview?.completedPlans
 
   return (
-    <div className="container-fitspace mx-auto">
+    <div className="container-fitspace mx-auto mb-24">
       <DashboardHeader title="Training Plans" icon={<LayoutList />} />
 
       {/* Plans Tabs */}

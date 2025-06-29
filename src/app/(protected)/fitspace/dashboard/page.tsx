@@ -29,12 +29,8 @@ export default async function DashboardPage() {
   )
 
   return (
-    <div className="container-fitspace mx-auto">
-      <DashboardHeader
-        title="Dashboard"
-        icon={<LayoutDashboard />}
-        description={`Good ${getCurrentPartOfDay()}${user.user.profile?.firstName ? `, ${user.user.profile?.firstName}` : ''}!`}
-      />
+    <div className="container-fitspace mx-auto mb-24">
+      <DashboardHeader title="Dashboard" icon={<LayoutDashboard />} />
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
         <TodaysSession
           workout={currentDay}
@@ -49,11 +45,4 @@ export default async function DashboardPage() {
       </div>
     </div>
   )
-}
-
-function getCurrentPartOfDay() {
-  const hour = new Date().getHours()
-  if (hour < 12) return 'morning'
-  if (hour < 18) return 'afternoon'
-  return 'evening'
 }

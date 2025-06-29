@@ -11,18 +11,37 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
   const pathname = usePathname()
   const navItems = useMemo(
     () => [
-      { href: '/fitspace/dashboard', icon: Home, label: 'Home' },
-      { href: '/fitspace/my-plans', icon: Calendar, label: 'Plans' },
+      {
+        href: '/fitspace/dashboard',
+        icon: Home,
+        label: 'Home',
+        prefetch: true,
+      },
+      {
+        href: '/fitspace/my-plans',
+        icon: Calendar,
+        label: 'Plans',
+        prefetch: true,
+      },
       {
         href: `/fitspace/workout/${currentWorkoutId || 'quick-workout'}`,
         icon: Dumbbell,
         label: 'Workout',
+        prefetch: true,
       },
-      { href: '/fitspace/progress', icon: TrendingUp, label: 'Progress' },
+      {
+        href: '/fitspace/progress',
+        icon: TrendingUp,
+        label: 'Progress',
+        disabled: true,
+        prefetch: true,
+      },
       {
         href: '/fitspace/marketplace?tab=trainers',
         icon: SearchIcon,
         label: 'Explore',
+        disabled: true,
+        prefetch: true,
       },
     ],
     [currentWorkoutId],
@@ -42,9 +61,10 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
               className={cn(
                 'flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-[60px]',
                 isActive
-                  ? 'text-primary bg-secondary shadow-neuro-light dark:shadow-neuro-dark'
+                  ? 'text-primary bg-card shadow-neuro-light dark:shadow-neuro-dark'
                   : 'text-muted-foreground hover:text-foreground ',
               )}
+              prefetch={item.prefetch}
             >
               <Icon className="h-5 w-5 mb-1" />
               <span className="text-xs font-medium">{item.label}</span>

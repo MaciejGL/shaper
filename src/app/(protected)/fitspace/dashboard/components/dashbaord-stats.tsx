@@ -8,8 +8,8 @@ import {
   Clock4Icon,
   DrumstickIcon,
   DumbbellIcon,
-  TrendingDownIcon,
-  TrendingUpIcon,
+  // TrendingDownIcon,
+  // TrendingUpIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -54,14 +54,14 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
     0,
   )
 
-  const weightLogLastWeek = 83
-  const weightLogCurrentWeek = 82
+  // const weightLogLastWeek = 83
+  // const weightLogCurrentWeek = 82
 
-  const diffWeight = weightLogCurrentWeek - weightLogLastWeek
+  // const diffWeight = weightLogCurrentWeek - weightLogLastWeek
 
   return (
     <div className="space-y-6 -mx-2 md:-mx-0">
-      <Card className="rounded-none md:rounded-lg py-4">
+      <Card className="rounded-none border-none border-t border-b md:border md:rounded-lg py-4">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="h-5 w-5" />
@@ -69,49 +69,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="grid grid-cols-2 gap-4 py-4">
-            <StatsItem
-              value={streak}
-              label="Day Streak"
-              icon={<CalendarDaysIcon className="size-4 text-amber-500" />}
-            />
-
-            <StatsItem
-              value={
-                <div className="text-2xl font-bold">
-                  {secondsToMinutes(totalDuration)}
-                  <span className="text-xs text-muted-foreground">min</span>
-                </div>
-              }
-              icon={<Clock4Icon className="size-4 text-blue-500" />}
-              label="Gym time"
-            />
-            <StatsItem
-              value={
-                <div className="text-2xl font-bold flex items-baseline gap-1">
-                  {weightLogCurrentWeek}
-                  {diffWeight !== 0 && (
-                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                      <p>
-                        {diffWeight > 0 ? '+' : '-'}
-                        {Math.abs(diffWeight)}kg
-                      </p>
-                    </div>
-                  )}
-                </div>
-              }
-              icon={
-                diffWeight > 0 ? (
-                  <TrendingUpIcon className="size-4 text-green-500" />
-                ) : (
-                  <TrendingDownIcon className="size-4 text-cyan-500" />
-                )
-              }
-              label="Weight trend"
-            />
-          </div>
-
-          <div className="space-y-4 pt-2 border-t border-border/50">
+          <div className="space-y-4 border-b border-border/50 pb-4">
             <div className="flex justify-between items-center text-sm">
               <span className="text-muted-foreground">Workouts This Week</span>
               <span className="font-medium">
@@ -132,9 +90,9 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                   <div
                     className={cn(
                       'rounded-md shadow-neuro-light dark:shadow-neuro-dark shrink-0 p-3 min-w-[5rem]',
-                      !day.isRestDay && 'bg-primary-foreground',
+                      !day.isRestDay && 'bg-card',
                       day.isRestDay &&
-                        'bg-muted-foreground/10 text-muted-foreground',
+                        'bg-muted-foreground/5 text-muted-foreground',
                     )}
                   >
                     <div className="flex-center flex-col gap-1 text-xs md:text-md text-center">
@@ -156,6 +114,47 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                 </Link>
               ))}
             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4 py-4">
+            <StatsItem
+              value={streak}
+              label="Day Streak"
+              icon={<CalendarDaysIcon className="size-4 text-amber-500" />}
+            />
+
+            <StatsItem
+              value={
+                <div className="text-2xl font-bold">
+                  {secondsToMinutes(totalDuration)}
+                  <span className="text-xs text-muted-foreground">min</span>
+                </div>
+              }
+              icon={<Clock4Icon className="size-4 text-blue-500" />}
+              label="Gym time"
+            />
+            {/* <StatsItem
+              value={
+                <div className="text-2xl font-bold flex items-baseline gap-1">
+                  {weightLogCurrentWeek}
+                  {diffWeight !== 0 && (
+                    <div className="text-xs text-muted-foreground flex items-center gap-1">
+                      <p>
+                        {diffWeight > 0 ? '+' : '-'}
+                        {Math.abs(diffWeight)}kg
+                      </p>
+                    </div>
+                  )}
+                </div>
+              }
+              icon={
+                diffWeight > 0 ? (
+                  <TrendingUpIcon className="size-4 text-green-500" />
+                ) : (
+                  <TrendingDownIcon className="size-4 text-cyan-500" />
+                )
+              }
+              label="Weight trend"
+            /> */}
           </div>
         </CardContent>
       </Card>
