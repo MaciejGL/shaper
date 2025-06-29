@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import { RadioGroupTabs } from '@/components/radio-group'
 import { Button } from '@/components/ui/button'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
+import { cn } from '@/lib/utils'
 
 export function WeekTabs() {
   const {
@@ -14,6 +15,7 @@ export function WeekTabs() {
     addWeek,
     removeWeek,
     cloneWeek,
+    isLoadingInitialData,
   } = useTrainingPlan()
   const weeks = formData.weeks
   const handleWeekChange = (value: string) => {
@@ -29,7 +31,12 @@ export function WeekTabs() {
   }))
 
   return (
-    <div className="mb-6 bg-card dark:bg-card-on-card shadow-xs p-2 rounded-lg w-max min-w-full flex items-center gap-2 justify-start">
+    <div
+      className={cn(
+        'mb-6 bg-card dark:bg-card-on-card shadow-xs p-2 rounded-lg w-max min-w-full flex items-center gap-2 justify-start',
+        isLoadingInitialData && 'masked-placeholder-text',
+      )}
+    >
       <RadioGroupTabs
         title="Select Week"
         hideTitle

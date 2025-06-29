@@ -2,7 +2,6 @@
 
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { AnimatePresence } from 'framer-motion'
 import {
   FlameIcon,
   GaugeIcon,
@@ -12,19 +11,17 @@ import {
   Trash2,
 } from 'lucide-react'
 import { InfoIcon, Plus, X } from 'lucide-react'
-import { useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import React from 'react'
 
-import { useIsFirstRender } from '@/components/animated-grid'
-import { AnimateHeightItem } from '@/components/animations/animated-container'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogFooter,
-  DialogHeader,
-  DialogTitle,
 } from '@/components/ui/dialog'
 import {
   DropdownMenu,
@@ -49,11 +46,20 @@ import {
 } from '@/components/ui/tooltip'
 import { VideoPreview } from '@/components/video-preview'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
-import { GQLExerciseType } from '@/generated/graphql-client'
+import {
+  GQLExerciseType,
+  GQLUpdateExerciseFormInput,
+  GQLUpdateExerciseSetFormInput,
+  useAddSetExerciseFormMutation,
+  useGetExerciseFormDataQuery,
+  useRemoveExerciseFromDayMutation,
+  useRemoveSetExerciseFormMutation,
+  useUpdateExerciseFormMutation,
+} from '@/generated/graphql-client'
+import { useDebouncedInvalidation } from '@/hooks/use-debounced-invalidation'
+import { useDebouncedMutationWrapper } from '@/hooks/use-debounced-mutation-wrapper'
 import { formatTempoInput, handleTempoKeyDown } from '@/lib/format-tempo'
 import { cn } from '@/lib/utils'
-
-import { TrainingExercise } from '../../../types'
 
 import { InsertionIndicatorBlank } from './insertion-indicators'
 import { EXERCISE_TYPES } from './utils'
@@ -63,222 +69,226 @@ interface SortableExerciseProps {
   dayOfWeek: number
 }
 
-export function SortableExercise({
-  exerciseId,
-  dayOfWeek,
-}: SortableExerciseProps) {
-  const { formData, activeWeek, removeExercise } = useTrainingPlan()
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+export const SortableExercise = React.memo(
+  function SortableExercise({ exerciseId, dayOfWeek }: SortableExerciseProps) {
+    const { formData, activeWeek, removeExercise } = useTrainingPlan()
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
 
-  // Get exercise data directly from context
-  const currentDay = formData.weeks[activeWeek]?.days.find(
-    (day) => day.dayOfWeek === dayOfWeek,
-  )
-  const exercise = currentDay?.exercises.find((ex) => ex.id === exerciseId)
+    // Use ref to persist dropdown state across re-renders
+    const isDropdownOpenRef = useRef(false)
+    const [, forceUpdate] = useState({})
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: exerciseId, // Use exerciseId directly
-    data: {
-      type: 'day-exercise',
-      exercise,
-    },
-  })
+    // Force component update function to trigger re-render when needed
+    const triggerUpdate = useCallback(() => {
+      forceUpdate({})
+    }, [])
 
-  if (!exercise) {
-    console.error('[SortableExercise]: Exercise not found', exerciseId)
-    return null
-  }
+    // Get exercise data directly from context
+    const currentDay = formData.weeks[activeWeek]?.days.find(
+      (day) => day.dayOfWeek === dayOfWeek,
+    )
+    const exercise = currentDay?.exercises.find((ex) => ex.id === exerciseId)
 
-  // Improved styling with better z-index handling
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 1000 : 1,
-  }
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging,
+    } = useSortable({
+      id: exerciseId,
+      data: {
+        type: 'day-exercise',
+        exercise,
+      },
+    })
 
-  const handleRemoveExercise = (
-    e:
-      | React.MouseEvent<HTMLDivElement, MouseEvent>
-      | React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
-    e.stopPropagation()
-
-    // Find the exercise in the current day and remove it
-    const currentWeek = formData.weeks[activeWeek]
-    const day = currentWeek.days.find((d) => d.dayOfWeek === dayOfWeek)
-
-    if (day) {
-      const exerciseIndex = day.exercises.findIndex(
-        (ex) => ex.id === exercise.id,
-      )
-      if (exerciseIndex !== -1) {
-        removeExercise(activeWeek, dayOfWeek, exerciseIndex)
-      } else {
-        console.error('[SortableExercise]: Exercise not found for removal')
-      }
-    } else {
-      console.error('[SortableExercise]: Day not found for exercise removal')
+    // Improved styling with better z-index handling
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      zIndex: isDragging ? 1000 : 1,
     }
-  }
 
-  return (
-    <div className="relative group">
-      <Card
-        ref={setNodeRef}
-        style={style}
-        {...attributes}
-        {...listeners}
-        className={cn(
-          'cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px]',
-          isDragging && 'border-primary/50 !bg-muted/50',
-        )}
-        hoverable
-      >
-        {isDragging && <InsertionIndicatorBlank isActive={true} />}
-        {!isDragging && (
-          <CardContent
-            className="grow p-3 flex flex-col gap-2 justify-between overflow-hidden cursor-pointer"
-            onClick={() => setIsEditDialogOpen(true)}
-          >
-            {exercise.type && (
-              <p className="text-xs  pr-6 text-muted-foreground">
-                {EXERCISE_TYPES[exercise.type]}
-              </p>
-            )}
-            <p className="text-sm font-medium pr-6 mb-4">{exercise.name}</p>
+    // Memoized dropdown change handler
+    const handleDropdownOpenChange = useCallback(
+      (open: boolean) => {
+        isDropdownOpenRef.current = open
+        triggerUpdate() // Force re-render to update dropdown state
+      },
+      [triggerUpdate],
+    )
 
-            <div className="flex items-center gap-2 flex-wrap">
-              {exercise.warmupSets && (
-                <Badge variant="outline">
-                  <FlameIcon />
-                  {exercise.warmupSets} warmups
-                </Badge>
-              )}
-              {exercise.sets.length > 0 && (
-                <Badge variant="outline">
-                  <FlameIcon /> {exercise.sets.length} sets
-                </Badge>
-              )}
-              {exercise.restSeconds && (
-                <Badge variant="outline">
-                  <TimerIcon /> {exercise.restSeconds} rest
-                </Badge>
-              )}
-              {exercise.tempo && (
-                <Badge variant="outline">
-                  <GaugeIcon /> {exercise.tempo}
-                </Badge>
-              )}
-            </div>
-          </CardContent>
-        )}
-      </Card>
-      {!isDragging && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-0 absolute top-1 right-1 z-10 transition-all duration-200 opacity-0 group-hover:opacity-100"
-              iconOnly={<MoreHorizontal />}
-            />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
-              <Pencil className="w-3 h-3" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => handleRemoveExercise(e)}
-              className="cursor-pointer"
+    // Memoized handlers to prevent unnecessary re-renders
+    const handleEditClick = useCallback(() => {
+      setIsEditDialogOpen(true)
+      isDropdownOpenRef.current = false
+      triggerUpdate()
+    }, [triggerUpdate])
+
+    const handleRemoveExercise = useCallback(
+      (
+        e:
+          | React.MouseEvent<HTMLDivElement, MouseEvent>
+          | React.MouseEvent<HTMLButtonElement, MouseEvent>,
+      ) => {
+        e.stopPropagation()
+        if (!exercise) {
+          console.error('[SortableExercise]: Exercise not found', exerciseId)
+          return
+        }
+
+        // Close dropdown immediately
+        isDropdownOpenRef.current = false
+
+        // Find the exercise in the current day and remove it
+        const currentWeek = formData.weeks[activeWeek]
+        const day = currentWeek.days.find((d) => d.dayOfWeek === dayOfWeek)
+
+        if (day) {
+          const exerciseIndex = day.exercises.findIndex(
+            (ex) => ex.id === exercise.id,
+          )
+          if (exerciseIndex !== -1) {
+            removeExercise(activeWeek, dayOfWeek, exerciseIndex)
+          } else {
+            console.error('[SortableExercise]: Exercise not found for removal')
+          }
+        } else {
+          console.error(
+            '[SortableExercise]: Day not found for exercise removal',
+          )
+        }
+      },
+      [
+        activeWeek,
+        dayOfWeek,
+        exerciseId,
+        exercise,
+        formData.weeks,
+        removeExercise,
+      ],
+    )
+
+    if (!exercise) {
+      console.error('[SortableExercise]: Exercise not found', exerciseId)
+      return null
+    }
+
+    return (
+      <div className="relative group">
+        <Card
+          ref={setNodeRef}
+          style={style}
+          {...attributes}
+          {...listeners}
+          className={cn(
+            'cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px]',
+            isDragging && 'border-primary/50 !bg-muted/50',
+          )}
+          hoverable
+        >
+          {isDragging && <InsertionIndicatorBlank isActive={true} />}
+          {!isDragging && (
+            <CardContent
+              className="grow p-3 flex flex-col gap-2 justify-between overflow-hidden cursor-pointer"
+              onClick={() => setIsEditDialogOpen(true)}
             >
-              <Trash2 className="w-3 h-3" />
-              Remove
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent dialogTitle={exercise.name} className="sm:max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>{exercise.name}</DialogTitle>
-          </DialogHeader>
-          <ExerciseDialogContent
-            exerciseId={exerciseId}
-            dayOfWeek={dayOfWeek}
-          />
+              {exercise.type && (
+                <p className="text-xs  pr-6 text-muted-foreground">
+                  {EXERCISE_TYPES[exercise.type]}
+                </p>
+              )}
+              <p className="text-sm font-medium pr-6 mb-4">{exercise.name}</p>
 
-          <DialogFooter className="flex flex-row justify-between gap-2">
-            <Button variant="destructive" onClick={handleRemoveExercise}>
-              <Trash2 className="w-3 h-3" />
-              Remove
-            </Button>
-            <div className="flex gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
+                {exercise.warmupSets && (
+                  <Badge variant="outline">
+                    <FlameIcon />
+                    {exercise.warmupSets} warmups
+                  </Badge>
+                )}
+                {exercise.sets.length > 0 && (
+                  <Badge variant="outline">
+                    <FlameIcon /> {exercise.sets.length} sets
+                  </Badge>
+                )}
+                {exercise.restSeconds && (
+                  <Badge variant="outline">
+                    <TimerIcon /> {exercise.restSeconds} rest
+                  </Badge>
+                )}
+                {exercise.tempo && (
+                  <Badge variant="outline">
+                    <GaugeIcon /> {exercise.tempo}
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          )}
+        </Card>
+        {!isDragging && (
+          <DropdownMenu
+            open={isDropdownOpenRef.current}
+            onOpenChange={handleDropdownOpenChange}
+          >
+            <DropdownMenuTrigger asChild>
               <Button
-                variant="outline"
-                onClick={() => setIsEditDialogOpen(false)}
+                variant="ghost"
+                size="sm"
+                className="p-0 absolute top-1 right-1 z-10 transition-all duration-200 opacity-0 group-hover:opacity-100"
+                iconOnly={<MoreHorizontal />}
+              />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={handleEditClick}>
+                <Pencil className="w-3 h-3" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={handleRemoveExercise}
+                className="cursor-pointer"
               >
-                Cancel
-              </Button>
-              <Button onClick={() => setIsEditDialogOpen(false)}>Save</Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
-}
+                <Trash2 className="w-3 h-3" />
+                Remove
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+        {isEditDialogOpen && (
+          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+            <DialogContent dialogTitle={exercise.name} className="sm:max-w-2xl">
+              <ExerciseDialogContent exerciseId={exerciseId} />
+            </DialogContent>
+          </Dialog>
+        )}
+      </div>
+    )
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.exerciseId === nextProps.exerciseId &&
+      prevProps.dayOfWeek === nextProps.dayOfWeek
+    )
+  },
+)
 
-// Kanban-specific ExerciseSets component that works with specific dayOfWeek
 type KanbanExerciseSetsProps = {
-  exerciseId: string
-  dayOfWeek: number
+  isLoading: boolean
+  sets: GQLUpdateExerciseSetFormInput[]
+  onUpdateSet: (index: number, field: string, value?: number) => Promise<void>
+  onRemoveSet: (index: number) => Promise<void>
+  onAddSet: () => Promise<void>
 }
 
 function KanbanExerciseSets({
-  exerciseId,
-  dayOfWeek,
+  isLoading,
+  onUpdateSet,
+  onRemoveSet,
+  onAddSet,
+  sets,
 }: KanbanExerciseSetsProps) {
-  const isFirstRender = useIsFirstRender()
-  const { addSet, removeSet, updateSet, activeWeek, formData } =
-    useTrainingPlan()
-
-  // Get exercise data directly from context
-  const targetDayIndex = formData.weeks[activeWeek]?.days.findIndex(
-    (day) => day.dayOfWeek === dayOfWeek,
-  )
-  const targetDay = formData.weeks[activeWeek]?.days[targetDayIndex]
-  const exercise = targetDay?.exercises.find((ex) => ex.id === exerciseId)
-  const exerciseIndex =
-    targetDay?.exercises.findIndex((ex) => ex.id === exerciseId) ?? -1
-
-  if (!exercise || exerciseIndex === -1) {
-    console.error('[KanbanExerciseSets]: Exercise not found', exerciseId)
-    return <div>Exercise sets not found</div>
-  }
-
-  const sets = exercise.sets ?? []
-  const onAddSet = () => {
-    addSet(activeWeek, targetDayIndex, exerciseIndex, {
-      order: sets.length + 1,
-    })
-  }
-  const onRemoveSet = (index: number) => {
-    removeSet(activeWeek, targetDayIndex, exerciseIndex, index)
-  }
-  const onUpdateSet = (index: number, field: string, value?: number) => {
-    updateSet(activeWeek, targetDayIndex, exerciseIndex, index, {
-      [field]: value,
-    })
-  }
-
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-end">
@@ -293,210 +303,427 @@ function KanbanExerciseSets({
         </Button>
       </div>
 
-      <AnimatePresence mode="wait">
-        <div className="space-y-2 bg-card px-6 py-2 rounded-md">
-          {sets.map((set, index) => (
-            <AnimateHeightItem
-              id={`set-${set.order}`}
-              key={set.order}
-              className="flex items-center gap-2"
-              isFirstRender={isFirstRender}
+      <div
+        className={cn(
+          'space-y-2 bg-card px-6 py-2 rounded-md',
+          isLoading && 'animate-pulse min-h-[120px]',
+        )}
+      >
+        {sets.map((set, index) => (
+          <div
+            key={set.order + index}
+            className="flex items-center gap-2 group/set"
+          >
+            <div
+              className={cn('font-medium w-8', set.order === 1 && 'mt-[20px]')}
             >
-              <div
-                className={cn(
-                  'font-medium w-8',
-                  set.order === 1 && 'mt-[20px]',
+              #{set.order}
+            </div>
+            <div className="flex items-center gap-4">
+              <div>
+                {set.order === 1 && (
+                  <Label htmlFor={`reps-${set.order}`} className="text-sm mb-1">
+                    Reps
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <InfoIcon className="size-3" />
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>
+                          Minimum reps are required. If You don't want to
+                          specify range of reps You can leave Max Reps blank.
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </Label>
                 )}
-              >
-                {set.order}
-              </div>
-              <div className="flex items-center gap-4">
-                <div>
-                  {set.order === 1 && (
-                    <Label
-                      htmlFor={`reps-${set.order}`}
-                      className="text-sm mb-1"
-                    >
-                      Reps
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <InfoIcon className="size-3" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>
-                            Minimum reps are required. If You don't want to
-                            specify range of reps You can leave Max Reps blank.
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </Label>
-                  )}
-                  <div className="flex items-center gap-1">
-                    <Input
-                      id={`min-reps-${set.order}`}
-                      placeholder="Min*"
-                      type="number"
-                      min="1"
-                      value={set.minReps || ''}
-                      onChange={(e) =>
-                        onUpdateSet(
-                          index,
-                          'minReps',
-                          e.target.value === ''
-                            ? undefined
-                            : Number.parseInt(e.target.value),
-                        )
-                      }
-                      className="max-w-20"
-                    />
-                    -
-                    <Input
-                      id={`max-reps-${set.order}`}
-                      type="number"
-                      placeholder="Max"
-                      min="1"
-                      error={
-                        set.minReps && set.maxReps && set.minReps > set.maxReps
-                          ? 'Min reps must be less than max reps'
-                          : undefined
-                      }
-                      value={set.maxReps || ''}
-                      onChange={(e) =>
-                        onUpdateSet(
-                          index,
-                          'maxReps',
-                          e.target.value === ''
-                            ? undefined
-                            : Number.parseInt(e.target.value),
-                        )
-                      }
-                      className="max-w-20"
-                    />
-                  </div>
-                </div>
-                <div>
-                  {set.order === 1 && (
-                    <Label
-                      htmlFor={`weight-${set.order}`}
-                      className="text-sm mb-1"
-                    >
-                      Weight
-                    </Label>
-                  )}
+                <div className="flex items-center gap-1">
                   <Input
-                    id={`weight-${set.order}`}
-                    type="number"
-                    min="0"
-                    step="2.5"
-                    value={set.weight ?? ''}
-                    onChange={(e) =>
-                      onUpdateSet(
-                        index,
-                        'weight',
-                        e.target.value === ''
-                          ? undefined
-                          : Number.parseFloat(e.target.value),
-                      )
-                    }
-                    className="max-w-32"
-                  />
-                </div>
-                <div>
-                  {set.order === 1 && (
-                    <Label
-                      htmlFor={`rpe-${set.order}`}
-                      className="text-sm mb-1"
-                    >
-                      RPE
-                    </Label>
-                  )}
-                  <Input
-                    id={`rpe-${set.order}`}
+                    id={`min-reps-${set.order}`}
+                    placeholder="Min*"
+                    variant="ghost"
                     type="number"
                     min="1"
-                    max="10"
-                    step="1"
-                    value={set.rpe ?? ''}
+                    value={set.minReps || ''}
                     onChange={(e) =>
                       onUpdateSet(
                         index,
-                        'rpe',
+                        'minReps',
                         e.target.value === ''
                           ? undefined
-                          : Number.parseFloat(e.target.value),
+                          : Number.parseInt(e.target.value),
+                      )
+                    }
+                    className="max-w-20"
+                  />
+                  -
+                  <Input
+                    id={`max-reps-${set.order}`}
+                    variant="ghost"
+                    type="number"
+                    placeholder="Max"
+                    min="1"
+                    error={
+                      set.minReps && set.maxReps && set.minReps > set.maxReps
+                        ? 'Min reps must be less than max reps'
+                        : undefined
+                    }
+                    value={set.maxReps || ''}
+                    onChange={(e) =>
+                      onUpdateSet(
+                        index,
+                        'maxReps',
+                        e.target.value === ''
+                          ? undefined
+                          : Number.parseInt(e.target.value),
                       )
                     }
                     className="max-w-20"
                   />
                 </div>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon-md"
-                className="self-end"
-                onClick={() => onRemoveSet(index)}
-                disabled={sets.length <= 1}
-                iconOnly={<X />}
-              />
-            </AnimateHeightItem>
-          ))}
-        </div>
-      </AnimatePresence>
+              <div>
+                {set.order === 1 && (
+                  <Label
+                    htmlFor={`weight-${set.order}`}
+                    className="text-sm mb-1"
+                  >
+                    Weight
+                  </Label>
+                )}
+                <Input
+                  id={`weight-${set.order}`}
+                  variant="ghost"
+                  type="number"
+                  min="0"
+                  step="2.5"
+                  value={set.weight ?? ''}
+                  onChange={(e) =>
+                    onUpdateSet(
+                      index,
+                      'weight',
+                      e.target.value === ''
+                        ? undefined
+                        : Number.parseFloat(e.target.value),
+                    )
+                  }
+                  className="max-w-32"
+                />
+              </div>
+              <div>
+                {set.order === 1 && (
+                  <Label htmlFor={`rpe-${set.order}`} className="text-sm mb-1">
+                    RPE
+                  </Label>
+                )}
+                <Input
+                  id={`rpe-${set.order}`}
+                  variant="ghost"
+                  type="number"
+                  min="1"
+                  max="10"
+                  step="1"
+                  value={set.rpe ?? ''}
+                  onChange={(e) =>
+                    onUpdateSet(
+                      index,
+                      'rpe',
+                      e.target.value === ''
+                        ? undefined
+                        : Number.parseFloat(e.target.value),
+                    )
+                  }
+                  className="max-w-20"
+                />
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-md"
+              className={cn(
+                '!opacity-0 group-hover/set:!opacity-100 self-end',
+                (!set.id || sets.length <= 1) &&
+                  '!opacity-0 group-hover/set:!opacity-0',
+              )}
+              onClick={() => onRemoveSet(index)}
+              disabled={sets.length <= 1 || !set.id}
+              iconOnly={<X />}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
 
 type ExerciseDialogContentProps = {
   exerciseId: string
-  dayOfWeek: number
 }
 
-export function ExerciseDialogContent({
-  exerciseId,
-  dayOfWeek,
-}: ExerciseDialogContentProps) {
-  const { activeWeek, updateExercise, formData } = useTrainingPlan()
-
-  // Get exercise data directly from context
-  const currentDay = formData.weeks[activeWeek]?.days.find(
-    (day) => day.dayOfWeek === dayOfWeek,
+function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
+  const { data, error, isLoading } = useGetExerciseFormDataQuery(
+    { exerciseId },
+    {
+      enabled: !!exerciseId,
+      staleTime: 30 * 1000,
+    },
   )
-  const exercise = currentDay?.exercises.find((ex) => ex.id === exerciseId)
-  const exerciseIndex =
-    currentDay?.exercises.findIndex((ex) => ex.id === exerciseId) ?? -1
 
-  // Early return if exercise not found
-  if (!exercise) {
-    console.error('[ExerciseDialogContent]: Exercise not found', exerciseId)
-    return <div>Exercise not found</div>
-  }
+  const debouncedBoardInvalidation = useDebouncedInvalidation({
+    queryKeys: ['GetTemplateTrainingPlanById'],
+    delay: 100,
+  })
 
-  // Helper function to update exercise with proper error handling
-  const handleUpdateExercise = (updates: Partial<TrainingExercise>) => {
-    updateExercise(activeWeek, dayOfWeek, exerciseIndex, {
-      ...exercise,
-      ...updates,
+  const { mutateAsync: removeExercise, isPending: isRemovingExercise } =
+    useRemoveExerciseFromDayMutation({
+      onSuccess: () => {
+        debouncedBoardInvalidation()
+      },
     })
+  const { mutateAsync: updateExerciseForm } = useUpdateExerciseFormMutation()
+  const { mutateAsync: addSetExerciseForm } = useAddSetExerciseFormMutation()
+  const { mutateAsync: removeSetExerciseForm } =
+    useRemoveSetExerciseFormMutation()
+  const debouncedInvalidateQueries = useDebouncedInvalidation({
+    queryKeys: ['GetTemplateTrainingPlanById', 'GetExerciseFormData'],
+    delay: 1000,
+  })
+  const initialDataLoaded = useRef(false)
+
+  const [localData, setLocalData] = useState<
+    Omit<GQLUpdateExerciseFormInput, 'exerciseId'>
+  >({
+    name: '',
+    instructions: '',
+    additionalInstructions: '',
+    restSeconds: undefined,
+    warmupSets: undefined,
+    tempo: '',
+    sets: [],
+  })
+
+  useEffect(() => {
+    if (data?.exercise && !initialDataLoaded.current) {
+      setLocalData({
+        name: data.exercise.name || '',
+        type: data.exercise.type || null,
+        instructions: data.exercise.instructions || '',
+        additionalInstructions: data.exercise.additionalInstructions || '',
+        restSeconds: data.exercise.restSeconds || undefined,
+        warmupSets: data.exercise.warmupSets || undefined,
+        tempo: data.exercise.tempo || '',
+        sets: data.exercise.sets.map((set) => ({
+          id: set.id,
+          order: set.order,
+          minReps: set.minReps || undefined,
+          maxReps: set.maxReps || undefined,
+          weight: set.weight || undefined,
+          rpe: set.rpe || undefined,
+        })),
+      })
+
+      initialDataLoaded.current = true
+    }
+  }, [data?.exercise])
+
+  const exercise = data?.exercise
+
+  const debouncedUpdateExerciseForm = useDebouncedMutationWrapper(
+    updateExerciseForm,
+    {
+      delay: 700,
+      onSuccess: () => debouncedInvalidateQueries(),
+      onError: (error) => console.error('Update failed:', error),
+    },
+  )
+
+  const updateExercise = useCallback(
+    async (input: Omit<GQLUpdateExerciseFormInput, 'exerciseId'>) => {
+      const beforeExercise = {
+        ...exercise,
+      }
+
+      const updatedExercise: Omit<GQLUpdateExerciseFormInput, 'exerciseId'> = {
+        ...localData,
+        name: input.name,
+        type: input.type,
+        instructions: input.instructions,
+        additionalInstructions: input.additionalInstructions,
+        restSeconds: input.restSeconds ? Number(input.restSeconds) : undefined,
+        warmupSets: input.warmupSets ? Number(input.warmupSets) : undefined,
+        tempo: input.tempo,
+        sets: input.sets,
+      }
+
+      try {
+        setLocalData(updatedExercise)
+
+        await debouncedUpdateExerciseForm(
+          {
+            input: {
+              exerciseId,
+              ...updatedExercise,
+            },
+          },
+          {
+            onError: () => {
+              console.error('[Update exercise]: Failed to update exercise', {
+                exerciseId,
+              })
+              setLocalData(beforeExercise)
+            },
+          },
+        )
+      } catch (error) {
+        console.error('Day update failed:', error)
+        setLocalData(beforeExercise)
+      }
+    },
+    [debouncedUpdateExerciseForm, exerciseId, exercise, localData],
+  )
+
+  const addSet = useCallback(
+    async (input: Omit<GQLUpdateExerciseSetFormInput, 'exerciseId'>) => {
+      const lastSetData = localData.sets?.[localData.sets.length - 1]
+      const addedSet: Omit<GQLUpdateExerciseSetFormInput, 'exerciseId'> = {
+        minReps: input.minReps ? Number(input.minReps) : lastSetData?.minReps,
+        maxReps: input.maxReps ? Number(input.maxReps) : lastSetData?.maxReps,
+        weight: input.weight ? Number(input.weight) : lastSetData?.weight,
+        rpe: input.rpe ? Number(input.rpe) : lastSetData?.rpe,
+        order: localData.sets?.length ? localData.sets.length + 1 : 1,
+      }
+
+      try {
+        setLocalData({
+          ...localData,
+          sets: [...(localData.sets || []), addedSet],
+        })
+
+        await addSetExerciseForm(
+          {
+            input: {
+              exerciseId,
+              set: {
+                maxReps: addedSet.maxReps,
+                minReps: addedSet.minReps,
+                weight: addedSet.weight,
+                rpe: addedSet.rpe,
+              },
+            },
+          },
+          {
+            onSuccess: (data) => {
+              debouncedInvalidateQueries()
+              setLocalData({
+                ...localData,
+                sets: [
+                  ...(localData.sets || []),
+                  { ...addedSet, id: data.addSetExerciseForm.id },
+                ],
+              })
+            },
+            onError: () => {
+              console.error('[Add set]: Failed to add set', {
+                exerciseId,
+              })
+              setLocalData({
+                ...localData,
+                sets: localData.sets?.filter((set) => set.id !== addedSet.id),
+              })
+            },
+          },
+        )
+      } catch (error) {
+        console.error('Day update failed:', error)
+        setLocalData({
+          ...localData,
+          sets: localData.sets?.filter((set) => set.id !== addedSet.id),
+        })
+      }
+    },
+    [exerciseId, localData, addSetExerciseForm, debouncedInvalidateQueries],
+  )
+
+  const removeSet = useCallback(
+    async (setId: string) => {
+      const beforeSets = [...(localData.sets || [])]
+
+      try {
+        setLocalData({
+          ...localData,
+          sets: localData.sets?.filter((set) => set.id !== setId),
+        })
+
+        await removeSetExerciseForm(
+          {
+            setId,
+          },
+          {
+            onSuccess: () => {
+              debouncedInvalidateQueries()
+            },
+            onError: () => {
+              console.error('[Remove set]: Failed to remove set', {
+                exerciseId,
+              })
+              setLocalData({
+                ...localData,
+                sets: beforeSets,
+              })
+            },
+          },
+        )
+      } catch (error) {
+        console.error('Day update failed:', error)
+        setLocalData({
+          ...localData,
+          sets: beforeSets,
+        })
+      }
+    },
+    [removeSetExerciseForm, localData, exerciseId, debouncedInvalidateQueries],
+  )
+
+  if (error) {
+    return <div>Failed to load exercise</div>
   }
 
   return (
     <div className="gap-2">
       <div className="space-y-8">
+        <div className="flex flex-col gap-1">
+          <Label htmlFor="exerciseName" className="text-sm">
+            Exercise name
+          </Label>
+          <Input
+            id="exerciseName"
+            variant="ghost"
+            value={localData.name ?? ''}
+            onChange={(e) =>
+              updateExercise({
+                ...localData,
+                name: e.target.value,
+              })
+            }
+          />
+        </div>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm items-end">
           <div className="flex flex-col gap-1">
             <Label htmlFor="exerciseType" className="text-sm">
               Exercise type
             </Label>
             <Select
-              value={exercise.type ?? ''}
+              value={localData.type ?? ''}
               onValueChange={(value) =>
-                handleUpdateExercise({
+                updateExercise({
+                  ...localData,
                   type: value === 'none' ? null : (value as GQLExerciseType),
                 })
               }
             >
-              <SelectTrigger>
+              <SelectTrigger variant="ghost">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
@@ -510,17 +737,19 @@ export function ExerciseDialogContent({
             </Select>
           </div>
 
-          {exercise.type !== GQLExerciseType.Cardio && (
+          {exercise?.type !== GQLExerciseType.Cardio && (
             <Input
               id="restSeconds"
               label="Rest (s)"
               type="number"
               size="md"
-              value={exercise.restSeconds ?? ''}
+              variant="ghost"
+              value={localData.restSeconds ?? ''}
               min="0"
               step="15"
               onChange={(e) =>
-                handleUpdateExercise({
+                updateExercise({
+                  ...localData,
                   restSeconds:
                     e.target.value === '' ? undefined : Number(e.target.value),
                 })
@@ -530,17 +759,19 @@ export function ExerciseDialogContent({
             />
           )}
 
-          {exercise.type !== GQLExerciseType.Cardio && (
+          {exercise?.type !== GQLExerciseType.Cardio && (
             <Input
               id="warmup"
               label="Warmup sets"
               size="md"
+              variant="ghost"
               type="number"
               min="0"
               step="1"
-              value={exercise.warmupSets ?? ''}
+              value={localData.warmupSets ?? ''}
               onChange={(e) => {
-                handleUpdateExercise({
+                updateExercise({
+                  ...localData,
                   warmupSets:
                     e.target.value === '' ? undefined : Number(e.target.value),
                 })
@@ -550,17 +781,19 @@ export function ExerciseDialogContent({
             />
           )}
 
-          {exercise.type !== GQLExerciseType.Cardio && (
+          {exercise?.type !== GQLExerciseType.Cardio && (
             <Input
               id="tempo"
               label="Tempo"
               size="md"
+              variant="ghost"
               pattern="[0-9]*"
               placeholder="3-2-3"
-              value={exercise.tempo ?? ''}
+              value={localData.tempo ?? ''}
               onChange={(e) => {
                 const formattedValue = formatTempoInput(e)
-                handleUpdateExercise({
+                updateExercise({
+                  ...localData,
                   tempo: formattedValue,
                 })
               }}
@@ -571,14 +804,39 @@ export function ExerciseDialogContent({
           )}
 
           <div className="flex gap-1">
-            {exercise.videoUrl && (
+            {exercise?.videoUrl && (
               <VideoPreview url={exercise.videoUrl} variant="secondary" />
             )}
           </div>
         </div>
         <div className="w-full grid grid-cols-1 @4xl/section:grid-cols-[1fr_400px] gap-8">
-          {exercise.type !== GQLExerciseType.Cardio && (
-            <KanbanExerciseSets exerciseId={exerciseId} dayOfWeek={dayOfWeek} />
+          {exercise?.type !== GQLExerciseType.Cardio && (
+            <KanbanExerciseSets
+              onUpdateSet={(index, field, value) => {
+                return updateExercise({
+                  ...localData,
+                  sets: localData.sets?.map((set, i) =>
+                    i === index ? { ...set, [field]: value } : set,
+                  ),
+                })
+              }}
+              onRemoveSet={(index) =>
+                localData.sets?.[index].id
+                  ? removeSet(localData.sets[index].id)
+                  : Promise.resolve()
+              }
+              onAddSet={() =>
+                addSet({
+                  minReps: undefined,
+                  maxReps: undefined,
+                  weight: undefined,
+                  rpe: undefined,
+                  order: localData.sets?.length ? localData.sets.length + 1 : 1,
+                })
+              }
+              isLoading={isLoading}
+              sets={localData.sets || []}
+            />
           )}
           <div className="flex flex-col gap-8">
             <div className="flex flex-col gap-2">
@@ -590,10 +848,12 @@ export function ExerciseDialogContent({
               </Label>
               <Textarea
                 id="instructions"
-                className="text-sm text-foreground bg-muted p-2 rounded-md h-full min-h-24 border-none"
-                value={exercise.instructions ?? ''}
+                className="min-h-24"
+                variant="ghost"
+                value={localData.instructions ?? ''}
                 onChange={(e) =>
-                  handleUpdateExercise({
+                  updateExercise({
+                    ...localData,
                     instructions: e.target.value,
                   })
                 }
@@ -611,10 +871,13 @@ export function ExerciseDialogContent({
               </Label>
               <Textarea
                 id="additionalInstructions"
-                className="text-sm text-foreground bg-muted p-2 rounded-md h-full min-h-12 border-none"
-                value={exercise.additionalInstructions ?? ''}
+                rows={3}
+                variant="ghost"
+                className="min-h-24"
+                value={localData.additionalInstructions ?? ''}
                 onChange={(e) =>
-                  handleUpdateExercise({
+                  updateExercise({
+                    ...localData,
                     additionalInstructions: e.target.value,
                   })
                 }
@@ -623,6 +886,21 @@ export function ExerciseDialogContent({
           </div>
         </div>
       </div>
+      <DialogFooter className="flex flex-row justify-between mt-4">
+        <Button
+          variant="destructive"
+          onClick={() => removeExercise({ exerciseId })}
+          disabled={isRemovingExercise}
+          loading={isRemovingExercise}
+        >
+          Remove exercise
+        </Button>
+        <DialogClose>
+          <Button variant="outline" disabled={isRemovingExercise}>
+            Close
+          </Button>
+        </DialogClose>
+      </DialogFooter>
     </div>
   )
 }

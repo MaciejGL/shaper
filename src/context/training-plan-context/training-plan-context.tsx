@@ -41,7 +41,7 @@ const initialFormData: TrainingPlanFormData = {
       days: Array.from({ length: 7 }, (_, i) => ({
         id: 'cmaod14o30004uhht6c7ldfx2' + i,
         dayOfWeek: i,
-        isRestDay: [0, 6].includes(i),
+        isRestDay: false,
         exercises: [],
       })),
     },

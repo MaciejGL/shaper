@@ -42,7 +42,7 @@ export function FormActions({
 
   return (
     <div>
-      <div className="flex justify-end gap-2 items-center">
+      <div className="flex justify-end gap-4 items-end">
         <AnimatePresence>
           {isSavingChanges && (
             <motion.div
@@ -50,11 +50,10 @@ export function FormActions({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 0, scale: 0.9 }}
               transition={{ duration: 0.2 }}
+              className="flex items-center gap-4"
             >
-              <p className="text-sm text-muted-foreground">
-                <Loader2 className="size-4 mr-2 animate-spin" /> Saving
-                changes...
-              </p>
+              <Loader2 className="size-4 animate-spin" />
+              <p className="text-sm text-muted-foreground">Saving changes...</p>
             </motion.div>
           )}
         </AnimatePresence>
