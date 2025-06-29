@@ -24,6 +24,7 @@ import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { GQLDifficulty } from '@/generated/graphql-client'
+import { useAutoSyncedInput } from '@/hooks/use-auto-synced-input'
 
 import type { TrainingPlanFormData } from '../../../types'
 
@@ -71,6 +72,19 @@ function PlanDetailsHeader({
   data,
   updateData,
 }: Pick<PlanDetailsProps, 'data' | 'updateData'>) {
+  // Auto-synced inputs that protect user typing
+  const titleInput = useAutoSyncedInput(
+    data.title,
+    (value) => updateData({ ...data, title: value }),
+    500, // 500ms debounce for title
+  )
+
+  const descriptionInput = useAutoSyncedInput(
+    data.description ?? '',
+    (value) => updateData({ ...data, description: value }),
+    700, // 700ms debounce for description (longer text)
+  )
+
   return (
     <Card>
       <CardHeader>
@@ -89,8 +103,10 @@ function PlanDetailsHeader({
             <Input
               id="title"
               placeholder="e.g., Upper Body Strength Program"
-              value={data.title}
-              onChange={(e) => updateData({ ...data, title: e.target.value })}
+              value={titleInput.value}
+              onChange={(e) => titleInput.onChange(e.target.value)}
+              onFocus={titleInput.onFocus}
+              onBlur={titleInput.onBlur}
               className="w-full"
             />
           </div>
@@ -121,10 +137,10 @@ function PlanDetailsHeader({
           <Textarea
             id="description"
             placeholder="Describe the goals, target audience, and key features of this training plan..."
-            value={data.description ?? ''}
-            onChange={(e) =>
-              updateData({ ...data, description: e.target.value })
-            }
+            value={descriptionInput.value}
+            onChange={(e) => descriptionInput.onChange(e.target.value)}
+            onFocus={descriptionInput.onFocus}
+            onBlur={descriptionInput.onBlur}
             className="min-h-[120px] resize-none"
           />
           <p className="text-xs text-muted-foreground">

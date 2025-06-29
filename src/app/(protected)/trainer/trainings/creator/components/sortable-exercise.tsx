@@ -2,9 +2,11 @@
 
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { useIsMutating } from '@tanstack/react-query'
 import {
   FlameIcon,
   GaugeIcon,
+  Loader2,
   MoreHorizontal,
   Pencil,
   TimerIcon,
@@ -196,22 +198,27 @@ export const SortableExercise = React.memo(
               }}
             >
               {exercise.type && (
-                <p className="text-xs  pr-6 text-muted-foreground">
+                <Badge variant="secondary">
                   {EXERCISE_TYPES[exercise.type]}
-                </p>
+                </Badge>
               )}
-              <p className="text-sm font-medium pr-6 mb-4">{exercise.name}</p>
+              <p className="text-md font-medium pr-4">{exercise.name}</p>
+              <p className="text-sm text-muted-foreground">
+                {exercise.additionalInstructions}
+              </p>
 
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap mt-8">
+                {exercise.sets.length > 0 && (
+                  <Badge variant="outline">
+                    <FlameIcon /> {exercise.sets.length} set
+                    {exercise.sets.length === 1 ? '' : 's'}
+                  </Badge>
+                )}
                 {exercise.warmupSets && (
                   <Badge variant="outline">
                     <FlameIcon />
-                    {exercise.warmupSets} warmups
-                  </Badge>
-                )}
-                {exercise.sets.length > 0 && (
-                  <Badge variant="outline">
-                    <FlameIcon /> {exercise.sets.length} sets
+                    {exercise.warmupSets} warmup
+                    {exercise.warmupSets === 1 ? '' : 's'}
                   </Badge>
                 )}
                 {exercise.restSeconds && (
@@ -685,6 +692,8 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
     [removeSetExerciseForm, localData, exerciseId, debouncedInvalidateQueries],
   )
 
+  const hasPendingMutations = useIsMutating() > 0
+
   if (error) {
     return <div>Failed to load exercise</div>
   }
@@ -692,7 +701,10 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
   return (
     <div className="gap-2">
       <DialogHeader className="mb-8">
-        <DialogTitle>Edit exercise</DialogTitle>
+        <DialogTitle className="flex flex-row items-center gap-2">
+          Edit exercise{' '}
+          {hasPendingMutations && <Loader2 className="w-4 h-4 animate-spin" />}
+        </DialogTitle>
         <DialogDescription>
           Edit the exercise details and sets.
         </DialogDescription>
@@ -895,14 +907,17 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
         <Button
           variant="destructive"
           onClick={() => removeExercise({ exerciseId })}
-          disabled={isRemovingExercise}
+          disabled={isRemovingExercise || hasPendingMutations}
           loading={isRemovingExercise}
         >
           Remove exercise
         </Button>
         <DialogClose asChild>
-          <Button variant="outline" disabled={isRemovingExercise}>
-            Close
+          <Button
+            variant="outline"
+            disabled={isRemovingExercise || hasPendingMutations}
+          >
+            Done
           </Button>
         </DialogClose>
       </DialogFooter>

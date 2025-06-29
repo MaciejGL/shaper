@@ -14,6 +14,10 @@ const badgeVariants = cva(
         secondary: cn(
           'border-transparent bg-muted dark:bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90',
         ),
+        info: cn(
+          'border-transparent bg-blue-500/70 text-black [a&]:hover:bg-blue-500/90 focus-visible:ring-blue-500/20 dark:focus-visible:ring-blue-500/40 dark:bg-blue-500/60',
+          'dark:bg-blue-500/60',
+        ),
 
         warning: cn(
           ' border-transparent bg-amber-500/70 text-black [a&]:hover:bg-amber-500/90 focus-visible:ring-amber-500/20 dark:focus-visible:ring-amber-500/40 dark:bg-amber-500/60',

@@ -218,6 +218,9 @@ export async function getMyPlansOverview(context: GQLContext) {
   }
   const plans = await prisma.trainingPlan.findMany({
     where: { assignedToId: user.user.id },
+    orderBy: {
+      updatedAt: 'desc',
+    },
     include: {
       createdBy: {
         include: {

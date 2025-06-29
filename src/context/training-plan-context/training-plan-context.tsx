@@ -7,7 +7,6 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from 'react'
 
@@ -91,16 +90,16 @@ export function TrainingPlanProvider({
         }),
       },
     )
-  const initialDataLoaded = useRef(false)
 
   // ## Set initial data
   useEffect(() => {
-    if (templateTrainingPlan && !initialDataLoaded.current) {
+    if (templateTrainingPlan) {
       setDetails(templateTrainingPlan.details)
       setWeeks(templateTrainingPlan.weeks as TrainingPlanFormData['weeks'])
-      initialDataLoaded.current = true
+      // Reset dirty state when we receive fresh data from server
+      setIsDirty(false)
     }
-  }, [templateTrainingPlan, details, weeks])
+  }, [templateTrainingPlan]) // Simple dependency array - just templateTrainingPlan
 
   // ## Mutations
   const {
