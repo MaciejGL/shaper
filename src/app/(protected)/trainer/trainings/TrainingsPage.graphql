@@ -102,6 +102,18 @@ mutation UpdateTrainingWeekDetails($input: UpdateTrainingWeekDetailsInput!) {
   updateTrainingWeekDetails(input: $input)
 }
 
+mutation DuplicateTrainingWeek($input: DuplicateTrainingWeekInput!) {
+  duplicateTrainingWeek(input: $input)
+}
+
+mutation RemoveTrainingWeek($weekId: ID!) {
+  removeTrainingWeek(weekId: $weekId)
+}
+
+mutation AddTrainingWeek($input: AddTrainingWeekInput!) {
+  addTrainingWeek(input: $input)
+}
+
 mutation UpdateTrainingDayData($input: UpdateTrainingDayDataInput!) {
   updateTrainingDayData(input: $input)
 }

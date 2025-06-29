@@ -12,6 +12,7 @@ import {
 } from 'react'
 
 import { useGetTemplateTrainingPlanByIdQuery } from '@/generated/graphql-client'
+import { useUnsavedChangesWarning } from '@/hooks/use-unsaved-changes-warning'
 
 import type { TrainingPlanFormData } from '../../app/(protected)/trainer/trainings/creator-old/components/types'
 
@@ -113,12 +114,13 @@ export function TrainingPlanProvider({
   } = useTrainingPlanMutations()
 
   // ## Granular update functions (with debounced auto-save)
-  const {
-    updateWeek,
-    removeWeek: _removeWeek,
-    addWeek,
-    cloneWeek: _cloneWeek,
-  } = useWeekHandlers(weeks, setWeeks, setIsDirty, setActiveWeek)
+  const { updateWeek, removeWeek, addWeek, cloneWeek } = useWeekHandlers({
+    trainingId,
+    weeks,
+    setWeeks,
+    setIsDirty,
+    setActiveWeek,
+  })
   const { updateDetails } = useDetailsHandlers({
     trainingId,
     details,
@@ -128,18 +130,11 @@ export function TrainingPlanProvider({
   const { updateDay } = useDayHandlers(weeks, setWeeks, setIsDirty)
   const { updateExercise, addExercise, removeExercise, moveExercise } =
     useExerciseHandlers({ setWeeks, setIsDirty, weeks })
-  const {
-    updateSet: _updateSet,
-    addSet: _addSet,
-    removeSet: _removeSet,
-  } = useSetHandlers(setWeeks, setIsDirty)
-
-  // Wrap all update methods with debounced auto-save
-  const removeWeek = _removeWeek
-  const cloneWeek = _cloneWeek
-  const updateSet = _updateSet
-  const addSet = _addSet
-  const removeSet = _removeSet
+  const { updateSet, addSet, removeSet } = useSetHandlers(
+    setWeeks,
+    setIsDirty,
+    weeks,
+  )
 
   // Memoize handlers to prevent unnecessary re-renders
   const clearDraft = useCallback(() => {
@@ -151,17 +146,13 @@ export function TrainingPlanProvider({
     setIsDirty(false)
   }, [templateTrainingPlan])
 
-  // ## Auto-Save System
-  // Two-tier approach:
-  // 1. Debounced auto-save (5s after last update operation)
-  // 2. Immediate save on navigation/page close for data protection
-  // useAutoSaveOnNavigation({
-  //   isDirty,
-  //   onSave: autoSave,
-  //   isSaving: isUpdating,
-  //   enabled: !!trainingId,
-  //   autoSaveDelay: 0, // Immediate save on navigation
-  // })
+  // ## Unsaved Changes Protection
+  // Warn user when trying to close page with unsaved changes or any pending operations
+  // TanStack Query automatically detects all pending mutations
+  useUnsavedChangesWarning({
+    isDirty,
+    enabled: !!trainingId, // Only enable for existing training plans
+  })
 
   const handleSubmit = useCallback(async () => {
     const currentTrainingId = trainingId
@@ -225,6 +216,7 @@ export function TrainingPlanProvider({
       // Loading states
       isLoadingInitialData: isLoadingInitialData,
       isPending,
+      isUpdating: false, // TODO: Track update mutation status
       isDeleting,
       isDuplicating,
 

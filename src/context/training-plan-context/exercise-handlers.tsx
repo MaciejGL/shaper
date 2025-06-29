@@ -1,4 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { isNil } from 'lodash'
 import { useCallback } from 'react'
 
@@ -12,6 +11,8 @@ import {
   useRemoveExerciseFromDayMutation,
   useUpdateTrainingExerciseMutation,
 } from '@/generated/graphql-client'
+import { useDebouncedInvalidation } from '@/hooks/use-debounced-invalidation'
+import { useDebouncedMutationWrapper } from '@/hooks/use-debounced-mutation-wrapper'
 import { createId } from '@/lib/create-id'
 
 import { PartialTrainingPlanFormDataExercise } from './types'
@@ -25,9 +26,30 @@ export const useExerciseHandlers = ({
   setIsDirty: React.Dispatch<React.SetStateAction<boolean>>
   weeks: TrainingPlanFormData['weeks']
 }) => {
-  const queryClient = useQueryClient()
+  const debouncedInvalidateQueries = useDebouncedInvalidation({
+    queryKey: ['GetTemplateTrainingPlanById'],
+    delay: 1000,
+  })
   const { mutateAsync: updateExerciseMutation } =
     useUpdateTrainingExerciseMutation()
+
+  // Wrap the exercise update mutation with debouncing for text inputs
+  const debouncedUpdateExerciseMutation = useDebouncedMutationWrapper(
+    updateExerciseMutation,
+    {
+      delay: 700, // 700ms delay for text input debouncing
+      onSuccess: () => {
+        setIsDirty(false)
+        debouncedInvalidateQueries()
+      },
+      onError: (error) => {
+        console.error('[Update exercise]: Failed to update exercise', {
+          error,
+        })
+        // We'll handle rollback in the individual call
+      },
+    },
+  )
   const updateExercise = useCallback(
     (
       weekIndex: number,
@@ -76,6 +98,7 @@ export const useExerciseHandlers = ({
         })
         return
       }
+      // Update local state immediately for responsive UI
       setWeeks((prev) => {
         const newWeeks = [...prev]
         const newDays = [...newWeeks[weekIndex].days]
@@ -89,7 +112,9 @@ export const useExerciseHandlers = ({
         return newWeeks
       })
       setIsDirty(true)
-      updateExerciseMutation(
+
+      // Use debounced mutation for API call
+      debouncedUpdateExerciseMutation(
         {
           input: {
             id: currentExercise.id,
@@ -107,11 +132,7 @@ export const useExerciseHandlers = ({
           },
         },
         {
-          onSuccess: () => {
-            queryClient.invalidateQueries({
-              queryKey: ['GetTemplateTrainingPlanById'],
-            })
-          },
+          // Handle error and rollback optimistic update
           onError: () => {
             console.error('[Update exercise]: Failed to update exercise', {
               weekIndex,
@@ -124,7 +145,7 @@ export const useExerciseHandlers = ({
         },
       )
     },
-    [setWeeks, setIsDirty, updateExerciseMutation, weeks, queryClient],
+    [setWeeks, setIsDirty, debouncedUpdateExerciseMutation, weeks],
   )
 
   const { mutateAsync: addExerciseToDayMutation } =
@@ -211,9 +232,7 @@ export const useExerciseHandlers = ({
         {
           onSuccess: () => {
             setIsDirty(false)
-            queryClient.invalidateQueries({
-              queryKey: ['GetTemplateTrainingPlanById'],
-            })
+            debouncedInvalidateQueries()
           },
           onError: () => {
             console.error('[Add exercise]: Failed to add exercise', {
@@ -226,7 +245,13 @@ export const useExerciseHandlers = ({
         },
       )
     },
-    [setWeeks, setIsDirty, addExerciseToDayMutation, weeks, queryClient],
+    [
+      setWeeks,
+      setIsDirty,
+      addExerciseToDayMutation,
+      weeks,
+      debouncedInvalidateQueries,
+    ],
   )
 
   const { mutateAsync: removeExerciseFromDayMutation } =
@@ -282,9 +307,7 @@ export const useExerciseHandlers = ({
         {
           onSuccess: () => {
             setIsDirty(false)
-            queryClient.invalidateQueries({
-              queryKey: ['GetTemplateTrainingPlanById'],
-            })
+            debouncedInvalidateQueries()
           },
           onError: () => {
             console.error('[Remove exercise]: Failed to remove exercise', {
@@ -297,7 +320,13 @@ export const useExerciseHandlers = ({
         },
       )
     },
-    [setWeeks, setIsDirty, removeExerciseFromDayMutation, weeks, queryClient],
+    [
+      setWeeks,
+      setIsDirty,
+      removeExerciseFromDayMutation,
+      weeks,
+      debouncedInvalidateQueries,
+    ],
   )
 
   const { mutateAsync: moveExerciseMutation } = useMoveExerciseMutation()
@@ -402,9 +431,7 @@ export const useExerciseHandlers = ({
           {
             onSuccess: () => {
               setIsDirty(false)
-              queryClient.invalidateQueries({
-                queryKey: ['GetTemplateTrainingPlanById'],
-              })
+              debouncedInvalidateQueries()
             },
             onError: (error) => {
               console.error(
@@ -499,9 +526,7 @@ export const useExerciseHandlers = ({
           {
             onSuccess: () => {
               setIsDirty(false)
-              queryClient.invalidateQueries({
-                queryKey: ['GetTemplateTrainingPlanById'],
-              })
+              debouncedInvalidateQueries()
             },
             onError: (error) => {
               console.error(
@@ -515,7 +540,13 @@ export const useExerciseHandlers = ({
         )
       }
     },
-    [setWeeks, setIsDirty, moveExerciseMutation, weeks, queryClient],
+    [
+      setWeeks,
+      setIsDirty,
+      moveExerciseMutation,
+      weeks,
+      debouncedInvalidateQueries,
+    ],
   )
 
   return {

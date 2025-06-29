@@ -1,4 +1,3 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { isNil } from 'lodash'
 import { useCallback } from 'react'
 import { toast } from 'sonner'
@@ -7,16 +6,33 @@ import {
   TrainingPlanFormData,
   TrainingWeek,
 } from '@/app/(protected)/trainer/trainings/creator-old/components/types'
-import { useUpdateTrainingWeekDetailsMutation } from '@/generated/graphql-client'
+import {
+  useAddTrainingWeekMutation,
+  useDuplicateTrainingWeekMutation,
+  useRemoveTrainingWeekMutation,
+  useUpdateTrainingWeekDetailsMutation,
+} from '@/generated/graphql-client'
+import { useDebouncedInvalidation } from '@/hooks/use-debounced-invalidation'
 import { createId } from '@/lib/create-id'
 
-export const useWeekHandlers = (
-  weeks: TrainingPlanFormData['weeks'],
-  setWeeks: React.Dispatch<React.SetStateAction<TrainingPlanFormData['weeks']>>,
-  setIsDirty: React.Dispatch<React.SetStateAction<boolean>>,
-  setActiveWeek: React.Dispatch<React.SetStateAction<number>>,
-) => {
-  const queryClient = useQueryClient()
+export const useWeekHandlers = ({
+  trainingId,
+  weeks,
+  setWeeks,
+  setIsDirty,
+  setActiveWeek,
+}: {
+  trainingId?: string
+  weeks: TrainingPlanFormData['weeks']
+  setWeeks: React.Dispatch<React.SetStateAction<TrainingPlanFormData['weeks']>>
+  setIsDirty: React.Dispatch<React.SetStateAction<boolean>>
+  setActiveWeek: React.Dispatch<React.SetStateAction<number>>
+}) => {
+  const debouncedInvalidateQueries = useDebouncedInvalidation({
+    queryKey: ['GetTemplateTrainingPlanById'],
+    delay: 1000,
+  })
+
   const { mutateAsync: updateTrainingWeek } =
     useUpdateTrainingWeekDetailsMutation()
 
@@ -48,9 +64,7 @@ export const useWeekHandlers = (
         {
           onSuccess: () => {
             setIsDirty(true)
-            queryClient.invalidateQueries({
-              queryKey: ['GetTemplateTrainingPlanById'],
-            })
+            debouncedInvalidateQueries()
           },
           onError: () => {
             toast.error('Failed to update week details')
@@ -70,9 +84,15 @@ export const useWeekHandlers = (
       })
       setIsDirty(true)
     },
-    [setWeeks, setIsDirty, updateTrainingWeek, weeks],
+    [
+      setWeeks,
+      setIsDirty,
+      updateTrainingWeek,
+      weeks,
+      debouncedInvalidateQueries,
+    ],
   )
-
+  const { mutateAsync: removeWeekMutation } = useRemoveTrainingWeekMutation()
   const removeWeek = useCallback(
     (weekIndex: number) => {
       if (isNil(weekIndex)) {
@@ -81,39 +101,63 @@ export const useWeekHandlers = (
         })
         return
       }
+      const before = weeks[weekIndex]
 
       setWeeks((prev) => {
         const newWeeks = renumberWeeks(
           prev.filter((_, index) => index !== weekIndex),
         )
 
-        // Handle active week selection after removal
         setActiveWeek((currentActiveWeek) => {
-          // If we're removing the currently active week
           if (currentActiveWeek === weekIndex) {
-            // If removing the first week, stay at 0 (if there are remaining weeks)
-            // If removing any other week, select the previous week
             return weekIndex > 0 ? weekIndex - 1 : 0
-          }
-          // If removing a week that comes before the active week,
-          // decrement active week index to maintain the same week selection
-          else if (weekIndex < currentActiveWeek) {
+          } else if (weekIndex < currentActiveWeek) {
             return currentActiveWeek - 1
-          }
-          // If removing a week after the active week, no change needed
-          else {
+          } else {
             return currentActiveWeek
           }
         })
 
         return newWeeks
       })
+      removeWeekMutation(
+        { weekId: before.id },
+        {
+          onSuccess: () => {
+            setIsDirty(true)
+            debouncedInvalidateQueries()
+          },
+          onError: () => {
+            toast.error('Failed to remove week')
+            setWeeks((prev) => {
+              const newWeeks = [...prev]
+              newWeeks[weekIndex] = before
+              return newWeeks
+            })
+            setIsDirty(true)
+          },
+        },
+      )
       setIsDirty(true)
     },
-    [setWeeks, setIsDirty, setActiveWeek],
+    [
+      setWeeks,
+      setIsDirty,
+      setActiveWeek,
+      removeWeekMutation,
+      weeks,
+      debouncedInvalidateQueries,
+    ],
   )
 
+  const { mutateAsync: addWeekMutation } = useAddTrainingWeekMutation()
   const addWeek = useCallback(() => {
+    if (!trainingId) {
+      console.error('[Add week]: Training ID is required')
+      return
+    }
+    const before = [...weeks]
+
     setWeeks((prev) => {
       const newWeeks = [...prev]
       newWeeks.push({
@@ -124,24 +168,58 @@ export const useWeekHandlers = (
         days: Array.from({ length: 7 }, (_, i) => ({
           id: createId(),
           dayOfWeek: i,
-          isRestDay: [0, 6].includes(i),
+          isRestDay: false,
           exercises: [],
         })),
       })
       return newWeeks
     })
+    addWeekMutation(
+      {
+        input: {
+          trainingPlanId: trainingId,
+          weekNumber: before.length + 1,
+        },
+      },
+      {
+        onSuccess: () => {
+          setIsDirty(true)
+          debouncedInvalidateQueries()
+        },
+        onError: () => {
+          toast.error('Failed to add week')
+          setWeeks(before)
+          setIsDirty(true)
+        },
+      },
+    )
     setIsDirty(true)
-  }, [setWeeks, setIsDirty])
+  }, [
+    setWeeks,
+    setIsDirty,
+    trainingId,
+    debouncedInvalidateQueries,
+    addWeekMutation,
+    weeks,
+  ])
 
+  const { mutateAsync: duplicateWeek } = useDuplicateTrainingWeekMutation()
   const cloneWeek = useCallback(
     (weekIndex: number) => {
+      if (!trainingId) {
+        console.error('[Clone week]: Training ID is required')
+        return
+      }
+
+      const before = [...weeks]
+
       setWeeks((prev) => {
         const newWeeks = [...prev]
         newWeeks.push({
           ...newWeeks[weekIndex],
           id: createId(),
           weekNumber: prev.length + 1,
-          name: `Week ${prev.length + 1} (Copy of ${newWeeks[weekIndex].name})`,
+          name: `Week ${prev.length + 1}`,
           days: newWeeks[weekIndex].days.map((day) => ({
             ...day,
             id: createId(),
@@ -157,9 +235,35 @@ export const useWeekHandlers = (
         })
         return newWeeks
       })
+      duplicateWeek(
+        {
+          input: {
+            weekId: before[weekIndex].id,
+            trainingPlanId: trainingId,
+          },
+        },
+        {
+          onSuccess: () => {
+            setIsDirty(true)
+            debouncedInvalidateQueries()
+          },
+          onError: () => {
+            toast.error('Failed to duplicate week')
+            setWeeks(before)
+            setIsDirty(true)
+          },
+        },
+      )
       setIsDirty(true)
     },
-    [setWeeks, setIsDirty],
+    [
+      setWeeks,
+      setIsDirty,
+      duplicateWeek,
+      debouncedInvalidateQueries,
+      trainingId,
+      weeks,
+    ],
   )
 
   return {

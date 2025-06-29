@@ -1,9 +1,12 @@
 import {
   GQLMutationAddExerciseToDayArgs,
   GQLMutationAddSetToExerciseArgs,
+  GQLMutationAddTrainingWeekArgs,
+  GQLMutationDuplicateTrainingWeekArgs,
   GQLMutationMoveExerciseArgs,
   GQLMutationRemoveExerciseFromDayArgs,
   GQLMutationRemoveSetFromExerciseArgs,
+  GQLMutationRemoveTrainingWeekArgs,
   GQLMutationResolvers,
   GQLMutationUpdateExerciseSetArgs,
   GQLMutationUpdateTrainingDayDataArgs,
@@ -38,9 +41,12 @@ import {
 import {
   addExerciseToDay,
   addSetToExercise,
+  addTrainingWeek,
+  duplicateTrainingWeek,
   moveExercise,
   removeExerciseFromDay,
   removeSetFromExercise,
+  removeTrainingWeek,
   updateExerciseSet,
   updateTrainingDayData,
   updateTrainingExercise,
@@ -125,6 +131,26 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     context,
   ) => {
     return updateTrainingWeekDetails(input, context)
+  },
+
+  duplicateTrainingWeek: (
+    _,
+    { input }: GQLMutationDuplicateTrainingWeekArgs,
+    context,
+  ) => {
+    return duplicateTrainingWeek(input, context)
+  },
+
+  removeTrainingWeek: (
+    _,
+    { weekId }: GQLMutationRemoveTrainingWeekArgs,
+    context,
+  ) => {
+    return removeTrainingWeek(weekId, context)
+  },
+
+  addTrainingWeek: (_, { input }: GQLMutationAddTrainingWeekArgs, context) => {
+    return addTrainingWeek(input, context)
   },
 
   updateTrainingDayData: (

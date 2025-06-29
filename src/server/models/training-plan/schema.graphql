@@ -86,6 +86,9 @@ type Mutation {
   updateExerciseSet(input: UpdateExerciseSetInput!): Boolean!
 
   # Add/remove operations
+  duplicateTrainingWeek(input: DuplicateTrainingWeekInput!): ID!
+  removeTrainingWeek(weekId: ID!): Boolean!
+  addTrainingWeek(input: AddTrainingWeekInput!): ID!
   addExerciseToDay(input: AddExerciseToDayInput!): ID!
   removeExerciseFromDay(exerciseId: ID!): Boolean!
   moveExercise(input: MoveExerciseInput!): Boolean!
@@ -248,4 +251,14 @@ input MoveExerciseInput {
   exerciseId: ID!
   newOrder: Int!
   targetDayId: ID # Optional: when provided, moves exercise to a different day
+}
+
+input DuplicateTrainingWeekInput {
+  weekId: ID!
+  trainingPlanId: ID!
+}
+
+input AddTrainingWeekInput {
+  trainingPlanId: ID!
+  weekNumber: Int!
 }

@@ -3,12 +3,17 @@ import { useCallback } from 'react'
 
 import { TrainingPlanFormData } from '@/app/(protected)/trainer/trainings/creator-old/components/types'
 import { useUpdateTrainingDayDataMutation } from '@/generated/graphql-client'
+import { useDebouncedInvalidation } from '@/hooks/use-debounced-invalidation'
 
 export const useDayHandlers = (
   weeks: TrainingPlanFormData['weeks'],
   setWeeks: React.Dispatch<React.SetStateAction<TrainingPlanFormData['weeks']>>,
   setIsDirty: React.Dispatch<React.SetStateAction<boolean>>,
 ) => {
+  const debouncedInvalidateQueries = useDebouncedInvalidation({
+    queryKey: ['GetTemplateTrainingPlanById'],
+    delay: 1000,
+  })
   const { mutateAsync: updateTrainingDay } = useUpdateTrainingDayDataMutation()
   const updateDay = useCallback(
     async (
@@ -56,20 +61,41 @@ export const useDayHandlers = (
           return newWeeks
         })
         setIsDirty(true)
-        await updateTrainingDay({
-          input: {
-            dayId: currentDay.id,
-            workoutType: updatedDay.workoutType,
-            isRestDay: updatedDay.isRestDay,
+        await updateTrainingDay(
+          {
+            input: {
+              dayId: currentDay.id,
+              workoutType: updatedDay.workoutType,
+              isRestDay: updatedDay.isRestDay,
+            },
           },
-        })
+          {
+            onSuccess: () => {
+              debouncedInvalidateQueries()
+            },
+            onError: () => {
+              console.error('[Update day]: Failed to update day', {
+                weekIndex,
+                dayIndex,
+              })
+              setWeeks(beforeWeeks)
+              setIsDirty(true)
+            },
+          },
+        )
       } catch (error) {
         console.error('Day update failed:', error)
         setWeeks(beforeWeeks)
         setIsDirty(true)
       }
     },
-    [setWeeks, setIsDirty, updateTrainingDay, weeks],
+    [
+      setWeeks,
+      setIsDirty,
+      updateTrainingDay,
+      weeks,
+      debouncedInvalidateQueries,
+    ],
   )
 
   return {

@@ -4,9 +4,12 @@ import { GraphQLError } from 'graphql'
 import {
   GQLMutationAddExerciseToDayArgs,
   GQLMutationAddSetToExerciseArgs,
+  GQLMutationAddTrainingWeekArgs,
+  GQLMutationDuplicateTrainingWeekArgs,
   GQLMutationMoveExerciseArgs,
   GQLMutationRemoveExerciseFromDayArgs,
   GQLMutationRemoveSetFromExerciseArgs,
+  GQLMutationRemoveTrainingWeekArgs,
   GQLMutationUpdateExerciseSetArgs,
   GQLMutationUpdateTrainingDayDataArgs,
   GQLMutationUpdateTrainingExerciseArgs,
@@ -86,6 +89,201 @@ export async function updateTrainingWeekDetails(
   })
 
   return true
+}
+
+export async function duplicateTrainingWeek(
+  input: GQLMutationDuplicateTrainingWeekArgs['input'],
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  // Get the plan to verify ownership and determine the next week number
+  const plan = await prisma.trainingPlan.findUnique({
+    where: { id: input.trainingPlanId, createdById: user.user.id },
+    include: {
+      weeks: {
+        select: { weekNumber: true },
+        orderBy: { weekNumber: 'desc' },
+        take: 1,
+      },
+    },
+  })
+
+  if (!plan) {
+    throw new GraphQLError('Training plan not found or unauthorized')
+  }
+
+  // Get the week to duplicate with all necessary nested data
+  const weekToDuplicate = await prisma.trainingWeek.findUnique({
+    where: { id: input.weekId },
+    include: {
+      plan: { select: { createdById: true } }, // For additional ownership verification
+      days: {
+        include: {
+          exercises: {
+            include: {
+              sets: {
+                orderBy: { order: 'asc' },
+              },
+            },
+            orderBy: { order: 'asc' },
+          },
+        },
+        orderBy: { dayOfWeek: 'asc' },
+      },
+    },
+  })
+
+  if (!weekToDuplicate || weekToDuplicate.plan.createdById !== user.user.id) {
+    throw new GraphQLError('Training week not found or unauthorized')
+  }
+
+  // Determine the next week number (last week + 1)
+  const nextWeekNumber =
+    plan.weeks.length > 0 ? plan.weeks[0].weekNumber + 1 : 1
+
+  return await prisma.$transaction(async (tx) => {
+    // Create the new week
+    const newWeek = await tx.trainingWeek.create({
+      data: {
+        planId: input.trainingPlanId,
+        weekNumber: nextWeekNumber,
+        name: `Week ${nextWeekNumber}`,
+        description: weekToDuplicate.description,
+        isExtra: weekToDuplicate.isExtra,
+        days: {
+          create: weekToDuplicate.days.map((day) => ({
+            dayOfWeek: day.dayOfWeek,
+            isRestDay: day.isRestDay,
+            workoutType: day.workoutType,
+            isExtra: day.isExtra,
+            exercises: {
+              create: day.exercises.map((exercise) => ({
+                name: exercise.name,
+                order: exercise.order,
+                restSeconds: exercise.restSeconds,
+                tempo: exercise.tempo,
+                instructions: exercise.instructions,
+                additionalInstructions: exercise.additionalInstructions,
+                type: exercise.type,
+                warmupSets: exercise.warmupSets,
+                baseId: exercise.baseId,
+                isExtra: exercise.isExtra,
+                sets: {
+                  create: exercise.sets.map((set) => ({
+                    order: set.order,
+                    reps: set.reps,
+                    minReps: set.minReps,
+                    maxReps: set.maxReps,
+                    weight: set.weight,
+                    rpe: set.rpe,
+                    isExtra: set.isExtra,
+                  })),
+                },
+              })),
+            },
+          })),
+        },
+      },
+    })
+
+    return newWeek.id
+  })
+}
+
+export async function removeTrainingWeek(
+  weekId: GQLMutationRemoveTrainingWeekArgs['weekId'],
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  // Get the week to be deleted with its details
+  const week = await prisma.trainingWeek.findUnique({
+    where: { id: weekId },
+    include: { plan: { select: { createdById: true } } },
+  })
+
+  if (!week || week.plan.createdById !== user.user.id) {
+    throw new GraphQLError('Training week not found or unauthorized')
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    // Store the week number of the week being deleted
+    const deletedWeekNumber = week.weekNumber
+
+    // Delete the week
+    await tx.trainingWeek.delete({
+      where: { id: weekId },
+    })
+
+    // Decrement the weekNumber of all weeks that came after the deleted one
+    await tx.trainingWeek.updateMany({
+      where: {
+        planId: week.planId,
+        weekNumber: { gt: deletedWeekNumber },
+      },
+      data: {
+        weekNumber: { decrement: 1 },
+      },
+    })
+
+    return true
+  })
+}
+
+export async function addTrainingWeek(
+  input: GQLMutationAddTrainingWeekArgs['input'],
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  const plan = await prisma.trainingPlan.findUnique({
+    where: { id: input.trainingPlanId, createdById: user.user.id },
+    select: { id: true },
+  })
+
+  if (!plan) {
+    throw new GraphQLError('Training plan not found or unauthorized')
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    // If inserting at a specific week number, increment weekNumber of all existing weeks >= input.weekNumber
+    await tx.trainingWeek.updateMany({
+      where: {
+        planId: input.trainingPlanId,
+        weekNumber: { gte: input.weekNumber },
+      },
+      data: {
+        weekNumber: { increment: 1 },
+      },
+    })
+
+    // Create the new week
+    const newWeek = await tx.trainingWeek.create({
+      data: {
+        planId: input.trainingPlanId,
+        weekNumber: input.weekNumber,
+        name: `Week ${input.weekNumber}`,
+        description: '',
+        days: {
+          create: Array.from({ length: 7 }, (_, i) => ({
+            dayOfWeek: i,
+          })),
+        },
+      },
+    })
+
+    return newWeek.id
+  })
 }
 
 /**
@@ -337,6 +535,18 @@ export async function addExerciseToDay(
         type: input.type,
         warmupSets: input.warmupSets,
         baseId: input.baseId,
+        sets: {
+          create: [
+            {
+              order: 1,
+              reps: null,
+              minReps: null,
+              maxReps: null,
+              weight: null,
+              rpe: null,
+            },
+          ],
+        },
       },
     })
 

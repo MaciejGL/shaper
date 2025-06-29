@@ -60,6 +60,11 @@ export type GQLAddSetToExerciseInput = {
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type GQLAddTrainingWeekInput = {
+  trainingPlanId: Scalars['ID']['input'];
+  weekNumber: Scalars['Int']['input'];
+};
+
 export type GQLAiExerciseSuggestion = {
   __typename?: 'AiExerciseSuggestion';
   aiMeta: EntireFieldWrapper<GQLAiMeta>;
@@ -203,6 +208,11 @@ export enum GQLDifficulty {
   Expert = 'EXPERT',
   Intermediate = 'INTERMEDIATE'
 }
+
+export type GQLDuplicateTrainingWeekInput = {
+  trainingPlanId: Scalars['ID']['input'];
+  weekId: Scalars['ID']['input'];
+};
 
 export enum GQLEquipment {
   Band = 'BAND',
@@ -356,6 +366,7 @@ export type GQLMutation = {
   addExercisesToWorkout: EntireFieldWrapper<Array<GQLTrainingExercise>>;
   addSet: EntireFieldWrapper<GQLExerciseSet>;
   addSetToExercise: EntireFieldWrapper<Scalars['ID']['output']>;
+  addTrainingWeek: EntireFieldWrapper<Scalars['ID']['output']>;
   assignTrainingPlanToClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   cancelCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   closePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -373,6 +384,7 @@ export type GQLMutation = {
   deleteReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   duplicateTrainingPlan: EntireFieldWrapper<Scalars['ID']['output']>;
+  duplicateTrainingWeek: EntireFieldWrapper<Scalars['ID']['output']>;
   extendPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   getAiExerciseSuggestions: EntireFieldWrapper<Array<GQLAiExerciseSuggestion>>;
   logWorkoutProgress: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -391,6 +403,7 @@ export type GQLMutation = {
   removeSet: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeSetFromExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeTrainingPlanFromClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  removeTrainingWeek: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeWeek: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateExerciseSet: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -441,6 +454,11 @@ export type GQLMutationAddSetArgs = {
 
 export type GQLMutationAddSetToExerciseArgs = {
   input: GQLAddSetToExerciseInput;
+};
+
+
+export type GQLMutationAddTrainingWeekArgs = {
+  input: GQLAddTrainingWeekInput;
 };
 
 
@@ -522,6 +540,11 @@ export type GQLMutationDeleteTrainingPlanArgs = {
 
 export type GQLMutationDuplicateTrainingPlanArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDuplicateTrainingWeekArgs = {
+  input: GQLDuplicateTrainingWeekInput;
 };
 
 
@@ -618,6 +641,11 @@ export type GQLMutationRemoveSetFromExerciseArgs = {
 export type GQLMutationRemoveTrainingPlanFromClientArgs = {
   clientId: Scalars['ID']['input'];
   planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveTrainingWeekArgs = {
+  weekId: Scalars['ID']['input'];
 };
 
 
@@ -1298,6 +1326,7 @@ export type GQLResolversTypes = {
   AddExerciseToDayInput: GQLAddExerciseToDayInput;
   AddExercisesToWorkoutInput: GQLAddExercisesToWorkoutInput;
   AddSetToExerciseInput: GQLAddSetToExerciseInput;
+  AddTrainingWeekInput: GQLAddTrainingWeekInput;
   AiExerciseSuggestion: ResolverTypeWrapper<GQLAiExerciseSuggestion>;
   AiMeta: ResolverTypeWrapper<GQLAiMeta>;
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
@@ -1317,6 +1346,7 @@ export type GQLResolversTypes = {
   CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
   DeleteReviewInput: GQLDeleteReviewInput;
   Difficulty: GQLDifficulty;
+  DuplicateTrainingWeekInput: GQLDuplicateTrainingWeekInput;
   Equipment: GQLEquipment;
   ExerciseLog: ResolverTypeWrapper<GQLExerciseLog>;
   ExerciseProgress: ResolverTypeWrapper<GQLExerciseProgress>;
@@ -1382,6 +1412,7 @@ export type GQLResolversParentTypes = {
   AddExerciseToDayInput: GQLAddExerciseToDayInput;
   AddExercisesToWorkoutInput: GQLAddExercisesToWorkoutInput;
   AddSetToExerciseInput: GQLAddSetToExerciseInput;
+  AddTrainingWeekInput: GQLAddTrainingWeekInput;
   AiExerciseSuggestion: GQLAiExerciseSuggestion;
   AiMeta: GQLAiMeta;
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
@@ -1399,6 +1430,7 @@ export type GQLResolversParentTypes = {
   CreateTrainingPlanPayload: GQLCreateTrainingPlanPayload;
   CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
   DeleteReviewInput: GQLDeleteReviewInput;
+  DuplicateTrainingWeekInput: GQLDuplicateTrainingWeekInput;
   ExerciseLog: GQLExerciseLog;
   ExerciseProgress: GQLExerciseProgress;
   ExerciseSet: GQLExerciseSet;
@@ -1583,6 +1615,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   addExercisesToWorkout?: Resolver<Array<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType, RequireFields<GQLMutationAddExercisesToWorkoutArgs, 'input'>>;
   addSet?: Resolver<GQLResolversTypes['ExerciseSet'], ParentType, ContextType, RequireFields<GQLMutationAddSetArgs, 'exerciseId'>>;
   addSetToExercise?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAddSetToExerciseArgs, 'input'>>;
+  addTrainingWeek?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAddTrainingWeekArgs, 'input'>>;
   assignTrainingPlanToClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignTrainingPlanToClientArgs, 'input'>>;
   cancelCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationCancelCoachingRequestArgs, 'id'>>;
   closePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationClosePlanArgs, 'planId'>>;
@@ -1600,6 +1633,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   deleteReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteReviewArgs, 'input'>>;
   deleteTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteTrainingPlanArgs, 'id'>>;
   duplicateTrainingPlan?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingPlanArgs, 'id'>>;
+  duplicateTrainingWeek?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingWeekArgs, 'input'>>;
   extendPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationExtendPlanArgs, 'planId' | 'weeks'>>;
   getAiExerciseSuggestions?: Resolver<Array<GQLResolversTypes['AiExerciseSuggestion']>, ParentType, ContextType, RequireFields<GQLMutationGetAiExerciseSuggestionsArgs, 'dayId'>>;
   logWorkoutProgress?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutProgressArgs, 'dayId' | 'tick'>>;
@@ -1618,6 +1652,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   removeSet?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveSetArgs, 'setId'>>;
   removeSetFromExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveSetFromExerciseArgs, 'setId'>>;
   removeTrainingPlanFromClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingPlanFromClientArgs, 'clientId' | 'planId'>>;
+  removeTrainingWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingWeekArgs, 'weekId'>>;
   removeWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveWeekArgs, 'planId' | 'weekId'>>;
   updateExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseArgs, 'id' | 'input'>>;
   updateExerciseSet?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseSetArgs, 'input'>>;

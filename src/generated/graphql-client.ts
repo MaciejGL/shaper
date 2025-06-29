@@ -58,6 +58,11 @@ export type GQLAddSetToExerciseInput = {
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type GQLAddTrainingWeekInput = {
+  trainingPlanId: Scalars['ID']['input'];
+  weekNumber: Scalars['Int']['input'];
+};
+
 export type GQLAiExerciseSuggestion = {
   __typename?: 'AiExerciseSuggestion';
   aiMeta: GQLAiMeta;
@@ -201,6 +206,11 @@ export enum GQLDifficulty {
   Expert = 'EXPERT',
   Intermediate = 'INTERMEDIATE'
 }
+
+export type GQLDuplicateTrainingWeekInput = {
+  trainingPlanId: Scalars['ID']['input'];
+  weekId: Scalars['ID']['input'];
+};
 
 export enum GQLEquipment {
   Band = 'BAND',
@@ -354,6 +364,7 @@ export type GQLMutation = {
   addExercisesToWorkout: Array<GQLTrainingExercise>;
   addSet: GQLExerciseSet;
   addSetToExercise: Scalars['ID']['output'];
+  addTrainingWeek: Scalars['ID']['output'];
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   closePlan: Scalars['Boolean']['output'];
@@ -371,6 +382,7 @@ export type GQLMutation = {
   deleteReview: Scalars['Boolean']['output'];
   deleteTrainingPlan: Scalars['Boolean']['output'];
   duplicateTrainingPlan: Scalars['ID']['output'];
+  duplicateTrainingWeek: Scalars['ID']['output'];
   extendPlan: Scalars['Boolean']['output'];
   getAiExerciseSuggestions: Array<GQLAiExerciseSuggestion>;
   logWorkoutProgress: Scalars['ID']['output'];
@@ -389,6 +401,7 @@ export type GQLMutation = {
   removeSet: Scalars['Boolean']['output'];
   removeSetFromExercise: Scalars['Boolean']['output'];
   removeTrainingPlanFromClient: Scalars['Boolean']['output'];
+  removeTrainingWeek: Scalars['Boolean']['output'];
   removeWeek: Scalars['Boolean']['output'];
   updateExercise: Scalars['Boolean']['output'];
   updateExerciseSet: Scalars['Boolean']['output'];
@@ -439,6 +452,11 @@ export type GQLMutationAddSetArgs = {
 
 export type GQLMutationAddSetToExerciseArgs = {
   input: GQLAddSetToExerciseInput;
+};
+
+
+export type GQLMutationAddTrainingWeekArgs = {
+  input: GQLAddTrainingWeekInput;
 };
 
 
@@ -520,6 +538,11 @@ export type GQLMutationDeleteTrainingPlanArgs = {
 
 export type GQLMutationDuplicateTrainingPlanArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDuplicateTrainingWeekArgs = {
+  input: GQLDuplicateTrainingWeekInput;
 };
 
 
@@ -616,6 +639,11 @@ export type GQLMutationRemoveSetFromExerciseArgs = {
 export type GQLMutationRemoveTrainingPlanFromClientArgs = {
   clientId: Scalars['ID']['input'];
   planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveTrainingWeekArgs = {
+  weekId: Scalars['ID']['input'];
 };
 
 
@@ -1579,6 +1607,27 @@ export type GQLUpdateTrainingWeekDetailsMutationVariables = Exact<{
 
 
 export type GQLUpdateTrainingWeekDetailsMutation = { __typename?: 'Mutation', updateTrainingWeekDetails: boolean };
+
+export type GQLDuplicateTrainingWeekMutationVariables = Exact<{
+  input: GQLDuplicateTrainingWeekInput;
+}>;
+
+
+export type GQLDuplicateTrainingWeekMutation = { __typename?: 'Mutation', duplicateTrainingWeek: string };
+
+export type GQLRemoveTrainingWeekMutationVariables = Exact<{
+  weekId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveTrainingWeekMutation = { __typename?: 'Mutation', removeTrainingWeek: boolean };
+
+export type GQLAddTrainingWeekMutationVariables = Exact<{
+  input: GQLAddTrainingWeekInput;
+}>;
+
+
+export type GQLAddTrainingWeekMutation = { __typename?: 'Mutation', addTrainingWeek: string };
 
 export type GQLUpdateTrainingDayDataMutationVariables = Exact<{
   input: GQLUpdateTrainingDayDataInput;
@@ -4124,6 +4173,78 @@ useUpdateTrainingWeekDetailsMutation.getKey = () => ['UpdateTrainingWeekDetails'
 
 
 useUpdateTrainingWeekDetailsMutation.fetcher = (variables: GQLUpdateTrainingWeekDetailsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateTrainingWeekDetailsMutation, GQLUpdateTrainingWeekDetailsMutationVariables>(UpdateTrainingWeekDetailsDocument, variables, options);
+
+export const DuplicateTrainingWeekDocument = `
+    mutation DuplicateTrainingWeek($input: DuplicateTrainingWeekInput!) {
+  duplicateTrainingWeek(input: $input)
+}
+    `;
+
+export const useDuplicateTrainingWeekMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDuplicateTrainingWeekMutation, TError, GQLDuplicateTrainingWeekMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDuplicateTrainingWeekMutation, TError, GQLDuplicateTrainingWeekMutationVariables, TContext>(
+      {
+    mutationKey: ['DuplicateTrainingWeek'],
+    mutationFn: (variables?: GQLDuplicateTrainingWeekMutationVariables) => fetchData<GQLDuplicateTrainingWeekMutation, GQLDuplicateTrainingWeekMutationVariables>(DuplicateTrainingWeekDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDuplicateTrainingWeekMutation.getKey = () => ['DuplicateTrainingWeek'];
+
+
+useDuplicateTrainingWeekMutation.fetcher = (variables: GQLDuplicateTrainingWeekMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDuplicateTrainingWeekMutation, GQLDuplicateTrainingWeekMutationVariables>(DuplicateTrainingWeekDocument, variables, options);
+
+export const RemoveTrainingWeekDocument = `
+    mutation RemoveTrainingWeek($weekId: ID!) {
+  removeTrainingWeek(weekId: $weekId)
+}
+    `;
+
+export const useRemoveTrainingWeekMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveTrainingWeekMutation, TError, GQLRemoveTrainingWeekMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveTrainingWeekMutation, TError, GQLRemoveTrainingWeekMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveTrainingWeek'],
+    mutationFn: (variables?: GQLRemoveTrainingWeekMutationVariables) => fetchData<GQLRemoveTrainingWeekMutation, GQLRemoveTrainingWeekMutationVariables>(RemoveTrainingWeekDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveTrainingWeekMutation.getKey = () => ['RemoveTrainingWeek'];
+
+
+useRemoveTrainingWeekMutation.fetcher = (variables: GQLRemoveTrainingWeekMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveTrainingWeekMutation, GQLRemoveTrainingWeekMutationVariables>(RemoveTrainingWeekDocument, variables, options);
+
+export const AddTrainingWeekDocument = `
+    mutation AddTrainingWeek($input: AddTrainingWeekInput!) {
+  addTrainingWeek(input: $input)
+}
+    `;
+
+export const useAddTrainingWeekMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLAddTrainingWeekMutation, TError, GQLAddTrainingWeekMutationVariables, TContext>) => {
+    
+    return useMutation<GQLAddTrainingWeekMutation, TError, GQLAddTrainingWeekMutationVariables, TContext>(
+      {
+    mutationKey: ['AddTrainingWeek'],
+    mutationFn: (variables?: GQLAddTrainingWeekMutationVariables) => fetchData<GQLAddTrainingWeekMutation, GQLAddTrainingWeekMutationVariables>(AddTrainingWeekDocument, variables)(),
+    ...options
+  }
+    )};
+
+useAddTrainingWeekMutation.getKey = () => ['AddTrainingWeek'];
+
+
+useAddTrainingWeekMutation.fetcher = (variables: GQLAddTrainingWeekMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAddTrainingWeekMutation, GQLAddTrainingWeekMutationVariables>(AddTrainingWeekDocument, variables, options);
 
 export const UpdateTrainingDayDataDocument = `
     mutation UpdateTrainingDayData($input: UpdateTrainingDayDataInput!) {
