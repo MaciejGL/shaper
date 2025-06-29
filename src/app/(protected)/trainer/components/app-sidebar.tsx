@@ -221,7 +221,7 @@ function SidebarItem({
 
   return (
     <SidebarMenuItem key={item.title}>
-      <SidebarMenuButton asChild disabled={item.disabled} size="lg">
+      <SidebarMenuButton asChild disabled={item.disabled} size="md">
         {item.url ? (
           <Link href={item.url} className="inline-flex py-4">
             <item.icon />
