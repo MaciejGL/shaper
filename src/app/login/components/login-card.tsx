@@ -1,5 +1,6 @@
 'use client'
 
+import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -60,9 +61,20 @@ export const LoginCard = () => {
             handleLogin={handleLogin}
           />
         )}
-        {errorMessage && (
-          <p className="text-red-500 text-sm text-center">{errorMessage}</p>
-        )}
+        <AnimatePresence>
+          {errorMessage && (
+            <motion.p
+              key={errorMessage}
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className="text-amber-500 mt-2 text-sm text-center"
+            >
+              {errorMessage}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </CardContent>
       {showOtp && (
         <CardFooter>
