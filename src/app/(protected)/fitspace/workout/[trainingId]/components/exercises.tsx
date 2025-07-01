@@ -101,7 +101,7 @@ export function Exercises() {
       {!activeDay.isRestDay && (
         <div className="flex flex-col py-2 space-y-2 w-full">
           <div className="flex justify-between items-end gap-2">
-            <p className="text-md text-muted-foreground">
+            <p className="text-md">
               {formatWorkoutType(activeDay.workoutType)}
             </p>
             <ExercisesCompleted
@@ -242,11 +242,7 @@ function ExercisesCompleted({
   totalExercises: number
 }) {
   return (
-    <Badge
-      variant="outline"
-      size="sm"
-      className="self-end text-muted-foreground"
-    >
+    <Badge variant="outline" size="sm" className="self-end">
       {completedExercises}/{totalExercises} completed{' '}
       {completedExercises === totalExercises ? (
         <BadgeCheckIcon className="text-green-500" />

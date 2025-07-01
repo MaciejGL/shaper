@@ -48,7 +48,7 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
   )
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background shadow-neuro-light dark:shadow-neuro-dark">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar shadow-neuro-light dark:shadow-neuro-dark">
       <div className="flex items-center justify-around py-2 px-4 max-w-md mx-auto">
         {navItems.map((item) => {
           const Icon = item.icon
@@ -59,9 +59,9 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center p-2 rounded-lg transition-colors min-w-[60px]',
+                'flex flex-col items-center justify-center p-2 rounded-xl transition-colors min-w-[60px]',
                 isActive
-                  ? 'text-primary bg-card shadow-neuro-light dark:shadow-neuro-dark'
+                  ? 'text-primary bg-zinc-200 dark:bg-zinc-800'
                   : 'text-muted-foreground hover:text-foreground ',
               )}
               prefetch={item.prefetch}

@@ -1,0 +1,63 @@
+query BodyMeasures {
+  bodyMeasures {
+    id
+    measuredAt
+    weight
+    chest
+    waist
+    hips
+    neck
+    bicepsLeft
+    bicepsRight
+    thighLeft
+    thighRight
+    calfLeft
+    calfRight
+    bodyFat
+    notes
+  }
+}
+
+mutation AddBodyMeasurement($input: AddBodyMeasurementInput!) {
+  addBodyMeasurement(input: $input) {
+    id
+    measuredAt
+    weight
+    chest
+    waist
+    hips
+    neck
+    bicepsLeft
+    bicepsRight
+    thighLeft
+    thighRight
+    calfLeft
+    calfRight
+    bodyFat
+    notes
+  }
+}
+
+mutation UpdateBodyMeasurement($input: UpdateBodyMeasurementInput!) {
+  updateBodyMeasurement(input: $input) {
+    id
+    measuredAt
+    weight
+    chest
+    waist
+    hips
+    neck
+    bicepsLeft
+    bicepsRight
+    thighLeft
+    thighRight
+    calfLeft
+    calfRight
+    bodyFat
+    notes
+  }
+}
+
+mutation DeleteBodyMeasurement($id: ID!) {
+  deleteBodyMeasurement(id: $id)
+}

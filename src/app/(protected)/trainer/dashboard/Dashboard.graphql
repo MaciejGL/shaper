@@ -23,15 +23,18 @@ query user {
       updatedAt
       bodyMeasures {
         id
+        measuredAt
         weight
-        height
         chest
         waist
         hips
         neck
-        biceps
-        thigh
-        calf
+        bicepsLeft
+        bicepsRight
+        thighLeft
+        thighRight
+        calfLeft
+        calfRight
         bodyFat
         notes
       }

@@ -10,10 +10,7 @@ export function ExercisesList({
   selectedExercises,
   onExerciseSelect,
 }: {
-  filteredExercises: (Pick<
-    GQLBaseExercise,
-    'id' | 'name' | 'equipment' | 'isPublic'
-  > & {
+  filteredExercises: (Pick<GQLBaseExercise, 'id' | 'name' | 'equipment'> & {
     muscleGroups: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
   })[]
   selectedExercises: string[]
@@ -44,9 +41,6 @@ export function ExercisesList({
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <div className="font-medium text-sm">{exercise.name}</div>
                   <div className="flex items-center gap-2">
-                    <Badge size="sm" variant="outline">
-                      {exercise.isPublic ? 'Public' : 'Trainer'}
-                    </Badge>
                     {selectedExercises.includes(exercise.id) && (
                       <div className="flex items-center">
                         <Check className="h-4 w-4 text-green-600" />

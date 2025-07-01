@@ -29,23 +29,6 @@ type UserSession {
   createdAt: String!
 }
 
-type UserBodyMeasure {
-  id: ID!
-  userProfile: UserProfile!
-  measuredAt: String!
-  weight: Float
-  height: Float
-  chest: Float
-  waist: Float
-  hips: Float
-  neck: Float
-  biceps: Float
-  thigh: Float
-  calf: Float
-  bodyFat: Float
-  notes: String
-}
-
 type Query {
   user: User
   myClients: [UserPublic!]!

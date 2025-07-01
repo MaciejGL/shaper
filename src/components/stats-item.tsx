@@ -7,14 +7,20 @@ export function StatsItem({
   icon,
   label,
   iconPosition = 'left',
+  variant = 'default',
 }: {
   value: number | string | React.ReactNode
   icon?: React.ReactNode
   label: string
   iconPosition?: 'left' | 'top'
+  variant?: 'default' | 'secondary'
 }) {
   return (
-    <div className="text-center p-3 bg-white dark:bg-background rounded-lg shadow-neuro-light dark:shadow-neuro-dark">
+    <div
+      className={cn('text-center p-3 bg-background rounded-lg', {
+        'bg-card': variant === 'secondary',
+      })}
+    >
       {icon ? (
         <div
           className={cn('flex items-center gap-2', {

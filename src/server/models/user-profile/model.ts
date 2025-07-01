@@ -8,10 +8,11 @@ import {
   GQLActivityLevel,
   GQLFitnessLevel,
   GQLGoal,
-  GQLUserBodyMeasure,
   GQLUserProfile,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+
+import UserBodyMeasure from '../user-body-measure/model'
 
 export default class UserProfile implements GQLUserProfile {
   constructor(
@@ -97,10 +98,8 @@ export default class UserProfile implements GQLUserProfile {
       return []
     }
 
-    // TODO: fix this
-    return bodyMeasures.map(
-      (measure) => measure as unknown as GQLUserBodyMeasure,
-    )
+    // Use the proper UserBodyMeasure model
+    return bodyMeasures.map((measure) => new UserBodyMeasure(measure))
   }
 
   get fitnessLevel() {

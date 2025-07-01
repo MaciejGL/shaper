@@ -38,8 +38,7 @@ export const Main = async ({
           className={cn(
             'w-full h-full p-2 md:p-4 lg:p-8 bg-background overflow-y-auto',
             {
-              'md:rounded-md shadow-neuro-light dark:shadow-neuro-dark':
-                isTrainer,
+              'md:rounded-md': isTrainer,
             },
           )}
         >

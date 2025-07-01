@@ -69,6 +69,7 @@ function Calendar({
           <ChevronRight className={cn('size-4', className)} {...props} />
         ),
       }}
+      weekStartsOn={1}
       {...props}
     />
   )

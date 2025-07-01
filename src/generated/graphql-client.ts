@@ -30,6 +30,23 @@ export type GQLAddAiExerciseToWorkoutInput = {
   sets: Array<InputMaybe<GQLSuggestedSetsInput>>;
 };
 
+export type GQLAddBodyMeasurementInput = {
+  bicepsLeft?: InputMaybe<Scalars['Float']['input']>;
+  bicepsRight?: InputMaybe<Scalars['Float']['input']>;
+  bodyFat?: InputMaybe<Scalars['Float']['input']>;
+  calfLeft?: InputMaybe<Scalars['Float']['input']>;
+  calfRight?: InputMaybe<Scalars['Float']['input']>;
+  chest?: InputMaybe<Scalars['Float']['input']>;
+  hips?: InputMaybe<Scalars['Float']['input']>;
+  measuredAt?: InputMaybe<Scalars['String']['input']>;
+  neck?: InputMaybe<Scalars['Float']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  thighLeft?: InputMaybe<Scalars['Float']['input']>;
+  thighRight?: InputMaybe<Scalars['Float']['input']>;
+  waist?: InputMaybe<Scalars['Float']['input']>;
+  weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
 export type GQLAddExerciseToDayInput = {
   additionalInstructions?: InputMaybe<Scalars['String']['input']>;
   baseId?: InputMaybe<Scalars['ID']['input']>;
@@ -372,6 +389,7 @@ export type GQLMutation = {
   acceptCoachingRequest?: Maybe<GQLCoachingRequest>;
   activatePlan: Scalars['Boolean']['output'];
   addAiExerciseToWorkout: GQLTrainingExercise;
+  addBodyMeasurement: GQLUserBodyMeasure;
   addExerciseToDay: Scalars['ID']['output'];
   addExercisesToWorkout: Array<GQLTrainingExercise>;
   addSet: GQLExerciseSet;
@@ -388,6 +406,7 @@ export type GQLMutation = {
   createNotification: GQLNotification;
   createReview: Scalars['Boolean']['output'];
   createTrainingPlan: GQLCreateTrainingPlanPayload;
+  deleteBodyMeasurement: Scalars['Boolean']['output'];
   deleteExercise: Scalars['Boolean']['output'];
   deleteNote: Scalars['Boolean']['output'];
   deleteNotification: Scalars['Boolean']['output'];
@@ -417,6 +436,7 @@ export type GQLMutation = {
   removeTrainingPlanFromClient: Scalars['Boolean']['output'];
   removeTrainingWeek: Scalars['Boolean']['output'];
   removeWeek: Scalars['Boolean']['output'];
+  updateBodyMeasurement: GQLUserBodyMeasure;
   updateExercise: Scalars['Boolean']['output'];
   updateExerciseForm: GQLTrainingExercise;
   updateExerciseSet: Scalars['Boolean']['output'];
@@ -447,6 +467,11 @@ export type GQLMutationActivatePlanArgs = {
 
 export type GQLMutationAddAiExerciseToWorkoutArgs = {
   input: GQLAddAiExerciseToWorkoutInput;
+};
+
+
+export type GQLMutationAddBodyMeasurementArgs = {
+  input: GQLAddBodyMeasurementInput;
 };
 
 
@@ -523,6 +548,11 @@ export type GQLMutationCreateReviewArgs = {
 
 export type GQLMutationCreateTrainingPlanArgs = {
   input: GQLCreateTrainingPlanInput;
+};
+
+
+export type GQLMutationDeleteBodyMeasurementArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -678,6 +708,11 @@ export type GQLMutationRemoveWeekArgs = {
 };
 
 
+export type GQLMutationUpdateBodyMeasurementArgs = {
+  input: GQLUpdateBodyMeasurementInput;
+};
+
+
 export type GQLMutationUpdateExerciseArgs = {
   id: Scalars['ID']['input'];
   input: GQLUpdateExerciseInput;
@@ -798,6 +833,7 @@ export type GQLOneRmLog = {
 
 export type GQLQuery = {
   __typename?: 'Query';
+  bodyMeasures: Array<GQLUserBodyMeasure>;
   coachingRequest?: Maybe<GQLCoachingRequest>;
   coachingRequests: Array<GQLCoachingRequest>;
   exercise?: Maybe<GQLBaseExercise>;
@@ -1035,6 +1071,24 @@ export type GQLTrainingWeek = {
   weekNumber: Scalars['Int']['output'];
 };
 
+export type GQLUpdateBodyMeasurementInput = {
+  bicepsLeft?: InputMaybe<Scalars['Float']['input']>;
+  bicepsRight?: InputMaybe<Scalars['Float']['input']>;
+  bodyFat?: InputMaybe<Scalars['Float']['input']>;
+  calfLeft?: InputMaybe<Scalars['Float']['input']>;
+  calfRight?: InputMaybe<Scalars['Float']['input']>;
+  chest?: InputMaybe<Scalars['Float']['input']>;
+  hips?: InputMaybe<Scalars['Float']['input']>;
+  id: Scalars['ID']['input'];
+  measuredAt?: InputMaybe<Scalars['String']['input']>;
+  neck?: InputMaybe<Scalars['Float']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  thighLeft?: InputMaybe<Scalars['Float']['input']>;
+  thighRight?: InputMaybe<Scalars['Float']['input']>;
+  waist?: InputMaybe<Scalars['Float']['input']>;
+  weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
 export type GQLUpdateExerciseFormInput = {
   additionalInstructions?: InputMaybe<Scalars['String']['input']>;
   exerciseId: Scalars['ID']['input'];
@@ -1192,18 +1246,19 @@ export type GQLUser = {
 
 export type GQLUserBodyMeasure = {
   __typename?: 'UserBodyMeasure';
-  biceps?: Maybe<Scalars['Float']['output']>;
+  bicepsLeft?: Maybe<Scalars['Float']['output']>;
+  bicepsRight?: Maybe<Scalars['Float']['output']>;
   bodyFat?: Maybe<Scalars['Float']['output']>;
-  calf?: Maybe<Scalars['Float']['output']>;
+  calfLeft?: Maybe<Scalars['Float']['output']>;
+  calfRight?: Maybe<Scalars['Float']['output']>;
   chest?: Maybe<Scalars['Float']['output']>;
-  height?: Maybe<Scalars['Float']['output']>;
   hips?: Maybe<Scalars['Float']['output']>;
   id: Scalars['ID']['output'];
   measuredAt: Scalars['String']['output'];
   neck?: Maybe<Scalars['Float']['output']>;
   notes?: Maybe<Scalars['String']['output']>;
-  thigh?: Maybe<Scalars['Float']['output']>;
-  userProfile: GQLUserProfile;
+  thighLeft?: Maybe<Scalars['Float']['output']>;
+  thighRight?: Maybe<Scalars['Float']['output']>;
   waist?: Maybe<Scalars['Float']['output']>;
   weight?: Maybe<Scalars['Float']['output']>;
 };
@@ -1396,6 +1451,47 @@ export type GQLUpdateProfileMutationVariables = Exact<{
 
 export type GQLUpdateProfileMutation = { __typename?: 'Mutation', updateProfile?: { __typename?: 'UserProfile', id: string } | undefined | null };
 
+export type GQLBodyMeasuresQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLBodyMeasuresQuery = { __typename?: 'Query', bodyMeasures: Array<{ __typename?: 'UserBodyMeasure', id: string, measuredAt: string, weight?: number | undefined | null, chest?: number | undefined | null, waist?: number | undefined | null, hips?: number | undefined | null, neck?: number | undefined | null, bicepsLeft?: number | undefined | null, bicepsRight?: number | undefined | null, thighLeft?: number | undefined | null, thighRight?: number | undefined | null, calfLeft?: number | undefined | null, calfRight?: number | undefined | null, bodyFat?: number | undefined | null, notes?: string | undefined | null }> };
+
+export type GQLAddBodyMeasurementMutationVariables = Exact<{
+  input: GQLAddBodyMeasurementInput;
+}>;
+
+
+export type GQLAddBodyMeasurementMutation = { __typename?: 'Mutation', addBodyMeasurement: { __typename?: 'UserBodyMeasure', id: string, measuredAt: string, weight?: number | undefined | null, chest?: number | undefined | null, waist?: number | undefined | null, hips?: number | undefined | null, neck?: number | undefined | null, bicepsLeft?: number | undefined | null, bicepsRight?: number | undefined | null, thighLeft?: number | undefined | null, thighRight?: number | undefined | null, calfLeft?: number | undefined | null, calfRight?: number | undefined | null, bodyFat?: number | undefined | null, notes?: string | undefined | null } };
+
+export type GQLUpdateBodyMeasurementMutationVariables = Exact<{
+  input: GQLUpdateBodyMeasurementInput;
+}>;
+
+
+export type GQLUpdateBodyMeasurementMutation = { __typename?: 'Mutation', updateBodyMeasurement: { __typename?: 'UserBodyMeasure', id: string, measuredAt: string, weight?: number | undefined | null, chest?: number | undefined | null, waist?: number | undefined | null, hips?: number | undefined | null, neck?: number | undefined | null, bicepsLeft?: number | undefined | null, bicepsRight?: number | undefined | null, thighLeft?: number | undefined | null, thighRight?: number | undefined | null, calfLeft?: number | undefined | null, calfRight?: number | undefined | null, bodyFat?: number | undefined | null, notes?: string | undefined | null } };
+
+export type GQLDeleteBodyMeasurementMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLDeleteBodyMeasurementMutation = { __typename?: 'Mutation', deleteBodyMeasurement: boolean };
+
+export type GQLAvailableExercisesForProgressQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLAvailableExercisesForProgressQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', baseExercise?: { __typename?: 'BaseExercise', id: string, name: string, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', alias?: string | undefined | null, name: string }> } | undefined | null }> };
+
+export type GQLSelectedExercisesProgressQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+  exerciseIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+}>;
+
+
+export type GQLSelectedExercisesProgressQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', averageRpe?: number | undefined | null, totalSets?: number | undefined | null, lastPerformed?: string | undefined | null, baseExercise?: { __typename?: 'BaseExercise', id: string, name: string, muscleGroups: Array<{ __typename?: 'MuscleGroup', alias?: string | undefined | null, name: string, groupSlug: string, category: { __typename?: 'MuscleGroupCategory', name: string } }> } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }>, totalVolumeProgress: Array<{ __typename?: 'VolumeEntry', week: string, totalVolume: number, totalSets: number }> }> };
+
 export type GQLGetTrainingPlanPreviewByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
 }>;
@@ -1537,7 +1633,7 @@ export type GQLExercisesProgressByUserQuery = { __typename?: 'Query', exercisesP
 export type GQLUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, createdAt: string, updatedAt: string, bodyMeasures: Array<{ __typename?: 'UserBodyMeasure', id: string, weight?: number | undefined | null, height?: number | undefined | null, chest?: number | undefined | null, waist?: number | undefined | null, hips?: number | undefined | null, neck?: number | undefined | null, biceps?: number | undefined | null, thigh?: number | undefined | null, calf?: number | undefined | null, bodyFat?: number | undefined | null, notes?: string | undefined | null }> } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string } | undefined | null, clients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string }>, sessions: Array<{ __typename?: 'UserSession', id: string, createdAt: string, expiresAt: string }> } | undefined | null };
+export type GQLUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, createdAt: string, updatedAt: string, bodyMeasures: Array<{ __typename?: 'UserBodyMeasure', id: string, measuredAt: string, weight?: number | undefined | null, chest?: number | undefined | null, waist?: number | undefined | null, hips?: number | undefined | null, neck?: number | undefined | null, bicepsLeft?: number | undefined | null, bicepsRight?: number | undefined | null, thighLeft?: number | undefined | null, thighRight?: number | undefined | null, calfLeft?: number | undefined | null, calfRight?: number | undefined | null, bodyFat?: number | undefined | null, notes?: string | undefined | null }> } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string } | undefined | null, clients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string }>, sessions: Array<{ __typename?: 'UserSession', id: string, createdAt: string, expiresAt: string }> } | undefined | null };
 
 export type GQLMuscleGroupCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2476,6 +2572,310 @@ useUpdateProfileMutation.getKey = () => ['UpdateProfile'];
 
 
 useUpdateProfileMutation.fetcher = (variables: GQLUpdateProfileMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateProfileMutation, GQLUpdateProfileMutationVariables>(UpdateProfileDocument, variables, options);
+
+export const BodyMeasuresDocument = `
+    query BodyMeasures {
+  bodyMeasures {
+    id
+    measuredAt
+    weight
+    chest
+    waist
+    hips
+    neck
+    bicepsLeft
+    bicepsRight
+    thighLeft
+    thighRight
+    calfLeft
+    calfRight
+    bodyFat
+    notes
+  }
+}
+    `;
+
+export const useBodyMeasuresQuery = <
+      TData = GQLBodyMeasuresQuery,
+      TError = unknown
+    >(
+      variables?: GQLBodyMeasuresQueryVariables,
+      options?: Omit<UseQueryOptions<GQLBodyMeasuresQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLBodyMeasuresQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLBodyMeasuresQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['BodyMeasures'] : ['BodyMeasures', variables],
+    queryFn: fetchData<GQLBodyMeasuresQuery, GQLBodyMeasuresQueryVariables>(BodyMeasuresDocument, variables),
+    ...options
+  }
+    )};
+
+useBodyMeasuresQuery.getKey = (variables?: GQLBodyMeasuresQueryVariables) => variables === undefined ? ['BodyMeasures'] : ['BodyMeasures', variables];
+
+export const useInfiniteBodyMeasuresQuery = <
+      TData = InfiniteData<GQLBodyMeasuresQuery>,
+      TError = unknown
+    >(
+      variables: GQLBodyMeasuresQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLBodyMeasuresQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLBodyMeasuresQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLBodyMeasuresQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['BodyMeasures.infinite'] : ['BodyMeasures.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLBodyMeasuresQuery, GQLBodyMeasuresQueryVariables>(BodyMeasuresDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteBodyMeasuresQuery.getKey = (variables?: GQLBodyMeasuresQueryVariables) => variables === undefined ? ['BodyMeasures.infinite'] : ['BodyMeasures.infinite', variables];
+
+
+useBodyMeasuresQuery.fetcher = (variables?: GQLBodyMeasuresQueryVariables, options?: RequestInit['headers']) => fetchData<GQLBodyMeasuresQuery, GQLBodyMeasuresQueryVariables>(BodyMeasuresDocument, variables, options);
+
+export const AddBodyMeasurementDocument = `
+    mutation AddBodyMeasurement($input: AddBodyMeasurementInput!) {
+  addBodyMeasurement(input: $input) {
+    id
+    measuredAt
+    weight
+    chest
+    waist
+    hips
+    neck
+    bicepsLeft
+    bicepsRight
+    thighLeft
+    thighRight
+    calfLeft
+    calfRight
+    bodyFat
+    notes
+  }
+}
+    `;
+
+export const useAddBodyMeasurementMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLAddBodyMeasurementMutation, TError, GQLAddBodyMeasurementMutationVariables, TContext>) => {
+    
+    return useMutation<GQLAddBodyMeasurementMutation, TError, GQLAddBodyMeasurementMutationVariables, TContext>(
+      {
+    mutationKey: ['AddBodyMeasurement'],
+    mutationFn: (variables?: GQLAddBodyMeasurementMutationVariables) => fetchData<GQLAddBodyMeasurementMutation, GQLAddBodyMeasurementMutationVariables>(AddBodyMeasurementDocument, variables)(),
+    ...options
+  }
+    )};
+
+useAddBodyMeasurementMutation.getKey = () => ['AddBodyMeasurement'];
+
+
+useAddBodyMeasurementMutation.fetcher = (variables: GQLAddBodyMeasurementMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAddBodyMeasurementMutation, GQLAddBodyMeasurementMutationVariables>(AddBodyMeasurementDocument, variables, options);
+
+export const UpdateBodyMeasurementDocument = `
+    mutation UpdateBodyMeasurement($input: UpdateBodyMeasurementInput!) {
+  updateBodyMeasurement(input: $input) {
+    id
+    measuredAt
+    weight
+    chest
+    waist
+    hips
+    neck
+    bicepsLeft
+    bicepsRight
+    thighLeft
+    thighRight
+    calfLeft
+    calfRight
+    bodyFat
+    notes
+  }
+}
+    `;
+
+export const useUpdateBodyMeasurementMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateBodyMeasurementMutation, TError, GQLUpdateBodyMeasurementMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateBodyMeasurementMutation, TError, GQLUpdateBodyMeasurementMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateBodyMeasurement'],
+    mutationFn: (variables?: GQLUpdateBodyMeasurementMutationVariables) => fetchData<GQLUpdateBodyMeasurementMutation, GQLUpdateBodyMeasurementMutationVariables>(UpdateBodyMeasurementDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateBodyMeasurementMutation.getKey = () => ['UpdateBodyMeasurement'];
+
+
+useUpdateBodyMeasurementMutation.fetcher = (variables: GQLUpdateBodyMeasurementMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateBodyMeasurementMutation, GQLUpdateBodyMeasurementMutationVariables>(UpdateBodyMeasurementDocument, variables, options);
+
+export const DeleteBodyMeasurementDocument = `
+    mutation DeleteBodyMeasurement($id: ID!) {
+  deleteBodyMeasurement(id: $id)
+}
+    `;
+
+export const useDeleteBodyMeasurementMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDeleteBodyMeasurementMutation, TError, GQLDeleteBodyMeasurementMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDeleteBodyMeasurementMutation, TError, GQLDeleteBodyMeasurementMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteBodyMeasurement'],
+    mutationFn: (variables?: GQLDeleteBodyMeasurementMutationVariables) => fetchData<GQLDeleteBodyMeasurementMutation, GQLDeleteBodyMeasurementMutationVariables>(DeleteBodyMeasurementDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDeleteBodyMeasurementMutation.getKey = () => ['DeleteBodyMeasurement'];
+
+
+useDeleteBodyMeasurementMutation.fetcher = (variables: GQLDeleteBodyMeasurementMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteBodyMeasurementMutation, GQLDeleteBodyMeasurementMutationVariables>(DeleteBodyMeasurementDocument, variables, options);
+
+export const AvailableExercisesForProgressDocument = `
+    query AvailableExercisesForProgress($userId: ID!) {
+  exercisesProgressByUser(userId: $userId) {
+    baseExercise {
+      id
+      name
+      muscleGroups {
+        alias
+        name
+      }
+      equipment
+    }
+  }
+}
+    `;
+
+export const useAvailableExercisesForProgressQuery = <
+      TData = GQLAvailableExercisesForProgressQuery,
+      TError = unknown
+    >(
+      variables: GQLAvailableExercisesForProgressQueryVariables,
+      options?: Omit<UseQueryOptions<GQLAvailableExercisesForProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLAvailableExercisesForProgressQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLAvailableExercisesForProgressQuery, TError, TData>(
+      {
+    queryKey: ['AvailableExercisesForProgress', variables],
+    queryFn: fetchData<GQLAvailableExercisesForProgressQuery, GQLAvailableExercisesForProgressQueryVariables>(AvailableExercisesForProgressDocument, variables),
+    ...options
+  }
+    )};
+
+useAvailableExercisesForProgressQuery.getKey = (variables: GQLAvailableExercisesForProgressQueryVariables) => ['AvailableExercisesForProgress', variables];
+
+export const useInfiniteAvailableExercisesForProgressQuery = <
+      TData = InfiniteData<GQLAvailableExercisesForProgressQuery>,
+      TError = unknown
+    >(
+      variables: GQLAvailableExercisesForProgressQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLAvailableExercisesForProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLAvailableExercisesForProgressQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLAvailableExercisesForProgressQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['AvailableExercisesForProgress.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLAvailableExercisesForProgressQuery, GQLAvailableExercisesForProgressQueryVariables>(AvailableExercisesForProgressDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteAvailableExercisesForProgressQuery.getKey = (variables: GQLAvailableExercisesForProgressQueryVariables) => ['AvailableExercisesForProgress.infinite', variables];
+
+
+useAvailableExercisesForProgressQuery.fetcher = (variables: GQLAvailableExercisesForProgressQueryVariables, options?: RequestInit['headers']) => fetchData<GQLAvailableExercisesForProgressQuery, GQLAvailableExercisesForProgressQueryVariables>(AvailableExercisesForProgressDocument, variables, options);
+
+export const SelectedExercisesProgressDocument = `
+    query SelectedExercisesProgress($userId: ID!, $exerciseIds: [ID!]!) {
+  exercisesProgressByUser(userId: $userId) {
+    baseExercise {
+      id
+      name
+      muscleGroups {
+        alias
+        name
+        groupSlug
+        category {
+          name
+        }
+      }
+    }
+    estimated1RMProgress {
+      date
+      average1RM
+      detailedLogs {
+        estimated1RM
+        weight
+        reps
+      }
+    }
+    totalVolumeProgress {
+      week
+      totalVolume
+      totalSets
+    }
+    averageRpe
+    totalSets
+    lastPerformed
+  }
+}
+    `;
+
+export const useSelectedExercisesProgressQuery = <
+      TData = GQLSelectedExercisesProgressQuery,
+      TError = unknown
+    >(
+      variables: GQLSelectedExercisesProgressQueryVariables,
+      options?: Omit<UseQueryOptions<GQLSelectedExercisesProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLSelectedExercisesProgressQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLSelectedExercisesProgressQuery, TError, TData>(
+      {
+    queryKey: ['SelectedExercisesProgress', variables],
+    queryFn: fetchData<GQLSelectedExercisesProgressQuery, GQLSelectedExercisesProgressQueryVariables>(SelectedExercisesProgressDocument, variables),
+    ...options
+  }
+    )};
+
+useSelectedExercisesProgressQuery.getKey = (variables: GQLSelectedExercisesProgressQueryVariables) => ['SelectedExercisesProgress', variables];
+
+export const useInfiniteSelectedExercisesProgressQuery = <
+      TData = InfiniteData<GQLSelectedExercisesProgressQuery>,
+      TError = unknown
+    >(
+      variables: GQLSelectedExercisesProgressQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLSelectedExercisesProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLSelectedExercisesProgressQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLSelectedExercisesProgressQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['SelectedExercisesProgress.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLSelectedExercisesProgressQuery, GQLSelectedExercisesProgressQueryVariables>(SelectedExercisesProgressDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteSelectedExercisesProgressQuery.getKey = (variables: GQLSelectedExercisesProgressQueryVariables) => ['SelectedExercisesProgress.infinite', variables];
+
+
+useSelectedExercisesProgressQuery.fetcher = (variables: GQLSelectedExercisesProgressQueryVariables, options?: RequestInit['headers']) => fetchData<GQLSelectedExercisesProgressQuery, GQLSelectedExercisesProgressQueryVariables>(SelectedExercisesProgressDocument, variables, options);
 
 export const GetTrainingPlanPreviewByIdDocument = `
     query GetTrainingPlanPreviewById($id: ID!) {
@@ -3491,15 +3891,18 @@ export const UserDocument = `
       updatedAt
       bodyMeasures {
         id
+        measuredAt
         weight
-        height
         chest
         waist
         hips
         neck
-        biceps
-        thigh
-        calf
+        bicepsLeft
+        bicepsRight
+        thighLeft
+        thighRight
+        calfLeft
+        calfRight
         bodyFat
         notes
       }

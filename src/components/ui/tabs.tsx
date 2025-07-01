@@ -20,15 +20,15 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  'bg-card dark:bg-muted-foreground/10 text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[2px] shadow-xs',
+  'bg-card dark:bg-muted-foreground/10 text-muted-foreground inline-flex h-9 w-fit items-center justify-center rounded-lg p-[2px]',
   {
     variants: {
       variant: {
         default: '',
       },
       size: {
-        default: 'h-9',
         sm: 'h-8',
+        default: 'h-9',
         lg: 'h-10 p-0.5',
       },
     },
