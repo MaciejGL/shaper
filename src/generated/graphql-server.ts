@@ -40,6 +40,7 @@ export type GQLAddBodyMeasurementInput = {
   calfRight?: InputMaybe<Scalars['Float']['input']>;
   chest?: InputMaybe<Scalars['Float']['input']>;
   hips?: InputMaybe<Scalars['Float']['input']>;
+  measuredAt?: InputMaybe<Scalars['String']['input']>;
   neck?: InputMaybe<Scalars['Float']['input']>;
   notes?: InputMaybe<Scalars['String']['input']>;
   thighLeft?: InputMaybe<Scalars['Float']['input']>;
@@ -437,6 +438,7 @@ export type GQLMutation = {
   removeTrainingPlanFromClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeTrainingWeek: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeWeek: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  updateBodyMeasurement: EntireFieldWrapper<GQLUserBodyMeasure>;
   updateExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateExerciseForm: EntireFieldWrapper<GQLTrainingExercise>;
   updateExerciseSet: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -705,6 +707,11 @@ export type GQLMutationRemoveTrainingWeekArgs = {
 export type GQLMutationRemoveWeekArgs = {
   planId: Scalars['ID']['input'];
   weekId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationUpdateBodyMeasurementArgs = {
+  input: GQLUpdateBodyMeasurementInput;
 };
 
 
@@ -1064,6 +1071,24 @@ export type GQLTrainingWeek = {
   trainingPlanId: EntireFieldWrapper<Scalars['ID']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
   weekNumber: EntireFieldWrapper<Scalars['Int']['output']>;
+};
+
+export type GQLUpdateBodyMeasurementInput = {
+  bicepsLeft?: InputMaybe<Scalars['Float']['input']>;
+  bicepsRight?: InputMaybe<Scalars['Float']['input']>;
+  bodyFat?: InputMaybe<Scalars['Float']['input']>;
+  calfLeft?: InputMaybe<Scalars['Float']['input']>;
+  calfRight?: InputMaybe<Scalars['Float']['input']>;
+  chest?: InputMaybe<Scalars['Float']['input']>;
+  hips?: InputMaybe<Scalars['Float']['input']>;
+  id: Scalars['ID']['input'];
+  measuredAt?: InputMaybe<Scalars['String']['input']>;
+  neck?: InputMaybe<Scalars['Float']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  thighLeft?: InputMaybe<Scalars['Float']['input']>;
+  thighRight?: InputMaybe<Scalars['Float']['input']>;
+  waist?: InputMaybe<Scalars['Float']['input']>;
+  weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type GQLUpdateExerciseFormInput = {
@@ -1472,6 +1497,7 @@ export type GQLResolversTypes = {
   TrainingExercise: ResolverTypeWrapper<GQLTrainingExercise>;
   TrainingPlan: ResolverTypeWrapper<GQLTrainingPlan>;
   TrainingWeek: ResolverTypeWrapper<GQLTrainingWeek>;
+  UpdateBodyMeasurementInput: GQLUpdateBodyMeasurementInput;
   UpdateExerciseFormInput: GQLUpdateExerciseFormInput;
   UpdateExerciseInput: GQLUpdateExerciseInput;
   UpdateExerciseSetFormInput: GQLUpdateExerciseSetFormInput;
@@ -1556,6 +1582,7 @@ export type GQLResolversParentTypes = {
   TrainingExercise: GQLTrainingExercise;
   TrainingPlan: GQLTrainingPlan;
   TrainingWeek: GQLTrainingWeek;
+  UpdateBodyMeasurementInput: GQLUpdateBodyMeasurementInput;
   UpdateExerciseFormInput: GQLUpdateExerciseFormInput;
   UpdateExerciseInput: GQLUpdateExerciseInput;
   UpdateExerciseSetFormInput: GQLUpdateExerciseSetFormInput;
@@ -1755,6 +1782,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   removeTrainingPlanFromClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingPlanFromClientArgs, 'clientId' | 'planId'>>;
   removeTrainingWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingWeekArgs, 'weekId'>>;
   removeWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveWeekArgs, 'planId' | 'weekId'>>;
+  updateBodyMeasurement?: Resolver<GQLResolversTypes['UserBodyMeasure'], ParentType, ContextType, RequireFields<GQLMutationUpdateBodyMeasurementArgs, 'input'>>;
   updateExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseArgs, 'id' | 'input'>>;
   updateExerciseForm?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseFormArgs, 'input'>>;
   updateExerciseSet?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseSetArgs, 'input'>>;

@@ -95,6 +95,25 @@ input UpdateProfileInput {
 }
 
 input AddBodyMeasurementInput {
+  measuredAt: String
+  weight: Float
+  chest: Float
+  waist: Float
+  hips: Float
+  neck: Float
+  bicepsLeft: Float
+  bicepsRight: Float
+  thighLeft: Float
+  thighRight: Float
+  calfLeft: Float
+  calfRight: Float
+  bodyFat: Float
+  notes: String
+}
+
+input UpdateBodyMeasurementInput {
+  id: ID!
+  measuredAt: String
   weight: Float
   chest: Float
   waist: Float
@@ -113,5 +132,6 @@ input AddBodyMeasurementInput {
 type Mutation {
   updateProfile(input: UpdateProfileInput!): UserProfile
   addBodyMeasurement(input: AddBodyMeasurementInput!): UserBodyMeasure!
+  updateBodyMeasurement(input: UpdateBodyMeasurementInput!): UserBodyMeasure!
   deleteBodyMeasurement(id: ID!): Boolean!
 }

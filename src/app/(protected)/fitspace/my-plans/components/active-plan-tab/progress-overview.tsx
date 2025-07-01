@@ -26,11 +26,16 @@ export function ProgressOverview({
         completedWorkoutsDays={completedWorkoutsDays}
         totalWorkouts={totalWorkouts}
       />
-      <div className="grid grid-cols-2 gap-4 bg-muted p-4 mt-6 rounded-lg">
-        <StatsItem value={currentWeekNumber ?? 1} label="Current Week" />
+      <div className="grid grid-cols-2 gap-4 bg-card-on-card p-4 mt-6 rounded-lg">
         <StatsItem
+          variant="secondary"
+          value={currentWeekNumber ?? 1}
+          label="Current Week"
+        />
+        <StatsItem
+          variant="secondary"
           value={
-            <div className="">
+            <div>
               <span>{weeksCompleted}</span>
               <span className="text-xs text-muted-foreground">
                 / {weekCount}
@@ -40,8 +45,9 @@ export function ProgressOverview({
           label="Weeks Completed"
         />
         <StatsItem
+          variant="secondary"
           value={
-            <div className="">
+            <div>
               <span>{completedWorkoutsThisWeek}</span>
               <span className="text-xs text-muted-foreground">
                 / {totalWorkoutsThisWeek}
@@ -51,8 +57,9 @@ export function ProgressOverview({
           label="Workouts This Week"
         />
         <StatsItem
+          variant="secondary"
           value={
-            <div className="">
+            <div>
               <span>{completedWorkouts}</span>
               <span className="text-xs text-muted-foreground">
                 / {totalWorkouts}

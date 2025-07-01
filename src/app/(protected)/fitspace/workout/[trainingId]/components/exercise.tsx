@@ -312,7 +312,7 @@ export function ExerciseSelector({
       <DropdownMenuTrigger className="group/dropdown" asChild>
         <Button
           variant="secondary"
-          className={cn('w-full justify-between', className)}
+          className={cn('w-full justify-between bg-secondary', className)}
           iconEnd={
             <ChevronDown
               className={cn(
@@ -409,9 +409,9 @@ function ExerciseSets({
           className={cn(sharedLayoutStyles, 'text-xs text-muted-foreground')}
         >
           <div className="min-w-2.5"></div>
-          <div className="text-center">Reps</div>
-          <div className="text-center">Weight</div>
-          <div className={cn('text-center', !hasRpe && 'hidden')}>
+          <div className="text-center min-w-[96px]">Reps</div>
+          <div className="text-center min-w-[96px]">Weight</div>
+          <div className={cn('text-center', !hasRpe && 'opacity-0')}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex justify-center gap-1">
@@ -608,17 +608,17 @@ function ExerciseSet({
           <div
             className={cn(
               sharedLayoutStyles,
-              'rounded-t-md bg-muted dark:bg-card pb-2 -mb-2',
+              'rounded-t-md bg-muted-foreground/10 dark:bg-card/50 pb-2 -mb-2',
             )}
           >
             <div className="min-w-2.5"></div>
-            <div className="text-xs text-muted-foreground text-center">
+            <div className="text-xs text-muted-foreground text-center min-w-[96px]">
               {repRange}
             </div>
-            <div className="text-xs text-muted-foreground text-center">
+            <div className="text-xs text-muted-foreground text-center min-w-[96px]">
               {set.weight}
             </div>
-            <div />
+            <div className="" />
           </div>
           {hasExtraSets && <div className="w-8 shrink-0" />}
         </div>
@@ -629,7 +629,7 @@ function ExerciseSet({
           <div
             className={cn(
               sharedLayoutStyles,
-              'rounded-md shadow-neuro-light dark:shadow-neuro-dark bg-card text-primary',
+              'rounded-md bg-card text-primary',
             )}
           >
             <div className="min-w-2.5">{set.order}.</div>
@@ -640,7 +640,7 @@ function ExerciseSet({
               inputMode="decimal"
               variant={'secondary'}
               placeholder={thisSet?.log?.reps?.toString() || ''}
-              className="min-w-[96px]"
+              className="min-w-[96px] text-center"
             />
             <Input
               id={`set-${set.id}-weight`}
@@ -649,34 +649,34 @@ function ExerciseSet({
               variant="secondary"
               inputMode="decimal"
               placeholder={thisSet?.log?.weight?.toString() || ''}
-              className="min-w-[96px]"
+              className="min-w-[96px] text-center"
             />
             <div className="text-sm text-muted-foreground text-center">
               {set.rpe}
             </div>
           </div>
         </div>
-        {hasExtraSets && !set.isExtra ? (
-          <div className="w-8 shrink-0" />
-        ) : (
-          set.isExtra && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
-                  iconOnly={<MoreHorizontalIcon />}
-                  loading={isRemovingSet}
-                  className="self-center"
-                />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={handleRemoveSet}>
-                  <TrashIcon /> Remove set
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )
+        {hasExtraSets && (
+          <div className="w-8 shrink-0 flex justify-center">
+            {set.isExtra && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    iconOnly={<MoreHorizontalIcon />}
+                    loading={isRemovingSet}
+                    className="self-center"
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={handleRemoveSet}>
+                    <TrashIcon /> Remove set
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
         )}
       </div>
     </AnimateChangeInHeight>

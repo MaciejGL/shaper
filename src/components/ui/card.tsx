@@ -12,6 +12,7 @@ const cardVariants = cva(
       variant: {
         default: '',
         elevated: 'shadow-neuro-light dark:shadow-neuro-dark',
+        secondary: 'bg-card border-0 shadow-none',
         gradient:
           'border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-white via-white to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800 border-0',
       },
@@ -27,7 +28,7 @@ function Card({
   hoverable = false,
   ...props
 }: React.ComponentProps<'div'> & {
-  variant?: 'default' | 'gradient' | 'elevated'
+  variant?: 'default' | 'gradient' | 'elevated' | 'secondary'
   borderless?: boolean
   hoverable?: boolean
 }) {

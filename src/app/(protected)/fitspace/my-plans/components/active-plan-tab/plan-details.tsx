@@ -15,7 +15,7 @@ export function PlanDetails({
   const endDateFormatted = endDate ? formatDate(endDate, 'MMM d, yyyy') : null
 
   return (
-    <div className="flex items-center justify-between text-sm text-muted-foreground shadow-neuro-light dark:shadow-neuro-dark p-4 rounded-lg bg-card">
+    <div className="flex items-center justify-between text-sm text-muted-foreground p-4 rounded-lg bg-card">
       <div className="flex items-center gap-1">
         <Calendar className="h-4 w-4" />
         {startDateFormatted && <span>Started {startDateFormatted}</span>}

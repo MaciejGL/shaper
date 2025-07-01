@@ -68,6 +68,7 @@ export function ExerciseSelection({
       <DialogTrigger asChild>
         <Button
           size="sm"
+          variant="secondary"
           iconOnly={<SettingsIcon />}
           disabled={!availableExercises || isLoading}
         >

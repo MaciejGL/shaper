@@ -89,10 +89,9 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                 >
                   <div
                     className={cn(
-                      'rounded-md shadow-neuro-light dark:shadow-neuro-dark shrink-0 p-3 min-w-[5rem]',
-                      !day.isRestDay && 'bg-card',
-                      day.isRestDay &&
-                        'bg-muted-foreground/5 text-muted-foreground',
+                      'rounded-md shrink-0 p-3 min-w-[5rem]',
+                      !day.isRestDay && 'bg-primary/6',
+                      day.isRestDay && 'bg-muted/20 text-muted-foreground',
                     )}
                   >
                     <div className="flex-center flex-col gap-1 text-xs md:text-md text-center">
@@ -132,29 +131,6 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
               icon={<Clock4Icon className="size-4 text-blue-500" />}
               label="Gym time"
             />
-            {/* <StatsItem
-              value={
-                <div className="text-2xl font-bold flex items-baseline gap-1">
-                  {weightLogCurrentWeek}
-                  {diffWeight !== 0 && (
-                    <div className="text-xs text-muted-foreground flex items-center gap-1">
-                      <p>
-                        {diffWeight > 0 ? '+' : '-'}
-                        {Math.abs(diffWeight)}kg
-                      </p>
-                    </div>
-                  )}
-                </div>
-              }
-              icon={
-                diffWeight > 0 ? (
-                  <TrendingUpIcon className="size-4 text-green-500" />
-                ) : (
-                  <TrendingDownIcon className="size-4 text-cyan-500" />
-                )
-              }
-              label="Weight trend"
-            /> */}
           </div>
         </CardContent>
       </Card>

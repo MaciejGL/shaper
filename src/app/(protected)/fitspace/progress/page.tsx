@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  GQLUserBodyMeasure,
   useExercisesProgressByUserQuery,
   useUserQuery,
 } from '@/generated/graphql-client'
@@ -38,12 +37,9 @@ export default function ProgressPage() {
   if (isProd) {
     return <div>Progress page</div>
   }
-  // Mock body measures for MVP - in real implementation, this would come from GraphQL
-  const bodyMeasures = userData?.user?.profile?.bodyMeasures || []
-
-  const handleAddMeasurement = async (measurements: GQLUserBodyMeasure) => {
-    // TODO: Implement addBodyMeasurement mutation
-    console.info('Adding measurement:', measurements)
+  const handleRefresh = () => {
+    // Refresh both user data and exercise progress
+    // The body measurements component handles its own refresh
   }
 
   return (
@@ -70,19 +66,14 @@ export default function ProgressPage() {
         </TabsList>
 
         <TabsContent value="body-measures">
-          <BodyMeasurements
-            bodyMeasures={bodyMeasures}
-            onAddMeasurement={handleAddMeasurement}
-          />
+          <BodyMeasurements onRefresh={handleRefresh} />
         </TabsContent>
 
         <TabsContent value="exercises">
-          <div className="space-y-6">
-            <SelectedExercisesProgress
-              exerciseProgress={exerciseProgress?.exercisesProgressByUser || []}
-              userId={userId}
-            />
-          </div>
+          <SelectedExercisesProgress
+            exerciseProgress={exerciseProgress?.exercisesProgressByUser || []}
+            userId={userId}
+          />
         </TabsContent>
       </Tabs>
     </div>
