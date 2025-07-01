@@ -10,11 +10,7 @@ import { MeasurementsEmptyState } from './measurements-empty-state'
 import { MeasurementsOverview } from './measurements-overview'
 import { WeightProgressChart } from './weight-progress-chart'
 
-interface BodyMeasurementsProps {
-  onRefresh?: () => void
-}
-
-export function BodyMeasurements({ onRefresh }: BodyMeasurementsProps) {
+export function BodyMeasurements() {
   const { data, refetch } = useBodyMeasuresQuery()
   const bodyMeasures = useMemo(
     () => data?.bodyMeasures || [],
@@ -23,7 +19,6 @@ export function BodyMeasurements({ onRefresh }: BodyMeasurementsProps) {
 
   const handleMeasurementAdded = () => {
     refetch()
-    onRefresh?.()
   }
 
   // Show empty state when no measurements exist

@@ -8,7 +8,6 @@ import {
   useExercisesProgressByUserQuery,
   useUserQuery,
 } from '@/generated/graphql-client'
-import { isProd } from '@/lib/get-base-url'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
@@ -34,14 +33,6 @@ export default function ProgressPage() {
     { enabled: !!userId },
   )
 
-  if (isProd) {
-    return <div>Progress page</div>
-  }
-  const handleRefresh = () => {
-    // Refresh both user data and exercise progress
-    // The body measurements component handles its own refresh
-  }
-
   return (
     <div className="container-fitspace mx-auto mb-24">
       <DashboardHeader
@@ -66,7 +57,7 @@ export default function ProgressPage() {
         </TabsList>
 
         <TabsContent value="body-measures">
-          <BodyMeasurements onRefresh={handleRefresh} />
+          <BodyMeasurements />
         </TabsContent>
 
         <TabsContent value="exercises">
