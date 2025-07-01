@@ -629,7 +629,7 @@ function ExerciseSet({
           <div
             className={cn(
               sharedLayoutStyles,
-              'rounded-md bg-card text-primary',
+              'rounded-md bg-card  dark:bg-secondary text-primary',
             )}
           >
             <div className="min-w-2.5">{set.order}.</div>
