@@ -37,8 +37,6 @@ export function MeasurementHistoryList({
     return null
   }
 
-  console.log(monthsToShow)
-
   return (
     <div className="space-y-4">
       {monthsToShow.map(({ month, measurements: monthMeasurements }) => (

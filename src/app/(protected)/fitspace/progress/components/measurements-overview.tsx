@@ -8,7 +8,7 @@ import { StatCard } from './stat-card'
 export function MeasurementsOverview() {
   const { bodyMeasures, getLatestMeasurement, getTrend, onMeasurementAdded } =
     useBodyMeasurementsContext()
-  console.log(bodyMeasures)
+
   return (
     <Section
       title="Body Measurements Overview"
