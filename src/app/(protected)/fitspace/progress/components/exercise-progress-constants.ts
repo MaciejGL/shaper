@@ -1,4 +1,5 @@
 import { GQLExercisesProgressByUserQuery } from '@/generated/graphql-client'
+import { formatSets, formatWeight } from '@/lib/utils'
 
 export type ChartType = 'oneRM' | 'sets' | 'volume'
 export type TimePeriod = '12weeks' | '1year' | 'all'
@@ -10,11 +11,11 @@ export type ExerciseProgress =
 export function formatYAxisTick(value: number, chartType: ChartType): string {
   switch (chartType) {
     case 'oneRM':
-      return `${value.toFixed(0)}kg`
+      return formatWeight(value, 0)
     case 'sets':
-      return Math.round(value).toString()
+      return formatSets(value)
     case 'volume':
-      return `${value.toFixed(0)}kg`
+      return formatWeight(value, 0)
     default:
       return value.toString()
   }
@@ -26,11 +27,11 @@ export function formatTooltipValue(
 ): string {
   switch (chartType) {
     case 'oneRM':
-      return `${value.toFixed(1)} kg`
+      return formatWeight(value, 1)
     case 'sets':
-      return `${Math.round(value)} sets`
+      return `${formatSets(value)} sets`
     case 'volume':
-      return `${value.toFixed(0)} kg`
+      return formatWeight(value, 0)
     default:
       return value.toString()
   }

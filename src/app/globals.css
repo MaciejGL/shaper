@@ -237,3 +237,12 @@
 @utility animate-collapsible-slide-up {
   animation: collapsible-slide-up 0.3s ease-out;
 }
+
+/* Fix for recharts mobile touch events */
+.recharts-wrapper {
+  touch-action: manipulation;
+}
+
+.recharts-surface {
+  touch-action: manipulation;
+}

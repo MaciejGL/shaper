@@ -79,17 +79,28 @@ export function useChartData(
       return []
     }
 
+    // Helper function to ensure valid number
+    const safeNumber = (
+      value: number | null | undefined,
+      fallback: number = 0,
+    ): number => {
+      if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
+        return fallback
+      }
+      return value
+    }
+
     // Create data points from 1RM progression
     const allDataPoints = new Map()
 
-    oneRMData.forEach((item) => {
+    oneRMData.forEach((item, index) => {
       if (!item.date) return
 
       const date = new Date(item.date)
       if (isNaN(date.getTime())) return
 
-      // Use real data from the exercise
-      const totalSetsFromExercise = exercise?.totalSets || 0
+      // Use real data from the exercise with safe number validation
+      const totalSetsFromExercise = safeNumber(exercise?.totalSets, 0)
       const volumeFromProgress = exercise?.totalVolumeProgress || []
 
       // Calculate estimated sets and volume for this data point
@@ -110,12 +121,13 @@ export function useChartData(
         matchingVolume?.totalVolume ||
         (item.average1RM || 50) * 0.75 * setsPerPoint * 8 // Estimate: 1RM * 75% * sets * reps
 
-      const key = `date-${item.date}`
+      // Use timestamp to ensure unique keys and avoid duplicate date issues
+      const key = `${date.getTime()}-${index}`
       allDataPoints.set(key, {
         date: format(date, 'd MMM'),
-        oneRM: item.average1RM || 0,
+        oneRM: safeNumber(item.average1RM, 0),
         sets: Math.round(setsPerPoint),
-        volume: Math.round(volumePerPoint),
+        volume: Math.round(volumePerPoint || 0),
         timestamp: date.getTime(),
       })
     })
@@ -141,7 +153,24 @@ export function useChartData(
       .sort((a, b) => a.timestamp - b.timestamp)
       .slice(-15) // Show up to 15 data points
 
-    return result
+    // Ensure unique date strings for display to prevent X-axis issues
+    const seenDates = new Map<string, number>()
+    const finalResult = result.map((item) => {
+      const originalDate = item.date
+      const count = seenDates.get(originalDate) || 0
+      seenDates.set(originalDate, count + 1)
+
+      // If we've seen this date before, add a suffix
+      const uniqueDate =
+        count > 0 ? `${originalDate} (${count + 1})` : originalDate
+
+      return {
+        ...item,
+        date: uniqueDate,
+      }
+    })
+
+    return finalResult
   }, [exercise, timePeriod])
 }
 

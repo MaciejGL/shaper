@@ -77,12 +77,22 @@ export function ExerciseProgressChart({
 
   // Helper functions for Y-axis range calculation
   const getValidChartValues = (chartType: ChartType) => {
-    return chartData
-      .map((item) => item[chartType] as number)
-      .filter((val) => val > 0)
+    const values = chartData
+      .map((item) => item[chartType])
+      .filter((val) => val !== undefined && val !== null)
+
+    // Only filter out negative values for 1RM, allow 0 for volume and sets
+    if (chartType === 'oneRM') {
+      return values.filter((val) => val > 0)
+    }
+
+    // For volume and sets, allow 0 and positive values
+    return values.filter((val) => val >= 0)
   }
 
   const calculateSetsYAxisRange = (values: number[]) => {
+    if (values.length === 0) return { min: 0, max: 20 }
+
     const min = Math.min(...values)
     const max = Math.max(...values)
     const dataRange = max - min
@@ -104,11 +114,22 @@ export function ExerciseProgressChart({
   }
 
   const calculateStandardYAxisRange = (values: number[]) => {
+    if (values.length === 0) return { min: 0, max: 100 }
+
     const min = Math.min(...values)
     const max = Math.max(...values)
     const range = max - min
-    const padding = Math.max(range * 0.1, range * 0.05)
 
+    // For very small ranges or when all values are 0, provide a minimum range
+    if (range < 1 || max === 0) {
+      const baseMax = Math.max(max, 10) // Ensure at least 10 for meaningful scale
+      return {
+        min: 0,
+        max: baseMax * 1.2, // Add 20% padding
+      }
+    }
+
+    const padding = Math.max(range * 0.1, range * 0.05)
     return {
       min: Math.max(0, min - padding),
       max: max + padding,
@@ -119,7 +140,19 @@ export function ExerciseProgressChart({
     if (chartData.length < 2) return { min: 0, max: 100 }
 
     const values = getValidChartValues(chartType)
-    if (values.length === 0) return { min: 0, max: 100 }
+    if (values.length === 0) {
+      // Return sensible defaults based on chart type
+      switch (chartType) {
+        case 'oneRM':
+          return { min: 0, max: 100 }
+        case 'sets':
+          return { min: 0, max: 20 }
+        case 'volume':
+          return { min: 0, max: 1000 }
+        default:
+          return { min: 0, max: 100 }
+      }
+    }
 
     return chartType === 'sets'
       ? calculateSetsYAxisRange(values)
@@ -127,6 +160,24 @@ export function ExerciseProgressChart({
   }
 
   const yAxisRange = calculateYAxisRange(activeChart)
+
+  // Safety check - if we have chart data but no valid values, use raw data
+  const hasAnyData = chartData.length > 0
+  const hasValidValues = getValidChartValues(activeChart).length > 0
+
+  // If we have data but no valid values after filtering, adjust the domain
+  const finalYAxisRange =
+    hasAnyData && !hasValidValues
+      ? {
+          min: 0,
+          max: Math.max(
+            10,
+            Math.max(
+              ...chartData.map((item) => (item[activeChart] as number) || 0),
+            ) * 1.2,
+          ),
+        }
+      : yAxisRange
 
   const chartConfig = {
     oneRM: {
@@ -202,12 +253,12 @@ export function ExerciseProgressChart({
         <div className="w-full px-2">
           <ChartContainer
             config={chartConfig}
-            className="h-full w-full min-h-0 bg-background/30 dark:bg-black/20 rounded-lg p-2"
+            className="w-full h-[200px] bg-card-on-card dark:bg-black/40 rounded-lg p-2"
           >
             {activeChart === 'oneRM' ? (
               <LineChart
                 data={chartData}
-                margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                margin={{ top: 15, right: 8, left: -12, bottom: 10 }}
               >
                 <CartesianGrid
                   strokeDasharray="2 2"
@@ -219,15 +270,15 @@ export function ExerciseProgressChart({
                   axisLine={false}
                   tickLine={false}
                   interval="preserveStartEnd"
-                  height={20}
+                  height={10}
+                  tickMargin={6}
                 />
                 <YAxis
                   tick={{ fontSize: 9 }}
                   axisLine={false}
                   tickLine={false}
-                  width={30}
                   tickFormatter={(value) => formatYAxisTick(value, activeChart)}
-                  domain={[yAxisRange.min, yAxisRange.max]}
+                  domain={[finalYAxisRange.min, finalYAxisRange.max]}
                 />
                 <ChartTooltip
                   content={<ChartTooltipContent />}
@@ -241,14 +292,18 @@ export function ExerciseProgressChart({
                   dataKey={activeChart}
                   stroke={`var(--color-${activeChart})`}
                   strokeWidth={2.5}
-                  dot={{ r: 2.5 }}
-                  activeDot={{ r: 4 }}
+                  dot={{ r: 3 }}
+                  activeDot={{ r: 6 }}
                 />
               </LineChart>
+            ) : chartData.length === 0 ? (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                No data available for {activeChart}
+              </div>
             ) : (
               <BarChart
                 data={chartData}
-                margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+                margin={{ top: 15, right: 8, left: -12, bottom: 10 }}
               >
                 <CartesianGrid strokeDasharray="2 2" opacity={0.3} />
                 <XAxis
@@ -257,15 +312,21 @@ export function ExerciseProgressChart({
                   axisLine={false}
                   tickLine={false}
                   interval="preserveStartEnd"
-                  height={20}
+                  height={10}
                 />
                 <YAxis
                   tick={{ fontSize: 9 }}
                   axisLine={false}
                   tickLine={false}
-                  width={30}
+                  width={
+                    activeChart === 'sets'
+                      ? 30
+                      : activeChart === 'volume'
+                        ? 70
+                        : undefined
+                  }
                   tickFormatter={(value) => formatYAxisTick(value, activeChart)}
-                  domain={[yAxisRange.min, yAxisRange.max]}
+                  domain={[finalYAxisRange.min, finalYAxisRange.max]}
                 />
                 <ChartTooltip
                   content={<ChartTooltipContent />}

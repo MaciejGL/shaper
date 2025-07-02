@@ -1,3 +1,5 @@
+import { formatNumber } from '@/lib/utils'
+
 interface LogItemsProps {
   items: {
     monthYear: string
@@ -74,9 +76,11 @@ export function ExerciseLogItem({
               >
                 <span className="text-muted-foreground">{index + 1}</span>
                 <span className="text-center">{set.reps}</span>
-                <span className="text-center">{set.weight}</span>
                 <span className="text-center">
-                  {set.estimatedRM.toFixed(1)}
+                  {formatNumber(set.weight, 0)}
+                </span>
+                <span className="text-center">
+                  {formatNumber(set.estimatedRM, 1)}
                 </span>
               </div>
             ))}

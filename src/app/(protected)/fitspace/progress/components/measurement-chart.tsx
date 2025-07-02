@@ -8,7 +8,7 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart'
 import { GQLBodyMeasuresQuery } from '@/generated/graphql-client'
-import { cn } from '@/lib/utils'
+import { cn, formatNumber } from '@/lib/utils'
 
 import { MeasurementField } from './measurement-constants'
 
@@ -69,7 +69,7 @@ export function MeasurementChart({
     >
       <LineChart
         data={chartData}
-        margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
+        margin={{ top: 15, right: 8, left: 0, bottom: 12 }}
       >
         <CartesianGrid strokeDasharray="2 2" opacity={0.3} />
         <XAxis
@@ -78,14 +78,15 @@ export function MeasurementChart({
           axisLine={false}
           tickLine={false}
           interval="preserveStartEnd"
-          height={20}
+          height={10}
+          tickMargin={8}
         />
         <YAxis
           tick={{ fontSize: 9 }}
           axisLine={false}
           tickLine={false}
-          width={30}
-          tickFormatter={(value) => `${value.toFixed(1)}${unit}`}
+          width={38}
+          tickFormatter={(value) => `${formatNumber(value, 1)}${unit}`}
           domain={[yAxisMin, yAxisMax]}
         />
         <ChartTooltip content={<ChartTooltipContent />} />

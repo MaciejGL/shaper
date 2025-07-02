@@ -103,7 +103,22 @@ ${colorConfig
   )
 }
 
-const ChartTooltip = RechartsPrimitive.Tooltip
+// Simple ChartTooltip with mobile support
+const ChartTooltip = React.forwardRef<
+  React.ElementRef<typeof RechartsPrimitive.Tooltip>,
+  React.ComponentPropsWithoutRef<typeof RechartsPrimitive.Tooltip>
+>((props, ref) => {
+  return (
+    <RechartsPrimitive.Tooltip
+      ref={ref}
+      trigger="click" // Use click for both mobile and desktop
+      allowEscapeViewBox={{ x: false, y: false }} // Keep tooltip in view
+      {...props}
+    />
+  )
+})
+
+ChartTooltip.displayName = 'ChartTooltip'
 
 function ChartTooltipContent({
   active,

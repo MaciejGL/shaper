@@ -22,6 +22,7 @@ import {
   type GQLGetClientByIdQuery,
   useExercisesProgressByUserQuery,
 } from '@/generated/graphql-client'
+import { formatNumber, formatWeight } from '@/lib/utils'
 
 interface ExerciseLogsProps {
   plan: NonNullable<GQLGetClientByIdQuery['getClientActivePlan']>
@@ -233,6 +234,9 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
               data={dailyOneRmData}
               margin={{
                 top: 20,
+                right: 15,
+                bottom: 25,
+                left: 60,
               }}
             >
               <CartesianGrid vertical={false} />
@@ -257,6 +261,8 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
+                width={60}
+                tickFormatter={(value) => formatWeight(value, 0)}
                 domain={[oneRMRange.min, oneRMRange.max]}
               />
               <ChartTooltip
@@ -275,15 +281,22 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
                       </div>
                       <div>
                         <span className="text-muted-foreground">Avg 1RM:</span>{' '}
-                        <strong>{dayData.average1RM} kg</strong>
+                        <strong>{formatWeight(dayData.average1RM, 1)}</strong>
                       </div>
                       <div className="mt-2 text-sm grid grid-cols-[3fr_1fr_3fr_3fr] gap-2">
                         {dayData.detailedLogs.map((log, idx) => (
                           <Fragment key={idx}>
-                            <div>{log.weight}kg</div>
+                            <div>
+                              {log.weight ? formatWeight(log.weight, 0) : '—'}
+                            </div>
                             <div>x</div>
                             <div>{log.reps} reps</div>
-                            <div>1RM {log.estimated1RM.toFixed(1)}</div>
+                            <div>
+                              1RM{' '}
+                              {log.estimated1RM
+                                ? formatWeight(log.estimated1RM, 1)
+                                : '—'}
+                            </div>
                           </Fragment>
                         ))}
                       </div>
@@ -315,6 +328,9 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
               data={exercise.totalVolumeProgress}
               margin={{
                 top: 20,
+                right: 60,
+                bottom: 25,
+                left: 60,
               }}
             >
               <CartesianGrid vertical={false} />
@@ -341,6 +357,8 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
+                width={60}
+                tickFormatter={(value) => formatNumber(value, 0)}
                 domain={[
                   volumeSetRanges.volume.min,
                   volumeSetRanges.volume.max,
@@ -361,6 +379,8 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
+                width={60}
+                tickFormatter={(value) => Math.round(value).toString()}
                 domain={[volumeSetRanges.sets.min, volumeSetRanges.sets.max]}
               />
               <ChartTooltip content={<ChartTooltipContent />} />

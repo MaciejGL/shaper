@@ -1,6 +1,6 @@
 import { TrendingDown, TrendingUp } from 'lucide-react'
 
-import { cn } from '@/lib/utils'
+import { cn, formatNumber } from '@/lib/utils'
 
 interface StatCardProps {
   label: string
@@ -37,7 +37,7 @@ export function StatCard({
         <TrendIcon className="h-3 w-3" />
         <span>
           {isPositive ? '+' : ''}
-          {trend.toFixed(1)} {unit}
+          {formatNumber(trend, 1)} {unit}
         </span>
       </div>
     )
@@ -67,7 +67,7 @@ export function StatCard({
             value === undefined && 'text-muted-foreground',
           )}
         >
-          {value ? `${value.toFixed(1)} ${unit}` : '—'}
+          {value ? `${formatNumber(value, 1)} ${unit}` : '—'}
         </div>
         {trend !== null && trend !== undefined && formatTrend(trend)}
       </div>

@@ -1,6 +1,7 @@
 import { BicepsFlexed, TrendingDown, TrendingUp } from 'lucide-react'
 
 import { StatsItem } from '@/components/stats-item'
+import { formatNumber } from '@/lib/utils'
 
 interface ExerciseProgressStatsProps {
   currentOneRM: number
@@ -17,7 +18,7 @@ export function ExerciseProgressStats({
         label="Current 1RM"
         value={
           <p className="text-md font-medium flex items-center gap-1">
-            {currentOneRM.toFixed(1)} <span className="text-sm">kg</span>
+            {formatNumber(currentOneRM, 1)} <span className="text-sm">kg</span>
           </p>
         }
         icon={<BicepsFlexed className="text-amber-500 size-4" />}
@@ -26,7 +27,7 @@ export function ExerciseProgressStats({
         label="Improvement"
         value={
           <p className="text-md font-medium flex items-center gap-1">
-            {improvement.toFixed(1)} <span className="text-sm">%</span>
+            {formatNumber(improvement, 1)} <span className="text-sm">%</span>
           </p>
         }
         icon={
