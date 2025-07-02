@@ -48,7 +48,7 @@ export function StatCard({
       className={cn(
         'rounded-lg bg-card dark:bg-card',
         size === 'sm' ? 'p-2' : 'p-3',
-        isOnCard && 'bg-card-on-card dark:bg-card',
+        isOnCard && 'bg-card-on-card dark:bg-card-on-card',
       )}
     >
       <span

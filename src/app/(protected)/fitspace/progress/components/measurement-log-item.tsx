@@ -15,12 +15,14 @@ interface MeasurementLogItemProps {
     label: string
     unit: string
   }[]
+  isOnCard?: boolean
 }
 
 export function MeasurementLogItem({
   measurement,
   onUpdate,
   relevantFields,
+  isOnCard = false,
 }: MeasurementLogItemProps) {
   // Count non-null measurements
   const measurementCount = [
@@ -47,9 +49,10 @@ export function MeasurementLogItem({
 
   return (
     <div
-      className={
-        'flex items-center justify-between p-3 last-of-type:rounded-b-lg first-of-type:rounded-t-lg not-last-of-type:border-b border-border bg-card'
-      }
+      className={cn(
+        'flex items-center justify-between p-3 last-of-type:rounded-b-lg first-of-type:rounded-t-lg not-last-of-type:border-b border-border bg-card',
+        isOnCard && 'bg-card-on-card border-muted-foreground/20',
+      )}
     >
       <div className="flex-1">
         {!relevantFields && (

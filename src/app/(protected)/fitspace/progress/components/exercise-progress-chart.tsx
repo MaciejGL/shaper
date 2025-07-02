@@ -75,6 +75,59 @@ export function ExerciseProgressChart({
     chartData.length > 0 ? chartData[chartData.length - 1].oneRM : 0
   const exerciseId = exercise.baseExercise?.id
 
+  // Helper functions for Y-axis range calculation
+  const getValidChartValues = (chartType: ChartType) => {
+    return chartData
+      .map((item) => item[chartType] as number)
+      .filter((val) => val > 0)
+  }
+
+  const calculateSetsYAxisRange = (values: number[]) => {
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const dataRange = max - min
+    const minDisplayRange = 4
+
+    if (dataRange < minDisplayRange) {
+      const padding = (minDisplayRange - dataRange) / 2
+      return {
+        min: Math.max(0, Math.floor(min - padding)),
+        max: Math.ceil(max + padding),
+      }
+    }
+
+    const padding = Math.max(dataRange * 0.1, 0.5)
+    return {
+      min: Math.max(0, Math.floor(min - padding)),
+      max: Math.ceil(max + padding),
+    }
+  }
+
+  const calculateStandardYAxisRange = (values: number[]) => {
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const range = max - min
+    const padding = Math.max(range * 0.1, range * 0.05)
+
+    return {
+      min: Math.max(0, min - padding),
+      max: max + padding,
+    }
+  }
+
+  const calculateYAxisRange = (chartType: ChartType) => {
+    if (chartData.length < 2) return { min: 0, max: 100 }
+
+    const values = getValidChartValues(chartType)
+    if (values.length === 0) return { min: 0, max: 100 }
+
+    return chartType === 'sets'
+      ? calculateSetsYAxisRange(values)
+      : calculateStandardYAxisRange(values)
+  }
+
+  const yAxisRange = calculateYAxisRange(activeChart)
+
   const chartConfig = {
     oneRM: {
       label: '1RM (kg)',
@@ -174,6 +227,7 @@ export function ExerciseProgressChart({
                   tickLine={false}
                   width={30}
                   tickFormatter={(value) => formatYAxisTick(value, activeChart)}
+                  domain={[yAxisRange.min, yAxisRange.max]}
                 />
                 <ChartTooltip
                   content={<ChartTooltipContent />}
@@ -211,6 +265,7 @@ export function ExerciseProgressChart({
                   tickLine={false}
                   width={30}
                   tickFormatter={(value) => formatYAxisTick(value, activeChart)}
+                  domain={[yAxisRange.min, yAxisRange.max]}
                 />
                 <ChartTooltip
                   content={<ChartTooltipContent />}

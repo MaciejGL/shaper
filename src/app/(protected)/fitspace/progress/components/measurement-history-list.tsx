@@ -12,6 +12,7 @@ interface MeasurementHistoryListProps {
   onUpdate: () => void
   focusField?: MeasurementField // If provided, show only this field's data
   maxMonths?: number // Limit number of months to display
+  isOnCard?: boolean
 }
 
 export function MeasurementHistoryList({
@@ -19,6 +20,7 @@ export function MeasurementHistoryList({
   onUpdate,
   focusField,
   maxMonths,
+  isOnCard = false,
 }: MeasurementHistoryListProps) {
   const { measurementsByMonth } = useBodyMeasurements(measurements)
 
@@ -34,6 +36,8 @@ export function MeasurementHistoryList({
     }
     return null
   }
+
+  console.log(monthsToShow)
 
   return (
     <div className="space-y-4">
@@ -72,6 +76,7 @@ export function MeasurementHistoryList({
                   measurement={measurement}
                   onUpdate={onUpdate}
                   relevantFields={relevantFields}
+                  isOnCard={isOnCard}
                 />
               )
             })}

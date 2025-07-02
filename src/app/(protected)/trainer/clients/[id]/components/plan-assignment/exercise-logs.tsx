@@ -133,6 +133,91 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
     detailedLogs: entry.detailedLogs,
   }))
 
+  // Helper functions for clean Y-axis range calculations
+  const calculateWeightYAxisRange = (values: number[]) => {
+    if (values.length === 0) return { min: 0, max: 100 }
+
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const range = max - min
+    const padding = Math.max(range * 0.1, 5) // Minimum 5kg padding
+
+    return {
+      min: Math.max(0, min - padding),
+      max: max + padding,
+    }
+  }
+
+  const calculateVolumeYAxisRange = (values: number[]) => {
+    if (values.length === 0) return { min: 0, max: 1000 }
+
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const range = max - min
+    const padding = Math.max(range * 0.1, 50) // Minimum 50kg padding
+
+    return {
+      min: Math.max(0, min - padding),
+      max: max + padding,
+    }
+  }
+
+  const calculateSetsYAxisRange = (values: number[]) => {
+    if (values.length === 0) return { min: 0, max: 20 }
+
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const dataRange = max - min
+    const minDisplayRange = 4
+
+    if (dataRange < minDisplayRange) {
+      const padding = (minDisplayRange - dataRange) / 2
+      return {
+        min: Math.max(0, Math.floor(min - padding)),
+        max: Math.ceil(max + padding),
+      }
+    }
+
+    const padding = Math.max(dataRange * 0.1, 1)
+    return {
+      min: Math.max(0, Math.floor(min - padding)),
+      max: Math.ceil(max + padding),
+    }
+  }
+
+  // Main calculation functions
+  const calculate1RMRange = () => {
+    if (dailyOneRmData.length < 2) return { min: 0, max: 100 }
+    const values = dailyOneRmData
+      .map((item) => item.average1RM)
+      .filter((val) => val > 0)
+    return calculateWeightYAxisRange(values)
+  }
+
+  const calculateVolumeSetRanges = () => {
+    if (exercise.totalVolumeProgress.length < 2) {
+      return {
+        volume: { min: 0, max: 1000 },
+        sets: { min: 0, max: 20 },
+      }
+    }
+
+    const volumes = exercise.totalVolumeProgress
+      .map((item) => item.totalVolume)
+      .filter((val) => val > 0)
+    const sets = exercise.totalVolumeProgress
+      .map((item) => item.totalSets)
+      .filter((val) => val > 0)
+
+    return {
+      volume: calculateVolumeYAxisRange(volumes),
+      sets: calculateSetsYAxisRange(sets),
+    }
+  }
+
+  const oneRMRange = calculate1RMRange()
+  const volumeSetRanges = calculateVolumeSetRanges()
+
   return (
     <Card>
       <CardHeader>
@@ -172,6 +257,7 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
+                domain={[oneRMRange.min, oneRMRange.max]}
               />
               <ChartTooltip
                 content={({ payload }) => {
@@ -255,6 +341,10 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
+                domain={[
+                  volumeSetRanges.volume.min,
+                  volumeSetRanges.volume.max,
+                ]}
               />
               {/* Right Y-axis for total sets */}
               <YAxis
@@ -271,6 +361,7 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
+                domain={[volumeSetRanges.sets.min, volumeSetRanges.sets.max]}
               />
               <ChartTooltip content={<ChartTooltipContent />} />
               {/* Bar for total volume - matches left axis */}

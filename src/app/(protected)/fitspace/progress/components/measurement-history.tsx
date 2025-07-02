@@ -1,19 +1,13 @@
 import { Calendar } from 'lucide-react'
 
 import { CardTitle } from '@/components/ui/card'
-import { GQLBodyMeasuresQuery } from '@/generated/graphql-client'
 
+import { useBodyMeasurementsContext } from './body-measurements-context'
 import { MeasurementHistoryList } from './measurement-history-list'
 
-interface MeasurementHistoryProps {
-  bodyMeasures: GQLBodyMeasuresQuery['bodyMeasures']
-  onMeasurementAdded: () => void
-}
+export function MeasurementHistory() {
+  const { bodyMeasures, onMeasurementAdded } = useBodyMeasurementsContext()
 
-export function MeasurementHistory({
-  bodyMeasures,
-  onMeasurementAdded,
-}: MeasurementHistoryProps) {
   if (bodyMeasures.length === 0) {
     return null
   }

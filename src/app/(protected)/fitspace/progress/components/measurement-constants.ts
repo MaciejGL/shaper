@@ -1,8 +1,7 @@
 export const measurementCategories = [
   {
     id: 'core',
-    title: 'Weight & Body Composition',
-    description: '',
+    title: 'Core Measurements',
     fields: [
       { key: 'weight' as const, label: 'Weight', unit: 'kg' },
       { key: 'bodyFat' as const, label: 'Body Fat', unit: '%' },
@@ -11,7 +10,6 @@ export const measurementCategories = [
   {
     id: 'circumferences',
     title: 'Body Circumferences',
-    description: 'Chest, waist, hips, and neck',
     fields: [
       { key: 'chest' as const, label: 'Chest', unit: 'cm' },
       { key: 'waist' as const, label: 'Waist', unit: 'cm' },
@@ -22,7 +20,6 @@ export const measurementCategories = [
   {
     id: 'limbs',
     title: 'Arms & Legs',
-    description: 'Biceps, thighs, and calves',
     fields: [
       { key: 'bicepsLeft' as const, label: 'Left Bicep', unit: 'cm' },
       { key: 'bicepsRight' as const, label: 'Right Bicep', unit: 'cm' },
