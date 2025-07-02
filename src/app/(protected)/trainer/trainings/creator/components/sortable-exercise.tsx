@@ -187,7 +187,7 @@ export const SortableExercise = React.memo(
             // Remove border and background when dragging. It's a wrapper in sorting context
             isDragging && 'border-none !bg-primary/10 mx-2 !scale-100',
           )}
-          hoverable
+          variant="secondary"
         >
           {/* {isDragging && <InsertionIndicatorBlank isActive={true} />} */}
           {!isDragging && (

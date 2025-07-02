@@ -23,7 +23,7 @@ export const TrainingExerciseCard = React.memo(function TrainingExerciseCard({
   return (
     <Card
       className="cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px] select-none"
-      hoverable
+      variant="secondary"
     >
       <CardContent className="grow p-3 flex flex-col gap-2 justify-between overflow-hidden cursor-pointer">
         {exercise.type && (
@@ -66,8 +66,8 @@ export const SidebarExercsesCard = React.memo(function SidebarExercsesCard({
 }: SidebarExercsesCardProps) {
   return (
     <Card
-      className="cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out"
-      hoverable
+      className="cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out bg-card-on-card"
+      variant="secondary"
     >
       <CardContent className="p-3">
         <p className="text-sm font-medium pr-6">{exercise.name}</p>

@@ -129,7 +129,7 @@ export function useDragDropLogic(day: TrainingDay) {
 
         setDraggedOverIndex(insertIndex)
       },
-      16,
+      10,
     ) // Reduce throttle delay to ~60fps for faster response
 
     calculateInsertionIndexRef.current = throttledFunc

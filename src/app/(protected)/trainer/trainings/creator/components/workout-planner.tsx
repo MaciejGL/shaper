@@ -5,13 +5,12 @@ import {
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
-  KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   pointerWithin,
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
-import { sortableKeyboardCoordinates } from '@dnd-kit/sortable'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 
@@ -77,11 +76,15 @@ export default function WorkoutPlanner() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8,
+        distance: 0,
       },
     }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 150,
+        tolerance: 8,
+        distance: 8,
+      },
     }),
   )
 

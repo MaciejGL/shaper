@@ -33,10 +33,10 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
       {...attributes}
       {...listeners}
       className={cn(
-        'p-0 cursor-grab active:cursor-grabbing transition-colors',
+        'p-0 cursor-grab active:cursor-grabbing transition-colors bg-card-on-card',
         isDragging ? 'opacity-0' : '',
       )}
-      hoverable
+      variant="secondary"
     >
       <CardContent className="p-2">
         <div className="font-medium text-sm space-y-1">
