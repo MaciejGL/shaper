@@ -102,6 +102,7 @@ export const ExerciseList = React.memo(
 
     return (
       <div className="flex-1 max-w-full">
+        {/* Sidebar insertion indicator at the start of the list */}
         <InsertionIndicator isActive={draggedOverIndex === 0} />
 
         <div className="min-h-[120px] py-2 rounded">
@@ -119,6 +120,7 @@ export const ExerciseList = React.memo(
                   dayOfWeek={day.dayOfWeek}
                   exerciseIndex={index}
                 />
+                {/* Sidebar insertion indicator at the end of the list */}
                 <InsertionIndicator isActive={draggedOverIndex === index + 1} />
               </div>
             ))}

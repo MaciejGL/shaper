@@ -13,7 +13,6 @@ import {
 } from '@/generated/graphql-client'
 import { useDebouncedInvalidation } from '@/hooks/use-debounced-invalidation'
 import { useDebouncedMutationWrapper } from '@/hooks/use-debounced-mutation-wrapper'
-import { createId } from '@/lib/create-id'
 
 import { PartialTrainingPlanFormDataExercise } from './types'
 
@@ -179,8 +178,11 @@ export const useExerciseHandlers = ({
       const order =
         typeof atIndex === 'number' ? atIndex + 1 : newExercises.length + 1
 
+      // Create a temporary ID for optimistic updates
+      const tempId = `temp-exercise-${Date.now()}-${Math.random()}`
+
       const newExercise: TrainingExercise = {
-        id: createId(),
+        id: tempId, // Use temporary ID for tracking
         name: exercise.name || '',
         instructions: exercise.instructions,
         sets: exercise.sets || [],
@@ -231,19 +233,24 @@ export const useExerciseHandlers = ({
         },
         {
           onSuccess: (data) => {
+            // Replace the temporary exercise with the real one from server
             setWeeks((prev) => {
-              if (atIndex) {
-                prev[weekIndex].days[dayIndex].exercises[atIndex] = {
-                  ...prev[weekIndex].days[dayIndex].exercises[atIndex],
+              const updatedWeeks = [...prev]
+              const dayExercises =
+                updatedWeeks[weekIndex].days[dayIndex].exercises
+
+              // Find and replace the temporary exercise with the real one
+              const exerciseIndex = dayExercises.findIndex(
+                (ex) => ex.id === tempId,
+              )
+              if (exerciseIndex !== -1) {
+                dayExercises[exerciseIndex] = {
+                  ...dayExercises[exerciseIndex],
                   id: data.addExerciseToDay,
                 }
-              } else {
-                prev[weekIndex].days[dayIndex].exercises.push({
-                  ...newExercise,
-                  id: data.addExerciseToDay,
-                })
               }
-              return prev
+
+              return updatedWeeks
             })
             setIsDirty(false)
             debouncedInvalidateQueries()

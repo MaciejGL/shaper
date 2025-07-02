@@ -66,7 +66,6 @@ import { useDebouncedMutationWrapper } from '@/hooks/use-debounced-mutation-wrap
 import { formatTempoInput, handleTempoKeyDown } from '@/lib/format-tempo'
 import { cn } from '@/lib/utils'
 
-import { InsertionIndicatorBlank } from './insertion-indicators'
 import { EXERCISE_TYPES } from './utils'
 
 interface SortableExerciseProps {
@@ -185,11 +184,12 @@ export const SortableExercise = React.memo(
           {...listeners}
           className={cn(
             'cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px] select-none',
-            isDragging && 'border-primary/50 !bg-muted/50',
+            // Remove border and background when dragging. It's a wrapper in sorting context
+            isDragging && 'border-none !bg-primary/10 mx-2 !scale-100',
           )}
           hoverable
         >
-          {isDragging && <InsertionIndicatorBlank isActive={true} />}
+          {/* {isDragging && <InsertionIndicatorBlank isActive={true} />} */}
           {!isDragging && (
             <CardContent
               className="grow p-3 flex flex-col gap-2 justify-between overflow-hidden cursor-pointer"
@@ -593,7 +593,14 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
   const addSet = useCallback(
     async (input: Omit<GQLUpdateExerciseSetFormInput, 'exerciseId'>) => {
       const lastSetData = localData.sets?.[localData.sets.length - 1]
-      const addedSet: Omit<GQLUpdateExerciseSetFormInput, 'exerciseId'> = {
+
+      // Create a temporary ID for optimistic updates
+      const tempId = `temp-${Date.now()}-${Math.random()}`
+
+      const addedSet: Omit<GQLUpdateExerciseSetFormInput, 'exerciseId'> & {
+        id?: string
+      } = {
+        id: tempId, // Add temporary ID for tracking
         minReps: input.minReps ? Number(input.minReps) : lastSetData?.minReps,
         maxReps: input.maxReps ? Number(input.maxReps) : lastSetData?.maxReps,
         weight: input.weight ? Number(input.weight) : lastSetData?.weight,
@@ -602,10 +609,11 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
       }
 
       try {
-        setLocalData({
-          ...localData,
-          sets: [...(localData.sets || []), addedSet],
-        })
+        // Optimistic update: add set with temporary ID
+        setLocalData((prevData) => ({
+          ...prevData,
+          sets: [...(prevData.sets || []), addedSet],
+        }))
 
         await addSetExerciseForm(
           {
@@ -622,34 +630,44 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
           {
             onSuccess: (data) => {
               debouncedInvalidateQueries()
-              setLocalData({
-                ...localData,
-                sets: [
-                  ...(localData.sets || []),
-                  { ...addedSet, id: data.addSetExerciseForm.id },
-                ],
-              })
+              // Replace the temporary set with the real one from server
+              setLocalData((prevData) => ({
+                ...prevData,
+                sets:
+                  prevData.sets?.map((set) =>
+                    set.id === tempId
+                      ? { ...addedSet, id: data.addSetExerciseForm.id }
+                      : set,
+                  ) || [],
+              }))
             },
             onError: () => {
               console.error('[Add set]: Failed to add set', {
                 exerciseId,
               })
-              setLocalData({
-                ...localData,
-                sets: localData.sets?.filter((set) => set.id !== addedSet.id),
-              })
+              // Remove the temporary set on error
+              setLocalData((prevData) => ({
+                ...prevData,
+                sets: prevData.sets?.filter((set) => set.id !== tempId) || [],
+              }))
             },
           },
         )
       } catch (error) {
         console.error('Day update failed:', error)
-        setLocalData({
-          ...localData,
-          sets: localData.sets?.filter((set) => set.id !== addedSet.id),
-        })
+        // Remove the temporary set on error
+        setLocalData((prevData) => ({
+          ...prevData,
+          sets: prevData.sets?.filter((set) => set.id !== tempId) || [],
+        }))
       }
     },
-    [exerciseId, localData, addSetExerciseForm, debouncedInvalidateQueries],
+    [
+      exerciseId,
+      localData.sets,
+      addSetExerciseForm,
+      debouncedInvalidateQueries,
+    ],
   )
 
   const removeSet = useCallback(

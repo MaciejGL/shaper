@@ -44,9 +44,10 @@ export function useDragDropLogic(day: TrainingDay) {
     }
   }, [active])
 
-  // Immediately clear insertion indicator when not dragging or when over changes to null
+  // Immediately clear insertion indicator when not dragging - this is the key fix
   useEffect(() => {
-    if (!dragInfo?.isDraggingAnyItem || !over) {
+    if (!dragInfo?.isDraggingAnyItem) {
+      // Immediately clear the indicator
       setDraggedOverIndex(null)
       // Cancel any pending throttled calls immediately
       if (calculateInsertionIndexRef.current) {
@@ -56,7 +57,20 @@ export function useDragDropLogic(day: TrainingDay) {
         throttledMouseMoveRef.current.cancel()
       }
     }
-  }, [dragInfo?.isDraggingAnyItem, over])
+  }, [dragInfo?.isDraggingAnyItem]) // Only depend on isDraggingAnyItem, not 'over'
+
+  // Also clear when over becomes null, but don't depend on dragInfo here to avoid conflicts
+  useEffect(() => {
+    if (!over && !active) {
+      setDraggedOverIndex(null)
+      if (calculateInsertionIndexRef.current) {
+        calculateInsertionIndexRef.current.cancel()
+      }
+      if (throttledMouseMoveRef.current) {
+        throttledMouseMoveRef.current.cancel()
+      }
+    }
+  }, [over, active])
 
   // Create throttled insertion index calculation
   const calculateInsertionIndex = useMemo(() => {
@@ -66,6 +80,7 @@ export function useDragDropLogic(day: TrainingDay) {
 
     const throttledFunc = throttle(
       (over: Over | null, isMouseOver: boolean) => {
+        // Double-check drag state before doing anything
         if (
           !dragInfo?.isDraggingAnyItem ||
           !over ||
@@ -135,8 +150,8 @@ export function useDragDropLogic(day: TrainingDay) {
     }
 
     const throttledMouseMove = throttle((e: MouseEvent) => {
-      // Double-check we're still dragging to prevent race conditions
-      if (!dragInfo?.isDraggingAnyItem) {
+      // Triple-check we're still dragging to prevent race conditions
+      if (!dragInfo?.isDraggingAnyItem || !active) {
         setDraggedOverIndex(null)
         return
       }
@@ -168,7 +183,7 @@ export function useDragDropLogic(day: TrainingDay) {
         document.removeEventListener('mousemove', throttledMouseMoveRef.current)
       }
     }
-  }, [dragInfo?.isDraggingAnyItem, calculateInsertionIndex, over])
+  }, [dragInfo?.isDraggingAnyItem, calculateInsertionIndex, over, active]) // Added 'active' to dependencies
 
   // Update drag state reference without causing rerenders
   useEffect(() => {
@@ -181,7 +196,7 @@ export function useDragDropLogic(day: TrainingDay) {
     }
   }, [dragInfo?.isDraggingAnyItem, active, day.exercises])
 
-  // Cleanup on unmount or when active drag changes
+  // Cleanup on unmount or when active drag changes - enhanced cleanup
   useEffect(() => {
     return () => {
       // Clean up all throttled functions on unmount
@@ -191,6 +206,8 @@ export function useDragDropLogic(day: TrainingDay) {
       if (throttledMouseMoveRef.current) {
         throttledMouseMoveRef.current.cancel()
       }
+      // Also clear the indicator state
+      setDraggedOverIndex(null)
     }
   }, [])
 

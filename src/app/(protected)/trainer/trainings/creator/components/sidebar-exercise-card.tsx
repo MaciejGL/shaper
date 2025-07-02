@@ -69,7 +69,7 @@ export const SidebarExercsesCard = React.memo(function SidebarExercsesCard({
       className="cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out"
       hoverable
     >
-      <CardContent className="p-3 flex items-center justify-between">
+      <CardContent className="p-3">
         <p className="text-sm font-medium pr-6">{exercise.name}</p>
         <Badge variant="outline">
           {exercise.isPublic ? 'Public' : 'Private'}
