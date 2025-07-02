@@ -2,6 +2,7 @@
 
 import { useMemo } from 'react'
 
+import { Loader } from '@/components/loader'
 import { useBodyMeasuresQuery } from '@/generated/graphql-client'
 
 import { DetailedMeasurements } from './detailed-measurements'
@@ -11,7 +12,7 @@ import { MeasurementsOverview } from './measurements-overview'
 import { WeightProgressChart } from './weight-progress-chart'
 
 export function BodyMeasurements() {
-  const { data, refetch } = useBodyMeasuresQuery()
+  const { data, refetch, isLoading } = useBodyMeasuresQuery()
   const bodyMeasures = useMemo(
     () => data?.bodyMeasures || [],
     [data?.bodyMeasures],
@@ -19,6 +20,14 @@ export function BodyMeasurements() {
 
   const handleMeasurementAdded = () => {
     refetch()
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <Loader />
+      </div>
+    )
   }
 
   // Show empty state when no measurements exist

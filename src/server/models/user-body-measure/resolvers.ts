@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client'
+
 import {
   GQLMutationResolvers,
   GQLQueryResolvers,
@@ -59,8 +61,12 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Handle measuredAt field specifically
     const { measuredAt, ...otherData } = measurementData
-    const data: any = {
-      userProfileId: userProfile.id,
+    const data: Prisma.UserBodyMeasureCreateInput = {
+      userProfile: {
+        connect: {
+          id: userProfile.id,
+        },
+      },
       ...otherData,
     }
 
@@ -113,7 +119,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Handle measuredAt field specifically
     const { measuredAt, ...otherData } = measurementData
-    const data: any = { ...otherData }
+    const data: Prisma.UserBodyMeasureUpdateInput = { ...otherData }
 
     // If measuredAt is provided, parse it as a Date
     if (measuredAt) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowUp, MoreVertical, X } from 'lucide-react'
+import { ArrowUp, ListCheckIcon, MoreVertical, X } from 'lucide-react'
 import { useState } from 'react'
 import {
   Bar,
@@ -21,6 +21,11 @@ import {
   ChartTooltipContent,
 } from '@/components/ui/chart'
 import {
+  Drawer,
+  DrawerTrigger,
+  SimpleDrawerContent,
+} from '@/components/ui/drawer'
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -28,6 +33,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 
 import { ExerciseChartControls } from './exercise-chart-controls'
+import { ExerciseLogsContent } from './exercise-logs-drawer-content'
 import {
   ChartType,
   ExerciseProgress,
@@ -56,7 +62,7 @@ export function ExerciseProgressChart({
   canMoveToTop,
 }: ExerciseProgressChartProps) {
   const [activeChart, setActiveChart] = useState<ChartType>('oneRM')
-
+  // Add query here and add loading state
   const chartData = useChartData(exercise, timePeriod)
   const improvement = useExerciseImprovement(exercise, timePeriod)
 
@@ -90,33 +96,39 @@ export function ExerciseProgressChart({
         <div className="flex flex-col gap-2 items-start">
           <div className="flex items-start justify-between w-full">
             <CardTitle className="text-lg pt-3">{exerciseName}</CardTitle>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  iconOnly={<MoreVertical />}
-                  className="mt-2"
-                />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                {canMoveToTop && (
+            <div className="flex items-center gap-2 mt-2">
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button variant="ghost" iconOnly={<ListCheckIcon />} />
+                </DrawerTrigger>
+                <SimpleDrawerContent title={`${exerciseName} - Logs`}>
+                  <ExerciseLogsContent exercise={exercise} />
+                </SimpleDrawerContent>
+              </Drawer>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" iconOnly={<MoreVertical />} />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {canMoveToTop && (
+                    <DropdownMenuItem
+                      onClick={() => exerciseId && onMoveToTop(exerciseId)}
+                      className="gap-2"
+                    >
+                      <ArrowUp className="size-4" />
+                      Move to Top
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem
-                    onClick={() => exerciseId && onMoveToTop(exerciseId)}
+                    onClick={() => exerciseId && onRemoveExercise(exerciseId)}
                     className="gap-2"
                   >
-                    <ArrowUp className="size-4" />
-                    Move to Top
+                    <X className="size-4" />
+                    Remove
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuItem
-                  onClick={() => exerciseId && onRemoveExercise(exerciseId)}
-                  className="gap-2"
-                >
-                  <X className="size-4" />
-                  Remove
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           <ExerciseProgressStats

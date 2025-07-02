@@ -40,6 +40,25 @@ export function useBodyMeasurements(
     )
   }
 
+  // Check if a specific field has historical data (multiple measurements)
+  // This determines if the field should be clickable in the UI
+  const fieldHasHistoricalData = (field: MeasurementField): boolean => {
+    const fieldValues = bodyMeasures
+      .map((measurement) => measurement[field])
+      .filter((value) => value !== null && value !== undefined)
+
+    // Require at least 2 measurements to consider it "historical data" worth viewing
+    return fieldValues.length >= 2
+  }
+
+  // Get all measurements for a specific field (for drawer content)
+  const getFieldMeasurements = (field: MeasurementField) => {
+    return bodyMeasures.filter(
+      (measurement) =>
+        measurement[field] !== null && measurement[field] !== undefined,
+    )
+  }
+
   // Group measurements by month for history
   const measurementsByMonth = useMemo(() => {
     const grouped: Record<string, typeof bodyMeasures> = {}
@@ -65,6 +84,8 @@ export function useBodyMeasurements(
     getLatestMeasurement,
     getTrend,
     categoryHasData,
+    fieldHasHistoricalData,
+    getFieldMeasurements,
     measurementsByMonth,
   }
 }

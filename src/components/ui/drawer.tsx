@@ -145,7 +145,7 @@ type SimpleDrawerProps = {
   title: string
   headerIcon?: React.ReactNode
   children: React.ReactNode
-  footer: React.ReactNode
+  footer?: React.ReactNode
 }
 
 export function SimpleDrawerContent({
@@ -168,9 +168,11 @@ export function SimpleDrawerContent({
         {/* Content */}
         {children}
       </div>
-      <DrawerFooter className="sticky bottom-0 bg-background border-t p-4">
-        {footer}
-      </DrawerFooter>
+      {footer && (
+        <DrawerFooter className="sticky bottom-0 bg-background border-t p-4">
+          {footer}
+        </DrawerFooter>
+      )}
     </DrawerContent>
   )
 }

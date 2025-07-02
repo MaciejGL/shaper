@@ -34,18 +34,6 @@ export function MeasurementsOverview({
           unit="%"
           trend={getTrend('bodyFat')}
         />
-        <StatCard
-          label="Waist"
-          value={getLatestMeasurement('waist')}
-          unit="cm"
-          trend={getTrend('waist')}
-        />
-        <StatCard
-          label="Chest"
-          value={getLatestMeasurement('chest')}
-          unit="cm"
-          trend={getTrend('chest')}
-        />
       </div>
     </Section>
   )

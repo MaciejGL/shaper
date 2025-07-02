@@ -8,6 +8,7 @@ interface StatCardProps {
   unit: string
   trend?: number | null
   size?: 'default' | 'sm'
+  isOnCard?: boolean
 }
 
 export function StatCard({
@@ -16,6 +17,7 @@ export function StatCard({
   unit,
   trend,
   size = 'default',
+  isOnCard = false,
 }: StatCardProps) {
   const formatTrend = (trend: number) => {
     const isPositive = trend > 0
@@ -42,7 +44,13 @@ export function StatCard({
   }
 
   return (
-    <div className={cn('rounded-lg bg-card', size === 'sm' ? 'p-2' : 'p-3')}>
+    <div
+      className={cn(
+        'rounded-lg bg-card dark:bg-card',
+        size === 'sm' ? 'p-2' : 'p-3',
+        isOnCard && 'bg-card-on-card dark:bg-card',
+      )}
+    >
       <span
         className={cn(
           'text-muted-foreground',

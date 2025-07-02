@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 
+import { Loader } from '@/components/loader'
 import {
   Select,
   SelectContent,
@@ -67,7 +68,11 @@ export function SelectedExercisesProgress({
         />
       }
     >
-      {selectedExercises.length === 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center h-full min-h-[400px]">
+          <Loader />
+        </div>
+      ) : selectedExercises.length === 0 ? (
         <ExerciseEmptyState
           onOpenSelection={() => setIsOpen(true)}
           hasAvailableExercises={hasAvailableExercises}

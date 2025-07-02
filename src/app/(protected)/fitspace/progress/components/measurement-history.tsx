@@ -3,8 +3,7 @@ import { Calendar } from 'lucide-react'
 import { CardTitle } from '@/components/ui/card'
 import { GQLBodyMeasuresQuery } from '@/generated/graphql-client'
 
-import { MeasurementLogItem } from './measurement-log-item'
-import { useBodyMeasurements } from './use-body-measurements'
+import { MeasurementHistoryList } from './measurement-history-list'
 
 interface MeasurementHistoryProps {
   bodyMeasures: GQLBodyMeasuresQuery['bodyMeasures']
@@ -15,8 +14,6 @@ export function MeasurementHistory({
   bodyMeasures,
   onMeasurementAdded,
 }: MeasurementHistoryProps) {
-  const { measurementsByMonth } = useBodyMeasurements(bodyMeasures)
-
   if (bodyMeasures.length === 0) {
     return null
   }
@@ -30,19 +27,11 @@ export function MeasurementHistory({
         </CardTitle>
       </div>
       <div className="px-2">
-        <div className="space-y-6 pt-6">
-          {measurementsByMonth.map(({ month, measurements }) => (
-            <div key={month}>
-              <h3 className="font-semibold text-lg mb-3">{month}</h3>
-              {measurements.map((measurement) => (
-                <MeasurementLogItem
-                  key={measurement.id}
-                  measurement={measurement}
-                  onUpdate={onMeasurementAdded}
-                />
-              ))}
-            </div>
-          ))}
+        <div className="pt-6">
+          <MeasurementHistoryList
+            measurements={bodyMeasures}
+            onUpdate={onMeasurementAdded}
+          />
         </div>
       </div>
     </div>
