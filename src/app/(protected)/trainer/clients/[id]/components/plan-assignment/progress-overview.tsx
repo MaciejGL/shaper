@@ -37,6 +37,8 @@ export function ProgressOverview({ plan }: ProgressOverviewProps) {
     60 /
     completedWorkouts.length
 
+  const weeksCompleted = plan.weeks.filter((week) => week.completedAt).length
+
   return (
     <div className="space-y-6">
       {/* Progress Metrics */}
@@ -54,7 +56,7 @@ export function ProgressOverview({ plan }: ProgressOverviewProps) {
             </div>
             <Progress value={plan.progress} className="mt-2" />
             <p className="text-xs text-muted-foreground mt-2">
-              Week {plan.currentWeekNumber} of {plan.weekCount}
+              Week {weeksCompleted} of {plan.weekCount}
             </p>
           </CardContent>
         </Card>

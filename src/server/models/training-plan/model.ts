@@ -10,7 +10,7 @@ import {
   User as PrismaUser,
   WorkoutSessionEvent as PrismaWorkoutSessionEvent,
 } from '@prisma/client'
-import { getWeekYear } from 'date-fns'
+import { differenceInCalendarDays } from 'date-fns'
 
 import { GQLDifficulty, GQLTrainingPlan } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
@@ -144,17 +144,23 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   get currentWeekNumber() {
-    // we need to get when training has Started first, then check how many weeks have passed. Then find week that we expect to match that week number
-
+    // Calculate which week of the training plan the user should currently be on
     const startDate = this.data.startDate
     if (!startDate) {
       return null
     }
-    const startDateWeek = getWeekYear(startDate)
-    const currentWeek = getWeekYear(new Date())
 
-    const weeksPassed = currentWeek - startDateWeek
-    const currentWeekNumber = weeksPassed + 1
+    const currentDate = new Date()
+    const daysPassed = differenceInCalendarDays(currentDate, startDate)
+
+    // If training hasn't started yet (negative days), return week 1
+    if (daysPassed < 0) {
+      return 1
+    }
+
+    // Calculate which week we're in (1-indexed)
+    // Week 1: days 0-6, Week 2: days 7-13, etc.
+    const currentWeekNumber = Math.floor(daysPassed / 7) + 1
 
     return currentWeekNumber
   }
