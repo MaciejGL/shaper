@@ -10,7 +10,6 @@ import {
   GQLGoal,
   GQLUserProfile,
 } from '@/generated/graphql-server'
-import { prisma } from '@/lib/db'
 
 import UserBodyMeasure from '../user-body-measure/model'
 
@@ -59,47 +58,28 @@ export default class UserProfile implements GQLUserProfile {
   }
 
   async weight() {
-    let bodyMeasures = this.data.bodyMeasures ?? null
-    if (!bodyMeasures) {
-      console.warn(
+    const bodyMeasures = this.data.bodyMeasures
+    if (bodyMeasures) {
+      const latestMeasure = bodyMeasures.at(0)
+      return latestMeasure?.weight ?? this.data.weight
+    } else {
+      console.error(
         `[UserProfile] No body measures (Weight) found for user ${this.id}. Loading from database.`,
       )
-      bodyMeasures = await prisma.userBodyMeasure.findMany({
-        where: {
-          userProfileId: this.data.id,
-        },
-        orderBy: {
-          measuredAt: 'desc',
-        },
-      })
+      return null
     }
-    const latestMeasure = bodyMeasures?.at(0)
-
-    return latestMeasure?.weight ?? this.data.weight
   }
 
   async bodyMeasures() {
-    let bodyMeasures = this.data.bodyMeasures ?? null
-    if (!bodyMeasures) {
-      console.warn(
+    const bodyMeasures = this.data.bodyMeasures
+    if (bodyMeasures) {
+      return bodyMeasures.map((measure) => new UserBodyMeasure(measure))
+    } else {
+      console.error(
         `[UserProfile] No body measures (Body Measures) found for user ${this.id}. Loading from database.`,
       )
-      bodyMeasures = await prisma.userBodyMeasure.findMany({
-        where: {
-          userProfileId: this.data.id,
-        },
-        orderBy: {
-          measuredAt: 'desc',
-        },
-      })
-    }
-
-    if (!bodyMeasures) {
       return []
     }
-
-    // Use the proper UserBodyMeasure model
-    return bodyMeasures.map((measure) => new UserBodyMeasure(measure))
   }
 
   get fitnessLevel() {

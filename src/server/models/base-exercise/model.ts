@@ -3,6 +3,7 @@ import {
   MuscleGroup as PrismaMuscleGroup,
   MuscleGroupCategory as PrismaMuscleGroupCategory,
 } from '@prisma/client'
+import { GraphQLError } from 'graphql'
 
 import {
   GQLBaseExercise,
@@ -70,32 +71,12 @@ export default class BaseExercise implements GQLBaseExercise {
       return this.data.muscleGroups.map((muscleGroup) => {
         return new MuscleGroup(muscleGroup, this.context)
       })
+    } else {
+      console.error(
+        `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
+      )
+      throw new GraphQLError('No muscle groups found for exercise')
     }
-
-    console.warn(
-      `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
-    )
-
-    const muscleGroups = await prisma.muscleGroup.findMany({
-      where: {
-        exercises: {
-          some: {
-            id: this.data.id,
-          },
-        },
-      },
-      include: {
-        category: true,
-      },
-    })
-
-    if (!muscleGroups.length) {
-      return []
-    }
-
-    return muscleGroups.map(
-      (muscleGroup) => new MuscleGroup(muscleGroup, this.context),
-    )
   }
 
   async muscleGroupCategories() {
@@ -103,34 +84,12 @@ export default class BaseExercise implements GQLBaseExercise {
       return this.data.muscleGroups.map((muscleGroup) => {
         return new MuscleGroupCategory(muscleGroup.category, this.context)
       })
+    } else {
+      console.error(
+        `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
+      )
+      throw new GraphQLError('No muscle groups found for exercise')
     }
-
-    console.warn(
-      `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
-    )
-
-    const muscleGroups = await prisma.muscleGroup.findMany({
-      where: {
-        exercises: {
-          some: {
-            id: this.data.id,
-          },
-        },
-      },
-      include: {
-        category: true,
-      },
-      distinct: ['categoryId'],
-    })
-
-    if (!muscleGroups.length) {
-      return []
-    }
-
-    return muscleGroups.map(
-      (muscleGroup) =>
-        new MuscleGroupCategory(muscleGroup.category, this.context),
-    )
   }
 
   get isPublic() {

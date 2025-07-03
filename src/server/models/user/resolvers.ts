@@ -62,7 +62,15 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           },
         },
         sessions: true,
-        notifications: true,
+        notifications: {
+          include: {
+            creator: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
       },
     })
 
