@@ -23,18 +23,9 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import { GQLDifficulty } from '@/generated/graphql-client'
 import { useAutoSyncedInput } from '@/hooks/use-auto-synced-input'
-
-import type { TrainingPlanFormData } from '../../../types'
-
-type PlanDetailsProps = {
-  data: TrainingPlanFormData['details']
-  createdAt?: string
-  updatedAt?: string
-  assignedCount?: number
-  updateData: (data: TrainingPlanFormData['details']) => void
-}
 
 const DIFFICULTIES: { label: string; value: GQLDifficulty }[] = [
   { label: 'Beginner', value: GQLDifficulty.Beginner },
@@ -43,22 +34,22 @@ const DIFFICULTIES: { label: string; value: GQLDifficulty }[] = [
   { label: 'Expert', value: GQLDifficulty.Expert },
 ]
 
-export function PlanDetailsForm({
-  data,
-  updateData,
-  createdAt,
-  updatedAt,
-  assignedCount,
-}: PlanDetailsProps) {
+export function PlanDetailsForm() {
+  // Use unified training plan context instead of props
+  const { formData, createdAt, updatedAt, assignedCount } = useTrainingPlan()
+
+  // Early return if no data is loaded
+  if (!formData) {
+    return <div>Loading...</div>
+  }
+
   return (
     <div className="grid lg:grid-cols-3 gap-6">
       <div className="lg:col-span-2 space-y-6">
-        <PlanDetailsHeader data={data} updateData={updateData} />
+        <PlanDetailsHeader />
       </div>
       <div className="w-full gap-6">
         <PlanPublicications
-          data={data}
-          updateData={updateData}
           createdAt={createdAt}
           updatedAt={updatedAt}
           assignedCount={assignedCount}
@@ -68,22 +59,27 @@ export function PlanDetailsForm({
   )
 }
 
-function PlanDetailsHeader({
-  data,
-  updateData,
-}: Pick<PlanDetailsProps, 'data' | 'updateData'>) {
-  // Auto-synced inputs that protect user typing
+function PlanDetailsHeader() {
+  // Use unified training plan context
+  const { formData, updateDetails } = useTrainingPlan()
+
+  // Call hooks unconditionally
   const titleInput = useAutoSyncedInput(
-    data.title,
-    (value) => updateData({ ...data, title: value }),
+    formData?.details.title || '',
+    (value) => updateDetails({ title: value }),
     500, // 500ms debounce for title
   )
 
   const descriptionInput = useAutoSyncedInput(
-    data.description ?? '',
-    (value) => updateData({ ...data, description: value }),
+    formData?.details.description ?? '',
+    (value) => updateDetails({ description: value }),
     700, // 700ms debounce for description (longer text)
   )
+
+  // Early return after hooks
+  if (!formData) return null
+
+  const data = formData.details
 
   return (
     <Card>
@@ -115,7 +111,7 @@ function PlanDetailsHeader({
             <Select
               value={data.difficulty ?? ''}
               onValueChange={(value: GQLDifficulty) =>
-                updateData({ ...data, difficulty: value })
+                updateDetails({ difficulty: value })
               }
             >
               <SelectTrigger>
@@ -154,14 +150,22 @@ function PlanDetailsHeader({
 }
 
 function PlanPublicications({
-  data,
-  updateData,
   createdAt,
   updatedAt,
   assignedCount,
-}: PlanDetailsProps) {
+}: {
+  createdAt?: string
+  updatedAt?: string
+  assignedCount?: number
+}) {
+  // Use unified training plan context
+  const { formData, updateDetails } = useTrainingPlan()
+
+  if (!formData) return null
+
+  const data = formData.details
   const isDraft = data.isDraft ?? false
-  const setIsDraft = (value: boolean) => updateData({ ...data, isDraft: value })
+  const setIsDraft = (value: boolean) => updateDetails({ isDraft: value })
 
   return (
     <Card>

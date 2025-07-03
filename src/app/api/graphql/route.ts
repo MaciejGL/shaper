@@ -17,7 +17,7 @@ const yoga = createYoga<{
   req: NextRequest
 }>({
   schema,
-  logging: 'debug',
+  logging: 'info',
   graphqlEndpoint: '/api/graphql',
   cors: {
     origin: ['https://fit-space.app', 'https://www.fit-space.app'],

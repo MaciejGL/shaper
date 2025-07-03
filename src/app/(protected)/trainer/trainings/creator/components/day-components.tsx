@@ -16,34 +16,38 @@ import { WorkoutTypeSelect } from './workout-type-select'
 // Memoized day header to prevent unnecessary rerenders
 export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
   const { formData, updateDay, activeWeek } = useTrainingPlan()
-  const day = formData.weeks[activeWeek]?.days[dayIndex]
-  const [isRestDay, setIsRestDay] = useState(day.isRestDay)
-  const [workoutType, setWorkoutType] = useState(day.workoutType)
+  const day = formData?.weeks[activeWeek]?.days[dayIndex]
+
+  const [isRestDay, setIsRestDay] = useState(day?.isRestDay ?? false)
+  const [workoutType, setWorkoutType] = useState(day?.workoutType)
 
   useEffect(() => {
-    setIsRestDay(day.isRestDay)
-    setWorkoutType(day.workoutType)
+    if (day) {
+      setIsRestDay(day.isRestDay)
+      setWorkoutType(day.workoutType)
+    }
   }, [day])
 
   const handleRestDayChange = useCallback(
     (bool: boolean) => {
       setIsRestDay(bool)
+      // Only pass the allowed fields for the mutation
       updateDay(activeWeek, dayIndex, {
-        ...day,
         isRestDay: bool,
       })
     },
-    [activeWeek, day, dayIndex, updateDay],
+    [activeWeek, dayIndex, updateDay],
   )
 
   const handleValueChange = useCallback(
     (value: GQLWorkoutType) => {
+      setWorkoutType(value)
+      // Only pass the allowed fields for the mutation
       updateDay(activeWeek, dayIndex, {
-        ...day,
         workoutType: value,
       })
     },
-    [activeWeek, day, dayIndex, updateDay],
+    [activeWeek, dayIndex, updateDay],
   )
 
   return (
@@ -54,13 +58,13 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
           onCheckedChange={(value) => handleRestDayChange(!value)}
         />
         <span className="font-medium text-sm py-3">
-          {dayNames[day.dayOfWeek]}
+          {dayNames[day?.dayOfWeek ?? 0]}
         </span>
       </div>
       <AnimatePresence>
         {!isRestDay && (
           <motion.div
-            key={day.id}
+            key={day?.id}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}

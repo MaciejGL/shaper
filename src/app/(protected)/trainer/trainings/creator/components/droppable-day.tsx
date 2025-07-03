@@ -18,20 +18,29 @@ interface DroppableDayProps {
 // Main component - memoized to prevent rerenders when day data hasn't changed
 export const DroppableDay = React.memo(({ dayIndex }: DroppableDayProps) => {
   const { formData, activeWeek } = useTrainingPlan()
-  const day = formData.weeks[activeWeek]?.days[dayIndex]
+  const day = formData?.weeks[activeWeek]?.days[dayIndex]
 
-  const { containerRef, draggedOverIndex } = useDragDropLogic(day)
+  const { containerRef, draggedOverIndex } = useDragDropLogic(
+    day || {
+      id: `fallback-${dayIndex}`,
+      dayOfWeek: dayIndex,
+      isRestDay: true,
+      exercises: [],
+      workoutType: null,
+    },
+  )
 
   const { setNodeRef } = useDroppable({
-    id: day.id,
-    disabled: day.isRestDay,
+    id: day?.id || `day-${dayIndex}`,
+    disabled: day?.isRestDay ?? true,
     data: {
       type: 'day',
       day: day,
     },
   })
 
-  if (!day) return null
+  // Return early if data is not yet loaded or day not found
+  if (!formData || !day) return null
 
   return (
     <motion.div

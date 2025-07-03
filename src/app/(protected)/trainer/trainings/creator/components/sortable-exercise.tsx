@@ -13,7 +13,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { InfoIcon, Plus, X } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 import React from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -55,14 +55,11 @@ import {
   GQLExerciseType,
   GQLUpdateExerciseFormInput,
   GQLUpdateExerciseSetFormInput,
-  useAddSetExerciseFormMutation,
   useGetExerciseFormDataQuery,
   useRemoveExerciseFromDayMutation,
-  useRemoveSetExerciseFormMutation,
-  useUpdateExerciseFormMutation,
 } from '@/generated/graphql-client'
 import { useDebouncedInvalidation } from '@/hooks/use-debounced-invalidation'
-import { useDebouncedMutationWrapper } from '@/hooks/use-debounced-mutation-wrapper'
+import { useExerciseFormMutations } from '@/hooks/use-exercise-form-mutations'
 import { formatTempoInput, handleTempoKeyDown } from '@/lib/format-tempo'
 import { cn } from '@/lib/utils'
 
@@ -81,7 +78,7 @@ export const SortableExercise = React.memo(
     exerciseIndex,
   }: SortableExerciseProps) {
     const { formData, activeWeek, removeExercise } = useTrainingPlan()
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+    const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
 
     // Revert to original stable key
     const stableKey = `${activeWeek}-${dayOfWeek}-${exerciseIndex}`
@@ -89,10 +86,10 @@ export const SortableExercise = React.memo(
     // Memoize expensive computations
     const currentDay = useMemo(
       () =>
-        formData.weeks[activeWeek]?.days.find(
+        formData?.weeks[activeWeek]?.days.find(
           (day) => day.dayOfWeek === dayOfWeek,
         ),
-      [formData.weeks, activeWeek, dayOfWeek],
+      [formData?.weeks, activeWeek, dayOfWeek],
     )
 
     // Revert to original index-based lookup
@@ -129,46 +126,28 @@ export const SortableExercise = React.memo(
       zIndex: isDragging ? 1000 : 1,
     }
 
-    const handleRemoveExercise = useCallback(
-      (
-        e:
-          | React.MouseEvent<HTMLDivElement, MouseEvent>
-          | React.MouseEvent<HTMLButtonElement, MouseEvent>,
-      ) => {
-        e.stopPropagation()
-        if (!exercise) {
-          console.error('[SortableExercise]: Exercise not found', exerciseId)
-          return
-        }
+    const handleRemoveExercise = useCallback(() => {
+      if (!formData || !exercise) return
 
-        // Find the exercise in the current day and remove it
-        const currentWeek = formData.weeks[activeWeek]
-        const day = currentWeek.days.find((d) => d.dayOfWeek === dayOfWeek)
+      // Find the exercise in the current day and remove it
+      const currentWeek = formData.weeks[activeWeek]
+      if (!currentWeek) return
 
-        if (day) {
-          const exerciseIndex = day.exercises.findIndex(
-            (ex) => ex.id === exercise.id,
-          )
-          if (exerciseIndex !== -1) {
-            removeExercise(activeWeek, dayOfWeek, exerciseIndex)
-          } else {
-            console.error('[SortableExercise]: Exercise not found for removal')
-          }
+      const day = currentWeek.days.find((d) => d.dayOfWeek === dayOfWeek)
+
+      if (day) {
+        const exerciseIndex = day.exercises.findIndex(
+          (ex) => ex.id === exercise.id,
+        )
+        if (exerciseIndex !== -1) {
+          removeExercise(activeWeek, dayOfWeek, exerciseIndex)
         } else {
-          console.error(
-            '[SortableExercise]: Day not found for exercise removal',
-          )
+          console.error('[SortableExercise]: Exercise not found for removal')
         }
-      },
-      [
-        activeWeek,
-        dayOfWeek,
-        exerciseId,
-        exercise,
-        formData.weeks,
-        removeExercise,
-      ],
-    )
+      } else {
+        console.error('[SortableExercise]: Day not found for exercise removal')
+      }
+    }, [activeWeek, dayOfWeek, exercise, removeExercise, formData])
 
     if (!exercise) {
       console.warn('[SortableExercise]: Exercise not found', exerciseId)
@@ -469,6 +448,7 @@ type ExerciseDialogContentProps = {
 }
 
 function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
+  // Use cached data directly - no local state needed!
   const { data, error, isLoading } = useGetExerciseFormDataQuery(
     { exerciseId },
     {
@@ -488,226 +468,44 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
         debouncedBoardInvalidation()
       },
     })
-  const { mutateAsync: updateExerciseForm } = useUpdateExerciseFormMutation()
-  const { mutateAsync: addSetExerciseForm } = useAddSetExerciseFormMutation()
-  const { mutateAsync: removeSetExerciseForm } =
-    useRemoveSetExerciseFormMutation()
-  const debouncedInvalidateQueries = useDebouncedInvalidation({
-    queryKeys: ['GetTemplateTrainingPlanById', 'GetExerciseFormData'],
-    delay: 1000,
-  })
-  const initialDataLoaded = useRef(false)
 
-  const [localData, setLocalData] = useState<
-    Omit<GQLUpdateExerciseFormInput, 'exerciseId'>
-  >({
-    name: '',
-    instructions: '',
-    additionalInstructions: '',
-    restSeconds: undefined,
-    warmupSets: undefined,
-    tempo: '',
-    sets: [],
-  })
-
-  useEffect(() => {
-    if (data?.exercise && !initialDataLoaded.current) {
-      setLocalData({
-        name: data.exercise.name || '',
-        type: data.exercise.type || null,
-        instructions: data.exercise.instructions || '',
-        additionalInstructions: data.exercise.additionalInstructions || '',
-        restSeconds: data.exercise.restSeconds || undefined,
-        warmupSets: data.exercise.warmupSets || undefined,
-        tempo: data.exercise.tempo || '',
-        sets: data.exercise.sets.map((set) => ({
-          id: set.id,
-          order: set.order,
-          minReps: set.minReps || undefined,
-          maxReps: set.maxReps || undefined,
-          weight: set.weight || undefined,
-          rpe: set.rpe || undefined,
-        })),
-      })
-
-      initialDataLoaded.current = true
-    }
-  }, [data?.exercise])
+  // Use the unified optimistic mutations system
+  const {
+    updateExercise: updateExerciseOptimistic,
+    addSet: addSetOptimistic,
+    removeSet: removeSetOptimistic,
+  } = useExerciseFormMutations(exerciseId)
 
   const exercise = data?.exercise
 
-  const debouncedUpdateExerciseForm = useDebouncedMutationWrapper(
-    updateExerciseForm,
-    {
-      delay: 700,
-      onSuccess: () => debouncedInvalidateQueries(),
-      onError: (error) => console.error('Update failed:', error),
-    },
-  )
-
   const updateExercise = useCallback(
-    async (input: Omit<GQLUpdateExerciseFormInput, 'exerciseId'>) => {
-      const beforeExercise = {
-        ...exercise,
-      }
-
-      const updatedExercise: Omit<GQLUpdateExerciseFormInput, 'exerciseId'> = {
-        ...localData,
-        name: input.name,
-        type: input.type,
-        instructions: input.instructions,
-        additionalInstructions: input.additionalInstructions,
-        restSeconds: input.restSeconds ? Number(input.restSeconds) : undefined,
-        warmupSets: input.warmupSets ? Number(input.warmupSets) : undefined,
-        tempo: input.tempo,
-        sets: input.sets,
-      }
-
-      try {
-        setLocalData(updatedExercise)
-
-        await debouncedUpdateExerciseForm(
-          {
-            input: {
-              exerciseId,
-              ...updatedExercise,
-            },
-          },
-          {
-            onError: () => {
-              console.error('[Update exercise]: Failed to update exercise', {
-                exerciseId,
-              })
-              setLocalData(beforeExercise)
-            },
-          },
-        )
-      } catch (error) {
-        console.error('Day update failed:', error)
-        setLocalData(beforeExercise)
-      }
+    (input: Omit<GQLUpdateExerciseFormInput, 'exerciseId'>) => {
+      updateExerciseOptimistic({
+        input: {
+          exerciseId,
+          ...input,
+        },
+      })
     },
-    [debouncedUpdateExerciseForm, exerciseId, exercise, localData],
+    [updateExerciseOptimistic, exerciseId],
   )
 
-  const addSet = useCallback(
-    async (input: Omit<GQLUpdateExerciseSetFormInput, 'exerciseId'>) => {
-      const lastSetData = localData.sets?.[localData.sets.length - 1]
+  const addSetToExercise = useCallback(() => {
+    const lastSetData = exercise?.sets?.[exercise.sets.length - 1]
 
-      // Create a temporary ID for optimistic updates
-      const tempId = `temp-${Date.now()}-${Math.random()}`
-
-      const addedSet: Omit<GQLUpdateExerciseSetFormInput, 'exerciseId'> & {
-        id?: string
-      } = {
-        id: tempId, // Add temporary ID for tracking
-        minReps: input.minReps ? Number(input.minReps) : lastSetData?.minReps,
-        maxReps: input.maxReps ? Number(input.maxReps) : lastSetData?.maxReps,
-        weight: input.weight ? Number(input.weight) : lastSetData?.weight,
-        rpe: input.rpe ? Number(input.rpe) : lastSetData?.rpe,
-        order: localData.sets?.length ? localData.sets.length + 1 : 1,
-      }
-
-      try {
-        // Optimistic update: add set with temporary ID
-        setLocalData((prevData) => ({
-          ...prevData,
-          sets: [...(prevData.sets || []), addedSet],
-        }))
-
-        await addSetExerciseForm(
-          {
-            input: {
-              exerciseId,
-              set: {
-                maxReps: addedSet.maxReps,
-                minReps: addedSet.minReps,
-                weight: addedSet.weight,
-                rpe: addedSet.rpe,
-              },
-            },
-          },
-          {
-            onSuccess: (data) => {
-              debouncedInvalidateQueries()
-              // Replace the temporary set with the real one from server
-              setLocalData((prevData) => ({
-                ...prevData,
-                sets:
-                  prevData.sets?.map((set) =>
-                    set.id === tempId
-                      ? { ...addedSet, id: data.addSetExerciseForm.id }
-                      : set,
-                  ) || [],
-              }))
-            },
-            onError: () => {
-              console.error('[Add set]: Failed to add set', {
-                exerciseId,
-              })
-              // Remove the temporary set on error
-              setLocalData((prevData) => ({
-                ...prevData,
-                sets: prevData.sets?.filter((set) => set.id !== tempId) || [],
-              }))
-            },
-          },
-        )
-      } catch (error) {
-        console.error('Day update failed:', error)
-        // Remove the temporary set on error
-        setLocalData((prevData) => ({
-          ...prevData,
-          sets: prevData.sets?.filter((set) => set.id !== tempId) || [],
-        }))
-      }
-    },
-    [
-      exerciseId,
-      localData.sets,
-      addSetExerciseForm,
-      debouncedInvalidateQueries,
-    ],
-  )
+    addSetOptimistic({
+      minReps: lastSetData?.minReps ?? undefined,
+      maxReps: lastSetData?.maxReps ?? undefined,
+      weight: lastSetData?.weight ?? undefined,
+      rpe: lastSetData?.rpe ?? undefined,
+    })
+  }, [addSetOptimistic, exercise?.sets])
 
   const removeSet = useCallback(
-    async (setId: string) => {
-      const beforeSets = [...(localData.sets || [])]
-
-      try {
-        setLocalData({
-          ...localData,
-          sets: localData.sets?.filter((set) => set.id !== setId),
-        })
-
-        await removeSetExerciseForm(
-          {
-            setId,
-          },
-          {
-            onSuccess: () => {
-              debouncedInvalidateQueries()
-            },
-            onError: () => {
-              console.error('[Remove set]: Failed to remove set', {
-                exerciseId,
-              })
-              setLocalData({
-                ...localData,
-                sets: beforeSets,
-              })
-            },
-          },
-        )
-      } catch (error) {
-        console.error('Day update failed:', error)
-        setLocalData({
-          ...localData,
-          sets: beforeSets,
-        })
-      }
+    (setId: string) => {
+      removeSetOptimistic({ setId })
     },
-    [removeSetExerciseForm, localData, exerciseId, debouncedInvalidateQueries],
+    [removeSetOptimistic],
   )
 
   const hasPendingMutations = useIsMutating() > 0
@@ -735,11 +533,24 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
           <Input
             id="exerciseName"
             variant="ghost"
-            value={localData.name ?? ''}
+            value={exercise?.name ?? ''}
             onChange={(e) =>
               updateExercise({
-                ...localData,
                 name: e.target.value,
+                type: exercise?.type,
+                instructions: exercise?.instructions,
+                additionalInstructions: exercise?.additionalInstructions,
+                restSeconds: exercise?.restSeconds,
+                warmupSets: exercise?.warmupSets,
+                tempo: exercise?.tempo,
+                sets: exercise?.sets?.map((set) => ({
+                  id: set.id,
+                  order: set.order,
+                  minReps: set.minReps,
+                  maxReps: set.maxReps,
+                  weight: set.weight,
+                  rpe: set.rpe,
+                })),
               })
             }
           />
@@ -750,11 +561,24 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               Variation
             </Label>
             <Select
-              value={localData.type ?? ''}
+              value={exercise?.type ?? ''}
               onValueChange={(value) =>
                 updateExercise({
-                  ...localData,
+                  name: exercise?.name,
                   type: value === 'none' ? null : (value as GQLExerciseType),
+                  instructions: exercise?.instructions,
+                  additionalInstructions: exercise?.additionalInstructions,
+                  restSeconds: exercise?.restSeconds,
+                  warmupSets: exercise?.warmupSets,
+                  tempo: exercise?.tempo,
+                  sets: exercise?.sets?.map((set) => ({
+                    id: set.id,
+                    order: set.order,
+                    minReps: set.minReps,
+                    maxReps: set.maxReps,
+                    weight: set.weight,
+                    rpe: set.rpe,
+                  })),
                 })
               }
             >
@@ -779,16 +603,30 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               type="number"
               size="md"
               variant="ghost"
-              value={localData.restSeconds ?? ''}
+              value={exercise?.restSeconds ?? ''}
               min="0"
               step="15"
-              onChange={(e) =>
+              onChange={(e) => {
+                const restSeconds =
+                  e.target.value === '' ? undefined : Number(e.target.value)
                 updateExercise({
-                  ...localData,
-                  restSeconds:
-                    e.target.value === '' ? undefined : Number(e.target.value),
+                  name: exercise?.name,
+                  type: exercise?.type,
+                  instructions: exercise?.instructions,
+                  additionalInstructions: exercise?.additionalInstructions,
+                  restSeconds,
+                  warmupSets: exercise?.warmupSets,
+                  tempo: exercise?.tempo,
+                  sets: exercise?.sets?.map((set) => ({
+                    id: set.id,
+                    order: set.order,
+                    minReps: set.minReps,
+                    maxReps: set.maxReps,
+                    weight: set.weight,
+                    rpe: set.rpe,
+                  })),
                 })
-              }
+              }}
               className="min-w-28 max-w-min"
               iconStart={<TimerIcon />}
             />
@@ -803,12 +641,26 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               type="number"
               min="0"
               step="1"
-              value={localData.warmupSets ?? ''}
+              value={exercise?.warmupSets ?? ''}
               onChange={(e) => {
+                const warmupSets =
+                  e.target.value === '' ? undefined : Number(e.target.value)
                 updateExercise({
-                  ...localData,
-                  warmupSets:
-                    e.target.value === '' ? undefined : Number(e.target.value),
+                  name: exercise?.name,
+                  type: exercise?.type,
+                  instructions: exercise?.instructions,
+                  additionalInstructions: exercise?.additionalInstructions,
+                  restSeconds: exercise?.restSeconds,
+                  warmupSets,
+                  tempo: exercise?.tempo,
+                  sets: exercise?.sets?.map((set) => ({
+                    id: set.id,
+                    order: set.order,
+                    minReps: set.minReps,
+                    maxReps: set.maxReps,
+                    weight: set.weight,
+                    rpe: set.rpe,
+                  })),
                 })
               }}
               iconStart={<GaugeIcon />}
@@ -824,12 +676,25 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               variant="ghost"
               pattern="[0-9]*"
               placeholder="3-2-3"
-              value={localData.tempo ?? ''}
+              value={exercise?.tempo ?? ''}
               onChange={(e) => {
                 const formattedValue = formatTempoInput(e)
                 updateExercise({
-                  ...localData,
+                  name: exercise?.name,
+                  type: exercise?.type,
+                  instructions: exercise?.instructions,
+                  additionalInstructions: exercise?.additionalInstructions,
+                  restSeconds: exercise?.restSeconds,
+                  warmupSets: exercise?.warmupSets,
                   tempo: formattedValue,
+                  sets: exercise?.sets?.map((set) => ({
+                    id: set.id,
+                    order: set.order,
+                    minReps: set.minReps,
+                    maxReps: set.maxReps,
+                    weight: set.weight,
+                    rpe: set.rpe,
+                  })),
                 })
               }}
               onKeyDown={handleTempoKeyDown}
@@ -847,30 +712,61 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
         <div className="w-full grid grid-cols-1 @4xl/section:grid-cols-[1fr_400px] gap-8">
           {exercise?.type !== GQLExerciseType.Cardio && (
             <KanbanExerciseSets
-              onUpdateSet={(index, field, value) => {
-                return updateExercise({
-                  ...localData,
-                  sets: localData.sets?.map((set, i) =>
-                    i === index ? { ...set, [field]: value } : set,
-                  ),
+              onUpdateSet={async (index, field, value) => {
+                const currentSet = exercise?.sets?.[index]
+                if (!currentSet) return
+
+                const updatedSets = exercise.sets.map((set, i) =>
+                  i === index
+                    ? {
+                        id: set.id,
+                        order: set.order,
+                        minReps: field === 'minReps' ? value : set.minReps,
+                        maxReps: field === 'maxReps' ? value : set.maxReps,
+                        weight: field === 'weight' ? value : set.weight,
+                        rpe: field === 'rpe' ? value : set.rpe,
+                      }
+                    : {
+                        id: set.id,
+                        order: set.order,
+                        minReps: set.minReps,
+                        maxReps: set.maxReps,
+                        weight: set.weight,
+                        rpe: set.rpe,
+                      },
+                )
+
+                updateExercise({
+                  name: exercise?.name,
+                  type: exercise?.type,
+                  instructions: exercise?.instructions,
+                  additionalInstructions: exercise?.additionalInstructions,
+                  restSeconds: exercise?.restSeconds,
+                  warmupSets: exercise?.warmupSets,
+                  tempo: exercise?.tempo,
+                  sets: updatedSets,
                 })
               }}
-              onRemoveSet={(index) =>
-                localData.sets?.[index].id
-                  ? removeSet(localData.sets[index].id)
-                  : Promise.resolve()
-              }
-              onAddSet={() =>
-                addSet({
-                  minReps: undefined,
-                  maxReps: undefined,
-                  weight: undefined,
-                  rpe: undefined,
-                  order: localData.sets?.length ? localData.sets.length + 1 : 1,
-                })
-              }
+              onRemoveSet={async (index) => {
+                const setId = exercise?.sets?.[index]?.id
+                if (setId) {
+                  removeSet(setId)
+                }
+              }}
+              onAddSet={async () => {
+                addSetToExercise()
+              }}
               isLoading={isLoading}
-              sets={localData.sets || []}
+              sets={
+                exercise?.sets?.map((set) => ({
+                  id: set.id,
+                  order: set.order,
+                  minReps: set.minReps,
+                  maxReps: set.maxReps,
+                  weight: set.weight,
+                  rpe: set.rpe,
+                })) || []
+              }
             />
           )}
           <div className="flex flex-col gap-8">
@@ -885,11 +781,24 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 id="instructions"
                 className="min-h-24"
                 variant="ghost"
-                value={localData.instructions ?? ''}
+                value={exercise?.instructions ?? ''}
                 onChange={(e) =>
                   updateExercise({
-                    ...localData,
+                    name: exercise?.name,
+                    type: exercise?.type,
                     instructions: e.target.value,
+                    additionalInstructions: exercise?.additionalInstructions,
+                    restSeconds: exercise?.restSeconds,
+                    warmupSets: exercise?.warmupSets,
+                    tempo: exercise?.tempo,
+                    sets: exercise?.sets?.map((set) => ({
+                      id: set.id,
+                      order: set.order,
+                      minReps: set.minReps,
+                      maxReps: set.maxReps,
+                      weight: set.weight,
+                      rpe: set.rpe,
+                    })),
                   })
                 }
               />
@@ -909,11 +818,24 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 rows={3}
                 variant="ghost"
                 className="min-h-24"
-                value={localData.additionalInstructions ?? ''}
+                value={exercise?.additionalInstructions ?? ''}
                 onChange={(e) =>
                   updateExercise({
-                    ...localData,
+                    name: exercise?.name,
+                    type: exercise?.type,
+                    instructions: exercise?.instructions,
                     additionalInstructions: e.target.value,
+                    restSeconds: exercise?.restSeconds,
+                    warmupSets: exercise?.warmupSets,
+                    tempo: exercise?.tempo,
+                    sets: exercise?.sets?.map((set) => ({
+                      id: set.id,
+                      order: set.order,
+                      minReps: set.minReps,
+                      maxReps: set.maxReps,
+                      weight: set.weight,
+                      rpe: set.rpe,
+                    })),
                   })
                 }
               />

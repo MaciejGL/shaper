@@ -12,15 +12,15 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
+import { DashboardHeader } from '@/app/(protected)/trainer/components/dashboard-header'
+import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
-import { PartialTrainingPlanFormDataExercise } from '@/context/training-plan-context/types'
 import { useTrainerExercisesQuery } from '@/generated/graphql-client'
-import { createId } from '@/lib/create-id'
+import { GQLAddExerciseToDayInput } from '@/generated/graphql-server'
 
-import { DashboardHeader } from '../../../components/dashboard-header'
 import { TrainingDay } from '../../../types'
 
 import { DayGrid } from './day-grid'
@@ -37,19 +37,15 @@ enum Tab {
 
 export default function WorkoutPlanner() {
   const {
-    createdAt,
-    updatedAt,
-    assignedCount,
-
     formData,
-    activeWeek,
-    isDirty,
     trainingId,
+    isDirty,
+    activeWeek,
     isDeletingTrainingPlan,
     isDuplicatingTrainingPlan,
+    isLoadingInitialData,
     addExercise,
     moveExercise,
-    updateDetails,
     clearDraft,
     handleDelete,
     handleDuplicate,
@@ -96,7 +92,7 @@ export default function WorkoutPlanner() {
     const { active, over } = event
     setActiveId(null)
 
-    if (!over) {
+    if (!over || !formData) {
       return
     }
 
@@ -151,24 +147,41 @@ export default function WorkoutPlanner() {
     const newExercise = joinedExercises.find((ex) => ex.id === active.id)
     if (!newExercise) return
 
-    const exerciseToAdd: PartialTrainingPlanFormDataExercise = {
+    const exerciseToAdd: Omit<GQLAddExerciseToDayInput, 'dayId' | 'order'> = {
       baseId: newExercise.id,
       name: newExercise.name,
-      videoUrl: newExercise.videoUrl || '',
       instructions: newExercise.description || '',
-      order: (targetPosition || 0) + 1,
-      sets: [
-        {
-          id: createId(),
-          order: 1,
-          minReps: undefined,
-          maxReps: undefined,
-          weight: undefined,
-        },
-      ],
+      additionalInstructions: undefined,
+      restSeconds: undefined,
+      tempo: undefined,
+      type: undefined,
+      warmupSets: undefined,
     }
 
-    addExercise(activeWeek, targetDay.dayOfWeek, exerciseToAdd, targetPosition)
+    addExercise(activeWeek, targetDay.dayOfWeek, exerciseToAdd)
+  }
+
+  // Show loading state while data is loading
+  if (isLoadingInitialData || !formData) {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="flex justify-between items-baseline">
+          <DashboardHeader
+            title="Workout Editor"
+            prevSegment={{
+              label: 'Training Plans',
+              href: '/trainer/trainings',
+            }}
+            className="mb-10 mt-0"
+          />
+        </div>
+        <div className="space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-64 w-full" />
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -211,13 +224,7 @@ export default function WorkoutPlanner() {
         </div>
       </div>
       <TabsContent value="details" className="">
-        <PlanDetailsForm
-          data={formData.details}
-          updateData={updateDetails}
-          createdAt={createdAt}
-          updatedAt={updatedAt}
-          assignedCount={assignedCount}
-        />
+        <PlanDetailsForm />
       </TabsContent>
       <TabsContent value="weeks" className="flex-1">
         <DndContext
