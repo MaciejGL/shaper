@@ -61,6 +61,7 @@ import {
 import { useDebouncedInvalidation } from '@/hooks/use-debounced-invalidation'
 import { useExerciseFormMutations } from '@/hooks/use-exercise-form-mutations'
 import { formatTempoInput, handleTempoKeyDown } from '@/lib/format-tempo'
+import { isTemporaryId } from '@/lib/optimistic-mutations'
 import { cn } from '@/lib/utils'
 
 import { EXERCISE_TYPES } from './utils'
@@ -280,11 +281,12 @@ function KanbanExerciseSets({
         <Label>Sets</Label>
         <Button
           type="button"
-          variant="outline"
+          variant="secondary"
           size="sm"
           onClick={() => onAddSet()}
+          iconStart={<Plus />}
         >
-          <Plus className="h-4 w-4 mr-1" /> Add Set
+          Add Set
         </Button>
       </div>
 
@@ -297,7 +299,10 @@ function KanbanExerciseSets({
         {sets.map((set, index) => (
           <div
             key={set.order + index}
-            className="flex items-center gap-2 group/set"
+            className={cn(
+              'flex items-center gap-2 group/set',
+              set.id && isTemporaryId(set.id) && 'opacity-60 animate-pulse',
+            )}
           >
             <div
               className={cn('font-medium w-8', set.order === 1 && 'mt-[20px]')}
@@ -330,7 +335,10 @@ function KanbanExerciseSets({
                     type="number"
                     min="1"
                     value={set.minReps || ''}
-                    onChange={(e) =>
+                    disabled={set.id ? isTemporaryId(set.id) : true}
+                    onChange={(e) => {
+                      // Don't update sets with temporary IDs to prevent API errors
+                      if (!set.id || isTemporaryId(set.id)) return
                       onUpdateSet(
                         index,
                         'minReps',
@@ -338,7 +346,7 @@ function KanbanExerciseSets({
                           ? undefined
                           : Number.parseInt(e.target.value),
                       )
-                    }
+                    }}
                     className="max-w-20"
                   />
                   -
@@ -354,7 +362,10 @@ function KanbanExerciseSets({
                         : undefined
                     }
                     value={set.maxReps || ''}
-                    onChange={(e) =>
+                    disabled={set.id ? isTemporaryId(set.id) : true}
+                    onChange={(e) => {
+                      // Don't update sets with temporary IDs to prevent API errors
+                      if (!set.id || isTemporaryId(set.id)) return
                       onUpdateSet(
                         index,
                         'maxReps',
@@ -362,7 +373,7 @@ function KanbanExerciseSets({
                           ? undefined
                           : Number.parseInt(e.target.value),
                       )
-                    }
+                    }}
                     className="max-w-20"
                   />
                 </div>
@@ -383,7 +394,10 @@ function KanbanExerciseSets({
                   min="0"
                   step="2.5"
                   value={set.weight ?? ''}
-                  onChange={(e) =>
+                  disabled={set.id ? isTemporaryId(set.id) : true}
+                  onChange={(e) => {
+                    // Don't update sets with temporary IDs to prevent API errors
+                    if (!set.id || isTemporaryId(set.id)) return
                     onUpdateSet(
                       index,
                       'weight',
@@ -391,7 +405,7 @@ function KanbanExerciseSets({
                         ? undefined
                         : Number.parseFloat(e.target.value),
                     )
-                  }
+                  }}
                   className="max-w-32"
                 />
               </div>
@@ -409,7 +423,10 @@ function KanbanExerciseSets({
                   max="10"
                   step="1"
                   value={set.rpe ?? ''}
-                  onChange={(e) =>
+                  disabled={set.id ? isTemporaryId(set.id) : true}
+                  onChange={(e) => {
+                    // Don't update sets with temporary IDs to prevent API errors
+                    if (!set.id || isTemporaryId(set.id)) return
                     onUpdateSet(
                       index,
                       'rpe',
@@ -417,7 +434,7 @@ function KanbanExerciseSets({
                         ? undefined
                         : Number.parseFloat(e.target.value),
                     )
-                  }
+                  }}
                   className="max-w-20"
                 />
               </div>
@@ -429,11 +446,17 @@ function KanbanExerciseSets({
               size="icon-md"
               className={cn(
                 '!opacity-0 group-hover/set:!opacity-100 self-end',
-                (!set.id || sets.length <= 1) &&
+                (!set.id ||
+                  sets.length <= 1 ||
+                  (set.id && isTemporaryId(set.id))) &&
                   '!opacity-0 group-hover/set:!opacity-0',
               )}
               onClick={() => onRemoveSet(index)}
-              disabled={sets.length <= 1 || !set.id}
+              disabled={
+                sets.length <= 1 ||
+                !set.id ||
+                Boolean(set.id && isTemporaryId(set.id))
+              }
               iconOnly={<X />}
             />
           </div>
@@ -834,7 +857,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
         </Button>
         <DialogClose asChild>
           <Button
-            variant="outline"
+            variant="secondary"
             disabled={isRemovingExercise || hasPendingMutations}
           >
             Done

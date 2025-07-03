@@ -388,3 +388,14 @@ export function createTrainingPlanOptimisticUpdate() {
 export function generateTempId(prefix = 'temp') {
   return `${prefix}-${Date.now()}-${Math.random()}`
 }
+
+/**
+ * Helper to check if an ID is temporary
+ */
+export function isTemporaryId(id: string): boolean {
+  return (
+    id.startsWith('temp-') ||
+    id.startsWith('set-') ||
+    id.startsWith('exercise-')
+  )
+}
