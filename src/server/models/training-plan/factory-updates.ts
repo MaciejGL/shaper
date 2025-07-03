@@ -860,6 +860,24 @@ export async function removeSetFromExercise(
       })
     }
 
+    const updatedExercise = await tx.trainingExercise.findUnique({
+      where: { id: set.exerciseId },
+      include: {
+        sets: true,
+      },
+    })
+
+    const allSetsCompleted = updatedExercise?.sets.every(
+      (set) => set.completedAt,
+    )
+
+    if (allSetsCompleted) {
+      await tx.trainingExercise.update({
+        where: { id: set.exerciseId },
+        data: { completedAt: new Date() },
+      })
+    }
+
     return true
   })
 }

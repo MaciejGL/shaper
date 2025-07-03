@@ -1,7 +1,7 @@
 'use client'
 
 import type React from 'react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -26,10 +26,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
 import {
   GQLEquipment,
-  GQLExercisesBasicInfoQuery,
   GQLMuscleGroupCategoriesQuery,
   GQLTrainerExercisesQuery,
   useCreateExerciseMutation,
+  useGetExerciseWithSubstitutesQuery,
   useTrainerExercisesQuery,
   useUpdateExerciseMutation,
 } from '@/generated/graphql-client'
@@ -37,13 +37,15 @@ import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
 
 import { MuscleGroupSelector } from './muscle-group-selector'
+import { SubstituteExercisesManager } from './substitute-exercises-manager'
 
 interface CreateExerciseDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   categories?: GQLMuscleGroupCategoriesQuery['muscleGroupCategories']
   exercise?: GQLTrainerExercisesQuery['userExercises'][number]
-  exercises?: GQLExercisesBasicInfoQuery
+  userExercises?: GQLTrainerExercisesQuery['userExercises']
+  publicExercises?: GQLTrainerExercisesQuery['publicExercises']
 }
 
 export type CreateExerciseFormData = {
@@ -54,6 +56,7 @@ export type CreateExerciseFormData = {
   muscleGroups: {
     id: string
   }[]
+  substituteIds: string[]
 }
 
 export function CreateExerciseDialog({
@@ -61,7 +64,8 @@ export function CreateExerciseDialog({
   onOpenChange,
   categories,
   exercise,
-  exercises,
+  userExercises,
+  publicExercises,
 }: CreateExerciseDialogProps) {
   const [formData, setFormData] = useState<CreateExerciseFormData>({
     name: exercise?.name ?? '',
@@ -69,7 +73,35 @@ export function CreateExerciseDialog({
     equipment: exercise?.equipment ?? undefined,
     videoUrl: exercise?.videoUrl ?? '',
     muscleGroups: exercise?.muscleGroups.map((mg) => ({ id: mg.id })) ?? [],
+    substituteIds: [],
   })
+
+  // Load existing substitute IDs when editing
+  const {
+    data: exerciseWithSubstitutes,
+    isLoading: isLoadingExerciseWithSubstitutes,
+  } = useGetExerciseWithSubstitutesQuery(
+    {
+      id: exercise?.id || '',
+    },
+    {
+      enabled: !!exercise?.id,
+    },
+  )
+
+  // Update form data when exercise with substitutes is loaded
+  useEffect(() => {
+    if (exerciseWithSubstitutes?.exercise?.substitutes) {
+      const existingSubstituteIds =
+        exerciseWithSubstitutes.exercise.substitutes.map(
+          (sub) => sub.substituteId,
+        )
+      setFormData((prev) => ({
+        ...prev,
+        substituteIds: existingSubstituteIds,
+      }))
+    }
+  }, [exerciseWithSubstitutes])
   const invalidateQuery = useInvalidateQuery()
   const { mutateAsync: createExercise, isPending: isCreatingExercise } =
     useCreateExerciseMutation({
@@ -78,6 +110,11 @@ export function CreateExerciseDialog({
         toast.success('Exercise created successfully')
         invalidateQuery({
           queryKey: useTrainerExercisesQuery.getKey(),
+        })
+        invalidateQuery({
+          queryKey: useGetExerciseWithSubstitutesQuery.getKey({
+            id: exercise?.id || '',
+          }),
         })
       },
     })
@@ -88,6 +125,11 @@ export function CreateExerciseDialog({
         toast.success('Exercise updated successfully')
         invalidateQuery({
           queryKey: useTrainerExercisesQuery.getKey(),
+        })
+        invalidateQuery({
+          queryKey: useGetExerciseWithSubstitutesQuery.getKey({
+            id: exercise?.id || '',
+          }),
         })
       },
     })
@@ -103,6 +145,7 @@ export function CreateExerciseDialog({
           input: {
             ...formData,
             muscleGroups: formData.muscleGroups.map((mg) => mg.id),
+            substituteIds: formData.substituteIds,
           },
         })
       } else {
@@ -110,6 +153,7 @@ export function CreateExerciseDialog({
           input: {
             ...formData,
             muscleGroups: formData.muscleGroups.map((mg) => mg.id),
+            substituteIds: formData.substituteIds,
           },
         })
       }
@@ -120,6 +164,7 @@ export function CreateExerciseDialog({
         equipment: undefined,
         videoUrl: '',
         muscleGroups: [],
+        substituteIds: [],
       })
     } catch (error) {
       console.error(error)
@@ -140,9 +185,10 @@ export function CreateExerciseDialog({
     | { error: string; level: 'user' | 'public' }
     | undefined = useMemo(() => {
     if (
-      exercises?.userExercises?.some(
+      userExercises?.some(
         (e) =>
-          e.name.trim().toLowerCase() === formData.name.trim().toLowerCase(),
+          e.name.trim().toLowerCase() === formData.name.trim().toLowerCase() &&
+          e.id !== exercise?.id,
       )
     ) {
       return {
@@ -153,7 +199,7 @@ export function CreateExerciseDialog({
     }
 
     if (
-      exercises?.publicExercises?.some(
+      publicExercises?.some(
         (e) =>
           e.name.trim().toLowerCase() === formData.name.trim().toLowerCase(),
       )
@@ -165,7 +211,7 @@ export function CreateExerciseDialog({
     }
 
     return undefined
-  }, [exercises, formData.name])
+  }, [userExercises, publicExercises, formData.name, exercise?.id])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -183,6 +229,7 @@ export function CreateExerciseDialog({
             <Label htmlFor="name">Exercise Name *</Label>
             <Input
               id="name"
+              variant="secondary"
               value={formData.name}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, name: e.target.value }))
@@ -232,6 +279,7 @@ export function CreateExerciseDialog({
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
+              variant="ghost"
               value={formData.description ?? ''}
               onChange={(e) =>
                 setFormData((prev) => ({
@@ -249,6 +297,7 @@ export function CreateExerciseDialog({
             <Input
               id="videoUrl"
               type="url"
+              variant="secondary"
               value={formData.videoUrl ?? ''}
               onChange={(e) =>
                 setFormData((prev) => ({ ...prev, videoUrl: e.target.value }))
@@ -264,6 +313,26 @@ export function CreateExerciseDialog({
               onMuscleGroupsChange={handleMuscleGroupsChange}
             />
           </div>
+
+          {formData.muscleGroups.length > 0 && (
+            <div className="space-y-2">
+              <SubstituteExercisesManager
+                exerciseId={exercise?.id || ''}
+                selectedMuscleGroupIds={formData.muscleGroups.map(
+                  (mg) => mg.id,
+                )}
+                availableExercises={{
+                  userExercises: userExercises || [],
+                  publicExercises: publicExercises || [],
+                }}
+                selectedSubstituteIds={formData.substituteIds}
+                onSubstitutesChange={(substituteIds: string[]) => {
+                  setFormData((prev) => ({ ...prev, substituteIds }))
+                }}
+                isLoading={isLoadingExerciseWithSubstitutes}
+              />
+            </div>
+          )}
 
           <DialogFooter>
             <Button

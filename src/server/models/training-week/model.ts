@@ -18,6 +18,14 @@ export default class TrainingWeek implements GQLTrainingWeek {
     protected data: PrismaTrainingWeek & {
       days?: (PrismaTrainingDay & {
         exercises?: (PrismaTrainingExercise & {
+          substitutedBy?: PrismaTrainingExercise & {
+            base?: PrismaBaseExercise & {
+              muscleGroups: PrismaMuscleGroup[]
+            }
+            sets?: (PrismaExerciseSet & {
+              log?: PrismaExerciseSetLog
+            })[]
+          }
           sets?: (PrismaExerciseSet & {
             log?: PrismaExerciseSetLog
           })[]

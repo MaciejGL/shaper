@@ -11,12 +11,14 @@ import {
   MoreHorizontalIcon,
   NotebookTextIcon,
   PlusIcon,
+  Replace,
   TimerIcon,
   TrashIcon,
 } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { Badge } from '@/components/ui/badge'
@@ -28,6 +30,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Drawer, SimpleDrawerContent } from '@/components/ui/drawer'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,6 +39,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
   Tooltip,
   TooltipContent,
@@ -51,6 +56,7 @@ import {
   useFitspaceMarkExerciseAsCompletedMutation,
   useFitspaceRemoveExerciseFromWorkoutMutation,
   useFitspaceRemoveSetMutation,
+  useFitspaceSwapExerciseMutation,
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
 import { convertSecondsToTimeString } from '@/lib/convert-seconds-time-to-string'
@@ -169,6 +175,22 @@ function ExerciseHeader({
   handleRemoveExercise: () => void
   isRemoving: boolean
 }) {
+  const invalidateQuery = useInvalidateQuery()
+  const { trainingId } = useParams<{ trainingId: string }>()
+  const { mutateAsync: swapExercise, isPending: isSwapping } =
+    useFitspaceSwapExerciseMutation({
+      onSuccess: () => {
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+        })
+        toast.success('Exercise swapped')
+      },
+    })
+
+  const [isSwapExerciseOpen, setIsSwapExerciseOpen] = useState(false)
+  const [selectedSubstituteId, setSelectedSubstituteId] = useState<
+    string | null
+  >(null)
   const [activeExerciseId, setActiveExerciseId] = useQueryState('exercise')
   const [isInstructionsOpen, setIsInstructionsOpen] = useState(false)
 
@@ -179,6 +201,19 @@ function ExerciseHeader({
   const isSuperset =
     exercise.type === GQLExerciseType.Superset_1A ||
     exercise.type === GQLExerciseType.Superset_1B
+
+  const handleSwapExercise = async () => {
+    if (!selectedSubstituteId) {
+      return
+    }
+    await swapExercise({
+      exerciseId: exercise.id,
+      substituteId: selectedSubstituteId,
+    })
+    setIsSwapExerciseOpen(false)
+    setSelectedSubstituteId(null)
+  }
+
   return (
     <div>
       <ExerciseSelector
@@ -223,8 +258,11 @@ function ExerciseHeader({
           )}
         </div>
         <div className="flex gap-2">
-          {exercise.videoUrl && (
-            <VideoPreview variant="secondary" url={exercise.videoUrl} />
+          {(exercise.substitutedBy?.videoUrl || exercise.videoUrl) && (
+            <VideoPreview
+              variant="secondary"
+              url={exercise.substitutedBy?.videoUrl || exercise.videoUrl || ''}
+            />
           )}
           <Button
             variant="secondary"
@@ -260,6 +298,11 @@ function ExerciseHeader({
                   <NotebookTextIcon /> Instructions
                 </DropdownMenuItem>
               )}
+              {exercise.substitutes.length > 0 && (
+                <DropdownMenuItem onClick={() => setIsSwapExerciseOpen(true)}>
+                  <Replace /> Swap exercise
+                </DropdownMenuItem>
+              )}
               {exercise.isExtra && (
                 <DropdownMenuItem
                   onClick={handleRemoveExercise}
@@ -283,6 +326,73 @@ function ExerciseHeader({
               </DialogDescription>
             </DialogContent>
           </Dialog>
+          {isSwapExerciseOpen && (
+            <Drawer
+              open={isSwapExerciseOpen}
+              onOpenChange={setIsSwapExerciseOpen}
+            >
+              <SimpleDrawerContent
+                title="Swap exercise"
+                footer={
+                  <Button
+                    variant="secondary"
+                    disabled={!selectedSubstituteId}
+                    loading={isSwapping}
+                    onClick={() => handleSwapExercise()}
+                  >
+                    Swap
+                  </Button>
+                }
+              >
+                <div className="flex flex-col gap-2">
+                  <RadioGroup
+                    value={selectedSubstituteId}
+                    onValueChange={(value) => {
+                      setSelectedSubstituteId(value)
+                    }}
+                  >
+                    <Label
+                      key={exercise.id}
+                      htmlFor={exercise.id}
+                      className={cn(
+                        'flex items-center gap-2 p-4 rounded-md bg-card-on-card',
+                        !exercise.substitutedBy && 'opacity-50 cursor-default',
+                      )}
+                    >
+                      <RadioGroupItem
+                        value={exercise.id}
+                        id={exercise.id}
+                        disabled={!exercise.substitutedBy}
+                      />
+                      {exercise.name} (original)
+                    </Label>
+                    {exercise.substitutes.map((substitute) => (
+                      <Label
+                        key={substitute.substitute.id}
+                        htmlFor={substitute.substitute.id}
+                        className={cn(
+                          'flex items-center gap-2 p-4 rounded-md bg-card-on-card',
+                          substitute.substitute.id ===
+                            exercise.substitutedBy?.baseId &&
+                            'opacity-50 cursor-default',
+                        )}
+                      >
+                        <RadioGroupItem
+                          value={substitute.substitute.id}
+                          id={substitute.substitute.id}
+                          disabled={
+                            substitute.substitute.id ===
+                            exercise.substitutedBy?.baseId
+                          }
+                        />
+                        {substitute.substitute.name}
+                      </Label>
+                    ))}
+                  </RadioGroup>
+                </div>
+              </SimpleDrawerContent>
+            </Drawer>
+          )}
         </div>
       </div>
       {exercise.additionalInstructions && (
@@ -307,6 +417,12 @@ export function ExerciseSelector({
 }) {
   const { activeDay } = useWorkout()
 
+  const activeDayWithoutSubstitutes = activeDay?.exercises.filter(
+    (e) =>
+      activeDay?.exercises.findIndex((e2) => e2.substitutedBy?.id === e.id) ===
+      -1,
+  )
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="group/dropdown" asChild>
@@ -326,7 +442,8 @@ export function ExerciseSelector({
               <span className="truncate">Summary</span>
             ) : (
               <span className="truncate">
-                {exercise?.order}. {exercise?.name}{' '}
+                {exercise?.order}.{' '}
+                {exercise?.substitutedBy?.name || exercise?.name}{' '}
               </span>
             )}
             {exercise?.completedAt ? (
@@ -336,7 +453,7 @@ export function ExerciseSelector({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="min-w-64">
-        {activeDay?.exercises.map((exercise, index) => (
+        {activeDayWithoutSubstitutes?.map((exercise, index) => (
           <React.Fragment key={exercise.id}>
             <DropdownMenuItem
               key={exercise.id}
@@ -344,8 +461,8 @@ export function ExerciseSelector({
               onClick={() => setActiveExerciseId(exercise.id)}
             >
               <div className="text-sm flex justify-between w-full gap-4">
-                {index + 1}. {exercise.name}
-                {exercise.completedAt ? (
+                {index + 1}. {exercise.substitutedBy?.name || exercise.name}
+                {exercise.substitutedBy?.completedAt || exercise.completedAt ? (
                   <BadgeCheckIcon className="self-start ml-auto mt-0.5 text-green-500" />
                 ) : null}
               </div>
@@ -396,11 +513,13 @@ function ExerciseSets({
 
   const handleAddSet = async () => {
     await addSet({
-      exerciseId: exercise.id,
+      exerciseId: exercise.substitutedBy?.id || exercise.id,
     })
   }
 
-  const hasExtraSets = exercise.sets.some((set) => set.isExtra)
+  const hasExtraSets = (exercise.substitutedBy?.sets || exercise.sets).some(
+    (set) => set.isExtra,
+  )
 
   return (
     <div className="flex flex-col mt-4 py-4">
@@ -437,22 +556,31 @@ function ExerciseSets({
         {hasExtraSets && <div className="w-8 shrink-0" />}
       </div>
       <div className="flex flex-col">
-        {exercise.sets.map((set) => (
-          <ExerciseSet
-            key={set.id}
-            set={set}
-            previousLogs={previousLogs}
-            isExerciseCompleted={isExerciseCompleted}
-            hasExtraSets={hasExtraSets}
-          />
-        ))}
+        {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
+          return (
+            <ExerciseSet
+              key={set.id}
+              set={set}
+              previousLogs={previousLogs}
+              isExerciseCompleted={isExerciseCompleted}
+              hasExtraSets={hasExtraSets}
+            />
+          )
+        })}
         <Button
           variant="secondary"
-          size={exercise.sets.length > 0 ? 'icon-sm' : 'sm'}
+          size={
+            (exercise.substitutedBy?.sets || exercise.sets).length > 0
+              ? 'icon-sm'
+              : 'sm'
+          }
           iconOnly={<PlusIcon />}
           loading={isAddingSet}
           onClick={handleAddSet}
-          className={cn(exercise.sets.length > 0 && 'ml-auto')}
+          className={cn(
+            (exercise.substitutedBy?.sets || exercise.sets).length > 0 &&
+              'ml-auto',
+          )}
         />
       </div>
     </div>
@@ -502,7 +630,9 @@ function ExerciseSet({
           const updatedSet = newWorkout.getWorkout.plan.weeks
             .flatMap((week) => week.days)
             .flatMap((day) => day.exercises)
-            .flatMap((exercise) => exercise.sets)
+            .flatMap(
+              (exercise) => exercise.substitutedBy?.sets || exercise.sets,
+            )
             .find((s) => s.id === newLog.input.setId)
 
           if (updatedSet) {

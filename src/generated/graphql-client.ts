@@ -87,6 +87,12 @@ export type GQLAddSetToExerciseInput = {
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type GQLAddSubstituteExerciseInput = {
+  originalId: Scalars['ID']['input'];
+  reason?: InputMaybe<Scalars['String']['input']>;
+  substituteId: Scalars['ID']['input'];
+};
+
 export type GQLAddTrainingWeekInput = {
   trainingPlanId: Scalars['ID']['input'];
   weekNumber: Scalars['Int']['input'];
@@ -113,6 +119,7 @@ export type GQLAssignTrainingPlanToClientInput = {
 export type GQLBaseExercise = {
   __typename?: 'BaseExercise';
   additionalInstructions?: Maybe<Scalars['String']['output']>;
+  canBeSubstitutedBy: Array<GQLBaseExerciseSubstitute>;
   createdAt: Scalars['String']['output'];
   createdBy?: Maybe<GQLUserPublic>;
   description?: Maybe<Scalars['String']['output']>;
@@ -122,9 +129,21 @@ export type GQLBaseExercise = {
   muscleGroupCategories: Array<GQLMuscleGroupCategory>;
   muscleGroups: Array<GQLMuscleGroup>;
   name: Scalars['String']['output'];
+  substitutes: Array<GQLBaseExerciseSubstitute>;
   type?: Maybe<GQLExerciseType>;
   updatedAt: Scalars['String']['output'];
   videoUrl?: Maybe<Scalars['String']['output']>;
+};
+
+export type GQLBaseExerciseSubstitute = {
+  __typename?: 'BaseExerciseSubstitute';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  original: GQLBaseExercise;
+  originalId: Scalars['ID']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+  substitute: GQLBaseExercise;
+  substituteId: Scalars['ID']['output'];
 };
 
 export type GQLCoachingRequest = {
@@ -150,6 +169,7 @@ export type GQLCreateExerciseInput = {
   equipment?: InputMaybe<GQLEquipment>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
+  substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -395,6 +415,7 @@ export type GQLMutation = {
   addSet: GQLExerciseSet;
   addSetExerciseForm: GQLExerciseSet;
   addSetToExercise: Scalars['ID']['output'];
+  addSubstituteExercise: Scalars['Boolean']['output'];
   addTrainingWeek: Scalars['ID']['output'];
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
@@ -433,9 +454,11 @@ export type GQLMutation = {
   removeSet: Scalars['Boolean']['output'];
   removeSetExerciseForm: Scalars['Boolean']['output'];
   removeSetFromExercise: Scalars['Boolean']['output'];
+  removeSubstituteExercise: Scalars['Boolean']['output'];
   removeTrainingPlanFromClient: Scalars['Boolean']['output'];
   removeTrainingWeek: Scalars['Boolean']['output'];
   removeWeek: Scalars['Boolean']['output'];
+  swapExercise: GQLSubstitute;
   updateBodyMeasurement: GQLUserBodyMeasure;
   updateExercise: Scalars['Boolean']['output'];
   updateExerciseForm: GQLTrainingExercise;
@@ -445,6 +468,7 @@ export type GQLMutation = {
   updateProfile?: Maybe<GQLUserProfile>;
   updateReview: Scalars['Boolean']['output'];
   updateSetLog?: Maybe<GQLExerciseSetLog>;
+  updateSubstituteExercise: Scalars['Boolean']['output'];
   updateTrainingDayData: Scalars['Boolean']['output'];
   updateTrainingExercise: Scalars['Boolean']['output'];
   updateTrainingPlan: Scalars['Boolean']['output'];
@@ -497,6 +521,11 @@ export type GQLMutationAddSetExerciseFormArgs = {
 
 export type GQLMutationAddSetToExerciseArgs = {
   input: GQLAddSetToExerciseInput;
+};
+
+
+export type GQLMutationAddSubstituteExerciseArgs = {
+  input: GQLAddSubstituteExerciseInput;
 };
 
 
@@ -691,6 +720,11 @@ export type GQLMutationRemoveSetFromExerciseArgs = {
 };
 
 
+export type GQLMutationRemoveSubstituteExerciseArgs = {
+  input: GQLRemoveSubstituteExerciseInput;
+};
+
+
 export type GQLMutationRemoveTrainingPlanFromClientArgs = {
   clientId: Scalars['ID']['input'];
   planId: Scalars['ID']['input'];
@@ -705,6 +739,12 @@ export type GQLMutationRemoveTrainingWeekArgs = {
 export type GQLMutationRemoveWeekArgs = {
   planId: Scalars['ID']['input'];
   weekId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationSwapExerciseArgs = {
+  exerciseId: Scalars['ID']['input'];
+  substituteId: Scalars['ID']['input'];
 };
 
 
@@ -751,6 +791,11 @@ export type GQLMutationUpdateReviewArgs = {
 
 export type GQLMutationUpdateSetLogArgs = {
   input: GQLLogSetInput;
+};
+
+
+export type GQLMutationUpdateSubstituteExerciseArgs = {
+  input: GQLUpdateSubstituteExerciseInput;
 };
 
 
@@ -964,6 +1009,11 @@ export type GQLQueryUserPublicArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type GQLRemoveSubstituteExerciseInput = {
+  originalId: Scalars['ID']['input'];
+  substituteId: Scalars['ID']['input'];
+};
+
 export type GQLReview = {
   __typename?: 'Review';
   comment?: Maybe<Scalars['String']['output']>;
@@ -976,6 +1026,24 @@ export type GQLReview = {
   isHidden: Scalars['Boolean']['output'];
   rating: Scalars['Int']['output'];
   updatedAt: Scalars['String']['output'];
+};
+
+export type GQLSubstitute = {
+  __typename?: 'Substitute';
+  additionalInstructions?: Maybe<Scalars['String']['output']>;
+  baseId?: Maybe<Scalars['ID']['output']>;
+  completedAt?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  dayId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  instructions?: Maybe<Scalars['String']['output']>;
+  isPublic: Scalars['Boolean']['output'];
+  muscleGroups: Array<GQLMuscleGroup>;
+  name: Scalars['String']['output'];
+  sets: Array<GQLExerciseSet>;
+  type?: Maybe<GQLExerciseType>;
+  updatedAt: Scalars['String']['output'];
+  videoUrl?: Maybe<Scalars['String']['output']>;
 };
 
 export type GQLSuggestedSets = {
@@ -1022,6 +1090,8 @@ export type GQLTrainingExercise = {
   order: Scalars['Int']['output'];
   restSeconds?: Maybe<Scalars['Int']['output']>;
   sets: Array<GQLExerciseSet>;
+  substitutedBy?: Maybe<GQLSubstitute>;
+  substitutes: Array<GQLBaseExerciseSubstitute>;
   tempo?: Maybe<Scalars['String']['output']>;
   type?: Maybe<GQLExerciseType>;
   updatedAt: Scalars['String']['output'];
@@ -1113,6 +1183,7 @@ export type GQLUpdateExerciseInput = {
   equipment?: InputMaybe<GQLEquipment>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -1169,6 +1240,12 @@ export type GQLUpdateReviewInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   rating?: InputMaybe<Scalars['Int']['input']>;
   reviewId: Scalars['ID']['input'];
+};
+
+export type GQLUpdateSubstituteExerciseInput = {
+  originalId: Scalars['ID']['input'];
+  reason?: InputMaybe<Scalars['String']['input']>;
+  substituteId: Scalars['ID']['input'];
 };
 
 export type GQLUpdateTrainingDayDataInput = {
@@ -1521,7 +1598,7 @@ export type GQLFitspaceGetWorkoutQueryVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceGetWorkoutQuery = { __typename?: 'Query', getWorkout?: { __typename?: 'GetWorkoutPayload', plan: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, duration?: number | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, isExtra: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> }> }> }> } } | undefined | null };
+export type GQLFitspaceGetWorkoutQuery = { __typename?: 'Query', getWorkout?: { __typename?: 'GetWorkoutPayload', plan: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, duration?: number | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, isExtra: boolean, substitutedBy?: { __typename?: 'Substitute', id: string, name: string, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> } | undefined | null, substitutes: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, substitute: { __typename?: 'BaseExercise', id: string, name: string } }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> }> }> }> } } | undefined | null };
 
 export type GQLFitspaceGetExercisesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1614,6 +1691,14 @@ export type GQLFitspaceRemoveSetMutationVariables = Exact<{
 
 
 export type GQLFitspaceRemoveSetMutation = { __typename?: 'Mutation', removeSet: boolean };
+
+export type GQLFitspaceSwapExerciseMutationVariables = Exact<{
+  exerciseId: Scalars['ID']['input'];
+  substituteId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLFitspaceSwapExerciseMutation = { __typename?: 'Mutation', swapExercise: { __typename?: 'Substitute', id: string } };
 
 export type GQLGetClientsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -1711,6 +1796,34 @@ export type GQLDeleteExerciseMutationVariables = Exact<{
 
 
 export type GQLDeleteExerciseMutation = { __typename?: 'Mutation', deleteExercise: boolean };
+
+export type GQLAddSubstituteExerciseMutationVariables = Exact<{
+  input: GQLAddSubstituteExerciseInput;
+}>;
+
+
+export type GQLAddSubstituteExerciseMutation = { __typename?: 'Mutation', addSubstituteExercise: boolean };
+
+export type GQLRemoveSubstituteExerciseMutationVariables = Exact<{
+  input: GQLRemoveSubstituteExerciseInput;
+}>;
+
+
+export type GQLRemoveSubstituteExerciseMutation = { __typename?: 'Mutation', removeSubstituteExercise: boolean };
+
+export type GQLUpdateSubstituteExerciseMutationVariables = Exact<{
+  input: GQLUpdateSubstituteExerciseInput;
+}>;
+
+
+export type GQLUpdateSubstituteExerciseMutation = { __typename?: 'Mutation', updateSubstituteExercise: boolean };
+
+export type GQLGetExerciseWithSubstitutesQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetExerciseWithSubstitutesQuery = { __typename?: 'Query', exercise?: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, equipment?: GQLEquipment | undefined | null, substitutes: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, originalId: string, substituteId: string, reason?: string | undefined | null, createdAt: string, substitute: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, groupSlug: string }> } }>, canBeSubstitutedBy: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, originalId: string, substituteId: string, reason?: string | undefined | null, createdAt: string, original: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, groupSlug: string }> } }> } | undefined | null };
 
 export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, createdAt: string, updatedAt: string, assignedCount: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> };
 
@@ -1872,7 +1985,7 @@ export type GQLGetExerciseFormDataQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetExerciseFormDataQuery = { __typename?: 'Query', exercise?: { __typename?: 'TrainingExercise', id: string, name: string, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, restSeconds?: number | undefined | null, warmupSets?: number | undefined | null, tempo?: string | undefined | null, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> } | undefined | null };
+export type GQLGetExerciseFormDataQuery = { __typename?: 'Query', exercise?: { __typename?: 'TrainingExercise', id: string, name: string, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, restSeconds?: number | undefined | null, warmupSets?: number | undefined | null, tempo?: string | undefined | null, videoUrl?: string | undefined | null, substitutes: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, substitute: { __typename?: 'BaseExercise', name: string } }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> } | undefined | null };
 
 export type GQLUpdateExerciseFormMutationVariables = Exact<{
   input: GQLUpdateExerciseFormInput;
@@ -3146,6 +3259,41 @@ export const FitspaceGetWorkoutDocument = `
             videoUrl
             completedAt
             isExtra
+            substitutedBy {
+              id
+              name
+              instructions
+              additionalInstructions
+              type
+              videoUrl
+              completedAt
+              baseId
+              sets {
+                id
+                order
+                reps
+                minReps
+                maxReps
+                weight
+                rpe
+                isExtra
+                completedAt
+                log {
+                  id
+                  weight
+                  rpe
+                  reps
+                  createdAt
+                }
+              }
+            }
+            substitutes {
+              id
+              substitute {
+                id
+                name
+              }
+            }
             muscleGroups {
               id
               alias
@@ -3650,6 +3798,32 @@ useFitspaceRemoveSetMutation.getKey = () => ['FitspaceRemoveSet'];
 
 
 useFitspaceRemoveSetMutation.fetcher = (variables: GQLFitspaceRemoveSetMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceRemoveSetMutation, GQLFitspaceRemoveSetMutationVariables>(FitspaceRemoveSetDocument, variables, options);
+
+export const FitspaceSwapExerciseDocument = `
+    mutation FitspaceSwapExercise($exerciseId: ID!, $substituteId: ID!) {
+  swapExercise(exerciseId: $exerciseId, substituteId: $substituteId) {
+    id
+  }
+}
+    `;
+
+export const useFitspaceSwapExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceSwapExerciseMutation, TError, GQLFitspaceSwapExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceSwapExerciseMutation, TError, GQLFitspaceSwapExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceSwapExercise'],
+    mutationFn: (variables?: GQLFitspaceSwapExerciseMutationVariables) => fetchData<GQLFitspaceSwapExerciseMutation, GQLFitspaceSwapExerciseMutationVariables>(FitspaceSwapExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceSwapExerciseMutation.getKey = () => ['FitspaceSwapExercise'];
+
+
+useFitspaceSwapExerciseMutation.fetcher = (variables: GQLFitspaceSwapExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceSwapExerciseMutation, GQLFitspaceSwapExerciseMutationVariables>(FitspaceSwapExerciseDocument, variables, options);
 
 export const GetClientsDocument = `
     query GetClients {
@@ -4558,6 +4732,167 @@ useDeleteExerciseMutation.getKey = () => ['DeleteExercise'];
 
 useDeleteExerciseMutation.fetcher = (variables: GQLDeleteExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteExerciseMutation, GQLDeleteExerciseMutationVariables>(DeleteExerciseDocument, variables, options);
 
+export const AddSubstituteExerciseDocument = `
+    mutation AddSubstituteExercise($input: AddSubstituteExerciseInput!) {
+  addSubstituteExercise(input: $input)
+}
+    `;
+
+export const useAddSubstituteExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLAddSubstituteExerciseMutation, TError, GQLAddSubstituteExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLAddSubstituteExerciseMutation, TError, GQLAddSubstituteExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['AddSubstituteExercise'],
+    mutationFn: (variables?: GQLAddSubstituteExerciseMutationVariables) => fetchData<GQLAddSubstituteExerciseMutation, GQLAddSubstituteExerciseMutationVariables>(AddSubstituteExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useAddSubstituteExerciseMutation.getKey = () => ['AddSubstituteExercise'];
+
+
+useAddSubstituteExerciseMutation.fetcher = (variables: GQLAddSubstituteExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAddSubstituteExerciseMutation, GQLAddSubstituteExerciseMutationVariables>(AddSubstituteExerciseDocument, variables, options);
+
+export const RemoveSubstituteExerciseDocument = `
+    mutation RemoveSubstituteExercise($input: RemoveSubstituteExerciseInput!) {
+  removeSubstituteExercise(input: $input)
+}
+    `;
+
+export const useRemoveSubstituteExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveSubstituteExerciseMutation, TError, GQLRemoveSubstituteExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveSubstituteExerciseMutation, TError, GQLRemoveSubstituteExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveSubstituteExercise'],
+    mutationFn: (variables?: GQLRemoveSubstituteExerciseMutationVariables) => fetchData<GQLRemoveSubstituteExerciseMutation, GQLRemoveSubstituteExerciseMutationVariables>(RemoveSubstituteExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveSubstituteExerciseMutation.getKey = () => ['RemoveSubstituteExercise'];
+
+
+useRemoveSubstituteExerciseMutation.fetcher = (variables: GQLRemoveSubstituteExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveSubstituteExerciseMutation, GQLRemoveSubstituteExerciseMutationVariables>(RemoveSubstituteExerciseDocument, variables, options);
+
+export const UpdateSubstituteExerciseDocument = `
+    mutation UpdateSubstituteExercise($input: UpdateSubstituteExerciseInput!) {
+  updateSubstituteExercise(input: $input)
+}
+    `;
+
+export const useUpdateSubstituteExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateSubstituteExerciseMutation, TError, GQLUpdateSubstituteExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateSubstituteExerciseMutation, TError, GQLUpdateSubstituteExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateSubstituteExercise'],
+    mutationFn: (variables?: GQLUpdateSubstituteExerciseMutationVariables) => fetchData<GQLUpdateSubstituteExerciseMutation, GQLUpdateSubstituteExerciseMutationVariables>(UpdateSubstituteExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateSubstituteExerciseMutation.getKey = () => ['UpdateSubstituteExercise'];
+
+
+useUpdateSubstituteExerciseMutation.fetcher = (variables: GQLUpdateSubstituteExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateSubstituteExerciseMutation, GQLUpdateSubstituteExerciseMutationVariables>(UpdateSubstituteExerciseDocument, variables, options);
+
+export const GetExerciseWithSubstitutesDocument = `
+    query GetExerciseWithSubstitutes($id: ID!) {
+  exercise(id: $id) {
+    id
+    name
+    description
+    equipment
+    substitutes {
+      id
+      originalId
+      substituteId
+      reason
+      createdAt
+      substitute {
+        id
+        name
+        description
+        equipment
+        muscleGroups {
+          id
+          name
+          groupSlug
+        }
+      }
+    }
+    canBeSubstitutedBy {
+      id
+      originalId
+      substituteId
+      reason
+      createdAt
+      original {
+        id
+        name
+        description
+        equipment
+        muscleGroups {
+          id
+          name
+          groupSlug
+        }
+      }
+    }
+  }
+}
+    `;
+
+export const useGetExerciseWithSubstitutesQuery = <
+      TData = GQLGetExerciseWithSubstitutesQuery,
+      TError = unknown
+    >(
+      variables: GQLGetExerciseWithSubstitutesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetExerciseWithSubstitutesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetExerciseWithSubstitutesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetExerciseWithSubstitutesQuery, TError, TData>(
+      {
+    queryKey: ['GetExerciseWithSubstitutes', variables],
+    queryFn: fetchData<GQLGetExerciseWithSubstitutesQuery, GQLGetExerciseWithSubstitutesQueryVariables>(GetExerciseWithSubstitutesDocument, variables),
+    ...options
+  }
+    )};
+
+useGetExerciseWithSubstitutesQuery.getKey = (variables: GQLGetExerciseWithSubstitutesQueryVariables) => ['GetExerciseWithSubstitutes', variables];
+
+export const useInfiniteGetExerciseWithSubstitutesQuery = <
+      TData = InfiniteData<GQLGetExerciseWithSubstitutesQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetExerciseWithSubstitutesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetExerciseWithSubstitutesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetExerciseWithSubstitutesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetExerciseWithSubstitutesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetExerciseWithSubstitutes.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetExerciseWithSubstitutesQuery, GQLGetExerciseWithSubstitutesQueryVariables>(GetExerciseWithSubstitutesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetExerciseWithSubstitutesQuery.getKey = (variables: GQLGetExerciseWithSubstitutesQueryVariables) => ['GetExerciseWithSubstitutes.infinite', variables];
+
+
+useGetExerciseWithSubstitutesQuery.fetcher = (variables: GQLGetExerciseWithSubstitutesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetExerciseWithSubstitutesQuery, GQLGetExerciseWithSubstitutesQueryVariables>(GetExerciseWithSubstitutesDocument, variables, options);
+
 export const GetTemplatesDocument = `
     query GetTemplates($draft: Boolean) {
   getTemplates(draft: $draft) {
@@ -5174,6 +5509,12 @@ export const GetExerciseFormDataDocument = `
     warmupSets
     tempo
     videoUrl
+    substitutes {
+      id
+      substitute {
+        name
+      }
+    }
     sets {
       id
       order

@@ -32,12 +32,16 @@ interface ExerciseCardProps {
   categories?: GQLMuscleGroupCategoriesQuery['muscleGroupCategories']
   isFirstRender: boolean
   isLoading?: boolean
+  userExercises?: GQLTrainerExercisesQuery['userExercises']
+  publicExercises?: GQLTrainerExercisesQuery['publicExercises']
 }
 
 export function ExerciseCard({
   exercise,
   categories,
   isFirstRender,
+  userExercises,
+  publicExercises,
   isLoading,
 }: ExerciseCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -156,11 +160,13 @@ export function ExerciseCard({
         </CardContent>
       </Card>
 
-      {!exercise.isPublic && (
+      {!exercise.isPublic && isEditDialogOpen && (
         <CreateExerciseDialog
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
           exercise={exercise}
+          userExercises={userExercises}
+          publicExercises={publicExercises}
           categories={categories}
         />
       )}

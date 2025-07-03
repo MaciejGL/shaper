@@ -19,6 +19,14 @@ export default class TrainingDay implements GQLTrainingDay {
     protected data: PrismaTrainingDay & {
       events?: PrismaWorkoutSessionEvent[]
       exercises?: (PrismaTrainingExercise & {
+        substitutedBy?: PrismaTrainingExercise & {
+          base?: PrismaBaseExercise & {
+            muscleGroups: PrismaMuscleGroup[]
+          }
+          sets?: (PrismaExerciseSet & {
+            log?: PrismaExerciseSetLog
+          })[]
+        }
         sets?: (PrismaExerciseSet & {
           log?: PrismaExerciseSetLog
         })[]

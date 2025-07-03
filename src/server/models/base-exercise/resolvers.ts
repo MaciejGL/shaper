@@ -297,6 +297,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     return results
   },
 }
+
 export const Mutation: GQLMutationResolvers<GQLContext> = {
   createExercise: async (_, { input }, context) => {
     const user = context.user
@@ -309,7 +310,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         id: { in: input.muscleGroups },
       },
     })
-    await prisma.baseExercise.create({
+
+    // Create the exercise first
+    const exercise = await prisma.baseExercise.create({
       data: {
         name: input.name,
         description: input.description,
@@ -326,15 +329,60 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       },
     })
 
+    // Add substitute exercises if provided
+    if (input.substituteIds && input.substituteIds.length > 0) {
+      // Validate that substitute exercises exist and are accessible
+      const substitutes = await prisma.baseExercise.findMany({
+        where: {
+          id: { in: input.substituteIds },
+          OR: [
+            { createdById: user.user.id }, // User's own exercises
+            { isPublic: true }, // Public exercises
+          ],
+        },
+      })
+
+      if (substitutes.length !== input.substituteIds.length) {
+        throw new Error(
+          'Some substitute exercises were not found or are not accessible',
+        )
+      }
+
+      await prisma.baseExerciseSubstitute.createMany({
+        data: substitutes.map((substitute) => ({
+          originalId: exercise.id,
+          substituteId: substitute.id,
+        })),
+      })
+    }
+
     return true
   },
-  updateExercise: async (_, { id, input }) => {
+  updateExercise: async (_, { id, input }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Verify exercise ownership
+    const exercise = await prisma.baseExercise.findFirst({
+      where: {
+        id,
+        createdById: user.user.id,
+      },
+    })
+
+    if (!exercise) {
+      throw new Error('Exercise not found or access denied')
+    }
+
     const muscleGroups = await prisma.muscleGroup.findMany({
       where: {
         id: { in: input.muscleGroups ?? [] },
       },
     })
 
+    // Update the exercise
     await prisma.baseExercise.update({
       where: { id },
       data: {
@@ -343,16 +391,177 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         videoUrl: input.videoUrl,
         equipment: input.equipment,
         muscleGroups: {
-          connect: muscleGroups.map((mg) => ({ id: mg.id })),
+          set: muscleGroups.map((mg) => ({ id: mg.id })),
         },
+      },
+    })
+
+    // Update substitute exercises if provided
+    if (input.substituteIds !== undefined) {
+      // Remove existing substitutes
+      await prisma.baseExerciseSubstitute.deleteMany({
+        where: { originalId: id },
+      })
+
+      // Add new substitutes
+      if (input.substituteIds && input.substituteIds.length > 0) {
+        // Validate that substitute exercises exist and are accessible
+        const substitutes = await prisma.baseExercise.findMany({
+          where: {
+            id: { in: input.substituteIds },
+            OR: [
+              { createdById: user.user.id }, // User's own exercises
+              { isPublic: true }, // Public exercises
+            ],
+          },
+        })
+
+        if (substitutes.length !== input.substituteIds.length) {
+          throw new Error(
+            'Some substitute exercises were not found or are not accessible',
+          )
+        }
+
+        await prisma.baseExerciseSubstitute.createMany({
+          data: substitutes.map((substitute) => ({
+            originalId: id,
+            substituteId: substitute.id,
+          })),
+        })
+      }
+    }
+
+    return true
+  },
+  deleteExercise: async (_, { id }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Verify exercise ownership
+    const exercise = await prisma.baseExercise.findFirst({
+      where: {
+        id,
+        createdById: user.user.id,
+      },
+    })
+
+    if (!exercise) {
+      throw new Error('Exercise not found or access denied')
+    }
+
+    await prisma.baseExercise.delete({
+      where: { id },
+    })
+
+    return true
+  },
+  // New substitute exercises management mutations
+  addSubstituteExercise: async (_, { input }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Verify original exercise ownership
+    const originalExercise = await prisma.baseExercise.findFirst({
+      where: {
+        id: input.originalId,
+        createdById: user.user.id,
+      },
+    })
+
+    if (!originalExercise) {
+      throw new Error('Original exercise not found or access denied')
+    }
+
+    // Verify substitute exercise exists and is accessible
+    const substituteExercise = await prisma.baseExercise.findFirst({
+      where: {
+        id: input.substituteId,
+        OR: [
+          { createdById: user.user.id }, // User's own exercises
+          { isPublic: true }, // Public exercises
+        ],
+      },
+    })
+
+    if (!substituteExercise) {
+      throw new Error('Substitute exercise not found or not accessible')
+    }
+
+    // Prevent self-substitution
+    if (input.originalId === input.substituteId) {
+      throw new Error('An exercise cannot be a substitute for itself')
+    }
+
+    // Create the substitute relationship
+    await prisma.baseExerciseSubstitute.create({
+      data: {
+        originalId: input.originalId,
+        substituteId: input.substituteId,
+        reason: input.reason,
       },
     })
 
     return true
   },
-  deleteExercise: async (_, { id }) => {
-    await prisma.baseExercise.delete({
-      where: { id },
+  removeSubstituteExercise: async (_, { input }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Verify original exercise ownership
+    const originalExercise = await prisma.baseExercise.findFirst({
+      where: {
+        id: input.originalId,
+        createdById: user.user.id,
+      },
+    })
+
+    if (!originalExercise) {
+      throw new Error('Original exercise not found or access denied')
+    }
+
+    // Remove the substitute relationship
+    await prisma.baseExerciseSubstitute.deleteMany({
+      where: {
+        originalId: input.originalId,
+        substituteId: input.substituteId,
+      },
+    })
+
+    return true
+  },
+  updateSubstituteExercise: async (_, { input }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Verify original exercise ownership
+    const originalExercise = await prisma.baseExercise.findFirst({
+      where: {
+        id: input.originalId,
+        createdById: user.user.id,
+      },
+    })
+
+    if (!originalExercise) {
+      throw new Error('Original exercise not found or access denied')
+    }
+
+    // Update the substitute relationship
+    await prisma.baseExerciseSubstitute.updateMany({
+      where: {
+        originalId: input.originalId,
+        substituteId: input.substituteId,
+      },
+      data: {
+        reason: input.reason,
+      },
     })
 
     return true

@@ -1,0 +1,56 @@
+mutation AddSubstituteExercise($input: AddSubstituteExerciseInput!) {
+  addSubstituteExercise(input: $input)
+}
+
+mutation RemoveSubstituteExercise($input: RemoveSubstituteExerciseInput!) {
+  removeSubstituteExercise(input: $input)
+}
+
+mutation UpdateSubstituteExercise($input: UpdateSubstituteExerciseInput!) {
+  updateSubstituteExercise(input: $input)
+}
+
+query GetExerciseWithSubstitutes($id: ID!) {
+  exercise(id: $id) {
+    id
+    name
+    description
+    equipment
+    substitutes {
+      id
+      originalId
+      substituteId
+      reason
+      createdAt
+      substitute {
+        id
+        name
+        description
+        equipment
+        muscleGroups {
+          id
+          name
+          groupSlug
+        }
+      }
+    }
+    canBeSubstitutedBy {
+      id
+      originalId
+      substituteId
+      reason
+      createdAt
+      original {
+        id
+        name
+        description
+        equipment
+        muscleGroups {
+          id
+          name
+          groupSlug
+        }
+      }
+    }
+  }
+}

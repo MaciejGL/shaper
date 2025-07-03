@@ -843,6 +843,21 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 }
               />
             </div>
+            {(exercise?.substitutes?.length ?? 0) > 0 && (
+              <div className="flex flex-col gap-2">
+                <p className="text-sm">Substitute options</p>
+                <div className="flex flex-wrap gap-2">
+                  {exercise?.substitutes.map((substitute) => (
+                    <div
+                      key={substitute.id}
+                      className="px-3 py-2 rounded-md bg-card"
+                    >
+                      {substitute.substitute.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -13,6 +13,7 @@ import {
   removeExerciseFromWorkout,
   removeSet,
   removeSetExerciseForm,
+  swapExercise,
   updateExerciseForm,
 } from './factory'
 
@@ -50,5 +51,8 @@ export const Mutation: GQLMutationResolvers = {
   },
   removeSetExerciseForm: async (_, { setId }) => {
     return removeSetExerciseForm(setId)
+  },
+  swapExercise: async (_, { exerciseId, substituteId }, context) => {
+    return swapExercise(exerciseId, substituteId, context)
   },
 }

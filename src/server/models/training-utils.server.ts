@@ -39,9 +39,32 @@ export async function getFullPlanById(id: string) {
                   order: 'asc',
                 },
                 include: {
+                  substitutedBy: {
+                    include: {
+                      base: {
+                        include: {
+                          muscleGroups: true,
+                        },
+                      },
+                      sets: {
+                        include: {
+                          log: true,
+                        },
+                        orderBy: {
+                          order: 'asc',
+                        },
+                      },
+                    },
+                  },
+                  substitutes: true,
                   base: {
                     include: {
                       muscleGroups: true,
+                      substitutes: {
+                        include: {
+                          substitute: true,
+                        },
+                      },
                     },
                   },
                   logs: true,

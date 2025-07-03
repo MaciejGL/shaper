@@ -1,3 +1,22 @@
+type Substitute {
+  id: ID!
+  name: String!
+  instructions: String
+  additionalInstructions: String
+  type: ExerciseType
+  completedAt: String
+  muscleGroups: [MuscleGroup!]!
+  sets: [ExerciseSet!]!
+  isPublic: Boolean!
+  videoUrl: String
+
+  dayId: ID!
+  baseId: ID
+
+  createdAt: String!
+  updatedAt: String!
+}
+
 type TrainingExercise {
   id: ID!
   name: String!
@@ -14,7 +33,8 @@ type TrainingExercise {
   sets: [ExerciseSet!]!
   logs: [ExerciseLog!]!
   isPublic: Boolean!
-
+  substitutes: [BaseExerciseSubstitute!]!
+  substitutedBy: Substitute
   videoUrl: String
 
   dayId: ID!
@@ -55,6 +75,7 @@ type Mutation {
   updateExerciseForm(input: UpdateExerciseFormInput!): TrainingExercise!
   addSetExerciseForm(input: AddSetExerciseFormInput!): ExerciseSet!
   removeSetExerciseForm(setId: ID!): Boolean!
+  swapExercise(exerciseId: ID!, substituteId: ID!): Substitute!
 }
 
 input AddSetExerciseFormInput {

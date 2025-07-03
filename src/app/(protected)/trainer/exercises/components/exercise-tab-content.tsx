@@ -48,7 +48,9 @@ export function ExerciseTabContent({
         <LoadingExercises />
       ) : (
         <MyExercises
-          exercises={userFilteredExercises}
+          userExercisesFiltered={userFilteredExercises}
+          userExercises={userExercises}
+          publicExercises={publicExercises}
           categories={categories}
           setIsCreateDialogOpen={setIsCreateDialogOpen}
         />
@@ -101,11 +103,15 @@ function PublicExercises({
 }
 
 function MyExercises({
-  exercises,
+  userExercisesFiltered,
+  userExercises,
+  publicExercises,
   categories,
   setIsCreateDialogOpen,
 }: {
-  exercises?: GQLTrainerExercisesQuery['userExercises']
+  userExercisesFiltered?: GQLTrainerExercisesQuery['userExercises']
+  userExercises?: GQLTrainerExercisesQuery['userExercises']
+  publicExercises?: GQLTrainerExercisesQuery['publicExercises']
   categories?: GQLMuscleGroupCategoriesQuery['muscleGroupCategories']
   setIsCreateDialogOpen: (open: boolean) => void
 }) {
@@ -114,15 +120,17 @@ function MyExercises({
 
   return (
     <AnimatedGrid layoutId="exercises">
-      {exercises?.map((exercise) => (
+      {userExercisesFiltered?.map((exercise) => (
         <ExerciseCard
           key={exercise.id}
           exercise={exercise}
           isFirstRender={isFirstRender}
           categories={categories}
+          userExercises={userExercises}
+          publicExercises={publicExercises}
         />
       ))}
-      {hasAnyFilter && exercises?.length === 0 && (
+      {hasAnyFilter && userExercisesFiltered?.length === 0 && (
         <AnimatedGridItem
           id="no-exercises"
           layoutId="exercises-no-exercises"
@@ -137,7 +145,7 @@ function MyExercises({
           </Card>
         </AnimatedGridItem>
       )}
-      {!hasAnyFilter && exercises?.length === 0 && (
+      {!hasAnyFilter && userExercisesFiltered?.length === 0 && (
         <AnimatedGridItem
           id="no-exercises"
           layoutId="exercises-no-exercises"

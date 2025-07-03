@@ -12,6 +12,18 @@ type BaseExercise {
   createdBy: UserPublic
   createdAt: String!
   updatedAt: String!
+  substitutes: [BaseExerciseSubstitute!]!
+  canBeSubstitutedBy: [BaseExerciseSubstitute!]!
+}
+
+type BaseExerciseSubstitute {
+  id: ID!
+  originalId: ID!
+  substituteId: ID!
+  reason: String
+  createdAt: String!
+  original: BaseExercise!
+  substitute: BaseExercise!
 }
 
 enum Equipment {
@@ -58,6 +70,9 @@ type Mutation {
   createExercise(input: CreateExerciseInput!): Boolean!
   updateExercise(id: ID!, input: UpdateExerciseInput!): Boolean!
   deleteExercise(id: ID!): Boolean!
+  addSubstituteExercise(input: AddSubstituteExerciseInput!): Boolean!
+  removeSubstituteExercise(input: RemoveSubstituteExerciseInput!): Boolean!
+  updateSubstituteExercise(input: UpdateSubstituteExerciseInput!): Boolean!
 }
 
 input CreateExerciseInput {
@@ -66,6 +81,7 @@ input CreateExerciseInput {
   videoUrl: String
   equipment: Equipment
   muscleGroups: [ID!]!
+  substituteIds: [ID!]
 }
 
 input UpdateExerciseInput {
@@ -74,6 +90,24 @@ input UpdateExerciseInput {
   videoUrl: String
   equipment: Equipment
   muscleGroups: [ID!]!
+  substituteIds: [ID!]
+}
+
+input AddSubstituteExerciseInput {
+  originalId: ID!
+  substituteId: ID!
+  reason: String
+}
+
+input RemoveSubstituteExerciseInput {
+  originalId: ID!
+  substituteId: ID!
+}
+
+input UpdateSubstituteExerciseInput {
+  originalId: ID!
+  substituteId: ID!
+  reason: String
 }
 
 type ExerciseProgress {

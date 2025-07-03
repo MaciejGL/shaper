@@ -27,6 +27,14 @@ export default class TrainingPlan implements GQLTrainingPlan {
         days?: (PrismaTrainingDay & {
           events?: PrismaWorkoutSessionEvent
           exercises?: (PrismaTrainingExercise & {
+            substitutedBy?: PrismaTrainingExercise & {
+              base?: PrismaBaseExercise & {
+                muscleGroups: PrismaMuscleGroup[]
+              }
+              sets?: (PrismaExerciseSet & {
+                log?: PrismaExerciseSetLog
+              })[]
+            }
             sets?: (PrismaExerciseSet & {
               log?: PrismaExerciseSetLog
             })[]

@@ -19,7 +19,7 @@ import { GQLContext } from '@/types/gql-context'
 import BaseExercise from '../base-exercise/model'
 import ExerciseSet from '../exercise-set/model'
 
-import TrainingExercise from './model'
+import TrainingExercise, { ExerciseSubstitute } from './model'
 import { ExerciseSuggestion } from './types'
 
 // Focused function to get a single training exercise for form editing
@@ -32,6 +32,16 @@ export const getTrainingExercise = async (
     include: {
       sets: {
         orderBy: { order: 'asc' },
+      },
+      base: {
+        include: {
+          muscleGroups: true,
+          substitutes: {
+            include: {
+              substitute: true,
+            },
+          },
+        },
       },
     },
   })
@@ -590,4 +600,102 @@ export const removeSetExerciseForm = async (setId: string) => {
   })
 
   return true
+}
+
+export const swapExercise = async (
+  exerciseId: string,
+  substituteId: string,
+  context: GQLContext,
+) => {
+  const exercise = await prisma.trainingExercise.findUnique({
+    where: { id: exerciseId },
+    include: {
+      sets: {
+        orderBy: { order: 'asc' },
+      },
+      base: {
+        include: {
+          substitutedBy: true,
+          substitutes: {
+            include: {
+              substitute: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!exercise) {
+    console.error(
+      `[TrainingExercise] Could not find exercise to swap: ${exerciseId}`,
+    )
+    throw new GraphQLError('We could not find the exercise to swap')
+  }
+  //Check if user wants to revert the substitution
+  if (exercise.id === substituteId) {
+    const revertedExercise = await prisma.trainingExercise.update({
+      where: { id: exerciseId },
+      data: {
+        substitutedById: null,
+      },
+    })
+    if (exercise.substitutedById) {
+      await prisma.trainingExercise.delete({
+        where: { id: exercise.substitutedById },
+      })
+    }
+    return new TrainingExercise(revertedExercise, context)
+  }
+  const substitute = exercise.base?.substitutes.find(
+    (s) => s.substituteId === substituteId,
+  )
+
+  if (!substitute) {
+    console.error(
+      `[TrainingExercise] Could not find substitute to swap: ${substituteId}`,
+    )
+    throw new GraphQLError('We could not find the substitute to swap')
+  }
+
+  // remove previous substitution
+  if (exercise.substitutedById) {
+    await prisma.trainingExercise.delete({
+      where: { id: exercise.substitutedById },
+    })
+  }
+
+  const newSubstitution = await prisma.trainingExercise.create({
+    data: {
+      baseId: substitute.substituteId,
+      dayId: exercise.dayId,
+      name: substitute.substitute.name,
+      order: exercise.order,
+      restSeconds: exercise.restSeconds,
+      instructions: substitute.substitute.description,
+      additionalInstructions: substitute.substitute.additionalInstructions,
+      type: substitute.substitute.type,
+      sets: {
+        createMany: {
+          data: exercise.sets.map((set) => ({
+            order: set.order,
+            minReps: set.minReps,
+            maxReps: set.maxReps,
+            weight: set.weight,
+            rpe: set.rpe,
+            reps: set.reps,
+          })),
+        },
+      },
+    },
+  })
+
+  await prisma.trainingExercise.update({
+    where: { id: exerciseId },
+    data: {
+      substitutedById: newSubstitution.id,
+    },
+  })
+
+  return new ExerciseSubstitute(newSubstitution, context)
 }
