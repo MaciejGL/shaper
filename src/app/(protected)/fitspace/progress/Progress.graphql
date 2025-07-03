@@ -5,7 +5,7 @@ type Query {
 }
 
 type Mutation {
-  addBodyMeasurement(input: AddBodyMeasurementInput!): UserBodyMeasure!
+  addBodyMeasurement(input: AddBodyMeasurementInput!): UserBodyMeasurement!
 }
 
 input AddBodyMeasurementInput {
@@ -22,6 +22,16 @@ input AddBodyMeasurementInput {
   calfLeft: Float
   calfRight: Float
   notes: String
+}
+
+# Specific query for progress page - only requests what's needed
+query ProgressUser {
+  user {
+    id
+    email
+    name
+    role
+  }
 }
 
 # Query for getting exercises the user has progress data for

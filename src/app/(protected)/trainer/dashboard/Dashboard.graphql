@@ -1,5 +1,6 @@
-query user {
-  user {
+# Full user query for trainer dashboard - includes all data needed
+query TrainerDashboardUser {
+  userWithAllData {
     id
     email
     name
@@ -64,5 +65,18 @@ query user {
       createdAt
       expiresAt
     }
+  }
+}
+
+# Lightweight user query for basic info only - no N+1 queries
+query BasicUser {
+  user {
+    id
+    email
+    name
+    image
+    role
+    createdAt
+    updatedAt
   }
 }

@@ -31,5 +31,6 @@ type UserSession {
 
 type Query {
   user: User
+  userWithAllData: User
   myClients: [UserPublic!]!
 }

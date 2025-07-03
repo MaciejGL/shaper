@@ -862,6 +862,7 @@ export type GQLQuery = {
   user?: EntireFieldWrapper<Maybe<GQLUser>>;
   userExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
   userPublic?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
+  userWithAllData?: EntireFieldWrapper<Maybe<GQLUser>>;
 };
 
 
@@ -1869,6 +1870,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   user?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
   userExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType, Partial<GQLQueryUserExercisesArgs>>;
   userPublic?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType, RequireFields<GQLQueryUserPublicArgs, 'id'>>;
+  userWithAllData?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
 };
 
 export type GQLReviewResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Review'] = GQLResolversParentTypes['Review']> = {

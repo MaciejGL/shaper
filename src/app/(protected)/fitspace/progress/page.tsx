@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   useExercisesProgressByUserQuery,
-  useUserQuery,
+  useProgressUserQuery,
 } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
@@ -15,7 +15,7 @@ import { BodyMeasurements } from './components/body-measurements'
 import { SelectedExercisesProgress } from './components/selected-exercises-progress'
 
 export default function ProgressPage() {
-  const { data: userData } = useUserQuery()
+  const { data: userData } = useProgressUserQuery()
   const [userId, setUserId] = useState<string | null>(null)
 
   // Use the generated FitspaceGoalProgress query hook
