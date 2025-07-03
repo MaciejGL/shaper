@@ -9,7 +9,7 @@ import { AddMeasurementModal } from './add-measurement-modal'
 
 interface MeasurementLogItemProps {
   measurement: GQLBodyMeasuresQuery['bodyMeasures'][0]
-  onUpdate: () => void
+  onUpdate?: () => void
   relevantFields?: {
     key: keyof GQLBodyMeasuresQuery['bodyMeasures'][0]
     label: string
@@ -73,16 +73,18 @@ export function MeasurementLogItem({
           </div>
         )}
       </div>
-      <AddMeasurementModal measurement={measurement} onSuccess={onUpdate}>
-        <Button
-          variant="secondary"
-          size="sm"
-          iconOnly={<Pencil />}
-          className={cn(relevantFields && 'self-start')}
-        >
-          Edit
-        </Button>
-      </AddMeasurementModal>
+      {onUpdate && (
+        <AddMeasurementModal measurement={measurement} onSuccess={onUpdate}>
+          <Button
+            variant="secondary"
+            size="sm"
+            iconOnly={<Pencil />}
+            className={cn(relevantFields && 'self-start')}
+          >
+            Edit
+          </Button>
+        </AddMeasurementModal>
+      )}
     </div>
   )
 }

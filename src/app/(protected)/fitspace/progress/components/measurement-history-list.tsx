@@ -9,7 +9,7 @@ import { useBodyMeasurements } from './use-body-measurements'
 
 interface MeasurementHistoryListProps {
   measurements: GQLBodyMeasuresQuery['bodyMeasures']
-  onUpdate: () => void
+  onUpdate?: () => void
   focusField?: MeasurementField // If provided, show only this field's data
   maxMonths?: number // Limit number of months to display
   isOnCard?: boolean

@@ -834,6 +834,7 @@ export type GQLOneRmLog = {
 export type GQLQuery = {
   __typename?: 'Query';
   bodyMeasures: Array<GQLUserBodyMeasure>;
+  clientBodyMeasures: Array<GQLUserBodyMeasure>;
   coachingRequest?: Maybe<GQLCoachingRequest>;
   coachingRequests: Array<GQLCoachingRequest>;
   exercise?: Maybe<GQLBaseExercise>;
@@ -861,6 +862,11 @@ export type GQLQuery = {
   userExercises: Array<GQLBaseExercise>;
   userPublic?: Maybe<GQLUserPublic>;
   userWithAllData?: Maybe<GQLUser>;
+};
+
+
+export type GQLQueryClientBodyMeasuresArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -1628,6 +1634,13 @@ export type GQLGetClientByIdQueryVariables = Exact<{
 
 
 export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goals: Array<GQLGoal>, currentWeight?: number | undefined | null, height?: number | undefined | null, allergies?: string | undefined | null } | undefined | null, getClientTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null }>, getClientActivePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, name: string, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, duration?: number | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null } | undefined | null }> }> }> }> } | undefined | null };
+
+export type GQLClientBodyMeasuresQueryVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLClientBodyMeasuresQuery = { __typename?: 'Query', clientBodyMeasures: Array<{ __typename?: 'UserBodyMeasure', id: string, measuredAt: string, weight?: number | undefined | null, chest?: number | undefined | null, waist?: number | undefined | null, hips?: number | undefined | null, neck?: number | undefined | null, bicepsLeft?: number | undefined | null, bicepsRight?: number | undefined | null, thighLeft?: number | undefined | null, thighRight?: number | undefined | null, calfLeft?: number | undefined | null, calfRight?: number | undefined | null, bodyFat?: number | undefined | null, notes?: string | undefined | null }> };
 
 export type GQLExercisesProgressByUserQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -3851,6 +3864,70 @@ useInfiniteGetClientByIdQuery.getKey = (variables: GQLGetClientByIdQueryVariable
 
 
 useGetClientByIdQuery.fetcher = (variables: GQLGetClientByIdQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetClientByIdQuery, GQLGetClientByIdQueryVariables>(GetClientByIdDocument, variables, options);
+
+export const ClientBodyMeasuresDocument = `
+    query ClientBodyMeasures($clientId: ID!) {
+  clientBodyMeasures(clientId: $clientId) {
+    id
+    measuredAt
+    weight
+    chest
+    waist
+    hips
+    neck
+    bicepsLeft
+    bicepsRight
+    thighLeft
+    thighRight
+    calfLeft
+    calfRight
+    bodyFat
+    notes
+  }
+}
+    `;
+
+export const useClientBodyMeasuresQuery = <
+      TData = GQLClientBodyMeasuresQuery,
+      TError = unknown
+    >(
+      variables: GQLClientBodyMeasuresQueryVariables,
+      options?: Omit<UseQueryOptions<GQLClientBodyMeasuresQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLClientBodyMeasuresQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLClientBodyMeasuresQuery, TError, TData>(
+      {
+    queryKey: ['ClientBodyMeasures', variables],
+    queryFn: fetchData<GQLClientBodyMeasuresQuery, GQLClientBodyMeasuresQueryVariables>(ClientBodyMeasuresDocument, variables),
+    ...options
+  }
+    )};
+
+useClientBodyMeasuresQuery.getKey = (variables: GQLClientBodyMeasuresQueryVariables) => ['ClientBodyMeasures', variables];
+
+export const useInfiniteClientBodyMeasuresQuery = <
+      TData = InfiniteData<GQLClientBodyMeasuresQuery>,
+      TError = unknown
+    >(
+      variables: GQLClientBodyMeasuresQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLClientBodyMeasuresQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLClientBodyMeasuresQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLClientBodyMeasuresQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['ClientBodyMeasures.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLClientBodyMeasuresQuery, GQLClientBodyMeasuresQueryVariables>(ClientBodyMeasuresDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteClientBodyMeasuresQuery.getKey = (variables: GQLClientBodyMeasuresQueryVariables) => ['ClientBodyMeasures.infinite', variables];
+
+
+useClientBodyMeasuresQuery.fetcher = (variables: GQLClientBodyMeasuresQueryVariables, options?: RequestInit['headers']) => fetchData<GQLClientBodyMeasuresQuery, GQLClientBodyMeasuresQueryVariables>(ClientBodyMeasuresDocument, variables, options);
 
 export const ExercisesProgressByUserDocument = `
     query ExercisesProgressByUser($userId: ID!) {

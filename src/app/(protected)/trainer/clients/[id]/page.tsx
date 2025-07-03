@@ -4,12 +4,14 @@ import { use } from 'react'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useGetClientByIdQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../components/dashboard-header'
 
 import { ClientActivePlan } from './components/client-active-plan'
 import { ClientInfo } from './components/client-info/client-info'
+import { ClientMeasurements } from './components/client-measurements'
 import { ClientNotes } from './components/client-notes/client-notes'
 import { SharedPlansWithClient } from './components/shared-plans'
 
@@ -37,33 +39,63 @@ export default function ClientDetailPage({
         title="Client Profile"
         prevSegment={{ label: 'Clients', href: '/trainer/clients' }}
       />
-
-      <AnimatedPageTransition id="client-detail-page">
-        <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_4fr] gap-12">
-          <ClientInfo
-            client={client}
-            clientName={clientName}
-            activePlan={activePlan}
-          />
-
-          <SharedPlansWithClient
-            plans={data?.getClientTrainingPlans}
-            clientName={clientName}
-            clientId={client.id}
-            activePlan={activePlan}
-          />
-          <div className="@3xl/client-detail-page:col-span-2">
+      <Tabs defaultValue="info">
+        <TabsList size="lg">
+          <TabsTrigger size="lg" value="info">
+            Client Info
+          </TabsTrigger>
+          <TabsTrigger size="lg" value="plans">
+            Manage Plans
+          </TabsTrigger>
+          <TabsTrigger
+            size="lg"
+            value="active-plan"
+            disabled={!hasAssignedPlans}
+          >
+            Active Plan
+          </TabsTrigger>
+          <TabsTrigger size="lg" value="measurements">
+            Measurements Logs
+          </TabsTrigger>
+        </TabsList>
+        <AnimatedPageTransition id="info">
+          <TabsContent value="info">
+            <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_4fr] gap-12">
+              <ClientInfo
+                client={client}
+                clientName={clientName}
+                activePlan={activePlan}
+              />
+              <ClientNotes clientId={client.id} />
+            </div>
+          </TabsContent>
+        </AnimatedPageTransition>
+        <AnimatedPageTransition id="plans">
+          <TabsContent value="plans">
+            <SharedPlansWithClient
+              plans={data?.getClientTrainingPlans}
+              clientName={clientName}
+              clientId={client.id}
+              activePlan={activePlan}
+            />
+          </TabsContent>
+        </AnimatedPageTransition>
+        <AnimatedPageTransition id="active-plan">
+          <TabsContent value="active-plan">
             <ClientActivePlan
               client={client}
               clientName={clientName}
               activePlan={activePlan}
               hasAssignedPlans={hasAssignedPlans}
             />
-          </div>
-
-          <ClientNotes clientId={client.id} />
-        </div>
-      </AnimatedPageTransition>
+          </TabsContent>
+        </AnimatedPageTransition>
+        <AnimatedPageTransition id="measurements">
+          <TabsContent value="measurements">
+            <ClientMeasurements client={client} clientName={clientName} />
+          </TabsContent>
+        </AnimatedPageTransition>
+      </Tabs>
     </div>
   )
 }

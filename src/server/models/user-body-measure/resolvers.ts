@@ -35,6 +35,67 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     return bodyMeasures.map((measure) => new UserBodyMeasure(measure))
   },
+  clientBodyMeasures: async (_parent, { clientId }, context) => {
+    const userSession = context.user
+    if (!userSession) {
+      throw new Error('User not found')
+    }
+
+    // Verify the trainer-client relationship exists
+    const client = await prisma.user.findUnique({
+      where: {
+        id: clientId,
+        trainerId: userSession.user.id, // Ensure the client belongs to this trainer
+      },
+    })
+
+    if (!client) {
+      throw new Error('Client not found or not associated with this trainer')
+    }
+
+    // Get the client's user profile
+    const userProfile = await prisma.userProfile.findUnique({
+      where: { userId: clientId },
+    })
+
+    if (!userProfile) {
+      throw new Error('Client profile not found')
+    }
+
+    // Find the coaching request that established the relationship
+    const coachingRequest = await prisma.coachingRequest.findFirst({
+      where: {
+        OR: [
+          { senderId: clientId, recipientId: userSession.user.id },
+          { senderId: userSession.user.id, recipientId: clientId },
+        ],
+        status: 'ACCEPTED',
+      },
+      orderBy: {
+        updatedAt: 'desc', // Get the most recent accepted request
+      },
+    })
+
+    // If no coaching request found, return empty array
+    if (!coachingRequest) {
+      return []
+    }
+
+    // Get body measurements since the coaching relationship was established
+    const bodyMeasures = await prisma.userBodyMeasure.findMany({
+      where: {
+        userProfileId: userProfile.id,
+        measuredAt: {
+          gte: coachingRequest.updatedAt, // Only measurements after the relationship was established
+        },
+      },
+      orderBy: {
+        measuredAt: 'desc',
+      },
+    })
+
+    return bodyMeasures.map((measure) => new UserBodyMeasure(measure))
+  },
 }
 
 export const Mutation: GQLMutationResolvers<GQLContext> = {

@@ -836,6 +836,7 @@ export type GQLOneRmLog = {
 export type GQLQuery = {
   __typename?: 'Query';
   bodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
+  clientBodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
   coachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   coachingRequests: EntireFieldWrapper<Array<GQLCoachingRequest>>;
   exercise?: EntireFieldWrapper<Maybe<GQLBaseExercise>>;
@@ -863,6 +864,11 @@ export type GQLQuery = {
   userExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
   userPublic?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
   userWithAllData?: EntireFieldWrapper<Maybe<GQLUser>>;
+};
+
+
+export type GQLQueryClientBodyMeasuresArgs = {
+  clientId: Scalars['ID']['input'];
 };
 
 
@@ -1844,6 +1850,7 @@ export type GQLOneRmLogResolvers<ContextType = GQLContext, ParentType extends GQ
 
 export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Query'] = GQLResolversParentTypes['Query']> = {
   bodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
+  clientBodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType, RequireFields<GQLQueryClientBodyMeasuresArgs, 'clientId'>>;
   coachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLQueryCoachingRequestArgs, 'id'>>;
   coachingRequests?: Resolver<Array<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType>;
   exercise?: Resolver<Maybe<GQLResolversTypes['BaseExercise']>, ParentType, ContextType, RequireFields<GQLQueryExerciseArgs, 'id'>>;

@@ -75,6 +75,7 @@ type UserBodyMeasure {
 type Query {
   profile: UserProfile
   bodyMeasures: [UserBodyMeasure!]!
+  clientBodyMeasures(clientId: ID!): [UserBodyMeasure!]!
 }
 
 input UpdateProfileInput {

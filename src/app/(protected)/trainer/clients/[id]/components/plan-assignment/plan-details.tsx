@@ -5,6 +5,7 @@ import { Activity, Calendar, Clock, Target } from 'lucide-react'
 
 import { CollapsibleText } from '@/components/collapsible-text'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
 import { GQLGetClientByIdQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
@@ -18,26 +19,30 @@ export function PlanDetails({ assignedPlan }: PlanAssignmentProps) {
     : 0
 
   return (
-    <div className="space-y-6 shadow-neuro-light dark:shadow-neuro-dark rounded-lg p-4">
-      <div className="space-y-2">
-        <p className="text-lg font-semibold">{assignedPlan.title}</p>
-        <div className="flex flex-wrap gap-2">
-          {assignedPlan.difficulty && (
-            <Badge variant="secondary" className="capitalize">
-              {assignedPlan.difficulty.toLowerCase()}
-            </Badge>
-          )}
-          <Badge variant="secondary">
-            {assignedPlan.weekCount}{' '}
-            {assignedPlan.weekCount === 1 ? 'week' : 'weeks'}
-          </Badge>
-        </div>
-      </div>
-      <div className="max-w-2xl">
-        <CollapsibleText maxLines={6} text={assignedPlan.description} />
-      </div>
-      <div className="space-y-4">
-        <div className="bg-muted/50 rounded-lg p-4">
+    <div className="space-y-6">
+      <Card className="max-w-max">
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <p className="text-lg font-semibold">{assignedPlan.title}</p>
+            <div className="flex flex-wrap gap-2">
+              {assignedPlan.difficulty && (
+                <Badge variant="secondary" className="capitalize">
+                  {assignedPlan.difficulty.toLowerCase()}
+                </Badge>
+              )}
+              <Badge variant="secondary">
+                {assignedPlan.weekCount}{' '}
+                {assignedPlan.weekCount === 1 ? 'week' : 'weeks'}
+              </Badge>
+            </div>
+          </div>
+          <div className="max-w-2xl">
+            <CollapsibleText maxLines={6} text={assignedPlan.description} />
+          </div>
+        </CardContent>
+      </Card>
+      <Card className="space-y-4">
+        <CardContent>
           <div className="grid grid-cols-2 @xl/client-detail-page:grid-cols-4 gap-4">
             {assignedPlan.startDate && (
               <div className="flex items-center gap-2">
@@ -91,8 +96,8 @@ export function PlanDetails({ assignedPlan }: PlanAssignmentProps) {
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

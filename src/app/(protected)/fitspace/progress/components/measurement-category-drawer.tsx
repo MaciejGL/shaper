@@ -19,9 +19,10 @@ import { useBodyMeasurements } from './use-body-measurements'
 interface MeasurementCategoryDrawerProps {
   category: MeasurementCategory
   measurements: GQLBodyMeasuresQuery['bodyMeasures']
-  onUpdate: () => void
+  onUpdate?: () => void
   children: React.ReactNode
   focusField?: MeasurementField
+  drawerDirection?: 'bottom' | 'right'
 }
 
 export function MeasurementCategoryDrawer({
@@ -30,6 +31,7 @@ export function MeasurementCategoryDrawer({
   onUpdate,
   children,
   focusField,
+  drawerDirection = 'bottom',
 }: MeasurementCategoryDrawerProps) {
   // Filter measurements to only include those with data for the focused field
   const filteredMeasurements = focusField
@@ -52,16 +54,18 @@ export function MeasurementCategoryDrawer({
     : category.title
 
   return (
-    <Drawer>
+    <Drawer direction={drawerDirection}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <SimpleDrawerContent
         title={drawerTitle}
         footer={
-          <div className="flex gap-2">
-            <AddMeasurementModal onSuccess={onUpdate}>
-              <Button className="flex-1">Add Measurement</Button>
-            </AddMeasurementModal>
-          </div>
+          onUpdate && (
+            <div className="flex gap-2">
+              <AddMeasurementModal onSuccess={onUpdate}>
+                <Button className="flex-1">Add Measurement</Button>
+              </AddMeasurementModal>
+            </div>
+          )
         }
       >
         <div className="space-y-6">
