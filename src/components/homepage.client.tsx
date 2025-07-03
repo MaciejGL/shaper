@@ -148,11 +148,11 @@ export function HomepageClient() {
   return (
     <div
       ref={scrollContainerRef}
-      className="h-screen w-full overflow-y-auto overflow-x-hidden"
+      className="h-screen w-full overflow-y-auto overflow-x-hidden dark"
     >
       <main
         ref={containerRef}
-        className="min-h-screen w-full bg-gradient-to-br from-zinc-50 via-zinc-100 to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800 overflow-x-hidden"
+        className="min-h-screen w-full bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-800 overflow-x-hidden"
       >
         {/* Hero Section */}
         <motion.section
@@ -172,10 +172,10 @@ export function HomepageClient() {
             >
               <AnimatedLogo infinite={false} size={140} />
               <div className="space-y-4">
-                <AnimatedLogoText className="text-4xl" />
+                <AnimatedLogoText className="text-4xl text-white" />
                 <motion.p
                   variants={itemVariants}
-                  className="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed"
+                  className="text-lg md:text-xl text-zinc-300 max-w-2xl leading-relaxed"
                 >
                   Your personal fitness coach. Track workouts, follow training
                   plans, and achieve your fitness goals with professional
@@ -259,10 +259,10 @@ export function HomepageClient() {
             className="max-w-7xl mx-auto"
           >
             <motion.div variants={itemVariants} className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-zinc-100 dark:to-zinc-400 bg-clip-text text-transparent">
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">
                 Experience Fitspace
               </h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-lg text-zinc-300 max-w-2xl mx-auto">
                 See how Fitspace transforms your fitness journey with powerful
                 features
               </p>
@@ -286,7 +286,7 @@ export function HomepageClient() {
                     index={0}
                     colors={{
                       primary: 'rgba(59, 131, 246, 0.007)',
-                      secondary: 'rgba(99, 101, 241, 0.7)',
+                      secondary: 'rgba(45, 48, 207, 0.628)',
                     }}
                   />
                   <Image
@@ -307,10 +307,10 @@ export function HomepageClient() {
                   viewport={{ once: true, amount: 0.4 }}
                   className="text-center mt-6"
                 >
-                  <h3 className="font-semibold text-lg mb-2">
+                  <h3 className="font-semibold text-lg mb-2 text-white">
                     Intuitive Interface
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-zinc-400">
                     Clean, modern design that makes fitness tracking effortless
                   </p>
                 </motion.div>
@@ -331,7 +331,7 @@ export function HomepageClient() {
                   <MockupGradient
                     index={1}
                     colors={{
-                      primary: 'rgba(139, 92, 246, 0.34)',
+                      primary: 'rgba(138, 92, 246, 0.223)',
                       secondary: 'rgba(168, 85, 247, 0.15)',
                     }}
                   />
@@ -353,10 +353,10 @@ export function HomepageClient() {
                   viewport={{ once: true, amount: 0.4 }}
                   className="text-center mt-6"
                 >
-                  <h3 className="font-semibold text-lg mb-2">
+                  <h3 className="font-semibold text-lg mb-2 text-white">
                     Personal Coaching
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-zinc-400">
                     Connect with professional trainers for guided workouts
                   </p>
                 </motion.div>
@@ -376,8 +376,8 @@ export function HomepageClient() {
                   <MockupGradient
                     index={2}
                     colors={{
-                      primary: 'rgba(39, 112, 229, 0.452)',
-                      secondary: 'rgba(138, 92, 246, 0.338)',
+                      primary: 'rgba(4, 88, 222, 0.357)',
+                      secondary: 'rgba(138, 92, 246, 0.328)',
                     }}
                   />
                   <Image
@@ -398,8 +398,10 @@ export function HomepageClient() {
                   viewport={{ once: true, amount: 0.4 }}
                   className="text-center mt-6"
                 >
-                  <h3 className="font-semibold text-lg mb-2">Smart Tracking</h3>
-                  <p className="text-sm text-muted-foreground">
+                  <h3 className="font-semibold text-lg mb-2 text-white">
+                    Smart Tracking
+                  </h3>
+                  <p className="text-sm text-zinc-400">
                     Advanced analytics and progress monitoring
                   </p>
                 </motion.div>
@@ -411,7 +413,7 @@ export function HomepageClient() {
         {/* Feature Highlights */}
         <motion.section
           style={{ y: featuresY }}
-          className="py-24 px-4 bg-gradient-to-r from-zinc-50/50 to-zinc-100/50 dark:from-zinc-900/50 dark:to-zinc-800/50 relative z-5"
+          className="py-24 px-4 bg-gradient-to-r from-zinc-950 to-zinc-900 relative z-5"
         >
           <motion.div
             initial="hidden"
@@ -423,10 +425,10 @@ export function HomepageClient() {
               variants={subtleTextVariants}
               className="text-center mb-12"
             >
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
                 Why Choose Fitspace?
               </h2>
-              <p className="text-muted-foreground">
+              <p className="text-zinc-300">
                 Everything you need to transform your fitness journey
               </p>
             </motion.div>
@@ -452,36 +454,35 @@ export function HomepageClient() {
                     'Expert trainers to guide you every step of the way to achieving your goals',
                 },
               ].map((feature, index) => (
-                <Card
-                  variant="gradient"
-                  className="border border-border shadow-neuro-light dark:shadow-neuro-dark"
+                <motion.div
                   key={feature.title}
+                  variants={featureVariants}
+                  whileHover="hover"
+                  custom={index}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.1 }}
                 >
-                  <motion.div
-                    key={feature.title}
-                    variants={featureVariants}
-                    whileHover="hover"
-                    custom={index}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, amount: 0.3 }}
-                    className="group text-center p-8"
+                  <Card
+                    variant="gradient"
+                    className="border border-zinc-700 shadow-neuro-dark 
+                    group text-center p-8"
                   >
                     <motion.div
                       className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center"
                       whileHover={{ rotate: 360 }}
-                      transition={{ duration: 0.5 }}
+                      transition={{ duration: 0.3 }}
                     >
                       {feature.icon}
                     </motion.div>
-                    <h3 className="font-semibold text-xl mb-3">
+                    <h3 className="font-semibold text-xl mb-3 text-white">
                       {feature.title}
                     </h3>
-                    <p className="text-muted-foreground leading-relaxed">
+                    <p className="text-zinc-400 leading-relaxed">
                       {feature.description}
                     </p>
-                  </motion.div>
-                </Card>
+                  </Card>
+                </motion.div>
               ))}
             </div>
           </motion.div>
@@ -498,13 +499,13 @@ export function HomepageClient() {
           >
             <motion.h2
               variants={subtleTextVariants}
-              className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-zinc-900 to-zinc-600 dark:from-zinc-100 dark:to-zinc-400 bg-clip-text text-transparent"
+              className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent"
             >
               Ready to Transform Your Fitness?
             </motion.h2>
             <motion.p
               variants={subtleTextVariants}
-              className="text-lg text-muted-foreground mb-8"
+              className="text-lg text-zinc-300 mb-8"
             >
               Join thousands of users who have already started their fitness
               journey with Fitspace

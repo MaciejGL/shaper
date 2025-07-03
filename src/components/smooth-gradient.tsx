@@ -153,7 +153,14 @@ export function MockupGradient({
   index?: number
   colors?: SmoothGradientProps['colors']
 }) {
-  return <SmoothGradient variant="mockup" index={index} colors={colors} />
+  return (
+    <SmoothGradient
+      variant="mockup"
+      intensity="medium"
+      index={index}
+      colors={colors}
+    />
+  )
 }
 
 export function FeatureGradient({ index = 0 }: { index?: number }) {
