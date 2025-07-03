@@ -7,6 +7,7 @@ import type {
   GQLGetExerciseFormDataQuery,
   GQLGetTemplateTrainingPlanByIdQuery,
   GQLUpdateExerciseFormInput,
+  GQLUpdateExerciseSetInput,
 } from '@/generated/graphql-client'
 
 /**
@@ -185,6 +186,47 @@ export function createExerciseFormOptimisticUpdate() {
           ...oldData.exercise,
           sets: oldData.exercise.sets.filter(
             (set) => set.id !== variables.setId,
+          ),
+        },
+      }
+    },
+
+    updateSet: (
+      oldData: GQLGetExerciseFormDataQuery,
+      variables: { input: GQLUpdateExerciseSetInput },
+    ): GQLGetExerciseFormDataQuery => {
+      if (!oldData?.exercise) return oldData
+
+      return {
+        ...oldData,
+        exercise: {
+          ...oldData.exercise,
+          sets: oldData.exercise.sets.map((set) =>
+            set.id === variables.input.id
+              ? {
+                  ...set,
+                  minReps:
+                    variables.input.minReps !== undefined
+                      ? variables.input.minReps
+                      : set.minReps,
+                  maxReps:
+                    variables.input.maxReps !== undefined
+                      ? variables.input.maxReps
+                      : set.maxReps,
+                  weight:
+                    variables.input.weight !== undefined
+                      ? variables.input.weight
+                      : set.weight,
+                  rpe:
+                    variables.input.rpe !== undefined
+                      ? variables.input.rpe
+                      : set.rpe,
+                  order:
+                    variables.input.order !== undefined
+                      ? variables.input.order
+                      : set.order,
+                }
+              : set,
           ),
         },
       }

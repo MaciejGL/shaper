@@ -4,10 +4,12 @@ import {
   type GQLAddSetExerciseFormMutation,
   type GQLAddSetExerciseFormMutationVariables,
   type GQLGetExerciseFormDataQuery,
+  type GQLUpdateExerciseSetInput,
   useAddSetExerciseFormMutation,
   useGetExerciseFormDataQuery,
   useRemoveSetExerciseFormMutation,
   useUpdateExerciseFormMutation,
+  useUpdateExerciseSetMutation,
 } from '@/generated/graphql-client'
 import { useDebouncedInvalidation } from '@/hooks/use-debounced-invalidation'
 import {
@@ -90,6 +92,18 @@ export function useExerciseFormMutations(exerciseId: string) {
       console.error('[RemoveSet]: Failed to remove set', { exerciseId, error }),
   })
 
+  // Update set mutation
+  const { mutateAsync: updateExerciseSetMutation } =
+    useUpdateExerciseSetMutation()
+  const { optimisticMutate: updateSetOptimistic } = useOptimisticMutation({
+    queryKey: exerciseQueryKey,
+    mutationFn: updateExerciseSetMutation,
+    updateFn: optimisticUpdaters.updateSet,
+    onSuccess: () => debouncedInvalidateQueries(),
+    onError: (error) =>
+      console.error('[UpdateSet]: Failed to update set', { exerciseId, error }),
+  })
+
   // Wrapper functions for easier use
   const addSet = async (setData: {
     minReps?: number
@@ -109,9 +123,16 @@ export function useExerciseFormMutations(exerciseId: string) {
     )
   }
 
+  const updateSet = async (setData: GQLUpdateExerciseSetInput) => {
+    return updateSetOptimistic({
+      input: setData,
+    })
+  }
+
   return {
     updateExercise,
     addSet,
     removeSet,
+    updateSet,
   }
 }

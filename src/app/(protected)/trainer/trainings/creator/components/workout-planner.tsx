@@ -72,7 +72,9 @@ export default function WorkoutPlanner() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 0,
+        delay: 150,
+        tolerance: 8,
+        distance: 8,
       },
     }),
     useSensor(TouchSensor, {

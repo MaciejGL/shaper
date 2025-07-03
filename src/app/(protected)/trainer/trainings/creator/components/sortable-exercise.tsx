@@ -474,6 +474,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
     updateExercise: updateExerciseOptimistic,
     addSet: addSetOptimistic,
     removeSet: removeSetOptimistic,
+    updateSet: updateSetOptimistic,
   } = useExerciseFormMutations(exerciseId)
 
   const exercise = data?.exercise
@@ -716,35 +717,14 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 const currentSet = exercise?.sets?.[index]
                 if (!currentSet) return
 
-                const updatedSets = exercise.sets.map((set, i) =>
-                  i === index
-                    ? {
-                        id: set.id,
-                        order: set.order,
-                        minReps: field === 'minReps' ? value : set.minReps,
-                        maxReps: field === 'maxReps' ? value : set.maxReps,
-                        weight: field === 'weight' ? value : set.weight,
-                        rpe: field === 'rpe' ? value : set.rpe,
-                      }
-                    : {
-                        id: set.id,
-                        order: set.order,
-                        minReps: set.minReps,
-                        maxReps: set.maxReps,
-                        weight: set.weight,
-                        rpe: set.rpe,
-                      },
-                )
-
-                updateExercise({
-                  name: exercise?.name,
-                  type: exercise?.type,
-                  instructions: exercise?.instructions,
-                  additionalInstructions: exercise?.additionalInstructions,
-                  restSeconds: exercise?.restSeconds,
-                  warmupSets: exercise?.warmupSets,
-                  tempo: exercise?.tempo,
-                  sets: updatedSets,
+                // Use the specific updateSet function for individual set updates
+                updateSetOptimistic({
+                  id: currentSet.id,
+                  order: currentSet.order,
+                  minReps: field === 'minReps' ? value : currentSet.minReps,
+                  maxReps: field === 'maxReps' ? value : currentSet.maxReps,
+                  weight: field === 'weight' ? value : currentSet.weight,
+                  rpe: field === 'rpe' ? value : currentSet.rpe,
                 })
               }}
               onRemoveSet={async (index) => {
