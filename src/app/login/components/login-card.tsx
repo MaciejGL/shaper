@@ -36,7 +36,7 @@ export const LoginCard = () => {
   return (
     <Card
       variant="gradient"
-      className="flex flex-col gap-12 w-full max-w-md shadow-neuro-light dark:shadow-neuro-dark"
+      className="flex flex-col gap-8 w-full max-w-md shadow-neuro-light dark:shadow-neuro-dark"
     >
       <CardHeader className="space-y-1">
         <CardTitle>Login</CardTitle>

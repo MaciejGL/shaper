@@ -1,3 +1,6 @@
+'use client'
+
+import { motion } from 'framer-motion'
 import { ReactNode } from 'react'
 
 interface SmoothGradientProps {
@@ -112,6 +115,7 @@ export function SmoothGradient({
 
   const config = gradientConfigs[variant]
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const createGradient = (layer: any, layerIndex: number) => {
     const gradientColors = layer.colors
       .map(
@@ -177,5 +181,31 @@ export function OrbGradient({
     <div className={`${sizeMap[size]} ${className}`} style={style}>
       <SmoothGradient variant="orb" colors={colors} />
     </div>
+  )
+}
+
+export function LoginOrbGradient() {
+  return (
+    <motion.div
+      animate={{
+        scale: [1, 1.4, 1],
+        rotate: [0, 180, 360],
+      }}
+      transition={{
+        duration: 20,
+        repeat: Number.POSITIVE_INFINITY,
+        ease: 'linear',
+      }}
+      className="absolute top-1/4 right-1/4"
+    >
+      <OrbGradient
+        size="large"
+        colors={{
+          primary: 'rgba(59, 131, 246, 0.421)',
+          secondary: 'rgba(132, 90, 232, 0.307)',
+          accent: 'rgba(59, 131, 246, 0.209)',
+        }}
+      />
+    </motion.div>
   )
 }
