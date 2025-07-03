@@ -36,6 +36,9 @@ export default class CoachingRequest implements GQLCoachingRequest {
   }
 
   async recipient() {
+    console.error(
+      `[CoachingRequest] Making database query for recipient user in request ${this.id}. This could cause N+1 queries.`,
+    )
     const user = await prisma.user.findUnique({
       where: { id: this.data.recipientId },
     })
@@ -49,6 +52,9 @@ export default class CoachingRequest implements GQLCoachingRequest {
   }
 
   async sender() {
+    console.error(
+      `[CoachingRequest] Making database query for sender user in request ${this.id}. This could cause N+1 queries.`,
+    )
     const user = await prisma.user.findUnique({
       where: { id: this.data.senderId },
     })

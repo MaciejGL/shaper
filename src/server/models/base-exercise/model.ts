@@ -101,6 +101,9 @@ export default class BaseExercise implements GQLBaseExercise {
       return null
     }
 
+    console.error(
+      `[BaseExercise] Making database query for createdBy user in exercise ${this.id}. This could cause N+1 queries.`,
+    )
     const user = await prisma.user.findUnique({
       where: {
         id: this.data.createdById,

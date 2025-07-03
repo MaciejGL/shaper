@@ -125,6 +125,9 @@ export default class TrainingExercise implements GQLTrainingExercise {
   }
 
   async logs() {
+    console.error(
+      `[TrainingExercise] Making database query for exercise logs in exercise ${this.id}. This could cause N+1 queries.`,
+    )
     const logs = await prisma.exerciseLog.findMany({
       where: {
         exerciseId: this.id,

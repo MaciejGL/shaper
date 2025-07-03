@@ -119,30 +119,13 @@ export function createExerciseFormOptimisticUpdate() {
         exercise: {
           ...oldData.exercise,
           name: variables.input.name || oldData.exercise.name,
-          type:
-            variables.input.type !== undefined
-              ? variables.input.type
-              : oldData.exercise.type,
-          instructions:
-            variables.input.instructions !== undefined
-              ? variables.input.instructions
-              : oldData.exercise.instructions,
-          additionalInstructions:
-            variables.input.additionalInstructions !== undefined
-              ? variables.input.additionalInstructions
-              : oldData.exercise.additionalInstructions,
-          restSeconds:
-            variables.input.restSeconds !== undefined
-              ? variables.input.restSeconds
-              : oldData.exercise.restSeconds,
-          warmupSets:
-            variables.input.warmupSets !== undefined
-              ? variables.input.warmupSets
-              : oldData.exercise.warmupSets,
-          tempo:
-            variables.input.tempo !== undefined
-              ? variables.input.tempo
-              : oldData.exercise.tempo,
+          // Use provided values directly - allows undefined/null to clear fields
+          type: variables.input.type,
+          instructions: variables.input.instructions,
+          additionalInstructions: variables.input.additionalInstructions,
+          restSeconds: variables.input.restSeconds,
+          warmupSets: variables.input.warmupSets,
+          tempo: variables.input.tempo,
           sets: oldData.exercise.sets,
         },
       }
@@ -205,26 +188,12 @@ export function createExerciseFormOptimisticUpdate() {
             set.id === variables.input.id
               ? {
                   ...set,
-                  minReps:
-                    variables.input.minReps !== undefined
-                      ? variables.input.minReps
-                      : set.minReps,
-                  maxReps:
-                    variables.input.maxReps !== undefined
-                      ? variables.input.maxReps
-                      : set.maxReps,
-                  weight:
-                    variables.input.weight !== undefined
-                      ? variables.input.weight
-                      : set.weight,
-                  rpe:
-                    variables.input.rpe !== undefined
-                      ? variables.input.rpe
-                      : set.rpe,
-                  order:
-                    variables.input.order !== undefined
-                      ? variables.input.order
-                      : set.order,
+                  // Use provided values directly - allows undefined/null to clear fields
+                  minReps: variables.input.minReps,
+                  maxReps: variables.input.maxReps,
+                  weight: variables.input.weight,
+                  rpe: variables.input.rpe,
+                  order: variables.input.order,
                 }
               : set,
           ),
