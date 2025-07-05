@@ -1,6 +1,7 @@
 import { prisma } from '@lib/db'
 import { Prisma } from '@prisma/client'
 import { formatISO, startOfDay, startOfISOWeek } from 'date-fns'
+import { GraphQLError } from 'graphql'
 import { groupBy } from 'lodash'
 
 import {
@@ -448,7 +449,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     })
 
     if (!exercise) {
-      throw new Error('Exercise not found or access denied')
+      throw new GraphQLError('Exercise not found or access denied')
     }
 
     await prisma.baseExercise.delete({

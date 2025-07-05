@@ -1,15 +1,32 @@
 import { useDraggable } from '@dnd-kit/core'
+import { PencilIcon } from 'lucide-react'
+import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { GQLTrainerExercisesQuery } from '@/generated/graphql-client'
+import {
+  GQLMuscleGroupCategoriesQuery,
+  GQLTrainerExercisesQuery,
+} from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
+
+import { CreateExerciseDialog } from '../../../exercises/components/create-exercise-dialog'
 
 interface ExerciseCardProps {
   exercise: GQLTrainerExercisesQuery['userExercises'][number]
+  categories: GQLMuscleGroupCategoriesQuery['muscleGroupCategories']
+  publicExercises: GQLTrainerExercisesQuery['publicExercises']
+  userExercises: GQLTrainerExercisesQuery['userExercises']
 }
 
-export function ExerciseCard({ exercise }: ExerciseCardProps) {
+export function ExerciseCard({
+  exercise,
+  categories,
+  publicExercises,
+  userExercises,
+}: ExerciseCardProps) {
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: exercise.id,
@@ -27,25 +44,45 @@ export function ExerciseCard({ exercise }: ExerciseCardProps) {
     : undefined
 
   return (
-    <Card
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={cn(
-        'p-0 cursor-grab active:cursor-grabbing transition-colors bg-card-on-card',
-        isDragging ? 'opacity-0' : '',
+    <>
+      <Card
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+        className={cn(
+          'p-0 cursor-grab active:cursor-grabbing transition-colors bg-card-on-card group/exercise-card',
+          isDragging ? 'opacity-0' : '',
+        )}
+        variant="secondary"
+      >
+        <CardContent className="p-2">
+          <div className="font-medium text-sm space-y-1">
+            <div className="flex items-start justify-between">
+              <p>{exercise.name}</p>
+              <Button
+                className="group-hover/exercise-card:opacity-100 opacity-0 transition-opacity"
+                variant="ghost"
+                iconOnly={<PencilIcon />}
+                onClick={() => setIsCreateDialogOpen(true)}
+              />
+            </div>
+            <Badge variant="secondary">
+              {exercise.isPublic ? 'Public' : 'Private'}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
+      {isCreateDialogOpen && (
+        <CreateExerciseDialog
+          open={isCreateDialogOpen}
+          onOpenChange={setIsCreateDialogOpen}
+          categories={categories}
+          exercise={exercise}
+          publicExercises={publicExercises}
+          userExercises={userExercises}
+        />
       )}
-      variant="secondary"
-    >
-      <CardContent className="p-2">
-        <div className="font-medium text-sm space-y-1">
-          <p>{exercise.name}</p>
-          <Badge variant="secondary">
-            {exercise.isPublic ? 'Public' : 'Private'}
-          </Badge>
-        </div>
-      </CardContent>
-    </Card>
+    </>
   )
 }

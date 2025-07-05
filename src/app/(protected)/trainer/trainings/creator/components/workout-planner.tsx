@@ -240,7 +240,8 @@ export default function WorkoutPlanner() {
               searchTerm={searchTerm}
               selectedMuscleGroup={selectedMuscleGroup}
               selectedEquipment={selectedEquipment}
-              exercises={joinedExercises}
+              trainerExercises={exercisesData?.userExercises || []}
+              publicExercises={exercisesData?.publicExercises || []}
               isLoading={exercisesLoading}
               onSearchChange={setSearchTerm}
               onMuscleGroupChange={setSelectedMuscleGroup}

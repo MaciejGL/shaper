@@ -29,6 +29,7 @@ import {
   GQLMuscleGroupCategoriesQuery,
   GQLTrainerExercisesQuery,
   useCreateExerciseMutation,
+  useDeleteExerciseMutation,
   useGetExerciseWithSubstitutesQuery,
   useTrainerExercisesQuery,
   useUpdateExerciseMutation,
@@ -53,9 +54,7 @@ export type CreateExerciseFormData = {
   description?: string | null
   equipment?: GQLEquipment
   videoUrl?: string | null
-  muscleGroups: {
-    id: string
-  }[]
+  muscleGroups: { id: string }[]
   substituteIds: string[]
 }
 
@@ -64,6 +63,7 @@ export function CreateExerciseDialog({
   onOpenChange,
   categories,
   exercise,
+
   userExercises,
   publicExercises,
 }: CreateExerciseDialogProps) {
@@ -102,6 +102,7 @@ export function CreateExerciseDialog({
       }))
     }
   }, [exerciseWithSubstitutes])
+
   const invalidateQuery = useInvalidateQuery()
   const { mutateAsync: createExercise, isPending: isCreatingExercise } =
     useCreateExerciseMutation({
@@ -131,6 +132,17 @@ export function CreateExerciseDialog({
             id: exercise?.id || '',
           }),
         })
+      },
+    })
+
+  const { mutateAsync: deleteExercise, isPending: isDeletingExercise } =
+    useDeleteExerciseMutation({
+      onSuccess: () => {
+        invalidateQuery({
+          queryKey: useTrainerExercisesQuery.getKey(),
+        })
+        toast.success('Exercise deleted successfully')
+        onOpenChange(false)
       },
     })
 
@@ -217,14 +229,15 @@ export function CreateExerciseDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         dialogTitle={title}
-        className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto"
+        fullScreen
+        className="sm:max-w-[600px]"
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto">
           <div className="space-y-2">
             <Label htmlFor="name">Exercise Name *</Label>
             <Input
@@ -252,27 +265,6 @@ export function CreateExerciseDialog({
                 {isNameTakenError.error}
               </p>
             )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="equipment">Equipment</Label>
-            <Select
-              value={formData.equipment}
-              onValueChange={(value: GQLEquipment) =>
-                setFormData((prev) => ({ ...prev, equipment: value }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select equipment" />
-              </SelectTrigger>
-              <SelectContent>
-                {EQUIPMENT_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="space-y-2">
@@ -307,6 +299,27 @@ export function CreateExerciseDialog({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="equipment">Equipment</Label>
+            <Select
+              value={formData.equipment}
+              onValueChange={(value: GQLEquipment) =>
+                setFormData((prev) => ({ ...prev, equipment: value }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select equipment" />
+              </SelectTrigger>
+              <SelectContent>
+                {EQUIPMENT_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <MuscleGroupSelector
               categories={categories}
               selectedMuscleGroups={formData.muscleGroups}
@@ -314,45 +327,62 @@ export function CreateExerciseDialog({
             />
           </div>
 
-          {formData.muscleGroups.length > 0 && (
-            <div className="space-y-2">
-              <SubstituteExercisesManager
-                exerciseId={exercise?.id || ''}
-                selectedMuscleGroupIds={formData.muscleGroups.map(
-                  (mg) => mg.id,
-                )}
-                availableExercises={{
-                  userExercises: userExercises || [],
-                  publicExercises: publicExercises || [],
-                }}
-                selectedSubstituteIds={formData.substituteIds}
-                onSubstitutesChange={(substituteIds: string[]) => {
-                  setFormData((prev) => ({ ...prev, substituteIds }))
-                }}
-                isLoading={isLoadingExerciseWithSubstitutes}
-              />
-            </div>
-          )}
-
-          <DialogFooter>
+          <div className="space-y-2">
+            <SubstituteExercisesManager
+              exerciseId={exercise?.id}
+              selectedMuscleGroupIds={
+                formData.muscleGroups.length > 0
+                  ? formData.muscleGroups.map((mg) => mg.id)
+                  : (categories?.map((mg) => mg.id) ?? [])
+              }
+              availableExercises={{
+                userExercises: userExercises || [],
+                publicExercises: publicExercises || [],
+              }}
+              selectedSubstituteIds={formData.substituteIds}
+              onSubstitutesChange={(substituteIds: string[]) => {
+                setFormData((prev) => ({ ...prev, substituteIds }))
+              }}
+              isLoading={isLoadingExerciseWithSubstitutes}
+            />
+          </div>
+        </form>
+        <DialogFooter className="flex flex-row gap-2">
+          {exercise?.id && (
             <Button
               type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
+              variant="destructive"
+              onClick={() => deleteExercise({ id: exercise.id })}
               disabled={
-                !formData.name.trim() || isNameTakenError?.level === 'user'
+                isDeletingExercise ||
+                isLoadingExerciseWithSubstitutes ||
+                isCreatingExercise ||
+                isUpdatingExercise
               }
-              loading={isCreatingExercise || isUpdatingExercise}
+              loading={isDeletingExercise}
+              className="mr-auto"
             >
-              {exercise?.id ? 'Update Exercise' : 'Create Exercise'}
+              Remove Exercise
             </Button>
-          </DialogFooter>
-        </form>
+          )}
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => onOpenChange(false)}
+            className="ml-auto"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={
+              !formData.name.trim() || isNameTakenError?.level === 'user'
+            }
+            loading={isCreatingExercise || isUpdatingExercise}
+          >
+            {exercise?.id ? 'Update Exercise' : 'Create Exercise'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

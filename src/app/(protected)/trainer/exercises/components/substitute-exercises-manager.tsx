@@ -33,7 +33,7 @@ interface SubstituteExercisesManagerProps {
   selectedMuscleGroupIds: string[]
   onSubstitutesChange: (substituteIds: string[]) => void
   isLoading: boolean
-  exerciseId: string
+  exerciseId?: string
 }
 
 export function SubstituteExercisesManager({
