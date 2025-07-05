@@ -13,38 +13,58 @@ export function AnimatedLogo({
   size?: number
   forceColor?: string
 }) {
-  // Animation variants for the paths
+  // Animation variants for the container
   const containerVariants = {
     initial: {},
     animate: {
       transition: {
-        staggerChildren: 0.1, // Faster stagger for spring effect
-        delayChildren: 0.05, // Quick start
+        staggerChildren: 0.2, // Reduced stagger for smoother flow
+        delayChildren: 0.1,
       },
     },
   }
 
+  // Animation variants for the circle (center element)
+  const circleVariants = {
+    initial: {
+      scale: 0,
+      opacity: 0,
+    },
+    animate: {
+      scale: 1,
+      opacity: 1,
+      transition: {
+        duration: 0.4,
+        delay: 0.5,
+        ease: 'easeOut',
+      },
+    },
+  }
+
+  // Animation variants for the paths with smooth stroke drawing effect
   const pathVariants = {
     initial: {
-      scale: 0.9, // Start from slightly smaller size
+      strokeDasharray: '100 100', // Set up dash pattern
+      strokeDashoffset: 100, // Start with path hidden
+      opacity: 0,
     },
     animate: (custom: number) => ({
-      fillOpacity: 1,
-      scale: [0.9, 1.05, 0.9], // Pulse between 0.9 and 1.05
+      strokeDashoffset: 0, // Animate to reveal the path
+      opacity: 1,
       transition: {
-        // Continuous pulse animation
-        scale: {
-          duration: 1, // One complete pulse cycle takes 2 seconds
-          repeat: infinite ? Infinity : 0, // Repeat indefinitely
-          repeatType: 'reverse', // Smoothly reverse the animation
-          ease: 'easeInOut', // Smooth easing
-          delay: custom * 0.1, // Stagger the pulse effect
+        strokeDashoffset: {
+          duration: 1, // Longer duration for smoother drawing
+          ease: 'easeInOut',
+          delay: custom * 0.3, // Stagger each path
+          ...(infinite && {
+            repeat: Infinity,
+            repeatType: 'reverse',
+            repeatDelay: 0.5,
+          }),
         },
-        // Fade in quickly
-        fillOpacity: {
-          duration: 0.3,
-          delay: custom * 0.15,
-          ease: 'easeOut',
+        opacity: {
+          duration: 0.2,
+          delay: custom * 0.2,
         },
       },
     }),
@@ -55,34 +75,66 @@ export function AnimatedLogo({
       <motion.svg
         width={size}
         height={size}
-        viewBox="0 0 100 100"
+        viewBox="0 0 512 512"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         variants={containerVariants}
         initial="initial"
         animate="animate"
       >
-        <motion.g style={{ transformOrigin: '50px 50px' }}>
-          <motion.path
-            d="M50 95C44.0905 95 38.2389 93.836 32.7792 91.5746C27.3196 89.3131 22.3588 85.9984 18.1802 81.8198C14.0016 77.6412 10.6869 72.6804 8.42542 67.2208C6.16396 61.7611 5 55.9095 5 50L10.9999 50C10.9999 55.1216 12.0087 60.193 13.9686 64.9247C15.9285 69.6564 18.8013 73.9557 22.4228 77.5772C26.0443 81.1987 30.3436 84.0715 35.0753 86.0314C39.807 87.9913 44.8784 89.0001 50 89.0001L50 95Z"
+        {/* Define masks for the stroke effects */}
+        <defs>
+          <mask id="path-2-inside-1_3370_1806" fill="white">
+            <path d="M256 416.885C229.542 416.885 203.493 410.36 180.159 397.888C156.826 385.416 136.928 367.382 122.229 345.383C107.53 323.384 98.4828 298.1 95.8895 271.77C93.2961 245.439 97.2365 218.876 107.361 194.432C117.486 169.988 133.483 148.419 153.936 131.634C174.388 114.849 198.664 103.368 224.613 98.2061C250.562 93.0445 277.384 94.3621 302.703 102.042C328.021 109.723 351.055 123.529 369.763 142.237L346.146 165.854C331.321 151.03 313.069 140.09 293.007 134.004C272.945 127.918 251.691 126.874 231.129 130.964C210.567 135.054 191.331 144.153 175.124 157.453C158.918 170.753 146.242 187.844 138.219 207.214C130.196 226.583 127.074 247.632 129.129 268.496C131.184 289.36 138.352 309.395 150 326.827C161.648 344.259 177.414 358.549 195.904 368.432C214.394 378.315 235.035 383.485 256 383.485L256 416.885Z" />
+          </mask>
+          <mask id="path-3-inside-2_3370_1806" fill="white">
+            <path d="M256 480.632C196.424 480.632 139.288 456.966 97.161 414.839C55.0342 372.712 31.3677 315.576 31.3677 256C31.3677 196.424 55.0342 139.288 97.161 97.161C139.288 55.0342 196.424 31.3677 256 31.3677L256 66.4556C205.73 66.4556 157.518 86.4254 121.972 121.972C86.4254 157.518 66.4556 205.73 66.4556 256C66.4556 306.27 86.4254 354.482 121.972 390.028C157.518 425.575 205.73 445.545 256 445.545L256 480.632Z" />
+          </mask>
+        </defs>
+
+        <motion.g style={{ transformOrigin: '256px 256px' }}>
+          {/* Center circle - appears first */}
+          <motion.circle
+            cx="256"
+            cy="256"
+            r="100.174"
             fill="currentColor"
-            variants={pathVariants}
-            custom={0} // Outer layer
+            variants={circleVariants}
             className={forceColor}
           />
+
+          {/* Middle ring with smooth progressive stroke drawing */}
           <motion.path
-            d="M50 83C41.2479 83 32.8542 79.5232 26.6655 73.3345C20.4768 67.1458 17 58.7521 17 50C17 41.2479 20.4768 32.8542 26.6655 26.6655C32.8542 20.4768 41.2479 17 50 17L50 22.9985C42.8388 22.9985 35.9708 25.8433 30.9071 30.9071C25.8433 35.9708 22.9985 42.8388 22.9985 50C22.9985 57.1612 25.8433 64.0292 30.9071 69.0929C35.9708 74.1567 42.8388 77.0015 50 77.0015L50 83Z"
-            fill="currentColor"
+            d="M256 416.885C229.542 416.885 203.493 410.36 180.159 397.888C156.826 385.416 136.928 367.382 122.229 345.383C107.53 323.384 98.4828 298.1 95.8895 271.77C93.2961 245.439 97.2365 218.876 107.361 194.432C117.486 169.988 133.483 148.419 153.936 131.634C174.388 114.849 198.664 103.368 224.613 98.2061C250.562 93.0445 277.384 94.3621 302.703 102.042C328.021 109.723 351.055 123.529 369.763 142.237L346.146 165.854C331.321 151.03 313.069 140.09 293.007 134.004C272.945 127.918 251.691 126.874 231.129 130.964C210.567 135.054 191.331 144.153 175.124 157.453C158.918 170.753 146.242 187.844 138.219 207.214C130.196 226.583 127.074 247.632 129.129 268.496C131.184 289.36 138.352 309.395 150 326.827C161.648 344.259 177.414 358.549 195.904 368.432C214.394 378.315 235.035 383.485 256 383.485L256 416.885Z"
+            stroke="currentColor"
+            strokeWidth="100"
+            fill="none"
+            mask="url(#path-2-inside-1_3370_1806)"
             variants={pathVariants}
-            custom={1} // Middle layer
+            custom={0} // First path to draw
             className={forceColor}
+            pathLength="100" // Normalize path length for consistent animation
+            style={{
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round', // Smooth joins
+            }}
           />
+
+          {/* Outer ring with smooth progressive stroke drawing */}
           <motion.path
-            d="M50 71C45.8466 71 41.7865 69.7684 38.333 67.4609C34.8796 65.1534 32.188 61.8736 30.5985 58.0364C29.0091 54.1991 28.5932 49.9767 29.4035 45.9031C30.2138 41.8295 32.2139 38.0877 35.1508 35.1508C38.0877 32.2139 41.8295 30.2138 45.9031 29.4035C49.9767 28.5932 54.1991 29.0091 58.0364 30.5985C61.8736 32.188 65.1534 34.8796 67.4609 38.333C69.7684 41.7865 71 45.8466 71 50L50 50L50 71Z"
-            fill="currentColor"
+            d="M256 480.632C196.424 480.632 139.288 456.966 97.161 414.839C55.0342 372.712 31.3677 315.576 31.3677 256C31.3677 196.424 55.0342 139.288 97.161 97.161C139.288 55.0342 196.424 31.3677 256 31.3677L256 66.4556C205.73 66.4556 157.518 86.4254 121.972 121.972C86.4254 157.518 66.4556 205.73 66.4556 256C66.4556 306.27 86.4254 354.482 121.972 390.028C157.518 425.575 205.73 445.545 256 445.545L256 480.632Z"
+            stroke="currentColor"
+            strokeWidth="120"
+            fill="none"
+            mask="url(#path-3-inside-2_3370_1806)"
             variants={pathVariants}
-            custom={2} // Inner layer
+            custom={1} // Second path to draw
             className={forceColor}
+            pathLength="100" // Normalize path length for consistent animation
+            style={{
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round', // Smooth joins
+            }}
           />
         </motion.g>
       </motion.svg>

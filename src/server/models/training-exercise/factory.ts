@@ -7,6 +7,7 @@ import {
   GQLAddAiExerciseToWorkoutInput,
   GQLAddSetExerciseFormInput,
   GQLUpdateExerciseFormInput,
+  GQLWorkoutSessionEvent,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 import {
@@ -383,6 +384,9 @@ export const addSet = async (exerciseId: string) => {
     },
   })
 
+  // Check completion cascade after adding set
+  await checkCompletionCascadeAfterSetAddition(exerciseId)
+
   return new ExerciseSet(set)
 }
 
@@ -425,6 +429,9 @@ export const removeSet = async (setId: string) => {
       order: { decrement: 1 },
     },
   })
+
+  // Check completion cascade after set removal
+  await checkCompletionCascadeAfterSetRemoval(exercise.id)
 
   return true
 }
@@ -600,6 +607,213 @@ export const removeSetExerciseForm = async (setId: string) => {
   })
 
   return true
+}
+
+// Helper function to handle completion cascade after set removal
+const checkCompletionCascadeAfterSetRemoval = async (exerciseId: string) => {
+  // 1. Check if all remaining sets in the exercise are completed
+  const incompleteSets = await prisma.exerciseSet.count({
+    where: {
+      exerciseId,
+      completedAt: null,
+    },
+  })
+
+  if (incompleteSets > 0) {
+    // If there are incomplete sets, no need to cascade further
+    return
+  }
+
+  // 2. Mark exercise as completed if all sets are completed
+  await prisma.trainingExercise.update({
+    where: { id: exerciseId },
+    data: { completedAt: new Date() },
+  })
+
+  // 3. Check if all exercises in the day are completed
+  const day = await prisma.trainingDay.findFirst({
+    where: {
+      exercises: {
+        some: { id: exerciseId },
+      },
+    },
+    select: {
+      id: true,
+      weekId: true,
+      exercises: {
+        select: { completedAt: true },
+      },
+    },
+  })
+
+  if (!day) return
+
+  const allExercisesCompleted = day.exercises.every((ex) => ex.completedAt)
+  if (!allExercisesCompleted) {
+    return
+  }
+
+  // 4. Mark day as completed if all exercises are completed
+  await prisma.trainingDay.update({
+    where: { id: day.id },
+    data: { completedAt: new Date() },
+  })
+
+  // Update workout session event to complete
+  await updateWorkoutSessionEvent(day.id, GQLWorkoutSessionEvent.Complete)
+
+  // 5. Check if all days in the week are completed
+  const week = await prisma.trainingWeek.findUnique({
+    where: { id: day.weekId },
+    select: {
+      id: true,
+      planId: true,
+      days: { select: { completedAt: true, isRestDay: true } },
+    },
+  })
+
+  if (!week) return
+
+  const allDaysCompleted = week.days
+    .filter((d) => !d.isRestDay)
+    .every((d) => d.completedAt)
+  if (!allDaysCompleted) {
+    return
+  }
+
+  // 6. Mark week as completed if all days are completed
+  await prisma.trainingWeek.update({
+    where: { id: week.id },
+    data: { completedAt: new Date() },
+  })
+
+  // 7. Check if all weeks in the plan are completed
+  const plan = await prisma.trainingPlan.findUnique({
+    where: { id: week.planId },
+    select: {
+      id: true,
+      weeks: { select: { completedAt: true } },
+    },
+  })
+
+  if (!plan) return
+
+  const allWeeksCompleted = plan.weeks.every((w) => w.completedAt)
+  if (allWeeksCompleted) {
+    // 8. Mark plan as completed if all weeks are completed
+    await prisma.trainingPlan.update({
+      where: { id: plan.id },
+      data: { completedAt: new Date() },
+    })
+  }
+}
+
+// Helper function to handle completion cascade after set addition
+const checkCompletionCascadeAfterSetAddition = async (exerciseId: string) => {
+  // When adding a new set, we need to check if previously completed entities
+  // should now be marked as incomplete since the new set won't be completed initially
+
+  // 1. Check if the exercise was previously completed
+  const exercise = await prisma.trainingExercise.findUnique({
+    where: { id: exerciseId },
+    select: {
+      completedAt: true,
+      dayId: true,
+    },
+  })
+
+  if (!exercise || !exercise.completedAt) {
+    // Exercise wasn't completed, no cascade needed
+    return
+  }
+
+  // 2. Mark exercise as incomplete since we added a new uncompleted set
+  await prisma.trainingExercise.update({
+    where: { id: exerciseId },
+    data: { completedAt: null },
+  })
+
+  // 3. Check if the day was completed and mark it as incomplete
+  const day = await prisma.trainingDay.findUnique({
+    where: { id: exercise.dayId },
+    select: {
+      completedAt: true,
+      weekId: true,
+    },
+  })
+
+  if (!day || !day.completedAt) {
+    // Day wasn't completed, no further cascade needed
+    return
+  }
+
+  // 4. Mark day as incomplete
+  await prisma.trainingDay.update({
+    where: { id: exercise.dayId },
+    data: { completedAt: null },
+  })
+
+  // Update workout session event to progress
+  await updateWorkoutSessionEvent(
+    exercise.dayId,
+    GQLWorkoutSessionEvent.Progress,
+  )
+
+  // 5. Check if the week was completed and mark it as incomplete
+  const week = await prisma.trainingWeek.findUnique({
+    where: { id: day.weekId },
+    select: {
+      completedAt: true,
+      planId: true,
+    },
+  })
+
+  if (!week || !week.completedAt) {
+    // Week wasn't completed, no further cascade needed
+    return
+  }
+
+  // 6. Mark week as incomplete
+  await prisma.trainingWeek.update({
+    where: { id: day.weekId },
+    data: { completedAt: null },
+  })
+
+  // 7. Check if the plan was completed and mark it as incomplete
+  const plan = await prisma.trainingPlan.findUnique({
+    where: { id: week.planId },
+    select: {
+      completedAt: true,
+    },
+  })
+
+  if (!plan || !plan.completedAt) {
+    // Plan wasn't completed, no further cascade needed
+    return
+  }
+
+  // 8. Mark plan as incomplete
+  await prisma.trainingPlan.update({
+    where: { id: week.planId },
+    data: { completedAt: null },
+  })
+}
+
+// Helper function to update workout session events
+const updateWorkoutSessionEvent = async (
+  dayId: string,
+  type: GQLWorkoutSessionEvent,
+) => {
+  const event = await prisma.workoutSessionEvent.findFirst({
+    where: { dayId },
+  })
+
+  if (event) {
+    await prisma.workoutSessionEvent.update({
+      where: { id: event.id },
+      data: { type },
+    })
+  }
 }
 
 export const swapExercise = async (
