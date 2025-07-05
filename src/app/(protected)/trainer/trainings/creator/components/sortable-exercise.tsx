@@ -82,7 +82,7 @@ export const SortableExercise = React.memo(
     const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
 
     // Revert to original stable key
-    const stableKey = `${activeWeek}-${dayOfWeek}-${exerciseIndex}`
+    const stableKey = `${activeWeek}-${dayOfWeek}-${exerciseIndex}-${exerciseId}`
 
     // Memoize expensive computations
     const currentDay = useMemo(

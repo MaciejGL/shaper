@@ -98,7 +98,8 @@ export const ExerciseList = React.memo(
     const exerciseKeys = useMemo(
       () =>
         day.exercises?.map(
-          (_, index) => `${activeWeek}-${day.dayOfWeek}-${index}`,
+          (exercise, index) =>
+            `${activeWeek}-${day.dayOfWeek}-${index}-${exercise.id}`,
         ) || [],
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [day.exercises?.length, activeWeek, day.dayOfWeek], // Only depend on length, not full array
@@ -116,7 +117,7 @@ export const ExerciseList = React.memo(
           >
             {day.exercises?.map((exercise, index) => (
               <div
-                key={exerciseKeys[index]} // Use stable key for React key
+                key={exerciseKeys[index] + exercise.id} // Use stable key for React key
                 className="mb-2 w-full"
               >
                 <SortableExercise

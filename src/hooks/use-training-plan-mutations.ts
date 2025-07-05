@@ -205,10 +205,19 @@ export function useTrainingPlanMutations(trainingId?: string) {
         sets: [],
         order,
       }
+      // Insert at the correct position based on order
+      const insertIndex = Math.min(order - 1, currentExercises.length) // order is 1-based, array is 0-based
 
-      currentExercises.push(newExercise)
-      targetDay.exercises = currentExercises
+      // Update order of exercises that come after the insertion point
+      const updatedExercises = currentExercises.map((ex) => ({
+        ...ex,
+        order: ex.order >= order ? ex.order + 1 : ex.order,
+      }))
 
+      // Insert the new exercise at the correct position
+      updatedExercises.splice(insertIndex, 0, newExercise)
+
+      targetDay.exercises = updatedExercises
       return {
         ...oldData,
         getTrainingPlanById: {

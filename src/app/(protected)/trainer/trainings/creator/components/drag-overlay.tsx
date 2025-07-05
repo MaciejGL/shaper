@@ -26,8 +26,9 @@ export function DragOverlay({ activeId, exercises, weeks }: DragOverlayProps) {
 
   // Handle dragging day exercises with stable key format (weekIndex-dayIndex-exerciseIndex)
   const stableKeyParts = activeId.split('-')
-  if (stableKeyParts.length === 3) {
-    const [weekIndexStr, dayIndexStr, exerciseIndexStr] = stableKeyParts
+  if (stableKeyParts.length >= 3) {
+    const [weekIndexStr, dayIndexStr, exerciseIndexStr, exerciseId] =
+      stableKeyParts
     const weekIndex = parseInt(weekIndexStr, 10)
     const dayIndex = parseInt(dayIndexStr, 10)
     const exerciseIndex = parseInt(exerciseIndexStr, 10)
@@ -40,6 +41,7 @@ export function DragOverlay({ activeId, exercises, weeks }: DragOverlayProps) {
     if (dayExercise) {
       return (
         <TrainingExerciseCard
+          key={exerciseId}
           exercise={dayExercise as unknown as TrainingExercise}
         />
       )

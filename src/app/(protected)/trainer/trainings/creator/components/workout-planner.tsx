@@ -149,7 +149,7 @@ export default function WorkoutPlanner() {
     const newExercise = joinedExercises.find((ex) => ex.id === active.id)
     if (!newExercise) return
 
-    const exerciseToAdd: Omit<GQLAddExerciseToDayInput, 'dayId' | 'order'> = {
+    const exerciseToAdd: Omit<GQLAddExerciseToDayInput, 'dayId'> = {
       baseId: newExercise.id,
       name: newExercise.name,
       instructions: newExercise.description || '',
@@ -158,6 +158,7 @@ export default function WorkoutPlanner() {
       tempo: undefined,
       type: undefined,
       warmupSets: undefined,
+      order: targetPosition + 1,
     }
 
     addExercise(activeWeek, targetDay.dayOfWeek, exerciseToAdd)
