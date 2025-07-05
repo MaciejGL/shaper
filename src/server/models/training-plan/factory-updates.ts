@@ -445,37 +445,22 @@ export async function updateExerciseSet(
     throw new GraphQLError('User not found')
   }
 
-  // Verify ownership
-  const set = await prisma.exerciseSet.findUnique({
-    where: { id: input.id },
-    include: {
+  await prisma.exerciseSet.update({
+    where: {
+      id: input.id,
       exercise: {
-        include: {
-          day: {
-            include: {
-              week: {
-                include: { plan: { select: { createdById: true } } },
-              },
-            },
-          },
+        day: {
+          week: { plan: { createdById: user.user.id } },
         },
       },
     },
-  })
-
-  if (!set || set.exercise.day.week.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Exercise set not found or unauthorized')
-  }
-
-  await prisma.exerciseSet.update({
-    where: { id: input.id },
     data: {
-      order: input.order,
-      reps: input.reps,
-      minReps: input.minReps,
-      maxReps: input.maxReps,
-      weight: input.weight,
-      rpe: input.rpe,
+      order: input.order ?? null,
+      reps: input.reps ?? null,
+      minReps: input.minReps ?? null,
+      maxReps: input.maxReps ?? null,
+      weight: input.weight ?? null,
+      rpe: input.rpe ?? null,
     },
   })
 
