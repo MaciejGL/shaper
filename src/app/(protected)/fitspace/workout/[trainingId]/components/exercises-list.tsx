@@ -24,10 +24,10 @@ export function ExercisesList({
             <div
               key={exercise.id}
               className={cn(
-                'p-3 flex justify-between cursor-pointer hover:bg-accent/50 shadow-neuro-light dark:shadow-neuro-dark rounded-md transition-colors',
+                'p-3 flex justify-between border border-border cursor-pointer hover:border-primary/20 rounded-lg transition-colors',
                 selectedExercises.includes(exercise.id)
-                  ? 'bg-accent/50'
-                  : ' bg-card',
+                  ? 'bg-primary/5'
+                  : ' bg-card ',
               )}
               onClick={() => {
                 if (selectedExercises.includes(exercise.id)) {

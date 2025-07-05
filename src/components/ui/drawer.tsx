@@ -146,6 +146,7 @@ type SimpleDrawerProps = {
   headerIcon?: React.ReactNode
   children: React.ReactNode
   footer?: React.ReactNode
+  className?: string
 }
 
 export function SimpleDrawerContent({
@@ -153,6 +154,7 @@ export function SimpleDrawerContent({
   headerIcon,
   children,
   footer,
+  className,
 }: SimpleDrawerProps) {
   const Icon = headerIcon
   return (
@@ -164,7 +166,9 @@ export function SimpleDrawerContent({
         </DrawerTitle>
       </DrawerHeader>
 
-      <div className="p-4 overflow-y-auto max-h-[calc(95vh-8rem)]">
+      <div
+        className={cn('p-4 overflow-y-auto max-h-[calc(95vh-8rem)]', className)}
+      >
         {/* Content */}
         {children}
       </div>
