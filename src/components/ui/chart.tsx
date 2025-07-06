@@ -102,21 +102,7 @@ ${colorConfig
     />
   )
 }
-
-// Simple ChartTooltip with mobile support
-const ChartTooltip = React.forwardRef<
-  React.ElementRef<typeof RechartsPrimitive.Tooltip>,
-  React.ComponentPropsWithoutRef<typeof RechartsPrimitive.Tooltip>
->((props, ref) => {
-  return (
-    <RechartsPrimitive.Tooltip
-      ref={ref}
-      trigger="click" // Use click for both mobile and desktop
-      allowEscapeViewBox={{ x: false, y: false }} // Keep tooltip in view
-      {...props}
-    />
-  )
-})
+const ChartTooltip = RechartsPrimitive.Tooltip
 
 ChartTooltip.displayName = 'ChartTooltip'
 
@@ -189,7 +175,7 @@ function ChartTooltipContent({
   return (
     <div
       className={cn(
-        'border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl',
+        'border-border/50 bg-background grid min-w-[8rem] items-start gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs shadow-xl z-50',
         className,
       )}
     >
@@ -217,20 +203,17 @@ function ChartTooltipContent({
                   ) : (
                     !hideIndicator && (
                       <div
-                        className={cn(
-                          'shrink-0 rounded-[2px] border-(--color-border) bg-(--color-bg)',
-                          {
-                            'h-2.5 w-2.5': indicator === 'dot',
-                            'w-1': indicator === 'line',
-                            'w-0 border-[1.5px] border-dashed bg-transparent':
-                              indicator === 'dashed',
-                            'my-0.5': nestLabel && indicator === 'dashed',
-                          },
-                        )}
+                        className={cn('shrink-0 rounded-[2px]', {
+                          'h-2.5 w-2.5': indicator === 'dot',
+                          'w-1': indicator === 'line',
+                          'w-0 border-[1.5px] border-dashed bg-transparent':
+                            indicator === 'dashed',
+                          'my-0.5': nestLabel && indicator === 'dashed',
+                        })}
                         style={
                           {
-                            '--color-bg': indicatorColor,
-                            '--color-border': indicatorColor,
+                            backgroundColor: indicatorColor,
+                            borderColor: indicatorColor,
                           } as React.CSSProperties
                         }
                       />
@@ -238,7 +221,7 @@ function ChartTooltipContent({
                   )}
                   <div
                     className={cn(
-                      'flex flex-1 justify-between leading-none',
+                      'flex flex-1 justify-between leading-none gap-4',
                       nestLabel ? 'items-end' : 'items-center',
                     )}
                   >
@@ -248,9 +231,11 @@ function ChartTooltipContent({
                         {itemConfig?.label || item.name}
                       </span>
                     </div>
-                    {item.value && (
+                    {item.value !== undefined && item.value !== null && (
                       <span className="text-foreground font-mono font-medium tabular-nums">
-                        {item.value.toLocaleString()}
+                        {typeof item.value === 'number'
+                          ? item.value.toLocaleString()
+                          : item.value}
                       </span>
                     )}
                   </div>

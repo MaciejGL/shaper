@@ -20,17 +20,12 @@ interface MeasurementChartProps {
   className?: string
 }
 
-// Calculate 7-day moving average
-function calculateMovingAverage(
-  data: number[],
-  windowSize: number = 7,
-): (number | null)[] {
-  return data.map((_, index) => {
-    if (index < windowSize - 1) return null // Not enough data points
-
-    const window = data.slice(index - windowSize + 1, index + 1)
-    const sum = window.reduce((acc, val) => acc + val, 0)
-    return sum / window.length
+// Calculate running average (cumulative average from start to each point)
+function calculateRunningAverage(data: number[]): number[] {
+  let sum = 0
+  return data.map((value, index) => {
+    sum += value
+    return Math.round((sum / (index + 1)) * 100) / 100 // Round to 2 decimal places
   })
 }
 
@@ -52,23 +47,23 @@ export function MeasurementChart({
     return null
   }
 
-  // Extract values for moving average calculation
+  // Extract values for running average calculation
   const values = filteredData.map((measurement) => measurement[field] as number)
 
-  // Calculate 7-day moving average
-  const movingAverages = calculateMovingAverage(values, 7)
+  // Calculate running average (shows your average weight throughout the journey)
+  const runningAverages = calculateRunningAverage(values)
 
-  // Create chart data with both actual values and moving averages
+  // Create chart data with both actual values and running averages
   const chartData = filteredData.map((measurement, index) => ({
     date: format(new Date(measurement.measuredAt), 'dd MMM'),
     [field]: measurement[field],
-    [`${field}Average`]: movingAverages[index],
+    [`${field}Average`]: runningAverages[index],
   }))
 
   // Calculate dynamic Y-axis range based on both actual values and averages
   const allValues = [
     ...values,
-    ...(movingAverages.filter((val) => val !== null) as number[]),
+    ...(runningAverages.filter((val) => val !== null) as number[]),
   ]
   const minValue = Math.min(...allValues)
   const maxValue = Math.max(...allValues)
@@ -85,7 +80,7 @@ export function MeasurementChart({
       color: 'var(--chart-1)',
     },
     [`${field}Average`]: {
-      label: `Weekly Average (${unit})`,
+      label: `Running Average (${unit})`,
       color: 'var(--chart-2)',
     },
   } satisfies ChartConfig
@@ -126,7 +121,6 @@ export function MeasurementChart({
           domain={[yAxisMin, yAxisMax]}
         />
         <ChartTooltip content={<ChartTooltipContent />} />
-        {/* Actual measurements line */}
         <Line
           dataKey={field}
           type="monotone"
@@ -135,7 +129,6 @@ export function MeasurementChart({
           dot={{ r: 2.5 }}
           activeDot={{ r: 4 }}
         />
-        {/* 7-day moving average line */}
         <Line
           dataKey={`${field}Average`}
           type="monotone"
