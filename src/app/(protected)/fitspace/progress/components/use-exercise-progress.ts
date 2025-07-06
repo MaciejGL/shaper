@@ -8,12 +8,12 @@ export function useExerciseProgress(
   userId: string | null,
 ) {
   const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(false)
+  const [isInitialLoading, setIsInitialLoading] = useState(true) // Changed: Start with true
+  const [hasLoadedFromStorage, setHasLoadedFromStorage] = useState(false) // Added: Track if we've loaded from storage
 
   // Load selected exercises from localStorage on mount
   useEffect(() => {
     if (userId) {
-      setIsLoading(true)
       const stored = localStorage.getItem(`selectedExercises_${userId}`)
       if (stored) {
         try {
@@ -26,7 +26,8 @@ export function useExerciseProgress(
         }
       }
     }
-    setIsLoading(false)
+    setHasLoadedFromStorage(true)
+    setIsInitialLoading(false)
   }, [userId])
 
   // Filter and maintain order based on selectedExerciseIds array
@@ -35,6 +36,29 @@ export function useExerciseProgress(
       .map((id) => exerciseProgress.find((ex) => ex.baseExercise?.id === id))
       .filter(Boolean)
   }, [exerciseProgress, selectedExerciseIds])
+
+  // Calculate if we're still loading - consider the case where we have IDs but no matching exercises yet
+  const isLoading = useMemo(() => {
+    // If we haven't loaded from storage yet, we're loading
+    if (!hasLoadedFromStorage) return true
+
+    // If we have selected IDs but no exercises have been found yet, and we have exercise progress data, we're still loading
+    if (
+      selectedExerciseIds.length > 0 &&
+      selectedExercises.length === 0 &&
+      exerciseProgress.length > 0
+    ) {
+      return false // This means the exercises weren't found in the data (user might have selected exercises that are no longer available)
+    }
+
+    return isInitialLoading
+  }, [
+    hasLoadedFromStorage,
+    selectedExerciseIds.length,
+    selectedExercises.length,
+    exerciseProgress.length,
+    isInitialLoading,
+  ])
 
   // Save selected exercises to localStorage when they change
   const handleExerciseSelectionChange = (exerciseIds: string[]) => {
