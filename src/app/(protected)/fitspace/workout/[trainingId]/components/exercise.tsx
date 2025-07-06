@@ -738,7 +738,7 @@ function ExerciseSet({
           <div
             className={cn(
               sharedLayoutStyles,
-              'rounded-t-md bg-muted-foreground/10 dark:bg-card/50 pb-2 -mb-2',
+              'rounded-t-md bg-secondary/50 dark:bg-card/50 pb-2 -mb-2 border-t border-l border-r border-border dark:border-none',
             )}
           >
             <div className="min-w-2.5"></div>
@@ -754,12 +754,12 @@ function ExerciseSet({
         </div>
       )}
 
-      <div className="flex items-start gap-1 pb-2">
+      <div className="flex items-start gap-1 pb-2 ">
         <div>
           <div
             className={cn(
               sharedLayoutStyles,
-              'rounded-md bg-card  dark:bg-secondary text-primary',
+              'rounded-md bg-card  dark:bg-secondary text-primary border-l border-r border-b border-border dark:border-none',
             )}
           >
             <div className="min-w-2.5">{set.order}.</div>

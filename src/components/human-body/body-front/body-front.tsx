@@ -1,10 +1,5 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-
 import { ConnectionLine } from '../connection-line'
 import { MuscleLabel } from '../muscle-label'
 import { BodyViewProps } from '../types'
