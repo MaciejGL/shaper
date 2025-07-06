@@ -15,7 +15,12 @@ import ClientCard from './client-card'
 export type Client = NonNullable<GQLGetClientsQuery['myClients']>[number]
 
 export function ClientsTabs() {
-  const { data } = useGetClientsQuery()
+  const { data } = useGetClientsQuery(
+    {},
+    {
+      refetchOnWindowFocus: false,
+    },
+  )
   const [search] = useQueryState('search')
 
   const clients = data?.myClients ?? []

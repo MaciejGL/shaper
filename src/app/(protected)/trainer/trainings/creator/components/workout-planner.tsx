@@ -62,7 +62,12 @@ export default function WorkoutPlanner() {
   const [selectedEquipment, setSelectedEquipment] = useState('all')
 
   const { data: exercisesData, isLoading: exercisesLoading } =
-    useTrainerExercisesQuery()
+    useTrainerExercisesQuery(
+      {},
+      {
+        refetchOnWindowFocus: false,
+      },
+    )
 
   const joinedExercises = [
     ...(exercisesData?.userExercises || []),

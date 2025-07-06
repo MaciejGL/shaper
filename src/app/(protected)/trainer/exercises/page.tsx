@@ -16,10 +16,20 @@ import { Header } from './components/header'
 export default function TrainerExercisesPage() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
-  const { data: muscleGroupCategories } = useMuscleGroupCategoriesQuery()
-  const { data: exercisesData } = useTrainerExercisesQuery({
-    where: undefined, // Get all exercises without filtering
-  })
+  const { data: muscleGroupCategories } = useMuscleGroupCategoriesQuery(
+    {},
+    {
+      refetchOnWindowFocus: false,
+    },
+  )
+  const { data: exercisesData } = useTrainerExercisesQuery(
+    {
+      where: undefined, // Get all exercises without filtering
+    },
+    {
+      refetchOnWindowFocus: false,
+    },
+  )
 
   const categories = muscleGroupCategories?.muscleGroupCategories
 

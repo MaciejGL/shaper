@@ -27,9 +27,14 @@ export function ExerciseTabContent({
     ?.find((c) => c.id === categoryId)
     ?.muscles.map((m) => m.id)
 
-  const { data: exercises, isLoading } = useTrainerExercisesQuery({
-    where: categoryId === 'all' ? undefined : { muscleGroups: category },
-  })
+  const { data: exercises, isLoading } = useTrainerExercisesQuery(
+    {
+      where: categoryId === 'all' ? undefined : { muscleGroups: category },
+    },
+    {
+      refetchOnWindowFocus: false,
+    },
+  )
 
   const userExercises = exercises?.userExercises
   const publicExercises = exercises?.publicExercises

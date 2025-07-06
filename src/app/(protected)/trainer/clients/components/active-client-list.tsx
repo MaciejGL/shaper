@@ -28,7 +28,12 @@ import {
 import { GQLUser } from '@/generated/graphql-client'
 
 export function ActiveClientList() {
-  const { data } = useGetClientsQuery()
+  const { data } = useGetClientsQuery(
+    {},
+    {
+      refetchOnWindowFocus: false,
+    },
+  )
 
   return (
     <div>

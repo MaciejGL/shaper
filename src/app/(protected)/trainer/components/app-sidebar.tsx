@@ -88,11 +88,13 @@ export function AppSidebar() {
   const { data: clients, isPlaceholderData: isPlaceholderClients } =
     useGetClientsQuery(undefined, {
       placeholderData: placeholderClients,
+      refetchOnWindowFocus: false,
     })
 
   const { data: templatesData, isPlaceholderData: isPlaceholderTemplates } =
     useGetTemplatesQuery(undefined, {
       placeholderData: placeholderTemplates,
+      refetchOnWindowFocus: false,
     })
 
   const { mutate: createDraftTemplate, isPending: isCreatingDraftTemplate } =

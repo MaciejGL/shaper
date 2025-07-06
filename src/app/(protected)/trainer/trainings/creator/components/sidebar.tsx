@@ -50,7 +50,12 @@ export function Sidebar({
   const {
     data: muscleGroupCategoriesData,
     isLoading: muscleGroupCategoriesLoading,
-  } = useMuscleGroupCategoriesQuery()
+  } = useMuscleGroupCategoriesQuery(
+    {},
+    {
+      refetchOnWindowFocus: false,
+    },
+  )
   const allMuscleGroups = muscleGroupCategoriesData?.muscleGroupCategories || []
 
   const filteredExercises = [...trainerExercises, ...publicExercises].filter(

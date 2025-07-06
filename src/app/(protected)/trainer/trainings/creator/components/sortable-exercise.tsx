@@ -865,16 +865,12 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
         <Button
           variant="destructive"
           onClick={() => removeExercise({ exerciseId })}
-          disabled={isRemovingExercise || hasPendingMutations}
           loading={isRemovingExercise}
         >
           Remove exercise
         </Button>
         <DialogClose asChild>
-          <Button
-            variant="secondary"
-            disabled={isRemovingExercise || hasPendingMutations}
-          >
+          <Button variant="secondary" disabled={isRemovingExercise}>
             Done
           </Button>
         </DialogClose>
