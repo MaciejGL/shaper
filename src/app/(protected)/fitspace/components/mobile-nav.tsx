@@ -132,6 +132,8 @@ function QuickActionDrawer({
                 onClick={() => onOpenChange(false)}
                 variant="secondary"
                 iconStart={<SaladIcon />}
+                disabled
+                className="line-through"
               >
                 View Today's
               </Button>
@@ -139,6 +141,8 @@ function QuickActionDrawer({
                 onClick={() => onOpenChange(false)}
                 variant="secondary"
                 iconStart={<NotepadText />}
+                disabled
+                className="line-through"
               >
                 Meal Plan
               </Button>
@@ -155,6 +159,8 @@ function QuickActionDrawer({
                 href="/fitspace/marketplace?tab=trainers"
                 variant="secondary"
                 iconStart={<UserRoundSearch />}
+                disabled
+                className="line-through"
               >
                 Find Trainer
               </ButtonLink>
@@ -163,6 +169,8 @@ function QuickActionDrawer({
                 href="/fitspace/marketplace?tab=plans"
                 variant="secondary"
                 iconStart={<DumbbellIcon />}
+                disabled
+                className="line-through"
               >
                 Find Plan
               </ButtonLink>

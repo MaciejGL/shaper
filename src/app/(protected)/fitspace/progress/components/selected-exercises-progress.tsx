@@ -73,7 +73,7 @@ export function SelectedExercisesProgress({
         />
       ) : (
         <div className="flex flex-col gap-2">
-          <div className="grid gap-6">
+          <div className="grid md:grid-cols-2 gap-6">
             {selectedExercises.map((exercise, index) => (
               <ExerciseProgressChart
                 key={exercise?.baseExercise?.id || index}

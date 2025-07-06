@@ -294,7 +294,8 @@ export function BodyCompositionMetrics() {
             <CardTitle>Daily Calorie Needs</CardTitle>
           </div>
           <CardDescription>
-            Based on your BMR and activity level
+            Based on your BMR and activity level. Estimated value may vary based
+            on your activity and fitness level.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -193,7 +193,10 @@ export function ExerciseProgressChart({
   } satisfies ChartConfig
 
   return (
-    <Card variant="secondary" className="p-0 -mx-4 rounded-none">
+    <Card
+      variant="secondary"
+      className="p-0 -mx-4 md:-mx-0 md:rounded-xl rounded-none"
+    >
       <CardHeader className="p-0 pl-4 pr-1">
         <div className="flex flex-col gap-2 items-start">
           <div className="flex items-start justify-between w-full">
