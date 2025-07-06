@@ -1,12 +1,23 @@
 import { format } from 'date-fns'
+import { differenceInYears } from 'date-fns'
 import { useMemo } from 'react'
 
 import { GQLBodyMeasuresQuery } from '@/generated/graphql-client'
+import {
+  getBestBodyFatEstimate,
+  getBodyFatCategory,
+} from '@/lib/body-composition'
 
 import { MeasurementField } from './measurement-constants'
 
 export function useBodyMeasurements(
   bodyMeasures: GQLBodyMeasuresQuery['bodyMeasures'],
+  userProfile?: {
+    height?: number | null
+    weight?: number | null
+    sex?: string | null
+    birthday?: string | null
+  } | null,
 ) {
   // Get the most recent non-null value for each measurement type
   const getLatestMeasurement = (
@@ -29,6 +40,64 @@ export function useBodyMeasurements(
 
     if (recentValues.length < 2) return null
     return (recentValues[0] as number) - (recentValues[1] as number)
+  }
+
+  // Get estimated body fat percentage based on available measurements
+  const getEstimatedBodyFat = () => {
+    if (!userProfile) return null
+
+    const latestMeasurement = bodyMeasures[0] // Most recent measurement
+
+    // If user has manually entered body fat, use that instead
+    if (latestMeasurement?.bodyFat) {
+      return {
+        percentage: latestMeasurement.bodyFat,
+        method: 'Manual Entry',
+        confidence: 'high' as const,
+        isEstimated: false,
+        category: getBodyFatCategory(
+          latestMeasurement.bodyFat,
+          (userProfile.sex as 'male' | 'female') || 'male',
+        ),
+      }
+    }
+
+    // Calculate age from birthday
+    const age = userProfile.birthday
+      ? differenceInYears(new Date(), new Date(userProfile.birthday))
+      : 0
+
+    // Use the latest measurement data combined with profile data
+    const weight = getLatestMeasurement('weight') || userProfile.weight || 0
+    const height = userProfile.height || 0
+    const waist = getLatestMeasurement('waist') || 0
+    const neck = getLatestMeasurement('neck') || 0
+    const hips = getLatestMeasurement('hips') || 0
+    const sex = (userProfile.sex as 'male' | 'female') || 'male'
+
+    // Ensure we have minimum required data
+    if (!weight || !height || !age || !sex) return null
+
+    const estimation = getBestBodyFatEstimate({
+      weight,
+      height,
+      age,
+      sex,
+      waist: waist || undefined,
+      neck: neck || undefined,
+      hips: hips || undefined,
+    })
+
+    if (estimation.percentage === 0) return null
+
+    return {
+      percentage: estimation.percentage,
+      method: estimation.method,
+      confidence: estimation.confidence,
+      isEstimated: true,
+      category: getBodyFatCategory(estimation.percentage, sex),
+      missingMeasurements: estimation.missingMeasurements,
+    }
   }
 
   // Check if a category has any data
@@ -83,6 +152,7 @@ export function useBodyMeasurements(
   return {
     getLatestMeasurement,
     getTrend,
+    getEstimatedBodyFat,
     categoryHasData,
     fieldHasHistoricalData,
     getFieldMeasurements,

@@ -9,6 +9,7 @@ interface StatCardProps {
   trend?: number | null
   size?: 'default' | 'sm'
   isOnCard?: boolean
+  subtitle?: string
 }
 
 export function StatCard({
@@ -18,6 +19,7 @@ export function StatCard({
   trend,
   size = 'default',
   isOnCard = false,
+  subtitle,
 }: StatCardProps) {
   const formatTrend = (trend: number) => {
     const isPositive = trend > 0
@@ -46,19 +48,21 @@ export function StatCard({
   return (
     <div
       className={cn(
-        'rounded-lg bg-card dark:bg-card',
+        'rounded-lg bg-card dark:bg-card h-full',
         size === 'sm' ? 'p-2' : 'p-3',
         isOnCard && 'bg-card-on-card dark:bg-card-on-card',
       )}
     >
-      <span
-        className={cn(
-          'text-muted-foreground',
-          size === 'sm' ? 'text-xs' : 'text-sm',
-        )}
-      >
-        {label}
-      </span>
+      <div className="flex items-center justify-between">
+        <span
+          className={cn(
+            'text-muted-foreground',
+            size === 'sm' ? 'text-xs' : 'text-sm',
+          )}
+        >
+          {label}
+        </span>
+      </div>
       <div className="mt-2">
         <div
           className={cn(
@@ -69,6 +73,9 @@ export function StatCard({
         >
           {value ? `${formatNumber(value, 1)} ${unit}` : '—'}
         </div>
+        {subtitle && (
+          <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
+        )}
         {trend !== null && trend !== undefined && formatTrend(trend)}
       </div>
     </div>

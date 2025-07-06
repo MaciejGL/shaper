@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { CartesianGrid, Line, LineChart, XAxis, YAxis } from 'recharts'
+import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from 'recharts'
 
 import {
   ChartConfig,
@@ -20,6 +20,20 @@ interface MeasurementChartProps {
   className?: string
 }
 
+// Calculate 7-day moving average
+function calculateMovingAverage(
+  data: number[],
+  windowSize: number = 7,
+): (number | null)[] {
+  return data.map((_, index) => {
+    if (index < windowSize - 1) return null // Not enough data points
+
+    const window = data.slice(index - windowSize + 1, index + 1)
+    const sum = window.reduce((acc, val) => acc + val, 0)
+    return sum / window.length
+  })
+}
+
 export function MeasurementChart({
   measurements,
   field,
@@ -27,24 +41,37 @@ export function MeasurementChart({
   unit,
   className,
 }: MeasurementChartProps) {
-  const chartData = measurements
+  // First, prepare the filtered and sorted data with values
+  const filteredData = measurements
     .slice()
     .reverse()
     .filter((measurement) => measurement[field] != null)
-    .map((measurement) => ({
-      date: format(new Date(measurement.measuredAt), 'dd MMM'),
-      [field]: measurement[field],
-    }))
 
   // Don't render chart if insufficient data
-  if (chartData.length < 2) {
+  if (filteredData.length < 2) {
     return null
   }
 
-  // Calculate dynamic Y-axis range based on actual data values
-  const values = chartData.map((item) => item[field] as number)
-  const minValue = Math.min(...values)
-  const maxValue = Math.max(...values)
+  // Extract values for moving average calculation
+  const values = filteredData.map((measurement) => measurement[field] as number)
+
+  // Calculate 7-day moving average
+  const movingAverages = calculateMovingAverage(values, 7)
+
+  // Create chart data with both actual values and moving averages
+  const chartData = filteredData.map((measurement, index) => ({
+    date: format(new Date(measurement.measuredAt), 'dd MMM'),
+    [field]: measurement[field],
+    [`${field}Average`]: movingAverages[index],
+  }))
+
+  // Calculate dynamic Y-axis range based on both actual values and averages
+  const allValues = [
+    ...values,
+    ...(movingAverages.filter((val) => val !== null) as number[]),
+  ]
+  const minValue = Math.min(...allValues)
+  const maxValue = Math.max(...allValues)
   const range = maxValue - minValue
 
   // Add 10% padding around the data range, with a minimum padding of 1 unit
@@ -57,7 +84,16 @@ export function MeasurementChart({
       label: `${label} (${unit})`,
       color: 'var(--chart-1)',
     },
+    [`${field}Average`]: {
+      label: `Weekly Average (${unit})`,
+      color: 'var(--chart-2)',
+    },
   } satisfies ChartConfig
+
+  // Custom legend formatter to use chartConfig labels
+  const legendFormatter = (value: string) => {
+    return chartConfig[value as keyof typeof chartConfig]?.label || value
+  }
 
   return (
     <ChartContainer
@@ -90,6 +126,7 @@ export function MeasurementChart({
           domain={[yAxisMin, yAxisMax]}
         />
         <ChartTooltip content={<ChartTooltipContent />} />
+        {/* Actual measurements line */}
         <Line
           dataKey={field}
           type="monotone"
@@ -97,6 +134,26 @@ export function MeasurementChart({
           strokeWidth={2.5}
           dot={{ r: 2.5 }}
           activeDot={{ r: 4 }}
+        />
+        {/* 7-day moving average line */}
+        <Line
+          dataKey={`${field}Average`}
+          type="monotone"
+          stroke={`var(--color-${field}Average)`}
+          strokeWidth={2}
+          dot={{ r: 2 }}
+          activeDot={{ r: 3 }}
+          connectNulls={false}
+        />
+        <Legend
+          verticalAlign="bottom"
+          height={20}
+          iconType="line"
+          formatter={legendFormatter}
+          wrapperStyle={{
+            fontSize: '12px',
+            paddingTop: '20px',
+          }}
         />
       </LineChart>
     </ChartContainer>

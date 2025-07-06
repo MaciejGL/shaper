@@ -120,12 +120,11 @@ export function AddMeasurementModal({
     }
 
     const input = Object.fromEntries(
-      Object.entries(data)
-        .filter(([, value]) => value && value.trim() !== '')
-        .map(([key, value]) => {
-          if (key === 'notes') return [key, value]
-          return [key, parseFloat(value as string)]
-        }),
+      Object.entries(data).map(([key, value]) => {
+        if (key === 'notes') return [key, value]
+        if (value === '') return [key, null]
+        return [key, parseFloat(value as string)]
+      }),
     )
 
     if (Object.keys(input).length === 0) {

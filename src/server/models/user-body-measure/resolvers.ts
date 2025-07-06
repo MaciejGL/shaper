@@ -171,20 +171,13 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       throw new Error('Body measurement not found or does not belong to user')
     }
 
-    // Filter out null/undefined values to only update provided measurements
-    const measurementData = Object.fromEntries(
-      Object.entries(updateData).filter(
-        ([, value]) => value !== null && value !== undefined,
-      ),
-    )
-
     // Handle measuredAt field specifically
-    const { measuredAt, ...otherData } = measurementData
+    const { measuredAt, ...otherData } = updateData
     const data: Prisma.UserBodyMeasureUpdateInput = { ...otherData }
 
     // If measuredAt is provided, parse it as a Date
     if (measuredAt) {
-      data.measuredAt = new Date(measuredAt as string)
+      data.measuredAt = new Date(measuredAt)
     }
 
     const updatedMeasurement = await prisma.userBodyMeasure.update({

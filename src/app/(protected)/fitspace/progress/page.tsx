@@ -1,6 +1,6 @@
 'use client'
 
-import { Dumbbell, Scale, TrendingUp } from 'lucide-react'
+import { TrendingUp } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -11,6 +11,7 @@ import {
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
+import { BodyComposition } from './components/body-composition'
 import { BodyMeasurements } from './components/body-measurements'
 import { SelectedExercisesProgress } from './components/selected-exercises-progress'
 
@@ -47,17 +48,25 @@ export default function ProgressPage() {
             value="body-measures"
             className="flex items-center gap-2"
           >
-            <Scale className="size-4" />
             Body Measures
           </TabsTrigger>
+          <TabsTrigger
+            value="body-composition"
+            className="flex items-center gap-2"
+          >
+            BMI & BMR
+          </TabsTrigger>
           <TabsTrigger value="exercises" className="flex items-center gap-2">
-            <Dumbbell className="size-4" />
             Exercises
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="body-measures">
           <BodyMeasurements />
+        </TabsContent>
+
+        <TabsContent value="body-composition">
+          <BodyComposition />
         </TabsContent>
 
         <TabsContent value="exercises">

@@ -6,8 +6,23 @@ import { Section } from './section'
 import { StatCard } from './stat-card'
 
 export function MeasurementsOverview() {
-  const { bodyMeasures, getLatestMeasurement, getTrend, onMeasurementAdded } =
-    useBodyMeasurementsContext()
+  const {
+    bodyMeasures,
+    getLatestMeasurement,
+    getTrend,
+    getEstimatedBodyFat,
+    onMeasurementAdded,
+  } = useBodyMeasurementsContext()
+
+  const estimatedBodyFat = getEstimatedBodyFat()
+  const manualBodyFat = getLatestMeasurement('bodyFat')
+
+  // Determine which body fat value to display
+  const displayBodyFat = manualBodyFat || estimatedBodyFat?.percentage
+  const bodyFatLabel =
+    !manualBodyFat && estimatedBodyFat?.percentage
+      ? 'Body Fat (Est.)'
+      : 'Body Fat'
 
   return (
     <Section
@@ -31,6 +46,7 @@ export function MeasurementsOverview() {
             />
           </button>
         </MeasurementCategoryDrawer>
+
         <MeasurementCategoryDrawer
           key={'bodyFat'}
           category={measurementCategories[0]}
@@ -38,13 +54,8 @@ export function MeasurementsOverview() {
           onUpdate={onMeasurementAdded}
           focusField={'bodyFat'}
         >
-          <button className="text-left">
-            <StatCard
-              label="Body Fat"
-              value={getLatestMeasurement('bodyFat')}
-              unit="%"
-              trend={getTrend('bodyFat')}
-            />
+          <button className="text-left h-full">
+            <StatCard label={bodyFatLabel} value={displayBodyFat} unit="%" />
           </button>
         </MeasurementCategoryDrawer>
       </div>

@@ -99,7 +99,7 @@ export function PersonalInfo({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="sex">Sex</Label>
+            <Label htmlFor="sex">Gender</Label>
             {isEditing ? (
               <Select
                 value={profile?.sex ?? ''}

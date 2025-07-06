@@ -6,6 +6,7 @@ import { Loader } from '@/components/loader'
 import {
   GQLBodyMeasuresQuery,
   useBodyMeasuresQuery,
+  useProfileQuery,
 } from '@/generated/graphql-client'
 
 import { MeasurementsEmptyState } from './measurements-empty-state'
@@ -21,6 +22,9 @@ interface BodyMeasurementsContextType {
     typeof useBodyMeasurements
   >['getLatestMeasurement']
   getTrend: ReturnType<typeof useBodyMeasurements>['getTrend']
+  getEstimatedBodyFat: ReturnType<
+    typeof useBodyMeasurements
+  >['getEstimatedBodyFat']
   fieldHasHistoricalData: ReturnType<
     typeof useBodyMeasurements
   >['fieldHasHistoricalData']
@@ -50,6 +54,8 @@ export function BodyMeasurementsProvider({
   children,
 }: BodyMeasurementsProviderProps) {
   const { data, refetch, isLoading } = useBodyMeasuresQuery()
+  const { data: profileData } = useProfileQuery()
+
   const bodyMeasures = useMemo(
     () => data?.bodyMeasures || [],
     [data?.bodyMeasures],
@@ -59,13 +65,14 @@ export function BodyMeasurementsProvider({
     refetch()
   }, [refetch])
 
-  // Get utility functions from the hook
+  // Get utility functions from the hook, now with profile data
   const {
     getLatestMeasurement,
     getTrend,
+    getEstimatedBodyFat,
     fieldHasHistoricalData,
     measurementsByMonth,
-  } = useBodyMeasurements(bodyMeasures)
+  } = useBodyMeasurements(bodyMeasures, profileData?.profile)
 
   const contextValue = useMemo(
     () => ({
@@ -74,6 +81,7 @@ export function BodyMeasurementsProvider({
       onMeasurementAdded: handleMeasurementAdded,
       getLatestMeasurement,
       getTrend,
+      getEstimatedBodyFat,
       fieldHasHistoricalData,
       measurementsByMonth,
     }),
@@ -82,6 +90,7 @@ export function BodyMeasurementsProvider({
       isLoading,
       getLatestMeasurement,
       getTrend,
+      getEstimatedBodyFat,
       fieldHasHistoricalData,
       measurementsByMonth,
       handleMeasurementAdded,
