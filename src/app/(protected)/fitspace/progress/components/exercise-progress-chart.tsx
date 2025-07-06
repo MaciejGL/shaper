@@ -31,6 +31,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { ExerciseChartControls } from './exercise-chart-controls'
 import { ExerciseLogsContent } from './exercise-logs-drawer-content'
@@ -41,14 +42,12 @@ import {
   formatTooltipValue,
   formatYAxisTick,
   getChartLabel,
-  getTimePeriodLabel,
 } from './exercise-progress-constants'
 import { ExerciseProgressStats } from './exercise-progress-stats'
 import { useChartData, useExerciseImprovement } from './use-exercise-progress'
 
 interface ExerciseProgressChartProps {
   exercise?: ExerciseProgress
-  timePeriod: TimePeriod
   onRemoveExercise: (exerciseId: string) => void
   onMoveToTop: (exerciseId: string) => void
   canMoveToTop: boolean
@@ -56,13 +55,12 @@ interface ExerciseProgressChartProps {
 
 export function ExerciseProgressChart({
   exercise,
-  timePeriod,
   onRemoveExercise,
   onMoveToTop,
   canMoveToTop,
 }: ExerciseProgressChartProps) {
+  const [timePeriod, setTimePeriod] = useState<TimePeriod>('1month')
   const [activeChart, setActiveChart] = useState<ChartType>('oneRM')
-  // Add query here and add loading state
   const chartData = useChartData(exercise, timePeriod)
   const improvement = useExerciseImprovement(exercise, timePeriod)
 
@@ -250,10 +248,10 @@ export function ExerciseProgressChart({
         />
 
         {/* Chart Display */}
-        <div className="w-full px-2">
+        <div className="w-full">
           <ChartContainer
             config={chartConfig}
-            className="w-full h-[200px] bg-card-on-card dark:bg-black/40 rounded-lg p-2"
+            className="w-full h-[200px] bg-card dark:bg-black/40 p-2"
           >
             {activeChart === 'oneRM' ? (
               <LineChart
@@ -345,16 +343,29 @@ export function ExerciseProgressChart({
           </ChartContainer>
         </div>
 
-        {/* Chart Description */}
-        <div className="text-center mt-2 pb-4">
-          <p className="text-xs text-muted-foreground">
-            {activeChart === 'oneRM' &&
-              `Estimated 1RM Progression (${getTimePeriodLabel(timePeriod)})`}
-            {activeChart === 'sets' &&
-              `Weekly Sets Completed (${getTimePeriodLabel(timePeriod)})`}
-            {activeChart === 'volume' &&
-              `Training Volume Progress (${getTimePeriodLabel(timePeriod)})`}
-          </p>
+        <div className="flex justify-center mt-2 pb-4">
+          <Tabs
+            defaultValue="1month"
+            onValueChange={(value) => setTimePeriod(value as TimePeriod)}
+          >
+            <TabsList variant="secondary" rounded="full" size="sm">
+              <TabsTrigger rounded="full" value="1month" size="sm">
+                1M
+              </TabsTrigger>
+              <TabsTrigger rounded="full" value="3months" size="sm">
+                3M
+              </TabsTrigger>
+              <TabsTrigger rounded="full" value="6months" size="sm">
+                6M
+              </TabsTrigger>
+              <TabsTrigger rounded="full" value="1year" size="sm">
+                1Y
+              </TabsTrigger>
+              <TabsTrigger rounded="full" value="all" size="sm">
+                All
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </CardContent>
     </Card>

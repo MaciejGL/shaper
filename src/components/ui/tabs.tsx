@@ -25,11 +25,17 @@ const tabsListVariants = cva(
     variants: {
       variant: {
         default: '',
+        secondary: 'bg-muted-foreground/10',
       },
       size: {
         sm: 'h-8 rounded-lg',
         default: 'h-9 rounded-xl',
         lg: 'h-10 p-0.5 rounded-xl',
+      },
+      rounded: {
+        default: 'rounded-xl',
+        lg: 'rounded-lg',
+        full: 'rounded-full',
       },
     },
   },
@@ -38,15 +44,17 @@ function TabsList({
   className,
   variant = 'default',
   size = 'default',
+  rounded = 'full',
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> & {
-  variant?: 'default'
+  variant?: 'default' | 'secondary'
   size?: 'default' | 'sm' | 'lg'
+  rounded?: 'default' | 'lg' | 'full'
 }) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
-      className={cn(tabsListVariants({ variant, size }), className)}
+      className={cn(tabsListVariants({ variant, size, rounded }), className)}
       {...props}
     />
   )
@@ -64,6 +72,11 @@ const tabsTriggerVariants = cva(
         default: 'text-sm rounded-xl',
         lg: 'text-sm px-3 py-1 rounded-xl',
       },
+      rounded: {
+        default: 'rounded-xl',
+        lg: 'rounded-lg',
+        full: 'rounded-full px-4',
+      },
     },
   },
 )
@@ -72,15 +85,21 @@ function TabsTrigger({
   className,
   variant = 'default',
   size = 'default',
+  rounded = 'full',
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Trigger> & {
   variant?: 'default'
   size?: 'default' | 'sm' | 'lg'
+  rounded?: 'default' | 'lg' | 'full'
 }) {
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
-      className={cn(tabsTriggerVariants({ variant, size }), '', className)}
+      className={cn(
+        tabsTriggerVariants({ variant, size, rounded }),
+        '',
+        className,
+      )}
       {...props}
     />
   )

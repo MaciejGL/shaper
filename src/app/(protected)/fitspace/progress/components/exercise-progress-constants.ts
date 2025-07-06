@@ -2,7 +2,7 @@ import { GQLExercisesProgressByUserQuery } from '@/generated/graphql-client'
 import { formatSets, formatWeight } from '@/lib/utils'
 
 export type ChartType = 'oneRM' | 'sets' | 'volume'
-export type TimePeriod = '12weeks' | '1year' | 'all'
+export type TimePeriod = '1month' | '3months' | '6months' | '1year' | 'all'
 
 export type ExerciseProgress =
   GQLExercisesProgressByUserQuery['exercisesProgressByUser'][number]
@@ -45,19 +45,6 @@ export function getChartLabel(chartType: ChartType): string {
       return 'Sets'
     case 'volume':
       return 'Volume'
-    default:
-      return ''
-  }
-}
-
-export function getTimePeriodLabel(timePeriod: TimePeriod): string {
-  switch (timePeriod) {
-    case '12weeks':
-      return 'Last 12 Weeks'
-    case '1year':
-      return 'Last Year'
-    case 'all':
-      return 'All Time'
     default:
       return ''
   }

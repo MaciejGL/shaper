@@ -8,10 +8,12 @@ export function useExerciseProgress(
   userId: string | null,
 ) {
   const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(false)
 
   // Load selected exercises from localStorage on mount
   useEffect(() => {
     if (userId) {
+      setIsLoading(true)
       const stored = localStorage.getItem(`selectedExercises_${userId}`)
       if (stored) {
         try {
@@ -24,6 +26,7 @@ export function useExerciseProgress(
         }
       }
     }
+    setIsLoading(false)
   }, [userId])
 
   // Filter and maintain order based on selectedExerciseIds array
@@ -65,6 +68,7 @@ export function useExerciseProgress(
     handleExerciseSelectionChange,
     handleRemoveExercise,
     handleMoveToTop,
+    isLoading,
   }
 }
 
@@ -137,8 +141,14 @@ export function useChartData(
     let cutoffTime = 0
 
     switch (timePeriod) {
-      case '12weeks':
-        cutoffTime = now.getTime() - 12 * 7 * 24 * 60 * 60 * 1000
+      case '1month':
+        cutoffTime = now.getTime() - 30 * 24 * 60 * 60 * 1000
+        break
+      case '3months':
+        cutoffTime = now.getTime() - 90 * 24 * 60 * 60 * 1000
+        break
+      case '6months':
+        cutoffTime = now.getTime() - 6 * 30 * 24 * 60 * 60 * 1000
         break
       case '1year':
         cutoffTime = now.getTime() - 365 * 24 * 60 * 60 * 1000
@@ -191,8 +201,11 @@ export function useExerciseImprovement(
     let cutoffTime = 0
 
     switch (timePeriod) {
-      case '12weeks':
-        cutoffTime = now.getTime() - 12 * 7 * 24 * 60 * 60 * 1000
+      case '1month':
+        cutoffTime = now.getTime() - 30 * 24 * 60 * 60 * 1000
+        break
+      case '3months':
+        cutoffTime = now.getTime() - 90 * 24 * 60 * 60 * 1000
         break
       case '1year':
         cutoffTime = now.getTime() - 365 * 24 * 60 * 60 * 1000
@@ -233,7 +246,15 @@ export function useExerciseImprovement(
 
     // Cap improvement at reasonable bounds for the time period
     const maxImprovement =
-      timePeriod === '12weeks' ? 50 : timePeriod === '1year' ? 100 : 150
+      timePeriod === '1month'
+        ? 50
+        : timePeriod === '3months'
+          ? 50
+          : timePeriod === '6months'
+            ? 50
+            : timePeriod === '1year'
+              ? 100
+              : 150
     const minImprovement = -50
 
     return Math.max(
