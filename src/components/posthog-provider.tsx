@@ -1,17 +1,15 @@
 'use client'
 
-import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect } from 'react'
 import type * as React from 'react'
 
 import { usePostHogUserEnhanced } from '@/hooks/use-posthog-user-enhanced'
 // import { usePostHogUser } from '@/hooks/use-posthog-user'
-import { capturePageView, initPostHog } from '@/lib/posthog'
+import { initPostHog } from '@/lib/posthog'
+
+import { PostHogPageTracker } from './posthog-page-tracker'
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-
   // Automatically handle user identification
   //   usePostHogUser()
   usePostHogUserEnhanced()
@@ -24,17 +22,12 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     init()
   }, [])
 
-  useEffect(() => {
-    // Track page views on route changes
-    if (pathname) {
-      const url =
-        pathname +
-        (searchParams.toString() ? `?${searchParams.toString()}` : '')
-      capturePageView(url)
-    }
-  }, [pathname, searchParams])
-
-  return <>{children}</>
+  return (
+    <>
+      <PostHogPageTracker />
+      {children}
+    </>
+  )
 }
 
 export default PostHogProvider
