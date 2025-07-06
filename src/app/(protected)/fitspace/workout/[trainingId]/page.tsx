@@ -1,6 +1,6 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { redirect, useParams } from 'next/navigation'
 
 import { Loader } from '@/components/loader'
 import { useFitspaceGetWorkoutQuery } from '@/generated/graphql-client'
@@ -21,6 +21,10 @@ export default function WorkoutPage() {
 
   if (isLoading) {
     return <Loader />
+  }
+
+  if (!data?.getWorkout) {
+    return redirect('/fitspace/workout/quick-workout')
   }
 
   return data?.getWorkout ? (

@@ -413,6 +413,7 @@ export type GQLMutation = {
   addAiExerciseToWorkout: EntireFieldWrapper<GQLTrainingExercise>;
   addBodyMeasurement: EntireFieldWrapper<GQLUserBodyMeasure>;
   addExerciseToDay: EntireFieldWrapper<Scalars['ID']['output']>;
+  addExercisesToQuickWorkout: EntireFieldWrapper<GQLTrainingPlan>;
   addExercisesToWorkout: EntireFieldWrapper<Array<GQLTrainingExercise>>;
   addSet: EntireFieldWrapper<GQLExerciseSet>;
   addSetExerciseForm: EntireFieldWrapper<GQLExerciseSet>;
@@ -503,6 +504,11 @@ export type GQLMutationAddBodyMeasurementArgs = {
 
 export type GQLMutationAddExerciseToDayArgs = {
   input: GQLAddExerciseToDayInput;
+};
+
+
+export type GQLMutationAddExercisesToQuickWorkoutArgs = {
+  exerciseIds: Array<Scalars['ID']['input']>;
 };
 
 
@@ -830,6 +836,7 @@ export type GQLMyPlansPayload = {
   activePlan?: EntireFieldWrapper<Maybe<GQLTrainingPlan>>;
   availablePlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   completedPlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
+  quickWorkoutPlan?: EntireFieldWrapper<Maybe<GQLTrainingPlan>>;
 };
 
 export type GQLNote = {
@@ -890,6 +897,7 @@ export type GQLQuery = {
   getClientTrainingPlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getExercises: EntireFieldWrapper<GQLGetExercisesResponse>;
   getMyPlansOverview: EntireFieldWrapper<GQLMyPlansPayload>;
+  getQuickWorkoutPlan: EntireFieldWrapper<GQLTrainingPlan>;
   getTemplates: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getTrainingExercise?: EntireFieldWrapper<Maybe<GQLTrainingExercise>>;
   getTrainingPlanById: EntireFieldWrapper<GQLTrainingPlan>;
@@ -1844,6 +1852,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   addAiExerciseToWorkout?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationAddAiExerciseToWorkoutArgs, 'input'>>;
   addBodyMeasurement?: Resolver<GQLResolversTypes['UserBodyMeasure'], ParentType, ContextType, RequireFields<GQLMutationAddBodyMeasurementArgs, 'input'>>;
   addExerciseToDay?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAddExerciseToDayArgs, 'input'>>;
+  addExercisesToQuickWorkout?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLMutationAddExercisesToQuickWorkoutArgs, 'exerciseIds'>>;
   addExercisesToWorkout?: Resolver<Array<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType, RequireFields<GQLMutationAddExercisesToWorkoutArgs, 'input'>>;
   addSet?: Resolver<GQLResolversTypes['ExerciseSet'], ParentType, ContextType, RequireFields<GQLMutationAddSetArgs, 'exerciseId'>>;
   addSetExerciseForm?: Resolver<GQLResolversTypes['ExerciseSet'], ParentType, ContextType, RequireFields<GQLMutationAddSetExerciseFormArgs, 'input'>>;
@@ -1913,6 +1922,7 @@ export type GQLMyPlansPayloadResolvers<ContextType = GQLContext, ParentType exte
   activePlan?: Resolver<Maybe<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType>;
   availablePlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType>;
   completedPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType>;
+  quickWorkoutPlan?: Resolver<Maybe<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -1963,6 +1973,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getClientTrainingPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientTrainingPlansArgs, 'clientId'>>;
   getExercises?: Resolver<GQLResolversTypes['GetExercisesResponse'], ParentType, ContextType>;
   getMyPlansOverview?: Resolver<GQLResolversTypes['MyPlansPayload'], ParentType, ContextType>;
+  getQuickWorkoutPlan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
   getTemplates?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetTemplatesArgs>>;
   getTrainingExercise?: Resolver<Maybe<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainingExerciseArgs, 'id'>>;
   getTrainingPlanById?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLQueryGetTrainingPlanByIdArgs, 'id'>>;

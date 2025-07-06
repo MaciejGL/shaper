@@ -43,6 +43,7 @@ import {
   addSetToExercise,
   addTrainingWeek,
   duplicateTrainingWeek,
+  getQuickWorkoutPlan,
   moveExercise,
   removeExerciseFromDay,
   removeSetFromExercise,
@@ -72,6 +73,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   },
   getWorkout: async (_, args, context) => {
     return getWorkout(args, context)
+  },
+  getQuickWorkoutPlan: async (_, __, context) => {
+    return getQuickWorkoutPlan(context)
   },
 }
 

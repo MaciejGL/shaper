@@ -1,4 +1,5 @@
 import { prisma } from '@lib/db'
+import { addDays, getWeek, startOfWeek } from 'date-fns'
 import { GraphQLError } from 'graphql'
 
 import {
@@ -17,6 +18,10 @@ import {
   GQLMutationUpdateTrainingWeekDetailsArgs,
 } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
+
+import { getFullPlanById } from '../training-utils.server'
+
+import TrainingPlan from './model'
 
 // Using generated GraphQL types instead of custom interfaces
 
@@ -865,4 +870,78 @@ export async function removeSetFromExercise(
 
     return true
   })
+}
+
+export async function getQuickWorkoutPlan(context: GQLContext) {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  const plan = await prisma.trainingPlan.findFirst({
+    where: {
+      assignedToId: user.user.id,
+      createdById: user.user.id,
+    },
+  })
+
+  if (!plan) {
+    console.info('[getQuickWorkoutPlan] Creating new quick workout plan')
+    // Create a new quick workout plan
+    await prisma.trainingPlan.create({
+      data: {
+        title: 'Quick Workout',
+        createdById: user.user.id,
+        assignedToId: user.user.id,
+        isPublic: false,
+        isDraft: false,
+        weeks: {
+          create: {
+            name: `Week ${getWeek(startOfWeek(new Date(), { weekStartsOn: 1 }))}`,
+            weekNumber: 1,
+            isExtra: true,
+            scheduledAt: startOfWeek(new Date(), { weekStartsOn: 1 }),
+
+            days: {
+              createMany: {
+                data: Array.from({ length: 7 }, (_, i) => ({
+                  dayOfWeek: i,
+                  isRestDay: false,
+                  isExtra: true,
+                  scheduledAt: addDays(
+                    startOfWeek(new Date(), { weekStartsOn: 1 }),
+                    i,
+                  ),
+                })),
+              },
+            },
+          },
+        },
+      },
+    })
+  }
+
+  const quickWorkoutPlan = await prisma.trainingPlan.findFirst({
+    where: {
+      assignedToId: user.user.id,
+      createdById: user.user.id,
+    },
+  })
+
+  if (!quickWorkoutPlan) {
+    console.error('[getQuickWorkoutPlan] Quick workout plan not found')
+    throw new GraphQLError('Quick workout plan not found')
+  }
+
+  const fullPlan = await getFullPlanById(quickWorkoutPlan.id)
+
+  if (!fullPlan) {
+    console.error(
+      '[getFullPlanById] Quick workout plan not found',
+      quickWorkoutPlan.id,
+    )
+    throw new GraphQLError('Quick workout plan not found')
+  }
+
+  return new TrainingPlan(fullPlan, context)
 }

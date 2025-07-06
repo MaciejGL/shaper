@@ -76,6 +76,7 @@ type Mutation {
   addSetExerciseForm(input: AddSetExerciseFormInput!): ExerciseSet!
   removeSetExerciseForm(setId: ID!): Boolean!
   swapExercise(exerciseId: ID!, substituteId: ID!): Substitute!
+  addExercisesToQuickWorkout(exerciseIds: [ID!]!): TrainingPlan!
 }
 
 input AddSetExerciseFormInput {

@@ -13,6 +13,7 @@ import { AvailablePlansTab } from './components/available-plans-tab'
 import { CompletedPlansTab } from './components/completed-plans-tab'
 import { PlanActionDialog } from './components/plan-action-dialog/plan-action-dialog'
 import { usePlanAction } from './components/plan-action-dialog/use-plan-action'
+import { QuickWorkoutPlanTab } from './components/quick-workout-plan-tab/quick-workout-plan-tab'
 import { PlanTab } from './types'
 
 export default function MyPlansPage() {
@@ -22,6 +23,7 @@ export default function MyPlansPage() {
       PlanTab.Active,
       PlanTab.Available,
       PlanTab.Completed,
+      PlanTab.QuickWorkout,
     ]),
   )
 
@@ -40,6 +42,7 @@ export default function MyPlansPage() {
   const activePlan = data?.getMyPlansOverview?.activePlan
   const availablePlans = data?.getMyPlansOverview?.availablePlans
   const completedPlans = data?.getMyPlansOverview?.completedPlans
+  const quickWorkoutPlan = data?.getMyPlansOverview?.quickWorkoutPlan
 
   return (
     <div className="container-fitspace mx-auto mb-24">
@@ -47,30 +50,45 @@ export default function MyPlansPage() {
 
       {/* Plans Tabs */}
       <Tabs
-        value={tab ?? PlanTab.Active}
+        value={tab ?? (activePlan ? PlanTab.Active : PlanTab.QuickWorkout)}
         onValueChange={(value) => setTab(value as PlanTab)}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger
-            value={PlanTab.Active}
-            className="flex items-center gap-2"
-          >
-            Active
-          </TabsTrigger>
-          <TabsTrigger
-            value={PlanTab.Available}
-            className="flex items-center gap-2"
-          >
-            Available
-          </TabsTrigger>
-          <TabsTrigger
-            value={PlanTab.Completed}
-            className="flex items-center gap-2"
-          >
-            Completed
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto hide-scrollbar">
+          <TabsList className="grid grid-cols-4 w-max">
+            <TabsTrigger
+              value={PlanTab.QuickWorkout}
+              className="flex items-center gap-2"
+            >
+              Quick Workouts
+            </TabsTrigger>
+            <TabsTrigger
+              value={PlanTab.Active}
+              className="flex items-center gap-2"
+            >
+              Active
+            </TabsTrigger>
+            <TabsTrigger
+              value={PlanTab.Available}
+              className="flex items-center gap-2"
+            >
+              Available
+            </TabsTrigger>
+            <TabsTrigger
+              value={PlanTab.Completed}
+              className="flex items-center gap-2"
+            >
+              Completed
+            </TabsTrigger>
+          </TabsList>
+        </div>
+        {/* Quick Workout Plan */}
+        <TabsContent value={PlanTab.QuickWorkout} className="mt-6 space-y-4">
+          <QuickWorkoutPlanTab
+            plan={quickWorkoutPlan}
+            loading={isLoadingPlans}
+          />
+        </TabsContent>
 
         {/* Active Plans */}
         <TabsContent value={PlanTab.Active} className="mt-6 space-y-4">

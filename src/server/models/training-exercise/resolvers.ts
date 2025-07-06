@@ -5,6 +5,7 @@ import {
 
 import {
   addAiExerciseToWorkout,
+  addExercisesToQuickWorkout,
   addExercisesToWorkout,
   addSet,
   addSetExerciseForm,
@@ -28,7 +29,11 @@ export const Mutation: GQLMutationResolvers = {
     return getAiExerciseSuggestions(dayId, context)
   },
   addExercisesToWorkout: async (_, { input }, context) => {
-    return addExercisesToWorkout(input.workoutId, input.exerciseIds, context)
+    return addExercisesToWorkout(
+      input.workoutId ?? '',
+      input.exerciseIds,
+      context,
+    )
   },
   removeExerciseFromWorkout: async (_, { exerciseId }) => {
     return removeExerciseFromWorkout(exerciseId)
@@ -54,5 +59,8 @@ export const Mutation: GQLMutationResolvers = {
   },
   swapExercise: async (_, { exerciseId, substituteId }, context) => {
     return swapExercise(exerciseId, substituteId, context)
+  },
+  addExercisesToQuickWorkout: async (_, { exerciseIds }, context) => {
+    return addExercisesToQuickWorkout(exerciseIds, context)
   },
 }

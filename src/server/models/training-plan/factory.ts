@@ -216,40 +216,47 @@ export async function getMyPlansOverview(context: GQLContext) {
   if (!user) {
     throw new Error('User not found')
   }
-  const plans = await prisma.trainingPlan.findMany({
-    where: { assignedToId: user.user.id },
-    orderBy: {
-      updatedAt: 'desc',
-    },
-    include: {
-      createdBy: {
-        include: {
-          profile: true,
+  const [plans, quickWorkoutPlan] = await Promise.all([
+    prisma.trainingPlan.findMany({
+      where: {
+        assignedToId: user.user.id,
+        createdById: {
+          not: user.user.id,
         },
       },
-      weeks: {
-        orderBy: {
-          weekNumber: 'asc',
+      orderBy: {
+        updatedAt: 'desc',
+      },
+      include: {
+        createdBy: {
+          include: {
+            profile: true,
+          },
         },
-        include: {
-          days: {
-            orderBy: {
-              dayOfWeek: 'asc',
-            },
-            include: {
-              exercises: {
-                orderBy: {
-                  order: 'asc',
-                },
-                include: {
-                  base: {
-                    include: {
-                      muscleGroups: true,
-                    },
+        weeks: {
+          orderBy: {
+            weekNumber: 'asc',
+          },
+          include: {
+            days: {
+              orderBy: {
+                dayOfWeek: 'asc',
+              },
+              include: {
+                exercises: {
+                  orderBy: {
+                    order: 'asc',
                   },
-                  sets: {
-                    orderBy: {
-                      order: 'asc',
+                  include: {
+                    base: {
+                      include: {
+                        muscleGroups: true,
+                      },
+                    },
+                    sets: {
+                      orderBy: {
+                        order: 'asc',
+                      },
                     },
                   },
                 },
@@ -258,8 +265,53 @@ export async function getMyPlansOverview(context: GQLContext) {
           },
         },
       },
-    },
-  })
+    }),
+
+    prisma.trainingPlan.findFirst({
+      where: {
+        assignedToId: user.user.id,
+        createdById: user.user.id,
+      },
+      include: {
+        createdBy: {
+          include: {
+            profile: true,
+          },
+        },
+        weeks: {
+          orderBy: {
+            weekNumber: 'asc',
+          },
+          include: {
+            days: {
+              orderBy: {
+                dayOfWeek: 'asc',
+              },
+              include: {
+                exercises: {
+                  orderBy: {
+                    order: 'asc',
+                  },
+                  include: {
+                    base: {
+                      include: {
+                        muscleGroups: true,
+                      },
+                    },
+                    sets: {
+                      orderBy: {
+                        order: 'asc',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  ])
 
   const activePlan = plans.find(
     (plan) => plan.assignedToId === user.user.id && plan.active,
@@ -278,6 +330,9 @@ export async function getMyPlansOverview(context: GQLContext) {
     completedPlans: completedPlans.map(
       (plan) => new TrainingPlan(plan, context),
     ),
+    quickWorkoutPlan: quickWorkoutPlan
+      ? new TrainingPlan(quickWorkoutPlan, context)
+      : null,
   }
 }
 
@@ -305,6 +360,12 @@ export async function getWorkout(
 
   if (!plan || plan.assignedToId !== user.user.id) {
     return null
+  }
+
+  if (plan.assignedToId === user.user.id && plan.createdById === user.user.id) {
+    return {
+      plan: new TrainingPlan(plan, context),
+    }
   }
 
   if (!plan.startDate) {

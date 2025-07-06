@@ -46,6 +46,7 @@ type MyPlansPayload {
   activePlan: TrainingPlan
   availablePlans: [TrainingPlan!]!
   completedPlans: [TrainingPlan!]!
+  quickWorkoutPlan: TrainingPlan
 }
 
 type Query {
@@ -54,6 +55,7 @@ type Query {
   getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!
   getClientActivePlan(clientId: ID!): TrainingPlan
   getMyPlansOverview: MyPlansPayload!
+  getQuickWorkoutPlan: TrainingPlan!
 }
 
 type CreateTrainingPlanPayload {

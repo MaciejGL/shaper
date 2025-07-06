@@ -49,6 +49,43 @@ query FitspaceMyPlans {
         }
       }
     }
+    quickWorkoutPlan {
+      id
+      totalWorkouts
+      weekCount
+      completedWorkoutsDays
+      adherence
+      updatedAt
+
+      weeks {
+        id
+        weekNumber
+        scheduledAt
+        completedAt
+        days {
+          id
+          dayOfWeek
+
+          completedAt
+          scheduledAt
+          exercises {
+            id
+            videoUrl
+            instructions
+            name
+            muscleGroups {
+              id
+              name
+              alias
+            }
+            completedAt
+            sets {
+              id
+            }
+          }
+        }
+      }
+    }
     availablePlans {
       id
       title

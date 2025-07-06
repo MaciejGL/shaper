@@ -187,7 +187,9 @@ export default class TrainingPlan implements GQLTrainingPlan {
     const weeks = this.data.weeks ?? []
     const days = weeks
       .flatMap((week) => week.days)
-      .filter((day) => !day?.isRestDay)
+      .filter(
+        (day) => !day?.isRestDay && day?.exercises && day.exercises.length > 0,
+      )
     const completedDays = days.filter((day) => day?.completedAt)
     const adherence = Math.round((completedDays.length / days.length) * 100)
     return adherence
@@ -198,7 +200,9 @@ export default class TrainingPlan implements GQLTrainingPlan {
     const totalWorkoutDays =
       weeks?.reduce(
         (acc, week) =>
-          acc + (week.days?.filter((day) => !day.isRestDay)?.length ?? 0),
+          acc +
+          (week.days?.filter((day) => !day.isRestDay && day.exercises?.length)
+            ?.length ?? 0),
         0,
       ) ?? 0
 

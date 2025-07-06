@@ -1,5 +1,13 @@
 import { TrainingDay } from '@prisma/client'
 import { TrainingExercise as TrainingExerciseType } from '@prisma/client'
+import {
+  addDays,
+  getWeek,
+  isSameDay,
+  isSameWeek,
+  startOfToday,
+  startOfWeek,
+} from 'date-fns'
 import { GraphQLError } from 'graphql'
 import { isNil } from 'lodash'
 
@@ -19,6 +27,8 @@ import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from '../base-exercise/model'
 import ExerciseSet from '../exercise-set/model'
+import TrainingPlan from '../training-plan/model'
+import { getFullPlanById } from '../training-utils.server'
 
 import TrainingExercise, { ExerciseSubstitute } from './model'
 import { ExerciseSuggestion } from './types'
@@ -912,4 +922,130 @@ export const swapExercise = async (
   })
 
   return new ExerciseSubstitute(newSubstitution, context)
+}
+
+export const addExercisesToQuickWorkout = async (
+  exerciseIds: string[],
+  context: GQLContext,
+) => {
+  if (!context.user) {
+    throw new GraphQLError('User not found')
+  }
+
+  const quickWorkoutPlan = await prisma.trainingPlan.findFirst({
+    where: {
+      assignedToId: context.user.user.id,
+      createdById: context.user.user.id,
+    },
+    include: {
+      weeks: true,
+    },
+  })
+
+  if (!quickWorkoutPlan) {
+    throw new GraphQLError('Quick workout plan not found')
+  }
+
+  const currentWeek = getWeek(startOfWeek(new Date(), { weekStartsOn: 1 }))
+  const hasCurrentWeek = quickWorkoutPlan.weeks.some((week) => {
+    if (!week.scheduledAt) {
+      return false
+    }
+    return isSameWeek(
+      week.scheduledAt,
+      startOfWeek(new Date(), { weekStartsOn: 1 }),
+    )
+  })
+
+  if (!hasCurrentWeek) {
+    // create a new week
+    await prisma.trainingWeek.create({
+      data: {
+        planId: quickWorkoutPlan.id,
+        weekNumber: currentWeek,
+        name: `Week ${currentWeek}`,
+        scheduledAt: startOfWeek(new Date(), { weekStartsOn: 1 }),
+        isExtra: true,
+        days: {
+          createMany: {
+            data: Array.from({ length: 7 }, (_, i) => ({
+              dayOfWeek: i,
+              isRestDay: false,
+              isExtra: true,
+              scheduledAt: addDays(
+                startOfWeek(new Date(), { weekStartsOn: 1 }),
+                i,
+              ),
+            })),
+          },
+        },
+      },
+    })
+  }
+
+  const fullPlan = await getFullPlanById(quickWorkoutPlan.id)
+
+  if (!fullPlan) {
+    throw new GraphQLError('Quick workout plan not found')
+  }
+
+  // get plans todays day - FIX: Find the actual day, not the week
+  const today = startOfToday()
+  const startOfWeekDate = startOfWeek(today, { weekStartsOn: 1 })
+
+  // Find the current week first
+  const currentWeekData = fullPlan.weeks.find((week) => {
+    if (!week.scheduledAt) {
+      return false
+    }
+    return isSameWeek(week.scheduledAt, startOfWeekDate)
+  })
+
+  if (!currentWeekData) {
+    throw new GraphQLError('Current week not found')
+  }
+
+  // Then find the actual day within that week
+  const currentDay = currentWeekData.days.find(
+    (d) => d.scheduledAt && isSameDay(d.scheduledAt, today),
+  )
+
+  if (!currentDay) {
+    throw new GraphQLError('Day not found')
+  }
+
+  const baseExercises = await prisma.baseExercise.findMany({
+    where: {
+      id: { in: exerciseIds },
+    },
+  })
+
+  const trainingExercises = await prisma.trainingExercise.createManyAndReturn({
+    data: baseExercises.map((exercise, index) => ({
+      baseId: exercise.id,
+      name: exercise.name,
+      order: index + 1,
+      instructions: exercise.description,
+      additionalInstructions: exercise.additionalInstructions,
+      type: exercise.type,
+      isExtra: true,
+      dayId: currentDay.id, // FIX: Use the actual day ID, not week ID
+    })),
+  })
+
+  await prisma.exerciseSet.createMany({
+    data: trainingExercises.map((exercise, index) => ({
+      exerciseId: exercise.id,
+      order: index + 1,
+      isExtra: true,
+    })),
+  })
+
+  const completedPlan = await getFullPlanById(quickWorkoutPlan.id)
+
+  if (!completedPlan) {
+    throw new GraphQLError('Quick workout plan not found')
+  }
+
+  return new TrainingPlan(completedPlan, context)
 }
