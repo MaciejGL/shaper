@@ -33,3 +33,18 @@ export const measurementCategories = [
 
 export type MeasurementCategory = (typeof measurementCategories)[number]
 export type MeasurementField = MeasurementCategory['fields'][number]['key']
+export enum MeasurementFieldEnum {
+  Weight = 'weight',
+  BodyFat = 'bodyFat',
+  Chest = 'chest',
+  Neck = 'neck',
+  Waist = 'waist',
+  Hips = 'hips',
+  BicepsLeft = 'bicepsLeft',
+  BicepsRight = 'bicepsRight',
+  ThighLeft = 'thighLeft',
+  ThighRight = 'thighRight',
+  CalfLeft = 'calfLeft',
+  CalfRight = 'calfRight',
+  Notes = 'notes',
+}

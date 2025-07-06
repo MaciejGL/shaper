@@ -24,7 +24,9 @@ export const getExpectedDayDate = (
   weekStartDate.setDate(trainingStartDate.getDate() + currentWeekIndex * 7)
 
   // Calculate the date for the specific day of the week
-  const dayOffset = day.dayOfWeek - getDay(trainingStartDate) + 1
+  // Convert trainingStartDate day from Sunday=0 to Monday=0 system to match day.dayOfWeek
+  const trainingStartDayOfWeek = (getDay(trainingStartDate) + 6) % 7
+  const dayOffset = day.dayOfWeek - trainingStartDayOfWeek + 1
   const expectedDate = new Date(weekStartDate)
   expectedDate.setDate(weekStartDate.getDate() + dayOffset)
 

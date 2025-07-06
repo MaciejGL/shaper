@@ -1,6 +1,6 @@
 'use client'
 
-import { secondsToMinutes } from 'date-fns'
+import { getDay, secondsToMinutes } from 'date-fns'
 import {
   Activity,
   BadgeCheck,
@@ -8,15 +8,15 @@ import {
   Clock4Icon,
   DrumstickIcon,
   DumbbellIcon,
-  // TrendingDownIcon,
-  // TrendingUpIcon,
 } from 'lucide-react'
 import Link from 'next/link'
+import { useRef } from 'react'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { StatsItem } from '@/components/stats-item'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { GQLFitspaceDashboardQuery } from '@/generated/graphql-client'
+import { useScrollToItem } from '@/hooks/use-scroll-to-item'
 import { cn } from '@/lib/utils'
 
 export type DashboardStatsProps = {
@@ -29,10 +29,26 @@ export type DashboardStatsProps = {
 }
 
 export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const currentDayOfWeek = (getDay(new Date()) + 6) % 7
+
+  const currentDayIndex = currentWeek?.days.findIndex(
+    (day) => day.dayOfWeek === currentDayOfWeek,
+  )
+
+  useScrollToItem({
+    containerRef: scrollContainerRef,
+    currentIndex: currentDayIndex,
+    itemCount: currentWeek?.days.length ?? 0,
+    itemWidth: 80 + 8, // min-w-[5rem] (80px) + gap-2 (8px)
+    itemSelector: '.day-card',
+    dependencies: [plan?.id, currentDayOfWeek],
+    scrollDelay: 100,
+  })
+
   if (!plan || !currentWeek) {
     return null
   }
-
   const workoutsThisWeekCompleted = currentWeek.days.filter(
     (day) => day.completedAt,
   ).length
@@ -54,11 +70,6 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
     0,
   )
 
-  // const weightLogLastWeek = 83
-  // const weightLogCurrentWeek = 82
-
-  // const diffWeight = weightLogCurrentWeek - weightLogLastWeek
-
   return (
     <div className="space-y-6 -mx-2 md:-mx-0">
       <Card className="rounded-none border-none border-t border-b md:border md:rounded-lg py-4">
@@ -76,42 +87,58 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                 {workoutsThisWeekCompleted} of {workoutsThisWeekGoal} workouts
               </span>
             </div>
-            <div className="flex flex-wrap gap-1 md:gap-2">
-              {currentWeek.days.map((day, index) => (
-                <Link
-                  href={
-                    day.isRestDay
-                      ? '#'
-                      : `/fitspace/workout/${plan.id}?week=${currentWeek.id}&day=${day.id}&exercise=${day.exercises.at(0)?.id}`
-                  }
-                  key={index}
-                  className="shrink-0"
-                >
-                  <div
-                    className={cn(
-                      'rounded-md shrink-0 p-3 min-w-[5rem]',
-                      !day.isRestDay && 'bg-primary/6',
-                      day.isRestDay && 'bg-muted/20 text-muted-foreground',
-                    )}
-                  >
-                    <div className="flex-center flex-col gap-1 text-xs md:text-md text-center">
-                      {day.completedAt && (
-                        <BadgeCheck className={cn('size-4 text-green-500')} />
-                      )}
-                      {!day.completedAt && !day.isRestDay && (
-                        <DumbbellIcon className={cn('size-4 text-amber-600')} />
-                      )}
-                      {day.isRestDay && (
-                        <DrumstickIcon className="size-4 text-muted-foreground" />
-                      )}
-                      <span>{getDayName(day.dayOfWeek, { short: true })}</span>
-                      <span className="font-medium truncate">
-                        {day.workoutType?.split(' ').at(0) ?? 'Rest'}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
+            <div
+              ref={scrollContainerRef}
+              className="overflow-x-auto scrollbar-hide py-2 -mx-4 px-4"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              <div className="flex gap-2">
+                {currentWeek.days.map((day, index) => {
+                  return (
+                    <Link
+                      href={
+                        day.isRestDay
+                          ? '#'
+                          : `/fitspace/workout/${plan.id}?week=${currentWeek.id}&day=${day.id}&exercise=${day.exercises.at(0)?.id}`
+                      }
+                      key={index}
+                      className="shrink-0 last:pr-4"
+                    >
+                      <div
+                        className={cn(
+                          'day-card rounded-md shrink-0 p-3 min-w-[5rem]',
+                          !day.isRestDay && 'bg-primary/6',
+                          day.isRestDay && 'bg-muted/20 text-muted-foreground',
+                          day.dayOfWeek === currentDayOfWeek &&
+                            'ring-2 ring-primary/20',
+                        )}
+                      >
+                        <div className="flex-center flex-col gap-1 text-xs md:text-md text-center">
+                          {day.completedAt && (
+                            <BadgeCheck
+                              className={cn('size-4 text-green-500')}
+                            />
+                          )}
+                          {!day.completedAt && !day.isRestDay && (
+                            <DumbbellIcon
+                              className={cn('size-4 text-amber-600')}
+                            />
+                          )}
+                          {day.isRestDay && (
+                            <DrumstickIcon className="size-4 text-muted-foreground" />
+                          )}
+                          <span>
+                            {getDayName(day.dayOfWeek, { short: true })}
+                          </span>
+                          <span className="font-medium truncate">
+                            {day.workoutType?.split(' ').at(0) ?? 'Rest'}
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 py-4">

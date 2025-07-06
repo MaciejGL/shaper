@@ -42,11 +42,6 @@ export function MeasurementChart({
     .reverse()
     .filter((measurement) => measurement[field] != null)
 
-  // Don't render chart if insufficient data
-  if (filteredData.length < 2) {
-    return null
-  }
-
   // Extract values for running average calculation
   const values = filteredData.map((measurement) => measurement[field] as number)
 
@@ -80,7 +75,7 @@ export function MeasurementChart({
       color: 'var(--chart-1)',
     },
     [`${field}Average`]: {
-      label: `Running Average (${unit})`,
+      label: `Weekly Average (${unit})`,
       color: 'var(--chart-2)',
     },
   } satisfies ChartConfig

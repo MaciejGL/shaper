@@ -45,7 +45,7 @@ export function MeasurementLogItem({
       ? '1 measurement'
       : `${measurementCount} measurements`
   const date = new Date(measurement.measuredAt)
-  const formattedDate = format(date, 'eee, d MMM')
+  const formattedDate = format(date, 'eee, d MMM HH:mm')
 
   return (
     <div

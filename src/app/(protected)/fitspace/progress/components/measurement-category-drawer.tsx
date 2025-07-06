@@ -1,6 +1,5 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
 import {
   Drawer,
   DrawerTrigger,
@@ -9,7 +8,6 @@ import {
 import { GQLBodyMeasuresQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
-import { AddMeasurementModal } from './add-measurement-modal'
 import { MeasurementChart } from './measurement-chart'
 import { MeasurementCategory, MeasurementField } from './measurement-constants'
 import { MeasurementHistoryList } from './measurement-history-list'
@@ -53,21 +51,14 @@ export function MeasurementCategoryDrawer({
     ? `${category.fields.find((f) => f.key === focusField)?.label} Progress`
     : category.title
 
+  const hasData =
+    filteredMeasurements.length > 0 &&
+    fieldsToShow.some((f) => getLatestMeasurement(f.key) !== null)
+
   return (
     <Drawer direction={drawerDirection}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <SimpleDrawerContent
-        title={drawerTitle}
-        footer={
-          onUpdate && (
-            <div className="flex gap-2">
-              <AddMeasurementModal onSuccess={onUpdate}>
-                <Button className="flex-1">Add Measurement</Button>
-              </AddMeasurementModal>
-            </div>
-          )
-        }
-      >
+      <SimpleDrawerContent title={drawerTitle}>
         <div className="space-y-6">
           {/* Current Stats */}
           <div
@@ -92,17 +83,18 @@ export function MeasurementCategoryDrawer({
           </div>
 
           {/* Charts for fields with enough data */}
-          {fieldsToShow.map((field) => (
-            <div key={field.key}>
-              <h3 className="font-semibold mb-3">{field.label} Progress</h3>
-              <MeasurementChart
-                measurements={filteredMeasurements}
-                field={field.key}
-                label={field.label}
-                unit={field.unit}
-              />
-            </div>
-          ))}
+          {hasData &&
+            fieldsToShow.map((field) => (
+              <div key={field.key}>
+                <h3 className="font-semibold mb-3">{field.label} Progress</h3>
+                <MeasurementChart
+                  measurements={filteredMeasurements}
+                  field={field.key}
+                  label={field.label}
+                  unit={field.unit}
+                />
+              </div>
+            ))}
 
           {/* Recent History */}
           <div>

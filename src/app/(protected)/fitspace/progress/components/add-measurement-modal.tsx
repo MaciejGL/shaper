@@ -21,6 +21,8 @@ import {
   useUpdateBodyMeasurementMutation,
 } from '@/generated/graphql-client'
 
+import { MeasurementField, MeasurementFieldEnum } from './measurement-constants'
+
 const measurementSchema = z.object({
   weight: z.string({ message: 'Invalid weight' }).optional(),
   bodyFat: z.string({ message: 'Invalid body fat' }).optional(),
@@ -39,19 +41,24 @@ const measurementSchema = z.object({
 
 type MeasurementFormData = z.infer<typeof measurementSchema>
 
+export type AddMeasurementType = (keyof MeasurementFormData)[]
 interface AddMeasurementModalProps {
+  title?: string
   onSuccess?: () => void
   measurement?: GQLBodyMeasuresQuery['bodyMeasures'][0]
+  showFields?: MeasurementFieldEnum[]
   children?: React.ReactNode
 }
 
 export function AddMeasurementModal({
   onSuccess,
+  title,
   measurement,
+  showFields,
   children,
 }: AddMeasurementModalProps) {
-  const [open, setOpen] = useState(false)
   const isEdit = !!measurement
+  const [open, setOpen] = useState(false)
 
   const [form, setForm] = useState<MeasurementFormData>({
     weight: measurement?.weight?.toString() || '',
@@ -214,7 +221,12 @@ export function AddMeasurementModal({
         },
       ],
     },
-  ]
+  ].filter((group) => {
+    if (!showFields) return true
+    return group.fields.some((field) =>
+      showFields.includes(field.name as MeasurementField & 'notes'),
+    )
+  })
 
   const hasValues = Object.values(form).some((value) => value !== '')
 
@@ -239,7 +251,9 @@ export function AddMeasurementModal({
         )}
       </DrawerTrigger>
       <SimpleDrawerContent
-        title={isEdit ? 'Edit Body Measurements' : 'Add Body Measurements'}
+        title={
+          title || (isEdit ? 'Edit Body Measurements' : 'Add Body Measurements')
+        }
         footer={
           <div className="flex gap-3">
             {isEdit && (
