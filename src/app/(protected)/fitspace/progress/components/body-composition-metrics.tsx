@@ -1,7 +1,7 @@
 'use client'
 
 import { differenceInYears } from 'date-fns'
-import { Calculator, Heart, Scale, TrendingUp } from 'lucide-react'
+import { Calculator, Heart, InfoIcon, Scale, TrendingUp } from 'lucide-react'
 import { useMemo } from 'react'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -13,11 +13,19 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useProfileQuery } from '@/generated/graphql-client'
-import { cn } from '@/lib/utils'
+import { cn, formatNumber } from '@/lib/utils'
 import { calculateBMR } from '@/lib/workout/calculate-calories-burned'
 
-import { BodyFatEstimationGuide } from './body-fat-estimation-guide'
+import {
+  BodyFatEstimationGuide,
+  BodyFatEstimationGuideContent,
+} from './body-fat-estimation-guide'
 import { useBodyMeasurementsContext } from './body-measurements-context'
 
 // BMI Categories based on WHO standards
@@ -190,7 +198,7 @@ export function BodyCompositionMetrics() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold mb-2">
-              {metrics.bmr.toLocaleString()}
+              {formatNumber(metrics.bmr)}
             </div>
             <p className="text-sm text-muted-foreground mb-4">calories/day</p>
 
@@ -218,42 +226,54 @@ export function BodyCompositionMetrics() {
                   </div>
 
                   {/* Show estimation details if it's estimated */}
-                  {metrics.bodyFat.isEstimated && (
-                    <div className="text-xs text-muted-foreground space-y-1">
-                      <div className="flex justify-between">
-                        <span>Method:</span>
-                        <span>{metrics.bodyFat.method}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Confidence:</span>
-                        <span
-                          className={cn(
-                            'first-letter:uppercase',
-                            metrics.bodyFat.confidence === 'high'
-                              ? 'text-green-600 dark:text-green-400'
-                              : metrics.bodyFat.confidence === 'medium'
-                                ? 'text-yellow-600 dark:text-yellow-400'
-                                : 'text-red-600 dark:text-red-400',
-                          )}
-                        >
-                          {metrics.bodyFat.confidence}
-                        </span>
-                      </div>
 
-                      {metrics.bodyFat.missingMeasurements &&
-                        metrics.bodyFat.missingMeasurements.length > 0 && (
-                          <Alert variant="info" className="mt-2">
-                            <AlertTitle>
-                              For Navy Method (most accurate):
-                            </AlertTitle>
-                            <AlertDescription>
-                              Add:{' '}
-                              {metrics.bodyFat.missingMeasurements.join(', ')}
-                            </AlertDescription>
-                          </Alert>
-                        )}
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <div className="flex justify-between">
+                      <span>Method:</span>
+                      {metrics.bodyFat.isEstimated && (
+                        <Tooltip>
+                          <TooltipTrigger className="flex items-center gap-1">
+                            <span>{metrics.bodyFat.method}</span>
+                            <InfoIcon className="size-3 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-card-on-card p-0">
+                            <BodyFatEstimationGuideContent
+                              estimatedBodyFat={metrics.bodyFat}
+                            />
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
-                  )}
+                    <div className="flex justify-between">
+                      <span>Confidence:</span>
+                      <span
+                        className={cn(
+                          'first-letter:uppercase',
+                          metrics.bodyFat.confidence === 'high'
+                            ? 'text-green-600 dark:text-green-400'
+                            : metrics.bodyFat.confidence === 'medium'
+                              ? 'text-yellow-600 dark:text-yellow-400'
+                              : 'text-red-600 dark:text-red-400',
+                        )}
+                      >
+                        {metrics.bodyFat.confidence}
+                      </span>
+                    </div>
+
+                    {metrics.bodyFat.missingMeasurements &&
+                      metrics.bodyFat.missingMeasurements.length > 0 && (
+                        <Alert variant="info" className="mt-2">
+                          <AlertTitle>
+                            For Navy Method (most accurate):
+                          </AlertTitle>
+                          <AlertDescription>
+                            Add:{' '}
+                            {metrics.bodyFat.missingMeasurements.join(', ')}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                  </div>
+
                   {metrics.bodyFat?.isEstimated && (
                     <BodyFatEstimationGuide
                       estimatedBodyFat={metrics.bodyFat}
@@ -285,7 +305,7 @@ export function BodyCompositionMetrics() {
                   {activity.level}
                 </div>
                 <div className="text-2xl font-bold text-primary mb-1">
-                  {activity.calories.toLocaleString()}
+                  {formatNumber(activity.calories)}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {activity.description}

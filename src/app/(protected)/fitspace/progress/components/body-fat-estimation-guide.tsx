@@ -21,11 +21,48 @@ interface BodyFatEstimationGuideProps {
 export function BodyFatEstimationGuide({
   estimatedBodyFat,
 }: BodyFatEstimationGuideProps) {
-  const missingMeasurements = estimatedBodyFat.missingMeasurements || []
-
   if (estimatedBodyFat.confidence === 'high') {
     return null
   }
+
+  return (
+    <Accordion
+      type="single"
+      collapsible
+      defaultValue="body-fat-estimation-guide"
+    >
+      <AccordionItem value="body-fat-estimation-guide">
+        <AccordionTrigger className="flex items-center justify-between w-full p-4 bg-card-on-card rounded-lg text-left hover:bg-card-on-card/80 dark:hover:bg-card-on-card/80 transition-colors">
+          <div>
+            <div className="flex items-center gap-2">
+              <InfoIcon size={16} />
+              <span className="text-sm font-medium ">
+                Body Fat Estimation Guide
+              </span>
+            </div>
+            <p className="text-xs mt-1 text-muted-foreground">
+              Currently using{' '}
+              <span className="font-bold text-foreground">
+                {estimatedBodyFat.method}
+              </span>
+            </p>
+          </div>
+        </AccordionTrigger>
+
+        <AccordionContent>
+          <BodyFatEstimationGuideContent estimatedBodyFat={estimatedBodyFat} />
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
+  )
+}
+
+export function BodyFatEstimationGuideContent({
+  estimatedBodyFat,
+}: {
+  estimatedBodyFat: BodyFatEstimationGuideProps['estimatedBodyFat']
+}) {
+  const missingMeasurements = estimatedBodyFat.missingMeasurements || []
 
   const estimationMethods = [
     {
@@ -59,87 +96,59 @@ export function BodyFatEstimationGuide({
     "Neck: Just below the Adam's apple, straight around",
     'Track over time: Single measurements can vary, trends matter more',
   ]
-
   return (
-    <Accordion
-      type="single"
-      collapsible
-      defaultValue="body-fat-estimation-guide"
-    >
-      <AccordionItem value="body-fat-estimation-guide">
-        <AccordionTrigger className="flex items-center justify-between w-full p-4 bg-card-on-card rounded-lg text-left hover:bg-card-on-card/80 dark:hover:bg-card-on-card/80 transition-colors">
-          <div>
-            <div className="flex items-center gap-2">
-              <InfoIcon size={16} />
-              <span className="text-sm font-medium ">
-                Body Fat Estimation Guide
-              </span>
-            </div>
-            <p className="text-xs mt-1 text-muted-foreground">
-              Currently using{' '}
-              <span className="font-bold text-foreground">
-                {estimatedBodyFat.method}
-              </span>
+    <div className="mt-2 p-4 bg-card-on-card rounded-lg">
+      <div className="space-y-4">
+        {/* Method Hierarchy */}
+        <div>
+          <h4 className="text-sm font-semibold  mb-2">
+            Estimation Method Hierarchy
+          </h4>
+          <div className="space-y-3">
+            {estimationMethods.map((method) => (
+              <EstimationMethodItem
+                key={method.rank}
+                rank={method.rank}
+                name={method.name}
+                accuracy={method.accuracy}
+                requirements={method.requirements}
+                tip={method.tip}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Pro Tips */}
+        <div className="border-t border-card-on-card pt-3">
+          <h4 className="text-md font-semibold  mb-2">
+            Pro Tips for Better Accuracy
+          </h4>
+          <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
+            {proTips.map((tip, index) => (
+              <li key={index}>{tip}</li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Next Steps */}
+        {missingMeasurements.length > 0 && (
+          <div className="border-t border-card-on-card pt-3">
+            <h4 className="text-md font-semibold mb-2">
+              Next Steps to Improve Accuracy
+            </h4>
+            <p className="text-sm text-muted-foreground mb-2">
+              Add these measurements to upgrade to a more accurate method:
             </p>
-          </div>
-        </AccordionTrigger>
-
-        <AccordionContent>
-          <div className="mt-2 p-4 bg-card-on-card rounded-lg">
-            <div className="space-y-4">
-              {/* Method Hierarchy */}
-              <div>
-                <h4 className="text-sm font-semibold  mb-2">
-                  Estimation Method Hierarchy
-                </h4>
-                <div className="space-y-3">
-                  {estimationMethods.map((method) => (
-                    <EstimationMethodItem
-                      key={method.rank}
-                      rank={method.rank}
-                      name={method.name}
-                      accuracy={method.accuracy}
-                      requirements={method.requirements}
-                      tip={method.tip}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Pro Tips */}
-              <div className="border-t border-card-on-card pt-3">
-                <h4 className="text-md font-semibold  mb-2">
-                  Pro Tips for Better Accuracy
-                </h4>
-                <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-4">
-                  {proTips.map((tip, index) => (
-                    <li key={index}>{tip}</li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Next Steps */}
-              {missingMeasurements.length > 0 && (
-                <div className="border-t border-card-on-card pt-3">
-                  <h4 className="text-md font-semibold mb-2">
-                    Next Steps to Improve Accuracy
-                  </h4>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Add these measurements to upgrade to a more accurate method:
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {missingMeasurements.map((measurement) => (
-                      <Badge key={measurement} variant="outline">
-                        {measurement}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
+            <div className="flex flex-wrap gap-2">
+              {missingMeasurements.map((measurement) => (
+                <Badge key={measurement} variant="outline">
+                  {measurement}
+                </Badge>
+              ))}
             </div>
           </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+        )}
+      </div>
+    </div>
   )
 }
