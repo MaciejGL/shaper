@@ -70,6 +70,11 @@ export function MeasurementLogItem({
                 </span>
               </div>
             ))}
+            {measurement.notes && (
+              <div className="bg-muted rounded-md p-2 pt-2 text-xs text-muted-foreground whitespace-pre-wrap">
+                {measurement.notes}
+              </div>
+            )}
           </div>
         )}
       </div>
