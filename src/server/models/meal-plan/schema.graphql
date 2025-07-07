@@ -1,0 +1,315 @@
+type MealPlan {
+  id: ID!
+  title: String!
+  description: String
+  completedAt: String
+
+  isPublic: Boolean!
+  isTemplate: Boolean!
+  isDraft: Boolean!
+  active: Boolean!
+  startDate: String
+  endDate: String
+
+  dailyCalories: Float
+  dailyProtein: Float
+  dailyCarbs: Float
+  dailyFat: Float
+
+  createdBy: UserPublic
+  assignedTo: UserPublic
+  weeks: [MealWeek!]!
+
+  weekCount: Int!
+  assignedCount: Int!
+
+  createdAt: String!
+  updatedAt: String!
+}
+
+type MealWeek {
+  id: ID!
+  weekNumber: Int!
+  name: String!
+  description: String
+  completedAt: String
+  isExtra: Boolean!
+
+  days: [MealDay!]!
+  plan: MealPlan
+
+  # Calculated fields
+  totalCalories: Float!
+  totalProtein: Float!
+  totalCarbs: Float!
+  totalFat: Float!
+}
+
+type MealDay {
+  id: ID!
+  dayOfWeek: Int!
+  completedAt: String
+  scheduledAt: String
+
+  targetCalories: Float
+  targetProtein: Float
+  targetCarbs: Float
+  targetFat: Float
+
+  meals: [Meal!]!
+  week: MealWeek
+
+  # Calculated fields
+  actualCalories: Float!
+  actualProtein: Float!
+  actualCarbs: Float!
+  actualFat: Float!
+  plannedCalories: Float!
+  plannedProtein: Float!
+  plannedCarbs: Float!
+  plannedFat: Float!
+}
+
+type Meal {
+  id: ID!
+  name: String!
+  dateTime: String!
+  instructions: String
+  completedAt: String
+
+  foods: [MealFood!]!
+  logs: [MealLog!]!
+  day: MealDay
+
+  # Calculated totals from planned foods
+  plannedCalories: Float!
+  plannedProtein: Float!
+  plannedCarbs: Float!
+  plannedFat: Float!
+
+  # Calculated totals from logged foods
+  loggedCalories: Float!
+  loggedProtein: Float!
+  loggedCarbs: Float!
+  loggedFat: Float!
+}
+
+type MealFood {
+  id: ID!
+  name: String!
+  quantity: Float!
+  unit: String!
+
+  # Nutritional information per 100g
+  caloriesPer100g: Float
+  proteinPer100g: Float
+  carbsPer100g: Float
+  fatPer100g: Float
+  fiberPer100g: Float
+
+  # Open Food Facts integration
+  openFoodFactsId: String
+  productData: String
+
+  meal: Meal
+
+  # Calculated nutrition for this specific quantity
+  totalCalories: Float!
+  totalProtein: Float!
+  totalCarbs: Float!
+  totalFat: Float!
+  totalFiber: Float!
+}
+
+type MealLog {
+  id: ID!
+  loggedAt: String!
+  completedAt: String
+
+  meal: Meal
+  user: UserPublic!
+  items: [MealLogItem!]!
+
+  # Calculated totals from logged items
+  totalCalories: Float!
+  totalProtein: Float!
+  totalCarbs: Float!
+  totalFat: Float!
+}
+
+type MealLogItem {
+  id: ID!
+  name: String!
+  quantity: Float!
+  unit: String!
+  barcode: String
+
+  # Nutritional data (calculated from quantity)
+  calories: Float
+  protein: Float
+  carbs: Float
+  fat: Float
+  fiber: Float
+
+  # Open Food Facts integration
+  openFoodFactsId: String
+  productData: String
+
+  # Reference to planned food (if logging from plan)
+  plannedFood: MealFood
+
+  notes: String
+  createdAt: String!
+
+  log: MealLog
+}
+
+type MyMealPlansPayload {
+  activePlan: MealPlan
+  availablePlans: [MealPlan!]!
+  completedPlans: [MealPlan!]!
+}
+
+type CreateMealPlanPayload {
+  id: ID!
+  success: Boolean!
+}
+
+# Queries - Only essential ones
+type Query {
+  getMealPlanTemplates(draft: Boolean): [MealPlan!]!
+  getMealPlanById(id: ID!): MealPlan!
+  getClientMealPlans(clientId: ID!): [MealPlan!]!
+  getClientActiveMealPlan(clientId: ID!): MealPlan
+  getMyMealPlansOverview: MyMealPlansPayload!
+}
+
+# Mutations - Streamlined for meal-level operations
+type Mutation {
+  # Essential meal plan operations
+  createMealPlan(input: CreateMealPlanInput!): CreateMealPlanPayload!
+  createDraftMealTemplate: MealPlan!
+  assignMealPlanToClient(input: AssignMealPlanToClientInput!): Boolean!
+  duplicateMealPlan(id: ID!): ID!
+  updateMealPlanDetails(input: UpdateMealPlanDetailsInput!): Boolean!
+
+  # New batch meal operation - replaces individual food mutations
+  saveMeal(input: SaveMealInput!): Boolean!
+
+  # Food logging mutations (if needed for future)
+  logMealFood(input: LogMealFoodInput!): MealLogItem!
+  updateMealFoodLog(input: UpdateMealFoodLogInput!): Boolean!
+  deleteMealFoodLog(id: ID!): Boolean!
+}
+
+# Input Types
+input CreateMealPlanInput {
+  title: String!
+  description: String
+  isPublic: Boolean
+  isDraft: Boolean
+  dailyCalories: Float
+  dailyProtein: Float
+  dailyCarbs: Float
+  dailyFat: Float
+  weeks: [CreateMealWeekInput!]
+}
+
+input UpdateMealPlanDetailsInput {
+  id: ID!
+  title: String
+  description: String
+  isPublic: Boolean
+  isDraft: Boolean
+  dailyCalories: Float
+  dailyProtein: Float
+  dailyCarbs: Float
+  dailyFat: Float
+}
+
+input CreateMealWeekInput {
+  weekNumber: Int!
+  name: String!
+  description: String
+  days: [CreateMealDayInput!]
+}
+
+input CreateMealDayInput {
+  dayOfWeek: Int!
+  targetCalories: Float
+  targetProtein: Float
+  targetCarbs: Float
+  targetFat: Float
+  meals: [CreateMealInput!]
+}
+
+input CreateMealInput {
+  name: String!
+  dateTime: String!
+  instructions: String
+  foods: [CreateMealFoodInput!]
+}
+
+input CreateMealFoodInput {
+  name: String!
+  quantity: Float!
+  unit: String!
+  caloriesPer100g: Float
+  proteinPer100g: Float
+  carbsPer100g: Float
+  fatPer100g: Float
+  fiberPer100g: Float
+  openFoodFactsId: String
+  productData: String
+}
+
+input AssignMealPlanToClientInput {
+  planId: ID!
+  clientId: ID!
+  startDate: String
+}
+
+# New batch meal input - replaces AddFoodToMeal, UpdateMealFood, RemoveFoodFromMeal
+input SaveMealInput {
+  dayId: ID!
+  hour: Int! # Hour of the day (7-23)
+  foods: [MealFoodInput!]! # Complete list of foods for this meal
+}
+
+input MealFoodInput {
+  id: ID # If provided, update existing food; if null, create new food
+  name: String!
+  quantity: Float!
+  unit: String!
+  caloriesPer100g: Float
+  proteinPer100g: Float
+  carbsPer100g: Float
+  fatPer100g: Float
+  fiberPer100g: Float
+  openFoodFactsId: String
+  productData: String
+}
+
+# Food logging inputs (kept for future use)
+input LogMealFoodInput {
+  mealId: ID!
+  name: String!
+  quantity: Float!
+  unit: String!
+  barcode: String
+  calories: Float
+  protein: Float
+  carbs: Float
+  fat: Float
+  fiber: Float
+  openFoodFactsId: String
+  productData: String
+  plannedFoodId: ID
+  notes: String
+}
+
+input UpdateMealFoodLogInput {
+  id: ID!
+  quantity: Float
+  notes: String
+}

@@ -40,11 +40,12 @@ export async function initPostHog(): Promise<PostHog | null> {
       persistence: 'localStorage+cookie',
       autocapture: true,
       disable_session_recording: false,
+      verbose: false,
+      enable_recording_console_log: false,
       loaded: (posthog: PostHog) => {
         // Only enable debug mode in development
-        if (process.env.NODE_ENV === 'development') {
-          posthog.debug()
-        }
+
+        posthog.debug(false)
       },
     })
 

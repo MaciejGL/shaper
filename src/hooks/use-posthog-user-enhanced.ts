@@ -3,7 +3,7 @@
 import { useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
 
-import { useTrainerDashboardUserQuery } from '@/generated/graphql-client'
+import { useUserWithAllDataQuery } from '@/generated/graphql-client'
 import { identifyUser, resetUser } from '@/lib/posthog'
 
 /**
@@ -16,11 +16,11 @@ export function usePostHogUserEnhanced() {
   const [hasIdentified, setHasIdentified] = useState(false)
 
   // Get detailed user data from GraphQL
-  const { data: userData } = useTrainerDashboardUserQuery(
+  const { data: userData } = useUserWithAllDataQuery(
     {},
     {
       enabled: status === 'authenticated' && !!session?.user?.email,
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 20 * 60 * 1000, // 20 minutes
     },
   )
 
@@ -69,30 +69,13 @@ export function usePostHogUserEnhanced() {
             userProperties.phone = profile.phone
             userProperties.birthday = profile.birthday
             userProperties.sex = profile.sex
-            userProperties.activity_level = profile.activityLevel
-            userProperties.goals = profile.goals
-            userProperties.bio = profile.bio
-            userProperties.has_avatar = !!profile.avatarUrl
-
-            // Add body measurements if available
-            if (profile.bodyMeasures && profile.bodyMeasures.length > 0) {
-              const latestMeasure = profile.bodyMeasures[0] // Assuming first is latest
-              userProperties.latest_weight = latestMeasure.weight
-              userProperties.chest_measurement = latestMeasure.chest
-              userProperties.waist_measurement = latestMeasure.waist
-              userProperties.hips_measurement = latestMeasure.hips
-              userProperties.body_fat = latestMeasure.bodyFat
-              userProperties.last_measurement_date = latestMeasure.measuredAt
-            }
           }
 
           // Add trainer information
           if (user.trainer) {
             userProperties.has_trainer = true
             userProperties.trainer_id = user.trainer.id
-            userProperties.trainer_name =
-              `${user.trainer.firstName || ''} ${user.trainer.lastName || ''}`.trim() ||
-              user.trainer.email
+            userProperties.hasTrainer = true
           } else {
             userProperties.has_trainer = false
           }
@@ -103,11 +86,6 @@ export function usePostHogUserEnhanced() {
             userProperties.is_trainer = true
           } else {
             userProperties.is_trainer = false
-          }
-
-          // Add session count
-          if (user.sessions) {
-            userProperties.session_count = user.sessions.length
           }
         }
 
