@@ -64,7 +64,7 @@ export function EnhancedBodyView({
   })
 
   return (
-    <Tabs>
+    <Tabs defaultValue="front">
       <TabsList className="mx-auto">
         <TabsTrigger value="front">Front</TabsTrigger>
         <TabsTrigger value="back">Back</TabsTrigger>

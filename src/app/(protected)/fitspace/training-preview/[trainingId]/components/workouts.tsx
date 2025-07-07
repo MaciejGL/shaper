@@ -1,7 +1,7 @@
 import { Clock, Dumbbell, Target } from 'lucide-react'
 import { useState } from 'react'
 
-import { getDayName } from '@/app/(protected)/trainer/trainings/creator/components/utils'
+import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

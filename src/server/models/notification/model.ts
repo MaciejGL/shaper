@@ -1,17 +1,22 @@
-import { Notification as PrismaNotification } from '@prisma/client'
+import {
+  Notification as PrismaNotification,
+  User as PrismaUser,
+} from '@prisma/client'
+import { GraphQLError } from 'graphql'
 
 import {
   GQLNotification,
   GQLNotificationType,
 } from '@/generated/graphql-server'
-import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
 import User from '../user/model'
 
 export default class Notification implements GQLNotification {
   constructor(
-    protected data: PrismaNotification,
+    protected data: PrismaNotification & {
+      creator?: PrismaUser | null
+    },
     protected context: GQLContext,
   ) {}
 
@@ -50,16 +55,13 @@ export default class Notification implements GQLNotification {
   }
 
   async creator() {
-    if (!this.data.createdBy) return null
-
-    console.warn(
-      `[Notification] No creator found for notification ${this.id}. Loading from database.`,
-    )
-
-    const creator = await prisma.user.findUnique({
-      where: { id: this.data.createdBy },
-    })
-    if (!creator) return null
-    return new User(creator, this.context)
+    if (this.data.creator) {
+      return new User(this.data.creator, this.context)
+    } else {
+      console.error(
+        `[Notification] No creator found for notification ${this.id}. Loading from database.`,
+      )
+      throw new GraphQLError('No creator found for notification')
+    }
   }
 }

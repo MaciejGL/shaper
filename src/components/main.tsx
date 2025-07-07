@@ -24,13 +24,13 @@ export const Main = async ({
   return (
     <main
       className={cn(
-        'h-svh grid grid-cols-1 grid-rows-[auto_1fr] w-full bg-sidebar',
+        'h-dvh grid grid-cols-1 grid-rows-[auto_1fr] w-full bg-sidebar',
         className,
       )}
     >
       {user && <Navbar user={user} withSidebar={withSidebar} />}
       <div
-        className={cn('w-full h-[calc(100%+0.5rem)] !overflow-hidden', {
+        className={cn('w-full h-[calc(100%+0.5rem)] overflow-hidden', {
           'md:p-2 -mt-2': isTrainer,
         })}
       >
@@ -38,9 +38,7 @@ export const Main = async ({
           className={cn(
             'w-full h-full p-2 md:p-4 lg:p-8 bg-background overflow-y-auto',
             {
-              'md:rounded-md shadow-neuro-light dark:shadow-neuro-dark':
-                isTrainer,
-              'pb-24 md:pb-24 lg:pb-24': !isTrainer,
+              'md:rounded-md': isTrainer,
             },
           )}
         >

@@ -1,5 +1,5 @@
 import { formatDate } from 'date-fns'
-import { BookmarkXIcon, SparklesIcon, Trash } from 'lucide-react'
+import { BicepsFlexed, BookmarkXIcon, Trash } from 'lucide-react'
 import { Pause } from 'lucide-react'
 import { useState } from 'react'
 
@@ -55,7 +55,7 @@ export function PlanActionDialog({
       title: 'Activate Plan',
       description: `Are you sure you want to activate "${plan.title}"? This will become your active training plan.`,
       confirmText: 'Activate Plan',
-      icon: <SparklesIcon className="size-4" />,
+      icon: <BicepsFlexed className="size-4" />,
     },
     pause: {
       title: 'Pause Plan',

@@ -158,7 +158,7 @@ export function Summary({
           <div className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold">Stats</h2>
 
-            <div className="grid grid-cols-2 gap-4 bg-muted rounded-lg p-4">
+            <div className="grid grid-cols-2 gap-4 bg-secondary rounded-lg p-4">
               <StatsItem
                 value={displayedDuration}
                 label="Duration (min)"

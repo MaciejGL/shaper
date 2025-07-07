@@ -1,11 +1,15 @@
-import { ButtonLink } from '@/components/ui/button-link'
+import { redirect } from 'next/navigation'
 
-export default function Home() {
-  return (
-    <main className="min-h-screen grid grid-rows-1 w-full bg-zinc-100">
-      <div className="flex flex-col items-center gap-8 justify-center h-screen">
-        <ButtonLink href="/login">Login</ButtonLink>
-      </div>
-    </main>
-  )
+import { HomepageClient } from '@/components/homepage.client'
+import { GQLUserRole } from '@/generated/graphql-client'
+import { getCurrentUser } from '@/lib/getUser'
+
+export default async function Home() {
+  const user = await getCurrentUser()
+  if (user?.user.role === GQLUserRole.Trainer) {
+    return redirect('/trainer/dashboard')
+  } else if (user?.user.role === GQLUserRole.Client) {
+    return redirect('/fitspace/dashboard')
+  }
+  return <HomepageClient />
 }

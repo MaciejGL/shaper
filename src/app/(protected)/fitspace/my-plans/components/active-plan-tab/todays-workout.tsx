@@ -104,12 +104,15 @@ function WorkoutDay({
           opacity: expanded ? 1 : 0,
         }}
         transition={{ type: 'spring', stiffness: 100, damping: 20 }}
-        style={{ overflow: 'hidden' }}
+        className="overflow-hidden"
+        style={{
+          pointerEvents: expanded ? 'auto' : 'none',
+        }}
       >
         <WorkoutDayExercises day={day} />
       </motion.div>
       {!forceExpanded && (
-        <div className="flex justify-center">
+        <div className={cn('flex justify-center', day.isRestDay && 'hidden')}>
           <button
             type="button"
             onClick={() => setExpanded((prev) => !prev)}
@@ -166,7 +169,7 @@ function WorkoutDayExercises({
   return (
     <div className="flex flex-col gap-2">
       <h2 className="text-sm font-medium">Exercises</h2>
-      <div className="space-y-2 bg-muted/50 rounded-lg p-4  dark:shadow-neuro-dark">
+      <div className="space-y-2 bg-card-on-card rounded-lg p-4">
         <div className="space-y-3">
           {day.exercises.map((exercise, index) => (
             <Fragment key={index}>
@@ -204,9 +207,9 @@ function WorkoutDayExercises({
 
 function RestDay() {
   return (
-    <div className="px-4 py-8 flex flex-col gap-4 items-center">
-      <BiggyIcon icon={HamIcon} size="md" />
-      <span className="text-muted-foreground text-sm text-center max-w-[25ch]">
+    <div className="px-4 flex flex-col gap-4 items-center">
+      <BiggyIcon icon={HamIcon} size="sm" />
+      <span className="text-sm text-center max-w-[25ch]">
         Rest and recover for next workout!
       </span>
     </div>

@@ -20,7 +20,7 @@ export function EquipmentFilters({
           key={equipment}
           onClick={() => onEquipmentToggle(equipment)}
           variant={
-            selectedEquipment.includes(equipment) ? 'default' : 'secondary'
+            selectedEquipment.includes(equipment) ? 'default' : 'outline'
           }
           size="xs"
         >

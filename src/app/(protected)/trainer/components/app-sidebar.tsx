@@ -10,6 +10,7 @@ import {
   PlusCircleIcon,
   UserRoundCogIcon,
   Users2Icon,
+  UtensilsIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -31,8 +32,10 @@ import {
 } from '@/components/ui/sidebar'
 import { TRAINER_LINKS } from '@/constants/user-links'
 import {
+  useCreateDraftMealTemplateMutation,
   useCreateDraftTemplateMutation,
   useGetClientsQuery,
+  useGetMealPlanTemplatesQuery,
   useGetTemplatesQuery,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
@@ -82,17 +85,40 @@ const placeholderTemplates = {
   }),
 }
 
+const placeholderMealPlans = {
+  getMealPlanTemplates: Array(2).fill({
+    id: 'placeholder' + Math.random(),
+    title: 'Loading...',
+    description: null,
+    isDraft: false,
+    dailyCalories: 0,
+    dailyProtein: 0,
+    dailyCarbs: 0,
+    dailyFat: 0,
+    weekCount: 0,
+    assignedCount: 0,
+  }),
+}
+
 export function AppSidebar() {
   const queryClient = useQueryClient()
   const router = useRouter()
   const { data: clients, isPlaceholderData: isPlaceholderClients } =
     useGetClientsQuery(undefined, {
       placeholderData: placeholderClients,
+      refetchOnWindowFocus: false,
     })
 
   const { data: templatesData, isPlaceholderData: isPlaceholderTemplates } =
     useGetTemplatesQuery(undefined, {
       placeholderData: placeholderTemplates,
+      refetchOnWindowFocus: false,
+    })
+
+  const { data: mealPlansData, isPlaceholderData: isPlaceholderMealPlans } =
+    useGetMealPlanTemplatesQuery(undefined, {
+      placeholderData: placeholderMealPlans,
+      refetchOnWindowFocus: false,
     })
 
   const { mutate: createDraftTemplate, isPending: isCreatingDraftTemplate } =
@@ -102,16 +128,37 @@ export function AppSidebar() {
 
         queryClient.invalidateQueries({ queryKey: ['GetTemplates'] })
 
-        router.push(`/trainer/trainings/creator-new/${newPlan.id}`)
+        router.push(`/trainer/trainings/creator/${newPlan.id}`)
       },
       onError: (error) => {
         console.error('❌ Failed to create draft template:', error)
       },
     })
 
+  const {
+    mutate: createDraftMealTemplate,
+    isPending: isCreatingDraftMealTemplate,
+  } = useCreateDraftMealTemplateMutation({
+    onSuccess: (data) => {
+      const newPlan = data.createDraftMealTemplate
+
+      queryClient.invalidateQueries({ queryKey: ['GetMealPlanTemplates'] })
+
+      router.push(`/trainer/meal-plans/creator/${newPlan.id}`)
+    },
+    onError: (error) => {
+      console.error('❌ Failed to create draft meal template:', error)
+    },
+  })
+
   const templates = useMemo(
     () => templatesData?.getTemplates || [],
     [templatesData],
+  )
+
+  const mealPlans = useMemo(
+    () => mealPlansData?.getMealPlanTemplates || [],
+    [mealPlansData],
   )
 
   const items: SidebarItemType[] = useMemo(
@@ -152,7 +199,29 @@ export function AppSidebar() {
           },
           ...templates.map((template) => ({
             title: template.title,
-            url: TRAINER_LINKS.trainings.href + `/creator-new/${template.id}`,
+            url: TRAINER_LINKS.trainings.href + `/creator/${template.id}`,
+            icon: FileIcon,
+            disabled: false,
+          })),
+        ],
+      },
+      // Meal Plans item
+      {
+        title: TRAINER_LINKS.mealPlans.label,
+        url: TRAINER_LINKS.mealPlans.href,
+        icon: UtensilsIcon,
+        disabled: TRAINER_LINKS.mealPlans.disabled,
+        subItems: [
+          {
+            title: 'Create',
+            onClick: () => createDraftMealTemplate({}),
+            icon: PlusCircleIcon,
+            loading: isCreatingDraftMealTemplate,
+            disabled: false,
+          },
+          ...mealPlans.map((plan) => ({
+            title: plan.title,
+            url: TRAINER_LINKS.mealPlans.href + `/creator/${plan.id}`,
             icon: FileIcon,
             disabled: false,
           })),
@@ -166,7 +235,15 @@ export function AppSidebar() {
         disabled: TRAINER_LINKS.exercises.disabled,
       },
     ],
-    [clients, templates, createDraftTemplate, isCreatingDraftTemplate],
+    [
+      clients,
+      templates,
+      mealPlans,
+      createDraftTemplate,
+      isCreatingDraftTemplate,
+      createDraftMealTemplate,
+      isCreatingDraftMealTemplate,
+    ],
   )
 
   const footerItems = [
@@ -187,7 +264,11 @@ export function AppSidebar() {
               <SidebarItem
                 key={item.title + index}
                 item={item}
-                isLoading={isPlaceholderClients || isPlaceholderTemplates}
+                isLoading={
+                  isPlaceholderClients ||
+                  isPlaceholderTemplates ||
+                  isPlaceholderMealPlans
+                }
               />
             ))}
           </SidebarMenu>
@@ -232,6 +313,7 @@ function SidebarItem({
           <Button
             onClick={item.onClick}
             variant="variantless"
+            size="lg"
             className="inline-flex w-full text-left justify-start pl-0"
             disabled={item.disabled}
             loading={item.loading}
@@ -245,7 +327,7 @@ function SidebarItem({
       <SidebarMenuSub>
         {item.subItems?.map((subItem, index) => (
           <SidebarMenuSubItem key={subItem.title + index}>
-            <SidebarMenuSubButton asChild>
+            <SidebarMenuSubButton asChild size="md">
               {subItem.url ? (
                 <Link
                   href={subItem.url}

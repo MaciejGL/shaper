@@ -16,7 +16,7 @@ export type TodaysSessionProps = {
 export function TodaysSession({ workout, planId }: TodaysSessionProps) {
   if (!workout || !planId) {
     return (
-      <Card className="@container/todays-session">
+      <Card className="@container/todays-session" variant="secondary">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Calendar className="h-5 w-5" />
@@ -36,7 +36,7 @@ export function TodaysSession({ workout, planId }: TodaysSessionProps) {
                 Activate plan
               </ButtonLink>
               <ButtonLink
-                href="/fitspace/sessions/quick-workout"
+                href="/fitspace/workout/quick-workout"
                 variant="default"
               >
                 Start quick session
@@ -49,7 +49,7 @@ export function TodaysSession({ workout, planId }: TodaysSessionProps) {
   }
 
   return (
-    <Card>
+    <Card variant="secondary">
       <CardContent>
         <TodaysWorkout
           planId={planId}

@@ -9,7 +9,6 @@ import {
 } from '@prisma/client'
 
 import { GQLTrainingWeek } from '@/generated/graphql-server'
-import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
 import TrainingDay from '../training-day/model'
@@ -19,6 +18,14 @@ export default class TrainingWeek implements GQLTrainingWeek {
     protected data: PrismaTrainingWeek & {
       days?: (PrismaTrainingDay & {
         exercises?: (PrismaTrainingExercise & {
+          substitutedBy?: PrismaTrainingExercise & {
+            base?: PrismaBaseExercise & {
+              muscleGroups: PrismaMuscleGroup[]
+            }
+            sets?: (PrismaExerciseSet & {
+              log?: PrismaExerciseSetLog
+            })[]
+          }
           sets?: (PrismaExerciseSet & {
             log?: PrismaExerciseSetLog
           })[]
@@ -80,18 +87,14 @@ export default class TrainingWeek implements GQLTrainingWeek {
   }
 
   async days() {
-    let days = this.data.days
-    if (!days || days.length === 0) {
-      console.warn(
+    const days = this.data.days
+    if (days) {
+      return days.map((day) => new TrainingDay(day, this.context))
+    } else {
+      console.error(
         `[TrainingWeek] No days found for week ${this.id}. Loading from database.`,
       )
-      days = await prisma.trainingDay.findMany({
-        where: {
-          weekId: this.id,
-        },
-      })
+      return []
     }
-
-    return days.map((day) => new TrainingDay(day, this.context))
   }
 }

@@ -7,13 +7,10 @@ import { toast } from 'sonner'
 import { EnhancedBodyView } from '@/components/human-body/enhanced-body-view'
 import { Button } from '@/components/ui/button'
 import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
+  Drawer,
+  DrawerTrigger,
+  SimpleDrawerContent,
+} from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
@@ -179,26 +176,40 @@ export function AddExerciseModal({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogTrigger asChild>
+    <Drawer open={isOpen} onOpenChange={handleClose}>
+      <DrawerTrigger asChild>
         <Button variant="secondary" iconStart={<Search />} className="grow">
           Find exercises
         </Button>
-      </DialogTrigger>
-      <DialogContent dialogTitle="Add Exercise" fullScreen className="px-0">
-        <DialogHeader className="px-4">
-          <DialogTitle>Add Exercise</DialogTitle>
-
-          <AnimatePresence mode="wait">
-            <SelectedFilters
-              selectedMuscleGroups={selectedMuscleGroups}
-              selectedEquipment={selectedEquipment}
-              onClearFilters={clearAllFilters}
-              onEquipmentToggle={toggleEquipment}
-              onMuscleGroupToggle={toggleMuscleGroup}
-            />
-          </AnimatePresence>
-        </DialogHeader>
+      </DrawerTrigger>
+      <SimpleDrawerContent
+        title="Add Exercise"
+        footer={
+          <Button
+            onClick={handleAddExercise}
+            disabled={!selectedExercises.length}
+            loading={isAdding}
+            iconStart={<PlusIcon />}
+          >
+            Add Exercise
+          </Button>
+        }
+        className="pt-0 px-0"
+      >
+        <AnimatePresence mode="wait">
+          {(selectedMuscleGroups.length > 0 ||
+            selectedEquipment.length > 0) && (
+            <div className="sticky top-0 bg-sidebar z-[100] -mx-4 px-8 py-2">
+              <SelectedFilters
+                selectedMuscleGroups={selectedMuscleGroups}
+                selectedEquipment={selectedEquipment}
+                onClearFilters={clearAllFilters}
+                onEquipmentToggle={toggleEquipment}
+                onMuscleGroupToggle={toggleMuscleGroup}
+              />
+            </div>
+          )}
+        </AnimatePresence>
         <div className="flex flex-col gap-6 overflow-y-auto">
           <div>
             <div className="py-6">
@@ -241,17 +252,7 @@ export function AddExerciseModal({
             </div>
           </div>
         </div>
-        <DialogFooter className="px-4">
-          <Button
-            onClick={handleAddExercise}
-            disabled={!selectedExercises.length}
-            loading={isAdding}
-            iconStart={<PlusIcon />}
-          >
-            Add Exercise
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      </SimpleDrawerContent>
+    </Drawer>
   )
 }

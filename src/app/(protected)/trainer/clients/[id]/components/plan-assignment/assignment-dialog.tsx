@@ -33,7 +33,12 @@ export function AssignPlanDialog({
   activePlan,
   trigger,
 }: AssignPlanDialogProps) {
-  const { data } = useGetTemplatesQuery({ draft: false })
+  const { data } = useGetTemplatesQuery(
+    { draft: false },
+    {
+      refetchOnWindowFocus: false,
+    },
+  )
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null)

@@ -5,21 +5,35 @@ import {
 
 import {
   addAiExerciseToWorkout,
+  addExercisesToQuickWorkout,
   addExercisesToWorkout,
   addSet,
+  addSetExerciseForm,
   getAiExerciseSuggestions,
+  getTrainingExercise,
   removeExerciseFromWorkout,
   removeSet,
+  removeSetExerciseForm,
+  swapExercise,
+  updateExerciseForm,
 } from './factory'
 
-export const Query: GQLQueryResolvers = {}
+export const Query: GQLQueryResolvers = {
+  getTrainingExercise: async (_, { id }, context) => {
+    return getTrainingExercise(id, context)
+  },
+}
 
 export const Mutation: GQLMutationResolvers = {
   getAiExerciseSuggestions: async (_, { dayId }, context) => {
     return getAiExerciseSuggestions(dayId, context)
   },
   addExercisesToWorkout: async (_, { input }, context) => {
-    return addExercisesToWorkout(input.workoutId, input.exerciseIds, context)
+    return addExercisesToWorkout(
+      input.workoutId ?? '',
+      input.exerciseIds,
+      context,
+    )
   },
   removeExerciseFromWorkout: async (_, { exerciseId }) => {
     return removeExerciseFromWorkout(exerciseId)
@@ -32,5 +46,21 @@ export const Mutation: GQLMutationResolvers = {
   },
   addAiExerciseToWorkout: async (_, { input }, context) => {
     return addAiExerciseToWorkout(input, context)
+  },
+  updateExerciseForm: async (_, { input }, context) => {
+    return updateExerciseForm(input, context)
+  },
+
+  addSetExerciseForm: async (_, { input }, context) => {
+    return addSetExerciseForm(input, context)
+  },
+  removeSetExerciseForm: async (_, { setId }) => {
+    return removeSetExerciseForm(setId)
+  },
+  swapExercise: async (_, { exerciseId, substituteId }, context) => {
+    return swapExercise(exerciseId, substituteId, context)
+  },
+  addExercisesToQuickWorkout: async (_, { exerciseIds }, context) => {
+    return addExercisesToQuickWorkout(exerciseIds, context)
   },
 }

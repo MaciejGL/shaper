@@ -1,0 +1,69 @@
+# Get public exercises only - clients can't access user exercises
+query QuickWorkoutExercises($where: ExerciseWhereInput) {
+  publicExercises(where: $where) {
+    id
+    name
+    description
+    videoUrl
+    equipment
+    type
+    description
+    muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+  }
+}
+
+# Look for the user's own quick workout plan (created by them and assigned to them)
+query FitspaceGetUserQuickWorkoutPlan {
+  getQuickWorkoutPlan {
+    id
+    title
+
+    weeks {
+      id
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        exercises {
+          id
+          name
+          baseId
+          sets {
+            id
+            order
+            reps
+            minReps
+            maxReps
+            weight
+            rpe
+          }
+        }
+      }
+    }
+  }
+}
+
+# Create a new quick workout plan for the user
+mutation CreateQuickWorkoutPlan($input: CreateTrainingPlanInput!) {
+  createTrainingPlan(input: $input) {
+    id
+    success
+  }
+}
+
+# Assign the created plan to the user (but don't activate it)
+mutation AssignQuickWorkoutPlan($input: AssignTrainingPlanToClientInput!) {
+  assignTrainingPlanToClient(input: $input)
+}
+
+# Add exercise to the quick workout day
+mutation AddExercisesToQuickWorkout($exerciseIds: [ID!]!) {
+  addExercisesToQuickWorkout(exerciseIds: $exerciseIds) {
+    id
+  }
+}

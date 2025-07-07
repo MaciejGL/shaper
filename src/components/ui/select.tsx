@@ -31,7 +31,7 @@ const selectTriggerVariants = cva(
     variants: {
       variant: {
         default: cn('border border-input'),
-        ghost: cn('border-none'),
+        ghost: cn('border-none bg-card'),
       },
       size: {
         xs: cn(

@@ -1,5 +1,6 @@
 'use client'
 
+import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -33,13 +34,16 @@ export const LoginCard = () => {
   } = useLoginForm()
 
   return (
-    <Card className="flex flex-col gap-4 w-full max-w-md">
+    <Card
+      variant="gradient"
+      className="flex flex-col gap-8 w-full max-w-md shadow-neuro-light dark:shadow-neuro-dark"
+    >
       <CardHeader className="space-y-1">
         <CardTitle>Login</CardTitle>
         <CardDescription>
           {!showOtp
             ? 'Enter your email to receive a one-time password to login.'
-            : 'Enter the 6-digit code sent to your email to login.'}
+            : 'Enter the 4-digit code sent to your email to login.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -57,9 +61,20 @@ export const LoginCard = () => {
             handleLogin={handleLogin}
           />
         )}
-        {errorMessage && (
-          <p className="text-red-500 text-sm text-center">{errorMessage}</p>
-        )}
+        <AnimatePresence>
+          {errorMessage && (
+            <motion.p
+              key={errorMessage}
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              className="text-amber-500 mt-2 text-sm text-center"
+            >
+              {errorMessage}
+            </motion.p>
+          )}
+        </AnimatePresence>
       </CardContent>
       {showOtp && (
         <CardFooter>
@@ -68,7 +83,7 @@ export const LoginCard = () => {
               variant="default"
               loading={isLoading}
               onClick={handleLogin}
-              disabled={otp.length !== 6}
+              disabled={otp.length !== 4}
             >
               Login
             </Button>

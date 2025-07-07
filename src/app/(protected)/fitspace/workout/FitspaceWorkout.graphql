@@ -48,6 +48,41 @@ query FitspaceGetWorkout($trainingId: ID!) {
             videoUrl
             completedAt
             isExtra
+            substitutedBy {
+              id
+              name
+              instructions
+              additionalInstructions
+              type
+              videoUrl
+              completedAt
+              baseId
+              sets {
+                id
+                order
+                reps
+                minReps
+                maxReps
+                weight
+                rpe
+                isExtra
+                completedAt
+                log {
+                  id
+                  weight
+                  rpe
+                  reps
+                  createdAt
+                }
+              }
+            }
+            substitutes {
+              id
+              substitute {
+                id
+                name
+              }
+            }
             muscleGroups {
               id
               alias
@@ -202,4 +237,10 @@ mutation FitspaceAddSet($exerciseId: ID!) {
 
 mutation FitspaceRemoveSet($setId: ID!) {
   removeSet(setId: $setId)
+}
+
+mutation FitspaceSwapExercise($exerciseId: ID!, $substituteId: ID!) {
+  swapExercise(exerciseId: $exerciseId, substituteId: $substituteId) {
+    id
+  }
 }

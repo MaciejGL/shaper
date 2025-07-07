@@ -3,7 +3,7 @@ import { BadgeCheckIcon, ChevronLeft } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 
-import { getDayName } from '@/app/(protected)/trainer/trainings/creator/components/utils'
+import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { Button } from '@/components/ui/button'
 import {
   Select,
@@ -66,8 +66,8 @@ function Day({ day }: { day: WorkoutDay }) {
       <button
         data-selected={isSelected}
         className={cn(
-          'size-12 shrink-0 rounded-md flex-center flex-col text-primary transition-all bg-secondary dark:bg-secondary dark:text-primary cursor-pointer hover:bg-secondary/80 shadow-neuro-light dark:shadow-neuro-dark',
-          'data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground dark:data-[selected=true]:bg-primary dark:data-[selected=true]:text-primary-foreground',
+          'size-12 shrink-0 rounded-md flex-center flex-col text-primary transition-all bg-primary/5 dark:bg-secondary dark:text-primary cursor-pointer hover:bg-secondary/80',
+          'data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground dark:data-[selected=true]:bg-primary dark:data-[selected=true]:text-primary-foreground shadow-xs',
         )}
         onClick={handleClick}
       >

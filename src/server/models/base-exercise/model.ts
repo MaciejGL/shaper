@@ -1,11 +1,14 @@
 import {
   BaseExercise as PrismaBaseExercise,
+  BaseExerciseSubstitute as PrismaBaseExerciseSubstitute,
   MuscleGroup as PrismaMuscleGroup,
   MuscleGroupCategory as PrismaMuscleGroupCategory,
 } from '@prisma/client'
+import { GraphQLError } from 'graphql'
 
 import {
   GQLBaseExercise,
+  GQLBaseExerciseSubstitute,
   GQLEquipment,
   GQLExerciseType,
 } from '@/generated/graphql-server'
@@ -16,11 +19,87 @@ import MuscleGroupCategory from '../muscle-group-category/model'
 import MuscleGroup from '../muscle-group/model'
 import UserPublic from '../user-public/model'
 
+export class BaseExerciseSubstitute implements GQLBaseExerciseSubstitute {
+  constructor(
+    protected data: PrismaBaseExerciseSubstitute & {
+      original?: PrismaBaseExercise & {
+        muscleGroups: (PrismaMuscleGroup & {
+          category: PrismaMuscleGroupCategory
+        })[]
+      }
+      substitute?: PrismaBaseExercise & {
+        muscleGroups: (PrismaMuscleGroup & {
+          category: PrismaMuscleGroupCategory
+        })[]
+      }
+    },
+    protected context: GQLContext,
+  ) {}
+
+  get id() {
+    return this.data.id
+  }
+
+  get originalId() {
+    return this.data.originalId
+  }
+
+  get substituteId() {
+    return this.data.substituteId
+  }
+
+  get reason() {
+    return this.data.reason
+  }
+
+  get createdAt() {
+    return this.data.createdAt.toISOString()
+  }
+
+  async original() {
+    if (this.data.original) {
+      return new BaseExercise(this.data.original, this.context)
+    }
+
+    console.error(
+      `[BaseExerciseSubstitute] No original exercise found for substitute ${this.id}. Loading from database.`,
+    )
+
+    throw new GraphQLError('Original exercise not found')
+  }
+
+  async substitute() {
+    if (this.data.substitute) {
+      return new BaseExercise(this.data.substitute, this.context)
+    }
+
+    console.error(
+      `[BaseExerciseSubstitute] No substitute exercise found for substitute ${this.id}. Loading from database.`,
+    )
+
+    throw new GraphQLError('Substitute exercise not found')
+  }
+}
+
 export default class BaseExercise implements GQLBaseExercise {
   constructor(
     protected data: PrismaBaseExercise & {
       muscleGroups: (PrismaMuscleGroup & {
         category: PrismaMuscleGroupCategory
+      })[]
+      substitutes?: (PrismaBaseExerciseSubstitute & {
+        substitute: PrismaBaseExercise & {
+          muscleGroups: (PrismaMuscleGroup & {
+            category: PrismaMuscleGroupCategory
+          })[]
+        }
+      })[]
+      substitutedBy?: (PrismaBaseExerciseSubstitute & {
+        original: PrismaBaseExercise & {
+          muscleGroups: (PrismaMuscleGroup & {
+            category: PrismaMuscleGroupCategory
+          })[]
+        }
       })[]
     },
     protected context: GQLContext,
@@ -70,32 +149,12 @@ export default class BaseExercise implements GQLBaseExercise {
       return this.data.muscleGroups.map((muscleGroup) => {
         return new MuscleGroup(muscleGroup, this.context)
       })
+    } else {
+      console.error(
+        `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
+      )
+      throw new GraphQLError('No muscle groups found for exercise')
     }
-
-    console.warn(
-      `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
-    )
-
-    const muscleGroups = await prisma.muscleGroup.findMany({
-      where: {
-        exercises: {
-          some: {
-            id: this.data.id,
-          },
-        },
-      },
-      include: {
-        category: true,
-      },
-    })
-
-    if (!muscleGroups.length) {
-      return []
-    }
-
-    return muscleGroups.map(
-      (muscleGroup) => new MuscleGroup(muscleGroup, this.context),
-    )
   }
 
   async muscleGroupCategories() {
@@ -103,34 +162,12 @@ export default class BaseExercise implements GQLBaseExercise {
       return this.data.muscleGroups.map((muscleGroup) => {
         return new MuscleGroupCategory(muscleGroup.category, this.context)
       })
+    } else {
+      console.error(
+        `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
+      )
+      throw new GraphQLError('No muscle groups found for exercise')
     }
-
-    console.warn(
-      `[BaseExercise] No muscle groups found for exercise ${this.id}. Loading from database.`,
-    )
-
-    const muscleGroups = await prisma.muscleGroup.findMany({
-      where: {
-        exercises: {
-          some: {
-            id: this.data.id,
-          },
-        },
-      },
-      include: {
-        category: true,
-      },
-      distinct: ['categoryId'],
-    })
-
-    if (!muscleGroups.length) {
-      return []
-    }
-
-    return muscleGroups.map(
-      (muscleGroup) =>
-        new MuscleGroupCategory(muscleGroup.category, this.context),
-    )
   }
 
   get isPublic() {
@@ -142,6 +179,9 @@ export default class BaseExercise implements GQLBaseExercise {
       return null
     }
 
+    console.error(
+      `[BaseExercise] Making database query for createdBy user in exercise ${this.id}. This could cause N+1 queries.`,
+    )
     const user = await prisma.user.findUnique({
       where: {
         id: this.data.createdById,
@@ -161,5 +201,59 @@ export default class BaseExercise implements GQLBaseExercise {
 
   get updatedAt() {
     return this.data.updatedAt.toISOString()
+  }
+
+  async substitutes() {
+    if (this.data.substitutes) {
+      return this.data.substitutes.map(
+        (substitute) => new BaseExerciseSubstitute(substitute, this.context),
+      )
+    }
+
+    const substitutes = await prisma.baseExerciseSubstitute.findMany({
+      where: { originalId: this.data.id },
+      include: {
+        substitute: {
+          include: {
+            muscleGroups: {
+              include: {
+                category: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    return substitutes.map(
+      (substitute) => new BaseExerciseSubstitute(substitute, this.context),
+    )
+  }
+
+  async canBeSubstitutedBy() {
+    if (this.data.substitutedBy) {
+      return this.data.substitutedBy.map(
+        (substitute) => new BaseExerciseSubstitute(substitute, this.context),
+      )
+    }
+
+    const substitutedBy = await prisma.baseExerciseSubstitute.findMany({
+      where: { substituteId: this.data.id },
+      include: {
+        original: {
+          include: {
+            muscleGroups: {
+              include: {
+                category: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    return substitutedBy.map(
+      (substitute) => new BaseExerciseSubstitute(substitute, this.context),
+    )
   }
 }

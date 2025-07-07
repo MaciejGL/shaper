@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { CardContent, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   GQLGetNotesQuery,
   useCreateNoteMutation,
@@ -111,10 +111,10 @@ export function ClientNotes({ clientId }: { clientId: string }) {
   }
 
   return (
-    <div className="shadow-neuro-light dark:shadow-neuro-dark rounded-lg p-4">
-      <div>
-        <div className="flex justify-between mb-2">
-          <CardTitle className="text-2xl font-semibold">Notes</CardTitle>
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between">
+          <CardTitle>Notes</CardTitle>
           <Button
             variant="outline"
             size="icon-xs"
@@ -137,8 +137,8 @@ export function ClientNotes({ clientId }: { clientId: string }) {
           onCreateNote={handleCreateNote}
           onCancelCreate={handleCancelCreate}
         />
-      </div>
-      <CardContent className="p-0 pt-4">
+      </CardHeader>
+      <CardContent>
         {notes.length === 0 ? (
           <div className="text-sm text-muted-foreground">
             You haven't added any notes yet.
@@ -164,7 +164,7 @@ export function ClientNotes({ clientId }: { clientId: string }) {
           </div>
         )}
       </CardContent>
-    </div>
+    </Card>
   )
 }
 

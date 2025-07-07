@@ -7,9 +7,9 @@ import {
   TrainingExercise as PrismaTrainingExercise,
   WorkoutSessionEvent as PrismaWorkoutSessionEvent,
 } from '@prisma/client'
+import { GraphQLError } from 'graphql'
 
 import { GQLTrainingDay, GQLWorkoutType } from '@/generated/graphql-server'
-import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
 import TrainingExercise from '../training-exercise/model'
@@ -19,6 +19,14 @@ export default class TrainingDay implements GQLTrainingDay {
     protected data: PrismaTrainingDay & {
       events?: PrismaWorkoutSessionEvent[]
       exercises?: (PrismaTrainingExercise & {
+        substitutedBy?: PrismaTrainingExercise & {
+          base?: PrismaBaseExercise & {
+            muscleGroups: PrismaMuscleGroup[]
+          }
+          sets?: (PrismaExerciseSet & {
+            log?: PrismaExerciseSetLog
+          })[]
+        }
         sets?: (PrismaExerciseSet & {
           log?: PrismaExerciseSetLog
         })[]
@@ -70,45 +78,32 @@ export default class TrainingDay implements GQLTrainingDay {
   }
 
   async exercises() {
-    let exercises = this.data.exercises
+    const exercises = this.data.exercises
 
-    if (!exercises) {
-      console.warn(
+    if (exercises) {
+      return exercises.map(
+        (exercise) => new TrainingExercise(exercise, this.context),
+      )
+    } else {
+      console.error(
         `[TrainingDay] No exercises found for day ${this.id}. Loading from database.`,
       )
-      exercises = await prisma.trainingExercise.findMany({
-        where: {
-          dayId: this.id,
-        },
-      })
+      throw new GraphQLError('No exercises found for day')
     }
-    return exercises.map(
-      (exercise) => new TrainingExercise(exercise, this.context),
-    )
   }
 
   async duration() {
-    let events = this.data.events
-
-    if (!events) {
-      console.warn(
+    const events = this.data.events
+    if (events) {
+      return events.find(
+        (event) => event.type === 'PROGRESS' || event.type === 'COMPLETE',
+      )?.totalDuration
+    } else {
+      console.error(
         `[TrainingDay] No workout session events found for day ${this.id}. Loading from database.`,
       )
-      events = await prisma.workoutSessionEvent.findMany({
-        where: { dayId: this.id },
-        orderBy: { timestamp: 'asc' },
-      })
-    }
-
-    const event = events.find(
-      (event) => event.type === 'PROGRESS' || event.type === 'COMPLETE',
-    )
-
-    if (!event) {
       return 0
     }
-
-    return event.totalDuration
   }
 
   get scheduledAt() {

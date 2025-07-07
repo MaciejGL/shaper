@@ -1,4 +1,3 @@
-import { CardContent, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { GQLGetClientByIdQuery } from '@/generated/graphql-client'
 
@@ -21,41 +20,39 @@ export function ClientActivePlan({
 }) {
   return (
     <div>
-      <CardTitle className="text-2xl font-semibold mb-4">Active Plan</CardTitle>
+      <div className="text-2xl font-semibold mb-4">Active Plan</div>
 
-      <CardContent className="h-full p-0">
-        {activePlan ? (
-          <Tabs defaultValue="active-plan" className="h-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="active-plan">Details</TabsTrigger>
-              <TabsTrigger value="progress">Progress</TabsTrigger>
-              <TabsTrigger value="exercise-logs">Exercise Logs</TabsTrigger>
-            </TabsList>
+      {activePlan ? (
+        <Tabs defaultValue="active-plan">
+          <TabsList>
+            <TabsTrigger value="active-plan">Details</TabsTrigger>
+            <TabsTrigger value="progress">Progress</TabsTrigger>
+            <TabsTrigger value="exercise-logs">Exercise Logs</TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="active-plan" className="mt-2 gap-6 grow">
-              <PlanDetails assignedPlan={activePlan} />
-            </TabsContent>
+          <TabsContent value="active-plan" className="mt-2 gap-6 grow">
+            <PlanDetails assignedPlan={activePlan} />
+          </TabsContent>
 
-            <TabsContent value="progress" className="mt-2">
-              <div className="space-y-6">
-                <ProgressOverview plan={activePlan} />
-                <WeeklyProgress plan={activePlan} />
-              </div>
-            </TabsContent>
+          <TabsContent value="progress" className="mt-2">
+            <div className="space-y-6">
+              <ProgressOverview plan={activePlan} />
+              <WeeklyProgress plan={activePlan} />
+            </div>
+          </TabsContent>
 
-            <TabsContent value="exercise-logs" className="mt-2">
-              <ExerciseLogs plan={activePlan} clientId={client.id} />
-            </TabsContent>
-          </Tabs>
-        ) : (
-          <NoPlanCard
-            clientName={clientName}
-            clientId={client.id}
-            activePlan={activePlan}
-            hasAssignedPlans={hasAssignedPlans}
-          />
-        )}
-      </CardContent>
+          <TabsContent value="exercise-logs" className="mt-2">
+            <ExerciseLogs plan={activePlan} clientId={client.id} />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <NoPlanCard
+          clientName={clientName}
+          clientId={client.id}
+          activePlan={activePlan}
+          hasAssignedPlans={hasAssignedPlans}
+        />
+      )}
     </div>
   )
 }

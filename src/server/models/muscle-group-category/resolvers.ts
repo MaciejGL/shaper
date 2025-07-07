@@ -9,7 +9,12 @@ import MuscleGroupCategory from './model'
 
 export const Query: GQLQueryResolvers = {
   muscleGroupCategories: async (_, __, context) => {
-    const categories = await prisma.muscleGroupCategory.findMany()
+    // Preload all muscles to prevent N+1 queries
+    const categories = await prisma.muscleGroupCategory.findMany({
+      include: {
+        muscles: true,
+      },
+    })
     return categories.map(
       (category) => new MuscleGroupCategory(category, context),
     )
@@ -17,6 +22,9 @@ export const Query: GQLQueryResolvers = {
   muscleGroupCategory: async (_, { id }, context) => {
     const category = await prisma.muscleGroupCategory.findUnique({
       where: { id },
+      include: {
+        muscles: true,
+      },
     })
 
     if (!category) {

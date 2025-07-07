@@ -4,7 +4,7 @@ import { formatDate } from 'date-fns'
 import { CheckCircle, ChevronDown, Circle } from 'lucide-react'
 import { useState } from 'react'
 
-import { dayNames } from '@/app/(protected)/trainer/trainings/creator/components/utils'
+import { dayNames } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { Badge } from '@/components/ui/badge'
 import { CardTitle } from '@/components/ui/card'
 import {
@@ -77,7 +77,14 @@ const DayCard = ({
       onOpenChange={(open) => !day.isRestDay && setIsOpen(open)}
     >
       <CollapsibleTrigger asChild>
-        <div className="cursor-pointer bg-muted/50 hover:bg-muted/70 transition-colors p-3  rounded-md">
+        <div
+          className={cn(
+            'cursor-pointer bg-muted/50 transition-colors p-3  rounded-md',
+            day.isRestDay
+              ? 'opacity-50 hover:bg-muted/50 cursor-default'
+              : 'hover:bg-muted/70',
+          )}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {

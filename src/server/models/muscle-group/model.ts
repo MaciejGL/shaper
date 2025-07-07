@@ -1,4 +1,7 @@
-import { MuscleGroup as PrismaMuscleGroup } from '@prisma/client'
+import {
+  MuscleGroup as PrismaMuscleGroup,
+  MuscleGroupCategory as PrismaMuscleGroupCategory,
+} from '@prisma/client'
 
 import { GQLMuscleGroup } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
@@ -9,7 +12,9 @@ import MuscleGroupCategory from '../muscle-group-category/model'
 
 export default class MuscleGroup implements GQLMuscleGroup {
   constructor(
-    protected data: PrismaMuscleGroup,
+    protected data: PrismaMuscleGroup & {
+      category?: PrismaMuscleGroupCategory
+    },
     protected context: GQLContext,
   ) {}
 
@@ -34,20 +39,35 @@ export default class MuscleGroup implements GQLMuscleGroup {
   }
 
   async category() {
-    const category = await prisma.muscleGroupCategory.findUnique({
-      where: {
-        id: this.data.categoryId,
-      },
-    })
+    const category = this.data.category
+    if (category) {
+      return new MuscleGroupCategory(category, this.context)
+    } else {
+      console.error(
+        `[MuscleGroup] No category found for muscle group ${this.id}. Loading from database.`,
+      )
+      // Fallback to database query if category not included
+      console.error(
+        `[MuscleGroup] Making database query for category in muscle group ${this.id}. This could cause N+1 queries.`,
+      )
+      const categoryFromDb = await prisma.muscleGroupCategory.findUnique({
+        where: {
+          id: this.data.categoryId,
+        },
+      })
 
-    if (!category) {
-      throw null
+      if (!categoryFromDb) {
+        throw null
+      }
+
+      return new MuscleGroupCategory(categoryFromDb, this.context)
     }
-
-    return new MuscleGroupCategory(category, this.context)
   }
 
   async exercises() {
+    console.error(
+      `[MuscleGroup] Making database query for exercises in muscle group ${this.id}. This could cause N+1 queries.`,
+    )
     const exercises = await prisma.baseExercise.findMany({
       where: {
         muscleGroups: {

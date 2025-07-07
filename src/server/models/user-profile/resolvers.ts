@@ -8,7 +8,7 @@ import { GQLContext } from '@/types/gql-context'
 import UserProfile from './model'
 
 export const Query: GQLQueryResolvers<GQLContext> = {
-  profile: async (_, __, context) => {
+  profile: async (_parent, _args, context) => {
     const userSession = context.user
     if (!userSession) {
       throw new Error('User not found')
@@ -31,7 +31,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 }
 
 export const Mutation: GQLMutationResolvers<GQLContext> = {
-  updateProfile: async (_, { input }, context) => {
+  updateProfile: async (_parent, { input }, context) => {
     const userSession = context.user
     if (!userSession) {
       throw new Error('User not found')

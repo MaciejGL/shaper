@@ -10,10 +10,7 @@ export function ExercisesList({
   selectedExercises,
   onExerciseSelect,
 }: {
-  filteredExercises: (Pick<
-    GQLBaseExercise,
-    'id' | 'name' | 'equipment' | 'isPublic'
-  > & {
+  filteredExercises: (Pick<GQLBaseExercise, 'id' | 'name' | 'equipment'> & {
     muscleGroups: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
   })[]
   selectedExercises: string[]
@@ -27,10 +24,10 @@ export function ExercisesList({
             <div
               key={exercise.id}
               className={cn(
-                'p-3 flex justify-between cursor-pointer hover:bg-accent/50 shadow-neuro-light dark:shadow-neuro-dark rounded-md transition-colors',
+                'p-3 flex justify-between border border-border cursor-pointer hover:border-primary/20 rounded-lg transition-colors',
                 selectedExercises.includes(exercise.id)
-                  ? 'bg-accent/50'
-                  : ' bg-card',
+                  ? 'bg-primary/5'
+                  : ' bg-card ',
               )}
               onClick={() => {
                 if (selectedExercises.includes(exercise.id)) {
@@ -44,9 +41,6 @@ export function ExercisesList({
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <div className="font-medium text-sm">{exercise.name}</div>
                   <div className="flex items-center gap-2">
-                    <Badge size="sm" variant="outline">
-                      {exercise.isPublic ? 'Public' : 'Trainer'}
-                    </Badge>
                     {selectedExercises.includes(exercise.id) && (
                       <div className="flex items-center">
                         <Check className="h-4 w-4 text-green-600" />

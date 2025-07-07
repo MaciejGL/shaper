@@ -73,7 +73,16 @@ const useNotifications = (
   }
 
   const onClearAll = async () => {
-    await markAllNotificationsAsRead({ userId: user.id })
+    await markAllNotificationsAsRead(
+      { userId: user.id },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({
+            queryKey: useNotificationsQuery.getKey({ userId: user.id }),
+          })
+        },
+      },
+    )
   }
 
   return {

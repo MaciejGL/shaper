@@ -1,5 +1,18 @@
 import {
+  GQLMutationAddExerciseToDayArgs,
+  GQLMutationAddSetToExerciseArgs,
+  GQLMutationAddTrainingWeekArgs,
+  GQLMutationDuplicateTrainingWeekArgs,
+  GQLMutationMoveExerciseArgs,
+  GQLMutationRemoveExerciseFromDayArgs,
+  GQLMutationRemoveSetFromExerciseArgs,
+  GQLMutationRemoveTrainingWeekArgs,
   GQLMutationResolvers,
+  GQLMutationUpdateExerciseSetArgs,
+  GQLMutationUpdateTrainingDayDataArgs,
+  GQLMutationUpdateTrainingExerciseArgs,
+  GQLMutationUpdateTrainingPlanDetailsArgs,
+  GQLMutationUpdateTrainingWeekDetailsArgs,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
@@ -25,6 +38,22 @@ import {
   removeWeek,
   updateTrainingPlan,
 } from './factory'
+import {
+  addExerciseToDay,
+  addSetToExercise,
+  addTrainingWeek,
+  duplicateTrainingWeek,
+  getQuickWorkoutPlan,
+  moveExercise,
+  removeExerciseFromDay,
+  removeSetFromExercise,
+  removeTrainingWeek,
+  updateExerciseSet,
+  updateTrainingDayData,
+  updateTrainingExercise,
+  updateTrainingPlanDetails,
+  updateTrainingWeekDetails,
+} from './factory-updates'
 
 export const Query: GQLQueryResolvers<GQLContext> = {
   getTrainingPlanById: async (_, args, context) => {
@@ -44,6 +73,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   },
   getWorkout: async (_, args, context) => {
     return getWorkout(args, context)
+  },
+  getQuickWorkoutPlan: async (_, __, context) => {
+    return getQuickWorkoutPlan(context)
   },
 }
 
@@ -86,5 +118,102 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   },
   removeWeek: async (_, args, context) => {
     return removeWeek(args, context)
+  },
+
+  // Granular update mutations - more efficient than full plan updates
+  updateTrainingPlanDetails: (
+    _,
+    { input }: GQLMutationUpdateTrainingPlanDetailsArgs,
+    context,
+  ) => {
+    return updateTrainingPlanDetails(input, context)
+  },
+
+  updateTrainingWeekDetails: (
+    _,
+    { input }: GQLMutationUpdateTrainingWeekDetailsArgs,
+    context,
+  ) => {
+    return updateTrainingWeekDetails(input, context)
+  },
+
+  duplicateTrainingWeek: (
+    _,
+    { input }: GQLMutationDuplicateTrainingWeekArgs,
+    context,
+  ) => {
+    return duplicateTrainingWeek(input, context)
+  },
+
+  removeTrainingWeek: (
+    _,
+    { weekId }: GQLMutationRemoveTrainingWeekArgs,
+    context,
+  ) => {
+    return removeTrainingWeek(weekId, context)
+  },
+
+  addTrainingWeek: (_, { input }: GQLMutationAddTrainingWeekArgs, context) => {
+    return addTrainingWeek(input, context)
+  },
+
+  updateTrainingDayData: (
+    _,
+    { input }: GQLMutationUpdateTrainingDayDataArgs,
+    context,
+  ) => {
+    return updateTrainingDayData(input, context)
+  },
+
+  updateTrainingExercise: (
+    _,
+    { input }: GQLMutationUpdateTrainingExerciseArgs,
+    context,
+  ) => {
+    return updateTrainingExercise(input, context)
+  },
+
+  updateExerciseSet: (
+    _,
+    { input }: GQLMutationUpdateExerciseSetArgs,
+    context,
+  ) => {
+    return updateExerciseSet(input, context)
+  },
+
+  addExerciseToDay: (
+    _,
+    { input }: GQLMutationAddExerciseToDayArgs,
+    context,
+  ) => {
+    return addExerciseToDay(input, context)
+  },
+
+  removeExerciseFromDay: (
+    _,
+    { exerciseId }: GQLMutationRemoveExerciseFromDayArgs,
+    context,
+  ) => {
+    return removeExerciseFromDay(exerciseId, context)
+  },
+
+  moveExercise: (_, { input }: GQLMutationMoveExerciseArgs, context) => {
+    return moveExercise(input, context)
+  },
+
+  addSetToExercise: (
+    _,
+    { input }: GQLMutationAddSetToExerciseArgs,
+    context,
+  ) => {
+    return addSetToExercise(input, context)
+  },
+
+  removeSetFromExercise: (
+    _,
+    { setId }: GQLMutationRemoveSetFromExerciseArgs,
+    context,
+  ) => {
+    return removeSetFromExercise(setId, context)
   },
 }

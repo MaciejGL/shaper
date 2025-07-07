@@ -1,51 +1,21 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useIsMutating } from '@tanstack/react-query'
 import {
   ReactNode,
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react'
 
 import { useGetTemplateTrainingPlanByIdQuery } from '@/generated/graphql-client'
+import { useTrainingPlanMutations } from '@/hooks/use-training-plan-mutations'
+import { useUnsavedChangesWarning } from '@/hooks/use-unsaved-changes-warning'
 
-import type { TrainingPlanFormData } from '../../app/(protected)/trainer/trainings/creator/components/types'
-
-import { useDayHandlers } from './day-handlers'
-import { useExerciseHandlers } from './exercise-handlers'
-import { useTrainingPlanMutations } from './mutations'
-import { useSetHandlers } from './set-handlers'
+import { useTrainingPlanMutations as useLegacyMutations } from './mutations'
 import type { TrainingPlanContextType } from './types'
-import { useWeekHandlers } from './week-handlers'
-
-// Initial form data (moved from use-training-plan-form.ts)
-const initialFormData: TrainingPlanFormData = {
-  details: {
-    title: '',
-    description: '',
-    isPublic: false,
-    isDraft: true,
-    difficulty: undefined,
-  },
-  weeks: [
-    {
-      id: 'cmaod14o30004uhht6c7ldfx23',
-      weekNumber: 1,
-      name: 'Week 1',
-      description: '',
-      days: Array.from({ length: 7 }, (_, i) => ({
-        id: 'cmaod14o30004uhht6c7ldfx2' + i,
-        dayOfWeek: i,
-        isRestDay: [0, 6].includes(i),
-        exercises: [],
-      })),
-    },
-  ],
-}
 
 const TrainingPlanContext = createContext<TrainingPlanContextType | null>(null)
 
@@ -56,152 +26,92 @@ export function TrainingPlanProvider({
   children: ReactNode
   trainingId?: string
 }) {
-  // ## State
-  const router = useRouter()
-  const [isDirty, setIsDirty] = useState(false)
-  const [currentStep, setCurrentStep] = useState(0)
+  // ## State - Only keep UI-specific state, not data state
   const [activeWeek, setActiveWeek] = useState(0)
-  const [activeDay, setActiveDay] = useState(0)
-  const [details, setDetails] = useState<TrainingPlanFormData['details']>(
-    initialFormData.details,
-  )
-  const [weeks, setWeeks] = useState<TrainingPlanFormData['weeks']>(
-    initialFormData.weeks,
-  )
 
-  // ## Queries and mutations (moved from use-training-plan-form.ts)
+  // ## Queries - React Query cache as single source of truth
   const { data: templateTrainingPlan, isLoading: isLoadingInitialData } =
     useGetTemplateTrainingPlanByIdQuery(
       { id: trainingId! },
       {
         enabled: !!trainingId,
         refetchOnMount: 'always',
-        select: (data) => ({
-          details: {
-            title: data.getTrainingPlanById.title,
-            description: data.getTrainingPlanById.description,
-            isPublic: data.getTrainingPlanById.isPublic,
-            isTemplate: data.getTrainingPlanById.isTemplate,
-            isDraft: data.getTrainingPlanById.isDraft,
-            difficulty: data.getTrainingPlanById.difficulty,
-          },
-          weeks: data.getTrainingPlanById.weeks,
-        }),
+        // No need for select transformation - use data directly
       },
     )
 
-  // ## Create draft template immediately for new plans
-  // useEffect(() => {
-  //   if (!trainingId && !actualTrainingId && !createDraftTemplate.isPending) {
-  //     console.log('🚀 Creating draft template for new plan...')
-  //     createDraftTemplate.mutate({})
-  //   }
-  // }, [trainingId, actualTrainingId, createDraftTemplate])
-
-  // ## Set initial data
-  useEffect(() => {
-    if (templateTrainingPlan) {
-      setDetails(templateTrainingPlan.details)
-      setWeeks(templateTrainingPlan.weeks as TrainingPlanFormData['weeks'])
-    }
-  }, [templateTrainingPlan])
-
-  // ## Mutations
+  // ## Unified Optimistic Mutations - Replace all handler files
   const {
-    createTrainingPlan,
-    updateTrainingPlan,
+    updateDetails,
+    updateExercise,
+    addExercise,
+    removeExercise,
+    addSet,
+    updateSet,
+    removeSet,
+    updateDay,
+    moveExercise: moveExerciseMutation,
+    addWeek,
+    removeWeek,
+    cloneWeek,
+    updateWeek,
+  } = useTrainingPlanMutations(trainingId)
+
+  // ## Legacy mutations (delete, duplicate) - Keep for now
+  const {
     deleteTrainingPlan,
     duplicateTrainingPlan,
-    isPending,
-    isUpdating,
-    isDeleting,
-    isDuplicating,
-  } = useTrainingPlanMutations()
+    isDeleting: isDeletingTrainingPlan,
+    isDuplicating: isDuplicatingTrainingPlan,
+  } = useLegacyMutations()
 
-  // ## Granular update functions
-  const { updateWeek, removeWeek, addWeek, cloneWeek } = useWeekHandlers(
-    setWeeks,
-    setIsDirty,
-    setActiveWeek,
-  )
-  const updateDetails = useCallback(
-    (newDetails: Partial<TrainingPlanFormData['details']>) => {
-      setDetails((prev) => ({ ...prev, ...newDetails }))
-      setIsDirty(true)
-    },
-    [],
-  )
-  const { updateDay } = useDayHandlers(setWeeks, setIsDirty)
-  const { updateExercise, addExercise, removeExercise, moveExercise } =
-    useExerciseHandlers(setWeeks, setIsDirty)
-  const { updateSet, addSet, removeSet } = useSetHandlers(setWeeks, setIsDirty)
+  // ## Derived data from React Query cache
+  const formData = useMemo(() => {
+    if (!templateTrainingPlan?.getTrainingPlanById) return null
 
-  // Memoize handlers to prevent unnecessary re-renders
-  const clearDraft = useCallback(() => {
-    setDetails(templateTrainingPlan?.details || initialFormData.details)
-    setWeeks(
-      (templateTrainingPlan?.weeks as TrainingPlanFormData['weeks']) ||
-        initialFormData.weeks,
-    )
-    setIsDirty(false)
+    const plan = templateTrainingPlan.getTrainingPlanById
+    return {
+      details: {
+        title: plan.title,
+        description: plan.description,
+        isPublic: plan.isPublic,
+        isTemplate: plan.isTemplate,
+        isDraft: plan.isDraft,
+        difficulty: plan.difficulty,
+      },
+      weeks: plan.weeks,
+    }
   }, [templateTrainingPlan])
 
-  const handleSubmit = useCallback(async () => {
-    const currentTrainingId = trainingId
-    if (currentTrainingId) {
-      await updateTrainingPlan({
-        input: {
-          id: currentTrainingId,
-          isPublic: details.isPublic,
-          isDraft: details.isDraft,
-          title: details.title,
-          description: details.description,
-          difficulty: details.difficulty,
-          weeks: weeks,
-        },
-      })
-      setIsDirty(false)
-      router.refresh()
-    } else {
-      // This should rarely happen now since we create draft templates immediately
-      const res = await createTrainingPlan({
-        input: {
-          isPublic: details.isPublic,
-          isDraft: details.isDraft,
-          title: details.title,
-          description: details.description,
-          difficulty: details.difficulty,
-          weeks: weeks.map((week) => ({
-            ...week,
-            id: undefined,
-            days: week.days.map((day) => ({
-              ...day,
-              id: undefined,
-              exercises: day.exercises.map((exercise) => ({
-                ...exercise,
-                id: undefined,
-                sets: exercise.sets.map((set) => ({
-                  ...set,
-                  id: undefined,
-                })),
-              })),
-            })),
-          })),
-        },
-      })
-      clearDraft()
-      setIsDirty(false)
-      router.push(`/trainer/trainings/${res.createTrainingPlan.id}`)
-    }
-  }, [
-    trainingId,
-    updateTrainingPlan,
-    createTrainingPlan,
-    clearDraft,
-    router,
-    details,
-    weeks,
-  ])
+  // ## Check if there are any pending mutations (for unsaved changes warning)
+  // With optimistic updates, "dirty" means pending mutations that haven't completed
+
+  const mutationKeys = [
+    'UpdateTrainingPlanDetails',
+    'UpdateTrainingWeekDetails',
+    'DuplicateTrainingWeek',
+    'RemoveTrainingWeek',
+    'AddTrainingWeek',
+    'UpdateTrainingDayData',
+    'UpdateTrainingExercise',
+    'UpdateExerciseSet',
+    'AddExerciseToDay',
+    'RemoveExerciseFromDay',
+    'MoveExercise',
+    'AddSetToExercise',
+    'RemoveSetFromExercise',
+  ]
+  const isDirty =
+    useIsMutating({
+      mutationKey: mutationKeys,
+    }) > 0
+
+  // ## Unsaved Changes Protection
+  useUnsavedChangesWarning({
+    isDirty,
+    enabled: !!trainingId,
+    mutationKeyFilter: mutationKeys,
+  })
 
   const handleDelete = useCallback(
     async (trainingId: string) => {
@@ -217,74 +127,107 @@ export function TrainingPlanProvider({
     [duplicateTrainingPlan],
   )
 
+  // Clear draft status by setting isDraft to false
+  const clearDraft = useCallback(() => {
+    updateDetails({ isDraft: false })
+  }, [updateDetails])
+
+  // Wrapper for moveExercise to maintain API compatibility
+  const moveExercise = useCallback(
+    (
+      sourceWeekIndex: number,
+      sourceDayIndex: number,
+      sourceExerciseIndex: number,
+      targetWeekIndex: number,
+      targetDayIndex: number,
+      targetExerciseIndex: number,
+    ) => {
+      if (!formData) return
+
+      // Calculate target day ID
+      const targetDay = formData.weeks[targetWeekIndex]?.days[targetDayIndex]
+      const newOrder = targetExerciseIndex + 1 // Convert from 0-based index to 1-based order
+
+      moveExerciseMutation(
+        sourceWeekIndex,
+        sourceDayIndex,
+        sourceExerciseIndex,
+        newOrder,
+        targetDay?.id,
+      ).catch((error) => {
+        console.error('Failed to move exercise:', error)
+      })
+    },
+    [formData, moveExerciseMutation],
+  )
+
   // Memoize the context value to prevent unnecessary re-renders
   const value = useMemo(
     () => ({
-      // State
-      formData: { details, weeks },
-      trainingId: trainingId, // Always provide the real training ID
+      // Data directly from React Query cache (no more local state!)
+      formData,
+      trainingId,
       isDirty,
-      currentStep,
       activeWeek,
-      activeDay,
+      isDeletingTrainingPlan,
+      isDuplicatingTrainingPlan,
 
       // Loading states
-      isLoadingInitialData: isLoadingInitialData,
-      isPending,
-      isUpdating,
-      isDeleting,
-      isDuplicating,
+      isLoadingInitialData,
 
-      // Actions
-      setCurrentStep,
+      // Metadata
+      createdAt: templateTrainingPlan?.getTrainingPlanById?.createdAt,
+      updatedAt: templateTrainingPlan?.getTrainingPlanById?.updatedAt,
+      assignedCount: templateTrainingPlan?.getTrainingPlanById?.assignedCount,
+
+      // UI Actions
       setActiveWeek,
-      setActiveDay,
+
+      // Unified Optimistic Mutations (NEW)
       updateDetails,
-      updateWeek,
-      removeWeek,
-      cloneWeek,
-      addWeek,
-      updateDay,
       updateExercise,
       addExercise,
       removeExercise,
-      moveExercise,
-      updateSet,
       addSet,
+      updateSet,
       removeSet,
+      updateDay,
+      moveExercise,
+      addWeek,
+      removeWeek,
+      cloneWeek,
+      updateWeek,
       clearDraft,
-      handleSubmit,
+
+      // Legacy/Not Yet Migrated (OLD - will be replaced gradually)
       handleDelete,
       handleDuplicate,
     }),
     [
-      details,
-      weeks,
+      formData,
       trainingId,
       isDirty,
-      currentStep,
       activeWeek,
-      activeDay,
+      isDeletingTrainingPlan,
+      isDuplicatingTrainingPlan,
       isLoadingInitialData,
-      isPending,
-      isUpdating,
-      isDeleting,
-      isDuplicating,
+      templateTrainingPlan?.getTrainingPlanById?.createdAt,
+      templateTrainingPlan?.getTrainingPlanById?.updatedAt,
+      templateTrainingPlan?.getTrainingPlanById?.assignedCount,
       updateDetails,
-      updateWeek,
-      removeWeek,
-      addWeek,
-      cloneWeek,
       updateDay,
       updateExercise,
       addExercise,
       removeExercise,
-      moveExercise,
-      updateSet,
       addSet,
+      updateSet,
       removeSet,
+      removeWeek,
+      addWeek,
+      cloneWeek,
+      updateWeek,
+      moveExercise,
       clearDraft,
-      handleSubmit,
       handleDelete,
       handleDuplicate,
     ],

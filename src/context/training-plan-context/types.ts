@@ -1,4 +1,13 @@
-import { TrainingPlanFormData } from '@/app/(protected)/trainer/trainings/creator/components/types'
+import type {
+  GQLAddExerciseToDayInput,
+  GQLAddSetToExerciseInput,
+  GQLUpdateExerciseSetInput,
+  GQLUpdateTrainingDayDataInput,
+  GQLUpdateTrainingExerciseInput,
+  GQLUpdateTrainingPlanDetailsInput,
+} from '@/generated/graphql-server'
+
+import type { TrainingPlanFormData } from '../../app/(protected)/trainer/types'
 
 export type PartialTrainingPlanFormDataWeek = Partial<
   TrainingPlanFormData['weeks'][number]
@@ -19,52 +28,70 @@ export type PartialTrainingPlanFormDataDetails = Partial<
   TrainingPlanFormData['details']
 >
 
-export type TrainingPlanContextType = {
-  // State
-  formData: TrainingPlanFormData
+export interface TrainingPlanContextType {
+  // Data from React Query cache (can be null while loading)
+  formData: TrainingPlanFormData | null
   trainingId?: string
   isDirty: boolean
-  currentStep: number
   activeWeek: number
-  activeDay: number
+  isDeletingTrainingPlan: boolean
+  isDuplicatingTrainingPlan: boolean
+
+  // Loading states
   isLoadingInitialData: boolean
-  isPending: boolean
-  isUpdating: boolean
-  isDeleting: boolean
-  isDuplicating: boolean
 
-  // Actions
-  setCurrentStep: (step: number) => void
-  setActiveWeek: (week: number) => void
-  setActiveDay: (day: number) => void
+  // Metadata
+  createdAt?: string
+  updatedAt?: string
+  assignedCount?: number
 
-  // Granular update functions
-  updateDetails: (details: PartialTrainingPlanFormDataDetails) => void
-  updateWeek: (weekIndex: number, week: PartialTrainingPlanFormDataWeek) => void
-  removeWeek: (weekIndex: number) => void
-  addWeek: () => void
-  cloneWeek: (weekIndex: number) => void
-  updateDay: (
-    weekIndex: number,
-    dayIndex: number,
-    day: PartialTrainingPlanFormDataDay,
+  // UI Actions
+  setActiveWeek: (weekIndex: number) => void
+
+  // Unified Optimistic Mutations (ALL fully type-safe now)
+  updateDetails: (
+    detailsData: Partial<Omit<GQLUpdateTrainingPlanDetailsInput, 'id'>>,
   ) => void
   updateExercise: (
     weekIndex: number,
     dayIndex: number,
     exerciseIndex: number,
-    exercise: PartialTrainingPlanFormDataExercise,
+    exerciseData: Partial<Omit<GQLUpdateTrainingExerciseInput, 'id'>>,
   ) => void
   addExercise: (
     weekIndex: number,
     dayIndex: number,
-    exercise: PartialTrainingPlanFormDataExercise,
+    exercise: Omit<GQLAddExerciseToDayInput, 'dayId' | 'order'>,
     atIndex?: number,
   ) => void
   removeExercise: (
     weekIndex: number,
     dayIndex: number,
     exerciseIndex: number,
+  ) => void
+  addSet: (
+    weekIndex: number,
+    dayIndex: number,
+    exerciseIndex: number,
+    setData: Omit<GQLAddSetToExerciseInput, 'exerciseId' | 'order'>,
+  ) => void
+  updateSet: (
+    weekIndex: number,
+    dayIndex: number,
+    exerciseIndex: number,
+    setIndex: number,
+    setData: Partial<Omit<GQLUpdateExerciseSetInput, 'id'>>,
+  ) => void
+  removeSet: (
+    weekIndex: number,
+    dayIndex: number,
+    exerciseIndex: number,
+    setIndex: number,
+  ) => void
+  updateDay: (
+    weekIndex: number,
+    dayIndex: number,
+    dayData: Partial<Omit<GQLUpdateTrainingDayDataInput, 'dayId'>>,
   ) => void
   moveExercise: (
     sourceWeekIndex: number,
@@ -74,29 +101,22 @@ export type TrainingPlanContextType = {
     targetDayIndex: number,
     targetExerciseIndex: number,
   ) => void
-  updateSet: (
+
+  // Week operations - now fully implemented with proper types
+  addWeek: () => void
+  removeWeek: (weekIndex: number) => void
+  cloneWeek: (weekIndex: number) => void
+  updateWeek: (
     weekIndex: number,
-    dayIndex: number,
-    exerciseIndex: number,
-    setIndex: number,
-    set: PartialTrainingPlanFormDataSet,
-  ) => void
-  addSet: (
-    weekIndex: number,
-    dayIndex: number,
-    exerciseIndex: number,
-    set: PartialTrainingPlanFormDataSet,
-  ) => void
-  removeSet: (
-    weekIndex: number,
-    dayIndex: number,
-    exerciseIndex: number,
-    setIndex: number,
+    weekData: Partial<{
+      weekNumber: number
+      name: string
+      description: string
+    }>,
   ) => void
 
-  // Other actions
+  // Utility functions
   clearDraft: () => void
-  handleSubmit: () => Promise<void>
   handleDelete: (trainingId: string) => Promise<void>
   handleDuplicate: (trainingId: string) => Promise<void>
 }

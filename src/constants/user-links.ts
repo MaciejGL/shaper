@@ -6,6 +6,11 @@ export const TRAINER_LINKS = {
   },
   clients: { href: '/trainer/clients', label: 'Clients', disabled: false },
   trainings: { href: '/trainer/trainings', label: 'Trainings', disabled: true },
+  mealPlans: {
+    href: '/trainer/meal-plans',
+    label: 'Meal Plans',
+    disabled: false,
+  },
   exercises: { href: '/trainer/exercises', label: 'Exercises', disabled: true },
   profile: { href: '/trainer/profile', label: 'Profile', disabled: false },
 }

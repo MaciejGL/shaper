@@ -15,12 +15,25 @@ export const authOptions = {
       async authorize(credentials) {
         const { email, otp } = credentials ?? {}
         if (!email || !otp) return null
+
         const loaders = createUserLoaders()
         const user = await loaders.authSession.load(email)
 
         if (!user || user.sessions.length === 0) return null
 
-        await prisma.userSession.delete({ where: { id: user.sessions[0].id } })
+        const session = user.sessions[0] // Most recent session (ordered by 'desc')
+
+        if (session.otp !== otp) {
+          return null // Invalid OTP
+        }
+
+        if (new Date(session.expiresAt) < new Date()) {
+          // Clean up expired session
+          await prisma.userSession.delete({ where: { id: session.id } })
+          return null // Session expired
+        }
+
+        await prisma.userSession.delete({ where: { id: session.id } })
 
         return user as UserWithSession['user']
       },

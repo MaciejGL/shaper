@@ -16,6 +16,7 @@ import { Exercise, ExerciseSelector } from './exercise'
 import { ExercisesPagination } from './exercises-pagaination'
 import { RestDay } from './rest-day'
 import { Summary } from './summary'
+import { SwipeableWrapper } from './swipeable-wrapper'
 
 export function Exercises() {
   const { activeDay } = useWorkout()
@@ -64,6 +65,35 @@ export function Exercises() {
     })
   }
 
+  // Add swipe handlers
+  const handleSwipeLeft = () => {
+    const currentIndex = activeDay.exercises.findIndex(
+      (ex) => ex.id === activeExerciseId,
+    )
+    if (currentIndex < activeDay.exercises.length - 1) {
+      const nextExercise = activeDay.exercises[currentIndex + 1]
+      handlePaginationClick(nextExercise.id, 'next')
+    } else {
+      // Go to summary
+      handlePaginationClick('summary', 'next')
+    }
+  }
+
+  const handleSwipeRight = () => {
+    if (activeExerciseId === 'summary') {
+      const lastExercise = activeDay.exercises[activeDay.exercises.length - 1]
+      handlePaginationClick(lastExercise?.id ?? null, 'prev')
+    } else {
+      const currentIndex = activeDay.exercises.findIndex(
+        (ex) => ex.id === activeExerciseId,
+      )
+      if (currentIndex > 0) {
+        const prevExercise = activeDay.exercises[currentIndex - 1]
+        handlePaginationClick(prevExercise.id, 'prev')
+      }
+    }
+  }
+
   const exercises = activeDay.exercises
 
   return (
@@ -71,7 +101,7 @@ export function Exercises() {
       {!activeDay.isRestDay && (
         <div className="flex flex-col py-2 space-y-2 w-full">
           <div className="flex justify-between items-end gap-2">
-            <p className="text-md text-muted-foreground">
+            <p className="text-md">
               {formatWorkoutType(activeDay.workoutType)}
             </p>
             <ExercisesCompleted
@@ -87,72 +117,86 @@ export function Exercises() {
         <RestDay />
       ) : selectedExercise ? (
         <div className="relative">
-          <AnimateChangeInHeight
-            transition={{
-              type: 'tween',
-              stiffness: 80,
-              damping: 10,
-              mass: 0.5,
-              duration: 0.05,
-            }}
+          <SwipeableWrapper
+            onSwipeLeft={handleSwipeLeft}
+            onSwipeRight={handleSwipeRight}
+            disabled={exercises.length <= 1} // Disable if only one exercise
           >
-            <AnimatedPageTransition
-              id={selectedExercise.id}
-              variant={animationVariant}
-              mode="wait"
-              className="w-full"
+            <AnimateChangeInHeight
+              transition={{
+                type: 'tween',
+                stiffness: 80,
+                damping: 10,
+                mass: 0.5,
+                duration: 0.05,
+              }}
             >
-              <Exercise
-                exercise={selectedExercise}
-                exercises={exercises}
-                onPaginationClick={handlePaginationClick}
-              />
-            </AnimatedPageTransition>
-          </AnimateChangeInHeight>
+              <AnimatedPageTransition
+                id={selectedExercise.id}
+                variant={animationVariant}
+                mode="wait"
+                className="w-full"
+              >
+                <Exercise
+                  exercise={selectedExercise}
+                  exercises={exercises}
+                  onPaginationClick={handlePaginationClick}
+                />
+              </AnimatedPageTransition>
+            </AnimateChangeInHeight>
+          </SwipeableWrapper>
           {exercises.length > 1 && (
             <ExercisesPagination onClick={handlePaginationClick} />
           )}
         </div>
       ) : (
         <div className="relative">
-          <AnimateChangeInHeight
-            transition={{
-              type: 'tween',
-              stiffness: 80,
-              damping: 10,
-              mass: 0.5,
-              duration: 0.05,
-            }}
+          <SwipeableWrapper
+            onSwipeLeft={() => {}} // No next from summary
+            onSwipeRight={handleSwipeRight}
           >
-            <AnimatedPageTransition
-              id={'results'}
-              variant={animationVariant}
-              mode="wait"
-              className="w-full"
+            <AnimateChangeInHeight
+              transition={{
+                type: 'tween',
+                stiffness: 80,
+                damping: 10,
+                mass: 0.5,
+                duration: 0.05,
+              }}
             >
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="secondary"
-                  iconStart={<ChevronLeft />}
-                  className="w-max"
-                  onClick={() => {
-                    handlePaginationClick(exercises.at(-1)?.id ?? null, 'prev')
-                  }}
-                >
-                  Exercises
-                </Button>
-                <ExerciseSelector
-                  activeExerciseId={'summary'}
-                  setActiveExerciseId={setActiveExerciseId}
-                  className="w-auto grow"
+              <AnimatedPageTransition
+                id={'results'}
+                variant={animationVariant}
+                mode="wait"
+                className="w-full"
+              >
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="secondary"
+                    iconStart={<ChevronLeft />}
+                    className="w-max"
+                    onClick={() => {
+                      handlePaginationClick(
+                        exercises.at(-1)?.id ?? null,
+                        'prev',
+                      )
+                    }}
+                  >
+                    Exercises
+                  </Button>
+                  <ExerciseSelector
+                    activeExerciseId={'summary'}
+                    setActiveExerciseId={setActiveExerciseId}
+                    className="w-auto grow"
+                  />
+                </div>
+                <Results
+                  handlePaginationClick={handlePaginationClick}
+                  lastExerciseId={exercises.at(-1)?.id ?? null}
                 />
-              </div>
-              <Results
-                handlePaginationClick={handlePaginationClick}
-                lastExerciseId={exercises.at(-1)?.id ?? null}
-              />
-            </AnimatedPageTransition>
-          </AnimateChangeInHeight>
+              </AnimatedPageTransition>
+            </AnimateChangeInHeight>
+          </SwipeableWrapper>
         </div>
       )}
     </AnimatedPageTransition>
@@ -198,11 +242,7 @@ function ExercisesCompleted({
   totalExercises: number
 }) {
   return (
-    <Badge
-      variant="outline"
-      size="sm"
-      className="self-end text-muted-foreground"
-    >
+    <Badge variant="outline" size="sm" className="self-end">
       {completedExercises}/{totalExercises} completed{' '}
       {completedExercises === totalExercises ? (
         <BadgeCheckIcon className="text-green-500" />

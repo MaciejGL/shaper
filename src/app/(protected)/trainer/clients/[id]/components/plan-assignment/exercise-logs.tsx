@@ -22,6 +22,7 @@ import {
   type GQLGetClientByIdQuery,
   useExercisesProgressByUserQuery,
 } from '@/generated/graphql-client'
+import { formatNumber, formatWeight } from '@/lib/utils'
 
 interface ExerciseLogsProps {
   plan: NonNullable<GQLGetClientByIdQuery['getClientActivePlan']>
@@ -133,6 +134,91 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
     detailedLogs: entry.detailedLogs,
   }))
 
+  // Helper functions for clean Y-axis range calculations
+  const calculateWeightYAxisRange = (values: number[]) => {
+    if (values.length === 0) return { min: 0, max: 100 }
+
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const range = max - min
+    const padding = Math.max(range * 0.1, 5) // Minimum 5kg padding
+
+    return {
+      min: Math.max(0, min - padding),
+      max: max + padding,
+    }
+  }
+
+  const calculateVolumeYAxisRange = (values: number[]) => {
+    if (values.length === 0) return { min: 0, max: 1000 }
+
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const range = max - min
+    const padding = Math.max(range * 0.1, 50) // Minimum 50kg padding
+
+    return {
+      min: Math.max(0, min - padding),
+      max: max + padding,
+    }
+  }
+
+  const calculateSetsYAxisRange = (values: number[]) => {
+    if (values.length === 0) return { min: 0, max: 20 }
+
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const dataRange = max - min
+    const minDisplayRange = 4
+
+    if (dataRange < minDisplayRange) {
+      const padding = (minDisplayRange - dataRange) / 2
+      return {
+        min: Math.max(0, Math.floor(min - padding)),
+        max: Math.ceil(max + padding),
+      }
+    }
+
+    const padding = Math.max(dataRange * 0.1, 1)
+    return {
+      min: Math.max(0, Math.floor(min - padding)),
+      max: Math.ceil(max + padding),
+    }
+  }
+
+  // Main calculation functions
+  const calculate1RMRange = () => {
+    if (dailyOneRmData.length < 2) return { min: 0, max: 100 }
+    const values = dailyOneRmData
+      .map((item) => item.average1RM)
+      .filter((val) => val > 0)
+    return calculateWeightYAxisRange(values)
+  }
+
+  const calculateVolumeSetRanges = () => {
+    if (exercise.totalVolumeProgress.length < 2) {
+      return {
+        volume: { min: 0, max: 1000 },
+        sets: { min: 0, max: 20 },
+      }
+    }
+
+    const volumes = exercise.totalVolumeProgress
+      .map((item) => item.totalVolume)
+      .filter((val) => val > 0)
+    const sets = exercise.totalVolumeProgress
+      .map((item) => item.totalSets)
+      .filter((val) => val > 0)
+
+    return {
+      volume: calculateVolumeYAxisRange(volumes),
+      sets: calculateSetsYAxisRange(sets),
+    }
+  }
+
+  const oneRMRange = calculate1RMRange()
+  const volumeSetRanges = calculateVolumeSetRanges()
+
   return (
     <Card>
       <CardHeader>
@@ -148,6 +234,9 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
               data={dailyOneRmData}
               margin={{
                 top: 20,
+                right: 15,
+                bottom: 25,
+                left: 60,
               }}
             >
               <CartesianGrid vertical={false} />
@@ -172,6 +261,9 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
+                width={60}
+                tickFormatter={(value) => formatWeight(value, 0)}
+                domain={[oneRMRange.min, oneRMRange.max]}
               />
               <ChartTooltip
                 content={({ payload }) => {
@@ -189,15 +281,22 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
                       </div>
                       <div>
                         <span className="text-muted-foreground">Avg 1RM:</span>{' '}
-                        <strong>{dayData.average1RM} kg</strong>
+                        <strong>{formatWeight(dayData.average1RM, 1)}</strong>
                       </div>
                       <div className="mt-2 text-sm grid grid-cols-[3fr_1fr_3fr_3fr] gap-2">
                         {dayData.detailedLogs.map((log, idx) => (
                           <Fragment key={idx}>
-                            <div>{log.weight}kg</div>
+                            <div>
+                              {log.weight ? formatWeight(log.weight, 0) : '—'}
+                            </div>
                             <div>x</div>
                             <div>{log.reps} reps</div>
-                            <div>1RM {log.estimated1RM.toFixed(1)}</div>
+                            <div>
+                              1RM{' '}
+                              {log.estimated1RM
+                                ? formatWeight(log.estimated1RM, 1)
+                                : '—'}
+                            </div>
                           </Fragment>
                         ))}
                       </div>
@@ -229,6 +328,9 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
               data={exercise.totalVolumeProgress}
               margin={{
                 top: 20,
+                right: 60,
+                bottom: 25,
+                left: 60,
               }}
             >
               <CartesianGrid vertical={false} />
@@ -255,6 +357,12 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
+                width={60}
+                tickFormatter={(value) => formatNumber(value, 0)}
+                domain={[
+                  volumeSetRanges.volume.min,
+                  volumeSetRanges.volume.max,
+                ]}
               />
               {/* Right Y-axis for total sets */}
               <YAxis
@@ -271,6 +379,9 @@ export function ExerciseProgressCard({ exercise }: ExerciseProgressCardProps) {
                 tickLine={false}
                 tickMargin={10}
                 axisLine={false}
+                width={60}
+                tickFormatter={(value) => Math.round(value).toString()}
+                domain={[volumeSetRanges.sets.min, volumeSetRanges.sets.max]}
               />
               <ChartTooltip content={<ChartTooltipContent />} />
               {/* Bar for total volume - matches left axis */}

@@ -50,7 +50,7 @@ export function WorkoutPageClient({ plan }: WorkoutPageClientProps) {
   return (
     <WorkoutProvider plan={data?.getWorkout?.plan}>
       <Navigation />
-      <div className="max-w-sm mx-auto">
+      <div className="max-w-sm mx-auto pb-24">
         <Exercises />
       </div>
     </WorkoutProvider>

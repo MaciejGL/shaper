@@ -1,0 +1,85 @@
+# Add to user-profile schema
+type Query {
+  bodyMeasures: [UserBodyMeasure!]!
+  goalProgress: GoalProgressSummary!
+}
+
+type Mutation {
+  addBodyMeasurement(input: AddBodyMeasurementInput!): UserBodyMeasurement!
+}
+
+input AddBodyMeasurementInput {
+  weight: Float
+  bodyFat: Float
+  chest: Float
+  waist: Float
+  hips: Float
+  neck: Float
+  bicepsLeft: Float
+  bicepsRight: Float
+  thighLeft: Float
+  thighRight: Float
+  calfLeft: Float
+  calfRight: Float
+  notes: String
+}
+
+# Specific query for progress page - only requests what's needed
+query ProgressUser {
+  user {
+    id
+    email
+    name
+    role
+  }
+}
+
+# Query for getting exercises the user has progress data for
+query AvailableExercisesForProgress($userId: ID!) {
+  exercisesProgressByUser(userId: $userId) {
+    baseExercise {
+      id
+      name
+      muscleGroups {
+        alias
+        name
+      }
+      equipment
+    }
+  }
+}
+
+# Query for getting progress data for selected exercises only
+query SelectedExercisesProgress($userId: ID!, $exerciseIds: [ID!]!) {
+  exercisesProgressByUser(userId: $userId) {
+    baseExercise {
+      id
+      name
+      muscleGroups {
+        alias
+        name
+        groupSlug
+        category {
+          name
+        }
+      }
+    }
+    estimated1RMProgress {
+      date
+      average1RM
+      detailedLogs {
+        estimated1RM
+        weight
+        reps
+      }
+    }
+    totalVolumeProgress {
+      week
+      totalVolume
+      totalSets
+    }
+    averageRpe
+    totalSets
+    lastPerformed
+  }
+}

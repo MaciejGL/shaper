@@ -77,6 +77,26 @@ query GetClientById($id: ID!) {
   }
 }
 
+query ClientBodyMeasures($clientId: ID!) {
+  clientBodyMeasures(clientId: $clientId) {
+    id
+    measuredAt
+    weight
+    chest
+    waist
+    hips
+    neck
+    bicepsLeft
+    bicepsRight
+    thighLeft
+    thighRight
+    calfLeft
+    calfRight
+    bodyFat
+    notes
+  }
+}
+
 query ExercisesProgressByUser($userId: ID!) {
   exercisesProgressByUser(userId: $userId) {
     baseExercise {

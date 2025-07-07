@@ -28,7 +28,7 @@ export function Header({
 }) {
   return (
     <div className="pb-6">
-      <div className="flex justify-between items-start">
+      <div className="flex justify-between items-start gap-2">
         <PlanHeader title={plan.title} loading={loading} planId={plan.id} />
         <PlanActions handlePlanAction={handlePlanAction} plan={plan} />
       </div>

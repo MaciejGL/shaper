@@ -1,5 +1,6 @@
 import { formatDate } from 'date-fns'
 import {
+  BicepsFlexed,
   LayoutDashboard,
   MoreHorizontalIcon,
   SparklesIcon,
@@ -36,7 +37,7 @@ export function AvailablePlansTab({
   loading: boolean
 }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2">
+    <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
       {availablePlans.map((plan) => (
         <PlanCard
           key={plan.id}
@@ -207,7 +208,7 @@ function Actions({
       <Button
         className="flex-1"
         onClick={() => handlePlanAction('activate', plan)}
-        iconStart={<SparklesIcon />}
+        iconStart={<BicepsFlexed />}
       >
         Activate Plan
       </Button>

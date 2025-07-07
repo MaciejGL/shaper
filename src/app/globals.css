@@ -46,10 +46,10 @@
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.96 0 6.35);
+  --background: oklch(0.945 0 6.35);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
-  --card-on-card: oklch(0.985 0 0 / 5%);
+  --card-on-card: oklch(0.21 0.006 285.885 / 5%);
   --card-foreground: oklch(0.141 0.005 285.823);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.141 0.005 285.823);
@@ -91,10 +91,10 @@
 }
 
 .dark {
-  --background: oklch(0.21 0.006 285.885);
+  --background: oklch(0.19 0.006 285.885);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.223 0.006 286.033);
-  --card-on-card: oklch(0.985 0 0 / 5%);
+  --card-on-card: oklch(0.985 0 0 / 3%);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.21 0.006 285.885);
   --popover-foreground: oklch(0.985 0 0);
@@ -115,7 +115,7 @@
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.141 0.005 285.823);
+  --sidebar: oklch(0.22 0.005 285.823);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
@@ -236,4 +236,13 @@
 
 @utility animate-collapsible-slide-up {
   animation: collapsible-slide-up 0.3s ease-out;
+}
+
+/* Fix for recharts mobile touch events */
+.recharts-wrapper {
+  touch-action: manipulation;
+}
+
+.recharts-surface {
+  touch-action: manipulation;
 }

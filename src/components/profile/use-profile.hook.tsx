@@ -37,6 +37,14 @@ export function useProfile() {
     bio: '',
   })
 
+  const getGender = (sex?: string | null) => {
+    if (sex === 'male') return 'Male'
+    if (sex === 'female') return 'Female'
+    if (sex === 'other') return 'Other'
+
+    return null
+  }
+
   useEffect(() => {
     const profileData = data?.profile
     if (profileData) {
@@ -46,7 +54,7 @@ export function useProfile() {
         phone: profileData.phone,
         email: profileData.email,
         birthday: profileData.birthday,
-        sex: profileData.sex,
+        sex: getGender(profileData.sex),
         avatarUrl: profileData.avatarUrl,
         height: profileData.height,
         weight: profileData.weight,
