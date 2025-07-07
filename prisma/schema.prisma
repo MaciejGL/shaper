@@ -458,7 +458,6 @@ model MealFood {
   name      String
   quantity  Float // Planned amount
   unit      String // "grams", "cups", "pieces", etc.
-  order     Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

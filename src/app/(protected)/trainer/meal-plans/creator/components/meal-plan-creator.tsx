@@ -1,16 +1,22 @@
 'use client'
 
+import { useParams } from 'next/navigation'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  MealPlanProvider,
+  useMealPlanContext,
+} from '@/context/meal-plan-context/meal-plan-context'
 
 import { dayNames, getDayName } from '../../../trainings/creator/utils'
 
-import { MealTimeSlots } from './meal-time-slots'
+import MealTimeSlots from './meal-time-slots'
 
-export default function MealPlanCreator() {
+function MealPlanCreatorContent() {
   const [selectedDay, setSelectedDay] = useState(0)
+  const { mealPlan, isLoading } = useMealPlanContext()
 
   // Mock data for demonstration
   const formData = {
@@ -20,6 +26,19 @@ export default function MealPlanCreator() {
       targetCalories: 2500,
       targetProtein: 150,
     },
+  }
+
+  const selectedWeek = mealPlan?.weeks.at(0)
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-lg font-medium">Loading meal plan...</div>
+          <div className="text-muted-foreground">Please wait</div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -51,12 +70,11 @@ export default function MealPlanCreator() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="container max-w-[900px] mx-auto px-4 py-6">
         <div className="space-y-6">
           {/* Day Selector */}
-
           <div className="grid grid-cols-7 gap-2">
-            {Array.from({ length: 7 }).map((_, index) => (
+            {selectedWeek?.days.map((day, index) => (
               <Button
                 key={index}
                 variant={selectedDay === index ? 'default' : 'secondary'}
@@ -68,21 +86,33 @@ export default function MealPlanCreator() {
                 onClick={() => setSelectedDay(index)}
               >
                 <span className="text-lg font-medium">
-                  {getDayName(index, { short: true })}
+                  {getDayName(day.dayOfWeek, { short: true })}
                 </span>
               </Button>
             ))}
           </div>
 
           {/* Selected Day Meal Planning */}
-          <div className="space-y-4">
-            <MealTimeSlots
-              key={dayNames[selectedDay]}
-              dayName={dayNames[selectedDay]}
-            />
-          </div>
+          {selectedWeek?.days[selectedDay] && (
+            <div className="space-y-4">
+              <MealTimeSlots
+                key={dayNames[selectedDay]}
+                day={selectedWeek?.days[selectedDay]}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
+  )
+}
+
+export default function MealPlanCreator() {
+  const { mealPlanId } = useParams<{ mealPlanId: string }>()
+
+  return (
+    <MealPlanProvider mealPlanId={mealPlanId}>
+      <MealPlanCreatorContent />
+    </MealPlanProvider>
   )
 }

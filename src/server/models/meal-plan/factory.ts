@@ -4,6 +4,7 @@ import {
   GQLMutationAssignMealPlanToClientArgs,
   GQLMutationCreateMealPlanArgs,
   GQLMutationDuplicateMealPlanArgs,
+  GQLMutationSaveMealArgs,
   GQLNotificationType,
   GQLQueryGetClientActiveMealPlanArgs,
   GQLQueryGetClientMealPlansArgs,
@@ -53,7 +54,7 @@ export async function getMealPlanTemplates(
                 include: {
                   foods: {
                     orderBy: {
-                      order: 'asc',
+                      createdAt: 'asc',
                     },
                   },
                 },
@@ -108,7 +109,7 @@ export async function getMealPlanById(
                   include: {
                     foods: {
                       orderBy: {
-                        order: 'asc',
+                        createdAt: 'asc',
                       },
                     },
                     logs: {
@@ -199,7 +200,7 @@ export async function getClientActiveMealPlan(
                 include: {
                   foods: {
                     orderBy: {
-                      order: 'asc',
+                      createdAt: 'asc',
                     },
                   },
                   logs: {
@@ -255,7 +256,7 @@ export async function getMyMealPlansOverview(context: GQLContext) {
                 include: {
                   foods: {
                     orderBy: {
-                      order: 'asc',
+                      createdAt: 'asc',
                     },
                   },
                   logs: {
@@ -332,7 +333,6 @@ export async function createMealPlan(
                         name: food.name,
                         quantity: food.quantity,
                         unit: food.unit,
-                        order: food.order,
                         caloriesPer100g: food.caloriesPer100g,
                         proteinPer100g: food.proteinPer100g,
                         carbsPer100g: food.carbsPer100g,
@@ -492,7 +492,6 @@ export async function duplicateMealPlan(
                           name: food.name,
                           quantity: food.quantity,
                           unit: food.unit,
-                          order: food.order,
                           caloriesPer100g: food.caloriesPer100g,
                           proteinPer100g: food.proteinPer100g,
                           carbsPer100g: food.carbsPer100g,
@@ -588,5 +587,134 @@ export async function createDraftMealTemplate(context: GQLContext) {
   } catch (error) {
     console.error('Error creating draft meal template:', error)
     throw new GraphQLError('Failed to create draft meal template')
+  }
+}
+
+// New batch meal operation - replaces individual food mutations
+export async function saveMeal(
+  args: GQLMutationSaveMealArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  try {
+    const { input } = args
+    const { dayId, hour, foods } = input
+
+    // Verify that the day exists and the user has permission to modify it
+    const day = await prisma.mealDay.findUnique({
+      where: { id: dayId },
+      include: {
+        week: {
+          include: {
+            plan: true,
+          },
+        },
+        meals: {
+          include: {
+            foods: true,
+          },
+        },
+      },
+    })
+
+    if (!day) {
+      throw new Error('Day not found')
+    }
+
+    if (day.week.plan.createdById !== user.user.id) {
+      throw new Error('You can only modify your own meal plans')
+    }
+
+    // Create the target datetime for this hour
+    const mealDateTime = new Date(new Date().setHours(hour, 0, 0, 0))
+
+    // Find or create meal for this hour
+    let meal = day.meals.find((m) => new Date(m.dateTime).getHours() === hour)
+
+    if (!meal) {
+      // Create new meal with smart naming
+      const mealName =
+        hour >= 6 && hour < 11
+          ? 'Breakfast'
+          : hour >= 11 && hour < 16
+            ? 'Lunch'
+            : hour >= 16 && hour < 21
+              ? 'Dinner'
+              : 'Snack'
+
+      meal = await prisma.meal.create({
+        data: {
+          dayId: dayId,
+          name: mealName,
+          dateTime: mealDateTime,
+        },
+        include: {
+          foods: true,
+        },
+      })
+    }
+
+    // Get current food IDs
+    const existingFoodIds = meal.foods.map((f: any) => f.id)
+    const providedFoodIds = foods
+      .filter((f: any) => f.id)
+      .map((f: any) => f.id!)
+
+    // Remove foods that are no longer in the list
+    for (const foodId of existingFoodIds) {
+      if (!providedFoodIds.includes(foodId)) {
+        await prisma.mealFood.delete({
+          where: { id: foodId },
+        })
+      }
+    }
+
+    // Add or update foods
+    for (const food of foods) {
+      if (food.id) {
+        // Update existing food
+        await prisma.mealFood.update({
+          where: { id: food.id },
+          data: {
+            name: food.name,
+            quantity: food.quantity,
+            unit: food.unit,
+            caloriesPer100g: food.caloriesPer100g,
+            proteinPer100g: food.proteinPer100g,
+            carbsPer100g: food.carbsPer100g,
+            fatPer100g: food.fatPer100g,
+            fiberPer100g: food.fiberPer100g,
+            openFoodFactsId: food.openFoodFactsId,
+            productData: food.productData ? JSON.parse(food.productData) : null,
+          },
+        })
+      } else {
+        // Add new food
+        await prisma.mealFood.create({
+          data: {
+            mealId: meal.id,
+            name: food.name,
+            quantity: food.quantity,
+            unit: food.unit,
+            caloriesPer100g: food.caloriesPer100g,
+            proteinPer100g: food.proteinPer100g,
+            carbsPer100g: food.carbsPer100g,
+            fatPer100g: food.fatPer100g,
+            fiberPer100g: food.fiberPer100g,
+            openFoodFactsId: food.openFoodFactsId,
+            productData: food.productData ? JSON.parse(food.productData) : null,
+          },
+        })
+      }
+    }
+
+    return true
+  } catch (error) {
+    console.error('Error saving meal:', error)
+    throw new GraphQLError('Failed to save meal')
   }
 }

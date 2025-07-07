@@ -41,6 +41,7 @@ fragment MealPlanTemplate on MealPlan {
           carbsPer100g
           fatPer100g
           fiberPer100g
+          openFoodFactsId
         }
       }
     }
@@ -92,14 +93,6 @@ mutation CreateDraftMealTemplate {
   }
 }
 
-mutation UpdateMealPlan($input: UpdateMealPlanInput!) {
-  updateMealPlan(input: $input)
-}
-
-mutation DeleteMealPlan($id: ID!) {
-  deleteMealPlan(id: $id)
-}
-
 mutation DuplicateMealPlan($id: ID!) {
   duplicateMealPlan(id: $id)
 }
@@ -108,48 +101,12 @@ mutation AssignMealPlanToClient($input: AssignMealPlanToClientInput!) {
   assignMealPlanToClient(input: $input)
 }
 
-mutation RemoveMealPlanFromClient($planId: ID!, $clientId: ID!) {
-  removeMealPlanFromClient(planId: $planId, clientId: $clientId)
+# New batch meal operation
+mutation SaveMeal($input: SaveMealInput!) {
+  saveMeal(input: $input)
 }
 
-# Granular update mutations
-mutation UpdateMealPlanDetails($input: UpdateMealPlanDetailsInput!) {
-  updateMealPlanDetails(input: $input)
-}
-
-mutation UpdateMealWeekDetails($input: UpdateMealWeekDetailsInput!) {
-  updateMealWeekDetails(input: $input)
-}
-
-mutation UpdateMealDayData($input: UpdateMealDayDataInput!) {
-  updateMealDayData(input: $input)
-}
-
-mutation AddMealToDay($input: AddMealToDayInput!) {
-  addMealToDay(input: $input)
-}
-
-mutation UpdateMeal($input: UpdateMealInput!) {
-  updateMeal(input: $input)
-}
-
-mutation RemoveMealFromDay($mealId: ID!) {
-  removeMealFromDay(mealId: $mealId)
-}
-
-mutation AddFoodToMeal($input: AddFoodToMealInput!) {
-  addFoodToMeal(input: $input)
-}
-
-mutation UpdateMealFood($input: UpdateMealFoodInput!) {
-  updateMealFood(input: $input)
-}
-
-mutation RemoveFoodFromMeal($foodId: ID!) {
-  removeFoodFromMeal(foodId: $foodId)
-}
-
-# Food logging mutations
+# Food logging mutations (kept for future use)
 mutation LogMealFood($input: LogMealFoodInput!) {
   logMealFood(input: $input) {
     id

@@ -47,7 +47,6 @@ export interface MealPlanFormData {
           fatPer100g?: number
           fiberPer100g?: number
           openFoodFactsId?: string
-          order: number
         }[]
       }[]
     }[]
@@ -111,7 +110,7 @@ export interface MealPlanContextType {
     weekIndex: number,
     dayIndex: number,
     mealIndex: number,
-    foodData: Omit<GQLAddFoodToMealInput, 'mealId' | 'order'>,
+    foodData: Omit<GQLAddFoodToMealInput, 'mealId' | 'dayId' | 'mealDateTime'>,
   ) => void
   updateFood: (
     weekIndex: number,

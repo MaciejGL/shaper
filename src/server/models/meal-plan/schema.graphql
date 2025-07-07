@@ -99,7 +99,6 @@ type MealFood {
   name: String!
   quantity: Float!
   unit: String!
-  order: Int!
 
   # Nutritional information per 100g
   caloriesPer100g: Float
@@ -176,7 +175,7 @@ type CreateMealPlanPayload {
   success: Boolean!
 }
 
-# Queries
+# Queries - Only essential ones
 type Query {
   getMealPlanTemplates(draft: Boolean): [MealPlan!]!
   getMealPlanById(id: ID!): MealPlan!
@@ -185,38 +184,21 @@ type Query {
   getMyMealPlansOverview: MyMealPlansPayload!
 }
 
-# Mutations
+# Mutations - Streamlined for meal-level operations
 type Mutation {
+  # Essential meal plan operations
   createMealPlan(input: CreateMealPlanInput!): CreateMealPlanPayload!
   createDraftMealTemplate: MealPlan!
-  updateMealPlan(input: UpdateMealPlanInput!): Boolean!
-  deleteMealPlan(id: ID!): Boolean!
+  assignMealPlanToClient(input: AssignMealPlanToClientInput!): Boolean!
   duplicateMealPlan(id: ID!): ID!
 
-  assignMealPlanToClient(input: AssignMealPlanToClientInput!): Boolean!
-  removeMealPlanFromClient(planId: ID!, clientId: ID!): Boolean!
+  # New batch meal operation - replaces individual food mutations
+  saveMeal(input: SaveMealInput!): Boolean!
 
-  activateMealPlan(planId: ID!, startDate: String!): Boolean!
-  pauseMealPlan(planId: ID!): Boolean!
-  completeMealPlan(planId: ID!): Boolean!
-
-  # Food logging mutations
+  # Food logging mutations (if needed for future)
   logMealFood(input: LogMealFoodInput!): MealLogItem!
   updateMealFoodLog(input: UpdateMealFoodLogInput!): Boolean!
   deleteMealFoodLog(id: ID!): Boolean!
-
-  # Granular update mutations
-  updateMealPlanDetails(input: UpdateMealPlanDetailsInput!): Boolean!
-  updateMealWeekDetails(input: UpdateMealWeekDetailsInput!): Boolean!
-  updateMealDayData(input: UpdateMealDayDataInput!): Boolean!
-  updateMeal(input: UpdateMealInput!): Boolean!
-  updateMealFood(input: UpdateMealFoodInput!): Boolean!
-
-  # Add/remove operations
-  addMealToDay(input: AddMealToDayInput!): ID!
-  removeMealFromDay(mealId: ID!): Boolean!
-  addFoodToMeal(input: AddFoodToMealInput!): ID!
-  removeFoodFromMeal(foodId: ID!): Boolean!
 }
 
 # Input Types
@@ -259,61 +241,6 @@ input CreateMealFoodInput {
   name: String!
   quantity: Float!
   unit: String!
-  order: Int!
-  caloriesPer100g: Float
-  proteinPer100g: Float
-  carbsPer100g: Float
-  fatPer100g: Float
-  fiberPer100g: Float
-  openFoodFactsId: String
-  productData: String
-}
-
-input UpdateMealPlanInput {
-  id: ID!
-  title: String
-  description: String
-  isPublic: Boolean
-  isDraft: Boolean
-  dailyCalories: Float
-  dailyProtein: Float
-  dailyCarbs: Float
-  dailyFat: Float
-  weeks: [UpdateMealWeekInput!]
-}
-
-input UpdateMealWeekInput {
-  id: ID!
-  weekNumber: Int!
-  name: String
-  description: String
-  days: [UpdateMealDayInput!]
-}
-
-input UpdateMealDayInput {
-  id: ID!
-  dayOfWeek: Int!
-  targetCalories: Float
-  targetProtein: Float
-  targetCarbs: Float
-  targetFat: Float
-  meals: [UpdateMealInput!]
-}
-
-input UpdateMealInput {
-  id: ID!
-  name: String
-  dateTime: String
-  instructions: String
-  foods: [UpdateMealFoodInput!]
-}
-
-input UpdateMealFoodInput {
-  id: ID!
-  name: String
-  quantity: Float
-  unit: String
-  order: Int
   caloriesPer100g: Float
   proteinPer100g: Float
   carbsPer100g: Float
@@ -329,6 +256,28 @@ input AssignMealPlanToClientInput {
   startDate: String
 }
 
+# New batch meal input - replaces AddFoodToMeal, UpdateMealFood, RemoveFoodFromMeal
+input SaveMealInput {
+  dayId: ID!
+  hour: Int! # Hour of the day (7-23)
+  foods: [MealFoodInput!]! # Complete list of foods for this meal
+}
+
+input MealFoodInput {
+  id: ID # If provided, update existing food; if null, create new food
+  name: String!
+  quantity: Float!
+  unit: String!
+  caloriesPer100g: Float
+  proteinPer100g: Float
+  carbsPer100g: Float
+  fatPer100g: Float
+  fiberPer100g: Float
+  openFoodFactsId: String
+  productData: String
+}
+
+# Food logging inputs (kept for future use)
 input LogMealFoodInput {
   mealId: ID!
   name: String!
@@ -350,53 +299,4 @@ input UpdateMealFoodLogInput {
   id: ID!
   quantity: Float
   notes: String
-}
-
-input UpdateMealPlanDetailsInput {
-  id: ID!
-  title: String
-  description: String
-  isPublic: Boolean
-  isDraft: Boolean
-  dailyCalories: Float
-  dailyProtein: Float
-  dailyCarbs: Float
-  dailyFat: Float
-}
-
-input UpdateMealWeekDetailsInput {
-  id: ID!
-  name: String
-  description: String
-  weekNumber: Int
-}
-
-input UpdateMealDayDataInput {
-  dayId: ID!
-  targetCalories: Float
-  targetProtein: Float
-  targetCarbs: Float
-  targetFat: Float
-}
-
-input AddMealToDayInput {
-  dayId: ID!
-  name: String!
-  dateTime: String!
-  instructions: String
-}
-
-input AddFoodToMealInput {
-  mealId: ID!
-  name: String!
-  quantity: Float!
-  unit: String!
-  order: Int!
-  caloriesPer100g: Float
-  proteinPer100g: Float
-  carbsPer100g: Float
-  fatPer100g: Float
-  fiberPer100g: Float
-  openFoodFactsId: String
-  productData: String
 }

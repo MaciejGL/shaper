@@ -14,6 +14,7 @@ import {
   getMealPlanById,
   getMealPlanTemplates,
   getMyMealPlansOverview,
+  saveMeal,
 } from './factory'
 
 export const Query: GQLQueryResolvers<GQLContext> = {
@@ -47,25 +48,11 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   duplicateMealPlan: async (_, args, context) => {
     return duplicateMealPlan(args, context)
   },
-  // TODO: Implement other mutations
-  updateMealPlan: async () => {
-    throw new Error('Not implemented')
+  // New batch meal operation
+  saveMeal: async (_, args, context) => {
+    return saveMeal(args, context)
   },
-  deleteMealPlan: async () => {
-    throw new Error('Not implemented')
-  },
-  removeMealPlanFromClient: async () => {
-    throw new Error('Not implemented')
-  },
-  activateMealPlan: async () => {
-    throw new Error('Not implemented')
-  },
-  pauseMealPlan: async () => {
-    throw new Error('Not implemented')
-  },
-  completeMealPlan: async () => {
-    throw new Error('Not implemented')
-  },
+  // Food logging mutations (kept for future use)
   logMealFood: async () => {
     throw new Error('Not implemented')
   },
@@ -73,33 +60,6 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     throw new Error('Not implemented')
   },
   deleteMealFoodLog: async () => {
-    throw new Error('Not implemented')
-  },
-  updateMealPlanDetails: async () => {
-    throw new Error('Not implemented')
-  },
-  updateMealWeekDetails: async () => {
-    throw new Error('Not implemented')
-  },
-  updateMealDayData: async () => {
-    throw new Error('Not implemented')
-  },
-  updateMeal: async () => {
-    throw new Error('Not implemented')
-  },
-  updateMealFood: async () => {
-    throw new Error('Not implemented')
-  },
-  addMealToDay: async () => {
-    throw new Error('Not implemented')
-  },
-  removeMealFromDay: async () => {
-    throw new Error('Not implemented')
-  },
-  addFoodToMeal: async () => {
-    throw new Error('Not implemented')
-  },
-  removeFoodFromMeal: async () => {
     throw new Error('Not implemented')
   },
 }
