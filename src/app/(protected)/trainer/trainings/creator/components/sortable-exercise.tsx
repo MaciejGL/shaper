@@ -272,6 +272,7 @@ type KanbanExerciseSetsProps = {
   onUpdateSet: (index: number, field: string, value?: number) => Promise<void>
   onRemoveSet: (index: number) => Promise<void>
   onAddSet: () => Promise<void>
+  disabled?: boolean
 }
 
 function KanbanExerciseSets({
@@ -280,6 +281,7 @@ function KanbanExerciseSets({
   onRemoveSet,
   onAddSet,
   sets,
+  disabled,
 }: KanbanExerciseSetsProps) {
   return (
     <div className="space-y-2">
@@ -291,6 +293,7 @@ function KanbanExerciseSets({
           size="sm"
           onClick={() => onAddSet()}
           iconStart={<Plus />}
+          disabled={disabled}
         >
           Add Set
         </Button>
@@ -341,7 +344,9 @@ function KanbanExerciseSets({
                     type="number"
                     min="1"
                     value={set.minReps || ''}
-                    disabled={set.id ? isTemporaryId(set.id) : true}
+                    disabled={
+                      disabled || (set.id ? isTemporaryId(set.id) : true)
+                    }
                     onChange={(e) => {
                       // Don't update sets with temporary IDs to prevent API errors
                       if (!set.id || isTemporaryId(set.id)) return
@@ -368,7 +373,9 @@ function KanbanExerciseSets({
                         : undefined
                     }
                     value={set.maxReps || ''}
-                    disabled={set.id ? isTemporaryId(set.id) : true}
+                    disabled={
+                      disabled || (set.id ? isTemporaryId(set.id) : true)
+                    }
                     onChange={(e) => {
                       // Don't update sets with temporary IDs to prevent API errors
                       if (!set.id || isTemporaryId(set.id)) return
@@ -400,7 +407,7 @@ function KanbanExerciseSets({
                   min="0"
                   step="2.5"
                   value={set.weight ?? ''}
-                  disabled={set.id ? isTemporaryId(set.id) : true}
+                  disabled={disabled || (set.id ? isTemporaryId(set.id) : true)}
                   onChange={(e) => {
                     // Don't update sets with temporary IDs to prevent API errors
                     if (!set.id || isTemporaryId(set.id)) return
@@ -429,7 +436,7 @@ function KanbanExerciseSets({
                   max="10"
                   step="1"
                   value={set.rpe ?? ''}
-                  disabled={set.id ? isTemporaryId(set.id) : true}
+                  disabled={disabled || (set.id ? isTemporaryId(set.id) : true)}
                   onChange={(e) => {
                     // Don't update sets with temporary IDs to prevent API errors
                     if (!set.id || isTemporaryId(set.id)) return
@@ -461,7 +468,8 @@ function KanbanExerciseSets({
               disabled={
                 sets.length <= 1 ||
                 !set.id ||
-                Boolean(set.id && isTemporaryId(set.id))
+                Boolean(set.id && isTemporaryId(set.id)) ||
+                disabled
               }
               iconOnly={<X />}
             />
@@ -544,6 +552,12 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
     return <div>Failed to load exercise</div>
   }
 
+  const disabled =
+    isLoading ||
+    isRemovingExercise ||
+    hasPendingMutations ||
+    isTemporaryId(exerciseId)
+
   return (
     <div className="gap-2">
       <DialogHeader className="mb-8">
@@ -564,6 +578,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
             id="exerciseName"
             variant="ghost"
             value={exercise?.name ?? ''}
+            disabled={disabled}
             onChange={(e) =>
               updateExercise({
                 name: e.target.value,
@@ -592,6 +607,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
             </Label>
             <Select
               value={exercise?.type ?? ''}
+              disabled={disabled}
               onValueChange={(value) =>
                 updateExercise({
                   name: exercise?.name,
@@ -636,6 +652,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               value={exercise?.restSeconds ?? ''}
               min="0"
               step="15"
+              disabled={disabled}
               onChange={(e) => {
                 const restSeconds =
                   e.target.value === '' ? undefined : Number(e.target.value)
@@ -672,6 +689,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               min="0"
               step="1"
               value={exercise?.warmupSets ?? ''}
+              disabled={disabled}
               onChange={(e) => {
                 const warmupSets =
                   e.target.value === '' ? undefined : Number(e.target.value)
@@ -707,6 +725,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               pattern="[0-9]*"
               placeholder="3-2-3"
               value={exercise?.tempo ?? ''}
+              disabled={disabled}
               onChange={(e) => {
                 const formattedValue = formatTempoInput(e)
                 updateExercise({
@@ -766,6 +785,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 addSetToExercise()
               }}
               isLoading={isLoading}
+              disabled={disabled}
               sets={
                 exercise?.sets?.map((set) => ({
                   id: set.id,
@@ -791,6 +811,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 className="min-h-24"
                 variant="ghost"
                 value={exercise?.instructions ?? ''}
+                disabled={disabled}
                 onChange={(e) =>
                   updateExercise({
                     name: exercise?.name,
@@ -828,6 +849,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 variant="ghost"
                 className="min-h-24"
                 value={exercise?.additionalInstructions ?? ''}
+                disabled={disabled}
                 onChange={(e) =>
                   updateExercise({
                     name: exercise?.name,
@@ -853,7 +875,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               <div className="flex flex-col gap-2">
                 <p className="text-sm">Substitute options</p>
                 <div className="flex flex-wrap gap-2">
-                  {exercise?.substitutes.map((substitute) => (
+                  {exercise?.substitutes?.map((substitute) => (
                     <div
                       key={substitute.id}
                       className="px-3 py-2 rounded-md bg-card"
@@ -872,11 +894,12 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
           variant="destructive"
           onClick={() => removeExercise({ exerciseId })}
           loading={isRemovingExercise}
+          disabled={disabled}
         >
           Remove exercise
         </Button>
         <DialogClose asChild>
-          <Button variant="secondary" disabled={isRemovingExercise}>
+          <Button variant="secondary" disabled={disabled}>
             Done
           </Button>
         </DialogClose>
