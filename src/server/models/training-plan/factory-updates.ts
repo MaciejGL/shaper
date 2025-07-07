@@ -198,7 +198,7 @@ export async function duplicateTrainingWeek(
 
       return newWeek.id
     },
-    { timeout: 15000, maxWait: 15000 },
+    { timeout: 30000, maxWait: 30000 },
   )
 }
 
@@ -293,7 +293,7 @@ export async function addTrainingWeek(
 
       return newWeek.id
     },
-    { timeout: 15000, maxWait: 15000 },
+    { timeout: 30000, maxWait: 30000 },
   )
 }
 

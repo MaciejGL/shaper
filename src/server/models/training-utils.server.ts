@@ -177,6 +177,6 @@ export async function duplicatePlan({
         where: { id: newPlanId },
       })
     },
-    { timeout: 15000, maxWait: 15000 },
+    { timeout: 30000, maxWait: 30000 },
   )
 }

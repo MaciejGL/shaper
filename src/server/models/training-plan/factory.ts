@@ -708,7 +708,7 @@ export async function updateTrainingPlan(
         }
       }
     },
-    { timeout: 15000 },
+    { timeout: 30000, maxWait: 30000 },
   )
 
   return true
