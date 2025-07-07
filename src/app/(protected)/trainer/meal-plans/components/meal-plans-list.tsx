@@ -13,15 +13,33 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 import { GQLGetMealPlanTemplatesQuery } from '@/generated/graphql-client'
 
 export function MealPlansList({
   plans,
+  isLoading,
 }: {
   plans: GQLGetMealPlanTemplatesQuery['getMealPlanTemplates']
+  isLoading?: boolean
 }) {
   const drafts = plans.filter((plan) => plan.isDraft)
   const templates = plans.filter((plan) => !plan.isDraft)
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-xl font-bold">Meal Plans</h2>
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="h-48 w-full" />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <AnimatedPageTransition id="meal-plans-list">

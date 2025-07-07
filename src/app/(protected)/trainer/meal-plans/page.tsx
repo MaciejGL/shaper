@@ -1,22 +1,41 @@
-import { PlusCircle, UtensilsIcon } from 'lucide-react'
+'use client'
 
-import { ButtonLink } from '@/components/ui/button-link'
+import { useQueryClient } from '@tanstack/react-query'
+import { PlusCircle, UtensilsIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
+import { Button } from '@/components/ui/button'
 import {
-  GQLGetMealPlanTemplatesQuery,
-  GetMealPlanTemplatesDocument,
+  useCreateDraftMealTemplateMutation,
+  useGetMealPlanTemplatesQuery,
 } from '@/generated/graphql-client'
-import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
 import { DashboardHeader } from '../components/dashboard-header'
 
 import { MealPlansList } from './components/meal-plans-list'
 
-export const dynamic = 'force-dynamic'
+export default function MealPlansPage() {
+  const { data, isLoading } = useGetMealPlanTemplatesQuery()
 
-export default async function MealPlansPage() {
-  const { data } = await gqlServerFetch<GQLGetMealPlanTemplatesQuery>(
-    GetMealPlanTemplatesDocument,
-  )
+  const queryClient = useQueryClient()
+
+  const router = useRouter()
+
+  const {
+    mutate: createDraftMealTemplate,
+    isPending: isCreatingDraftMealTemplate,
+  } = useCreateDraftMealTemplateMutation({
+    onSuccess: (data) => {
+      const newPlan = data.createDraftMealTemplate
+
+      queryClient.invalidateQueries({ queryKey: ['GetMealPlanTemplates'] })
+
+      router.push(`/trainer/meal-plans/creator/${newPlan.id}`)
+    },
+    onError: (error) => {
+      console.error('❌ Failed to create draft meal template:', error)
+    },
+  })
 
   return (
     <div className="container h-full">
@@ -26,16 +45,20 @@ export default async function MealPlansPage() {
           description="Manage your meal plans and nutrition templates"
           icon={<UtensilsIcon />}
         />
-        <ButtonLink
-          href="/trainer/meal-plans/creator/new"
+        <Button
+          onClick={() => createDraftMealTemplate({})}
+          loading={isCreatingDraftMealTemplate}
           iconStart={<PlusCircle />}
           className="self-baseline"
         >
           Create New Plan
-        </ButtonLink>
+        </Button>
       </div>
 
-      <MealPlansList plans={data?.getMealPlanTemplates || []} />
+      <MealPlansList
+        plans={data?.getMealPlanTemplates || []}
+        isLoading={isLoading}
+      />
     </div>
   )
 }
