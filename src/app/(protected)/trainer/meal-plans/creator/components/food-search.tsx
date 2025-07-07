@@ -21,8 +21,36 @@ interface FoodSearchProps {
   onClose: () => void
 }
 
+// Types for OpenFoodFacts API response
+interface OpenFoodFactsProduct {
+  product_name: string
+  code: string
+  nutriments?: {
+    'energy-kcal_100g'?: number | string
+    proteins_100g?: number | string
+    carbohydrates_100g?: number | string
+    fat_100g?: number | string
+    fiber_100g?: number | string
+  }
+}
+
+interface OpenFoodFactsSearchResponse {
+  products?: OpenFoodFactsProduct[]
+}
+
+// Type for search results displayed in UI
+interface SearchResult {
+  name: string
+  openFoodFactsId: string
+  caloriesPer100g: number
+  proteinPer100g: number
+  carbsPer100g: number
+  fatPer100g: number
+  fiberPer100g: number
+}
+
 // Simple food search using the existing API
-async function searchFoods(query: string) {
+async function searchFoods(query: string): Promise<SearchResult[]> {
   if (query.length < 2) return []
 
   try {
@@ -31,18 +59,21 @@ async function searchFoods(query: string) {
     )
     if (!response.ok) throw new Error('Search failed')
 
-    const data = await response.json()
+    const data: OpenFoodFactsSearchResponse = await response.json()
     return (
-      data.products?.map((product: any) => ({
-        name: product.product_name,
-        openFoodFactsId: product.code,
-        // Convert all nutrition values to numbers explicitly
-        caloriesPer100g: Number(product.nutriments?.['energy-kcal_100g']) || 0,
-        proteinPer100g: Number(product.nutriments?.proteins_100g) || 0,
-        carbsPer100g: Number(product.nutriments?.carbohydrates_100g) || 0,
-        fatPer100g: Number(product.nutriments?.fat_100g) || 0,
-        fiberPer100g: Number(product.nutriments?.fiber_100g) || 0,
-      })) || []
+      data.products?.map(
+        (product: OpenFoodFactsProduct): SearchResult => ({
+          name: product.product_name,
+          openFoodFactsId: product.code,
+          // Convert all nutrition values to numbers explicitly
+          caloriesPer100g:
+            Number(product.nutriments?.['energy-kcal_100g']) || 0,
+          proteinPer100g: Number(product.nutriments?.proteins_100g) || 0,
+          carbsPer100g: Number(product.nutriments?.carbohydrates_100g) || 0,
+          fatPer100g: Number(product.nutriments?.fat_100g) || 0,
+          fiberPer100g: Number(product.nutriments?.fiber_100g) || 0,
+        }),
+      ) || []
     )
   } catch (error) {
     console.error('Food search error:', error)
@@ -109,7 +140,6 @@ export default function FoodSearch({ dayId, hour, onClose }: FoodSearchProps) {
     setIsSearching(true)
     try {
       const results = await searchFoods(term)
-
       setSearchResults(results || [])
     } catch (error) {
       console.error('Search error:', error)
@@ -129,7 +159,7 @@ export default function FoodSearch({ dayId, hour, onClose }: FoodSearchProps) {
 
   // Add food to local state
   const addFood = useCallback(
-    (foodItem: any) => {
+    (foodItem: SearchResult) => {
       const newFood: EditableFood = {
         name: foodItem.name,
         quantity: 100,
@@ -205,7 +235,9 @@ export default function FoodSearch({ dayId, hour, onClose }: FoodSearchProps) {
   const handleCancel = useCallback(() => {
     if (hasChanges) {
       if (
-        confirm('You have unsaved changes. Are you sure you want to close?')
+        window.confirm(
+          'You have unsaved changes. Are you sure you want to close?',
+        )
       ) {
         onClose()
       }
@@ -214,9 +246,9 @@ export default function FoodSearch({ dayId, hour, onClose }: FoodSearchProps) {
     }
   }, [hasChanges, onClose])
 
-  const calculateNutrition = (food: EditableFood, qty: number) => {
-    // Handle invalid quantities
-    if (!qty || qty < 0 || isNaN(qty)) {
+  const calculateNutrition = (food: EditableFood, qty: number | null) => {
+    // Handle null or invalid quantities
+    if (qty === null || qty === undefined || qty <= 0 || isNaN(qty)) {
       return {
         calories: 0,
         protein: 0,
@@ -227,8 +259,6 @@ export default function FoodSearch({ dayId, hour, onClose }: FoodSearchProps) {
     }
 
     // Calculate based on unit type
-
-    // Use per-100g values with factor calculation for grams/ml/etc
     const factor = qty / 100
     return {
       calories: Math.round((Number(food.caloriesPer100g) || 0) * factor),
@@ -362,15 +392,17 @@ export default function FoodSearch({ dayId, hour, onClose }: FoodSearchProps) {
                             id={`quantity-${food.id}`}
                             type="text"
                             variant="secondary"
-                            value={food.quantity}
+                            value={food.quantity ?? ''}
                             onChange={(e) => {
                               const formattedValue = formatNumberInput(e)
                               updateFood(index, {
-                                quantity: Number(formattedValue),
+                                quantity:
+                                  formattedValue === ''
+                                    ? null
+                                    : Number(formattedValue),
                               })
                             }}
-                            min="0.1"
-                            step={food.unit === 'serving' ? '0.1' : '1'}
+                            placeholder="Enter quantity"
                             className="h-9"
                             iconEnd={<p>{food.unit}</p>}
                           />

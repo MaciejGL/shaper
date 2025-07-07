@@ -18,7 +18,7 @@ type Meal = MealPlanData['weeks'][0]['days'][0]['meals'][0]
 export interface EditableFood {
   id?: string // Optional for new foods
   name: string
-  quantity: number
+  quantity: number | null // Allow null for empty inputs
   unit: string
   caloriesPer100g: number
   proteinPer100g: number
@@ -102,19 +102,22 @@ export function MealPlanProvider({
     async (dayId: string, hour: number, foods: EditableFood[]) => {
       try {
         // Convert EditableFood to the format expected by the mutation
-        const mealFoods = foods.map((food) => ({
-          id: food.id || null,
-          name: food.name,
-          quantity: food.quantity,
-          unit: food.unit,
-          caloriesPer100g: food.caloriesPer100g,
-          proteinPer100g: food.proteinPer100g,
-          carbsPer100g: food.carbsPer100g,
-          fatPer100g: food.fatPer100g,
-          fiberPer100g: food.fiberPer100g,
-          openFoodFactsId: food.openFoodFactsId,
-          productData: null, // We don't use productData in the UI currently
-        }))
+        // Filter out foods with null quantities first
+        const mealFoods = foods
+          .filter((food) => food.quantity !== null && food.quantity > 0)
+          .map((food) => ({
+            id: food.id || null,
+            name: food.name,
+            quantity: food.quantity!, // We know it's not null due to filter
+            unit: food.unit,
+            caloriesPer100g: food.caloriesPer100g,
+            proteinPer100g: food.proteinPer100g,
+            carbsPer100g: food.carbsPer100g,
+            fatPer100g: food.fatPer100g,
+            fiberPer100g: food.fiberPer100g,
+            openFoodFactsId: food.openFoodFactsId,
+            productData: null, // We don't use productData in the UI currently
+          }))
 
         await saveMealMutation.mutateAsync({
           input: {
