@@ -155,6 +155,7 @@ export const SortableExercise = React.memo(
       return null
     }
 
+    const isTemporary = isTemporaryId(exercise.id)
     return (
       <div className="relative group">
         <Card
@@ -166,6 +167,7 @@ export const SortableExercise = React.memo(
             'cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px] select-none',
             // Remove border and background when dragging. It's a wrapper in sorting context
             isDragging && 'border-none !bg-primary/10 mx-2 !scale-100',
+            isTemporary && 'opacity-50',
           )}
           variant="secondary"
         >
@@ -174,7 +176,9 @@ export const SortableExercise = React.memo(
             <CardContent
               className="grow p-3 flex flex-col gap-2 justify-between overflow-hidden cursor-pointer"
               onClick={() => {
-                setIsEditDialogOpen(true)
+                if (!isTemporary) {
+                  setIsEditDialogOpen(true)
+                }
               }}
             >
               {exercise.type && (
@@ -215,7 +219,7 @@ export const SortableExercise = React.memo(
             </CardContent>
           )}
         </Card>
-        {!isDragging && (
+        {!isDragging && !isTemporary && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -240,10 +244,12 @@ export const SortableExercise = React.memo(
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {isEditDialogOpen && (
+        {isEditDialogOpen && !isTemporary && (
           <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
             <DialogContent dialogTitle={exercise.name} className="sm:max-w-2xl">
-              <ExerciseDialogContent exerciseId={exerciseId} />
+              {!isTemporary && (
+                <ExerciseDialogContent exerciseId={exercise.id} />
+              )}
             </DialogContent>
           </Dialog>
         )}
