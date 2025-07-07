@@ -10,6 +10,7 @@ import {
   PlusCircleIcon,
   UserRoundCogIcon,
   Users2Icon,
+  UtensilsIcon,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -31,8 +32,10 @@ import {
 } from '@/components/ui/sidebar'
 import { TRAINER_LINKS } from '@/constants/user-links'
 import {
+  useCreateDraftMealTemplateMutation,
   useCreateDraftTemplateMutation,
   useGetClientsQuery,
+  useGetMealPlanTemplatesQuery,
   useGetTemplatesQuery,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
@@ -82,6 +85,21 @@ const placeholderTemplates = {
   }),
 }
 
+const placeholderMealPlans = {
+  getMealPlanTemplates: Array(2).fill({
+    id: 'placeholder' + Math.random(),
+    title: 'Loading...',
+    description: null,
+    isDraft: false,
+    dailyCalories: 0,
+    dailyProtein: 0,
+    dailyCarbs: 0,
+    dailyFat: 0,
+    weekCount: 0,
+    assignedCount: 0,
+  }),
+}
+
 export function AppSidebar() {
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -94,6 +112,12 @@ export function AppSidebar() {
   const { data: templatesData, isPlaceholderData: isPlaceholderTemplates } =
     useGetTemplatesQuery(undefined, {
       placeholderData: placeholderTemplates,
+      refetchOnWindowFocus: false,
+    })
+
+  const { data: mealPlansData, isPlaceholderData: isPlaceholderMealPlans } =
+    useGetMealPlanTemplatesQuery(undefined, {
+      placeholderData: placeholderMealPlans,
       refetchOnWindowFocus: false,
     })
 
@@ -111,9 +135,30 @@ export function AppSidebar() {
       },
     })
 
+  const {
+    mutate: createDraftMealTemplate,
+    isPending: isCreatingDraftMealTemplate,
+  } = useCreateDraftMealTemplateMutation({
+    onSuccess: (data) => {
+      const newPlan = data.createDraftMealTemplate
+
+      queryClient.invalidateQueries({ queryKey: ['GetMealPlanTemplates'] })
+
+      router.push(`/trainer/meal-plans/creator/${newPlan.id}`)
+    },
+    onError: (error) => {
+      console.error('❌ Failed to create draft meal template:', error)
+    },
+  })
+
   const templates = useMemo(
     () => templatesData?.getTemplates || [],
     [templatesData],
+  )
+
+  const mealPlans = useMemo(
+    () => mealPlansData?.getMealPlanTemplates || [],
+    [mealPlansData],
   )
 
   const items: SidebarItemType[] = useMemo(
@@ -160,6 +205,28 @@ export function AppSidebar() {
           })),
         ],
       },
+      // Meal Plans item
+      {
+        title: TRAINER_LINKS.mealPlans.label,
+        url: TRAINER_LINKS.mealPlans.href,
+        icon: UtensilsIcon,
+        disabled: TRAINER_LINKS.mealPlans.disabled,
+        subItems: [
+          {
+            title: 'Create',
+            onClick: () => createDraftMealTemplate({}),
+            icon: PlusCircleIcon,
+            loading: isCreatingDraftMealTemplate,
+            disabled: false,
+          },
+          ...mealPlans.map((plan) => ({
+            title: plan.title,
+            url: TRAINER_LINKS.mealPlans.href + `/creator/${plan.id}`,
+            icon: FileIcon,
+            disabled: false,
+          })),
+        ],
+      },
       // Exercises item
       {
         title: TRAINER_LINKS.exercises.label,
@@ -168,7 +235,15 @@ export function AppSidebar() {
         disabled: TRAINER_LINKS.exercises.disabled,
       },
     ],
-    [clients, templates, createDraftTemplate, isCreatingDraftTemplate],
+    [
+      clients,
+      templates,
+      mealPlans,
+      createDraftTemplate,
+      isCreatingDraftTemplate,
+      createDraftMealTemplate,
+      isCreatingDraftMealTemplate,
+    ],
   )
 
   const footerItems = [
@@ -189,7 +264,11 @@ export function AppSidebar() {
               <SidebarItem
                 key={item.title + index}
                 item={item}
-                isLoading={isPlaceholderClients || isPlaceholderTemplates}
+                isLoading={
+                  isPlaceholderClients ||
+                  isPlaceholderTemplates ||
+                  isPlaceholderMealPlans
+                }
               />
             ))}
           </SidebarMenu>

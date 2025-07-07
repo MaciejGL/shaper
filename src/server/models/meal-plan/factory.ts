@@ -26,13 +26,10 @@ export async function getMealPlanTemplates(
     throw new Error('User not found')
   }
 
-  const { draft } = args
-
   const mealPlans = await prisma.mealPlan.findMany({
     where: {
       createdById: user.user.id,
       isTemplate: true,
-      isDraft: draft ?? false,
     },
     orderBy: {
       updatedAt: 'desc',

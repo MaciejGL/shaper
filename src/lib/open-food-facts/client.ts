@@ -3,13 +3,36 @@ import type { FoodProduct } from '@prisma/client'
 import { prisma } from '@/lib/db'
 
 interface OpenFoodFactsSearchResponse {
-  products: OpenFoodFactsProduct[]
+  products: OpenFoodFactsSearchResult[]
   count: number
   page: number
   page_count: number
   page_size: number
 }
 
+// Search results have a flattened structure (v1 API)
+export interface OpenFoodFactsSearchResult {
+  code: string
+  product_name: string
+  brands?: string
+  nutriments: {
+    'energy-kcal_100g'?: number
+    proteins_100g?: number
+    carbohydrates_100g?: number
+    fat_100g?: number
+    fiber_100g?: number
+    sugars_100g?: number
+    salt_100g?: number
+  }
+  ingredients_text?: string
+  allergens?: string
+  image_url?: string
+  image_front_url?: string
+  serving_size?: string
+  serving_quantity?: number
+}
+
+// Single product API has nested structure (v2 API)
 interface OpenFoodFactsProduct {
   code: string
   product: {
@@ -86,30 +109,124 @@ export class OpenFoodFactsClient {
     query: string,
     limit = 20,
     page = 1,
-  ): Promise<OpenFoodFactsProduct[]> {
+  ): Promise<OpenFoodFactsSearchResult[]> {
     try {
-      const params = new URLSearchParams({
+      // First try: Search with category filters for basic ingredients
+      const restrictedParams = new URLSearchParams({
         search_terms: query,
+        search_simple: '1',
+        action: 'process',
+        json: '1',
         page_size: limit.toString(),
         page: page.toString(),
-        json: '1',
+        sort_by: 'unique_scans_n',
+        countries: 'Norway',
+        // Prioritize basic ingredients over processed products
+        categories_tags:
+          'en:meats,en:fresh-meat,en:poultry,en:chicken-and-its-products,en:beef-and-its-products,en:raw-meat',
         fields:
           'code,product_name,brands,nutriments,image_url,image_front_url,serving_size,serving_quantity,ingredients_text,allergens',
       })
 
-      const response = await fetch(`${this.baseUrl}/search?${params}`, {
-        headers: {
-          'User-Agent': this.userAgent,
+      let response = await fetch(
+        `https://world.openfoodfacts.org/cgi/search.pl?${restrictedParams}`,
+        {
+          headers: {
+            'User-Agent': this.userAgent,
+          },
         },
-      })
+      )
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const data: OpenFoodFactsSearchResponse = await response.json()
+      let data: OpenFoodFactsSearchResponse = await response.json()
 
-      return data.products || []
+      // If we get few results with category filters, try broader search
+      if ((data.products || []).length < 5) {
+        const broadParams = new URLSearchParams({
+          search_terms: query,
+          search_simple: '1',
+          action: 'process',
+          json: '1',
+          page_size: limit.toString(),
+          page: page.toString(),
+          sort_by: 'unique_scans_n',
+          countries: 'Norway',
+          fields:
+            'code,product_name,brands,nutriments,image_url,image_front_url,serving_size,serving_quantity,ingredients_text,allergens',
+        })
+
+        response = await fetch(
+          `https://world.openfoodfacts.org/cgi/search.pl?${broadParams}`,
+          {
+            headers: {
+              'User-Agent': this.userAgent,
+            },
+          },
+        )
+
+        if (response.ok) {
+          data = await response.json()
+        }
+      }
+
+      // Filter results to prefer products with nutrition data, but don't exclude completely
+      const filteredProducts = (data.products || []).filter((product) => {
+        // At minimum, we need a product name
+        return product.product_name && product.product_name.trim().length > 0
+      })
+
+      // Sort by nutrition data completeness and prefer basic ingredients
+      const sortedProducts = filteredProducts.sort((a, b) => {
+        const getRelevanceScore = (product: OpenFoodFactsSearchResult) => {
+          const nutrients = product.nutriments || {}
+          let score = 0
+
+          // Boost nutrition data completeness
+          if (nutrients['energy-kcal_100g'] !== undefined) score += 1
+          if (nutrients.proteins_100g !== undefined) score += 1
+          if (nutrients.carbohydrates_100g !== undefined) score += 1
+          if (nutrients.fat_100g !== undefined) score += 1
+
+          // Boost basic ingredients (less processing, simpler names)
+          const name = product.product_name?.toLowerCase() || ''
+          if (
+            name.includes('fresh') ||
+            name.includes('raw') ||
+            name.includes('natural')
+          )
+            score += 2
+          if (
+            name.includes('breast') ||
+            name.includes('thigh') ||
+            name.includes('fillet')
+          )
+            score += 2
+          if (name.includes('organic') || name.includes('økologisk')) score += 1
+
+          // Penalize processed products
+          if (
+            name.includes('sausage') ||
+            name.includes('processed') ||
+            name.includes('cured')
+          )
+            score -= 2
+          if (
+            name.includes('sauce') ||
+            name.includes('marinated') ||
+            name.includes('seasoned')
+          )
+            score -= 1
+
+          return score
+        }
+
+        return getRelevanceScore(b) - getRelevanceScore(a)
+      })
+
+      return sortedProducts
     } catch (error) {
       console.error('Error searching products:', error)
       return []
@@ -122,20 +239,34 @@ export class OpenFoodFactsClient {
     page = 1,
   ): Promise<OpenFoodFactsSearchResponse> {
     try {
+      // Use the v1 search API which is more reliable
       const params = new URLSearchParams({
         search_terms: query,
+        search_simple: '1',
+        action: 'process',
+        json: '1',
         page_size: limit.toString(),
         page: page.toString(),
-        json: '1',
+        // Sort by popularity (scan count) to get more common products first
+        sort_by: 'unique_scans_n',
+        // Filter for Norwegian products to get local/relevant results
+        countries: 'Norway',
+        // Prioritize basic ingredients over processed products
+        categories_tags:
+          'en:meats,en:fresh-meat,en:poultry,en:chicken-and-its-products,en:beef-and-its-products,en:raw-meat',
         fields:
           'code,product_name,brands,nutriments,image_url,image_front_url,serving_size,serving_quantity,ingredients_text,allergens',
       })
 
-      const response = await fetch(`${this.baseUrl}/search?${params}`, {
-        headers: {
-          'User-Agent': this.userAgent,
+      // Use the v1 search endpoint instead of v2
+      const response = await fetch(
+        `https://world.openfoodfacts.org/cgi/search.pl?${params}`,
+        {
+          headers: {
+            'User-Agent': this.userAgent,
+          },
         },
-      })
+      )
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
