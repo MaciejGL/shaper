@@ -701,6 +701,7 @@ export type GQLMutation = {
   updateExerciseForm: GQLTrainingExercise;
   updateExerciseSet: Scalars['Boolean']['output'];
   updateMealFoodLog: Scalars['Boolean']['output'];
+  updateMealPlanDetails: Scalars['Boolean']['output'];
   updateNote: GQLNote;
   updateNotification: GQLNotification;
   updateProfile?: Maybe<GQLUserProfile>;
@@ -1044,6 +1045,11 @@ export type GQLMutationUpdateExerciseSetArgs = {
 
 export type GQLMutationUpdateMealFoodLogArgs = {
   input: GQLUpdateMealFoodLogInput;
+};
+
+
+export type GQLMutationUpdateMealPlanDetailsArgs = {
+  input: GQLUpdateMealPlanDetailsInput;
 };
 
 
@@ -1529,6 +1535,18 @@ export type GQLUpdateMealFoodLogInput = {
   id: Scalars['ID']['input'];
   notes?: InputMaybe<Scalars['String']['input']>;
   quantity?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type GQLUpdateMealPlanDetailsInput = {
+  dailyCalories?: InputMaybe<Scalars['Float']['input']>;
+  dailyCarbs?: InputMaybe<Scalars['Float']['input']>;
+  dailyFat?: InputMaybe<Scalars['Float']['input']>;
+  dailyProtein?: InputMaybe<Scalars['Float']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['ID']['input'];
+  isDraft?: InputMaybe<Scalars['Boolean']['input']>;
+  isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GQLUpdateNoteInput = {
@@ -2232,6 +2250,13 @@ export type GQLSaveMealMutationVariables = Exact<{
 
 export type GQLSaveMealMutation = { __typename?: 'Mutation', saveMeal: boolean };
 
+export type GQLUpdateMealPlanDetailsMutationVariables = Exact<{
+  input: GQLUpdateMealPlanDetailsInput;
+}>;
+
+
+export type GQLUpdateMealPlanDetailsMutation = { __typename?: 'Mutation', updateMealPlanDetails: boolean };
+
 export type GQLLogMealFoodMutationVariables = Exact<{
   input: GQLLogMealFoodInput;
 }>;
@@ -2245,13 +2270,6 @@ export type GQLUpdateMealFoodLogMutationVariables = Exact<{
 
 
 export type GQLUpdateMealFoodLogMutation = { __typename?: 'Mutation', updateMealFoodLog: boolean };
-
-export type GQLDeleteMealFoodLogMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type GQLDeleteMealFoodLogMutation = { __typename?: 'Mutation', deleteMealFoodLog: boolean };
 
 export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, createdAt: string, updatedAt: string, assignedCount: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> };
 
@@ -5865,6 +5883,30 @@ useSaveMealMutation.getKey = () => ['SaveMeal'];
 
 useSaveMealMutation.fetcher = (variables: GQLSaveMealMutationVariables, options?: RequestInit['headers']) => fetchData<GQLSaveMealMutation, GQLSaveMealMutationVariables>(SaveMealDocument, variables, options);
 
+export const UpdateMealPlanDetailsDocument = `
+    mutation UpdateMealPlanDetails($input: UpdateMealPlanDetailsInput!) {
+  updateMealPlanDetails(input: $input)
+}
+    `;
+
+export const useUpdateMealPlanDetailsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateMealPlanDetailsMutation, TError, GQLUpdateMealPlanDetailsMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateMealPlanDetailsMutation, TError, GQLUpdateMealPlanDetailsMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateMealPlanDetails'],
+    mutationFn: (variables?: GQLUpdateMealPlanDetailsMutationVariables) => fetchData<GQLUpdateMealPlanDetailsMutation, GQLUpdateMealPlanDetailsMutationVariables>(UpdateMealPlanDetailsDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateMealPlanDetailsMutation.getKey = () => ['UpdateMealPlanDetails'];
+
+
+useUpdateMealPlanDetailsMutation.fetcher = (variables: GQLUpdateMealPlanDetailsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMealPlanDetailsMutation, GQLUpdateMealPlanDetailsMutationVariables>(UpdateMealPlanDetailsDocument, variables, options);
+
 export const LogMealFoodDocument = `
     mutation LogMealFood($input: LogMealFoodInput!) {
   logMealFood(input: $input) {
@@ -5924,30 +5966,6 @@ useUpdateMealFoodLogMutation.getKey = () => ['UpdateMealFoodLog'];
 
 
 useUpdateMealFoodLogMutation.fetcher = (variables: GQLUpdateMealFoodLogMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMealFoodLogMutation, GQLUpdateMealFoodLogMutationVariables>(UpdateMealFoodLogDocument, variables, options);
-
-export const DeleteMealFoodLogDocument = `
-    mutation DeleteMealFoodLog($id: ID!) {
-  deleteMealFoodLog(id: $id)
-}
-    `;
-
-export const useDeleteMealFoodLogMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLDeleteMealFoodLogMutation, TError, GQLDeleteMealFoodLogMutationVariables, TContext>) => {
-    
-    return useMutation<GQLDeleteMealFoodLogMutation, TError, GQLDeleteMealFoodLogMutationVariables, TContext>(
-      {
-    mutationKey: ['DeleteMealFoodLog'],
-    mutationFn: (variables?: GQLDeleteMealFoodLogMutationVariables) => fetchData<GQLDeleteMealFoodLogMutation, GQLDeleteMealFoodLogMutationVariables>(DeleteMealFoodLogDocument, variables)(),
-    ...options
-  }
-    )};
-
-useDeleteMealFoodLogMutation.getKey = () => ['DeleteMealFoodLog'];
-
-
-useDeleteMealFoodLogMutation.fetcher = (variables: GQLDeleteMealFoodLogMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteMealFoodLogMutation, GQLDeleteMealFoodLogMutationVariables>(DeleteMealFoodLogDocument, variables, options);
 
 export const GetTemplatesDocument = `
     query GetTemplates($draft: Boolean) {

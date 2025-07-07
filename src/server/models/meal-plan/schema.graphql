@@ -191,6 +191,7 @@ type Mutation {
   createDraftMealTemplate: MealPlan!
   assignMealPlanToClient(input: AssignMealPlanToClientInput!): Boolean!
   duplicateMealPlan(id: ID!): ID!
+  updateMealPlanDetails(input: UpdateMealPlanDetailsInput!): Boolean!
 
   # New batch meal operation - replaces individual food mutations
   saveMeal(input: SaveMealInput!): Boolean!
@@ -212,6 +213,18 @@ input CreateMealPlanInput {
   dailyCarbs: Float
   dailyFat: Float
   weeks: [CreateMealWeekInput!]
+}
+
+input UpdateMealPlanDetailsInput {
+  id: ID!
+  title: String
+  description: String
+  isPublic: Boolean
+  isDraft: Boolean
+  dailyCalories: Float
+  dailyProtein: Float
+  dailyCarbs: Float
+  dailyFat: Float
 }
 
 input CreateMealWeekInput {

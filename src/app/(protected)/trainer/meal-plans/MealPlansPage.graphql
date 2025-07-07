@@ -106,6 +106,10 @@ mutation SaveMeal($input: SaveMealInput!) {
   saveMeal(input: $input)
 }
 
+mutation UpdateMealPlanDetails($input: UpdateMealPlanDetailsInput!) {
+  updateMealPlanDetails(input: $input)
+}
+
 # Food logging mutations (kept for future use)
 mutation LogMealFood($input: LogMealFoodInput!) {
   logMealFood(input: $input) {
@@ -125,8 +129,4 @@ mutation LogMealFood($input: LogMealFoodInput!) {
 
 mutation UpdateMealFoodLog($input: UpdateMealFoodLogInput!) {
   updateMealFoodLog(input: $input)
-}
-
-mutation DeleteMealFoodLog($id: ID!) {
-  deleteMealFoodLog(id: $id)
 }

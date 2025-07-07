@@ -15,6 +15,7 @@ import {
   getMealPlanTemplates,
   getMyMealPlansOverview,
   saveMeal,
+  updateMealPlanDetails,
 } from './factory'
 
 export const Query: GQLQueryResolvers<GQLContext> = {
@@ -47,6 +48,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   },
   duplicateMealPlan: async (_, args, context) => {
     return duplicateMealPlan(args, context)
+  },
+  updateMealPlanDetails: async (_, args, context) => {
+    return updateMealPlanDetails(args, context)
   },
   // New batch meal operation
   saveMeal: async (_, args, context) => {

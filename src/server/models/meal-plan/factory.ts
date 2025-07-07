@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { GraphQLError } from 'graphql'
 
 import {
@@ -5,6 +6,7 @@ import {
   GQLMutationCreateMealPlanArgs,
   GQLMutationDuplicateMealPlanArgs,
   GQLMutationSaveMealArgs,
+  GQLMutationUpdateMealPlanDetailsArgs,
   GQLNotificationType,
   GQLQueryGetClientActiveMealPlanArgs,
   GQLQueryGetClientMealPlansArgs,
@@ -659,10 +661,8 @@ export async function saveMeal(
     }
 
     // Get current food IDs
-    const existingFoodIds = meal.foods.map((f: any) => f.id)
-    const providedFoodIds = foods
-      .filter((f: any) => f.id)
-      .map((f: any) => f.id!)
+    const existingFoodIds = meal.foods.map((f) => f.id)
+    const providedFoodIds = foods.filter((f) => f.id).map((f) => f.id!)
 
     // Remove foods that are no longer in the list
     for (const foodId of existingFoodIds) {
@@ -716,5 +716,55 @@ export async function saveMeal(
   } catch (error) {
     console.error('Error saving meal:', error)
     throw new GraphQLError('Failed to save meal')
+  }
+}
+
+export async function updateMealPlanDetails(
+  args: GQLMutationUpdateMealPlanDetailsArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { id, ...updateData } = args.input
+
+  try {
+    // Verify the meal plan exists and user has permission to update it
+    const mealPlan = await prisma.mealPlan.findUnique({
+      where: { id },
+    })
+
+    if (!mealPlan) {
+      throw new Error('Meal plan not found')
+    }
+
+    if (mealPlan.createdById !== user.user.id) {
+      throw new Error('You can only update your own meal plans')
+    }
+
+    // Filter out null values and create update data
+    const filteredUpdateData: Prisma.MealPlanUpdateInput = {
+      title: updateData.title ?? undefined,
+      description: updateData.description ?? undefined,
+      isPublic: updateData.isPublic ?? undefined,
+      isDraft: updateData.isDraft ?? undefined,
+      dailyCalories: updateData.dailyCalories,
+      dailyProtein: updateData.dailyProtein,
+      dailyCarbs: updateData.dailyCarbs,
+      dailyFat: updateData.dailyFat,
+    }
+
+    // Update the meal plan details
+    await prisma.mealPlan.update({
+      where: { id },
+      data: filteredUpdateData,
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error updating meal plan details:', error)
+    throw new GraphQLError('Failed to update meal plan details')
   }
 }
