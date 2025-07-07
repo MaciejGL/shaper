@@ -5,7 +5,6 @@ import {
 } from '@prisma/client'
 
 import { GQLMealLogItem } from '@/generated/graphql-server'
-import { openFoodFactsClient } from '@/lib/open-food-facts/client'
 import { GQLContext } from '@/types/gql-context'
 
 import MealLog from '../meal-log/model'
@@ -66,58 +65,5 @@ export default class MealLogItem implements GQLMealLogItem {
 
   async log() {
     return this.data.log ? new MealLog(this.data.log, this.context) : null
-  }
-
-  // Calculated nutrition fields based on quantity
-  get totalCalories() {
-    if (!this.data.calories || !this.data.quantity || !this.data.unit) {
-      return 0
-    }
-
-    const nutrition = openFoodFactsClient.calculateNutrition(
-      this.data,
-      this.data.quantity,
-      this.data.unit,
-    )
-    return Math.round(nutrition.calories * 100) / 100
-  }
-
-  get totalProtein() {
-    if (!this.data.protein || !this.data.quantity || !this.data.unit) {
-      return 0
-    }
-
-    const nutrition = openFoodFactsClient.calculateNutrition(
-      this.data,
-      this.data.quantity,
-      this.data.unit,
-    )
-    return Math.round(nutrition.protein * 100) / 100
-  }
-
-  get totalCarbs() {
-    if (!this.data.carbs || !this.data.quantity || !this.data.unit) {
-      return 0
-    }
-
-    const nutrition = openFoodFactsClient.calculateNutrition(
-      this.data,
-      this.data.quantity,
-      this.data.unit,
-    )
-    return Math.round(nutrition.carbs * 100) / 100
-  }
-
-  get totalFat() {
-    if (!this.data.fat || !this.data.quantity || !this.data.unit) {
-      return 0
-    }
-
-    const nutrition = openFoodFactsClient.calculateNutrition(
-      this.data,
-      this.data.quantity,
-      this.data.unit,
-    )
-    return Math.round(nutrition.fat * 100) / 100
   }
 }

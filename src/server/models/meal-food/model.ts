@@ -32,10 +32,6 @@ export default class MealFood implements GQLMealFood {
     return this.data.unit
   }
 
-  get order() {
-    return this.data.order
-  }
-
   get name() {
     return this.data.name
   }
