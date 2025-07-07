@@ -36,7 +36,7 @@ export function TodaysSession({ workout, planId }: TodaysSessionProps) {
                 Activate plan
               </ButtonLink>
               <ButtonLink
-                href="/fitspace/sessions/quick-workout"
+                href="/fitspace/workout/quick-workout"
                 variant="default"
               >
                 Start quick session

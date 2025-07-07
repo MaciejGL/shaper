@@ -28,9 +28,17 @@ export default async function DashboardPage() {
     data?.getWorkout?.plan?.weeks,
   )
 
+  // TO ADD:
+  // - Profile completion - with survey
+
+  // - Last PRs from this and last week
+  // - emtpy state on my stats(add weight progress)
+  // - My favourite exercises progress(?)
+
   return (
     <div className="container-fitspace mx-auto mb-24">
       <DashboardHeader title="Dashboard" icon={<LayoutDashboard />} />
+
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
         <TodaysSession
           workout={currentDay}
