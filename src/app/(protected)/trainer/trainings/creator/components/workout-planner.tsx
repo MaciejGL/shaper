@@ -39,14 +39,12 @@ export default function WorkoutPlanner() {
   const {
     formData,
     trainingId,
-    isDirty,
     activeWeek,
     isDeletingTrainingPlan,
     isDuplicatingTrainingPlan,
     isLoadingInitialData,
     addExercise,
     moveExercise,
-    clearDraft,
     handleDelete,
     handleDuplicate,
   } = useTrainingPlan()
@@ -220,12 +218,10 @@ export default function WorkoutPlanner() {
           </TabsList>
           <div className="relative">
             <FormActions
-              isDirty={isDirty}
               trainingId={trainingId}
               isDuplicating={isDuplicatingTrainingPlan}
               isDeleting={isDeletingTrainingPlan}
               onDelete={handleDelete}
-              onClearDraft={clearDraft}
               onDuplicate={handleDuplicate}
             />
           </div>
