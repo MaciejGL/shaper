@@ -593,7 +593,6 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
   const disabled =
     isLoading ||
     isRemovingExercise ||
-    hasPendingMutations ||
     isTemporaryId(exerciseId) ||
     Boolean(exercise?.completedAt)
 
