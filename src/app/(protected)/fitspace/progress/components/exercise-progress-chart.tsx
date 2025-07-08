@@ -48,9 +48,9 @@ import { useChartData, useExerciseImprovement } from './use-exercise-progress'
 
 interface ExerciseProgressChartProps {
   exercise?: ExerciseProgress
-  onRemoveExercise: (exerciseId: string) => void
-  onMoveToTop: (exerciseId: string) => void
-  canMoveToTop: boolean
+  onRemoveExercise?: (exerciseId: string) => void
+  onMoveToTop?: (exerciseId: string) => void
+  canMoveToTop?: boolean
 }
 
 export function ExerciseProgressChart({
@@ -210,29 +210,31 @@ export function ExerciseProgressChart({
                   <ExerciseLogsContent exercise={exercise} />
                 </SimpleDrawerContent>
               </Drawer>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" iconOnly={<MoreVertical />} />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  {canMoveToTop && (
+              {onRemoveExercise && onMoveToTop && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" iconOnly={<MoreVertical />} />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    {canMoveToTop && (
+                      <DropdownMenuItem
+                        onClick={() => exerciseId && onMoveToTop(exerciseId)}
+                        className="gap-2"
+                      >
+                        <ArrowUp className="size-4" />
+                        Move to Top
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem
-                      onClick={() => exerciseId && onMoveToTop(exerciseId)}
+                      onClick={() => exerciseId && onRemoveExercise(exerciseId)}
                       className="gap-2"
                     >
-                      <ArrowUp className="size-4" />
-                      Move to Top
+                      <X className="size-4" />
+                      Remove
                     </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem
-                    onClick={() => exerciseId && onRemoveExercise(exerciseId)}
-                    className="gap-2"
-                  >
-                    <X className="size-4" />
-                    Remove
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           </div>
 

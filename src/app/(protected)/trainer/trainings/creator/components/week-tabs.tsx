@@ -54,6 +54,7 @@ export function WeekTabs() {
           setActiveWeek(weeks.length)
         }}
         iconOnly={<Plus />}
+        disabled={Boolean(formData?.details.completedAt)}
       >
         Add week
       </Button>

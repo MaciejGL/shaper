@@ -9,7 +9,6 @@ import {
   startOfWeek,
 } from 'date-fns'
 import { GraphQLError } from 'graphql'
-import { isNil } from 'lodash'
 
 import {
   GQLAddAiExerciseToWorkoutInput,
@@ -27,6 +26,7 @@ import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from '../base-exercise/model'
 import ExerciseSet from '../exercise-set/model'
+import { isEditPlanNotAllowed } from '../training-plan/factory-updates'
 import TrainingPlan from '../training-plan/model'
 import { getFullPlanById } from '../training-utils.server'
 
@@ -108,33 +108,45 @@ export const updateExerciseForm = async (
     throw new GraphQLError('Exercise not found')
   }
 
+  if (isEditPlanNotAllowed(context.user, exercise.completedAt)) {
+    throw new GraphQLError('Cannot edit completed exercise')
+  }
+
   if (exercise.day.week.plan.createdById !== context.user?.user.id) {
     throw new GraphQLError('Access denied')
   }
 
   // Prepare data for Prisma update (filter out null values)
-  const updateData: Partial<TrainingExerciseType> = {}
-  if (exerciseUpdates.name !== undefined && exerciseUpdates.name !== null) {
-    updateData.name = exerciseUpdates.name
+  const updateData: Partial<TrainingExerciseType> = {
+    name: exerciseUpdates.name ?? undefined,
+    instructions: exerciseUpdates.instructions ?? null,
+    additionalInstructions: exerciseUpdates.additionalInstructions ?? null,
+    type: exerciseUpdates.type ?? null,
+    restSeconds: exerciseUpdates.restSeconds ?? null,
+    warmupSets: exerciseUpdates.warmupSets ?? null,
+    tempo: exerciseUpdates.tempo ?? null,
   }
-  if (!isNil(exerciseUpdates.instructions)) {
-    updateData.instructions = exerciseUpdates.instructions
-  }
-  if (!isNil(exerciseUpdates.additionalInstructions)) {
-    updateData.additionalInstructions = exerciseUpdates.additionalInstructions
-  }
-  if (!isNil(exerciseUpdates.type)) {
-    updateData.type = exerciseUpdates.type
-  }
-  if (!isNil(exerciseUpdates.restSeconds)) {
-    updateData.restSeconds = exerciseUpdates.restSeconds
-  }
-  if (!isNil(exerciseUpdates.warmupSets)) {
-    updateData.warmupSets = exerciseUpdates.warmupSets
-  }
-  if (!isNil(exerciseUpdates.tempo)) {
-    updateData.tempo = exerciseUpdates.tempo
-  }
+  // if (exerciseUpdates.name !== undefined && exerciseUpdates.name !== null) {
+  //   updateData.name = exerciseUpdates.name
+  // }
+  // if (!isNil(exerciseUpdates.instructions)) {
+  //   updateData.instructions = exerciseUpdates.instructions
+  // }
+  // if (!isNil(exerciseUpdates.additionalInstructions)) {
+  //   updateData.additionalInstructions = exerciseUpdates.additionalInstructions
+  // }
+  // if (!isNil(exerciseUpdates.type)) {
+  //   updateData.type = exerciseUpdates.type
+  // }
+  // if (!isNil(exerciseUpdates.restSeconds)) {
+  //   updateData.restSeconds = exerciseUpdates.restSeconds
+  // }
+  // if (!isNil(exerciseUpdates.warmupSets)) {
+  //   updateData.warmupSets = exerciseUpdates.warmupSets
+  // }
+  // if (!isNil(exerciseUpdates.tempo)) {
+  //   updateData.tempo = exerciseUpdates.tempo
+  // }
 
   // Update exercise data
   await prisma.trainingExercise.update({
@@ -562,6 +574,9 @@ export const addSetExerciseForm = async (
   if (!trainingExercise) {
     throw new Error('Training exercise not found')
   }
+  if (isEditPlanNotAllowed(context.user, trainingExercise.completedAt)) {
+    throw new GraphQLError('Cannot add sets to completed exercise')
+  }
 
   const newSet = await prisma.exerciseSet.create({
     data: {
@@ -578,7 +593,10 @@ export const addSetExerciseForm = async (
   return new ExerciseSet(newSet)
 }
 
-export const removeSetExerciseForm = async (setId: string) => {
+export const removeSetExerciseForm = async (
+  setId: string,
+  context: GQLContext,
+) => {
   // Get the set with its order and exercise information
   const set = await prisma.exerciseSet.findUnique({
     where: { id: setId },
@@ -597,6 +615,9 @@ export const removeSetExerciseForm = async (setId: string) => {
     throw new Error('Set not found')
   }
 
+  if (isEditPlanNotAllowed(context.user, set.exercise.completedAt)) {
+    throw new GraphQLError('Cannot remove completed set')
+  }
   const setOrder = set.order
   const exerciseId = set.exerciseId
 

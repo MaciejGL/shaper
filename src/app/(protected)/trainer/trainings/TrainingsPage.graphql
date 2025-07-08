@@ -9,18 +9,24 @@ fragment TrainingTemplate on TrainingPlan {
   createdAt
   updatedAt
   assignedCount
+  completedAt
+  assignedTo {
+    id
+  }
 
   weeks {
     id
     weekNumber
     name
     description
+    completedAt
 
     days {
       id
       dayOfWeek
       isRestDay
       workoutType
+      completedAt
 
       exercises {
         id
@@ -33,6 +39,7 @@ fragment TrainingTemplate on TrainingPlan {
         type
         order
         videoUrl
+        completedAt
 
         sets {
           id
@@ -42,6 +49,7 @@ fragment TrainingTemplate on TrainingPlan {
           maxReps
           weight
           rpe
+          completedAt
         }
       }
     }

@@ -5,6 +5,7 @@ import {
   GQLMutationAssignMealPlanToClientArgs,
   GQLMutationCreateMealPlanArgs,
   GQLMutationDuplicateMealPlanArgs,
+  GQLMutationRemoveMealPlanFromClientArgs,
   GQLMutationSaveMealArgs,
   GQLMutationUpdateMealPlanDetailsArgs,
   GQLNotificationType,
@@ -392,6 +393,7 @@ export async function assignMealPlanToClient(
       data: {
         assignedToId: clientId,
         isTemplate: false,
+        isDraft: false,
         startDate: startDate ? new Date(startDate) : null,
       },
     })
@@ -417,6 +419,61 @@ export async function assignMealPlanToClient(
   } catch (error) {
     console.error('Error assigning meal plan:', error)
     throw new GraphQLError('Failed to assign meal plan')
+  }
+}
+
+export async function removeMealPlanFromClient(
+  args: GQLMutationRemoveMealPlanFromClientArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+  const { planId, clientId } = args
+
+  try {
+    // Get the meal plan with weeks to check the constraint
+    const mealPlan = await prisma.mealPlan.findUnique({
+      where: {
+        id: planId,
+        assignedToId: clientId,
+        isTemplate: false,
+        createdById: user.user.id,
+      },
+      include: {
+        weeks: {
+          select: {
+            id: true,
+            weekNumber: true,
+          },
+        },
+      },
+    })
+
+    if (!mealPlan) {
+      throw new Error('Meal plan not found or unauthorized')
+    }
+
+    // Check if the plan has only 1 week (business rule)
+    if (mealPlan.weeks.length > 1) {
+      throw new Error('Cannot remove meal plan with more than 1 week')
+    }
+
+    // Delete the meal plan
+    await prisma.mealPlan.delete({
+      where: {
+        id: planId,
+        assignedToId: clientId,
+        isTemplate: false,
+        createdById: user.user.id,
+      },
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error removing meal plan:', error)
+    throw new GraphQLError('Failed to remove meal plan')
   }
 }
 
@@ -461,7 +518,7 @@ export async function duplicateMealPlan(
     // Create duplicate
     const duplicatedPlan = await prisma.mealPlan.create({
       data: {
-        title: `${originalPlanData.title} (Copy)`,
+        title: originalPlanData.title,
         description: originalPlanData.description,
         isPublic: false,
         isTemplate: true,

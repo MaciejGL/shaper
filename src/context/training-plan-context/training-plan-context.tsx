@@ -78,6 +78,8 @@ export function TrainingPlanProvider({
         isTemplate: plan.isTemplate,
         isDraft: plan.isDraft,
         difficulty: plan.difficulty,
+        assignedTo: plan.assignedTo,
+        completedAt: plan.completedAt,
       },
       weeks: plan.weeks,
     }

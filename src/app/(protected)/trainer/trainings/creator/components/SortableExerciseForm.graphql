@@ -10,6 +10,7 @@ query GetExerciseFormData($exerciseId: ID!) {
     warmupSets
     tempo
     videoUrl
+    completedAt
     substitutes {
       id
       substitute {
@@ -23,6 +24,7 @@ query GetExerciseFormData($exerciseId: ID!) {
       maxReps
       weight
       rpe
+      completedAt
     }
   }
 }

@@ -50,12 +50,15 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
     [activeWeek, dayIndex, updateDay],
   )
 
+  const isDisabled = Boolean(day?.completedAt)
+
   return (
     <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
       <div className="flex items-center gap-2">
         <Checkbox
           checked={!isRestDay}
           onCheckedChange={(value) => handleRestDayChange(!value)}
+          disabled={isDisabled}
         />
         <span className="font-medium text-sm py-3">
           {dayNames[day?.dayOfWeek ?? 0]}
@@ -74,6 +77,7 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
               dayIndex={dayIndex}
               workoutType={workoutType}
               onValueChange={handleValueChange}
+              disabled={isDisabled}
             />
           </motion.div>
         )}

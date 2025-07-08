@@ -7,6 +7,7 @@ import {
   FlameIcon,
   GaugeIcon,
   Loader2,
+  LockIcon,
   MoreHorizontal,
   Pencil,
   TimerIcon,
@@ -155,17 +156,20 @@ export const SortableExercise = React.memo(
       return null
     }
 
+    const isDisabled = Boolean(exercise.completedAt)
+
     return (
       <div className="relative group">
         <Card
           ref={setNodeRef}
           style={style}
-          {...attributes}
-          {...listeners}
+          {...(isDisabled ? {} : attributes)}
+          {...(isDisabled ? {} : listeners)}
           className={cn(
             'cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px] select-none',
             // Remove border and background when dragging. It's a wrapper in sorting context
             isDragging && 'border-none !bg-primary/10 mx-2 !scale-100',
+            isDisabled && 'opacity-50',
           )}
           variant="secondary"
         >
@@ -194,23 +198,23 @@ export const SortableExercise = React.memo(
                     {exercise.sets.length === 1 ? '' : 's'}
                   </Badge>
                 )}
-                {exercise.warmupSets && (
+                {exercise.warmupSets ? (
                   <Badge variant="outline">
                     <FlameIcon />
                     {exercise.warmupSets} warmup
                     {exercise.warmupSets === 1 ? '' : 's'}
                   </Badge>
-                )}
-                {exercise.restSeconds && (
+                ) : null}
+                {exercise.restSeconds ? (
                   <Badge variant="outline">
                     <TimerIcon /> {exercise.restSeconds} rest
                   </Badge>
-                )}
-                {exercise.tempo && (
+                ) : null}
+                {exercise.tempo ? (
                   <Badge variant="outline">
                     <GaugeIcon /> {exercise.tempo}
                   </Badge>
-                )}
+                ) : null}
               </div>
             </CardContent>
           )}
@@ -222,7 +226,8 @@ export const SortableExercise = React.memo(
                 variant="ghost"
                 size="sm"
                 className="p-0 absolute top-1 right-1 z-10 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                iconOnly={<MoreHorizontal />}
+                iconOnly={isDisabled ? <LockIcon /> : <MoreHorizontal />}
+                disabled={isDisabled}
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -230,13 +235,15 @@ export const SortableExercise = React.memo(
                 <Pencil className="w-3 h-3" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={handleRemoveExercise}
-                className="cursor-pointer"
-              >
-                <Trash2 className="w-3 h-3" />
-                Remove
-              </DropdownMenuItem>
+              {!isDisabled && (
+                <DropdownMenuItem
+                  onClick={handleRemoveExercise}
+                  className="cursor-pointer"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Remove
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         )}
@@ -262,10 +269,11 @@ export const SortableExercise = React.memo(
 
 type KanbanExerciseSetsProps = {
   isLoading: boolean
-  sets: GQLUpdateExerciseSetFormInput[]
+  sets: (GQLUpdateExerciseSetFormInput & { completedAt?: string | null })[]
   onUpdateSet: (index: number, field: string, value?: number) => Promise<void>
   onRemoveSet: (index: number) => Promise<void>
   onAddSet: () => Promise<void>
+  isExerciseCompleted: boolean
 }
 
 function KanbanExerciseSets({
@@ -274,7 +282,9 @@ function KanbanExerciseSets({
   onRemoveSet,
   onAddSet,
   sets,
+  isExerciseCompleted,
 }: KanbanExerciseSetsProps) {
+  const isExerciseDisabled = Boolean(isExerciseCompleted)
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-end">
@@ -285,6 +295,7 @@ function KanbanExerciseSets({
           size="sm"
           onClick={() => onAddSet()}
           iconStart={<Plus />}
+          disabled={isExerciseDisabled}
         >
           Add Set
         </Button>
@@ -335,7 +346,11 @@ function KanbanExerciseSets({
                     type="number"
                     min="1"
                     value={set.minReps || ''}
-                    disabled={set.id ? isTemporaryId(set.id) : true}
+                    disabled={
+                      set.id
+                        ? isTemporaryId(set.id)
+                        : true || isExerciseDisabled || Boolean(set.completedAt)
+                    }
                     onChange={(e) => {
                       // Don't update sets with temporary IDs to prevent API errors
                       if (!set.id || isTemporaryId(set.id)) return
@@ -362,7 +377,11 @@ function KanbanExerciseSets({
                         : undefined
                     }
                     value={set.maxReps || ''}
-                    disabled={set.id ? isTemporaryId(set.id) : true}
+                    disabled={
+                      set.id
+                        ? isTemporaryId(set.id)
+                        : true || isExerciseDisabled || Boolean(set.completedAt)
+                    }
                     onChange={(e) => {
                       // Don't update sets with temporary IDs to prevent API errors
                       if (!set.id || isTemporaryId(set.id)) return
@@ -394,7 +413,11 @@ function KanbanExerciseSets({
                   min="0"
                   step="2.5"
                   value={set.weight ?? ''}
-                  disabled={set.id ? isTemporaryId(set.id) : true}
+                  disabled={
+                    set.id
+                      ? isTemporaryId(set.id)
+                      : true || isExerciseDisabled || Boolean(set.completedAt)
+                  }
                   onChange={(e) => {
                     // Don't update sets with temporary IDs to prevent API errors
                     if (!set.id || isTemporaryId(set.id)) return
@@ -423,7 +446,11 @@ function KanbanExerciseSets({
                   max="10"
                   step="1"
                   value={set.rpe ?? ''}
-                  disabled={set.id ? isTemporaryId(set.id) : true}
+                  disabled={
+                    set.id
+                      ? isTemporaryId(set.id)
+                      : true || isExerciseDisabled || Boolean(set.completedAt)
+                  }
                   onChange={(e) => {
                     // Don't update sets with temporary IDs to prevent API errors
                     if (!set.id || isTemporaryId(set.id)) return
@@ -440,25 +467,29 @@ function KanbanExerciseSets({
               </div>
             </div>
 
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon-md"
-              className={cn(
-                '!opacity-0 group-hover/set:!opacity-100 self-end',
-                (!set.id ||
+            {(!isExerciseDisabled || !set.completedAt) && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-md"
+                className={cn(
+                  '!opacity-0 group-hover/set:!opacity-100 self-end',
+                  (!set.id ||
+                    sets.length <= 1 ||
+                    (set.id && isTemporaryId(set.id))) &&
+                    '!opacity-0 group-hover/set:!opacity-0',
+                )}
+                onClick={() => onRemoveSet(index)}
+                disabled={
                   sets.length <= 1 ||
-                  (set.id && isTemporaryId(set.id))) &&
-                  '!opacity-0 group-hover/set:!opacity-0',
-              )}
-              onClick={() => onRemoveSet(index)}
-              disabled={
-                sets.length <= 1 ||
-                !set.id ||
-                Boolean(set.id && isTemporaryId(set.id))
-              }
-              iconOnly={<X />}
-            />
+                  !set.id ||
+                  Boolean(set.id && isTemporaryId(set.id)) ||
+                  isExerciseDisabled ||
+                  Boolean(set.completedAt)
+                }
+                iconOnly={<X />}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -538,6 +569,8 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
     return <div>Failed to load exercise</div>
   }
 
+  const isDisabled = Boolean(exercise?.completedAt)
+
   return (
     <div className="gap-2">
       <DialogHeader className="mb-8">
@@ -557,6 +590,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
           <Input
             id="exerciseName"
             variant="ghost"
+            disabled={isDisabled}
             value={exercise?.name ?? ''}
             onChange={(e) =>
               updateExercise({
@@ -586,6 +620,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
             </Label>
             <Select
               value={exercise?.type ?? ''}
+              disabled={isDisabled}
               onValueChange={(value) =>
                 updateExercise({
                   name: exercise?.name,
@@ -627,9 +662,10 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               type="number"
               size="md"
               variant="ghost"
-              value={exercise?.restSeconds ?? ''}
               min="0"
               step="15"
+              disabled={isDisabled}
+              value={exercise?.restSeconds ?? ''}
               onChange={(e) => {
                 const restSeconds =
                   e.target.value === '' ? undefined : Number(e.target.value)
@@ -665,6 +701,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               type="number"
               min="0"
               step="1"
+              disabled={isDisabled}
               value={exercise?.warmupSets ?? ''}
               onChange={(e) => {
                 const warmupSets =
@@ -700,6 +737,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               variant="ghost"
               pattern="[0-9]*"
               placeholder="3-2-3"
+              disabled={isDisabled}
               value={exercise?.tempo ?? ''}
               onChange={(e) => {
                 const formattedValue = formatTempoInput(e)
@@ -736,6 +774,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
         <div className="w-full grid grid-cols-1 @4xl/section:grid-cols-[1fr_400px] gap-8">
           {exercise?.type !== GQLExerciseType.Cardio && (
             <KanbanExerciseSets
+              isExerciseCompleted={isDisabled}
               onUpdateSet={async (index, field, value) => {
                 const currentSet = exercise?.sets?.[index]
                 if (!currentSet) return
@@ -768,6 +807,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                   maxReps: set.maxReps,
                   weight: set.weight,
                   rpe: set.rpe,
+                  completedAt: set.completedAt,
                 })) || []
               }
             />
@@ -784,6 +824,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 id="instructions"
                 className="min-h-24"
                 variant="ghost"
+                disabled={isDisabled}
                 value={exercise?.instructions ?? ''}
                 onChange={(e) =>
                   updateExercise({
@@ -821,6 +862,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 rows={3}
                 variant="ghost"
                 className="min-h-24"
+                disabled={isDisabled}
                 value={exercise?.additionalInstructions ?? ''}
                 onChange={(e) =>
                   updateExercise({
@@ -862,15 +904,21 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
         </div>
       </div>
       <DialogFooter className="flex flex-row justify-between mt-4">
-        <Button
-          variant="destructive"
-          onClick={() => removeExercise({ exerciseId })}
-          loading={isRemovingExercise}
-        >
-          Remove exercise
-        </Button>
+        {!isDisabled && (
+          <Button
+            variant="destructive"
+            onClick={() => removeExercise({ exerciseId })}
+            loading={isRemovingExercise}
+          >
+            Remove exercise
+          </Button>
+        )}
         <DialogClose asChild>
-          <Button variant="secondary" disabled={isRemovingExercise}>
+          <Button
+            variant="secondary"
+            className="ml-auto"
+            disabled={isRemovingExercise}
+          >
             Done
           </Button>
         </DialogClose>
