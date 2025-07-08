@@ -15,6 +15,10 @@ const badgeVariants = cva(
           'border-transparent bg-muted-foreground/10 dark:bg-muted-foreground/10 text-secondary-foreground [a&]:hover:bg-muted-foreground/20',
         ),
 
+        tertiary: cn(
+          'border-transparent bg-card/50 dark:bg-muted/30 text-secondary-foreground [a&]:hover:bg-card/70 dark:[a&]:hover:bg-muted/40',
+        ),
+
         success: cn(
           'border-transparent bg-green-500/70 text-black [a&]:hover:bg-green-500/90 focus-visible:ring-green-500/20 dark:focus-visible:ring-green-500/40 dark:bg-green-500/60',
           'dark:bg-green-500/60',

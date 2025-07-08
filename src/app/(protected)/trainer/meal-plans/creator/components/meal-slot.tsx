@@ -55,8 +55,8 @@ export function MealSlot({ hour, day }: MealSlotProps) {
         <Card
           key={hour}
           className={cn(
-            'bg-muted/30 group/meal-card cursor-pointer transition-all shadow-sm',
-            !hasFood && 'bg-muted/15',
+            'bg-card dark:bg-muted/30 group/meal-card cursor-pointer transition-all shadow-xs',
+            !hasFood && 'bg-card/50 dark:bg-muted/15',
           )}
           onClick={() => handleOpenMeal(hour)}
         >
@@ -90,7 +90,7 @@ export function MealSlot({ hour, day }: MealSlotProps) {
                   {meal.foods.map((food) => (
                     <div
                       key={food.id}
-                      className="flex flex-col px-3 py-2 gap-2 rounded-md bg-card-on-card w-full shadow-sm"
+                      className="flex flex-col px-3 py-2 gap-2 rounded-md bg-card-on-card w-full shadow-xs"
                     >
                       <div className="flex items-center justify-between">
                         <p className="text-md font-medium">{food.name}</p>
@@ -99,7 +99,7 @@ export function MealSlot({ hour, day }: MealSlotProps) {
                           {food.quantity} {food.unit}
                         </p>
                       </div>
-                      <div className="flex gap-1 ml-auto">
+                      <div className="flex gap-2 ml-auto">
                         <MacroBadge
                           macro="calories"
                           size="sm"
@@ -134,8 +134,11 @@ export function MealSlot({ hour, day }: MealSlotProps) {
         </Card>
         <div className="flex items-start justify-end w-20">
           <Badge
-            variant="secondary"
-            className={cn('w-full', !hasFood && '!bg-muted/30')}
+            variant="tertiary"
+            className={cn(
+              'w-full',
+              !hasFood && '!bg-card/40 dark:!bg-muted/30',
+            )}
           >
             {formatHour(hour)}
           </Badge>
