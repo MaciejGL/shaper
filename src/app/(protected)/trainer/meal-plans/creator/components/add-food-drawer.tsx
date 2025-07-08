@@ -1,5 +1,7 @@
+import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useMemo, useState } from 'react'
 
+import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -28,6 +30,7 @@ export function AddFoodDrawer({
   handleCloseSheet: () => void
 }) {
   const { getMealByHour, saveMeal } = useMealPlanContext()
+  const { openModal } = useConfirmationModalContext()
   const [foods, setFoods] = useState<EditableFood[]>([])
   const [hasChanges, setHasChanges] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
@@ -65,25 +68,29 @@ export function AddFoodDrawer({
     }
   }, [hasChanges, saveMeal, dayId, selectedHour, foods, handleCloseSheet])
 
-  // Cancel changes
+  // Cancel changes with confirmation modal
   const handleCancel = useCallback(() => {
     if (hasChanges) {
-      if (
-        window.confirm(
-          'You have unsaved changes. Are you sure you want to close?',
-        )
-      ) {
-        handleCloseSheet()
-      }
+      openModal({
+        title: 'Unsaved Changes',
+        description:
+          'You have unsaved changes to this meal. Are you sure you want to close without saving?',
+        confirmText: 'Close anyway',
+        cancelText: 'Keep editing',
+        variant: 'default',
+        onConfirm: () => {
+          handleCloseSheet()
+        },
+      })
     } else {
       handleCloseSheet()
     }
-  }, [hasChanges, handleCloseSheet])
+  }, [hasChanges, handleCloseSheet, openModal])
 
   return (
     <Drawer
       open={selectedHour !== null}
-      onOpenChange={handleCloseSheet}
+      onOpenChange={handleCancel}
       direction="right"
     >
       <DrawerContent dialogTitle="Edit Meal" className="w-full sm:!max-w-lg">
@@ -145,12 +152,21 @@ export function AddFoodDrawer({
           )}
         </div>
 
-        <div className="p-4 sticky bottom-0 bg-background">
+        <div className="p-4 sticky bottom-0 bg-sidebar border-t">
           <div className="flex items-center justify-between">
-            <div className="text-sm text-muted-foreground">
-              {hasChanges ? 'Unsaved changes' : 'No changes'}
-            </div>
-            <div className="flex gap-2">
+            <AnimatePresence>
+              {hasChanges && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, x: 10 }}
+                  animate={{ opacity: 1, y: 0, x: 0 }}
+                  exit={{ opacity: 0, y: -10, x: -10 }}
+                  className="text-sm text-muted-foreground"
+                >
+                  Unsaved changes
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <div className="flex gap-2 ml-auto">
               <Button
                 variant="secondary"
                 onClick={handleCancel}
