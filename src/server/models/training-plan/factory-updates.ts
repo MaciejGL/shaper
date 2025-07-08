@@ -28,7 +28,7 @@ import TrainingPlan from './model'
 const isTrainer = (user: GQLContext['user']) =>
   user?.user.role.toLowerCase() === 'trainer'
 
-const isEditPlanNotAllowed = (
+export const isEditPlanNotAllowed = (
   user: GQLContext['user'],
   completedAt: Date | null,
 ) => isTrainer(user) && completedAt

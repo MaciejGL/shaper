@@ -949,11 +949,7 @@ export function useTrainingPlanMutations(trainingId?: string) {
       // Call debounce BEFORE mutation like other operations
       debouncedInvalidateQueries()
 
-      optimisticRemoveWeek
-        .optimisticMutate({ weekId: weekToRemove.id })
-        .catch(() => {
-          toast.error('Failed to remove week')
-        })
+      optimisticRemoveWeek.optimisticMutate({ weekId: weekToRemove.id })
     },
     [trainingId, optimisticRemoveWeek, debouncedInvalidateQueries, queryClient],
   )

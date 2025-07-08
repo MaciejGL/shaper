@@ -27,6 +27,7 @@ import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from '../base-exercise/model'
 import ExerciseSet from '../exercise-set/model'
+import { isEditPlanNotAllowed } from '../training-plan/factory-updates'
 import TrainingPlan from '../training-plan/model'
 import { getFullPlanById } from '../training-utils.server'
 
@@ -106,6 +107,10 @@ export const updateExerciseForm = async (
 
   if (!exercise) {
     throw new GraphQLError('Exercise not found')
+  }
+
+  if (isEditPlanNotAllowed(context.user, exercise.completedAt)) {
+    throw new GraphQLError('Cannot edit completed exercise')
   }
 
   if (exercise.day.week.plan.createdById !== context.user?.user.id) {
@@ -562,6 +567,9 @@ export const addSetExerciseForm = async (
   if (!trainingExercise) {
     throw new Error('Training exercise not found')
   }
+  if (isEditPlanNotAllowed(context.user, trainingExercise.completedAt)) {
+    throw new GraphQLError('Cannot add sets to completed exercise')
+  }
 
   const newSet = await prisma.exerciseSet.create({
     data: {
@@ -578,7 +586,10 @@ export const addSetExerciseForm = async (
   return new ExerciseSet(newSet)
 }
 
-export const removeSetExerciseForm = async (setId: string) => {
+export const removeSetExerciseForm = async (
+  setId: string,
+  context: GQLContext,
+) => {
   // Get the set with its order and exercise information
   const set = await prisma.exerciseSet.findUnique({
     where: { id: setId },
@@ -597,6 +608,9 @@ export const removeSetExerciseForm = async (setId: string) => {
     throw new Error('Set not found')
   }
 
+  if (isEditPlanNotAllowed(context.user, set.exercise.completedAt)) {
+    throw new GraphQLError('Cannot remove completed set')
+  }
   const setOrder = set.order
   const exerciseId = set.exerciseId
 
