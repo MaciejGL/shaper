@@ -1,3 +1,6 @@
+import { Edit } from 'lucide-react'
+
+import { ButtonLink } from '@/components/ui/button-link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { GQLGetClientByIdQuery } from '@/generated/graphql-client'
 
@@ -20,7 +23,19 @@ export function ClientActivePlan({
 }) {
   return (
     <div>
-      <div className="text-2xl font-semibold mb-4">Active Plan</div>
+      <div className="flex items-center justify-between mb-4">
+        <div className="text-2xl font-semibold">Active Plan</div>
+        {activePlan && (
+          <ButtonLink
+            href={`/trainer/trainings/creator/${activePlan.id}`}
+            variant="secondary"
+            size="sm"
+            iconStart={<Edit className="h-4 w-4" />}
+          >
+            Edit Plan
+          </ButtonLink>
+        )}
+      </div>
 
       {activePlan ? (
         <Tabs defaultValue="active-plan">
