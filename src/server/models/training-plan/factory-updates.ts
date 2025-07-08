@@ -25,6 +25,14 @@ import TrainingPlan from './model'
 
 // Using generated GraphQL types instead of custom interfaces
 
+const isTrainer = (user: GQLContext['user']) =>
+  user?.user.role.toLowerCase() === 'trainer'
+
+const isEditPlanNotAllowed = (
+  user: GQLContext['user'],
+  completedAt: Date | null,
+) => isTrainer(user) && completedAt
+
 /**
  * Update only the basic details of a training plan
  * Much more efficient than updating the entire plan structure
@@ -41,11 +49,15 @@ export async function updateTrainingPlanDetails(
   // Verify ownership
   const plan = await prisma.trainingPlan.findUnique({
     where: { id: input.id, createdById: user.user.id },
-    select: { id: true },
+    select: { id: true, completedAt: true },
   })
 
   if (!plan) {
     throw new GraphQLError('Training plan not found or unauthorized')
+  }
+
+  if (isEditPlanNotAllowed(user, plan.completedAt)) {
+    throw new GraphQLError('Cannot edit completed training plan')
   }
 
   await prisma.trainingPlan.update({
@@ -82,6 +94,11 @@ export async function updateTrainingWeekDetails(
 
   if (!week || week.plan.createdById !== user.user.id) {
     throw new GraphQLError('Training week not found or unauthorized')
+  }
+
+  // Prevent editing completed weeks
+  if (isEditPlanNotAllowed(user, week.completedAt)) {
+    throw new GraphQLError('Cannot edit completed training week')
   }
 
   await prisma.trainingWeek.update({
@@ -145,6 +162,9 @@ export async function duplicateTrainingWeek(
   if (!weekToDuplicate || weekToDuplicate.plan.createdById !== user.user.id) {
     throw new GraphQLError('Training week not found or unauthorized')
   }
+
+  // Note: We don't prevent duplicating completed weeks as this is creating a new week
+  // The completed status is not copied to the new week
 
   // Determine the next week number (last week + 1)
   const nextWeekNumber =
@@ -211,11 +231,19 @@ export async function removeTrainingWeek(
   // Get the week to be deleted with its details
   const week = await prisma.trainingWeek.findUnique({
     where: { id: weekId },
-    include: { plan: { select: { createdById: true } } },
+    include: { plan: { select: { createdById: true, completedAt: true } } },
   })
 
   if (!week || week.plan.createdById !== user.user.id) {
     throw new GraphQLError('Training week not found or unauthorized')
+  }
+
+  // Prevent removing weeks from completed training plans or completed weeks
+  if (isEditPlanNotAllowed(user, week.completedAt)) {
+    throw new GraphQLError('Cannot remove completed training week')
+  }
+  if (isEditPlanNotAllowed(user, week.plan.completedAt)) {
+    throw new GraphQLError('Cannot remove weeks from completed training plan')
   }
 
   return await prisma.$transaction(async (tx) => {
@@ -253,11 +281,16 @@ export async function addTrainingWeek(
 
   const plan = await prisma.trainingPlan.findUnique({
     where: { id: input.trainingPlanId, createdById: user.user.id },
-    select: { id: true },
+    select: { id: true, completedAt: true },
   })
 
   if (!plan) {
     throw new GraphQLError('Training plan not found or unauthorized')
+  }
+
+  // Prevent adding weeks to completed training plans
+  if (isEditPlanNotAllowed(user, plan.completedAt)) {
+    throw new GraphQLError('Cannot add weeks to completed training plan')
   }
 
   return await prisma.$transaction(async (tx) => {
@@ -319,6 +352,14 @@ export async function updateTrainingDayData(
     throw new GraphQLError('Training day not found or unauthorized')
   }
 
+  // Prevent editing completed days or days in completed weeks
+  if (isEditPlanNotAllowed(user, day.completedAt)) {
+    throw new GraphQLError('Cannot edit completed training day')
+  }
+  if (isEditPlanNotAllowed(user, day.week.completedAt)) {
+    throw new GraphQLError('Cannot edit days in completed training week')
+  }
+
   await prisma.trainingDay.update({
     where: { id: input.dayId },
     data: {
@@ -361,6 +402,17 @@ export async function updateTrainingExercise(
 
   if (!exercise || exercise.day.week.plan.createdById !== user.user.id) {
     throw new GraphQLError('Training exercise not found or unauthorized')
+  }
+
+  // Prevent editing completed exercises, days, or weeks
+  if (isEditPlanNotAllowed(user, exercise.completedAt)) {
+    throw new GraphQLError('Cannot edit completed training exercise')
+  }
+  if (isEditPlanNotAllowed(user, exercise.day.completedAt)) {
+    throw new GraphQLError('Cannot edit exercises in completed training day')
+  }
+  if (isEditPlanNotAllowed(user, exercise.day.week.completedAt)) {
+    throw new GraphQLError('Cannot edit exercises in completed training week')
   }
 
   await prisma.$transaction(async (tx) => {
@@ -450,14 +502,47 @@ export async function updateExerciseSet(
     throw new GraphQLError('User not found')
   }
 
+  // Verify ownership and check completion status
+  const set = await prisma.exerciseSet.findUnique({
+    where: { id: input.id },
+    include: {
+      exercise: {
+        include: {
+          day: {
+            include: {
+              week: {
+                include: {
+                  plan: { select: { createdById: true } },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!set || set.exercise.day.week.plan.createdById !== user.user.id) {
+    throw new GraphQLError('Exercise set not found or unauthorized')
+  }
+
+  // Prevent editing completed sets, exercises, days, or weeks
+  if (isEditPlanNotAllowed(user, set.completedAt)) {
+    throw new GraphQLError('Cannot edit completed exercise set')
+  }
+  if (isEditPlanNotAllowed(user, set.exercise.completedAt)) {
+    throw new GraphQLError('Cannot edit sets in completed training exercise')
+  }
+  if (isEditPlanNotAllowed(user, set.exercise.day.completedAt)) {
+    throw new GraphQLError('Cannot edit sets in completed training day')
+  }
+  if (isEditPlanNotAllowed(user, set.exercise.day.week.completedAt)) {
+    throw new GraphQLError('Cannot edit sets in completed training week')
+  }
+
   await prisma.exerciseSet.update({
     where: {
       id: input.id,
-      exercise: {
-        day: {
-          week: { plan: { createdById: user.user.id } },
-        },
-      },
     },
     data: {
       order: input.order ?? null,
@@ -496,6 +581,14 @@ export async function addExerciseToDay(
 
   if (!day || day.week.plan.createdById !== user.user.id) {
     throw new GraphQLError('Training day not found or unauthorized')
+  }
+
+  // Prevent adding exercises to completed days or weeks
+  if (isEditPlanNotAllowed(user, day.completedAt)) {
+    throw new GraphQLError('Cannot add exercises to completed training day')
+  }
+  if (isEditPlanNotAllowed(user, day.week.completedAt)) {
+    throw new GraphQLError('Cannot add exercises to completed training week')
   }
 
   return await prisma.$transaction(async (tx) => {
@@ -574,6 +667,21 @@ export async function removeExerciseFromDay(
     throw new GraphQLError('Training exercise not found or unauthorized')
   }
 
+  // Prevent removing exercises from completed items
+  if (isEditPlanNotAllowed(user, exercise.completedAt)) {
+    throw new GraphQLError('Cannot remove completed training exercise')
+  }
+  if (isEditPlanNotAllowed(user, exercise.day.completedAt)) {
+    throw new GraphQLError(
+      'Cannot remove exercises from completed training day',
+    )
+  }
+  if (isEditPlanNotAllowed(user, exercise.day.week.completedAt)) {
+    throw new GraphQLError(
+      'Cannot remove exercises from completed training week',
+    )
+  }
+
   return await prisma.$transaction(async (tx) => {
     // Store the order of the exercise being deleted
     const deletedOrder = exercise.order
@@ -628,6 +736,17 @@ export async function moveExercise(
 
   if (!exercise || exercise.day.week.plan.createdById !== user.user.id) {
     throw new GraphQLError('Training exercise not found or unauthorized')
+  }
+
+  // Prevent moving completed exercises or exercises in completed items
+  if (isEditPlanNotAllowed(user, exercise.completedAt)) {
+    throw new GraphQLError('Cannot move completed training exercise')
+  }
+  if (isEditPlanNotAllowed(user, exercise.day.completedAt)) {
+    throw new GraphQLError('Cannot move exercises from completed training day')
+  }
+  if (isEditPlanNotAllowed(user, exercise.day.week.completedAt)) {
+    throw new GraphQLError('Cannot move exercises from completed training week')
   }
 
   const sourceDayId = input.dayId
@@ -762,6 +881,17 @@ export async function addSetToExercise(
     throw new GraphQLError('Training exercise not found or unauthorized')
   }
 
+  // Prevent adding sets to completed items
+  if (isEditPlanNotAllowed(user, exercise.completedAt)) {
+    throw new GraphQLError('Cannot add sets to completed training exercise')
+  }
+  if (isEditPlanNotAllowed(user, exercise.day.completedAt)) {
+    throw new GraphQLError('Cannot add sets to completed training day')
+  }
+  if (isEditPlanNotAllowed(user, exercise.day.week.completedAt)) {
+    throw new GraphQLError('Cannot add sets to completed training week')
+  }
+
   return await prisma.$transaction(async (tx) => {
     // If inserting at a specific order position, increment order of all sets >= input.order
     if (input.order !== undefined) {
@@ -826,6 +956,22 @@ export async function removeSetFromExercise(
 
   if (!set || set.exercise.day.week.plan.createdById !== user.user.id) {
     throw new GraphQLError('Exercise set not found or unauthorized')
+  }
+
+  // Prevent removing sets from completed items
+  if (isEditPlanNotAllowed(user, set.completedAt)) {
+    throw new GraphQLError('Cannot remove completed exercise set')
+  }
+  if (isEditPlanNotAllowed(user, set.exercise.completedAt)) {
+    throw new GraphQLError(
+      'Cannot remove sets from completed training exercise',
+    )
+  }
+  if (isEditPlanNotAllowed(user, set.exercise.day.completedAt)) {
+    throw new GraphQLError('Cannot remove sets from completed training day')
+  }
+  if (isEditPlanNotAllowed(user, set.exercise.day.week.completedAt)) {
+    throw new GraphQLError('Cannot remove sets from completed training week')
   }
 
   return await prisma.$transaction(async (tx) => {
