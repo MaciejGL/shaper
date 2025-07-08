@@ -75,6 +75,24 @@ query GetClientById($id: ID!) {
       }
     }
   }
+
+  getClientMealPlans(clientId: $id) {
+    id
+    title
+    description
+    isDraft
+    dailyCalories
+    dailyProtein
+    dailyCarbs
+    dailyFat
+    weekCount
+    startDate
+    endDate
+    active
+    assignedCount
+    createdAt
+    updatedAt
+  }
 }
 
 query ClientBodyMeasures($clientId: ID!) {

@@ -14,6 +14,7 @@ import {
   getMealPlanById,
   getMealPlanTemplates,
   getMyMealPlansOverview,
+  removeMealPlanFromClient,
   saveMeal,
   updateMealPlanDetails,
 } from './factory'
@@ -45,6 +46,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   },
   assignMealPlanToClient: async (_, args, context) => {
     return assignMealPlanToClient(args, context)
+  },
+  removeMealPlanFromClient: async (_, args, context) => {
+    return removeMealPlanFromClient(args, context)
   },
   duplicateMealPlan: async (_, args, context) => {
     return duplicateMealPlan(args, context)

@@ -3,7 +3,6 @@
 import { useParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -18,6 +17,7 @@ import { cn } from '@/lib/utils'
 import { getDayName } from '../../../trainings/creator/utils'
 
 import { ChartPieDonutText } from './chart-pie-donut-text'
+import { MealPlanHeader } from './meal-plan-header'
 import { MealTimeSlots } from './meal-time-slots'
 import {
   calculateFoodNutrition,
@@ -203,29 +203,11 @@ function MealPlanCreatorContent() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-card/50 rounded-lg sticky -top-4 z-10 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                Meal Plan Creator
-              </h1>
-              {mealPlan?.title && (
-                <p className="text-muted-foreground mt-1">{mealPlan.title}</p>
-              )}
-            </div>
-
-            <div className="flex items-center gap-4">
-              <Badge variant="outline" className="flex items-center gap-1">
-                {mealPlan?.dailyCalories} cal
-              </Badge>
-              <Badge variant="outline" className="flex items-center gap-1">
-                {mealPlan?.dailyProtein}g protein
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MealPlanHeader
+        title={mealPlan?.title}
+        dailyCalories={mealPlan?.dailyCalories}
+        dailyProtein={mealPlan?.dailyProtein}
+      />
 
       <div className="grid grid-cols-[2fr_3fr] container max-w-[900px] gap-4 mx-auto pt-6">
         <Input
