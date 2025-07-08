@@ -23,7 +23,7 @@ import { useMealPlanDetailsMutation } from '@/hooks/use-meal-plan-details-mutati
 import { formatNumberInput } from '@/lib/format-tempo'
 import { cn } from '@/lib/utils'
 
-import { dayNames, getDayName } from '../../../trainings/creator/utils'
+import { getDayName } from '../../../trainings/creator/utils'
 
 import MealTimeSlots from './meal-time-slots'
 
@@ -143,7 +143,7 @@ function MealPlanCreatorContent() {
     500, // 500ms debounce for dailyProtein
   )
 
-  const selectedWeek = mealPlan?.weeks.at(0)
+  const selectedWeek = useMemo(() => mealPlan?.weeks.at(0), [mealPlan?.weeks])
 
   const totalNutrients: {
     kcal: number
@@ -238,12 +238,19 @@ function MealPlanCreatorContent() {
     mealPlan?.dailyFat,
   ])
 
+  const selectedDayMeals = useMemo(
+    () => selectedWeek?.days[selectedDay],
+    [selectedWeek?.days, selectedDay],
+  )
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg font-medium">Loading meal plan...</div>
-          <div className="text-muted-foreground">Please wait</div>
+          <div className="text-lg font-medium animate-pulse">
+            Loading meal plan...
+          </div>
+          <div className="text-muted-foreground animate-pulse">Please wait</div>
         </div>
       </div>
     )
@@ -422,22 +429,19 @@ function MealPlanCreatorContent() {
             </div>
             <div className="flex items-center gap-2">
               <ChartPieDonutText
-                totalCalorie={totalNutrients.kcal || 0}
-                totalProtein={totalNutrients.protein || 0}
-                totalCarbs={totalNutrients.carbs || 0}
-                totalFat={totalNutrients.fat || 0}
-                totalFiber={totalNutrients.fiber || 0}
+                totalCalorie={totalNutrients.kcal ?? 0}
+                totalProtein={totalNutrients.protein ?? 0}
+                totalCarbs={totalNutrients.carbs ?? 0}
+                totalFat={totalNutrients.fat ?? 0}
+                totalFiber={totalNutrients.fiber ?? 0}
               />
             </div>
           </div>
 
           {/* Selected Day Meal Planning */}
-          {selectedWeek?.days[selectedDay] && (
+          {selectedDayMeals && (
             <div className="space-y-4">
-              <MealTimeSlots
-                key={dayNames[selectedDay]}
-                day={selectedWeek?.days[selectedDay]}
-              />
+              <MealTimeSlots key={selectedDay} day={selectedDayMeals} />
             </div>
           )}
         </div>
@@ -446,7 +450,7 @@ function MealPlanCreatorContent() {
   )
 }
 
-export default function MealPlanCreator() {
+export function MealPlanCreator() {
   const { mealPlanId } = useParams<{ mealPlanId: string }>()
 
   return (

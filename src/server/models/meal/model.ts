@@ -10,6 +10,7 @@ import { GQLMeal } from '@/generated/graphql-server'
 import { openFoodFactsClient } from '@/lib/open-food-facts/client'
 import { GQLContext } from '@/types/gql-context'
 
+import MealFood from '../meal-food/model'
 import MealLog from '../meal-log/model'
 
 export default class Meal implements GQLMeal {
@@ -50,7 +51,9 @@ export default class Meal implements GQLMeal {
   }
 
   async foods() {
-    return []
+    return (
+      this.data.foods?.map((food) => new MealFood(food, this.context)) || []
+    )
   }
 
   async logs() {
