@@ -55,7 +55,7 @@ export const convertToGrams = (quantity: number, unit: string): number => {
   return quantity * conversionFactor
 }
 
-export const calculateFoodNutrition = (food: {
+type Food = {
   caloriesPer100g?: number | null
   proteinPer100g?: number | null
   carbsPer100g?: number | null
@@ -63,7 +63,8 @@ export const calculateFoodNutrition = (food: {
   fiberPer100g?: number | null
   quantity: number
   unit: string
-}) => {
+}
+export const calculateFoodNutrition = (food: Food) => {
   const grams = convertToGrams(food.quantity, food.unit)
   const factor = grams / 100 // Convert from per 100g to actual grams
 
@@ -78,4 +79,23 @@ export const calculateFoodNutrition = (food: {
 
 export const formatHour = (hour: number) => {
   return `${hour}:00`
+}
+
+export const getMealNutrients = (foods: Food[]) => {
+  const mealNutrition = foods.reduce(
+    (mealAcc, food) => {
+      const foodNutrition = calculateFoodNutrition(food)
+
+      return {
+        kcal: mealAcc.kcal + foodNutrition.calories,
+        protein: mealAcc.protein + foodNutrition.protein,
+        carbs: mealAcc.carbs + foodNutrition.carbs,
+        fat: mealAcc.fat + foodNutrition.fat,
+        fiber: mealAcc.fiber + foodNutrition.fiber,
+      }
+    },
+    { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
+  )
+
+  return mealNutrition
 }

@@ -19,7 +19,11 @@ import { getDayName } from '../../../trainings/creator/utils'
 
 import { ChartPieDonutText } from './chart-pie-donut-text'
 import { MealTimeSlots } from './meal-time-slots'
-import { calculateFoodNutrition, calculateMacroPercentage } from './utils'
+import {
+  calculateFoodNutrition,
+  calculateMacroPercentage,
+  getMealNutrients,
+} from './utils'
 
 function MealPlanCreatorContent() {
   const [selectedDay, setSelectedDay] = useState(0)
@@ -80,20 +84,7 @@ function MealPlanCreatorContent() {
 
     const dayNutrition = selectedWeek.days[selectedDay].meals.reduce(
       (dayAcc, meal) => {
-        const mealNutrition = meal.foods.reduce(
-          (mealAcc, food) => {
-            const foodNutrition = calculateFoodNutrition(food)
-
-            return {
-              kcal: mealAcc.kcal + foodNutrition.calories,
-              protein: mealAcc.protein + foodNutrition.protein,
-              carbs: mealAcc.carbs + foodNutrition.carbs,
-              fat: mealAcc.fat + foodNutrition.fat,
-              fiber: mealAcc.fiber + foodNutrition.fiber,
-            }
-          },
-          { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
-        )
+        const mealNutrition = getMealNutrients(meal.foods)
 
         return {
           kcal: dayAcc.kcal + mealNutrition.kcal,
