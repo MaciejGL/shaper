@@ -170,53 +170,56 @@ export async function duplicateTrainingWeek(
   const nextWeekNumber =
     plan.weeks.length > 0 ? plan.weeks[0].weekNumber + 1 : 1
 
-  return await prisma.$transaction(async (tx) => {
-    // Create the new week
-    const newWeek = await tx.trainingWeek.create({
-      data: {
-        planId: input.trainingPlanId,
-        weekNumber: nextWeekNumber,
-        name: `Week ${nextWeekNumber}`,
-        description: weekToDuplicate.description,
-        isExtra: weekToDuplicate.isExtra,
-        days: {
-          create: weekToDuplicate.days.map((day) => ({
-            dayOfWeek: day.dayOfWeek,
-            isRestDay: day.isRestDay,
-            workoutType: day.workoutType,
-            isExtra: day.isExtra,
-            exercises: {
-              create: day.exercises.map((exercise) => ({
-                name: exercise.name,
-                order: exercise.order,
-                restSeconds: exercise.restSeconds,
-                tempo: exercise.tempo,
-                instructions: exercise.instructions,
-                additionalInstructions: exercise.additionalInstructions,
-                type: exercise.type,
-                warmupSets: exercise.warmupSets,
-                baseId: exercise.baseId,
-                isExtra: exercise.isExtra,
-                sets: {
-                  create: exercise.sets.map((set) => ({
-                    order: set.order,
-                    reps: set.reps,
-                    minReps: set.minReps,
-                    maxReps: set.maxReps,
-                    weight: set.weight,
-                    rpe: set.rpe,
-                    isExtra: set.isExtra,
-                  })),
-                },
-              })),
-            },
-          })),
+  return await prisma.$transaction(
+    async (tx) => {
+      // Create the new week
+      const newWeek = await tx.trainingWeek.create({
+        data: {
+          planId: input.trainingPlanId,
+          weekNumber: nextWeekNumber,
+          name: `Week ${nextWeekNumber}`,
+          description: weekToDuplicate.description,
+          isExtra: weekToDuplicate.isExtra,
+          days: {
+            create: weekToDuplicate.days.map((day) => ({
+              dayOfWeek: day.dayOfWeek,
+              isRestDay: day.isRestDay,
+              workoutType: day.workoutType,
+              isExtra: day.isExtra,
+              exercises: {
+                create: day.exercises.map((exercise) => ({
+                  name: exercise.name,
+                  order: exercise.order,
+                  restSeconds: exercise.restSeconds,
+                  tempo: exercise.tempo,
+                  instructions: exercise.instructions,
+                  additionalInstructions: exercise.additionalInstructions,
+                  type: exercise.type,
+                  warmupSets: exercise.warmupSets,
+                  baseId: exercise.baseId,
+                  isExtra: exercise.isExtra,
+                  sets: {
+                    create: exercise.sets.map((set) => ({
+                      order: set.order,
+                      reps: set.reps,
+                      minReps: set.minReps,
+                      maxReps: set.maxReps,
+                      weight: set.weight,
+                      rpe: set.rpe,
+                      isExtra: set.isExtra,
+                    })),
+                  },
+                })),
+              },
+            })),
+          },
         },
-      },
-    })
+      })
 
-    return newWeek.id
-  })
+      return newWeek.id
+    },
+    { timeout: 30000, maxWait: 30000 },
+  )
 }
 
 export async function removeTrainingWeek(
@@ -293,35 +296,38 @@ export async function addTrainingWeek(
     throw new GraphQLError('Cannot add weeks to completed training plan')
   }
 
-  return await prisma.$transaction(async (tx) => {
-    // If inserting at a specific week number, increment weekNumber of all existing weeks >= input.weekNumber
-    await tx.trainingWeek.updateMany({
-      where: {
-        planId: input.trainingPlanId,
-        weekNumber: { gte: input.weekNumber },
-      },
-      data: {
-        weekNumber: { increment: 1 },
-      },
-    })
-
-    // Create the new week
-    const newWeek = await tx.trainingWeek.create({
-      data: {
-        planId: input.trainingPlanId,
-        weekNumber: input.weekNumber,
-        name: `Week ${input.weekNumber}`,
-        description: '',
-        days: {
-          create: Array.from({ length: 7 }, (_, i) => ({
-            dayOfWeek: i,
-          })),
+  return await prisma.$transaction(
+    async (tx) => {
+      // If inserting at a specific week number, increment weekNumber of all existing weeks >= input.weekNumber
+      await tx.trainingWeek.updateMany({
+        where: {
+          planId: input.trainingPlanId,
+          weekNumber: { gte: input.weekNumber },
         },
-      },
-    })
+        data: {
+          weekNumber: { increment: 1 },
+        },
+      })
 
-    return newWeek.id
-  })
+      // Create the new week
+      const newWeek = await tx.trainingWeek.create({
+        data: {
+          planId: input.trainingPlanId,
+          weekNumber: input.weekNumber,
+          name: `Week ${input.weekNumber}`,
+          description: '',
+          days: {
+            create: Array.from({ length: 7 }, (_, i) => ({
+              dayOfWeek: i,
+            })),
+          },
+        },
+      })
+
+      return newWeek.id
+    },
+    { timeout: 30000, maxWait: 30000 },
+  )
 }
 
 /**
