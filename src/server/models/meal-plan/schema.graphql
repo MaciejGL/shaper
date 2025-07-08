@@ -190,6 +190,7 @@ type Mutation {
   createMealPlan(input: CreateMealPlanInput!): CreateMealPlanPayload!
   createDraftMealTemplate: MealPlan!
   assignMealPlanToClient(input: AssignMealPlanToClientInput!): Boolean!
+  removeMealPlanFromClient(planId: ID!, clientId: ID!): Boolean!
   duplicateMealPlan(id: ID!): ID!
   updateMealPlanDetails(input: UpdateMealPlanDetailsInput!): Boolean!
 

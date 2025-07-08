@@ -1,12 +1,6 @@
 import { useIsMutating } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  Copy,
-  Loader2,
-  MoreHorizontalIcon,
-  RefreshCcwIcon,
-  Trash2,
-} from 'lucide-react'
+import { Copy, Loader2, MoreHorizontalIcon, Trash2 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -15,30 +9,30 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 
 type FormActionsProps = {
-  isDirty: boolean
   trainingId?: string
   isDuplicating: boolean
   isDeleting: boolean
   onDelete: (trainingId: string) => Promise<void>
-  onClearDraft: () => void
   onDuplicate: (trainingId: string) => Promise<void>
 }
 
 export function FormActions({
-  isDirty,
   trainingId,
-
   isDuplicating,
   isDeleting,
   onDelete,
-  onClearDraft,
+
   onDuplicate,
 }: FormActionsProps) {
   const pendingMutationsCount = useIsMutating()
+  const { formData } = useTrainingPlan()
 
   const isSavingChanges = pendingMutationsCount > 0
+
+  const isDisabled = formData?.details.assignedTo
 
   return (
     <div>
@@ -63,16 +57,6 @@ export function FormActions({
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem
-              onClick={onClearDraft}
-              disabled={
-                isSavingChanges || isDuplicating || isDeleting || !isDirty
-              }
-            >
-              <RefreshCcwIcon className="size-4 mr-2" />
-              Reset Changes
-            </DropdownMenuItem>
-
-            <DropdownMenuItem
               onClick={() => onDuplicate(trainingId!)}
               loading={isDuplicating}
               disabled={
@@ -83,16 +67,18 @@ export function FormActions({
               Duplicate
             </DropdownMenuItem>
 
-            <DropdownMenuItem
-              onClick={() => onDelete(trainingId!)}
-              loading={isDeleting}
-              disabled={
-                isSavingChanges || isDuplicating || isDeleting || !trainingId
-              }
-            >
-              <Trash2 className="size-4 mr-2" />
-              Delete
-            </DropdownMenuItem>
+            {!isDisabled && (
+              <DropdownMenuItem
+                onClick={() => onDelete(trainingId!)}
+                loading={isDeleting}
+                disabled={
+                  isSavingChanges || isDuplicating || isDeleting || !trainingId
+                }
+              >
+                <Trash2 className="size-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

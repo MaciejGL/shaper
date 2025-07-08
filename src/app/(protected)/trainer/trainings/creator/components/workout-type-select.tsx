@@ -18,16 +18,22 @@ type WorkoutTypeSelectProps = {
   dayIndex: number
   workoutType?: GQLWorkoutType | null
   onValueChange: (value: GQLWorkoutType) => void
+  disabled?: boolean
 }
 
 export function WorkoutTypeSelect({
   dayIndex,
   workoutType,
   onValueChange,
+  disabled,
 }: WorkoutTypeSelectProps) {
   return (
     <div className="space-y-2">
-      <Select value={workoutType || ''} onValueChange={onValueChange}>
+      <Select
+        value={workoutType || ''}
+        onValueChange={onValueChange}
+        disabled={disabled}
+      >
         <SelectTrigger id={`workout-type-${dayIndex}`} className="w-full">
           <SelectValue placeholder="Select type" />
         </SelectTrigger>

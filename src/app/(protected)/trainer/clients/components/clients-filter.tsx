@@ -20,6 +20,7 @@ export function ClientsFilter() {
           <Input
             id="search"
             type="search"
+            variant="ghost"
             placeholder="Search clients..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}

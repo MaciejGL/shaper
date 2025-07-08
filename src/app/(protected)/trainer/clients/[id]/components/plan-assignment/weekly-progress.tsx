@@ -32,7 +32,7 @@ export function WeeklyProgress({ plan }: WeeklyProgressProps) {
       </div>
 
       <Tabs defaultValue={plan.weeks[0]?.id} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="w-full">
           {plan.weeks.map((week, index) => (
             <TabsTrigger key={week.id} value={week.id}>
               {week.completedAt && (
@@ -138,7 +138,7 @@ const DayCard = ({
       </CollapsibleTrigger>
 
       <CollapsibleContent className="overflow-hidden">
-        <div className="pt-4">
+        <div className="p-4">
           {day.isRestDay ? (
             <p className="text-sm text-muted-foreground text-center py-4">
               Rest day - no exercises scheduled
@@ -167,7 +167,7 @@ const ExerciseCard = ({
   const completedSets = exercise.sets.filter((set) => set.completedAt).length
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 bg-card-on-card rounded-md p-4">
       {/* Exercise Header */}
       <div className="flex items-center justify-between">
         <h4 className="font-medium text-sm">{exercise.name}</h4>

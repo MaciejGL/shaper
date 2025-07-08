@@ -25,6 +25,7 @@ export const Query: GQLQueryResolvers = {
 }
 
 export const Mutation: GQLMutationResolvers = {
+  // Fitspace
   getAiExerciseSuggestions: async (_, { dayId }, context) => {
     return getAiExerciseSuggestions(dayId, context)
   },
@@ -50,17 +51,18 @@ export const Mutation: GQLMutationResolvers = {
   updateExerciseForm: async (_, { input }, context) => {
     return updateExerciseForm(input, context)
   },
-
-  addSetExerciseForm: async (_, { input }, context) => {
-    return addSetExerciseForm(input, context)
-  },
-  removeSetExerciseForm: async (_, { setId }) => {
-    return removeSetExerciseForm(setId)
-  },
   swapExercise: async (_, { exerciseId, substituteId }, context) => {
     return swapExercise(exerciseId, substituteId, context)
   },
   addExercisesToQuickWorkout: async (_, { exerciseIds }, context) => {
     return addExercisesToQuickWorkout(exerciseIds, context)
+  },
+
+  // TRAINER
+  addSetExerciseForm: async (_, { input }, context) => {
+    return addSetExerciseForm(input, context)
+  },
+  removeSetExerciseForm: async (_, { setId }, context) => {
+    return removeSetExerciseForm(setId, context)
   },
 }

@@ -2,17 +2,8 @@
 
 import { useParams } from 'next/navigation'
 import { useMemo, useState } from 'react'
-import { Label, Pie, PieChart } from 'recharts'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CardContent } from '@/components/ui/card'
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from '@/components/ui/chart'
 import { Input } from '@/components/ui/input'
 import {
   MealPlanProvider,
@@ -23,87 +14,16 @@ import { useMealPlanDetailsMutation } from '@/hooks/use-meal-plan-details-mutati
 import { formatNumberInput } from '@/lib/format-tempo'
 import { cn } from '@/lib/utils'
 
-import { dayNames, getDayName } from '../../../trainings/creator/utils'
+import { getDayName } from '../../../trainings/creator/utils'
 
-import MealTimeSlots from './meal-time-slots'
-
-const macroCaloriesMultiplier = {
-  protein: 4,
-  carbs: 4,
-  fat: 9,
-}
-
-const calculateMacroPercentage = (
-  macro: number,
-  calories: number,
-  macroType: 'protein' | 'carbs' | 'fat',
-) => {
-  return (
-    ((macro * macroCaloriesMultiplier[macroType]) / calories) *
-    100
-  ).toFixed(0)
-}
-
-const convertToGrams = (quantity: number, unit: string): number => {
-  const unitLower = unit.toLowerCase()
-
-  const conversions: Record<string, number> = {
-    g: 1,
-    grams: 1,
-    gram: 1,
-    kg: 1000,
-    kilogram: 1000,
-    kilograms: 1000,
-    oz: 28.35,
-    ounce: 28.35,
-    ounces: 28.35,
-    lb: 453.59,
-    pound: 453.59,
-    pounds: 453.59,
-    cup: 240,
-    cups: 240,
-    tbsp: 15,
-    tablespoon: 15,
-    tablespoons: 15,
-    tsp: 5,
-    teaspoon: 5,
-    teaspoons: 5,
-    ml: 1,
-    milliliter: 1,
-    milliliters: 1,
-    l: 1000,
-    liter: 1000,
-    liters: 1000,
-    piece: 100,
-    pieces: 100,
-    slice: 30,
-    slices: 30,
-  }
-
-  const conversionFactor = conversions[unitLower] || 1
-  return quantity * conversionFactor
-}
-
-const calculateFoodNutrition = (food: {
-  caloriesPer100g?: number | null
-  proteinPer100g?: number | null
-  carbsPer100g?: number | null
-  fatPer100g?: number | null
-  fiberPer100g?: number | null
-  quantity: number
-  unit: string
-}) => {
-  const grams = convertToGrams(food.quantity, food.unit)
-  const factor = grams / 100 // Convert from per 100g to actual grams
-
-  return {
-    calories: Math.round((food.caloriesPer100g || 0) * factor * 100) / 100,
-    protein: Math.round((food.proteinPer100g || 0) * factor * 100) / 100,
-    carbs: Math.round((food.carbsPer100g || 0) * factor * 100) / 100,
-    fat: Math.round((food.fatPer100g || 0) * factor * 100) / 100,
-    fiber: Math.round((food.fiberPer100g || 0) * factor * 100) / 100,
-  }
-}
+import { ChartPieDonutText } from './chart-pie-donut-text'
+import { MealPlanHeader } from './meal-plan-header'
+import { MealTimeSlots } from './meal-time-slots'
+import {
+  calculateFoodNutrition,
+  calculateMacroPercentage,
+  getMealNutrients,
+} from './utils'
 
 function MealPlanCreatorContent() {
   const [selectedDay, setSelectedDay] = useState(0)
@@ -143,7 +63,7 @@ function MealPlanCreatorContent() {
     500, // 500ms debounce for dailyProtein
   )
 
-  const selectedWeek = mealPlan?.weeks.at(0)
+  const selectedWeek = useMemo(() => mealPlan?.weeks.at(0), [mealPlan?.weeks])
 
   const totalNutrients: {
     kcal: number
@@ -164,20 +84,7 @@ function MealPlanCreatorContent() {
 
     const dayNutrition = selectedWeek.days[selectedDay].meals.reduce(
       (dayAcc, meal) => {
-        const mealNutrition = meal.foods.reduce(
-          (mealAcc, food) => {
-            const foodNutrition = calculateFoodNutrition(food)
-
-            return {
-              kcal: mealAcc.kcal + foodNutrition.calories,
-              protein: mealAcc.protein + foodNutrition.protein,
-              carbs: mealAcc.carbs + foodNutrition.carbs,
-              fat: mealAcc.fat + foodNutrition.fat,
-              fiber: mealAcc.fiber + foodNutrition.fiber,
-            }
-          },
-          { kcal: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 },
-        )
+        const mealNutrition = getMealNutrients(meal.foods)
 
         return {
           kcal: dayAcc.kcal + mealNutrition.kcal,
@@ -223,6 +130,19 @@ function MealPlanCreatorContent() {
       Number(fatPercentage) -
       100
 
+    const caloriesExceeded = mealPlan?.dailyCalories
+      ? totalNutrients.kcal - mealPlan?.dailyCalories
+      : 0
+    const proteinExceeded = mealPlan?.dailyProtein
+      ? totalNutrients.protein - mealPlan?.dailyProtein
+      : 0
+    const carbsExceeded = mealPlan?.dailyCarbs
+      ? totalNutrients.carbs - mealPlan?.dailyCarbs
+      : 0
+    const fatExceeded = mealPlan?.dailyFat
+      ? totalNutrients.fat - mealPlan?.dailyFat
+      : 0
+
     return {
       protein: proteinPercentage,
       carbs: carbsPercentage,
@@ -230,20 +150,51 @@ function MealPlanCreatorContent() {
       estimatedPercentageExceeded,
       hasExceededMacroLimits: estimatedPercentageExceeded > 0,
       isMacroLimitMet: estimatedPercentageExceeded === 0,
+      caloriesExceeded,
+      proteinExceeded,
+      carbsExceeded,
+      fatExceeded,
     }
   }, [
     mealPlan?.dailyCalories,
     mealPlan?.dailyProtein,
     mealPlan?.dailyCarbs,
     mealPlan?.dailyFat,
+    totalNutrients.kcal,
+    totalNutrients.protein,
+    totalNutrients.carbs,
+    totalNutrients.fat,
   ])
+
+  const selectedDayMeals = useMemo(
+    () => selectedWeek?.days[selectedDay],
+    [selectedWeek?.days, selectedDay],
+  )
+
+  const eachDayNutrients = useMemo(() => {
+    if (!selectedWeek) return []
+
+    return selectedWeek.days.map((day) => {
+      const dayCalories = day.meals.reduce((dayAcc, meal) => {
+        const mealCalories = meal.foods.reduce((mealAcc, food) => {
+          const foodNutrition = calculateFoodNutrition(food)
+          return mealAcc + foodNutrition.calories
+        }, 0)
+        return dayAcc + mealCalories
+      }, 0)
+
+      return Math.round(dayCalories * 100) / 100
+    })
+  }, [selectedWeek])
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="text-lg font-medium">Loading meal plan...</div>
-          <div className="text-muted-foreground">Please wait</div>
+          <div className="text-lg font-medium animate-pulse">
+            Loading meal plan...
+          </div>
+          <div className="text-muted-foreground animate-pulse">Please wait</div>
         </div>
       </div>
     )
@@ -252,29 +203,11 @@ function MealPlanCreatorContent() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-card/50 rounded-lg sticky -top-4 z-10 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                Meal Plan Creator
-              </h1>
-              {mealPlan?.title && (
-                <p className="text-muted-foreground mt-1">{mealPlan.title}</p>
-              )}
-            </div>
-
-            <div className="flex items-center gap-4">
-              <Badge variant="outline" className="flex items-center gap-1">
-                {mealPlan?.dailyCalories} cal
-              </Badge>
-              <Badge variant="outline" className="flex items-center gap-1">
-                {mealPlan?.dailyProtein}g protein
-              </Badge>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MealPlanHeader
+        title={mealPlan?.title}
+        dailyCalories={mealPlan?.dailyCalories}
+        dailyProtein={mealPlan?.dailyProtein}
+      />
 
       <div className="grid grid-cols-[2fr_3fr] container max-w-[900px] gap-4 mx-auto pt-6">
         <Input
@@ -399,45 +332,89 @@ function MealPlanCreatorContent() {
                 <span className="text-lg font-medium">
                   {getDayName(day.dayOfWeek, { short: true })}
                 </span>
+                <span
+                  className={cn(
+                    'text-md text-muted-foreground',
+                    selectedDay === index && 'text-muted',
+                    eachDayNutrients[index] > (mealPlan?.dailyCalories || 0) &&
+                      'text-amber-500',
+                  )}
+                >
+                  {eachDayNutrients[index].toFixed(0)} kcal
+                </span>
               </Button>
             ))}
           </div>
-          <div className="flex items-center gap-24 justify-center">
+          <div className="flex items-center gap-20 justify-center">
             <div className="flex flex-col gap-2">
-              <h2 className="text-lg font-medium">
-                {totalNutrients.kcal.toFixed(0)} kcal
-              </h2>
-              <p className="text-sm text-green-500">
-                {totalNutrients.protein.toFixed(0)}g protein
-              </p>
-              <p className="text-sm text-blue-500">
-                {totalNutrients.carbs.toFixed(0)}g carbs
-              </p>
-              <p className="text-sm text-yellow-500">
-                {totalNutrients.fat.toFixed(0)}g fat
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {totalNutrients.fiber.toFixed(0)}g fiber
-              </p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-medium">
+                  {totalNutrients.kcal.toFixed(0)} kcal{' '}
+                  {macroPercentage.caloriesExceeded > 0 && (
+                    <span className="text-xs text-destructive/80">
+                      ({macroPercentage.caloriesExceeded.toFixed(0)} kcal)
+                    </span>
+                  )}
+                </h2>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-4 bg-green-500 rounded-sm" />
+                <p className="text-sm">
+                  {totalNutrients.protein.toFixed(0)}g protein
+                  {macroPercentage.proteinExceeded > 0 && (
+                    <span className="text-xs text-destructive/80">
+                      {' '}
+                      ({macroPercentage.proteinExceeded}g)
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-4 bg-blue-500 rounded-sm" />
+                <p className="text-sm">
+                  {totalNutrients.carbs.toFixed(0)}g carbs
+                  {macroPercentage.carbsExceeded > 0 && (
+                    <span className="text-xs text-destructive/80">
+                      {' '}
+                      ({macroPercentage.carbsExceeded}g)
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-4 bg-yellow-500 rounded-sm" />
+                <p className="text-sm">
+                  {totalNutrients.fat.toFixed(0)}g fat
+                  {macroPercentage.fatExceeded > 0 && (
+                    <span className="text-xs text-destructive/80">
+                      {' '}
+                      ({macroPercentage.fatExceeded}g)
+                    </span>
+                  )}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-4 bg-violet-500 rounded-sm" />
+                <p className="text-sm">
+                  {totalNutrients.fiber.toFixed(0)}g fiber
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               <ChartPieDonutText
-                totalCalorie={totalNutrients.kcal || 0}
-                totalProtein={totalNutrients.protein || 0}
-                totalCarbs={totalNutrients.carbs || 0}
-                totalFat={totalNutrients.fat || 0}
-                totalFiber={totalNutrients.fiber || 0}
+                totalCalorie={totalNutrients.kcal ?? 0}
+                totalProtein={totalNutrients.protein ?? 0}
+                totalCarbs={totalNutrients.carbs ?? 0}
+                totalFat={totalNutrients.fat ?? 0}
+                totalFiber={totalNutrients.fiber ?? 0}
               />
             </div>
           </div>
 
           {/* Selected Day Meal Planning */}
-          {selectedWeek?.days[selectedDay] && (
+          {selectedDayMeals && (
             <div className="space-y-4">
-              <MealTimeSlots
-                key={dayNames[selectedDay]}
-                day={selectedWeek?.days[selectedDay]}
-              />
+              <MealTimeSlots key={selectedDay} day={selectedDayMeals} />
             </div>
           )}
         </div>
@@ -446,123 +423,12 @@ function MealPlanCreatorContent() {
   )
 }
 
-export default function MealPlanCreator() {
+export function MealPlanCreator() {
   const { mealPlanId } = useParams<{ mealPlanId: string }>()
 
   return (
     <MealPlanProvider mealPlanId={mealPlanId}>
       <MealPlanCreatorContent />
     </MealPlanProvider>
-  )
-}
-
-const chartConfig = {
-  kcal: {
-    label: 'kcal',
-  },
-  protein: {
-    label: 'Protein',
-    color: 'var(--chart-2)',
-  },
-  carbs: {
-    label: 'Carbs',
-    color: 'var(--chart-1)',
-  },
-  fat: {
-    label: 'Fat',
-    color: 'var(--chart-3)',
-  },
-  fiber: {
-    label: 'Fiber',
-    color: 'var(--chart-4)',
-  },
-} satisfies ChartConfig
-
-function ChartPieDonutText({
-  totalCalorie,
-  totalProtein,
-  totalCarbs,
-  totalFat,
-  totalFiber,
-}: {
-  totalCalorie: number
-  totalProtein: number
-  totalCarbs: number
-  totalFat: number
-  totalFiber: number
-}) {
-  const chartData = [
-    {
-      macro: 'protein',
-      value: Number(totalProtein?.toFixed(0)) || 1,
-      fill: 'var(--color-chart-2)',
-    },
-    {
-      macro: 'carbs',
-      value: Number(totalCarbs?.toFixed(0)) || 1,
-      fill: 'var(--color-chart-1)',
-    },
-    {
-      macro: 'fat',
-      value: Number(totalFat?.toFixed(0)) || 1,
-      fill: 'var(--color-chart-3)',
-    },
-    {
-      macro: 'fiber',
-      value: Number(totalFiber?.toFixed(0)) || 1,
-      fill: 'var(--color-chart-4)',
-    },
-  ]
-  return (
-    <CardContent className="flex-1 pb-0">
-      <ChartContainer
-        config={chartConfig}
-        className="mx-auto aspect-square min-w-[250px] max-h-[250px]"
-      >
-        <PieChart>
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel />}
-          />
-          <Pie
-            data={chartData}
-            dataKey="value"
-            nameKey="macro"
-            innerRadius={60}
-            strokeWidth={5}
-          >
-            <Label
-              content={({ viewBox }) => {
-                if (viewBox && 'cx' in viewBox && 'cy' in viewBox) {
-                  return (
-                    <text
-                      x={viewBox.cx}
-                      y={viewBox.cy}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                    >
-                      <tspan
-                        x={viewBox.cx}
-                        y={viewBox.cy}
-                        className="fill-foreground text-3xl font-bold"
-                      >
-                        {totalCalorie?.toFixed(0)}
-                      </tspan>
-                      <tspan
-                        x={viewBox.cx}
-                        y={(viewBox.cy || 0) + 24}
-                        className="fill-muted-foreground"
-                      >
-                        kcal
-                      </tspan>
-                    </text>
-                  )
-                }
-              }}
-            />
-          </Pie>
-        </PieChart>
-      </ChartContainer>
-    </CardContent>
   )
 }

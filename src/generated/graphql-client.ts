@@ -687,6 +687,7 @@ export type GQLMutation = {
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
   removeExerciseFromDay: Scalars['Boolean']['output'];
   removeExerciseFromWorkout: Scalars['Boolean']['output'];
+  removeMealPlanFromClient: Scalars['Boolean']['output'];
   removeSet: Scalars['Boolean']['output'];
   removeSetExerciseForm: Scalars['Boolean']['output'];
   removeSetFromExercise: Scalars['Boolean']['output'];
@@ -971,6 +972,12 @@ export type GQLMutationRemoveExerciseFromDayArgs = {
 
 export type GQLMutationRemoveExerciseFromWorkoutArgs = {
   exerciseId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveMealPlanFromClientArgs = {
+  clientId: Scalars['ID']['input'];
+  planId: Scalars['ID']['input'];
 };
 
 
@@ -2094,7 +2101,7 @@ export type GQLGetClientByIdQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goals: Array<GQLGoal>, currentWeight?: number | undefined | null, height?: number | undefined | null, allergies?: string | undefined | null } | undefined | null, getClientTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null }>, getClientActivePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, name: string, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, duration?: number | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null } | undefined | null }> }> }> }> } | undefined | null };
+export type GQLGetClientByIdQuery = { __typename?: 'Query', userPublic?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, phone?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, birthday?: string | undefined | null, goals: Array<GQLGoal>, currentWeight?: number | undefined | null, height?: number | undefined | null, allergies?: string | undefined | null } | undefined | null, getClientTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null }>, getClientActivePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, progress?: number | undefined | null, nextSession?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, name: string, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, duration?: number | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null } | undefined | null }> }> }> }> } | undefined | null, getClientMealPlans: Array<{ __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, isDraft: boolean, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, assignedCount: number, createdAt: string, updatedAt: string }> };
 
 export type GQLClientBodyMeasuresQueryVariables = Exact<{
   clientId: Scalars['ID']['input'];
@@ -2243,6 +2250,14 @@ export type GQLAssignMealPlanToClientMutationVariables = Exact<{
 
 export type GQLAssignMealPlanToClientMutation = { __typename?: 'Mutation', assignMealPlanToClient: boolean };
 
+export type GQLRemoveMealPlanFromClientMutationVariables = Exact<{
+  planId: Scalars['ID']['input'];
+  clientId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveMealPlanFromClientMutation = { __typename?: 'Mutation', removeMealPlanFromClient: boolean };
+
 export type GQLSaveMealMutationVariables = Exact<{
   input: GQLSaveMealInput;
 }>;
@@ -2271,7 +2286,7 @@ export type GQLUpdateMealFoodLogMutationVariables = Exact<{
 
 export type GQLUpdateMealFoodLogMutation = { __typename?: 'Mutation', updateMealFoodLog: boolean };
 
-export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, createdAt: string, updatedAt: string, assignedCount: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> };
+export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, createdAt: string, updatedAt: string, assignedCount: number, completedAt?: string | undefined | null, assignedTo?: { __typename?: 'UserPublic', id: string } | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null }> }> }> }> };
 
 export type GQLGetTemplatesQueryVariables = Exact<{
   draft?: InputMaybe<Scalars['Boolean']['input']>;
@@ -2285,7 +2300,7 @@ export type GQLGetTemplateTrainingPlanByIdQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetTemplateTrainingPlanByIdQuery = { __typename?: 'Query', getTrainingPlanById: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, createdAt: string, updatedAt: string, assignedCount: number, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
+export type GQLGetTemplateTrainingPlanByIdQuery = { __typename?: 'Query', getTrainingPlanById: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, createdAt: string, updatedAt: string, assignedCount: number, completedAt?: string | undefined | null, assignedTo?: { __typename?: 'UserPublic', id: string } | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null }> }> }> }> } };
 
 export type GQLCreateTrainingPlanMutationVariables = Exact<{
   input: GQLCreateTrainingPlanInput;
@@ -2431,7 +2446,7 @@ export type GQLGetExerciseFormDataQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetExerciseFormDataQuery = { __typename?: 'Query', exercise?: { __typename?: 'TrainingExercise', id: string, name: string, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, restSeconds?: number | undefined | null, warmupSets?: number | undefined | null, tempo?: string | undefined | null, videoUrl?: string | undefined | null, substitutes: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, substitute: { __typename?: 'BaseExercise', name: string } }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> } | undefined | null };
+export type GQLGetExerciseFormDataQuery = { __typename?: 'Query', exercise?: { __typename?: 'TrainingExercise', id: string, name: string, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, restSeconds?: number | undefined | null, warmupSets?: number | undefined | null, tempo?: string | undefined | null, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, substitutes: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, substitute: { __typename?: 'BaseExercise', name: string } }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null }> } | undefined | null };
 
 export type GQLUpdateExerciseFormMutationVariables = Exact<{
   input: GQLUpdateExerciseFormInput;
@@ -2634,16 +2649,22 @@ export const TrainingTemplateFragmentDoc = `
   createdAt
   updatedAt
   assignedCount
+  completedAt
+  assignedTo {
+    id
+  }
   weeks {
     id
     weekNumber
     name
     description
+    completedAt
     days {
       id
       dayOfWeek
       isRestDay
       workoutType
+      completedAt
       exercises {
         id
         name
@@ -2655,6 +2676,7 @@ export const TrainingTemplateFragmentDoc = `
         type
         order
         videoUrl
+        completedAt
         sets {
           id
           order
@@ -2663,6 +2685,7 @@ export const TrainingTemplateFragmentDoc = `
           maxReps
           weight
           rpe
+          completedAt
         }
       }
     }
@@ -4739,6 +4762,23 @@ export const GetClientByIdDocument = `
       }
     }
   }
+  getClientMealPlans(clientId: $id) {
+    id
+    title
+    description
+    isDraft
+    dailyCalories
+    dailyProtein
+    dailyCarbs
+    dailyFat
+    weekCount
+    startDate
+    endDate
+    active
+    assignedCount
+    createdAt
+    updatedAt
+  }
 }
     `;
 
@@ -5859,6 +5899,30 @@ useAssignMealPlanToClientMutation.getKey = () => ['AssignMealPlanToClient'];
 
 useAssignMealPlanToClientMutation.fetcher = (variables: GQLAssignMealPlanToClientMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAssignMealPlanToClientMutation, GQLAssignMealPlanToClientMutationVariables>(AssignMealPlanToClientDocument, variables, options);
 
+export const RemoveMealPlanFromClientDocument = `
+    mutation RemoveMealPlanFromClient($planId: ID!, $clientId: ID!) {
+  removeMealPlanFromClient(planId: $planId, clientId: $clientId)
+}
+    `;
+
+export const useRemoveMealPlanFromClientMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveMealPlanFromClientMutation, TError, GQLRemoveMealPlanFromClientMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveMealPlanFromClientMutation, TError, GQLRemoveMealPlanFromClientMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveMealPlanFromClient'],
+    mutationFn: (variables?: GQLRemoveMealPlanFromClientMutationVariables) => fetchData<GQLRemoveMealPlanFromClientMutation, GQLRemoveMealPlanFromClientMutationVariables>(RemoveMealPlanFromClientDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveMealPlanFromClientMutation.getKey = () => ['RemoveMealPlanFromClient'];
+
+
+useRemoveMealPlanFromClientMutation.fetcher = (variables: GQLRemoveMealPlanFromClientMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveMealPlanFromClientMutation, GQLRemoveMealPlanFromClientMutationVariables>(RemoveMealPlanFromClientDocument, variables, options);
+
 export const SaveMealDocument = `
     mutation SaveMeal($input: SaveMealInput!) {
   saveMeal(input: $input)
@@ -6583,6 +6647,7 @@ export const GetExerciseFormDataDocument = `
     warmupSets
     tempo
     videoUrl
+    completedAt
     substitutes {
       id
       substitute {
@@ -6596,6 +6661,7 @@ export const GetExerciseFormDataDocument = `
       maxReps
       weight
       rpe
+      completedAt
     }
   }
 }

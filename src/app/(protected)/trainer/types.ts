@@ -5,6 +5,7 @@ import {
   GQLTrainingExercise,
   GQLTrainingPlan,
   GQLTrainingWeek,
+  GQLUser,
 } from '@/generated/graphql-client'
 
 export type TrainingPlanFormData = {
@@ -14,21 +15,22 @@ export type TrainingPlanFormData = {
 
 export type TrainingDetails = Pick<
   GQLTrainingPlan,
-  'title' | 'description' | 'isPublic' | 'isDraft'
+  'title' | 'description' | 'isPublic' | 'isDraft' | 'completedAt'
 > & {
   difficulty?: GQLDifficulty | null
+  assignedTo?: Pick<GQLUser, 'id'> | null
 }
 
 export type TrainingWeek = Pick<
   GQLTrainingWeek,
-  'weekNumber' | 'name' | 'description' | 'id'
+  'weekNumber' | 'name' | 'description' | 'id' | 'completedAt'
 > & {
   days: TrainingDay[]
 }
 
 export type TrainingDay = Pick<
   GQLTrainingDay,
-  'dayOfWeek' | 'isRestDay' | 'workoutType' | 'id'
+  'dayOfWeek' | 'isRestDay' | 'workoutType' | 'id' | 'completedAt'
 > & {
   exercises: TrainingExercise[]
 }
@@ -46,13 +48,21 @@ export type TrainingExercise = Pick<
   | 'warmupSets'
   | 'baseId'
   | 'videoUrl'
+  | 'completedAt'
 > & {
   sets: TrainingSet[]
 }
 
 export type TrainingSet = Pick<
   GQLExerciseSet,
-  'order' | 'reps' | 'weight' | 'rpe' | 'id' | 'minReps' | 'maxReps'
+  | 'order'
+  | 'reps'
+  | 'weight'
+  | 'rpe'
+  | 'id'
+  | 'minReps'
+  | 'maxReps'
+  | 'completedAt'
 >
 
 export enum WorkoutType {

@@ -32,7 +32,7 @@ export const DroppableDay = React.memo(({ dayIndex }: DroppableDayProps) => {
 
   const { setNodeRef } = useDroppable({
     id: day?.id || `day-${dayIndex}`,
-    disabled: day?.isRestDay ?? true,
+    disabled: day?.isRestDay || Boolean(day?.completedAt),
     data: {
       type: 'day',
       day: day,

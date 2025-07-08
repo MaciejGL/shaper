@@ -101,6 +101,10 @@ mutation AssignMealPlanToClient($input: AssignMealPlanToClientInput!) {
   assignMealPlanToClient(input: $input)
 }
 
+mutation RemoveMealPlanFromClient($planId: ID!, $clientId: ID!) {
+  removeMealPlanFromClient(planId: $planId, clientId: $clientId)
+}
+
 # New batch meal operation
 mutation SaveMeal($input: SaveMealInput!) {
   saveMeal(input: $input)

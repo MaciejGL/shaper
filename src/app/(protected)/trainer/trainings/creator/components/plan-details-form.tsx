@@ -48,13 +48,15 @@ export function PlanDetailsForm() {
       <div className="lg:col-span-2 space-y-6">
         <PlanDetailsHeader />
       </div>
-      <div className="w-full gap-6">
-        <PlanPublicications
-          createdAt={createdAt}
-          updatedAt={updatedAt}
-          assignedCount={assignedCount}
-        />
-      </div>
+      {!formData.details.assignedTo && (
+        <div className="w-full gap-6">
+          <PlanPublicications
+            createdAt={createdAt}
+            updatedAt={updatedAt}
+            assignedCount={assignedCount}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -81,6 +83,8 @@ function PlanDetailsHeader() {
 
   const data = formData.details
 
+  const isDisabled = !!data.completedAt
+
   return (
     <Card>
       <CardHeader>
@@ -104,6 +108,7 @@ function PlanDetailsHeader() {
               onFocus={titleInput.onFocus}
               onBlur={titleInput.onBlur}
               className="w-full"
+              disabled={isDisabled}
             />
           </div>
           <div className="space-y-2">
@@ -113,6 +118,7 @@ function PlanDetailsHeader() {
               onValueChange={(value: GQLDifficulty) =>
                 updateDetails({ difficulty: value })
               }
+              disabled={isDisabled}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select difficulty" />
@@ -138,6 +144,7 @@ function PlanDetailsHeader() {
             onFocus={descriptionInput.onFocus}
             onBlur={descriptionInput.onBlur}
             className="min-h-[120px] resize-none"
+            disabled={isDisabled}
           />
           <p className="text-xs text-muted-foreground">
             Help clients understand what this plan offers and who it's designed
