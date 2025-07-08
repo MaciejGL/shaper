@@ -9,7 +9,6 @@ import {
   startOfWeek,
 } from 'date-fns'
 import { GraphQLError } from 'graphql'
-import { isNil } from 'lodash'
 
 import {
   GQLAddAiExerciseToWorkoutInput,
@@ -118,28 +117,36 @@ export const updateExerciseForm = async (
   }
 
   // Prepare data for Prisma update (filter out null values)
-  const updateData: Partial<TrainingExerciseType> = {}
-  if (exerciseUpdates.name !== undefined && exerciseUpdates.name !== null) {
-    updateData.name = exerciseUpdates.name
+  const updateData: Partial<TrainingExerciseType> = {
+    name: exerciseUpdates.name ?? undefined,
+    instructions: exerciseUpdates.instructions ?? null,
+    additionalInstructions: exerciseUpdates.additionalInstructions ?? null,
+    type: exerciseUpdates.type ?? null,
+    restSeconds: exerciseUpdates.restSeconds ?? null,
+    warmupSets: exerciseUpdates.warmupSets ?? null,
+    tempo: exerciseUpdates.tempo ?? null,
   }
-  if (!isNil(exerciseUpdates.instructions)) {
-    updateData.instructions = exerciseUpdates.instructions
-  }
-  if (!isNil(exerciseUpdates.additionalInstructions)) {
-    updateData.additionalInstructions = exerciseUpdates.additionalInstructions
-  }
-  if (!isNil(exerciseUpdates.type)) {
-    updateData.type = exerciseUpdates.type
-  }
-  if (!isNil(exerciseUpdates.restSeconds)) {
-    updateData.restSeconds = exerciseUpdates.restSeconds
-  }
-  if (!isNil(exerciseUpdates.warmupSets)) {
-    updateData.warmupSets = exerciseUpdates.warmupSets
-  }
-  if (!isNil(exerciseUpdates.tempo)) {
-    updateData.tempo = exerciseUpdates.tempo
-  }
+  // if (exerciseUpdates.name !== undefined && exerciseUpdates.name !== null) {
+  //   updateData.name = exerciseUpdates.name
+  // }
+  // if (!isNil(exerciseUpdates.instructions)) {
+  //   updateData.instructions = exerciseUpdates.instructions
+  // }
+  // if (!isNil(exerciseUpdates.additionalInstructions)) {
+  //   updateData.additionalInstructions = exerciseUpdates.additionalInstructions
+  // }
+  // if (!isNil(exerciseUpdates.type)) {
+  //   updateData.type = exerciseUpdates.type
+  // }
+  // if (!isNil(exerciseUpdates.restSeconds)) {
+  //   updateData.restSeconds = exerciseUpdates.restSeconds
+  // }
+  // if (!isNil(exerciseUpdates.warmupSets)) {
+  //   updateData.warmupSets = exerciseUpdates.warmupSets
+  // }
+  // if (!isNil(exerciseUpdates.tempo)) {
+  //   updateData.tempo = exerciseUpdates.tempo
+  // }
 
   // Update exercise data
   await prisma.trainingExercise.update({

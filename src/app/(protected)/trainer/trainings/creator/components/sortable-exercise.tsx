@@ -198,23 +198,23 @@ export const SortableExercise = React.memo(
                     {exercise.sets.length === 1 ? '' : 's'}
                   </Badge>
                 )}
-                {exercise.warmupSets && (
+                {exercise.warmupSets ? (
                   <Badge variant="outline">
                     <FlameIcon />
                     {exercise.warmupSets} warmup
                     {exercise.warmupSets === 1 ? '' : 's'}
                   </Badge>
-                )}
-                {exercise.restSeconds && (
+                ) : null}
+                {exercise.restSeconds ? (
                   <Badge variant="outline">
                     <TimerIcon /> {exercise.restSeconds} rest
                   </Badge>
-                )}
-                {exercise.tempo && (
+                ) : null}
+                {exercise.tempo ? (
                   <Badge variant="outline">
                     <GaugeIcon /> {exercise.tempo}
                   </Badge>
-                )}
+                ) : null}
               </div>
             </CardContent>
           )}

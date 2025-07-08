@@ -120,12 +120,12 @@ export function createExerciseFormOptimisticUpdate() {
           ...oldData.exercise,
           name: variables.input.name || oldData.exercise.name,
           // Use provided values directly - allows undefined/null to clear fields
-          type: variables.input.type,
-          instructions: variables.input.instructions,
+          type: variables.input.type ?? undefined,
+          instructions: variables.input.instructions ?? undefined,
           additionalInstructions: variables.input.additionalInstructions,
-          restSeconds: variables.input.restSeconds,
-          warmupSets: variables.input.warmupSets,
-          tempo: variables.input.tempo,
+          restSeconds: variables.input.restSeconds ?? undefined,
+          warmupSets: variables.input.warmupSets ?? undefined,
+          tempo: variables.input.tempo ?? undefined,
           sets: oldData.exercise.sets,
         },
       }
