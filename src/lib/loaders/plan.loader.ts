@@ -89,6 +89,43 @@ export const createPlanLoaders = () => ({
 
     return planIds.map((id) => map.get(id) ?? 0)
   }),
+
+  collaboratorCountByTrainingPlanId: new DataLoader(
+    async (planIds: readonly string[]) => {
+      const counts = await prisma.trainingPlanCollaborator.groupBy({
+        by: ['trainingPlanId'],
+        where: {
+          trainingPlanId: { in: planIds as string[] },
+        },
+        _count: { trainingPlanId: true },
+      })
+
+      const map = new Map(
+        counts.map((item) => [item.trainingPlanId, item._count.trainingPlanId]),
+      )
+
+      return planIds.map((id) => map.get(id) ?? 0)
+    },
+  ),
+
+  collaboratorCountByMealPlanId: new DataLoader(
+    async (planIds: readonly string[]) => {
+      const counts = await prisma.mealPlanCollaborator.groupBy({
+        by: ['mealPlanId'],
+        where: {
+          mealPlanId: { in: planIds as string[] },
+        },
+        _count: { mealPlanId: true },
+      })
+
+      const map = new Map(
+        counts.map((item) => [item.mealPlanId, item._count.mealPlanId]),
+      )
+
+      return planIds.map((id) => map.get(id) ?? 0)
+    },
+  ),
+
   weeksByPlanId: new DataLoader(async (planIds: readonly string[]) => {
     const allWeeks = await prisma.trainingWeek.findMany({
       where: {

@@ -2,7 +2,9 @@ import { FilesIcon, PlusCircle } from 'lucide-react'
 
 import { ButtonLink } from '@/components/ui/button-link'
 import {
+  GQLGetCollaborationTemplatesQuery,
   GQLGetTemplatesQuery,
+  GetCollaborationTemplatesDocument,
   GetTemplatesDocument,
 } from '@/generated/graphql-client'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
@@ -14,8 +16,13 @@ import { TrainingPlansList } from './components/training-plans-list'
 export const dynamic = 'force-dynamic'
 
 export default async function Page() {
-  const { data } =
-    await gqlServerFetch<GQLGetTemplatesQuery>(GetTemplatesDocument)
+  const [{ data: templatesData }, { data: collaborationData }] =
+    await Promise.all([
+      gqlServerFetch<GQLGetTemplatesQuery>(GetTemplatesDocument),
+      gqlServerFetch<GQLGetCollaborationTemplatesQuery>(
+        GetCollaborationTemplatesDocument,
+      ),
+    ])
 
   return (
     <div className="container h-full">
@@ -34,7 +41,10 @@ export default async function Page() {
         </ButtonLink>
       </div>
 
-      <TrainingPlansList plans={data?.getTemplates || []} />
+      <TrainingPlansList
+        plans={templatesData?.getTemplates || []}
+        collaborationPlans={collaborationData?.getCollaborationTemplates || []}
+      />
     </div>
   )
 }

@@ -12,6 +12,11 @@ export const TRAINER_LINKS = {
     disabled: false,
   },
   exercises: { href: '/trainer/exercises', label: 'Exercises', disabled: true },
+  collaboration: {
+    href: '/trainer/collaboration',
+    label: 'Collaboration',
+    disabled: false,
+  },
   profile: { href: '/trainer/profile', label: 'Profile', disabled: false },
 }
 

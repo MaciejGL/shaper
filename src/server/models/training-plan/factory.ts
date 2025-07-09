@@ -146,6 +146,45 @@ export async function getTemplates(
   return templates.map((template) => new TrainingPlan(template, context))
 }
 
+export async function getCollaborationTemplates(
+  args: GQLQueryGetTemplatesArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const where: Prisma.TrainingPlanWhereInput = {
+    isTemplate: true,
+    createdById: { not: user.user.id }, // Not created by current user
+    collaborators: {
+      some: {
+        collaboratorId: user.user.id, // Current user is a collaborator
+      },
+    },
+  }
+
+  if (typeof args.draft === 'boolean') {
+    where.isDraft = args.draft
+  }
+
+  const templates = await prisma.trainingPlan.findMany({
+    where,
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      createdBy: {
+        include: {
+          profile: true,
+        },
+      },
+    },
+  })
+  return templates.map((template) => new TrainingPlan(template, context))
+}
+
 export async function getClientTrainingPlans(
   args: GQLQueryGetClientTrainingPlansArgs,
   context: GQLContext,

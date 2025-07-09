@@ -6,6 +6,7 @@ import {
   DumbbellIcon,
   FileIcon,
   FilesIcon,
+  HandshakeIcon,
   LayoutDashboardIcon,
   PlusCircleIcon,
   UserRoundCogIcon,
@@ -233,6 +234,13 @@ export function AppSidebar() {
         url: TRAINER_LINKS.exercises.href,
         icon: DumbbellIcon,
         disabled: TRAINER_LINKS.exercises.disabled,
+      },
+      // Collaboration item
+      {
+        title: TRAINER_LINKS.collaboration.label,
+        url: TRAINER_LINKS.collaboration.href,
+        icon: HandshakeIcon,
+        disabled: TRAINER_LINKS.collaboration.disabled,
       },
     ],
     [

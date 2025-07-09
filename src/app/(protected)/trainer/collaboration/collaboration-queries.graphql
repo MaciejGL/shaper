@@ -1,0 +1,219 @@
+query MyCollaborationInvitations {
+  myCollaborationInvitations {
+    id
+    sender {
+      id
+      firstName
+      lastName
+      email
+    }
+    recipient {
+      id
+      firstName
+      lastName
+      email
+    }
+    status
+    message
+    createdAt
+    updatedAt
+  }
+}
+
+query SentCollaborationInvitations {
+  sentCollaborationInvitations {
+    id
+    sender {
+      id
+      firstName
+      lastName
+      email
+    }
+    recipient {
+      id
+      firstName
+      lastName
+      email
+    }
+    status
+    message
+    createdAt
+    updatedAt
+  }
+}
+
+mutation SendCollaborationInvitation(
+  $input: SendCollaborationInvitationInput!
+) {
+  sendCollaborationInvitation(input: $input) {
+    id
+    sender {
+      id
+      firstName
+      lastName
+      email
+    }
+    recipient {
+      id
+      firstName
+      lastName
+      email
+    }
+    status
+    message
+    createdAt
+    updatedAt
+  }
+}
+
+mutation RespondToCollaborationInvitation(
+  $input: RespondToCollaborationInvitationInput!
+) {
+  respondToCollaborationInvitation(input: $input) {
+    id
+    sender {
+      id
+      firstName
+      lastName
+      email
+    }
+    recipient {
+      id
+      firstName
+      lastName
+      email
+    }
+    status
+    message
+    createdAt
+    updatedAt
+  }
+}
+
+query MyTrainingPlanCollaborations {
+  myTrainingPlanCollaborations {
+    id
+    trainingPlan {
+      id
+      title
+    }
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}
+
+query MyMealPlanCollaborations {
+  myMealPlanCollaborations {
+    id
+    mealPlan {
+      id
+      title
+    }
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}
+
+mutation RemoveTrainingPlanCollaborator(
+  $input: RemoveTrainingPlanCollaboratorInput!
+) {
+  removeTrainingPlanCollaborator(input: $input)
+}
+
+mutation RemoveMealPlanCollaborator($input: RemoveMealPlanCollaboratorInput!) {
+  removeMealPlanCollaborator(input: $input)
+}
+
+mutation UpdateTrainingPlanCollaboratorPermission(
+  $input: UpdateTrainingPlanCollaboratorPermissionInput!
+) {
+  updateTrainingPlanCollaboratorPermission(input: $input) {
+    id
+    permission
+  }
+}
+
+mutation UpdateMealPlanCollaboratorPermission(
+  $input: UpdateMealPlanCollaboratorPermissionInput!
+) {
+  updateMealPlanCollaboratorPermission(input: $input) {
+    id
+    permission
+  }
+}
+
+query TrainingPlanCollaborators($trainingPlanId: ID!) {
+  trainingPlanCollaborators(trainingPlanId: $trainingPlanId) {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}
+
+query MealPlanCollaborators($mealPlanId: ID!) {
+  mealPlanCollaborators(mealPlanId: $mealPlanId) {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}
+
+mutation AddTrainingPlanCollaborator(
+  $input: AddTrainingPlanCollaboratorInput!
+) {
+  addTrainingPlanCollaborator(input: $input) {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}
+
+mutation AddMealPlanCollaborator($input: AddMealPlanCollaboratorInput!) {
+  addMealPlanCollaborator(input: $input) {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}

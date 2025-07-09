@@ -602,6 +602,7 @@ export type GQLMealPlan = {
   active: Scalars['Boolean']['output'];
   assignedCount: Scalars['Int']['output'];
   assignedTo?: Maybe<GQLUserPublic>;
+  collaboratorCount: Scalars['Int']['output'];
   completedAt?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
   createdBy?: Maybe<GQLUserPublic>;
@@ -1304,6 +1305,8 @@ export type GQLQuery = {
   getClientActivePlan?: Maybe<GQLTrainingPlan>;
   getClientMealPlans: Array<GQLMealPlan>;
   getClientTrainingPlans: Array<GQLTrainingPlan>;
+  getCollaborationMealPlanTemplates: Array<GQLMealPlan>;
+  getCollaborationTemplates: Array<GQLTrainingPlan>;
   getExercises: GQLGetExercisesResponse;
   getMealPlanById: GQLMealPlan;
   getMealPlanTemplates: Array<GQLMealPlan>;
@@ -1375,6 +1378,16 @@ export type GQLQueryGetClientMealPlansArgs = {
 
 export type GQLQueryGetClientTrainingPlansArgs = {
   clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetCollaborationMealPlanTemplatesArgs = {
+  draft?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+
+export type GQLQueryGetCollaborationTemplatesArgs = {
+  draft?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -1587,6 +1600,7 @@ export type GQLTrainingPlan = {
   adherence: Scalars['Float']['output'];
   assignedCount: Scalars['Int']['output'];
   assignedTo?: Maybe<GQLUserPublic>;
+  collaboratorCount: Scalars['Int']['output'];
   completedAt?: Maybe<Scalars['String']['output']>;
   completedWorkoutsDays: Scalars['Int']['output'];
   createdAt: Scalars['String']['output'];
@@ -2288,6 +2302,96 @@ export type GQLExercisesProgressByUserQueryVariables = Exact<{
 
 export type GQLExercisesProgressByUserQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', averageRpe?: number | undefined | null, totalSets?: number | undefined | null, lastPerformed?: string | undefined | null, baseExercise?: { __typename?: 'BaseExercise', id: string, name: string, muscleGroups: Array<{ __typename?: 'MuscleGroup', alias?: string | undefined | null, name: string, groupSlug: string, category: { __typename?: 'MuscleGroupCategory', name: string } }> } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }>, totalVolumeProgress: Array<{ __typename?: 'VolumeEntry', week: string, totalVolume: number, totalSets: number }> }> };
 
+export type GQLMyCollaborationInvitationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLMyCollaborationInvitationsQuery = { __typename?: 'Query', myCollaborationInvitations: Array<{ __typename?: 'CollaborationInvitation', id: string, status: GQLCollaborationInvitationStatus, message?: string | undefined | null, createdAt: string, updatedAt: string, sender: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string }, recipient: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> };
+
+export type GQLSentCollaborationInvitationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLSentCollaborationInvitationsQuery = { __typename?: 'Query', sentCollaborationInvitations: Array<{ __typename?: 'CollaborationInvitation', id: string, status: GQLCollaborationInvitationStatus, message?: string | undefined | null, createdAt: string, updatedAt: string, sender: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string }, recipient: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> };
+
+export type GQLSendCollaborationInvitationMutationVariables = Exact<{
+  input: GQLSendCollaborationInvitationInput;
+}>;
+
+
+export type GQLSendCollaborationInvitationMutation = { __typename?: 'Mutation', sendCollaborationInvitation: { __typename?: 'CollaborationInvitation', id: string, status: GQLCollaborationInvitationStatus, message?: string | undefined | null, createdAt: string, updatedAt: string, sender: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string }, recipient: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } } };
+
+export type GQLRespondToCollaborationInvitationMutationVariables = Exact<{
+  input: GQLRespondToCollaborationInvitationInput;
+}>;
+
+
+export type GQLRespondToCollaborationInvitationMutation = { __typename?: 'Mutation', respondToCollaborationInvitation: { __typename?: 'CollaborationInvitation', id: string, status: GQLCollaborationInvitationStatus, message?: string | undefined | null, createdAt: string, updatedAt: string, sender: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string }, recipient: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } } };
+
+export type GQLMyTrainingPlanCollaborationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLMyTrainingPlanCollaborationsQuery = { __typename?: 'Query', myTrainingPlanCollaborations: Array<{ __typename?: 'TrainingPlanCollaborator', id: string, permission: GQLCollaborationPermission, createdAt: string, updatedAt: string, trainingPlan: { __typename?: 'TrainingPlan', id: string, title: string }, addedBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> };
+
+export type GQLMyMealPlanCollaborationsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLMyMealPlanCollaborationsQuery = { __typename?: 'Query', myMealPlanCollaborations: Array<{ __typename?: 'MealPlanCollaborator', id: string, permission: GQLCollaborationPermission, createdAt: string, updatedAt: string, mealPlan: { __typename?: 'MealPlan', id: string, title: string }, addedBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> };
+
+export type GQLRemoveTrainingPlanCollaboratorMutationVariables = Exact<{
+  input: GQLRemoveTrainingPlanCollaboratorInput;
+}>;
+
+
+export type GQLRemoveTrainingPlanCollaboratorMutation = { __typename?: 'Mutation', removeTrainingPlanCollaborator: boolean };
+
+export type GQLRemoveMealPlanCollaboratorMutationVariables = Exact<{
+  input: GQLRemoveMealPlanCollaboratorInput;
+}>;
+
+
+export type GQLRemoveMealPlanCollaboratorMutation = { __typename?: 'Mutation', removeMealPlanCollaborator: boolean };
+
+export type GQLUpdateTrainingPlanCollaboratorPermissionMutationVariables = Exact<{
+  input: GQLUpdateTrainingPlanCollaboratorPermissionInput;
+}>;
+
+
+export type GQLUpdateTrainingPlanCollaboratorPermissionMutation = { __typename?: 'Mutation', updateTrainingPlanCollaboratorPermission: { __typename?: 'TrainingPlanCollaborator', id: string, permission: GQLCollaborationPermission } };
+
+export type GQLUpdateMealPlanCollaboratorPermissionMutationVariables = Exact<{
+  input: GQLUpdateMealPlanCollaboratorPermissionInput;
+}>;
+
+
+export type GQLUpdateMealPlanCollaboratorPermissionMutation = { __typename?: 'Mutation', updateMealPlanCollaboratorPermission: { __typename?: 'MealPlanCollaborator', id: string, permission: GQLCollaborationPermission } };
+
+export type GQLTrainingPlanCollaboratorsQueryVariables = Exact<{
+  trainingPlanId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLTrainingPlanCollaboratorsQuery = { __typename?: 'Query', trainingPlanCollaborators: Array<{ __typename?: 'TrainingPlanCollaborator', id: string, permission: GQLCollaborationPermission, createdAt: string, updatedAt: string, collaborator: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> };
+
+export type GQLMealPlanCollaboratorsQueryVariables = Exact<{
+  mealPlanId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLMealPlanCollaboratorsQuery = { __typename?: 'Query', mealPlanCollaborators: Array<{ __typename?: 'MealPlanCollaborator', id: string, permission: GQLCollaborationPermission, createdAt: string, updatedAt: string, collaborator: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> };
+
+export type GQLAddTrainingPlanCollaboratorMutationVariables = Exact<{
+  input: GQLAddTrainingPlanCollaboratorInput;
+}>;
+
+
+export type GQLAddTrainingPlanCollaboratorMutation = { __typename?: 'Mutation', addTrainingPlanCollaborator: { __typename?: 'TrainingPlanCollaborator', id: string, permission: GQLCollaborationPermission, createdAt: string, updatedAt: string, collaborator: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } } };
+
+export type GQLAddMealPlanCollaboratorMutationVariables = Exact<{
+  input: GQLAddMealPlanCollaboratorInput;
+}>;
+
+
+export type GQLAddMealPlanCollaboratorMutation = { __typename?: 'Mutation', addMealPlanCollaborator: { __typename?: 'MealPlanCollaborator', id: string, permission: GQLCollaborationPermission, createdAt: string, updatedAt: string, collaborator: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } } };
+
 export type GQLTrainerDashboardUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2386,7 +2490,14 @@ export type GQLGetMealPlanTemplatesQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetMealPlanTemplatesQuery = { __typename?: 'Query', getMealPlanTemplates: Array<{ __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, isDraft: boolean, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, weekCount: number, assignedCount: number, createdAt: string, updatedAt: string }> };
+export type GQLGetMealPlanTemplatesQuery = { __typename?: 'Query', getMealPlanTemplates: Array<{ __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, isDraft: boolean, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, weekCount: number, assignedCount: number, collaboratorCount: number, createdAt: string, updatedAt: string }> };
+
+export type GQLGetCollaborationMealPlanTemplatesQueryVariables = Exact<{
+  draft?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type GQLGetCollaborationMealPlanTemplatesQuery = { __typename?: 'Query', getCollaborationMealPlanTemplates: Array<{ __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, isDraft: boolean, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, weekCount: number, assignedCount: number, collaboratorCount: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null }> };
 
 export type GQLGetMealPlanByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2464,7 +2575,14 @@ export type GQLGetTemplatesQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetTemplatesQuery = { __typename?: 'Query', getTemplates: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isDraft: boolean, weekCount: number, assignedCount: number }> };
+export type GQLGetTemplatesQuery = { __typename?: 'Query', getTemplates: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isDraft: boolean, weekCount: number, assignedCount: number, collaboratorCount: number }> };
+
+export type GQLGetCollaborationTemplatesQueryVariables = Exact<{
+  draft?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type GQLGetCollaborationTemplatesQuery = { __typename?: 'Query', getCollaborationTemplates: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isDraft: boolean, weekCount: number, assignedCount: number, collaboratorCount: number, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null }> };
 
 export type GQLGetTemplateTrainingPlanByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5135,6 +5253,638 @@ useInfiniteExercisesProgressByUserQuery.getKey = (variables: GQLExercisesProgres
 
 useExercisesProgressByUserQuery.fetcher = (variables: GQLExercisesProgressByUserQueryVariables, options?: RequestInit['headers']) => fetchData<GQLExercisesProgressByUserQuery, GQLExercisesProgressByUserQueryVariables>(ExercisesProgressByUserDocument, variables, options);
 
+export const MyCollaborationInvitationsDocument = `
+    query MyCollaborationInvitations {
+  myCollaborationInvitations {
+    id
+    sender {
+      id
+      firstName
+      lastName
+      email
+    }
+    recipient {
+      id
+      firstName
+      lastName
+      email
+    }
+    status
+    message
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useMyCollaborationInvitationsQuery = <
+      TData = GQLMyCollaborationInvitationsQuery,
+      TError = unknown
+    >(
+      variables?: GQLMyCollaborationInvitationsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLMyCollaborationInvitationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLMyCollaborationInvitationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLMyCollaborationInvitationsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['MyCollaborationInvitations'] : ['MyCollaborationInvitations', variables],
+    queryFn: fetchData<GQLMyCollaborationInvitationsQuery, GQLMyCollaborationInvitationsQueryVariables>(MyCollaborationInvitationsDocument, variables),
+    ...options
+  }
+    )};
+
+useMyCollaborationInvitationsQuery.getKey = (variables?: GQLMyCollaborationInvitationsQueryVariables) => variables === undefined ? ['MyCollaborationInvitations'] : ['MyCollaborationInvitations', variables];
+
+export const useInfiniteMyCollaborationInvitationsQuery = <
+      TData = InfiniteData<GQLMyCollaborationInvitationsQuery>,
+      TError = unknown
+    >(
+      variables: GQLMyCollaborationInvitationsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLMyCollaborationInvitationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLMyCollaborationInvitationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLMyCollaborationInvitationsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['MyCollaborationInvitations.infinite'] : ['MyCollaborationInvitations.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLMyCollaborationInvitationsQuery, GQLMyCollaborationInvitationsQueryVariables>(MyCollaborationInvitationsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteMyCollaborationInvitationsQuery.getKey = (variables?: GQLMyCollaborationInvitationsQueryVariables) => variables === undefined ? ['MyCollaborationInvitations.infinite'] : ['MyCollaborationInvitations.infinite', variables];
+
+
+useMyCollaborationInvitationsQuery.fetcher = (variables?: GQLMyCollaborationInvitationsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMyCollaborationInvitationsQuery, GQLMyCollaborationInvitationsQueryVariables>(MyCollaborationInvitationsDocument, variables, options);
+
+export const SentCollaborationInvitationsDocument = `
+    query SentCollaborationInvitations {
+  sentCollaborationInvitations {
+    id
+    sender {
+      id
+      firstName
+      lastName
+      email
+    }
+    recipient {
+      id
+      firstName
+      lastName
+      email
+    }
+    status
+    message
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useSentCollaborationInvitationsQuery = <
+      TData = GQLSentCollaborationInvitationsQuery,
+      TError = unknown
+    >(
+      variables?: GQLSentCollaborationInvitationsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLSentCollaborationInvitationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLSentCollaborationInvitationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLSentCollaborationInvitationsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['SentCollaborationInvitations'] : ['SentCollaborationInvitations', variables],
+    queryFn: fetchData<GQLSentCollaborationInvitationsQuery, GQLSentCollaborationInvitationsQueryVariables>(SentCollaborationInvitationsDocument, variables),
+    ...options
+  }
+    )};
+
+useSentCollaborationInvitationsQuery.getKey = (variables?: GQLSentCollaborationInvitationsQueryVariables) => variables === undefined ? ['SentCollaborationInvitations'] : ['SentCollaborationInvitations', variables];
+
+export const useInfiniteSentCollaborationInvitationsQuery = <
+      TData = InfiniteData<GQLSentCollaborationInvitationsQuery>,
+      TError = unknown
+    >(
+      variables: GQLSentCollaborationInvitationsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLSentCollaborationInvitationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLSentCollaborationInvitationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLSentCollaborationInvitationsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['SentCollaborationInvitations.infinite'] : ['SentCollaborationInvitations.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLSentCollaborationInvitationsQuery, GQLSentCollaborationInvitationsQueryVariables>(SentCollaborationInvitationsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteSentCollaborationInvitationsQuery.getKey = (variables?: GQLSentCollaborationInvitationsQueryVariables) => variables === undefined ? ['SentCollaborationInvitations.infinite'] : ['SentCollaborationInvitations.infinite', variables];
+
+
+useSentCollaborationInvitationsQuery.fetcher = (variables?: GQLSentCollaborationInvitationsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLSentCollaborationInvitationsQuery, GQLSentCollaborationInvitationsQueryVariables>(SentCollaborationInvitationsDocument, variables, options);
+
+export const SendCollaborationInvitationDocument = `
+    mutation SendCollaborationInvitation($input: SendCollaborationInvitationInput!) {
+  sendCollaborationInvitation(input: $input) {
+    id
+    sender {
+      id
+      firstName
+      lastName
+      email
+    }
+    recipient {
+      id
+      firstName
+      lastName
+      email
+    }
+    status
+    message
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useSendCollaborationInvitationMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLSendCollaborationInvitationMutation, TError, GQLSendCollaborationInvitationMutationVariables, TContext>) => {
+    
+    return useMutation<GQLSendCollaborationInvitationMutation, TError, GQLSendCollaborationInvitationMutationVariables, TContext>(
+      {
+    mutationKey: ['SendCollaborationInvitation'],
+    mutationFn: (variables?: GQLSendCollaborationInvitationMutationVariables) => fetchData<GQLSendCollaborationInvitationMutation, GQLSendCollaborationInvitationMutationVariables>(SendCollaborationInvitationDocument, variables)(),
+    ...options
+  }
+    )};
+
+useSendCollaborationInvitationMutation.getKey = () => ['SendCollaborationInvitation'];
+
+
+useSendCollaborationInvitationMutation.fetcher = (variables: GQLSendCollaborationInvitationMutationVariables, options?: RequestInit['headers']) => fetchData<GQLSendCollaborationInvitationMutation, GQLSendCollaborationInvitationMutationVariables>(SendCollaborationInvitationDocument, variables, options);
+
+export const RespondToCollaborationInvitationDocument = `
+    mutation RespondToCollaborationInvitation($input: RespondToCollaborationInvitationInput!) {
+  respondToCollaborationInvitation(input: $input) {
+    id
+    sender {
+      id
+      firstName
+      lastName
+      email
+    }
+    recipient {
+      id
+      firstName
+      lastName
+      email
+    }
+    status
+    message
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useRespondToCollaborationInvitationMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRespondToCollaborationInvitationMutation, TError, GQLRespondToCollaborationInvitationMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRespondToCollaborationInvitationMutation, TError, GQLRespondToCollaborationInvitationMutationVariables, TContext>(
+      {
+    mutationKey: ['RespondToCollaborationInvitation'],
+    mutationFn: (variables?: GQLRespondToCollaborationInvitationMutationVariables) => fetchData<GQLRespondToCollaborationInvitationMutation, GQLRespondToCollaborationInvitationMutationVariables>(RespondToCollaborationInvitationDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRespondToCollaborationInvitationMutation.getKey = () => ['RespondToCollaborationInvitation'];
+
+
+useRespondToCollaborationInvitationMutation.fetcher = (variables: GQLRespondToCollaborationInvitationMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRespondToCollaborationInvitationMutation, GQLRespondToCollaborationInvitationMutationVariables>(RespondToCollaborationInvitationDocument, variables, options);
+
+export const MyTrainingPlanCollaborationsDocument = `
+    query MyTrainingPlanCollaborations {
+  myTrainingPlanCollaborations {
+    id
+    trainingPlan {
+      id
+      title
+    }
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useMyTrainingPlanCollaborationsQuery = <
+      TData = GQLMyTrainingPlanCollaborationsQuery,
+      TError = unknown
+    >(
+      variables?: GQLMyTrainingPlanCollaborationsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLMyTrainingPlanCollaborationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLMyTrainingPlanCollaborationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLMyTrainingPlanCollaborationsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['MyTrainingPlanCollaborations'] : ['MyTrainingPlanCollaborations', variables],
+    queryFn: fetchData<GQLMyTrainingPlanCollaborationsQuery, GQLMyTrainingPlanCollaborationsQueryVariables>(MyTrainingPlanCollaborationsDocument, variables),
+    ...options
+  }
+    )};
+
+useMyTrainingPlanCollaborationsQuery.getKey = (variables?: GQLMyTrainingPlanCollaborationsQueryVariables) => variables === undefined ? ['MyTrainingPlanCollaborations'] : ['MyTrainingPlanCollaborations', variables];
+
+export const useInfiniteMyTrainingPlanCollaborationsQuery = <
+      TData = InfiniteData<GQLMyTrainingPlanCollaborationsQuery>,
+      TError = unknown
+    >(
+      variables: GQLMyTrainingPlanCollaborationsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLMyTrainingPlanCollaborationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLMyTrainingPlanCollaborationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLMyTrainingPlanCollaborationsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['MyTrainingPlanCollaborations.infinite'] : ['MyTrainingPlanCollaborations.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLMyTrainingPlanCollaborationsQuery, GQLMyTrainingPlanCollaborationsQueryVariables>(MyTrainingPlanCollaborationsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteMyTrainingPlanCollaborationsQuery.getKey = (variables?: GQLMyTrainingPlanCollaborationsQueryVariables) => variables === undefined ? ['MyTrainingPlanCollaborations.infinite'] : ['MyTrainingPlanCollaborations.infinite', variables];
+
+
+useMyTrainingPlanCollaborationsQuery.fetcher = (variables?: GQLMyTrainingPlanCollaborationsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMyTrainingPlanCollaborationsQuery, GQLMyTrainingPlanCollaborationsQueryVariables>(MyTrainingPlanCollaborationsDocument, variables, options);
+
+export const MyMealPlanCollaborationsDocument = `
+    query MyMealPlanCollaborations {
+  myMealPlanCollaborations {
+    id
+    mealPlan {
+      id
+      title
+    }
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useMyMealPlanCollaborationsQuery = <
+      TData = GQLMyMealPlanCollaborationsQuery,
+      TError = unknown
+    >(
+      variables?: GQLMyMealPlanCollaborationsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLMyMealPlanCollaborationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLMyMealPlanCollaborationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLMyMealPlanCollaborationsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['MyMealPlanCollaborations'] : ['MyMealPlanCollaborations', variables],
+    queryFn: fetchData<GQLMyMealPlanCollaborationsQuery, GQLMyMealPlanCollaborationsQueryVariables>(MyMealPlanCollaborationsDocument, variables),
+    ...options
+  }
+    )};
+
+useMyMealPlanCollaborationsQuery.getKey = (variables?: GQLMyMealPlanCollaborationsQueryVariables) => variables === undefined ? ['MyMealPlanCollaborations'] : ['MyMealPlanCollaborations', variables];
+
+export const useInfiniteMyMealPlanCollaborationsQuery = <
+      TData = InfiniteData<GQLMyMealPlanCollaborationsQuery>,
+      TError = unknown
+    >(
+      variables: GQLMyMealPlanCollaborationsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLMyMealPlanCollaborationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLMyMealPlanCollaborationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLMyMealPlanCollaborationsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['MyMealPlanCollaborations.infinite'] : ['MyMealPlanCollaborations.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLMyMealPlanCollaborationsQuery, GQLMyMealPlanCollaborationsQueryVariables>(MyMealPlanCollaborationsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteMyMealPlanCollaborationsQuery.getKey = (variables?: GQLMyMealPlanCollaborationsQueryVariables) => variables === undefined ? ['MyMealPlanCollaborations.infinite'] : ['MyMealPlanCollaborations.infinite', variables];
+
+
+useMyMealPlanCollaborationsQuery.fetcher = (variables?: GQLMyMealPlanCollaborationsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMyMealPlanCollaborationsQuery, GQLMyMealPlanCollaborationsQueryVariables>(MyMealPlanCollaborationsDocument, variables, options);
+
+export const RemoveTrainingPlanCollaboratorDocument = `
+    mutation RemoveTrainingPlanCollaborator($input: RemoveTrainingPlanCollaboratorInput!) {
+  removeTrainingPlanCollaborator(input: $input)
+}
+    `;
+
+export const useRemoveTrainingPlanCollaboratorMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveTrainingPlanCollaboratorMutation, TError, GQLRemoveTrainingPlanCollaboratorMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveTrainingPlanCollaboratorMutation, TError, GQLRemoveTrainingPlanCollaboratorMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveTrainingPlanCollaborator'],
+    mutationFn: (variables?: GQLRemoveTrainingPlanCollaboratorMutationVariables) => fetchData<GQLRemoveTrainingPlanCollaboratorMutation, GQLRemoveTrainingPlanCollaboratorMutationVariables>(RemoveTrainingPlanCollaboratorDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveTrainingPlanCollaboratorMutation.getKey = () => ['RemoveTrainingPlanCollaborator'];
+
+
+useRemoveTrainingPlanCollaboratorMutation.fetcher = (variables: GQLRemoveTrainingPlanCollaboratorMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveTrainingPlanCollaboratorMutation, GQLRemoveTrainingPlanCollaboratorMutationVariables>(RemoveTrainingPlanCollaboratorDocument, variables, options);
+
+export const RemoveMealPlanCollaboratorDocument = `
+    mutation RemoveMealPlanCollaborator($input: RemoveMealPlanCollaboratorInput!) {
+  removeMealPlanCollaborator(input: $input)
+}
+    `;
+
+export const useRemoveMealPlanCollaboratorMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveMealPlanCollaboratorMutation, TError, GQLRemoveMealPlanCollaboratorMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveMealPlanCollaboratorMutation, TError, GQLRemoveMealPlanCollaboratorMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveMealPlanCollaborator'],
+    mutationFn: (variables?: GQLRemoveMealPlanCollaboratorMutationVariables) => fetchData<GQLRemoveMealPlanCollaboratorMutation, GQLRemoveMealPlanCollaboratorMutationVariables>(RemoveMealPlanCollaboratorDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveMealPlanCollaboratorMutation.getKey = () => ['RemoveMealPlanCollaborator'];
+
+
+useRemoveMealPlanCollaboratorMutation.fetcher = (variables: GQLRemoveMealPlanCollaboratorMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveMealPlanCollaboratorMutation, GQLRemoveMealPlanCollaboratorMutationVariables>(RemoveMealPlanCollaboratorDocument, variables, options);
+
+export const UpdateTrainingPlanCollaboratorPermissionDocument = `
+    mutation UpdateTrainingPlanCollaboratorPermission($input: UpdateTrainingPlanCollaboratorPermissionInput!) {
+  updateTrainingPlanCollaboratorPermission(input: $input) {
+    id
+    permission
+  }
+}
+    `;
+
+export const useUpdateTrainingPlanCollaboratorPermissionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateTrainingPlanCollaboratorPermissionMutation, TError, GQLUpdateTrainingPlanCollaboratorPermissionMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateTrainingPlanCollaboratorPermissionMutation, TError, GQLUpdateTrainingPlanCollaboratorPermissionMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateTrainingPlanCollaboratorPermission'],
+    mutationFn: (variables?: GQLUpdateTrainingPlanCollaboratorPermissionMutationVariables) => fetchData<GQLUpdateTrainingPlanCollaboratorPermissionMutation, GQLUpdateTrainingPlanCollaboratorPermissionMutationVariables>(UpdateTrainingPlanCollaboratorPermissionDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateTrainingPlanCollaboratorPermissionMutation.getKey = () => ['UpdateTrainingPlanCollaboratorPermission'];
+
+
+useUpdateTrainingPlanCollaboratorPermissionMutation.fetcher = (variables: GQLUpdateTrainingPlanCollaboratorPermissionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateTrainingPlanCollaboratorPermissionMutation, GQLUpdateTrainingPlanCollaboratorPermissionMutationVariables>(UpdateTrainingPlanCollaboratorPermissionDocument, variables, options);
+
+export const UpdateMealPlanCollaboratorPermissionDocument = `
+    mutation UpdateMealPlanCollaboratorPermission($input: UpdateMealPlanCollaboratorPermissionInput!) {
+  updateMealPlanCollaboratorPermission(input: $input) {
+    id
+    permission
+  }
+}
+    `;
+
+export const useUpdateMealPlanCollaboratorPermissionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateMealPlanCollaboratorPermissionMutation, TError, GQLUpdateMealPlanCollaboratorPermissionMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateMealPlanCollaboratorPermissionMutation, TError, GQLUpdateMealPlanCollaboratorPermissionMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateMealPlanCollaboratorPermission'],
+    mutationFn: (variables?: GQLUpdateMealPlanCollaboratorPermissionMutationVariables) => fetchData<GQLUpdateMealPlanCollaboratorPermissionMutation, GQLUpdateMealPlanCollaboratorPermissionMutationVariables>(UpdateMealPlanCollaboratorPermissionDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateMealPlanCollaboratorPermissionMutation.getKey = () => ['UpdateMealPlanCollaboratorPermission'];
+
+
+useUpdateMealPlanCollaboratorPermissionMutation.fetcher = (variables: GQLUpdateMealPlanCollaboratorPermissionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMealPlanCollaboratorPermissionMutation, GQLUpdateMealPlanCollaboratorPermissionMutationVariables>(UpdateMealPlanCollaboratorPermissionDocument, variables, options);
+
+export const TrainingPlanCollaboratorsDocument = `
+    query TrainingPlanCollaborators($trainingPlanId: ID!) {
+  trainingPlanCollaborators(trainingPlanId: $trainingPlanId) {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useTrainingPlanCollaboratorsQuery = <
+      TData = GQLTrainingPlanCollaboratorsQuery,
+      TError = unknown
+    >(
+      variables: GQLTrainingPlanCollaboratorsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLTrainingPlanCollaboratorsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLTrainingPlanCollaboratorsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLTrainingPlanCollaboratorsQuery, TError, TData>(
+      {
+    queryKey: ['TrainingPlanCollaborators', variables],
+    queryFn: fetchData<GQLTrainingPlanCollaboratorsQuery, GQLTrainingPlanCollaboratorsQueryVariables>(TrainingPlanCollaboratorsDocument, variables),
+    ...options
+  }
+    )};
+
+useTrainingPlanCollaboratorsQuery.getKey = (variables: GQLTrainingPlanCollaboratorsQueryVariables) => ['TrainingPlanCollaborators', variables];
+
+export const useInfiniteTrainingPlanCollaboratorsQuery = <
+      TData = InfiniteData<GQLTrainingPlanCollaboratorsQuery>,
+      TError = unknown
+    >(
+      variables: GQLTrainingPlanCollaboratorsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLTrainingPlanCollaboratorsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLTrainingPlanCollaboratorsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLTrainingPlanCollaboratorsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['TrainingPlanCollaborators.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLTrainingPlanCollaboratorsQuery, GQLTrainingPlanCollaboratorsQueryVariables>(TrainingPlanCollaboratorsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteTrainingPlanCollaboratorsQuery.getKey = (variables: GQLTrainingPlanCollaboratorsQueryVariables) => ['TrainingPlanCollaborators.infinite', variables];
+
+
+useTrainingPlanCollaboratorsQuery.fetcher = (variables: GQLTrainingPlanCollaboratorsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLTrainingPlanCollaboratorsQuery, GQLTrainingPlanCollaboratorsQueryVariables>(TrainingPlanCollaboratorsDocument, variables, options);
+
+export const MealPlanCollaboratorsDocument = `
+    query MealPlanCollaborators($mealPlanId: ID!) {
+  mealPlanCollaborators(mealPlanId: $mealPlanId) {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useMealPlanCollaboratorsQuery = <
+      TData = GQLMealPlanCollaboratorsQuery,
+      TError = unknown
+    >(
+      variables: GQLMealPlanCollaboratorsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLMealPlanCollaboratorsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLMealPlanCollaboratorsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLMealPlanCollaboratorsQuery, TError, TData>(
+      {
+    queryKey: ['MealPlanCollaborators', variables],
+    queryFn: fetchData<GQLMealPlanCollaboratorsQuery, GQLMealPlanCollaboratorsQueryVariables>(MealPlanCollaboratorsDocument, variables),
+    ...options
+  }
+    )};
+
+useMealPlanCollaboratorsQuery.getKey = (variables: GQLMealPlanCollaboratorsQueryVariables) => ['MealPlanCollaborators', variables];
+
+export const useInfiniteMealPlanCollaboratorsQuery = <
+      TData = InfiniteData<GQLMealPlanCollaboratorsQuery>,
+      TError = unknown
+    >(
+      variables: GQLMealPlanCollaboratorsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLMealPlanCollaboratorsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLMealPlanCollaboratorsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLMealPlanCollaboratorsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['MealPlanCollaborators.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLMealPlanCollaboratorsQuery, GQLMealPlanCollaboratorsQueryVariables>(MealPlanCollaboratorsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteMealPlanCollaboratorsQuery.getKey = (variables: GQLMealPlanCollaboratorsQueryVariables) => ['MealPlanCollaborators.infinite', variables];
+
+
+useMealPlanCollaboratorsQuery.fetcher = (variables: GQLMealPlanCollaboratorsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMealPlanCollaboratorsQuery, GQLMealPlanCollaboratorsQueryVariables>(MealPlanCollaboratorsDocument, variables, options);
+
+export const AddTrainingPlanCollaboratorDocument = `
+    mutation AddTrainingPlanCollaborator($input: AddTrainingPlanCollaboratorInput!) {
+  addTrainingPlanCollaborator(input: $input) {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useAddTrainingPlanCollaboratorMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLAddTrainingPlanCollaboratorMutation, TError, GQLAddTrainingPlanCollaboratorMutationVariables, TContext>) => {
+    
+    return useMutation<GQLAddTrainingPlanCollaboratorMutation, TError, GQLAddTrainingPlanCollaboratorMutationVariables, TContext>(
+      {
+    mutationKey: ['AddTrainingPlanCollaborator'],
+    mutationFn: (variables?: GQLAddTrainingPlanCollaboratorMutationVariables) => fetchData<GQLAddTrainingPlanCollaboratorMutation, GQLAddTrainingPlanCollaboratorMutationVariables>(AddTrainingPlanCollaboratorDocument, variables)(),
+    ...options
+  }
+    )};
+
+useAddTrainingPlanCollaboratorMutation.getKey = () => ['AddTrainingPlanCollaborator'];
+
+
+useAddTrainingPlanCollaboratorMutation.fetcher = (variables: GQLAddTrainingPlanCollaboratorMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAddTrainingPlanCollaboratorMutation, GQLAddTrainingPlanCollaboratorMutationVariables>(AddTrainingPlanCollaboratorDocument, variables, options);
+
+export const AddMealPlanCollaboratorDocument = `
+    mutation AddMealPlanCollaborator($input: AddMealPlanCollaboratorInput!) {
+  addMealPlanCollaborator(input: $input) {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useAddMealPlanCollaboratorMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLAddMealPlanCollaboratorMutation, TError, GQLAddMealPlanCollaboratorMutationVariables, TContext>) => {
+    
+    return useMutation<GQLAddMealPlanCollaboratorMutation, TError, GQLAddMealPlanCollaboratorMutationVariables, TContext>(
+      {
+    mutationKey: ['AddMealPlanCollaborator'],
+    mutationFn: (variables?: GQLAddMealPlanCollaboratorMutationVariables) => fetchData<GQLAddMealPlanCollaboratorMutation, GQLAddMealPlanCollaboratorMutationVariables>(AddMealPlanCollaboratorDocument, variables)(),
+    ...options
+  }
+    )};
+
+useAddMealPlanCollaboratorMutation.getKey = () => ['AddMealPlanCollaborator'];
+
+
+useAddMealPlanCollaboratorMutation.fetcher = (variables: GQLAddMealPlanCollaboratorMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAddMealPlanCollaboratorMutation, GQLAddMealPlanCollaboratorMutationVariables>(AddMealPlanCollaboratorDocument, variables, options);
+
 export const TrainerDashboardUserDocument = `
     query TrainerDashboardUser {
   userWithAllData {
@@ -5860,6 +6610,7 @@ export const GetMealPlanTemplatesDocument = `
     dailyFat
     weekCount
     assignedCount
+    collaboratorCount
     createdAt
     updatedAt
   }
@@ -5907,6 +6658,73 @@ useInfiniteGetMealPlanTemplatesQuery.getKey = (variables?: GQLGetMealPlanTemplat
 
 
 useGetMealPlanTemplatesQuery.fetcher = (variables?: GQLGetMealPlanTemplatesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMealPlanTemplatesQuery, GQLGetMealPlanTemplatesQueryVariables>(GetMealPlanTemplatesDocument, variables, options);
+
+export const GetCollaborationMealPlanTemplatesDocument = `
+    query GetCollaborationMealPlanTemplates($draft: Boolean) {
+  getCollaborationMealPlanTemplates(draft: $draft) {
+    id
+    title
+    description
+    isDraft
+    dailyCalories
+    dailyProtein
+    dailyCarbs
+    dailyFat
+    weekCount
+    assignedCount
+    collaboratorCount
+    createdBy {
+      id
+      firstName
+      lastName
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useGetCollaborationMealPlanTemplatesQuery = <
+      TData = GQLGetCollaborationMealPlanTemplatesQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetCollaborationMealPlanTemplatesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetCollaborationMealPlanTemplatesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetCollaborationMealPlanTemplatesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetCollaborationMealPlanTemplatesQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetCollaborationMealPlanTemplates'] : ['GetCollaborationMealPlanTemplates', variables],
+    queryFn: fetchData<GQLGetCollaborationMealPlanTemplatesQuery, GQLGetCollaborationMealPlanTemplatesQueryVariables>(GetCollaborationMealPlanTemplatesDocument, variables),
+    ...options
+  }
+    )};
+
+useGetCollaborationMealPlanTemplatesQuery.getKey = (variables?: GQLGetCollaborationMealPlanTemplatesQueryVariables) => variables === undefined ? ['GetCollaborationMealPlanTemplates'] : ['GetCollaborationMealPlanTemplates', variables];
+
+export const useInfiniteGetCollaborationMealPlanTemplatesQuery = <
+      TData = InfiniteData<GQLGetCollaborationMealPlanTemplatesQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetCollaborationMealPlanTemplatesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetCollaborationMealPlanTemplatesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetCollaborationMealPlanTemplatesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetCollaborationMealPlanTemplatesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetCollaborationMealPlanTemplates.infinite'] : ['GetCollaborationMealPlanTemplates.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetCollaborationMealPlanTemplatesQuery, GQLGetCollaborationMealPlanTemplatesQueryVariables>(GetCollaborationMealPlanTemplatesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetCollaborationMealPlanTemplatesQuery.getKey = (variables?: GQLGetCollaborationMealPlanTemplatesQueryVariables) => variables === undefined ? ['GetCollaborationMealPlanTemplates.infinite'] : ['GetCollaborationMealPlanTemplates.infinite', variables];
+
+
+useGetCollaborationMealPlanTemplatesQuery.fetcher = (variables?: GQLGetCollaborationMealPlanTemplatesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetCollaborationMealPlanTemplatesQuery, GQLGetCollaborationMealPlanTemplatesQueryVariables>(GetCollaborationMealPlanTemplatesDocument, variables, options);
 
 export const GetMealPlanByIdDocument = `
     query GetMealPlanById($id: ID!) {
@@ -6210,6 +7028,7 @@ export const GetTemplatesDocument = `
     isDraft
     weekCount
     assignedCount
+    collaboratorCount
   }
 }
     `;
@@ -6255,6 +7074,68 @@ useInfiniteGetTemplatesQuery.getKey = (variables?: GQLGetTemplatesQueryVariables
 
 
 useGetTemplatesQuery.fetcher = (variables?: GQLGetTemplatesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetTemplatesQuery, GQLGetTemplatesQueryVariables>(GetTemplatesDocument, variables, options);
+
+export const GetCollaborationTemplatesDocument = `
+    query GetCollaborationTemplates($draft: Boolean) {
+  getCollaborationTemplates(draft: $draft) {
+    id
+    title
+    description
+    isPublic
+    isDraft
+    weekCount
+    assignedCount
+    collaboratorCount
+    createdBy {
+      id
+      firstName
+      lastName
+    }
+  }
+}
+    `;
+
+export const useGetCollaborationTemplatesQuery = <
+      TData = GQLGetCollaborationTemplatesQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetCollaborationTemplatesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetCollaborationTemplatesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetCollaborationTemplatesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetCollaborationTemplatesQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetCollaborationTemplates'] : ['GetCollaborationTemplates', variables],
+    queryFn: fetchData<GQLGetCollaborationTemplatesQuery, GQLGetCollaborationTemplatesQueryVariables>(GetCollaborationTemplatesDocument, variables),
+    ...options
+  }
+    )};
+
+useGetCollaborationTemplatesQuery.getKey = (variables?: GQLGetCollaborationTemplatesQueryVariables) => variables === undefined ? ['GetCollaborationTemplates'] : ['GetCollaborationTemplates', variables];
+
+export const useInfiniteGetCollaborationTemplatesQuery = <
+      TData = InfiniteData<GQLGetCollaborationTemplatesQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetCollaborationTemplatesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetCollaborationTemplatesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetCollaborationTemplatesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetCollaborationTemplatesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetCollaborationTemplates.infinite'] : ['GetCollaborationTemplates.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetCollaborationTemplatesQuery, GQLGetCollaborationTemplatesQueryVariables>(GetCollaborationTemplatesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetCollaborationTemplatesQuery.getKey = (variables?: GQLGetCollaborationTemplatesQueryVariables) => variables === undefined ? ['GetCollaborationTemplates.infinite'] : ['GetCollaborationTemplates.infinite', variables];
+
+
+useGetCollaborationTemplatesQuery.fetcher = (variables?: GQLGetCollaborationTemplatesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetCollaborationTemplatesQuery, GQLGetCollaborationTemplatesQueryVariables>(GetCollaborationTemplatesDocument, variables, options);
 
 export const GetTemplateTrainingPlanByIdDocument = `
     query GetTemplateTrainingPlanById($id: ID!) {

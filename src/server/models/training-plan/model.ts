@@ -147,6 +147,12 @@ export default class TrainingPlan implements GQLTrainingPlan {
     return count
   }
 
+  async collaboratorCount() {
+    return this.context.loaders.plan.collaboratorCountByTrainingPlanId.load(
+      this.data.id,
+    )
+  }
+
   get isDemo() {
     return this.data.assignedToId !== this.context.user?.user.id
   }

@@ -65,6 +65,25 @@ query GetTemplates($draft: Boolean) {
     isDraft
     weekCount
     assignedCount
+    collaboratorCount
+  }
+}
+
+query GetCollaborationTemplates($draft: Boolean) {
+  getCollaborationTemplates(draft: $draft) {
+    id
+    title
+    description
+    isPublic
+    isDraft
+    weekCount
+    assignedCount
+    collaboratorCount
+    createdBy {
+      id
+      firstName
+      lastName
+    }
   }
 }
 

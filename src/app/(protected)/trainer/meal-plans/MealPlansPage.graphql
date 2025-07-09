@@ -60,6 +60,30 @@ query GetMealPlanTemplates($draft: Boolean) {
     dailyFat
     weekCount
     assignedCount
+    collaboratorCount
+    createdAt
+    updatedAt
+  }
+}
+
+query GetCollaborationMealPlanTemplates($draft: Boolean) {
+  getCollaborationMealPlanTemplates(draft: $draft) {
+    id
+    title
+    description
+    isDraft
+    dailyCalories
+    dailyProtein
+    dailyCarbs
+    dailyFat
+    weekCount
+    assignedCount
+    collaboratorCount
+    createdBy {
+      id
+      firstName
+      lastName
+    }
     createdAt
     updatedAt
   }

@@ -11,6 +11,7 @@ import {
   duplicateMealPlan,
   getClientActiveMealPlan,
   getClientMealPlans,
+  getCollaborationMealPlanTemplates,
   getMealPlanById,
   getMealPlanTemplates,
   getMyMealPlansOverview,
@@ -22,6 +23,9 @@ import {
 export const Query: GQLQueryResolvers<GQLContext> = {
   getMealPlanTemplates: async (_, args, context) => {
     return getMealPlanTemplates(args, context)
+  },
+  getCollaborationMealPlanTemplates: async (_, args, context) => {
+    return getCollaborationMealPlanTemplates(args, context)
   },
   getMealPlanById: async (_, args, context) => {
     return getMealPlanById(args, context)

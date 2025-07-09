@@ -76,6 +76,72 @@ export async function getMealPlanTemplates(
   return mealPlans.map((plan) => new MealPlan(plan, context))
 }
 
+export async function getCollaborationMealPlanTemplates(
+  args: GQLQueryGetMealPlanTemplatesArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const where: Prisma.MealPlanWhereInput = {
+    isTemplate: true,
+    createdById: { not: user.user.id }, // Not created by current user
+    collaborators: {
+      some: {
+        collaboratorId: user.user.id, // Current user is a collaborator
+      },
+    },
+  }
+
+  if (typeof args.draft === 'boolean') {
+    where.isDraft = args.draft
+  }
+
+  const mealPlans = await prisma.mealPlan.findMany({
+    where,
+    orderBy: {
+      updatedAt: 'desc',
+    },
+    include: {
+      createdBy: {
+        include: {
+          profile: true,
+        },
+      },
+      weeks: {
+        orderBy: {
+          weekNumber: 'asc',
+        },
+        include: {
+          days: {
+            orderBy: {
+              dayOfWeek: 'asc',
+            },
+            include: {
+              meals: {
+                orderBy: {
+                  dateTime: 'asc',
+                },
+                include: {
+                  foods: {
+                    orderBy: {
+                      createdAt: 'asc',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  return mealPlans.map((plan) => new MealPlan(plan, context))
+}
+
 export async function getMealPlanById(
   args: GQLQueryGetMealPlanByIdArgs,
   context: GQLContext,

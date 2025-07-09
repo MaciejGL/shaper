@@ -1,7 +1,8 @@
 import { useIsMutating } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
-import { Copy, Loader2, MoreHorizontalIcon, Trash2 } from 'lucide-react'
+import { Copy, Loader2, MoreHorizontalIcon, Trash2, Users } from 'lucide-react'
 
+import { ManageCollaboratorsDialog } from '@/app/(protected)/trainer/collaboration/components/manage-collaborators-dialog'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -66,6 +67,26 @@ export function FormActions({
               <Copy className="size-4 mr-2" />
               Duplicate
             </DropdownMenuItem>
+            {trainingId && (
+              <ManageCollaboratorsDialog
+                planId={trainingId}
+                planTitle={formData?.details.title || 'Training Plan'}
+                planType="training"
+                trigger={
+                  <DropdownMenuItem
+                    disabled={
+                      isSavingChanges ||
+                      isDuplicating ||
+                      isDeleting ||
+                      !trainingId
+                    }
+                  >
+                    <Users className="size-4 mr-2" />
+                    Manage Collaborators
+                  </DropdownMenuItem>
+                }
+              />
+            )}
 
             {!isDisabled && (
               <DropdownMenuItem

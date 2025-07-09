@@ -22,6 +22,7 @@ type MealPlan {
 
   weekCount: Int!
   assignedCount: Int!
+  collaboratorCount: Int!
 
   createdAt: String!
   updatedAt: String!
@@ -178,6 +179,7 @@ type CreateMealPlanPayload {
 # Queries - Only essential ones
 type Query {
   getMealPlanTemplates(draft: Boolean): [MealPlan!]!
+  getCollaborationMealPlanTemplates(draft: Boolean): [MealPlan!]!
   getMealPlanById(id: ID!): MealPlan!
   getClientMealPlans(clientId: ID!): [MealPlan!]!
   getClientActiveMealPlan(clientId: ID!): MealPlan
