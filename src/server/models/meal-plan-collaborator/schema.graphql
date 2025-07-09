@@ -1,0 +1,39 @@
+type MealPlanCollaborator {
+  id: ID!
+  mealPlan: MealPlan!
+  collaborator: UserPublic!
+  addedBy: UserPublic!
+  permission: CollaborationPermission!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input AddMealPlanCollaboratorInput {
+  mealPlanId: ID!
+  collaboratorEmail: String!
+  permission: CollaborationPermission!
+}
+
+input UpdateMealPlanCollaboratorPermissionInput {
+  collaboratorId: ID!
+  permission: CollaborationPermission!
+}
+
+input RemoveMealPlanCollaboratorInput {
+  collaboratorId: ID!
+}
+
+type Mutation {
+  addMealPlanCollaborator(
+    input: AddMealPlanCollaboratorInput!
+  ): MealPlanCollaborator!
+  updateMealPlanCollaboratorPermission(
+    input: UpdateMealPlanCollaboratorPermissionInput!
+  ): MealPlanCollaborator!
+  removeMealPlanCollaborator(input: RemoveMealPlanCollaboratorInput!): Boolean!
+}
+
+type Query {
+  mealPlanCollaborators(mealPlanId: ID!): [MealPlanCollaborator!]!
+  myMealPlanCollaborations: [MealPlanCollaborator!]!
+}

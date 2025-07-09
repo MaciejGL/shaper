@@ -1,0 +1,44 @@
+type CollaborationInvitation {
+  id: ID!
+  sender: UserPublic!
+  recipient: UserPublic!
+  status: CollaborationInvitationStatus!
+  message: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+enum CollaborationInvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+input SendCollaborationInvitationInput {
+  recipientEmail: String!
+  message: String
+}
+
+input RespondToCollaborationInvitationInput {
+  invitationId: ID!
+  action: CollaborationInvitationAction!
+}
+
+enum CollaborationInvitationAction {
+  ACCEPT
+  REJECT
+}
+
+type Mutation {
+  sendCollaborationInvitation(
+    input: SendCollaborationInvitationInput!
+  ): CollaborationInvitation!
+  respondToCollaborationInvitation(
+    input: RespondToCollaborationInvitationInput!
+  ): CollaborationInvitation!
+}
+
+type Query {
+  myCollaborationInvitations: [CollaborationInvitation!]!
+  sentCollaborationInvitations: [CollaborationInvitation!]!
+}

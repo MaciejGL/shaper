@@ -4,6 +4,59 @@ import DataLoader from 'dataloader'
 import { prisma } from '@/lib/db'
 
 export const createPlanLoaders = () => ({
+  trainingPlanById: new DataLoader(async (planIds: readonly string[]) => {
+    const plans = await prisma.trainingPlan.findMany({
+      where: { id: { in: planIds as string[] } },
+      include: {
+        weeks: {
+          include: {
+            days: {
+              include: {
+                exercises: {
+                  include: {
+                    sets: true,
+                    base: {
+                      include: {
+                        muscleGroups: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    const map = new Map(plans.map((plan) => [plan.id, plan]))
+    return planIds.map((id) => map.get(id) ?? null)
+  }),
+
+  mealPlanById: new DataLoader(async (planIds: readonly string[]) => {
+    const plans = await prisma.mealPlan.findMany({
+      where: { id: { in: planIds as string[] } },
+      include: {
+        weeks: {
+          include: {
+            days: {
+              include: {
+                meals: {
+                  include: {
+                    foods: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    const map = new Map(plans.map((plan) => [plan.id, plan]))
+    return planIds.map((id) => map.get(id) ?? null)
+  }),
+
   weekCountByPlanId: new DataLoader(async (planIds: readonly string[]) => {
     const counts = await prisma.trainingWeek.groupBy({
       by: ['planId'],

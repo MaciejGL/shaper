@@ -34,6 +34,18 @@ model User {
   assignedMealPlans    MealPlan[]        @relation("AssignedMealPlans")
   createdMealPlans     MealPlan[]        @relation("CreatedMealPlans")
   mealLogs             MealLog[]         @relation("MealLogs")
+  
+  // Collaboration relationships
+  sentCollaborationInvitations     CollaborationInvitation[] @relation("SentCollaborationInvitations")
+  receivedCollaborationInvitations CollaborationInvitation[] @relation("ReceivedCollaborationInvitations")
+  
+  // Training plan collaborations
+  trainingPlanCollaborations       TrainingPlanCollaborator[] @relation("TrainingPlanCollaborations")
+  addedTrainingPlanCollaborators   TrainingPlanCollaborator[] @relation("AddedTrainingPlanCollaborators")
+  
+  // Meal plan collaborations
+  mealPlanCollaborations           MealPlanCollaborator[] @relation("MealPlanCollaborations")
+  addedMealPlanCollaborators       MealPlanCollaborator[] @relation("AddedMealPlanCollaborators")
 }
 
 model UserSession {
@@ -150,6 +162,7 @@ model TrainingPlan {
   template     TrainingPlan?  @relation("Template", fields: [templateId], references: [id])
   templates    TrainingPlan[] @relation("Template")
   weeks        TrainingWeek[]
+  collaborators TrainingPlanCollaborator[]
 
   @@index([completedAt])
 }
@@ -363,6 +376,61 @@ model BaseExerciseSubstitute {
   @@index([substituteId])
 }
 
+// COLLABORATION SYSTEM
+
+model CollaborationInvitation {
+  id          String   @id @default(uuid())
+  senderId    String
+  recipientId String
+  status      String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  message     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  sender    User @relation("SentCollaborationInvitations", fields: [senderId], references: [id])
+  recipient User @relation("ReceivedCollaborationInvitations", fields: [recipientId], references: [id])
+  
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([status])
+}
+
+model TrainingPlanCollaborator {
+  id             String   @id @default(uuid())
+  trainingPlanId String
+  collaboratorId String
+  addedById      String
+  permission     String   @default("EDIT") // VIEW, EDIT, ADMIN
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  trainingPlan TrainingPlan @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+  collaborator User         @relation("TrainingPlanCollaborations", fields: [collaboratorId], references: [id])
+  addedBy      User         @relation("AddedTrainingPlanCollaborators", fields: [addedById], references: [id])
+  
+  @@unique([trainingPlanId, collaboratorId])
+  @@index([trainingPlanId])
+  @@index([collaboratorId])
+}
+
+model MealPlanCollaborator {
+  id           String   @id @default(uuid())
+  mealPlanId   String
+  collaboratorId String
+  addedById    String
+  permission   String   @default("EDIT") // VIEW, EDIT, ADMIN
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  mealPlan     MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  collaborator User     @relation("MealPlanCollaborations", fields: [collaboratorId], references: [id])
+  addedBy      User     @relation("AddedMealPlanCollaborators", fields: [addedById], references: [id])
+  
+  @@unique([mealPlanId, collaboratorId])
+  @@index([mealPlanId])
+  @@index([collaboratorId])
+}
+
 // MEAL plan
 
 model MealPlan {
@@ -393,6 +461,7 @@ model MealPlan {
   template   MealPlan?  @relation("MealTemplate", fields: [templateId], references: [id])
   templates  MealPlan[] @relation("MealTemplate")
   weeks      MealWeek[]
+  collaborators MealPlanCollaborator[]
 
   @@index([completedAt])
 }
