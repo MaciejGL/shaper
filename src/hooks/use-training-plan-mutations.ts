@@ -531,15 +531,13 @@ export function useTrainingPlanMutations(trainingId?: string) {
 
       // Move all exercises from source to target
       const exercisesToMove = [...sourceDay.exercises]
-      const targetExerciseCount = targetDay.exercises.length
 
       // Clear source day exercises
       sourceDay.exercises = []
 
       // Add exercises to target day, reordering them
-      const movedExercises = exercisesToMove.map((exercise, index) => ({
+      const movedExercises = exercisesToMove.map((exercise) => ({
         ...exercise,
-        order: targetExerciseCount + index + 1,
       }))
 
       targetDay.exercises = [...targetDay.exercises, ...movedExercises]
@@ -547,7 +545,8 @@ export function useTrainingPlanMutations(trainingId?: string) {
       // If target day was a rest day, set it to not be a rest day
       if (targetDay.isRestDay) {
         targetDay.isRestDay = false
-        targetDay.workoutType = targetDay.workoutType
+        targetDay.workoutType = sourceDay.workoutType
+        sourceDay.workoutType = targetDay.workoutType
       }
 
       return {

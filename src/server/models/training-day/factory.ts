@@ -97,15 +97,21 @@ export const moveExercisesToDay = async (
       })
     }
 
-    if (targetDay.isRestDay) {
-      await tx.trainingDay.update({
-        where: { id: targetDayId },
-        data: {
-          isRestDay: false,
-          workoutType: targetDay.workoutType,
-        },
-      })
-    }
+    await tx.trainingDay.update({
+      where: { id: targetDayId },
+      data: {
+        isRestDay: false,
+        workoutType: sourceDay.workoutType,
+      },
+    })
+
+    await tx.trainingDay.update({
+      where: { id: sourceDayId },
+      data: {
+        isRestDay: false,
+        workoutType: targetDay.workoutType,
+      },
+    })
 
     return true
   })

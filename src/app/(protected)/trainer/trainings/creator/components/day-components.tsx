@@ -1,5 +1,4 @@
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { AnimatePresence, motion } from 'framer-motion'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Checkbox } from '@/components/ui/checkbox'
@@ -12,7 +11,6 @@ import { dayNames } from '../utils'
 import { DayDropdownMenu } from './day-dropdown-menu'
 import { InsertionIndicator } from './insertion-indicators'
 import { SortableExercise } from './sortable-exercise'
-import { WorkoutTypeSelect } from './workout-type-select'
 
 // Memoized day header to prevent unnecessary rerenders
 export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
@@ -20,12 +18,10 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
   const day = formData?.weeks[activeWeek]?.days[dayIndex]
 
   const [isRestDay, setIsRestDay] = useState(day?.isRestDay ?? false)
-  const [workoutType, setWorkoutType] = useState(day?.workoutType)
 
   useEffect(() => {
     if (day) {
       setIsRestDay(day.isRestDay)
-      setWorkoutType(day.workoutType)
     }
   }, [day])
 
@@ -35,17 +31,6 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
       // Only pass the allowed fields for the mutation
       updateDay(activeWeek, dayIndex, {
         isRestDay: bool,
-      })
-    },
-    [activeWeek, dayIndex, updateDay],
-  )
-
-  const handleValueChange = useCallback(
-    (value: GQLWorkoutType) => {
-      setWorkoutType(value)
-      // Only pass the allowed fields for the mutation
-      updateDay(activeWeek, dayIndex, {
-        workoutType: value,
       })
     },
     [activeWeek, dayIndex, updateDay],
@@ -64,27 +49,12 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
         <span className="font-medium text-sm py-3">
           {dayNames[day?.dayOfWeek ?? 0]}
         </span>
+        <span className="text-sm text-muted-foreground">
+          {getWorkoutTypeLabel(day?.workoutType)} ({day?.exercises?.length ?? 0}
+          )
+        </span>
       </div>
       <div className="flex items-center gap-2">
-        <AnimatePresence>
-          {!isRestDay && (
-            <motion.div
-              key={day?.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <WorkoutTypeSelect
-                dayIndex={dayIndex}
-                workoutType={workoutType}
-                onValueChange={handleValueChange}
-                disabled={isDisabled}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
         {/* Move exercises dropdown - only show if day has exercises and not disabled */}
         {day?.id && !isDisabled && (
           <DayDropdownMenu
@@ -171,3 +141,12 @@ export const RestDayContent = React.memo(() => {
   )
 })
 RestDayContent.displayName = 'RestDayContent'
+
+const addSpacesToCamelCase = (str: string) => {
+  return str.replace(/([a-z])([A-Z])/g, '$1 $2')
+}
+
+const getWorkoutTypeLabel = (workoutType?: GQLWorkoutType | null) => {
+  if (!workoutType) return ''
+  return addSpacesToCamelCase(workoutType)
+}

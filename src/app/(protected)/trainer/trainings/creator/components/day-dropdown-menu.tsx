@@ -1,19 +1,23 @@
-import { MoreVertical } from 'lucide-react'
+import { BicepsFlexedIcon, MoreVertical, ReplaceAllIcon } from 'lucide-react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuPortal,
+  DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
+import { GQLWorkoutType } from '@/generated/graphql-client'
 
-import { dayNames } from '../utils'
+import { dayNames, workoutTypeGroups } from '../utils'
 
 interface MoveExercisesDropdownProps {
   sourceDayId: string
@@ -39,6 +43,10 @@ export function DayDropdownMenu({
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="start">
+        <WorkoutTypeDropdown
+          sourceWeekIndex={sourceWeekIndex}
+          sourceDayIndex={sourceDayIndex}
+        />
         <MoveDropdownItem
           sourceDayId={sourceDayId}
           sourceWeekIndex={sourceWeekIndex}
@@ -46,6 +54,70 @@ export function DayDropdownMenu({
         />
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+function WorkoutTypeDropdown({
+  sourceWeekIndex,
+  sourceDayIndex,
+}: {
+  sourceWeekIndex: number
+  sourceDayIndex: number
+}) {
+  const { formData, updateDay, activeWeek } = useTrainingPlan()
+  const day = formData?.weeks[activeWeek]?.days[sourceDayIndex]
+
+  const [workoutType, setWorkoutType] = useState(day?.workoutType)
+
+  useEffect(() => {
+    if (day) {
+      setWorkoutType(day.workoutType)
+    }
+  }, [day])
+
+  const handleSelectWorkoutType = useCallback(
+    (value: GQLWorkoutType) => {
+      setWorkoutType(value)
+      updateDay(sourceWeekIndex, sourceDayIndex, {
+        workoutType: value,
+      })
+    },
+    [sourceWeekIndex, sourceDayIndex, updateDay],
+  )
+
+  if (day?.isRestDay) {
+    return null
+  }
+
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger className="flex items-center gap-2">
+        <BicepsFlexedIcon className="size-4" />
+        Select Day Type
+      </DropdownMenuSubTrigger>
+      <DropdownMenuPortal>
+        <DropdownMenuSubContent>
+          {workoutTypeGroups.map((group) => (
+            <React.Fragment key={group.label}>
+              <DropdownMenuLabel className="text-md font-medium pt-4">
+                {group.label}
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {group.types.map((type) => (
+                <DropdownMenuItem
+                  key={type}
+                  disabled={workoutType === type}
+                  onClick={() => handleSelectWorkoutType(type)}
+                  className="flex justify-between items-center"
+                >
+                  {type}
+                </DropdownMenuItem>
+              ))}
+            </React.Fragment>
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuPortal>
+    </DropdownMenuSub>
   )
 }
 
@@ -75,7 +147,10 @@ function MoveDropdownItem({
 
   return formData.weeks.map((week, weekIndex) => (
     <DropdownMenuSub key={week.id}>
-      <DropdownMenuSubTrigger>Move Exercises</DropdownMenuSubTrigger>
+      <DropdownMenuSubTrigger className="flex items-center gap-2">
+        <ReplaceAllIcon className="size-4" />
+        Move Exercises
+      </DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
           {week.days.map((day, dayIndex) => {
@@ -88,7 +163,7 @@ function MoveDropdownItem({
             return (
               <DropdownMenuItem
                 key={day.id}
-                disabled={isSourceDay || isCompletedDay}
+                disabled={isSourceDay || isCompletedDay || exerciseCount > 0}
                 onClick={() => moveExercisesToDay(sourceDayId, day.id)}
                 className="flex justify-between items-center"
               >
