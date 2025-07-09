@@ -89,7 +89,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Check if recipient exists and is a trainer
     const recipient = await prisma.user.findUnique({
-      where: { email: recipientEmail },
+      where: { email: recipientEmail, role: 'TRAINER' },
     })
 
     if (!recipient) {
