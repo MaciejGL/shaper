@@ -612,6 +612,11 @@ export type GQLMoveExerciseInput = {
   targetDayId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export type GQLMoveExercisesToDayInput = {
+  sourceDayId: Scalars['ID']['input'];
+  targetDayId: Scalars['ID']['input'];
+};
+
 export type GQLMuscleGroup = {
   __typename?: 'MuscleGroup';
   alias?: Maybe<Scalars['String']['output']>;
@@ -683,6 +688,7 @@ export type GQLMutation = {
   markWorkoutAsCompleted?: Maybe<Scalars['Boolean']['output']>;
   moderateReview: Scalars['Boolean']['output'];
   moveExercise: Scalars['Boolean']['output'];
+  moveExercisesToDay: Scalars['Boolean']['output'];
   pausePlan: Scalars['Boolean']['output'];
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
   removeExerciseFromDay: Scalars['Boolean']['output'];
@@ -952,6 +958,11 @@ export type GQLMutationModerateReviewArgs = {
 
 export type GQLMutationMoveExerciseArgs = {
   input: GQLMoveExerciseInput;
+};
+
+
+export type GQLMutationMoveExercisesToDayArgs = {
+  input: GQLMoveExercisesToDayInput;
 };
 
 
@@ -2435,6 +2446,13 @@ export type GQLRemoveSetFromExerciseMutationVariables = Exact<{
 
 
 export type GQLRemoveSetFromExerciseMutation = { __typename?: 'Mutation', removeSetFromExercise: boolean };
+
+export type GQLMoveExercisesToDayMutationVariables = Exact<{
+  input: GQLMoveExercisesToDayInput;
+}>;
+
+
+export type GQLMoveExercisesToDayMutation = { __typename?: 'Mutation', moveExercisesToDay: boolean };
 
 export type GQLCreateDraftTemplateMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -6586,6 +6604,30 @@ useRemoveSetFromExerciseMutation.getKey = () => ['RemoveSetFromExercise'];
 
 
 useRemoveSetFromExerciseMutation.fetcher = (variables: GQLRemoveSetFromExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveSetFromExerciseMutation, GQLRemoveSetFromExerciseMutationVariables>(RemoveSetFromExerciseDocument, variables, options);
+
+export const MoveExercisesToDayDocument = `
+    mutation MoveExercisesToDay($input: MoveExercisesToDayInput!) {
+  moveExercisesToDay(input: $input)
+}
+    `;
+
+export const useMoveExercisesToDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLMoveExercisesToDayMutation, TError, GQLMoveExercisesToDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLMoveExercisesToDayMutation, TError, GQLMoveExercisesToDayMutationVariables, TContext>(
+      {
+    mutationKey: ['MoveExercisesToDay'],
+    mutationFn: (variables?: GQLMoveExercisesToDayMutationVariables) => fetchData<GQLMoveExercisesToDayMutation, GQLMoveExercisesToDayMutationVariables>(MoveExercisesToDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useMoveExercisesToDayMutation.getKey = () => ['MoveExercisesToDay'];
+
+
+useMoveExercisesToDayMutation.fetcher = (variables: GQLMoveExercisesToDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLMoveExercisesToDayMutation, GQLMoveExercisesToDayMutationVariables>(MoveExercisesToDayDocument, variables, options);
 
 export const CreateDraftTemplateDocument = `
     mutation CreateDraftTemplate {

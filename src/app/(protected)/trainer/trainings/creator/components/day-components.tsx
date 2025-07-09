@@ -9,6 +9,7 @@ import { GQLWorkoutType } from '@/generated/graphql-client'
 import { TrainingDay } from '../../../types'
 import { dayNames } from '../utils'
 
+import { DayDropdownMenu } from './day-dropdown-menu'
 import { InsertionIndicator } from './insertion-indicators'
 import { SortableExercise } from './sortable-exercise'
 import { WorkoutTypeSelect } from './workout-type-select'
@@ -64,24 +65,36 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
           {dayNames[day?.dayOfWeek ?? 0]}
         </span>
       </div>
-      <AnimatePresence>
-        {!isRestDay && (
-          <motion.div
-            key={day?.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            <WorkoutTypeSelect
-              dayIndex={dayIndex}
-              workoutType={workoutType}
-              onValueChange={handleValueChange}
-              disabled={isDisabled}
-            />
-          </motion.div>
+      <div className="flex items-center gap-2">
+        <AnimatePresence>
+          {!isRestDay && (
+            <motion.div
+              key={day?.id}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <WorkoutTypeSelect
+                dayIndex={dayIndex}
+                workoutType={workoutType}
+                onValueChange={handleValueChange}
+                disabled={isDisabled}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Move exercises dropdown - only show if day has exercises and not disabled */}
+        {day?.id && !isDisabled && (
+          <DayDropdownMenu
+            sourceDayId={day.id}
+            sourceWeekIndex={activeWeek}
+            sourceDayIndex={dayIndex}
+            disabled={isDisabled}
+          />
         )}
-      </AnimatePresence>
+      </div>
     </div>
   )
 })

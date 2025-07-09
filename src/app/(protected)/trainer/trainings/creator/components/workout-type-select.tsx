@@ -34,7 +34,11 @@ export function WorkoutTypeSelect({
         onValueChange={onValueChange}
         disabled={disabled}
       >
-        <SelectTrigger id={`workout-type-${dayIndex}`} className="w-full">
+        <SelectTrigger
+          variant="ghost"
+          id={`workout-type-${dayIndex}`}
+          className="w-full"
+        >
           <SelectValue placeholder="Select type" />
         </SelectTrigger>
         <SelectContent>

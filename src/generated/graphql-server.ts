@@ -614,6 +614,11 @@ export type GQLMoveExerciseInput = {
   targetDayId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export type GQLMoveExercisesToDayInput = {
+  sourceDayId: Scalars['ID']['input'];
+  targetDayId: Scalars['ID']['input'];
+};
+
 export type GQLMuscleGroup = {
   __typename?: 'MuscleGroup';
   alias?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -685,6 +690,7 @@ export type GQLMutation = {
   markWorkoutAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   moderateReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   moveExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  moveExercisesToDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   pausePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   rejectCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   removeExerciseFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -954,6 +960,11 @@ export type GQLMutationModerateReviewArgs = {
 
 export type GQLMutationMoveExerciseArgs = {
   input: GQLMoveExerciseInput;
+};
+
+
+export type GQLMutationMoveExercisesToDayArgs = {
+  input: GQLMoveExercisesToDayInput;
 };
 
 
@@ -1931,6 +1942,7 @@ export type GQLResolversTypes = {
   MealWeek: ResolverTypeWrapper<GQLMealWeek>;
   ModerateReviewInput: GQLModerateReviewInput;
   MoveExerciseInput: GQLMoveExerciseInput;
+  MoveExercisesToDayInput: GQLMoveExercisesToDayInput;
   MuscleGroup: ResolverTypeWrapper<GQLMuscleGroup>;
   MuscleGroupCategory: ResolverTypeWrapper<GQLMuscleGroupCategory>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -2042,6 +2054,7 @@ export type GQLResolversParentTypes = {
   MealWeek: GQLMealWeek;
   ModerateReviewInput: GQLModerateReviewInput;
   MoveExerciseInput: GQLMoveExerciseInput;
+  MoveExercisesToDayInput: GQLMoveExercisesToDayInput;
   MuscleGroup: GQLMuscleGroup;
   MuscleGroupCategory: GQLMuscleGroupCategory;
   Mutation: {};
@@ -2421,6 +2434,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   markWorkoutAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkWorkoutAsCompletedArgs, 'dayId'>>;
   moderateReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationModerateReviewArgs, 'input'>>;
   moveExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationMoveExerciseArgs, 'input'>>;
+  moveExercisesToDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationMoveExercisesToDayArgs, 'input'>>;
   pausePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationPausePlanArgs, 'planId'>>;
   rejectCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
   removeExerciseFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveExerciseFromDayArgs, 'exerciseId'>>;
