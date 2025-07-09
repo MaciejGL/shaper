@@ -19,17 +19,15 @@ import { ManagePlanModal } from '../manage-plan-modal'
 
 export function Header({
   plan,
-  loading,
   handlePlanAction,
 }: {
   plan: NonNullable<ActivePlan>
-  loading: boolean
   handlePlanAction: (action: PlanAction, plan: NonNullable<ActivePlan>) => void
 }) {
   return (
     <div className="pb-6">
       <div className="flex justify-between items-start gap-2">
-        <PlanHeader title={plan.title} loading={loading} planId={plan.id} />
+        <PlanHeader title={plan.title} planId={plan.id} />
         <PlanActions handlePlanAction={handlePlanAction} plan={plan} />
       </div>
     </div>
@@ -38,29 +36,19 @@ export function Header({
 
 function PlanHeader({
   title,
-  loading,
+
   planId,
 }: {
   title: string
-  loading: boolean
   planId: string
 }) {
   return (
     <div className="flex-1">
       <div className="mb-2">
         <Link href={`/fitspace/training-preview/${planId}`}>
-          <h2
-            className={cn(
-              'text-2xl font-medium mb-1',
-              loading && 'masked-placeholder-text',
-            )}
-          >
-            {title}
-          </h2>
+          <h2 className={cn('text-2xl font-medium mb-1')}>{title}</h2>
         </Link>
-        <Badge variant="secondary" isLoading={loading}>
-          Active
-        </Badge>
+        <Badge variant="secondary">Active</Badge>
       </div>
     </div>
   )

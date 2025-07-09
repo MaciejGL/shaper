@@ -54,36 +54,24 @@ export default function MyPlansPage() {
         onValueChange={(value) => setTab(value as PlanTab)}
         className="w-full"
       >
-        <div className="overflow-x-auto hide-scrollbar">
-          <TabsList className="grid grid-cols-4 w-max">
-            <TabsTrigger
-              value={PlanTab.QuickWorkout}
-              className="flex items-center gap-2"
-            >
+        <div className="overflow-x-auto hide-scrollbar -mx-2 px-2">
+          <TabsList className="grid grid-cols-4 w-max mb-4">
+            <TabsTrigger size="lg" value={PlanTab.QuickWorkout}>
               Quick Workouts
             </TabsTrigger>
-            <TabsTrigger
-              value={PlanTab.Active}
-              className="flex items-center gap-2"
-            >
+            <TabsTrigger size="lg" value={PlanTab.Active}>
               Active
             </TabsTrigger>
-            <TabsTrigger
-              value={PlanTab.Available}
-              className="flex items-center gap-2"
-            >
+            <TabsTrigger size="lg" value={PlanTab.Available}>
               Available
             </TabsTrigger>
-            <TabsTrigger
-              value={PlanTab.Completed}
-              className="flex items-center gap-2"
-            >
+            <TabsTrigger size="lg" value={PlanTab.Completed}>
               Completed
             </TabsTrigger>
           </TabsList>
         </div>
         {/* Quick Workout Plan */}
-        <TabsContent value={PlanTab.QuickWorkout} className="mt-6 space-y-4">
+        <TabsContent value={PlanTab.QuickWorkout} className="space-y-4">
           <QuickWorkoutPlanTab
             plan={quickWorkoutPlan}
             loading={isLoadingPlans}
@@ -91,7 +79,7 @@ export default function MyPlansPage() {
         </TabsContent>
 
         {/* Active Plans */}
-        <TabsContent value={PlanTab.Active} className="mt-6 space-y-4">
+        <TabsContent value={PlanTab.Active} className="space-y-4">
           <ActivePlanTab
             plan={activePlan}
             handlePlanAction={handlePlanAction}
@@ -100,7 +88,7 @@ export default function MyPlansPage() {
         </TabsContent>
 
         {/* Available Plans */}
-        <TabsContent value={PlanTab.Available} className="mt-6 space-y-4">
+        <TabsContent value={PlanTab.Available} className="space-y-4">
           <AvailablePlansTab
             availablePlans={availablePlans ?? []}
             handlePlanAction={handlePlanAction}
@@ -109,7 +97,7 @@ export default function MyPlansPage() {
         </TabsContent>
 
         {/* Completed Plans */}
-        <TabsContent value={PlanTab.Completed} className="mt-6 space-y-4">
+        <TabsContent value={PlanTab.Completed} className="space-y-4">
           <CompletedPlansTab
             completedPlans={completedPlans ?? []}
             handlePlanAction={handlePlanAction}

@@ -42,11 +42,7 @@ export function ActivePlanTab({
     <div className="mb-4">
       {plan ? (
         <div key={plan.id}>
-          <Header
-            plan={plan}
-            loading={loading}
-            handlePlanAction={handlePlanAction}
-          />
+          <Header plan={plan} handlePlanAction={handlePlanAction} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6">
             <div className="p-4 rounded-lg bg-card">
               <ProgressOverview

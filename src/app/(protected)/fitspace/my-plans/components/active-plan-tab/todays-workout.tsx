@@ -29,7 +29,7 @@ export function TodaysWorkout({
   isNextWorkout,
   forceExpanded,
 }: {
-  todaysWorkout: NonNullable<ActivePlan>['weeks'][number]['days'][number]
+  todaysWorkout?: NonNullable<ActivePlan>['weeks'][number]['days'][number]
   planId: string
   isNextWorkout?: boolean
   forceExpanded?: boolean

@@ -1,14 +1,4 @@
-query FitspaceDashboard {
-  myTrainer {
-    id
-    firstName
-    lastName
-    image
-    sex
-    averageRating
-    yearsOfExperience
-  }
-
+query FitspaceDashboardGetWorkout {
   getWorkout {
     plan {
       id

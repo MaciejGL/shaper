@@ -1,6 +1,6 @@
 'use client'
 
-import { getDay, secondsToMinutes } from 'date-fns'
+import { secondsToMinutes } from 'date-fns'
 import {
   Activity,
   BadgeCheck,
@@ -15,26 +15,22 @@ import { useRef } from 'react'
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { StatsItem } from '@/components/stats-item'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { GQLFitspaceDashboardQuery } from '@/generated/graphql-client'
+import { GQLFitspaceDashboardGetWorkoutQuery } from '@/generated/graphql-client'
 import { useScrollToItem } from '@/hooks/use-scroll-to-item'
+import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
 import { cn } from '@/lib/utils'
 
 export type DashboardStatsProps = {
   plan?: NonNullable<
-    NonNullable<GQLFitspaceDashboardQuery['getWorkout']>['plan']
+    NonNullable<GQLFitspaceDashboardGetWorkoutQuery['getWorkout']>['plan']
   >
-  currentWeek?: NonNullable<
-    NonNullable<GQLFitspaceDashboardQuery['getWorkout']>['plan']
-  >['weeks'][number]
 }
 
-export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
+export function DashboardStats({ plan }: DashboardStatsProps) {
+  const { currentWeek, currentDay } = getCurrentWeekAndDay(plan?.weeks)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-  const currentDayOfWeek = (getDay(new Date()) + 6) % 7
 
-  const currentDayIndex = currentWeek?.days.findIndex(
-    (day) => day.dayOfWeek === currentDayOfWeek,
-  )
+  const currentDayIndex = currentDay?.dayOfWeek ?? 0
 
   useScrollToItem({
     containerRef: scrollContainerRef,
@@ -42,7 +38,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
     itemCount: currentWeek?.days.length ?? 0,
     itemWidth: 80 + 8, // min-w-[5rem] (80px) + gap-2 (8px)
     itemSelector: '.day-card',
-    dependencies: [plan?.id, currentDayOfWeek],
+    dependencies: [plan?.id, currentDay?.dayOfWeek],
     scrollDelay: 100,
   })
 
@@ -71,8 +67,8 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
   )
 
   return (
-    <div className="space-y-6 -mx-2 md:-mx-0">
-      <Card className="rounded-none border-none border-t border-b md:border md:rounded-lg py-4">
+    <div className="space-y-6">
+      <Card className="py-4">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Activity className="h-5 w-5" />
@@ -109,7 +105,7 @@ export function DashboardStats({ plan, currentWeek }: DashboardStatsProps) {
                           'day-card rounded-md shrink-0 p-3 min-w-[5rem]',
                           !day.isRestDay && 'bg-primary/6',
                           day.isRestDay && 'bg-muted/20 text-muted-foreground',
-                          day.dayOfWeek === currentDayOfWeek &&
+                          day.dayOfWeek === currentDay?.dayOfWeek &&
                             'ring-2 ring-primary/20',
                         )}
                       >
@@ -173,7 +169,7 @@ const calculateStreak = ({
   currentWeekIndex: number
   currentDayIndex: number
   weeks: NonNullable<
-    NonNullable<GQLFitspaceDashboardQuery['getWorkout']>['plan']
+    NonNullable<GQLFitspaceDashboardGetWorkoutQuery['getWorkout']>['plan']
   >['weeks']
 }): number => {
   let streak = 0

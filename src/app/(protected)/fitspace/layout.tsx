@@ -8,9 +8,7 @@ import { getCurrentUser, requireAuth } from '@/lib/getUser'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
 import { MobileNav } from './components/mobile-nav'
-import { PrefetchFitspacePages } from './components/prefetch-pages'
-
-export const dynamic = 'force-dynamic'
+import { PrefetchFitspacePages } from './prefetch-pages'
 
 export default async function ProtectedLayout({
   children,

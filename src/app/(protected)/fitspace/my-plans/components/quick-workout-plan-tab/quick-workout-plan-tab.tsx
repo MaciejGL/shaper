@@ -49,16 +49,36 @@ export function QuickWorkoutPlanTab({
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-card rounded-lg animate-pulse" />
-          ))}
+        {/* Header Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <StatsItem
+            value={10}
+            label="Workouts Completed"
+            icon={<DumbbellIcon className="w-5 h-5 text-primary" />}
+            variant="secondary"
+            loading={loading}
+          />
+          <StatsItem
+            value={10}
+            label="Weeks Active"
+            icon={<Calendar className="w-5 h-5 text-primary" />}
+            variant="secondary"
+            loading={loading}
+          />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[1, 2].map((i) => (
-            <div key={i} className="h-64 bg-card rounded-lg animate-pulse" />
-          ))}
-        </div>
+
+        <Select value={'1'} onValueChange={() => {}} disabled={loading}>
+          <SelectTrigger variant="ghost" className="w-full animate-pulse">
+            <SelectValue placeholder="Select a date" />
+          </SelectTrigger>
+        </Select>
+
+        {Array.from({ length: 2 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-64 w-full bg-card rounded-lg animate-pulse"
+          />
+        ))}
       </div>
     )
   }

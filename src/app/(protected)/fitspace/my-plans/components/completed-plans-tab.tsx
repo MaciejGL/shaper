@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { Loader } from '@/components/loader'
+import { CardSkeleton } from '@/components/card-skeleton'
 import { RatingStars } from '@/components/rating-stars'
 import { StatsItem } from '@/components/stats-item'
 import { Badge } from '@/components/ui/badge'
@@ -49,8 +49,10 @@ export function CompletedPlansTab({
 }) {
   if (loading)
     return (
-      <div className="flex justify-center items-center h-full min-h-[50vh]">
-        <Loader />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <CardSkeleton key={index} />
+        ))}
       </div>
     )
 
@@ -58,7 +60,7 @@ export function CompletedPlansTab({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {completedPlans.length > 0 ? (
         completedPlans.map((plan) => (
-          <Card key={plan.id} variant="elevated">
+          <Card key={plan.id}>
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
                 <div className="flex-1">

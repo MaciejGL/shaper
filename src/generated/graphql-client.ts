@@ -1794,10 +1794,10 @@ export enum GQLWorkoutType {
   UpperBody = 'UpperBody'
 }
 
-export type GQLFitspaceDashboardQueryVariables = Exact<{ [key: string]: never; }>;
+export type GQLFitspaceDashboardGetWorkoutQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLFitspaceDashboardQuery = { __typename?: 'Query', myTrainer?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null, averageRating?: number | undefined | null, yearsOfExperience?: number | undefined | null } | undefined | null, getWorkout?: { __typename?: 'GetWorkoutPayload', plan: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, duration?: number | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }> }> }> }> } } | undefined | null };
+export type GQLFitspaceDashboardGetWorkoutQuery = { __typename?: 'Query', getWorkout?: { __typename?: 'GetWorkoutPayload', plan: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, duration?: number | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }> }> }> }> } } | undefined | null };
 
 export type GQLFitspaceMyPlansQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2692,17 +2692,8 @@ export const TrainingTemplateFragmentDoc = `
   }
 }
     `;
-export const FitspaceDashboardDocument = `
-    query FitspaceDashboard {
-  myTrainer {
-    id
-    firstName
-    lastName
-    image
-    sex
-    averageRating
-    yearsOfExperience
-  }
+export const FitspaceDashboardGetWorkoutDocument = `
+    query FitspaceDashboardGetWorkout {
   getWorkout {
     plan {
       id
@@ -2746,47 +2737,47 @@ export const FitspaceDashboardDocument = `
 }
     `;
 
-export const useFitspaceDashboardQuery = <
-      TData = GQLFitspaceDashboardQuery,
+export const useFitspaceDashboardGetWorkoutQuery = <
+      TData = GQLFitspaceDashboardGetWorkoutQuery,
       TError = unknown
     >(
-      variables?: GQLFitspaceDashboardQueryVariables,
-      options?: Omit<UseQueryOptions<GQLFitspaceDashboardQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitspaceDashboardQuery, TError, TData>['queryKey'] }
+      variables?: GQLFitspaceDashboardGetWorkoutQueryVariables,
+      options?: Omit<UseQueryOptions<GQLFitspaceDashboardGetWorkoutQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitspaceDashboardGetWorkoutQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<GQLFitspaceDashboardQuery, TError, TData>(
+    return useQuery<GQLFitspaceDashboardGetWorkoutQuery, TError, TData>(
       {
-    queryKey: variables === undefined ? ['FitspaceDashboard'] : ['FitspaceDashboard', variables],
-    queryFn: fetchData<GQLFitspaceDashboardQuery, GQLFitspaceDashboardQueryVariables>(FitspaceDashboardDocument, variables),
+    queryKey: variables === undefined ? ['FitspaceDashboardGetWorkout'] : ['FitspaceDashboardGetWorkout', variables],
+    queryFn: fetchData<GQLFitspaceDashboardGetWorkoutQuery, GQLFitspaceDashboardGetWorkoutQueryVariables>(FitspaceDashboardGetWorkoutDocument, variables),
     ...options
   }
     )};
 
-useFitspaceDashboardQuery.getKey = (variables?: GQLFitspaceDashboardQueryVariables) => variables === undefined ? ['FitspaceDashboard'] : ['FitspaceDashboard', variables];
+useFitspaceDashboardGetWorkoutQuery.getKey = (variables?: GQLFitspaceDashboardGetWorkoutQueryVariables) => variables === undefined ? ['FitspaceDashboardGetWorkout'] : ['FitspaceDashboardGetWorkout', variables];
 
-export const useInfiniteFitspaceDashboardQuery = <
-      TData = InfiniteData<GQLFitspaceDashboardQuery>,
+export const useInfiniteFitspaceDashboardGetWorkoutQuery = <
+      TData = InfiniteData<GQLFitspaceDashboardGetWorkoutQuery>,
       TError = unknown
     >(
-      variables: GQLFitspaceDashboardQueryVariables,
-      options: Omit<UseInfiniteQueryOptions<GQLFitspaceDashboardQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitspaceDashboardQuery, TError, TData>['queryKey'] }
+      variables: GQLFitspaceDashboardGetWorkoutQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLFitspaceDashboardGetWorkoutQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitspaceDashboardGetWorkoutQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useInfiniteQuery<GQLFitspaceDashboardQuery, TError, TData>(
+    return useInfiniteQuery<GQLFitspaceDashboardGetWorkoutQuery, TError, TData>(
       (() => {
     const { queryKey: optionsQueryKey, ...restOptions } = options;
     return {
-      queryKey: optionsQueryKey ?? variables === undefined ? ['FitspaceDashboard.infinite'] : ['FitspaceDashboard.infinite', variables],
-      queryFn: (metaData) => fetchData<GQLFitspaceDashboardQuery, GQLFitspaceDashboardQueryVariables>(FitspaceDashboardDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      queryKey: optionsQueryKey ?? variables === undefined ? ['FitspaceDashboardGetWorkout.infinite'] : ['FitspaceDashboardGetWorkout.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLFitspaceDashboardGetWorkoutQuery, GQLFitspaceDashboardGetWorkoutQueryVariables>(FitspaceDashboardGetWorkoutDocument, {...variables, ...(metaData.pageParam ?? {})})(),
       ...restOptions
     }
   })()
     )};
 
-useInfiniteFitspaceDashboardQuery.getKey = (variables?: GQLFitspaceDashboardQueryVariables) => variables === undefined ? ['FitspaceDashboard.infinite'] : ['FitspaceDashboard.infinite', variables];
+useInfiniteFitspaceDashboardGetWorkoutQuery.getKey = (variables?: GQLFitspaceDashboardGetWorkoutQueryVariables) => variables === undefined ? ['FitspaceDashboardGetWorkout.infinite'] : ['FitspaceDashboardGetWorkout.infinite', variables];
 
 
-useFitspaceDashboardQuery.fetcher = (variables?: GQLFitspaceDashboardQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceDashboardQuery, GQLFitspaceDashboardQueryVariables>(FitspaceDashboardDocument, variables, options);
+useFitspaceDashboardGetWorkoutQuery.fetcher = (variables?: GQLFitspaceDashboardGetWorkoutQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceDashboardGetWorkoutQuery, GQLFitspaceDashboardGetWorkoutQueryVariables>(FitspaceDashboardGetWorkoutDocument, variables, options);
 
 export const FitspaceMyPlansDocument = `
     query FitspaceMyPlans {

@@ -1,9 +1,8 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
 
-import { useUserWithAllDataQuery } from '@/generated/graphql-client'
+import { useUser } from '@/context/user-context'
 import { identifyUser, resetUser } from '@/lib/posthog'
 
 /**
@@ -11,49 +10,39 @@ import { identifyUser, resetUser } from '@/lib/posthog'
  * with detailed user profile information from the database
  */
 export function usePostHogUserEnhanced() {
-  const { data: session, status } = useSession()
+  const { session, user } = useUser()
+  const status = session.status
   const lastUserIdRef = useRef<string | null>(null)
   const [hasIdentified, setHasIdentified] = useState(false)
-
-  // Get detailed user data from GraphQL
-  const { data: userData } = useUserWithAllDataQuery(
-    {},
-    {
-      enabled: status === 'authenticated' && !!session?.user?.email,
-      staleTime: 20 * 60 * 1000, // 20 minutes
-    },
-  )
 
   useEffect(() => {
     if (status === 'loading') {
       return // Wait for session to load
     }
 
-    if (status === 'authenticated' && session?.user?.email) {
-      const userId = session.user.email
+    if (status === 'authenticated' && user?.email) {
+      const userId = user.email
 
       // Only identify if it's a different user or first time
       if (lastUserIdRef.current !== userId || !hasIdentified) {
         // Build comprehensive user properties
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const userProperties: Record<string, any> = {
-          email: session.user.email,
+          email: user.email,
           session_start: new Date().toISOString(),
         }
 
         // Add basic session properties
-        if (session.user.name) {
-          userProperties.name = session.user.name
-        }
-
-        if (session.user.image) {
-          userProperties.avatar = session.user.image
+        if (user.name) {
+          userProperties.name = user.name
+          userProperties.first_name = user.profile?.firstName
+          userProperties.last_name = user.profile?.lastName
+          userProperties.full_name =
+            `${user.profile?.firstName || ''} ${user.profile?.lastName || ''}`.trim()
         }
 
         // Add detailed user properties from GraphQL data
-        if (userData?.userWithAllData) {
-          const user = userData.userWithAllData
-
+        if (user) {
           userProperties.user_id = user.id
           userProperties.user_role = user.role
           userProperties.created_at = user.createdAt
@@ -102,12 +91,12 @@ export function usePostHogUserEnhanced() {
         setHasIdentified(false)
       }
     }
-  }, [session, status, userData, hasIdentified])
+  }, [user, status, hasIdentified])
 
   return {
     isAuthenticated: status === 'authenticated',
-    user: session?.user || null,
-    userData: userData?.userWithAllData || null,
+    userSession: session.data?.user || null,
+    user: user || null,
     isLoading: status === 'loading',
     hasIdentified,
   }

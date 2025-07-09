@@ -8,17 +8,20 @@ export function StatsItem({
   label,
   iconPosition = 'left',
   variant = 'default',
+  loading = false,
 }: {
   value: number | string | React.ReactNode
   icon?: React.ReactNode
   label: string
   iconPosition?: 'left' | 'top'
   variant?: 'default' | 'secondary'
+  loading?: boolean
 }) {
   return (
     <div
       className={cn('text-center p-3 bg-background rounded-lg', {
         'bg-card': variant === 'secondary',
+        'masked-placeholder-text': loading,
       })}
     >
       {icon ? (
