@@ -24,6 +24,10 @@ import {
   GQLQueryGetTemplatesArgs,
   GQLQueryGetTrainingPlanByIdArgs,
 } from '@/generated/graphql-server'
+import {
+  CollaborationAction,
+  checkTrainingPlanPermission,
+} from '@/lib/permissions/collaboration-permissions'
 import { GQLContext } from '@/types/gql-context'
 
 import { createNotification } from '../notification/factory'
@@ -40,16 +44,19 @@ export async function getTrainingPlanById(
   if (!user) {
     throw new Error('User not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    id,
+    CollaborationAction.VIEW,
+    'view training plan',
+  )
+
   try {
     const trainingPlan = await prisma.trainingPlan.findUnique({
-      where: {
-        id,
-        OR: [
-          { createdById: user.user.id },
-          { assignedToId: user.user.id },
-          { isPublic: true },
-        ],
-      },
+      where: { id },
       include: {
         weeks: {
           orderBy: {
@@ -453,6 +460,15 @@ export async function updateTrainingPlan(
     throw new Error('User not found')
   }
 
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    input.id,
+    CollaborationAction.EDIT,
+    'update training plan',
+  )
+
   const createdAt = await prisma.trainingPlan.findUnique({
     where: { id: input.id },
     select: { createdAt: true },
@@ -465,7 +481,7 @@ export async function updateTrainingPlan(
 
       // First, update the training plan basic details
       await tx.trainingPlan.update({
-        where: { id: input.id, createdById: user.user.id },
+        where: { id: input.id },
         data: {
           title: input.title ?? undefined,
           description: input.description ?? undefined,
@@ -723,10 +739,19 @@ export async function duplicateTrainingPlan(
     throw new Error('User not found')
   }
 
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    args.id,
+    CollaborationAction.VIEW,
+    'duplicate training plan',
+  )
+
   const plan = await getFullPlanById(args.id)
 
-  if (!plan || plan.createdById !== user.user.id) {
-    throw new Error('Training plan not found or unauthorized')
+  if (!plan) {
+    throw new Error('Training plan not found')
   }
 
   const duplicated = await duplicatePlan({ plan, asTemplate: true })
@@ -747,9 +772,18 @@ export async function deleteTrainingPlan(
 
   const { id } = args
 
-  // First check if the training plan exists and user has permission
+  // Check collaboration permissions - only creators can delete plans
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    id,
+    CollaborationAction.DELETE,
+    'delete training plan',
+  )
+
+  // Check if the training plan exists
   const trainingPlan = await prisma.trainingPlan.findUnique({
-    where: { id, createdById: user.user.id },
+    where: { id },
   })
 
   if (!trainingPlan) {
@@ -774,10 +808,20 @@ export async function assignTrainingPlanToClient(
   if (!user) {
     throw new Error('User not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    planId,
+    CollaborationAction.SHARE,
+    'assign training plan to client',
+  )
+
   const plan = await getFullPlanById(planId)
 
-  if (!plan || plan.createdById !== user?.user.id) {
-    throw new Error('Training plan not found or unauthorized')
+  if (!plan) {
+    throw new Error('Training plan not found')
   }
 
   const duplicated = await duplicatePlan({ plan, asTemplate: false })
@@ -824,12 +868,20 @@ export async function removeTrainingPlanFromClient(
   }
   const { planId, clientId } = args
 
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    planId,
+    CollaborationAction.DELETE,
+    'remove training plan from client',
+  )
+
   await prisma.trainingPlan.delete({
     where: {
       id: planId,
       assignedToId: clientId,
       isTemplate: false,
-      createdById: user.user.id,
     },
   })
 
@@ -1117,13 +1169,23 @@ export async function removeWeek(
 ) {
   const { planId, weekId } = args
 
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    planId,
+    CollaborationAction.EDIT,
+    'remove week',
+  )
+
   // Verify the plan exists and get the week to remove
   const plan = await getFullPlanById(planId)
-  const isOwner =
-    plan?.createdById === context.user?.user.id ||
-    plan?.assignedToId === context.user?.user.id
-  if (!plan || !isOwner)
-    throw new GraphQLError('Training plan not found or unauthorized')
+  if (!plan) throw new GraphQLError('Training plan not found')
 
   const weekToRemove = plan.weeks.find((w) => w.id === weekId)
   if (!weekToRemove) throw new GraphQLError('Week not found')

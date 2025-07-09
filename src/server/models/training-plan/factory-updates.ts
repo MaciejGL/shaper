@@ -17,6 +17,10 @@ import {
   GQLMutationUpdateTrainingPlanDetailsArgs,
   GQLMutationUpdateTrainingWeekDetailsArgs,
 } from '@/generated/graphql-server'
+import {
+  CollaborationAction,
+  checkTrainingPlanPermission,
+} from '@/lib/permissions/collaboration-permissions'
 import { GQLContext } from '@/types/gql-context'
 
 import { getFullPlanById } from '../training-utils.server'
@@ -46,14 +50,23 @@ export async function updateTrainingPlanDetails(
     throw new GraphQLError('User not found')
   }
 
-  // Verify ownership
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    input.id,
+    CollaborationAction.EDIT,
+    'update training plan details',
+  )
+
+  // Get plan for additional checks
   const plan = await prisma.trainingPlan.findUnique({
-    where: { id: input.id, createdById: user.user.id },
+    where: { id: input.id },
     select: { id: true, completedAt: true },
   })
 
   if (!plan) {
-    throw new GraphQLError('Training plan not found or unauthorized')
+    throw new GraphQLError('Training plan not found')
   }
 
   if (isEditPlanNotAllowed(user, plan.completedAt)) {
@@ -86,15 +99,24 @@ export async function updateTrainingWeekDetails(
     throw new GraphQLError('User not found')
   }
 
-  // Verify ownership through the plan
+  // Get week with plan ID for permission check
   const week = await prisma.trainingWeek.findUnique({
     where: { id: input.id },
-    include: { plan: { select: { createdById: true } } },
+    include: { plan: { select: { id: true } } },
   })
 
-  if (!week || week.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Training week not found or unauthorized')
+  if (!week) {
+    throw new GraphQLError('Training week not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    week.plan.id,
+    CollaborationAction.EDIT,
+    'update training week details',
+  )
 
   // Prevent editing completed weeks
   if (isEditPlanNotAllowed(user, week.completedAt)) {
@@ -122,9 +144,18 @@ export async function duplicateTrainingWeek(
     throw new GraphQLError('User not found')
   }
 
-  // Get the plan to verify ownership and determine the next week number
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    input.trainingPlanId,
+    CollaborationAction.EDIT,
+    'duplicate training week',
+  )
+
+  // Get the plan to determine the next week number
   const plan = await prisma.trainingPlan.findUnique({
-    where: { id: input.trainingPlanId, createdById: user.user.id },
+    where: { id: input.trainingPlanId },
     include: {
       weeks: {
         select: { weekNumber: true },
@@ -135,14 +166,14 @@ export async function duplicateTrainingWeek(
   })
 
   if (!plan) {
-    throw new GraphQLError('Training plan not found or unauthorized')
+    throw new GraphQLError('Training plan not found')
   }
 
   // Get the week to duplicate with all necessary nested data
   const weekToDuplicate = await prisma.trainingWeek.findUnique({
     where: { id: input.weekId },
     include: {
-      plan: { select: { createdById: true } }, // For additional ownership verification
+      plan: { select: { id: true } },
       days: {
         include: {
           exercises: {
@@ -159,8 +190,15 @@ export async function duplicateTrainingWeek(
     },
   })
 
-  if (!weekToDuplicate || weekToDuplicate.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Training week not found or unauthorized')
+  if (!weekToDuplicate) {
+    throw new GraphQLError('Training week not found')
+  }
+
+  // Verify the week belongs to the same plan we're duplicating to
+  if (weekToDuplicate.plan.id !== input.trainingPlanId) {
+    throw new GraphQLError(
+      'Week does not belong to the specified training plan',
+    )
   }
 
   // Note: We don't prevent duplicating completed weeks as this is creating a new week
@@ -234,12 +272,21 @@ export async function removeTrainingWeek(
   // Get the week to be deleted with its details
   const week = await prisma.trainingWeek.findUnique({
     where: { id: weekId },
-    include: { plan: { select: { createdById: true, completedAt: true } } },
+    include: { plan: { select: { id: true, completedAt: true } } },
   })
 
-  if (!week || week.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Training week not found or unauthorized')
+  if (!week) {
+    throw new GraphQLError('Training week not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    week.plan.id,
+    CollaborationAction.EDIT,
+    'remove training week',
+  )
 
   // Prevent removing weeks from completed training plans or completed weeks
   if (isEditPlanNotAllowed(user, week.completedAt)) {
@@ -282,13 +329,22 @@ export async function addTrainingWeek(
     throw new GraphQLError('User not found')
   }
 
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    input.trainingPlanId,
+    CollaborationAction.EDIT,
+    'add training week',
+  )
+
   const plan = await prisma.trainingPlan.findUnique({
-    where: { id: input.trainingPlanId, createdById: user.user.id },
+    where: { id: input.trainingPlanId },
     select: { id: true, completedAt: true },
   })
 
   if (!plan) {
-    throw new GraphQLError('Training plan not found or unauthorized')
+    throw new GraphQLError('Training plan not found')
   }
 
   // Prevent adding weeks to completed training plans
@@ -342,21 +398,30 @@ export async function updateTrainingDayData(
     throw new GraphQLError('User not found')
   }
 
-  // Verify ownership through the plan
+  // Get day with plan ID for permission check
   const day = await prisma.trainingDay.findUnique({
     where: { id: input.dayId },
     include: {
       week: {
         include: {
-          plan: { select: { createdById: true } },
+          plan: { select: { id: true } },
         },
       },
     },
   })
 
-  if (!day || day.week.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Training day not found or unauthorized')
+  if (!day) {
+    throw new GraphQLError('Training day not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    day.week.plan.id,
+    CollaborationAction.EDIT,
+    'update training day data',
+  )
 
   // Prevent editing completed days or days in completed weeks
   if (isEditPlanNotAllowed(user, day.completedAt)) {
@@ -390,7 +455,7 @@ export async function updateTrainingExercise(
     throw new GraphQLError('User not found')
   }
 
-  // Verify ownership
+  // Get exercise with plan ID for permission check
   const exercise = await prisma.trainingExercise.findUnique({
     where: { id: input.id },
     include: {
@@ -398,7 +463,7 @@ export async function updateTrainingExercise(
         include: {
           week: {
             include: {
-              plan: { select: { createdById: true } },
+              plan: { select: { id: true } },
             },
           },
         },
@@ -406,9 +471,18 @@ export async function updateTrainingExercise(
     },
   })
 
-  if (!exercise || exercise.day.week.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Training exercise not found or unauthorized')
+  if (!exercise) {
+    throw new GraphQLError('Training exercise not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    exercise.day.week.plan.id,
+    CollaborationAction.EDIT,
+    'update training exercise',
+  )
 
   // Prevent editing completed exercises, days, or weeks
   if (isEditPlanNotAllowed(user, exercise.completedAt)) {
@@ -508,7 +582,7 @@ export async function updateExerciseSet(
     throw new GraphQLError('User not found')
   }
 
-  // Verify ownership and check completion status
+  // Get set with plan ID for permission check
   const set = await prisma.exerciseSet.findUnique({
     where: { id: input.id },
     include: {
@@ -518,7 +592,7 @@ export async function updateExerciseSet(
             include: {
               week: {
                 include: {
-                  plan: { select: { createdById: true } },
+                  plan: { select: { id: true } },
                 },
               },
             },
@@ -528,9 +602,18 @@ export async function updateExerciseSet(
     },
   })
 
-  if (!set || set.exercise.day.week.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Exercise set not found or unauthorized')
+  if (!set) {
+    throw new GraphQLError('Exercise set not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    set.exercise.day.week.plan.id,
+    CollaborationAction.EDIT,
+    'update training exercise',
+  )
 
   // Prevent editing completed sets, exercises, days, or weeks
   if (isEditPlanNotAllowed(user, set.completedAt)) {
@@ -575,19 +658,28 @@ export async function addExerciseToDay(
     throw new GraphQLError('User not found')
   }
 
-  // Verify ownership
+  // Get day with plan ID for permission check
   const day = await prisma.trainingDay.findUnique({
     where: { id: input.dayId },
     include: {
       week: {
-        include: { plan: { select: { createdById: true } } },
+        include: { plan: { select: { id: true } } },
       },
     },
   })
 
-  if (!day || day.week.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Training day not found or unauthorized')
+  if (!day) {
+    throw new GraphQLError('Training day not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    day.week.plan.id,
+    CollaborationAction.EDIT,
+    'add exercise to day',
+  )
 
   // Prevent adding exercises to completed days or weeks
   if (isEditPlanNotAllowed(user, day.completedAt)) {
@@ -655,23 +747,32 @@ export async function removeExerciseFromDay(
     throw new GraphQLError('User not found')
   }
 
-  // Verify ownership and get exercise details
+  // Get exercise with plan ID for permission check
   const exercise = await prisma.trainingExercise.findUnique({
     where: { id: exerciseId },
     include: {
       day: {
         include: {
           week: {
-            include: { plan: { select: { createdById: true } } },
+            include: { plan: { select: { id: true } } },
           },
         },
       },
     },
   })
 
-  if (!exercise || exercise.day.week.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Training exercise not found or unauthorized')
+  if (!exercise) {
+    throw new GraphQLError('Training exercise not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    exercise.day.week.plan.id,
+    CollaborationAction.EDIT,
+    'update training exercise',
+  )
 
   // Prevent removing exercises from completed items
   if (isEditPlanNotAllowed(user, exercise.completedAt)) {
@@ -733,16 +834,25 @@ export async function moveExercise(
       day: {
         include: {
           week: {
-            include: { plan: { select: { createdById: true } } },
+            include: { plan: { select: { id: true } } },
           },
         },
       },
     },
   })
 
-  if (!exercise || exercise.day.week.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Training exercise not found or unauthorized')
+  if (!exercise) {
+    throw new GraphQLError('Training exercise not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    exercise.day.week.plan.id,
+    CollaborationAction.EDIT,
+    'update training exercise',
+  )
 
   // Prevent moving completed exercises or exercises in completed items
   if (isEditPlanNotAllowed(user, exercise.completedAt)) {
@@ -869,23 +979,32 @@ export async function addSetToExercise(
     throw new GraphQLError('User not found')
   }
 
-  // Verify ownership
+  // Get exercise with plan ID for permission check
   const exercise = await prisma.trainingExercise.findUnique({
     where: { id: input.exerciseId },
     include: {
       day: {
         include: {
           week: {
-            include: { plan: { select: { createdById: true } } },
+            include: { plan: { select: { id: true } } },
           },
         },
       },
     },
   })
 
-  if (!exercise || exercise.day.week.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Training exercise not found or unauthorized')
+  if (!exercise) {
+    throw new GraphQLError('Training exercise not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    exercise.day.week.plan.id,
+    CollaborationAction.EDIT,
+    'update training exercise',
+  )
 
   // Prevent adding sets to completed items
   if (isEditPlanNotAllowed(user, exercise.completedAt)) {
@@ -942,7 +1061,7 @@ export async function removeSetFromExercise(
     throw new GraphQLError('User not found')
   }
 
-  // Verify ownership and get set details
+  // Get set with plan ID for permission check
   const set = await prisma.exerciseSet.findUnique({
     where: { id: setId },
     include: {
@@ -951,7 +1070,7 @@ export async function removeSetFromExercise(
           day: {
             include: {
               week: {
-                include: { plan: { select: { createdById: true } } },
+                include: { plan: { select: { id: true } } },
               },
             },
           },
@@ -960,9 +1079,18 @@ export async function removeSetFromExercise(
     },
   })
 
-  if (!set || set.exercise.day.week.plan.createdById !== user.user.id) {
-    throw new GraphQLError('Exercise set not found or unauthorized')
+  if (!set) {
+    throw new GraphQLError('Exercise set not found')
   }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    set.exercise.day.week.plan.id,
+    CollaborationAction.EDIT,
+    'update training exercise',
+  )
 
   // Prevent removing sets from completed items
   if (isEditPlanNotAllowed(user, set.completedAt)) {

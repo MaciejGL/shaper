@@ -15,6 +15,10 @@ import {
   GQLQueryGetMealPlanTemplatesArgs,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import {
+  CollaborationAction,
+  checkMealPlanPermission,
+} from '@/lib/permissions/collaboration-permissions'
 import { GQLContext } from '@/types/gql-context'
 
 import { createNotification } from '../notification/factory'
@@ -82,16 +86,18 @@ export async function getMealPlanById(
     throw new Error('User not found')
   }
 
+  // Check collaboration permissions
+  await checkMealPlanPermission(
+    context,
+    user.user.id,
+    id,
+    CollaborationAction.VIEW,
+    'view meal plan',
+  )
+
   try {
     const mealPlan = await prisma.mealPlan.findUnique({
-      where: {
-        id,
-        OR: [
-          { createdById: user.user.id },
-          { assignedToId: user.user.id },
-          { isPublic: true },
-        ],
-      },
+      where: { id },
       include: {
         createdBy: true,
         assignedTo: true,
@@ -376,13 +382,18 @@ export async function assignMealPlanToClient(
     throw new Error('User not found')
   }
 
+  // Check collaboration permissions
+  await checkMealPlanPermission(
+    context,
+    user.user.id,
+    planId,
+    CollaborationAction.SHARE,
+    'assign meal plan to client',
+  )
+
   try {
     // Get the template plan
     const templatePlan = await getMealPlanById({ id: planId }, context)
-
-    if (!templatePlan || templatePlan.createdBy?.id !== user.user.id) {
-      throw new Error('Meal plan not found or unauthorized')
-    }
 
     // Duplicate the plan for the client
     const duplicatedPlan = await duplicateMealPlan({ id: planId }, context)
@@ -432,6 +443,15 @@ export async function removeMealPlanFromClient(
   }
   const { planId, clientId } = args
 
+  // Check collaboration permissions
+  await checkMealPlanPermission(
+    context,
+    user.user.id,
+    planId,
+    CollaborationAction.DELETE,
+    'remove meal plan from client',
+  )
+
   try {
     // Get the meal plan with weeks to check the constraint
     const mealPlan = await prisma.mealPlan.findUnique({
@@ -439,7 +459,6 @@ export async function removeMealPlanFromClient(
         id: planId,
         assignedToId: clientId,
         isTemplate: false,
-        createdById: user.user.id,
       },
       include: {
         weeks: {
@@ -466,7 +485,6 @@ export async function removeMealPlanFromClient(
         id: planId,
         assignedToId: clientId,
         isTemplate: false,
-        createdById: user.user.id,
       },
     })
 
@@ -485,6 +503,15 @@ export async function duplicateMealPlan(
   if (!user) {
     throw new Error('User not found')
   }
+
+  // Check collaboration permissions
+  await checkMealPlanPermission(
+    context,
+    user.user.id,
+    args.id,
+    CollaborationAction.VIEW,
+    'duplicate meal plan',
+  )
 
   try {
     // Get the original plan with all nested data (raw Prisma data)
@@ -509,10 +536,6 @@ export async function duplicateMealPlan(
 
     if (!originalPlanData) {
       throw new Error('Meal plan not found')
-    }
-
-    if (originalPlanData.createdById !== user.user.id) {
-      throw new Error('You can only duplicate your own meal plans')
     }
 
     // Create duplicate
@@ -663,13 +686,13 @@ export async function saveMeal(
     const { input } = args
     const { dayId, hour, foods } = input
 
-    // Verify that the day exists and the user has permission to modify it
+    // Verify that the day exists and get plan ID for permission check
     const day = await prisma.mealDay.findUnique({
       where: { id: dayId },
       include: {
         week: {
           include: {
-            plan: true,
+            plan: { select: { id: true } },
           },
         },
         meals: {
@@ -684,9 +707,14 @@ export async function saveMeal(
       throw new Error('Day not found')
     }
 
-    if (day.week.plan.createdById !== user.user.id) {
-      throw new Error('You can only modify your own meal plans')
-    }
+    // Check collaboration permissions
+    await checkMealPlanPermission(
+      context,
+      user.user.id,
+      day.week.plan.id,
+      CollaborationAction.EDIT,
+      'save meal',
+    )
 
     // Create the target datetime for this hour
     const mealDateTime = new Date(new Date().setHours(hour, 0, 0, 0))
@@ -787,18 +815,23 @@ export async function updateMealPlanDetails(
 
   const { id, ...updateData } = args.input
 
+  // Check collaboration permissions
+  await checkMealPlanPermission(
+    context,
+    user.user.id,
+    id,
+    CollaborationAction.EDIT,
+    'update meal plan details',
+  )
+
   try {
-    // Verify the meal plan exists and user has permission to update it
+    // Verify the meal plan exists
     const mealPlan = await prisma.mealPlan.findUnique({
       where: { id },
     })
 
     if (!mealPlan) {
       throw new Error('Meal plan not found')
-    }
-
-    if (mealPlan.createdById !== user.user.id) {
-      throw new Error('You can only update your own meal plans')
     }
 
     // Filter out null values and create update data
