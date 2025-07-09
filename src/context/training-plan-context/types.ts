@@ -101,6 +101,7 @@ export interface TrainingPlanContextType {
     targetDayIndex: number,
     targetExerciseIndex: number,
   ) => void
+  moveExercisesToDay: (sourceDayId: string, targetDayId: string) => void
 
   // Week operations - now fully implemented with proper types
   addWeek: () => void
