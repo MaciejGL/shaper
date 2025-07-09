@@ -3,6 +3,10 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import {
+  sendCollaborationInvitationNotification,
+  sendCollaborationResponseNotification,
+} from '@/lib/notifications/collaboration-notifications'
 import { GQLContext } from '@/types/gql-context'
 
 import CollaborationInvitation from './model'
@@ -135,16 +139,12 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     })
 
     // Create notification for recipient
-    await prisma.notification.create({
-      data: {
-        userId: recipient.id,
-        createdBy: senderId,
-        type: 'COLLABORATION_INVITATION',
-        message: `${user.user.name || user.user.email} sent you a collaboration invitation`,
-        relatedItemId: invitation.id,
-        link: `/collaboration/invitations`,
-      },
-    })
+    await sendCollaborationInvitationNotification(
+      senderId,
+      recipient.id,
+      invitation.id,
+      context,
+    )
 
     return new CollaborationInvitation(invitation, context)
   },
@@ -207,21 +207,13 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     })
 
     // Create notification for sender
-    const message =
-      action === 'ACCEPT'
-        ? `${user.user.name || user.user.email} accepted your collaboration invitation`
-        : `${user.user.name || user.user.email} rejected your collaboration invitation`
-
-    await prisma.notification.create({
-      data: {
-        userId: invitation.senderId,
-        createdBy: userId,
-        type: 'COLLABORATION_RESPONSE',
-        message,
-        relatedItemId: invitation.id,
-        link: `/collaboration/invitations`,
-      },
-    })
+    await sendCollaborationResponseNotification(
+      userId,
+      invitation.senderId,
+      invitation.id,
+      action,
+      context,
+    )
 
     return new CollaborationInvitation(updatedInvitation, context)
   },

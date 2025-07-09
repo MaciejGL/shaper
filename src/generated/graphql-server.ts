@@ -1267,11 +1267,17 @@ export enum GQLNotificationType {
   CoachingRequest = 'COACHING_REQUEST',
   CoachingRequestAccepted = 'COACHING_REQUEST_ACCEPTED',
   CoachingRequestRejected = 'COACHING_REQUEST_REJECTED',
+  CollaborationInvitation = 'COLLABORATION_INVITATION',
+  CollaborationResponse = 'COLLABORATION_RESPONSE',
+  MealPlanCollaboration = 'MEAL_PLAN_COLLABORATION',
+  MealPlanCollaborationRemoved = 'MEAL_PLAN_COLLABORATION_REMOVED',
   Message = 'MESSAGE',
   NewMealPlanAssigned = 'NEW_MEAL_PLAN_ASSIGNED',
   NewTrainingPlanAssigned = 'NEW_TRAINING_PLAN_ASSIGNED',
   Reminder = 'REMINDER',
-  System = 'SYSTEM'
+  System = 'SYSTEM',
+  TrainingPlanCollaboration = 'TRAINING_PLAN_COLLABORATION',
+  TrainingPlanCollaborationRemoved = 'TRAINING_PLAN_COLLABORATION_REMOVED'
 }
 
 export type GQLOneRmEntry = {

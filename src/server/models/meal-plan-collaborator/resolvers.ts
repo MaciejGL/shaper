@@ -3,6 +3,11 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import {
+  sendMealPlanCollaborationNotification,
+  sendMealPlanCollaborationPermissionUpdatedNotification,
+  sendMealPlanCollaborationRemovedNotification,
+} from '@/lib/notifications/collaboration-notifications'
 import { GQLContext } from '@/types/gql-context'
 
 import MealPlanCollaborator from './model'
@@ -210,16 +215,14 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     })
 
     // Create notification for the collaborator
-    await prisma.notification.create({
-      data: {
-        userId: collaborator.id,
-        createdBy: user.user.id,
-        type: 'MEAL_PLAN_COLLABORATION',
-        message: `${user.user.name || user.user.email} added you as a collaborator to meal plan "${collaboration.mealPlan.title}"`,
-        relatedItemId: mealPlanId,
-        link: `/trainer/meal-plans/${mealPlanId}`,
-      },
-    })
+    await sendMealPlanCollaborationNotification(
+      user.user.id,
+      collaborator.id,
+      mealPlanId,
+      collaboration.mealPlan.title,
+      permission,
+      context,
+    )
 
     return new MealPlanCollaborator(collaboration, context)
   },
@@ -270,6 +273,16 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       },
     })
 
+    // Create notification for the permission change
+    await sendMealPlanCollaborationPermissionUpdatedNotification(
+      user.user.id,
+      updatedCollaboration.collaboratorId,
+      updatedCollaboration.mealPlanId,
+      updatedCollaboration.mealPlan.title,
+      permission,
+      context,
+    )
+
     return new MealPlanCollaborator(updatedCollaboration, context)
   },
 
@@ -307,15 +320,13 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     })
 
     // Create notification for the removed collaborator
-    await prisma.notification.create({
-      data: {
-        userId: collaboration.collaboratorId,
-        createdBy: user.user.id,
-        type: 'MEAL_PLAN_COLLABORATION_REMOVED',
-        message: `${user.user.name || user.user.email} removed you as a collaborator from meal plan "${collaboration.mealPlan.title}"`,
-        relatedItemId: collaboration.mealPlanId,
-      },
-    })
+    await sendMealPlanCollaborationRemovedNotification(
+      user.user.id,
+      collaboration.collaboratorId,
+      collaboration.mealPlanId,
+      collaboration.mealPlan.title,
+      context,
+    )
 
     return true
   },

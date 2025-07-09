@@ -3,6 +3,11 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import {
+  sendTrainingPlanCollaborationNotification,
+  sendTrainingPlanCollaborationPermissionUpdatedNotification,
+  sendTrainingPlanCollaborationRemovedNotification,
+} from '@/lib/notifications/collaboration-notifications'
 import { GQLContext } from '@/types/gql-context'
 
 import TrainingPlanCollaborator from './model'
@@ -211,16 +216,14 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     })
 
     // Create notification for the collaborator
-    await prisma.notification.create({
-      data: {
-        userId: collaborator.id,
-        createdBy: user.user.id,
-        type: 'TRAINING_PLAN_COLLABORATION',
-        message: `${user.user.name || user.user.email} added you as a collaborator to training plan "${collaboration.trainingPlan.title}"`,
-        relatedItemId: trainingPlanId,
-        link: `/trainer/trainings/${trainingPlanId}`,
-      },
-    })
+    await sendTrainingPlanCollaborationNotification(
+      user.user.id,
+      collaborator.id,
+      trainingPlanId,
+      collaboration.trainingPlan.title,
+      permission,
+      context,
+    )
 
     return new TrainingPlanCollaborator(collaboration, context)
   },
@@ -274,6 +277,16 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       },
     })
 
+    // Create notification for the permission change
+    await sendTrainingPlanCollaborationPermissionUpdatedNotification(
+      user.user.id,
+      updatedCollaboration.collaboratorId,
+      updatedCollaboration.trainingPlanId,
+      updatedCollaboration.trainingPlan.title,
+      permission,
+      context,
+    )
+
     return new TrainingPlanCollaborator(updatedCollaboration, context)
   },
 
@@ -314,15 +327,13 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     })
 
     // Create notification for the removed collaborator
-    await prisma.notification.create({
-      data: {
-        userId: collaboration.collaboratorId,
-        createdBy: user.user.id,
-        type: 'TRAINING_PLAN_COLLABORATION_REMOVED',
-        message: `${user.user.name || user.user.email} removed you as a collaborator from training plan "${collaboration.trainingPlan.title}"`,
-        relatedItemId: collaboration.trainingPlanId,
-      },
-    })
+    await sendTrainingPlanCollaborationRemovedNotification(
+      user.user.id,
+      collaboration.collaboratorId,
+      collaboration.trainingPlanId,
+      collaboration.trainingPlan.title,
+      context,
+    )
 
     return true
   },
