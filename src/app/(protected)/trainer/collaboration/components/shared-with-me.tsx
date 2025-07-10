@@ -62,8 +62,6 @@ export function SharedWithMe() {
   const mealCollaborationCount =
     mealCollaborations?.myMealPlanCollaborations.length || 0
 
-  console.log(trainingCollaborations)
-
   return (
     <div className="space-y-8">
       <div className="space-y-4">

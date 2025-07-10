@@ -787,12 +787,12 @@ export async function duplicateTrainingPlan(
     throw new Error('User not found')
   }
 
-  // Check collaboration permissions
+  // Check collaboration permissions - only ADMIN level users can duplicate plans
   await checkTrainingPlanPermission(
     context,
     user.user.id,
     args.id,
-    CollaborationAction.VIEW,
+    CollaborationAction.MANAGE_COLLABORATORS,
     'duplicate training plan',
   )
 
@@ -1222,7 +1222,7 @@ export async function removeWeek(
     throw new Error('User not found')
   }
 
-  // Check collaboration permissions
+  // Check collaboration permissions - only ADMIN level users can remove weeks
   await checkTrainingPlanPermission(
     context,
     user.user.id,
