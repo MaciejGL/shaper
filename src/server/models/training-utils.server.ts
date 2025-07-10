@@ -89,9 +89,11 @@ export async function getFullPlanById(id: string) {
 export async function duplicatePlan({
   plan,
   asTemplate,
+  createdById,
 }: {
   plan: FullTrainingPlan
   asTemplate: boolean
+  createdById?: string
 }) {
   return prisma.$transaction(
     async (tx) => {
@@ -108,7 +110,7 @@ export async function duplicatePlan({
           isDraft: asTemplate ? false : plan.isDraft,
           difficulty: plan.difficulty,
           templateId: asTemplate ? null : plan.templateId,
-          createdById: plan.createdById,
+          createdById: createdById || plan.createdById,
           assignedToId: plan.assignedToId,
         },
       })

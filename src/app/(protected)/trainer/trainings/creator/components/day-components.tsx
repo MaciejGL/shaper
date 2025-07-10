@@ -49,10 +49,12 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
         <span className="font-medium text-sm py-3">
           {dayNames[day?.dayOfWeek ?? 0]}
         </span>
-        <span className="text-sm text-muted-foreground">
-          {getWorkoutTypeLabel(day?.workoutType)} ({day?.exercises?.length ?? 0}
-          )
-        </span>
+        {!day?.isRestDay && (
+          <span className="text-sm text-muted-foreground overflow-hidden whitespace-nowrap">
+            {getWorkoutTypeLabel(day?.workoutType)} (
+            {day?.exercises?.length ?? 0})
+          </span>
+        )}
       </div>
       <div className="flex items-center gap-2">
         {/* Move exercises dropdown - only show if day has exercises and not disabled */}

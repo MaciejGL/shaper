@@ -802,7 +802,11 @@ export async function duplicateTrainingPlan(
     throw new Error('Training plan not found')
   }
 
-  const duplicated = await duplicatePlan({ plan, asTemplate: true })
+  const duplicated = await duplicatePlan({
+    plan,
+    asTemplate: true,
+    createdById: user.user.id,
+  })
   if (!duplicated) {
     throw new Error('Failed to duplicate plan')
   }
@@ -872,7 +876,11 @@ export async function assignTrainingPlanToClient(
     throw new Error('Training plan not found')
   }
 
-  const duplicated = await duplicatePlan({ plan, asTemplate: false })
+  const duplicated = await duplicatePlan({
+    plan,
+    asTemplate: false,
+    createdById: user.user.id,
+  })
 
   if (!duplicated) {
     throw new Error('Failed to assign plan')

@@ -2,6 +2,10 @@ import { GraphQLError } from 'graphql'
 
 import { GQLMoveExercisesToDayInput } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import {
+  CollaborationAction,
+  checkTrainingPlanPermission,
+} from '@/lib/permissions/collaboration-permissions'
 import { GQLContext } from '@/types/gql-context'
 
 /**
@@ -38,6 +42,7 @@ export const moveExercisesToDay = async (
           include: {
             plan: {
               select: {
+                id: true,
                 createdById: true,
               },
             },
@@ -53,6 +58,7 @@ export const moveExercisesToDay = async (
           include: {
             plan: {
               select: {
+                id: true,
                 createdById: true,
               },
             },
@@ -66,12 +72,14 @@ export const moveExercisesToDay = async (
     throw new GraphQLError('Source or target day not found')
   }
 
-  if (
-    sourceDay.week.plan.createdById !== user.user.id ||
-    targetDay.week.plan.createdById !== user.user.id
-  ) {
-    throw new GraphQLError('You do not have permission to move exercises')
-  }
+  // Check collaboration permissions for both source and target plans
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    sourceDay.week.plan.id,
+    CollaborationAction.EDIT,
+    'move exercises from source day',
+  )
 
   if (!sourceDay.exercises || sourceDay.exercises.length === 0) {
     throw new GraphQLError('Source day has no exercises to move')

@@ -886,14 +886,23 @@ export async function moveExercise(
           where: { id: input.targetDayId },
           include: {
             week: {
-              include: { plan: { select: { createdById: true } } },
+              include: { plan: { select: { id: true } } },
             },
           },
         })
 
-        if (!targetDay || targetDay.week.plan.createdById !== user.user.id) {
-          throw new GraphQLError('Target day not found or unauthorized')
+        if (!targetDay) {
+          throw new GraphQLError('Target day not found')
         }
+
+        // Check collaboration permissions for target plan
+        await checkTrainingPlanPermission(
+          context,
+          user.user.id,
+          targetDay.week.plan.id,
+          CollaborationAction.EDIT,
+          'move exercise to target day',
+        )
       }
 
       // Remove from source day: decrement order of exercises that came after
