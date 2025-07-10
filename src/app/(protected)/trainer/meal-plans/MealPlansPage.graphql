@@ -73,8 +73,8 @@ fragment MealPlanTemplate on MealPlan {
   }
 }
 
-query GetMealPlanTemplates($draft: Boolean) {
-  getMealPlanTemplates(draft: $draft) {
+query GetMealPlanTemplates($draft: Boolean, $limit: Int) {
+  getMealPlanTemplates(draft: $draft, limit: $limit) {
     id
     title
     description

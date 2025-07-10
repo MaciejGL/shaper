@@ -1468,11 +1468,13 @@ export type GQLQueryGetMealPlanByIdArgs = {
 
 export type GQLQueryGetMealPlanTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
 export type GQLQueryGetTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 

@@ -154,6 +154,9 @@ export function CollaboratorsAccess() {
   const [removingFromTeam, setRemovingFromTeam] = useState<Set<string>>(
     new Set(),
   )
+  const [removingCollaborators, setRemovingCollaborators] = useState<
+    Set<string>
+  >(new Set())
 
   const { mutate: removeFromTeam } =
     useRespondToCollaborationInvitationMutation({
@@ -201,10 +204,56 @@ export function CollaboratorsAccess() {
   }
 
   const { mutate: removeTrainingCollaborator } =
-    useRemoveTrainingPlanCollaboratorMutation()
+    useRemoveTrainingPlanCollaboratorMutation({
+      onSuccess: async (_, variables) => {
+        try {
+          await refetch()
+          toast.success('Collaborator removed successfully')
+        } catch (error) {
+          toast.error('Failed to refresh data')
+        } finally {
+          setRemovingCollaborators((prev) => {
+            const newSet = new Set(prev)
+            newSet.delete(variables.input.collaboratorId)
+            return newSet
+          })
+        }
+      },
+      onError: (_, variables) => {
+        setRemovingCollaborators((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(variables.input.collaboratorId)
+          return newSet
+        })
+        toast.error('Failed to remove collaborator')
+      },
+    })
 
   const { mutate: removeMealCollaborator } =
-    useRemoveMealPlanCollaboratorMutation()
+    useRemoveMealPlanCollaboratorMutation({
+      onSuccess: async (_, variables) => {
+        try {
+          await refetch()
+          toast.success('Collaborator removed successfully')
+        } catch (error) {
+          toast.error('Failed to refresh data')
+        } finally {
+          setRemovingCollaborators((prev) => {
+            const newSet = new Set(prev)
+            newSet.delete(variables.input.collaboratorId)
+            return newSet
+          })
+        }
+      },
+      onError: (_, variables) => {
+        setRemovingCollaborators((prev) => {
+          const newSet = new Set(prev)
+          newSet.delete(variables.input.collaboratorId)
+          return newSet
+        })
+        toast.error('Failed to remove collaborator')
+      },
+    })
 
   const { mutate: updateTrainingPermission } =
     useUpdateTrainingPlanCollaboratorPermissionMutation({
@@ -262,6 +311,9 @@ export function CollaboratorsAccess() {
     collaboratorId: string,
     planType: string,
   ) => {
+    // Set loading state for this specific collaborator removal
+    setRemovingCollaborators((prev) => new Set(prev).add(collaboratorId))
+
     if (planType === 'TRAINING') {
       removeTrainingCollaborator({
         input: { collaboratorId },
@@ -526,7 +578,10 @@ export function CollaboratorsAccess() {
                                                 planAccess.permission ===
                                                   permission ||
                                                 isUpdating ||
-                                                isRemovingUser
+                                                isRemovingUser ||
+                                                removingCollaborators.has(
+                                                  planAccess.id,
+                                                )
                                               }
                                             >
                                               {getPermissionLabel(permission)}
@@ -547,11 +602,21 @@ export function CollaboratorsAccess() {
                                             planAccess.planType,
                                           )
                                         }
-                                        disabled={isUpdating || isRemovingUser}
+                                        disabled={
+                                          isUpdating ||
+                                          isRemovingUser ||
+                                          removingCollaborators.has(
+                                            planAccess.id,
+                                          )
+                                        }
                                         className="text-destructive focus:text-destructive"
                                       >
                                         <Trash2 className="h-4 w-4 mr-2" />
-                                        Remove Access
+                                        {removingCollaborators.has(
+                                          planAccess.id,
+                                        )
+                                          ? 'Removing...'
+                                          : 'Remove Access'}
                                       </DropdownMenuItem>
                                     </DropdownMenuContent>
                                   </DropdownMenu>

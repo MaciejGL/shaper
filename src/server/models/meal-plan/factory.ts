@@ -42,6 +42,7 @@ export async function getMealPlanTemplates(
     orderBy: {
       updatedAt: 'desc',
     },
+    take: args.limit ?? undefined,
     include: {
       createdBy: true,
       weeks: {

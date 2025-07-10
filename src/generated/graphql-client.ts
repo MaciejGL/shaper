@@ -1466,11 +1466,13 @@ export type GQLQueryGetMealPlanByIdArgs = {
 
 export type GQLQueryGetMealPlanTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
 export type GQLQueryGetTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2590,6 +2592,7 @@ export type GQLMealPlanTemplateFragment = { __typename?: 'MealPlan', id: string,
 
 export type GQLGetMealPlanTemplatesQueryVariables = Exact<{
   draft?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -2675,6 +2678,7 @@ export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: str
 
 export type GQLGetTemplatesQueryVariables = Exact<{
   draft?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
 
 
@@ -6982,8 +6986,8 @@ useInfiniteGetExerciseWithSubstitutesQuery.getKey = (variables: GQLGetExerciseWi
 useGetExerciseWithSubstitutesQuery.fetcher = (variables: GQLGetExerciseWithSubstitutesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetExerciseWithSubstitutesQuery, GQLGetExerciseWithSubstitutesQueryVariables>(GetExerciseWithSubstitutesDocument, variables, options);
 
 export const GetMealPlanTemplatesDocument = `
-    query GetMealPlanTemplates($draft: Boolean) {
-  getMealPlanTemplates(draft: $draft) {
+    query GetMealPlanTemplates($draft: Boolean, $limit: Int) {
+  getMealPlanTemplates(draft: $draft, limit: $limit) {
     id
     title
     description
@@ -7413,8 +7417,8 @@ useUpdateMealFoodLogMutation.getKey = () => ['UpdateMealFoodLog'];
 useUpdateMealFoodLogMutation.fetcher = (variables: GQLUpdateMealFoodLogMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMealFoodLogMutation, GQLUpdateMealFoodLogMutationVariables>(UpdateMealFoodLogDocument, variables, options);
 
 export const GetTemplatesDocument = `
-    query GetTemplates($draft: Boolean) {
-  getTemplates(draft: $draft) {
+    query GetTemplates($draft: Boolean, $limit: Int) {
+  getTemplates(draft: $draft, limit: $limit) {
     id
     title
     description

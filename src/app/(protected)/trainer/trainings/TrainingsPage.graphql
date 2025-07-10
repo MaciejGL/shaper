@@ -80,8 +80,8 @@ fragment TrainingTemplate on TrainingPlan {
   }
 }
 
-query GetTemplates($draft: Boolean) {
-  getTemplates(draft: $draft) {
+query GetTemplates($draft: Boolean, $limit: Int) {
+  getTemplates(draft: $draft, limit: $limit) {
     id
     title
     description

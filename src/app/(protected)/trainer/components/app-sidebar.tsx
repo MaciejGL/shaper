@@ -111,16 +111,22 @@ export function AppSidebar() {
     })
 
   const { data: templatesData, isPlaceholderData: isPlaceholderTemplates } =
-    useGetTemplatesQuery(undefined, {
-      placeholderData: placeholderTemplates,
-      refetchOnWindowFocus: false,
-    })
+    useGetTemplatesQuery(
+      { limit: 3 },
+      {
+        placeholderData: placeholderTemplates,
+        refetchOnWindowFocus: false,
+      },
+    )
 
   const { data: mealPlansData, isPlaceholderData: isPlaceholderMealPlans } =
-    useGetMealPlanTemplatesQuery(undefined, {
-      placeholderData: placeholderMealPlans,
-      refetchOnWindowFocus: false,
-    })
+    useGetMealPlanTemplatesQuery(
+      { limit: 3 },
+      {
+        placeholderData: placeholderMealPlans,
+        refetchOnWindowFocus: false,
+      },
+    )
 
   const { mutate: createDraftTemplate, isPending: isCreatingDraftTemplate } =
     useCreateDraftTemplateMutation({

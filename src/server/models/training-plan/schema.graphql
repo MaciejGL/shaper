@@ -52,7 +52,7 @@ type MyPlansPayload {
 }
 
 type Query {
-  getTemplates(draft: Boolean): [TrainingPlan!]!
+  getTemplates(draft: Boolean, limit: Int): [TrainingPlan!]!
   getCollaborationTemplates(draft: Boolean): [TrainingPlan!]!
   getTrainingPlanById(id: ID!): TrainingPlan!
   getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!

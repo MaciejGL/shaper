@@ -156,6 +156,7 @@ export async function getTemplates(
     orderBy: {
       createdAt: 'desc',
     },
+    take: args.limit ?? undefined,
   })
   return templates.map((template) => new TrainingPlan(template, context))
 }
