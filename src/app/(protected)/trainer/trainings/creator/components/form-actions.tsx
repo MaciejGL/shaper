@@ -29,7 +29,7 @@ export function FormActions({
   onDuplicate,
 }: FormActionsProps) {
   const pendingMutationsCount = useIsMutating()
-  const { formData } = useTrainingPlan()
+  const { formData, canAdmin } = useTrainingPlan()
 
   const isSavingChanges = pendingMutationsCount > 0
 
@@ -61,7 +61,11 @@ export function FormActions({
               onClick={() => onDuplicate(trainingId!)}
               loading={isDuplicating}
               disabled={
-                isSavingChanges || isDuplicating || isDeleting || !trainingId
+                isSavingChanges ||
+                isDuplicating ||
+                isDeleting ||
+                !trainingId ||
+                !canAdmin
               }
             >
               <Copy className="size-4 mr-2" />
@@ -78,7 +82,8 @@ export function FormActions({
                       isSavingChanges ||
                       isDuplicating ||
                       isDeleting ||
-                      !trainingId
+                      !trainingId ||
+                      !canAdmin
                     }
                   >
                     <Users className="size-4 mr-2" />
@@ -93,7 +98,11 @@ export function FormActions({
                 onClick={() => onDelete(trainingId!)}
                 loading={isDeleting}
                 disabled={
-                  isSavingChanges || isDuplicating || isDeleting || !trainingId
+                  isSavingChanges ||
+                  isDuplicating ||
+                  isDeleting ||
+                  !trainingId ||
+                  !canAdmin
                 }
               >
                 <Trash2 className="size-4 mr-2" />

@@ -16,6 +16,7 @@ export function WeekTabs() {
     removeWeek,
     cloneWeek,
     isLoadingInitialData,
+    canEdit,
   } = useTrainingPlan()
   const weeks = formData?.weeks || []
   const handleWeekChange = (value: string) => {
@@ -26,11 +27,13 @@ export function WeekTabs() {
     id: `week-${index}`,
     value: index.toString(),
     label: `Week ${week.weekNumber}`,
-    onRemove: () => {
-      setActiveWeek(activeWeek > 0 ? activeWeek - 1 : 0)
-      removeWeek(index)
-    },
-    onCopy: () => cloneWeek(index),
+    onRemove: canEdit
+      ? () => {
+          setActiveWeek(activeWeek > 0 ? activeWeek - 1 : 0)
+          removeWeek(index)
+        }
+      : undefined,
+    onCopy: canEdit ? () => cloneWeek(index) : undefined,
   }))
 
   return (
@@ -54,7 +57,7 @@ export function WeekTabs() {
           setActiveWeek(weeks.length)
         }}
         iconOnly={<Plus />}
-        disabled={Boolean(formData?.details.completedAt)}
+        disabled={Boolean(formData?.details.completedAt) || !canEdit}
       >
         Add week
       </Button>

@@ -58,6 +58,20 @@ export async function getTrainingPlanById(
     const trainingPlan = await prisma.trainingPlan.findUnique({
       where: { id },
       include: {
+        createdBy: {
+          include: {
+            profile: true,
+          },
+        },
+        collaborators: {
+          include: {
+            collaborator: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
         weeks: {
           orderBy: {
             weekNumber: 'asc',

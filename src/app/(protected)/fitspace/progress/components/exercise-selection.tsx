@@ -119,7 +119,7 @@ export function ExerciseSelection({
                       isSelected
                         ? 'bg-accent/50'
                         : isMaxReached
-                          ? 'border-muted bg-muted/20 opacity-50 cursor-not-allowed'
+                          ? 'border-muted bg-muted/20 opacity-50  '
                           : 'border-border hover:bg-muted/50',
                     )}
                     onClick={() =>

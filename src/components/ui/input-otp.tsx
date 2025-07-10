@@ -21,7 +21,7 @@ function InputOTP({
         'flex items-center gap-1 has-disabled:opacity-50',
         containerClassName,
       )}
-      className={cn('disabled:cursor-not-allowed', className)}
+      className={cn('disabled: ', className)}
       {...props}
     />
   )

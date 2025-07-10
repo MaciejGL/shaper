@@ -15,6 +15,7 @@ import { parseAsStringEnum, useQueryState } from 'nuqs'
 import React, { useState } from 'react'
 
 import { DashboardHeader } from '@/app/(protected)/trainer/components/dashboard-header'
+import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
@@ -47,6 +48,10 @@ export default function WorkoutPlanner() {
     moveExercise,
     handleDelete,
     handleDuplicate,
+    currentUserPermission,
+    isCreator,
+    isViewingOthersPlans,
+    canEdit,
   } = useTrainingPlan()
 
   const [tab, setTab] = useQueryState(
@@ -71,6 +76,23 @@ export default function WorkoutPlanner() {
     ...(exercisesData?.userExercises || []),
     ...(exercisesData?.publicExercises || []),
   ]
+
+  // Permission badge helper
+  const getPermissionBadge = () => {
+    if (isLoadingInitialData) return null
+
+    if (isCreator) {
+      return <Badge variant="secondary">Creator</Badge>
+    }
+
+    if (isViewingOthersPlans) {
+      const permissionLabel = currentUserPermission?.toLowerCase() || 'view'
+      const variant = canEdit ? 'primary' : 'outline'
+      return <Badge variant={variant}>{permissionLabel}</Badge>
+    }
+
+    return null
+  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -198,14 +220,16 @@ export default function WorkoutPlanner() {
     >
       <div>
         <div className="flex justify-between items-baseline">
-          <DashboardHeader
-            title={`Workout Editor ${formData.details.title ? `- ${formData.details.title}` : ''}`}
-            prevSegment={{
-              label: 'Training Plans',
-              href: '/trainer/trainings',
-            }}
-            className="mb-10 mt-0"
-          />
+          <div className="flex items-center gap-3">
+            <DashboardHeader
+              title={`Workout Editor ${formData.details.title ? `- ${formData.details.title}` : ''}`}
+              prevSegment={{
+                label: 'Training Plans',
+                href: '/trainer/trainings',
+              }}
+              className="mb-10 mt-0"
+            />
+          </div>
         </div>
         <div className="flex justify-between items-end">
           <TabsList size="lg">
@@ -217,6 +241,7 @@ export default function WorkoutPlanner() {
             </TabsTrigger>
           </TabsList>
           <div className="relative">
+            <div className="mb-2">{getPermissionBadge()}</div>
             <FormActions
               trainingId={trainingId}
               isDuplicating={isDuplicatingTrainingPlan}

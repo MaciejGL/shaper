@@ -47,7 +47,7 @@ export function getUserCollaboration(
   plan: PlanWithCollaborators,
   userId: string,
 ): CollaboratorInfo | null {
-  if (!plan.collaborators) return null
+  if (!plan?.collaborators) return null
 
   return (
     plan.collaborators.find(
@@ -128,7 +128,7 @@ export function isCreator(
   plan: PlanWithCollaborators,
   userId: string,
 ): boolean {
-  return plan.createdBy?.id === userId
+  return plan?.createdBy?.id === userId
 }
 
 /**

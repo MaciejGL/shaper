@@ -392,7 +392,9 @@ export function generateTempId(prefix = 'temp') {
 /**
  * Helper to check if an ID is temporary
  */
-export function isTemporaryId(id: string): boolean {
+export function isTemporaryId(id?: string | null): boolean {
+  if (!id) return false
+
   return (
     id.startsWith('temp-') ||
     id.startsWith('set-') ||

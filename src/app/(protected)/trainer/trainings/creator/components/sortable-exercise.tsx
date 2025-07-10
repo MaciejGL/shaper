@@ -79,7 +79,7 @@ export const SortableExercise = React.memo(
     dayOfWeek,
     exerciseIndex,
   }: SortableExerciseProps) {
-    const { formData, activeWeek, removeExercise } = useTrainingPlan()
+    const { formData, activeWeek, removeExercise, canEdit } = useTrainingPlan()
     const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
 
     // Revert to original stable key
@@ -100,6 +100,10 @@ export const SortableExercise = React.memo(
       [currentDay, exerciseIndex],
     )
 
+    // Permission checks
+    const isDisabled = Boolean(exercise?.completedAt)
+    const canEditExercise = canEdit && !isDisabled
+
     const {
       attributes,
       listeners,
@@ -116,6 +120,7 @@ export const SortableExercise = React.memo(
         dayIndex: dayOfWeek,
         exerciseIndex,
       },
+      disabled: !canEditExercise,
       // Optimize animations
       animateLayoutChanges: () => false, // Disable layout animations for better performance
     })
@@ -156,18 +161,19 @@ export const SortableExercise = React.memo(
       return null
     }
 
-    const isDisabled = Boolean(exercise.completedAt)
-
     const isTemporary = isTemporaryId(exercise.id)
     return (
       <div className="relative group">
         <Card
           ref={setNodeRef}
           style={style}
-          {...(isDisabled ? {} : attributes)}
-          {...(isDisabled ? {} : listeners)}
+          {...(canEditExercise ? attributes : {})}
+          {...(canEditExercise ? listeners : {})}
           className={cn(
-            'cursor-grab active:cursor-grabbing p-0 transition-all duration-200 ease-out min-h-[120px] select-none',
+            'p-0 transition-all duration-200 ease-out min-h-[120px] select-none',
+            canEditExercise
+              ? 'cursor-grab active:cursor-grabbing'
+              : 'cursor-default',
             // Remove border and background when dragging. It's a wrapper in sorting context
             isDragging && 'border-none !bg-primary/10 mx-2 !scale-100',
             isDisabled && 'opacity-50',
@@ -231,15 +237,14 @@ export const SortableExercise = React.memo(
                 size="sm"
                 className="p-0 absolute top-1 right-1 z-10 transition-all duration-200 opacity-0 group-hover:opacity-100"
                 iconOnly={isDisabled ? <LockIcon /> : <MoreHorizontal />}
-                disabled={isDisabled}
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
                 <Pencil className="w-3 h-3" />
-                Edit
+                {canEdit ? 'Edit' : 'View'}
               </DropdownMenuItem>
-              {!isDisabled && (
+              {canEditExercise && (
                 <DropdownMenuItem
                   onClick={handleRemoveExercise}
                   className="cursor-pointer"
@@ -355,12 +360,10 @@ function KanbanExerciseSets({
                     min="1"
                     value={set.minReps || ''}
                     disabled={
-                      set.id
-                        ? isTemporaryId(set.id)
-                        : true ||
-                          isExerciseDisabled ||
-                          Boolean(set.completedAt) ||
-                          disabled
+                      isTemporaryId(set.id) ||
+                      isExerciseDisabled ||
+                      Boolean(set.completedAt) ||
+                      disabled
                     }
                     onChange={(e) => {
                       // Don't update sets with temporary IDs to prevent API errors
@@ -389,12 +392,10 @@ function KanbanExerciseSets({
                     }
                     value={set.maxReps || ''}
                     disabled={
-                      set.id
-                        ? isTemporaryId(set.id)
-                        : true ||
-                          isExerciseDisabled ||
-                          Boolean(set.completedAt) ||
-                          disabled
+                      isTemporaryId(set.id) ||
+                      isExerciseDisabled ||
+                      Boolean(set.completedAt) ||
+                      disabled
                     }
                     onChange={(e) => {
                       // Don't update sets with temporary IDs to prevent API errors
@@ -428,12 +429,10 @@ function KanbanExerciseSets({
                   step="2.5"
                   value={set.weight ?? ''}
                   disabled={
-                    set.id
-                      ? isTemporaryId(set.id)
-                      : true ||
-                        isExerciseDisabled ||
-                        Boolean(set.completedAt) ||
-                        disabled
+                    isTemporaryId(set.id) ||
+                    isExerciseDisabled ||
+                    Boolean(set.completedAt) ||
+                    disabled
                   }
                   onChange={(e) => {
                     // Don't update sets with temporary IDs to prevent API errors
@@ -464,12 +463,10 @@ function KanbanExerciseSets({
                   step="1"
                   value={set.rpe ?? ''}
                   disabled={
-                    set.id
-                      ? isTemporaryId(set.id)
-                      : true ||
-                        isExerciseDisabled ||
-                        Boolean(set.completedAt) ||
-                        disabled
+                    isTemporaryId(set.id) ||
+                    isExerciseDisabled ||
+                    Boolean(set.completedAt) ||
+                    disabled
                   }
                   onChange={(e) => {
                     // Don't update sets with temporary IDs to prevent API errors
@@ -531,6 +528,9 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
       staleTime: 30 * 1000,
     },
   )
+
+  // Get permission context
+  const { canEdit } = useTrainingPlan()
 
   const debouncedBoardInvalidation = useDebouncedInvalidation({
     queryKeys: ['GetTemplateTrainingPlanById'],
@@ -594,17 +594,20 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
     isLoading ||
     isRemovingExercise ||
     isTemporaryId(exerciseId) ||
-    Boolean(exercise?.completedAt)
+    Boolean(exercise?.completedAt) ||
+    !canEdit
 
   return (
     <div className="gap-2">
       <DialogHeader className="mb-8">
         <DialogTitle className="flex flex-row items-center gap-2">
-          Edit exercise{' '}
+          {canEdit ? 'Edit' : 'View'} exercise{' '}
           {hasPendingMutations && <Loader2 className="w-4 h-4 animate-spin" />}
         </DialogTitle>
         <DialogDescription>
-          Edit the exercise details and sets.
+          {canEdit
+            ? 'Edit the exercise details and sets.'
+            : 'View the exercise details and sets.'}
         </DialogDescription>
       </DialogHeader>
       <div className="space-y-8">

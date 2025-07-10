@@ -1,6 +1,7 @@
 import type {
   GQLAddExerciseToDayInput,
   GQLAddSetToExerciseInput,
+  GQLCollaborationPermission,
   GQLUpdateExerciseSetInput,
   GQLUpdateTrainingDayDataInput,
   GQLUpdateTrainingExerciseInput,
@@ -44,6 +45,14 @@ export interface TrainingPlanContextType {
   createdAt?: string
   updatedAt?: string
   assignedCount?: number
+
+  // Permission information
+  currentUserPermission?: GQLCollaborationPermission
+  isCreator: boolean
+  isViewingOthersPlans: boolean
+  canView: boolean
+  canEdit: boolean
+  canAdmin: boolean
 
   // UI Actions
   setActiveWeek: (weekIndex: number) => void

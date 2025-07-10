@@ -13,6 +13,30 @@ fragment TrainingTemplate on TrainingPlan {
   assignedTo {
     id
   }
+  createdBy {
+    id
+    firstName
+    lastName
+    email
+  }
+  collaborators {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    createdAt
+    updatedAt
+  }
 
   weeks {
     id

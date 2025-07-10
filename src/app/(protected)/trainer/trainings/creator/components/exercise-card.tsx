@@ -18,6 +18,7 @@ interface ExerciseCardProps {
   categories: GQLMuscleGroupCategoriesQuery['muscleGroupCategories']
   publicExercises: GQLTrainerExercisesQuery['publicExercises']
   userExercises: GQLTrainerExercisesQuery['userExercises']
+  canEdit?: boolean
 }
 
 export function ExerciseCard({
@@ -25,6 +26,7 @@ export function ExerciseCard({
   categories,
   publicExercises,
   userExercises,
+  canEdit = true,
 }: ExerciseCardProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const { attributes, listeners, setNodeRef, transform, isDragging } =
@@ -34,6 +36,7 @@ export function ExerciseCard({
         type: 'exercise',
         exercise,
       },
+      disabled: !canEdit,
     })
 
   const style = transform
@@ -51,7 +54,8 @@ export function ExerciseCard({
         {...attributes}
         {...listeners}
         className={cn(
-          'p-0 cursor-grab active:cursor-grabbing transition-colors bg-card-on-card group/exercise-card',
+          'p-0 transition-colors bg-card-on-card group/exercise-card',
+          canEdit ? 'cursor-grab active:cursor-grabbing' : 'cursor-default',
           isDragging ? 'opacity-0' : '',
         )}
         variant="secondary"
@@ -65,6 +69,7 @@ export function ExerciseCard({
                 variant="ghost"
                 iconOnly={<PencilIcon />}
                 onClick={() => setIsCreateDialogOpen(true)}
+                disabled={!canEdit}
               />
             </div>
             <Badge variant="secondary">
