@@ -82,13 +82,33 @@ export default function WorkoutPlanner() {
     if (isLoadingInitialData) return null
 
     if (isCreator) {
-      return <Badge variant="secondary">Creator</Badge>
+      return null
     }
 
     if (isViewingOthersPlans) {
       const permissionLabel = currentUserPermission?.toLowerCase() || 'view'
-      const variant = canEdit ? 'primary' : 'outline'
-      return <Badge variant={variant}>{permissionLabel}</Badge>
+      const variant = canEdit ? 'primary' : 'secondary'
+      if (permissionLabel === 'view') {
+        return (
+          <Badge variant={variant} className="capitalize">
+            View mode
+          </Badge>
+        )
+      }
+      if (permissionLabel === 'edit') {
+        return (
+          <Badge variant={variant} className="capitalize">
+            Edit mode
+          </Badge>
+        )
+      }
+      if (permissionLabel === 'admin') {
+        return (
+          <Badge variant={variant} className="capitalize">
+            Edit mode
+          </Badge>
+        )
+      }
     }
 
     return null
@@ -230,6 +250,7 @@ export default function WorkoutPlanner() {
               className="mb-10 mt-0"
             />
           </div>
+          <div className="mb-2">{getPermissionBadge()}</div>
         </div>
         <div className="flex justify-between items-end">
           <TabsList size="lg">
@@ -241,7 +262,6 @@ export default function WorkoutPlanner() {
             </TabsTrigger>
           </TabsList>
           <div className="relative">
-            <div className="mb-2">{getPermissionBadge()}</div>
             <FormActions
               trainingId={trainingId}
               isDuplicating={isDuplicatingTrainingPlan}

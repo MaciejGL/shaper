@@ -20,6 +20,7 @@ export interface PlanWithCollaborators {
     id: string
     firstName?: string | null
     lastName?: string | null
+    email?: string | null
   } | null
 }
 
@@ -44,7 +45,7 @@ export type UserFromContext =
  * Gets the current user's collaboration record for a specific plan
  */
 export function getUserCollaboration(
-  plan: PlanWithCollaborators,
+  plan: PlanWithCollaborators | null,
   userId: string,
 ): CollaboratorInfo | null {
   if (!plan?.collaborators) return null
@@ -60,7 +61,7 @@ export function getUserCollaboration(
  * Gets the current user's permission level for a specific plan
  */
 export function getUserPermission(
-  plan: PlanWithCollaborators,
+  plan: PlanWithCollaborators | null,
   userId: string,
 ): GQLCollaborationPermission | null {
   const collaboration = getUserCollaboration(plan, userId)
@@ -71,10 +72,11 @@ export function getUserPermission(
  * Checks if user has a specific permission level (or higher) on a plan
  */
 export function hasPermission(
-  plan: PlanWithCollaborators,
+  plan: PlanWithCollaborators | null,
   userId: string,
   requiredPermission: GQLCollaborationPermission,
 ): boolean {
+  if (!plan) return false
   const userPermission = getUserPermission(plan, userId)
   if (!userPermission) return false
 
@@ -95,9 +97,12 @@ export function hasPermission(
  * Checks if user has ADMIN permission on a plan
  */
 export function hasAdminPermission(
-  plan: PlanWithCollaborators,
+  plan: PlanWithCollaborators | null,
   userId: string,
 ): boolean {
+  if (!plan) return false
+  // Creators always have admin permission
+  if (isCreator(plan, userId)) return true
   return hasPermission(plan, userId, GQLCollaborationPermission.Admin)
 }
 
@@ -105,9 +110,12 @@ export function hasAdminPermission(
  * Checks if user has EDIT permission (or higher) on a plan
  */
 export function hasEditPermission(
-  plan: PlanWithCollaborators,
+  plan: PlanWithCollaborators | null,
   userId: string,
 ): boolean {
+  if (!plan) return false
+  // Creators always have edit permission
+  if (isCreator(plan, userId)) return true
   return hasPermission(plan, userId, GQLCollaborationPermission.Edit)
 }
 
@@ -115,9 +123,12 @@ export function hasEditPermission(
  * Checks if user has VIEW permission (or higher) on a plan
  */
 export function hasViewPermission(
-  plan: PlanWithCollaborators,
+  plan: PlanWithCollaborators | null,
   userId: string,
 ): boolean {
+  if (!plan) return false
+  // Creators always have view permission
+  if (isCreator(plan, userId)) return true
   return hasPermission(plan, userId, GQLCollaborationPermission.View)
 }
 
@@ -125,9 +136,10 @@ export function hasViewPermission(
  * Checks if user is the creator of a plan
  */
 export function isCreator(
-  plan: PlanWithCollaborators,
+  plan: PlanWithCollaborators | null,
   userId: string,
 ): boolean {
+  if (!plan) return false
   return plan?.createdBy?.id === userId
 }
 
@@ -135,9 +147,10 @@ export function isCreator(
  * Checks if user has access to a plan (either as creator or collaborator)
  */
 export function hasAccessToPlan(
-  plan: PlanWithCollaborators,
+  plan: PlanWithCollaborators | null,
   userId: string,
 ): boolean {
+  if (!plan) return false
   return isCreator(plan, userId) || hasViewPermission(plan, userId)
 }
 
@@ -163,10 +176,10 @@ export function getPermissionDisplayText(
  * Hook-like utility for getting user permissions (to be used in components)
  */
 export function useUserPermissions(
-  plan: PlanWithCollaborators,
+  plan: PlanWithCollaborators | null,
   user: UserFromContext,
 ) {
-  if (!user || user === undefined) {
+  if (!user || user === undefined || !plan) {
     return {
       hasAdmin: false,
       hasEdit: false,
