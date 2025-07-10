@@ -17,10 +17,12 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useUser } from '@/context/user-context'
 import {
   GQLGetCollaborationMealPlanTemplatesQuery,
   GQLGetMealPlanTemplatesQuery,
 } from '@/generated/graphql-client'
+import { useUserPermissions } from '@/lib/collaboration-utils'
 import { getDisplayName } from '@/lib/user-utils'
 
 export function MealPlansList({
@@ -182,6 +184,11 @@ export function CollaborationMealPlanCard({
 }: {
   plan: GQLGetCollaborationMealPlanTemplatesQuery['getCollaborationMealPlanTemplates'][number]
 }) {
+  const { user } = useUser()
+
+  // Check if current user has ADMIN permission on this plan
+  const { hasAdmin } = useUserPermissions(plan, user)
+
   return (
     <Card>
       <CardHeader>
@@ -229,21 +236,23 @@ export function CollaborationMealPlanCard({
         )}
       </CardContent>
       <CardFooter className="flex justify-between mt-auto">
-        <ManageCollaboratorsDialog
-          planId={plan.id}
-          planTitle={plan.title}
-          planType="meal"
-          trigger={
-            <Button
-              variant="ghost"
-              size="sm"
-              iconStart={<UserPlus className="h-4 w-4" />}
-            >
-              Collaborate
-              {plan.collaboratorCount > 0 && ` (${plan.collaboratorCount})`}
-            </Button>
-          }
-        />
+        {hasAdmin && (
+          <ManageCollaboratorsDialog
+            planId={plan.id}
+            planTitle={plan.title}
+            planType="meal"
+            trigger={
+              <Button
+                variant="ghost"
+                size="sm"
+                iconStart={<UserPlus className="h-4 w-4" />}
+              >
+                Collaborate
+                {plan.collaboratorCount > 0 && ` (${plan.collaboratorCount})`}
+              </Button>
+            }
+          />
+        )}
         <ButtonLink
           variant="outline"
           size="sm"

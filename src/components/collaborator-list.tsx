@@ -57,7 +57,8 @@ export function CollaboratorList({
               {showPermissions && (
                 <Badge
                   variant={getPermissionColor(collab.permission)}
-                  className="text-xs h-4"
+                  className="text-xs"
+                  size="sm"
                 >
                   {collab.permission.toLowerCase()}
                 </Badge>

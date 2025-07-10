@@ -16,10 +16,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { useUser } from '@/context/user-context'
 import {
   GQLGetCollaborationTemplatesQuery,
   GQLGetTemplatesQuery,
 } from '@/generated/graphql-client'
+import { useUserPermissions } from '@/lib/collaboration-utils'
 import { getDisplayName } from '@/lib/user-utils'
 
 export function TrainingPlansList({
@@ -156,6 +158,11 @@ export function CollaborationTrainingCard({
 }: {
   plan: GQLGetCollaborationTemplatesQuery['getCollaborationTemplates'][number]
 }) {
+  const { user } = useUser()
+
+  // Check if current user has ADMIN permission on this plan
+  const { hasAdmin } = useUserPermissions(plan, user)
+
   return (
     <Card>
       <CardHeader>
@@ -198,26 +205,29 @@ export function CollaborationTrainingCard({
         )}
       </CardContent>
       <CardFooter className="flex justify-between mt-auto">
-        <ManageCollaboratorsDialog
-          planId={plan.id}
-          planTitle={plan.title}
-          planType="training"
-          trigger={
-            <Button
-              variant="ghost"
-              size="sm"
-              iconStart={<UserPlus className="h-4 w-4" />}
-            >
-              Collaborate
-              {plan.collaboratorCount > 0 && ` (${plan.collaboratorCount})`}
-            </Button>
-          }
-        />
+        {hasAdmin && (
+          <ManageCollaboratorsDialog
+            planId={plan.id}
+            planTitle={plan.title}
+            planType="training"
+            trigger={
+              <Button
+                variant="ghost"
+                size="sm"
+                iconStart={<UserPlus className="h-4 w-4" />}
+              >
+                Collaborate
+                {plan.collaboratorCount > 0 && ` (${plan.collaboratorCount})`}
+              </Button>
+            }
+          />
+        )}
         <ButtonLink
-          variant="outline"
+          variant="secondary"
           size="sm"
           href={`./trainings/creator/${plan.id}`}
           iconStart={<Edit className="h-4 w-4" />}
+          className="ml-auto"
         >
           Edit
         </ButtonLink>
