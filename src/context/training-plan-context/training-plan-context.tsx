@@ -53,7 +53,7 @@ export function TrainingPlanProvider({
     hasView: canView,
     isCreator,
     permission: currentUserPermission,
-  } = useUserPermissions(plan, user)
+  } = useUserPermissions(plan ?? null, user)
 
   // ## Unified Optimistic Mutations - Replace all handler files
   const {

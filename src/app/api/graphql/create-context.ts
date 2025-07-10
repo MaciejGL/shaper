@@ -7,7 +7,7 @@ export const createContext = async () => {
   const context = {
     user: userSession,
     loaders: {
-      plan: null as any, // Will be set below
+      plan: null as unknown as ReturnType<typeof createPlanLoaders>, // Will be set below
       user: createUserLoaders(),
     },
   }
