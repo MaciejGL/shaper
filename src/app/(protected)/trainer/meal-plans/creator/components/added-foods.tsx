@@ -50,11 +50,13 @@ export function AddedFoods({
   removeFood,
   setHasChanges,
   setFoods,
+  canEdit,
 }: {
   foods: EditableFood[]
   removeFood: (index: number) => void
   setHasChanges: (hasChanges: boolean) => void
   setFoods: Dispatch<SetStateAction<EditableFood[]>>
+  canEdit: boolean
 }) {
   // Update food in local state
   const updateFood = useCallback(
@@ -125,6 +127,7 @@ export function AddedFoods({
                         className="group-hover/food:opacity-100 opacity-0"
                         onClick={() => removeFood(index)}
                         iconOnly={<XIcon />}
+                        disabled={!canEdit}
                       />
                     </div>
 
@@ -153,6 +156,7 @@ export function AddedFoods({
                           placeholder="Enter quantity"
                           className="h-9"
                           iconEnd={<p>{food.unit}</p>}
+                          disabled={!canEdit}
                         />
                       </div>
                     </div>

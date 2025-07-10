@@ -9,6 +9,11 @@ export const calculateMacroPercentage = (
   calories: number,
   macroType: 'protein' | 'carbs' | 'fat',
 ) => {
+  // Handle division by zero - return 0 when calories is 0 or falsy
+  if (!calories || calories === 0) {
+    return '0'
+  }
+
   return (
     ((macro * macroCaloriesMultiplier[macroType]) / calories) *
     100

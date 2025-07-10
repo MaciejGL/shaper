@@ -16,7 +16,14 @@ export function MealPlanHeader({
   dailyCalories?: number | null
   dailyProtein?: number | null
 }) {
-  const { mealPlan } = useMealPlanContext()
+  const {
+    mealPlan,
+    currentUserPermission,
+    isCreator,
+    isViewingOthersPlans,
+    canEdit,
+    isLoading,
+  } = useMealPlanContext()
   const { updateDetails } = useMealPlanDetailsMutation(mealPlan?.id || '')
   const invalidateQuery = useInvalidateQuery()
   const draftInput = useAutoSyncedInput(
@@ -30,6 +37,43 @@ export function MealPlanHeader({
     500,
   )
 
+  // Permission badge helper
+  const getPermissionBadge = () => {
+    if (isLoading) return null
+
+    if (isCreator) {
+      return null
+    }
+
+    if (isViewingOthersPlans) {
+      const permissionLabel = currentUserPermission?.toLowerCase() || 'view'
+      const variant = canEdit ? 'primary' : 'secondary'
+      if (permissionLabel === 'view') {
+        return (
+          <Badge variant={variant} className="capitalize">
+            View mode
+          </Badge>
+        )
+      }
+      if (permissionLabel === 'edit') {
+        return (
+          <Badge variant={variant} className="capitalize">
+            Edit mode
+          </Badge>
+        )
+      }
+      if (permissionLabel === 'admin') {
+        return (
+          <Badge variant={variant} className="capitalize">
+            Edit mode
+          </Badge>
+        )
+      }
+    }
+
+    return null
+  }
+
   return (
     <div className="bg-card/50 rounded-lg sticky -top-4 z-10 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-4">
@@ -37,6 +81,7 @@ export function MealPlanHeader({
           <div>
             <h1 className="text-2xl font-bold flex items-center gap-2">
               Meal Plan Creator
+              {getPermissionBadge()}
             </h1>
             {title && <p className="text-muted-foreground mt-1">{title}</p>}
           </div>
@@ -65,6 +110,7 @@ export function MealPlanHeader({
                 onCheckedChange={draftInput.onChange}
                 onFocus={draftInput.onFocus}
                 onBlur={draftInput.onBlur}
+                disabled={!canEdit}
               />
             </div>
           </div>

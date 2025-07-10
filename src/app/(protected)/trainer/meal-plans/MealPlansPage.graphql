@@ -11,6 +11,31 @@ fragment MealPlanTemplate on MealPlan {
   updatedAt
   assignedCount
 
+  createdBy {
+    id
+    firstName
+    lastName
+    email
+  }
+
+  collaborators {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    createdAt
+  }
+
   weeks {
     id
     weekNumber

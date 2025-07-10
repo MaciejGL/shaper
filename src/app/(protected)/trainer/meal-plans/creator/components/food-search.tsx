@@ -27,6 +27,7 @@ interface FoodSearchProps {
   foods: EditableFood[]
   setFoods: Dispatch<SetStateAction<EditableFood[]>>
   setHasChanges: Dispatch<SetStateAction<boolean>>
+  canEdit: boolean
 }
 
 // Types for OpenFoodFacts API response
@@ -111,6 +112,7 @@ export default function FoodSearch({
   foods,
   setFoods,
   setHasChanges,
+  canEdit,
 }: FoodSearchProps) {
   const { getMealByHour } = useMealPlanContext()
 
@@ -144,6 +146,11 @@ export default function FoodSearch({
   // Add food to local state
   const addFood = useCallback(
     (foodItem: SearchResult) => {
+      if (!canEdit) {
+        toast.error('You do not have permission to add foods')
+        return
+      }
+
       const newFood: EditableFood = {
         name: foodItem.name,
         quantity: 100,
@@ -175,7 +182,7 @@ export default function FoodSearch({
       setSearchTerm('')
       setSearchResults([])
     },
-    [foods, setFoods, setHasChanges, setSearchTerm, setSearchResults],
+    [canEdit, foods, setFoods, setHasChanges, setSearchTerm, setSearchResults],
   )
 
   // Handle search
@@ -218,7 +225,7 @@ export default function FoodSearch({
     <div className="flex flex-col pb-4 space-y-4">
       <Input
         id="food-search"
-        placeholder="Search for foods..."
+        placeholder={canEdit ? 'Search for foods...' : 'View foods (read-only)'}
         variant="secondary"
         value={searchTerm}
         onChange={(e) => {
@@ -228,6 +235,7 @@ export default function FoodSearch({
         iconEnd={
           <XIcon className="cursor-pointer" onClick={() => setSearchTerm('')} />
         }
+        disabled={!canEdit}
       />
 
       {isSearching && <FoodSearchLoading />}

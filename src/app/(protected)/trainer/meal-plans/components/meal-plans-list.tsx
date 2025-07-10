@@ -254,10 +254,11 @@ export function CollaborationMealPlanCard({
           />
         )}
         <ButtonLink
-          variant="outline"
+          variant="secondary"
           size="sm"
           href={`./meal-plans/creator/${plan.id}`}
           iconStart={<Edit className="h-4 w-4" />}
+          className="ml-auto"
         >
           Edit
         </ButtonLink>

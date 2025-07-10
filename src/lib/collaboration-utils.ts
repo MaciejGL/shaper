@@ -212,9 +212,8 @@ export function useUserPermissions(
 export function getPermissionColor(permission: string): BadgeProps['variant'] {
   switch (permission) {
     case 'ADMIN':
-      return 'destructive'
-    case 'EDIT':
       return 'primary'
+    case 'EDIT':
     case 'VIEW':
       return 'secondary'
     case 'TEAM_MEMBER':

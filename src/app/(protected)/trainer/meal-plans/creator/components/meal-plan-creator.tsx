@@ -27,7 +27,7 @@ import {
 
 function MealPlanCreatorContent() {
   const [selectedDay, setSelectedDay] = useState(0)
-  const { mealPlan, isLoading } = useMealPlanContext()
+  const { mealPlan, isLoading, canEdit } = useMealPlanContext()
 
   // Initialize debounced mutation for updating meal plan details
   const { updateDetails } = useMealPlanDetailsMutation(mealPlan?.id || '')
@@ -220,6 +220,7 @@ function MealPlanCreatorContent() {
           onChange={(e) => titleInput.onChange(e.target.value)}
           onFocus={titleInput.onFocus}
           onBlur={titleInput.onBlur}
+          disabled={!canEdit}
         />
 
         <div className="flex gap-2">
@@ -235,6 +236,7 @@ function MealPlanCreatorContent() {
             }}
             onFocus={dailyCaloriesInput.onFocus}
             onBlur={dailyCaloriesInput.onBlur}
+            disabled={!canEdit}
           />
           <Input
             label="Protein"
@@ -249,6 +251,7 @@ function MealPlanCreatorContent() {
             }}
             onFocus={dailyProteinInput.onFocus}
             onBlur={dailyProteinInput.onBlur}
+            disabled={!canEdit}
             iconEnd={
               <p
                 className={cn(
@@ -274,6 +277,7 @@ function MealPlanCreatorContent() {
             }}
             onFocus={dailyCarbsInput.onFocus}
             onBlur={dailyCarbsInput.onBlur}
+            disabled={!canEdit}
             iconEnd={
               <p
                 className={cn(
@@ -299,6 +303,7 @@ function MealPlanCreatorContent() {
             }}
             onFocus={dailyFatInput.onFocus}
             onBlur={dailyFatInput.onBlur}
+            disabled={!canEdit}
             iconEnd={
               <p
                 className={cn(

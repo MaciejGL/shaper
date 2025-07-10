@@ -62,9 +62,7 @@ export default class User implements GQLUser {
     if (clients) {
       return clients.map((client) => new UserPublic(client, this.context))
     } else {
-      console.error(
-        `[User] No clients found for user ${this.id}. Loading from database.`,
-      )
+      console.error(`[User] No clients found for user ${this.id}. Skipping.`)
       return []
     }
   }
@@ -74,9 +72,7 @@ export default class User implements GQLUser {
     if (trainer) {
       return new UserPublic(trainer, this.context)
     } else {
-      console.error(
-        `[User] No trainer found for user ${this.id}. Loading from database.`,
-      )
+      console.error(`[User] No trainer found for user ${this.id}. Skipping.`)
       return null
     }
   }
@@ -86,9 +82,7 @@ export default class User implements GQLUser {
     if (profile) {
       return new UserProfile(profile)
     } else {
-      console.error(
-        `[User] No profile found for user ${this.id}. Loading from database.`,
-      )
+      console.error(`[User] No profile found for user ${this.id}. Skipping.`)
       return null
     }
   }
@@ -104,9 +98,7 @@ export default class User implements GQLUser {
         createdAt: s.createdAt.toISOString(),
       }))
     } else {
-      console.error(
-        `[User] No sessions found for user ${this.id}. Loading from database.`,
-      )
+      console.error(`[User] No sessions found for user ${this.id}. Skipping.`)
       return []
     }
   }
@@ -117,7 +109,7 @@ export default class User implements GQLUser {
       return notifications.map((n) => new Notification(n, this.context))
     } else {
       console.error(
-        `[User] No notifications found for user ${this.id}. Loading from database.`,
+        `[User] No notifications found for user ${this.id}. Skipping.`,
       )
       return []
     }
@@ -129,7 +121,7 @@ export default class User implements GQLUser {
       return notifications.map((n) => new Notification(n, this.context))
     } else {
       console.error(
-        `[User] No notifications found for user ${this.id}. Loading from database.`,
+        `[User] No created notifications found for user ${this.id}. Skipping.`,
       )
       return []
     }

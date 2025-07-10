@@ -1,14 +1,22 @@
 'use client'
 
 import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query'
-import { ReactNode, createContext, useCallback, useContext } from 'react'
+import {
+  ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+} from 'react'
 import { toast } from 'sonner'
 
+import { useUser } from '@/context/user-context'
 import {
   GQLGetMealPlanByIdQuery,
   useGetMealPlanByIdQuery,
   useSaveMealMutation,
 } from '@/generated/graphql-client'
+import { useUserPermissions } from '@/lib/collaboration-utils'
 
 // Types for the context
 type MealPlanData = GQLGetMealPlanByIdQuery['getMealPlanById']
@@ -43,6 +51,14 @@ interface MealPlanContextType {
   refetchMealPlan: (
     options?: RefetchOptions,
   ) => Promise<QueryObserverResult<GQLGetMealPlanByIdQuery, unknown>>
+
+  // Permission fields
+  currentUserPermission: string | null
+  isCreator: boolean
+  isViewingOthersPlans: boolean
+  canView: boolean
+  canEdit: boolean
+  canAdmin: boolean
 }
 
 const MealPlanContext = createContext<MealPlanContextType | undefined>(
@@ -77,6 +93,22 @@ export function MealPlanProvider({
   )
 
   const saveMealMutation = useSaveMealMutation()
+
+  // User context and permissions
+  const { user } = useUser()
+  const mealPlan = mealPlanData?.getMealPlanById || null
+
+  const permissions = useUserPermissions(mealPlan, user)
+
+  const isViewingOthersPlans = useMemo(() => {
+    return mealPlan ? !permissions.isCreator : false
+  }, [mealPlan, permissions.isCreator])
+
+  const currentUserPermission = useMemo(() => {
+    if (!mealPlan) return null
+    if (permissions.isCreator) return 'CREATOR'
+    return permissions.permission
+  }, [mealPlan, permissions.isCreator, permissions.permission])
 
   const getMealByHour = useCallback(
     (dayId: string, hour: number) => {
@@ -145,6 +177,12 @@ export function MealPlanProvider({
     saveMeal,
     getMealByHour,
     refetchMealPlan: refetch,
+    currentUserPermission,
+    isCreator: permissions.isCreator,
+    isViewingOthersPlans,
+    canView: permissions.hasView,
+    canEdit: permissions.hasEdit,
+    canAdmin: permissions.hasAdmin,
   }
 
   return (
