@@ -23,9 +23,8 @@ import {
   useUpdateTrainingPlanCollaboratorPermissionMutation,
 } from '@/generated/graphql-client'
 import { getUserDisplayName } from '@/lib/user-utils'
+
 import { ManageCollaboratorsDialog } from './manage-collaborators-dialog'
-
-
 
 export function CollaborationManagement() {
   const { data: trainingCollaborations, refetch: refetchTraining } =
@@ -77,6 +76,10 @@ export function CollaborationManagement() {
       },
     })
 
+  const trainingCollaborationCount =
+    trainingCollaborations?.myTrainingPlanCollaborations.length
+  const mealCollaborationCount =
+    mealCollaborations?.myMealPlanCollaborations.length
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -86,20 +89,14 @@ export function CollaborationManagement() {
       <Tabs defaultValue="training">
         <TabsList>
           <TabsTrigger value="training">
-            Training Plans
-            {trainingCollaborations?.myTrainingPlanCollaborations.length && (
-              <Badge variant="outline" className="ml-2">
-                {trainingCollaborations.myTrainingPlanCollaborations.length}
-              </Badge>
-            )}
+            Training Plans{' '}
+            {trainingCollaborationCount
+              ? ` (${trainingCollaborationCount})`
+              : ''}
           </TabsTrigger>
           <TabsTrigger value="meal">
-            Meal Plans
-            {mealCollaborations?.myMealPlanCollaborations.length && (
-              <Badge variant="outline" className="ml-2">
-                {mealCollaborations.myMealPlanCollaborations.length}
-              </Badge>
-            )}
+            Meal Plans{' '}
+            {mealCollaborationCount ? ` (${mealCollaborationCount})` : ''}
           </TabsTrigger>
         </TabsList>
 
