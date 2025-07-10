@@ -4,6 +4,7 @@ import { Calendar, Edit, Target, UserPlus, Users } from 'lucide-react'
 
 import { ManageCollaboratorsDialog } from '@/app/(protected)/trainer/collaboration/components/manage-collaborators-dialog'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
+import { MealPlanCollaboratorList } from '@/components/collaborator-list'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
@@ -20,22 +21,7 @@ import {
   GQLGetCollaborationMealPlanTemplatesQuery,
   GQLGetMealPlanTemplatesQuery,
 } from '@/generated/graphql-client'
-
-function getDisplayName(user: {
-  firstName?: string | null
-  lastName?: string | null
-}) {
-  if (user.firstName && user.lastName) {
-    return `${user.firstName} ${user.lastName}`
-  }
-  if (user.firstName) {
-    return user.firstName
-  }
-  if (user.lastName) {
-    return user.lastName
-  }
-  return 'Unknown User'
-}
+import { getDisplayName } from '@/lib/user-utils'
 
 export function MealPlansList({
   plans,
@@ -216,7 +202,7 @@ export function CollaborationMealPlanCard({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex items-center text-sm text-muted-foreground gap-2 flex-wrap">
+        <div className="flex items-center text-sm text-muted-foreground gap-2 flex-wrap mb-3">
           <Badge variant="outline">
             <Calendar className="size-4" />
             {plan.weekCount} weeks
@@ -234,6 +220,13 @@ export function CollaborationMealPlanCard({
             </Badge>
           )}
         </div>
+        {plan.collaborators && plan.collaborators.length > 0 && (
+          <MealPlanCollaboratorList
+            collaborators={plan.collaborators}
+            maxVisible={2}
+            showPermissions={true}
+          />
+        )}
       </CardContent>
       <CardFooter className="flex justify-between mt-auto">
         <ManageCollaboratorsDialog

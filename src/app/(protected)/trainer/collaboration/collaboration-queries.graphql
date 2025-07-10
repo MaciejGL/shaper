@@ -138,6 +138,51 @@ mutation RemoveMealPlanCollaborator($input: RemoveMealPlanCollaboratorInput!) {
   removeMealPlanCollaborator(input: $input)
 }
 
+query MyTeamMembers {
+  myTeamMembers {
+    id
+    user {
+      id
+      firstName
+      lastName
+      email
+    }
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    isCurrentUserSender
+    createdAt
+    updatedAt
+  }
+}
+
+query MyPlanCollaborators {
+  myPlanCollaborators {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    planType
+    planId
+    planTitle
+    createdAt
+    updatedAt
+  }
+}
+
 mutation UpdateTrainingPlanCollaboratorPermission(
   $input: UpdateTrainingPlanCollaboratorPermissionInput!
 ) {
@@ -215,5 +260,42 @@ mutation AddMealPlanCollaborator($input: AddMealPlanCollaboratorInput!) {
     permission
     createdAt
     updatedAt
+  }
+}
+
+query AllPlansWithPermissions($userId: ID!) {
+  allPlansWithPermissions(userId: $userId) {
+    id
+    title
+    planType
+    description
+    isTemplate
+    createdAt
+    currentPermission
+    hasAccess
+  }
+}
+
+mutation BulkUpdatePlanPermissions($input: BulkUpdatePlanPermissionsInput!) {
+  bulkUpdatePlanPermissions(input: $input) {
+    id
+    planId
+    planTitle
+    planType
+    permission
+    createdAt
+    updatedAt
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
   }
 }

@@ -36,14 +36,14 @@ export const Mutation: GQLMutationResolvers = {
       context,
     )
   },
-  removeExerciseFromWorkout: async (_, { exerciseId }) => {
-    return removeExerciseFromWorkout(exerciseId)
+  removeExerciseFromWorkout: async (_, { exerciseId }, context) => {
+    return removeExerciseFromWorkout(exerciseId, context)
   },
-  addSet: async (_, { exerciseId }) => {
-    return addSet(exerciseId)
+  addSet: async (_, { exerciseId }, context) => {
+    return addSet(exerciseId, context)
   },
-  removeSet: async (_, { setId }) => {
-    return removeSet(setId)
+  removeSet: async (_, { setId }, context) => {
+    return removeSet(setId, context)
   },
   addAiExerciseToWorkout: async (_, { input }, context) => {
     return addAiExerciseToWorkout(input, context)

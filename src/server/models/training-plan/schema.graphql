@@ -27,6 +27,7 @@ type TrainingPlan {
   weekCount: Int!
   assignedCount: Int!
   collaboratorCount: Int!
+  collaborators: [TrainingPlanCollaborator!]!
   currentWeekNumber: Int
   completedWorkoutsDays: Int!
   adherence: Float!

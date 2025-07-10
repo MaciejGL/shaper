@@ -144,8 +144,8 @@ export function NotificationBell({
                   className="absolute -top-1 -right-1 flex items-center justify-center"
                 >
                   <span className="relative flex size-4">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-500 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full size-4 bg-lime-500 text-black text-[10px] font-medium items-center justify-center">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full size-4 bg-amber-500 text-black text-[10px] font-medium items-center justify-center">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   </span>
@@ -195,11 +195,12 @@ export function NotificationBell({
                   <React.Fragment key={notification.id}>
                     <DropdownMenuItem
                       key={notification.id}
-                      className="p-0 focus:bg-zinc-200 dark:focus:bg-zinc-700 cursor-pointer not-last-of-type:border-b border-border rounded-none"
                       onClick={(e) => {
                         handleOpenInvitation(notification, e)
                         onNotificationClick(notification)
                       }}
+                      className="p-0"
+                      asChild
                     >
                       <NotificationItem notification={notification} />
                     </DropdownMenuItem>

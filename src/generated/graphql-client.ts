@@ -134,6 +134,16 @@ export type GQLAssignTrainingPlanToClientInput = {
   startDate?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type GQLAvailablePlan = {
+  __typename?: 'AvailablePlan';
+  createdAt: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  isTemplate: Scalars['Boolean']['output'];
+  planType: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+};
+
 export type GQLBaseExercise = {
   __typename?: 'BaseExercise';
   additionalInstructions?: Maybe<Scalars['String']['output']>;
@@ -162,6 +172,11 @@ export type GQLBaseExerciseSubstitute = {
   reason?: Maybe<Scalars['String']['output']>;
   substitute: GQLBaseExercise;
   substituteId: Scalars['ID']['output'];
+};
+
+export type GQLBulkUpdatePlanPermissionsInput = {
+  planUpdates: Array<GQLPlanPermissionUpdateInput>;
+  userId: Scalars['ID']['input'];
 };
 
 export type GQLCoachingRequest = {
@@ -603,6 +618,7 @@ export type GQLMealPlan = {
   assignedCount: Scalars['Int']['output'];
   assignedTo?: Maybe<GQLUserPublic>;
   collaboratorCount: Scalars['Int']['output'];
+  collaborators: Array<GQLMealPlanCollaborator>;
   completedAt?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
   createdBy?: Maybe<GQLUserPublic>;
@@ -708,6 +724,7 @@ export type GQLMutation = {
   addTrainingWeek: Scalars['ID']['output'];
   assignMealPlanToClient: Scalars['Boolean']['output'];
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
+  bulkUpdatePlanPermissions: Array<GQLPlanCollaboratorSummary>;
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   closePlan: Scalars['Boolean']['output'];
   createCoachingRequest: GQLCoachingRequest;
@@ -862,6 +879,11 @@ export type GQLMutationAssignMealPlanToClientArgs = {
 
 export type GQLMutationAssignTrainingPlanToClientArgs = {
   input: GQLAssignTrainingPlanToClientInput;
+};
+
+
+export type GQLMutationBulkUpdatePlanPermissionsArgs = {
+  input: GQLBulkUpdatePlanPermissionsInput;
 };
 
 
@@ -1293,8 +1315,42 @@ export type GQLOneRmLog = {
   weight?: Maybe<Scalars['Float']['output']>;
 };
 
+export type GQLPlanCollaboratorSummary = {
+  __typename?: 'PlanCollaboratorSummary';
+  addedBy: GQLUserPublic;
+  collaborator: GQLUserPublic;
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  permission: GQLCollaborationPermission;
+  planId: Scalars['ID']['output'];
+  planTitle: Scalars['String']['output'];
+  planType: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export type GQLPlanPermissionUpdateInput = {
+  permission?: InputMaybe<GQLCollaborationPermission>;
+  planId: Scalars['ID']['input'];
+  planType: Scalars['String']['input'];
+  removeAccess?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type GQLPlanWithPermissions = {
+  __typename?: 'PlanWithPermissions';
+  createdAt: Scalars['String']['output'];
+  currentPermission?: Maybe<GQLCollaborationPermission>;
+  description?: Maybe<Scalars['String']['output']>;
+  hasAccess: Scalars['Boolean']['output'];
+  id: Scalars['ID']['output'];
+  isTemplate: Scalars['Boolean']['output'];
+  planType: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+};
+
 export type GQLQuery = {
   __typename?: 'Query';
+  allPlansWithPermissions: Array<GQLPlanWithPermissions>;
+  availablePlansForTeamMember: Array<GQLAvailablePlan>;
   bodyMeasures: Array<GQLUserBodyMeasure>;
   clientBodyMeasures: Array<GQLUserBodyMeasure>;
   coachingRequest?: Maybe<GQLCoachingRequest>;
@@ -1324,6 +1380,8 @@ export type GQLQuery = {
   myClients: Array<GQLUserPublic>;
   myCollaborationInvitations: Array<GQLCollaborationInvitation>;
   myMealPlanCollaborations: Array<GQLMealPlanCollaborator>;
+  myPlanCollaborators: Array<GQLPlanCollaboratorSummary>;
+  myTeamMembers: Array<GQLTeamMember>;
   myTrainer?: Maybe<GQLUserPublic>;
   myTrainingPlanCollaborations: Array<GQLTrainingPlanCollaborator>;
   note?: Maybe<GQLNote>;
@@ -1338,6 +1396,16 @@ export type GQLQuery = {
   userExercises: Array<GQLBaseExercise>;
   userPublic?: Maybe<GQLUserPublic>;
   userWithAllData?: Maybe<GQLUser>;
+};
+
+
+export type GQLQueryAllPlansWithPermissionsArgs = {
+  userId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryAvailablePlansForTeamMemberArgs = {
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -1552,6 +1620,16 @@ export type GQLSuggestedSetsInput = {
   rpe?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type GQLTeamMember = {
+  __typename?: 'TeamMember';
+  addedBy: GQLUserPublic;
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isCurrentUserSender: Scalars['Boolean']['output'];
+  updatedAt: Scalars['String']['output'];
+  user: GQLUserPublic;
+};
+
 export type GQLTrainingDay = {
   __typename?: 'TrainingDay';
   completedAt?: Maybe<Scalars['String']['output']>;
@@ -1601,6 +1679,7 @@ export type GQLTrainingPlan = {
   assignedCount: Scalars['Int']['output'];
   assignedTo?: Maybe<GQLUserPublic>;
   collaboratorCount: Scalars['Int']['output'];
+  collaborators: Array<GQLTrainingPlanCollaborator>;
   completedAt?: Maybe<Scalars['String']['output']>;
   completedWorkoutsDays: Scalars['Int']['output'];
   createdAt: Scalars['String']['output'];
@@ -2350,6 +2429,16 @@ export type GQLRemoveMealPlanCollaboratorMutationVariables = Exact<{
 
 export type GQLRemoveMealPlanCollaboratorMutation = { __typename?: 'Mutation', removeMealPlanCollaborator: boolean };
 
+export type GQLMyTeamMembersQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLMyTeamMembersQuery = { __typename?: 'Query', myTeamMembers: Array<{ __typename?: 'TeamMember', id: string, isCurrentUserSender: boolean, createdAt: string, updatedAt: string, user: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string }, addedBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> };
+
+export type GQLMyPlanCollaboratorsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLMyPlanCollaboratorsQuery = { __typename?: 'Query', myPlanCollaborators: Array<{ __typename?: 'PlanCollaboratorSummary', id: string, permission: GQLCollaborationPermission, planType: string, planId: string, planTitle: string, createdAt: string, updatedAt: string, collaborator: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string }, addedBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> };
+
 export type GQLUpdateTrainingPlanCollaboratorPermissionMutationVariables = Exact<{
   input: GQLUpdateTrainingPlanCollaboratorPermissionInput;
 }>;
@@ -2391,6 +2480,20 @@ export type GQLAddMealPlanCollaboratorMutationVariables = Exact<{
 
 
 export type GQLAddMealPlanCollaboratorMutation = { __typename?: 'Mutation', addMealPlanCollaborator: { __typename?: 'MealPlanCollaborator', id: string, permission: GQLCollaborationPermission, createdAt: string, updatedAt: string, collaborator: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } } };
+
+export type GQLAllPlansWithPermissionsQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLAllPlansWithPermissionsQuery = { __typename?: 'Query', allPlansWithPermissions: Array<{ __typename?: 'PlanWithPermissions', id: string, title: string, planType: string, description?: string | undefined | null, isTemplate: boolean, createdAt: string, currentPermission?: GQLCollaborationPermission | undefined | null, hasAccess: boolean }> };
+
+export type GQLBulkUpdatePlanPermissionsMutationVariables = Exact<{
+  input: GQLBulkUpdatePlanPermissionsInput;
+}>;
+
+
+export type GQLBulkUpdatePlanPermissionsMutation = { __typename?: 'Mutation', bulkUpdatePlanPermissions: Array<{ __typename?: 'PlanCollaboratorSummary', id: string, planId: string, planTitle: string, planType: string, permission: GQLCollaborationPermission, createdAt: string, updatedAt: string, collaborator: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string }, addedBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> };
 
 export type GQLTrainerDashboardUserQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2497,7 +2600,7 @@ export type GQLGetCollaborationMealPlanTemplatesQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetCollaborationMealPlanTemplatesQuery = { __typename?: 'Query', getCollaborationMealPlanTemplates: Array<{ __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, isDraft: boolean, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, weekCount: number, assignedCount: number, collaboratorCount: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null }> };
+export type GQLGetCollaborationMealPlanTemplatesQuery = { __typename?: 'Query', getCollaborationMealPlanTemplates: Array<{ __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, isDraft: boolean, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, weekCount: number, assignedCount: number, collaboratorCount: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null, collaborators: Array<{ __typename?: 'MealPlanCollaborator', id: string, permission: GQLCollaborationPermission, collaborator: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> }> };
 
 export type GQLGetMealPlanByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -2582,7 +2685,7 @@ export type GQLGetCollaborationTemplatesQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetCollaborationTemplatesQuery = { __typename?: 'Query', getCollaborationTemplates: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isDraft: boolean, weekCount: number, assignedCount: number, collaboratorCount: number, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null }> };
+export type GQLGetCollaborationTemplatesQuery = { __typename?: 'Query', getCollaborationTemplates: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isDraft: boolean, weekCount: number, assignedCount: number, collaboratorCount: number, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null, collaborators: Array<{ __typename?: 'TrainingPlanCollaborator', id: string, permission: GQLCollaborationPermission, collaborator: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> }> };
 
 export type GQLGetTemplateTrainingPlanByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5643,6 +5746,139 @@ useRemoveMealPlanCollaboratorMutation.getKey = () => ['RemoveMealPlanCollaborato
 
 useRemoveMealPlanCollaboratorMutation.fetcher = (variables: GQLRemoveMealPlanCollaboratorMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveMealPlanCollaboratorMutation, GQLRemoveMealPlanCollaboratorMutationVariables>(RemoveMealPlanCollaboratorDocument, variables, options);
 
+export const MyTeamMembersDocument = `
+    query MyTeamMembers {
+  myTeamMembers {
+    id
+    user {
+      id
+      firstName
+      lastName
+      email
+    }
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    isCurrentUserSender
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useMyTeamMembersQuery = <
+      TData = GQLMyTeamMembersQuery,
+      TError = unknown
+    >(
+      variables?: GQLMyTeamMembersQueryVariables,
+      options?: Omit<UseQueryOptions<GQLMyTeamMembersQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLMyTeamMembersQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLMyTeamMembersQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['MyTeamMembers'] : ['MyTeamMembers', variables],
+    queryFn: fetchData<GQLMyTeamMembersQuery, GQLMyTeamMembersQueryVariables>(MyTeamMembersDocument, variables),
+    ...options
+  }
+    )};
+
+useMyTeamMembersQuery.getKey = (variables?: GQLMyTeamMembersQueryVariables) => variables === undefined ? ['MyTeamMembers'] : ['MyTeamMembers', variables];
+
+export const useInfiniteMyTeamMembersQuery = <
+      TData = InfiniteData<GQLMyTeamMembersQuery>,
+      TError = unknown
+    >(
+      variables: GQLMyTeamMembersQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLMyTeamMembersQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLMyTeamMembersQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLMyTeamMembersQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['MyTeamMembers.infinite'] : ['MyTeamMembers.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLMyTeamMembersQuery, GQLMyTeamMembersQueryVariables>(MyTeamMembersDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteMyTeamMembersQuery.getKey = (variables?: GQLMyTeamMembersQueryVariables) => variables === undefined ? ['MyTeamMembers.infinite'] : ['MyTeamMembers.infinite', variables];
+
+
+useMyTeamMembersQuery.fetcher = (variables?: GQLMyTeamMembersQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMyTeamMembersQuery, GQLMyTeamMembersQueryVariables>(MyTeamMembersDocument, variables, options);
+
+export const MyPlanCollaboratorsDocument = `
+    query MyPlanCollaborators {
+  myPlanCollaborators {
+    id
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    permission
+    planType
+    planId
+    planTitle
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useMyPlanCollaboratorsQuery = <
+      TData = GQLMyPlanCollaboratorsQuery,
+      TError = unknown
+    >(
+      variables?: GQLMyPlanCollaboratorsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLMyPlanCollaboratorsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLMyPlanCollaboratorsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLMyPlanCollaboratorsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['MyPlanCollaborators'] : ['MyPlanCollaborators', variables],
+    queryFn: fetchData<GQLMyPlanCollaboratorsQuery, GQLMyPlanCollaboratorsQueryVariables>(MyPlanCollaboratorsDocument, variables),
+    ...options
+  }
+    )};
+
+useMyPlanCollaboratorsQuery.getKey = (variables?: GQLMyPlanCollaboratorsQueryVariables) => variables === undefined ? ['MyPlanCollaborators'] : ['MyPlanCollaborators', variables];
+
+export const useInfiniteMyPlanCollaboratorsQuery = <
+      TData = InfiniteData<GQLMyPlanCollaboratorsQuery>,
+      TError = unknown
+    >(
+      variables: GQLMyPlanCollaboratorsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLMyPlanCollaboratorsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLMyPlanCollaboratorsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLMyPlanCollaboratorsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['MyPlanCollaborators.infinite'] : ['MyPlanCollaborators.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLMyPlanCollaboratorsQuery, GQLMyPlanCollaboratorsQueryVariables>(MyPlanCollaboratorsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteMyPlanCollaboratorsQuery.getKey = (variables?: GQLMyPlanCollaboratorsQueryVariables) => variables === undefined ? ['MyPlanCollaborators.infinite'] : ['MyPlanCollaborators.infinite', variables];
+
+
+useMyPlanCollaboratorsQuery.fetcher = (variables?: GQLMyPlanCollaboratorsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMyPlanCollaboratorsQuery, GQLMyPlanCollaboratorsQueryVariables>(MyPlanCollaboratorsDocument, variables, options);
+
 export const UpdateTrainingPlanCollaboratorPermissionDocument = `
     mutation UpdateTrainingPlanCollaboratorPermission($input: UpdateTrainingPlanCollaboratorPermissionInput!) {
   updateTrainingPlanCollaboratorPermission(input: $input) {
@@ -5884,6 +6120,107 @@ useAddMealPlanCollaboratorMutation.getKey = () => ['AddMealPlanCollaborator'];
 
 
 useAddMealPlanCollaboratorMutation.fetcher = (variables: GQLAddMealPlanCollaboratorMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAddMealPlanCollaboratorMutation, GQLAddMealPlanCollaboratorMutationVariables>(AddMealPlanCollaboratorDocument, variables, options);
+
+export const AllPlansWithPermissionsDocument = `
+    query AllPlansWithPermissions($userId: ID!) {
+  allPlansWithPermissions(userId: $userId) {
+    id
+    title
+    planType
+    description
+    isTemplate
+    createdAt
+    currentPermission
+    hasAccess
+  }
+}
+    `;
+
+export const useAllPlansWithPermissionsQuery = <
+      TData = GQLAllPlansWithPermissionsQuery,
+      TError = unknown
+    >(
+      variables: GQLAllPlansWithPermissionsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLAllPlansWithPermissionsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLAllPlansWithPermissionsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLAllPlansWithPermissionsQuery, TError, TData>(
+      {
+    queryKey: ['AllPlansWithPermissions', variables],
+    queryFn: fetchData<GQLAllPlansWithPermissionsQuery, GQLAllPlansWithPermissionsQueryVariables>(AllPlansWithPermissionsDocument, variables),
+    ...options
+  }
+    )};
+
+useAllPlansWithPermissionsQuery.getKey = (variables: GQLAllPlansWithPermissionsQueryVariables) => ['AllPlansWithPermissions', variables];
+
+export const useInfiniteAllPlansWithPermissionsQuery = <
+      TData = InfiniteData<GQLAllPlansWithPermissionsQuery>,
+      TError = unknown
+    >(
+      variables: GQLAllPlansWithPermissionsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLAllPlansWithPermissionsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLAllPlansWithPermissionsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLAllPlansWithPermissionsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['AllPlansWithPermissions.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLAllPlansWithPermissionsQuery, GQLAllPlansWithPermissionsQueryVariables>(AllPlansWithPermissionsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteAllPlansWithPermissionsQuery.getKey = (variables: GQLAllPlansWithPermissionsQueryVariables) => ['AllPlansWithPermissions.infinite', variables];
+
+
+useAllPlansWithPermissionsQuery.fetcher = (variables: GQLAllPlansWithPermissionsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLAllPlansWithPermissionsQuery, GQLAllPlansWithPermissionsQueryVariables>(AllPlansWithPermissionsDocument, variables, options);
+
+export const BulkUpdatePlanPermissionsDocument = `
+    mutation BulkUpdatePlanPermissions($input: BulkUpdatePlanPermissionsInput!) {
+  bulkUpdatePlanPermissions(input: $input) {
+    id
+    planId
+    planTitle
+    planType
+    permission
+    createdAt
+    updatedAt
+    collaborator {
+      id
+      firstName
+      lastName
+      email
+    }
+    addedBy {
+      id
+      firstName
+      lastName
+      email
+    }
+  }
+}
+    `;
+
+export const useBulkUpdatePlanPermissionsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLBulkUpdatePlanPermissionsMutation, TError, GQLBulkUpdatePlanPermissionsMutationVariables, TContext>) => {
+    
+    return useMutation<GQLBulkUpdatePlanPermissionsMutation, TError, GQLBulkUpdatePlanPermissionsMutationVariables, TContext>(
+      {
+    mutationKey: ['BulkUpdatePlanPermissions'],
+    mutationFn: (variables?: GQLBulkUpdatePlanPermissionsMutationVariables) => fetchData<GQLBulkUpdatePlanPermissionsMutation, GQLBulkUpdatePlanPermissionsMutationVariables>(BulkUpdatePlanPermissionsDocument, variables)(),
+    ...options
+  }
+    )};
+
+useBulkUpdatePlanPermissionsMutation.getKey = () => ['BulkUpdatePlanPermissions'];
+
+
+useBulkUpdatePlanPermissionsMutation.fetcher = (variables: GQLBulkUpdatePlanPermissionsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLBulkUpdatePlanPermissionsMutation, GQLBulkUpdatePlanPermissionsMutationVariables>(BulkUpdatePlanPermissionsDocument, variables, options);
 
 export const TrainerDashboardUserDocument = `
     query TrainerDashboardUser {
@@ -6678,6 +7015,16 @@ export const GetCollaborationMealPlanTemplatesDocument = `
       firstName
       lastName
     }
+    collaborators {
+      id
+      collaborator {
+        id
+        firstName
+        lastName
+        email
+      }
+      permission
+    }
     createdAt
     updatedAt
   }
@@ -7090,6 +7437,16 @@ export const GetCollaborationTemplatesDocument = `
       id
       firstName
       lastName
+    }
+    collaborators {
+      id
+      collaborator {
+        id
+        firstName
+        lastName
+        email
+      }
+      permission
     }
   }
 }

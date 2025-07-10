@@ -35,12 +35,15 @@ const sendInvitationSchema = z.object({
 })
 
 type SendInvitationFormData = z.infer<typeof sendInvitationSchema>
-//
 interface SendInvitationDialogProps {
   onSuccess?: () => void
+  buttonText?: string
 }
 
-export function SendInvitationDialog({ onSuccess }: SendInvitationDialogProps) {
+export function SendInvitationDialog({
+  onSuccess,
+  buttonText,
+}: SendInvitationDialogProps) {
   const [open, setOpen] = useState(false)
 
   const form = useForm<SendInvitationFormData>({
@@ -76,8 +79,8 @@ export function SendInvitationDialog({ onSuccess }: SendInvitationDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button iconStart={<PlusIcon className="h-4 w-4" />}>
-          Send Invitation
+        <Button iconStart={<PlusIcon />} size="sm">
+          {buttonText ?? 'Send Invitation'}
         </Button>
       </DialogTrigger>
       <DialogContent dialogTitle="Send Collaboration Invitation">

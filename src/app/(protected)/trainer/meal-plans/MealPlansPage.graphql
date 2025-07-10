@@ -84,6 +84,16 @@ query GetCollaborationMealPlanTemplates($draft: Boolean) {
       firstName
       lastName
     }
+    collaborators {
+      id
+      collaborator {
+        id
+        firstName
+        lastName
+        email
+      }
+      permission
+    }
     createdAt
     updatedAt
   }

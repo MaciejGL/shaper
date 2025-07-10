@@ -175,7 +175,7 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
           />
         </div>
         <DrawerFooter>
-          <SwapAccountButton user={user} />
+          <SwapAccountButton />
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
@@ -257,7 +257,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
         <DropdownMenuSeparator />
         <div className="flex flex-col gap-2 px-4 py-4">
           <ModeToggle />
-          <SwapAccountButton user={user} />
+          <SwapAccountButton />
         </div>
       </DropdownMenuContent>
     </DropdownMenu>

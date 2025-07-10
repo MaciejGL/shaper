@@ -1,18 +1,17 @@
 'use client'
 
-import { ArrowRightLeftIcon } from 'lucide-react'
+import { User2 } from 'lucide-react'
 import { signIn } from 'next-auth/react'
 
-import { GQLUserRole } from '@/generated/graphql-server'
-import { UserWithSession } from '@/types/UserWithSession'
-
 import { Button } from '../ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu'
 
-export const SwapAccountButton = ({
-  user,
-}: {
-  user?: UserWithSession | null
-}) => {
+export const SwapAccountButton = () => {
   const isProduction = process.env.NODE_ENV === 'production'
 
   if (isProduction) {
@@ -22,21 +21,57 @@ export const SwapAccountButton = ({
   // Define the email or logic for the other account type
   const clientEmail = process.env.NEXT_PUBLIC_TEST_CLIENT_EMAIL
   const trainerEmail = process.env.NEXT_PUBLIC_TEST_TRAINER_EMAIL
-  const swapTo =
-    user?.user.role === GQLUserRole.Client ? trainerEmail : clientEmail
-  const handleSwap = async () => {
+  const trainer2Email = process.env.NEXT_PUBLIC_TEST_TRAINER2_EMAIL
+  const trainer3Email = process.env.NEXT_PUBLIC_TEST_TRAINER3_EMAIL
+
+  const handleSwap = async (email?: string) => {
+    if (!email) {
+      console.warn('No email provided')
+      return
+    }
     await signIn('account-swap', {
-      email: swapTo,
+      email,
     })
   }
 
+  const ACCOUNTS = [
+    {
+      email: trainerEmail,
+      label: 'Maciej Trainer',
+    },
+    {
+      email: trainer2Email,
+      label: 'Trainer Fitspace',
+    },
+    {
+      email: trainer3Email,
+      label: 'Dawid Trainer',
+    },
+    {
+      email: clientEmail,
+      label: 'Maciej Client',
+    },
+  ]
+
   return (
-    <Button
-      variant="default"
-      onClick={handleSwap}
-      iconStart={<ArrowRightLeftIcon />}
-    >
-      {user?.user.role === GQLUserRole.Client ? 'Trainer' : 'Client'}
-    </Button>
+    <div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="default" iconStart={<User2 />}>
+            Select Account
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {ACCOUNTS.map((account) => (
+            <DropdownMenuItem
+              key={account.email}
+              onClick={() => handleSwap(account.email)}
+            >
+              {account.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   )
 }

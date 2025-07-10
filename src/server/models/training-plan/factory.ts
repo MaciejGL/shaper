@@ -180,6 +180,15 @@ export async function getCollaborationTemplates(
           profile: true,
         },
       },
+      collaborators: {
+        include: {
+          collaborator: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+      },
     },
   })
   return templates.map((template) => new TrainingPlan(template, context))

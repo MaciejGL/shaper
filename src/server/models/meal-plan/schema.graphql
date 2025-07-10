@@ -23,6 +23,7 @@ type MealPlan {
   weekCount: Int!
   assignedCount: Int!
   collaboratorCount: Int!
+  collaborators: [MealPlanCollaborator!]!
 
   createdAt: String!
   updatedAt: String!

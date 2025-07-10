@@ -6,24 +6,30 @@ import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   GQLCollaborationInvitationAction,
-  useMyCollaborationInvitationsQuery,
+  GQLMyCollaborationInvitationsQuery,
+  GQLSentCollaborationInvitationsQuery,
   useRespondToCollaborationInvitationMutation,
-  useSentCollaborationInvitationsQuery,
 } from '@/generated/graphql-client'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { getUserDisplayName } from '@/lib/user-utils'
 
-import { SendInvitationDialog } from './send-invitation-dialog'
+import { LoadingSkeleton } from './loading-skeleton'
 
-export function CollaborationInvitations() {
-  const { data: receivedInvitations, refetch: refetchReceived } =
-    useMyCollaborationInvitationsQuery()
-  const { data: sentInvitations, refetch: refetchSent } =
-    useSentCollaborationInvitationsQuery()
-
+export function CollaborationInvitations({
+  receivedInvitations,
+  sentInvitations,
+  refetchReceived,
+  refetchSent,
+  isLoading,
+}: {
+  receivedInvitations?: GQLMyCollaborationInvitationsQuery
+  sentInvitations?: GQLSentCollaborationInvitationsQuery
+  refetchReceived: () => void
+  refetchSent: () => void
+  isLoading: boolean
+}) {
   const { mutate: respondToInvitation, isPending: isResponding } =
     useRespondToCollaborationInvitationMutation({
       onSuccess: () => {
@@ -60,50 +66,33 @@ export function CollaborationInvitations() {
     ) || []
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Collaboration Invitations</h2>
-        <SendInvitationDialog
-          onSuccess={() => {
-            refetchSent()
-            toast.success('Invitation sent successfully')
-          }}
-        />
-      </div>
+    <div className="space-y-8">
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">
+          Received Invitations{' '}
+          {pendingReceived.length > 0 && (
+            <Badge className="ml-2 rounded-full">
+              {pendingReceived.length}
+            </Badge>
+          )}
+        </h2>
+        <div className="space-y-4">
+          {isLoading ? <LoadingSkeleton count={3} /> : null}
+          {!isLoading &&
+          receivedInvitations?.myCollaborationInvitations.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <MailIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-2 text-muted-foreground">
+                  No invitations received
+                </p>
+              </CardContent>
+            </Card>
+          ) : null}
 
-      <Tabs defaultValue="received">
-        <TabsList>
-          <TabsTrigger value="received">
-            Received
-            {pendingReceived.length > 0 && (
-              <Badge variant="destructive" className="ml-2">
-                {pendingReceived.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger value="sent">
-            Sent
-            {pendingSent.length > 0 && (
-              <Badge variant="outline" className="ml-2">
-                {pendingSent.length}
-              </Badge>
-            )}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="received">
-          <div className="space-y-4">
-            {receivedInvitations?.myCollaborationInvitations.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <MailIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <p className="mt-2 text-muted-foreground">
-                    No invitations received
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              receivedInvitations?.myCollaborationInvitations.map(
+          {!isLoading &&
+          (receivedInvitations?.myCollaborationInvitations.length ?? 0) > 0
+            ? receivedInvitations?.myCollaborationInvitations.map(
                 (invitation) => (
                   <Card key={invitation.id}>
                     <CardHeader>
@@ -128,7 +117,7 @@ export function CollaborationInvitations() {
                                 ? 'outline'
                                 : invitation.status === 'ACCEPTED'
                                   ? 'primary'
-                                  : 'destructive'
+                                  : 'secondary'
                             }
                           >
                             {invitation.status}
@@ -178,23 +167,35 @@ export function CollaborationInvitations() {
                   </Card>
                 ),
               )
-            )}
-          </div>
-        </TabsContent>
+            : null}
+        </div>
+      </div>
 
-        <TabsContent value="sent">
-          <div className="space-y-4">
-            {sentInvitations?.sentCollaborationInvitations.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-8">
-                  <MailIcon className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <p className="mt-2 text-muted-foreground">
-                    No invitations sent
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              sentInvitations?.sentCollaborationInvitations.map(
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold">
+          Sent Invitations{' '}
+          {pendingSent.length > 0 && (
+            <Badge className="ml-2 rounded-full">{pendingSent.length}</Badge>
+          )}
+        </h2>
+
+        <div className="space-y-4">
+          {isLoading ? <LoadingSkeleton count={3} /> : null}
+          {!isLoading &&
+          sentInvitations?.sentCollaborationInvitations.length === 0 ? (
+            <Card>
+              <CardContent className="text-center py-8">
+                <MailIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+                <p className="mt-2 text-muted-foreground">
+                  No invitations sent
+                </p>
+              </CardContent>
+            </Card>
+          ) : null}
+
+          {!isLoading &&
+          (sentInvitations?.sentCollaborationInvitations.length ?? 0) > 0
+            ? sentInvitations?.sentCollaborationInvitations.map(
                 (invitation) => (
                   <Card key={invitation.id}>
                     <CardHeader>
@@ -216,7 +217,7 @@ export function CollaborationInvitations() {
                               ? 'outline'
                               : invitation.status === 'ACCEPTED'
                                 ? 'primary'
-                                : 'destructive'
+                                : 'secondary'
                           }
                         >
                           {invitation.status}
@@ -233,10 +234,9 @@ export function CollaborationInvitations() {
                   </Card>
                 ),
               )
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+            : null}
+        </div>
+      </div>
     </div>
   )
 }

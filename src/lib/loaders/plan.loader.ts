@@ -2,8 +2,11 @@
 import DataLoader from 'dataloader'
 
 import { prisma } from '@/lib/db'
+import MealPlanCollaborator from '@/server/models/meal-plan-collaborator/model'
+import TrainingPlanCollaborator from '@/server/models/training-plan-collaborator/model'
+import { GQLContext } from '@/types/gql-context'
 
-export const createPlanLoaders = () => ({
+export const createPlanLoaders = (context: GQLContext) => ({
   trainingPlanById: new DataLoader(async (planIds: readonly string[]) => {
     const plans = await prisma.trainingPlan.findMany({
       where: { id: { in: planIds as string[] } },
@@ -123,6 +126,54 @@ export const createPlanLoaders = () => ({
       )
 
       return planIds.map((id) => map.get(id) ?? 0)
+    },
+  ),
+
+  collaboratorsByTrainingPlanId: new DataLoader(
+    async (planIds: readonly string[]) => {
+      const collaborators = await prisma.trainingPlanCollaborator.findMany({
+        where: {
+          trainingPlanId: { in: planIds as string[] },
+        },
+        include: {
+          collaborator: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+      })
+
+      const grouped = planIds.map((planId) =>
+        collaborators
+          .filter((collab) => collab.trainingPlanId === planId)
+          .map((collab) => new TrainingPlanCollaborator(collab, context)),
+      )
+      return grouped
+    },
+  ),
+
+  collaboratorsByMealPlanId: new DataLoader(
+    async (planIds: readonly string[]) => {
+      const collaborators = await prisma.mealPlanCollaborator.findMany({
+        where: {
+          mealPlanId: { in: planIds as string[] },
+        },
+        include: {
+          collaborator: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+      })
+
+      const grouped = planIds.map((planId) =>
+        collaborators
+          .filter((collab) => collab.mealPlanId === planId)
+          .map((collab) => new MealPlanCollaborator(collab, context)),
+      )
+      return grouped
     },
   ),
 

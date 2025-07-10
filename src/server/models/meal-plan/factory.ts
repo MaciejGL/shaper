@@ -110,6 +110,15 @@ export async function getCollaborationMealPlanTemplates(
           profile: true,
         },
       },
+      collaborators: {
+        include: {
+          collaborator: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+      },
       weeks: {
         orderBy: {
           weekNumber: 'asc',

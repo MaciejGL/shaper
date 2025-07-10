@@ -153,6 +153,14 @@ export default class TrainingPlan implements GQLTrainingPlan {
     )
   }
 
+  async collaborators() {
+    const collaborators =
+      await this.context.loaders.plan.collaboratorsByTrainingPlanId.load(
+        this.data.id,
+      )
+    return collaborators
+  }
+
   get isDemo() {
     return this.data.assignedToId !== this.context.user?.user.id
   }

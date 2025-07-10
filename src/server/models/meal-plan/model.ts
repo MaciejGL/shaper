@@ -130,4 +130,12 @@ export default class MealPlan implements GQLMealPlan {
       this.data.id,
     )
   }
+
+  async collaborators() {
+    const collaborators =
+      await this.context.loaders.plan.collaboratorsByMealPlanId.load(
+        this.data.id,
+      )
+    return collaborators
+  }
 }
