@@ -48,14 +48,16 @@ export default function MealPlanPage() {
 
   return (
     <MealPlanProvider plan={data?.clientGetMealPlan?.plan}>
-      <Navigation />
-      <div className="max-w-sm mx-auto pb-24 pt-4">
-        {isLoading && (
-          <div className="flex justify-center items-center h-screen">
-            <Loader />
-          </div>
-        )}
-        <MealView />
+      <div className="flex flex-col h-full w-full">
+        <Navigation />
+        <div className="max-w-sm mx-auto pb-24 pt-4 grow w-full">
+          {isLoading && (
+            <div className="flex justify-center items-center h-screen">
+              <Loader />
+            </div>
+          )}
+          <MealView />
+        </div>
       </div>
     </MealPlanProvider>
   )

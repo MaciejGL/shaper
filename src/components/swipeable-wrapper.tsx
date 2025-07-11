@@ -1,11 +1,16 @@
 import { PanInfo, motion } from 'framer-motion'
 import { useRef, useState } from 'react'
 
+import { cn } from '@/lib/utils'
+
 interface SwipeableWrapperProps {
   children: React.ReactNode
   onSwipeLeft: () => void
   onSwipeRight: () => void
   disabled?: boolean
+  swipeThreshold?: number
+  velocityThreshold?: number
+  className?: string
 }
 
 export function SwipeableWrapper({
@@ -13,6 +18,9 @@ export function SwipeableWrapper({
   onSwipeLeft,
   onSwipeRight,
   disabled = false,
+  swipeThreshold = 50,
+  velocityThreshold = 300,
+  className = '',
 }: SwipeableWrapperProps) {
   const [isDragging, setIsDragging] = useState(false)
   const constraintsRef = useRef(null)
@@ -22,9 +30,6 @@ export function SwipeableWrapper({
     info: PanInfo,
   ) => {
     if (disabled) return
-
-    const swipeThreshold = 50 // Minimum distance for swipe
-    const velocityThreshold = 300 // Minimum velocity for swipe
 
     const { offset, velocity } = info
 
@@ -47,7 +52,7 @@ export function SwipeableWrapper({
   }
 
   return (
-    <div ref={constraintsRef} className="overflow-hidden">
+    <div ref={constraintsRef} className={cn('h-full w-full', className)}>
       <motion.div
         drag="x"
         dragConstraints={constraintsRef}
@@ -60,7 +65,10 @@ export function SwipeableWrapper({
           stiffness: 400,
           damping: 30,
         }}
-        className={`cursor-grab active:cursor-grabbing ${isDragging ? 'select-none' : ''}`}
+        className={cn(
+          'cursor-grab active:cursor-grabbing h-full w-full',
+          isDragging && 'select-none',
+        )}
         style={{
           touchAction: 'pan-y', // Allow vertical scrolling, prevent horizontal on mobile
         }}

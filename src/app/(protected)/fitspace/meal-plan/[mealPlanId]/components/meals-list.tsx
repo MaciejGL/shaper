@@ -105,6 +105,11 @@ export function MealsList({ meals }: MealsListProps) {
             onUncompleteMeal={handleUncompleteMeal}
           />
         ))}
+        {meals.length === 0 && (
+          <div className="text-center text-sm text-muted-foreground">
+            No meals found
+          </div>
+        )}
       </div>
 
       {/* Full Meal Logging Drawer */}

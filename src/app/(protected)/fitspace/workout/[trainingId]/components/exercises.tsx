@@ -4,6 +4,7 @@ import React, { startTransition, useEffect, useState } from 'react'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
+import { SwipeableWrapper } from '@/components/swipeable-wrapper'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -16,7 +17,6 @@ import { Exercise, ExerciseSelector } from './exercise'
 import { ExercisesPagination } from './exercises-pagaination'
 import { RestDay } from './rest-day'
 import { Summary } from './summary'
-import { SwipeableWrapper } from './swipeable-wrapper'
 
 export function Exercises() {
   const { activeDay } = useWorkout()
