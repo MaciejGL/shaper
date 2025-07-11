@@ -6,17 +6,26 @@ import { GQLContext } from '@/types/gql-context'
 
 import {
   assignMealPlanToClient,
+  batchLogMealFood,
+  clientGetMealPlan,
+  completeMeal,
   createDraftMealTemplate,
   createMealPlan,
   duplicateMealPlan,
+  fitspaceActivateMealPlan,
+  fitspaceDeactivateMealPlan,
+  fitspaceDeleteMealPlan,
   getClientActiveMealPlan,
   getClientMealPlans,
   getCollaborationMealPlanTemplates,
   getMealPlanById,
   getMealPlanTemplates,
   getMyMealPlansOverview,
+  logMealFood,
   removeMealPlanFromClient,
   saveMeal,
+  uncompleteMeal,
+  updateMealFoodLog,
   updateMealPlanDetails,
 } from './factory'
 
@@ -39,6 +48,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   getMyMealPlansOverview: async (_, __, context) => {
     return getMyMealPlansOverview(context)
   },
+  clientGetMealPlan: async (_, args, context) => {
+    return clientGetMealPlan(args, context)
+  },
 }
 
 export const Mutation: GQLMutationResolvers<GQLContext> = {
@@ -48,30 +60,43 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   createDraftMealTemplate: async (_, __, context) => {
     return createDraftMealTemplate(context)
   },
+  duplicateMealPlan: async (_, args, context) => {
+    return duplicateMealPlan(args, context)
+  },
   assignMealPlanToClient: async (_, args, context) => {
     return assignMealPlanToClient(args, context)
   },
   removeMealPlanFromClient: async (_, args, context) => {
     return removeMealPlanFromClient(args, context)
   },
-  duplicateMealPlan: async (_, args, context) => {
-    return duplicateMealPlan(args, context)
+  saveMeal: async (_, args, context) => {
+    return saveMeal(args, context)
   },
   updateMealPlanDetails: async (_, args, context) => {
     return updateMealPlanDetails(args, context)
   },
-  // New batch meal operation
-  saveMeal: async (_, args, context) => {
-    return saveMeal(args, context)
+  fitspaceActivateMealPlan: async (_, args, context) => {
+    return fitspaceActivateMealPlan(args, context)
   },
-  // Food logging mutations (kept for future use)
-  logMealFood: async () => {
-    throw new Error('Not implemented')
+  fitspaceDeactivateMealPlan: async (_, args, context) => {
+    return fitspaceDeactivateMealPlan(args, context)
   },
-  updateMealFoodLog: async () => {
-    throw new Error('Not implemented')
+  fitspaceDeleteMealPlan: async (_, args, context) => {
+    return fitspaceDeleteMealPlan(args, context)
   },
-  deleteMealFoodLog: async () => {
-    throw new Error('Not implemented')
+  completeMeal: async (_, args, context) => {
+    return completeMeal(args, context)
+  },
+  uncompleteMeal: async (_, args, context) => {
+    return uncompleteMeal(args, context)
+  },
+  logMealFood: async (_, args, context) => {
+    return logMealFood(args, context)
+  },
+  batchLogMealFood: async (_, args, context) => {
+    return batchLogMealFood(args, context)
+  },
+  updateMealFoodLog: async (_, args, context) => {
+    return updateMealFoodLog(args, context)
   },
 }

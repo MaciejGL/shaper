@@ -174,6 +174,26 @@ export type GQLBaseExerciseSubstitute = {
   substituteId: Scalars['ID']['output'];
 };
 
+export type GQLBatchLogMealFoodInput = {
+  foods: Array<GQLBatchLogMealFoodItemInput>;
+  mealId: Scalars['ID']['input'];
+};
+
+export type GQLBatchLogMealFoodItemInput = {
+  barcode?: InputMaybe<Scalars['String']['input']>;
+  calories?: InputMaybe<Scalars['Float']['input']>;
+  carbs?: InputMaybe<Scalars['Float']['input']>;
+  fat?: InputMaybe<Scalars['Float']['input']>;
+  fiber?: InputMaybe<Scalars['Float']['input']>;
+  name: Scalars['String']['input'];
+  notes?: InputMaybe<Scalars['String']['input']>;
+  openFoodFactsId?: InputMaybe<Scalars['String']['input']>;
+  productData?: InputMaybe<Scalars['String']['input']>;
+  protein?: InputMaybe<Scalars['Float']['input']>;
+  quantity: Scalars['Float']['input'];
+  unit: Scalars['String']['input'];
+};
+
 export type GQLBulkUpdatePlanPermissionsInput = {
   planUpdates: Array<GQLPlanPermissionUpdateInput>;
   userId: Scalars['ID']['input'];
@@ -463,6 +483,11 @@ export type GQLGetExercisesResponse = {
   trainerExercises: Array<GQLBaseExercise>;
 };
 
+export type GQLGetMealPlanPayload = {
+  __typename?: 'GetMealPlanPayload';
+  plan: GQLMealPlan;
+};
+
 export type GQLGetWorkoutPayload = {
   __typename?: 'GetWorkoutPayload';
   plan: GQLTrainingPlan;
@@ -488,7 +513,6 @@ export type GQLLogMealFoodInput = {
   name: Scalars['String']['input'];
   notes?: InputMaybe<Scalars['String']['input']>;
   openFoodFactsId?: InputMaybe<Scalars['String']['input']>;
-  plannedFoodId?: InputMaybe<Scalars['ID']['input']>;
   productData?: InputMaybe<Scalars['String']['input']>;
   protein?: InputMaybe<Scalars['Float']['input']>;
   quantity: Scalars['Float']['input'];
@@ -605,7 +629,6 @@ export type GQLMealLogItem = {
   name: Scalars['String']['output'];
   notes?: Maybe<Scalars['String']['output']>;
   openFoodFactsId?: Maybe<Scalars['String']['output']>;
-  plannedFood?: Maybe<GQLMealFood>;
   productData?: Maybe<Scalars['String']['output']>;
   protein?: Maybe<Scalars['Float']['output']>;
   quantity: Scalars['Float']['output'];
@@ -724,9 +747,11 @@ export type GQLMutation = {
   addTrainingWeek: Scalars['ID']['output'];
   assignMealPlanToClient: Scalars['Boolean']['output'];
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
+  batchLogMealFood: Scalars['Boolean']['output'];
   bulkUpdatePlanPermissions: Array<GQLPlanCollaboratorSummary>;
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   closePlan: Scalars['Boolean']['output'];
+  completeMeal: Scalars['Boolean']['output'];
   createCoachingRequest: GQLCoachingRequest;
   createDraftMealTemplate: GQLMealPlan;
   createDraftTemplate: GQLTrainingPlan;
@@ -738,7 +763,6 @@ export type GQLMutation = {
   createTrainingPlan: GQLCreateTrainingPlanPayload;
   deleteBodyMeasurement: Scalars['Boolean']['output'];
   deleteExercise: Scalars['Boolean']['output'];
-  deleteMealFoodLog: Scalars['Boolean']['output'];
   deleteNote: Scalars['Boolean']['output'];
   deleteNotification: Scalars['Boolean']['output'];
   deletePlan: Scalars['Boolean']['output'];
@@ -748,6 +772,9 @@ export type GQLMutation = {
   duplicateTrainingPlan: Scalars['ID']['output'];
   duplicateTrainingWeek: Scalars['ID']['output'];
   extendPlan: Scalars['Boolean']['output'];
+  fitspaceActivateMealPlan: Scalars['Boolean']['output'];
+  fitspaceDeactivateMealPlan: Scalars['Boolean']['output'];
+  fitspaceDeleteMealPlan: Scalars['Boolean']['output'];
   getAiExerciseSuggestions: Array<GQLAiExerciseSuggestion>;
   logMealFood: GQLMealLogItem;
   logWorkoutProgress: Scalars['ID']['output'];
@@ -778,6 +805,7 @@ export type GQLMutation = {
   saveMeal: Scalars['Boolean']['output'];
   sendCollaborationInvitation: GQLCollaborationInvitation;
   swapExercise: GQLSubstitute;
+  uncompleteMeal: Scalars['Boolean']['output'];
   updateBodyMeasurement: GQLUserBodyMeasure;
   updateExercise: Scalars['Boolean']['output'];
   updateExerciseForm: GQLTrainingExercise;
@@ -882,6 +910,11 @@ export type GQLMutationAssignTrainingPlanToClientArgs = {
 };
 
 
+export type GQLMutationBatchLogMealFoodArgs = {
+  input: GQLBatchLogMealFoodInput;
+};
+
+
 export type GQLMutationBulkUpdatePlanPermissionsArgs = {
   input: GQLBulkUpdatePlanPermissionsInput;
 };
@@ -894,6 +927,11 @@ export type GQLMutationCancelCoachingRequestArgs = {
 
 export type GQLMutationClosePlanArgs = {
   planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationCompleteMealArgs = {
+  mealId: Scalars['ID']['input'];
 };
 
 
@@ -943,11 +981,6 @@ export type GQLMutationDeleteExerciseArgs = {
 };
 
 
-export type GQLMutationDeleteMealFoodLogArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
 export type GQLMutationDeleteNoteArgs = {
   id: Scalars['ID']['input'];
 };
@@ -991,6 +1024,21 @@ export type GQLMutationDuplicateTrainingWeekArgs = {
 export type GQLMutationExtendPlanArgs = {
   planId: Scalars['ID']['input'];
   weeks: Array<Scalars['ID']['input']>;
+};
+
+
+export type GQLMutationFitspaceActivateMealPlanArgs = {
+  planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationFitspaceDeactivateMealPlanArgs = {
+  planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationFitspaceDeleteMealPlanArgs = {
+  planId: Scalars['ID']['input'];
 };
 
 
@@ -1149,6 +1197,11 @@ export type GQLMutationSendCollaborationInvitationArgs = {
 export type GQLMutationSwapExerciseArgs = {
   exerciseId: Scalars['ID']['input'];
   substituteId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationUncompleteMealArgs = {
+  mealId: Scalars['ID']['input'];
 };
 
 
@@ -1353,6 +1406,7 @@ export type GQLQuery = {
   availablePlansForTeamMember: Array<GQLAvailablePlan>;
   bodyMeasures: Array<GQLUserBodyMeasure>;
   clientBodyMeasures: Array<GQLUserBodyMeasure>;
+  clientGetMealPlan?: Maybe<GQLGetMealPlanPayload>;
   coachingRequest?: Maybe<GQLCoachingRequest>;
   coachingRequests: Array<GQLCoachingRequest>;
   exercise?: Maybe<GQLBaseExercise>;
@@ -1411,6 +1465,11 @@ export type GQLQueryAvailablePlansForTeamMemberArgs = {
 
 export type GQLQueryClientBodyMeasuresArgs = {
   clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryClientGetMealPlanArgs = {
+  mealPlanId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2065,6 +2124,79 @@ export type GQLFitspaceDashboardGetWorkoutQueryVariables = Exact<{ [key: string]
 
 export type GQLFitspaceDashboardGetWorkoutQuery = { __typename?: 'Query', getWorkout?: { __typename?: 'GetWorkoutPayload', plan: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, duration?: number | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }> }> }> }> } } | undefined | null };
 
+export type GQLFitspaceGetCurrentMealPlanIdQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLFitspaceGetCurrentMealPlanIdQuery = { __typename?: 'Query', getMyMealPlansOverview: { __typename?: 'MyMealPlansPayload', activePlan?: { __typename?: 'MealPlan', id: string } | undefined | null } };
+
+export type GQLFitspaceGetMealPlanQueryVariables = Exact<{
+  mealPlanId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GQLFitspaceGetMealPlanQuery = { __typename?: 'Query', clientGetMealPlan?: { __typename?: 'GetMealPlanPayload', plan: { __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, active: boolean, startDate?: string | undefined | null, endDate?: string | undefined | null, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, weeks: Array<{ __typename?: 'MealWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'MealDay', id: string, dayOfWeek: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, targetCalories?: number | undefined | null, targetProtein?: number | undefined | null, targetCarbs?: number | undefined | null, targetFat?: number | undefined | null, meals: Array<{ __typename?: 'Meal', id: string, name: string, dateTime: string, instructions?: string | undefined | null, completedAt?: string | undefined | null, foods: Array<{ __typename?: 'MealFood', id: string, name: string, quantity: number, unit: string, caloriesPer100g?: number | undefined | null, proteinPer100g?: number | undefined | null, carbsPer100g?: number | undefined | null, fatPer100g?: number | undefined | null, fiberPer100g?: number | undefined | null, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number, totalFiber: number, openFoodFactsId?: string | undefined | null }>, logs: Array<{ __typename?: 'MealLog', id: string, loggedAt: string, completedAt?: string | undefined | null, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number, items: Array<{ __typename?: 'MealLogItem', id: string, name: string, quantity: number, unit: string, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, fiber?: number | undefined | null, notes?: string | undefined | null, createdAt: string }> }> }> }> }> } } | undefined | null };
+
+export type GQLLogMealFoodMutationVariables = Exact<{
+  input: GQLLogMealFoodInput;
+}>;
+
+
+export type GQLLogMealFoodMutation = { __typename?: 'Mutation', logMealFood: { __typename?: 'MealLogItem', id: string, name: string, quantity: number, unit: string, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, fiber?: number | undefined | null, notes?: string | undefined | null, createdAt: string } };
+
+export type GQLBatchLogMealFoodMutationVariables = Exact<{
+  input: GQLBatchLogMealFoodInput;
+}>;
+
+
+export type GQLBatchLogMealFoodMutation = { __typename?: 'Mutation', batchLogMealFood: boolean };
+
+export type GQLUpdateMealFoodLogMutationVariables = Exact<{
+  input: GQLUpdateMealFoodLogInput;
+}>;
+
+
+export type GQLUpdateMealFoodLogMutation = { __typename?: 'Mutation', updateMealFoodLog: boolean };
+
+export type GQLCompleteMealMutationVariables = Exact<{
+  mealId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLCompleteMealMutation = { __typename?: 'Mutation', completeMeal: boolean };
+
+export type GQLUncompleteMealMutationVariables = Exact<{
+  mealId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLUncompleteMealMutation = { __typename?: 'Mutation', uncompleteMeal: boolean };
+
+export type GQLFitspaceMealPlansOverviewQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLFitspaceMealPlansOverviewQuery = { __typename?: 'Query', getMyMealPlansOverview: { __typename?: 'MyMealPlansPayload', activePlan?: { __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, weekCount: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null, weeks: Array<{ __typename?: 'MealWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'MealDay', id: string, dayOfWeek: number, targetCalories?: number | undefined | null, targetProtein?: number | undefined | null, targetCarbs?: number | undefined | null, targetFat?: number | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, meals: Array<{ __typename?: 'Meal', id: string, name: string, dateTime: string, completedAt?: string | undefined | null, instructions?: string | undefined | null, foods: Array<{ __typename?: 'MealFood', id: string, name: string, quantity: number, unit: string, caloriesPer100g?: number | undefined | null, proteinPer100g?: number | undefined | null, carbsPer100g?: number | undefined | null, fatPer100g?: number | undefined | null, fiberPer100g?: number | undefined | null }> }> }> }> } | undefined | null, availablePlans: Array<{ __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, startDate?: string | undefined | null, endDate?: string | undefined | null, active: boolean, weekCount: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null }> } };
+
+export type GQLFitspaceActivateMealPlanMutationVariables = Exact<{
+  planId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLFitspaceActivateMealPlanMutation = { __typename?: 'Mutation', fitspaceActivateMealPlan: boolean };
+
+export type GQLFitspaceDeactivateMealPlanMutationVariables = Exact<{
+  planId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLFitspaceDeactivateMealPlanMutation = { __typename?: 'Mutation', fitspaceDeactivateMealPlan: boolean };
+
+export type GQLFitspaceDeleteMealPlanMutationVariables = Exact<{
+  planId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLFitspaceDeleteMealPlanMutation = { __typename?: 'Mutation', fitspaceDeleteMealPlan: boolean };
+
 export type GQLFitspaceMyPlansQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2660,20 +2792,6 @@ export type GQLUpdateMealPlanDetailsMutationVariables = Exact<{
 
 export type GQLUpdateMealPlanDetailsMutation = { __typename?: 'Mutation', updateMealPlanDetails: boolean };
 
-export type GQLLogMealFoodMutationVariables = Exact<{
-  input: GQLLogMealFoodInput;
-}>;
-
-
-export type GQLLogMealFoodMutation = { __typename?: 'Mutation', logMealFood: { __typename?: 'MealLogItem', id: string, name: string, quantity: number, unit: string, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, fiber?: number | undefined | null, notes?: string | undefined | null, createdAt: string } };
-
-export type GQLUpdateMealFoodLogMutationVariables = Exact<{
-  input: GQLUpdateMealFoodLogInput;
-}>;
-
-
-export type GQLUpdateMealFoodLogMutation = { __typename?: 'Mutation', updateMealFoodLog: boolean };
-
 export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, createdAt: string, updatedAt: string, assignedCount: number, completedAt?: string | undefined | null, assignedTo?: { __typename?: 'UserPublic', id: string } | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } | undefined | null, collaborators: Array<{ __typename?: 'TrainingPlanCollaborator', id: string, permission: GQLCollaborationPermission, createdAt: string, updatedAt: string, collaborator: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string }, addedBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }>, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, instructions?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null }> }> }> }> };
 
 export type GQLGetTemplatesQueryVariables = Exact<{
@@ -3228,6 +3346,515 @@ useInfiniteFitspaceDashboardGetWorkoutQuery.getKey = (variables?: GQLFitspaceDas
 
 
 useFitspaceDashboardGetWorkoutQuery.fetcher = (variables?: GQLFitspaceDashboardGetWorkoutQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceDashboardGetWorkoutQuery, GQLFitspaceDashboardGetWorkoutQueryVariables>(FitspaceDashboardGetWorkoutDocument, variables, options);
+
+export const FitspaceGetCurrentMealPlanIdDocument = `
+    query FitspaceGetCurrentMealPlanId {
+  getMyMealPlansOverview {
+    activePlan {
+      id
+    }
+  }
+}
+    `;
+
+export const useFitspaceGetCurrentMealPlanIdQuery = <
+      TData = GQLFitspaceGetCurrentMealPlanIdQuery,
+      TError = unknown
+    >(
+      variables?: GQLFitspaceGetCurrentMealPlanIdQueryVariables,
+      options?: Omit<UseQueryOptions<GQLFitspaceGetCurrentMealPlanIdQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitspaceGetCurrentMealPlanIdQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLFitspaceGetCurrentMealPlanIdQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['FitspaceGetCurrentMealPlanId'] : ['FitspaceGetCurrentMealPlanId', variables],
+    queryFn: fetchData<GQLFitspaceGetCurrentMealPlanIdQuery, GQLFitspaceGetCurrentMealPlanIdQueryVariables>(FitspaceGetCurrentMealPlanIdDocument, variables),
+    ...options
+  }
+    )};
+
+useFitspaceGetCurrentMealPlanIdQuery.getKey = (variables?: GQLFitspaceGetCurrentMealPlanIdQueryVariables) => variables === undefined ? ['FitspaceGetCurrentMealPlanId'] : ['FitspaceGetCurrentMealPlanId', variables];
+
+export const useInfiniteFitspaceGetCurrentMealPlanIdQuery = <
+      TData = InfiniteData<GQLFitspaceGetCurrentMealPlanIdQuery>,
+      TError = unknown
+    >(
+      variables: GQLFitspaceGetCurrentMealPlanIdQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLFitspaceGetCurrentMealPlanIdQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitspaceGetCurrentMealPlanIdQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLFitspaceGetCurrentMealPlanIdQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['FitspaceGetCurrentMealPlanId.infinite'] : ['FitspaceGetCurrentMealPlanId.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLFitspaceGetCurrentMealPlanIdQuery, GQLFitspaceGetCurrentMealPlanIdQueryVariables>(FitspaceGetCurrentMealPlanIdDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteFitspaceGetCurrentMealPlanIdQuery.getKey = (variables?: GQLFitspaceGetCurrentMealPlanIdQueryVariables) => variables === undefined ? ['FitspaceGetCurrentMealPlanId.infinite'] : ['FitspaceGetCurrentMealPlanId.infinite', variables];
+
+
+useFitspaceGetCurrentMealPlanIdQuery.fetcher = (variables?: GQLFitspaceGetCurrentMealPlanIdQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetCurrentMealPlanIdQuery, GQLFitspaceGetCurrentMealPlanIdQueryVariables>(FitspaceGetCurrentMealPlanIdDocument, variables, options);
+
+export const FitspaceGetMealPlanDocument = `
+    query FitspaceGetMealPlan($mealPlanId: ID) {
+  clientGetMealPlan(mealPlanId: $mealPlanId) {
+    plan {
+      id
+      title
+      description
+      isPublic
+      isTemplate
+      isDraft
+      active
+      startDate
+      endDate
+      dailyCalories
+      dailyProtein
+      dailyCarbs
+      dailyFat
+      weeks {
+        id
+        weekNumber
+        name
+        description
+        completedAt
+        days {
+          id
+          dayOfWeek
+          completedAt
+          scheduledAt
+          targetCalories
+          targetProtein
+          targetCarbs
+          targetFat
+          meals {
+            id
+            name
+            dateTime
+            instructions
+            completedAt
+            foods {
+              id
+              name
+              quantity
+              unit
+              caloriesPer100g
+              proteinPer100g
+              carbsPer100g
+              fatPer100g
+              fiberPer100g
+              totalCalories
+              totalProtein
+              totalCarbs
+              totalFat
+              totalFiber
+              openFoodFactsId
+            }
+            logs {
+              id
+              loggedAt
+              completedAt
+              totalCalories
+              totalProtein
+              totalCarbs
+              totalFat
+              items {
+                id
+                name
+                quantity
+                unit
+                calories
+                protein
+                carbs
+                fat
+                fiber
+                notes
+                createdAt
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+export const useFitspaceGetMealPlanQuery = <
+      TData = GQLFitspaceGetMealPlanQuery,
+      TError = unknown
+    >(
+      variables?: GQLFitspaceGetMealPlanQueryVariables,
+      options?: Omit<UseQueryOptions<GQLFitspaceGetMealPlanQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitspaceGetMealPlanQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLFitspaceGetMealPlanQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['FitspaceGetMealPlan'] : ['FitspaceGetMealPlan', variables],
+    queryFn: fetchData<GQLFitspaceGetMealPlanQuery, GQLFitspaceGetMealPlanQueryVariables>(FitspaceGetMealPlanDocument, variables),
+    ...options
+  }
+    )};
+
+useFitspaceGetMealPlanQuery.getKey = (variables?: GQLFitspaceGetMealPlanQueryVariables) => variables === undefined ? ['FitspaceGetMealPlan'] : ['FitspaceGetMealPlan', variables];
+
+export const useInfiniteFitspaceGetMealPlanQuery = <
+      TData = InfiniteData<GQLFitspaceGetMealPlanQuery>,
+      TError = unknown
+    >(
+      variables: GQLFitspaceGetMealPlanQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLFitspaceGetMealPlanQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitspaceGetMealPlanQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLFitspaceGetMealPlanQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['FitspaceGetMealPlan.infinite'] : ['FitspaceGetMealPlan.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLFitspaceGetMealPlanQuery, GQLFitspaceGetMealPlanQueryVariables>(FitspaceGetMealPlanDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteFitspaceGetMealPlanQuery.getKey = (variables?: GQLFitspaceGetMealPlanQueryVariables) => variables === undefined ? ['FitspaceGetMealPlan.infinite'] : ['FitspaceGetMealPlan.infinite', variables];
+
+
+useFitspaceGetMealPlanQuery.fetcher = (variables?: GQLFitspaceGetMealPlanQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetMealPlanQuery, GQLFitspaceGetMealPlanQueryVariables>(FitspaceGetMealPlanDocument, variables, options);
+
+export const LogMealFoodDocument = `
+    mutation LogMealFood($input: LogMealFoodInput!) {
+  logMealFood(input: $input) {
+    id
+    name
+    quantity
+    unit
+    calories
+    protein
+    carbs
+    fat
+    fiber
+    notes
+    createdAt
+  }
+}
+    `;
+
+export const useLogMealFoodMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLLogMealFoodMutation, TError, GQLLogMealFoodMutationVariables, TContext>) => {
+    
+    return useMutation<GQLLogMealFoodMutation, TError, GQLLogMealFoodMutationVariables, TContext>(
+      {
+    mutationKey: ['LogMealFood'],
+    mutationFn: (variables?: GQLLogMealFoodMutationVariables) => fetchData<GQLLogMealFoodMutation, GQLLogMealFoodMutationVariables>(LogMealFoodDocument, variables)(),
+    ...options
+  }
+    )};
+
+useLogMealFoodMutation.getKey = () => ['LogMealFood'];
+
+
+useLogMealFoodMutation.fetcher = (variables: GQLLogMealFoodMutationVariables, options?: RequestInit['headers']) => fetchData<GQLLogMealFoodMutation, GQLLogMealFoodMutationVariables>(LogMealFoodDocument, variables, options);
+
+export const BatchLogMealFoodDocument = `
+    mutation BatchLogMealFood($input: BatchLogMealFoodInput!) {
+  batchLogMealFood(input: $input)
+}
+    `;
+
+export const useBatchLogMealFoodMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLBatchLogMealFoodMutation, TError, GQLBatchLogMealFoodMutationVariables, TContext>) => {
+    
+    return useMutation<GQLBatchLogMealFoodMutation, TError, GQLBatchLogMealFoodMutationVariables, TContext>(
+      {
+    mutationKey: ['BatchLogMealFood'],
+    mutationFn: (variables?: GQLBatchLogMealFoodMutationVariables) => fetchData<GQLBatchLogMealFoodMutation, GQLBatchLogMealFoodMutationVariables>(BatchLogMealFoodDocument, variables)(),
+    ...options
+  }
+    )};
+
+useBatchLogMealFoodMutation.getKey = () => ['BatchLogMealFood'];
+
+
+useBatchLogMealFoodMutation.fetcher = (variables: GQLBatchLogMealFoodMutationVariables, options?: RequestInit['headers']) => fetchData<GQLBatchLogMealFoodMutation, GQLBatchLogMealFoodMutationVariables>(BatchLogMealFoodDocument, variables, options);
+
+export const UpdateMealFoodLogDocument = `
+    mutation UpdateMealFoodLog($input: UpdateMealFoodLogInput!) {
+  updateMealFoodLog(input: $input)
+}
+    `;
+
+export const useUpdateMealFoodLogMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateMealFoodLogMutation, TError, GQLUpdateMealFoodLogMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateMealFoodLogMutation, TError, GQLUpdateMealFoodLogMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateMealFoodLog'],
+    mutationFn: (variables?: GQLUpdateMealFoodLogMutationVariables) => fetchData<GQLUpdateMealFoodLogMutation, GQLUpdateMealFoodLogMutationVariables>(UpdateMealFoodLogDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateMealFoodLogMutation.getKey = () => ['UpdateMealFoodLog'];
+
+
+useUpdateMealFoodLogMutation.fetcher = (variables: GQLUpdateMealFoodLogMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMealFoodLogMutation, GQLUpdateMealFoodLogMutationVariables>(UpdateMealFoodLogDocument, variables, options);
+
+export const CompleteMealDocument = `
+    mutation CompleteMeal($mealId: ID!) {
+  completeMeal(mealId: $mealId)
+}
+    `;
+
+export const useCompleteMealMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCompleteMealMutation, TError, GQLCompleteMealMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCompleteMealMutation, TError, GQLCompleteMealMutationVariables, TContext>(
+      {
+    mutationKey: ['CompleteMeal'],
+    mutationFn: (variables?: GQLCompleteMealMutationVariables) => fetchData<GQLCompleteMealMutation, GQLCompleteMealMutationVariables>(CompleteMealDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCompleteMealMutation.getKey = () => ['CompleteMeal'];
+
+
+useCompleteMealMutation.fetcher = (variables: GQLCompleteMealMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCompleteMealMutation, GQLCompleteMealMutationVariables>(CompleteMealDocument, variables, options);
+
+export const UncompleteMealDocument = `
+    mutation UncompleteMeal($mealId: ID!) {
+  uncompleteMeal(mealId: $mealId)
+}
+    `;
+
+export const useUncompleteMealMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUncompleteMealMutation, TError, GQLUncompleteMealMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUncompleteMealMutation, TError, GQLUncompleteMealMutationVariables, TContext>(
+      {
+    mutationKey: ['UncompleteMeal'],
+    mutationFn: (variables?: GQLUncompleteMealMutationVariables) => fetchData<GQLUncompleteMealMutation, GQLUncompleteMealMutationVariables>(UncompleteMealDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUncompleteMealMutation.getKey = () => ['UncompleteMeal'];
+
+
+useUncompleteMealMutation.fetcher = (variables: GQLUncompleteMealMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUncompleteMealMutation, GQLUncompleteMealMutationVariables>(UncompleteMealDocument, variables, options);
+
+export const FitspaceMealPlansOverviewDocument = `
+    query FitspaceMealPlansOverview {
+  getMyMealPlansOverview {
+    activePlan {
+      id
+      title
+      description
+      dailyCalories
+      dailyProtein
+      dailyCarbs
+      dailyFat
+      startDate
+      endDate
+      active
+      weekCount
+      createdAt
+      updatedAt
+      createdBy {
+        id
+        firstName
+        lastName
+        image
+      }
+      weeks {
+        id
+        weekNumber
+        name
+        description
+        completedAt
+        days {
+          id
+          dayOfWeek
+          targetCalories
+          targetProtein
+          targetCarbs
+          targetFat
+          completedAt
+          scheduledAt
+          meals {
+            id
+            name
+            dateTime
+            completedAt
+            instructions
+            foods {
+              id
+              name
+              quantity
+              unit
+              caloriesPer100g
+              proteinPer100g
+              carbsPer100g
+              fatPer100g
+              fiberPer100g
+            }
+          }
+        }
+      }
+    }
+    availablePlans {
+      id
+      title
+      description
+      dailyCalories
+      dailyProtein
+      dailyCarbs
+      dailyFat
+      startDate
+      endDate
+      active
+      weekCount
+      createdAt
+      updatedAt
+      createdBy {
+        id
+        firstName
+        lastName
+        image
+      }
+    }
+  }
+}
+    `;
+
+export const useFitspaceMealPlansOverviewQuery = <
+      TData = GQLFitspaceMealPlansOverviewQuery,
+      TError = unknown
+    >(
+      variables?: GQLFitspaceMealPlansOverviewQueryVariables,
+      options?: Omit<UseQueryOptions<GQLFitspaceMealPlansOverviewQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitspaceMealPlansOverviewQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLFitspaceMealPlansOverviewQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['FitspaceMealPlansOverview'] : ['FitspaceMealPlansOverview', variables],
+    queryFn: fetchData<GQLFitspaceMealPlansOverviewQuery, GQLFitspaceMealPlansOverviewQueryVariables>(FitspaceMealPlansOverviewDocument, variables),
+    ...options
+  }
+    )};
+
+useFitspaceMealPlansOverviewQuery.getKey = (variables?: GQLFitspaceMealPlansOverviewQueryVariables) => variables === undefined ? ['FitspaceMealPlansOverview'] : ['FitspaceMealPlansOverview', variables];
+
+export const useInfiniteFitspaceMealPlansOverviewQuery = <
+      TData = InfiniteData<GQLFitspaceMealPlansOverviewQuery>,
+      TError = unknown
+    >(
+      variables: GQLFitspaceMealPlansOverviewQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLFitspaceMealPlansOverviewQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitspaceMealPlansOverviewQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLFitspaceMealPlansOverviewQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['FitspaceMealPlansOverview.infinite'] : ['FitspaceMealPlansOverview.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLFitspaceMealPlansOverviewQuery, GQLFitspaceMealPlansOverviewQueryVariables>(FitspaceMealPlansOverviewDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteFitspaceMealPlansOverviewQuery.getKey = (variables?: GQLFitspaceMealPlansOverviewQueryVariables) => variables === undefined ? ['FitspaceMealPlansOverview.infinite'] : ['FitspaceMealPlansOverview.infinite', variables];
+
+
+useFitspaceMealPlansOverviewQuery.fetcher = (variables?: GQLFitspaceMealPlansOverviewQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceMealPlansOverviewQuery, GQLFitspaceMealPlansOverviewQueryVariables>(FitspaceMealPlansOverviewDocument, variables, options);
+
+export const FitspaceActivateMealPlanDocument = `
+    mutation FitspaceActivateMealPlan($planId: ID!) {
+  fitspaceActivateMealPlan(planId: $planId)
+}
+    `;
+
+export const useFitspaceActivateMealPlanMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceActivateMealPlanMutation, TError, GQLFitspaceActivateMealPlanMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceActivateMealPlanMutation, TError, GQLFitspaceActivateMealPlanMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceActivateMealPlan'],
+    mutationFn: (variables?: GQLFitspaceActivateMealPlanMutationVariables) => fetchData<GQLFitspaceActivateMealPlanMutation, GQLFitspaceActivateMealPlanMutationVariables>(FitspaceActivateMealPlanDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceActivateMealPlanMutation.getKey = () => ['FitspaceActivateMealPlan'];
+
+
+useFitspaceActivateMealPlanMutation.fetcher = (variables: GQLFitspaceActivateMealPlanMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceActivateMealPlanMutation, GQLFitspaceActivateMealPlanMutationVariables>(FitspaceActivateMealPlanDocument, variables, options);
+
+export const FitspaceDeactivateMealPlanDocument = `
+    mutation FitspaceDeactivateMealPlan($planId: ID!) {
+  fitspaceDeactivateMealPlan(planId: $planId)
+}
+    `;
+
+export const useFitspaceDeactivateMealPlanMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceDeactivateMealPlanMutation, TError, GQLFitspaceDeactivateMealPlanMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceDeactivateMealPlanMutation, TError, GQLFitspaceDeactivateMealPlanMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceDeactivateMealPlan'],
+    mutationFn: (variables?: GQLFitspaceDeactivateMealPlanMutationVariables) => fetchData<GQLFitspaceDeactivateMealPlanMutation, GQLFitspaceDeactivateMealPlanMutationVariables>(FitspaceDeactivateMealPlanDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceDeactivateMealPlanMutation.getKey = () => ['FitspaceDeactivateMealPlan'];
+
+
+useFitspaceDeactivateMealPlanMutation.fetcher = (variables: GQLFitspaceDeactivateMealPlanMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceDeactivateMealPlanMutation, GQLFitspaceDeactivateMealPlanMutationVariables>(FitspaceDeactivateMealPlanDocument, variables, options);
+
+export const FitspaceDeleteMealPlanDocument = `
+    mutation FitspaceDeleteMealPlan($planId: ID!) {
+  fitspaceDeleteMealPlan(planId: $planId)
+}
+    `;
+
+export const useFitspaceDeleteMealPlanMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceDeleteMealPlanMutation, TError, GQLFitspaceDeleteMealPlanMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceDeleteMealPlanMutation, TError, GQLFitspaceDeleteMealPlanMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceDeleteMealPlan'],
+    mutationFn: (variables?: GQLFitspaceDeleteMealPlanMutationVariables) => fetchData<GQLFitspaceDeleteMealPlanMutation, GQLFitspaceDeleteMealPlanMutationVariables>(FitspaceDeleteMealPlanDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceDeleteMealPlanMutation.getKey = () => ['FitspaceDeleteMealPlan'];
+
+
+useFitspaceDeleteMealPlanMutation.fetcher = (variables: GQLFitspaceDeleteMealPlanMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceDeleteMealPlanMutation, GQLFitspaceDeleteMealPlanMutationVariables>(FitspaceDeleteMealPlanDocument, variables, options);
 
 export const FitspaceMyPlansDocument = `
     query FitspaceMyPlans {
@@ -7355,66 +7982,6 @@ useUpdateMealPlanDetailsMutation.getKey = () => ['UpdateMealPlanDetails'];
 
 
 useUpdateMealPlanDetailsMutation.fetcher = (variables: GQLUpdateMealPlanDetailsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMealPlanDetailsMutation, GQLUpdateMealPlanDetailsMutationVariables>(UpdateMealPlanDetailsDocument, variables, options);
-
-export const LogMealFoodDocument = `
-    mutation LogMealFood($input: LogMealFoodInput!) {
-  logMealFood(input: $input) {
-    id
-    name
-    quantity
-    unit
-    calories
-    protein
-    carbs
-    fat
-    fiber
-    notes
-    createdAt
-  }
-}
-    `;
-
-export const useLogMealFoodMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLLogMealFoodMutation, TError, GQLLogMealFoodMutationVariables, TContext>) => {
-    
-    return useMutation<GQLLogMealFoodMutation, TError, GQLLogMealFoodMutationVariables, TContext>(
-      {
-    mutationKey: ['LogMealFood'],
-    mutationFn: (variables?: GQLLogMealFoodMutationVariables) => fetchData<GQLLogMealFoodMutation, GQLLogMealFoodMutationVariables>(LogMealFoodDocument, variables)(),
-    ...options
-  }
-    )};
-
-useLogMealFoodMutation.getKey = () => ['LogMealFood'];
-
-
-useLogMealFoodMutation.fetcher = (variables: GQLLogMealFoodMutationVariables, options?: RequestInit['headers']) => fetchData<GQLLogMealFoodMutation, GQLLogMealFoodMutationVariables>(LogMealFoodDocument, variables, options);
-
-export const UpdateMealFoodLogDocument = `
-    mutation UpdateMealFoodLog($input: UpdateMealFoodLogInput!) {
-  updateMealFoodLog(input: $input)
-}
-    `;
-
-export const useUpdateMealFoodLogMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLUpdateMealFoodLogMutation, TError, GQLUpdateMealFoodLogMutationVariables, TContext>) => {
-    
-    return useMutation<GQLUpdateMealFoodLogMutation, TError, GQLUpdateMealFoodLogMutationVariables, TContext>(
-      {
-    mutationKey: ['UpdateMealFoodLog'],
-    mutationFn: (variables?: GQLUpdateMealFoodLogMutationVariables) => fetchData<GQLUpdateMealFoodLogMutation, GQLUpdateMealFoodLogMutationVariables>(UpdateMealFoodLogDocument, variables)(),
-    ...options
-  }
-    )};
-
-useUpdateMealFoodLogMutation.getKey = () => ['UpdateMealFoodLog'];
-
-
-useUpdateMealFoodLogMutation.fetcher = (variables: GQLUpdateMealFoodLogMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMealFoodLogMutation, GQLUpdateMealFoodLogMutationVariables>(UpdateMealFoodLogDocument, variables, options);
 
 export const GetTemplatesDocument = `
     query GetTemplates($draft: Boolean, $limit: Int) {

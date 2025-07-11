@@ -3,10 +3,18 @@ import { GraphQLError } from 'graphql'
 
 import {
   GQLMutationAssignMealPlanToClientArgs,
+  GQLMutationBatchLogMealFoodArgs,
+  GQLMutationCompleteMealArgs,
   GQLMutationCreateMealPlanArgs,
   GQLMutationDuplicateMealPlanArgs,
+  GQLMutationFitspaceActivateMealPlanArgs,
+  GQLMutationFitspaceDeactivateMealPlanArgs,
+  GQLMutationFitspaceDeleteMealPlanArgs,
+  GQLMutationLogMealFoodArgs,
   GQLMutationRemoveMealPlanFromClientArgs,
   GQLMutationSaveMealArgs,
+  GQLMutationUncompleteMealArgs,
+  GQLMutationUpdateMealFoodLogArgs,
   GQLMutationUpdateMealPlanDetailsArgs,
   GQLNotificationType,
   GQLQueryGetClientActiveMealPlanArgs,
@@ -21,6 +29,7 @@ import {
 } from '@/lib/permissions/collaboration-permissions'
 import { GQLContext } from '@/types/gql-context'
 
+import MealLogItem from '../meal-log-item/model'
 import { createNotification } from '../notification/factory'
 
 import MealPlan from './model'
@@ -371,6 +380,120 @@ export async function getMyMealPlansOverview(context: GQLContext) {
     activePlan: activePlan ? new MealPlan(activePlan, context) : null,
     availablePlans: availablePlans.map((plan) => new MealPlan(plan, context)),
     completedPlans: completedPlans.map((plan) => new MealPlan(plan, context)),
+  }
+}
+
+export async function clientGetMealPlan(
+  args: { mealPlanId?: string | null },
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  let mealPlan
+
+  if (args.mealPlanId) {
+    // Get specific meal plan
+    mealPlan = await prisma.mealPlan.findFirst({
+      where: {
+        id: args.mealPlanId,
+        assignedToId: user.user.id,
+      },
+      include: {
+        createdBy: true,
+        assignedTo: true,
+        weeks: {
+          orderBy: {
+            weekNumber: 'asc',
+          },
+          include: {
+            days: {
+              orderBy: {
+                dayOfWeek: 'asc',
+              },
+              include: {
+                meals: {
+                  orderBy: {
+                    dateTime: 'asc',
+                  },
+                  include: {
+                    foods: {
+                      orderBy: {
+                        createdAt: 'asc',
+                      },
+                    },
+                    logs: {
+                      where: {
+                        userId: user.user.id,
+                      },
+                      include: {
+                        items: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+  } else {
+    // Get active meal plan
+    mealPlan = await prisma.mealPlan.findFirst({
+      where: {
+        assignedToId: user.user.id,
+        active: true,
+      },
+      include: {
+        createdBy: true,
+        assignedTo: true,
+        weeks: {
+          orderBy: {
+            weekNumber: 'asc',
+          },
+          include: {
+            days: {
+              orderBy: {
+                dayOfWeek: 'asc',
+              },
+              include: {
+                meals: {
+                  orderBy: {
+                    dateTime: 'asc',
+                  },
+                  include: {
+                    foods: {
+                      orderBy: {
+                        createdAt: 'asc',
+                      },
+                    },
+                    logs: {
+                      where: {
+                        userId: user.user.id,
+                      },
+                      include: {
+                        items: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+  }
+
+  if (!mealPlan) {
+    throw new Error('Meal plan not found')
+  }
+
+  return {
+    plan: new MealPlan(mealPlan, context),
   }
 }
 
@@ -931,6 +1054,496 @@ export async function updateMealPlanDetails(
     return true
   } catch (error) {
     console.error('Error updating meal plan details:', error)
-    throw new GraphQLError('Failed to update meal plan details')
+    throw new Error('Failed to update meal plan details')
+  }
+}
+
+/**
+ * Activate a meal plan for a client
+ */
+export async function fitspaceActivateMealPlan(
+  args: GQLMutationFitspaceActivateMealPlanArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { planId } = args
+
+  // Verify the meal plan exists and belongs to the user
+  const mealPlan = await prisma.mealPlan.findUnique({
+    where: { id: planId },
+  })
+
+  if (!mealPlan) {
+    throw new Error('Meal plan not found')
+  }
+
+  if (mealPlan.assignedToId !== user.user.id) {
+    throw new Error('You can only activate your own meal plans')
+  }
+
+  // Deactivate all other meal plans for this user
+  await prisma.mealPlan.updateMany({
+    where: {
+      assignedToId: user.user.id,
+      active: true,
+    },
+    data: {
+      active: false,
+    },
+  })
+
+  // Activate the selected meal plan
+  await prisma.mealPlan.update({
+    where: { id: planId },
+    data: {
+      active: true,
+    },
+  })
+
+  return true
+}
+
+/**
+ * Deactivate a meal plan for a client
+ */
+export async function fitspaceDeactivateMealPlan(
+  args: GQLMutationFitspaceDeactivateMealPlanArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { planId } = args
+
+  // Verify the meal plan exists and belongs to the user
+  const mealPlan = await prisma.mealPlan.findUnique({
+    where: { id: planId },
+  })
+
+  if (!mealPlan) {
+    throw new Error('Meal plan not found')
+  }
+
+  if (mealPlan.assignedToId !== user.user.id) {
+    throw new Error('You can only deactivate your own meal plans')
+  }
+
+  // Deactivate the meal plan
+  await prisma.mealPlan.update({
+    where: { id: planId },
+    data: {
+      active: false,
+    },
+  })
+
+  return true
+}
+
+/**
+ * Delete a meal plan for a client
+ */
+export async function fitspaceDeleteMealPlan(
+  args: GQLMutationFitspaceDeleteMealPlanArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { planId } = args
+
+  // Verify the meal plan exists and belongs to the user
+  const mealPlan = await prisma.mealPlan.findUnique({
+    where: { id: planId },
+  })
+
+  if (!mealPlan) {
+    throw new Error('Meal plan not found')
+  }
+
+  if (mealPlan.assignedToId !== user.user.id) {
+    throw new Error('You can only delete your own meal plans')
+  }
+
+  // Delete the meal plan (cascade will handle related records)
+  await prisma.mealPlan.delete({
+    where: { id: planId },
+  })
+
+  return true
+}
+
+/**
+ * Log a meal food item - creates a meal log and meal log item
+ */
+export async function logMealFood(
+  args: GQLMutationLogMealFoodArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { input } = args
+
+  try {
+    // Check if meal exists and belongs to user's meal plan
+    const meal = await prisma.meal.findUnique({
+      where: { id: input.mealId },
+      include: {
+        day: {
+          include: {
+            week: {
+              include: {
+                plan: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!meal) {
+      throw new Error('Meal not found')
+    }
+
+    if (meal.day.week.plan.assignedToId !== user.user.id) {
+      throw new Error('You can only log your own meals')
+    }
+
+    // Find or create meal log for this meal
+    let mealLog = await prisma.mealLog.findFirst({
+      where: {
+        mealId: input.mealId,
+        userId: user.user.id,
+      },
+    })
+
+    if (!mealLog) {
+      mealLog = await prisma.mealLog.create({
+        data: {
+          mealId: input.mealId,
+          userId: user.user.id,
+        },
+      })
+    }
+
+    // Create meal log item
+    const mealLogItem = await prisma.mealLogItem.create({
+      data: {
+        logId: mealLog.id,
+        name: input.name,
+        quantity: input.quantity,
+        unit: input.unit,
+        barcode: input.barcode,
+        calories: input.calories,
+        protein: input.protein,
+        carbs: input.carbs,
+        fat: input.fat,
+        fiber: input.fiber,
+        openFoodFactsId: input.openFoodFactsId,
+        productData: input.productData ? JSON.parse(input.productData) : null,
+        notes: input.notes,
+      },
+    })
+
+    return new MealLogItem(mealLogItem, context)
+  } catch (error) {
+    console.error('Error logging meal food:', error)
+    throw new GraphQLError('Failed to log meal food')
+  }
+}
+
+/**
+ * Batch log multiple meal foods in a single transaction
+ */
+export async function batchLogMealFood(
+  args: GQLMutationBatchLogMealFoodArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { input } = args
+
+  try {
+    // Check if meal exists and belongs to user's meal plan
+    const meal = await prisma.meal.findUnique({
+      where: { id: input.mealId },
+      include: {
+        day: {
+          include: {
+            week: {
+              include: {
+                plan: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!meal) {
+      throw new Error('Meal not found')
+    }
+
+    if (meal.day.week.plan.assignedToId !== user.user.id) {
+      throw new Error('You can only log your own meals')
+    }
+
+    // Use a transaction to ensure all foods are logged atomically
+    await prisma.$transaction(async (tx) => {
+      // Find or create meal log for this meal
+      let mealLog = await tx.mealLog.findFirst({
+        where: {
+          mealId: input.mealId,
+          userId: user.user.id,
+        },
+      })
+
+      if (!mealLog) {
+        mealLog = await tx.mealLog.create({
+          data: {
+            mealId: input.mealId,
+            userId: user.user.id,
+          },
+        })
+      }
+
+      // Create all meal log items in batch
+      const mealLogItems = input.foods.map((food) => ({
+        logId: mealLog.id,
+        name: food.name,
+        quantity: food.quantity,
+        unit: food.unit,
+        barcode: food.barcode ?? undefined,
+        calories: food.calories ?? undefined,
+        protein: food.protein ?? undefined,
+        carbs: food.carbs ?? undefined,
+        fat: food.fat ?? undefined,
+        fiber: food.fiber ?? undefined,
+        openFoodFactsId: food.openFoodFactsId ?? undefined,
+        productData: food.productData ? JSON.parse(food.productData) : null,
+        notes: food.notes ?? undefined,
+      }))
+
+      await tx.mealLogItem.createMany({
+        data: mealLogItems,
+      })
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error batch logging meal foods:', error)
+    throw new GraphQLError('Failed to batch log meal foods')
+  }
+}
+
+/**
+ * Update a meal food log item
+ */
+export async function updateMealFoodLog(
+  args: GQLMutationUpdateMealFoodLogArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { input } = args
+
+  try {
+    // Check if meal log item exists and belongs to user
+    const mealLogItem = await prisma.mealLogItem.findUnique({
+      where: { id: input.id },
+      include: {
+        log: {
+          include: {
+            meal: {
+              include: {
+                day: {
+                  include: {
+                    week: {
+                      include: {
+                        plan: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!mealLogItem) {
+      throw new Error('Meal log item not found')
+    }
+
+    if (mealLogItem.log.meal.day.week.plan.assignedToId !== user.user.id) {
+      throw new Error('You can only update your own meal logs')
+    }
+
+    // Update the meal log item
+    await prisma.mealLogItem.update({
+      where: { id: input.id },
+      data: {
+        quantity: input.quantity ?? undefined,
+        notes: input.notes ?? undefined,
+      },
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error updating meal food log:', error)
+    throw new GraphQLError('Failed to update meal food log')
+  }
+}
+
+/**
+ * Mark a meal as completed
+ */
+export async function completeMeal(
+  args: GQLMutationCompleteMealArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { mealId } = args
+
+  try {
+    // Check if meal exists and belongs to user's meal plan
+    const meal = await prisma.meal.findUnique({
+      where: { id: mealId },
+      include: {
+        day: {
+          include: {
+            week: {
+              include: {
+                plan: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!meal) {
+      throw new Error('Meal not found')
+    }
+
+    if (meal.day.week.plan.assignedToId !== user.user.id) {
+      throw new Error('You can only complete your own meals')
+    }
+
+    // Find or create meal log for this meal
+    let mealLog = await prisma.mealLog.findFirst({
+      where: {
+        mealId: mealId,
+        userId: user.user.id,
+      },
+    })
+
+    if (!mealLog) {
+      mealLog = await prisma.mealLog.create({
+        data: {
+          mealId: mealId,
+          userId: user.user.id,
+          completedAt: new Date(),
+        },
+      })
+    } else {
+      // Update existing meal log
+      await prisma.mealLog.update({
+        where: { id: mealLog.id },
+        data: {
+          completedAt: new Date(),
+        },
+      })
+    }
+
+    return true
+  } catch (error) {
+    console.error('Error completing meal:', error)
+    throw new GraphQLError('Failed to complete meal')
+  }
+}
+
+/**
+ * Mark a meal as uncompleted
+ */
+export async function uncompleteMeal(
+  args: GQLMutationUncompleteMealArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { mealId } = args
+
+  try {
+    // Check if meal exists and belongs to user's meal plan
+    const meal = await prisma.meal.findUnique({
+      where: { id: mealId },
+      include: {
+        day: {
+          include: {
+            week: {
+              include: {
+                plan: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!meal) {
+      throw new Error('Meal not found')
+    }
+
+    if (meal.day.week.plan.assignedToId !== user.user.id) {
+      throw new Error('You can only uncomplete your own meals')
+    }
+
+    // Find meal log for this meal
+    const mealLog = await prisma.mealLog.findFirst({
+      where: {
+        mealId: mealId,
+        userId: user.user.id,
+      },
+    })
+
+    if (mealLog) {
+      // Update existing meal log to remove completion
+      await prisma.mealLog.update({
+        where: { id: mealLog.id },
+        data: {
+          completedAt: null,
+        },
+      })
+    }
+
+    return true
+  } catch (error) {
+    console.error('Error uncompleting meal:', error)
+    throw new GraphQLError('Failed to uncomplete meal')
   }
 }

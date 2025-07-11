@@ -59,6 +59,18 @@ export default class MealLogItem implements GQLMealLogItem {
     return this.data.fiber
   }
 
+  get notes() {
+    return this.data.notes
+  }
+
+  get openFoodFactsId() {
+    return this.data.openFoodFactsId
+  }
+
+  get productData() {
+    return this.data.productData ? JSON.stringify(this.data.productData) : null
+  }
+
   get createdAt() {
     return this.data.createdAt.toISOString()
   }

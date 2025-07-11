@@ -134,15 +134,75 @@ export default class Meal implements GQLMeal {
   }
 
   get loggedCalories() {
-    return 0
+    if (!this.data.logs) return 0
+
+    let total = 0
+    this.data.logs.forEach((log) => {
+      log.items?.forEach((item) => {
+        total += item.calories || 0
+      })
+    })
+
+    return Math.round(total * 100) / 100
   }
+
   get loggedCarbs() {
-    return 0
+    if (!this.data.logs) return 0
+
+    let total = 0
+    this.data.logs.forEach((log) => {
+      log.items?.forEach((item) => {
+        total += item.carbs || 0
+      })
+    })
+
+    return Math.round(total * 100) / 100
   }
+
   get loggedFat() {
-    return 0
+    if (!this.data.logs) return 0
+
+    let total = 0
+    this.data.logs.forEach((log) => {
+      log.items?.forEach((item) => {
+        total += item.fat || 0
+      })
+    })
+
+    return Math.round(total * 100) / 100
   }
+
   get loggedProtein() {
-    return 0
+    if (!this.data.logs) return 0
+
+    let total = 0
+    this.data.logs.forEach((log) => {
+      log.items?.forEach((item) => {
+        total += item.protein || 0
+      })
+    })
+
+    return Math.round(total * 100) / 100
+  }
+
+  get completedAt() {
+    // Find the most recent completion date from logs
+    if (!this.data.logs || this.data.logs.length === 0) return null
+
+    const completedLogs = this.data.logs.filter((log) => log.completedAt)
+    if (completedLogs.length === 0) return null
+
+    // Return the most recent completion date
+    const latestCompletion = completedLogs.reduce((latest, log) => {
+      if (
+        !latest ||
+        (log.completedAt && log.completedAt > latest.completedAt!)
+      ) {
+        return log
+      }
+      return latest
+    })
+
+    return latestCompletion.completedAt?.toISOString() || null
   }
 }

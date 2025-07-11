@@ -3,6 +3,7 @@
 import {
   BicepsFlexed,
   Calendar,
+  ChefHatIcon,
   Dumbbell,
   DumbbellIcon,
   Home,
@@ -58,6 +59,12 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
         prefetch: true,
       },
       {
+        href: '/fitspace/meal-plan',
+        icon: SaladIcon,
+        label: 'Food',
+        prefetch: true,
+      },
+      {
         icon: MoreHorizontalIcon,
         label: 'More',
         prefetch: true,
@@ -70,7 +77,7 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar shadow-neuro-light dark:shadow-neuro-dark">
-        <div className="grid grid-cols-5 items-center py-2 px-4 max-w-md mx-auto">
+        <div className="grid grid-cols-6 items-center py-2 px-4 max-w-md mx-auto">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
@@ -128,24 +135,22 @@ function QuickActionDrawer({
           <div>
             <p className="text-md font-medium mb-2">Meal Plan</p>
             <div className="grid grid-cols-2 gap-4">
-              <Button
+              <ButtonLink
+                href="/fitspace/meal-plans"
                 onClick={() => onOpenChange(false)}
                 variant="secondary"
-                iconStart={<SaladIcon />}
-                disabled
-                className="line-through"
+                iconStart={<ChefHatIcon />}
               >
-                View Today's
-              </Button>
-              <Button
+                Activate Meal Plan
+              </ButtonLink>
+              <ButtonLink
                 onClick={() => onOpenChange(false)}
+                href="/fitspace/meal-plans"
                 variant="secondary"
                 iconStart={<NotepadText />}
-                disabled
-                className="line-through"
               >
-                Meal Plan
-              </Button>
+                Meal Plans
+              </ButtonLink>
             </div>
           </div>
           <div>

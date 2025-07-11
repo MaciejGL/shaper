@@ -157,8 +157,7 @@ type MealLogItem {
   openFoodFactsId: String
   productData: String
 
-  # Reference to planned food (if logging from plan)
-  plannedFood: MealFood
+  # Reference to planned food removed - using name matching instead
 
   notes: String
   createdAt: String!
@@ -185,6 +184,11 @@ type Query {
   getClientMealPlans(clientId: ID!): [MealPlan!]!
   getClientActiveMealPlan(clientId: ID!): MealPlan
   getMyMealPlansOverview: MyMealPlansPayload!
+  clientGetMealPlan(mealPlanId: ID): GetMealPlanPayload
+}
+
+type GetMealPlanPayload {
+  plan: MealPlan!
 }
 
 # Mutations - Streamlined for meal-level operations
@@ -197,13 +201,20 @@ type Mutation {
   duplicateMealPlan(id: ID!): ID!
   updateMealPlanDetails(input: UpdateMealPlanDetailsInput!): Boolean!
 
-  # New batch meal operation - replaces individual food mutations
+  # Fitspace meal plan activation/deactivation
+  fitspaceActivateMealPlan(planId: ID!): Boolean!
+  fitspaceDeactivateMealPlan(planId: ID!): Boolean!
+  fitspaceDeleteMealPlan(planId: ID!): Boolean!
+
+  # New batch meal operation - replaces individual food operations
   saveMeal(input: SaveMealInput!): Boolean!
 
-  # Food logging mutations (if needed for future)
+  # Meal logging operations
   logMealFood(input: LogMealFoodInput!): MealLogItem!
+  batchLogMealFood(input: BatchLogMealFoodInput!): Boolean!
   updateMealFoodLog(input: UpdateMealFoodLogInput!): Boolean!
-  deleteMealFoodLog(id: ID!): Boolean!
+  completeMeal(mealId: ID!): Boolean!
+  uncompleteMeal(mealId: ID!): Boolean!
 }
 
 # Input Types
@@ -308,12 +319,33 @@ input LogMealFoodInput {
   fiber: Float
   openFoodFactsId: String
   productData: String
-  plannedFoodId: ID
   notes: String
 }
 
 input UpdateMealFoodLogInput {
   id: ID!
   quantity: Float
+  notes: String
+}
+
+# Batch meal logging input
+input BatchLogMealFoodInput {
+  mealId: ID!
+  foods: [BatchLogMealFoodItemInput!]!
+}
+
+# Food item input for batch logging (without mealId)
+input BatchLogMealFoodItemInput {
+  name: String!
+  quantity: Float!
+  unit: String!
+  barcode: String
+  calories: Float
+  protein: Float
+  carbs: Float
+  fat: Float
+  fiber: Float
+  openFoodFactsId: String
+  productData: String
   notes: String
 }

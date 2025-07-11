@@ -18,6 +18,7 @@ export function MacroBadge({
       <Badge
         className={cn(
           'bg-green-500/20 text-green-600 dark:text-green-500 min-w-12 font-medium',
+          size === 'xs' && 'min-w-8',
           className,
         )}
         size={size}
@@ -31,6 +32,7 @@ export function MacroBadge({
       <Badge
         className={cn(
           'bg-blue-500/20 text-blue-600 dark:text-blue-500 min-w-12 font-medium',
+          size === 'xs' && 'min-w-8',
           className,
         )}
         size={size}
@@ -44,6 +46,7 @@ export function MacroBadge({
       <Badge
         className={cn(
           'bg-yellow-500/20 text-yellow-600 dark:text-yellow-500 min-w-12 font-medium',
+          size === 'xs' && 'min-w-8',
           className,
         )}
         size={size}
@@ -57,6 +60,7 @@ export function MacroBadge({
       <Badge
         className={cn(
           'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary min-w-12 font-medium',
+          size === 'xs' && 'min-w-8',
           className,
         )}
         size={size}
@@ -69,6 +73,7 @@ export function MacroBadge({
     <Badge
       className={cn(
         'bg-primary/10 text-primary dark:text-muted min-w-12 font-medium',
+        size === 'xs' && 'min-w-8',
         className,
       )}
       size={size}
@@ -87,16 +92,13 @@ export function BigMacroBadge({
   value: number
   className?: string
 }) {
+  const sharedClasses = cn(
+    'flex flex-col items-center justify-center p-3 rounded-lg shrink-0 size-[4.625rem]',
+  )
   const formattedValue = value.toFixed(0)
   if (macro === 'protein') {
     return (
-      <Badge
-        className={cn(
-          'flex flex-col items-center justify-center p-3 rounded-lg',
-          'bg-green-500/20',
-          className,
-        )}
-      >
+      <Badge className={cn(sharedClasses, 'bg-green-500/20', className)}>
         <p className="text-primary text-lg font-semibold">{formattedValue}g</p>
         <p className="text-xs text-muted-foreground">protein</p>
       </Badge>
@@ -104,13 +106,7 @@ export function BigMacroBadge({
   }
   if (macro === 'carbs') {
     return (
-      <Badge
-        className={cn(
-          'flex flex-col items-center justify-center p-3 rounded-lg',
-          'bg-blue-500/20',
-          className,
-        )}
-      >
+      <Badge className={cn(sharedClasses, 'bg-blue-500/20', className)}>
         <p className="text-primary text-lg font-semibold">{formattedValue}g</p>
         <p className="text-xs text-muted-foreground">carbs</p>
       </Badge>
@@ -118,13 +114,7 @@ export function BigMacroBadge({
   }
   if (macro === 'fat') {
     return (
-      <Badge
-        className={cn(
-          'flex flex-col items-center justify-center p-3 rounded-lg',
-          'bg-yellow-500/20',
-          className,
-        )}
-      >
+      <Badge className={cn(sharedClasses, 'bg-yellow-500/20', className)}>
         <p className="text-primary text-lg font-semibold">{formattedValue}g</p>
         <p className="text-xs text-muted-foreground">fat</p>
       </Badge>
@@ -134,7 +124,7 @@ export function BigMacroBadge({
     return (
       <Badge
         className={cn(
-          'flex flex-col items-center justify-center p-3 rounded-lg',
+          sharedClasses,
           'bg-primary/10 dark:bg-primary/20',
           className,
         )}
@@ -147,7 +137,8 @@ export function BigMacroBadge({
   return (
     <Badge
       className={cn(
-        'bg-primary/10 text-primary dark:text-muted min-w-12',
+        sharedClasses,
+        'bg-primary/10 text-primary dark:text-muted',
         className,
       )}
     >

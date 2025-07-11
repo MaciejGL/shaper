@@ -176,6 +176,26 @@ export type GQLBaseExerciseSubstitute = {
   substituteId: EntireFieldWrapper<Scalars['ID']['output']>;
 };
 
+export type GQLBatchLogMealFoodInput = {
+  foods: Array<GQLBatchLogMealFoodItemInput>;
+  mealId: Scalars['ID']['input'];
+};
+
+export type GQLBatchLogMealFoodItemInput = {
+  barcode?: InputMaybe<Scalars['String']['input']>;
+  calories?: InputMaybe<Scalars['Float']['input']>;
+  carbs?: InputMaybe<Scalars['Float']['input']>;
+  fat?: InputMaybe<Scalars['Float']['input']>;
+  fiber?: InputMaybe<Scalars['Float']['input']>;
+  name: Scalars['String']['input'];
+  notes?: InputMaybe<Scalars['String']['input']>;
+  openFoodFactsId?: InputMaybe<Scalars['String']['input']>;
+  productData?: InputMaybe<Scalars['String']['input']>;
+  protein?: InputMaybe<Scalars['Float']['input']>;
+  quantity: Scalars['Float']['input'];
+  unit: Scalars['String']['input'];
+};
+
 export type GQLBulkUpdatePlanPermissionsInput = {
   planUpdates: Array<GQLPlanPermissionUpdateInput>;
   userId: Scalars['ID']['input'];
@@ -465,6 +485,11 @@ export type GQLGetExercisesResponse = {
   trainerExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
 };
 
+export type GQLGetMealPlanPayload = {
+  __typename?: 'GetMealPlanPayload';
+  plan: EntireFieldWrapper<GQLMealPlan>;
+};
+
 export type GQLGetWorkoutPayload = {
   __typename?: 'GetWorkoutPayload';
   plan: EntireFieldWrapper<GQLTrainingPlan>;
@@ -490,7 +515,6 @@ export type GQLLogMealFoodInput = {
   name: Scalars['String']['input'];
   notes?: InputMaybe<Scalars['String']['input']>;
   openFoodFactsId?: InputMaybe<Scalars['String']['input']>;
-  plannedFoodId?: InputMaybe<Scalars['ID']['input']>;
   productData?: InputMaybe<Scalars['String']['input']>;
   protein?: InputMaybe<Scalars['Float']['input']>;
   quantity: Scalars['Float']['input'];
@@ -607,7 +631,6 @@ export type GQLMealLogItem = {
   name: EntireFieldWrapper<Scalars['String']['output']>;
   notes?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   openFoodFactsId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  plannedFood?: EntireFieldWrapper<Maybe<GQLMealFood>>;
   productData?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   protein?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   quantity: EntireFieldWrapper<Scalars['Float']['output']>;
@@ -726,9 +749,11 @@ export type GQLMutation = {
   addTrainingWeek: EntireFieldWrapper<Scalars['ID']['output']>;
   assignMealPlanToClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   assignTrainingPlanToClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  batchLogMealFood: EntireFieldWrapper<Scalars['Boolean']['output']>;
   bulkUpdatePlanPermissions: EntireFieldWrapper<Array<GQLPlanCollaboratorSummary>>;
   cancelCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   closePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  completeMeal: EntireFieldWrapper<Scalars['Boolean']['output']>;
   createCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
   createDraftMealTemplate: EntireFieldWrapper<GQLMealPlan>;
   createDraftTemplate: EntireFieldWrapper<GQLTrainingPlan>;
@@ -740,7 +765,6 @@ export type GQLMutation = {
   createTrainingPlan: EntireFieldWrapper<GQLCreateTrainingPlanPayload>;
   deleteBodyMeasurement: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
-  deleteMealFoodLog: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteNote: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteNotification: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deletePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -750,6 +774,9 @@ export type GQLMutation = {
   duplicateTrainingPlan: EntireFieldWrapper<Scalars['ID']['output']>;
   duplicateTrainingWeek: EntireFieldWrapper<Scalars['ID']['output']>;
   extendPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  fitspaceActivateMealPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  fitspaceDeactivateMealPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  fitspaceDeleteMealPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   getAiExerciseSuggestions: EntireFieldWrapper<Array<GQLAiExerciseSuggestion>>;
   logMealFood: EntireFieldWrapper<GQLMealLogItem>;
   logWorkoutProgress: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -780,6 +807,7 @@ export type GQLMutation = {
   saveMeal: EntireFieldWrapper<Scalars['Boolean']['output']>;
   sendCollaborationInvitation: EntireFieldWrapper<GQLCollaborationInvitation>;
   swapExercise: EntireFieldWrapper<GQLSubstitute>;
+  uncompleteMeal: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateBodyMeasurement: EntireFieldWrapper<GQLUserBodyMeasure>;
   updateExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateExerciseForm: EntireFieldWrapper<GQLTrainingExercise>;
@@ -884,6 +912,11 @@ export type GQLMutationAssignTrainingPlanToClientArgs = {
 };
 
 
+export type GQLMutationBatchLogMealFoodArgs = {
+  input: GQLBatchLogMealFoodInput;
+};
+
+
 export type GQLMutationBulkUpdatePlanPermissionsArgs = {
   input: GQLBulkUpdatePlanPermissionsInput;
 };
@@ -896,6 +929,11 @@ export type GQLMutationCancelCoachingRequestArgs = {
 
 export type GQLMutationClosePlanArgs = {
   planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationCompleteMealArgs = {
+  mealId: Scalars['ID']['input'];
 };
 
 
@@ -945,11 +983,6 @@ export type GQLMutationDeleteExerciseArgs = {
 };
 
 
-export type GQLMutationDeleteMealFoodLogArgs = {
-  id: Scalars['ID']['input'];
-};
-
-
 export type GQLMutationDeleteNoteArgs = {
   id: Scalars['ID']['input'];
 };
@@ -993,6 +1026,21 @@ export type GQLMutationDuplicateTrainingWeekArgs = {
 export type GQLMutationExtendPlanArgs = {
   planId: Scalars['ID']['input'];
   weeks: Array<Scalars['ID']['input']>;
+};
+
+
+export type GQLMutationFitspaceActivateMealPlanArgs = {
+  planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationFitspaceDeactivateMealPlanArgs = {
+  planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationFitspaceDeleteMealPlanArgs = {
+  planId: Scalars['ID']['input'];
 };
 
 
@@ -1151,6 +1199,11 @@ export type GQLMutationSendCollaborationInvitationArgs = {
 export type GQLMutationSwapExerciseArgs = {
   exerciseId: Scalars['ID']['input'];
   substituteId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationUncompleteMealArgs = {
+  mealId: Scalars['ID']['input'];
 };
 
 
@@ -1355,6 +1408,7 @@ export type GQLQuery = {
   availablePlansForTeamMember: EntireFieldWrapper<Array<GQLAvailablePlan>>;
   bodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
   clientBodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
+  clientGetMealPlan?: EntireFieldWrapper<Maybe<GQLGetMealPlanPayload>>;
   coachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   coachingRequests: EntireFieldWrapper<Array<GQLCoachingRequest>>;
   exercise?: EntireFieldWrapper<Maybe<GQLBaseExercise>>;
@@ -1413,6 +1467,11 @@ export type GQLQueryAvailablePlansForTeamMemberArgs = {
 
 export type GQLQueryClientBodyMeasuresArgs = {
   clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryClientGetMealPlanArgs = {
+  mealPlanId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -2152,6 +2211,8 @@ export type GQLResolversTypes = {
   AvailablePlan: ResolverTypeWrapper<GQLAvailablePlan>;
   BaseExercise: ResolverTypeWrapper<GQLBaseExercise>;
   BaseExerciseSubstitute: ResolverTypeWrapper<GQLBaseExerciseSubstitute>;
+  BatchLogMealFoodInput: GQLBatchLogMealFoodInput;
+  BatchLogMealFoodItemInput: GQLBatchLogMealFoodItemInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   BulkUpdatePlanPermissionsInput: GQLBulkUpdatePlanPermissionsInput;
   CoachingRequest: ResolverTypeWrapper<GQLCoachingRequest>;
@@ -2189,6 +2250,7 @@ export type GQLResolversTypes = {
   FitnessLevel: GQLFitnessLevel;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
   GetExercisesResponse: ResolverTypeWrapper<GQLGetExercisesResponse>;
+  GetMealPlanPayload: ResolverTypeWrapper<GQLGetMealPlanPayload>;
   GetWorkoutPayload: ResolverTypeWrapper<GQLGetWorkoutPayload>;
   Goal: GQLGoal;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
@@ -2290,6 +2352,8 @@ export type GQLResolversParentTypes = {
   AvailablePlan: GQLAvailablePlan;
   BaseExercise: GQLBaseExercise;
   BaseExerciseSubstitute: GQLBaseExerciseSubstitute;
+  BatchLogMealFoodInput: GQLBatchLogMealFoodInput;
+  BatchLogMealFoodItemInput: GQLBatchLogMealFoodItemInput;
   Boolean: Scalars['Boolean']['output'];
   BulkUpdatePlanPermissionsInput: GQLBulkUpdatePlanPermissionsInput;
   CoachingRequest: GQLCoachingRequest;
@@ -2319,6 +2383,7 @@ export type GQLResolversParentTypes = {
   ExerciseWhereInput: GQLExerciseWhereInput;
   Float: Scalars['Float']['output'];
   GetExercisesResponse: GQLGetExercisesResponse;
+  GetMealPlanPayload: GQLGetMealPlanPayload;
   GetWorkoutPayload: GQLGetWorkoutPayload;
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
@@ -2534,6 +2599,11 @@ export type GQLGetExercisesResponseResolvers<ContextType = GQLContext, ParentTyp
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLGetMealPlanPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetMealPlanPayload'] = GQLResolversParentTypes['GetMealPlanPayload']> = {
+  plan?: Resolver<GQLResolversTypes['MealPlan'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLGetWorkoutPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetWorkoutPayload'] = GQLResolversParentTypes['GetWorkoutPayload']> = {
   plan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -2628,7 +2698,6 @@ export type GQLMealLogItemResolvers<ContextType = GQLContext, ParentType extends
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   notes?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   openFoodFactsId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  plannedFood?: Resolver<Maybe<GQLResolversTypes['MealFood']>, ParentType, ContextType>;
   productData?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   protein?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   quantity?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
@@ -2728,9 +2797,11 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   addTrainingWeek?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAddTrainingWeekArgs, 'input'>>;
   assignMealPlanToClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignMealPlanToClientArgs, 'input'>>;
   assignTrainingPlanToClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignTrainingPlanToClientArgs, 'input'>>;
+  batchLogMealFood?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationBatchLogMealFoodArgs, 'input'>>;
   bulkUpdatePlanPermissions?: Resolver<Array<GQLResolversTypes['PlanCollaboratorSummary']>, ParentType, ContextType, RequireFields<GQLMutationBulkUpdatePlanPermissionsArgs, 'input'>>;
   cancelCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationCancelCoachingRequestArgs, 'id'>>;
   closePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationClosePlanArgs, 'planId'>>;
+  completeMeal?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCompleteMealArgs, 'mealId'>>;
   createCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationCreateCoachingRequestArgs, 'recipientEmail'>>;
   createDraftMealTemplate?: Resolver<GQLResolversTypes['MealPlan'], ParentType, ContextType>;
   createDraftTemplate?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
@@ -2742,7 +2813,6 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   createTrainingPlan?: Resolver<GQLResolversTypes['CreateTrainingPlanPayload'], ParentType, ContextType, RequireFields<GQLMutationCreateTrainingPlanArgs, 'input'>>;
   deleteBodyMeasurement?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteBodyMeasurementArgs, 'id'>>;
   deleteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteExerciseArgs, 'id'>>;
-  deleteMealFoodLog?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteMealFoodLogArgs, 'id'>>;
   deleteNote?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteNoteArgs, 'id'>>;
   deleteNotification?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteNotificationArgs, 'id'>>;
   deletePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeletePlanArgs, 'planId'>>;
@@ -2752,6 +2822,9 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   duplicateTrainingPlan?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingPlanArgs, 'id'>>;
   duplicateTrainingWeek?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingWeekArgs, 'input'>>;
   extendPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationExtendPlanArgs, 'planId' | 'weeks'>>;
+  fitspaceActivateMealPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationFitspaceActivateMealPlanArgs, 'planId'>>;
+  fitspaceDeactivateMealPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationFitspaceDeactivateMealPlanArgs, 'planId'>>;
+  fitspaceDeleteMealPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationFitspaceDeleteMealPlanArgs, 'planId'>>;
   getAiExerciseSuggestions?: Resolver<Array<GQLResolversTypes['AiExerciseSuggestion']>, ParentType, ContextType, RequireFields<GQLMutationGetAiExerciseSuggestionsArgs, 'dayId'>>;
   logMealFood?: Resolver<GQLResolversTypes['MealLogItem'], ParentType, ContextType, RequireFields<GQLMutationLogMealFoodArgs, 'input'>>;
   logWorkoutProgress?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutProgressArgs, 'dayId' | 'tick'>>;
@@ -2782,6 +2855,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   saveMeal?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationSaveMealArgs, 'input'>>;
   sendCollaborationInvitation?: Resolver<GQLResolversTypes['CollaborationInvitation'], ParentType, ContextType, RequireFields<GQLMutationSendCollaborationInvitationArgs, 'input'>>;
   swapExercise?: Resolver<GQLResolversTypes['Substitute'], ParentType, ContextType, RequireFields<GQLMutationSwapExerciseArgs, 'exerciseId' | 'substituteId'>>;
+  uncompleteMeal?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUncompleteMealArgs, 'mealId'>>;
   updateBodyMeasurement?: Resolver<GQLResolversTypes['UserBodyMeasure'], ParentType, ContextType, RequireFields<GQLMutationUpdateBodyMeasurementArgs, 'input'>>;
   updateExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseArgs, 'id' | 'input'>>;
   updateExerciseForm?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseFormArgs, 'input'>>;
@@ -2884,6 +2958,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   availablePlansForTeamMember?: Resolver<Array<GQLResolversTypes['AvailablePlan']>, ParentType, ContextType, RequireFields<GQLQueryAvailablePlansForTeamMemberArgs, 'userId'>>;
   bodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
   clientBodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType, RequireFields<GQLQueryClientBodyMeasuresArgs, 'clientId'>>;
+  clientGetMealPlan?: Resolver<Maybe<GQLResolversTypes['GetMealPlanPayload']>, ParentType, ContextType, Partial<GQLQueryClientGetMealPlanArgs>>;
   coachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLQueryCoachingRequestArgs, 'id'>>;
   coachingRequests?: Resolver<Array<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType>;
   exercise?: Resolver<Maybe<GQLResolversTypes['BaseExercise']>, ParentType, ContextType, RequireFields<GQLQueryExerciseArgs, 'id'>>;
@@ -3192,6 +3267,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   ExerciseSet?: GQLExerciseSetResolvers<ContextType>;
   ExerciseSetLog?: GQLExerciseSetLogResolvers<ContextType>;
   GetExercisesResponse?: GQLGetExercisesResponseResolvers<ContextType>;
+  GetMealPlanPayload?: GQLGetMealPlanPayloadResolvers<ContextType>;
   GetWorkoutPayload?: GQLGetWorkoutPayloadResolvers<ContextType>;
   Meal?: GQLMealResolvers<ContextType>;
   MealDay?: GQLMealDayResolvers<ContextType>;

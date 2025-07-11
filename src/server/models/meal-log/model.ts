@@ -8,6 +8,7 @@ import {
 import { GQLMealLog } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
 
+import MealLogItem from '../meal-log-item/model'
 import UserPublic from '../user-public/model'
 
 export default class MealLog implements GQLMealLog {
@@ -45,28 +46,38 @@ export default class MealLog implements GQLMealLog {
   }
 
   async items() {
-    return []
+    if (!this.data.items) return []
+
+    return this.data.items.map((item) => new MealLogItem(item, this.context))
   }
 
   get totalCalories() {
-    return 0
+    if (!this.data.items) return 0
+    return this.data.items.reduce(
+      (total, item) => total + (item.calories || 0),
+      0,
+    )
   }
+
   get totalCarbs() {
-    return 0
+    if (!this.data.items) return 0
+    return this.data.items.reduce((total, item) => total + (item.carbs || 0), 0)
   }
+
   get totalFat() {
-    return 0
+    if (!this.data.items) return 0
+    return this.data.items.reduce((total, item) => total + (item.fat || 0), 0)
   }
+
   get totalProtein() {
-    return 0
+    if (!this.data.items) return 0
+    return this.data.items.reduce(
+      (total, item) => total + (item.protein || 0),
+      0,
+    )
   }
   get totalFiber() {
-    return 0
-  }
-  get totalSugar() {
-    return 0
-  }
-  get totalSodium() {
-    return 0
+    if (!this.data.items) return 0
+    return this.data.items.reduce((total, item) => total + (item.fiber || 0), 0)
   }
 }
