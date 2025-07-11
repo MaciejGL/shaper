@@ -1,15 +1,14 @@
 'use client'
 
-import { createContext, useContext, useMemo, useState } from 'react'
+import { parseISO } from 'date-fns'
+import { useQueryState } from 'nuqs'
+import { createContext, useContext, useMemo } from 'react'
 
-import { MealDay, MealPlan, MealWeek } from '../page'
+import { MealDay, MealPlan } from '../page'
 
 interface MealPlanContextType {
   plan: MealPlan | null
-  activeWeek: MealWeek | null
   activeDay: MealDay | null
-  setActiveWeekId: (weekId: string) => void
-  setActiveDayId: (dayId: string) => void
 }
 
 const MealPlanContext = createContext<MealPlanContextType | null>(null)
@@ -28,28 +27,26 @@ interface MealPlanProviderProps {
 }
 
 export function MealPlanProvider({ children, plan }: MealPlanProviderProps) {
-  const [activeWeekId, setActiveWeekId] = useState<string | null>(null)
-  const [activeDayId, setActiveDayId] = useState<string | null>(null)
-
+  const [date] = useQueryState('date')
   const activeWeek = useMemo(() => {
-    if (!plan || !activeWeekId) return plan?.weeks[0] || null
-    return plan.weeks.find((week) => week.id === activeWeekId) || null
-  }, [plan, activeWeekId])
+    if (!plan) return null
+    return plan.weeks.at(0)
+  }, [plan])
 
   const activeDay = useMemo(() => {
-    if (!activeWeek || !activeDayId) return activeWeek?.days[0] || null
-    return activeWeek.days.find((day) => day.id === activeDayId) || null
-  }, [activeWeek, activeDayId])
+    if (!activeWeek || !date) return null
+    const selectedDate = parseISO(date)
+    // Convert JavaScript's Sunday=0, Monday=1 to Monday=0, Tuesday=1 system
+    const dayOfWeek = (selectedDate.getDay() + 6) % 7
+    return activeWeek.days.find((day) => day.dayOfWeek === dayOfWeek) || null
+  }, [activeWeek, date])
 
   const value = useMemo(
     () => ({
       plan: plan || null,
-      activeWeek,
       activeDay,
-      setActiveWeekId,
-      setActiveDayId,
     }),
-    [plan, activeWeek, activeDay],
+    [plan, activeDay],
   )
 
   return (

@@ -1,5 +1,6 @@
 'use client'
 
+import { startOfWeek } from 'date-fns'
 import { redirect, useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import { useEffect, useMemo } from 'react'
@@ -36,18 +37,12 @@ export default function MealPlanPage() {
   const { mealPlanId } = useParams<{ mealPlanId: string }>()
   const { data, isLoading } = useFitspaceGetMealPlanQuery({
     mealPlanId,
-    date: date ? date : now,
+    date: date
+      ? startOfWeek(new Date(date), { weekStartsOn: 1 }).toISOString()
+      : now,
   })
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <Loader />
-      </div>
-    )
-  }
-
-  if (!data?.clientGetMealPlan) {
+  if (!data?.clientGetMealPlan && !isLoading) {
     return redirect('/fitspace/meal-plans')
   }
 
@@ -55,6 +50,11 @@ export default function MealPlanPage() {
     <MealPlanProvider plan={data?.clientGetMealPlan?.plan}>
       <Navigation />
       <div className="max-w-sm mx-auto pb-24 pt-4">
+        {isLoading && (
+          <div className="flex justify-center items-center h-screen">
+            <Loader />
+          </div>
+        )}
         <MealView />
       </div>
     </MealPlanProvider>

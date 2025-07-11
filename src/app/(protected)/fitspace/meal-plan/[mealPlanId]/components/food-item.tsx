@@ -19,7 +19,7 @@ export function FoodItem({
     >
       <div className="flex justify-between gap-2">
         <p className="text-sm font-medium truncate">{food.name}</p>
-        <p className="text-xs">
+        <p className="text-xs shrink-0">
           {food.quantity} {food.unit}
         </p>
       </div>

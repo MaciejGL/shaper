@@ -431,8 +431,12 @@ export async function clientGetMealPlan(
                         userId: user.user.id,
                         loggedAt: args.date
                           ? {
-                              gte: startOfWeek(new Date(args.date)),
-                              lte: endOfWeek(new Date(args.date)),
+                              gte: startOfWeek(new Date(args.date), {
+                                weekStartsOn: 1,
+                              }),
+                              lte: endOfWeek(new Date(args.date), {
+                                weekStartsOn: 1,
+                              }),
                             }
                           : undefined,
                       },
