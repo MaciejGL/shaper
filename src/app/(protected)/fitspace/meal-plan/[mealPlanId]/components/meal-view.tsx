@@ -3,8 +3,9 @@ import { startTransition, useMemo, useState } from 'react'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { SwipeableWrapper } from '@/components/swipeable-wrapper'
+import { useWeekStartPreference } from '@/context/user-preferences-context'
 import { useDateSwipeNavigation } from '@/hooks/use-swipe-navigation'
-import { getWeekDays } from '@/lib/date-utils'
+import { getExtendedWeekDays } from '@/lib/date-utils'
 
 import { useMealPlan } from './meal-plan-context'
 import { MealsList } from './meals-list'
@@ -15,12 +16,13 @@ export function MealView() {
   const [animationVariant, setAnimationVariant] = useState<
     'slideFromLeft' | 'slideFromRight'
   >('slideFromLeft')
+  const weekStartsOn = useWeekStartPreference()
 
-  // Get available days for the current week
+  // Get available days for the current week and adjacent days for cross-week navigation
   const availableDays = useMemo(() => {
     if (!date) return []
-    return getWeekDays(date)
-  }, [date])
+    return getExtendedWeekDays(date, weekStartsOn)
+  }, [date, weekStartsOn])
 
   // Use the swipe navigation hook
   const { handleSwipeLeft, handleSwipeRight } = useDateSwipeNavigation({

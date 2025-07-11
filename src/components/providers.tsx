@@ -8,6 +8,7 @@ import type * as React from 'react'
 
 import { NavigationProvider } from '@/context/navigation-context'
 import { UserProvider } from '@/context/user-context'
+import { UserPreferencesProvider } from '@/context/user-preferences-context'
 import { getQueryClient } from '@/lib/get-query-client'
 
 import { ConfirmationModalProvider } from './confirmation-modal'
@@ -23,21 +24,23 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
         <UserProvider>
-          <ThemeProvider
-            attribute="class"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <PostHogProvider>
-              <NuqsAdapter>
-                <NavigationProvider>
-                  <ConfirmationModalProvider>
-                    <SidebarProvider>{children}</SidebarProvider>
-                  </ConfirmationModalProvider>
-                </NavigationProvider>
-              </NuqsAdapter>
-            </PostHogProvider>
-          </ThemeProvider>
+          <UserPreferencesProvider>
+            <ThemeProvider
+              attribute="class"
+              enableSystem
+              disableTransitionOnChange
+            >
+              <PostHogProvider>
+                <NuqsAdapter>
+                  <NavigationProvider>
+                    <ConfirmationModalProvider>
+                      <SidebarProvider>{children}</SidebarProvider>
+                    </ConfirmationModalProvider>
+                  </NavigationProvider>
+                </NuqsAdapter>
+              </PostHogProvider>
+            </ThemeProvider>
+          </UserPreferencesProvider>
         </UserProvider>
       </SessionProvider>
       {process.env.NEXT_PUBLIC_DEVTOOLS === 'true' && <ReactQueryDevtools />}

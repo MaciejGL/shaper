@@ -1,4 +1,4 @@
-import { addDays, format, parseISO, startOfWeek } from 'date-fns'
+import { addDays, format, parseISO, startOfWeek, subDays } from 'date-fns'
 
 export type WeekStartDay = 0 | 1 // 0 = Sunday, 1 = Monday
 
@@ -77,6 +77,70 @@ export function getWeekDays(
 }
 
 /**
+ * Get the Sunday from the previous week
+ * @param dateString - ISO date string
+ * @param weekStartsOn - Week start preference
+ * @returns ISO date string for previous week's Sunday
+ */
+export function getPreviousWeekSunday(
+  dateString: string,
+  weekStartsOn: WeekStartDay = DEFAULT_WEEK_START,
+): string {
+  const selectedDate = parseISO(dateString)
+  const startOfWeekDate = startOfWeek(selectedDate, { weekStartsOn })
+
+  // Go back to previous week's Sunday
+  const previousWeekStart = subDays(startOfWeekDate, 7)
+  const previousWeekSunday =
+    weekStartsOn === 1
+      ? addDays(previousWeekStart, 6) // If week starts on Monday, Sunday is at index 6
+      : previousWeekStart // If week starts on Sunday, Sunday is at index 0
+
+  return format(previousWeekSunday, 'yyyy-MM-dd')
+}
+
+/**
+ * Get the Monday from the next week
+ * @param dateString - ISO date string
+ * @param weekStartsOn - Week start preference
+ * @returns ISO date string for next week's Monday
+ */
+export function getNextWeekMonday(
+  dateString: string,
+  weekStartsOn: WeekStartDay = DEFAULT_WEEK_START,
+): string {
+  const selectedDate = parseISO(dateString)
+  const startOfWeekDate = startOfWeek(selectedDate, { weekStartsOn })
+
+  // Go to next week's Monday
+  const nextWeekStart = addDays(startOfWeekDate, 7)
+  const nextWeekMonday =
+    weekStartsOn === 1
+      ? nextWeekStart // If week starts on Monday, Monday is at index 0
+      : addDays(nextWeekStart, 1) // If week starts on Sunday, Monday is at index 1
+
+  return format(nextWeekMonday, 'yyyy-MM-dd')
+}
+
+/**
+ * Generate extended week days array that includes adjacent week days for seamless navigation
+ * @param dateString - ISO date string
+ * @param weekStartsOn - Week start preference
+ * @returns Array of ISO date strings including current week + previous Sunday + next Monday
+ */
+export function getExtendedWeekDays(
+  dateString: string,
+  weekStartsOn: WeekStartDay = DEFAULT_WEEK_START,
+): string[] {
+  const currentWeekDays = getWeekDays(dateString, weekStartsOn)
+  const previousSunday = getPreviousWeekSunday(dateString, weekStartsOn)
+  const nextMonday = getNextWeekMonday(dateString, weekStartsOn)
+
+  // Return array with previous Sunday at start and next Monday at end
+  return [previousSunday, ...currentWeekDays, nextMonday]
+}
+
+/**
  * Check if a given day matches the selected date's day of week
  * @param selectedDateString - Selected date ISO string
  * @param targetDayOfWeek - Target day of week (in database format)
@@ -103,6 +167,12 @@ export function createDateUtils(
     getDayOfWeek: (dateString: string) =>
       getDayOfWeek(dateString, weekStartsOn),
     getWeekDays: (dateString: string) => getWeekDays(dateString, weekStartsOn),
+    getExtendedWeekDays: (dateString: string) =>
+      getExtendedWeekDays(dateString, weekStartsOn),
+    getPreviousWeekSunday: (dateString: string) =>
+      getPreviousWeekSunday(dateString, weekStartsOn),
+    getNextWeekMonday: (dateString: string) =>
+      getNextWeekMonday(dateString, weekStartsOn),
     isDayMatch: (selectedDateString: string, targetDayOfWeek: number) =>
       isDayMatch(selectedDateString, targetDayOfWeek, weekStartsOn),
     normalizeDay: (jsDay: number) => normalizeDay(jsDay, weekStartsOn),

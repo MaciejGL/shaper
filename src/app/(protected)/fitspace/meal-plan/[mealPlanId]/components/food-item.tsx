@@ -18,8 +18,10 @@ export function FoodItem({
       }}
     >
       <div className="flex justify-between gap-2">
-        <p className="text-sm font-medium truncate">{food.name}</p>
-        <p className="text-xs shrink-0">
+        <p className="text-sm font-medium truncate min-w-0 flex-1 text-left">
+          {food.name}
+        </p>
+        <p className="text-xs shrink-0 whitespace-nowrap">
           {food.quantity} {food.unit}
         </p>
       </div>

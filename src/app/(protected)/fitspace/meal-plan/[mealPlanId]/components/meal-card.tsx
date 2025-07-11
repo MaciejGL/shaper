@@ -91,8 +91,8 @@ export function MealCard({ meal, onClick, onAddCustomFood }: MealCardProps) {
   const loggedTotals = calculateLoggedTotals(meal.foods)
 
   return (
-    <div className="grid grid-cols-[1fr_50px] gap-2">
-      <div>
+    <div className="grid grid-cols-[1fr_50px] gap-3">
+      <div className="min-w-0">
         <div className="flex items-center gap-2 justify-between">
           <MealTotals
             plannedTotals={{
