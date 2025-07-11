@@ -1,10 +1,11 @@
-import { addDays, format, formatDate, parseISO, startOfWeek } from 'date-fns'
+import { format, formatDate, parseISO, startOfWeek } from 'date-fns'
 import { useQueryState } from 'nuqs'
 import { useMemo } from 'react'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
+import { MealDayPickerDrawer } from '@/components/meal-day-picker-drawer'
 import { Progress } from '@/components/ui/progress'
-import { WeekPicker } from '@/components/week-picker'
+import { getDayOfWeek, getWeekDays, isDayMatch } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 import { DailyProgressCard } from './daily-progress-card'
@@ -37,7 +38,7 @@ export function Navigation() {
   return (
     <div
       className={cn(
-        'bg-sidebar rounded-b-lg sticky -top-[116px] z-10',
+        'bg-sidebar rounded-b-lg sticky -top-[120px] z-10',
         // Counter Main padding
         '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
         'p-2 md:p-4 lg:p-8',
@@ -62,10 +63,7 @@ function Day({ day }: { day: string }) {
   const planDay = useMemo(() => {
     if (!plan) return null
     return plan.weeks.at(0)?.days.find((planDay) => {
-      const selectedDate = parseISO(day)
-      // Convert JavaScript's Sunday=0, Monday=1 to Monday=0, Tuesday=1 system
-      const dayOfWeek = (selectedDate.getDay() + 6) % 7
-      return planDay.dayOfWeek === dayOfWeek
+      return isDayMatch(day, planDay.dayOfWeek)
     })
   }, [plan, day])
 
@@ -98,9 +96,7 @@ function Day({ day }: { day: string }) {
     setDate(day)
   }
 
-  const selectedDate = parseISO(day)
-  // Convert JavaScript's Sunday=0, Monday=1 to Monday=0, Tuesday=1 system
-  const dayOfWeek = (selectedDate.getDay() + 6) % 7
+  const dayOfWeek = getDayOfWeek(day)
   const dayName = getDayName(dayOfWeek, { short: true })
 
   return (
@@ -128,15 +124,7 @@ function DaySelector() {
 
   const days = useMemo(() => {
     if (!date) return []
-    const selectedDate = parseISO(date)
-    const startOfWeekDate = startOfWeek(selectedDate, { weekStartsOn: 1 })
-
-    const days = Array.from({ length: 7 }, (_, i) => {
-      const dayOfWeek = addDays(startOfWeekDate, i)
-      return format(dayOfWeek, 'yyyy-MM-dd')
-    })
-
-    return days
+    return getWeekDays(date)
   }, [date])
 
   return (
@@ -165,7 +153,7 @@ function WeekSelector() {
   }
 
   return (
-    <WeekPicker
+    <MealDayPickerDrawer
       value={selectedWeek}
       onChange={handleWeekChange}
       placeholder="Select week"

@@ -1,8 +1,9 @@
 'use client'
 
-import { parseISO } from 'date-fns'
 import { useQueryState } from 'nuqs'
 import { createContext, useContext, useMemo } from 'react'
+
+import { isDayMatch } from '@/lib/date-utils'
 
 import { MealDay, MealPlan } from '../page'
 
@@ -35,10 +36,9 @@ export function MealPlanProvider({ children, plan }: MealPlanProviderProps) {
 
   const activeDay = useMemo(() => {
     if (!activeWeek || !date) return null
-    const selectedDate = parseISO(date)
-    // Convert JavaScript's Sunday=0, Monday=1 to Monday=0, Tuesday=1 system
-    const dayOfWeek = (selectedDate.getDay() + 6) % 7
-    return activeWeek.days.find((day) => day.dayOfWeek === dayOfWeek) || null
+    return (
+      activeWeek.days.find((day) => isDayMatch(date, day.dayOfWeek)) || null
+    )
   }, [activeWeek, date])
 
   const value = useMemo(

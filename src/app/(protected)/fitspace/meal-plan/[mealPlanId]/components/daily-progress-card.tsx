@@ -40,9 +40,9 @@ export function DailyProgressCard({
 
   return (
     <div>
-      <div className="text-xs mt-1.5">
+      <div className="text-xs text-muted-foreground mt-1.5">
         <div className="grid grid-cols-4 gap-4">
-          <div>
+          <div className="space-y-1">
             <div className="flex justify-end">
               <FlameIcon className="size-3" />
               <span>
@@ -57,7 +57,7 @@ export function DailyProgressCard({
               )}
             />
           </div>
-          <div>
+          <div className="space-y-1">
             <div className="flex justify-end">
               <span>
                 {Math.round(dailyActual.protein)}/
@@ -71,7 +71,7 @@ export function DailyProgressCard({
               )}
             />
           </div>
-          <div>
+          <div className="space-y-1">
             <div className="flex justify-end">
               <span>
                 {Math.round(dailyActual.carbs)}/{Math.round(dailyTargets.carbs)}
@@ -82,7 +82,7 @@ export function DailyProgressCard({
               value={getProgressValue(dailyActual.carbs, dailyTargets.carbs)}
             />
           </div>
-          <div>
+          <div className="space-y-1">
             <div className="flex justify-end">
               <span>
                 {Math.round(dailyActual.fat)}/{Math.round(dailyTargets.fat)}F
