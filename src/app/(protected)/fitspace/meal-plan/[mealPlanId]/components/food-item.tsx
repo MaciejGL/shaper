@@ -1,9 +1,11 @@
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, PenSquareIcon, TrashIcon } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 
 import { FoodNutritionInfo } from './food-nutrition-info'
+import { useMealLogging } from './use-meal-logging'
 
 interface FoodItemProps {
   food: {
@@ -15,11 +17,11 @@ interface FoodItemProps {
     totalProtein: number
     totalCarbs: number
     totalFat: number
+    isCustomAddition?: boolean
   }
   showSeparator?: boolean
   isLogged?: boolean
   loggedQuantity?: number
-  onClick?: () => void
 }
 
 export function FoodItem({
@@ -27,21 +29,23 @@ export function FoodItem({
   showSeparator = false,
   isLogged = false,
   loggedQuantity,
-  onClick,
 }: FoodItemProps) {
-  const displayedQuantity = isLogged
-    ? loggedQuantity || food.quantity
-    : food.quantity
-  const isQuantityDifferent = isLogged && loggedQuantity !== food.quantity
+  const { handleRemoveLogItem, isRemovingLogItem } = useMealLogging()
+  const displayQuantity = loggedQuantity ?? food.quantity
+  const hasQuantityChanged =
+    loggedQuantity !== undefined && loggedQuantity !== food.quantity
 
-  // Calculate adjusted nutrition values when logged quantity differs
-  const nutritionRatio =
-    isLogged && loggedQuantity ? loggedQuantity / food.quantity : 1
+  // Calculate nutrition based on the actual logged quantity
+  const ratio = displayQuantity / food.quantity
+  const adjustedCalories = food.totalCalories * ratio
+  const adjustedProtein = food.totalProtein * ratio
+  const adjustedCarbs = food.totalCarbs * ratio
+  const adjustedFat = food.totalFat * ratio
 
-  const displayedCalories = Math.round(food.totalCalories * nutritionRatio)
-  const displayedProtein = Math.round(food.totalProtein * nutritionRatio)
-  const displayedCarbs = Math.round(food.totalCarbs * nutritionRatio)
-  const displayedFat = Math.round(food.totalFat * nutritionRatio)
+  const handleRemoveFood = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    handleRemoveLogItem(food.id)
+  }
 
   return (
     <div>
@@ -50,7 +54,6 @@ export function FoodItem({
         className={cn(
           'flex items-center gap-3 py-2 transition-colors bg-card-on-card rounded-md px-2 cursor-pointer hover:bg-muted/50',
         )}
-        onClick={onClick}
       >
         {/* Food Info */}
         <div className="flex-1 min-w-0 space-y-1">
@@ -60,11 +63,11 @@ export function FoodItem({
 
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">
-              {displayedQuantity} {food.unit}
+              {displayQuantity} {food.unit}
             </span>
 
             {/* Show planned vs actual */}
-            {isQuantityDifferent && (
+            {hasQuantityChanged && (
               <span className="text-xs text-muted-foreground">
                 (planned: {food.quantity} {food.unit})
               </span>
@@ -74,15 +77,24 @@ export function FoodItem({
 
         {/* Nutrition Info */}
         <FoodNutritionInfo
-          calories={displayedCalories}
-          protein={displayedProtein}
-          carbs={displayedCarbs}
-          fat={displayedFat}
+          calories={Math.round(adjustedCalories)}
+          protein={Math.round(adjustedProtein)}
+          carbs={Math.round(adjustedCarbs)}
+          fat={Math.round(adjustedFat)}
           isLogged={isLogged}
         />
 
-        {/* Arrow indicating clickable */}
-        <ChevronRight className="size-4 text-muted-foreground shrink-0" />
+        <div className="flex items-center gap-2">
+          {food.isCustomAddition && (
+            <Button
+              variant="secondary"
+              size="icon-sm"
+              onClick={handleRemoveFood}
+              iconOnly={<TrashIcon />}
+              loading={isRemovingLogItem}
+            />
+          )}
+        </div>
       </div>
     </div>
   )

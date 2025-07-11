@@ -3,8 +3,8 @@ import { PlusIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { SearchResult } from '@/lib/food-search'
 
-import { SearchResult } from './food-search'
 import { MacroBadge } from './macro-badge'
 
 export function FoodSearchResults({

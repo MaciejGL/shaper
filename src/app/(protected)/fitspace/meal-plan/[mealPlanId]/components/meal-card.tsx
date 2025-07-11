@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { CheckCircle, Circle } from 'lucide-react'
+import { CheckCircle, Circle, PlusIcon } from 'lucide-react'
 
 import { MacroBadge } from '@/app/(protected)/trainer/meal-plans/creator/components/macro-badge'
 import { Badge } from '@/components/ui/badge'
@@ -26,69 +26,76 @@ interface MealCardProps {
       totalProtein: number
       totalCarbs: number
       totalFat: number
-    }[]
-    logs: {
-      id: string
-      completedAt?: string | null
-      items: {
+      isCustomAddition: boolean
+      log?: {
         id: string
-        name: string
-        quantity: number
+        loggedQuantity: number
+        unit: string
+        loggedAt: string
+        notes?: string | null
         calories?: number | null
         protein?: number | null
         carbs?: number | null
         fat?: number | null
-      }[]
+        fiber?: number | null
+      } | null
     }[]
+    plannedCalories: number
+    plannedProtein: number
+    plannedCarbs: number
+    plannedFat: number
   }
   onClick?: () => void
+  onAddCustomFood?: () => void
   onCompleteMeal?: (mealId: string) => void
   onUncompleteMeal?: (mealId: string) => void
+}
+
+// Helper function to calculate logged totals from foods array
+function calculateLoggedTotals(foods: MealCardProps['meal']['foods']) {
+  let calories = 0
+  let protein = 0
+  let carbs = 0
+  let fat = 0
+
+  foods.forEach((food) => {
+    const log = food.log
+
+    if (food.isCustomAddition) {
+      calories += food.totalCalories
+      protein += food.totalProtein
+      carbs += food.totalCarbs
+      fat += food.totalFat
+    } else {
+      calories += log?.calories || food.totalCalories
+      protein += log?.protein || food.totalProtein
+      carbs += log?.carbs || food.totalCarbs
+      fat += log?.fat || food.totalFat
+    }
+  })
+
+  return {
+    calories: Math.round(calories * 100) / 100,
+    protein: Math.round(protein * 100) / 100,
+    carbs: Math.round(carbs * 100) / 100,
+    fat: Math.round(fat * 100) / 100,
+  }
 }
 
 export function MealCard({
   meal,
   onClick,
+  onAddCustomFood,
   onCompleteMeal,
   onUncompleteMeal,
 }: MealCardProps) {
-  // Get user's meal log for this meal
-  const userMealLog = meal.logs.find((log) => log.items && log.items.length > 0)
-  const isCompleted = userMealLog?.completedAt
+  // Check if meal is completed - if any food has been logged
+  const isCompleted =
+    Boolean(meal.foods.some((food) => food.log)) || Boolean(meal.completedAt)
 
-  // Create a map of logged items by food name (simpler approach)
-  const loggedItems = new Map(
-    userMealLog?.items?.map((item) => [
-      item.name,
-      {
-        quantity: item.quantity,
-        calories: item.calories || 0,
-        protein: item.protein || 0,
-        carbs: item.carbs || 0,
-        fat: item.fat || 0,
-      },
-    ]) || [],
-  )
-
-  const mealTotals = meal.foods.reduce(
-    (totals, food) => ({
-      calories: totals.calories + food.totalCalories,
-      protein: totals.protein + food.totalProtein,
-      carbs: totals.carbs + food.totalCarbs,
-      fat: totals.fat + food.totalFat,
-    }),
-    { calories: 0, protein: 0, carbs: 0, fat: 0 },
-  )
-
-  const loggedTotals = userMealLog?.items.reduce(
-    (totals, item) => ({
-      calories: totals.calories + (item.calories || 0),
-      protein: totals.protein + (item.protein || 0),
-      carbs: totals.carbs + (item.carbs || 0),
-      fat: totals.fat + (item.fat || 0),
-    }),
-    { calories: 0, protein: 0, carbs: 0, fat: 0 },
-  ) || { calories: 0, protein: 0, carbs: 0, fat: 0 }
+  const plannedFoods = meal.foods.filter((food) => !food.isCustomAddition)
+  const customFoods = meal.foods.filter((food) => food.isCustomAddition)
+  const loggedTotals = calculateLoggedTotals(meal.foods)
 
   const handleCompleteMeal = (e: React.MouseEvent) => {
     e.stopPropagation() // Prevent opening the drawer
@@ -101,11 +108,7 @@ export function MealCard({
 
   return (
     <Card
-      className={cn(
-        'transition-all cursor-pointer hover:shadow-md',
-        isCompleted &&
-          'border-green-200 bg-green-50/50 dark:border-green-800 dark:bg-green-950/20',
-      )}
+      className={cn('transition-all cursor-pointer hover:shadow-md')}
       onClick={onClick}
     >
       <CardHeader>
@@ -129,53 +132,103 @@ export function MealCard({
                   : 'text-gray-400 hover:text-green-600',
               )}
             />
+            <Button
+              variant="secondary"
+              size="icon-sm"
+              onClick={(e) => {
+                e.stopPropagation()
+                onAddCustomFood?.()
+              }}
+              iconOnly={<PlusIcon />}
+            >
+              Add Ingredient
+            </Button>
           </div>
         </div>
         {meal.instructions && (
           <p className="text-sm text-muted-foreground">{meal.instructions}</p>
         )}
+        <MealTotals
+          plannedTotals={{
+            calories: meal.plannedCalories,
+            protein: meal.plannedProtein,
+            carbs: meal.plannedCarbs,
+            fat: meal.plannedFat,
+          }}
+          loggedTotals={loggedTotals}
+          hasLogs={isCompleted}
+        />
       </CardHeader>
       <CardContent>
         {meal.foods.length > 0 ? (
-          <div className="space-y-1">
-            {meal.foods.map((food) => {
-              const loggedData = loggedItems.get(food.name)
-              const isLogged = !!loggedData
+          <div className="space-y-3">
+            {/* Planned Foods */}
+            {plannedFoods.length > 0 && (
+              <div className="space-y-1">
+                {plannedFoods.map((food) => {
+                  const isLogged = !!food.log
 
-              return (
-                <FoodItem
-                  key={food.id}
-                  food={food}
-                  isLogged={isLogged}
-                  loggedQuantity={loggedData?.quantity}
-                  onClick={onClick}
-                />
-              )
-            })}
+                  return (
+                    <FoodItem
+                      key={food.id}
+                      food={food}
+                      isLogged={isLogged}
+                      loggedQuantity={food.log?.loggedQuantity}
+                    />
+                  )
+                })}
+              </div>
+            )}
 
-            {/* Meal Totals */}
-            <Separator className="my-4" />
-            <div className="flex items-center justify-end gap-2">
-              <MealTotals
-                loggedTotals={loggedTotals}
-                mealTotals={mealTotals}
-                userMealLog={userMealLog}
-              />
-            </div>
+            {/* Custom Foods Added for Today */}
+            {customFoods.length > 0 && (
+              <div className="space-y-2">
+                <Separator className="flex-1 my-3" />
+                <div className="space-y-1">
+                  {customFoods.map((customFood) => {
+                    return (
+                      <FoodItem
+                        key={`custom-${customFood.id}`}
+                        food={customFood}
+                        isLogged={true}
+                        loggedQuantity={
+                          customFood.log?.loggedQuantity || customFood.quantity
+                        }
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
-          <p className="text-muted-foreground text-center py-4">
-            No foods planned for this meal
-          </p>
+          <div className="text-center py-8">
+            <div className="text-sm text-muted-foreground mb-4">
+              This meal has no foods planned yet.
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={(e) => {
+                e.stopPropagation()
+                onAddCustomFood?.()
+              }}
+            >
+              <PlusIcon className="h-4 w-4" />
+              Add Ingredient
+            </Button>
+          </div>
         )}
       </CardContent>
     </Card>
   )
 }
+
 function MealTotals({
   loggedTotals,
-  mealTotals,
-  userMealLog,
+  plannedTotals,
+  hasLogs,
 }: {
   loggedTotals: {
     calories: number
@@ -183,36 +236,22 @@ function MealTotals({
     carbs: number
     fat: number
   }
-  mealTotals: { calories: number; protein: number; carbs: number; fat: number }
-  userMealLog?: MealCardProps['meal']['logs'][number]
+  plannedTotals: {
+    calories: number
+    protein: number
+    carbs: number
+    fat: number
+  }
+  hasLogs: boolean
 }) {
-  const hasAnyLogs = userMealLog?.items && userMealLog.items.length > 0
+  const totalsToShow = hasLogs ? loggedTotals : plannedTotals
+
   return (
-    <div className="flex items-center gap-2">
-      {hasAnyLogs ? (
-        <>
-          <MacroBadge
-            macro="calories"
-            value={Math.round(loggedTotals.calories)}
-          />
-          <MacroBadge
-            macro="protein"
-            value={Math.round(loggedTotals.protein)}
-          />
-          <MacroBadge macro="carbs" value={Math.round(loggedTotals.carbs)} />
-          <MacroBadge macro="fat" value={Math.round(loggedTotals.fat)} />
-        </>
-      ) : (
-        <>
-          <MacroBadge
-            macro="calories"
-            value={Math.round(mealTotals.calories)}
-          />
-          <MacroBadge macro="protein" value={Math.round(mealTotals.protein)} />
-          <MacroBadge macro="carbs" value={Math.round(mealTotals.carbs)} />
-          <MacroBadge macro="fat" value={Math.round(mealTotals.fat)} />
-        </>
-      )}
+    <div className="flex flex-wrap gap-1 justify-center pt-2">
+      <MacroBadge macro="calories" value={Math.round(totalsToShow.calories)} />
+      <MacroBadge macro="protein" value={Math.round(totalsToShow.protein)} />
+      <MacroBadge macro="carbs" value={Math.round(totalsToShow.carbs)} />
+      <MacroBadge macro="fat" value={Math.round(totalsToShow.fat)} />
     </div>
   )
 }

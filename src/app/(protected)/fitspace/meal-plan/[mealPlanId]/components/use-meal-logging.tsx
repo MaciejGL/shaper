@@ -4,7 +4,7 @@ import { toast } from 'sonner'
 import {
   useBatchLogMealFoodMutation,
   useCompleteMealMutation,
-  useLogMealFoodMutation,
+  useRemoveMealLogMutation,
   useUncompleteMealMutation,
   useUpdateMealFoodLogMutation,
 } from '@/generated/graphql-client'
@@ -23,21 +23,6 @@ interface FoodQuantity {
 
 export function useMealLogging() {
   const queryClient = useQueryClient()
-
-  const { mutate: logMealFood, isPending: isLoggingFood } =
-    useLogMealFoodMutation({
-      onSuccess: () => {
-        // Invalidate all meal plan related queries to refresh the UI
-        queryClient.invalidateQueries({ queryKey: ['FitspaceGetMealPlan'] })
-        queryClient.invalidateQueries({
-          queryKey: ['FitspaceMealPlansOverview'],
-        })
-      },
-      onError: (error) => {
-        toast.error('Failed to log meal food')
-        console.error('Error logging meal food:', error)
-      },
-    })
 
   const { mutate: batchLogMealFood, isPending: isBatchLoggingFood } =
     useBatchLogMealFoodMutation({
@@ -95,32 +80,15 @@ export function useMealLogging() {
       },
     })
 
-  const handleLogFood = (
-    mealId: string,
-    foodId: string,
-    quantity: number,
-    foodData: {
-      name: string
-      unit: string
-      calories?: number
-      protein?: number
-      carbs?: number
-      fat?: number
-    },
-  ) => {
-    logMealFood({
-      input: {
-        mealId,
-        name: foodData.name,
-        quantity,
-        unit: foodData.unit,
-        calories: foodData.calories,
-        protein: foodData.protein,
-        carbs: foodData.carbs,
-        fat: foodData.fat,
+  const { mutate: removeLog, isPending: isRemovingLogItem } =
+    useRemoveMealLogMutation({
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ['FitspaceGetMealPlan'] })
+        queryClient.invalidateQueries({
+          queryKey: ['FitspaceMealPlansOverview'],
+        })
       },
     })
-  }
 
   const handleBatchLogMeal = (
     mealId: string,
@@ -180,15 +148,6 @@ export function useMealLogging() {
     })
   }
 
-  const handleUpdateQuantity = (logItemId: string, quantity: number) => {
-    updateMealFoodLog({
-      input: {
-        id: logItemId,
-        quantity,
-      },
-    })
-  }
-
   const handleCompleteMeal = (mealId: string) => {
     completeMeal({ mealId })
   }
@@ -197,18 +156,22 @@ export function useMealLogging() {
     uncompleteMeal({ mealId })
   }
 
+  const handleRemoveLogItem = (foodId: string) => {
+    removeLog({ foodId })
+  }
+
   return {
-    handleLogFood,
     handleBatchLogMeal,
     handleRemoveLog,
-    handleUpdateQuantity,
     handleCompleteMeal,
     handleUncompleteMeal,
+    handleRemoveLogItem,
+    isRemovingLogItem,
     isLoading:
-      isLoggingFood ||
       isBatchLoggingFood ||
       isUpdatingLog ||
       isCompletingMeal ||
-      isUncompletingMeal,
+      isUncompletingMeal ||
+      isRemovingLogItem,
   }
 }

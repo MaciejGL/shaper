@@ -111,7 +111,7 @@ export class OpenFoodFactsClient {
     page = 1,
   ): Promise<OpenFoodFactsSearchResult[]> {
     try {
-      // First try: Search with category filters for basic ingredients
+      // First try: Simple search without category filters for reliability
       const restrictedParams = new URLSearchParams({
         search_terms: query,
         search_simple: '1',
@@ -122,8 +122,6 @@ export class OpenFoodFactsClient {
         sort_by: 'unique_scans_n',
         countries: 'Norway',
         // Prioritize basic ingredients over processed products
-        categories_tags:
-          'en:meats,en:fresh-meat,en:poultry,en:chicken-and-its-products,en:beef-and-its-products,en:raw-meat',
         fields:
           'code,product_name,brands,nutriments,image_url,image_front_url,serving_size,serving_quantity,ingredients_text,allergens',
       })
@@ -134,17 +132,41 @@ export class OpenFoodFactsClient {
           headers: {
             'User-Agent': this.userAgent,
           },
+          signal: AbortSignal.timeout(10000), // 10 second timeout
         },
       )
 
       if (!response.ok) {
+        console.error(
+          `OpenFoodFacts API error: ${response.status} ${response.statusText}`,
+        )
+        console.error(
+          `Request URL: https://world.openfoodfacts.org/cgi/search.pl?${restrictedParams}`,
+        )
+
+        // For 429 (rate limit) or 503 (service unavailable), return empty results instead of throwing
+        if (
+          response.status === 429 ||
+          response.status === 503 ||
+          response.status >= 500
+        ) {
+          console.warn(
+            `OpenFoodFacts API temporarily unavailable (${response.status}), returning empty results`,
+          )
+          return []
+        }
+
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
       let data: OpenFoodFactsSearchResponse = await response.json()
 
-      // If we get few results with category filters, try broader search
+      // If we get few results, try even broader search
       if ((data.products || []).length < 5) {
+        console.log(
+          `Got ${(data.products || []).length} results, trying broader search`,
+        )
+
         const broadParams = new URLSearchParams({
           search_terms: query,
           search_simple: '1',
@@ -153,22 +175,32 @@ export class OpenFoodFactsClient {
           page_size: limit.toString(),
           page: page.toString(),
           sort_by: 'unique_scans_n',
-          countries: 'Norway',
           fields:
             'code,product_name,brands,nutriments,image_url,image_front_url,serving_size,serving_quantity,ingredients_text,allergens',
         })
 
-        response = await fetch(
-          `https://world.openfoodfacts.org/cgi/search.pl?${broadParams}`,
-          {
-            headers: {
-              'User-Agent': this.userAgent,
+        try {
+          response = await fetch(
+            `https://world.openfoodfacts.org/cgi/search.pl?${broadParams}`,
+            {
+              headers: {
+                'User-Agent': this.userAgent,
+              },
+              signal: AbortSignal.timeout(10000), // 10 second timeout
             },
-          },
-        )
+          )
 
-        if (response.ok) {
-          data = await response.json()
+          if (response.ok) {
+            data = await response.json()
+            console.log(
+              `Broader search returned ${(data.products || []).length} results`,
+            )
+          } else {
+            console.warn(`Broader search failed with status ${response.status}`)
+          }
+        } catch (error) {
+          console.warn('Broader search failed:', error)
+          // Continue with original data
         }
       }
 
@@ -251,9 +283,6 @@ export class OpenFoodFactsClient {
         sort_by: 'unique_scans_n',
         // Filter for Norwegian products to get local/relevant results
         countries: 'Norway',
-        // Prioritize basic ingredients over processed products
-        categories_tags:
-          'en:meats,en:fresh-meat,en:poultry,en:chicken-and-its-products,en:beef-and-its-products,en:raw-meat',
         fields:
           'code,product_name,brands,nutriments,image_url,image_front_url,serving_size,serving_quantity,ingredients_text,allergens',
       })
@@ -265,10 +294,36 @@ export class OpenFoodFactsClient {
           headers: {
             'User-Agent': this.userAgent,
           },
+          signal: AbortSignal.timeout(10000), // 10 second timeout
         },
       )
 
       if (!response.ok) {
+        console.error(
+          `OpenFoodFacts pagination API error: ${response.status} ${response.statusText}`,
+        )
+        console.error(
+          `Request URL: https://world.openfoodfacts.org/cgi/search.pl?${params}`,
+        )
+
+        // For 429 (rate limit) or 503 (service unavailable), return empty results instead of throwing
+        if (
+          response.status === 429 ||
+          response.status === 503 ||
+          response.status >= 500
+        ) {
+          console.warn(
+            `OpenFoodFacts API temporarily unavailable (${response.status}), returning empty results`,
+          )
+          return {
+            products: [],
+            count: 0,
+            page: 1,
+            page_count: 0,
+            page_size: limit,
+          }
+        }
+
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 

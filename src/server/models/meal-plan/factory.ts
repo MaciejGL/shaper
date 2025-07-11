@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client'
 import { GraphQLError } from 'graphql'
 
 import {
+  GQLMutationAddCustomFoodToMealArgs,
   GQLMutationAssignMealPlanToClientArgs,
   GQLMutationBatchLogMealFoodArgs,
   GQLMutationCompleteMealArgs,
@@ -10,7 +11,7 @@ import {
   GQLMutationFitspaceActivateMealPlanArgs,
   GQLMutationFitspaceDeactivateMealPlanArgs,
   GQLMutationFitspaceDeleteMealPlanArgs,
-  GQLMutationLogMealFoodArgs,
+  GQLMutationRemoveMealLogArgs,
   GQLMutationRemoveMealPlanFromClientArgs,
   GQLMutationSaveMealArgs,
   GQLMutationUncompleteMealArgs,
@@ -489,7 +490,7 @@ export async function clientGetMealPlan(
   }
 
   if (!mealPlan) {
-    throw new Error('Meal plan not found')
+    return null
   }
 
   return {
@@ -1181,89 +1182,8 @@ export async function fitspaceDeleteMealPlan(
 }
 
 /**
- * Log a meal food item - creates a meal log and meal log item
- */
-export async function logMealFood(
-  args: GQLMutationLogMealFoodArgs,
-  context: GQLContext,
-) {
-  const user = context.user
-  if (!user) {
-    throw new Error('User not found')
-  }
-
-  const { input } = args
-
-  try {
-    // Check if meal exists and belongs to user's meal plan
-    const meal = await prisma.meal.findUnique({
-      where: { id: input.mealId },
-      include: {
-        day: {
-          include: {
-            week: {
-              include: {
-                plan: true,
-              },
-            },
-          },
-        },
-      },
-    })
-
-    if (!meal) {
-      throw new Error('Meal not found')
-    }
-
-    if (meal.day.week.plan.assignedToId !== user.user.id) {
-      throw new Error('You can only log your own meals')
-    }
-
-    // Find or create meal log for this meal
-    let mealLog = await prisma.mealLog.findFirst({
-      where: {
-        mealId: input.mealId,
-        userId: user.user.id,
-      },
-    })
-
-    if (!mealLog) {
-      mealLog = await prisma.mealLog.create({
-        data: {
-          mealId: input.mealId,
-          userId: user.user.id,
-        },
-      })
-    }
-
-    // Create meal log item
-    const mealLogItem = await prisma.mealLogItem.create({
-      data: {
-        logId: mealLog.id,
-        name: input.name,
-        quantity: input.quantity,
-        unit: input.unit,
-        barcode: input.barcode,
-        calories: input.calories,
-        protein: input.protein,
-        carbs: input.carbs,
-        fat: input.fat,
-        fiber: input.fiber,
-        openFoodFactsId: input.openFoodFactsId,
-        productData: input.productData ? JSON.parse(input.productData) : null,
-        notes: input.notes,
-      },
-    })
-
-    return new MealLogItem(mealLogItem, context)
-  } catch (error) {
-    console.error('Error logging meal food:', error)
-    throw new GraphQLError('Failed to log meal food')
-  }
-}
-
-/**
  * Batch log multiple meal foods in a single transaction
+ * Updates existing log items or creates new ones (upsert behavior)
  */
 export async function batchLogMealFood(
   args: GQLMutationBatchLogMealFoodArgs,
@@ -1281,6 +1201,7 @@ export async function batchLogMealFood(
     const meal = await prisma.meal.findUnique({
       where: { id: input.mealId },
       include: {
+        foods: true, // Include planned foods for matching
         day: {
           include: {
             week: {
@@ -1309,6 +1230,9 @@ export async function batchLogMealFood(
           mealId: input.mealId,
           userId: user.user.id,
         },
+        include: {
+          items: true, // Include existing log items
+        },
       })
 
       if (!mealLog) {
@@ -1317,29 +1241,68 @@ export async function batchLogMealFood(
             mealId: input.mealId,
             userId: user.user.id,
           },
+          include: {
+            items: true,
+          },
         })
       }
 
-      // Create all meal log items in batch
-      const mealLogItems = input.foods.map((food) => ({
-        logId: mealLog.id,
-        name: food.name,
-        quantity: food.quantity,
-        unit: food.unit,
-        barcode: food.barcode ?? undefined,
-        calories: food.calories ?? undefined,
-        protein: food.protein ?? undefined,
-        carbs: food.carbs ?? undefined,
-        fat: food.fat ?? undefined,
-        fiber: food.fiber ?? undefined,
-        openFoodFactsId: food.openFoodFactsId ?? undefined,
-        productData: food.productData ? JSON.parse(food.productData) : null,
-        notes: food.notes ?? undefined,
-      }))
+      // Process each food in the batch
+      for (const food of input.foods) {
+        // Find existing log item for this food (match by name, case-insensitive)
+        const existingLogItem = mealLog.items.find(
+          (item) => item.name.toLowerCase() === food.name.toLowerCase(),
+        )
 
-      await tx.mealLogItem.createMany({
-        data: mealLogItems,
-      })
+        // Find planned food to link to (optional)
+        const plannedFood = meal.foods.find(
+          (mf) => mf.name.toLowerCase() === food.name.toLowerCase(),
+        )
+        if (existingLogItem) {
+          // Update existing log item
+          await tx.mealLogItem.update({
+            where: { id: existingLogItem.id },
+            data: {
+              quantity: food.quantity,
+              unit: food.unit,
+              barcode: food.barcode ?? undefined,
+              calories: food.calories ?? undefined,
+              protein: food.protein ?? undefined,
+              carbs: food.carbs ?? undefined,
+              fat: food.fat ?? undefined,
+              fiber: food.fiber ?? undefined,
+              openFoodFactsId: food.openFoodFactsId ?? undefined,
+              productData: food.productData
+                ? JSON.parse(food.productData)
+                : null,
+              notes: food.notes ?? undefined,
+              plannedFoodId: plannedFood?.id ?? undefined,
+            },
+          })
+        } else {
+          // Create new log item
+          await tx.mealLogItem.create({
+            data: {
+              logId: mealLog.id,
+              name: food.name,
+              quantity: food.quantity,
+              unit: food.unit,
+              barcode: food.barcode ?? undefined,
+              calories: food.calories ?? undefined,
+              protein: food.protein ?? undefined,
+              carbs: food.carbs ?? undefined,
+              fat: food.fat ?? undefined,
+              fiber: food.fiber ?? undefined,
+              openFoodFactsId: food.openFoodFactsId ?? undefined,
+              productData: food.productData
+                ? JSON.parse(food.productData)
+                : null,
+              notes: food.notes ?? undefined,
+              plannedFoodId: plannedFood?.id ?? undefined,
+            },
+          })
+        }
+      }
     })
 
     return true
@@ -1396,13 +1359,44 @@ export async function updateMealFoodLog(
       throw new Error('You can only update your own meal logs')
     }
 
+    // Prepare update data
+    const updateData: Prisma.MealLogItemUpdateInput = {
+      notes: input.notes ?? undefined,
+    }
+
+    // If quantity is being updated, recalculate nutritional values for custom additions
+    if (input.quantity !== undefined && input.quantity !== null) {
+      updateData.quantity = input.quantity
+
+      // For custom additions, recalculate nutritional values based on new quantity
+      if (mealLogItem.isCustomAddition && mealLogItem.quantity > 0) {
+        const currentQuantity = mealLogItem.quantity
+        const newQuantity = input.quantity
+        const ratio = newQuantity / currentQuantity
+
+        // Recalculate nutritional values based on the new quantity
+        updateData.calories = mealLogItem.calories
+          ? Math.round(mealLogItem.calories * ratio * 100) / 100
+          : null
+        updateData.protein = mealLogItem.protein
+          ? Math.round(mealLogItem.protein * ratio * 100) / 100
+          : null
+        updateData.carbs = mealLogItem.carbs
+          ? Math.round(mealLogItem.carbs * ratio * 100) / 100
+          : null
+        updateData.fat = mealLogItem.fat
+          ? Math.round(mealLogItem.fat * ratio * 100) / 100
+          : null
+        updateData.fiber = mealLogItem.fiber
+          ? Math.round(mealLogItem.fiber * ratio * 100) / 100
+          : null
+      }
+    }
+
     // Update the meal log item
     await prisma.mealLogItem.update({
       where: { id: input.id },
-      data: {
-        quantity: input.quantity ?? undefined,
-        notes: input.notes ?? undefined,
-      },
+      data: updateData,
     })
 
     return true
@@ -1545,5 +1539,122 @@ export async function uncompleteMeal(
   } catch (error) {
     console.error('Error uncompleting meal:', error)
     throw new GraphQLError('Failed to uncomplete meal')
+  }
+}
+
+/**
+ * Add a custom food to a meal (creates a MealLogItem with isCustomAddition = true)
+ */
+export async function addCustomFoodToMeal(
+  args: GQLMutationAddCustomFoodToMealArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { input } = args
+
+  try {
+    // Check if meal exists and belongs to user's meal plan
+    const meal = await prisma.meal.findUnique({
+      where: { id: input.mealId },
+      include: {
+        day: {
+          include: {
+            week: {
+              include: {
+                plan: true,
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!meal) {
+      throw new Error('Meal not found')
+    }
+
+    if (meal.day.week.plan.assignedToId !== user.user.id) {
+      throw new Error('You can only add foods to your own meals')
+    }
+
+    // Find or create meal log for this meal
+    let mealLog = await prisma.mealLog.findFirst({
+      where: {
+        mealId: input.mealId,
+        userId: user.user.id,
+      },
+    })
+
+    if (!mealLog) {
+      mealLog = await prisma.mealLog.create({
+        data: {
+          mealId: input.mealId,
+          userId: user.user.id,
+        },
+      })
+    }
+
+    // Calculate nutritional data from per100g values
+    const factor = input.quantity / 100
+    const calories = input.caloriesPer100g
+      ? input.caloriesPer100g * factor
+      : null
+    const protein = input.proteinPer100g ? input.proteinPer100g * factor : null
+    const carbs = input.carbsPer100g ? input.carbsPer100g * factor : null
+    const fat = input.fatPer100g ? input.fatPer100g * factor : null
+    const fiber = input.fiberPer100g ? input.fiberPer100g * factor : null
+
+    // Create meal log item as custom addition
+    const mealLogItem = await prisma.mealLogItem.create({
+      data: {
+        logId: mealLog.id,
+        name: input.name,
+        quantity: input.quantity,
+        unit: input.unit,
+        calories,
+        protein,
+        carbs,
+        fat,
+        fiber,
+        openFoodFactsId: input.openFoodFactsId,
+        productData: input.productData ? JSON.parse(input.productData) : null,
+        notes: input.notes,
+        plannedFoodId: null, // Not linked to any planned food
+        isCustomAddition: true, // This is a custom addition
+      },
+    })
+
+    return new MealLogItem(mealLogItem, context)
+  } catch (error) {
+    console.error('Error adding custom food to meal:', error)
+    throw new GraphQLError('Failed to add custom food to meal')
+  }
+}
+
+export async function removeMealLog(
+  args: GQLMutationRemoveMealLogArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { foodId } = args
+
+  try {
+    // Check if meal exists and belongs to user's meal plan
+    await prisma.mealLogItem.delete({
+      where: { id: foodId },
+    })
+
+    return true
+  } catch (error) {
+    console.error('Error removing meal log:', error)
+    throw new GraphQLError('Failed to remove meal log')
   }
 }

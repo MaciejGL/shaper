@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { CustomFoodSearchDrawer } from './custom-food-search-drawer'
 import { MealCard } from './meal-card'
 import { MealLoggingDrawer } from './meal-logging-drawer'
 import { useMealLogging } from './use-meal-logging'
@@ -20,20 +21,28 @@ interface MealsListProps {
       totalProtein: number
       totalCarbs: number
       totalFat: number
-    }[]
-    logs: {
-      id: string
-      completedAt?: string | null
-      items: {
+      isCustomAddition: boolean
+      log?: {
         id: string
-        name: string
-        quantity: number
+        loggedQuantity: number
+        unit: string
+        loggedAt: string
+        notes?: string | null
         calories?: number | null
         protein?: number | null
         carbs?: number | null
         fat?: number | null
-      }[]
+        fiber?: number | null
+      } | null
     }[]
+    plannedCalories: number
+    plannedProtein: number
+    plannedCarbs: number
+    plannedFat: number
+    loggedCalories: number
+    loggedProtein: number
+    loggedCarbs: number
+    loggedFat: number
   }[]
 }
 
@@ -53,7 +62,9 @@ export function MealsList({ meals }: MealsListProps) {
   const [selectedMeal, setSelectedMeal] = useState<(typeof meals)[0] | null>(
     null,
   )
+
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [customFoodDrawerOpen, setCustomFoodDrawerOpen] = useState(false)
 
   const {
     handleBatchLogMeal,
@@ -65,6 +76,11 @@ export function MealsList({ meals }: MealsListProps) {
   const handleMealClick = (meal: (typeof meals)[0]) => {
     setSelectedMeal(meal)
     setDrawerOpen(true)
+  }
+
+  const handleAddCustomFood = (meal: (typeof meals)[0]) => {
+    setSelectedMeal(meal)
+    setCustomFoodDrawerOpen(true)
   }
 
   const handleCloseDrawer = () => {
@@ -88,19 +104,41 @@ export function MealsList({ meals }: MealsListProps) {
             key={meal.id}
             meal={meal}
             onClick={() => handleMealClick(meal)}
+            onAddCustomFood={() => handleAddCustomFood(meal)}
             onCompleteMeal={handleCompleteMeal}
             onUncompleteMeal={handleUncompleteMeal}
           />
         ))}
       </div>
 
-      {/* Meal Logging Drawer */}
+      {/* Full Meal Logging Drawer */}
       <MealLoggingDrawer
         meal={selectedMeal}
         open={drawerOpen}
         onClose={handleCloseDrawer}
         onSave={handleSaveMealLog}
         isLoading={isLoading}
+      />
+
+      {/* Single Food Adjustment Drawer */}
+      {/* <SingleFoodAdjustmentDrawer
+        food={selectedFood}
+        mealName={selectedMeal?.name || ''}
+        open={singleFoodDrawerOpen}
+        onClose={handleCloseSingleFoodDrawer}
+        onSave={handleSaveSingleFood}
+        isLoading={isLoading}
+      /> */}
+
+      {/* Custom Food Search Drawer */}
+      <CustomFoodSearchDrawer
+        isOpen={customFoodDrawerOpen}
+        onClose={() => setCustomFoodDrawerOpen(false)}
+        mealId={selectedMeal?.id || ''}
+        onFoodAdded={() => {
+          // Invalidate queries to refresh the meal data
+          setCustomFoodDrawerOpen(false)
+        }}
       />
     </>
   )

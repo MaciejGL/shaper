@@ -24,7 +24,7 @@ export default function MealPlanPage() {
   }
 
   if (!data?.clientGetMealPlan) {
-    return redirect('/fitspace/meal-plan/no-plan')
+    return redirect('/fitspace/meal-plans')
   }
 
   return data?.clientGetMealPlan ? (

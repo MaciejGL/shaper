@@ -7,11 +7,9 @@ import {
 } from '@prisma/client'
 
 import { GQLMeal } from '@/generated/graphql-server'
-import { openFoodFactsClient } from '@/lib/open-food-facts/client'
 import { GQLContext } from '@/types/gql-context'
 
-import MealFood from '../meal-food/model'
-import MealLog from '../meal-log/model'
+import MealFoodItem from '../meal-food-item/model'
 
 export default class Meal implements GQLMeal {
   constructor(
@@ -22,7 +20,6 @@ export default class Meal implements GQLMeal {
         items?: PrismaMealLogItem[]
       })[]
     },
-
     protected context: GQLContext,
   ) {}
 
@@ -34,10 +31,6 @@ export default class Meal implements GQLMeal {
     return this.data.name
   }
 
-  get description() {
-    return this.data.instructions
-  }
-
   get dateTime() {
     return this.data.dateTime.toISOString()
   }
@@ -46,33 +39,61 @@ export default class Meal implements GQLMeal {
     return this.data.instructions
   }
 
-  async day() {
-    return null
-  }
-
   async foods() {
-    return (
-      this.data.foods?.map((food) => new MealFood(food, this.context)) || []
-    )
+    const foodItems: MealFoodItem[] = []
+
+    // Add planned foods with their consumption logs
+    if (this.data.foods) {
+      // Get all consumption logs (not custom additions) for this meal
+      const consumptionLogs = new Map<string, PrismaMealLogItem>()
+
+      this.data.logs?.forEach((log) => {
+        log.items?.forEach((item) => {
+          if (!item.isCustomAddition) {
+            // Keep only the latest log for each food name
+            const existing = consumptionLogs.get(item.name.toLowerCase())
+            if (!existing || item.createdAt > existing.createdAt) {
+              consumptionLogs.set(item.name.toLowerCase(), item)
+            }
+          }
+        })
+      })
+
+      // Add planned foods with their latest consumption logs
+      this.data.foods.forEach((plannedFood) => {
+        const latestLog =
+          consumptionLogs.get(plannedFood.name.toLowerCase()) || null
+        const foodItem = new MealFoodItem(
+          { ...plannedFood, latestLog },
+          this.context,
+        )
+        foodItems.push(foodItem)
+      })
+    }
+
+    // Add custom additions
+    if (this.data.logs) {
+      this.data.logs.forEach((log) => {
+        log.items?.forEach((item) => {
+          if (item.isCustomAddition) {
+            const foodItem = new MealFoodItem(item, this.context)
+            foodItems.push(foodItem)
+          }
+        })
+      })
+    }
+
+    return foodItems
   }
 
-  async logs() {
-    return this.data.logs?.map((log) => new MealLog(log, this.context)) || []
-  }
-
-  // Calculated nutrition fields from planned foods
   get plannedCalories() {
     if (!this.data.foods) return 0
 
     let total = 0
     this.data.foods.forEach((food) => {
-      if (food.caloriesPer100g && food.quantity && food.unit) {
-        const nutrition = openFoodFactsClient.calculateNutrition(
-          food,
-          food.quantity,
-          food.unit,
-        )
-        total += nutrition.calories
+      const caloriesPer100g = food.caloriesPer100g
+      if (caloriesPer100g) {
+        total += (caloriesPer100g * food.quantity) / 100
       }
     })
 
@@ -84,13 +105,9 @@ export default class Meal implements GQLMeal {
 
     let total = 0
     this.data.foods.forEach((food) => {
-      if (food.proteinPer100g && food.quantity && food.unit) {
-        const nutrition = openFoodFactsClient.calculateNutrition(
-          food,
-          food.quantity,
-          food.unit,
-        )
-        total += nutrition.protein
+      const proteinPer100g = food.proteinPer100g
+      if (proteinPer100g) {
+        total += (proteinPer100g * food.quantity) / 100
       }
     })
 
@@ -102,13 +119,9 @@ export default class Meal implements GQLMeal {
 
     let total = 0
     this.data.foods.forEach((food) => {
-      if (food.carbsPer100g && food.quantity && food.unit) {
-        const nutrition = openFoodFactsClient.calculateNutrition(
-          food,
-          food.quantity,
-          food.unit,
-        )
-        total += nutrition.carbs
+      const carbsPer100g = food.carbsPer100g
+      if (carbsPer100g) {
+        total += (carbsPer100g * food.quantity) / 100
       }
     })
 
@@ -120,66 +133,10 @@ export default class Meal implements GQLMeal {
 
     let total = 0
     this.data.foods.forEach((food) => {
-      if (food.fatPer100g && food.quantity && food.unit) {
-        const nutrition = openFoodFactsClient.calculateNutrition(
-          food,
-          food.quantity,
-          food.unit,
-        )
-        total += nutrition.fat
+      const fatPer100g = food.fatPer100g
+      if (fatPer100g) {
+        total += (fatPer100g * food.quantity) / 100
       }
-    })
-
-    return Math.round(total * 100) / 100
-  }
-
-  get loggedCalories() {
-    if (!this.data.logs) return 0
-
-    let total = 0
-    this.data.logs.forEach((log) => {
-      log.items?.forEach((item) => {
-        total += item.calories || 0
-      })
-    })
-
-    return Math.round(total * 100) / 100
-  }
-
-  get loggedCarbs() {
-    if (!this.data.logs) return 0
-
-    let total = 0
-    this.data.logs.forEach((log) => {
-      log.items?.forEach((item) => {
-        total += item.carbs || 0
-      })
-    })
-
-    return Math.round(total * 100) / 100
-  }
-
-  get loggedFat() {
-    if (!this.data.logs) return 0
-
-    let total = 0
-    this.data.logs.forEach((log) => {
-      log.items?.forEach((item) => {
-        total += item.fat || 0
-      })
-    })
-
-    return Math.round(total * 100) / 100
-  }
-
-  get loggedProtein() {
-    if (!this.data.logs) return 0
-
-    let total = 0
-    this.data.logs.forEach((log) => {
-      log.items?.forEach((item) => {
-        total += item.protein || 0
-      })
     })
 
     return Math.round(total * 100) / 100

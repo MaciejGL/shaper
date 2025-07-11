@@ -63,6 +63,14 @@ export default class MealLogItem implements GQLMealLogItem {
     return this.data.notes
   }
 
+  get plannedFoodId() {
+    return this.data.plannedFoodId
+  }
+
+  get isCustomAddition() {
+    return this.data.isCustomAddition ?? false
+  }
+
   get openFoodFactsId() {
     return this.data.openFoodFactsId
   }

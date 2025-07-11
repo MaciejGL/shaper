@@ -49,6 +49,21 @@ export type GQLAddBodyMeasurementInput = {
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type GQLAddCustomFoodToMealInput = {
+  caloriesPer100g?: InputMaybe<Scalars['Float']['input']>;
+  carbsPer100g?: InputMaybe<Scalars['Float']['input']>;
+  fatPer100g?: InputMaybe<Scalars['Float']['input']>;
+  fiberPer100g?: InputMaybe<Scalars['Float']['input']>;
+  mealId: Scalars['ID']['input'];
+  name: Scalars['String']['input'];
+  notes?: InputMaybe<Scalars['String']['input']>;
+  openFoodFactsId?: InputMaybe<Scalars['String']['input']>;
+  productData?: InputMaybe<Scalars['String']['input']>;
+  proteinPer100g?: InputMaybe<Scalars['Float']['input']>;
+  quantity: Scalars['Float']['input'];
+  unit: Scalars['String']['input'];
+};
+
 export type GQLAddExerciseToDayInput = {
   additionalInstructions?: InputMaybe<Scalars['String']['input']>;
   baseId?: InputMaybe<Scalars['ID']['input']>;
@@ -505,22 +520,6 @@ export enum GQLGoal {
   Maintain = 'MAINTAIN'
 }
 
-export type GQLLogMealFoodInput = {
-  barcode?: InputMaybe<Scalars['String']['input']>;
-  calories?: InputMaybe<Scalars['Float']['input']>;
-  carbs?: InputMaybe<Scalars['Float']['input']>;
-  fat?: InputMaybe<Scalars['Float']['input']>;
-  fiber?: InputMaybe<Scalars['Float']['input']>;
-  mealId: Scalars['ID']['input'];
-  name: Scalars['String']['input'];
-  notes?: InputMaybe<Scalars['String']['input']>;
-  openFoodFactsId?: InputMaybe<Scalars['String']['input']>;
-  productData?: InputMaybe<Scalars['String']['input']>;
-  protein?: InputMaybe<Scalars['Float']['input']>;
-  quantity: Scalars['Float']['input'];
-  unit: Scalars['String']['input'];
-};
-
 export type GQLLogSetInput = {
   loggedReps?: InputMaybe<Scalars['Int']['input']>;
   loggedWeight?: InputMaybe<Scalars['Float']['input']>;
@@ -532,14 +531,9 @@ export type GQLMeal = {
   completedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   dateTime: EntireFieldWrapper<Scalars['String']['output']>;
   day?: EntireFieldWrapper<Maybe<GQLMealDay>>;
-  foods: EntireFieldWrapper<Array<GQLMealFood>>;
+  foods: EntireFieldWrapper<Array<GQLMealFoodItem>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   instructions?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  loggedCalories: EntireFieldWrapper<Scalars['Float']['output']>;
-  loggedCarbs: EntireFieldWrapper<Scalars['Float']['output']>;
-  loggedFat: EntireFieldWrapper<Scalars['Float']['output']>;
-  loggedProtein: EntireFieldWrapper<Scalars['Float']['output']>;
-  logs: EntireFieldWrapper<Array<GQLMealLog>>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
   plannedCalories: EntireFieldWrapper<Scalars['Float']['output']>;
   plannedCarbs: EntireFieldWrapper<Scalars['Float']['output']>;
@@ -604,6 +598,42 @@ export type GQLMealFoodInput = {
   unit: Scalars['String']['input'];
 };
 
+export type GQLMealFoodItem = {
+  __typename?: 'MealFoodItem';
+  caloriesPer100g?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  carbsPer100g?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  fatPer100g?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  fiberPer100g?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  isCustomAddition: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  log?: EntireFieldWrapper<Maybe<GQLMealFoodLog>>;
+  name: EntireFieldWrapper<Scalars['String']['output']>;
+  openFoodFactsId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  productData?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  proteinPer100g?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  quantity: EntireFieldWrapper<Scalars['Float']['output']>;
+  totalCalories: EntireFieldWrapper<Scalars['Float']['output']>;
+  totalCarbs: EntireFieldWrapper<Scalars['Float']['output']>;
+  totalFat: EntireFieldWrapper<Scalars['Float']['output']>;
+  totalFiber: EntireFieldWrapper<Scalars['Float']['output']>;
+  totalProtein: EntireFieldWrapper<Scalars['Float']['output']>;
+  unit: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
+export type GQLMealFoodLog = {
+  __typename?: 'MealFoodLog';
+  calories?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  carbs?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  fat?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  fiber?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  loggedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  loggedQuantity: EntireFieldWrapper<Scalars['Float']['output']>;
+  notes?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  protein?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  unit: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
 export type GQLMealLog = {
   __typename?: 'MealLog';
   completedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -627,10 +657,12 @@ export type GQLMealLogItem = {
   fat?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   fiber?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
+  isCustomAddition: EntireFieldWrapper<Scalars['Boolean']['output']>;
   log?: EntireFieldWrapper<Maybe<GQLMealLog>>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
   notes?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   openFoodFactsId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  plannedFoodId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   productData?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   protein?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   quantity: EntireFieldWrapper<Scalars['Float']['output']>;
@@ -737,6 +769,7 @@ export type GQLMutation = {
   activatePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   addAiExerciseToWorkout: EntireFieldWrapper<GQLTrainingExercise>;
   addBodyMeasurement: EntireFieldWrapper<GQLUserBodyMeasure>;
+  addCustomFoodToMeal: EntireFieldWrapper<GQLMealLogItem>;
   addExerciseToDay: EntireFieldWrapper<Scalars['ID']['output']>;
   addExercisesToQuickWorkout: EntireFieldWrapper<GQLTrainingPlan>;
   addExercisesToWorkout: EntireFieldWrapper<Array<GQLTrainingExercise>>;
@@ -778,7 +811,6 @@ export type GQLMutation = {
   fitspaceDeactivateMealPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   fitspaceDeleteMealPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   getAiExerciseSuggestions: EntireFieldWrapper<Array<GQLAiExerciseSuggestion>>;
-  logMealFood: EntireFieldWrapper<GQLMealLogItem>;
   logWorkoutProgress: EntireFieldWrapper<Scalars['ID']['output']>;
   logWorkoutSessionEvent: EntireFieldWrapper<Scalars['ID']['output']>;
   markAllNotificationsRead: EntireFieldWrapper<Array<GQLNotification>>;
@@ -793,6 +825,7 @@ export type GQLMutation = {
   rejectCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   removeExerciseFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeExerciseFromWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  removeMealLog: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeMealPlanCollaborator: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeMealPlanFromClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeSet: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -849,6 +882,11 @@ export type GQLMutationAddAiExerciseToWorkoutArgs = {
 
 export type GQLMutationAddBodyMeasurementArgs = {
   input: GQLAddBodyMeasurementInput;
+};
+
+
+export type GQLMutationAddCustomFoodToMealArgs = {
+  input: GQLAddCustomFoodToMealInput;
 };
 
 
@@ -1049,11 +1087,6 @@ export type GQLMutationGetAiExerciseSuggestionsArgs = {
 };
 
 
-export type GQLMutationLogMealFoodArgs = {
-  input: GQLLogMealFoodInput;
-};
-
-
 export type GQLMutationLogWorkoutProgressArgs = {
   dayId: Scalars['ID']['input'];
   tick: Scalars['Int']['input'];
@@ -1125,6 +1158,11 @@ export type GQLMutationRemoveExerciseFromDayArgs = {
 
 export type GQLMutationRemoveExerciseFromWorkoutArgs = {
   exerciseId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveMealLogArgs = {
+  foodId: Scalars['ID']['input'];
 };
 
 
@@ -2195,6 +2233,7 @@ export type GQLResolversTypes = {
   ActivityLevel: GQLActivityLevel;
   AddAiExerciseToWorkoutInput: GQLAddAiExerciseToWorkoutInput;
   AddBodyMeasurementInput: GQLAddBodyMeasurementInput;
+  AddCustomFoodToMealInput: GQLAddCustomFoodToMealInput;
   AddExerciseToDayInput: GQLAddExerciseToDayInput;
   AddExercisesToWorkoutInput: GQLAddExercisesToWorkoutInput;
   AddMealPlanCollaboratorInput: GQLAddMealPlanCollaboratorInput;
@@ -2255,12 +2294,13 @@ export type GQLResolversTypes = {
   Goal: GQLGoal;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
-  LogMealFoodInput: GQLLogMealFoodInput;
   LogSetInput: GQLLogSetInput;
   Meal: ResolverTypeWrapper<GQLMeal>;
   MealDay: ResolverTypeWrapper<GQLMealDay>;
   MealFood: ResolverTypeWrapper<GQLMealFood>;
   MealFoodInput: GQLMealFoodInput;
+  MealFoodItem: ResolverTypeWrapper<GQLMealFoodItem>;
+  MealFoodLog: ResolverTypeWrapper<GQLMealFoodLog>;
   MealLog: ResolverTypeWrapper<GQLMealLog>;
   MealLogItem: ResolverTypeWrapper<GQLMealLogItem>;
   MealPlan: ResolverTypeWrapper<GQLMealPlan>;
@@ -2336,6 +2376,7 @@ export type GQLResolversTypes = {
 export type GQLResolversParentTypes = {
   AddAiExerciseToWorkoutInput: GQLAddAiExerciseToWorkoutInput;
   AddBodyMeasurementInput: GQLAddBodyMeasurementInput;
+  AddCustomFoodToMealInput: GQLAddCustomFoodToMealInput;
   AddExerciseToDayInput: GQLAddExerciseToDayInput;
   AddExercisesToWorkoutInput: GQLAddExercisesToWorkoutInput;
   AddMealPlanCollaboratorInput: GQLAddMealPlanCollaboratorInput;
@@ -2387,12 +2428,13 @@ export type GQLResolversParentTypes = {
   GetWorkoutPayload: GQLGetWorkoutPayload;
   ID: Scalars['ID']['output'];
   Int: Scalars['Int']['output'];
-  LogMealFoodInput: GQLLogMealFoodInput;
   LogSetInput: GQLLogSetInput;
   Meal: GQLMeal;
   MealDay: GQLMealDay;
   MealFood: GQLMealFood;
   MealFoodInput: GQLMealFoodInput;
+  MealFoodItem: GQLMealFoodItem;
+  MealFoodLog: GQLMealFoodLog;
   MealLog: GQLMealLog;
   MealLogItem: GQLMealLogItem;
   MealPlan: GQLMealPlan;
@@ -2613,14 +2655,9 @@ export type GQLMealResolvers<ContextType = GQLContext, ParentType extends GQLRes
   completedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   dateTime?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   day?: Resolver<Maybe<GQLResolversTypes['MealDay']>, ParentType, ContextType>;
-  foods?: Resolver<Array<GQLResolversTypes['MealFood']>, ParentType, ContextType>;
+  foods?: Resolver<Array<GQLResolversTypes['MealFoodItem']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   instructions?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  loggedCalories?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
-  loggedCarbs?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
-  loggedFat?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
-  loggedProtein?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
-  logs?: Resolver<Array<GQLResolversTypes['MealLog']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   plannedCalories?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   plannedCarbs?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
@@ -2672,6 +2709,42 @@ export type GQLMealFoodResolvers<ContextType = GQLContext, ParentType extends GQ
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLMealFoodItemResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MealFoodItem'] = GQLResolversParentTypes['MealFoodItem']> = {
+  caloriesPer100g?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  carbsPer100g?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  fatPer100g?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  fiberPer100g?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  isCustomAddition?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  log?: Resolver<Maybe<GQLResolversTypes['MealFoodLog']>, ParentType, ContextType>;
+  name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  openFoodFactsId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  productData?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  proteinPer100g?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  quantity?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  totalCalories?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  totalCarbs?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  totalFat?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  totalFiber?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  totalProtein?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  unit?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLMealFoodLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MealFoodLog'] = GQLResolversParentTypes['MealFoodLog']> = {
+  calories?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  carbs?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  fat?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  fiber?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  loggedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  loggedQuantity?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  notes?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  protein?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  unit?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLMealLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MealLog'] = GQLResolversParentTypes['MealLog']> = {
   completedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
@@ -2694,10 +2767,12 @@ export type GQLMealLogItemResolvers<ContextType = GQLContext, ParentType extends
   fat?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   fiber?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  isCustomAddition?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   log?: Resolver<Maybe<GQLResolversTypes['MealLog']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   notes?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   openFoodFactsId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  plannedFoodId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   productData?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   protein?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   quantity?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
@@ -2785,6 +2860,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   activatePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationActivatePlanArgs, 'planId' | 'resume' | 'startDate'>>;
   addAiExerciseToWorkout?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationAddAiExerciseToWorkoutArgs, 'input'>>;
   addBodyMeasurement?: Resolver<GQLResolversTypes['UserBodyMeasure'], ParentType, ContextType, RequireFields<GQLMutationAddBodyMeasurementArgs, 'input'>>;
+  addCustomFoodToMeal?: Resolver<GQLResolversTypes['MealLogItem'], ParentType, ContextType, RequireFields<GQLMutationAddCustomFoodToMealArgs, 'input'>>;
   addExerciseToDay?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAddExerciseToDayArgs, 'input'>>;
   addExercisesToQuickWorkout?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLMutationAddExercisesToQuickWorkoutArgs, 'exerciseIds'>>;
   addExercisesToWorkout?: Resolver<Array<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType, RequireFields<GQLMutationAddExercisesToWorkoutArgs, 'input'>>;
@@ -2826,7 +2902,6 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   fitspaceDeactivateMealPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationFitspaceDeactivateMealPlanArgs, 'planId'>>;
   fitspaceDeleteMealPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationFitspaceDeleteMealPlanArgs, 'planId'>>;
   getAiExerciseSuggestions?: Resolver<Array<GQLResolversTypes['AiExerciseSuggestion']>, ParentType, ContextType, RequireFields<GQLMutationGetAiExerciseSuggestionsArgs, 'dayId'>>;
-  logMealFood?: Resolver<GQLResolversTypes['MealLogItem'], ParentType, ContextType, RequireFields<GQLMutationLogMealFoodArgs, 'input'>>;
   logWorkoutProgress?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutProgressArgs, 'dayId' | 'tick'>>;
   logWorkoutSessionEvent?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutSessionEventArgs, 'dayId' | 'event'>>;
   markAllNotificationsRead?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLMutationMarkAllNotificationsReadArgs, 'userId'>>;
@@ -2841,6 +2916,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   rejectCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
   removeExerciseFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveExerciseFromDayArgs, 'exerciseId'>>;
   removeExerciseFromWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveExerciseFromWorkoutArgs, 'exerciseId'>>;
+  removeMealLog?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveMealLogArgs, 'foodId'>>;
   removeMealPlanCollaborator?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveMealPlanCollaboratorArgs, 'input'>>;
   removeMealPlanFromClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveMealPlanFromClientArgs, 'clientId' | 'planId'>>;
   removeSet?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveSetArgs, 'setId'>>;
@@ -3272,6 +3348,8 @@ export type GQLResolvers<ContextType = GQLContext> = {
   Meal?: GQLMealResolvers<ContextType>;
   MealDay?: GQLMealDayResolvers<ContextType>;
   MealFood?: GQLMealFoodResolvers<ContextType>;
+  MealFoodItem?: GQLMealFoodItemResolvers<ContextType>;
+  MealFoodLog?: GQLMealFoodLogResolvers<ContextType>;
   MealLog?: GQLMealLogResolvers<ContextType>;
   MealLogItem?: GQLMealLogItemResolvers<ContextType>;
   MealPlan?: GQLMealPlanResolvers<ContextType>;

@@ -79,8 +79,8 @@ type Meal {
   instructions: String
   completedAt: String
 
-  foods: [MealFood!]!
-  logs: [MealLog!]!
+  # Unified foods array - contains both planned foods and custom additions
+  foods: [MealFoodItem!]!
   day: MealDay
 
   # Calculated totals from planned foods
@@ -88,12 +88,54 @@ type Meal {
   plannedProtein: Float!
   plannedCarbs: Float!
   plannedFat: Float!
+}
 
-  # Calculated totals from logged foods
-  loggedCalories: Float!
-  loggedProtein: Float!
-  loggedCarbs: Float!
-  loggedFat: Float!
+# Unified type for both planned foods and custom additions
+type MealFoodItem {
+  id: ID!
+  name: String!
+  quantity: Float!
+  unit: String!
+
+  # Nutritional information per 100g
+  caloriesPer100g: Float
+  proteinPer100g: Float
+  carbsPer100g: Float
+  fatPer100g: Float
+  fiberPer100g: Float
+
+  # Open Food Facts integration
+  openFoodFactsId: String
+  productData: String
+
+  # Calculated nutrition for this specific quantity
+  totalCalories: Float!
+  totalProtein: Float!
+  totalCarbs: Float!
+  totalFat: Float!
+  totalFiber: Float!
+
+  # Source information
+  isCustomAddition: Boolean!
+
+  # Log data (unified for both planned and custom foods)
+  log: MealFoodLog
+}
+
+# Unified log data for food consumption
+type MealFoodLog {
+  id: ID!
+  loggedQuantity: Float!
+  unit: String!
+  loggedAt: String!
+  notes: String
+
+  # Nutritional data (calculated from logged quantity)
+  calories: Float
+  protein: Float
+  carbs: Float
+  fat: Float
+  fiber: Float
 }
 
 type MealFood {
@@ -157,7 +199,9 @@ type MealLogItem {
   openFoodFactsId: String
   productData: String
 
-  # Reference to planned food removed - using name matching instead
+  # Planned food relationship
+  plannedFoodId: String
+  isCustomAddition: Boolean!
 
   notes: String
   createdAt: String!
@@ -210,11 +254,14 @@ type Mutation {
   saveMeal(input: SaveMealInput!): Boolean!
 
   # Meal logging operations
-  logMealFood(input: LogMealFoodInput!): MealLogItem!
   batchLogMealFood(input: BatchLogMealFoodInput!): Boolean!
   updateMealFoodLog(input: UpdateMealFoodLogInput!): Boolean!
   completeMeal(mealId: ID!): Boolean!
   uncompleteMeal(mealId: ID!): Boolean!
+
+  # Custom food addition
+  addCustomFoodToMeal(input: AddCustomFoodToMealInput!): MealLogItem!
+  removeMealLog(foodId: ID!): Boolean!
 }
 
 # Input Types
@@ -305,23 +352,6 @@ input MealFoodInput {
   productData: String
 }
 
-# Food logging inputs (kept for future use)
-input LogMealFoodInput {
-  mealId: ID!
-  name: String!
-  quantity: Float!
-  unit: String!
-  barcode: String
-  calories: Float
-  protein: Float
-  carbs: Float
-  fat: Float
-  fiber: Float
-  openFoodFactsId: String
-  productData: String
-  notes: String
-}
-
 input UpdateMealFoodLogInput {
   id: ID!
   quantity: Float
@@ -345,6 +375,22 @@ input BatchLogMealFoodItemInput {
   carbs: Float
   fat: Float
   fiber: Float
+  openFoodFactsId: String
+  productData: String
+  notes: String
+}
+
+# Custom food addition input
+input AddCustomFoodToMealInput {
+  mealId: ID!
+  name: String!
+  quantity: Float!
+  unit: String!
+  caloriesPer100g: Float
+  proteinPer100g: Float
+  carbsPer100g: Float
+  fatPer100g: Float
+  fiberPer100g: Float
   openFoodFactsId: String
   productData: String
   notes: String

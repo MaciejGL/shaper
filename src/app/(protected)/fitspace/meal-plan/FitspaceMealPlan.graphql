@@ -47,6 +47,7 @@ query FitspaceGetMealPlan($mealPlanId: ID) {
             instructions
             completedAt
 
+            # Unified foods array - contains both planned foods and custom additions
             foods {
               id
               name
@@ -63,52 +64,33 @@ query FitspaceGetMealPlan($mealPlanId: ID) {
               totalFat
               totalFiber
               openFoodFactsId
-            }
+              productData
+              isCustomAddition
 
-            logs {
-              id
-              loggedAt
-              completedAt
-              totalCalories
-              totalProtein
-              totalCarbs
-              totalFat
-
-              items {
+              # Log data for consumption tracking
+              log {
                 id
-                name
-                quantity
+                loggedQuantity
                 unit
+                loggedAt
+                notes
                 calories
                 protein
                 carbs
                 fat
                 fiber
-                notes
-                createdAt
               }
             }
+
+            # Calculated totals
+            plannedCalories
+            plannedProtein
+            plannedCarbs
+            plannedFat
           }
         }
       }
     }
-  }
-}
-
-# Meal logging mutations
-mutation LogMealFood($input: LogMealFoodInput!) {
-  logMealFood(input: $input) {
-    id
-    name
-    quantity
-    unit
-    calories
-    protein
-    carbs
-    fat
-    fiber
-    notes
-    createdAt
   }
 }
 
@@ -126,4 +108,22 @@ mutation CompleteMeal($mealId: ID!) {
 
 mutation UncompleteMeal($mealId: ID!) {
   uncompleteMeal(mealId: $mealId)
+}
+
+mutation AddCustomFoodToMeal($input: AddCustomFoodToMealInput!) {
+  addCustomFoodToMeal(input: $input) {
+    id
+    name
+    quantity
+    unit
+    calories
+    protein
+    carbs
+    fat
+    fiber
+  }
+}
+
+mutation RemoveMealLog($foodId: ID!) {
+  removeMealLog(foodId: $foodId)
 }

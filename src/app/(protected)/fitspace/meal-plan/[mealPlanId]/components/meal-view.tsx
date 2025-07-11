@@ -16,28 +16,22 @@ export function MealView() {
     fat: activeDay.targetFat || plan?.dailyFat || 0,
   }
 
+  // Use the logged values if available, otherwise use planned values
   const dailyActual = {
     calories: activeDay.meals.reduce(
-      (sum, meal) =>
-        sum +
-        meal.foods.reduce((mealSum, food) => mealSum + food.totalCalories, 0),
+      (sum, meal) => sum + (meal.loggedCalories || meal.plannedCalories),
       0,
     ),
     protein: activeDay.meals.reduce(
-      (sum, meal) =>
-        sum +
-        meal.foods.reduce((mealSum, food) => mealSum + food.totalProtein, 0),
+      (sum, meal) => sum + (meal.loggedProtein || meal.plannedProtein),
       0,
     ),
     carbs: activeDay.meals.reduce(
-      (sum, meal) =>
-        sum +
-        meal.foods.reduce((mealSum, food) => mealSum + food.totalCarbs, 0),
+      (sum, meal) => sum + (meal.loggedCarbs || meal.plannedCarbs),
       0,
     ),
     fat: activeDay.meals.reduce(
-      (sum, meal) =>
-        sum + meal.foods.reduce((mealSum, food) => mealSum + food.totalFat, 0),
+      (sum, meal) => sum + (meal.loggedFat || meal.plannedFat),
       0,
     ),
   }

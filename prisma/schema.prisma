@@ -586,6 +586,9 @@ model MealLogItem {
   // Reference to planned food (if logging from plan)
   plannedFoodId String? // Links to MealFood if logging planned item
 
+  // Custom food addition tracking
+  isCustomAddition Boolean @default(false) // True if user added this food (not just logging consumption)
+
   notes     String? // User notes about preparation, etc.
   createdAt DateTime @default(now())
 

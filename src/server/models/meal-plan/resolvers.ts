@@ -5,6 +5,7 @@ import {
 import { GQLContext } from '@/types/gql-context'
 
 import {
+  addCustomFoodToMeal,
   assignMealPlanToClient,
   batchLogMealFood,
   clientGetMealPlan,
@@ -21,7 +22,7 @@ import {
   getMealPlanById,
   getMealPlanTemplates,
   getMyMealPlansOverview,
-  logMealFood,
+  removeMealLog,
   removeMealPlanFromClient,
   saveMeal,
   uncompleteMeal,
@@ -90,13 +91,17 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   uncompleteMeal: async (_, args, context) => {
     return uncompleteMeal(args, context)
   },
-  logMealFood: async (_, args, context) => {
-    return logMealFood(args, context)
-  },
+
   batchLogMealFood: async (_, args, context) => {
     return batchLogMealFood(args, context)
   },
   updateMealFoodLog: async (_, args, context) => {
     return updateMealFoodLog(args, context)
+  },
+  addCustomFoodToMeal: async (_, args, context) => {
+    return addCustomFoodToMeal(args, context)
+  },
+  removeMealLog: async (_, args, context) => {
+    return removeMealLog(args, context)
   },
 }
