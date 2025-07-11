@@ -4,6 +4,7 @@ import { useQueryState } from 'nuqs'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { Button } from '@/components/ui/button'
+import { Progress } from '@/components/ui/progress'
 import {
   Select,
   SelectContent,
@@ -13,14 +14,39 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 
+import { MealDay } from '../page'
+
+import { DailyProgressCard } from './daily-progress-card'
 import { useMealPlan } from './meal-plan-context'
-import { MealDay } from './meal-plan-page.client'
 
 export function Navigation() {
+  const { activeDay, plan } = useMealPlan()
+
+  const dailyTargets = {
+    calories: activeDay?.targetCalories || plan?.dailyCalories || 0,
+    protein: activeDay?.targetProtein || plan?.dailyProtein || 0,
+    carbs: activeDay?.targetCarbs || plan?.dailyCarbs || 0,
+    fat: activeDay?.targetFat || plan?.dailyFat || 0,
+  }
+
+  // Use the logged values if available, otherwise use planned values
+  const dailyActual = {
+    calories: activeDay?.meals.reduce(
+      (sum, meal) => sum + meal.plannedCalories,
+      0,
+    ),
+    protein: activeDay?.meals.reduce(
+      (sum, meal) => sum + meal.plannedProtein,
+      0,
+    ),
+    carbs: activeDay?.meals.reduce((sum, meal) => sum + meal.plannedCarbs, 0),
+    fat: activeDay?.meals.reduce((sum, meal) => sum + meal.plannedFat, 0),
+  }
+
   return (
     <div
       className={cn(
-        'bg-sidebar rounded-b-lg sticky -top-2 z-10',
+        'bg-sidebar rounded-b-lg sticky -top-[116px] z-10',
         // Counter Main padding
         '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
         'p-2 md:p-4 lg:p-8',
@@ -30,23 +56,40 @@ export function Navigation() {
         <WeekSelector />
         <DaySelector />
       </div>
+      <DailyProgressCard
+        dailyTargets={dailyTargets}
+        dailyActual={dailyActual}
+      />
     </div>
   )
 }
 
 function Day({ day }: { day: MealDay }) {
-  const { activeDay } = useMealPlan()
-  const [, setActiveDayId] = useQueryState('day')
+  const { activeDay, plan } = useMealPlan()
 
   const isSelected = activeDay?.id === day.id
 
   const handleClick = () => {
-    setActiveDayId(day.id)
+    setDate(day.scheduledAt)
   }
 
-  const isDayCompleted = day.completedAt
-  const completionRate =
-    day.meals.filter((meal) => meal.completedAt).length / day.meals.length
+  const dailyTargets = {
+    calories: day?.targetCalories || plan?.dailyCalories || 0,
+    protein: day?.targetProtein || plan?.dailyProtein || 0,
+    carbs: day?.targetCarbs || plan?.dailyCarbs || 0,
+    fat: day?.targetFat || plan?.dailyFat || 0,
+  }
+
+  // Use the logged values if available, otherwise use planned values
+  const dailyActual = {
+    calories: day?.meals.reduce((sum, meal) => sum + meal.plannedCalories, 0),
+    protein: day?.meals.reduce((sum, meal) => sum + meal.plannedProtein, 0),
+    carbs: day?.meals.reduce((sum, meal) => sum + meal.plannedCarbs, 0),
+    fat: day?.meals.reduce((sum, meal) => sum + meal.plannedFat, 0),
+  }
+
+  const calorieCompletionPercentage =
+    ((dailyActual.calories || 0) * 100) / dailyTargets.calories
 
   return (
     <div>
@@ -65,35 +108,23 @@ function Day({ day }: { day: MealDay }) {
           {day.scheduledAt && <p>{formatDate(day.scheduledAt, 'd')}</p>}
         </span>
       </button>
-      <div className="relative h-1 my-1 mx-auto w-[66%] bg-secondary rounded-full">
-        <div
-          className={cn(
-            'absolute inset-0',
-            'h-1 rounded-full transition-all',
-            isDayCompleted && 'bg-green-500',
-            !day.completedAt && 'bg-amber-500',
-            completionRate > 0 && completionRate < 1 && `bg-green-500`,
-          )}
-          style={{
-            width:
-              completionRate > 0 && completionRate < 1
-                ? `${completionRate * 100}%`
-                : undefined,
-          }}
-        />
+      <div className="my-1 mx-auto w-[76%]">
+        <Progress value={calorieCompletionPercentage || 0} />
       </div>
     </div>
   )
 }
 
 function DaySelector() {
+  const [date] = useQueryState('date')
+
   const { activeWeek } = useMealPlan()
   if (!activeWeek) return null
-  const days = activeWeek.days
+
   return (
     <div className="flex gap-[4px] w-full justify-between mt-2">
       {days.map((day) => (
-        <Day key={day.id} day={day} />
+        <Day key={day.id} day={day} date={date} />
       ))}
     </div>
   )

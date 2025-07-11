@@ -1501,6 +1501,7 @@ export type GQLQueryClientBodyMeasuresArgs = {
 
 
 export type GQLQueryClientGetMealPlanArgs = {
+  date?: InputMaybe<Scalars['String']['input']>;
   mealPlanId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -2157,6 +2158,7 @@ export type GQLFitspaceGetCurrentMealPlanIdQuery = { __typename?: 'Query', getMy
 
 export type GQLFitspaceGetMealPlanQueryVariables = Exact<{
   mealPlanId?: InputMaybe<Scalars['ID']['input']>;
+  date?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
@@ -3426,8 +3428,8 @@ useInfiniteFitspaceGetCurrentMealPlanIdQuery.getKey = (variables?: GQLFitspaceGe
 useFitspaceGetCurrentMealPlanIdQuery.fetcher = (variables?: GQLFitspaceGetCurrentMealPlanIdQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetCurrentMealPlanIdQuery, GQLFitspaceGetCurrentMealPlanIdQueryVariables>(FitspaceGetCurrentMealPlanIdDocument, variables, options);
 
 export const FitspaceGetMealPlanDocument = `
-    query FitspaceGetMealPlan($mealPlanId: ID) {
-  clientGetMealPlan(mealPlanId: $mealPlanId) {
+    query FitspaceGetMealPlan($mealPlanId: ID, $date: String) {
+  clientGetMealPlan(mealPlanId: $mealPlanId, date: $date) {
     plan {
       id
       title

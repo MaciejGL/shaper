@@ -228,7 +228,7 @@ type Query {
   getClientMealPlans(clientId: ID!): [MealPlan!]!
   getClientActiveMealPlan(clientId: ID!): MealPlan
   getMyMealPlansOverview: MyMealPlansPayload!
-  clientGetMealPlan(mealPlanId: ID): GetMealPlanPayload
+  clientGetMealPlan(mealPlanId: ID, date: String): GetMealPlanPayload
 }
 
 type GetMealPlanPayload {

@@ -6,8 +6,8 @@ query FitspaceGetCurrentMealPlanId {
   }
 }
 
-query FitspaceGetMealPlan($mealPlanId: ID) {
-  clientGetMealPlan(mealPlanId: $mealPlanId) {
+query FitspaceGetMealPlan($mealPlanId: ID, $date: String) {
+  clientGetMealPlan(mealPlanId: $mealPlanId, date: $date) {
     plan {
       id
       title

@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { FlameIcon } from 'lucide-react'
+
 import { Progress } from '@/components/ui/progress'
 
 interface DailyProgressCardProps {
@@ -8,11 +9,11 @@ interface DailyProgressCardProps {
     carbs: number
     fat: number
   }
-  dailyActual: {
-    calories: number
-    protein: number
-    carbs: number
-    fat: number
+  dailyActual?: {
+    calories?: number
+    protein?: number
+    carbs?: number
+    fat?: number
   }
 }
 
@@ -25,16 +26,25 @@ export function DailyProgressCard({
     return (actual / target) * 100
   }
 
+  if (
+    !dailyActual?.calories ||
+    !dailyTargets.calories ||
+    !dailyActual.protein ||
+    !dailyTargets.protein ||
+    !dailyActual.carbs ||
+    !dailyTargets.carbs ||
+    !dailyActual.fat ||
+    !dailyTargets.fat
+  )
+    return null
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Daily Progress</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+    <div>
+      <div className="text-xs mt-1.5">
+        <div className="grid grid-cols-4 gap-4">
           <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span>Calories</span>
+            <div className="flex justify-end">
+              <FlameIcon className="size-3" />
               <span>
                 {Math.round(dailyActual.calories)}/
                 {Math.round(dailyTargets.calories)}
@@ -48,11 +58,10 @@ export function DailyProgressCard({
             />
           </div>
           <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span>Protein</span>
+            <div className="flex justify-end">
               <span>
-                {Math.round(dailyActual.protein)}g/
-                {Math.round(dailyTargets.protein)}g
+                {Math.round(dailyActual.protein)}/
+                {Math.round(dailyTargets.protein)}P
               </span>
             </div>
             <Progress
@@ -63,11 +72,10 @@ export function DailyProgressCard({
             />
           </div>
           <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span>Carbs</span>
+            <div className="flex justify-end">
               <span>
-                {Math.round(dailyActual.carbs)}g/
-                {Math.round(dailyTargets.carbs)}g
+                {Math.round(dailyActual.carbs)}/{Math.round(dailyTargets.carbs)}
+                C
               </span>
             </div>
             <Progress
@@ -75,11 +83,9 @@ export function DailyProgressCard({
             />
           </div>
           <div>
-            <div className="flex justify-between text-sm mb-1">
-              <span>Fat</span>
+            <div className="flex justify-end">
               <span>
-                {Math.round(dailyActual.fat)}g/
-                {Math.round(dailyTargets.fat)}g
+                {Math.round(dailyActual.fat)}/{Math.round(dailyTargets.fat)}F
               </span>
             </div>
             <Progress
@@ -87,7 +93,7 @@ export function DailyProgressCard({
             />
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }

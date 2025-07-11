@@ -1503,6 +1503,7 @@ export type GQLQueryClientBodyMeasuresArgs = {
 
 
 export type GQLQueryClientGetMealPlanArgs = {
+  date?: InputMaybe<Scalars['String']['input']>;
   mealPlanId?: InputMaybe<Scalars['ID']['input']>;
 };
 

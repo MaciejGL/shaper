@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo, useState } from 'react'
 
-import { MealDay, MealPlan, MealWeek } from './meal-plan-page.client'
+import { MealDay, MealPlan, MealWeek } from '../page'
 
 interface MealPlanContextType {
   plan: MealPlan | null

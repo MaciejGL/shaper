@@ -39,10 +39,6 @@ interface MealsListProps {
     plannedProtein: number
     plannedCarbs: number
     plannedFat: number
-    loggedCalories: number
-    loggedProtein: number
-    loggedCarbs: number
-    loggedFat: number
   }[]
 }
 

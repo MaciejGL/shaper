@@ -1,11 +1,9 @@
 import { ChefHat } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Drawer, SimpleDrawerContent } from '@/components/ui/drawer'
 import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 
 import { MealHeaderInfo } from './meal-header-info'
@@ -58,10 +56,6 @@ interface MealLoggingDrawerProps {
     plannedProtein: number
     plannedCarbs: number
     plannedFat: number
-    loggedCalories: number
-    loggedProtein: number
-    loggedCarbs: number
-    loggedFat: number
   } | null
   open: boolean
   onClose: () => void

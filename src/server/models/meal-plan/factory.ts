@@ -1,6 +1,8 @@
 import { Prisma } from '@prisma/client'
+import { endOfWeek, startOfWeek } from 'date-fns'
 import { GraphQLError } from 'graphql'
 
+import { GQLQueryClientGetMealPlanArgs } from '@/generated/graphql-client'
 import {
   GQLMutationAddCustomFoodToMealArgs,
   GQLMutationAssignMealPlanToClientArgs,
@@ -384,7 +386,7 @@ export async function getMyMealPlansOverview(context: GQLContext) {
 }
 
 export async function clientGetMealPlan(
-  args: { mealPlanId?: string | null },
+  args: GQLQueryClientGetMealPlanArgs,
   context: GQLContext,
 ) {
   const user = context.user
@@ -427,6 +429,12 @@ export async function clientGetMealPlan(
                     logs: {
                       where: {
                         userId: user.user.id,
+                        loggedAt: args.date
+                          ? {
+                              gte: startOfWeek(new Date(args.date)),
+                              lte: endOfWeek(new Date(args.date)),
+                            }
+                          : undefined,
                       },
                       include: {
                         items: true,
