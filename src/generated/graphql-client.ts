@@ -843,7 +843,6 @@ export type GQLMutation = {
   updateExercise: Scalars['Boolean']['output'];
   updateExerciseForm: GQLTrainingExercise;
   updateExerciseSet: Scalars['Boolean']['output'];
-  updateMealFoodLog: Scalars['Boolean']['output'];
   updateMealPlanCollaboratorPermission: GQLMealPlanCollaborator;
   updateMealPlanDetails: Scalars['Boolean']['output'];
   updateNote: GQLNote;
@@ -1261,11 +1260,6 @@ export type GQLMutationUpdateExerciseFormArgs = {
 
 export type GQLMutationUpdateExerciseSetArgs = {
   input: GQLUpdateExerciseSetInput;
-};
-
-
-export type GQLMutationUpdateMealFoodLogArgs = {
-  input: GQLUpdateMealFoodLogInput;
 };
 
 
@@ -1891,12 +1885,6 @@ export type GQLUpdateExerciseSetInput = {
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
-export type GQLUpdateMealFoodLogInput = {
-  id: Scalars['ID']['input'];
-  notes?: InputMaybe<Scalars['String']['input']>;
-  quantity?: InputMaybe<Scalars['Float']['input']>;
-};
-
 export type GQLUpdateMealPlanCollaboratorPermissionInput = {
   collaboratorId: Scalars['ID']['input'];
   permission: GQLCollaborationPermission;
@@ -2180,13 +2168,6 @@ export type GQLBatchLogMealFoodMutationVariables = Exact<{
 
 
 export type GQLBatchLogMealFoodMutation = { __typename?: 'Mutation', batchLogMealFood: boolean };
-
-export type GQLUpdateMealFoodLogMutationVariables = Exact<{
-  input: GQLUpdateMealFoodLogInput;
-}>;
-
-
-export type GQLUpdateMealFoodLogMutation = { __typename?: 'Mutation', updateMealFoodLog: boolean };
 
 export type GQLCompleteMealMutationVariables = Exact<{
   mealId: Scalars['ID']['input'];
@@ -3590,30 +3571,6 @@ useBatchLogMealFoodMutation.getKey = () => ['BatchLogMealFood'];
 
 
 useBatchLogMealFoodMutation.fetcher = (variables: GQLBatchLogMealFoodMutationVariables, options?: RequestInit['headers']) => fetchData<GQLBatchLogMealFoodMutation, GQLBatchLogMealFoodMutationVariables>(BatchLogMealFoodDocument, variables, options);
-
-export const UpdateMealFoodLogDocument = `
-    mutation UpdateMealFoodLog($input: UpdateMealFoodLogInput!) {
-  updateMealFoodLog(input: $input)
-}
-    `;
-
-export const useUpdateMealFoodLogMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLUpdateMealFoodLogMutation, TError, GQLUpdateMealFoodLogMutationVariables, TContext>) => {
-    
-    return useMutation<GQLUpdateMealFoodLogMutation, TError, GQLUpdateMealFoodLogMutationVariables, TContext>(
-      {
-    mutationKey: ['UpdateMealFoodLog'],
-    mutationFn: (variables?: GQLUpdateMealFoodLogMutationVariables) => fetchData<GQLUpdateMealFoodLogMutation, GQLUpdateMealFoodLogMutationVariables>(UpdateMealFoodLogDocument, variables)(),
-    ...options
-  }
-    )};
-
-useUpdateMealFoodLogMutation.getKey = () => ['UpdateMealFoodLog'];
-
-
-useUpdateMealFoodLogMutation.fetcher = (variables: GQLUpdateMealFoodLogMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMealFoodLogMutation, GQLUpdateMealFoodLogMutationVariables>(UpdateMealFoodLogDocument, variables, options);
 
 export const CompleteMealDocument = `
     mutation CompleteMeal($mealId: ID!) {

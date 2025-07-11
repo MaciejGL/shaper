@@ -26,7 +26,6 @@ import {
   removeMealPlanFromClient,
   saveMeal,
   uncompleteMeal,
-  updateMealFoodLog,
   updateMealPlanDetails,
 } from './factory'
 
@@ -95,9 +94,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   batchLogMealFood: async (_, args, context) => {
     return batchLogMealFood(args, context)
   },
-  updateMealFoodLog: async (_, args, context) => {
-    return updateMealFoodLog(args, context)
-  },
+
   addCustomFoodToMeal: async (_, args, context) => {
     return addCustomFoodToMeal(args, context)
   },

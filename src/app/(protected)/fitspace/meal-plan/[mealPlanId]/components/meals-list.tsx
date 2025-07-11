@@ -98,7 +98,7 @@ export function MealsList({ meals }: MealsListProps) {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-6">
         {meals.map((meal) => (
           <MealCard
             key={meal.id}

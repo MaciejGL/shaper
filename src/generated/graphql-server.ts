@@ -845,7 +845,6 @@ export type GQLMutation = {
   updateExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateExerciseForm: EntireFieldWrapper<GQLTrainingExercise>;
   updateExerciseSet: EntireFieldWrapper<Scalars['Boolean']['output']>;
-  updateMealFoodLog: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateMealPlanCollaboratorPermission: EntireFieldWrapper<GQLMealPlanCollaborator>;
   updateMealPlanDetails: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateNote: EntireFieldWrapper<GQLNote>;
@@ -1263,11 +1262,6 @@ export type GQLMutationUpdateExerciseFormArgs = {
 
 export type GQLMutationUpdateExerciseSetArgs = {
   input: GQLUpdateExerciseSetInput;
-};
-
-
-export type GQLMutationUpdateMealFoodLogArgs = {
-  input: GQLUpdateMealFoodLogInput;
 };
 
 
@@ -1893,12 +1887,6 @@ export type GQLUpdateExerciseSetInput = {
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
-export type GQLUpdateMealFoodLogInput = {
-  id: Scalars['ID']['input'];
-  notes?: InputMaybe<Scalars['String']['input']>;
-  quantity?: InputMaybe<Scalars['Float']['input']>;
-};
-
 export type GQLUpdateMealPlanCollaboratorPermissionInput = {
   collaboratorId: Scalars['ID']['input'];
   permission: GQLCollaborationPermission;
@@ -2345,7 +2333,6 @@ export type GQLResolversTypes = {
   UpdateExerciseInput: GQLUpdateExerciseInput;
   UpdateExerciseSetFormInput: GQLUpdateExerciseSetFormInput;
   UpdateExerciseSetInput: GQLUpdateExerciseSetInput;
-  UpdateMealFoodLogInput: GQLUpdateMealFoodLogInput;
   UpdateMealPlanCollaboratorPermissionInput: GQLUpdateMealPlanCollaboratorPermissionInput;
   UpdateMealPlanDetailsInput: GQLUpdateMealPlanDetailsInput;
   UpdateNoteInput: GQLUpdateNoteInput;
@@ -2478,7 +2465,6 @@ export type GQLResolversParentTypes = {
   UpdateExerciseInput: GQLUpdateExerciseInput;
   UpdateExerciseSetFormInput: GQLUpdateExerciseSetFormInput;
   UpdateExerciseSetInput: GQLUpdateExerciseSetInput;
-  UpdateMealFoodLogInput: GQLUpdateMealFoodLogInput;
   UpdateMealPlanCollaboratorPermissionInput: GQLUpdateMealPlanCollaboratorPermissionInput;
   UpdateMealPlanDetailsInput: GQLUpdateMealPlanDetailsInput;
   UpdateNoteInput: GQLUpdateNoteInput;
@@ -2936,7 +2922,6 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseArgs, 'id' | 'input'>>;
   updateExerciseForm?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseFormArgs, 'input'>>;
   updateExerciseSet?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseSetArgs, 'input'>>;
-  updateMealFoodLog?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateMealFoodLogArgs, 'input'>>;
   updateMealPlanCollaboratorPermission?: Resolver<GQLResolversTypes['MealPlanCollaborator'], ParentType, ContextType, RequireFields<GQLMutationUpdateMealPlanCollaboratorPermissionArgs, 'input'>>;
   updateMealPlanDetails?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateMealPlanDetailsArgs, 'input'>>;
   updateNote?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationUpdateNoteArgs, 'input'>>;

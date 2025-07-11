@@ -15,7 +15,6 @@ import {
   GQLMutationRemoveMealPlanFromClientArgs,
   GQLMutationSaveMealArgs,
   GQLMutationUncompleteMealArgs,
-  GQLMutationUpdateMealFoodLogArgs,
   GQLMutationUpdateMealPlanDetailsArgs,
   GQLNotificationType,
   GQLQueryGetClientActiveMealPlanArgs,
@@ -1309,100 +1308,6 @@ export async function batchLogMealFood(
   } catch (error) {
     console.error('Error batch logging meal foods:', error)
     throw new GraphQLError('Failed to batch log meal foods')
-  }
-}
-
-/**
- * Update a meal food log item
- */
-export async function updateMealFoodLog(
-  args: GQLMutationUpdateMealFoodLogArgs,
-  context: GQLContext,
-) {
-  const user = context.user
-  if (!user) {
-    throw new Error('User not found')
-  }
-
-  const { input } = args
-
-  try {
-    // Check if meal log item exists and belongs to user
-    const mealLogItem = await prisma.mealLogItem.findUnique({
-      where: { id: input.id },
-      include: {
-        log: {
-          include: {
-            meal: {
-              include: {
-                day: {
-                  include: {
-                    week: {
-                      include: {
-                        plan: true,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    })
-
-    if (!mealLogItem) {
-      throw new Error('Meal log item not found')
-    }
-
-    if (mealLogItem.log.meal.day.week.plan.assignedToId !== user.user.id) {
-      throw new Error('You can only update your own meal logs')
-    }
-
-    // Prepare update data
-    const updateData: Prisma.MealLogItemUpdateInput = {
-      notes: input.notes ?? undefined,
-    }
-
-    // If quantity is being updated, recalculate nutritional values for custom additions
-    if (input.quantity !== undefined && input.quantity !== null) {
-      updateData.quantity = input.quantity
-
-      // For custom additions, recalculate nutritional values based on new quantity
-      if (mealLogItem.isCustomAddition && mealLogItem.quantity > 0) {
-        const currentQuantity = mealLogItem.quantity
-        const newQuantity = input.quantity
-        const ratio = newQuantity / currentQuantity
-
-        // Recalculate nutritional values based on the new quantity
-        updateData.calories = mealLogItem.calories
-          ? Math.round(mealLogItem.calories * ratio * 100) / 100
-          : null
-        updateData.protein = mealLogItem.protein
-          ? Math.round(mealLogItem.protein * ratio * 100) / 100
-          : null
-        updateData.carbs = mealLogItem.carbs
-          ? Math.round(mealLogItem.carbs * ratio * 100) / 100
-          : null
-        updateData.fat = mealLogItem.fat
-          ? Math.round(mealLogItem.fat * ratio * 100) / 100
-          : null
-        updateData.fiber = mealLogItem.fiber
-          ? Math.round(mealLogItem.fiber * ratio * 100) / 100
-          : null
-      }
-    }
-
-    // Update the meal log item
-    await prisma.mealLogItem.update({
-      where: { id: input.id },
-      data: updateData,
-    })
-
-    return true
-  } catch (error) {
-    console.error('Error updating meal food log:', error)
-    throw new GraphQLError('Failed to update meal food log')
   }
 }
 

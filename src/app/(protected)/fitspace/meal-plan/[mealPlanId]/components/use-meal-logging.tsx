@@ -6,7 +6,6 @@ import {
   useCompleteMealMutation,
   useRemoveMealLogMutation,
   useUncompleteMealMutation,
-  useUpdateMealFoodLogMutation,
 } from '@/generated/graphql-client'
 
 interface FoodQuantity {
@@ -35,20 +34,6 @@ export function useMealLogging() {
       onError: (error) => {
         toast.error('Failed to log meal foods')
         console.error('Error batch logging meal foods:', error)
-      },
-    })
-
-  const { mutate: updateMealFoodLog, isPending: isUpdatingLog } =
-    useUpdateMealFoodLogMutation({
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['FitspaceGetMealPlan'] })
-        queryClient.invalidateQueries({
-          queryKey: ['FitspaceMealPlansOverview'],
-        })
-      },
-      onError: (error) => {
-        toast.error('Failed to update meal log')
-        console.error('Error updating meal log:', error)
       },
     })
 
@@ -138,16 +123,6 @@ export function useMealLogging() {
     )
   }
 
-  const handleRemoveLog = (logItemId: string) => {
-    // Set quantity to 0 to effectively remove the log
-    updateMealFoodLog({
-      input: {
-        id: logItemId,
-        quantity: 0,
-      },
-    })
-  }
-
   const handleCompleteMeal = (mealId: string) => {
     completeMeal({ mealId })
   }
@@ -162,14 +137,12 @@ export function useMealLogging() {
 
   return {
     handleBatchLogMeal,
-    handleRemoveLog,
     handleCompleteMeal,
     handleUncompleteMeal,
     handleRemoveLogItem,
     isRemovingLogItem,
     isLoading:
       isBatchLoggingFood ||
-      isUpdatingLog ||
       isCompletingMeal ||
       isUncompletingMeal ||
       isRemovingLogItem,

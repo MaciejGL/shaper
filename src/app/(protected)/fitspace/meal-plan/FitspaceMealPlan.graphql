@@ -98,10 +98,6 @@ mutation BatchLogMealFood($input: BatchLogMealFoodInput!) {
   batchLogMealFood(input: $input)
 }
 
-mutation UpdateMealFoodLog($input: UpdateMealFoodLogInput!) {
-  updateMealFoodLog(input: $input)
-}
-
 mutation CompleteMeal($mealId: ID!) {
   completeMeal(mealId: $mealId)
 }

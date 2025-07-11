@@ -1,3 +1,5 @@
+import { FlameIcon } from 'lucide-react'
+
 import { Badge, BadgeProps } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
@@ -17,7 +19,7 @@ export function MacroBadge({
     return (
       <Badge
         className={cn(
-          'bg-green-500/20 text-green-600 dark:text-green-500 min-w-12 font-medium',
+          'bg-green-500/20 text-green-600 dark:text-green-500 min-w-12 font-medium rounded-full',
           size === 'xs' && 'min-w-8',
           className,
         )}
@@ -31,7 +33,7 @@ export function MacroBadge({
     return (
       <Badge
         className={cn(
-          'bg-blue-500/20 text-blue-600 dark:text-blue-500 min-w-12 font-medium',
+          'bg-blue-500/20 text-blue-600 dark:text-blue-500 min-w-12 font-medium rounded-full',
           size === 'xs' && 'min-w-8',
           className,
         )}
@@ -45,7 +47,7 @@ export function MacroBadge({
     return (
       <Badge
         className={cn(
-          'bg-yellow-500/20 text-yellow-600 dark:text-yellow-500 min-w-12 font-medium',
+          'bg-yellow-500/20 text-yellow-600 dark:text-yellow-500 min-w-12 font-medium rounded-full',
           size === 'xs' && 'min-w-8',
           className,
         )}
@@ -59,20 +61,20 @@ export function MacroBadge({
     return (
       <Badge
         className={cn(
-          'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary min-w-12 font-medium',
+          'bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary min-w-12 font-medium rounded-full',
           size === 'xs' && 'min-w-8',
           className,
         )}
         size={size}
       >
-        {formattedValue}kcal
+        {formattedValue} <FlameIcon />
       </Badge>
     )
   }
   return (
     <Badge
       className={cn(
-        'bg-primary/10 text-primary dark:text-muted min-w-12 font-medium',
+        'bg-primary/10 text-primary dark:text-muted min-w-12 font-medium rounded-full',
         size === 'xs' && 'min-w-8',
         className,
       )}

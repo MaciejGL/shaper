@@ -255,7 +255,6 @@ type Mutation {
 
   # Meal logging operations
   batchLogMealFood(input: BatchLogMealFoodInput!): Boolean!
-  updateMealFoodLog(input: UpdateMealFoodLogInput!): Boolean!
   completeMeal(mealId: ID!): Boolean!
   uncompleteMeal(mealId: ID!): Boolean!
 
@@ -350,12 +349,6 @@ input MealFoodInput {
   fiberPer100g: Float
   openFoodFactsId: String
   productData: String
-}
-
-input UpdateMealFoodLogInput {
-  id: ID!
-  quantity: Float
-  notes: String
 }
 
 # Batch meal logging input

@@ -1,16 +1,14 @@
 import { format } from 'date-fns'
-import { CheckCircle, Circle, PlusIcon } from 'lucide-react'
+import { Edit3Icon, FlameIcon, PlusIcon, XIcon } from 'lucide-react'
+import { useState } from 'react'
 
-import { MacroBadge } from '@/app/(protected)/trainer/meal-plans/creator/components/macro-badge'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Separator } from '@/components/ui/separator'
-import { cn } from '@/lib/utils'
 
 import { FoodItem } from './food-item'
+import { useMealLogging } from './use-meal-logging'
 
-interface MealCardProps {
+export interface MealCardProps {
   meal: {
     id: string
     name: string
@@ -82,146 +80,86 @@ function calculateLoggedTotals(foods: MealCardProps['meal']['foods']) {
   }
 }
 
-export function MealCard({
-  meal,
-  onClick,
-  onAddCustomFood,
-  onCompleteMeal,
-  onUncompleteMeal,
-}: MealCardProps) {
+export function MealCard({ meal, onClick, onAddCustomFood }: MealCardProps) {
+  const { handleRemoveLogItem } = useMealLogging()
+  const [removingFoodId, setRemovingFoodId] = useState<string | null>(null)
   // Check if meal is completed - if any food has been logged
-  const isCompleted =
-    Boolean(meal.foods.some((food) => food.log)) || Boolean(meal.completedAt)
+  const isCompleted = Boolean(meal.completedAt)
 
   const plannedFoods = meal.foods.filter((food) => !food.isCustomAddition)
   const customFoods = meal.foods.filter((food) => food.isCustomAddition)
   const loggedTotals = calculateLoggedTotals(meal.foods)
 
-  const handleCompleteMeal = (e: React.MouseEvent) => {
-    e.stopPropagation() // Prevent opening the drawer
-    if (isCompleted && onUncompleteMeal) {
-      onUncompleteMeal(meal.id)
-    } else if (onCompleteMeal) {
-      onCompleteMeal(meal.id)
-    }
-  }
-
   return (
-    <Card
-      className={cn('transition-all cursor-pointer hover:shadow-md')}
-      onClick={onClick}
-    >
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CardTitle className="text-base">{meal.name}</CardTitle>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              {format(new Date(meal.dateTime), 'HH:mm')}
-            </Badge>
+    <div className="grid grid-cols-[1fr_50px] gap-2">
+      <div>
+        <div className="flex items-center gap-2 justify-between">
+          <MealTotals
+            plannedTotals={{
+              calories: meal.plannedCalories,
+              protein: meal.plannedProtein,
+              carbs: meal.plannedCarbs,
+              fat: meal.plannedFat,
+            }}
+            loggedTotals={loggedTotals}
+            hasLogs={isCompleted}
+          />
+          <div className="flex gap-2">
             <Button
               variant="ghost"
-              size="icon-sm"
-              onClick={handleCompleteMeal}
-              iconOnly={isCompleted ? <CheckCircle /> : <Circle />}
-              className={cn(
-                '',
-                isCompleted
-                  ? 'text-green-600 hover:text-green-700'
-                  : 'text-gray-400 hover:text-green-600',
-              )}
+              size="icon-xs"
+              iconOnly={<Edit3Icon />}
+              onClick={() => onClick?.()}
             />
             <Button
-              variant="secondary"
-              size="icon-sm"
-              onClick={(e) => {
-                e.stopPropagation()
-                onAddCustomFood?.()
-              }}
+              variant="ghost"
+              size="icon-xs"
               iconOnly={<PlusIcon />}
-            >
-              Add Ingredient
-            </Button>
+              onClick={onAddCustomFood}
+            />
           </div>
         </div>
-        {meal.instructions && (
-          <p className="text-sm text-muted-foreground">{meal.instructions}</p>
-        )}
-        <MealTotals
-          plannedTotals={{
-            calories: meal.plannedCalories,
-            protein: meal.plannedProtein,
-            carbs: meal.plannedCarbs,
-            fat: meal.plannedFat,
-          }}
-          loggedTotals={loggedTotals}
-          hasLogs={isCompleted}
-        />
-      </CardHeader>
-      <CardContent>
-        {meal.foods.length > 0 ? (
-          <div className="space-y-3">
-            {/* Planned Foods */}
-            {plannedFoods.length > 0 && (
-              <div className="space-y-1">
-                {plannedFoods.map((food) => {
-                  const isLogged = !!food.log
-
-                  return (
-                    <FoodItem
-                      key={food.id}
-                      food={food}
-                      isLogged={isLogged}
-                      loggedQuantity={food.log?.loggedQuantity}
-                    />
-                  )
-                })}
-              </div>
-            )}
-
-            {/* Custom Foods Added for Today */}
-            {customFoods.length > 0 && (
-              <div className="space-y-2">
-                <Separator className="flex-1 my-3" />
-                <div className="space-y-1">
-                  {customFoods.map((customFood) => {
-                    return (
-                      <FoodItem
-                        key={`custom-${customFood.id}`}
-                        food={customFood}
-                        isLogged={true}
-                        loggedQuantity={
-                          customFood.log?.loggedQuantity || customFood.quantity
-                        }
-                      />
-                    )
-                  })}
-                </div>
-              </div>
+        <div className="flex flex-col gap-2">
+          {plannedFoods.map((food) => (
+            <FoodItem key={food.id} food={food} onClick={() => onClick?.()} />
+          ))}
+          {customFoods.map((food) => (
+            <FoodItem key={food.id} food={food} onClick={() => onClick?.()} />
+          ))}
+        </div>
+      </div>
+      <div className="flex flex-col gap-2">
+        <Badge variant="outline" className="rounded-full font-mono">
+          {format(new Date(meal.dateTime), 'HH:mm')}
+        </Badge>
+        {[...plannedFoods, ...customFoods].map((food) => (
+          <div
+            key={food.id}
+            className="flex items-center justify-center h-[56px]"
+          >
+            {food.isCustomAddition && (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                className="text-muted-foreground"
+                iconOnly={<XIcon />}
+                loading={removingFoodId === food.id}
+                onClick={async () => {
+                  try {
+                    setRemovingFoodId(food.id)
+                    await handleRemoveLogItem(food.id)
+                  } catch (error) {
+                    console.error(error)
+                  } finally {
+                    setRemovingFoodId(null)
+                  }
+                }}
+              />
             )}
           </div>
-        ) : (
-          <div className="text-center py-8">
-            <div className="text-sm text-muted-foreground mb-4">
-              This meal has no foods planned yet.
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={(e) => {
-                e.stopPropagation()
-                onAddCustomFood?.()
-              }}
-            >
-              <PlusIcon className="h-4 w-4" />
-              Add Ingredient
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -247,11 +185,24 @@ function MealTotals({
   const totalsToShow = hasLogs ? loggedTotals : plannedTotals
 
   return (
-    <div className="flex flex-wrap gap-1 justify-center pt-2">
-      <MacroBadge macro="calories" value={Math.round(totalsToShow.calories)} />
+    <div className="flex gap-2">
+      <p className="text-sm font-medium flex items-center text-primary">
+        {Math.round(totalsToShow.calories)}
+        <FlameIcon className="size-3" />
+      </p>
+      <p className="text-sm font-medium text-green-600">
+        {Math.round(totalsToShow.protein)}P
+      </p>
+      <p className="text-sm font-medium text-blue-600">
+        {Math.round(totalsToShow.carbs)}C
+      </p>
+      <p className="text-sm font-medium text-yellow-600">
+        {Math.round(totalsToShow.fat)}F
+      </p>
+      {/* <MacroBadge macro="calories" value={Math.round(totalsToShow.calories)} />
       <MacroBadge macro="protein" value={Math.round(totalsToShow.protein)} />
       <MacroBadge macro="carbs" value={Math.round(totalsToShow.carbs)} />
-      <MacroBadge macro="fat" value={Math.round(totalsToShow.fat)} />
+      <MacroBadge macro="fat" value={Math.round(totalsToShow.fat)} /> */}
     </div>
   )
 }
