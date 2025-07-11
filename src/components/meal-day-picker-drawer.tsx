@@ -46,7 +46,7 @@ export function MealDayPickerDrawer({
         <Button
           variant="secondary"
           className={cn(
-            'w-full justify-start text-left font-normal',
+            'justify-start text-left font-normal',
             !value && 'text-muted-foreground',
             className,
           )}

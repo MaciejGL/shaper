@@ -1,9 +1,12 @@
-import { format, formatDate, parseISO, startOfWeek } from 'date-fns'
+import { format, formatDate, isSameDay, parseISO, startOfWeek } from 'date-fns'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Calendar1 } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { useMemo } from 'react'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { MealDayPickerDrawer } from '@/components/meal-day-picker-drawer'
+import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { getDayOfWeek, getWeekDays, isDayMatch } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
@@ -183,11 +186,42 @@ function WeekSelector() {
     setDate(dateString)
   }
 
+  const isOnAnotherDay = useMemo(() => {
+    if (!date) return false
+    const today = new Date()
+    return !isSameDay(parseISO(date), today)
+  }, [date])
+
+  const handleTodayClick = () => {
+    setDate(format(new Date(), 'yyyy-MM-dd'))
+  }
+
   return (
-    <MealDayPickerDrawer
-      value={selectedWeek}
-      onChange={handleWeekChange}
-      placeholder="Select week"
-    />
+    <div className="flex items-center gap-2">
+      <MealDayPickerDrawer
+        value={selectedWeek}
+        onChange={handleWeekChange}
+        placeholder="Select week"
+      />
+      <AnimatePresence>
+        {isOnAnotherDay && (
+          <motion.div
+            key="today-button" // Add this key prop
+            initial={{ opacity: 0, x: 4, scale: 0.8 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 4, scale: 0.8 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Button
+              variant="secondary"
+              iconOnly={<Calendar1 />}
+              onClick={handleTodayClick}
+            >
+              Today
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }
