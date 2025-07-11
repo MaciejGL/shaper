@@ -11,6 +11,56 @@ import { cn } from '@/lib/utils'
 import { DailyProgressCard } from './daily-progress-card'
 import { useMealPlan } from './meal-plan-context'
 
+function calculateLoggedTotals(
+  meals: {
+    foods: {
+      totalCalories: number
+      totalProtein: number
+      totalCarbs: number
+      totalFat: number
+      isCustomAddition: boolean
+      log?: {
+        calories?: number | null
+        protein?: number | null
+        carbs?: number | null
+        fat?: number | null
+      } | null
+    }[]
+  }[],
+) {
+  let calories = 0
+  let protein = 0
+  let carbs = 0
+  let fat = 0
+
+  meals.forEach((meal) => {
+    meal.foods.forEach((food) => {
+      const log = food.log
+
+      if (food.isCustomAddition) {
+        // For custom additions, use the food's total values directly
+        calories += food.totalCalories
+        protein += food.totalProtein
+        carbs += food.totalCarbs
+        fat += food.totalFat
+      } else {
+        // For regular foods, use logged values if available, otherwise fall back to planned values
+        calories += log?.calories || food.totalCalories
+        protein += log?.protein || food.totalProtein
+        carbs += log?.carbs || food.totalCarbs
+        fat += log?.fat || food.totalFat
+      }
+    })
+  })
+
+  return {
+    calories: Math.round(calories * 100) / 100,
+    protein: Math.round(protein * 100) / 100,
+    carbs: Math.round(carbs * 100) / 100,
+    fat: Math.round(fat * 100) / 100,
+  }
+}
+
 export function Navigation() {
   const { activeDay, plan } = useMealPlan()
 
@@ -22,18 +72,7 @@ export function Navigation() {
   }
 
   // Use the logged values if available, otherwise use planned values
-  const dailyActual = {
-    calories: activeDay?.meals.reduce(
-      (sum, meal) => sum + meal.plannedCalories,
-      0,
-    ),
-    protein: activeDay?.meals.reduce(
-      (sum, meal) => sum + meal.plannedProtein,
-      0,
-    ),
-    carbs: activeDay?.meals.reduce((sum, meal) => sum + meal.plannedCarbs, 0),
-    fat: activeDay?.meals.reduce((sum, meal) => sum + meal.plannedFat, 0),
-  }
+  const dailyActual = calculateLoggedTotals(activeDay?.meals || [])
 
   return (
     <div
@@ -77,15 +116,7 @@ function Day({ day }: { day: string }) {
   }
 
   // Use the logged values if available, otherwise use planned values
-  const dailyActual = {
-    calories: planDay?.meals.reduce(
-      (sum, meal) => sum + meal.plannedCalories,
-      0,
-    ),
-    protein: planDay?.meals.reduce((sum, meal) => sum + meal.plannedProtein, 0),
-    carbs: planDay?.meals.reduce((sum, meal) => sum + meal.plannedCarbs, 0),
-    fat: planDay?.meals.reduce((sum, meal) => sum + meal.plannedFat, 0),
-  }
+  const dailyActual = calculateLoggedTotals(planDay?.meals || [])
 
   const calorieCompletionPercentage =
     dailyTargets.calories > 0

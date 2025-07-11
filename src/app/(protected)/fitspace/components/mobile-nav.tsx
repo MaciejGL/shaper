@@ -6,7 +6,7 @@ import {
   ChefHatIcon,
   Dumbbell,
   DumbbellIcon,
-  Home,
+  LayoutDashboardIcon,
   MoreHorizontalIcon,
   NotepadText,
   PersonStanding,
@@ -35,8 +35,8 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
     () => [
       {
         href: '/fitspace/dashboard',
-        icon: Home,
-        label: 'Home',
+        icon: LayoutDashboardIcon,
+        label: 'Dash',
         prefetch: true,
       },
       {
@@ -52,16 +52,16 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
         prefetch: true,
       },
       {
+        href: '/fitspace/meal-plan',
+        icon: SaladIcon,
+        label: 'Food',
+        prefetch: true,
+      },
+      {
         href: '/fitspace/progress',
         icon: TrendingUp,
         label: 'Progress',
         disabled: true,
-        prefetch: true,
-      },
-      {
-        href: '/fitspace/meal-plan',
-        icon: SaladIcon,
-        label: 'Food',
         prefetch: true,
       },
       {
@@ -77,7 +77,7 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar shadow-neuro-light dark:shadow-neuro-dark">
-        <div className="grid grid-cols-6 items-center py-2 px-4 max-w-md mx-auto">
+        <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
@@ -87,7 +87,7 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
                   key={item.href || item.label}
                   onClick={item.onClick}
                   className={cn(
-                    'flex flex-col text-muted-foreground hover:text-foreground items-center justify-center p-2 rounded-xl transition-colors min-w-[60px] cursor-pointer',
+                    'flex flex-col text-muted-foreground hover:text-foreground items-center justify-center p-2 rounded-xl transition-colors min-w-[40px] cursor-pointer',
                     isMoreOpen && 'text-primary bg-zinc-200 dark:bg-zinc-800',
                   )}
                 >
@@ -102,7 +102,7 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
                 key={item.href || item.label}
                 href={item.href}
                 className={cn(
-                  'flex flex-col items-center justify-center p-2 rounded-xl transition-colors min-w-[60px]',
+                  'flex flex-col items-center justify-center p-2 rounded-xl transition-colors min-w-[40px]',
                   isActive
                     ? 'text-primary bg-zinc-200 dark:bg-zinc-800'
                     : 'text-muted-foreground hover:text-foreground ',

@@ -38,7 +38,7 @@ function Progress({
         })}
         style={{
           transitionDuration: `${duration}ms`,
-          transform: `translateX(-${100 - fallbackValue}%)`,
+          transform: `translateX(-${Math.max(0, 100 - fallbackValue)}%)`,
         }}
       />
     </ProgressPrimitive.Root>

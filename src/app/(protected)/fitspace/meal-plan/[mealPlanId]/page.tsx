@@ -1,6 +1,6 @@
 'use client'
 
-import { startOfWeek } from 'date-fns'
+import { format, startOfWeek } from 'date-fns'
 import { redirect, useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import { useEffect, useMemo } from 'react'
@@ -26,7 +26,7 @@ export type MealDay = NonNullable<MealWeek>['days'][number]
 export type Meal = NonNullable<MealDay>['meals'][number]
 
 export default function MealPlanPage() {
-  const now = useMemo(() => new Date().toISOString(), [])
+  const now = useMemo(() => format(new Date(), 'yyyy-MM-dd'), [])
   const [date, setDate] = useQueryState('date')
   useEffect(() => {
     if (!date) {
