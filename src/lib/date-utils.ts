@@ -1,9 +1,26 @@
-import { addDays, format, parseISO, startOfWeek, subDays } from 'date-fns'
+import {
+  addDays,
+  format,
+  formatDistanceToNow,
+  parseISO,
+  startOfWeek,
+  subDays,
+} from 'date-fns'
 
 export type WeekStartDay = 0 | 1 // 0 = Sunday, 1 = Monday
 
 // User preference - this could come from user settings/context in the future
 export const DEFAULT_WEEK_START: WeekStartDay = 1 // Monday
+
+/**
+ * Format a date as relative time (e.g., "2 hours ago", "3 days ago")
+ * @param date - Date string or Date object
+ * @returns Formatted relative time string
+ */
+export function formatRelativeTime(date: string | Date): string {
+  const dateObj = typeof date === 'string' ? parseISO(date) : date
+  return formatDistanceToNow(dateObj, { addSuffix: true })
+}
 
 /**
  * Convert JavaScript's getDay() to a standardized day number based on week start preference
