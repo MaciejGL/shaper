@@ -464,20 +464,8 @@ export async function clientGetMealPlan(
         weekStartsOn: 1,
       })
 
-      console.log(
-        `DEBUG (specific plan): Requested date: ${requestedDate.toISOString()}, Plan start date: ${planStartDate.toISOString()}, Plan ID: ${mealPlan.id}`,
-      )
-
       if (requestedDate < planStartDate) {
-        console.log(
-          `Requested date ${requestedDate.toISOString()} is before plan start date ${planStartDate.toISOString()}, using default meal plan for user:`,
-          user.user.id,
-        )
         mealPlan = null // This will trigger the default plan logic below
-      } else {
-        console.log(
-          `Requested date ${requestedDate.toISOString()} is on or after plan start date ${planStartDate.toISOString()}, using specific meal plan`,
-        )
       }
     }
   } else {
@@ -547,30 +535,14 @@ export async function clientGetMealPlan(
         weekStartsOn: 1,
       })
 
-      console.log(
-        `DEBUG: Requested date: ${requestedDate.toISOString()}, Plan start date: ${planStartDate.toISOString()}, Plan ID: ${mealPlan.id}`,
-      )
-
       if (requestedDate < planStartDate) {
-        console.log(
-          `Requested date ${requestedDate.toISOString()} is before plan start date ${planStartDate.toISOString()}, using default meal plan for user:`,
-          user.user.id,
-        )
         mealPlan = null // This will trigger the default plan logic below
-      } else {
-        console.log(
-          `Requested date ${requestedDate.toISOString()} is on or after plan start date ${planStartDate.toISOString()}, using active meal plan`,
-        )
       }
     }
   }
 
   // If no meal plan found, use default meal plan for logging
   if (!mealPlan) {
-    console.log(
-      'No active meal plan found, using default meal plan for user:',
-      user.user.id,
-    )
     const defaultPlan = await getOrCreateDefaultMealPlan(
       context,
       args.date ?? undefined,
@@ -606,12 +578,29 @@ export async function getActiveMealPlan(
     throw new Error('User not found')
   }
 
-  // Get active assigned plan
+  // Calculate week boundaries for the requested date
+  const requestedDate = args.date ? new Date(args.date) : new Date()
+  const weekStart = startOfWeek(requestedDate, { weekStartsOn: 1 })
+  const weekEnd = endOfWeek(requestedDate, { weekStartsOn: 1 })
+
+  // Get active assigned plan OR completed plans within the requested date range
   const activePlan = await prisma.mealPlan.findFirst({
     where: {
       assignedToId: user.user.id,
-      active: true,
       startDate: { not: null },
+      OR: [
+        {
+          // Active plans that have started by the requested date
+          active: true,
+          startDate: { lte: weekEnd },
+        },
+        {
+          // Completed plans where requested date is within range
+          active: false,
+          endDate: { not: null, gte: weekStart },
+          startDate: { lte: weekEnd },
+        },
+      ],
     },
     include: {
       createdBy: true,
@@ -631,12 +620,8 @@ export async function getActiveMealPlan(
                       userId: user.user.id,
                       loggedAt: args.date
                         ? {
-                            gte: startOfWeek(new Date(args.date), {
-                              weekStartsOn: 1,
-                            }),
-                            lte: endOfWeek(new Date(args.date), {
-                              weekStartsOn: 1,
-                            }),
+                            gte: weekStart,
+                            lte: weekEnd,
                           }
                         : undefined,
                     },
@@ -1242,10 +1227,7 @@ export async function getOrCreateDefaultMealPlan(
         })
       } catch (createError) {
         // If creation fails (e.g., due to race condition), try to fetch existing plan
-        console.log(
-          'Default meal plan creation failed, attempting to fetch existing:',
-          createError,
-        )
+
         const existingPlan = await prisma.mealPlan.findFirst({
           where: {
             createdById: user.user.id,
@@ -1329,10 +1311,6 @@ export async function cleanupDuplicateDefaultMealPlans(userId: string) {
     })
 
     if (defaultPlans.length > 1) {
-      console.log(
-        `Found ${defaultPlans.length} default meal plans for user ${userId}, cleaning up duplicates`,
-      )
-
       // Keep the first one, delete the rest
       const plansToDelete = defaultPlans.slice(1)
 
@@ -1356,13 +1334,6 @@ export async function cleanupDuplicateDefaultMealPlans(userId: string) {
           await prisma.mealPlan.delete({
             where: { id: plan.id },
           })
-          console.log(
-            `Deleted duplicate default meal plan ${plan.id} for user ${userId}`,
-          )
-        } else {
-          console.log(
-            `Keeping default meal plan ${plan.id} for user ${userId} due to existing logs`,
-          )
         }
       }
     }
@@ -1471,10 +1442,6 @@ async function mergeHistoricalLogsFromDefaultPlan(
                   // Merge historical logs with current meal logs
                   const existingLogs = meal.logs || []
                   meal.logs = [...existingLogs, ...markedHistoricalLogs]
-
-                  console.log(
-                    `Merged ${matchingHistoricalLogs.length} historical logs for ${meal.name} on day ${day.dayOfWeek}`,
-                  )
                 }
               })
             }
@@ -2255,10 +2222,6 @@ export async function addFoodToPersonalLog(
         isCustomAddition: true, // This is a custom addition
       },
     })
-
-    console.log(
-      `Added food "${input.name}" to Personal Food Log (${input.mealName}) for user: ${user.user.id}`,
-    )
 
     return new MealLogItem(mealLogItem, context)
   } catch (error) {
