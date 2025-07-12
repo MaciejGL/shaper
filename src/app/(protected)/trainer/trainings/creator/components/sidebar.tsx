@@ -77,7 +77,7 @@ export function Sidebar({
   )
 
   return (
-    <div className="w-80 bg-card dark:bg-card-on-card shadow-xs rounded-lg p-4 h-full max-h-full min-w-[300px]">
+    <div className="w-80 bg-card dark:bg-card-on-card shadow-xs rounded-lg p-4 h-full max-h-full min-w-[260px]">
       <div className="mb-6">
         <h3 className="font-semibold mb-3">Filters:</h3>
         <div className="space-y-3">

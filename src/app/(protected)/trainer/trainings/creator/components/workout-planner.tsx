@@ -275,7 +275,7 @@ export default function WorkoutPlanner() {
       <TabsContent value="details" className="">
         <PlanDetailsForm />
       </TabsContent>
-      <TabsContent value="weeks" className="flex-1">
+      <TabsContent value="weeks" className="flex-1 -mr-8">
         <DndContext
           sensors={sensors}
           collisionDetection={pointerWithin}
@@ -295,8 +295,10 @@ export default function WorkoutPlanner() {
               onEquipmentChange={setSelectedEquipment}
             />
 
-            <div className="grid grid-cols-1 grid-rows-[auto_1fr] pl-6 ">
-              <WeekTabs />
+            <div className="grid grid-cols-1 grid-rows-[auto_1fr] pl-4">
+              <div className="overflow-x-auto hide-scrollbar  pr-8">
+                <WeekTabs />
+              </div>
               <div className="overflow-x-auto pr-6 hide-scrollbar ">
                 <DayGrid />
               </div>

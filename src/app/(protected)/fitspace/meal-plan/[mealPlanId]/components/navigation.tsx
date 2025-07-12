@@ -109,11 +109,11 @@ export function Navigation() {
       <div className="mx-auto max-w-sm">
         <WeekSelector />
         <DaySelector />
+        <DailyProgressCard
+          dailyTargets={dailyTargets}
+          dailyActual={dailyActual}
+        />
       </div>
-      <DailyProgressCard
-        dailyTargets={dailyTargets}
-        dailyActual={dailyActual}
-      />
     </div>
   )
 }
