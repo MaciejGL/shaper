@@ -1,4 +1,4 @@
-import { ChefHat, MoreHorizontal, Play, Square, Trash2 } from 'lucide-react'
+import { ChefHat, MoreHorizontal } from 'lucide-react'
 
 import { MacroBadge } from '@/app/(protected)/trainer/meal-plans/creator/components/macro-badge'
 import { Badge } from '@/components/ui/badge'
@@ -50,14 +50,7 @@ export function MealPlanCard({
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <ChefHat className="size-4 text-muted-foreground" />
-              {isActive && (
-                <Badge
-                  variant="secondary"
-                  className="bg-primary text-primary-foreground"
-                >
-                  Active
-                </Badge>
-              )}
+              {isActive && <Badge>Active</Badge>}
             </div>
             <CardTitle className="text-lg">{plan.title}</CardTitle>
           </div>
@@ -78,7 +71,6 @@ export function MealPlanCard({
                     onAction('deactivate', plan)
                   }}
                 >
-                  <Square className="size-4 mr-2" />
                   Deactivate
                 </DropdownMenuItem>
               ) : (
@@ -88,7 +80,6 @@ export function MealPlanCard({
                     onAction('activate', plan)
                   }}
                 >
-                  <Play className="size-4 mr-2" />
                   Activate
                 </DropdownMenuItem>
               )}
@@ -99,7 +90,6 @@ export function MealPlanCard({
                 }}
                 className="text-red-600"
               >
-                <Trash2 className="size-4 mr-2" />
                 Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -118,7 +108,7 @@ export function MealPlanCard({
             </div>
             <div className="space-y-1">
               <div className="text-sm font-medium">Macros</div>
-              <div className="text-xs text-muted-foreground">
+              <div className="text-xs text-muted-foreground flex gap-1">
                 <MacroBadge macro="protein" value={plan.dailyProtein ?? 0} />
                 <MacroBadge macro="carbs" value={plan.dailyCarbs ?? 0} />
                 <MacroBadge macro="fat" value={plan.dailyFat ?? 0} />

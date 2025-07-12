@@ -1,15 +1,33 @@
 'use client'
 
+import { startOfWeek } from 'date-fns'
 import { useQueryState } from 'nuqs'
 import { createContext, useContext, useMemo } from 'react'
 
+import {
+  GQLGetActiveMealPlanQuery,
+  GQLGetDefaultMealPlanQuery,
+} from '@/generated/graphql-client'
 import { isDayMatch } from '@/lib/date-utils'
 
-import { MealDay, MealPlan } from '../page'
+// Type definitions for the meal plan data
+export type MealPlan = NonNullable<
+  | GQLGetActiveMealPlanQuery['getActiveMealPlan']
+  | GQLGetDefaultMealPlanQuery['getDefaultMealPlan']
+>
+
+export type MealWeek = NonNullable<MealPlan>['weeks'][number]
+
+export type MealDay = NonNullable<MealWeek>['days'][number]
+
+export type Meal = NonNullable<MealDay>['meals'][number]
 
 interface MealPlanContextType {
-  plan: MealPlan | null
+  activePlan: MealPlan | null
+  defaultPlan: MealPlan | null
+  currentPlan: MealPlan | null // The plan currently being shown based on date logic
   activeDay: MealDay | null
+  isShowingActivePlan: boolean
 }
 
 const MealPlanContext = createContext<MealPlanContextType | null>(null)
@@ -24,15 +42,52 @@ export function useMealPlan() {
 
 interface MealPlanProviderProps {
   children: React.ReactNode
-  plan: MealPlan | null | undefined
+  activePlan: MealPlan | null | undefined
+  defaultPlan: MealPlan | null | undefined
 }
 
-export function MealPlanProvider({ children, plan }: MealPlanProviderProps) {
+export function MealPlanProvider({
+  children,
+  activePlan,
+  defaultPlan,
+}: MealPlanProviderProps) {
   const [date] = useQueryState('date')
+
+  // Determine which plan to show based on date vs active plan start date
+  const { currentPlan, isShowingActivePlan } = useMemo(() => {
+    if (!activePlan || !date) {
+      return {
+        currentPlan: defaultPlan || null,
+        isShowingActivePlan: false,
+      }
+    }
+
+    // Check if current date is on or after the active plan start date
+    if (activePlan.startDate) {
+      const currentDate = startOfWeek(new Date(date), { weekStartsOn: 1 })
+      const planStartDate = startOfWeek(new Date(activePlan.startDate), {
+        weekStartsOn: 1,
+      })
+
+      if (currentDate >= planStartDate) {
+        return {
+          currentPlan: activePlan,
+          isShowingActivePlan: true,
+        }
+      }
+    }
+
+    // Fall back to default plan
+    return {
+      currentPlan: defaultPlan || null,
+      isShowingActivePlan: false,
+    }
+  }, [activePlan, defaultPlan, date])
+
   const activeWeek = useMemo(() => {
-    if (!plan) return null
-    return plan.weeks.at(0)
-  }, [plan])
+    if (!currentPlan) return null
+    return currentPlan.weeks.at(0)
+  }, [currentPlan])
 
   const activeDay = useMemo(() => {
     if (!activeWeek || !date) return null
@@ -43,10 +98,13 @@ export function MealPlanProvider({ children, plan }: MealPlanProviderProps) {
 
   const value = useMemo(
     () => ({
-      plan: plan || null,
+      activePlan: activePlan || null,
+      defaultPlan: defaultPlan || null,
+      currentPlan,
       activeDay,
+      isShowingActivePlan,
     }),
-    [plan, activeDay],
+    [activePlan, defaultPlan, currentPlan, activeDay, isShowingActivePlan],
   )
 
   return (

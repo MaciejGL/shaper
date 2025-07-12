@@ -229,6 +229,10 @@ type Query {
   getClientActiveMealPlan(clientId: ID!): MealPlan
   getMyMealPlansOverview: MyMealPlansPayload!
   clientGetMealPlan(mealPlanId: ID, date: String): GetMealPlanPayload
+
+  # New simplified queries to replace complex clientGetMealPlan logic
+  getActiveMealPlan(date: String): MealPlan # Returns active assigned plan with extra meals, or null
+  getDefaultMealPlan(date: String): MealPlan! # Always returns user's Personal Food Log
 }
 
 type GetMealPlanPayload {
@@ -260,6 +264,7 @@ type Mutation {
 
   # Custom food addition
   addCustomFoodToMeal(input: AddCustomFoodToMealInput!): MealLogItem!
+  addFoodToPersonalLog(input: AddFoodToPersonalLogInput!): MealLogItem!
   removeMealLog(foodId: ID!): Boolean!
 }
 
@@ -376,6 +381,23 @@ input BatchLogMealFoodItemInput {
 # Custom food addition input
 input AddCustomFoodToMealInput {
   mealId: ID!
+  name: String!
+  quantity: Float!
+  unit: String!
+  caloriesPer100g: Float
+  proteinPer100g: Float
+  carbsPer100g: Float
+  fatPer100g: Float
+  fiberPer100g: Float
+  openFoodFactsId: String
+  productData: String
+  notes: String
+}
+
+# Add food to personal log input (finds meal by name and day in user's default plan)
+input AddFoodToPersonalLogInput {
+  mealName: String! # "Breakfast", "Lunch", "Dinner", "Snack"
+  dayOfWeek: Int! # 0-6 (Monday-Sunday)
   name: String!
   quantity: Float!
   unit: String!

@@ -6,6 +6,7 @@ import { GQLContext } from '@/types/gql-context'
 
 import {
   addCustomFoodToMeal,
+  addFoodToPersonalLog,
   assignMealPlanToClient,
   batchLogMealFood,
   clientGetMealPlan,
@@ -16,9 +17,11 @@ import {
   fitspaceActivateMealPlan,
   fitspaceDeactivateMealPlan,
   fitspaceDeleteMealPlan,
+  getActiveMealPlan,
   getClientActiveMealPlan,
   getClientMealPlans,
   getCollaborationMealPlanTemplates,
+  getDefaultMealPlan,
   getMealPlanById,
   getMealPlanTemplates,
   getMyMealPlansOverview,
@@ -50,6 +53,13 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   },
   clientGetMealPlan: async (_, args, context) => {
     return clientGetMealPlan(args, context)
+  },
+  // New simplified resolvers
+  getActiveMealPlan: async (_, args, context) => {
+    return getActiveMealPlan(args, context)
+  },
+  getDefaultMealPlan: async (_, args, context) => {
+    return getDefaultMealPlan(args, context)
   },
 }
 
@@ -97,6 +107,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
   addCustomFoodToMeal: async (_, args, context) => {
     return addCustomFoodToMeal(args, context)
+  },
+  addFoodToPersonalLog: async (_, args, context) => {
+    return addFoodToPersonalLog(args, context)
   },
   removeMealLog: async (_, args, context) => {
     return removeMealLog(args, context)

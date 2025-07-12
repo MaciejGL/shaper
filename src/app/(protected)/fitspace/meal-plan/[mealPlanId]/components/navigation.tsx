@@ -12,25 +12,9 @@ import { getDayOfWeek, getWeekDays, isDayMatch } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 import { DailyProgressCard } from './daily-progress-card'
-import { useMealPlan } from './meal-plan-context'
+import { Meal, MealPlan, useMealPlan } from './meal-plan-context'
 
-function calculateLoggedTotals(
-  meals: {
-    foods: {
-      totalCalories: number
-      totalProtein: number
-      totalCarbs: number
-      totalFat: number
-      isCustomAddition: boolean
-      log?: {
-        calories?: number | null
-        protein?: number | null
-        carbs?: number | null
-        fat?: number | null
-      } | null
-    }[]
-  }[],
-) {
+function calculateLoggedTotals(meals: Meal[]) {
   let calories = 0
   let protein = 0
   let carbs = 0
@@ -64,18 +48,54 @@ function calculateLoggedTotals(
   }
 }
 
-export function Navigation() {
-  const { activeDay, plan } = useMealPlan()
+// Helper function to combine meals from both plans for a given date
+function getCombinedDailyTotals(
+  date: string,
+  activePlan: MealPlan | null,
+  defaultPlan: MealPlan | null,
+) {
+  if (!date) return { calories: 0, protein: 0, carbs: 0, fat: 0 }
 
-  const dailyTargets = {
-    calories: activeDay?.targetCalories || plan?.dailyCalories || 0,
-    protein: activeDay?.targetProtein || plan?.dailyProtein || 0,
-    carbs: activeDay?.targetCarbs || plan?.dailyCarbs || 0,
-    fat: activeDay?.targetFat || plan?.dailyFat || 0,
+  let combinedMeals: Meal[] = []
+
+  // Add meals from active plan if available
+  if (activePlan) {
+    const activePlanDay = activePlan.weeks.at(0)?.days.find((planDay) => {
+      return isDayMatch(date, planDay.dayOfWeek)
+    })
+    if (activePlanDay?.meals) {
+      combinedMeals = [...combinedMeals, ...activePlanDay.meals]
+    }
   }
 
-  // Use the logged values if available, otherwise use planned values
-  const dailyActual = calculateLoggedTotals(activeDay?.meals || [])
+  // Add meals from default plan if available
+  if (defaultPlan) {
+    const defaultPlanDay = defaultPlan.weeks.at(0)?.days.find((planDay) => {
+      return isDayMatch(date, planDay.dayOfWeek)
+    })
+    if (defaultPlanDay?.meals) {
+      combinedMeals = [...combinedMeals, ...defaultPlanDay.meals]
+    }
+  }
+
+  return calculateLoggedTotals(combinedMeals)
+}
+
+export function Navigation() {
+  const { activeDay, currentPlan, activePlan, defaultPlan } = useMealPlan()
+  const [date] = useQueryState('date')
+
+  const dailyTargets = {
+    calories: activeDay?.targetCalories || currentPlan?.dailyCalories || 0,
+    protein: activeDay?.targetProtein || currentPlan?.dailyProtein || 0,
+    carbs: activeDay?.targetCarbs || currentPlan?.dailyCarbs || 0,
+    fat: activeDay?.targetFat || currentPlan?.dailyFat || 0,
+  }
+
+  // Calculate combined totals from both plans for the current date
+  const dailyActual = useMemo(() => {
+    return getCombinedDailyTotals(date || '', activePlan, defaultPlan)
+  }, [activePlan, defaultPlan, date])
 
   return (
     <div
@@ -99,27 +119,29 @@ export function Navigation() {
 }
 
 function Day({ day }: { day: string }) {
-  const { plan } = useMealPlan()
+  const { currentPlan, activePlan, defaultPlan } = useMealPlan()
   const [date, setDate] = useQueryState('date')
 
   const planDay = useMemo(() => {
-    if (!plan) return null
-    return plan.weeks.at(0)?.days.find((planDay) => {
+    if (!currentPlan) return null
+    return currentPlan.weeks.at(0)?.days.find((planDay) => {
       return isDayMatch(day, planDay.dayOfWeek)
     })
-  }, [plan, day])
+  }, [currentPlan, day])
 
   const isSelected = date === day
 
   const dailyTargets = {
-    calories: planDay?.targetCalories || plan?.dailyCalories || 0,
-    protein: planDay?.targetProtein || plan?.dailyProtein || 0,
-    carbs: planDay?.targetCarbs || plan?.dailyCarbs || 0,
-    fat: planDay?.targetFat || plan?.dailyFat || 0,
+    calories: planDay?.targetCalories || currentPlan?.dailyCalories || 0,
+    protein: planDay?.targetProtein || currentPlan?.dailyProtein || 0,
+    carbs: planDay?.targetCarbs || currentPlan?.dailyCarbs || 0,
+    fat: planDay?.targetFat || currentPlan?.dailyFat || 0,
   }
 
-  // Use the logged values if available, otherwise use planned values
-  const dailyActual = calculateLoggedTotals(planDay?.meals || [])
+  // Calculate combined totals from both plans
+  const dailyActual = useMemo(() => {
+    return getCombinedDailyTotals(day, activePlan, defaultPlan)
+  }, [activePlan, defaultPlan, day])
 
   const calorieCompletionPercentage =
     dailyTargets.calories > 0

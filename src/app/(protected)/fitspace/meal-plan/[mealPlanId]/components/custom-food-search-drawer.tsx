@@ -1,7 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FoodSearchLoading } from '@/app/(protected)/trainer/meal-plans/creator/components/food-search-loading'
@@ -17,15 +17,20 @@ import {
 import { Input } from '@/components/ui/input'
 import {
   useAddCustomFoodToMealMutation,
-  useFitspaceGetMealPlanQuery,
+  useGetActiveMealPlanQuery,
+  useGetDefaultMealPlanQuery,
 } from '@/generated/graphql-client'
 import { SearchResult, searchFoods } from '@/lib/food-search'
+
+import { SelectedMeal } from './meal-logging-drawer'
+import { useMealLogging } from './use-meal-logging'
 
 interface CustomFoodSearchDrawerProps {
   isOpen: boolean
   onClose: () => void
   mealId: string
   onFoodAdded?: () => void
+  selectedMeal?: SelectedMeal | null
 }
 
 // Local useDebounce implementation (copied from food-search.tsx)
@@ -50,53 +55,61 @@ export function CustomFoodSearchDrawer({
   onClose,
   mealId,
   onFoodAdded,
+  selectedMeal,
 }: CustomFoodSearchDrawerProps) {
+  const { handleRemoveLogItem } = useMealLogging()
   const [searchTerm, setSearchTerm] = useState('')
   const debouncedQuery = useDebounce(searchTerm, 500)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
+  // Track which specific food item is being added
 
   const queryClient = useQueryClient()
 
-  // Use the generated mutation hook
-  const { mutateAsync: addCustomFoodToMeal, isPending: isAdding } =
-    useAddCustomFoodToMealMutation({
-      onSuccess: () => {
-        // Invalidate the meal plan query to refresh the data
-        queryClient.invalidateQueries({
-          queryKey: useFitspaceGetMealPlanQuery.getKey(),
-        })
-        onFoodAdded?.()
-        onClose()
-      },
-      onError: (error) => {
-        console.error('Error adding food:', error)
-        toast.error('Failed to add food to meal')
-      },
-    })
+  // Use the appropriate mutation hooks
+  const { mutateAsync: addCustomFoodToMeal } = useAddCustomFoodToMealMutation({
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: useGetActiveMealPlanQuery.getKey(),
+      })
+      queryClient.invalidateQueries({
+        queryKey: useGetDefaultMealPlanQuery.getKey(),
+      })
+      onFoodAdded?.()
+    },
+    onError: (error) => {
+      console.error('Error adding food to meal:', error)
+      toast.error('Failed to add food to meal')
+    },
+  })
 
   // Handle search
-  const handleSearch = async (term: string) => {
-    if (term.length < 2) {
-      setSearchResults([])
-      return
-    }
+  const handleSearch = useCallback(
+    async (term: string) => {
+      if (debouncedQuery.length < 2 || searchTerm.length < 2) {
+        return
+      }
 
-    setIsSearching(true)
-    try {
-      const results = await searchFoods(term)
-      setSearchResults(results || [])
-    } catch (error) {
-      console.error('Search error:', error)
-      toast.error('Failed to search foods')
-    } finally {
-      setIsSearching(false)
-    }
-  }
+      setIsSearching(true)
+      try {
+        const results = await searchFoods(term)
+        setSearchResults(results || [])
+      } catch (error) {
+        console.error('Search error:', error)
+        toast.error('Failed to search foods')
+      } finally {
+        setIsSearching(false)
+      }
+    },
+    [debouncedQuery, searchTerm],
+  )
 
   // Handle adding food to meal
   const addFood = async (foodItem: SearchResult) => {
+    // Set which food item is being added
+
     try {
+      // Add directly to the current meal (Personal Food Log)
       await addCustomFoodToMeal({
         input: {
           mealId,
@@ -121,10 +134,8 @@ export function CustomFoodSearchDrawer({
   React.useEffect(() => {
     if (debouncedQuery && debouncedQuery.trim().length > 2) {
       handleSearch(debouncedQuery.trim())
-    } else {
-      setSearchResults([])
     }
-  }, [debouncedQuery])
+  }, [debouncedQuery, handleSearch])
 
   const handleClose = () => {
     setSearchTerm('')
@@ -134,11 +145,11 @@ export function CustomFoodSearchDrawer({
 
   return (
     <Drawer open={isOpen} onClose={handleClose}>
-      <DrawerContent className="max-h-[90vh]" dialogTitle="Add Custom Food">
+      <DrawerContent className="h-full" dialogTitle="Search for products">
         <DrawerHeader>
-          <DrawerTitle>Add Custom Food</DrawerTitle>
+          <DrawerTitle>Search for products</DrawerTitle>
           <DrawerDescription>
-            Search for foods to add to this meal
+            Search for products to add to this meal.
           </DrawerDescription>
         </DrawerHeader>
 
@@ -150,6 +161,10 @@ export function CustomFoodSearchDrawer({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full"
+              onFocusCapture={() => {
+                setSearchTerm('')
+              }}
+              autoFocus={searchTerm.length === 0}
             />
 
             {isSearching && <FoodSearchLoading />}
@@ -158,7 +173,8 @@ export function CustomFoodSearchDrawer({
               <FoodSearchResults
                 searchResults={searchResults}
                 addFood={addFood}
-                isSearching={isAdding}
+                removeFood={handleRemoveLogItem}
+                selectedMeal={selectedMeal}
               />
             )}
 
@@ -180,7 +196,7 @@ export function CustomFoodSearchDrawer({
 
         <div className="p-4 border-t">
           <Button variant="secondary" onClick={handleClose} className="w-full">
-            Cancel
+            Close
           </Button>
         </div>
       </DrawerContent>

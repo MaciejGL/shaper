@@ -47,6 +47,7 @@ export interface MealCardProps {
   onAddCustomFood?: () => void
   onCompleteMeal?: (mealId: string) => void
   onUncompleteMeal?: (mealId: string) => void
+  isDefaultPlan?: boolean
 }
 
 // Helper function to calculate logged totals from foods array
@@ -59,17 +60,10 @@ function calculateLoggedTotals(foods: MealCardProps['meal']['foods']) {
   foods.forEach((food) => {
     const log = food.log
 
-    if (food.isCustomAddition) {
-      calories += food.totalCalories
-      protein += food.totalProtein
-      carbs += food.totalCarbs
-      fat += food.totalFat
-    } else {
-      calories += log?.calories || food.totalCalories
-      protein += log?.protein || food.totalProtein
-      carbs += log?.carbs || food.totalCarbs
-      fat += log?.fat || food.totalFat
-    }
+    calories += log?.calories || food.totalCalories
+    protein += log?.protein || food.totalProtein
+    carbs += log?.carbs || food.totalCarbs
+    fat += log?.fat || food.totalFat
   })
 
   return {
@@ -80,14 +74,15 @@ function calculateLoggedTotals(foods: MealCardProps['meal']['foods']) {
   }
 }
 
-export function MealCard({ meal, onClick, onAddCustomFood }: MealCardProps) {
+export function MealCard({
+  meal,
+  onClick,
+  onAddCustomFood,
+  isDefaultPlan,
+}: MealCardProps) {
   const { handleRemoveLogItem } = useMealLogging()
   const [removingFoodId, setRemovingFoodId] = useState<string | null>(null)
-  // Check if meal is completed - if any food has been logged
-  const isCompleted = Boolean(meal.completedAt)
 
-  const plannedFoods = meal.foods.filter((food) => !food.isCustomAddition)
-  const customFoods = meal.foods.filter((food) => food.isCustomAddition)
   const loggedTotals = calculateLoggedTotals(meal.foods)
 
   return (
@@ -102,7 +97,7 @@ export function MealCard({ meal, onClick, onAddCustomFood }: MealCardProps) {
               fat: meal.plannedFat,
             }}
             loggedTotals={loggedTotals}
-            hasLogs={isCompleted}
+            hasLogs={isDefaultPlan ? true : Boolean(meal.completedAt)}
           />
           <div className="flex gap-2">
             <Button
@@ -111,28 +106,30 @@ export function MealCard({ meal, onClick, onAddCustomFood }: MealCardProps) {
               iconOnly={<Edit3Icon />}
               onClick={() => onClick?.()}
             />
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              iconOnly={<PlusIcon />}
-              onClick={onAddCustomFood}
-            />
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          {plannedFoods.map((food) => (
+          {meal.foods.map((food) => (
             <FoodItem key={food.id} food={food} onClick={() => onClick?.()} />
           ))}
-          {customFoods.map((food) => (
-            <FoodItem key={food.id} food={food} onClick={() => onClick?.()} />
-          ))}
+
+          {isDefaultPlan && (
+            <button
+              className="bg-card p-2 rounded-lg space-y-1 h-[56px] overflow-hidden flex-center"
+              onClick={() => {
+                onAddCustomFood?.()
+              }}
+            >
+              <PlusIcon className="size-4" />
+            </button>
+          )}
         </div>
       </div>
       <div className="flex flex-col gap-2">
         <Badge variant="outline" className="rounded-full font-mono">
           {format(new Date(meal.dateTime), 'HH:mm')}
         </Badge>
-        {[...plannedFoods, ...customFoods].map((food) => (
+        {meal.foods.map((food) => (
           <div
             key={food.id}
             className="flex items-center justify-center h-[56px]"

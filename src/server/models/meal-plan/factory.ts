@@ -5,6 +5,7 @@ import { GraphQLError } from 'graphql'
 import { GQLQueryClientGetMealPlanArgs } from '@/generated/graphql-client'
 import {
   GQLMutationAddCustomFoodToMealArgs,
+  GQLMutationAddFoodToPersonalLogArgs,
   GQLMutationAssignMealPlanToClientArgs,
   GQLMutationBatchLogMealFoodArgs,
   GQLMutationCompleteMealArgs,
@@ -452,6 +453,33 @@ export async function clientGetMealPlan(
         },
       },
     })
+
+    // If we have a specific meal plan and a date filter, check if the requested date
+    // is before the plan's start date. If so, use the default plan instead.
+    if (mealPlan && args.date && mealPlan.startDate) {
+      const requestedDate = startOfWeek(new Date(args.date), {
+        weekStartsOn: 1,
+      })
+      const planStartDate = startOfWeek(new Date(mealPlan.startDate), {
+        weekStartsOn: 1,
+      })
+
+      console.log(
+        `DEBUG (specific plan): Requested date: ${requestedDate.toISOString()}, Plan start date: ${planStartDate.toISOString()}, Plan ID: ${mealPlan.id}`,
+      )
+
+      if (requestedDate < planStartDate) {
+        console.log(
+          `Requested date ${requestedDate.toISOString()} is before plan start date ${planStartDate.toISOString()}, using default meal plan for user:`,
+          user.user.id,
+        )
+        mealPlan = null // This will trigger the default plan logic below
+      } else {
+        console.log(
+          `Requested date ${requestedDate.toISOString()} is on or after plan start date ${planStartDate.toISOString()}, using specific meal plan`,
+        )
+      }
+    }
   } else {
     // Get active meal plan
     mealPlan = await prisma.mealPlan.findFirst({
@@ -485,6 +513,16 @@ export async function clientGetMealPlan(
                     logs: {
                       where: {
                         userId: user.user.id,
+                        loggedAt: args.date
+                          ? {
+                              gte: startOfWeek(new Date(args.date), {
+                                weekStartsOn: 1,
+                              }),
+                              lte: endOfWeek(new Date(args.date), {
+                                weekStartsOn: 1,
+                              }),
+                            }
+                          : undefined,
                       },
                       include: {
                         items: true,
@@ -498,15 +536,158 @@ export async function clientGetMealPlan(
         },
       },
     })
+
+    // If we have an active meal plan and a date filter, check if the requested date
+    // is before the plan's start date. If so, use the default plan instead.
+    if (mealPlan && args.date && mealPlan.startDate) {
+      const requestedDate = startOfWeek(new Date(args.date), {
+        weekStartsOn: 1,
+      })
+      const planStartDate = startOfWeek(new Date(mealPlan.startDate), {
+        weekStartsOn: 1,
+      })
+
+      console.log(
+        `DEBUG: Requested date: ${requestedDate.toISOString()}, Plan start date: ${planStartDate.toISOString()}, Plan ID: ${mealPlan.id}`,
+      )
+
+      if (requestedDate < planStartDate) {
+        console.log(
+          `Requested date ${requestedDate.toISOString()} is before plan start date ${planStartDate.toISOString()}, using default meal plan for user:`,
+          user.user.id,
+        )
+        mealPlan = null // This will trigger the default plan logic below
+      } else {
+        console.log(
+          `Requested date ${requestedDate.toISOString()} is on or after plan start date ${planStartDate.toISOString()}, using active meal plan`,
+        )
+      }
+    }
   }
 
+  // If no meal plan found, use default meal plan for logging
   if (!mealPlan) {
+    console.log(
+      'No active meal plan found, using default meal plan for user:',
+      user.user.id,
+    )
+    const defaultPlan = await getOrCreateDefaultMealPlan(
+      context,
+      args.date ?? undefined,
+    )
+    return {
+      plan: defaultPlan,
+    }
+  }
+
+  // If we have an active meal plan, also fetch historical logs from default plan
+  // and merge them to preserve user's logging history
+  const enhancedMealPlan = await mergeHistoricalLogsFromDefaultPlan(
+    mealPlan,
+    user.user.id,
+    args.date,
+  )
+
+  return {
+    plan: new MealPlan(enhancedMealPlan, context),
+  }
+}
+
+/**
+ * Get active meal plan - returns only the active assigned plan if it exists and date is valid
+ * Returns null if no active plan or date is before plan start
+ */
+export async function getActiveMealPlan(
+  args: { date?: string | null },
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  // Get active assigned plan
+  const activePlan = await prisma.mealPlan.findFirst({
+    where: {
+      assignedToId: user.user.id,
+      active: true,
+      startDate: { not: null },
+    },
+    include: {
+      createdBy: true,
+      assignedTo: true,
+      weeks: {
+        orderBy: { weekNumber: 'asc' },
+        include: {
+          days: {
+            orderBy: { dayOfWeek: 'asc' },
+            include: {
+              meals: {
+                orderBy: { dateTime: 'asc' },
+                include: {
+                  foods: { orderBy: { createdAt: 'asc' } },
+                  logs: {
+                    where: {
+                      userId: user.user.id,
+                      loggedAt: args.date
+                        ? {
+                            gte: startOfWeek(new Date(args.date), {
+                              weekStartsOn: 1,
+                            }),
+                            lte: endOfWeek(new Date(args.date), {
+                              weekStartsOn: 1,
+                            }),
+                          }
+                        : undefined,
+                    },
+                    include: { items: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  // If no active plan, return null
+  if (!activePlan) {
     return null
   }
 
-  return {
-    plan: new MealPlan(mealPlan, context),
+  // Check if requested date is before plan start date
+  if (args.date && activePlan.startDate) {
+    const requestedDate = startOfWeek(new Date(args.date), { weekStartsOn: 1 })
+    const planStartDate = startOfWeek(new Date(activePlan.startDate), {
+      weekStartsOn: 1,
+    })
+
+    if (requestedDate < planStartDate) {
+      return null // Use default plan instead
+    }
   }
+
+  return new MealPlan(activePlan, context)
+}
+
+/**
+ * Always returns user's Personal Food Log (default plan)
+ */
+export async function getDefaultMealPlan(
+  args: { date?: string | null },
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const defaultPlan = await getOrCreateDefaultMealPlan(
+    context,
+    args.date || undefined,
+  )
+  return defaultPlan
 }
 
 export async function createMealPlan(
@@ -883,6 +1064,433 @@ export async function createDraftMealTemplate(context: GQLContext) {
   }
 }
 
+/**
+ * Get or create a default meal plan for users without active meal plans
+ * This allows users to log meals even when they don't have a structured meal plan
+ */
+export async function getOrCreateDefaultMealPlan(
+  context: GQLContext,
+  dateFilter?: string,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  try {
+    // Check if user already has a default meal plan with more robust criteria
+    let defaultMealPlan = await prisma.mealPlan.findFirst({
+      where: {
+        createdById: user.user.id,
+        assignedToId: user.user.id,
+        isTemplate: false,
+        isDraft: false,
+        active: false,
+        title: 'Personal Food Log', // Unique identifier for default plans
+      },
+      include: {
+        createdBy: true,
+        assignedTo: true,
+        weeks: {
+          orderBy: {
+            weekNumber: 'asc',
+          },
+          include: {
+            days: {
+              orderBy: {
+                dayOfWeek: 'asc',
+              },
+              include: {
+                meals: {
+                  orderBy: {
+                    dateTime: 'asc',
+                  },
+                  include: {
+                    foods: {
+                      orderBy: {
+                        createdAt: 'asc',
+                      },
+                    },
+                    logs: {
+                      where: {
+                        userId: user.user.id,
+                        loggedAt: dateFilter
+                          ? {
+                              gte: startOfWeek(new Date(dateFilter), {
+                                weekStartsOn: 1,
+                              }),
+                              lte: endOfWeek(new Date(dateFilter), {
+                                weekStartsOn: 1,
+                              }),
+                            }
+                          : undefined,
+                      },
+                      include: {
+                        items: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!defaultMealPlan) {
+      // Create new default meal plan with error handling
+      try {
+        defaultMealPlan = await prisma.mealPlan.create({
+          data: {
+            title: 'Personal Food Log',
+            description: 'Your personal food logging space',
+            isPublic: false,
+            isTemplate: false,
+            isDraft: false,
+            active: false, // Not active by default
+            createdById: user.user.id,
+            assignedToId: user.user.id,
+            weeks: {
+              create: {
+                weekNumber: 1,
+                name: 'Default Week',
+                description: 'Default meal structure for daily logging',
+                days: {
+                  create: Array.from({ length: 7 }, (_, dayIndex) => ({
+                    dayOfWeek: dayIndex, // 0 = Monday, 6 = Sunday
+                    meals: {
+                      create: [
+                        {
+                          name: 'Breakfast',
+                          dateTime: new Date(`2024-01-01T08:00:00.000Z`),
+                          foods: { create: [] },
+                        },
+                        {
+                          name: 'Lunch',
+                          dateTime: new Date(`2024-01-01T12:00:00.000Z`),
+                          foods: { create: [] },
+                        },
+                        {
+                          name: 'Dinner',
+                          dateTime: new Date(`2024-01-01T18:00:00.000Z`),
+                          foods: { create: [] },
+                        },
+                        {
+                          name: 'Snack',
+                          dateTime: new Date(`2024-01-01T15:00:00.000Z`),
+                          foods: { create: [] },
+                        },
+                        {
+                          name: 'Supper',
+                          dateTime: new Date(`2024-01-01T20:00:00.000Z`),
+                          foods: { create: [] },
+                        },
+                      ],
+                    },
+                  })),
+                },
+              },
+            },
+          },
+          include: {
+            createdBy: true,
+            assignedTo: true,
+            weeks: {
+              orderBy: {
+                weekNumber: 'asc',
+              },
+              include: {
+                days: {
+                  orderBy: {
+                    dayOfWeek: 'asc',
+                  },
+                  include: {
+                    meals: {
+                      orderBy: {
+                        dateTime: 'asc',
+                      },
+                      include: {
+                        foods: {
+                          orderBy: {
+                            createdAt: 'asc',
+                          },
+                        },
+                        logs: {
+                          where: {
+                            userId: user.user.id,
+                            loggedAt: dateFilter
+                              ? {
+                                  gte: startOfWeek(new Date(dateFilter), {
+                                    weekStartsOn: 1,
+                                  }),
+                                  lte: endOfWeek(new Date(dateFilter), {
+                                    weekStartsOn: 1,
+                                  }),
+                                }
+                              : undefined,
+                          },
+                          include: { items: true },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        })
+      } catch (createError) {
+        // If creation fails (e.g., due to race condition), try to fetch existing plan
+        console.log(
+          'Default meal plan creation failed, attempting to fetch existing:',
+          createError,
+        )
+        const existingPlan = await prisma.mealPlan.findFirst({
+          where: {
+            createdById: user.user.id,
+            assignedToId: user.user.id,
+            isTemplate: false,
+            isDraft: false,
+            active: false,
+            title: 'Personal Food Log',
+          },
+          include: {
+            createdBy: true,
+            assignedTo: true,
+            weeks: {
+              orderBy: { weekNumber: 'asc' },
+              include: {
+                days: {
+                  orderBy: { dayOfWeek: 'asc' },
+                  include: {
+                    meals: {
+                      orderBy: { dateTime: 'asc' },
+                      include: {
+                        foods: { orderBy: { createdAt: 'asc' } },
+                        logs: {
+                          where: {
+                            userId: user.user.id,
+                            loggedAt: dateFilter
+                              ? {
+                                  gte: startOfWeek(new Date(dateFilter), {
+                                    weekStartsOn: 1,
+                                  }),
+                                  lte: endOfWeek(new Date(dateFilter), {
+                                    weekStartsOn: 1,
+                                  }),
+                                }
+                              : undefined,
+                          },
+                          include: { items: true },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        })
+
+        if (existingPlan) {
+          defaultMealPlan = existingPlan
+        } else {
+          throw createError // Re-throw if we still can't find/create the plan
+        }
+      }
+    }
+
+    return new MealPlan(defaultMealPlan, context)
+  } catch (error) {
+    console.error('Error getting or creating default meal plan:', error)
+    throw new GraphQLError('Failed to get or create default meal plan')
+  }
+}
+
+/**
+ * Cleanup utility to remove duplicate default meal plans for a user
+ * This can be called periodically to clean up any race condition artifacts
+ */
+export async function cleanupDuplicateDefaultMealPlans(userId: string) {
+  try {
+    const defaultPlans = await prisma.mealPlan.findMany({
+      where: {
+        createdById: userId,
+        assignedToId: userId,
+        isTemplate: false,
+        isDraft: false,
+        active: false,
+        title: 'Personal Food Log',
+      },
+      orderBy: {
+        createdAt: 'asc', // Keep the oldest one
+      },
+    })
+
+    if (defaultPlans.length > 1) {
+      console.log(
+        `Found ${defaultPlans.length} default meal plans for user ${userId}, cleaning up duplicates`,
+      )
+
+      // Keep the first one, delete the rest
+      const plansToDelete = defaultPlans.slice(1)
+
+      for (const plan of plansToDelete) {
+        // Check if the plan has any logs before deleting
+        const hasLogs = await prisma.mealLog.findFirst({
+          where: {
+            userId: userId,
+            meal: {
+              day: {
+                week: {
+                  planId: plan.id,
+                },
+              },
+            },
+          },
+        })
+
+        if (!hasLogs) {
+          // Safe to delete if no logs exist
+          await prisma.mealPlan.delete({
+            where: { id: plan.id },
+          })
+          console.log(
+            `Deleted duplicate default meal plan ${plan.id} for user ${userId}`,
+          )
+        } else {
+          console.log(
+            `Keeping default meal plan ${plan.id} for user ${userId} due to existing logs`,
+          )
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error cleaning up duplicate default meal plans:', error)
+    // Don't throw - this is a cleanup operation and shouldn't break user flow
+  }
+}
+
+/**
+ * Merge historical logs from user's default meal plan into an active meal plan
+ * This preserves user's logging history when switching between plans
+ */
+async function mergeHistoricalLogsFromDefaultPlan(
+  activeMealPlan: any,
+  userId: string,
+  dateFilter?: string | null,
+) {
+  try {
+    // Get user's default meal plan
+    const defaultMealPlan = await prisma.mealPlan.findFirst({
+      where: {
+        createdById: userId,
+        assignedToId: userId,
+        isTemplate: false,
+        isDraft: false,
+        active: false,
+        title: 'Personal Food Log',
+      },
+      include: {
+        weeks: {
+          include: {
+            days: {
+              include: {
+                meals: {
+                  include: {
+                    logs: {
+                      where: {
+                        userId: userId,
+                        loggedAt: dateFilter
+                          ? {
+                              gte: startOfWeek(new Date(dateFilter), {
+                                weekStartsOn: 1,
+                              }),
+                              lte: endOfWeek(new Date(dateFilter), {
+                                weekStartsOn: 1,
+                              }),
+                            }
+                          : undefined,
+                      },
+                      include: {
+                        items: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!defaultMealPlan) {
+      // No default plan exists, return active plan as-is
+      return activeMealPlan
+    }
+
+    // Extract historical logs from default plan
+    const historicalLogs = new Map<string, any[]>() // Map<mealName_dayOfWeek, logs[]>
+
+    defaultMealPlan.weeks.forEach((week) => {
+      week.days.forEach((day) => {
+        day.meals.forEach((meal) => {
+          if (meal.logs && meal.logs.length > 0) {
+            const key = `${meal.name.toLowerCase()}_${day.dayOfWeek}`
+            if (!historicalLogs.has(key)) {
+              historicalLogs.set(key, [])
+            }
+            historicalLogs.get(key)!.push(...meal.logs)
+          }
+        })
+      })
+    })
+
+    // Merge historical logs into active meal plan structure
+    if (activeMealPlan.weeks) {
+      activeMealPlan.weeks.forEach((week: any) => {
+        if (week.days) {
+          week.days.forEach((day: any) => {
+            if (day.meals) {
+              day.meals.forEach((meal: any) => {
+                const key = `${meal.name.toLowerCase()}_${day.dayOfWeek}`
+                const matchingHistoricalLogs = historicalLogs.get(key) || []
+
+                if (matchingHistoricalLogs.length > 0) {
+                  // Mark historical logs with metadata for UI distinction
+                  const markedHistoricalLogs = matchingHistoricalLogs.map(
+                    (log) => ({
+                      ...log,
+                      _isHistoricalFromDefault: true, // Metadata for UI
+                      _sourceDescription: 'Personal Food Log', // User-friendly source name
+                    }),
+                  )
+
+                  // Merge historical logs with current meal logs
+                  const existingLogs = meal.logs || []
+                  meal.logs = [...existingLogs, ...markedHistoricalLogs]
+
+                  console.log(
+                    `Merged ${matchingHistoricalLogs.length} historical logs for ${meal.name} on day ${day.dayOfWeek}`,
+                  )
+                }
+              })
+            }
+          })
+        }
+      })
+    }
+
+    return activeMealPlan
+  } catch (error) {
+    console.error('Error merging historical logs from default plan:', error)
+    // Return original plan if merging fails - don't break the user experience
+    return activeMealPlan
+  }
+}
+
 // New batch meal operation - replaces individual food mutations
 export async function saveMeal(
   args: GQLMutationSaveMealArgs,
@@ -1113,6 +1721,7 @@ export async function fitspaceActivateMealPlan(
     where: { id: planId },
     data: {
       active: true,
+      startDate: startOfWeek(new Date(), { weekStartsOn: 1 }),
     },
   })
 
@@ -1461,6 +2070,7 @@ export async function uncompleteMeal(
 
 /**
  * Add a custom food to a meal (creates a MealLogItem with isCustomAddition = true)
+ * Restricted to default plans only - users cannot modify assigned meal plans
  */
 export async function addCustomFoodToMeal(
   args: GQLMutationAddCustomFoodToMealArgs,
@@ -1498,10 +2108,17 @@ export async function addCustomFoodToMeal(
       throw new Error('You can only add foods to your own meals')
     }
 
+    // Restrict to default plans only - users cannot modify assigned meal plans
+    if (meal.day.week.plan.title !== 'Personal Food Log') {
+      throw new Error(
+        'Cannot add custom foods to assigned meal plans. Use addFoodToPersonalLog instead.',
+      )
+    }
+
     // Find or create meal log for this meal
     let mealLog = await prisma.mealLog.findFirst({
       where: {
-        mealId: input.mealId,
+        mealId: meal.id,
         userId: user.user.id,
       },
     })
@@ -1509,7 +2126,7 @@ export async function addCustomFoodToMeal(
     if (!mealLog) {
       mealLog = await prisma.mealLog.create({
         data: {
-          mealId: input.mealId,
+          mealId: meal.id,
           userId: user.user.id,
         },
       })
@@ -1549,6 +2166,104 @@ export async function addCustomFoodToMeal(
   } catch (error) {
     console.error('Error adding custom food to meal:', error)
     throw new GraphQLError('Failed to add custom food to meal')
+  }
+}
+
+/**
+ * Add a food directly to user's Personal Food Log
+ * This is used when users want to track additional foods beyond their assigned meal plan
+ */
+export async function addFoodToPersonalLog(
+  args: GQLMutationAddFoodToPersonalLogArgs,
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const { input } = args
+
+  try {
+    // Get or create user's default "Personal Food Log" plan
+    const defaultPlan = await getOrCreateDefaultMealPlan(context)
+
+    // Find the specific meal in the default plan
+    const meal = await prisma.meal.findFirst({
+      where: {
+        name: input.mealName,
+        day: {
+          dayOfWeek: input.dayOfWeek,
+          week: {
+            plan: {
+              id: defaultPlan.id,
+            },
+          },
+        },
+      },
+    })
+
+    if (!meal) {
+      throw new Error(
+        `Meal "${input.mealName}" not found for day ${input.dayOfWeek} in your Personal Food Log`,
+      )
+    }
+
+    // Find or create meal log for this meal
+    let mealLog = await prisma.mealLog.findFirst({
+      where: {
+        mealId: meal.id,
+        userId: user.user.id,
+      },
+    })
+
+    if (!mealLog) {
+      mealLog = await prisma.mealLog.create({
+        data: {
+          mealId: meal.id,
+          userId: user.user.id,
+        },
+      })
+    }
+
+    // Calculate nutritional data from per100g values
+    const factor = input.quantity / 100
+    const calories = input.caloriesPer100g
+      ? input.caloriesPer100g * factor
+      : null
+    const protein = input.proteinPer100g ? input.proteinPer100g * factor : null
+    const carbs = input.carbsPer100g ? input.carbsPer100g * factor : null
+    const fat = input.fatPer100g ? input.fatPer100g * factor : null
+    const fiber = input.fiberPer100g ? input.fiberPer100g * factor : null
+
+    // Create meal log item as custom addition to personal log
+    const mealLogItem = await prisma.mealLogItem.create({
+      data: {
+        logId: mealLog.id,
+        name: input.name,
+        quantity: input.quantity,
+        unit: input.unit,
+        calories,
+        protein,
+        carbs,
+        fat,
+        fiber,
+        openFoodFactsId: input.openFoodFactsId,
+        productData: input.productData ? JSON.parse(input.productData) : null,
+        notes: input.notes,
+        plannedFoodId: null, // Not linked to any planned food
+        isCustomAddition: true, // This is a custom addition
+      },
+    })
+
+    console.log(
+      `Added food "${input.name}" to Personal Food Log (${input.mealName}) for user: ${user.user.id}`,
+    )
+
+    return new MealLogItem(mealLogItem, context)
+  } catch (error) {
+    console.error('Error adding food to personal log:', error)
+    throw new GraphQLError('Failed to add food to personal log')
   }
 }
 

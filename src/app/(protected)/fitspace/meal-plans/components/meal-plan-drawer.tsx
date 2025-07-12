@@ -6,13 +6,10 @@ import {
   DrawerClose,
   SimpleDrawerContent,
 } from '@/components/ui/drawer'
-import { useFitspaceGetMealPlanQuery } from '@/generated/graphql-client'
 
 import { ActiveMealPlan, AvailableMealPlan, MealPlanAction } from '../types'
 
 import { MealPlanOverview } from './meal-plan-overview'
-import { MealSchedule } from './meal-schedule'
-import { MealScheduleSkeleton } from './meal-schedule-skeleton'
 
 interface MealPlanDrawerProps {
   plan: ActiveMealPlan | AvailableMealPlan | null
@@ -32,15 +29,6 @@ export function MealPlanDrawer({
   onAction,
   isLoading,
 }: MealPlanDrawerProps) {
-  // Fetch detailed meal plan data when drawer is open
-  const { data: detailedData, isLoading: isFetchingDetails } =
-    useFitspaceGetMealPlanQuery(
-      { mealPlanId: plan?.id },
-      { enabled: open && !!plan?.id },
-    )
-
-  const detailedPlan = detailedData?.clientGetMealPlan?.plan
-
   if (!plan) return null
 
   const isActive = plan.active
@@ -74,20 +62,10 @@ export function MealPlanDrawer({
           {/* Plan Overview */}
           <MealPlanOverview plan={plan} />
 
-          {/* Meal Schedule */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Meal Schedule</h3>
-
-            {isFetchingDetails ? (
-              <MealScheduleSkeleton />
-            ) : detailedPlan?.weeks && detailedPlan.weeks.length > 0 ? (
-              <MealSchedule weeks={detailedPlan.weeks} />
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                <ChefHat className="size-12 mx-auto mb-4 opacity-50" />
-                <p>No meal schedule available yet</p>
-              </div>
-            )}
+          {/* Simplified message for meal schedule */}
+          <div className="text-center py-8 text-muted-foreground">
+            <ChefHat className="size-12 mx-auto mb-4 opacity-50" />
+            <p>Activate this plan to view detailed meal schedule</p>
           </div>
 
           {/* Plan Creator */}

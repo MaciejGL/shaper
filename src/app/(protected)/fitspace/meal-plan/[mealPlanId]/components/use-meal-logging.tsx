@@ -4,6 +4,8 @@ import { toast } from 'sonner'
 import {
   useBatchLogMealFoodMutation,
   useCompleteMealMutation,
+  useGetActiveMealPlanQuery,
+  useGetDefaultMealPlanQuery,
   useRemoveMealLogMutation,
   useUncompleteMealMutation,
 } from '@/generated/graphql-client'
@@ -26,9 +28,11 @@ export function useMealLogging() {
   const { mutate: batchLogMealFood, isPending: isBatchLoggingFood } =
     useBatchLogMealFoodMutation({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['FitspaceGetMealPlan'] })
         queryClient.invalidateQueries({
-          queryKey: ['FitspaceMealPlansOverview'],
+          queryKey: useGetActiveMealPlanQuery.getKey(),
+        })
+        queryClient.invalidateQueries({
+          queryKey: useGetDefaultMealPlanQuery.getKey(),
         })
       },
       onError: (error) => {
@@ -40,9 +44,11 @@ export function useMealLogging() {
   const { mutate: completeMeal, isPending: isCompletingMeal } =
     useCompleteMealMutation({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['FitspaceGetMealPlan'] })
         queryClient.invalidateQueries({
-          queryKey: ['FitspaceMealPlansOverview'],
+          queryKey: useGetActiveMealPlanQuery.getKey(),
+        })
+        queryClient.invalidateQueries({
+          queryKey: useGetDefaultMealPlanQuery.getKey(),
         })
       },
       onError: (error) => {
@@ -54,9 +60,11 @@ export function useMealLogging() {
   const { mutate: uncompleteMeal, isPending: isUncompletingMeal } =
     useUncompleteMealMutation({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['FitspaceGetMealPlan'] })
         queryClient.invalidateQueries({
-          queryKey: ['FitspaceMealPlansOverview'],
+          queryKey: useGetActiveMealPlanQuery.getKey(),
+        })
+        queryClient.invalidateQueries({
+          queryKey: useGetDefaultMealPlanQuery.getKey(),
         })
       },
       onError: (error) => {
@@ -68,9 +76,11 @@ export function useMealLogging() {
   const { mutate: removeLog, isPending: isRemovingLogItem } =
     useRemoveMealLogMutation({
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ['FitspaceGetMealPlan'] })
         queryClient.invalidateQueries({
-          queryKey: ['FitspaceMealPlansOverview'],
+          queryKey: useGetActiveMealPlanQuery.getKey(),
+        })
+        queryClient.invalidateQueries({
+          queryKey: useGetDefaultMealPlanQuery.getKey(),
         })
       },
     })

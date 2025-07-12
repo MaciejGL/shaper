@@ -6,8 +6,9 @@ import {
   useFitspaceActivateMealPlanMutation,
   useFitspaceDeactivateMealPlanMutation,
   useFitspaceDeleteMealPlanMutation,
-  useFitspaceGetCurrentMealPlanIdQuery,
   useFitspaceMealPlansOverviewQuery,
+  useGetActiveMealPlanQuery,
+  useGetDefaultMealPlanQuery,
 } from '@/generated/graphql-client'
 
 import { ActiveMealPlan, AvailableMealPlan, MealPlanAction } from '../types'
@@ -31,7 +32,10 @@ export function useMealPlanAction() {
       queryKey: useFitspaceMealPlansOverviewQuery.getKey(),
     })
     queryClient.invalidateQueries({
-      queryKey: useFitspaceGetCurrentMealPlanIdQuery.getKey(),
+      queryKey: useGetActiveMealPlanQuery.getKey(),
+    })
+    queryClient.invalidateQueries({
+      queryKey: useGetDefaultMealPlanQuery.getKey(),
     })
   }
 

@@ -192,7 +192,6 @@ export default function FoodSearch({
             <FoodSearchResults
               searchResults={searchResults}
               addFood={addFood}
-              isSearching={isSearching}
             />
           )}
         </motion.div>

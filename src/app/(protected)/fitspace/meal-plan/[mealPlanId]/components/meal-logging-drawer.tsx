@@ -23,40 +23,44 @@ interface FoodQuantity {
   isCustomAddition: boolean
 }
 
-interface MealLoggingDrawerProps {
-  meal: {
+export type SelectedMeal = {
+  id: string
+  name: string
+  dateTime: string
+  instructions?: string | null
+
+  foods: {
     id: string
     name: string
-    dateTime: string
-    instructions?: string | null
-    foods: {
+    quantity: number
+    unit: string
+    totalCalories: number
+    totalProtein: number
+    totalCarbs: number
+    totalFat: number
+    isCustomAddition: boolean
+    openFoodFactsId?: string | null
+    log?: {
       id: string
-      name: string
-      quantity: number
+      loggedQuantity: number
       unit: string
-      totalCalories: number
-      totalProtein: number
-      totalCarbs: number
-      totalFat: number
-      isCustomAddition: boolean
-      log?: {
-        id: string
-        loggedQuantity: number
-        unit: string
-        loggedAt: string
-        notes?: string | null
-        calories?: number | null
-        protein?: number | null
-        carbs?: number | null
-        fat?: number | null
-        fiber?: number | null
-      } | null
-    }[]
-    plannedCalories: number
-    plannedProtein: number
-    plannedCarbs: number
-    plannedFat: number
-  } | null
+      loggedAt: string
+      notes?: string | null
+      calories?: number | null
+      protein?: number | null
+      carbs?: number | null
+      fat?: number | null
+      fiber?: number | null
+    } | null
+  }[]
+  plannedCalories: number
+  plannedProtein: number
+  plannedCarbs: number
+  plannedFat: number
+}
+
+interface MealLoggingDrawerProps {
+  meal: SelectedMeal | null
   open: boolean
   onClose: () => void
   onSave: (mealId: string, foodQuantities: FoodQuantity[]) => void

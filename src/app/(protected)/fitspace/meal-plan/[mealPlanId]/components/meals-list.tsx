@@ -3,43 +3,12 @@ import { useState } from 'react'
 import { CustomFoodSearchDrawer } from './custom-food-search-drawer'
 import { MealCard } from './meal-card'
 import { MealLoggingDrawer } from './meal-logging-drawer'
+import { Meal } from './meal-plan-context'
 import { useMealLogging } from './use-meal-logging'
 
 interface MealsListProps {
-  meals: {
-    id: string
-    name: string
-    dateTime: string
-    instructions?: string | null
-    completedAt?: string | null
-    foods: {
-      id: string
-      name: string
-      quantity: number
-      unit: string
-      totalCalories: number
-      totalProtein: number
-      totalCarbs: number
-      totalFat: number
-      isCustomAddition: boolean
-      log?: {
-        id: string
-        loggedQuantity: number
-        unit: string
-        loggedAt: string
-        notes?: string | null
-        calories?: number | null
-        protein?: number | null
-        carbs?: number | null
-        fat?: number | null
-        fiber?: number | null
-      } | null
-    }[]
-    plannedCalories: number
-    plannedProtein: number
-    plannedCarbs: number
-    plannedFat: number
-  }[]
+  planMeals: Meal[]
+  allowCustomFood?: boolean // Controls whether custom food additions are allowed
 }
 
 interface FoodQuantity {
@@ -54,10 +23,11 @@ interface FoodQuantity {
   totalFat: number
 }
 
-export function MealsList({ meals }: MealsListProps) {
-  const [selectedMeal, setSelectedMeal] = useState<(typeof meals)[0] | null>(
-    null,
-  )
+export function MealsList({
+  planMeals,
+  allowCustomFood = false,
+}: MealsListProps) {
+  const [selectedMealId, setSelectedMealId] = useState<string | null>(null)
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [customFoodDrawerOpen, setCustomFoodDrawerOpen] = useState(false)
@@ -69,19 +39,19 @@ export function MealsList({ meals }: MealsListProps) {
     isLoading,
   } = useMealLogging()
 
-  const handleMealClick = (meal: (typeof meals)[0]) => {
-    setSelectedMeal(meal)
+  const handleMealClick = (meal: Meal) => {
+    setSelectedMealId(meal.id)
     setDrawerOpen(true)
   }
 
-  const handleAddCustomFood = (meal: (typeof meals)[0]) => {
-    setSelectedMeal(meal)
+  const handleAddCustomFood = (meal: Meal) => {
+    setSelectedMealId(meal.id)
     setCustomFoodDrawerOpen(true)
   }
 
   const handleCloseDrawer = () => {
     setDrawerOpen(false)
-    setSelectedMeal(null)
+    setSelectedMealId(null)
   }
 
   const handleSaveMealLog = (
@@ -95,17 +65,23 @@ export function MealsList({ meals }: MealsListProps) {
   return (
     <>
       <div className="space-y-6">
-        {meals.map((meal) => (
-          <MealCard
-            key={meal.id}
-            meal={meal}
-            onClick={() => handleMealClick(meal)}
-            onAddCustomFood={() => handleAddCustomFood(meal)}
-            onCompleteMeal={handleCompleteMeal}
-            onUncompleteMeal={handleUncompleteMeal}
-          />
-        ))}
-        {meals.length === 0 && (
+        {planMeals.map((meal) => {
+          return (
+            <MealCard
+              key={meal.id}
+              meal={meal}
+              onClick={() => handleMealClick(meal)}
+              onAddCustomFood={
+                // Only show add custom food when allowed
+                allowCustomFood ? () => handleAddCustomFood(meal) : undefined
+              }
+              isDefaultPlan={allowCustomFood}
+              onCompleteMeal={handleCompleteMeal}
+              onUncompleteMeal={handleUncompleteMeal}
+            />
+          )
+        })}
+        {planMeals.length === 0 && (
           <div className="text-center text-sm text-muted-foreground">
             No meals found
           </div>
@@ -114,33 +90,24 @@ export function MealsList({ meals }: MealsListProps) {
 
       {/* Full Meal Logging Drawer */}
       <MealLoggingDrawer
-        meal={selectedMeal}
+        meal={planMeals.find((meal) => meal.id === selectedMealId) || null}
         open={drawerOpen}
         onClose={handleCloseDrawer}
         onSave={handleSaveMealLog}
         isLoading={isLoading}
       />
 
-      {/* Single Food Adjustment Drawer */}
-      {/* <SingleFoodAdjustmentDrawer
-        food={selectedFood}
-        mealName={selectedMeal?.name || ''}
-        open={singleFoodDrawerOpen}
-        onClose={handleCloseSingleFoodDrawer}
-        onSave={handleSaveSingleFood}
-        isLoading={isLoading}
-      /> */}
-
       {/* Custom Food Search Drawer */}
-      <CustomFoodSearchDrawer
-        isOpen={customFoodDrawerOpen}
-        onClose={() => setCustomFoodDrawerOpen(false)}
-        mealId={selectedMeal?.id || ''}
-        onFoodAdded={() => {
-          // Invalidate queries to refresh the meal data
-          setCustomFoodDrawerOpen(false)
-        }}
-      />
+      {selectedMealId && allowCustomFood && customFoodDrawerOpen && (
+        <CustomFoodSearchDrawer
+          isOpen={customFoodDrawerOpen}
+          onClose={() => setCustomFoodDrawerOpen(false)}
+          mealId={selectedMealId}
+          selectedMeal={
+            planMeals.find((meal) => meal.id === selectedMealId) || null
+          }
+        />
+      )}
     </>
   )
 }
