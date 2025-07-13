@@ -164,7 +164,6 @@ export function CustomFoodSearchDrawer({
               onFocusCapture={() => {
                 setSearchTerm('')
               }}
-              autoFocus={searchTerm.length === 0}
             />
 
             {isSearching && <FoodSearchLoading />}

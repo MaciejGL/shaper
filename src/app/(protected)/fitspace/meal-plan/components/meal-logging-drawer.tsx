@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { ChefHat } from 'lucide-react'
+import { ChefHat, FlameIcon, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils'
 import { MealHeaderInfo } from './meal-header-info'
 import { NutritionSummary } from './nutrition-summary'
 import { QuantityControls } from './quantity-controls'
+import { useMealLogging } from './use-meal-logging'
 
 interface FoodQuantity {
   id: string
@@ -79,6 +80,8 @@ export function MealLoggingDrawer({
   isLoading = false,
 }: MealLoggingDrawerProps) {
   const [foodQuantities, setFoodQuantities] = useState<FoodQuantity[]>([])
+  const [removingItemIds, setRemovingItemIds] = useState<string[]>([])
+  const { handleRemoveLogItem } = useMealLogging()
 
   // Initialize quantities when meal changes
   useEffect(() => {
@@ -142,6 +145,20 @@ export function MealLoggingDrawer({
     return sum + food.totalFat * ratio
   }, 0)
 
+  const handleRemoveLog = async (foodId: string) => {
+    setRemovingItemIds((prev) => [...prev, foodId])
+
+    try {
+      await handleRemoveLogItem(foodId)
+      // Wait for the mutation to complete using the global state
+      // Since handleRemoveLogItem doesn't return a promise, we need to handle this differently
+    } catch (error) {
+      console.error('Error removing food:', error)
+    } finally {
+      setRemovingItemIds((prev) => prev.filter((id) => id !== foodId))
+    }
+  }
+
   if (!meal) return null
 
   return (
@@ -160,6 +177,7 @@ export function MealLoggingDrawer({
                 </p>
               </div>
             </div>
+
             <MealHeaderInfo
               totalCalories={totalLoggedCalories}
               totalProtein={totalLoggedProtein}
@@ -175,13 +193,13 @@ export function MealLoggingDrawer({
               <Button
                 variant="secondary"
                 onClick={onClose}
-                disabled={isLoading}
+                disabled={isLoading || removingItemIds.length > 0}
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleSave}
-                disabled={isLoading}
+                disabled={isLoading || removingItemIds.length > 0}
                 loading={isLoading}
               >
                 Save Log
@@ -221,14 +239,29 @@ export function MealLoggingDrawer({
                         <div className="font-medium text-sm">{food.name}</div>
                       </div>
                       <div className="text-xs text-gray-500">
-                        {food.isCustomAddition ? 'Custom' : 'Planned'}:{' '}
+                        {food.isCustomAddition ? '' : 'Planned:'}{' '}
                         {food.originalQuantity}
                         {food.unit}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm font-medium">
-                        {Math.round(adjustedCalories)} cal
+                      <Button
+                        variant="secondary"
+                        size="icon-sm"
+                        iconOnly={<X />}
+                        onClick={() => handleRemoveLog(food.id)}
+                        disabled={removingItemIds.includes(food.id)}
+                        loading={removingItemIds.includes(food.id)}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-1">
+                      <div className="text-sm font-medium flex items-center gap-1">
+                        {Math.round(adjustedCalories)}{' '}
+                        <FlameIcon className="size-4" />
                       </div>
                       <NutritionSummary
                         protein={adjustedProtein}
@@ -236,16 +269,16 @@ export function MealLoggingDrawer({
                         fat={adjustedFat}
                       />
                     </div>
-                  </div>
-                  <div className="flex items-center justify-end gap-2">
-                    <QuantityControls
-                      id={`quantity-${food.id}`}
-                      value={food.loggedQuantity}
-                      unit={food.unit}
-                      onChange={(newQuantity: number) =>
-                        updateQuantity(food.id, newQuantity)
-                      }
-                    />
+                    <div className="flex items-center justify-between gap-2 self-end">
+                      <QuantityControls
+                        id={`quantity-${food.id}`}
+                        value={food.loggedQuantity}
+                        unit={food.unit}
+                        onChange={(newQuantity: number) =>
+                          updateQuantity(food.id, newQuantity)
+                        }
+                      />
+                    </div>
                   </div>
                 </div>
               )

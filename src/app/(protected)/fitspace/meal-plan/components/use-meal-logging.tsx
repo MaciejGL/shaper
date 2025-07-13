@@ -131,8 +131,8 @@ export function useMealLogging() {
     return uncompleteMeal({ mealId })
   }
 
-  const handleRemoveLogItem = (foodId: string) => {
-    removeLog({ foodId })
+  const handleRemoveLogItem = async (foodId: string) => {
+    await removeLog({ foodId })
   }
 
   return {
