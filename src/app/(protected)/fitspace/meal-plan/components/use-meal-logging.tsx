@@ -1,4 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { useQueryState } from 'nuqs'
 import { toast } from 'sonner'
 
 import {
@@ -9,6 +10,7 @@ import {
   useRemoveMealLogMutation,
   useUncompleteMealMutation,
 } from '@/generated/graphql-client'
+import { createTimestampWithDateAndCurrentTime } from '@/lib/utc-date-utils'
 
 interface FoodQuantity {
   id: string
@@ -24,6 +26,7 @@ interface FoodQuantity {
 
 export function useMealLogging() {
   const queryClient = useQueryClient()
+  const [date] = useQueryState('date') // Get current date from URL
 
   const { mutate: batchLogMealFood, isPending: isBatchLoggingFood } =
     useBatchLogMealFoodMutation({
@@ -119,6 +122,7 @@ export function useMealLogging() {
       input: {
         mealId,
         foods,
+        loggedAt: createTimestampWithDateAndCurrentTime(date), // Date being viewed + current time
       },
     })
   }

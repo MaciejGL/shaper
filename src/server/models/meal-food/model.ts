@@ -5,7 +5,6 @@ import {
 } from '@prisma/client'
 
 import { GQLMealFood } from '@/generated/graphql-server'
-import { openFoodFactsClient } from '@/lib/open-food-facts/client'
 import { GQLContext } from '@/types/gql-context'
 
 import Meal from '../meal/model'
@@ -16,12 +15,15 @@ export default class MealFood implements GQLMealFood {
       meal?: PrismaMeal
       foodProduct?: PrismaMealFoodProduct
     },
-
     protected context: GQLContext,
   ) {}
 
   get id() {
     return this.data.id
+  }
+
+  get name() {
+    return this.data.name
   }
 
   get quantity() {
@@ -32,16 +34,11 @@ export default class MealFood implements GQLMealFood {
     return this.data.unit
   }
 
-  get name() {
-    return this.data.name
-  }
-
-  get barcode() {
-    return this.data.openFoodFactsId || null
-  }
-
-  get brand() {
-    return null // Will be extracted from productData JSON when needed
+  get addedAt() {
+    // Provide a fallback if addedAt is somehow null
+    return this.data.addedAt
+      ? this.data.addedAt.toISOString()
+      : this.data.createdAt.toISOString()
   }
 
   get caloriesPer100g() {
@@ -64,84 +61,61 @@ export default class MealFood implements GQLMealFood {
     return this.data.fiberPer100g
   }
 
-  get sugarPer100g() {
-    return null // Not stored in database schema
+  get openFoodFactsId() {
+    return this.data.openFoodFactsId
   }
 
-  get sodiumPer100g() {
-    return null // Not stored in database schema
+  get productData() {
+    return this.data.productData ? JSON.stringify(this.data.productData) : null
+  }
+
+  get totalCalories() {
+    const per100g = this.data.caloriesPer100g || 0
+    const factor = this.data.quantity / 100
+    return per100g * factor
+  }
+
+  get totalProtein() {
+    const per100g = this.data.proteinPer100g || 0
+    const factor = this.data.quantity / 100
+    return per100g * factor
+  }
+
+  get totalCarbs() {
+    const per100g = this.data.carbsPer100g || 0
+    const factor = this.data.quantity / 100
+    return per100g * factor
+  }
+
+  get totalFat() {
+    const per100g = this.data.fatPer100g || 0
+    const factor = this.data.quantity / 100
+    return per100g * factor
+  }
+
+  get totalFiber() {
+    const per100g = this.data.fiberPer100g || 0
+    const factor = this.data.quantity / 100
+    return per100g * factor
+  }
+
+  // TODO: Add other required fields for GQLMealFood interface
+  async logs() {
+    return []
+  }
+
+  async addedBy() {
+    return null
+  }
+
+  get latestLog() {
+    return null
   }
 
   async meal() {
     if (!this.data.meal) {
       throw new Error('Meal relationship not loaded')
     }
-    return this.data.meal ? new Meal(this.data.meal, this.context) : null
-  }
-
-  // Calculated nutrition fields based on quantity
-  get totalCalories() {
-    if (!this.data.caloriesPer100g || !this.data.quantity || !this.data.unit) {
-      return 0
-    }
-
-    const nutrition = openFoodFactsClient.calculateNutrition(
-      this.data,
-      this.data.quantity,
-      this.data.unit,
-    )
-    return Math.round(nutrition.calories * 100) / 100
-  }
-
-  get totalProtein() {
-    if (!this.data.proteinPer100g || !this.data.quantity || !this.data.unit) {
-      return 0
-    }
-
-    const nutrition = openFoodFactsClient.calculateNutrition(
-      this.data,
-      this.data.quantity,
-      this.data.unit,
-    )
-    return Math.round(nutrition.protein * 100) / 100
-  }
-
-  get totalCarbs() {
-    if (!this.data.carbsPer100g || !this.data.quantity || !this.data.unit) {
-      return 0
-    }
-
-    const nutrition = openFoodFactsClient.calculateNutrition(
-      this.data,
-      this.data.quantity,
-      this.data.unit,
-    )
-    return Math.round(nutrition.carbs * 100) / 100
-  }
-
-  get totalFat() {
-    if (!this.data.fatPer100g || !this.data.quantity || !this.data.unit) {
-      return 0
-    }
-
-    const nutrition = openFoodFactsClient.calculateNutrition(
-      this.data,
-      this.data.quantity,
-      this.data.unit,
-    )
-    return Math.round(nutrition.fat * 100) / 100
-  }
-
-  get totalFiber() {
-    if (!this.data.fiberPer100g || !this.data.quantity || !this.data.unit) {
-      return 0
-    }
-
-    const nutrition = openFoodFactsClient.calculateNutrition(
-      this.data,
-      this.data.quantity,
-      this.data.unit,
-    )
-    return Math.round(nutrition.fiber * 100) / 100
+    return new Meal(this.data.meal, this.context)
   }
 }

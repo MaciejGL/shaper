@@ -17,7 +17,6 @@ import {
   fitspaceDeactivateMealPlan,
   fitspaceDeleteMealPlan,
   getActiveMealPlan,
-  getClientActiveMealPlan,
   getClientMealPlans,
   getCollaborationMealPlanTemplates,
   getDefaultMealPlan,
@@ -44,9 +43,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   getClientMealPlans: async (_, args, context) => {
     return getClientMealPlans(args, context)
   },
-  getClientActiveMealPlan: async (_, args, context) => {
-    return getClientActiveMealPlan(args, context)
-  },
+
   getMyMealPlansOverview: async (_, __, context) => {
     return getMyMealPlansOverview(context)
   },

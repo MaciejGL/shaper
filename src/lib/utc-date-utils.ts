@@ -132,3 +132,33 @@ export function compareWeeksUTC(
   if (week1 > week2) return 1
   return 0
 }
+
+/**
+ * Create a timestamp with specific date but current time
+ * Useful for meal logging where we want to preserve the date being viewed
+ * but record the actual time when the food was logged
+ * @param dateString - Date string in YYYY-MM-DD format (the date being viewed)
+ * @returns ISO string with the viewed date but current time
+ */
+export function createTimestampWithDateAndCurrentTime(
+  dateString?: string | null,
+): string {
+  if (!dateString) return new Date().toISOString()
+
+  // Parse the viewed date (e.g., "2025-07-13")
+  const viewedDate = fromZonedTime(dateString + 'T00:00:00', 'UTC')
+  const now = new Date()
+
+  // Combine viewed date with current time
+  const combinedDate = new Date(
+    viewedDate.getFullYear(),
+    viewedDate.getMonth(),
+    viewedDate.getDate(),
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds(),
+    now.getMilliseconds(),
+  )
+
+  return combinedDate.toISOString()
+}

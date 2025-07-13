@@ -23,7 +23,8 @@ model User {
   receivedCollaborationInvitations CollaborationInvitation[]  @relation("ReceivedCollaborationInvitations")
   sentCollaborationInvitations     CollaborationInvitation[]  @relation("SentCollaborationInvitations")
   exerciseLogs                     ExerciseLog[]
-  mealLogs                         MealLog[]                  @relation("MealLogs")
+  addedMealFoods                   MealFood[]                 @relation("AddedMealFoods")
+  mealFoodLogs                     MealFoodLog[]              @relation("MealFoodLogs")
   assignedMealPlans                MealPlan[]                 @relation("AssignedMealPlans")
   createdMealPlans                 MealPlan[]                 @relation("CreatedMealPlans")
   addedMealPlanCollaborators       MealPlanCollaborator[]     @relation("AddedMealPlanCollaborators")
@@ -492,7 +493,6 @@ model Meal {
   instructions String?
   day          MealDay    @relation(fields: [dayId], references: [id], onDelete: Cascade)
   foods        MealFood[]
-  logs         MealLog[]
   completedAt  DateTime?
 
   @@index([dateTime])
@@ -504,6 +504,7 @@ model MealFood {
   name            String
   quantity        Float
   unit            String
+  addedAt         DateTime      @default(now())
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   caloriesPer100g Float?
@@ -513,46 +514,33 @@ model MealFood {
   fiberPer100g    Float?
   openFoodFactsId String?
   productData     Json?
+  addedById       String?
   meal            Meal          @relation(fields: [mealId], references: [id], onDelete: Cascade)
-  MealLogItem     MealLogItem[]
-}
+  addedBy         User?         @relation("AddedMealFoods", fields: [addedById], references: [id])
+  logs            MealFoodLog[]
 
-model MealLog {
-  id          String        @id @default(uuid())
-  mealId      String
-  userId      String
-  loggedAt    DateTime      @default(now())
-  completedAt DateTime?
-  meal        Meal          @relation(fields: [mealId], references: [id], onDelete: Cascade)
-  user        User          @relation("MealLogs", fields: [userId], references: [id])
-  items       MealLogItem[]
-
-  @@index([userId, loggedAt])
   @@index([mealId])
+  @@index([addedAt])
 }
 
-model MealLogItem {
-  id               String    @id @default(uuid())
-  logId            String
-  name             String
-  barcode          String?
-  quantity         Float
-  unit             String
-  calories         Float?
-  protein          Float?
-  carbs            Float?
-  fat              Float?
-  fiber            Float?
-  openFoodFactsId  String?
-  productData      Json?
-  plannedFoodId    String?
-  notes            String?
-  createdAt        DateTime  @default(now())
-  isCustomAddition Boolean   @default(false)
-  log              MealLog   @relation(fields: [logId], references: [id], onDelete: Cascade)
-  plannedFood      MealFood? @relation(fields: [plannedFoodId], references: [id])
+model MealFoodLog {
+  id         String   @id @default(uuid())
+  mealFoodId String
+  userId     String
+  quantity   Float
+  unit       String
+  loggedAt   DateTime @default(now())
+  notes      String?
+  calories   Float?
+  protein    Float?
+  carbs      Float?
+  fat        Float?
+  fiber      Float?
+  mealFood   MealFood @relation(fields: [mealFoodId], references: [id], onDelete: Cascade)
+  user       User     @relation("MealFoodLogs", fields: [userId], references: [id])
 
-  @@index([logId])
+  @@index([mealFoodId])
+  @@index([userId, loggedAt])
 }
 
 model FoodProduct {

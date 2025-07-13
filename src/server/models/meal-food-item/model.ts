@@ -1,20 +1,22 @@
 import {
   MealFood as PrismaMealFood,
-  MealLogItem as PrismaMealLogItem,
+  MealFoodLog as PrismaMealFoodLog,
+  User as PrismaUser,
 } from '@prisma/client'
 
 import { GQLMealFoodItem } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
 
 import MealFoodLog from '../meal-food-log/model'
+import UserPublic from '../user-public/model'
 
 export default class MealFoodItem implements GQLMealFoodItem {
   constructor(
-    // Can be either planned food or custom addition data
-    protected data: (PrismaMealFood | PrismaMealLogItem) & {
-      // For planned foods, this will be the latest consumption log
-      // For custom additions, this will be null (the item itself is the log)
-      latestLog?: PrismaMealLogItem | null
+    protected data: PrismaMealFood & {
+      addedBy?: PrismaUser | null
+      logs?: (PrismaMealFoodLog & {
+        user?: PrismaUser
+      })[]
     },
     protected context: GQLContext,
   ) {}
@@ -35,78 +37,35 @@ export default class MealFoodItem implements GQLMealFoodItem {
     return this.data.unit
   }
 
+  get addedAt() {
+    // Provide a fallback if addedAt is somehow null
+    return this.data.addedAt
+      ? this.data.addedAt.toISOString()
+      : this.data.createdAt.toISOString()
+  }
+
   get caloriesPer100g() {
-    // For MealFood, access directly. For MealLogItem, need to calculate from actual values
-    if ('mealId' in this.data) {
-      // This is a MealFood
-      return this.data.caloriesPer100g
-    } else {
-      // This is a MealLogItem (custom addition)
-      // Calculate per 100g from actual values if available
-      if (this.data.calories && this.data.quantity) {
-        return (
-          Math.round((this.data.calories / this.data.quantity) * 100 * 100) /
-          100
-        )
-      }
-      return null
-    }
+    return this.data.caloriesPer100g
   }
 
   get proteinPer100g() {
-    if ('mealId' in this.data) {
-      return this.data.proteinPer100g
-    } else {
-      if (this.data.protein && this.data.quantity) {
-        return (
-          Math.round((this.data.protein / this.data.quantity) * 100 * 100) / 100
-        )
-      }
-      return null
-    }
+    return this.data.proteinPer100g
   }
 
   get carbsPer100g() {
-    if ('mealId' in this.data) {
-      return this.data.carbsPer100g
-    } else {
-      if (this.data.carbs && this.data.quantity) {
-        return (
-          Math.round((this.data.carbs / this.data.quantity) * 100 * 100) / 100
-        )
-      }
-      return null
-    }
+    return this.data.carbsPer100g
   }
 
   get fatPer100g() {
-    if ('mealId' in this.data) {
-      return this.data.fatPer100g
-    } else {
-      if (this.data.fat && this.data.quantity) {
-        return (
-          Math.round((this.data.fat / this.data.quantity) * 100 * 100) / 100
-        )
-      }
-      return null
-    }
+    return this.data.fatPer100g
   }
 
   get fiberPer100g() {
-    if ('mealId' in this.data) {
-      return this.data.fiberPer100g
-    } else {
-      if (this.data.fiber && this.data.quantity) {
-        return (
-          Math.round((this.data.fiber / this.data.quantity) * 100 * 100) / 100
-        )
-      }
-      return null
-    }
+    return this.data.fiberPer100g
   }
 
   get openFoodFactsId() {
-    return this.data.openFoodFactsId || null
+    return this.data.openFoodFactsId
   }
 
   get productData() {
@@ -114,77 +73,58 @@ export default class MealFoodItem implements GQLMealFoodItem {
   }
 
   get totalCalories() {
-    // For MealFood, calculate from per100g values
-    if ('mealId' in this.data) {
-      const caloriesPer100g = this.caloriesPer100g
-      if (!caloriesPer100g) return 0
-      return Math.round(((caloriesPer100g * this.quantity) / 100) * 100) / 100
-    } else {
-      // For MealLogItem, use actual logged values
-      return this.data.calories || 0
-    }
+    const per100g = this.data.caloriesPer100g || 0
+    const factor = this.data.quantity / 100
+    return per100g * factor
   }
 
   get totalProtein() {
-    if ('mealId' in this.data) {
-      const proteinPer100g = this.proteinPer100g
-      if (!proteinPer100g) return 0
-      return Math.round(((proteinPer100g * this.quantity) / 100) * 100) / 100
-    } else {
-      return this.data.protein || 0
-    }
+    const per100g = this.data.proteinPer100g || 0
+    const factor = this.data.quantity / 100
+    return per100g * factor
   }
 
   get totalCarbs() {
-    if ('mealId' in this.data) {
-      const carbsPer100g = this.carbsPer100g
-      if (!carbsPer100g) return 0
-      return Math.round(((carbsPer100g * this.quantity) / 100) * 100) / 100
-    } else {
-      return this.data.carbs || 0
-    }
+    const per100g = this.data.carbsPer100g || 0
+    const factor = this.data.quantity / 100
+    return per100g * factor
   }
 
   get totalFat() {
-    if ('mealId' in this.data) {
-      const fatPer100g = this.fatPer100g
-      if (!fatPer100g) return 0
-      return Math.round(((fatPer100g * this.quantity) / 100) * 100) / 100
-    } else {
-      return this.data.fat || 0
-    }
+    const per100g = this.data.fatPer100g || 0
+    const factor = this.data.quantity / 100
+    return per100g * factor
   }
 
   get totalFiber() {
-    if ('mealId' in this.data) {
-      const fiberPer100g = this.fiberPer100g
-      if (!fiberPer100g) return 0
-      return Math.round(((fiberPer100g * this.quantity) / 100) * 100) / 100
-    } else {
-      return this.data.fiber || 0
-    }
+    const per100g = this.data.fiberPer100g || 0
+    const factor = this.data.quantity / 100
+    return per100g * factor
   }
 
   get isCustomAddition() {
-    // Check if this is a MealLogItem with isCustomAddition = true
-    if ('isCustomAddition' in this.data) {
-      return this.data.isCustomAddition
-    }
-    // If it's a MealFood, it's not a custom addition
-    return false
+    // A food is considered a custom addition if it has an addedBy user
+    return Boolean(this.data.addedById)
   }
 
-  get log() {
-    // For planned foods, return the latest consumption log if it exists
-    if (!this.isCustomAddition && this.data.latestLog) {
-      return new MealFoodLog(this.data.latestLog, this.context)
+  async addedBy() {
+    if (!this.data.addedBy) {
+      return null
     }
+    return new UserPublic(this.data.addedBy, this.context)
+  }
 
-    // For custom additions, the item itself is the log
-    if (this.isCustomAddition && 'isCustomAddition' in this.data) {
-      return new MealFoodLog(this.data as PrismaMealLogItem, this.context)
+  async log() {
+    // Return the latest log entry if it exists
+    if (this.data.logs && this.data.logs.length > 0) {
+      const latestLog = this.data.logs[0] // logs are ordered by loggedAt desc
+      return new MealFoodLog(latestLog, this.context)
     }
-
     return null
+  }
+
+  async logs() {
+    if (!this.data.logs) return []
+    return this.data.logs.map((log) => new MealFoodLog(log, this.context))
   }
 }

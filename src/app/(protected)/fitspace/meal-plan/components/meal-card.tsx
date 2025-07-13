@@ -27,13 +27,20 @@ export interface MealCardProps {
       name: string
       quantity: number
       unit: string
+      addedAt: string
       totalCalories: number
       totalProtein: number
       totalCarbs: number
       totalFat: number
       isCustomAddition: boolean
+      addedBy?: {
+        id: string
+        firstName?: string | null
+        lastName?: string | null
+      } | null
       log?: {
         id: string
+        quantity: number
         loggedQuantity: number
         unit: string
         loggedAt: string
@@ -43,6 +50,15 @@ export interface MealCardProps {
         carbs?: number | null
         fat?: number | null
         fiber?: number | null
+        mealFood: {
+          id: string
+          name: string
+        }
+        user: {
+          id: string
+          firstName?: string | null
+          lastName?: string | null
+        }
       } | null
     }[]
     plannedCalories: number

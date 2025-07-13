@@ -90,12 +90,13 @@ type Meal {
   plannedFat: Float!
 }
 
-# Unified type for both planned foods and custom additions
+# Unified type for both planned foods and custom additions with logging info
 type MealFoodItem {
   id: ID!
   name: String!
   quantity: Float!
   unit: String!
+  addedAt: String!
 
   # Nutritional information per 100g
   caloriesPer100g: Float
@@ -117,15 +118,19 @@ type MealFoodItem {
 
   # Source information
   isCustomAddition: Boolean!
-
-  # Log data (unified for both planned and custom foods)
+  addedBy: UserPublic # User who added this food (null for trainer-planned foods)
+  # Log data (latest log entry for this food)
   log: MealFoodLog
+
+  # All logs for this food
+  logs: [MealFoodLog!]!
 }
 
-# Unified log data for food consumption
+# Log data for food consumption - direct relationship with MealFood
 type MealFoodLog {
   id: ID!
-  loggedQuantity: Float!
+  quantity: Float!
+  loggedQuantity: Float! # Alias for quantity for backwards compatibility
   unit: String!
   loggedAt: String!
   notes: String
@@ -136,6 +141,10 @@ type MealFoodLog {
   carbs: Float
   fat: Float
   fiber: Float
+
+  # Relationships
+  mealFood: MealFood!
+  user: UserPublic!
 }
 
 type MealFood {
@@ -143,6 +152,7 @@ type MealFood {
   name: String!
   quantity: Float!
   unit: String!
+  addedAt: String!
 
   # Nutritional information per 100g
   caloriesPer100g: Float
@@ -155,58 +165,19 @@ type MealFood {
   openFoodFactsId: String
   productData: String
 
-  meal: Meal
-
+  # Relationships
+  meal: Meal!
+  addedBy: UserPublic # User who added this food (null for trainer-planned foods)
+  logs: [MealFoodLog!]! # All logging instances for this food
   # Calculated nutrition for this specific quantity
   totalCalories: Float!
   totalProtein: Float!
   totalCarbs: Float!
   totalFat: Float!
   totalFiber: Float!
-}
 
-type MealLog {
-  id: ID!
-  loggedAt: String!
-  completedAt: String
-
-  meal: Meal
-  user: UserPublic!
-  items: [MealLogItem!]!
-
-  # Calculated totals from logged items
-  totalCalories: Float!
-  totalProtein: Float!
-  totalCarbs: Float!
-  totalFat: Float!
-}
-
-type MealLogItem {
-  id: ID!
-  name: String!
-  quantity: Float!
-  unit: String!
-  barcode: String
-
-  # Nutritional data (calculated from quantity)
-  calories: Float
-  protein: Float
-  carbs: Float
-  fat: Float
-  fiber: Float
-
-  # Open Food Facts integration
-  openFoodFactsId: String
-  productData: String
-
-  # Planned food relationship
-  plannedFoodId: String
-  isCustomAddition: Boolean!
-
-  notes: String
-  createdAt: String!
-
-  log: MealLog
+  # Latest log entry (for convenience)
+  latestLog: MealFoodLog
 }
 
 type MyMealPlansPayload {
@@ -226,7 +197,7 @@ type Query {
   getCollaborationMealPlanTemplates(draft: Boolean): [MealPlan!]!
   getMealPlanById(id: ID!): MealPlan!
   getClientMealPlans(clientId: ID!): [MealPlan!]!
-  getClientActiveMealPlan(clientId: ID!): MealPlan
+
   getMyMealPlansOverview: MyMealPlansPayload!
 
   # New simplified queries to replace complex clientGetMealPlan logic
@@ -262,8 +233,8 @@ type Mutation {
   uncompleteMeal(mealId: ID!): Boolean!
 
   # Custom food addition
-  addCustomFoodToMeal(input: AddCustomFoodToMealInput!): MealLogItem!
-  addFoodToPersonalLog(input: AddFoodToPersonalLogInput!): MealLogItem!
+  addCustomFoodToMeal(input: AddCustomFoodToMealInput!): MealFoodLog!
+  addFoodToPersonalLog(input: AddFoodToPersonalLogInput!): MealFoodLog!
   removeMealLog(foodId: ID!): Boolean!
 }
 
@@ -359,6 +330,7 @@ input MealFoodInput {
 input BatchLogMealFoodInput {
   mealId: ID!
   foods: [BatchLogMealFoodItemInput!]!
+  loggedAt: String # Full datetime with date being viewed + current time (ISO string) - used for loggedAt
 }
 
 # Food item input for batch logging (without mealId)
@@ -391,6 +363,7 @@ input AddCustomFoodToMealInput {
   openFoodFactsId: String
   productData: String
   notes: String
+  loggedAt: String # Full datetime with date being viewed + current time (ISO string) - used for loggedAt
 }
 
 # Add food to personal log input (finds meal by name and day in user's default plan)
@@ -408,4 +381,5 @@ input AddFoodToPersonalLogInput {
   openFoodFactsId: String
   productData: String
   notes: String
+  loggedAt: String # Full datetime with date being viewed + current time (ISO string) - used for loggedAt
 }

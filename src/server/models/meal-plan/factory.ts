@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client'
+import { endOfWeek, startOfWeek } from 'date-fns'
 import { GraphQLError } from 'graphql'
 
 import {
@@ -18,7 +19,6 @@ import {
   GQLMutationUncompleteMealArgs,
   GQLMutationUpdateMealPlanDetailsArgs,
   GQLNotificationType,
-  GQLQueryGetClientActiveMealPlanArgs,
   GQLQueryGetClientMealPlansArgs,
   GQLQueryGetMealPlanByIdArgs,
   GQLQueryGetMealPlanTemplatesArgs,
@@ -35,7 +35,7 @@ import {
 } from '@/lib/utc-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
-import MealLogItem from '../meal-log-item/model'
+import MealFoodLog from '../meal-food-log/model'
 import { createNotification } from '../notification/factory'
 
 import MealPlan from './model'
@@ -212,12 +212,6 @@ export async function getMealPlanById(
                         createdAt: 'asc',
                       },
                     },
-                    logs: {
-                      include: {
-                        user: true,
-                        items: true,
-                      },
-                    },
                   },
                 },
               },
@@ -263,64 +257,6 @@ export async function getClientMealPlans(
   return plans.map((plan) => new MealPlan(plan, context))
 }
 
-export async function getClientActiveMealPlan(
-  args: GQLQueryGetClientActiveMealPlanArgs,
-  context: GQLContext,
-) {
-  const { clientId } = args
-  const user = context.user
-  if (!user) {
-    throw new Error('User not found')
-  }
-
-  const plan = await prisma.mealPlan.findFirst({
-    where: {
-      assignedToId: clientId,
-      createdById: user.user.id,
-      startDate: { not: null },
-      active: true,
-    },
-    include: {
-      createdBy: true,
-      assignedTo: true,
-      weeks: {
-        orderBy: {
-          weekNumber: 'asc',
-        },
-        include: {
-          days: {
-            orderBy: {
-              dayOfWeek: 'asc',
-            },
-            include: {
-              meals: {
-                orderBy: {
-                  dateTime: 'asc',
-                },
-                include: {
-                  foods: {
-                    orderBy: {
-                      createdAt: 'asc',
-                    },
-                  },
-                  logs: {
-                    include: {
-                      user: true,
-                      items: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
-
-  return plan ? new MealPlan(plan, context) : null
-}
-
 export async function getMyMealPlansOverview(context: GQLContext) {
   const user = context.user
   if (!user) {
@@ -352,18 +288,6 @@ export async function getMyMealPlansOverview(context: GQLContext) {
               meals: {
                 orderBy: {
                   dateTime: 'asc',
-                },
-                include: {
-                  foods: {
-                    orderBy: {
-                      createdAt: 'asc',
-                    },
-                  },
-                  logs: {
-                    include: {
-                      items: true,
-                    },
-                  },
                 },
               },
             },
@@ -448,18 +372,18 @@ export async function getActiveMealPlan(
               meals: {
                 orderBy: { dateTime: 'asc' },
                 include: {
-                  foods: { orderBy: { createdAt: 'asc' } },
-                  logs: {
-                    where: {
-                      userId: user.user.id,
-                      loggedAt: args.date
-                        ? {
-                            gte: weekStart,
-                            lte: weekEnd,
-                          }
-                        : undefined,
+                  foods: {
+                    orderBy: { createdAt: 'asc' },
+                    include: {
+                      addedBy: true, // Include the user who added the food
+                      logs: {
+                        orderBy: { loggedAt: 'desc' },
+                        include: {
+                          user: true,
+                          mealFood: true, // Include the mealFood relationship
+                        },
+                      },
                     },
-                    include: { items: true },
                   },
                 },
               },
@@ -548,6 +472,7 @@ export async function createMealPlan(
                         name: food.name,
                         quantity: food.quantity,
                         unit: food.unit,
+                        addedAt: new Date(), // Always set addedAt for new foods
                         caloriesPer100g: food.caloriesPer100g,
                         proteinPer100g: food.proteinPer100g,
                         carbsPer100g: food.carbsPer100g,
@@ -780,6 +705,7 @@ export async function duplicateMealPlan(
                           name: food.name,
                           quantity: food.quantity,
                           unit: food.unit,
+                          addedAt: new Date(), // Always set addedAt for new foods
                           caloriesPer100g: food.caloriesPer100g,
                           proteinPer100g: food.proteinPer100g,
                           carbsPer100g: food.carbsPer100g,
@@ -891,6 +817,13 @@ export async function getOrCreateDefaultMealPlan(
     throw new Error('User not found')
   }
 
+  const weekStart = startOfWeek(new Date(dateFilter ?? ''), {
+    weekStartsOn: 1,
+  })
+  const weekEnd = endOfWeek(new Date(dateFilter ?? ''), {
+    weekStartsOn: 1,
+  })
+
   try {
     // Check if user already has a default meal plan with more robust criteria
     let defaultMealPlan = await prisma.mealPlan.findFirst({
@@ -921,25 +854,34 @@ export async function getOrCreateDefaultMealPlan(
                   },
                   include: {
                     foods: {
+                      where: dateFilter
+                        ? {
+                            addedAt: {
+                              gte: weekStart,
+                              lte: weekEnd,
+                            },
+                          }
+                        : undefined,
                       orderBy: {
-                        createdAt: 'asc',
-                      },
-                    },
-                    logs: {
-                      where: {
-                        userId: user.user.id,
-                        loggedAt: dateFilter
-                          ? {
-                              gte: new Date(dateFilter), // Client sends exact week start in UTC
-                              lte: new Date(
-                                new Date(dateFilter).getTime() +
-                                  6 * 24 * 60 * 60 * 1000,
-                              ), // Add 6 days for week end
-                            }
-                          : undefined,
+                        addedAt: 'asc',
                       },
                       include: {
-                        items: true,
+                        addedBy: true, // Include the user who added the food
+                        logs: {
+                          where: {
+                            loggedAt: dateFilter
+                              ? {
+                                  gte: weekStart,
+                                  lte: weekEnd,
+                                }
+                              : undefined,
+                          },
+                          orderBy: { loggedAt: 'desc' },
+                          include: {
+                            user: true,
+                            mealFood: true, // Include the mealFood relationship
+                          },
+                        },
                       },
                     },
                   },
@@ -1025,24 +967,23 @@ export async function getOrCreateDefaultMealPlan(
                       },
                       include: {
                         foods: {
-                          orderBy: {
-                            createdAt: 'asc',
+                          include: {
+                            addedBy: true, // Include the user who added the food
+                            logs: {
+                              where: {
+                                loggedAt: dateFilter
+                                  ? {
+                                      gte: weekStart,
+                                      lte: weekEnd,
+                                    }
+                                  : undefined,
+                              },
+                              orderBy: { loggedAt: 'desc' },
+                              include: {
+                                user: true,
+                              },
+                            },
                           },
-                        },
-                        logs: {
-                          where: {
-                            userId: user.user.id,
-                            loggedAt: dateFilter
-                              ? {
-                                  gte: new Date(dateFilter), // Client sends exact week start in UTC
-                                  lte: new Date(
-                                    new Date(dateFilter).getTime() +
-                                      6 * 24 * 60 * 60 * 1000,
-                                  ), // Add 6 days for week end
-                                }
-                              : undefined,
-                          },
-                          include: { items: true },
                         },
                       },
                     },
@@ -1076,21 +1017,36 @@ export async function getOrCreateDefaultMealPlan(
                     meals: {
                       orderBy: { dateTime: 'asc' },
                       include: {
-                        foods: { orderBy: { createdAt: 'asc' } },
-                        logs: {
-                          where: {
-                            userId: user.user.id,
-                            loggedAt: dateFilter
-                              ? {
-                                  gte: new Date(dateFilter), // Client sends exact week start in UTC
-                                  lte: new Date(
-                                    new Date(dateFilter).getTime() +
-                                      6 * 24 * 60 * 60 * 1000,
-                                  ), // Add 6 days for week end
-                                }
-                              : undefined,
+                        foods: {
+                          where: dateFilter
+                            ? {
+                                addedAt: {
+                                  gte: weekStart,
+                                  lte: weekEnd,
+                                },
+                              }
+                            : undefined,
+                          orderBy: {
+                            addedAt: 'asc',
                           },
-                          include: { items: true },
+                          include: {
+                            addedBy: true, // Include the user who added the food
+                            logs: {
+                              where: {
+                                loggedAt: dateFilter
+                                  ? {
+                                      gte: weekStart,
+                                      lte: weekEnd,
+                                    }
+                                  : undefined,
+                              },
+                              orderBy: { loggedAt: 'desc' },
+                              include: {
+                                user: true,
+                                mealFood: true, // Include the mealFood relationship
+                              },
+                            },
+                          },
                         },
                       },
                     },
@@ -1113,59 +1069,6 @@ export async function getOrCreateDefaultMealPlan(
   } catch (error) {
     console.error('Error getting or creating default meal plan:', error)
     throw new GraphQLError('Failed to get or create default meal plan')
-  }
-}
-
-/**
- * Cleanup utility to remove duplicate default meal plans for a user
- * This can be called periodically to clean up any race condition artifacts
- */
-export async function cleanupDuplicateDefaultMealPlans(userId: string) {
-  try {
-    const defaultPlans = await prisma.mealPlan.findMany({
-      where: {
-        createdById: userId,
-        assignedToId: userId,
-        isTemplate: false,
-        isDraft: false,
-        active: false,
-        title: 'Personal Food Log',
-      },
-      orderBy: {
-        createdAt: 'asc', // Keep the oldest one
-      },
-    })
-
-    if (defaultPlans.length > 1) {
-      // Keep the first one, delete the rest
-      const plansToDelete = defaultPlans.slice(1)
-
-      for (const plan of plansToDelete) {
-        // Check if the plan has any logs before deleting
-        const hasLogs = await prisma.mealLog.findFirst({
-          where: {
-            userId: userId,
-            meal: {
-              day: {
-                week: {
-                  planId: plan.id,
-                },
-              },
-            },
-          },
-        })
-
-        if (!hasLogs) {
-          // Safe to delete if no logs exist
-          await prisma.mealPlan.delete({
-            where: { id: plan.id },
-          })
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Error cleaning up duplicate default meal plans:', error)
-    // Don't throw - this is a cleanup operation and shouldn't break user flow
   }
 }
 
@@ -1282,6 +1185,7 @@ export async function saveMeal(
             name: food.name,
             quantity: food.quantity,
             unit: food.unit,
+            addedAt: new Date(), // Always set addedAt for new foods
             caloriesPer100g: food.caloriesPer100g,
             proteinPer100g: food.proteinPer100g,
             carbsPer100g: food.carbsPer100g,
@@ -1526,84 +1430,71 @@ export async function batchLogMealFood(
 
     // Use a transaction to ensure all foods are logged atomically
     await prisma.$transaction(async (tx) => {
-      // Find or create meal log for this meal
-      let mealLog = await tx.mealLog.findFirst({
-        where: {
-          mealId: input.mealId,
-          userId: user.user.id,
-        },
-        include: {
-          items: true, // Include existing log items
-        },
-      })
-
-      if (!mealLog) {
-        mealLog = await tx.mealLog.create({
-          data: {
-            mealId: input.mealId,
-            userId: user.user.id,
-          },
-          include: {
-            items: true,
-          },
-        })
-      }
-
       // Process each food in the batch
       for (const food of input.foods) {
-        // Find existing log item for this food (match by name, case-insensitive)
-        const existingLogItem = mealLog.items.find(
-          (item) => item.name.toLowerCase() === food.name.toLowerCase(),
-        )
-
-        // Find planned food to link to (optional)
-        const plannedFood = meal.foods.find(
+        // Find existing planned food to link to (optional)
+        let mealFood = meal.foods.find(
           (mf) => mf.name.toLowerCase() === food.name.toLowerCase(),
         )
-        if (existingLogItem) {
-          // Update existing log item
-          await tx.mealLogItem.update({
-            where: { id: existingLogItem.id },
+
+        // If no planned food exists, create one (for custom additions)
+        if (!mealFood) {
+          mealFood = await tx.mealFood.create({
             data: {
-              quantity: food.quantity,
-              unit: food.unit,
-              barcode: food.barcode ?? undefined,
-              calories: food.calories ?? undefined,
-              protein: food.protein ?? undefined,
-              carbs: food.carbs ?? undefined,
-              fat: food.fat ?? undefined,
-              fiber: food.fiber ?? undefined,
-              openFoodFactsId: food.openFoodFactsId ?? undefined,
-              productData: food.productData
-                ? JSON.parse(food.productData)
-                : null,
-              notes: food.notes ?? undefined,
-              plannedFoodId: plannedFood?.id ?? undefined,
-            },
-          })
-        } else {
-          // Create new log item
-          await tx.mealLogItem.create({
-            data: {
-              logId: mealLog.id,
+              mealId: meal.id,
               name: food.name,
               quantity: food.quantity,
               unit: food.unit,
-              barcode: food.barcode ?? undefined,
-              calories: food.calories ?? undefined,
-              protein: food.protein ?? undefined,
-              carbs: food.carbs ?? undefined,
-              fat: food.fat ?? undefined,
-              fiber: food.fiber ?? undefined,
+              // Use the date from loggedAt (which contains the week context date) but at a consistent time
+              addedAt: input.loggedAt
+                ? new Date(new Date(input.loggedAt).toDateString())
+                : new Date(),
+              addedById: user.user.id,
+              // Calculate per100g values from absolute values if possible
+              caloriesPer100g:
+                food.calories && food.quantity > 0
+                  ? (food.calories * 100) / food.quantity
+                  : null,
+              proteinPer100g:
+                food.protein && food.quantity > 0
+                  ? (food.protein * 100) / food.quantity
+                  : null,
+              carbsPer100g:
+                food.carbs && food.quantity > 0
+                  ? (food.carbs * 100) / food.quantity
+                  : null,
+              fatPer100g:
+                food.fat && food.quantity > 0
+                  ? (food.fat * 100) / food.quantity
+                  : null,
+              fiberPer100g:
+                food.fiber && food.quantity > 0
+                  ? (food.fiber * 100) / food.quantity
+                  : null,
               openFoodFactsId: food.openFoodFactsId ?? undefined,
               productData: food.productData
                 ? JSON.parse(food.productData)
                 : null,
-              notes: food.notes ?? undefined,
-              plannedFoodId: plannedFood?.id ?? undefined,
             },
           })
         }
+
+        // Create food log entry
+        await tx.mealFoodLog.create({
+          data: {
+            mealFoodId: mealFood.id,
+            userId: user.user.id,
+            quantity: food.quantity,
+            unit: food.unit,
+            loggedAt: input.loggedAt ? new Date(input.loggedAt) : new Date(),
+            notes: food.notes ?? undefined,
+            calories: food.calories ?? undefined,
+            protein: food.protein ?? undefined,
+            carbs: food.carbs ?? undefined,
+            fat: food.fat ?? undefined,
+            fiber: food.fiber ?? undefined,
+          },
+        })
       }
 
       if (!isDefaultPlan) {
@@ -1770,22 +1661,27 @@ export async function addCustomFoodToMeal(
       )
     }
 
-    // Find or create meal log for this meal
-    let mealLog = await prisma.mealLog.findFirst({
-      where: {
+    // Create meal food record for custom food
+    const mealFood = await prisma.mealFood.create({
+      data: {
         mealId: meal.id,
-        userId: user.user.id,
+        name: input.name,
+        quantity: input.quantity,
+        unit: input.unit,
+        // Use the date from loggedAt (which contains the week context date) but at a consistent time
+        addedAt: input.loggedAt
+          ? new Date(new Date(input.loggedAt).toDateString())
+          : new Date(),
+        addedById: user.user.id,
+        caloriesPer100g: input.caloriesPer100g,
+        proteinPer100g: input.proteinPer100g,
+        carbsPer100g: input.carbsPer100g,
+        fatPer100g: input.fatPer100g,
+        fiberPer100g: input.fiberPer100g,
+        openFoodFactsId: input.openFoodFactsId,
+        productData: input.productData ? JSON.parse(input.productData) : null,
       },
     })
-
-    if (!mealLog) {
-      mealLog = await prisma.mealLog.create({
-        data: {
-          mealId: meal.id,
-          userId: user.user.id,
-        },
-      })
-    }
 
     // Calculate nutritional data from per100g values
     const factor = input.quantity / 100
@@ -1797,27 +1693,28 @@ export async function addCustomFoodToMeal(
     const fat = input.fatPer100g ? input.fatPer100g * factor : null
     const fiber = input.fiberPer100g ? input.fiberPer100g * factor : null
 
-    // Create meal log item as custom addition
-    const mealLogItem = await prisma.mealLogItem.create({
+    // Create meal food log entry
+    const mealFoodLog = await prisma.mealFoodLog.create({
       data: {
-        logId: mealLog.id,
-        name: input.name,
+        mealFoodId: mealFood.id,
+        userId: user.user.id,
         quantity: input.quantity,
         unit: input.unit,
+        loggedAt: input.loggedAt ? new Date(input.loggedAt) : new Date(),
+        notes: input.notes,
         calories,
         protein,
         carbs,
         fat,
         fiber,
-        openFoodFactsId: input.openFoodFactsId,
-        productData: input.productData ? JSON.parse(input.productData) : null,
-        notes: input.notes,
-        plannedFoodId: null, // Not linked to any planned food
-        isCustomAddition: true, // This is a custom addition
+      },
+      include: {
+        mealFood: true, // Include the mealFood relationship
+        user: true, // Include the user relationship
       },
     })
 
-    return new MealLogItem(mealLogItem, context)
+    return new MealFoodLog(mealFoodLog, context)
   } catch (error) {
     console.error('Error adding custom food to meal:', error)
     throw new GraphQLError('Failed to add custom food to meal')
@@ -1864,22 +1761,27 @@ export async function addFoodToPersonalLog(
       )
     }
 
-    // Find or create meal log for this meal
-    let mealLog = await prisma.mealLog.findFirst({
-      where: {
+    // Create meal food record for custom food
+    const mealFood = await prisma.mealFood.create({
+      data: {
         mealId: meal.id,
-        userId: user.user.id,
+        name: input.name,
+        quantity: input.quantity,
+        unit: input.unit,
+        // Use the date from loggedAt (which contains the week context date) but at a consistent time
+        addedAt: input.loggedAt
+          ? new Date(new Date(input.loggedAt).toDateString())
+          : new Date(),
+        addedById: user.user.id,
+        caloriesPer100g: input.caloriesPer100g,
+        proteinPer100g: input.proteinPer100g,
+        carbsPer100g: input.carbsPer100g,
+        fatPer100g: input.fatPer100g,
+        fiberPer100g: input.fiberPer100g,
+        openFoodFactsId: input.openFoodFactsId,
+        productData: input.productData ? JSON.parse(input.productData) : null,
       },
     })
-
-    if (!mealLog) {
-      mealLog = await prisma.mealLog.create({
-        data: {
-          mealId: meal.id,
-          userId: user.user.id,
-        },
-      })
-    }
 
     // Calculate nutritional data from per100g values
     const factor = input.quantity / 100
@@ -1891,27 +1793,28 @@ export async function addFoodToPersonalLog(
     const fat = input.fatPer100g ? input.fatPer100g * factor : null
     const fiber = input.fiberPer100g ? input.fiberPer100g * factor : null
 
-    // Create meal log item as custom addition to personal log
-    const mealLogItem = await prisma.mealLogItem.create({
+    // Create meal food log entry
+    const mealFoodLog = await prisma.mealFoodLog.create({
       data: {
-        logId: mealLog.id,
-        name: input.name,
+        mealFoodId: mealFood.id,
+        userId: user.user.id,
         quantity: input.quantity,
         unit: input.unit,
+        loggedAt: input.loggedAt ? new Date(input.loggedAt) : new Date(),
+        notes: input.notes,
         calories,
         protein,
         carbs,
         fat,
         fiber,
-        openFoodFactsId: input.openFoodFactsId,
-        productData: input.productData ? JSON.parse(input.productData) : null,
-        notes: input.notes,
-        plannedFoodId: null, // Not linked to any planned food
-        isCustomAddition: true, // This is a custom addition
+      },
+      include: {
+        mealFood: true, // Include the mealFood relationship
+        user: true, // Include the user relationship
       },
     })
 
-    return new MealLogItem(mealLogItem, context)
+    return new MealFoodLog(mealFoodLog, context)
   } catch (error) {
     console.error('Error adding food to personal log:', error)
     throw new GraphQLError('Failed to add food to personal log')
@@ -1930,10 +1833,55 @@ export async function removeMealLog(
   const { foodId } = args
 
   try {
-    // Check if meal exists and belongs to user's meal plan
-    await prisma.mealLogItem.delete({
+    // First, get the meal food to understand its type and verify ownership
+    const mealFood = await prisma.mealFood.findUnique({
       where: { id: foodId },
+      include: {
+        meal: {
+          include: {
+            day: {
+              include: {
+                week: {
+                  include: {
+                    plan: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        logs: {
+          where: {
+            userId: user.user.id, // Only logs by the current user
+          },
+        },
+      },
     })
+
+    if (!mealFood) {
+      throw new Error('Food not found')
+    }
+
+    // Verify the user has access to this meal plan
+    if (mealFood.meal.day.week.plan.assignedToId !== user.user.id) {
+      throw new Error('You can only remove foods from your own meals')
+    }
+
+    // If it's a custom addition (added by the user), delete the entire MealFood
+    // This will cascade delete all associated MealFoodLog entries
+    if (mealFood.addedById === user.user.id) {
+      await prisma.mealFood.delete({
+        where: { id: foodId },
+      })
+    } else {
+      // If it's a planned food, just delete the user's log entries
+      await prisma.mealFoodLog.deleteMany({
+        where: {
+          mealFoodId: foodId,
+          userId: user.user.id,
+        },
+      })
+    }
 
     return true
   } catch (error) {

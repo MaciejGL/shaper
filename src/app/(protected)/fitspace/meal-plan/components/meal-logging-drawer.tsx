@@ -39,14 +39,21 @@ export type SelectedMeal = {
     name: string
     quantity: number
     unit: string
+    addedAt: string
     totalCalories: number
     totalProtein: number
     totalCarbs: number
     totalFat: number
     isCustomAddition: boolean
     openFoodFactsId?: string | null
+    addedBy?: {
+      id: string
+      firstName?: string | null
+      lastName?: string | null
+    } | null
     log?: {
       id: string
+      quantity: number
       loggedQuantity: number
       unit: string
       loggedAt: string
@@ -56,6 +63,15 @@ export type SelectedMeal = {
       carbs?: number | null
       fat?: number | null
       fiber?: number | null
+      mealFood: {
+        id: string
+        name: string
+      }
+      user: {
+        id: string
+        firstName?: string | null
+        lastName?: string | null
+      }
     } | null
   }[]
   plannedCalories: number

@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { useQueryState } from 'nuqs'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -21,6 +22,7 @@ import {
   useGetDefaultMealPlanQuery,
 } from '@/generated/graphql-client'
 import { SearchResult, searchFoods } from '@/lib/food-search'
+import { createTimestampWithDateAndCurrentTime } from '@/lib/utc-date-utils'
 
 import { SelectedMeal } from './meal-logging-drawer'
 import { useMealLogging } from './use-meal-logging'
@@ -58,6 +60,7 @@ export function CustomFoodSearchDrawer({
   selectedMeal,
 }: CustomFoodSearchDrawerProps) {
   const { handleRemoveLogItem } = useMealLogging()
+  const [date] = useQueryState('date') // Get current date from URL
   const [searchTerm, setSearchTerm] = useState('')
   const debouncedQuery = useDebounce(searchTerm, 500)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
@@ -122,6 +125,7 @@ export function CustomFoodSearchDrawer({
           fatPer100g: foodItem.fatPer100g,
           fiberPer100g: foodItem.fiberPer100g,
           openFoodFactsId: foodItem.openFoodFactsId,
+          loggedAt: createTimestampWithDateAndCurrentTime(date), // Date being viewed + current time
         },
       })
     } catch (error) {
