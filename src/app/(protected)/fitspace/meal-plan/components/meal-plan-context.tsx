@@ -1,6 +1,5 @@
 'use client'
 
-import { startOfWeek } from 'date-fns'
 import { useQueryState } from 'nuqs'
 import { createContext, useContext, useMemo } from 'react'
 
@@ -9,6 +8,7 @@ import {
   GQLGetDefaultMealPlanQuery,
 } from '@/generated/graphql-client'
 import { isDayMatch } from '@/lib/date-utils'
+import { compareWeeksUTC } from '@/lib/utc-date-utils'
 
 // Type definitions for the meal plan data
 export type MealPlan = NonNullable<
@@ -62,14 +62,9 @@ export function MealPlanProvider({
       }
     }
 
-    // Check if current date is on or after the active plan start date
+    // Check if current date is on or after the active plan start date (using UTC)
     if (activePlan.startDate) {
-      const currentDate = startOfWeek(new Date(date), { weekStartsOn: 1 })
-      const planStartDate = startOfWeek(new Date(activePlan.startDate), {
-        weekStartsOn: 1,
-      })
-
-      if (currentDate >= planStartDate) {
+      if (compareWeeksUTC(date, activePlan.startDate) >= 0) {
         return {
           currentPlan: activePlan,
           isShowingActivePlan: true,

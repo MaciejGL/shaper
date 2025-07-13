@@ -1,4 +1,4 @@
-import { format, formatDate, isSameDay, parseISO, startOfWeek } from 'date-fns'
+import { format, formatDate } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Calendar1 } from 'lucide-react'
 import { useQueryState } from 'nuqs'
@@ -9,6 +9,12 @@ import { MealDayPickerDrawer } from '@/components/meal-day-picker-drawer'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { getDayOfWeek, getWeekDays, isDayMatch } from '@/lib/date-utils'
+import {
+  formatUTCDate,
+  getStartOfWeekUTC,
+  getTodayUTC,
+  isSameDayUTC,
+} from '@/lib/utc-date-utils'
 import { cn } from '@/lib/utils'
 
 import { DailyProgressCard } from './daily-progress-card'
@@ -196,10 +202,9 @@ function WeekSelector() {
   const [date, setDate] = useQueryState('date')
 
   const selectedWeek = useMemo(() => {
-    if (!date) return new Date()
-    // Always return the Monday of the week for the selected date
-    const selectedDate = parseISO(date)
-    return startOfWeek(selectedDate, { weekStartsOn: 1 })
+    if (!date) return getStartOfWeekUTC(new Date())
+    // Always return the Monday of the week for the selected date in UTC
+    return getStartOfWeekUTC(date)
   }, [date])
 
   const handleWeekChange = (newWeekStart: Date) => {
@@ -210,12 +215,11 @@ function WeekSelector() {
 
   const isOnAnotherDay = useMemo(() => {
     if (!date) return false
-    const today = new Date()
-    return !isSameDay(parseISO(date), today)
+    return !isSameDayUTC(date, new Date())
   }, [date])
 
   const handleTodayClick = () => {
-    setDate(format(new Date(), 'yyyy-MM-dd'))
+    setDate(formatUTCDate(getTodayUTC()))
   }
 
   return (

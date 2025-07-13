@@ -1,6 +1,6 @@
 'use client'
 
-import { format, startOfWeek } from 'date-fns'
+import { format } from 'date-fns'
 import { useQueryState } from 'nuqs'
 import { useEffect, useMemo } from 'react'
 
@@ -9,6 +9,7 @@ import {
   useGetActiveMealPlanQuery,
   useGetDefaultMealPlanQuery,
 } from '@/generated/graphql-client'
+import { getStartOfWeekUTC, toISOString } from '@/lib/utc-date-utils'
 
 import { MealPlanProvider } from './components/meal-plan-context'
 import { MealView } from './components/meal-view'
@@ -24,8 +25,8 @@ export default function MealPlanPage() {
   }, [date, now, setDate])
 
   const dateParam = date
-    ? startOfWeek(new Date(date), { weekStartsOn: 1 }).toISOString()
-    : now
+    ? toISOString(getStartOfWeekUTC(date))
+    : toISOString(getStartOfWeekUTC(new Date()))
 
   // Always fetch both plans - let UI decide which to show
   const { data: activePlanData, isLoading: isLoadingActive } =

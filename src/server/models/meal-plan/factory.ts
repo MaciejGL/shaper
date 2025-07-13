@@ -1,5 +1,4 @@
 import { Prisma } from '@prisma/client'
-import { endOfWeek, startOfWeek } from 'date-fns'
 import { GraphQLError } from 'graphql'
 
 import {
@@ -29,6 +28,11 @@ import {
   CollaborationAction,
   checkMealPlanPermission,
 } from '@/lib/permissions/collaboration-permissions'
+import {
+  compareWeeksUTC,
+  getStartOfWeekUTC,
+  getWeekBoundariesUTC,
+} from '@/lib/utc-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
 import MealLogItem from '../meal-log-item/model'
@@ -398,10 +402,20 @@ export async function getActiveMealPlan(
     throw new Error('User not found')
   }
 
-  // Calculate week boundaries for the requested date
-  const requestedDate = args.date ? new Date(args.date) : new Date()
-  const weekStart = startOfWeek(requestedDate, { weekStartsOn: 1 })
-  const weekEnd = endOfWeek(requestedDate, { weekStartsOn: 1 })
+  // Handle date parameter - client now sends exact week start in UTC
+  let weekStart: Date, weekEnd: Date
+
+  if (args.date) {
+    // Client sends exact week start in UTC, use it directly
+    weekStart = new Date(args.date)
+    // Calculate week end from the start
+    weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000) // Add 6 days
+  } else {
+    // No date provided, use current week boundaries
+    const { gte, lte } = getWeekBoundariesUTC(new Date())
+    weekStart = gte
+    weekEnd = lte
+  }
 
   // Get active assigned plan OR completed plans within the requested date range
   const activePlan = await prisma.mealPlan.findFirst({
@@ -461,14 +475,9 @@ export async function getActiveMealPlan(
     return null
   }
 
-  // Check if requested date is before plan start date
+  // Check if requested date is before plan start date (using UTC)
   if (args.date && activePlan.startDate) {
-    const requestedDate = startOfWeek(new Date(args.date), { weekStartsOn: 1 })
-    const planStartDate = startOfWeek(new Date(activePlan.startDate), {
-      weekStartsOn: 1,
-    })
-
-    if (requestedDate < planStartDate) {
+    if (compareWeeksUTC(args.date, activePlan.startDate) < 0) {
       return null // Use default plan instead
     }
   }
@@ -921,12 +930,11 @@ export async function getOrCreateDefaultMealPlan(
                         userId: user.user.id,
                         loggedAt: dateFilter
                           ? {
-                              gte: startOfWeek(new Date(dateFilter), {
-                                weekStartsOn: 1,
-                              }),
-                              lte: endOfWeek(new Date(dateFilter), {
-                                weekStartsOn: 1,
-                              }),
+                              gte: new Date(dateFilter), // Client sends exact week start in UTC
+                              lte: new Date(
+                                new Date(dateFilter).getTime() +
+                                  6 * 24 * 60 * 60 * 1000,
+                              ), // Add 6 days for week end
                             }
                           : undefined,
                       },
@@ -1026,12 +1034,11 @@ export async function getOrCreateDefaultMealPlan(
                             userId: user.user.id,
                             loggedAt: dateFilter
                               ? {
-                                  gte: startOfWeek(new Date(dateFilter), {
-                                    weekStartsOn: 1,
-                                  }),
-                                  lte: endOfWeek(new Date(dateFilter), {
-                                    weekStartsOn: 1,
-                                  }),
+                                  gte: new Date(dateFilter), // Client sends exact week start in UTC
+                                  lte: new Date(
+                                    new Date(dateFilter).getTime() +
+                                      6 * 24 * 60 * 60 * 1000,
+                                  ), // Add 6 days for week end
                                 }
                               : undefined,
                           },
@@ -1075,12 +1082,11 @@ export async function getOrCreateDefaultMealPlan(
                             userId: user.user.id,
                             loggedAt: dateFilter
                               ? {
-                                  gte: startOfWeek(new Date(dateFilter), {
-                                    weekStartsOn: 1,
-                                  }),
-                                  lte: endOfWeek(new Date(dateFilter), {
-                                    weekStartsOn: 1,
-                                  }),
+                                  gte: new Date(dateFilter), // Client sends exact week start in UTC
+                                  lte: new Date(
+                                    new Date(dateFilter).getTime() +
+                                      6 * 24 * 60 * 60 * 1000,
+                                  ), // Add 6 days for week end
                                 }
                               : undefined,
                           },
@@ -1393,7 +1399,7 @@ export async function fitspaceActivateMealPlan(
     where: { id: planId },
     data: {
       active: true,
-      startDate: startOfWeek(new Date(), { weekStartsOn: 1 }),
+      startDate: getStartOfWeekUTC(new Date()),
     },
   })
 
