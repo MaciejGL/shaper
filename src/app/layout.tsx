@@ -70,6 +70,7 @@ export const metadata: Metadata = {
     title: 'Fitspace',
     statusBarStyle: 'black-translucent',
   },
+  manifest: '/manifest.json',
 }
 
 export default function RootLayout({
