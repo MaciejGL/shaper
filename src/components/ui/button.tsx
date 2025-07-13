@@ -7,24 +7,26 @@ import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
   cn(
-    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 [&_svg]:size-4 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive relative flex data-[loading=true]:opacity-30 cursor-pointer',
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none  [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 [&_svg]:size-4 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive relative flex cursor-pointer',
   ),
   {
     variants: {
       variant: {
-        default: cn('bg-primary text-primary-foreground hover:bg-primary/90'),
+        default: cn(
+          'bg-primary text-primary-foreground hover:bg-primary/90 data-[loading=true]:bg-primary/80 disabled:bg-primary/50',
+        ),
         destructive: cn(
-          'hover:bg-accent text-destructive/75 hover:text-destructive bg-destructive/10',
+          'hover:bg-accent text-destructive/75 hover:text-destructive bg-destructive/10 data-[loading=true]:bg-destructive/80 disabled:bg-destructive/50',
         ),
         outline:
-          'border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+          'border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 data-[loading=true]:bg-input/30 data-[loading=true]:text-input/70 disabled:bg-input/50',
         secondary:
-          'bg-secondary hover:bg-secondary/80 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80',
+          'bg-secondary hover:bg-secondary/80 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 data-[loading=true]:bg-secondary/80 data-[loading=true]:text-secondary/70 disabled:bg-secondary/50',
         ghost:
-          'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
-        link: 'text-primary underline-offset-4 hover:underline',
+          'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 data-[loading=true]:bg-accent/50 disabled:bg-accent/50',
+        link: 'text-primary underline-offset-4 hover:underline disabled:text-primary/50',
         variantless:
-          'bg-transparent text-primary hover:bg-transparent shadow-none',
+          'bg-transparent text-primary hover:bg-transparent shadow-none disabled:text-primary/50',
       },
       size: {
         variantless: 'h-auto p-0',
@@ -71,29 +73,27 @@ function Button({
   const defaultSize = iconOnly ? size || 'icon-md' : size || 'md'
 
   return (
-    <div className="relative">
-      <Comp
-        data-slot="button"
-        data-loading={loading}
-        className={cn(
-          buttonVariants({
-            variant,
-            size: defaultSize,
-            className,
-          }),
-        )}
-        disabled={disabled || loading}
-        {...props}
-      >
-        {iconStart && <span>{iconStart}</span>}
-        {iconOnly ? <span className="sr-only">{children}</span> : children}
-        {iconOnly && iconOnly}
-        {iconEnd && <span>{iconEnd}</span>}
-      </Comp>
-      {loading && (
-        <Loader2Icon className="size-[70%] animate-spin absolute z-[99999] inset-1/2 -translate-x-1/2 -translate-y-1/2 text-primary/80" />
+    <Comp
+      data-slot="button"
+      data-loading={loading}
+      className={cn(
+        buttonVariants({
+          variant,
+          size: defaultSize,
+          className,
+        }),
       )}
-    </div>
+      disabled={disabled || loading}
+      {...props}
+    >
+      {iconStart && <span>{iconStart}</span>}
+      {iconOnly ? <span className="sr-only">{children}</span> : children}
+      {iconOnly && iconOnly}
+      {iconEnd && <span>{iconEnd}</span>}
+      {loading && (
+        <Loader2Icon className="size-[70%] animate-spin absolute z-[99999] inset-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
+      )}
+    </Comp>
   )
 }
 
