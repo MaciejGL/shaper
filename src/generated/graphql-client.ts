@@ -1460,7 +1460,6 @@ export type GQLQuery = {
   availablePlansForTeamMember: Array<GQLAvailablePlan>;
   bodyMeasures: Array<GQLUserBodyMeasure>;
   clientBodyMeasures: Array<GQLUserBodyMeasure>;
-  clientGetMealPlan?: Maybe<GQLGetMealPlanPayload>;
   coachingRequest?: Maybe<GQLCoachingRequest>;
   coachingRequests: Array<GQLCoachingRequest>;
   exercise?: Maybe<GQLBaseExercise>;
@@ -1521,12 +1520,6 @@ export type GQLQueryAvailablePlansForTeamMemberArgs = {
 
 export type GQLQueryClientBodyMeasuresArgs = {
   clientId: Scalars['ID']['input'];
-};
-
-
-export type GQLQueryClientGetMealPlanArgs = {
-  date?: InputMaybe<Scalars['String']['input']>;
-  mealPlanId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 

@@ -1462,7 +1462,6 @@ export type GQLQuery = {
   availablePlansForTeamMember: EntireFieldWrapper<Array<GQLAvailablePlan>>;
   bodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
   clientBodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
-  clientGetMealPlan?: EntireFieldWrapper<Maybe<GQLGetMealPlanPayload>>;
   coachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   coachingRequests: EntireFieldWrapper<Array<GQLCoachingRequest>>;
   exercise?: EntireFieldWrapper<Maybe<GQLBaseExercise>>;
@@ -1523,12 +1522,6 @@ export type GQLQueryAvailablePlansForTeamMemberArgs = {
 
 export type GQLQueryClientBodyMeasuresArgs = {
   clientId: Scalars['ID']['input'];
-};
-
-
-export type GQLQueryClientGetMealPlanArgs = {
-  date?: InputMaybe<Scalars['String']['input']>;
-  mealPlanId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -3057,7 +3050,6 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   availablePlansForTeamMember?: Resolver<Array<GQLResolversTypes['AvailablePlan']>, ParentType, ContextType, RequireFields<GQLQueryAvailablePlansForTeamMemberArgs, 'userId'>>;
   bodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
   clientBodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType, RequireFields<GQLQueryClientBodyMeasuresArgs, 'clientId'>>;
-  clientGetMealPlan?: Resolver<Maybe<GQLResolversTypes['GetMealPlanPayload']>, ParentType, ContextType, Partial<GQLQueryClientGetMealPlanArgs>>;
   coachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLQueryCoachingRequestArgs, 'id'>>;
   coachingRequests?: Resolver<Array<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType>;
   exercise?: Resolver<Maybe<GQLResolversTypes['BaseExercise']>, ParentType, ContextType, RequireFields<GQLQueryExerciseArgs, 'id'>>;

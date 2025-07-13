@@ -9,7 +9,6 @@ import {
   addFoodToPersonalLog,
   assignMealPlanToClient,
   batchLogMealFood,
-  clientGetMealPlan,
   completeMeal,
   createDraftMealTemplate,
   createMealPlan,
@@ -51,9 +50,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   getMyMealPlansOverview: async (_, __, context) => {
     return getMyMealPlansOverview(context)
   },
-  clientGetMealPlan: async (_, args, context) => {
-    return clientGetMealPlan(args, context)
-  },
+
   // New simplified resolvers
   getActiveMealPlan: async (_, args, context) => {
     return getActiveMealPlan(args, context)

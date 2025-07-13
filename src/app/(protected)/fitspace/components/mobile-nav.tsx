@@ -17,7 +17,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { Icon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
@@ -31,6 +31,13 @@ import { MeasurementFieldEnum } from '../progress/components/measurement-constan
 export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
   const pathname = usePathname()
   const [isMoreOpen, setIsMoreOpen] = useState(false)
+  const [clickedItem, setClickedItem] = useState<string | null>(null)
+
+  // Clear clicked item when pathname changes
+  useEffect(() => {
+    setClickedItem(null)
+  }, [pathname])
+
   const navItems = useMemo(
     () => [
       {
@@ -68,7 +75,9 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
         icon: MoreHorizontalIcon,
         label: 'More',
         prefetch: true,
-        onClick: () => setIsMoreOpen(true),
+        onClick: () => {
+          setIsMoreOpen(true)
+        },
       },
     ],
     [currentWorkoutId],
@@ -81,6 +90,9 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
+            const isClicked = clickedItem === item.label && !isActive
+            const isHighlighted = isActive || isClicked
+
             if (item.onClick) {
               return (
                 <button
@@ -101,11 +113,12 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
               <Link
                 key={item.href || item.label}
                 href={item.href}
+                onClick={() => setClickedItem(item.label)}
                 className={cn(
                   'flex flex-col items-center justify-center p-2 rounded-xl transition-colors min-w-[40px]',
-                  isActive
+                  isHighlighted
                     ? 'text-primary bg-zinc-200 dark:bg-zinc-800'
-                    : 'text-muted-foreground hover:text-foreground ',
+                    : 'text-muted-foreground hover:text-foreground',
                 )}
                 prefetch={item.prefetch}
               >

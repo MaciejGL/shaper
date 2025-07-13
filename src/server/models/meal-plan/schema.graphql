@@ -228,7 +228,6 @@ type Query {
   getClientMealPlans(clientId: ID!): [MealPlan!]!
   getClientActiveMealPlan(clientId: ID!): MealPlan
   getMyMealPlansOverview: MyMealPlansPayload!
-  clientGetMealPlan(mealPlanId: ID, date: String): GetMealPlanPayload
 
   # New simplified queries to replace complex clientGetMealPlan logic
   getActiveMealPlan(date: String): MealPlan # Returns active assigned plan with extra meals, or null

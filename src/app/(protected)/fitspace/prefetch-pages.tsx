@@ -15,7 +15,6 @@ import {
   useFitspaceGetUserQuickWorkoutPlanQuery,
   useFitspaceGetWorkoutQuery,
   useFitspaceMyPlansQuery,
-  useProfileQuery,
   useProgressUserQuery,
 } from '@/generated/graphql-client'
 
@@ -36,6 +35,7 @@ export function PrefetchFitspacePages() {
     router.prefetch('/fitspace/dashboard', prefetchOptions)
     router.prefetch('/fitspace/marketplace', prefetchOptions)
     router.prefetch('/fitspace/my-plans', prefetchOptions)
+    router.prefetch('/fitspace/meal-plan', prefetchOptions)
     router.prefetch('/fitspace/profile', prefetchOptions)
     router.prefetch('/fitspace/progress', prefetchOptions)
     router.prefetch('/fitspace/workout/quick-workout', prefetchOptions)
@@ -73,13 +73,6 @@ export function PrefetchFitspacePages() {
         await queryClient.prefetchQuery({
           queryKey: useBodyMeasuresQuery.getKey(),
           queryFn: useBodyMeasuresQuery.fetcher(),
-          staleTime: STALE_TIME,
-        })
-
-        // Profile queries
-        await queryClient.prefetchQuery({
-          queryKey: useProfileQuery.getKey(),
-          queryFn: useProfileQuery.fetcher(),
           staleTime: STALE_TIME,
         })
       } catch (error) {
