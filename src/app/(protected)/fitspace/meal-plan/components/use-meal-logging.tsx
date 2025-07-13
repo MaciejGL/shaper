@@ -2,7 +2,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import {
-  GQLGetActiveMealPlanQuery,
   useBatchLogMealFoodMutation,
   useCompleteMealMutation,
   useGetActiveMealPlanQuery,
@@ -42,7 +41,7 @@ export function useMealLogging() {
       },
     })
 
-  const { mutate: completeMeal, isPending: isCompletingMeal } =
+  const { mutateAsync: completeMeal, isPending: isCompletingMeal } =
     useCompleteMealMutation({
       onSuccess: () => {
         queryClient.invalidateQueries({
@@ -56,43 +55,9 @@ export function useMealLogging() {
         toast.error('Something went wrong while completing meal')
         console.error('Error completing meal:', error)
       },
-      onMutate: (data) => {
-        const mealId = data.mealId
-        queryClient.setQueryData<GQLGetActiveMealPlanQuery>(
-          useGetActiveMealPlanQuery.getKey(),
-          (old) => {
-            if (!old?.getActiveMealPlan?.weeks) return old
-            return {
-              ...old,
-              getActiveMealPlan: {
-                ...old.getActiveMealPlan,
-                weeks: old.getActiveMealPlan.weeks.map((week) => {
-                  return {
-                    ...week,
-                    days: week.days.map((day) => {
-                      return {
-                        ...day,
-                        meals: day.meals.map((meal) => {
-                          if (meal.id === mealId) {
-                            return {
-                              ...meal,
-                              completedAt: new Date().toISOString(),
-                            }
-                          }
-                          return meal
-                        }),
-                      }
-                    }),
-                  }
-                }),
-              },
-            }
-          },
-        )
-      },
     })
 
-  const { mutate: uncompleteMeal, isPending: isUncompletingMeal } =
+  const { mutateAsync: uncompleteMeal, isPending: isUncompletingMeal } =
     useUncompleteMealMutation({
       onSuccess: () => {
         queryClient.invalidateQueries({
@@ -105,37 +70,6 @@ export function useMealLogging() {
       onError: (error) => {
         toast.error('Something went wrong while uncompleting meal')
         console.error('Error uncompleting meal:', error)
-      },
-      onMutate: (data) => {
-        const mealId = data.mealId
-        queryClient.setQueryData<GQLGetActiveMealPlanQuery>(
-          useGetActiveMealPlanQuery.getKey(),
-          (old) => {
-            if (!old?.getActiveMealPlan?.weeks) return old
-            return {
-              ...old,
-              getActiveMealPlan: {
-                ...old.getActiveMealPlan,
-                weeks: old.getActiveMealPlan.weeks.map((week) => {
-                  return {
-                    ...week,
-                    days: week.days.map((day) => {
-                      return {
-                        ...day,
-                        meals: day.meals.map((meal) => {
-                          if (meal.id === mealId) {
-                            return { ...meal, completedAt: null }
-                          }
-                          return meal
-                        }),
-                      }
-                    }),
-                  }
-                }),
-              },
-            }
-          },
-        )
       },
     })
 
@@ -151,7 +85,7 @@ export function useMealLogging() {
       },
     })
 
-  const handleBatchLogMeal = (
+  const handleBatchLogMeal = async (
     mealId: string,
     foodQuantities: FoodQuantity[],
   ) => {
@@ -181,7 +115,7 @@ export function useMealLogging() {
     })
 
     // Use batch mutation for single API call
-    batchLogMealFood({
+    return await batchLogMealFood({
       input: {
         mealId,
         foods,
@@ -190,11 +124,11 @@ export function useMealLogging() {
   }
 
   const handleCompleteMeal = (mealId: string) => {
-    completeMeal({ mealId })
+    return completeMeal({ mealId })
   }
 
   const handleUncompleteMeal = (mealId: string) => {
-    uncompleteMeal({ mealId })
+    return uncompleteMeal({ mealId })
   }
 
   const handleRemoveLogItem = (foodId: string) => {
@@ -207,6 +141,10 @@ export function useMealLogging() {
     handleUncompleteMeal,
     handleRemoveLogItem,
     isRemovingLogItem,
+    // Export specific loading states for better UX
+    isCompletingMeal,
+    isUncompletingMeal,
+    isBatchLoggingFood,
     isLoading:
       isBatchLoggingFood ||
       isCompletingMeal ||

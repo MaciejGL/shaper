@@ -71,27 +71,29 @@ function Button({
   const defaultSize = iconOnly ? size || 'icon-md' : size || 'md'
 
   return (
-    <Comp
-      data-slot="button"
-      data-loading={loading}
-      className={cn(
-        buttonVariants({
-          variant,
-          size: defaultSize,
-          className,
-        }),
-      )}
-      disabled={disabled || loading}
-      {...props}
-    >
-      {iconStart && <span>{iconStart}</span>}
-      {iconOnly ? <span className="sr-only">{children}</span> : children}
-      {iconOnly && iconOnly}
-      {iconEnd && <span>{iconEnd}</span>}
+    <div className="relative">
+      <Comp
+        data-slot="button"
+        data-loading={loading}
+        className={cn(
+          buttonVariants({
+            variant,
+            size: defaultSize,
+            className,
+          }),
+        )}
+        disabled={disabled || loading}
+        {...props}
+      >
+        {iconStart && <span>{iconStart}</span>}
+        {iconOnly ? <span className="sr-only">{children}</span> : children}
+        {iconOnly && iconOnly}
+        {iconEnd && <span>{iconEnd}</span>}
+      </Comp>
       {loading && (
-        <Loader2Icon className="animate-spin absolute z-[99999] inset-1/2 -translate-x-1/2 -translate-y-1/2 text-primary/80" />
+        <Loader2Icon className="size-[70%] animate-spin absolute z-[99999] inset-1/2 -translate-x-1/2 -translate-y-1/2 text-primary/80" />
       )}
-    </Comp>
+    </div>
   )
 }
 

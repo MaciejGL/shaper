@@ -7,7 +7,7 @@ import {
   SquareIcon,
   XIcon,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -52,8 +52,6 @@ export interface MealCardProps {
   }
   onClick?: () => void
   onAddCustomFood?: () => void
-  onCompleteMeal?: (mealId: string) => void
-  onUncompleteMeal?: (mealId: string) => void
   isDefaultPlan?: boolean
 }
 
@@ -85,13 +83,56 @@ export function MealCard({
   meal,
   onClick,
   onAddCustomFood,
-  onCompleteMeal,
-  onUncompleteMeal,
   isDefaultPlan,
 }: MealCardProps) {
-  const { handleRemoveLogItem } = useMealLogging()
+  const {
+    handleRemoveLogItem,
+    handleCompleteMeal,
+    handleUncompleteMeal,
+    isCompletingMeal,
+    isUncompletingMeal,
+  } = useMealLogging()
   const [removingFoodId, setRemovingFoodId] = useState<string | null>(null)
-  const isCompleted = Boolean(meal.completedAt)
+  const [optimisticCompletedState, setOptimisticCompletedState] = useState<
+    boolean | null
+  >(null)
+
+  // Clear optimistic state when actual data matches our optimistic expectation
+  useEffect(() => {
+    if (
+      optimisticCompletedState !== null &&
+      Boolean(meal.completedAt) === optimisticCompletedState
+    ) {
+      setOptimisticCompletedState(null)
+    }
+  }, [meal.completedAt, optimisticCompletedState])
+
+  // Use optimistic state if available, otherwise use actual state
+  const isCompleted =
+    optimisticCompletedState !== null
+      ? optimisticCompletedState
+      : Boolean(meal.completedAt)
+  const isCompletionLoading = isCompletingMeal || isUncompletingMeal
+
+  const handleCompletionToggle = async () => {
+    const newCompletedState = !isCompleted
+
+    // Optimistically update the UI
+    setOptimisticCompletedState(newCompletedState)
+
+    try {
+      if (newCompletedState) {
+        await handleCompleteMeal(meal.id)
+      } else {
+        await handleUncompleteMeal(meal.id)
+      }
+      // Don't clear optimistic state here - let useEffect handle it when actual data arrives
+    } catch (error) {
+      // Error - revert optimistic state
+      setOptimisticCompletedState(null)
+      console.error('Error toggling meal completion:', error)
+    }
+  }
 
   const loggedTotals = calculateLoggedTotals(meal.foods)
 
@@ -107,7 +148,12 @@ export function MealCard({
               fat: meal.plannedFat,
             }}
             loggedTotals={loggedTotals}
-            hasLogs={isDefaultPlan ? true : Boolean(meal.completedAt)}
+            hasLogs={
+              isDefaultPlan
+                ? true
+                : meal.foods.some((food) => food.log) ||
+                  Boolean(meal.completedAt)
+            }
           />
           <div className="flex gap-2">
             <Button
@@ -127,13 +173,9 @@ export function MealCard({
                     <SquareIcon />
                   )
                 }
-                onClick={() => {
-                  if (isCompleted) {
-                    onUncompleteMeal?.(meal.id)
-                  } else {
-                    onCompleteMeal?.(meal.id)
-                  }
-                }}
+                onClick={handleCompletionToggle}
+                disabled={isCompletionLoading}
+                loading={isCompletionLoading}
               />
             )}
           </div>

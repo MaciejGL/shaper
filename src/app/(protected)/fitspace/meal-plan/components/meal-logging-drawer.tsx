@@ -8,7 +8,6 @@ import {
   DrawerTitle,
   SimpleDrawerContent,
 } from '@/components/ui/drawer'
-import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
 import { MealHeaderInfo } from './meal-header-info'
@@ -180,7 +179,11 @@ export function MealLoggingDrawer({
               >
                 Cancel
               </Button>
-              <Button onClick={handleSave} disabled={isLoading}>
+              <Button
+                onClick={handleSave}
+                disabled={isLoading}
+                loading={isLoading}
+              >
                 Save Log
               </Button>
             </div>

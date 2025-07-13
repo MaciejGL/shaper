@@ -32,12 +32,7 @@ export function MealsList({
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [customFoodDrawerOpen, setCustomFoodDrawerOpen] = useState(false)
 
-  const {
-    handleBatchLogMeal,
-    handleCompleteMeal,
-    handleUncompleteMeal,
-    isLoading,
-  } = useMealLogging()
+  const { handleBatchLogMeal, isBatchLoggingFood } = useMealLogging()
 
   const handleMealClick = (meal: Meal) => {
     setSelectedMealId(meal.id)
@@ -54,11 +49,11 @@ export function MealsList({
     setSelectedMealId(null)
   }
 
-  const handleSaveMealLog = (
+  const handleSaveMealLog = async (
     mealId: string,
     foodQuantities: FoodQuantity[],
   ) => {
-    handleBatchLogMeal(mealId, foodQuantities)
+    await handleBatchLogMeal(mealId, foodQuantities)
     handleCloseDrawer()
   }
 
@@ -76,8 +71,6 @@ export function MealsList({
                 allowCustomFood ? () => handleAddCustomFood(meal) : undefined
               }
               isDefaultPlan={allowCustomFood}
-              onCompleteMeal={handleCompleteMeal}
-              onUncompleteMeal={handleUncompleteMeal}
             />
           )
         })}
@@ -94,7 +87,7 @@ export function MealsList({
         open={drawerOpen}
         onClose={handleCloseDrawer}
         onSave={handleSaveMealLog}
-        isLoading={isLoading}
+        isLoading={isBatchLoggingFood}
       />
 
       {/* Custom Food Search Drawer */}
