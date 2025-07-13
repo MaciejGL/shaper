@@ -1,6 +1,6 @@
 // Basic service worker for PWA
 const CACHE_NAME = 'fitspace-v1'
-const urlsToCache = ['/', '/login', '/manifest.json']
+const urlsToCache = ['/', '/login']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
