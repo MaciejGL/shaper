@@ -143,6 +143,10 @@ export default class Meal implements GQLMeal {
   }
 
   get completedAt() {
+    if (this.data.completedAt) {
+      return this.data.completedAt.toISOString()
+    }
+
     // Find the most recent completion date from logs
     if (!this.data.logs || this.data.logs.length === 0) return null
 

@@ -1,8 +1,13 @@
+import { format } from 'date-fns'
 import { ChefHat } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Drawer, SimpleDrawerContent } from '@/components/ui/drawer'
+import {
+  Drawer,
+  DrawerTitle,
+  SimpleDrawerContent,
+} from '@/components/ui/drawer'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
@@ -143,8 +148,28 @@ export function MealLoggingDrawer({
   return (
     <Drawer open={open} onOpenChange={onClose}>
       <SimpleDrawerContent
+        header={
+          <div className="flex items-end justify-between gap-2">
+            <div>
+              <DrawerTitle className="flex items-center gap-2">
+                <ChefHat className="size-5" />
+                {`Log ${meal.name}`}
+              </DrawerTitle>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {format(new Date(meal.dateTime), 'h:mm a')}
+                </p>
+              </div>
+            </div>
+            <MealHeaderInfo
+              totalCalories={totalLoggedCalories}
+              totalProtein={totalLoggedProtein}
+              totalCarbs={totalLoggedCarbs}
+              totalFat={totalLoggedFat}
+            />
+          </div>
+        }
         title={`Log ${meal.name}`}
-        headerIcon={<ChefHat className="size-5" />}
         footer={
           <div className="flex items-center justify-end w-full">
             <div className="flex items-center gap-2">
@@ -164,14 +189,6 @@ export function MealLoggingDrawer({
       >
         <div className="space-y-4">
           {/* Meal Info */}
-          <MealHeaderInfo
-            name={meal.name}
-            dateTime={meal.dateTime}
-            totalCalories={totalLoggedCalories}
-            totalProtein={totalLoggedProtein}
-            totalCarbs={totalLoggedCarbs}
-            totalFat={totalLoggedFat}
-          />
 
           {meal.instructions && (
             <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
@@ -183,7 +200,6 @@ export function MealLoggingDrawer({
 
           {/* Food Items */}
           <div className="space-y-3">
-            <Label className="text-base font-medium">Adjust portions</Label>
             {foodQuantities.map((food) => {
               const ratio = food.loggedQuantity / food.originalQuantity
               const adjustedCalories = food.totalCalories * ratio

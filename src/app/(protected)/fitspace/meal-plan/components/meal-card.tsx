@@ -1,5 +1,12 @@
 import { format } from 'date-fns'
-import { Edit3Icon, FlameIcon, PlusIcon, XIcon } from 'lucide-react'
+import {
+  CheckSquare2Icon,
+  Edit3Icon,
+  FlameIcon,
+  PlusIcon,
+  SquareIcon,
+  XIcon,
+} from 'lucide-react'
 import { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -78,17 +85,20 @@ export function MealCard({
   meal,
   onClick,
   onAddCustomFood,
+  onCompleteMeal,
+  onUncompleteMeal,
   isDefaultPlan,
 }: MealCardProps) {
   const { handleRemoveLogItem } = useMealLogging()
   const [removingFoodId, setRemovingFoodId] = useState<string | null>(null)
+  const isCompleted = Boolean(meal.completedAt)
 
   const loggedTotals = calculateLoggedTotals(meal.foods)
 
   return (
     <div className="grid grid-cols-[1fr_50px] gap-3">
       <div className="min-w-0">
-        <div className="flex items-center gap-2 justify-between">
+        <div className="flex items-center gap-2 justify-between mb-1">
           <MealTotals
             plannedTotals={{
               calories: meal.plannedCalories,
@@ -106,6 +116,26 @@ export function MealCard({
               iconOnly={<Edit3Icon />}
               onClick={() => onClick?.()}
             />
+            {!isDefaultPlan && (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                iconOnly={
+                  isCompleted ? (
+                    <CheckSquare2Icon className="text-green-600" />
+                  ) : (
+                    <SquareIcon />
+                  )
+                }
+                onClick={() => {
+                  if (isCompleted) {
+                    onUncompleteMeal?.(meal.id)
+                  } else {
+                    onCompleteMeal?.(meal.id)
+                  }
+                }}
+              />
+            )}
           </div>
         </div>
         <div className="flex flex-col gap-2">

@@ -144,6 +144,7 @@ export {
 type SimpleDrawerProps = {
   title: string
   headerIcon?: React.ReactNode
+  header?: React.ReactNode
   children: React.ReactNode
   footer?: React.ReactNode
   className?: string
@@ -152,6 +153,7 @@ type SimpleDrawerProps = {
 export function SimpleDrawerContent({
   title,
   headerIcon,
+  header,
   children,
   footer,
   className,
@@ -160,10 +162,14 @@ export function SimpleDrawerContent({
   return (
     <DrawerContent dialogTitle={title}>
       <DrawerHeader className="border-b">
-        <DrawerTitle className="flex items-center gap-2">
-          {Icon && Icon}
-          {title}
-        </DrawerTitle>
+        {header ? (
+          header
+        ) : (
+          <DrawerTitle className="flex items-center gap-2">
+            {Icon && Icon}
+            {title}
+          </DrawerTitle>
+        )}
       </DrawerHeader>
 
       <div

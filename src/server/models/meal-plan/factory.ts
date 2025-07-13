@@ -1809,6 +1809,10 @@ export async function batchLogMealFood(
       throw new Error('You can only log your own meals')
     }
 
+    const isDefaultPlan =
+      meal.day.week.plan.assignedToId === user.user.id &&
+      meal.day.week.plan.createdById === user.user.id
+
     // Use a transaction to ensure all foods are logged atomically
     await prisma.$transaction(async (tx) => {
       // Find or create meal log for this meal
@@ -1890,6 +1894,13 @@ export async function batchLogMealFood(
           })
         }
       }
+
+      if (!isDefaultPlan) {
+        await tx.meal.update({
+          where: { id: meal.id },
+          data: { completedAt: new Date() },
+        })
+      }
     })
 
     return true
@@ -1938,31 +1949,10 @@ export async function completeMeal(
       throw new Error('You can only complete your own meals')
     }
 
-    // Find or create meal log for this meal
-    let mealLog = await prisma.mealLog.findFirst({
-      where: {
-        mealId: mealId,
-        userId: user.user.id,
-      },
+    await prisma.meal.update({
+      where: { id: mealId },
+      data: { completedAt: new Date() },
     })
-
-    if (!mealLog) {
-      mealLog = await prisma.mealLog.create({
-        data: {
-          mealId: mealId,
-          userId: user.user.id,
-          completedAt: new Date(),
-        },
-      })
-    } else {
-      // Update existing meal log
-      await prisma.mealLog.update({
-        where: { id: mealLog.id },
-        data: {
-          completedAt: new Date(),
-        },
-      })
-    }
 
     return true
   } catch (error) {
@@ -2010,23 +2000,10 @@ export async function uncompleteMeal(
       throw new Error('You can only uncomplete your own meals')
     }
 
-    // Find meal log for this meal
-    const mealLog = await prisma.mealLog.findFirst({
-      where: {
-        mealId: mealId,
-        userId: user.user.id,
-      },
+    await prisma.meal.update({
+      where: { id: mealId },
+      data: { completedAt: null },
     })
-
-    if (mealLog) {
-      // Update existing meal log to remove completion
-      await prisma.mealLog.update({
-        where: { id: mealLog.id },
-        data: {
-          completedAt: null,
-        },
-      })
-    }
 
     return true
   } catch (error) {

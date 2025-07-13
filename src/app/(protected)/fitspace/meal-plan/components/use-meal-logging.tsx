@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
 import {
+  GQLGetActiveMealPlanQuery,
   useBatchLogMealFoodMutation,
   useCompleteMealMutation,
   useGetActiveMealPlanQuery,
@@ -36,7 +37,7 @@ export function useMealLogging() {
         })
       },
       onError: (error) => {
-        toast.error('Failed to log meal foods')
+        toast.error('Something went wrong while logging meal foods')
         console.error('Error batch logging meal foods:', error)
       },
     })
@@ -52,8 +53,42 @@ export function useMealLogging() {
         })
       },
       onError: (error) => {
-        toast.error('Failed to complete meal')
+        toast.error('Something went wrong while completing meal')
         console.error('Error completing meal:', error)
+      },
+      onMutate: (data) => {
+        const mealId = data.mealId
+        queryClient.setQueryData<GQLGetActiveMealPlanQuery>(
+          useGetActiveMealPlanQuery.getKey(),
+          (old) => {
+            if (!old?.getActiveMealPlan?.weeks) return old
+            return {
+              ...old,
+              getActiveMealPlan: {
+                ...old.getActiveMealPlan,
+                weeks: old.getActiveMealPlan.weeks.map((week) => {
+                  return {
+                    ...week,
+                    days: week.days.map((day) => {
+                      return {
+                        ...day,
+                        meals: day.meals.map((meal) => {
+                          if (meal.id === mealId) {
+                            return {
+                              ...meal,
+                              completedAt: new Date().toISOString(),
+                            }
+                          }
+                          return meal
+                        }),
+                      }
+                    }),
+                  }
+                }),
+              },
+            }
+          },
+        )
       },
     })
 
@@ -68,8 +103,39 @@ export function useMealLogging() {
         })
       },
       onError: (error) => {
-        toast.error('Failed to uncomplete meal')
+        toast.error('Something went wrong while uncompleting meal')
         console.error('Error uncompleting meal:', error)
+      },
+      onMutate: (data) => {
+        const mealId = data.mealId
+        queryClient.setQueryData<GQLGetActiveMealPlanQuery>(
+          useGetActiveMealPlanQuery.getKey(),
+          (old) => {
+            if (!old?.getActiveMealPlan?.weeks) return old
+            return {
+              ...old,
+              getActiveMealPlan: {
+                ...old.getActiveMealPlan,
+                weeks: old.getActiveMealPlan.weeks.map((week) => {
+                  return {
+                    ...week,
+                    days: week.days.map((day) => {
+                      return {
+                        ...day,
+                        meals: day.meals.map((meal) => {
+                          if (meal.id === mealId) {
+                            return { ...meal, completedAt: null }
+                          }
+                          return meal
+                        }),
+                      }
+                    }),
+                  }
+                }),
+              },
+            }
+          },
+        )
       },
     })
 
@@ -121,16 +187,6 @@ export function useMealLogging() {
         foods,
       },
     })
-
-    // Show success toast for the batch operation
-    const totalCalories = loggedItems.reduce((sum, food) => {
-      const ratio = food.loggedQuantity / food.originalQuantity
-      return sum + food.totalCalories * ratio
-    }, 0)
-
-    toast.success(
-      `Logged ${loggedItems.length} items (${Math.round(totalCalories)} cal)`,
-    )
   }
 
   const handleCompleteMeal = (mealId: string) => {

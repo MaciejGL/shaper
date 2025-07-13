@@ -287,19 +287,21 @@ export function AppSidebar() {
             ))}
           </SidebarMenu>
         </SidebarGroupContent>
+        <SidebarFooter>
+          <SidebarGroupContent>
+            <Divider className="mb-2" />
+            <SidebarMenu>
+              {footerItems.map((item, index) => (
+                <SidebarItem
+                  key={item.title + index}
+                  item={item}
+                  isLoading={false}
+                />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarFooter>
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <Divider className="mb-2" />
-          {footerItems.map((item, index) => (
-            <SidebarItem
-              key={item.title + index}
-              item={item}
-              isLoading={false}
-            />
-          ))}
-        </SidebarMenu>
-      </SidebarFooter>
     </Sidebar>
   )
 }

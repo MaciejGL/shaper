@@ -52,7 +52,10 @@ export function SwipeableWrapper({
   }
 
   return (
-    <div ref={constraintsRef} className={cn('h-full w-full', className)}>
+    <div
+      ref={constraintsRef}
+      className={cn('h-full w-full overflow-x-hidden', className)}
+    >
       <motion.div
         drag="x"
         dragConstraints={constraintsRef}

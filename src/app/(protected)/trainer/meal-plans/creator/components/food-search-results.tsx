@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { PlusIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
 
-import { SelectedMeal } from '@/app/(protected)/fitspace/meal-plan/[mealPlanId]/components/meal-logging-drawer'
+import { SelectedMeal } from '@/app/(protected)/fitspace/meal-plan/components/meal-logging-drawer'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { SearchResult } from '@/lib/food-search'

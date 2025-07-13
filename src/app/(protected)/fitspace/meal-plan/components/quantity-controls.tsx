@@ -2,6 +2,7 @@ import { Minus, Plus } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { formatNumberInput } from '@/lib/format-tempo'
 
 interface QuantityControlsProps {
   id: string
@@ -34,12 +35,6 @@ export function QuantityControls({
     onChange(newValue)
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = Number(e.target.value) || 0
-    const clampedValue = Math.max(min, max ? Math.min(max, newValue) : newValue)
-    onChange(clampedValue)
-  }
-
   return (
     <div className="flex items-center gap-1">
       <Button
@@ -53,9 +48,12 @@ export function QuantityControls({
         id={id}
         variant="secondary"
         value={value}
-        onChange={handleInputChange}
+        onChange={(e) => {
+          const newValue = formatNumberInput(e)
+          onChange(Number(newValue))
+        }}
         className="w-24 text-right"
-        type="number"
+        type="text"
         min={min}
         max={max}
         step={step}

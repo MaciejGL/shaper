@@ -100,7 +100,7 @@ export function Navigation() {
   return (
     <div
       className={cn(
-        'bg-sidebar rounded-b-lg sticky -top-[120px] z-10',
+        'bg-sidebar rounded-b-xl sticky -top-[120px] z-10',
         // Counter Main padding
         '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
         'p-2 md:p-4 lg:p-8',

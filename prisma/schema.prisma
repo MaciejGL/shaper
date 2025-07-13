@@ -9,43 +9,37 @@ datasource db {
 }
 
 model User {
-  id                   String            @id @default(uuid())
-  email                String            @unique
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-  image                String?
-  name                 String?
-  role                 String            @default("CLIENT")
-  trainerId            String?
-  BaseExercise         BaseExercise[]
-  receivedRequests     CoachingRequest[] @relation("ReceivedRequests")
-  sentRequests         CoachingRequest[] @relation("SentRequests")
-  exerciseLogs         ExerciseLog[]
-  createdNotes         Note[]            @relation("CreatedNotes")
-  createdNotifications Notification[]    @relation("NotificationCreator")
-  notifications        Notification[]
-  reviews              Review[]
-  assignedPlans        TrainingPlan[]    @relation("AssignedPlans")
-  createdPlans         TrainingPlan[]    @relation("CreatedPlans")
-  trainer              User?             @relation("TrainerClients", fields: [trainerId], references: [id])
-  clients              User[]            @relation("TrainerClients")
-  profile              UserProfile?
-  sessions             UserSession[]
-  assignedMealPlans    MealPlan[]        @relation("AssignedMealPlans")
-  createdMealPlans     MealPlan[]        @relation("CreatedMealPlans")
-  mealLogs             MealLog[]         @relation("MealLogs")
-  
-  // Collaboration relationships
-  sentCollaborationInvitations     CollaborationInvitation[] @relation("SentCollaborationInvitations")
-  receivedCollaborationInvitations CollaborationInvitation[] @relation("ReceivedCollaborationInvitations")
-  
-  // Training plan collaborations
-  trainingPlanCollaborations       TrainingPlanCollaborator[] @relation("TrainingPlanCollaborations")
+  id                               String                     @id @default(uuid())
+  email                            String                     @unique
+  createdAt                        DateTime                   @default(now())
+  updatedAt                        DateTime                   @updatedAt
+  image                            String?
+  name                             String?
+  role                             String                     @default("CLIENT")
+  trainerId                        String?
+  BaseExercise                     BaseExercise[]
+  receivedRequests                 CoachingRequest[]          @relation("ReceivedRequests")
+  sentRequests                     CoachingRequest[]          @relation("SentRequests")
+  receivedCollaborationInvitations CollaborationInvitation[]  @relation("ReceivedCollaborationInvitations")
+  sentCollaborationInvitations     CollaborationInvitation[]  @relation("SentCollaborationInvitations")
+  exerciseLogs                     ExerciseLog[]
+  mealLogs                         MealLog[]                  @relation("MealLogs")
+  assignedMealPlans                MealPlan[]                 @relation("AssignedMealPlans")
+  createdMealPlans                 MealPlan[]                 @relation("CreatedMealPlans")
+  addedMealPlanCollaborators       MealPlanCollaborator[]     @relation("AddedMealPlanCollaborators")
+  mealPlanCollaborations           MealPlanCollaborator[]     @relation("MealPlanCollaborations")
+  createdNotes                     Note[]                     @relation("CreatedNotes")
+  createdNotifications             Notification[]             @relation("NotificationCreator")
+  notifications                    Notification[]
+  reviews                          Review[]
+  assignedPlans                    TrainingPlan[]             @relation("AssignedPlans")
+  createdPlans                     TrainingPlan[]             @relation("CreatedPlans")
   addedTrainingPlanCollaborators   TrainingPlanCollaborator[] @relation("AddedTrainingPlanCollaborators")
-  
-  // Meal plan collaborations
-  mealPlanCollaborations           MealPlanCollaborator[] @relation("MealPlanCollaborations")
-  addedMealPlanCollaborators       MealPlanCollaborator[] @relation("AddedMealPlanCollaborators")
+  trainingPlanCollaborations       TrainingPlanCollaborator[] @relation("TrainingPlanCollaborations")
+  trainer                          User?                      @relation("TrainerClients", fields: [trainerId], references: [id])
+  clients                          User[]                     @relation("TrainerClients")
+  profile                          UserProfile?
+  sessions                         UserSession[]
 }
 
 model UserSession {
@@ -140,29 +134,29 @@ model Notification {
 }
 
 model TrainingPlan {
-  id           String         @id @default(uuid())
-  title        String
-  description  String?
-  createdById  String
-  isPublic     Boolean        @default(false)
-  isTemplate   Boolean        @default(false)
-  templateId   String?
-  completedAt  DateTime?
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  assignedToId String?
-  isDraft      Boolean        @default(true)
-  active       Boolean        @default(false)
-  endDate      DateTime?
-  startDate    DateTime?
-  difficulty   String?
-  reviews      Review[]
-  assignedTo   User?          @relation("AssignedPlans", fields: [assignedToId], references: [id])
-  createdBy    User           @relation("CreatedPlans", fields: [createdById], references: [id])
-  template     TrainingPlan?  @relation("Template", fields: [templateId], references: [id])
-  templates    TrainingPlan[] @relation("Template")
-  weeks        TrainingWeek[]
+  id            String                     @id @default(uuid())
+  title         String
+  description   String?
+  createdById   String
+  isPublic      Boolean                    @default(false)
+  isTemplate    Boolean                    @default(false)
+  templateId    String?
+  completedAt   DateTime?
+  createdAt     DateTime                   @default(now())
+  updatedAt     DateTime                   @updatedAt
+  assignedToId  String?
+  isDraft       Boolean                    @default(true)
+  active        Boolean                    @default(false)
+  endDate       DateTime?
+  startDate     DateTime?
+  difficulty    String?
+  reviews       Review[]
+  assignedTo    User?                      @relation("AssignedPlans", fields: [assignedToId], references: [id])
+  createdBy     User                       @relation("CreatedPlans", fields: [createdById], references: [id])
+  template      TrainingPlan?              @relation("Template", fields: [templateId], references: [id])
+  templates     TrainingPlan[]             @relation("Template")
   collaborators TrainingPlanCollaborator[]
+  weeks         TrainingWeek[]
 
   @@index([completedAt])
 }
@@ -218,15 +212,13 @@ model TrainingExercise {
   additionalInstructions String?
   type                   String?
   isExtra                Boolean           @default(false)
+  substitutedById        String?           @unique
   logs                   ExerciseLog[]
   sets                   ExerciseSet[]
+  base                   BaseExercise?     @relation(fields: [baseId], references: [id])
+  day                    TrainingDay       @relation(fields: [dayId], references: [id], onDelete: Cascade)
   substitutedBy          TrainingExercise? @relation("ReplacedBy", fields: [substitutedById], references: [id])
-  substitutedById        String?           @unique
-
-  substitutes TrainingExercise? @relation("ReplacedBy")
-
-  base BaseExercise? @relation(fields: [baseId], references: [id])
-  day  TrainingDay   @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  substitutes            TrainingExercise? @relation("ReplacedBy")
 
   @@index([dayId])
   @@index([baseId])
@@ -289,10 +281,10 @@ model BaseExercise {
   additionalInstructions String?
   type                   String?
   createdBy              User?                    @relation(fields: [createdById], references: [id])
-  trainingExercises      TrainingExercise[]
-  muscleGroups           MuscleGroup[]            @relation("ExerciseMuscleGroups")
   substitutes            BaseExerciseSubstitute[] @relation("OriginalExercise")
   substitutedBy          BaseExerciseSubstitute[] @relation("SubstituteExercise")
+  trainingExercises      TrainingExercise[]
+  muscleGroups           MuscleGroup[]            @relation("ExerciseMuscleGroups")
 }
 
 model MuscleGroup {
@@ -376,92 +368,82 @@ model BaseExerciseSubstitute {
   @@index([substituteId])
 }
 
-// COLLABORATION SYSTEM
-
 model CollaborationInvitation {
   id          String   @id @default(uuid())
   senderId    String
   recipientId String
-  status      String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  status      String   @default("PENDING")
   message     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  sender    User @relation("SentCollaborationInvitations", fields: [senderId], references: [id])
-  recipient User @relation("ReceivedCollaborationInvitations", fields: [recipientId], references: [id])
-  
+  recipient   User     @relation("ReceivedCollaborationInvitations", fields: [recipientId], references: [id])
+  sender      User     @relation("SentCollaborationInvitations", fields: [senderId], references: [id])
+
   @@index([senderId])
   @@index([recipientId])
   @@index([status])
 }
 
 model TrainingPlanCollaborator {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   trainingPlanId String
   collaboratorId String
   addedById      String
-  permission     String   @default("EDIT") // VIEW, EDIT, ADMIN
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  
-  trainingPlan TrainingPlan @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
-  collaborator User         @relation("TrainingPlanCollaborations", fields: [collaboratorId], references: [id])
-  addedBy      User         @relation("AddedTrainingPlanCollaborators", fields: [addedById], references: [id])
-  
+  permission     String       @default("EDIT")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  addedBy        User         @relation("AddedTrainingPlanCollaborators", fields: [addedById], references: [id])
+  collaborator   User         @relation("TrainingPlanCollaborations", fields: [collaboratorId], references: [id])
+  trainingPlan   TrainingPlan @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
+
   @@unique([trainingPlanId, collaboratorId])
   @@index([trainingPlanId])
   @@index([collaboratorId])
 }
 
 model MealPlanCollaborator {
-  id           String   @id @default(uuid())
-  mealPlanId   String
+  id             String   @id @default(uuid())
+  mealPlanId     String
   collaboratorId String
-  addedById    String
-  permission   String   @default("EDIT") // VIEW, EDIT, ADMIN
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  mealPlan     MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
-  collaborator User     @relation("MealPlanCollaborations", fields: [collaboratorId], references: [id])
-  addedBy      User     @relation("AddedMealPlanCollaborators", fields: [addedById], references: [id])
-  
+  addedById      String
+  permission     String   @default("EDIT")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  addedBy        User     @relation("AddedMealPlanCollaborators", fields: [addedById], references: [id])
+  collaborator   User     @relation("MealPlanCollaborations", fields: [collaboratorId], references: [id])
+  mealPlan       MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+
   @@unique([mealPlanId, collaboratorId])
   @@index([mealPlanId])
   @@index([collaboratorId])
 }
 
-// MEAL plan
-
 model MealPlan {
-  id           String    @id @default(uuid())
-  title        String
-  description  String?
-  createdById  String
-  isPublic     Boolean   @default(false)
-  isTemplate   Boolean   @default(false)
-  templateId   String?
-  completedAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  assignedToId String?
-  isDraft      Boolean   @default(true)
-  active       Boolean   @default(false)
-  endDate      DateTime?
-  startDate    DateTime?
-
-  // Nutritional goals/targets (moved here as you suggested)
+  id            String                 @id @default(uuid())
+  title         String
+  description   String?
+  createdById   String
+  isPublic      Boolean                @default(false)
+  isTemplate    Boolean                @default(false)
+  templateId    String?
+  completedAt   DateTime?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  assignedToId  String?
+  isDraft       Boolean                @default(true)
+  active        Boolean                @default(false)
+  endDate       DateTime?
+  startDate     DateTime?
   dailyCalories Float?
   dailyProtein  Float?
   dailyCarbs    Float?
   dailyFat      Float?
-
-  assignedTo User?      @relation("AssignedMealPlans", fields: [assignedToId], references: [id])
-  createdBy  User       @relation("CreatedMealPlans", fields: [createdById], references: [id])
-  template   MealPlan?  @relation("MealTemplate", fields: [templateId], references: [id])
-  templates  MealPlan[] @relation("MealTemplate")
-  weeks      MealWeek[]
+  assignedTo    User?                  @relation("AssignedMealPlans", fields: [assignedToId], references: [id])
+  createdBy     User                   @relation("CreatedMealPlans", fields: [createdById], references: [id])
+  template      MealPlan?              @relation("MealTemplate", fields: [templateId], references: [id])
+  templates     MealPlan[]             @relation("MealTemplate")
   collaborators MealPlanCollaborator[]
+  weeks         MealWeek[]
 
   @@index([completedAt])
 }
@@ -476,147 +458,116 @@ model MealWeek {
   description String?
   name        String
   isExtra     Boolean   @default(false)
-
-  days MealDay[]
-  plan MealPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
+  days        MealDay[]
+  plan        MealPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@index([completedAt])
 }
 
 model MealDay {
-  id          String    @id @default(uuid())
-  weekId      String
-  dayOfWeek   Int // 0-6 (Monday-Sunday)
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  scheduledAt DateTime?
-
-  // Daily nutritional targets (can override plan defaults)
+  id             String    @id @default(uuid())
+  weekId         String
+  dayOfWeek      Int
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  scheduledAt    DateTime?
   targetCalories Float?
   targetProtein  Float?
   targetCarbs    Float?
   targetFat      Float?
-
-  week  MealWeek @relation(fields: [weekId], references: [id], onDelete: Cascade)
-  meals Meal[]
+  meals          Meal[]
+  week           MealWeek  @relation(fields: [weekId], references: [id], onDelete: Cascade)
 
   @@index([completedAt])
 }
 
 model Meal {
-  id           String   @id @default(uuid())
+  id           String     @id @default(uuid())
   dayId        String
-  name         String // "Breakfast", "Lunch", "Dinner", "Snack 1", etc.
+  name         String
   dateTime     DateTime
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   instructions String?
-
-  day   MealDay    @relation(fields: [dayId], references: [id], onDelete: Cascade)
-  foods MealFood[]
-  logs  MealLog[] // Actual consumption logs
+  day          MealDay    @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  foods        MealFood[]
+  logs         MealLog[]
+  completedAt  DateTime?
 
   @@index([dateTime])
 }
 
-// Planned foods in the meal plan template
 model MealFood {
-  id        String   @id @default(uuid())
-  mealId    String
-  name      String
-  quantity  Float // Planned amount
-  unit      String // "grams", "cups", "pieces", etc.
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Nutritional information per 100g (from API)
+  id              String        @id @default(uuid())
+  mealId          String
+  name            String
+  quantity        Float
+  unit            String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
   caloriesPer100g Float?
   proteinPer100g  Float?
   carbsPer100g    Float?
   fatPer100g      Float?
   fiberPer100g    Float?
-
-  // Open Food Facts integration
-  openFoodFactsId String? // Barcode or product ID
-  productData     Json? // Cached product data from API
-
-  meal        Meal          @relation(fields: [mealId], references: [id], onDelete: Cascade)
-  MealLogItem MealLogItem[]
+  openFoodFactsId String?
+  productData     Json?
+  meal            Meal          @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  MealLogItem     MealLogItem[]
 }
 
-// Actual consumption logs by users
 model MealLog {
-  id          String    @id @default(uuid())
+  id          String        @id @default(uuid())
   mealId      String
   userId      String
-  loggedAt    DateTime  @default(now())
-  completedAt DateTime? // When the meal was actually consumed
-
-  meal  Meal          @relation(fields: [mealId], references: [id], onDelete: Cascade)
-  user  User          @relation("MealLogs", fields: [userId], references: [id])
-  items MealLogItem[]
+  loggedAt    DateTime      @default(now())
+  completedAt DateTime?
+  meal        Meal          @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  user        User          @relation("MealLogs", fields: [userId], references: [id])
+  items       MealLogItem[]
 
   @@index([userId, loggedAt])
   @@index([mealId])
 }
 
-// Individual food items logged by the user
 model MealLogItem {
-  id    String @id @default(uuid())
-  logId String
-
-  // Food identification
-  name     String
-  barcode  String? // For easy re-logging
-  quantity Float // Actual amount consumed
-  unit     String
-
-  // Nutritional data (calculated from quantity)
-  calories Float?
-  protein  Float?
-  carbs    Float?
-  fat      Float?
-  fiber    Float?
-
-  // Open Food Facts integration
-  openFoodFactsId String?
-  productData     Json? // Cached product data
-
-  // Reference to planned food (if logging from plan)
-  plannedFoodId String? // Links to MealFood if logging planned item
-
-  // Custom food addition tracking
-  isCustomAddition Boolean @default(false) // True if user added this food (not just logging consumption)
-
-  notes     String? // User notes about preparation, etc.
-  createdAt DateTime @default(now())
-
-  log         MealLog   @relation(fields: [logId], references: [id], onDelete: Cascade)
-  plannedFood MealFood? @relation(fields: [plannedFoodId], references: [id])
+  id               String    @id @default(uuid())
+  logId            String
+  name             String
+  barcode          String?
+  quantity         Float
+  unit             String
+  calories         Float?
+  protein          Float?
+  carbs            Float?
+  fat              Float?
+  fiber            Float?
+  openFoodFactsId  String?
+  productData      Json?
+  plannedFoodId    String?
+  notes            String?
+  createdAt        DateTime  @default(now())
+  isCustomAddition Boolean   @default(false)
+  log              MealLog   @relation(fields: [logId], references: [id], onDelete: Cascade)
+  plannedFood      MealFood? @relation(fields: [plannedFoodId], references: [id])
 
   @@index([logId])
 }
 
-// Food database cache (to reduce API calls)
 model FoodProduct {
-  id              String  @id @default(uuid())
-  openFoodFactsId String  @unique // Barcode or product ID
+  id              String   @id @default(uuid())
+  openFoodFactsId String   @unique
   name            String
   brand           String?
-
-  // Nutritional data per 100g
   caloriesPer100g Float?
   proteinPer100g  Float?
   carbsPer100g    Float?
   fatPer100g      Float?
   fiberPer100g    Float?
-
-  // Full product data from API
-  productData Json
-
-  lastUpdated DateTime @default(now())
-  createdAt   DateTime @default(now())
+  productData     Json
+  lastUpdated     DateTime @default(now())
+  createdAt       DateTime @default(now())
 
   @@index([name])
   @@index([lastUpdated])

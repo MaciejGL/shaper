@@ -68,7 +68,7 @@ export function MealView() {
         id={activeDay.id}
         variant={animationVariant}
         mode="wait"
-        className="w-full"
+        className="w-full pr-1"
       >
         {isShowingActivePlan && activePlan && defaultPlan ? (
           // Show tabs when user has active plan
@@ -102,7 +102,7 @@ export function MealView() {
           </Tabs>
         ) : (
           // Show single plan (default plan) when no active plan
-          <div>
+          <div className="pr-1">
             {/* Show meals from current plan based on date logic */}
             <MealsList
               planMeals={activeDay.meals || []}
