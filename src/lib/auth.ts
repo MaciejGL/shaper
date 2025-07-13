@@ -64,7 +64,23 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 
   pages: {
-    signIn: '/fitspace/dashboard',
+    signIn: '/login', // Fixed: Changed from '/fitspace/dashboard' to '/login'
     signOut: '/login',
+  },
+
+  callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Handle sign out redirect
+      if (url === baseUrl + '/login') {
+        return baseUrl + '/login'
+      }
+
+      // For other cases, ensure we don't redirect to protected routes during logout
+      if (url.startsWith(baseUrl)) {
+        return url
+      }
+
+      return baseUrl + '/login'
+    },
   },
 } satisfies NextAuthOptions

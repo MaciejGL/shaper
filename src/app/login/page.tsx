@@ -20,6 +20,7 @@ export default async function RequestOtpPage() {
       redirect('/trainer/dashboard')
     }
   }
+
   return (
     <div className="flex flex-col items-center justify-center h-full bg-zinc-100 dark:bg-gradient-to-br from-zinc-950 via-zinc-950 to-zinc-900 px-4 space-y-8">
       <Link href="/">
