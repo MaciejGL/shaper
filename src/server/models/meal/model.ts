@@ -2,22 +2,20 @@ import {
   Meal as PrismaMeal,
   MealDay as PrismaMealDay,
   MealFood as PrismaMealFood,
-  MealLog as PrismaMealLog,
-  MealLogItem as PrismaMealLogItem,
+  MealFoodLog as PrismaMealFoodLog,
 } from '@prisma/client'
 
 import { GQLMeal } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
 
-import MealFoodItem from '../meal-food-item/model'
+import MealFood from '../meal-food/model'
 
 export default class Meal implements GQLMeal {
   constructor(
     protected data: PrismaMeal & {
       day?: PrismaMealDay
-      foods?: PrismaMealFood[]
-      logs?: (PrismaMealLog & {
-        items?: PrismaMealLogItem[]
+      foods?: (PrismaMealFood & {
+        logs?: PrismaMealFoodLog[]
       })[]
     },
     protected context: GQLContext,
@@ -40,46 +38,13 @@ export default class Meal implements GQLMeal {
   }
 
   async foods() {
-    const foodItems: MealFoodItem[] = []
+    const foodItems: MealFood[] = []
 
     // Add planned foods with their consumption logs
     if (this.data.foods) {
-      // Get all consumption logs (not custom additions) for this meal
-      const consumptionLogs = new Map<string, PrismaMealLogItem>()
-
-      this.data.logs?.forEach((log) => {
-        log.items?.forEach((item) => {
-          if (!item.isCustomAddition) {
-            // Keep only the latest log for each food name
-            const existing = consumptionLogs.get(item.name.toLowerCase())
-            if (!existing || item.createdAt > existing.createdAt) {
-              consumptionLogs.set(item.name.toLowerCase(), item)
-            }
-          }
-        })
-      })
-
-      // Add planned foods with their latest consumption logs
-      this.data.foods.forEach((plannedFood) => {
-        const latestLog =
-          consumptionLogs.get(plannedFood.name.toLowerCase()) || null
-        const foodItem = new MealFoodItem(
-          { ...plannedFood, latestLog },
-          this.context,
-        )
+      this.data.foods.forEach((food) => {
+        const foodItem = new MealFood(food, this.context)
         foodItems.push(foodItem)
-      })
-    }
-
-    // Add custom additions
-    if (this.data.logs) {
-      this.data.logs.forEach((log) => {
-        log.items?.forEach((item) => {
-          if (item.isCustomAddition) {
-            const foodItem = new MealFoodItem(item, this.context)
-            foodItems.push(foodItem)
-          }
-        })
       })
     }
 
@@ -143,27 +108,6 @@ export default class Meal implements GQLMeal {
   }
 
   get completedAt() {
-    if (this.data.completedAt) {
-      return this.data.completedAt.toISOString()
-    }
-
-    // Find the most recent completion date from logs
-    if (!this.data.logs || this.data.logs.length === 0) return null
-
-    const completedLogs = this.data.logs.filter((log) => log.completedAt)
-    if (completedLogs.length === 0) return null
-
-    // Return the most recent completion date
-    const latestCompletion = completedLogs.reduce((latest, log) => {
-      if (
-        !latest ||
-        (log.completedAt && log.completedAt > latest.completedAt!)
-      ) {
-        return log
-      }
-      return latest
-    })
-
-    return latestCompletion.completedAt?.toISOString() || null
+    return this.data.completedAt?.toISOString() || null
   }
 }

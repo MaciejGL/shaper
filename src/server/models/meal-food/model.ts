@@ -1,19 +1,25 @@
 import {
   Meal as PrismaMeal,
   MealFood as PrismaMealFood,
+  MealFoodLog as PrismaMealFoodLog,
   FoodProduct as PrismaMealFoodProduct,
+  User as PrismaUser,
 } from '@prisma/client'
 
 import { GQLMealFood } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
 
+import MealFoodLog from '../meal-food-log/model'
 import Meal from '../meal/model'
+import UserPublic from '../user-public/model'
 
 export default class MealFood implements GQLMealFood {
   constructor(
     protected data: PrismaMealFood & {
       meal?: PrismaMeal
       foodProduct?: PrismaMealFoodProduct
+      addedBy?: PrismaUser | null
+      logs?: PrismaMealFoodLog[]
     },
     protected context: GQLContext,
   ) {}
@@ -99,17 +105,41 @@ export default class MealFood implements GQLMealFood {
     return per100g * factor
   }
 
-  // TODO: Add other required fields for GQLMealFood interface
   async logs() {
-    return []
+    if (!this.data.logs) return []
+    return this.data.logs.map((log) => new MealFoodLog(log, this.context))
   }
 
   async addedBy() {
-    return null
+    if (!this.data.addedBy) return null
+    return new UserPublic(this.data.addedBy, this.context)
   }
 
-  get latestLog() {
-    return null
+  async latestLog() {
+    if (!this.data.logs || this.data.logs.length === 0) return null
+
+    // Return the most recent log for this user
+    const userId = this.context.user?.user?.id
+    if (!userId) return null
+
+    const userLogs = this.data.logs.filter((log) => log.userId === userId)
+    if (userLogs.length === 0) return null
+
+    const mostRecentLog = userLogs.reduce((latest, current) =>
+      current.loggedAt > latest.loggedAt ? current : latest,
+    )
+
+    return new MealFoodLog(mostRecentLog, this.context)
+  }
+
+  get isCustomAddition() {
+    // A food is considered a custom addition if it was added by a user
+    return Boolean(this.data.addedById)
+  }
+
+  async log() {
+    // Alias for latestLog to match GraphQL schema expectations
+    return this.latestLog()
   }
 
   async meal() {

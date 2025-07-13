@@ -2,8 +2,7 @@ import {
   Meal as PrismaMeal,
   MealDay as PrismaMealDay,
   MealFood as PrismaMealFood,
-  MealLog as PrismaMealLog,
-  MealLogItem as PrismaMealLogItem,
+  MealFoodLog as PrismaMealFoodLog,
   MealWeek as PrismaMealWeek,
 } from '@prisma/client'
 
@@ -20,9 +19,8 @@ export default class MealDay implements GQLMealDay {
     protected data: PrismaMealDay & {
       week?: PrismaMealWeek
       meals?: (PrismaMeal & {
-        foods?: PrismaMealFood[]
-        logs?: (PrismaMealLog & {
-          items?: PrismaMealLogItem[]
+        foods?: (PrismaMealFood & {
+          logs?: PrismaMealFoodLog[]
         })[]
       })[]
     },

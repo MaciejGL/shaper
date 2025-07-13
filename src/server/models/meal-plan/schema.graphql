@@ -80,7 +80,7 @@ type Meal {
   completedAt: String
 
   # Unified foods array - contains both planned foods and custom additions
-  foods: [MealFoodItem!]!
+  foods: [MealFood!]!
   day: MealDay
 
   # Calculated totals from planned foods
@@ -90,41 +90,7 @@ type Meal {
   plannedFat: Float!
 }
 
-# Unified type for both planned foods and custom additions with logging info
-type MealFoodItem {
-  id: ID!
-  name: String!
-  quantity: Float!
-  unit: String!
-  addedAt: String!
-
-  # Nutritional information per 100g
-  caloriesPer100g: Float
-  proteinPer100g: Float
-  carbsPer100g: Float
-  fatPer100g: Float
-  fiberPer100g: Float
-
-  # Open Food Facts integration
-  openFoodFactsId: String
-  productData: String
-
-  # Calculated nutrition for this specific quantity
-  totalCalories: Float!
-  totalProtein: Float!
-  totalCarbs: Float!
-  totalFat: Float!
-  totalFiber: Float!
-
-  # Source information
-  isCustomAddition: Boolean!
-  addedBy: UserPublic # User who added this food (null for trainer-planned foods)
-  # Log data (latest log entry for this food)
-  log: MealFoodLog
-
-  # All logs for this food
-  logs: [MealFoodLog!]!
-}
+# Removed MealFoodItem - consolidated into MealFood
 
 # Log data for food consumption - direct relationship with MealFood
 type MealFoodLog {
@@ -165,10 +131,6 @@ type MealFood {
   openFoodFactsId: String
   productData: String
 
-  # Relationships
-  meal: Meal!
-  addedBy: UserPublic # User who added this food (null for trainer-planned foods)
-  logs: [MealFoodLog!]! # All logging instances for this food
   # Calculated nutrition for this specific quantity
   totalCalories: Float!
   totalProtein: Float!
@@ -176,8 +138,15 @@ type MealFood {
   totalFat: Float!
   totalFiber: Float!
 
-  # Latest log entry (for convenience)
-  latestLog: MealFoodLog
+  # Source information
+  isCustomAddition: Boolean!
+  addedBy: UserPublic # User who added this food (null for trainer-planned foods)
+  # Logging information
+  log: MealFoodLog # User-specific latest log entry
+  logs: [MealFoodLog!]! # All logging instances for this food
+  latestLog: MealFoodLog # Generic latest log entry (for convenience)
+  # Relationships (only available in certain contexts to avoid circular refs)
+  meal: Meal
 }
 
 type MyMealPlansPayload {

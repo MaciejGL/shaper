@@ -163,10 +163,6 @@ export class OpenFoodFactsClient {
 
       // If we get few results, try even broader search
       if ((data.products || []).length < 5) {
-        console.log(
-          `Got ${(data.products || []).length} results, trying broader search`,
-        )
-
         const broadParams = new URLSearchParams({
           search_terms: query,
           search_simple: '1',
@@ -192,9 +188,6 @@ export class OpenFoodFactsClient {
 
           if (response.ok) {
             data = await response.json()
-            console.log(
-              `Broader search returned ${(data.products || []).length} results`,
-            )
           } else {
             console.warn(`Broader search failed with status ${response.status}`)
           }

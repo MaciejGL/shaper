@@ -45,8 +45,6 @@ export function FoodSearchResults({
     },
   }
 
-  console.log(searchResults)
-
   return (
     <motion.div variants={variants} className="space-y-2">
       {searchResults.map((food, index) => {

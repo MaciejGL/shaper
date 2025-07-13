@@ -42,7 +42,7 @@ function initRedis(): Redis | null {
     })
 
     redisClient.on('reconnecting', () => {
-      console.log('[REDIS] Reconnecting...')
+      console.info('[REDIS] Reconnecting...')
     })
 
     return redisClient
