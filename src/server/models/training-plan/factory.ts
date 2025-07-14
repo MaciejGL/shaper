@@ -1,5 +1,6 @@
 import { prisma } from '@lib/db'
 import { Prisma } from '@prisma/client'
+import * as crypto from 'crypto'
 import { addDays, addWeeks, differenceInCalendarDays } from 'date-fns'
 import { GraphQLError } from 'graphql'
 
@@ -902,15 +903,17 @@ export async function updateTrainingPlan(
                       }
                     }
 
-                    // Execute bulk operations
-                    if (exercisesData.length > 0) {
-                      await tx.trainingExercise.createMany({
-                        data: exercisesData,
-                      })
-                    }
-                    if (setsData.length > 0) {
-                      await tx.exerciseSet.createMany({ data: setsData })
-                    }
+                    // Execute bulk operations in parallel
+                    await Promise.all([
+                      exercisesData.length > 0
+                        ? tx.trainingExercise.createMany({
+                            data: exercisesData,
+                          })
+                        : Promise.resolve(),
+                      setsData.length > 0
+                        ? tx.exerciseSet.createMany({ data: setsData })
+                        : Promise.resolve(),
+                    ])
                   }
                 } else {
                   // Create new day
@@ -961,15 +964,17 @@ export async function updateTrainingPlan(
                       }
                     }
 
-                    // Execute bulk operations
-                    if (exercisesData.length > 0) {
-                      await tx.trainingExercise.createMany({
-                        data: exercisesData,
-                      })
-                    }
-                    if (setsData.length > 0) {
-                      await tx.exerciseSet.createMany({ data: setsData })
-                    }
+                    // Execute bulk operations in parallel
+                    await Promise.all([
+                      exercisesData.length > 0
+                        ? tx.trainingExercise.createMany({
+                            data: exercisesData,
+                          })
+                        : Promise.resolve(),
+                      setsData.length > 0
+                        ? tx.exerciseSet.createMany({ data: setsData })
+                        : Promise.resolve(),
+                    ])
                   }
                 }
               }
@@ -1034,15 +1039,15 @@ export async function updateTrainingPlan(
                     }
                   }
 
-                  // Execute bulk operations
-                  if (exercisesData.length > 0) {
-                    await tx.trainingExercise.createMany({
-                      data: exercisesData,
-                    })
-                  }
-                  if (setsData.length > 0) {
-                    await tx.exerciseSet.createMany({ data: setsData })
-                  }
+                  // Execute bulk operations in parallel
+                  await Promise.all([
+                    exercisesData.length > 0
+                      ? tx.trainingExercise.createMany({ data: exercisesData })
+                      : Promise.resolve(),
+                    setsData.length > 0
+                      ? tx.exerciseSet.createMany({ data: setsData })
+                      : Promise.resolve(),
+                  ])
                 }
               }
             }
@@ -1421,19 +1426,26 @@ export async function extendPlan(args: GQLMutationExtendPlanArgs) {
     .sort((a, b) => a.weekNumber - b.weekNumber)
     .at(-1)?.scheduledAt
 
+  // Prepare bulk data for all entities across all weeks
+  const weeksData = []
+  const daysData = []
+  const exercisesData = []
+  const setsData = []
+
+  // Build up all the data for bulk operations
   for (const week of toClone) {
     nextWeekStart = nextWeekStart ? addWeeks(nextWeekStart, 1) : null
+    const newWeekId = crypto.randomUUID()
 
-    const newWeek = await prisma.trainingWeek.create({
-      data: {
-        planId,
-        name: week.name,
-        description: week.description,
-        weekNumber: nextWeekNumber++,
-        scheduledAt: nextWeekStart,
-        completedAt: null,
-        isExtra: true,
-      },
+    weeksData.push({
+      id: newWeekId,
+      planId,
+      name: week.name,
+      description: week.description,
+      weekNumber: nextWeekNumber++,
+      scheduledAt: nextWeekStart,
+      completedAt: null,
+      isExtra: true,
     })
 
     for (const day of week.days) {
@@ -1445,54 +1457,69 @@ export async function extendPlan(args: GQLMutationExtendPlanArgs) {
       const scheduledAt =
         offset != null && nextWeekStart ? addDays(nextWeekStart, offset) : null
 
-      const newDay = await prisma.trainingDay.create({
-        data: {
-          weekId: newWeek.id,
-          dayOfWeek: day.dayOfWeek,
-          workoutType: day.workoutType,
-          isRestDay: day.isRestDay,
-          scheduledAt,
-          completedAt: null,
-          isExtra: true,
-        },
+      const newDayId = crypto.randomUUID()
+      daysData.push({
+        id: newDayId,
+        weekId: newWeekId,
+        dayOfWeek: day.dayOfWeek,
+        workoutType: day.workoutType,
+        isRestDay: day.isRestDay,
+        scheduledAt,
+        completedAt: null,
+        isExtra: true,
       })
 
       for (const ex of day.exercises) {
-        const newExercise = await prisma.trainingExercise.create({
-          data: {
-            dayId: newDay.id,
-            name: ex.name,
-            baseId: ex.baseId,
-            restSeconds: ex.restSeconds,
-            order: ex.order,
-            isExtra: true,
-            additionalInstructions: ex.additionalInstructions,
-            completedAt: null,
-            instructions: ex.instructions,
-            tempo: ex.tempo,
-            type: ex.type,
-            warmupSets: ex.warmupSets,
-          },
+        const newExerciseId = crypto.randomUUID()
+        exercisesData.push({
+          id: newExerciseId,
+          dayId: newDayId,
+          name: ex.name,
+          baseId: ex.baseId,
+          restSeconds: ex.restSeconds,
+          order: ex.order,
+          isExtra: true,
+          additionalInstructions: ex.additionalInstructions,
+          completedAt: null,
+          instructions: ex.instructions,
+          tempo: ex.tempo,
+          type: ex.type,
+          warmupSets: ex.warmupSets,
         })
 
         for (const set of ex.sets) {
-          await prisma.exerciseSet.create({
-            data: {
-              exerciseId: newExercise.id,
-              reps: set.reps,
-              weight: set.weight,
-              rpe: set.rpe,
-              order: set.order,
-              isExtra: true,
-              maxReps: set.maxReps,
-              minReps: set.minReps,
-              completedAt: null,
-            },
+          setsData.push({
+            id: crypto.randomUUID(),
+            exerciseId: newExerciseId,
+            reps: set.reps,
+            weight: set.weight,
+            rpe: set.rpe,
+            order: set.order,
+            isExtra: true,
+            maxReps: set.maxReps,
+            minReps: set.minReps,
+            completedAt: null,
           })
         }
       }
     }
   }
+
+  // Execute bulk operations in parallel for maximum performance
+  await Promise.all([
+    weeksData.length > 0
+      ? prisma.trainingWeek.createMany({ data: weeksData })
+      : Promise.resolve(),
+    daysData.length > 0
+      ? prisma.trainingDay.createMany({ data: daysData })
+      : Promise.resolve(),
+    exercisesData.length > 0
+      ? prisma.trainingExercise.createMany({ data: exercisesData })
+      : Promise.resolve(),
+    setsData.length > 0
+      ? prisma.exerciseSet.createMany({ data: setsData })
+      : Promise.resolve(),
+  ])
 
   return true
 }

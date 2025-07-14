@@ -1,4 +1,5 @@
 import { prisma } from '@lib/db'
+import * as crypto from 'crypto'
 import { addDays, getWeek, startOfWeek } from 'date-fns'
 import { GraphQLError } from 'graphql'
 
@@ -210,7 +211,9 @@ export async function duplicateTrainingWeek(
 
   return await prisma.$transaction(
     async (tx) => {
-      // Create the new week
+      const uuid = () => crypto.randomUUID()
+
+      // Create the new week first
       const newWeek = await tx.trainingWeek.create({
         data: {
           planId: input.trainingPlanId,
@@ -218,45 +221,75 @@ export async function duplicateTrainingWeek(
           name: `Week ${nextWeekNumber}`,
           description: weekToDuplicate.description,
           isExtra: weekToDuplicate.isExtra,
-          days: {
-            create: weekToDuplicate.days.map((day) => ({
-              dayOfWeek: day.dayOfWeek,
-              isRestDay: day.isRestDay,
-              workoutType: day.workoutType,
-              isExtra: day.isExtra,
-              exercises: {
-                create: day.exercises.map((exercise) => ({
-                  name: exercise.name,
-                  order: exercise.order,
-                  restSeconds: exercise.restSeconds,
-                  tempo: exercise.tempo,
-                  instructions: exercise.instructions,
-                  additionalInstructions: exercise.additionalInstructions,
-                  type: exercise.type,
-                  warmupSets: exercise.warmupSets,
-                  baseId: exercise.baseId,
-                  isExtra: exercise.isExtra,
-                  sets: {
-                    create: exercise.sets.map((set) => ({
-                      order: set.order,
-                      reps: set.reps,
-                      minReps: set.minReps,
-                      maxReps: set.maxReps,
-                      weight: set.weight,
-                      rpe: set.rpe,
-                      isExtra: set.isExtra,
-                    })),
-                  },
-                })),
-              },
-            })),
-          },
         },
       })
 
+      // Prepare bulk data for all entities
+      const daysData = []
+      const exercisesData = []
+      const setsData = []
+
+      // Build up all the data for bulk operations
+      for (const day of weekToDuplicate.days) {
+        const newDayId = uuid()
+        daysData.push({
+          id: newDayId,
+          weekId: newWeek.id,
+          dayOfWeek: day.dayOfWeek,
+          isRestDay: day.isRestDay,
+          workoutType: day.workoutType,
+          isExtra: day.isExtra,
+        })
+
+        for (const exercise of day.exercises) {
+          const newExerciseId = uuid()
+          exercisesData.push({
+            id: newExerciseId,
+            dayId: newDayId,
+            name: exercise.name,
+            order: exercise.order,
+            restSeconds: exercise.restSeconds,
+            tempo: exercise.tempo,
+            instructions: exercise.instructions,
+            additionalInstructions: exercise.additionalInstructions,
+            type: exercise.type,
+            warmupSets: exercise.warmupSets,
+            baseId: exercise.baseId,
+            isExtra: exercise.isExtra,
+          })
+
+          for (const set of exercise.sets) {
+            setsData.push({
+              id: uuid(),
+              exerciseId: newExerciseId,
+              order: set.order,
+              reps: set.reps,
+              minReps: set.minReps,
+              maxReps: set.maxReps,
+              weight: set.weight,
+              rpe: set.rpe,
+              isExtra: set.isExtra,
+            })
+          }
+        }
+      }
+
+      // Execute bulk operations in parallel for maximum performance
+      await Promise.all([
+        daysData.length > 0
+          ? tx.trainingDay.createMany({ data: daysData })
+          : Promise.resolve(),
+        exercisesData.length > 0
+          ? tx.trainingExercise.createMany({ data: exercisesData })
+          : Promise.resolve(),
+        setsData.length > 0
+          ? tx.exerciseSet.createMany({ data: setsData })
+          : Promise.resolve(),
+      ])
+
       return newWeek.id
     },
-    { timeout: 30000, maxWait: 30000 },
+    { timeout: 10000, maxWait: 10000 }, // Reduced timeout due to bulk operations
   )
 }
 

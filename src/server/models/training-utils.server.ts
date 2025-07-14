@@ -175,19 +175,21 @@ export async function duplicatePlan({
         }
       }
 
-      // Execute bulk operations - much faster than individual creates
-      if (weeksData.length > 0) {
-        await tx.trainingWeek.createMany({ data: weeksData })
-      }
-      if (daysData.length > 0) {
-        await tx.trainingDay.createMany({ data: daysData })
-      }
-      if (exercisesData.length > 0) {
-        await tx.trainingExercise.createMany({ data: exercisesData })
-      }
-      if (setsData.length > 0) {
-        await tx.exerciseSet.createMany({ data: setsData })
-      }
+      // Execute bulk operations in parallel for maximum performance
+      await Promise.all([
+        weeksData.length > 0
+          ? tx.trainingWeek.createMany({ data: weeksData })
+          : Promise.resolve(),
+        daysData.length > 0
+          ? tx.trainingDay.createMany({ data: daysData })
+          : Promise.resolve(),
+        exercisesData.length > 0
+          ? tx.trainingExercise.createMany({ data: exercisesData })
+          : Promise.resolve(),
+        setsData.length > 0
+          ? tx.exerciseSet.createMany({ data: setsData })
+          : Promise.resolve(),
+      ])
 
       return await tx.trainingPlan.findUnique({
         where: { id: newPlanId },
