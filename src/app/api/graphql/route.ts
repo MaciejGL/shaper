@@ -1,6 +1,8 @@
 import { createYoga } from 'graphql-yoga'
 import { NextRequest } from 'next/server'
 
+import { dbMonitor } from '@/lib/db-monitor'
+
 import { createContext } from './create-context'
 import { createSchema } from './schema'
 
@@ -27,15 +29,45 @@ const yoga = createYoga<{
   fetchAPI: { Request, Response, Headers },
 })
 
-// // Handler wrapper for Next.js API routes
+// Handler wrapper for Next.js API routes with monitoring
 export async function GET(request: NextRequest) {
-  return yoga.handleRequest(request, {
-    req: request,
-  })
+  const startTime = Date.now()
+
+  try {
+    const response = await yoga.handleRequest(request, {
+      req: request,
+    })
+
+    // Track successful query
+    const executionTime = Date.now() - startTime
+    dbMonitor.trackQuery(executionTime, 'GraphQL-GET')
+
+    return response
+  } catch (error) {
+    // Track failed query
+    const executionTime = Date.now() - startTime
+    dbMonitor.trackQuery(executionTime, 'GraphQL-GET-ERROR')
+    throw error
+  }
 }
 
 export async function POST(request: NextRequest) {
-  return yoga.handleRequest(request, {
-    req: request,
-  })
+  const startTime = Date.now()
+
+  try {
+    const response = await yoga.handleRequest(request, {
+      req: request,
+    })
+
+    // Track successful query
+    const executionTime = Date.now() - startTime
+    dbMonitor.trackQuery(executionTime, 'GraphQL-POST')
+
+    return response
+  } catch (error) {
+    // Track failed query
+    const executionTime = Date.now() - startTime
+    dbMonitor.trackQuery(executionTime, 'GraphQL-POST-ERROR')
+    throw error
+  }
 }
