@@ -1656,6 +1656,7 @@ export type GQLSaveMealInput = {
   dayId: Scalars['ID']['input'];
   foods: Array<GQLMealFoodInput>;
   hour: Scalars['Int']['input'];
+  instructions?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GQLSendCollaborationInvitationInput = {

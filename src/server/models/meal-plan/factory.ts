@@ -1188,10 +1188,16 @@ export async function saveMeal(
           dayId: dayId,
           name: mealName,
           dateTime: mealDateTime,
+          instructions: input.instructions,
         },
         include: {
           foods: true,
         },
+      })
+    } else {
+      await prisma.meal.update({
+        where: { id: meal.id },
+        data: { instructions: input.instructions },
       })
     }
 

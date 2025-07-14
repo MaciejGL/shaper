@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import {
   MealPlanProvider,
   useMealPlanContext,
@@ -37,6 +38,12 @@ function MealPlanCreatorContent() {
     mealPlan?.title || '',
     (value) => updateDetails({ title: value }),
     500, // 500ms debounce for title
+  )
+
+  const descriptionInput = useAutoSyncedInput(
+    mealPlan?.description || '',
+    (value) => updateDetails({ description: value }),
+    500, // 500ms debounce for description
   )
 
   const dailyCaloriesInput = useAutoSyncedInput(
@@ -222,8 +229,18 @@ function MealPlanCreatorContent() {
           onBlur={titleInput.onBlur}
           disabled={!canEdit}
         />
+        <Textarea
+          id="description"
+          label="Description"
+          placeholder="Description"
+          variant="ghost"
+          value={descriptionInput.value}
+          onChange={(e) => descriptionInput.onChange(e.target.value)}
+          rows={1}
+          className="min-h-0"
+        />
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 col-span-full">
           <Input
             label="Calories"
             type="text"

@@ -10,6 +10,7 @@ import {
   DrawerDescription,
   DrawerHeader,
 } from '@/components/ui/drawer'
+import { Textarea } from '@/components/ui/textarea'
 import {
   EditableFood,
   useMealPlanContext,
@@ -33,8 +34,8 @@ export function AddFoodDrawer({
   const { openModal } = useConfirmationModalContext()
   const [foods, setFoods] = useState<EditableFood[]>([])
   const [hasChanges, setHasChanges] = useState(false)
+  const [instructions, setInstructions] = useState('')
   const [isSaving, setIsSaving] = useState(false)
-
   const meal = getMealByHour(dayId, selectedHour)
 
   const mealNutrients = useMemo(
@@ -57,7 +58,7 @@ export function AddFoodDrawer({
 
     setIsSaving(true)
     try {
-      await saveMeal(dayId, selectedHour, foods)
+      await saveMeal(dayId, selectedHour, foods, instructions)
       setHasChanges(false)
       handleCloseSheet()
     } catch (error) {
@@ -66,7 +67,15 @@ export function AddFoodDrawer({
     } finally {
       setIsSaving(false)
     }
-  }, [hasChanges, saveMeal, dayId, selectedHour, foods, handleCloseSheet])
+  }, [
+    hasChanges,
+    saveMeal,
+    dayId,
+    selectedHour,
+    foods,
+    handleCloseSheet,
+    instructions,
+  ])
 
   // Cancel changes with confirmation modal
   const handleCancel = useCallback(() => {
@@ -138,13 +147,24 @@ export function AddFoodDrawer({
 
           {/* Added Foods */}
           {foods.length > 0 && (
-            <AddedFoods
-              foods={foods}
-              removeFood={removeFood}
-              setHasChanges={setHasChanges}
-              setFoods={setFoods}
-              canEdit={canEdit}
-            />
+            <div>
+              <Textarea
+                id="instructions"
+                label="Instructions"
+                placeholder="Instructions"
+                variant="ghost"
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
+              />
+
+              <AddedFoods
+                foods={foods}
+                removeFood={removeFood}
+                setHasChanges={setHasChanges}
+                setFoods={setFoods}
+                canEdit={canEdit}
+              />
+            </div>
           )}
 
           {foods.length === 0 && (

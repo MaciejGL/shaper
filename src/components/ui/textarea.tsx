@@ -33,7 +33,7 @@ function Textarea({
   ...props
 }: TextareaProps & VariantProps<typeof textareaVariants>) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       {label && (
         <Label htmlFor={id} className="text-sm font-medium">
           {label}

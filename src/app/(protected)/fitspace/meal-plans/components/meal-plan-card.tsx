@@ -117,7 +117,7 @@ export function MealPlanCard({
           </div>
 
           {/* Creator */}
-          {plan.createdBy && (
+          {plan.createdBy?.firstName && (
             <div className="flex items-center gap-2 pt-2 border-t">
               <div className="text-xs text-muted-foreground">
                 Created by {plan.createdBy.firstName} {plan.createdBy.lastName}

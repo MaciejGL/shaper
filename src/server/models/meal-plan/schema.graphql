@@ -279,6 +279,7 @@ input SaveMealInput {
   dayId: ID!
   hour: Int! # Hour of the day (7-23)
   foods: [MealFoodInput!]! # Complete list of foods for this meal
+  instructions: String
 }
 
 input MealFoodInput {

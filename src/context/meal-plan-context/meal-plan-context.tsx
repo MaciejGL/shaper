@@ -46,6 +46,7 @@ interface MealPlanContextType {
     dayId: string,
     hour: number,
     foods: EditableFood[],
+    instructions: string,
   ) => Promise<void>
   getMealByHour: (dayId: string, hour: number) => Meal | null
   refetchMealPlan: (
@@ -131,7 +132,12 @@ export function MealPlanProvider({
   )
 
   const saveMeal = useCallback(
-    async (dayId: string, hour: number, foods: EditableFood[]) => {
+    async (
+      dayId: string,
+      hour: number,
+      foods: EditableFood[],
+      instructions: string,
+    ) => {
       try {
         // Convert EditableFood to the format expected by the mutation
         // Filter out foods with null quantities first
@@ -155,6 +161,7 @@ export function MealPlanProvider({
           input: {
             dayId,
             hour,
+            instructions,
             foods: mealFoods,
           },
         })
