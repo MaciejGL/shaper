@@ -3,8 +3,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { dbMonitor } from '@/lib/db-monitor'
 
 // GET /api/db-health - Get current database health stats
-export async function GET() {
+// GET /api/db-health?detailed=true - Get detailed connection information
+export async function GET(request: NextRequest) {
   try {
+    // Check if detailed information is requested
+    const { searchParams } = new URL(request.url)
+    const detailed = searchParams.get('detailed') === 'true'
+
     // Get current stats
     const stats = dbMonitor.getStats()
 
@@ -14,7 +19,8 @@ export async function GET() {
       dbMonitor.checkConnections(),
     ])
 
-    return NextResponse.json({
+    // Base response
+    const response = {
       healthy: isHealthy,
       timestamp: new Date().toISOString(),
       connections: {
@@ -36,7 +42,66 @@ export async function GET() {
         warning:
           stats.consecutiveFailures > 0 ? 'Database failures detected' : null,
       },
-    })
+    }
+
+    // Add detailed connection information if requested
+    if (detailed) {
+      const detailedConnections = await dbMonitor.getDetailedConnections()
+
+      if (detailedConnections) {
+        return NextResponse.json({
+          ...response,
+          detailed_connections: {
+            total_connections: detailedConnections.total_connections,
+            connections_by_application:
+              detailedConnections.connections_by_application,
+            connections_by_user: detailedConnections.connections_by_user,
+            connections_by_state: detailedConnections.connections_by_state,
+            active_connections: detailedConnections.active_connections.map(
+              (conn) => ({
+                pid: conn.pid,
+                user: conn.usename,
+                application: conn.application_name,
+                client_addr: conn.client_addr,
+                connection_duration: conn.connection_duration,
+                query_duration: conn.query_duration,
+                state: conn.state,
+                current_query: conn.query
+                  ? conn.query.length > 200
+                    ? conn.query.substring(0, 200) + '...'
+                    : conn.query
+                  : null,
+              }),
+            ),
+            idle_connections: detailedConnections.idle_connections.map(
+              (conn) => ({
+                pid: conn.pid,
+                user: conn.usename,
+                application: conn.application_name,
+                client_addr: conn.client_addr,
+                connection_duration: conn.connection_duration,
+                state: conn.state,
+              }),
+            ),
+            long_running_queries: detailedConnections.long_running_queries.map(
+              (conn) => ({
+                pid: conn.pid,
+                user: conn.usename,
+                application: conn.application_name,
+                query_duration: conn.query_duration,
+                current_query: conn.query
+                  ? conn.query.length > 200
+                    ? conn.query.substring(0, 200) + '...'
+                    : conn.query
+                  : null,
+              }),
+            ),
+          },
+        })
+      }
+    }
+
+    return NextResponse.json(response)
   } catch (error) {
     console.error('[DB-HEALTH] Health check error:', error)
     return NextResponse.json(
