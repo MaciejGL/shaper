@@ -45,7 +45,7 @@ export function useMealPlanAction() {
         invalidateQueries()
         router.refresh()
         if (dialogState.plan) {
-          router.push(`/fitspace/meal-plan/${dialogState.plan.id}`)
+          router.push(`/fitspace/meal-plan`)
         }
       },
     })

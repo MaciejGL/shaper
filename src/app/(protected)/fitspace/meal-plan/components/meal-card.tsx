@@ -202,14 +202,15 @@ export function MealCard({
           ))}
 
           {isDefaultPlan && (
-            <button
-              className="bg-card p-2 rounded-lg space-y-1 h-[56px] overflow-hidden flex-center"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 onAddCustomFood?.()
               }}
-            >
-              <PlusIcon className="size-4" />
-            </button>
+              iconOnly={<PlusIcon />}
+              className="grow h-[56px] !bg-card"
+            />
           )}
         </div>
       </div>

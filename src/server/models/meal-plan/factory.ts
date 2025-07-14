@@ -246,7 +246,6 @@ export async function getClientMealPlans(
     where: {
       assignedToId: clientId,
       createdById: user.user.id,
-      startDate: null,
     },
     include: {
       createdBy: true,
@@ -805,6 +804,131 @@ export async function createDraftMealTemplate(context: GQLContext) {
 }
 
 /**
+ * Creates the default meal plan structure data for Personal Food Log
+ * This utility function can be reused when creating or recreating default meal plans
+ */
+function createDefaultMealPlanData(userId: string) {
+  return {
+    title: 'Personal Food Log',
+    description: 'Your personal food logging space',
+    isPublic: false,
+    isTemplate: false,
+    isDraft: false,
+    active: false, // Not active by default
+    createdById: userId,
+    assignedToId: userId,
+    weeks: {
+      create: {
+        weekNumber: 1,
+        name: 'Default Week',
+        description: 'Default meal structure for daily logging',
+        days: {
+          create: Array.from({ length: 7 }, (_, dayIndex) => ({
+            dayOfWeek: dayIndex, // 0 = Monday, 6 = Sunday
+            meals: {
+              create: [
+                {
+                  name: 'Breakfast',
+                  dateTime: new Date(`2024-01-01T08:00:00.000Z`),
+                  foods: { create: [] },
+                },
+                {
+                  name: 'Lunch',
+                  dateTime: new Date(`2024-01-01T12:00:00.000Z`),
+                  foods: { create: [] },
+                },
+                {
+                  name: 'Dinner',
+                  dateTime: new Date(`2024-01-01T18:00:00.000Z`),
+                  foods: { create: [] },
+                },
+                {
+                  name: 'Snack',
+                  dateTime: new Date(`2024-01-01T15:00:00.000Z`),
+                  foods: { create: [] },
+                },
+                {
+                  name: 'Supper',
+                  dateTime: new Date(`2024-01-01T20:00:00.000Z`),
+                  foods: { create: [] },
+                },
+              ],
+            },
+          })),
+        },
+      },
+    },
+  }
+}
+
+/**
+ * Creates a new default meal plan with the standard meal structure
+ * This function can be called when we need to create or recreate a default meal plan
+ */
+async function createDefaultMealPlan(
+  context: GQLContext,
+  userId: string,
+  dateFilter?: string,
+) {
+  const weekStart = startOfWeek(new Date(dateFilter ?? ''), {
+    weekStartsOn: 1,
+  })
+  const weekEnd = endOfWeek(new Date(dateFilter ?? ''), {
+    weekStartsOn: 1,
+  })
+
+  const defaultMealPlan = await prisma.mealPlan.create({
+    data: createDefaultMealPlanData(userId),
+    include: {
+      createdBy: true,
+      assignedTo: true,
+      weeks: {
+        orderBy: {
+          weekNumber: 'asc',
+        },
+        include: {
+          days: {
+            orderBy: {
+              dayOfWeek: 'asc',
+            },
+            include: {
+              meals: {
+                orderBy: {
+                  dateTime: 'asc',
+                },
+                include: {
+                  foods: {
+                    include: {
+                      addedBy: true, // Include the user who added the food
+                      logs: {
+                        where: {
+                          loggedAt: dateFilter
+                            ? {
+                                gte: weekStart,
+                                lte: weekEnd,
+                              }
+                            : undefined,
+                        },
+                        orderBy: { loggedAt: 'desc' },
+                        include: {
+                          user: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  return defaultMealPlan
+}
+
+/**
  * Get or create a default meal plan for users without active meal plans
  * This allows users to log meals even when they don't have a structured meal plan
  */
@@ -896,106 +1020,13 @@ export async function getOrCreateDefaultMealPlan(
     if (!defaultMealPlan) {
       // Create new default meal plan with error handling
       try {
-        defaultMealPlan = await prisma.mealPlan.create({
-          data: {
-            title: 'Personal Food Log',
-            description: 'Your personal food logging space',
-            isPublic: false,
-            isTemplate: false,
-            isDraft: false,
-            active: false, // Not active by default
-            createdById: user.user.id,
-            assignedToId: user.user.id,
-            weeks: {
-              create: {
-                weekNumber: 1,
-                name: 'Default Week',
-                description: 'Default meal structure for daily logging',
-                days: {
-                  create: Array.from({ length: 7 }, (_, dayIndex) => ({
-                    dayOfWeek: dayIndex, // 0 = Monday, 6 = Sunday
-                    meals: {
-                      create: [
-                        {
-                          name: 'Breakfast',
-                          dateTime: new Date(`2024-01-01T08:00:00.000Z`),
-                          foods: { create: [] },
-                        },
-                        {
-                          name: 'Lunch',
-                          dateTime: new Date(`2024-01-01T12:00:00.000Z`),
-                          foods: { create: [] },
-                        },
-                        {
-                          name: 'Dinner',
-                          dateTime: new Date(`2024-01-01T18:00:00.000Z`),
-                          foods: { create: [] },
-                        },
-                        {
-                          name: 'Snack',
-                          dateTime: new Date(`2024-01-01T15:00:00.000Z`),
-                          foods: { create: [] },
-                        },
-                        {
-                          name: 'Supper',
-                          dateTime: new Date(`2024-01-01T20:00:00.000Z`),
-                          foods: { create: [] },
-                        },
-                      ],
-                    },
-                  })),
-                },
-              },
-            },
-          },
-          include: {
-            createdBy: true,
-            assignedTo: true,
-            weeks: {
-              orderBy: {
-                weekNumber: 'asc',
-              },
-              include: {
-                days: {
-                  orderBy: {
-                    dayOfWeek: 'asc',
-                  },
-                  include: {
-                    meals: {
-                      orderBy: {
-                        dateTime: 'asc',
-                      },
-                      include: {
-                        foods: {
-                          include: {
-                            addedBy: true, // Include the user who added the food
-                            logs: {
-                              where: {
-                                loggedAt: dateFilter
-                                  ? {
-                                      gte: weekStart,
-                                      lte: weekEnd,
-                                    }
-                                  : undefined,
-                              },
-                              orderBy: { loggedAt: 'desc' },
-                              include: {
-                                user: true,
-                              },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        })
+        defaultMealPlan = await createDefaultMealPlan(
+          context,
+          user.user.id,
+          dateFilter,
+        )
       } catch (createError) {
         // If creation fails (e.g., due to race condition), try to fetch existing plan
-
         const existingPlan = await prisma.mealPlan.findFirst({
           where: {
             createdById: user.user.id,
@@ -1063,6 +1094,25 @@ export async function getOrCreateDefaultMealPlan(
           throw createError // Re-throw if we still can't find/create the plan
         }
       }
+    }
+
+    // Check if default meal plan has empty meals for every day and recreate if necessary
+    const hasEmptyMeals = defaultMealPlan.weeks.every((week) =>
+      week.days.every((day) => day.meals.length === 0),
+    )
+
+    if (hasEmptyMeals) {
+      // Delete the current empty meal plan and create a new one
+      await prisma.mealPlan.delete({
+        where: { id: defaultMealPlan.id },
+      })
+
+      // Create a new default meal plan with proper structure
+      defaultMealPlan = await createDefaultMealPlan(
+        context,
+        user.user.id,
+        dateFilter,
+      )
     }
 
     return new MealPlan(defaultMealPlan, context)
@@ -1197,6 +1247,14 @@ export async function saveMeal(
         })
       }
     }
+    // Remove all meals that are empty now
+    await prisma.meal.deleteMany({
+      where: {
+        foods: {
+          none: {},
+        },
+      },
+    })
 
     return true
   } catch (error) {
