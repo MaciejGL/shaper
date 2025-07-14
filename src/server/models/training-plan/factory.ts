@@ -859,44 +859,57 @@ export async function updateTrainingPlan(
                     },
                   })
 
-                  // Handle exercises (simplified - delete and recreate for now)
+                  // Handle exercises (delete and recreate with bulk operations)
                   await tx.trainingExercise.deleteMany({
                     where: { dayId: dayInput.id },
                   })
 
-                  if (dayInput.exercises) {
+                  if (dayInput.exercises && dayInput.exercises.length > 0) {
+                    // Collect all exercises and sets data for bulk operations
+                    const exercisesData = []
+                    const setsData = []
+
                     for (const exerciseInput of dayInput.exercises) {
-                      const newExercise = await tx.trainingExercise.create({
-                        data: {
-                          dayId: dayInput.id,
-                          name: exerciseInput.name ?? '',
-                          restSeconds: exerciseInput.restSeconds,
-                          tempo: exerciseInput.tempo,
-                          instructions: exerciseInput.instructions,
-                          additionalInstructions:
-                            exerciseInput.additionalInstructions,
-                          type: exerciseInput.type,
-                          order: exerciseInput.order,
-                          warmupSets: exerciseInput.warmupSets,
-                          baseId: exerciseInput.baseId,
-                        },
+                      const newExerciseId = crypto.randomUUID()
+                      exercisesData.push({
+                        id: newExerciseId,
+                        dayId: dayInput.id,
+                        name: exerciseInput.name ?? '',
+                        restSeconds: exerciseInput.restSeconds,
+                        tempo: exerciseInput.tempo,
+                        instructions: exerciseInput.instructions,
+                        additionalInstructions:
+                          exerciseInput.additionalInstructions,
+                        type: exerciseInput.type,
+                        order: exerciseInput.order,
+                        warmupSets: exerciseInput.warmupSets,
+                        baseId: exerciseInput.baseId,
                       })
 
                       if (exerciseInput.sets) {
                         for (const setInput of exerciseInput.sets) {
-                          await tx.exerciseSet.create({
-                            data: {
-                              exerciseId: newExercise.id,
-                              order: setInput.order,
-                              reps: setInput.reps,
-                              minReps: setInput.minReps,
-                              maxReps: setInput.maxReps,
-                              weight: setInput.weight,
-                              rpe: setInput.rpe,
-                            },
+                          setsData.push({
+                            id: crypto.randomUUID(),
+                            exerciseId: newExerciseId,
+                            order: setInput.order,
+                            reps: setInput.reps,
+                            minReps: setInput.minReps,
+                            maxReps: setInput.maxReps,
+                            weight: setInput.weight,
+                            rpe: setInput.rpe,
                           })
                         }
                       }
+                    }
+
+                    // Execute bulk operations
+                    if (exercisesData.length > 0) {
+                      await tx.trainingExercise.createMany({
+                        data: exercisesData,
+                      })
+                    }
+                    if (setsData.length > 0) {
+                      await tx.exerciseSet.createMany({ data: setsData })
                     }
                   }
                 } else {
@@ -910,39 +923,52 @@ export async function updateTrainingPlan(
                     },
                   })
 
-                  if (dayInput.exercises) {
+                  if (dayInput.exercises && dayInput.exercises.length > 0) {
+                    // Collect all exercises and sets data for bulk operations
+                    const exercisesData = []
+                    const setsData = []
+
                     for (const exerciseInput of dayInput.exercises) {
-                      const newExercise = await tx.trainingExercise.create({
-                        data: {
-                          dayId: newDay.id,
-                          name: exerciseInput.name ?? '',
-                          restSeconds: exerciseInput.restSeconds,
-                          tempo: exerciseInput.tempo,
-                          instructions: exerciseInput.instructions,
-                          additionalInstructions:
-                            exerciseInput.additionalInstructions,
-                          type: exerciseInput.type,
-                          order: exerciseInput.order,
-                          warmupSets: exerciseInput.warmupSets,
-                          baseId: exerciseInput.baseId,
-                        },
+                      const newExerciseId = crypto.randomUUID()
+                      exercisesData.push({
+                        id: newExerciseId,
+                        dayId: newDay.id,
+                        name: exerciseInput.name ?? '',
+                        restSeconds: exerciseInput.restSeconds,
+                        tempo: exerciseInput.tempo,
+                        instructions: exerciseInput.instructions,
+                        additionalInstructions:
+                          exerciseInput.additionalInstructions,
+                        type: exerciseInput.type,
+                        order: exerciseInput.order,
+                        warmupSets: exerciseInput.warmupSets,
+                        baseId: exerciseInput.baseId,
                       })
 
                       if (exerciseInput.sets) {
                         for (const setInput of exerciseInput.sets) {
-                          await tx.exerciseSet.create({
-                            data: {
-                              exerciseId: newExercise.id,
-                              order: setInput.order,
-                              reps: setInput.reps,
-                              minReps: setInput.minReps,
-                              maxReps: setInput.maxReps,
-                              weight: setInput.weight,
-                              rpe: setInput.rpe,
-                            },
+                          setsData.push({
+                            id: crypto.randomUUID(),
+                            exerciseId: newExerciseId,
+                            order: setInput.order,
+                            reps: setInput.reps,
+                            minReps: setInput.minReps,
+                            maxReps: setInput.maxReps,
+                            weight: setInput.weight,
+                            rpe: setInput.rpe,
                           })
                         }
                       }
+                    }
+
+                    // Execute bulk operations
+                    if (exercisesData.length > 0) {
+                      await tx.trainingExercise.createMany({
+                        data: exercisesData,
+                      })
+                    }
+                    if (setsData.length > 0) {
+                      await tx.exerciseSet.createMany({ data: setsData })
                     }
                   }
                 }
@@ -970,39 +996,52 @@ export async function updateTrainingPlan(
                   },
                 })
 
-                if (dayInput.exercises) {
+                if (dayInput.exercises && dayInput.exercises.length > 0) {
+                  // Collect all exercises and sets data for bulk operations
+                  const exercisesData = []
+                  const setsData = []
+
                   for (const exerciseInput of dayInput.exercises) {
-                    const newExercise = await tx.trainingExercise.create({
-                      data: {
-                        dayId: newDay.id,
-                        name: exerciseInput.name ?? '',
-                        restSeconds: exerciseInput.restSeconds,
-                        tempo: exerciseInput.tempo,
-                        instructions: exerciseInput.instructions,
-                        additionalInstructions:
-                          exerciseInput.additionalInstructions,
-                        type: exerciseInput.type,
-                        order: exerciseInput.order,
-                        warmupSets: exerciseInput.warmupSets,
-                        baseId: exerciseInput.baseId,
-                      },
+                    const newExerciseId = crypto.randomUUID()
+                    exercisesData.push({
+                      id: newExerciseId,
+                      dayId: newDay.id,
+                      name: exerciseInput.name ?? '',
+                      restSeconds: exerciseInput.restSeconds,
+                      tempo: exerciseInput.tempo,
+                      instructions: exerciseInput.instructions,
+                      additionalInstructions:
+                        exerciseInput.additionalInstructions,
+                      type: exerciseInput.type,
+                      order: exerciseInput.order,
+                      warmupSets: exerciseInput.warmupSets,
+                      baseId: exerciseInput.baseId,
                     })
 
                     if (exerciseInput.sets) {
                       for (const setInput of exerciseInput.sets) {
-                        await tx.exerciseSet.create({
-                          data: {
-                            exerciseId: newExercise.id,
-                            order: setInput.order,
-                            reps: setInput.reps,
-                            minReps: setInput.minReps,
-                            maxReps: setInput.maxReps,
-                            weight: setInput.weight,
-                            rpe: setInput.rpe,
-                          },
+                        setsData.push({
+                          id: crypto.randomUUID(),
+                          exerciseId: newExerciseId,
+                          order: setInput.order,
+                          reps: setInput.reps,
+                          minReps: setInput.minReps,
+                          maxReps: setInput.maxReps,
+                          weight: setInput.weight,
+                          rpe: setInput.rpe,
                         })
                       }
                     }
+                  }
+
+                  // Execute bulk operations
+                  if (exercisesData.length > 0) {
+                    await tx.trainingExercise.createMany({
+                      data: exercisesData,
+                    })
+                  }
+                  if (setsData.length > 0) {
+                    await tx.exerciseSet.createMany({ data: setsData })
                   }
                 }
               }
@@ -1011,7 +1050,7 @@ export async function updateTrainingPlan(
         }
       }
     },
-    { timeout: 30000, maxWait: 30000 },
+    { timeout: 15000, maxWait: 15000 }, // Reduced timeout due to bulk operations
   )
 
   return true

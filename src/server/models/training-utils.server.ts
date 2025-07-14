@@ -100,6 +100,7 @@ export async function duplicatePlan({
       const uuid = () => crypto.randomUUID()
       const newPlanId = uuid()
 
+      // Create the main plan
       await tx.trainingPlan.create({
         data: {
           id: newPlanId,
@@ -115,70 +116,83 @@ export async function duplicatePlan({
         },
       })
 
+      // Prepare bulk data for all entities
+      const weeksData = []
+      const daysData = []
+      const exercisesData = []
+      const setsData = []
+
+      // Build up all the data for bulk operations
       for (const week of plan.weeks) {
         const newWeekId = uuid()
-        await tx.trainingWeek.create({
-          data: {
-            id: newWeekId,
-            name: week.name,
-            weekNumber: week.weekNumber,
-            description: week.description,
-            planId: newPlanId,
-          },
+        weeksData.push({
+          id: newWeekId,
+          name: week.name,
+          weekNumber: week.weekNumber,
+          description: week.description,
+          planId: newPlanId,
         })
 
         for (const day of week.days) {
           const newDayId = uuid()
-          await tx.trainingDay.create({
-            data: {
-              id: newDayId,
-              dayOfWeek: day.dayOfWeek,
-              isRestDay: day.isRestDay,
-              workoutType: day.workoutType,
-              weekId: newWeekId,
-            },
+          daysData.push({
+            id: newDayId,
+            dayOfWeek: day.dayOfWeek,
+            isRestDay: day.isRestDay,
+            workoutType: day.workoutType,
+            weekId: newWeekId,
           })
 
           for (const exercise of day.exercises) {
             const newExerciseId = uuid()
-            await tx.trainingExercise.create({
-              data: {
-                id: newExerciseId,
-                name: exercise.name,
-                restSeconds: exercise.restSeconds,
-                tempo: exercise.tempo,
-                instructions: exercise.instructions,
-                additionalInstructions: exercise.additionalInstructions,
-                type: exercise.type,
-                order: exercise.order,
-                warmupSets: exercise.warmupSets,
-                dayId: newDayId,
-                baseId: exercise.baseId ?? null,
-              },
+            exercisesData.push({
+              id: newExerciseId,
+              name: exercise.name,
+              restSeconds: exercise.restSeconds,
+              tempo: exercise.tempo,
+              instructions: exercise.instructions,
+              additionalInstructions: exercise.additionalInstructions,
+              type: exercise.type,
+              order: exercise.order,
+              warmupSets: exercise.warmupSets,
+              dayId: newDayId,
+              baseId: exercise.baseId ?? null,
             })
 
             for (const set of exercise.sets) {
-              await tx.exerciseSet.create({
-                data: {
-                  id: uuid(),
-                  order: set.order,
-                  reps: set.reps,
-                  minReps: set.minReps,
-                  maxReps: set.maxReps,
-                  weight: set.weight,
-                  rpe: set.rpe,
-                  exerciseId: newExerciseId,
-                },
+              setsData.push({
+                id: uuid(),
+                order: set.order,
+                reps: set.reps,
+                minReps: set.minReps,
+                maxReps: set.maxReps,
+                weight: set.weight,
+                rpe: set.rpe,
+                exerciseId: newExerciseId,
               })
             }
           }
         }
       }
 
+      // Execute bulk operations - much faster than individual creates
+      if (weeksData.length > 0) {
+        await tx.trainingWeek.createMany({ data: weeksData })
+      }
+      if (daysData.length > 0) {
+        await tx.trainingDay.createMany({ data: daysData })
+      }
+      if (exercisesData.length > 0) {
+        await tx.trainingExercise.createMany({ data: exercisesData })
+      }
+      if (setsData.length > 0) {
+        await tx.exerciseSet.createMany({ data: setsData })
+      }
+
       return await tx.trainingPlan.findUnique({
         where: { id: newPlanId },
       })
     },
-    { timeout: 30000, maxWait: 30000 },
+    { timeout: 10000, maxWait: 10000 }, // Reduced timeout since it should be much faster now
   )
 }
