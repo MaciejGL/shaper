@@ -134,28 +134,30 @@ export function compareWeeksUTC(
 }
 
 /**
- * Create a timestamp with specific date but current time
+ * Create a timestamp with specific date but current time in local timezone
  * Useful for meal logging where we want to preserve the date being viewed
- * but record the actual time when the food was logged
+ * but record the actual local time when the food was logged
  * @param dateString - Date string in YYYY-MM-DD format (the date being viewed)
- * @returns ISO string with the viewed date but current time
+ * @returns ISO string with the viewed date but current local time
  */
 export function createTimestampWithDateAndCurrentTime(
   dateString?: string | null,
 ): string {
   if (!dateString) return new Date().toISOString()
 
-  // Parse the viewed date (e.g., "2025-07-13") to get the date components
-  const viewedDate = fromZonedTime(dateString + 'T00:00:00', 'UTC')
+  // Get current time in local timezone
   const now = new Date()
 
-  // Get current time in UTC
-  const nowUTC = toZonedTime(now, 'UTC')
-
-  // Combine the viewed date with current UTC time
-  const combinedDate = fromZonedTime(
-    format(viewedDate, 'yyyy-MM-dd') + 'T' + format(nowUTC, 'HH:mm:ss.SSS'),
-    'UTC',
+  // Parse the viewed date and combine with current local time
+  // This creates a date in the user's local timezone, preserving the actual time context
+  const combinedDate = new Date(
+    parseInt(dateString.split('-')[0]), // year
+    parseInt(dateString.split('-')[1]) - 1, // month (0-indexed)
+    parseInt(dateString.split('-')[2]), // day
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds(),
+    now.getMilliseconds(),
   )
 
   return combinedDate.toISOString()
