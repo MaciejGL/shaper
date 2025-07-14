@@ -105,6 +105,7 @@ class DatabaseMonitor {
   // NEW: Get detailed connection information
   async getDetailedConnections(): Promise<DetailedConnectionStats | null> {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = await prisma.$queryRaw<any[]>`
         SELECT 
           pid,
