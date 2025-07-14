@@ -20,6 +20,10 @@ export function usePostHogUserEnhanced() {
       return // Wait for session to load
     }
 
+    if (process.env.NODE_ENV !== 'production') {
+      return
+    }
+
     if (status === 'authenticated' && user?.email) {
       const userId = user.email
 

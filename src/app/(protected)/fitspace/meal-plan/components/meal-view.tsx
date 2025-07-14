@@ -2,6 +2,7 @@ import { Calendar, Plus } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { startTransition, useMemo, useState } from 'react'
 
+import { useIsFirstRender } from '@/components/animated-grid'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { SwipeableWrapper } from '@/components/swipeable-wrapper'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -19,6 +20,8 @@ export function MealView() {
   const [animationVariant, setAnimationVariant] = useState<
     'slideFromLeft' | 'slideFromRight'
   >('slideFromLeft')
+  const isFirstRender = useIsFirstRender()
+
   const weekStartsOn = useWeekStartPreference()
 
   // Get corresponding day from default plan for custom logs tab
@@ -66,7 +69,7 @@ export function MealView() {
     >
       <AnimatedPageTransition
         id={activeDay.id}
-        variant={animationVariant}
+        variant={isFirstRender ? 'fade' : animationVariant}
         mode="wait"
         className="w-full pr-1"
       >
