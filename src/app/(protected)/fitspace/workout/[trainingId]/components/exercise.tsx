@@ -727,7 +727,8 @@ function ExerciseSet({
     }
   }
 
-  const showLabel = set.reps || set.weight || set.rpe
+  const showLabel =
+    set.reps || set.minReps || set.maxReps || set.weight || set.rpe
 
   const lastLog = previousLogs[previousLogs.length - 1]
   const thisSet = lastLog?.sets[set.order - 1]
