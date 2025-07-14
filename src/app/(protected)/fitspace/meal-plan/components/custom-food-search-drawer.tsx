@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { ScanBarcodeIcon, SearchIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
@@ -23,6 +24,7 @@ import {
 } from '@/generated/graphql-client'
 import { SearchResult, searchFoods } from '@/lib/food-search'
 import { createTimestampWithDateAndCurrentTime } from '@/lib/utc-date-utils'
+import { cn } from '@/lib/utils'
 
 import { SelectedMeal } from './meal-logging-drawer'
 import { useMealLogging } from './use-meal-logging'
@@ -147,6 +149,8 @@ export function CustomFoodSearchDrawer({
     onClose()
   }
 
+  const barcodeEnabled = false
+
   return (
     <Drawer open={isOpen} onClose={handleClose}>
       <DrawerContent className="h-full" dialogTitle="Search for products">
@@ -159,16 +163,31 @@ export function CustomFoodSearchDrawer({
 
         <div className="flex-1 overflow-y-auto p-4">
           <div className="space-y-4">
-            <Input
-              id="food-search"
-              placeholder="Search for foods..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full"
-              onFocusCapture={() => {
-                setSearchTerm('')
-              }}
-            />
+            <div
+              className={cn(
+                'grid gap-2',
+                barcodeEnabled && 'grid-cols-[auto_1fr_auto]',
+                !barcodeEnabled && 'grid-cols-[1fr]',
+              )}
+            >
+              {barcodeEnabled && (
+                <Button variant="secondary" iconStart={<ScanBarcodeIcon />}>
+                  Scan
+                </Button>
+              )}
+              <Input
+                id="food-search"
+                placeholder="Search for foods..."
+                variant="secondary"
+                iconStart={<SearchIcon />}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full grow"
+                onFocusCapture={() => {
+                  setSearchTerm('')
+                }}
+              />
+            </div>
 
             {isSearching && <FoodSearchLoading />}
 
@@ -188,12 +207,6 @@ export function CustomFoodSearchDrawer({
                   No foods found. Try a different search term.
                 </div>
               )}
-
-            {searchTerm.length === 0 && (
-              <div className="text-center text-muted-foreground py-8">
-                Start typing to search for foods...
-              </div>
-            )}
           </div>
         </div>
 

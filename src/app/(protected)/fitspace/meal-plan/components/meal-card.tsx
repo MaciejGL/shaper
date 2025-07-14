@@ -151,6 +151,7 @@ export function MealCard({
   }
 
   const loggedTotals = calculateLoggedTotals(meal.foods)
+  const hasFoods = meal.foods.length > 0
 
   return (
     <div className="grid grid-cols-[1fr_50px] gap-3">
@@ -172,12 +173,14 @@ export function MealCard({
             }
           />
           <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              iconOnly={<Edit3Icon />}
-              onClick={() => onClick?.()}
-            />
+            {hasFoods && (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                iconOnly={<Edit3Icon />}
+                onClick={() => onClick?.()}
+              />
+            )}
             {!isDefaultPlan && (
               <Button
                 variant="ghost"

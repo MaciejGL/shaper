@@ -22,7 +22,7 @@ export function FoodItem({
           {food.name}
         </p>
         <p className="text-xs shrink-0 whitespace-nowrap">
-          {food.log?.loggedQuantity} {food.unit}
+          {food.log?.loggedQuantity || food.quantity} {food.unit}
         </p>
       </div>
       <div className="flex gap-1">

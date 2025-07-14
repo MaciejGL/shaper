@@ -237,6 +237,13 @@ export function MealLoggingDrawer({
 
           {/* Food Items */}
           <div className="space-y-3">
+            {foodQuantities.length === 0 && (
+              <div className="flex-center flex-col gap-2">
+                <p className="text-sm text-muted-foreground">
+                  Add ingredients or products to your meal
+                </p>
+              </div>
+            )}
             {foodQuantities.map((food) => {
               const ratio = food.loggedQuantity / food.originalQuantity
               const adjustedCalories = food.totalCalories * ratio
