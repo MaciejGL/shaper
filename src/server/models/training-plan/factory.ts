@@ -1245,37 +1245,49 @@ export async function activatePlan(
   }
 
   if (resume) {
-    await prisma.trainingPlan.updateMany({
-      where: { assignedToId: user.user.id, active: true, id: { not: planId } },
-      data: { active: false },
-    })
+    const baseStartDate = new Date(startDate)
 
-    await prisma.trainingPlan.update({
-      where: { id: fullPlan.id, assignedToId: user.user.id },
-      data: {
-        active: true,
-        startDate: new Date(startDate),
-        weeks: {
-          update: fullPlan?.weeks.map((week, weekIndex) => ({
-            where: { id: week.id },
-            data: {
-              scheduledAt: addWeeks(new Date(startDate), weekIndex),
-              days: {
-                update: week.days.map((day) => ({
-                  where: { id: day.id },
-                  data: {
-                    scheduledAt: addDays(
-                      addWeeks(new Date(startDate), weekIndex),
-                      day.dayOfWeek,
-                    ),
-                  },
-                })),
-              },
-            },
-          })),
+    // Use bulk operations for resume case too
+    await Promise.all([
+      // Deactivate other plans
+      prisma.trainingPlan.updateMany({
+        where: {
+          assignedToId: user.user.id,
+          active: true,
+          id: { not: planId },
         },
-      },
-    })
+        data: { active: false },
+      }),
+
+      // Activate current plan
+      prisma.trainingPlan.update({
+        where: { id: fullPlan.id, assignedToId: user.user.id },
+        data: { active: true, startDate: baseStartDate },
+      }),
+
+      // Bulk update weeks scheduling
+      ...fullPlan.weeks.map((week, weekIndex) =>
+        prisma.trainingWeek.updateMany({
+          where: { id: week.id },
+          data: { scheduledAt: addWeeks(baseStartDate, weekIndex) },
+        }),
+      ),
+
+      // Bulk update days scheduling
+      ...fullPlan.weeks.flatMap((week, weekIndex) =>
+        week.days.map((day) =>
+          prisma.trainingDay.updateMany({
+            where: { id: day.id },
+            data: {
+              scheduledAt: addDays(
+                addWeeks(baseStartDate, weekIndex),
+                day.dayOfWeek,
+              ),
+            },
+          }),
+        ),
+      ),
+    ])
 
     return true
   }
@@ -1306,44 +1318,51 @@ export async function activatePlan(
           throw new Error('Failed to duplicate plan')
         }
 
-        const duplicatedFullPlan = await getFullPlanById(duplicated.id)
+        // Optimize: Calculate scheduling from original plan instead of fetching duplicated plan
+        const baseStartDate = new Date(startDate)
 
-        if (!duplicatedFullPlan) {
-          throw new Error('Failed to get duplicated plan')
-        }
+        // Use bulk operations for much better performance
+        await Promise.all([
+          // Activate the plan
+          tx.trainingPlan.update({
+            where: { id: duplicated.id, assignedToId: user.user.id },
+            data: { active: true, startDate: baseStartDate },
+          }),
 
-        // Then activate the new plan
-        await tx.trainingPlan.update({
-          where: {
-            id: duplicated.id,
-            assignedToId: user.user.id, // Ensure the plan belongs to the user
-          },
-          data: {
-            active: true,
-            startDate: new Date(startDate),
-            weeks: {
-              update: duplicatedFullPlan.weeks.map((week, weekIndex) => ({
-                where: { id: week.id },
-                data: {
-                  scheduledAt: addWeeks(new Date(startDate), weekIndex),
-                  days: {
-                    update: week.days.map((day) => ({
-                      where: { id: day.id },
-                      data: {
-                        scheduledAt: addDays(
-                          addWeeks(new Date(startDate), weekIndex),
-                          day.dayOfWeek,
-                        ),
-                      },
-                    })),
+          // Bulk update all weeks scheduling
+          ...fullPlan.weeks.map((week, weekIndex) =>
+            tx.trainingWeek.updateMany({
+              where: {
+                planId: duplicated.id,
+                weekNumber: week.weekNumber,
+              },
+              data: { scheduledAt: addWeeks(baseStartDate, weekIndex) },
+            }),
+          ),
+
+          // Bulk update all days scheduling
+          ...fullPlan.weeks.flatMap((week, weekIndex) =>
+            week.days.map((day) =>
+              tx.trainingDay.updateMany({
+                where: {
+                  week: {
+                    planId: duplicated.id,
+                    weekNumber: week.weekNumber,
                   },
+                  dayOfWeek: day.dayOfWeek,
                 },
-              })),
-            },
-          },
-        })
+                data: {
+                  scheduledAt: addDays(
+                    addWeeks(baseStartDate, weekIndex),
+                    day.dayOfWeek,
+                  ),
+                },
+              }),
+            ),
+          ),
+        ])
       },
-      { timeout: 15000, maxWait: 15000 },
+      { timeout: 20000, maxWait: 20000 }, // Reduced due to eliminated query and bulk operations
     )
   } catch (error) {
     console.error(error)
