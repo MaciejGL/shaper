@@ -6,6 +6,10 @@ query FitspaceGetCurrentWorkoutId {
   }
 }
 
+query FitspaceGetActivePlanId {
+  getActivePlanId
+}
+
 query FitspaceGetWorkout($trainingId: ID!) {
   getWorkout(trainingId: $trainingId) {
     plan {

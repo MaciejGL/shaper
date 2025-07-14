@@ -2,7 +2,7 @@
 
 import { LayoutDashboard } from 'lucide-react'
 
-import { useFitspaceDashboardGetWorkoutQuery } from '@/generated/graphql-client'
+import { useFitspaceDashboardGetCurrentWeekQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
@@ -14,7 +14,7 @@ import {
 } from './components/todays-session'
 
 export default function DashboardPage() {
-  const { data, isLoading } = useFitspaceDashboardGetWorkoutQuery()
+  const { data, isLoading } = useFitspaceDashboardGetCurrentWeekQuery()
 
   // TO ADD:
   // - Profile completion - with survey
@@ -32,9 +32,9 @@ export default function DashboardPage() {
       <DashboardHeader title="Dashboard" icon={<LayoutDashboard />} />
 
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
-        <TodaysSession plan={data?.getWorkout?.plan} />
+        <TodaysSession plan={data?.getCurrentWorkoutWeek?.plan ?? undefined} />
 
-        <DashboardStats plan={data?.getWorkout?.plan} />
+        <DashboardStats plan={data?.getCurrentWorkoutWeek?.plan ?? undefined} />
       </div>
     </div>
   )

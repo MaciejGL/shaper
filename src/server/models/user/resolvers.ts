@@ -80,6 +80,28 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     return new User(user, context)
   },
+  // Lightweight resolver for global context - only essential data
+  userBasic: async (_, __, context: GQLContext) => {
+    const userSession = context.user
+    if (!userSession) {
+      throw new Error('User not found')
+    }
+
+    // Only fetch essential data for global context
+    const user = await prisma.user.findUnique({
+      where: { id: userSession.user.id },
+      include: {
+        profile: true, // Include full profile (bodyMeasures will be lazy-loaded if needed)
+        // Exclude trainer, clients, sessions, notifications, and other heavy data
+      },
+    })
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    return new User(user, context)
+  },
   myClients: async (_, __, context) => {
     const user = context.user
     if (!user) {

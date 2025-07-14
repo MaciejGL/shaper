@@ -406,6 +406,230 @@ export async function getMyPlansOverview(context: GQLContext) {
   }
 }
 
+// Optimized version for when only basic plan info is needed (like getting active plan ID)
+export async function getMyPlansOverviewLite(context: GQLContext) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  // Only fetch basic plan data without nested relations
+  const [plans, quickWorkoutPlan] = await Promise.all([
+    prisma.trainingPlan.findMany({
+      where: {
+        assignedToId: user.user.id,
+        createdById: {
+          not: user.user.id,
+        },
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+      include: {
+        createdBy: {
+          include: {
+            profile: true,
+          },
+        },
+        // Only include basic stats, no nested data
+        _count: {
+          select: {
+            weeks: true,
+          },
+        },
+      },
+    }),
+
+    prisma.trainingPlan.findFirst({
+      where: {
+        assignedToId: user.user.id,
+        createdById: user.user.id,
+      },
+      include: {
+        createdBy: {
+          include: {
+            profile: true,
+          },
+        },
+        _count: {
+          select: {
+            weeks: true,
+          },
+        },
+      },
+    }),
+  ])
+
+  const activePlan = plans.find(
+    (plan) => plan.assignedToId === user.user.id && plan.active,
+  )
+
+  const availablePlans = plans.filter(
+    (plan) => plan.completedAt === null && plan.active === false,
+  )
+  const completedPlans = plans.filter((plan) => plan.completedAt !== null)
+
+  return {
+    activePlan: activePlan ? new TrainingPlan(activePlan, context) : null,
+    availablePlans: availablePlans.map(
+      (plan) => new TrainingPlan(plan, context),
+    ),
+    completedPlans: completedPlans.map(
+      (plan) => new TrainingPlan(plan, context),
+    ),
+    quickWorkoutPlan: quickWorkoutPlan
+      ? new TrainingPlan(quickWorkoutPlan, context)
+      : null,
+  }
+}
+
+// Optimized version for when full nested data is needed
+export async function getMyPlansOverviewFull(context: GQLContext) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const [plans, quickWorkoutPlan] = await Promise.all([
+    prisma.trainingPlan.findMany({
+      where: {
+        assignedToId: user.user.id,
+        createdById: {
+          not: user.user.id,
+        },
+      },
+      orderBy: {
+        updatedAt: 'desc',
+      },
+      include: {
+        createdBy: {
+          include: {
+            profile: true,
+          },
+        },
+        weeks: {
+          orderBy: {
+            weekNumber: 'asc',
+          },
+          include: {
+            days: {
+              orderBy: {
+                dayOfWeek: 'asc',
+              },
+              include: {
+                exercises: {
+                  orderBy: {
+                    order: 'asc',
+                  },
+                  include: {
+                    base: {
+                      include: {
+                        muscleGroups: true,
+                      },
+                    },
+                    sets: {
+                      orderBy: {
+                        order: 'asc',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+
+    prisma.trainingPlan.findFirst({
+      where: {
+        assignedToId: user.user.id,
+        createdById: user.user.id,
+      },
+      include: {
+        createdBy: {
+          include: {
+            profile: true,
+          },
+        },
+        weeks: {
+          orderBy: {
+            weekNumber: 'asc',
+          },
+          include: {
+            days: {
+              orderBy: {
+                dayOfWeek: 'asc',
+              },
+              include: {
+                exercises: {
+                  orderBy: {
+                    order: 'asc',
+                  },
+                  include: {
+                    base: {
+                      include: {
+                        muscleGroups: true,
+                      },
+                    },
+                    sets: {
+                      orderBy: {
+                        order: 'asc',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  ])
+
+  const activePlan = plans.find(
+    (plan) => plan.assignedToId === user.user.id && plan.active,
+  )
+
+  const availablePlans = plans.filter(
+    (plan) => plan.completedAt === null && plan.active === false,
+  )
+  const completedPlans = plans.filter((plan) => plan.completedAt !== null)
+
+  return {
+    activePlan: activePlan ? new TrainingPlan(activePlan, context) : null,
+    availablePlans: availablePlans.map(
+      (plan) => new TrainingPlan(plan, context),
+    ),
+    completedPlans: completedPlans.map(
+      (plan) => new TrainingPlan(plan, context),
+    ),
+    quickWorkoutPlan: quickWorkoutPlan
+      ? new TrainingPlan(quickWorkoutPlan, context)
+      : null,
+  }
+}
+
+// Lightweight resolver for getting just the active plan ID
+export async function getActivePlanId(context: GQLContext) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const activePlan = await prisma.trainingPlan.findFirst({
+    where: {
+      assignedToId: user.user.id,
+      active: true,
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  return activePlan?.id || null
+}
+
 export async function getWorkout(
   args: GQLQueryGetWorkoutArgs,
   context: GQLContext,
@@ -1343,4 +1567,77 @@ export async function createDraftTemplate(context: GQLContext) {
   })
 
   return new TrainingPlan(trainingPlan, context)
+}
+
+export async function getCurrentWorkoutWeek(context: GQLContext) {
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  const plan = await prisma.trainingPlan.findFirst({
+    where: { assignedToId: user.user.id, active: true },
+    include: {
+      weeks: {
+        orderBy: {
+          weekNumber: 'asc',
+        },
+        include: {
+          days: {
+            orderBy: {
+              dayOfWeek: 'asc',
+            },
+            include: {
+              events: true,
+              exercises: {
+                orderBy: {
+                  order: 'asc',
+                },
+                include: {
+                  sets: {
+                    orderBy: {
+                      order: 'asc',
+                    },
+                  },
+                  base: {
+                    include: {
+                      muscleGroups: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!plan) {
+    return null
+  }
+
+  const today = new Date()
+  const planStartDate = plan.startDate ? new Date(plan.startDate) : today
+  const daysSinceStart = Math.floor(
+    (today.getTime() - planStartDate.getTime()) / (1000 * 60 * 60 * 24),
+  )
+  const currentWeekIndex = Math.floor(daysSinceStart / 7)
+
+  // Instead of manipulating the structure, just return the plan with limited weeks
+  const limitedWeeks = plan.weeks.slice(
+    Math.max(0, currentWeekIndex - 4),
+    currentWeekIndex + 1,
+  )
+
+  const limitedPlan = {
+    ...plan,
+    weeks: limitedWeeks,
+  }
+
+  return {
+    plan: new TrainingPlan(limitedPlan, context),
+    currentWeekIndex,
+    totalWeeks: plan.weeks.length,
+  }
 }

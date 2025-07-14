@@ -1,5 +1,5 @@
 query FitspaceMyPlans {
-  getMyPlansOverview {
+  getMyPlansOverviewFull {
     activePlan {
       id
       title

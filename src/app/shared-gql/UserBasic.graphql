@@ -1,0 +1,18 @@
+query UserBasic {
+  userBasic {
+    id
+    email
+    name
+    role
+    createdAt
+    updatedAt
+    profile {
+      id
+      firstName
+      lastName
+      phone
+      birthday
+      sex
+    }
+  }
+}

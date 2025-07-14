@@ -1,20 +1,18 @@
 import { redirect } from 'next/navigation'
 
 import {
-  FitspaceGetCurrentWorkoutIdDocument,
-  GQLFitspaceGetCurrentWorkoutIdQuery,
+  FitspaceGetActivePlanIdDocument,
+  GQLFitspaceGetActivePlanIdQuery,
 } from '@/generated/graphql-client'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
 export default async function SessionPage() {
-  const { data } = await gqlServerFetch<GQLFitspaceGetCurrentWorkoutIdQuery>(
-    FitspaceGetCurrentWorkoutIdDocument,
+  const { data } = await gqlServerFetch<GQLFitspaceGetActivePlanIdQuery>(
+    FitspaceGetActivePlanIdDocument,
   )
 
-  if (data?.getMyPlansOverview?.activePlan?.id) {
-    return redirect(
-      `/fitspace/workout/${data.getMyPlansOverview.activePlan.id}`,
-    )
+  if (data?.getActivePlanId) {
+    return redirect(`/fitspace/workout/${data.getActivePlanId}`)
   } else {
     return redirect('/fitspace/workout/quick-workout')
   }

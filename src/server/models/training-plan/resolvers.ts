@@ -27,10 +27,14 @@ import {
   deleteTrainingPlan,
   duplicateTrainingPlan,
   extendPlan,
+  getActivePlanId,
   getClientActivePlan,
   getClientTrainingPlans,
   getCollaborationTemplates,
+  getCurrentWorkoutWeek,
   getMyPlansOverview,
+  getMyPlansOverviewFull,
+  getMyPlansOverviewLite,
   getTemplates,
   getTrainingPlanById,
   getWorkout,
@@ -72,6 +76,15 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   getMyPlansOverview: async (_, __, context) => {
     return getMyPlansOverview(context)
   },
+  getMyPlansOverviewLite: async (_, __, context) => {
+    return getMyPlansOverviewLite(context)
+  },
+  getMyPlansOverviewFull: async (_, __, context) => {
+    return getMyPlansOverviewFull(context)
+  },
+  getActivePlanId: async (_, __, context) => {
+    return getActivePlanId(context)
+  },
   getWorkout: async (_, args, context) => {
     return getWorkout(args, context)
   },
@@ -80,6 +93,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   },
   getCollaborationTemplates: async (_, args, context) => {
     return getCollaborationTemplates(args, context)
+  },
+  getCurrentWorkoutWeek: async (_, __, context) => {
+    return getCurrentWorkoutWeek(context)
   },
 }
 
