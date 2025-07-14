@@ -205,6 +205,12 @@ export default class TrainingPlan implements GQLTrainingPlan {
         (day) => !day?.isRestDay && day?.exercises && day.exercises.length > 0,
       )
     const completedDays = days.filter((day) => day?.completedAt)
+
+    // Prevent division by zero, which would return NaN and break GraphQL Float
+    if (days.length === 0) {
+      return 0
+    }
+
     const adherence = Math.round((completedDays.length / days.length) * 100)
     return adherence
   }
@@ -258,9 +264,14 @@ export default class TrainingPlan implements GQLTrainingPlan {
     const reviews = await this.context.loaders.plan.reviewsByPlanId.load(
       this.data.templateId,
     )
-    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0)
 
-    return totalRating / reviews.length || 0
+    // Prevent division by zero, which would return NaN and break GraphQL Float
+    if (reviews.length === 0) {
+      return 0
+    }
+
+    const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0)
+    return totalRating / reviews.length
   }
 
   async totalReviews() {
