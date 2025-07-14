@@ -145,19 +145,17 @@ export function createTimestampWithDateAndCurrentTime(
 ): string {
   if (!dateString) return new Date().toISOString()
 
-  // Parse the viewed date (e.g., "2025-07-13")
+  // Parse the viewed date (e.g., "2025-07-13") to get the date components
   const viewedDate = fromZonedTime(dateString + 'T00:00:00', 'UTC')
   const now = new Date()
 
-  // Combine viewed date with current time
-  const combinedDate = new Date(
-    viewedDate.getFullYear(),
-    viewedDate.getMonth(),
-    viewedDate.getDate(),
-    now.getHours(),
-    now.getMinutes(),
-    now.getSeconds(),
-    now.getMilliseconds(),
+  // Get current time in UTC
+  const nowUTC = toZonedTime(now, 'UTC')
+
+  // Combine the viewed date with current UTC time
+  const combinedDate = fromZonedTime(
+    format(viewedDate, 'yyyy-MM-dd') + 'T' + format(nowUTC, 'HH:mm:ss.SSS'),
+    'UTC',
   )
 
   return combinedDate.toISOString()
