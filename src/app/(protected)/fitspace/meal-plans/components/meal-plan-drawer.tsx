@@ -64,12 +64,14 @@ export function MealPlanDrawer({
 
           {/* Simplified message for meal schedule */}
           <div className="text-center py-8 text-muted-foreground">
-            <ChefHat className="size-12 mx-auto mb-4 opacity-50" />
-            <p>Activate this plan to view detailed meal schedule</p>
+            <p>
+              Activate this plan to view detailed meal schedule and log your
+              meals.
+            </p>
           </div>
 
           {/* Plan Creator */}
-          {plan.createdBy && (
+          {plan.createdBy?.firstName && (
             <div className="border-t pt-4">
               <div className="text-sm text-muted-foreground">
                 Created by {plan.createdBy.firstName} {plan.createdBy.lastName}

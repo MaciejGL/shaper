@@ -1,19 +1,14 @@
 'use client'
 
 import {
-  BicepsFlexed,
   Calendar,
   ChefHatIcon,
   Dumbbell,
-  DumbbellIcon,
   LayoutDashboardIcon,
   MoreHorizontalIcon,
-  NotepadText,
   PersonStanding,
-  PlusIcon,
   SaladIcon,
   TrendingUp,
-  UserRoundSearch,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -146,52 +141,19 @@ function QuickActionDrawer({
       <DrawerContent dialogTitle="Quick Actions">
         <div className="p-4 space-y-4">
           <div>
-            <p className="text-md font-medium mb-2">Meal Plan</p>
-            <div className="grid grid-cols-2 gap-4">
-              <ButtonLink
-                href="/fitspace/meal-plans"
-                onClick={() => onOpenChange(false)}
-                variant="secondary"
-                iconStart={<ChefHatIcon />}
-              >
-                Activate Meal Plan
-              </ButtonLink>
+            <div className="flex flex-wrap gap-4">
               <ButtonLink
                 onClick={() => onOpenChange(false)}
                 href="/fitspace/meal-plans"
                 variant="secondary"
-                iconStart={<NotepadText />}
+                className="size-20"
               >
-                Meal Plans
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <ChefHatIcon className="size-6" />
+                  <p className="text-xs font-medium">Meal Plans</p>
+                </div>
               </ButtonLink>
-            </div>
-          </div>
-          <div>
-            <DrawerMeasurement />
-          </div>
-          <div>
-            <p className="text-md font-medium mb-2">Explore</p>
-            <div className="grid grid-cols-2 gap-4">
-              <ButtonLink
-                onClick={() => onOpenChange(false)}
-                href="/fitspace/marketplace?tab=trainers"
-                variant="secondary"
-                iconStart={<UserRoundSearch />}
-                disabled
-                className="line-through"
-              >
-                Find Trainer
-              </ButtonLink>
-              <ButtonLink
-                onClick={() => onOpenChange(false)}
-                href="/fitspace/marketplace?tab=plans"
-                variant="secondary"
-                iconStart={<DumbbellIcon />}
-                disabled
-                className="line-through"
-              >
-                Find Plan
-              </ButtonLink>
+              <DrawerMeasurement />
             </div>
           </div>
         </div>
@@ -230,51 +192,23 @@ function DrawerMeasurement() {
   ]
   return (
     <>
-      <p className="text-md font-medium mb-2">Add logs</p>
-      <div className="grid grid-cols-2 gap-4">
-        <AddMeasurementModal showFields={weightFields} title="Add Weight">
-          <Button
-            variant="secondary"
-            iconStart={<Icon name="scale" />}
-            className="text-left justify-start"
-          >
-            Weight
-          </Button>
-        </AddMeasurementModal>
-        <AddMeasurementModal
-          showFields={circumferencesFields}
-          title="Add Circumferences"
-        >
-          <Button
-            variant="secondary"
-            iconStart={<PersonStanding />}
-            className="text-left justify-start"
-          >
-            Circumferences
-          </Button>
-        </AddMeasurementModal>
-        <AddMeasurementModal
-          showFields={armsLegsFields}
-          title="Add Arms & Legs"
-        >
-          <Button
-            variant="secondary"
-            iconStart={<BicepsFlexed />}
-            className="text-left justify-start"
-          >
-            Arms & Legs
-          </Button>
-        </AddMeasurementModal>
-        <AddMeasurementModal showFields={allFields} title="Add All">
-          <Button
-            variant="secondary"
-            iconStart={<PlusIcon />}
-            className="text-left justify-start"
-          >
-            Log all
-          </Button>
-        </AddMeasurementModal>
-      </div>
+      <AddMeasurementModal showFields={weightFields} title="Add Weight">
+        <Button variant="secondary" className="size-20">
+          <div className="flex flex-col items-center justify-center gap-2 text-xs">
+            <Icon name="scale" />
+            <span className="text-xs whitespace-pre-wrap">Log Weight</span>
+          </div>
+        </Button>
+      </AddMeasurementModal>
+
+      <AddMeasurementModal showFields={allFields} title="Add All">
+        <Button variant="secondary" className="size-20">
+          <div className="flex flex-col items-center justify-center gap-2 text-xs">
+            <PersonStanding />
+            <span className="text-xs whitespace-pre-wrap">Log Measures</span>
+          </div>
+        </Button>
+      </AddMeasurementModal>
     </>
   )
 }
