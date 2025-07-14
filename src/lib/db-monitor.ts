@@ -108,9 +108,8 @@ class DatabaseMonitor {
 export const dbMonitor = new DatabaseMonitor()
 
 // Periodic health check (only in production)
-if (process.env.NODE_ENV !== 'production') {
-  setInterval(async () => {
-    await dbMonitor.checkConnections()
-    await dbMonitor.healthCheck()
-  }, 60000) // Every minute
-}
+
+setInterval(async () => {
+  await dbMonitor.checkConnections()
+  await dbMonitor.healthCheck()
+}, 60000) // Every minute
