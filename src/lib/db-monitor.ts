@@ -226,34 +226,34 @@ class DatabaseMonitor {
     const details = await this.getDetailedConnections()
     if (!details) return
 
-    console.log('\n=== DATABASE CONNECTION SUMMARY ===')
-    console.log(`Total Connections: ${details.total_connections}`)
+    console.info('\n=== DATABASE CONNECTION SUMMARY ===')
+    console.info(`Total Connections: ${details.total_connections}`)
 
-    console.log('\n📱 By Application:')
+    console.info('\n📱 By Application:')
     Object.entries(details.connections_by_application)
       .sort(([, a], [, b]) => b - a)
       .forEach(([app, count]) => {
-        console.log(`  ${app}: ${count}`)
+        console.info(`  ${app}: ${count}`)
       })
 
-    console.log('\n👤 By User:')
+    console.info('\n👤 By User:')
     Object.entries(details.connections_by_user)
       .sort(([, a], [, b]) => b - a)
       .forEach(([user, count]) => {
-        console.log(`  ${user}: ${count}`)
+        console.info(`  ${user}: ${count}`)
       })
 
-    console.log('\n🔄 By State:')
+    console.info('\n🔄 By State:')
     Object.entries(details.connections_by_state)
       .sort(([, a], [, b]) => b - a)
       .forEach(([state, count]) => {
-        console.log(`  ${state}: ${count}`)
+        console.info(`  ${state}: ${count}`)
       })
 
     if (details.active_connections.length > 0) {
-      console.log('\n⚡ Active Connections:')
+      console.info('\n⚡ Active Connections:')
       details.active_connections.forEach((conn) => {
-        console.log(
+        console.info(
           `  PID ${conn.pid}: ${conn.application_name} (${conn.usename}) - ${conn.connection_duration}`,
         )
         if (conn.query) {
@@ -261,15 +261,15 @@ class DatabaseMonitor {
             conn.query.length > 100
               ? conn.query.substring(0, 100) + '...'
               : conn.query
-          console.log(`    Query: ${shortQuery}`)
+          console.info(`    Query: ${shortQuery}`)
         }
       })
     }
 
     if (details.long_running_queries.length > 0) {
-      console.log('\n🐌 Long-Running Queries:')
+      console.info('\n🐌 Long-Running Queries:')
       details.long_running_queries.forEach((conn) => {
-        console.log(
+        console.info(
           `  PID ${conn.pid}: ${conn.application_name} - Running for ${conn.query_duration}`,
         )
         if (conn.query) {
@@ -277,12 +277,12 @@ class DatabaseMonitor {
             conn.query.length > 100
               ? conn.query.substring(0, 100) + '...'
               : conn.query
-          console.log(`    Query: ${shortQuery}`)
+          console.info(`    Query: ${shortQuery}`)
         }
       })
     }
 
-    console.log('===================================\n')
+    console.info('===================================\n')
   }
 
   // Basic health check
