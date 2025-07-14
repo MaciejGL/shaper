@@ -19,7 +19,7 @@ export async function GET() {
       timestamp: new Date().toISOString(),
       connections: {
         active: connectionCount,
-        warning: connectionCount > 8 ? 'High connection count' : null,
+        warning: connectionCount > 6 ? 'High connection count' : null,
       },
       performance: {
         totalQueries: stats.totalQueries,

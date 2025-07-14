@@ -58,8 +58,8 @@ class DatabaseMonitor {
       const count = Number(result[0].count)
       this.stats.activeConnections = count
 
-      // Warn on high connection count
-      if (count > 8) {
+      // Warn on high connection count (adjusted for connection pooling)
+      if (count > 6) {
         console.warn(`[DB-MONITOR] High connection count: ${count}`)
       }
 
