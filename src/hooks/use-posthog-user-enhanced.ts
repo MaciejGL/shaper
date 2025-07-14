@@ -63,23 +63,6 @@ export function usePostHogUserEnhanced() {
             userProperties.birthday = profile.birthday
             userProperties.sex = profile.sex
           }
-
-          // Add trainer information
-          if (user.trainer) {
-            userProperties.has_trainer = true
-            userProperties.trainer_id = user.trainer.id
-            userProperties.hasTrainer = true
-          } else {
-            userProperties.has_trainer = false
-          }
-
-          // Add client information for trainers
-          if (user.role === 'TRAINER' && user.clients) {
-            userProperties.client_count = user.clients.length
-            userProperties.is_trainer = true
-          } else {
-            userProperties.is_trainer = false
-          }
         }
 
         // Identify user with PostHog

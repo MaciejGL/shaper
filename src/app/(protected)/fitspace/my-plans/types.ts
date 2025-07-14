@@ -2,13 +2,13 @@ import { GQLFitspaceMyPlansQuery } from '@/generated/graphql-client'
 
 export type PlanAction = 'activate' | 'pause' | 'close' | 'delete'
 export type AvailablePlan =
-  GQLFitspaceMyPlansQuery['getMyPlansOverview']['availablePlans'][number]
+  GQLFitspaceMyPlansQuery['getMyPlansOverviewFull']['availablePlans'][number]
 export type CompletedPlan =
-  GQLFitspaceMyPlansQuery['getMyPlansOverview']['completedPlans'][number]
+  GQLFitspaceMyPlansQuery['getMyPlansOverviewFull']['completedPlans'][number]
 export type ActivePlan =
-  GQLFitspaceMyPlansQuery['getMyPlansOverview']['activePlan']
+  GQLFitspaceMyPlansQuery['getMyPlansOverviewFull']['activePlan']
 export type QuickWorkoutPlan =
-  GQLFitspaceMyPlansQuery['getMyPlansOverview']['quickWorkoutPlan']
+  GQLFitspaceMyPlansQuery['getMyPlansOverviewFull']['quickWorkoutPlan']
 
 export enum PlanTab {
   QuickWorkout = 'quick-workout',

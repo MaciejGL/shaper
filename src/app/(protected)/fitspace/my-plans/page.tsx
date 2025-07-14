@@ -39,10 +39,10 @@ export default function MyPlansPage() {
   } = usePlanAction()
 
   const { data, isLoading: isLoadingPlans } = useFitspaceMyPlansQuery()
-  const activePlan = data?.getMyPlansOverview?.activePlan
-  const availablePlans = data?.getMyPlansOverview?.availablePlans
-  const completedPlans = data?.getMyPlansOverview?.completedPlans
-  const quickWorkoutPlan = data?.getMyPlansOverview?.quickWorkoutPlan
+  const activePlan = data?.getMyPlansOverviewFull?.activePlan
+  const availablePlans = data?.getMyPlansOverviewFull?.availablePlans
+  const completedPlans = data?.getMyPlansOverviewFull?.completedPlans
+  const quickWorkoutPlan = data?.getMyPlansOverviewFull?.quickWorkoutPlan
 
   return (
     <div className="container-fitspace mx-auto mb-24">
