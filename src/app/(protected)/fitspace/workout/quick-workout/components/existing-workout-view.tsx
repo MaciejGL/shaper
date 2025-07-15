@@ -41,7 +41,7 @@ export function ExistingWorkoutView({
   const isWorkoutCompleted = completedExercises === exercises.length
 
   return (
-    <div className="flex flex-col min-h-screen justify-center items-center p-4">
+    <div className="flex flex-col min-h-screen justify-center items-center py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -54,7 +54,7 @@ export function ExistingWorkoutView({
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.1 }}
-                className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 mx-auto flex items-center justify-center"
+                className="w-24 h-24 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 mx-auto flex items-center justify-center"
               >
                 <svg
                   className="w-12 h-12 text-white"
@@ -153,11 +153,6 @@ export function ExistingWorkoutView({
                   </Button>
                 </div>
               </div>
-
-              <p className="text-xs text-muted-foreground text-center">
-                Continue your workout, add more exercises, or start fresh with a
-                completely new workout.
-              </p>
             </div>
           </div>
         </div>

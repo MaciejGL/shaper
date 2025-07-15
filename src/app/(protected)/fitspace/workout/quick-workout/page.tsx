@@ -15,6 +15,7 @@ import { AiEquipmentStep } from './components/ai-equipment-step'
 import { AiMuscleGroupsStep } from './components/ai-muscle-groups-step'
 import { AiParametersStep } from './components/ai-parameters-step'
 import { AiResultsStep } from './components/ai-results-step'
+import type { Exercise } from './components/exercise-card'
 import { ExistingWorkoutView } from './components/existing-workout-view'
 import { ManualEquipmentStep } from './components/manual-equipment-step'
 import { ManualExercisesStep } from './components/manual-exercises-step'
@@ -27,11 +28,15 @@ import {
 import { WorkoutCreationLanding } from './components/workout-creation-landing'
 import { useAiWorkoutGeneration } from './hooks/use-ai-workout-generation'
 import { useManualWorkout } from './hooks/use-manual-workout'
-import { hasTodaysWorkoutExercises } from './utils/workout-utils'
+import {
+  getTodaysWorkoutExercises,
+  hasTodaysWorkoutExercises,
+} from './utils/workout-utils'
 
 export default function QuickWorkoutPage() {
   const [showWizard, setShowWizard] = useState(false)
   const [workoutFlow, setWorkoutFlow] = useState<WorkoutFlow>(null)
+  const [isAddingToExisting, setIsAddingToExisting] = useState(false)
 
   // AI workout generation hook
   const {
@@ -67,6 +72,28 @@ export default function QuickWorkoutPage() {
   const hasExistingWorkout = useMemo(() => {
     return hasTodaysWorkoutExercises(quickWorkoutPlan as GQLTrainingPlan)
   }, [quickWorkoutPlan])
+
+  // Get existing exercises for "Add More" mode
+  const existingExercises = useMemo(() => {
+    if (!isAddingToExisting || !quickWorkoutPlan) return []
+
+    const todaysWorkout = getTodaysWorkoutExercises(quickWorkoutPlan)
+    if (!todaysWorkout?.exercises) return []
+
+    return todaysWorkout.exercises.map(
+      (ex): Exercise => ({
+        id: ex.id,
+        name: ex.name,
+        equipment: ex.equipment,
+        completedAt: ex.completedAt,
+        muscleGroups: ex.muscleGroups.map((mg) => ({
+          id: mg.id,
+          alias: mg.alias,
+          groupSlug: mg.groupSlug,
+        })),
+      }),
+    )
+  }, [isAddingToExisting, quickWorkoutPlan])
 
   // Muscle groups data
   const allMuscleGroups = useMemo(() => {
@@ -117,8 +144,22 @@ export default function QuickWorkoutPage() {
 
   const shouldShowWizard = showWizard || !hasExistingWorkout
 
-  // Step change handler for AI flow
+  // Step change handler for AI flow and navigation
   const handleStepChange = (step: number) => {
+    // Handle back navigation from wizard
+    if (step === -1) {
+      if (hasExistingWorkout) {
+        // Go back to existing workout view
+        setShowWizard(false)
+        setWorkoutFlow(null)
+        setIsAddingToExisting(false) // Reset adding to existing flag
+      } else {
+        // If no existing workout, this shouldn't happen, but stay in wizard
+        console.warn('Attempted to navigate back with no existing workout')
+      }
+      return
+    }
+
     // If we're in AI flow and moving from ai-parameters (step 2) to ai-results (step 3)
     if (
       workoutFlow === 'ai' &&
@@ -211,11 +252,11 @@ export default function QuickWorkoutPage() {
         ],
       }))
 
-      // Create the workout (replace existing exercises)
+      // Create the workout
       await createQuickWorkout({
         input: {
           exercises,
-          replaceExisting: false, // For adding more exercises, don't replace existing ones
+          replaceExisting: !isAddingToExisting, // Replace only if not adding to existing
         },
       })
 
@@ -263,12 +304,14 @@ export default function QuickWorkoutPage() {
   const handleCreateNewWorkout = () => {
     setShowWizard(true)
     setWorkoutFlow(null) // Reset flow to show landing
+    setIsAddingToExisting(false) // Reset adding to existing flag
   }
 
   // Handle adding more exercises (goes directly to manual flow)
   const handleAddMoreExercises = () => {
     setShowWizard(true)
     setWorkoutFlow('manual') // Set to manual flow directly
+    setIsAddingToExisting(true) // Set flag to indicate adding to existing
   }
 
   // Show loading state
@@ -330,11 +373,13 @@ export default function QuickWorkoutPage() {
       onExerciseSelect={handleExerciseSelect}
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
+      existingExercises={existingExercises} // Pass existing exercises
     />
   )
 
   const manualReviewComponent = (
     <ManualReviewStep
+      existingExercises={existingExercises}
       selectedExercises={selectedExerciseObjects}
       onReorderExercises={handleReorderExercises}
       onRemoveExercise={handleRemoveExercise}

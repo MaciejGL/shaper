@@ -36,10 +36,14 @@ export function useManualWorkout({
 
   // Get selected exercise objects
   const selectedExerciseObjects = useMemo(() => {
-    return filteredExercises.filter((exercise) =>
-      selectedExercises.includes(exercise.id),
-    )
-  }, [filteredExercises, selectedExercises])
+    // Create a map for efficient lookup
+    const exerciseMap = new Map(allExercises.map((ex) => [ex.id, ex]))
+
+    // Return exercises in the order they were selected (preserves drag-and-drop order)
+    return selectedExercises
+      .map((id) => exerciseMap.get(id))
+      .filter((exercise): exercise is Exercise => exercise !== undefined)
+  }, [allExercises, selectedExercises])
 
   // Toggle functions
   const handleMuscleGroupToggle = (alias: string) => {

@@ -145,7 +145,11 @@ export function QuickWorkoutWizard({
       const newStep = currentStep - 1
       setCurrentStep(newStep)
       onStepChange?.(newStep)
+    } else if (isOnLanding && hasExistingWorkout) {
+      // From landing page, go back to existing workout view
+      onStepChange?.(-1)
     } else if (hasExistingWorkout) {
+      // From step 0 of a flow, go back to existing workout view
       onStepChange?.(-1)
     } else if (workoutFlow !== null && onFlowChange) {
       // Go back to landing page from step 0 of any flow (when landing is available)
@@ -191,9 +195,9 @@ export function QuickWorkoutWizard({
         <AnimatePresence mode="wait">
           <motion.div
             key={`${workoutFlow}-${currentStep}`}
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
+            exit={{ opacity: 0, x: -0 }}
             transition={{ duration: 0.3 }}
             className="space-y-6"
           >
