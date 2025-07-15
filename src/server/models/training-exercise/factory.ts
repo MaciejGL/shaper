@@ -13,11 +13,13 @@ import { GraphQLError } from 'graphql'
 import {
   GQLAddAiExerciseToWorkoutInput,
   GQLAddSetExerciseFormInput,
+  GQLGenerateAiWorkoutInput,
   GQLUpdateExerciseFormInput,
   GQLWorkoutSessionEvent,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 import {
+  QUICK_WORKOUT_ASSISTANT_ID,
   createAssistantThread,
   getLastAssistantMessage,
   parseAssistantJsonResponse,
@@ -746,6 +748,149 @@ export const getAiExerciseSuggestions = async (
   })
 
   return results
+}
+
+export const generateAiWorkout = async (
+  input: GQLGenerateAiWorkoutInput,
+  context: GQLContext,
+) => {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  const {
+    selectedMuscleGroups,
+    selectedEquipment,
+    exerciseCount,
+    maxSetsPerExercise,
+    rpeRange,
+    repFocus,
+  } = input
+
+  /* 1. Build AI prompt based on user preferences */
+  const muscleGroupsText =
+    selectedMuscleGroups.length > 0
+      ? `Target muscle groups: ${selectedMuscleGroups.join(', ')}`
+      : 'Target all muscle groups for a full-body workout'
+
+  const equipmentText =
+    selectedEquipment.length > 0
+      ? `Available equipment: ${selectedEquipment.join(', ')}`
+      : 'Use bodyweight exercises and suggest equipment alternatives'
+
+  /* Parse RPE and rep focus for the prompt */
+  const rpeText = rpeRange.replace('RPE_', '').replace('_', '-')
+  const repFocusText = repFocus.toLowerCase()
+  const repRangeText =
+    repFocus === 'STRENGTH'
+      ? '3-8 reps'
+      : repFocus === 'HYPERTROPHY'
+        ? '8-12 reps'
+        : '12-20 reps'
+
+  /* 2. Create assistant thread with workout generation prompt using dedicated assistant */
+  const thread = await createAssistantThread(
+    [
+      {
+        role: 'user',
+        content: `Generate a complete workout plan with the following requirements:
+      
+${muscleGroupsText}
+${equipmentText}
+- Number of exercises: ${exerciseCount}
+- Maximum sets per exercise: ${maxSetsPerExercise}
+- Target RPE range: ${rpeText} (Rate of Perceived Exertion)
+- Training focus: ${repFocusText} with ${repRangeText}
+- User trainer ID: ${context.user?.user.trainerId || 'none'}
+
+Generate the workout based on these preferences.`,
+      },
+    ],
+    QUICK_WORKOUT_ASSISTANT_ID,
+  )
+
+  /* 3. Get and parse assistant response */
+  const assistantReply = await getLastAssistantMessage(thread.id)
+
+  let aiResponse: {
+    exercises: {
+      id: string
+      createdBy: string
+      sets: number
+      reps: number
+      rpe: number
+      explanation: string
+    }[]
+  }
+
+  try {
+    aiResponse = parseAssistantJsonResponse(assistantReply)
+  } catch (error) {
+    console.error('[AI_WORKOUT] Failed to parse AI response:', error)
+    console.error(
+      '[AI_WORKOUT] Raw response that failed to parse:',
+      assistantReply,
+    )
+    throw new GraphQLError('Failed to parse AI response. Please try again.')
+  }
+
+  /* 4. Validate and hydrate exercises from database */
+  const requestedExerciseIds = aiResponse.exercises.map((e) => e.id)
+
+  const baseExercises = await prisma.baseExercise.findMany({
+    where: {
+      id: { in: requestedExerciseIds },
+      OR: [
+        { isPublic: true }, // Public exercises
+        { createdById: context.user?.user.trainerId }, // Trainer's exercises (if user has a trainer)
+      ],
+    },
+    include: { muscleGroups: { include: { category: true } } },
+  })
+
+  if (baseExercises.length === 0) {
+    throw new GraphQLError(
+      'No suitable exercises found for the specified criteria',
+    )
+  }
+
+  /* 5. Map AI response to final workout structure */
+  const workoutExercises = baseExercises
+    .map((exercise, index) => {
+      const aiExercise = aiResponse.exercises.find((e) => e.id === exercise.id)!
+
+      return {
+        exercise: new BaseExercise(exercise, context),
+        sets: Array.from({ length: aiExercise.sets }).map(() => ({
+          reps: aiExercise.reps,
+          rpe: aiExercise.rpe,
+        })),
+        order: index + 1, // Generate order since it's not in the AI response
+        aiMeta: {
+          explanation:
+            aiExercise.explanation ||
+            `Selected for targeting ${exercise.muscleGroups.map((mg) => mg.name).join(', ')}`,
+        },
+      }
+    })
+    .sort((a, b) => a.order - b.order) // Ensure proper ordering
+
+  // Generate summary and reasoning since they're not in the AI response
+  const summary = `${exerciseCount}-exercise workout targeting ${selectedMuscleGroups.length > 0 ? selectedMuscleGroups.join(', ') : 'full body'}`
+  const reasoning = `Workout designed with ${exerciseCount} exercises, ${maxSetsPerExercise} max sets per exercise. ${selectedEquipment.length > 0 ? `Using equipment: ${selectedEquipment.join(', ')}.` : 'Bodyweight-focused routine.'} Selected for balanced muscle development and progressive overload.`
+  const estimatedDuration = Math.max(25, exerciseCount * 8) // Estimate 8 minutes per exercise, minimum 25 minutes
+
+  const finalResult = {
+    exercises: workoutExercises,
+    totalDuration: estimatedDuration,
+    aiMeta: {
+      summary,
+      reasoning,
+    },
+  }
+
+  return finalResult
 }
 
 function buildWorkoutSummary(

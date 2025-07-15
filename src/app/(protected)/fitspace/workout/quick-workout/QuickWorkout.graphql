@@ -78,3 +78,77 @@ mutation AddExercisesToQuickWorkout($exercises: [QuickWorkoutExerciseInput!]!) {
     id
   }
 }
+
+mutation FitspaceAddExercisesToQuickWorkout(
+  $exercises: [QuickWorkoutExerciseInput!]!
+) {
+  addExercisesToQuickWorkout(exercises: $exercises) {
+    id
+    title
+    isDraft
+    weeks {
+      id
+      weekNumber
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        scheduledAt
+        exercises {
+          id
+          name
+          order
+          isExtra
+          baseId
+          muscleGroups {
+            id
+            alias
+            groupSlug
+          }
+          sets {
+            id
+            order
+            minReps
+            maxReps
+            reps
+            weight
+            rpe
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
+  generateAiWorkout(input: $input) {
+    exercises {
+      exercise {
+        id
+        name
+        description
+        videoUrl
+        equipment
+        isPublic
+        muscleGroups {
+          id
+          alias
+          groupSlug
+        }
+      }
+      sets {
+        reps
+        rpe
+      }
+      order
+      aiMeta {
+        explanation
+      }
+    }
+    totalDuration
+    aiMeta {
+      summary
+      reasoning
+    }
+  }
+}

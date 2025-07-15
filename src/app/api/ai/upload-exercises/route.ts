@@ -7,8 +7,47 @@ import { prisma } from '@/lib/db'
 import { openai } from '@/lib/open-ai/open-ai'
 
 const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID!
+const QUICK_WORKOUT_ASSISTANT_ID = process.env.OPENAI_ASSISTANT_QUICKWORKOUT_ID!
 const VECTOR_STORE_NAME = 'exercise-base' // change if you need more than one
-const TMP_FILENAME = 'exercises-list.json' // JSON-Lines ⇢ one doc per line
+const QUICK_WORKOUT_VECTOR_STORE_NAME = 'exercise-base-quickworkout'
+
+// Helper function to create/update vector store for an assistant
+async function createVectorStoreForAssistant(
+  assistantId: string,
+  storeName: string,
+  exerciseData: string,
+) {
+  const { data: stores } = await openai.vectorStores.list({ limit: 100 })
+  let vectorStore = stores.find((s) => s.name === storeName)
+
+  if (vectorStore?.id) {
+    await openai.vectorStores.delete(vectorStore.id)
+  }
+
+  vectorStore = await openai.vectorStores.create({
+    name: storeName,
+  })
+
+  // Create a unique temp file for this assistant
+  const tmpPath = path.join(tmpdir(), `${storeName}-exercises.json`)
+  writeFileSync(tmpPath, exerciseData, 'utf-8')
+
+  await openai.vectorStores.fileBatches.uploadAndPoll(vectorStore.id, {
+    files: [createReadStream(tmpPath)],
+  })
+
+  // Clean up temp file
+  unlinkSync(tmpPath)
+
+  // Associate vector store with assistant
+  await openai.beta.assistants.update(assistantId, {
+    tool_resources: {
+      file_search: { vector_store_ids: [vectorStore.id] },
+    },
+  })
+
+  return vectorStore.id
+}
 
 export async function POST() {
   try {
@@ -26,13 +65,11 @@ export async function POST() {
     }
 
     /* ------------------------------------------------------------------ */
-    /* 2. Flatten to JSON-Lines & save to a temp file                     */
-    const tmpPath = path.join(tmpdir(), TMP_FILENAME)
-
-    const json = baseExercises
+    /* 2. Prepare exercise data for vector stores                         */
+    const exerciseData = baseExercises
       .map((ex) =>
         JSON.stringify({
-          id: ex.id, // we’ll keep IDs as metadata
+          id: ex.id, // we'll keep IDs as metadata
           text: `${ex.name}. Muscles: ${ex.muscleGroups
             .map((m) => m.name)
             .join(', ')}`,
@@ -41,43 +78,44 @@ export async function POST() {
       )
       .join('\n')
 
-    writeFileSync(tmpPath, json, 'utf-8')
-
     /* ------------------------------------------------------------------ */
-    /* 3. Get (or create) a vector store                                  */
-    const { data: stores } = await openai.vectorStores.list({ limit: 100 })
-    let vectorStore = stores.find((s) => s.name === VECTOR_STORE_NAME)
+    /* 3. Create vector stores for both assistants                       */
+    const [generalVectorStoreId, quickWorkoutVectorStoreId] = await Promise.all(
+      [
+        createVectorStoreForAssistant(
+          ASSISTANT_ID,
+          VECTOR_STORE_NAME,
+          exerciseData,
+        ),
+        createVectorStoreForAssistant(
+          QUICK_WORKOUT_ASSISTANT_ID,
+          QUICK_WORKOUT_VECTOR_STORE_NAME,
+          exerciseData,
+        ),
+      ],
+    )
 
-    if (!vectorStore?.id) {
-      vectorStore = await openai.vectorStores.create({
-        name: VECTOR_STORE_NAME,
-      })
-    } else {
-      await openai.vectorStores.delete(vectorStore.id)
-    }
-
-    /* ------------------------------------------------------------------ */
-    /* 4. Upload the new file → store & wait until chunks are ready       */
-    await openai.vectorStores.fileBatches.uploadAndPoll(vectorStore.id, {
-      files: [createReadStream(tmpPath)],
-    }) // expects `{ files: Uploadable[] }`  :contentReference[oaicite:0]{index=0}
-
-    /* (optional) remove temp file */
-    unlinkSync(tmpPath)
-
-    /* ------------------------------------------------------------------ */
-    /* 5. Tell the Assistant to use this store for `file_search`          */
-    await openai.beta.assistants.update(ASSISTANT_ID, {
-      tool_resources: {
-        file_search: { vector_store_ids: [vectorStore.id] }, // v2 Assistants API
+    console.log(
+      '[EXERCISE_VECTOR_UPLOAD] Successfully updated both assistants:',
+      {
+        generalAssistant: {
+          id: ASSISTANT_ID,
+          vectorStoreId: generalVectorStoreId,
+        },
+        quickWorkoutAssistant: {
+          id: QUICK_WORKOUT_ASSISTANT_ID,
+          vectorStoreId: quickWorkoutVectorStoreId,
+        },
       },
-    })
+    )
 
     /* ------------------------------------------------------------------ */
-    /* 6. Done!                                                           */
+    /* 4. Done!                                                           */
     return NextResponse.json({
       success: true,
-      vectorStoreId: vectorStore.id,
+      generalVectorStoreId,
+      quickWorkoutVectorStoreId,
+      exerciseCount: baseExercises.length,
     })
   } catch (err) {
     console.error('[EXERCISE_VECTOR_UPLOAD]', err)

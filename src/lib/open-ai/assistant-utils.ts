@@ -1,17 +1,22 @@
 import { openai } from '@/lib/open-ai/open-ai'
 
 export const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID!
+export const QUICK_WORKOUT_ASSISTANT_ID =
+  process.env.OPENAI_ASSISTANT_QUICKWORKOUT_ID!
 
 /**
  * Creates a new OpenAI assistant thread and runs it with the given messages
  */
 type AssistantMessage = { role: 'user' | 'assistant'; content: string }
 
-export async function createAssistantThread(messages: AssistantMessage[]) {
+export async function createAssistantThread(
+  messages: AssistantMessage[],
+  assistantId: string = ASSISTANT_ID,
+) {
   const thread = await openai.beta.threads.create()
 
   await openai.beta.threads.runs.createAndPoll(thread.id, {
-    assistant_id: ASSISTANT_ID,
+    assistant_id: assistantId,
     additional_messages: messages,
   })
 

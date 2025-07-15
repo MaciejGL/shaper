@@ -18,11 +18,16 @@ import { GQLEquipment, GQLMuscleGroup } from '@/generated/graphql-client'
 
 import { EquipmentFilters } from '../../[trainingId]/components/equipment-filters'
 
+export type RpeRange = '6-7' | '7-8' | '8-10'
+export type RepFocus = 'strength' | 'hypertrophy' | 'endurance'
+
 export interface AiWorkoutInputData {
   selectedMuscleGroups: string[]
   selectedEquipment: GQLEquipment[]
   exerciseCount: number
   maxSetsPerExercise: number
+  rpeRange: RpeRange
+  repFocus: RepFocus
 }
 
 interface AiWorkoutInputProps {

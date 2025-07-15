@@ -10,6 +10,7 @@ import {
   addSet,
   addSetExerciseForm,
   clearTodaysWorkout,
+  generateAiWorkout,
   getAiExerciseSuggestions,
   getTrainingExercise,
   removeExerciseFromWorkout,
@@ -29,6 +30,9 @@ export const Mutation: GQLMutationResolvers = {
   // Fitspace
   getAiExerciseSuggestions: async (_, { dayId }, context) => {
     return getAiExerciseSuggestions(dayId, context)
+  },
+  generateAiWorkout: async (_, { input }, context) => {
+    return generateAiWorkout(input, context)
   },
   addExercisesToWorkout: async (_, { input }, context) => {
     return addExercisesToWorkout(

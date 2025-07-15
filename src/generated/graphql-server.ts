@@ -157,6 +157,27 @@ export type GQLAiMeta = {
   explanation: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
+export type GQLAiWorkoutExercise = {
+  __typename?: 'AiWorkoutExercise';
+  aiMeta: EntireFieldWrapper<GQLAiMeta>;
+  exercise: EntireFieldWrapper<GQLBaseExercise>;
+  order: EntireFieldWrapper<Scalars['Int']['output']>;
+  sets: EntireFieldWrapper<Array<Maybe<GQLSuggestedSets>>>;
+};
+
+export type GQLAiWorkoutMeta = {
+  __typename?: 'AiWorkoutMeta';
+  reasoning: EntireFieldWrapper<Scalars['String']['output']>;
+  summary: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
+export type GQLAiWorkoutResult = {
+  __typename?: 'AiWorkoutResult';
+  aiMeta: EntireFieldWrapper<GQLAiWorkoutMeta>;
+  exercises: EntireFieldWrapper<Array<GQLAiWorkoutExercise>>;
+  totalDuration?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+};
+
 export type GQLAssignMealPlanToClientInput = {
   clientId: Scalars['ID']['input'];
   planId: Scalars['ID']['input'];
@@ -517,6 +538,15 @@ export enum GQLFitnessLevel {
   Intermediate = 'INTERMEDIATE'
 }
 
+export type GQLGenerateAiWorkoutInput = {
+  exerciseCount: Scalars['Int']['input'];
+  maxSetsPerExercise: Scalars['Int']['input'];
+  repFocus: GQLRepFocus;
+  rpeRange: GQLRpeRange;
+  selectedEquipment: Array<GQLEquipment>;
+  selectedMuscleGroups: Array<Scalars['String']['input']>;
+};
+
 export type GQLGetExercisesResponse = {
   __typename?: 'GetExercisesResponse';
   publicExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
@@ -787,6 +817,7 @@ export type GQLMutation = {
   fitspaceActivateMealPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   fitspaceDeactivateMealPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   fitspaceDeleteMealPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  generateAiWorkout: EntireFieldWrapper<GQLAiWorkoutResult>;
   getAiExerciseSuggestions: EntireFieldWrapper<Array<GQLAiExerciseSuggestion>>;
   logWorkoutProgress: EntireFieldWrapper<Scalars['ID']['output']>;
   logWorkoutSessionEvent: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -1060,6 +1091,11 @@ export type GQLMutationFitspaceDeactivateMealPlanArgs = {
 
 export type GQLMutationFitspaceDeleteMealPlanArgs = {
   planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationGenerateAiWorkoutArgs = {
+  input: GQLGenerateAiWorkoutInput;
 };
 
 
@@ -1648,6 +1684,12 @@ export type GQLRemoveTrainingPlanCollaboratorInput = {
   collaboratorId: Scalars['ID']['input'];
 };
 
+export enum GQLRepFocus {
+  Endurance = 'ENDURANCE',
+  Hypertrophy = 'HYPERTROPHY',
+  Strength = 'STRENGTH'
+}
+
 export type GQLRespondToCollaborationInvitationInput = {
   action: GQLCollaborationInvitationAction;
   invitationId: Scalars['ID']['input'];
@@ -1666,6 +1708,12 @@ export type GQLReview = {
   rating: EntireFieldWrapper<Scalars['Int']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
+
+export enum GQLRpeRange {
+  Rpe_6_7 = 'RPE_6_7',
+  Rpe_7_8 = 'RPE_7_8',
+  Rpe_8_10 = 'RPE_8_10'
+}
 
 export type GQLSaveMealInput = {
   dayId: Scalars['ID']['input'];
@@ -2228,6 +2276,9 @@ export type GQLResolversTypes = {
   AddTrainingWeekInput: GQLAddTrainingWeekInput;
   AiExerciseSuggestion: ResolverTypeWrapper<GQLAiExerciseSuggestion>;
   AiMeta: ResolverTypeWrapper<GQLAiMeta>;
+  AiWorkoutExercise: ResolverTypeWrapper<GQLAiWorkoutExercise>;
+  AiWorkoutMeta: ResolverTypeWrapper<GQLAiWorkoutMeta>;
+  AiWorkoutResult: ResolverTypeWrapper<GQLAiWorkoutResult>;
   AssignMealPlanToClientInput: GQLAssignMealPlanToClientInput;
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
   AvailablePlan: ResolverTypeWrapper<GQLAvailablePlan>;
@@ -2272,6 +2323,7 @@ export type GQLResolversTypes = {
   ExerciseWhereInput: GQLExerciseWhereInput;
   FitnessLevel: GQLFitnessLevel;
   Float: ResolverTypeWrapper<Scalars['Float']['output']>;
+  GenerateAiWorkoutInput: GQLGenerateAiWorkoutInput;
   GetExercisesResponse: ResolverTypeWrapper<GQLGetExercisesResponse>;
   GetMealPlanPayload: ResolverTypeWrapper<GQLGetMealPlanPayload>;
   GetWorkoutPayload: ResolverTypeWrapper<GQLGetWorkoutPayload>;
@@ -2308,8 +2360,10 @@ export type GQLResolversTypes = {
   RemoveMealPlanCollaboratorInput: GQLRemoveMealPlanCollaboratorInput;
   RemoveSubstituteExerciseInput: GQLRemoveSubstituteExerciseInput;
   RemoveTrainingPlanCollaboratorInput: GQLRemoveTrainingPlanCollaboratorInput;
+  RepFocus: GQLRepFocus;
   RespondToCollaborationInvitationInput: GQLRespondToCollaborationInvitationInput;
   Review: ResolverTypeWrapper<GQLReview>;
+  RpeRange: GQLRpeRange;
   SaveMealInput: GQLSaveMealInput;
   SendCollaborationInvitationInput: GQLSendCollaborationInvitationInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
@@ -2370,6 +2424,9 @@ export type GQLResolversParentTypes = {
   AddTrainingWeekInput: GQLAddTrainingWeekInput;
   AiExerciseSuggestion: GQLAiExerciseSuggestion;
   AiMeta: GQLAiMeta;
+  AiWorkoutExercise: GQLAiWorkoutExercise;
+  AiWorkoutMeta: GQLAiWorkoutMeta;
+  AiWorkoutResult: GQLAiWorkoutResult;
   AssignMealPlanToClientInput: GQLAssignMealPlanToClientInput;
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
   AvailablePlan: GQLAvailablePlan;
@@ -2406,6 +2463,7 @@ export type GQLResolversParentTypes = {
   ExerciseSetLog: GQLExerciseSetLog;
   ExerciseWhereInput: GQLExerciseWhereInput;
   Float: Scalars['Float']['output'];
+  GenerateAiWorkoutInput: GQLGenerateAiWorkoutInput;
   GetExercisesResponse: GQLGetExercisesResponse;
   GetMealPlanPayload: GQLGetMealPlanPayload;
   GetWorkoutPayload: GQLGetWorkoutPayload;
@@ -2491,6 +2549,27 @@ export type GQLAiExerciseSuggestionResolvers<ContextType = GQLContext, ParentTyp
 
 export type GQLAiMetaResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiMeta'] = GQLResolversParentTypes['AiMeta']> = {
   explanation?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLAiWorkoutExerciseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiWorkoutExercise'] = GQLResolversParentTypes['AiWorkoutExercise']> = {
+  aiMeta?: Resolver<GQLResolversTypes['AiMeta'], ParentType, ContextType>;
+  exercise?: Resolver<GQLResolversTypes['BaseExercise'], ParentType, ContextType>;
+  order?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  sets?: Resolver<Array<Maybe<GQLResolversTypes['SuggestedSets']>>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLAiWorkoutMetaResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiWorkoutMeta'] = GQLResolversParentTypes['AiWorkoutMeta']> = {
+  reasoning?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  summary?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLAiWorkoutResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiWorkoutResult'] = GQLResolversParentTypes['AiWorkoutResult']> = {
+  aiMeta?: Resolver<GQLResolversTypes['AiWorkoutMeta'], ParentType, ContextType>;
+  exercises?: Resolver<Array<GQLResolversTypes['AiWorkoutExercise']>, ParentType, ContextType>;
+  totalDuration?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -2842,6 +2921,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   fitspaceActivateMealPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationFitspaceActivateMealPlanArgs, 'planId'>>;
   fitspaceDeactivateMealPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationFitspaceDeactivateMealPlanArgs, 'planId'>>;
   fitspaceDeleteMealPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationFitspaceDeleteMealPlanArgs, 'planId'>>;
+  generateAiWorkout?: Resolver<GQLResolversTypes['AiWorkoutResult'], ParentType, ContextType, RequireFields<GQLMutationGenerateAiWorkoutArgs, 'input'>>;
   getAiExerciseSuggestions?: Resolver<Array<GQLResolversTypes['AiExerciseSuggestion']>, ParentType, ContextType, RequireFields<GQLMutationGetAiExerciseSuggestionsArgs, 'dayId'>>;
   logWorkoutProgress?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutProgressArgs, 'dayId' | 'tick'>>;
   logWorkoutSessionEvent?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutSessionEventArgs, 'dayId' | 'event'>>;
@@ -3277,6 +3357,9 @@ export type GQLVolumeEntryResolvers<ContextType = GQLContext, ParentType extends
 export type GQLResolvers<ContextType = GQLContext> = {
   AiExerciseSuggestion?: GQLAiExerciseSuggestionResolvers<ContextType>;
   AiMeta?: GQLAiMetaResolvers<ContextType>;
+  AiWorkoutExercise?: GQLAiWorkoutExerciseResolvers<ContextType>;
+  AiWorkoutMeta?: GQLAiWorkoutMetaResolvers<ContextType>;
+  AiWorkoutResult?: GQLAiWorkoutResultResolvers<ContextType>;
   AvailablePlan?: GQLAvailablePlanResolvers<ContextType>;
   BaseExercise?: GQLBaseExerciseResolvers<ContextType>;
   BaseExerciseSubstitute?: GQLBaseExerciseSubstituteResolvers<ContextType>;
