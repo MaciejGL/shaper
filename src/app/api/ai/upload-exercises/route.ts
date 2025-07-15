@@ -95,7 +95,7 @@ export async function POST() {
       ],
     )
 
-    console.log(
+    console.info(
       '[EXERCISE_VECTOR_UPLOAD] Successfully updated both assistants:',
       {
         generalAssistant: {

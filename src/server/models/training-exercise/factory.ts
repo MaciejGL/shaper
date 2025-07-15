@@ -839,11 +839,8 @@ Generate the workout based on these preferences.`,
     )
     throw new GraphQLError('Failed to parse AI response. Please try again.')
   }
-  console.log('aiResponse', aiResponse)
   /* 4. Validate and hydrate exercises from database */
   const requestedExerciseIds = aiResponse.exercises.map((e) => e.id)
-
-  console.log('requestedExerciseIds', requestedExerciseIds)
 
   const baseExercises = await prisma.baseExercise.findMany({
     where: {
