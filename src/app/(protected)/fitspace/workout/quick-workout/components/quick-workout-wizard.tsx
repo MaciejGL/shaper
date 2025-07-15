@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, SparklesIcon } from 'lucide-react'
 import React, { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -246,12 +246,25 @@ export function QuickWorkoutWizard({
               ) : currentStep < currentSteps.length - 1 ? (
                 <Button
                   onClick={nextStep}
-                  variant="secondary"
+                  variant={
+                    currentSteps[currentStep].id === 'ai-parameters'
+                      ? 'gradient'
+                      : 'secondary'
+                  }
                   disabled={!canProceedFromStep(currentStep)}
                   className="flex-1"
-                  iconEnd={<ArrowRight />}
+                  iconEnd={
+                    currentSteps[currentStep].id === 'ai-parameters' ? (
+                      <SparklesIcon className="text-amber-200" />
+                    ) : (
+                      <ArrowRight />
+                    )
+                  }
                 >
-                  Next
+                  {workoutFlow === 'ai' &&
+                  currentSteps[currentStep].id === 'ai-parameters'
+                    ? 'Generate Workout'
+                    : 'Next'}
                 </Button>
               ) : (
                 <Button
