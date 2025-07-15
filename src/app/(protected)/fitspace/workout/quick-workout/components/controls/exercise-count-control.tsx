@@ -4,13 +4,7 @@ import { motion } from 'framer-motion'
 import { MinusIcon, PlusIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 
 interface ExerciseCountControlProps {
@@ -37,12 +31,6 @@ export function ExerciseCountControl({
       className={className}
     >
       <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg">Workout Intensity</CardTitle>
-          <CardDescription>
-            Configure how many exercises and sets we should include
-          </CardDescription>
-        </CardHeader>
         <CardContent className="space-y-8">
           <div className="space-y-4">
             <Label htmlFor="exercise-count" className="text-sm font-medium">

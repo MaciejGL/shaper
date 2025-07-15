@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { VideoPreview } from '@/components/video-preview'
 import { GQLFitspaceGenerateAiWorkoutMutation } from '@/generated/graphql-client'
 import { translateEquipment } from '@/utils/translate-equipment'
@@ -53,7 +53,7 @@ function ExerciseCard({ workoutExercise, index }: ExerciseCardProps) {
   const { exercise, sets, aiMeta } = workoutExercise
 
   return (
-    <Card className="shadow-sm hover:shadow-md transition-all duration-200">
+    <Card className="shadow-sm hover:shadow-md transition-all duration-200 py-0">
       <CardContent className="p-4">
         <div className="flex gap-4">
           {/* Exercise Number */}
@@ -89,7 +89,7 @@ function ExerciseCard({ workoutExercise, index }: ExerciseCardProps) {
             {/* Badges */}
             <div className="flex flex-wrap gap-2">
               {exercise.equipment && (
-                <Badge variant="secondary" className="capitalize">
+                <Badge variant="equipment" className="capitalize">
                   {translateEquipment(exercise.equipment)}
                 </Badge>
               )}
@@ -105,13 +105,11 @@ function ExerciseCard({ workoutExercise, index }: ExerciseCardProps) {
             </div>
 
             {/* AI Explanation */}
-            <div className="bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg border border-amber-200 dark:border-amber-800">
-              <div className="flex items-start gap-2">
-                <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                <p className="text-sm text-amber-800 dark:text-amber-200">
-                  {aiMeta.explanation}
-                </p>
-              </div>
+            <div className="flex items-start gap-2 -ml-6">
+              <Sparkles className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-muted-foreground">
+                {aiMeta.explanation}
+              </p>
             </div>
           </div>
         </div>

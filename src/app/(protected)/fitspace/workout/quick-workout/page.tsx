@@ -120,17 +120,13 @@ export default function QuickWorkoutPage() {
   )
 
   const aiParametersComponent = (
-    <AiParametersStep
-      data={aiInputData}
-      onDataChange={setAiInputData}
-      selectedMuscleGroups={aiInputData.selectedMuscleGroups}
-      selectedEquipment={aiInputData.selectedEquipment}
-    />
+    <AiParametersStep data={aiInputData} onDataChange={setAiInputData} />
   )
 
   const aiResultsComponent = (
     <AiResultsStep
       data={aiWorkoutResult}
+      inputData={aiInputData}
       isLoading={isGeneratingAiWorkout}
       error={aiGenerationError}
       onRetry={handleRetryAiGeneration}

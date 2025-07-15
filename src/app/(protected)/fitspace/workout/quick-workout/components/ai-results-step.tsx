@@ -4,11 +4,14 @@ import { Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { GQLFitspaceGenerateAiWorkoutMutation } from '@/generated/graphql-client'
 
+import { AiWorkoutInputData } from './ai-workout-input'
+import { WorkoutSummary } from './controls/workout-summary'
 import { AiExerciseList } from './results/ai-exercise-list'
 import { WorkoutSummaryCard } from './results/workout-summary-card'
 
 interface AiResultsStepProps {
   data: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout'] | null
+  inputData: AiWorkoutInputData
   isLoading?: boolean
   error?: string | null
   onRetry?: () => void
@@ -16,6 +19,7 @@ interface AiResultsStepProps {
 
 export function AiResultsStep({
   data,
+  inputData,
   isLoading = false,
   error = null,
   onRetry,
@@ -23,7 +27,7 @@ export function AiResultsStep({
   const exercises = data?.exercises || []
 
   if (isLoading) {
-    return <LoadingState />
+    return <LoadingState inputData={inputData} />
   }
 
   if (error) {
@@ -45,7 +49,7 @@ export function AiResultsStep({
   )
 }
 
-function LoadingState() {
+function LoadingState({ inputData }: { inputData: AiWorkoutInputData }) {
   return (
     <div className="space-y-6 text-center">
       <motion.div
@@ -58,16 +62,27 @@ function LoadingState() {
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
           >
-            <Sparkles className="h-6 w-6" />
+            <Sparkles className="h-6 w-6 animate-pulse" />
           </motion.div>
-          <span className="text-lg font-medium">
+          <span className="text-lg font-medium animate-pulse">
             Generating your workout...
           </span>
         </div>
         <p className="text-muted-foreground">
-          Our AI is analyzing your preferences and selecting the best exercises
-          for you.
+          We are analyzing your preferences and selecting the best exercises for
+          you.
         </p>
+        {/* Summary */}
+        {inputData && (
+          <WorkoutSummary
+            exerciseCount={inputData.exerciseCount}
+            maxSetsPerExercise={inputData.maxSetsPerExercise}
+            rpeRange={inputData.rpeRange}
+            repFocus={inputData.repFocus}
+            selectedMuscleGroups={inputData.selectedMuscleGroups}
+            selectedEquipment={inputData.selectedEquipment}
+          />
+        )}
       </motion.div>
     </div>
   )

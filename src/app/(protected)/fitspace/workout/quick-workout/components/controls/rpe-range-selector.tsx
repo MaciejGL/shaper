@@ -55,7 +55,7 @@ export function RpeRangeSelector({
           </CardTitle>
           <CardDescription>
             Rate of Perceived Exertion - How challenging should your workout
-            feel?
+            feel? 1-10 scale. Where 1 is very easy and 10 is at your limit.
           </CardDescription>
         </CardHeader>
         <CardContent>

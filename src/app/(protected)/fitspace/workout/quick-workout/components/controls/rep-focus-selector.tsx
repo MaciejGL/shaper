@@ -9,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 import type { RepFocus } from '../ai-workout-input'
 
@@ -80,14 +81,16 @@ export function RepFocusSelector({
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-2">
                       <div
-                        className={`w-4 h-4 rounded-full border-2 ${
-                          value === option.value
-                            ? 'border-primary bg-primary'
-                            : 'border-gray-300'
-                        } flex items-center justify-center`}
+                        className={cn(
+                          `w-4 h-4 rounded-full border-2 ${
+                            value === option.value
+                              ? 'border-primary'
+                              : 'border-gray-300'
+                          } flex items-center justify-center`,
+                        )}
                       >
                         {value === option.value && (
-                          <div className="w-2 h-2 rounded-full bg-white" />
+                          <div className="w-2 h-2 rounded-full bg-primary" />
                         )}
                       </div>
                       <span className="font-medium">{option.label}</span>

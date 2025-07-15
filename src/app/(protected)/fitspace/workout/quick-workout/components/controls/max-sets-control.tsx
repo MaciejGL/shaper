@@ -24,7 +24,7 @@ export function MaxSetsControl({
 
   return (
     <Card className={className}>
-      <CardContent className="pt-6">
+      <CardContent>
         <div className="space-y-4">
           <Label htmlFor="max-sets" className="text-sm font-medium">
             Maximum Sets per Exercise
