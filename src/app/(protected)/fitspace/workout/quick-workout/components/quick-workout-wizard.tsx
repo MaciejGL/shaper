@@ -35,14 +35,24 @@ const MANUAL_STEPS = [
 
 const AI_STEPS = [
   {
-    id: 'ai-input',
-    title: 'AI Workout Setup',
-    description: 'Tell AI what kind of workout you want',
+    id: 'ai-muscle-groups',
+    title: 'Choose Muscle Groups',
+    description: 'Select the muscles you want to target',
+  },
+  {
+    id: 'ai-equipment',
+    title: 'Select Equipment',
+    description: 'Choose available equipment',
+  },
+  {
+    id: 'ai-parameters',
+    title: 'Workout Parameters',
+    description: 'Set exercise count and intensity preferences',
   },
   {
     id: 'ai-results',
-    title: 'Your AI Workout',
-    description: 'Review and customize your generated workout',
+    title: 'Your Workout',
+    description: 'Review and customize your workout',
   },
 ]
 
@@ -61,7 +71,9 @@ interface QuickWorkoutWizardProps {
   equipmentComponent?: React.ReactNode
   exercisesComponent?: React.ReactNode
   reviewComponent?: React.ReactNode
-  aiInputComponent?: React.ReactNode
+  aiMuscleGroupsComponent?: React.ReactNode
+  aiEquipmentComponent?: React.ReactNode
+  aiParametersComponent?: React.ReactNode
   aiResultsComponent?: React.ReactNode
 
   // Flow control
@@ -85,7 +97,9 @@ export function QuickWorkoutWizard({
   equipmentComponent,
   exercisesComponent,
   reviewComponent,
-  aiInputComponent,
+  aiMuscleGroupsComponent,
+  aiEquipmentComponent,
+  aiParametersComponent,
   aiResultsComponent,
   hasExistingWorkout = false,
   showLanding = false,
@@ -291,8 +305,12 @@ export function QuickWorkoutWizard({
     if (workoutFlow === 'ai') {
       const stepId = currentSteps[currentStep].id
       switch (stepId) {
-        case 'ai-input':
-          return <StepContainer>{aiInputComponent}</StepContainer>
+        case 'ai-muscle-groups':
+          return <StepContainer>{aiMuscleGroupsComponent}</StepContainer>
+        case 'ai-equipment':
+          return <StepContainer>{aiEquipmentComponent}</StepContainer>
+        case 'ai-parameters':
+          return <StepContainer>{aiParametersComponent}</StepContainer>
         case 'ai-results':
           return <StepContainer>{aiResultsComponent}</StepContainer>
         default:

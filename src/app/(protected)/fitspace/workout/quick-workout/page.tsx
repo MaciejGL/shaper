@@ -11,6 +11,10 @@ import { useExerciseSelection } from '@/hooks/use-exercise-selection'
 import { useQuickWorkoutActions } from '@/hooks/use-quick-workout-actions'
 import { useQuickWorkoutFilters } from '@/hooks/use-quick-workout-filters'
 
+import { AiEquipmentStep } from './components/ai-equipment-step'
+import { AiMuscleGroupsStep } from './components/ai-muscle-groups-step'
+import { AiParametersStep } from './components/ai-parameters-step'
+import type { AiWorkoutInputData } from './components/ai-workout-input'
 import { ExerciseSelectionReview } from './components/exercise-selection-review'
 import { ExistingWorkoutView } from './components/existing-workout-view'
 import { QuickWorkoutFilters } from './components/quick-workout-filters'
@@ -28,6 +32,14 @@ import {
 export default function QuickWorkoutPage() {
   const [showWizard, setShowWizard] = useState(false)
   const [workoutFlow, setWorkoutFlow] = useState<WorkoutFlow>(null)
+
+  // AI workout input state
+  const [aiInputData, setAiInputData] = useState<AiWorkoutInputData>({
+    selectedMuscleGroups: [],
+    selectedEquipment: [],
+    exerciseCount: 5,
+    maxSetsPerExercise: 3,
+  })
 
   // Data fetching
   const { data: exercisesData } = useFitspaceGetExercisesQuery()
@@ -98,6 +110,22 @@ export default function QuickWorkoutPage() {
 
   const handleFlowChange = (flow: WorkoutFlow) => {
     setWorkoutFlow(flow)
+    // Reset AI input data when switching flows
+    if (flow === 'ai') {
+      setAiInputData({
+        selectedMuscleGroups: [],
+        selectedEquipment: [],
+        exerciseCount: 5,
+        maxSetsPerExercise: 3,
+      })
+    }
+  }
+
+  // Validation for proceeding from each step
+  const canProceedFromStep = () => {
+    // All steps in both manual and AI flows are valid for now
+    // AI steps are optional and manual steps use existing validation
+    return true
   }
 
   // Landing component
@@ -105,6 +133,28 @@ export default function QuickWorkoutPage() {
     <WorkoutCreationLanding
       onSelectManual={() => handleFlowChange('manual')}
       onSelectAI={() => handleFlowChange('ai')}
+    />
+  )
+
+  // AI step components
+  const aiMuscleGroupsComponent = (
+    <AiMuscleGroupsStep
+      muscleGroups={ALL_MUSCLE_GROUPS}
+      data={aiInputData}
+      onDataChange={setAiInputData}
+    />
+  )
+
+  const aiEquipmentComponent = (
+    <AiEquipmentStep data={aiInputData} onDataChange={setAiInputData} />
+  )
+
+  const aiParametersComponent = (
+    <AiParametersStep
+      data={aiInputData}
+      onDataChange={setAiInputData}
+      selectedMuscleGroups={aiInputData.selectedMuscleGroups}
+      selectedEquipment={aiInputData.selectedEquipment}
     />
   )
 
@@ -171,10 +221,13 @@ export default function QuickWorkoutPage() {
           equipmentComponent={renderStepComponent('equipment')}
           exercisesComponent={renderStepComponent('exercises')}
           reviewComponent={renderStepComponent('review')}
-          // AI flow components (TODO: implement these)
-          aiInputComponent={<div>AI Input Component - Coming Soon</div>}
+          // AI flow components
+          aiMuscleGroupsComponent={aiMuscleGroupsComponent}
+          aiEquipmentComponent={aiEquipmentComponent}
+          aiParametersComponent={aiParametersComponent}
           aiResultsComponent={<div>AI Results Component - Coming Soon</div>}
-          // Existing props
+          // Validation and actions
+          canProceedFromStep={canProceedFromStep}
           isAdding={actions.isAddingExercises}
           onFinish={handleAddExercises}
           hasExistingWorkout={hasExistingWorkout}

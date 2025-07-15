@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { PlusIcon, SparklesIcon } from 'lucide-react'
+import { ChevronRight, ListTodoIcon, SparklesIcon } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -32,39 +32,40 @@ export function WorkoutCreationLanding({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          <Card className="cursor-pointer transition-all">
-            <CardHeader className="pb-3">
+          <Card
+            className="cursor-pointer transition-all"
+            onClick={onSelectManual}
+          >
+            <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-secondary rounded-lg">
-                  <PlusIcon className="h-5 w-5" />
+                <div className="p-2 bg-card-on-card rounded-lg">
+                  <ListTodoIcon className="size-5" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <CardTitle className="text-lg">Manual Creation</CardTitle>
                   <CardDescription>
                     Build your workout step by step
                   </CardDescription>
                 </div>
+                <Button
+                  onClick={onSelectManual}
+                  variant="link"
+                  iconOnly={<ChevronRight />}
+                  className="self-start"
+                >
+                  Start Manual Creation
+                </Button>
               </div>
             </CardHeader>
             <CardContent className="pt-0">
               <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  Choose your muscle groups, select equipment, and pick
-                  exercises yourself.
-                </p>
                 <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  <Badge variant="secondary">1. Pick muscles</Badge>
-                  <Badge variant="secondary">2. Choose equipment</Badge>
+                  <Badge variant="secondary">1. Select muscles</Badge>
+                  <Badge variant="secondary">2. Select equipment</Badge>
                   <Badge variant="secondary">3. Select exercises</Badge>
                   <Badge variant="secondary">4. Review</Badge>
+                  <Badge variant="secondary">5. Start workout</Badge>
                 </div>
-                <Button
-                  onClick={onSelectManual}
-                  className="w-full"
-                  variant="secondary"
-                >
-                  Start Manual Creation
-                </Button>
               </div>
             </CardContent>
           </Card>
@@ -76,51 +77,43 @@ export function WorkoutCreationLanding({
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3, delay: 0.2 }}
         >
-          <Card className="cursor-pointer transition-all" variant="gradient">
-            <CardHeader className="pb-3">
+          <Card
+            className="cursor-pointer transition-all"
+            variant="gradient"
+            onClick={onSelectAI}
+          >
+            <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
-                  <SparklesIcon className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                <div className="p-2 bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-700 dark:to-amber-500 rounded-lg">
+                  <SparklesIcon className="size-5 text-amber-600 dark:text-amber-200" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <CardTitle className="text-lg flex items-center gap-2">
                     Quick Workout
                   </CardTitle>
                   <CardDescription>
-                    Let us find the best exercises for you
+                    Let us find the exercises for you
                   </CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  We'll find the best exercises for you based on your goals and
-                  preferences.
-                </p>
-                <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  <Badge variant="secondary">1. Quick setup</Badge>
-                  <Badge variant="secondary">2. Smart suggestions</Badge>
                 </div>
                 <Button
                   onClick={onSelectAI}
-                  variant="gradient"
-                  iconStart={<SparklesIcon />}
-                  className="w-full"
+                  variant="link"
+                  iconOnly={<ChevronRight />}
+                  className="self-start"
                 >
-                  Get a quick workout
+                  Start Quick Workout
                 </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                <Badge variant="secondary">1. Quick setup</Badge>
+                <Badge variant="secondary">2. Review</Badge>
+                <Badge variant="secondary">3. Start workout</Badge>
               </div>
             </CardContent>
           </Card>
         </motion.div>
-      </div>
-
-      {/* Footer Note */}
-      <div className="text-center">
-        <p className="text-xs text-muted-foreground">
-          You can always switch between manual and AI creation later
-        </p>
       </div>
     </div>
   )
