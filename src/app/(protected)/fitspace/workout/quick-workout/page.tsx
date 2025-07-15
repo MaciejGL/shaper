@@ -17,7 +17,9 @@ import { QuickWorkoutFilters } from './components/quick-workout-filters'
 import {
   QuickWorkoutWizard,
   QuickWorkoutWizardSkeleton,
+  type WorkoutFlow,
 } from './components/quick-workout-wizard'
+import { WorkoutCreationLanding } from './components/workout-creation-landing'
 import {
   getTodaysWorkoutExercises,
   hasTodaysWorkoutExercises,
@@ -25,6 +27,7 @@ import {
 
 export default function QuickWorkoutPage() {
   const [showWizard, setShowWizard] = useState(false)
+  const [workoutFlow, setWorkoutFlow] = useState<WorkoutFlow>(null)
 
   // Data fetching
   const { data: exercisesData } = useFitspaceGetExercisesQuery()
@@ -83,13 +86,27 @@ export default function QuickWorkoutPage() {
 
   const handleCreateNewWorkout = () => {
     setShowWizard(true)
+    setWorkoutFlow(null) // Reset flow to show landing
   }
 
   const handleWizardStepChange = (step: number) => {
     if (step === -1) {
       setShowWizard(false)
+      setWorkoutFlow(null) // Reset flow when going back
     }
   }
+
+  const handleFlowChange = (flow: WorkoutFlow) => {
+    setWorkoutFlow(flow)
+  }
+
+  // Landing component
+  const landingComponent = (
+    <WorkoutCreationLanding
+      onSelectManual={() => handleFlowChange('manual')}
+      onSelectAI={() => handleFlowChange('ai')}
+    />
+  )
 
   // Render different components based on current step
   const renderStepComponent = (stepId: string) => {
@@ -143,14 +160,25 @@ export default function QuickWorkoutPage() {
         <QuickWorkoutWizardSkeleton />
       ) : shouldShowWizard ? (
         <QuickWorkoutWizard
-          isAdding={actions.isAddingExercises}
-          onFinish={handleAddExercises}
-          hasExistingWorkout={hasExistingWorkout}
-          onStepChange={handleWizardStepChange}
+          // Flow control
+          showLanding={!hasExistingWorkout}
+          workoutFlow={workoutFlow}
+          onFlowChange={handleFlowChange}
+          // Landing component
+          landingComponent={landingComponent}
+          // Manual flow components
           muscleGroupsComponent={renderStepComponent('muscle-groups')}
           equipmentComponent={renderStepComponent('equipment')}
           exercisesComponent={renderStepComponent('exercises')}
           reviewComponent={renderStepComponent('review')}
+          // AI flow components (TODO: implement these)
+          aiInputComponent={<div>AI Input Component - Coming Soon</div>}
+          aiResultsComponent={<div>AI Results Component - Coming Soon</div>}
+          // Existing props
+          isAdding={actions.isAddingExercises}
+          onFinish={handleAddExercises}
+          hasExistingWorkout={hasExistingWorkout}
+          onStepChange={handleWizardStepChange}
         />
       ) : (
         <ExistingWorkoutView

@@ -1,13 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react'
-import { useState } from 'react'
+import React, { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
-const STEPS = [
+import type { WorkoutCreationLandingProps } from './workout-creation-landing'
+
+// Define different step flows
+const MANUAL_STEPS = [
   {
     id: 'muscle-groups',
     title: 'Choose Muscle Groups',
@@ -30,36 +33,93 @@ const STEPS = [
   },
 ]
 
+const AI_STEPS = [
+  {
+    id: 'ai-input',
+    title: 'AI Workout Setup',
+    description: 'Tell AI what kind of workout you want',
+  },
+  {
+    id: 'ai-results',
+    title: 'Your AI Workout',
+    description: 'Review and customize your generated workout',
+  },
+]
+
+const LANDING_STEP = {
+  id: 'landing',
+  title: 'Create Your Workout',
+  description: "Choose how you'd like to build your workout",
+}
+
+export type WorkoutFlow = 'manual' | 'ai' | null
+
 interface QuickWorkoutWizardProps {
   // Component props for each step
+  landingComponent?: React.ReactNode
   muscleGroupsComponent?: React.ReactNode
   equipmentComponent?: React.ReactNode
   exercisesComponent?: React.ReactNode
   reviewComponent?: React.ReactNode
+  aiInputComponent?: React.ReactNode
+  aiResultsComponent?: React.ReactNode
+
+  // Flow control
   hasExistingWorkout?: boolean
+  showLanding?: boolean
+  workoutFlow?: WorkoutFlow
+  onFlowChange?: (flow: WorkoutFlow) => void
+
   // Validation functions for each step
   canProceedFromStep?: (step: number) => boolean
   isAdding?: boolean
+
   // Callbacks
   onFinish?: () => void
   onStepChange?: (step: number) => void
 }
 
 export function QuickWorkoutWizard({
+  landingComponent,
   muscleGroupsComponent,
   equipmentComponent,
   exercisesComponent,
   reviewComponent,
+  aiInputComponent,
+  aiResultsComponent,
   hasExistingWorkout = false,
+  showLanding = false,
+  workoutFlow = null,
+  onFlowChange,
   canProceedFromStep = () => true,
   isAdding = false,
   onFinish,
   onStepChange,
 }: QuickWorkoutWizardProps) {
+  // Determine the current step sequence based on flow
+  const getSteps = () => {
+    if (showLanding && workoutFlow === null) {
+      return [LANDING_STEP]
+    }
+
+    switch (workoutFlow) {
+      case 'manual':
+        return MANUAL_STEPS
+      case 'ai':
+        return AI_STEPS
+      default:
+        return MANUAL_STEPS // fallback
+    }
+  }
+
+  const currentSteps = getSteps()
   const [currentStep, setCurrentStep] = useState(0)
 
   const nextStep = () => {
-    if (currentStep < STEPS.length - 1 && canProceedFromStep(currentStep)) {
+    if (
+      currentStep < currentSteps.length - 1 &&
+      canProceedFromStep(currentStep)
+    ) {
       const newStep = currentStep + 1
       setCurrentStep(newStep)
       onStepChange?.(newStep)
@@ -73,35 +133,50 @@ export function QuickWorkoutWizard({
       onStepChange?.(newStep)
     } else if (hasExistingWorkout) {
       onStepChange?.(-1)
+    } else if (workoutFlow !== null && onFlowChange) {
+      // Go back to landing page from step 0 of any flow (when landing is available)
+      onFlowChange(null)
+      setCurrentStep(0)
     }
+  }
+
+  const handleFlowSelection = (flow: WorkoutFlow) => {
+    onFlowChange?.(flow)
+    setCurrentStep(0) // Reset to first step of the new flow
   }
 
   const handleFinish = () => {
     onFinish?.()
   }
 
-  const progress = ((currentStep + 1) / STEPS.length) * 100
+  // Handle landing step special case for progress calculation
+  const isOnLanding = showLanding && workoutFlow === null
+  const progress = isOnLanding
+    ? 0
+    : ((currentStep + 1) / currentSteps.length) * 100
 
   return (
     <div className="bg-background -mt-2">
       {/* Header with Progress */}
-      <div className="sticky top-[-8px] z-50 bg-background px-2">
-        <div className="container py-4 space-y-4">
-          <div className="text-center mx-auto">
-            <p className="text-sm text-muted-foreground">
-              Step {currentStep + 1} of {STEPS.length}
-            </p>
-            <div className="w-10" /> {/* Spacer for centering */}
+      {!isOnLanding && (
+        <div className="sticky top-[-8px] z-50 bg-background px-2">
+          <div className="container py-4 space-y-4">
+            <div className="text-center mx-auto">
+              <p className="text-sm text-muted-foreground">
+                Step {currentStep + 1} of {currentSteps.length}
+              </p>
+              <div className="w-10" /> {/* Spacer for centering */}
+            </div>
+            <Progress value={progress} className="h-2" />
           </div>
-          <Progress value={progress} className="h-2" />
         </div>
-      </div>
+      )}
 
       {/* Step Content */}
       <div className="container pt-6">
         <AnimatePresence mode="wait">
           <motion.div
-            key={currentStep}
+            key={`${workoutFlow}-${currentStep}`}
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
@@ -110,76 +185,123 @@ export function QuickWorkoutWizard({
           >
             {/* Step Header */}
             <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold">{STEPS[currentStep].title}</h2>
+              <h2 className="text-2xl font-bold">
+                {currentSteps[currentStep].title}
+              </h2>
               <p className="text-muted-foreground">
-                {STEPS[currentStep].description}
+                {currentSteps[currentStep].description}
               </p>
             </div>
 
             {/* Step Content Container */}
-            <div className="min-h-[60vh]">
-              {currentStep === 0 && (
-                <StepContainer>{muscleGroupsComponent}</StepContainer>
-              )}
-
-              {currentStep === 1 && (
-                <StepContainer>{equipmentComponent}</StepContainer>
-              )}
-
-              {currentStep === 2 && (
-                <StepContainer>{exercisesComponent}</StepContainer>
-              )}
-
-              {currentStep === 3 && (
-                <StepContainer>{reviewComponent}</StepContainer>
-              )}
-            </div>
+            <div className="min-h-[60vh]">{renderStepContent()}</div>
           </motion.div>
         </AnimatePresence>
       </div>
 
       {/* Bottom Navigation */}
-      <div className="bg-background sticky bottom-[64px] -mx-2 px-2 z-50">
-        <div className="py-4">
-          <div className="flex justify-between gap-4">
-            <Button
-              variant="secondary"
-              onClick={prevStep}
-              disabled={currentStep === 0 && !hasExistingWorkout}
-              className={cn(
-                'flex-1 bg-transparent transition-opacity',
-                currentStep === 0 && !hasExistingWorkout && 'opacity-0',
-              )}
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Previous
-            </Button>
-
-            {currentStep < STEPS.length - 1 ? (
+      {!isOnLanding && (
+        <div className="bg-background sticky bottom-[64px] -mx-2 px-2 z-50">
+          <div className="py-4">
+            <div className="flex justify-between gap-4">
               <Button
-                onClick={nextStep}
                 variant="secondary"
-                disabled={!canProceedFromStep(currentStep)}
-                className="flex-1"
+                onClick={prevStep}
+                disabled={
+                  isOnLanding ||
+                  (currentStep === 0 &&
+                    !hasExistingWorkout &&
+                    (!workoutFlow || !onFlowChange))
+                }
+                className={cn(
+                  'flex-1 bg-transparent transition-opacity',
+                  (isOnLanding ||
+                    (currentStep === 0 &&
+                      !hasExistingWorkout &&
+                      (!workoutFlow || !onFlowChange))) &&
+                    'opacity-0',
+                )}
+                iconStart={<ArrowLeft />}
               >
-                Next
-                <ArrowRight className="h-4 w-4 ml-2" />
+                Previous
               </Button>
-            ) : (
-              <Button
-                onClick={handleFinish}
-                loading={isAdding}
-                iconStart={<Check />}
-                className="flex-1"
-              >
-                Start Workout
-              </Button>
-            )}
+
+              {isOnLanding ? (
+                // Hide next button on landing, user must choose flow
+                <div className="flex-1" />
+              ) : currentStep < currentSteps.length - 1 ? (
+                <Button
+                  onClick={nextStep}
+                  variant="secondary"
+                  disabled={!canProceedFromStep(currentStep)}
+                  className="flex-1"
+                  iconEnd={<ArrowRight />}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  onClick={handleFinish}
+                  loading={isAdding}
+                  iconStart={<Check />}
+                  className="flex-1"
+                >
+                  Start Workout
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
+
+  function renderStepContent() {
+    // Landing step
+    if (isOnLanding) {
+      // Clone the landing component to pass the flow selection handler
+      if (React.isValidElement<WorkoutCreationLandingProps>(landingComponent)) {
+        const landingWithProps = React.cloneElement(landingComponent, {
+          onSelectManual: () => handleFlowSelection('manual'),
+          onSelectAI: () => handleFlowSelection('ai'),
+        })
+        return <StepContainer>{landingWithProps}</StepContainer>
+      }
+      return <StepContainer>{landingComponent}</StepContainer>
+    }
+
+    // Manual flow steps
+    if (workoutFlow === 'manual') {
+      const stepId = currentSteps[currentStep].id
+      switch (stepId) {
+        case 'muscle-groups':
+          return <StepContainer>{muscleGroupsComponent}</StepContainer>
+        case 'equipment':
+          return <StepContainer>{equipmentComponent}</StepContainer>
+        case 'exercises':
+          return <StepContainer>{exercisesComponent}</StepContainer>
+        case 'review':
+          return <StepContainer>{reviewComponent}</StepContainer>
+        default:
+          return null
+      }
+    }
+
+    // AI flow steps
+    if (workoutFlow === 'ai') {
+      const stepId = currentSteps[currentStep].id
+      switch (stepId) {
+        case 'ai-input':
+          return <StepContainer>{aiInputComponent}</StepContainer>
+        case 'ai-results':
+          return <StepContainer>{aiResultsComponent}</StepContainer>
+        default:
+          return null
+      }
+    }
+
+    return null
+  }
 }
 
 // Container for consistent step styling
@@ -195,7 +317,7 @@ export function QuickWorkoutWizardSkeleton() {
         <div className="container py-4 space-y-4">
           <div className="text-center mx-auto">
             <p className="text-sm text-muted-foreground masked-placeholder-text">
-              Step 1 of {STEPS.length}
+              Getting Started
             </p>
             <div className="w-10" /> {/* Spacer for centering */}
           </div>
@@ -209,10 +331,10 @@ export function QuickWorkoutWizardSkeleton() {
           {/* Step Header */}
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold masked-placeholder-text mx-auto w-max">
-              {STEPS[0].title}
+              Create Your Workout
             </h2>
             <p className="text-muted-foreground masked-placeholder-text w-max mx-auto">
-              {STEPS[0].description}
+              Loading...
             </p>
           </div>
 

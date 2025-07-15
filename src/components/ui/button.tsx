@@ -28,6 +28,10 @@ const buttonVariants = cva(
           'bg-secondary hover:bg-secondary/80 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80',
           'data-[loading=true]:bg-secondary/80 data-[loading=true]:text-secondary-foreground/50 disabled:bg-secondary/50 data-[loading=true]:dark:bg-secondary/80 data-[loading=true]:dark:text-secondary-foreground/50 disabled:dark:bg-secondary/50',
         ),
+        gradient: cn(
+          'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0',
+          'data-[loading=true]:bg-gradient-to-r data-[loading=true]:from-amber-500 data-[loading=true]:to-orange-500 data-[loading=true]:hover:from-amber-600 data-[loading=true]:hover:to-orange-600 data-[loading=true]:text-white data-[loading=true]:border-0',
+        ),
         ghost: cn(
           'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 data-[loading=true]:bg-accent/50 disabled:bg-accent/50',
           'data-[loading=true]:bg-accent/50 data-[loading=true]:text-accent/70 disabled:bg-accent/50 data-[loading=true]:dark:bg-accent/50 data-[loading=true]:dark:text-accent/70 disabled:dark:bg-accent/50',

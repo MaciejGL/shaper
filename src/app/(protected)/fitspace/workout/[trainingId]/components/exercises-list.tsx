@@ -1,3 +1,5 @@
+import { SearchIcon } from 'lucide-react'
+
 import { Input } from '@/components/ui/input'
 
 import {
@@ -22,6 +24,8 @@ export function ExercisesList({
     <div className="pb-10">
       <Input
         id="search-exercises"
+        variant="secondary"
+        iconStart={<SearchIcon />}
         placeholder="Search exercises"
         value={searchTerm}
         onChange={(e) => onSearch(e.target.value)}
