@@ -10,6 +10,7 @@ import {
   addSet,
   addSetExerciseForm,
   clearTodaysWorkout,
+  createQuickWorkout,
   generateAiWorkout,
   getAiExerciseSuggestions,
   getTrainingExercise,
@@ -62,6 +63,13 @@ export const Mutation: GQLMutationResolvers = {
   swapExercise: async (_, { exerciseId, substituteId }, context) => {
     return swapExercise(exerciseId, substituteId, context)
   },
+
+  // Unified workout creation - works for both manual and AI flows
+  createQuickWorkout: async (_, { input }, context) => {
+    return createQuickWorkout(input, context)
+  },
+
+  // Legacy mutation - kept for backwards compatibility
   addExercisesToQuickWorkout: async (_, { exercises }, context) => {
     return addExercisesToQuickWorkout(exercises, context)
   },

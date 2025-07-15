@@ -59,7 +59,80 @@ query FitspaceGetUserQuickWorkoutPlan {
   }
 }
 
-# Create a new quick workout plan for the user
+# Unified quick workout creation - works for both manual and AI flows
+mutation FitspaceCreateQuickWorkout($input: CreateQuickWorkoutInput!) {
+  createQuickWorkout(input: $input) {
+    id
+    title
+    isDraft
+    weeks {
+      id
+      weekNumber
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        scheduledAt
+        exercises {
+          id
+          name
+          order
+          isExtra
+          baseId
+          muscleGroups {
+            id
+            alias
+            groupSlug
+          }
+          sets {
+            id
+            order
+            minReps
+            maxReps
+            reps
+            weight
+            rpe
+          }
+        }
+      }
+    }
+  }
+}
+
+# Generate AI workout (existing)
+mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
+  generateAiWorkout(input: $input) {
+    exercises {
+      exercise {
+        id
+        name
+        description
+        videoUrl
+        equipment
+        muscleGroups {
+          id
+          alias
+          groupSlug
+        }
+      }
+      sets {
+        reps
+        rpe
+      }
+      order
+      aiMeta {
+        explanation
+      }
+    }
+    aiMeta {
+      summary
+      reasoning
+    }
+    totalDuration
+  }
+}
+
+# Legacy mutations for backwards compatibility
 mutation CreateQuickWorkoutPlan($input: CreateTrainingPlanInput!) {
   createTrainingPlan(input: $input) {
     id
@@ -67,12 +140,10 @@ mutation CreateQuickWorkoutPlan($input: CreateTrainingPlanInput!) {
   }
 }
 
-# Assign the created plan to the user (but don't activate it)
 mutation AssignQuickWorkoutPlan($input: AssignTrainingPlanToClientInput!) {
   assignTrainingPlanToClient(input: $input)
 }
 
-# Add exercises to the quick workout day with order information
 mutation AddExercisesToQuickWorkout($exercises: [QuickWorkoutExerciseInput!]!) {
   addExercisesToQuickWorkout(exercises: $exercises) {
     id
@@ -116,39 +187,6 @@ mutation FitspaceAddExercisesToQuickWorkout(
           }
         }
       }
-    }
-  }
-}
-
-mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
-  generateAiWorkout(input: $input) {
-    exercises {
-      exercise {
-        id
-        name
-        description
-        videoUrl
-        equipment
-        isPublic
-        muscleGroups {
-          id
-          alias
-          groupSlug
-        }
-      }
-      sets {
-        reps
-        rpe
-      }
-      order
-      aiMeta {
-        explanation
-      }
-    }
-    totalDuration
-    aiMeta {
-      summary
-      reasoning
     }
   }
 }

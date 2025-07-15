@@ -386,6 +386,11 @@ export type GQLCreateNotificationInput = {
   userId: Scalars['ID']['input'];
 };
 
+export type GQLCreateQuickWorkoutInput = {
+  exercises: Array<GQLQuickWorkoutExerciseInput>;
+  replaceExisting: Scalars['Boolean']['input'];
+};
+
 export type GQLCreateReviewInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   rating: Scalars['Int']['input'];
@@ -799,6 +804,7 @@ export type GQLMutation = {
   createMealPlan: GQLCreateMealPlanPayload;
   createNote: GQLNote;
   createNotification: GQLNotification;
+  createQuickWorkout: GQLTrainingPlan;
   createReview: Scalars['Boolean']['output'];
   createTrainingPlan: GQLCreateTrainingPlanPayload;
   deleteBodyMeasurement: Scalars['Boolean']['output'];
@@ -1008,6 +1014,11 @@ export type GQLMutationCreateNoteArgs = {
 
 export type GQLMutationCreateNotificationArgs = {
   input: GQLCreateNotificationInput;
+};
+
+
+export type GQLMutationCreateQuickWorkoutArgs = {
+  input: GQLCreateQuickWorkoutInput;
 };
 
 
@@ -1667,6 +1678,16 @@ export type GQLQueryUserPublicArgs = {
 export type GQLQuickWorkoutExerciseInput = {
   exerciseId: Scalars['ID']['input'];
   order: Scalars['Int']['input'];
+  sets?: InputMaybe<Array<GQLQuickWorkoutSetInput>>;
+};
+
+export type GQLQuickWorkoutSetInput = {
+  maxReps?: InputMaybe<Scalars['Int']['input']>;
+  minReps?: InputMaybe<Scalars['Int']['input']>;
+  order: Scalars['Int']['input'];
+  reps?: InputMaybe<Scalars['Int']['input']>;
+  rpe?: InputMaybe<Scalars['Int']['input']>;
+  weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type GQLRemoveMealPlanCollaboratorInput = {
@@ -2552,6 +2573,20 @@ export type GQLFitspaceGetUserQuickWorkoutPlanQueryVariables = Exact<{ [key: str
 
 export type GQLFitspaceGetUserQuickWorkoutPlanQuery = { __typename?: 'Query', getQuickWorkoutPlan: { __typename?: 'TrainingPlan', id: string, title: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, order: number, completedAt?: string | undefined | null, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
 
+export type GQLFitspaceCreateQuickWorkoutMutationVariables = Exact<{
+  input: GQLCreateQuickWorkoutInput;
+}>;
+
+
+export type GQLFitspaceCreateQuickWorkoutMutation = { __typename?: 'Mutation', createQuickWorkout: { __typename?: 'TrainingPlan', id: string, title: string, isDraft: boolean, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, order: number, isExtra: boolean, baseId?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, minReps?: number | undefined | null, maxReps?: number | undefined | null, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
+
+export type GQLFitspaceGenerateAiWorkoutMutationVariables = Exact<{
+  input: GQLGenerateAiWorkoutInput;
+}>;
+
+
+export type GQLFitspaceGenerateAiWorkoutMutation = { __typename?: 'Mutation', generateAiWorkout: { __typename?: 'AiWorkoutResult', totalDuration?: number | undefined | null, exercises: Array<{ __typename?: 'AiWorkoutExercise', order: number, exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null>, aiMeta: { __typename?: 'AiMeta', explanation: string } }>, aiMeta: { __typename?: 'AiWorkoutMeta', summary: string, reasoning: string } } };
+
 export type GQLCreateQuickWorkoutPlanMutationVariables = Exact<{
   input: GQLCreateTrainingPlanInput;
 }>;
@@ -2579,13 +2614,6 @@ export type GQLFitspaceAddExercisesToQuickWorkoutMutationVariables = Exact<{
 
 
 export type GQLFitspaceAddExercisesToQuickWorkoutMutation = { __typename?: 'Mutation', addExercisesToQuickWorkout: { __typename?: 'TrainingPlan', id: string, title: string, isDraft: boolean, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, order: number, isExtra: boolean, baseId?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, minReps?: number | undefined | null, maxReps?: number | undefined | null, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
-
-export type GQLFitspaceGenerateAiWorkoutMutationVariables = Exact<{
-  input: GQLGenerateAiWorkoutInput;
-}>;
-
-
-export type GQLFitspaceGenerateAiWorkoutMutation = { __typename?: 'Mutation', generateAiWorkout: { __typename?: 'AiWorkoutResult', totalDuration?: number | undefined | null, exercises: Array<{ __typename?: 'AiWorkoutExercise', order: number, exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null>, aiMeta: { __typename?: 'AiMeta', explanation: string } }>, aiMeta: { __typename?: 'AiWorkoutMeta', summary: string, reasoning: string } } };
 
 export type GQLGetClientsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6060,6 +6088,117 @@ useInfiniteFitspaceGetUserQuickWorkoutPlanQuery.getKey = (variables?: GQLFitspac
 
 useFitspaceGetUserQuickWorkoutPlanQuery.fetcher = (variables?: GQLFitspaceGetUserQuickWorkoutPlanQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetUserQuickWorkoutPlanQuery, GQLFitspaceGetUserQuickWorkoutPlanQueryVariables>(FitspaceGetUserQuickWorkoutPlanDocument, variables, options);
 
+export const FitspaceCreateQuickWorkoutDocument = `
+    mutation FitspaceCreateQuickWorkout($input: CreateQuickWorkoutInput!) {
+  createQuickWorkout(input: $input) {
+    id
+    title
+    isDraft
+    weeks {
+      id
+      weekNumber
+      days {
+        id
+        dayOfWeek
+        isRestDay
+        scheduledAt
+        exercises {
+          id
+          name
+          order
+          isExtra
+          baseId
+          muscleGroups {
+            id
+            alias
+            groupSlug
+          }
+          sets {
+            id
+            order
+            minReps
+            maxReps
+            reps
+            weight
+            rpe
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+export const useFitspaceCreateQuickWorkoutMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceCreateQuickWorkoutMutation, TError, GQLFitspaceCreateQuickWorkoutMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceCreateQuickWorkoutMutation, TError, GQLFitspaceCreateQuickWorkoutMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceCreateQuickWorkout'],
+    mutationFn: (variables?: GQLFitspaceCreateQuickWorkoutMutationVariables) => fetchData<GQLFitspaceCreateQuickWorkoutMutation, GQLFitspaceCreateQuickWorkoutMutationVariables>(FitspaceCreateQuickWorkoutDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceCreateQuickWorkoutMutation.getKey = () => ['FitspaceCreateQuickWorkout'];
+
+
+useFitspaceCreateQuickWorkoutMutation.fetcher = (variables: GQLFitspaceCreateQuickWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceCreateQuickWorkoutMutation, GQLFitspaceCreateQuickWorkoutMutationVariables>(FitspaceCreateQuickWorkoutDocument, variables, options);
+
+export const FitspaceGenerateAiWorkoutDocument = `
+    mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
+  generateAiWorkout(input: $input) {
+    exercises {
+      exercise {
+        id
+        name
+        description
+        videoUrl
+        equipment
+        muscleGroups {
+          id
+          alias
+          groupSlug
+        }
+      }
+      sets {
+        reps
+        rpe
+      }
+      order
+      aiMeta {
+        explanation
+      }
+    }
+    aiMeta {
+      summary
+      reasoning
+    }
+    totalDuration
+  }
+}
+    `;
+
+export const useFitspaceGenerateAiWorkoutMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceGenerateAiWorkoutMutation, TError, GQLFitspaceGenerateAiWorkoutMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceGenerateAiWorkoutMutation, TError, GQLFitspaceGenerateAiWorkoutMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceGenerateAiWorkout'],
+    mutationFn: (variables?: GQLFitspaceGenerateAiWorkoutMutationVariables) => fetchData<GQLFitspaceGenerateAiWorkoutMutation, GQLFitspaceGenerateAiWorkoutMutationVariables>(FitspaceGenerateAiWorkoutDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceGenerateAiWorkoutMutation.getKey = () => ['FitspaceGenerateAiWorkout'];
+
+
+useFitspaceGenerateAiWorkoutMutation.fetcher = (variables: GQLFitspaceGenerateAiWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGenerateAiWorkoutMutation, GQLFitspaceGenerateAiWorkoutMutationVariables>(FitspaceGenerateAiWorkoutDocument, variables, options);
+
 export const CreateQuickWorkoutPlanDocument = `
     mutation CreateQuickWorkoutPlan($input: CreateTrainingPlanInput!) {
   createTrainingPlan(input: $input) {
@@ -6195,59 +6334,6 @@ useFitspaceAddExercisesToQuickWorkoutMutation.getKey = () => ['FitspaceAddExerci
 
 
 useFitspaceAddExercisesToQuickWorkoutMutation.fetcher = (variables: GQLFitspaceAddExercisesToQuickWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceAddExercisesToQuickWorkoutMutation, GQLFitspaceAddExercisesToQuickWorkoutMutationVariables>(FitspaceAddExercisesToQuickWorkoutDocument, variables, options);
-
-export const FitspaceGenerateAiWorkoutDocument = `
-    mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
-  generateAiWorkout(input: $input) {
-    exercises {
-      exercise {
-        id
-        name
-        description
-        videoUrl
-        equipment
-        isPublic
-        muscleGroups {
-          id
-          alias
-          groupSlug
-        }
-      }
-      sets {
-        reps
-        rpe
-      }
-      order
-      aiMeta {
-        explanation
-      }
-    }
-    totalDuration
-    aiMeta {
-      summary
-      reasoning
-    }
-  }
-}
-    `;
-
-export const useFitspaceGenerateAiWorkoutMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLFitspaceGenerateAiWorkoutMutation, TError, GQLFitspaceGenerateAiWorkoutMutationVariables, TContext>) => {
-    
-    return useMutation<GQLFitspaceGenerateAiWorkoutMutation, TError, GQLFitspaceGenerateAiWorkoutMutationVariables, TContext>(
-      {
-    mutationKey: ['FitspaceGenerateAiWorkout'],
-    mutationFn: (variables?: GQLFitspaceGenerateAiWorkoutMutationVariables) => fetchData<GQLFitspaceGenerateAiWorkoutMutation, GQLFitspaceGenerateAiWorkoutMutationVariables>(FitspaceGenerateAiWorkoutDocument, variables)(),
-    ...options
-  }
-    )};
-
-useFitspaceGenerateAiWorkoutMutation.getKey = () => ['FitspaceGenerateAiWorkout'];
-
-
-useFitspaceGenerateAiWorkoutMutation.fetcher = (variables: GQLFitspaceGenerateAiWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGenerateAiWorkoutMutation, GQLFitspaceGenerateAiWorkoutMutationVariables>(FitspaceGenerateAiWorkoutDocument, variables, options);
 
 export const GetClientsDocument = `
     query GetClients {

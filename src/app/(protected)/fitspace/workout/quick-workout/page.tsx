@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 
 import {
   GQLTrainingPlan,
+  useFitspaceCreateQuickWorkoutMutation,
   useFitspaceGetExercisesQuery,
   useFitspaceGetUserQuickWorkoutPlanQuery,
 } from '@/generated/graphql-client'
@@ -35,6 +36,10 @@ export default function QuickWorkoutPage() {
     handleGenerateAiWorkout,
     handleRetryAiGeneration,
   } = useAiWorkoutGeneration()
+
+  // Create workout mutation
+  const { mutateAsync: createQuickWorkout, isPending: isCreatingWorkout } =
+    useFitspaceCreateQuickWorkoutMutation()
 
   // Data fetching
   const { data: exercisesData } = useFitspaceGetExercisesQuery()
@@ -76,6 +81,46 @@ export default function QuickWorkoutPage() {
       !isGeneratingAiWorkout
     ) {
       handleGenerateAiWorkout()
+    }
+  }
+
+  // Handle creating workout from AI data
+  const handleFinish = async () => {
+    if (!aiWorkoutResult) {
+      console.error('No AI workout result to create')
+      return
+    }
+
+    try {
+      // Transform AI workout data to the format expected by createQuickWorkout
+      const exercises = aiWorkoutResult.exercises.map((aiExercise, index) => ({
+        exerciseId: aiExercise.exercise.id,
+        order: index + 1, // Use sequential order
+        sets:
+          aiExercise.sets?.map((aiSet, setIndex) => ({
+            order: setIndex + 1,
+            reps: aiSet?.reps || null,
+            minReps: null, // AI doesn't provide min/max, just target reps
+            maxReps: null,
+            rpe: aiSet?.rpe || null,
+            weight: null, // User will fill this during workout
+          })) || [],
+      }))
+
+      // Create the workout (replace existing exercises)
+      await createQuickWorkout({
+        input: {
+          exercises,
+          replaceExisting: true,
+        },
+      })
+
+      // Navigate to the workout
+      if (quickWorkoutPlan?.id) {
+        window.location.href = `/fitspace/workout/${quickWorkoutPlan.id}`
+      }
+    } catch (error) {
+      console.error('Failed to create workout:', error)
     }
   }
 
@@ -142,8 +187,8 @@ export default function QuickWorkoutPage() {
           onFlowChange={setWorkoutFlow}
           hasExistingWorkout={hasExistingWorkout}
           canProceedFromStep={() => true} // Simplified for now
-          isAdding={false} // Simplified for now
-          onFinish={() => console.log('Finish workout')} // Placeholder
+          isAdding={isCreatingWorkout}
+          onFinish={handleFinish}
           onStepChange={handleStepChange}
           // Manual flow components (placeholders)
           landingComponent={

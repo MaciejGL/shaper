@@ -78,14 +78,34 @@ type Mutation {
   addSetExerciseForm(input: AddSetExerciseFormInput!): ExerciseSet!
   removeSetExerciseForm(setId: ID!): Boolean!
   swapExercise(exerciseId: ID!, substituteId: ID!): Substitute!
+
+  # Unified workout creation - works for both manual and AI flows
+  createQuickWorkout(input: CreateQuickWorkoutInput!): TrainingPlan!
+
+  # Legacy mutation - kept for backwards compatibility
   addExercisesToQuickWorkout(
     exercises: [QuickWorkoutExerciseInput!]!
   ): TrainingPlan!
 }
 
+input CreateQuickWorkoutInput {
+  exercises: [QuickWorkoutExerciseInput!]!
+  replaceExisting: Boolean! # Whether to replace current exercises or add to them
+}
+
 input QuickWorkoutExerciseInput {
   exerciseId: ID!
   order: Int!
+  sets: [QuickWorkoutSetInput!] # Optional - if not provided, creates default sets
+}
+
+input QuickWorkoutSetInput {
+  order: Int!
+  reps: Int
+  minReps: Int
+  maxReps: Int
+  rpe: Int
+  weight: Float
 }
 
 input AddSetExerciseFormInput {

@@ -13,6 +13,7 @@ import { GraphQLError } from 'graphql'
 import {
   GQLAddAiExerciseToWorkoutInput,
   GQLAddSetExerciseFormInput,
+  GQLCreateQuickWorkoutInput,
   GQLGenerateAiWorkoutInput,
   GQLUpdateExerciseFormInput,
   GQLWorkoutSessionEvent,
@@ -1537,6 +1538,203 @@ export const addExercisesToQuickWorkout = async (
       order: index + 1,
       isExtra: true,
     })),
+  })
+
+  const completedPlan = await getFullPlanById(quickWorkoutPlan.id)
+
+  if (!completedPlan) {
+    throw new GraphQLError('Quick workout plan not found')
+  }
+
+  return new TrainingPlan(completedPlan, context)
+}
+
+/**
+ * Unified function to create a quick workout - works for both manual and AI flows
+ * Accepts complete exercise data including sets with reps, RPE, etc.
+ */
+export const createQuickWorkout = async (
+  input: GQLCreateQuickWorkoutInput,
+  context: GQLContext,
+) => {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  const quickWorkoutPlan = await prisma.trainingPlan.findFirst({
+    where: {
+      assignedToId: user.user.id,
+      createdById: user.user.id,
+    },
+    include: {
+      weeks: true,
+    },
+  })
+
+  if (!quickWorkoutPlan) {
+    throw new GraphQLError('Quick workout plan not found')
+  }
+
+  // Use UTC-based week start calculation
+  const weekStart = getUTCWeekStart()
+  const currentWeek = getISOWeek(weekStart)
+
+  const hasCurrentWeek = quickWorkoutPlan.weeks.some((week) => {
+    if (!week.scheduledAt) {
+      return false
+    }
+    return isSameWeek(week.scheduledAt, weekStart)
+  })
+
+  if (!hasCurrentWeek) {
+    // create a new week
+    await prisma.trainingWeek.create({
+      data: {
+        planId: quickWorkoutPlan.id,
+        weekNumber: currentWeek,
+        name: `Week ${currentWeek}`,
+        scheduledAt: weekStart,
+        isExtra: true,
+        days: {
+          createMany: {
+            data: Array.from({ length: 7 }, (_, i) => ({
+              dayOfWeek: i,
+              isRestDay: false,
+              isExtra: true,
+              scheduledAt: addDays(weekStart, i),
+            })),
+          },
+        },
+      },
+    })
+  }
+
+  const fullPlan = await getFullPlanById(quickWorkoutPlan.id)
+
+  if (!fullPlan) {
+    throw new GraphQLError('Quick workout plan not found')
+  }
+
+  // get plans todays day - Find the actual day using scheduledAt
+  const today = startOfToday()
+
+  // Find the current week first
+  const currentWeekData = fullPlan.weeks.find((week) => {
+    if (!week.scheduledAt) {
+      return false
+    }
+    return isSameWeek(week.scheduledAt, weekStart)
+  })
+
+  if (!currentWeekData) {
+    throw new GraphQLError('Current week not found')
+  }
+
+  // Then find the actual day within that week using scheduledAt
+  const currentDay = currentWeekData.days.find(
+    (d) => d.scheduledAt && isSameDay(d.scheduledAt, today),
+  )
+
+  if (!currentDay) {
+    throw new GraphQLError('Day not found')
+  }
+
+  // If replaceExisting is true, remove all current extra exercises
+  if (input.replaceExisting) {
+    await prisma.trainingExercise.deleteMany({
+      where: {
+        dayId: currentDay.id,
+        isExtra: true,
+      },
+    })
+  }
+
+  // Get current exercises to ensure proper ordering (only if not replacing)
+  const existingExercises = input.replaceExisting
+    ? []
+    : await prisma.trainingExercise.findMany({
+        where: {
+          dayId: currentDay.id,
+          isExtra: true,
+        },
+        select: { order: true },
+        orderBy: { order: 'desc' },
+        take: 1,
+      })
+
+  const maxExistingOrder = existingExercises[0]?.order || 0
+
+  // Extract exercise IDs for database query
+  const exerciseIds = input.exercises.map((ex) => ex.exerciseId)
+
+  const baseExercises = await prisma.baseExercise.findMany({
+    where: {
+      id: { in: exerciseIds },
+    },
+  })
+
+  // Create a map for quick lookup
+  const baseExerciseMap = new Map(baseExercises.map((ex) => [ex.id, ex]))
+
+  // Create exercises and sets in a transaction
+  await prisma.$transaction(async (tx) => {
+    for (const [index, exerciseInput] of input.exercises.entries()) {
+      const baseExercise = baseExerciseMap.get(exerciseInput.exerciseId)
+      if (!baseExercise) {
+        throw new GraphQLError(
+          `Exercise with ID ${exerciseInput.exerciseId} not found`,
+        )
+      }
+
+      // Ensure order is always after existing exercises to prevent conflicts
+      const safeOrder = input.replaceExisting
+        ? exerciseInput.order
+        : Math.max(exerciseInput.order, maxExistingOrder + index + 1)
+
+      // Create the training exercise
+      const trainingExercise = await tx.trainingExercise.create({
+        data: {
+          baseId: baseExercise.id,
+          name: baseExercise.name,
+          order: safeOrder,
+          instructions: baseExercise.description,
+          additionalInstructions: baseExercise.additionalInstructions,
+          type: baseExercise.type,
+          isExtra: true,
+          dayId: currentDay.id,
+        },
+      })
+
+      // Create sets - use provided sets or create default ones
+      const setsToCreate = exerciseInput.sets?.length
+        ? exerciseInput.sets.map((set) => ({
+            exerciseId: trainingExercise.id,
+            order: set.order,
+            reps: set.reps,
+            minReps: set.minReps,
+            maxReps: set.maxReps,
+            rpe: set.rpe,
+            weight: set.weight,
+            isExtra: true,
+          }))
+        : [
+            {
+              exerciseId: trainingExercise.id,
+              order: 1,
+              reps: null,
+              minReps: null,
+              maxReps: null,
+              rpe: null,
+              weight: null,
+              isExtra: true,
+            },
+          ]
+
+      await tx.exerciseSet.createMany({
+        data: setsToCreate,
+      })
+    }
   })
 
   const completedPlan = await getFullPlanById(quickWorkoutPlan.id)
