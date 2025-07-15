@@ -831,6 +831,17 @@ Generate the workout based on these preferences.`,
 
   try {
     aiResponse = parseAssistantJsonResponse(assistantReply)
+
+    // Ensure required fields exist, even if empty
+    if (!aiResponse.exercises) {
+      aiResponse.exercises = []
+    }
+    if (typeof aiResponse.summary !== 'string') {
+      aiResponse.summary = ''
+    }
+    if (typeof aiResponse.reasoning !== 'string') {
+      aiResponse.reasoning = ''
+    }
   } catch (error) {
     console.error('[AI_WORKOUT] Failed to parse AI response:', error)
     console.error(
@@ -839,6 +850,7 @@ Generate the workout based on these preferences.`,
     )
     throw new GraphQLError('Failed to parse AI response. Please try again.')
   }
+  console.info('aiResponse', aiResponse)
   /* 4. Validate and hydrate exercises from database */
   const requestedExerciseIds = aiResponse.exercises.map((e) => e.id)
 
@@ -852,6 +864,9 @@ Generate the workout based on these preferences.`,
     },
     include: { muscleGroups: { include: { category: true } } },
   })
+
+  console.info('requestedExerciseIds', requestedExerciseIds)
+  console.info('baseExercises', baseExercises)
 
   if (baseExercises.length === 0) {
     throw new GraphQLError(
@@ -892,8 +907,12 @@ Generate the workout based on these preferences.`,
     exercises: workoutExercises,
     totalDuration: estimatedDuration,
     aiMeta: {
-      summary: aiResponse.summary,
-      reasoning: aiResponse.reasoning,
+      summary:
+        aiResponse.summary?.trim() ||
+        `Generated ${workoutExercises.length} exercise workout targeting ${selectedMuscleGroups.length > 0 ? selectedMuscleGroups.join(', ') : 'all muscle groups'} with ${repFocusText} focus.`,
+      reasoning:
+        aiResponse.reasoning?.trim() ||
+        `Selected exercises based on your preferences: ${muscleGroupsText}, ${equipmentText}, targeting ${rpeText} RPE with ${repFocusText} focus.`,
     },
   }
 
