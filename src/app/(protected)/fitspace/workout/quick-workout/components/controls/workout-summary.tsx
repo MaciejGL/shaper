@@ -31,9 +31,9 @@ export function WorkoutSummary({
   const getRepRangeText = (focus: RepFocus) => {
     switch (focus) {
       case 'strength':
-        return '3-6 reps'
+        return '3-8 reps'
       case 'hypertrophy':
-        return '6-12 reps'
+        return '8-12 reps'
       case 'endurance':
         return '12-20 reps'
       default:
@@ -68,7 +68,7 @@ export function WorkoutSummary({
             <div className="flex flex-col gap-2 w-full">
               <p>Targeting muscle groups: </p>
               {selectedMuscleGroups.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap justify-center gap-2">
                   {selectedMuscleGroups.map((muscleGroup) => (
                     <Badge key={muscleGroup} variant="muscle">
                       {muscleGroup}
@@ -83,7 +83,7 @@ export function WorkoutSummary({
             <div className="flex flex-col gap-2">
               <p>Preferred equipment: </p>
               {selectedEquipment.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap justify-center gap-2">
                   {selectedEquipment.map((equipment) => (
                     <Badge key={equipment} variant="equipment">
                       {translateEquipment(equipment)}

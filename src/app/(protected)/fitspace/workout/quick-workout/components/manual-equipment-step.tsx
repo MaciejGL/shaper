@@ -20,21 +20,6 @@ export function ManualEquipmentStep({
 
   return (
     <div className="space-y-6">
-      {/* Selection count */}
-      {selectedEquipment.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.2 }}
-          className="text-center"
-        >
-          <span className="text-sm text-muted-foreground">
-            {selectedEquipment.length} equipment type
-            {selectedEquipment.length !== 1 ? 's' : ''} selected
-          </span>
-        </motion.div>
-      )}
-
       {/* Equipment filters */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

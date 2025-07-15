@@ -805,6 +805,8 @@ ${equipmentText}
 - Training focus: ${repFocusText} with ${repRangeText}
 - User trainer ID: ${context.user?.user.trainerId || 'none'}
 
+CRITICAL RESTRICTION: ${selectedMuscleGroups.length > 0 ? `You MUST ONLY select exercises that target these specific muscle groups: ${selectedMuscleGroups.join(', ')}. ABSOLUTELY NO EXERCISES for other muscle groups like legs, shoulders, back, core, etc. unless they are specifically in the selected list. For example, if user selected "chest, biceps" then NO leg exercises, NO back exercises, NO shoulder exercises - ONLY chest and biceps exercises. Every single exercise must primarily target one of: ${selectedMuscleGroups.join(', ')}.` : 'Create a full-body workout targeting all major muscle groups.'}
+
 Generate the workout based on these preferences.`,
       },
     ],
@@ -823,6 +825,8 @@ Generate the workout based on these preferences.`,
       rpe: number
       explanation: string
     }[]
+    summary: string
+    reasoning: string
   }
 
   try {
@@ -835,9 +839,11 @@ Generate the workout based on these preferences.`,
     )
     throw new GraphQLError('Failed to parse AI response. Please try again.')
   }
-
+  console.log('aiResponse', aiResponse)
   /* 4. Validate and hydrate exercises from database */
   const requestedExerciseIds = aiResponse.exercises.map((e) => e.id)
+
+  console.log('requestedExerciseIds', requestedExerciseIds)
 
   const baseExercises = await prisma.baseExercise.findMany({
     where: {
@@ -877,17 +883,20 @@ Generate the workout based on these preferences.`,
     })
     .sort((a, b) => a.order - b.order) // Ensure proper ordering
 
-  // Generate summary and reasoning since they're not in the AI response
-  const summary = `${exerciseCount}-exercise workout targeting ${selectedMuscleGroups.length > 0 ? selectedMuscleGroups.join(', ') : 'full body'}`
-  const reasoning = `Workout designed with ${exerciseCount} exercises, ${maxSetsPerExercise} max sets per exercise. ${selectedEquipment.length > 0 ? `Using equipment: ${selectedEquipment.join(', ')}.` : 'Bodyweight-focused routine.'} Selected for balanced muscle development and progressive overload.`
-  const estimatedDuration = Math.max(25, exerciseCount * 8) // Estimate 8 minutes per exercise, minimum 25 minutes
+  // Calculate duration based on sets: 45s per set + 90s break between sets
+  // Sum all sets across all exercises, then apply the formula
+  const totalSets = workoutExercises.reduce(
+    (sum, exercise) => sum + exercise.sets.length,
+    0,
+  )
+  const estimatedDuration = Math.round(totalSets * 0.75 + (totalSets - 1) * 1.5) // 45s per set + 90s break (in minutes)
 
   const finalResult = {
     exercises: workoutExercises,
     totalDuration: estimatedDuration,
     aiMeta: {
-      summary,
-      reasoning,
+      summary: aiResponse.summary,
+      reasoning: aiResponse.reasoning,
     },
   }
 

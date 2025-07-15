@@ -96,7 +96,7 @@ function ErrorState({
   onRetry?: () => void
 }) {
   return (
-    <div className="space-y-4 text-center">
+    <div className="space-y-4 text-center flex flex-col items-center justify-center">
       <div className="space-y-2">
         <h3 className="text-lg font-semibold text-destructive">
           Failed to generate workout

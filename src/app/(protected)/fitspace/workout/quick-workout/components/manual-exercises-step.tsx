@@ -2,8 +2,9 @@
 
 import { motion } from 'framer-motion'
 
-import { ExercisesList } from '../../[trainingId]/components/exercises-list'
+import { GQLEquipment } from '@/generated/graphql-client'
 
+import { EnhancedExercisesList } from './enhanced-exercises-list'
 import { Exercise } from './exercise-card'
 
 interface ManualExercisesStepProps {
@@ -13,6 +14,12 @@ interface ManualExercisesStepProps {
   searchTerm: string
   onSearchChange: (term: string) => void
   existingExercises?: Exercise[]
+
+  // Filter props
+  selectedMuscleGroups: string[]
+  onMuscleGroupChange: (muscleGroups: string[]) => void
+  selectedEquipment: GQLEquipment[]
+  onEquipmentChange: (equipment: GQLEquipment[]) => void
 }
 
 export function ManualExercisesStep({
@@ -22,6 +29,10 @@ export function ManualExercisesStep({
   searchTerm,
   onSearchChange,
   existingExercises = [],
+  selectedMuscleGroups,
+  onMuscleGroupChange,
+  selectedEquipment,
+  onEquipmentChange,
 }: ManualExercisesStepProps) {
   // Filter out exercises that are already in the existing workout
   const existingExerciseIds = existingExercises.map((ex) => ex.id)
@@ -47,33 +58,22 @@ export function ManualExercisesStep({
         </motion.div>
       )}
 
-      {/* Selection count */}
-      {selectedExercises.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.2 }}
-          className="text-center"
-        >
-          <span className="text-sm text-muted-foreground">
-            {selectedExercises.length} new exercise
-            {selectedExercises.length !== 1 ? 's' : ''} selected
-          </span>
-        </motion.div>
-      )}
-
       {/* Exercise list */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <ExercisesList
+        <EnhancedExercisesList
           selectedExercises={selectedExercises}
           onExerciseSelect={onExerciseSelect}
           filteredExercises={availableExercises}
-          onSearch={onSearchChange}
           searchTerm={searchTerm}
+          onSearchChange={onSearchChange}
+          selectedMuscleGroups={selectedMuscleGroups}
+          onMuscleGroupChange={onMuscleGroupChange}
+          selectedEquipment={selectedEquipment}
+          onEquipmentChange={onEquipmentChange}
         />
       </motion.div>
 

@@ -29,10 +29,12 @@ export function AnimateNumber({
   isPending = false,
   format,
   className,
+  duration = 1000,
   ...rest
 }: NumberFlowProps & {
   isPending?: boolean
   format?: AnimateNumberFormatType
+  duration?: number
 }) {
   return (
     <NumberFlow
@@ -42,7 +44,7 @@ export function AnimateNumber({
         notation: 'standard',
       }}
       transformTiming={{
-        duration: 1000,
+        duration,
         easing: 'ease-in-out',
       }}
       plugins={[continuous]}

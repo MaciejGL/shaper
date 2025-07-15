@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { MinusIcon, PlusIcon } from 'lucide-react'
 
+import { AnimateNumber } from '@/components/animate-number'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -48,9 +49,11 @@ export function ExerciseCountControl({
                   Decrease
                 </Button>
                 <div className="w-20 text-center">
-                  <span className="text-3xl font-bold text-primary">
-                    {value}
-                  </span>
+                  <AnimateNumber
+                    value={value}
+                    duration={300}
+                    className="text-3xl font-bold text-primary"
+                  />
                 </div>
                 <Button
                   variant="secondary"

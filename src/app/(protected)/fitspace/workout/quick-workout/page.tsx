@@ -132,8 +132,8 @@ export default function QuickWorkoutPage() {
     selectedExerciseObjects,
     filteredExercises,
     setSearchTerm,
-    handleMuscleGroupToggle,
-    handleEquipmentToggle,
+    setSelectedMuscleGroups,
+    setSelectedEquipment,
     handleExerciseSelect,
     handleRemoveExercise,
     handleReorderExercises,
@@ -359,14 +359,26 @@ export default function QuickWorkoutPage() {
     <ManualMuscleGroupsStep
       muscleGroups={allMuscleGroups}
       selectedMuscleGroups={selectedMuscleGroups}
-      onMuscleGroupToggle={handleMuscleGroupToggle}
+      onMuscleGroupToggle={(alias: string) => {
+        const newSelection = selectedMuscleGroups.includes(alias)
+          ? selectedMuscleGroups.filter((g) => g !== alias)
+          : [...selectedMuscleGroups, alias]
+        setSelectedMuscleGroups(newSelection)
+      }}
     />
   )
 
   const manualEquipmentComponent = (
     <ManualEquipmentStep
       selectedEquipment={selectedEquipment}
-      onEquipmentToggle={handleEquipmentToggle}
+      onEquipmentToggle={(
+        equipment: import('@/generated/graphql-client').GQLEquipment,
+      ) => {
+        const newSelection = selectedEquipment.includes(equipment)
+          ? selectedEquipment.filter((e) => e !== equipment)
+          : [...selectedEquipment, equipment]
+        setSelectedEquipment(newSelection)
+      }}
     />
   )
 
@@ -378,6 +390,10 @@ export default function QuickWorkoutPage() {
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
       existingExercises={existingExercises} // Pass existing exercises
+      selectedMuscleGroups={selectedMuscleGroups}
+      onMuscleGroupChange={setSelectedMuscleGroups}
+      selectedEquipment={selectedEquipment}
+      onEquipmentChange={setSelectedEquipment}
     />
   )
 

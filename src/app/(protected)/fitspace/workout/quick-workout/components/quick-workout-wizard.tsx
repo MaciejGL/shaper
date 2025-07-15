@@ -199,7 +199,7 @@ export function QuickWorkoutWizard({
       )}
 
       {/* Step Content */}
-      <div className="container pt-6">
+      <div className={cn('container pt-6', isOnLanding && 'pt-12')}>
         <AnimatePresence mode="wait">
           <motion.div
             key={`${workoutFlow}-${currentStep}`}

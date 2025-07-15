@@ -18,21 +18,6 @@ export function ManualMuscleGroupsStep({
 }: ManualMuscleGroupsStepProps) {
   return (
     <div className="space-y-6">
-      {/* Selection count */}
-      {selectedMuscleGroups.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.2 }}
-          className="text-center"
-        >
-          <span className="text-sm text-muted-foreground">
-            {selectedMuscleGroups.length} muscle group
-            {selectedMuscleGroups.length !== 1 ? 's' : ''} selected
-          </span>
-        </motion.div>
-      )}
-
       {/* Body view */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}

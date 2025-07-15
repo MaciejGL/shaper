@@ -105,7 +105,29 @@ export default class TrainingExercise implements GQLTrainingExercise {
   }
 
   get equipment() {
-    return this.data.base?.equipment as GQLEquipment | null
+    switch (this.data.base?.equipment) {
+      case 'BAND':
+        return GQLEquipment.Band
+      case 'BARBELL':
+        return GQLEquipment.Barbell
+      case 'BODYWEIGHT':
+        return GQLEquipment.Bodyweight
+      case 'CABLE':
+        return GQLEquipment.Cable
+      case 'DUMBBELL':
+        return GQLEquipment.Dumbbell
+      case 'KETTLEBELL':
+        return GQLEquipment.Kettlebell
+      case 'MACHINE':
+        return GQLEquipment.Machine
+      case 'SMITH_MACHINE':
+        return GQLEquipment.SmithMachine
+      case 'MEDICINE_BALL':
+      case 'OTHER':
+        return GQLEquipment.Other
+      default:
+        return GQLEquipment.Other
+    }
   }
 
   get muscleGroups() {

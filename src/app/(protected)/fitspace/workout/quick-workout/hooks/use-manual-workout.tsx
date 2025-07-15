@@ -3,11 +3,7 @@ import { useMemo, useState } from 'react'
 import { GQLEquipment } from '@/generated/graphql-client'
 
 import type { Exercise } from '../components/exercise-card'
-import {
-  filterExercises,
-  toggleEquipment,
-  toggleMuscleGroup,
-} from '../utils/exercise-filters'
+import { filterExercises } from '../utils/exercise-filters'
 
 interface UseManualWorkoutOptions {
   allExercises?: Exercise[]
@@ -44,15 +40,6 @@ export function useManualWorkout({
       .map((id) => exerciseMap.get(id))
       .filter((exercise): exercise is Exercise => exercise !== undefined)
   }, [allExercises, selectedExercises])
-
-  // Toggle functions
-  const handleMuscleGroupToggle = (alias: string) => {
-    setSelectedMuscleGroups((prev) => toggleMuscleGroup(prev, alias))
-  }
-
-  const handleEquipmentToggle = (equipment: GQLEquipment) => {
-    setSelectedEquipment((prev) => toggleEquipment(prev, equipment))
-  }
 
   const handleExerciseSelect = (exerciseId: string) => {
     setSelectedExercises((prev) =>
@@ -99,17 +86,17 @@ export function useManualWorkout({
     selectedMuscleGroups,
     selectedEquipment,
 
+    // Filter setters
+    setSearchTerm,
+    setSelectedMuscleGroups,
+    setSelectedEquipment,
+
     // Selection state
     selectedExercises,
     selectedExerciseObjects,
-
-    // Derived data
     filteredExercises,
 
     // Actions
-    setSearchTerm,
-    handleMuscleGroupToggle,
-    handleEquipmentToggle,
     handleExerciseSelect,
     handleRemoveExercise,
     handleReorderExercises,

@@ -1,10 +1,9 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { VideoPreview } from '@/components/video-preview'
 import { GQLFitspaceGenerateAiWorkoutMutation } from '@/generated/graphql-client'
 import { translateEquipment } from '@/utils/translate-equipment'
@@ -67,11 +66,9 @@ function ExerciseCard({ workoutExercise, index }: ExerciseCardProps) {
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <h4 className="font-semibold text-lg">{exercise.name}</h4>
-                {exercise.description && (
-                  <p className="text-sm text-muted-foreground">
-                    {exercise.description}
-                  </p>
-                )}
+                <p className="text-sm text-muted-foreground">
+                  {aiMeta.explanation}
+                </p>
               </div>
               {exercise.videoUrl && <VideoPreview url={exercise.videoUrl} />}
             </div>
@@ -105,12 +102,6 @@ function ExerciseCard({ workoutExercise, index }: ExerciseCardProps) {
             </div>
 
             {/* AI Explanation */}
-            <div className="flex items-start gap-2 -ml-6">
-              <Sparkles className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-muted-foreground">
-                {aiMeta.explanation}
-              </p>
-            </div>
           </div>
         </div>
       </CardContent>
