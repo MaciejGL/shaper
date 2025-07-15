@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react'
 
+import { CardSkeleton } from '@/components/card-skeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   GQLTrainingPlan,
   useFitspaceCreateQuickWorkoutMutation,
@@ -14,12 +16,17 @@ import { AiMuscleGroupsStep } from './components/ai-muscle-groups-step'
 import { AiParametersStep } from './components/ai-parameters-step'
 import { AiResultsStep } from './components/ai-results-step'
 import { ExistingWorkoutView } from './components/existing-workout-view'
+import { ManualEquipmentStep } from './components/manual-equipment-step'
+import { ManualExercisesStep } from './components/manual-exercises-step'
+import { ManualMuscleGroupsStep } from './components/manual-muscle-groups-step'
+import { ManualReviewStep } from './components/manual-review-step'
 import {
   QuickWorkoutWizard,
   WorkoutFlow,
 } from './components/quick-workout-wizard'
 import { WorkoutCreationLanding } from './components/workout-creation-landing'
 import { useAiWorkoutGeneration } from './hooks/use-ai-workout-generation'
+import { useManualWorkout } from './hooks/use-manual-workout'
 import { hasTodaysWorkoutExercises } from './utils/workout-utils'
 
 export default function QuickWorkoutPage() {
@@ -42,8 +49,9 @@ export default function QuickWorkoutPage() {
     useFitspaceCreateQuickWorkoutMutation()
 
   // Data fetching
-  const { data: exercisesData } = useFitspaceGetExercisesQuery()
-  const { data: quickWorkoutPlanData } =
+  const { data: exercisesData, isLoading: isLoadingExercises } =
+    useFitspaceGetExercisesQuery()
+  const { data: quickWorkoutPlanData, isLoading: isLoadingPlan } =
     useFitspaceGetUserQuickWorkoutPlanQuery(
       {},
       {
@@ -69,6 +77,44 @@ export default function QuickWorkoutPage() {
     )
   }, [exercisesData])
 
+  // All exercises data for manual flow
+  const allExercises = useMemo(() => {
+    const exercises = [
+      ...(exercisesData?.getExercises?.trainerExercises || []),
+      ...(exercisesData?.getExercises?.publicExercises || []),
+    ]
+    return exercises.map((ex) => ({
+      id: ex.id,
+      name: ex.name,
+      equipment: ex.equipment,
+      muscleGroups: ex.muscleGroups.map((mg) => ({
+        id: mg.id,
+        alias: mg.alias,
+        groupSlug: mg.groupSlug,
+      })),
+    }))
+  }, [exercisesData])
+
+  // Manual workout state management
+  const {
+    searchTerm,
+    selectedMuscleGroups,
+    selectedEquipment,
+    selectedExercises,
+    selectedExerciseObjects,
+    filteredExercises,
+    setSearchTerm,
+    handleMuscleGroupToggle,
+    handleEquipmentToggle,
+    handleExerciseSelect,
+    handleRemoveExercise,
+    handleReorderExercises,
+    canProceedToReview,
+  } = useManualWorkout({ allExercises })
+
+  // Loading state
+  const isLoading = isLoadingExercises || isLoadingPlan
+
   const shouldShowWizard = showWizard || !hasExistingWorkout
 
   // Step change handler for AI flow
@@ -85,7 +131,7 @@ export default function QuickWorkoutPage() {
   }
 
   // Handle creating workout from AI data
-  const handleFinish = async () => {
+  const handleFinishAI = async () => {
     if (!aiWorkoutResult) {
       console.error('No AI workout result to create')
       return
@@ -124,6 +170,86 @@ export default function QuickWorkoutPage() {
     }
   }
 
+  // Handle creating workout from manual data
+  const handleFinishManual = async () => {
+    if (selectedExercises.length === 0) {
+      console.error('No exercises selected')
+      return
+    }
+
+    try {
+      // Transform manual workout data to the format expected by createQuickWorkout
+      const exercises = selectedExercises.map((exerciseId, index) => ({
+        exerciseId,
+        order: index + 1, // Use selection order
+        sets: [
+          // Create default sets for manual selection
+          {
+            order: 1,
+            reps: null,
+            minReps: null,
+            maxReps: null,
+            rpe: null,
+            weight: null,
+          },
+          {
+            order: 2,
+            reps: null,
+            minReps: null,
+            maxReps: null,
+            rpe: null,
+            weight: null,
+          },
+          {
+            order: 3,
+            reps: null,
+            minReps: null,
+            maxReps: null,
+            rpe: null,
+            weight: null,
+          },
+        ],
+      }))
+
+      // Create the workout (replace existing exercises)
+      await createQuickWorkout({
+        input: {
+          exercises,
+          replaceExisting: false, // For adding more exercises, don't replace existing ones
+        },
+      })
+
+      // Navigate to the workout
+      if (quickWorkoutPlan?.id) {
+        window.location.href = `/fitspace/workout/${quickWorkoutPlan.id}`
+      }
+    } catch (error) {
+      console.error('Failed to create workout:', error)
+    }
+  }
+
+  // Unified finish handler
+  const handleFinish = () => {
+    if (workoutFlow === 'ai') {
+      return handleFinishAI()
+    } else if (workoutFlow === 'manual') {
+      return handleFinishManual()
+    }
+  }
+
+  // Step validation
+  const canProceedFromStep = (step: number) => {
+    if (workoutFlow === 'manual') {
+      switch (step) {
+        case 2: // exercises step
+          return canProceedToReview
+        default:
+          return true
+      }
+    }
+    return true // AI flow or default
+  }
+
   // Handle workflow selection
   const handleSelectManual = () => {
     setWorkoutFlow('manual')
@@ -133,22 +259,86 @@ export default function QuickWorkoutPage() {
     setWorkoutFlow('ai')
   }
 
-  // Handle creating new workout
+  // Handle creating new workout (goes to landing to choose AI/manual)
   const handleCreateNewWorkout = () => {
     setShowWizard(true)
+    setWorkoutFlow(null) // Reset flow to show landing
   }
 
-  // Handle continuing existing workout
-  const handleContinueWorkout = () => {
-    // Navigate to workout session or similar
-    console.log('Continue workout')
+  // Handle adding more exercises (goes directly to manual flow)
+  const handleAddMoreExercises = () => {
+    setShowWizard(true)
+    setWorkoutFlow('manual') // Set to manual flow directly
   }
 
-  // Placeholder components for manual flow (to be implemented)
-  const placeholderComponent = (
-    <div className="flex h-64 items-center justify-center rounded-lg border border-dashed">
-      <p className="text-muted-foreground">Manual flow - to be implemented</p>
-    </div>
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen pb-[80px]">
+        <div className="flex flex-col min-h-screen justify-center items-center p-4">
+          <div className="max-w-lg w-full space-y-6">
+            {/* Loading header */}
+            <div className="text-center space-y-4">
+              <Skeleton className="w-24 h-24 rounded-full mx-auto" />
+              <div className="space-y-2">
+                <Skeleton className="h-8 w-48 mx-auto" />
+                <Skeleton className="h-4 w-64 mx-auto" />
+              </div>
+            </div>
+
+            {/* Loading content */}
+            <div className="space-y-4">
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
+            </div>
+
+            {/* Loading buttons */}
+            <div className="space-y-3">
+              <Skeleton className="h-12 w-full" />
+              <div className="flex gap-3">
+                <Skeleton className="h-10 flex-1" />
+                <Skeleton className="h-10 flex-1" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Manual components
+  const manualMuscleGroupsComponent = (
+    <ManualMuscleGroupsStep
+      muscleGroups={allMuscleGroups}
+      selectedMuscleGroups={selectedMuscleGroups}
+      onMuscleGroupToggle={handleMuscleGroupToggle}
+    />
+  )
+
+  const manualEquipmentComponent = (
+    <ManualEquipmentStep
+      selectedEquipment={selectedEquipment}
+      onEquipmentToggle={handleEquipmentToggle}
+    />
+  )
+
+  const manualExercisesComponent = (
+    <ManualExercisesStep
+      filteredExercises={filteredExercises}
+      selectedExercises={selectedExercises}
+      onExerciseSelect={handleExerciseSelect}
+      searchTerm={searchTerm}
+      onSearchChange={setSearchTerm}
+    />
+  )
+
+  const manualReviewComponent = (
+    <ManualReviewStep
+      selectedExercises={selectedExerciseObjects}
+      onReorderExercises={handleReorderExercises}
+      onRemoveExercise={handleRemoveExercise}
+    />
   )
 
   // AI components
@@ -182,25 +372,26 @@ export default function QuickWorkoutPage() {
     <div className="min-h-screen pb-[80px]">
       {shouldShowWizard ? (
         <QuickWorkoutWizard
-          showLanding={!hasExistingWorkout}
+          showLanding={workoutFlow === null}
           workoutFlow={workoutFlow}
           onFlowChange={setWorkoutFlow}
           hasExistingWorkout={hasExistingWorkout}
-          canProceedFromStep={() => true} // Simplified for now
+          canProceedFromStep={canProceedFromStep}
           isAdding={isCreatingWorkout}
           onFinish={handleFinish}
           onStepChange={handleStepChange}
-          // Manual flow components (placeholders)
+          // Landing component
           landingComponent={
             <WorkoutCreationLanding
               onSelectManual={handleSelectManual}
               onSelectAI={handleSelectAI}
             />
           }
-          muscleGroupsComponent={placeholderComponent}
-          equipmentComponent={placeholderComponent}
-          exercisesComponent={placeholderComponent}
-          reviewComponent={placeholderComponent}
+          // Manual flow components
+          muscleGroupsComponent={manualMuscleGroupsComponent}
+          equipmentComponent={manualEquipmentComponent}
+          exercisesComponent={manualExercisesComponent}
+          reviewComponent={manualReviewComponent}
           // AI flow components
           aiMuscleGroupsComponent={aiMuscleGroupsComponent}
           aiEquipmentComponent={aiEquipmentComponent}
@@ -210,8 +401,8 @@ export default function QuickWorkoutPage() {
       ) : (
         <ExistingWorkoutView
           quickWorkoutPlan={quickWorkoutPlan}
-          onContinueWorkout={handleContinueWorkout}
           onCreateNewWorkout={handleCreateNewWorkout}
+          onAddMoreExercises={handleAddMoreExercises}
         />
       )}
     </div>

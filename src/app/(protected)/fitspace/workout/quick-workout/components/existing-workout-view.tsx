@@ -1,21 +1,13 @@
 'use client'
 
-import { useQueryClient } from '@tanstack/react-query'
-import { isToday } from 'date-fns'
 import { motion } from 'framer-motion'
 import { ListPlusIcon, PlusIcon } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import { Separator } from '@/components/ui/separator'
-import {
-  GQLFitspaceGetUserQuickWorkoutPlanQuery,
-  useFitspaceClearTodaysWorkoutMutation,
-  useFitspaceGetUserQuickWorkoutPlanQuery,
-} from '@/generated/graphql-client'
-import { useInvalidateQuery } from '@/lib/invalidate-query'
+import { GQLFitspaceGetUserQuickWorkoutPlanQuery } from '@/generated/graphql-client'
 
 import { getTodaysWorkoutExercises } from '../utils/workout-utils'
 
@@ -25,94 +17,22 @@ interface ExistingWorkoutViewProps {
   quickWorkoutPlan?:
     | GQLFitspaceGetUserQuickWorkoutPlanQuery['getQuickWorkoutPlan']
     | null
-  onContinueWorkout: () => void
   onCreateNewWorkout: () => void
+  onAddMoreExercises: () => void
 }
 
 export function ExistingWorkoutView({
   quickWorkoutPlan,
-  onContinueWorkout,
   onCreateNewWorkout,
+  onAddMoreExercises,
 }: ExistingWorkoutViewProps) {
-  const [isClearing, setIsClearing] = useState(false)
-  const invalidateQuery = useInvalidateQuery()
-  const queryClient = useQueryClient()
+  if (!quickWorkoutPlan) {
+    return null
+  }
 
-  const { mutateAsync: clearWorkout } = useFitspaceClearTodaysWorkoutMutation({
-    onMutate: async () => {
-      // Cancel any outgoing refetches so they don't overwrite our optimistic update
-      await queryClient.cancelQueries({
-        queryKey: useFitspaceGetUserQuickWorkoutPlanQuery.getKey(),
-      })
+  const todaysWorkout = getTodaysWorkoutExercises(quickWorkoutPlan)
 
-      // Snapshot the previous value
-      const previousData =
-        queryClient.getQueryData<GQLFitspaceGetUserQuickWorkoutPlanQuery>(
-          useFitspaceGetUserQuickWorkoutPlanQuery.getKey(),
-        )
-
-      // Optimistically update to remove today's exercises
-      if (previousData?.getQuickWorkoutPlan) {
-        const updatedData = {
-          ...previousData,
-          getQuickWorkoutPlan: {
-            ...previousData.getQuickWorkoutPlan,
-            weeks: previousData.getQuickWorkoutPlan.weeks.map((week) => ({
-              ...week,
-              days: week.days.map((day) => {
-                // Clear exercises for today's day
-                if (day.scheduledAt && isToday(new Date(day.scheduledAt))) {
-                  return {
-                    ...day,
-                    exercises: [],
-                  }
-                }
-                return day
-              }),
-            })),
-          },
-        }
-
-        queryClient.setQueryData<GQLFitspaceGetUserQuickWorkoutPlanQuery>(
-          useFitspaceGetUserQuickWorkoutPlanQuery.getKey(),
-          updatedData,
-        )
-      }
-
-      // Return a context object with the snapshotted value
-      return { previousData }
-    },
-    onError: (err, variables, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
-      if (context?.previousData) {
-        queryClient.setQueryData(
-          useFitspaceGetUserQuickWorkoutPlanQuery.getKey(),
-          context.previousData,
-        )
-      }
-    },
-    onSuccess: () => {
-      // Invalidate all related queries
-      invalidateQuery({
-        queryKey: useFitspaceGetUserQuickWorkoutPlanQuery.getKey(),
-      })
-      invalidateQuery({
-        queryKey: ['FitspaceGetWorkout'],
-      })
-      invalidateQuery({
-        queryKey: ['FitspaceMyPlans'],
-      })
-      invalidateQuery({
-        queryKey: ['FitspaceDashboardGetWorkout'],
-      })
-    },
-  })
-
-  const todaysWorkout = quickWorkoutPlan
-    ? getTodaysWorkoutExercises(quickWorkoutPlan)
-    : null
-
-  if (!todaysWorkout) {
+  if (!todaysWorkout?.exercises?.length) {
     return null
   }
 
@@ -120,33 +40,54 @@ export function ExistingWorkoutView({
   const completedExercises = exercises.filter((ex) => ex.completedAt).length
   const isWorkoutCompleted = completedExercises === exercises.length
 
-  const handleClearWorkout = async () => {
-    if (exercises.length === 0) return
-
-    setIsClearing(true)
-    try {
-      await clearWorkout({})
-
-      onCreateNewWorkout() // Switch to wizard after clearing
-    } catch (error) {
-      console.error('Failed to clear workout:', error)
-      toast.error('Failed to clear workout')
-    } finally {
-      setIsClearing(false)
-    }
-  }
-
   return (
-    <div className="container py-6 space-y-6">
+    <div className="flex flex-col min-h-screen justify-center items-center p-4">
       <motion.div
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-lg w-full"
       >
-        <div>
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <h2 className="text-2xl">You already have a workout for today</h2>
+        <div className="text-center">
+          <div className="mb-8">
+            <div className="space-y-4">
+              <motion.div
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.1 }}
+                className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 mx-auto flex items-center justify-center"
+              >
+                <svg
+                  className="w-12 h-12 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </motion.div>
+              <div>
+                <motion.h1
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-2xl font-bold"
+                >
+                  Welcome back!
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-muted-foreground mt-2"
+                >
+                  You have a workout ready for today
+                </motion.p>
+              </div>
             </div>
 
             {/* Progress indicator */}
@@ -182,22 +123,20 @@ export function ExistingWorkoutView({
             {/* Action Buttons */}
             <div className="space-y-4">
               <div className="flex flex-col gap-3">
-                <Button
-                  onClick={onContinueWorkout}
+                <ButtonLink
+                  href={`/fitspace/workout/${quickWorkoutPlan.id}`}
                   size="lg"
                   className="w-full"
                 >
                   {isWorkoutCompleted
                     ? 'View Completed Workout'
                     : 'Continue Workout'}
-                </Button>
+                </ButtonLink>
 
                 <div className="flex gap-3">
                   <Button
                     variant="secondary"
-                    onClick={handleClearWorkout}
-                    loading={isClearing}
-                    disabled={isClearing}
+                    onClick={onCreateNewWorkout}
                     className="flex-1"
                     iconStart={<PlusIcon />}
                   >
@@ -206,7 +145,7 @@ export function ExistingWorkoutView({
 
                   <Button
                     variant="secondary"
-                    onClick={onCreateNewWorkout}
+                    onClick={onAddMoreExercises}
                     className="flex-1"
                     iconStart={<ListPlusIcon />}
                   >
@@ -216,8 +155,8 @@ export function ExistingWorkoutView({
               </div>
 
               <p className="text-xs text-muted-foreground text-center">
-                You can continue your existing workout or create a completely
-                new one for today.
+                Continue your workout, add more exercises, or start fresh with a
+                completely new workout.
               </p>
             </div>
           </div>
