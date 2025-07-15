@@ -132,7 +132,7 @@ export function BackBodyView({
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <g clip-path="url(#clip0_3346_1070)">
+        <g clipPath="url(#clip0_3346_1070)">
           <Unselectable />
           <BackBodyBackground />
           <Traps getPathProps={getPathProps} />

@@ -2,7 +2,7 @@ import { TrainingDay } from '@prisma/client'
 import { TrainingExercise as TrainingExerciseType } from '@prisma/client'
 import {
   addDays,
-  getWeek,
+  getISOWeek,
   isSameDay,
   isSameWeek,
   startOfToday,
@@ -1138,8 +1138,19 @@ export const swapExercise = async (
   return new ExerciseSubstitute(newSubstitution, context)
 }
 
+/**
+ * Get the start of the current week in UTC
+ * This ensures consistent week starts regardless of server timezone
+ */
+function getUTCWeekStart(date: Date = new Date()): Date {
+  // Get the current week start in UTC
+  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
+  const weekStart = startOfWeek(utcDate, { weekStartsOn: 1 })
+  return new Date(weekStart.getTime() - date.getTimezoneOffset() * 60000)
+}
+
 export const addExercisesToQuickWorkout = async (
-  exerciseIds: string[],
+  exercises: { exerciseId: string; order: number }[],
   context: GQLContext,
 ) => {
   const user = context.user
@@ -1161,15 +1172,15 @@ export const addExercisesToQuickWorkout = async (
     throw new GraphQLError('Quick workout plan not found')
   }
 
-  const currentWeek = getWeek(startOfWeek(new Date(), { weekStartsOn: 1 }))
+  // Use UTC-based week start calculation
+  const weekStart = getUTCWeekStart()
+  const currentWeek = getISOWeek(weekStart)
+
   const hasCurrentWeek = quickWorkoutPlan.weeks.some((week) => {
     if (!week.scheduledAt) {
       return false
     }
-    return isSameWeek(
-      week.scheduledAt,
-      startOfWeek(new Date(), { weekStartsOn: 1 }),
-    )
+    return isSameWeek(week.scheduledAt, weekStart)
   })
 
   if (!hasCurrentWeek) {
@@ -1179,7 +1190,7 @@ export const addExercisesToQuickWorkout = async (
         planId: quickWorkoutPlan.id,
         weekNumber: currentWeek,
         name: `Week ${currentWeek}`,
-        scheduledAt: startOfWeek(new Date(), { weekStartsOn: 1 }),
+        scheduledAt: weekStart,
         isExtra: true,
         days: {
           createMany: {
@@ -1187,10 +1198,7 @@ export const addExercisesToQuickWorkout = async (
               dayOfWeek: i,
               isRestDay: false,
               isExtra: true,
-              scheduledAt: addDays(
-                startOfWeek(new Date(), { weekStartsOn: 1 }),
-                i,
-              ),
+              scheduledAt: addDays(weekStart, i),
             })),
           },
         },
@@ -1204,23 +1212,22 @@ export const addExercisesToQuickWorkout = async (
     throw new GraphQLError('Quick workout plan not found')
   }
 
-  // get plans todays day - FIX: Find the actual day, not the week
+  // get plans todays day - Find the actual day using scheduledAt
   const today = startOfToday()
-  const startOfWeekDate = startOfWeek(today, { weekStartsOn: 1 })
 
   // Find the current week first
   const currentWeekData = fullPlan.weeks.find((week) => {
     if (!week.scheduledAt) {
       return false
     }
-    return isSameWeek(week.scheduledAt, startOfWeekDate)
+    return isSameWeek(week.scheduledAt, weekStart)
   })
 
   if (!currentWeekData) {
     throw new GraphQLError('Current week not found')
   }
 
-  // Then find the actual day within that week
+  // Then find the actual day within that week using scheduledAt
   const currentDay = currentWeekData.days.find(
     (d) => d.scheduledAt && isSameDay(d.scheduledAt, today),
   )
@@ -1229,23 +1236,38 @@ export const addExercisesToQuickWorkout = async (
     throw new GraphQLError('Day not found')
   }
 
+  // Extract exercise IDs for database query
+  const exerciseIds = exercises.map((ex) => ex.exerciseId)
+
   const baseExercises = await prisma.baseExercise.findMany({
     where: {
       id: { in: exerciseIds },
     },
   })
 
+  // Create a map for quick lookup
+  const baseExerciseMap = new Map(baseExercises.map((ex) => [ex.id, ex]))
+
   const trainingExercises = await prisma.trainingExercise.createManyAndReturn({
-    data: baseExercises.map((exercise, index) => ({
-      baseId: exercise.id,
-      name: exercise.name,
-      order: index + 1,
-      instructions: exercise.description,
-      additionalInstructions: exercise.additionalInstructions,
-      type: exercise.type,
-      isExtra: true,
-      dayId: currentDay.id, // FIX: Use the actual day ID, not week ID
-    })),
+    data: exercises.map((exerciseInput) => {
+      const baseExercise = baseExerciseMap.get(exerciseInput.exerciseId)
+      if (!baseExercise) {
+        throw new GraphQLError(
+          `Exercise with ID ${exerciseInput.exerciseId} not found`,
+        )
+      }
+
+      return {
+        baseId: baseExercise.id,
+        name: baseExercise.name,
+        order: exerciseInput.order, // Use the provided order from UI
+        instructions: baseExercise.description,
+        additionalInstructions: baseExercise.additionalInstructions,
+        type: baseExercise.type,
+        isExtra: true,
+        dayId: currentDay.id, // Use the actual day ID
+      }
+    }),
   })
 
   await prisma.exerciseSet.createMany({

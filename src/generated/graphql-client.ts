@@ -869,7 +869,7 @@ export type GQLMutationAddExerciseToDayArgs = {
 
 
 export type GQLMutationAddExercisesToQuickWorkoutArgs = {
-  exerciseIds: Array<Scalars['ID']['input']>;
+  exercises: Array<GQLQuickWorkoutExerciseInput>;
 };
 
 
@@ -1627,6 +1627,11 @@ export type GQLQueryUserPublicArgs = {
   id: Scalars['ID']['input'];
 };
 
+export type GQLQuickWorkoutExerciseInput = {
+  exerciseId: Scalars['ID']['input'];
+  order: Scalars['Int']['input'];
+};
+
 export type GQLRemoveMealPlanCollaboratorInput = {
   collaboratorId: Scalars['ID']['input'];
 };
@@ -1733,6 +1738,7 @@ export type GQLTrainingExercise = {
   completedAt?: Maybe<Scalars['String']['output']>;
   createdAt: Scalars['String']['output'];
   dayId: Scalars['ID']['output'];
+  equipment?: Maybe<GQLEquipment>;
   id: Scalars['ID']['output'];
   instructions?: Maybe<Scalars['String']['output']>;
   isExtra: Scalars['Boolean']['output'];
@@ -2490,7 +2496,7 @@ export type GQLQuickWorkoutExercisesQuery = { __typename?: 'Query', publicExerci
 export type GQLFitspaceGetUserQuickWorkoutPlanQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLFitspaceGetUserQuickWorkoutPlanQuery = { __typename?: 'Query', getQuickWorkoutPlan: { __typename?: 'TrainingPlan', id: string, title: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
+export type GQLFitspaceGetUserQuickWorkoutPlanQuery = { __typename?: 'Query', getQuickWorkoutPlan: { __typename?: 'TrainingPlan', id: string, title: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, order: number, completedAt?: string | undefined | null, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
 
 export type GQLCreateQuickWorkoutPlanMutationVariables = Exact<{
   input: GQLCreateTrainingPlanInput;
@@ -2507,7 +2513,7 @@ export type GQLAssignQuickWorkoutPlanMutationVariables = Exact<{
 export type GQLAssignQuickWorkoutPlanMutation = { __typename?: 'Mutation', assignTrainingPlanToClient: boolean };
 
 export type GQLAddExercisesToQuickWorkoutMutationVariables = Exact<{
-  exerciseIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+  exercises: Array<GQLQuickWorkoutExerciseInput> | GQLQuickWorkoutExerciseInput;
 }>;
 
 
@@ -5885,14 +5891,25 @@ export const FitspaceGetUserQuickWorkoutPlanDocument = `
     title
     weeks {
       id
+      scheduledAt
       days {
         id
         dayOfWeek
         isRestDay
+        scheduledAt
         exercises {
           id
           name
           baseId
+          order
+          completedAt
+          equipment
+          muscleGroups {
+            id
+            name
+            alias
+            groupSlug
+          }
           sets {
             id
             order
@@ -6003,8 +6020,8 @@ useAssignQuickWorkoutPlanMutation.getKey = () => ['AssignQuickWorkoutPlan'];
 useAssignQuickWorkoutPlanMutation.fetcher = (variables: GQLAssignQuickWorkoutPlanMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAssignQuickWorkoutPlanMutation, GQLAssignQuickWorkoutPlanMutationVariables>(AssignQuickWorkoutPlanDocument, variables, options);
 
 export const AddExercisesToQuickWorkoutDocument = `
-    mutation AddExercisesToQuickWorkout($exerciseIds: [ID!]!) {
-  addExercisesToQuickWorkout(exerciseIds: $exerciseIds) {
+    mutation AddExercisesToQuickWorkout($exercises: [QuickWorkoutExerciseInput!]!) {
+  addExercisesToQuickWorkout(exercises: $exercises) {
     id
   }
 }

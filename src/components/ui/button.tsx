@@ -14,7 +14,7 @@ const buttonVariants = cva(
       variant: {
         default: cn(
           'bg-primary text-primary-foreground hover:bg-primary/90',
-          'data-[loading=true]:bg-primary/80 data-[loading=true]:text-primary/70 disabled:bg-primary/50 data-[loading=true]:dark:bg-primary/80 data-[loading=true]:dark:text-primary/70 disabled:dark:bg-primary/50',
+          'data-[loading=true]:bg-primary/80 data-[loading=true]:text-primary/70 disabled:bg-primary/50 data-[loading=true]:dark:bg-primary/80 data-[loading=true]:dark:text-primary-foreground/70 disabled:dark:bg-primary/50',
         ),
         destructive: cn(
           'hover:bg-accent text-destructive/75 hover:text-destructive bg-destructive/10',

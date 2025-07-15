@@ -1,6 +1,6 @@
 import { prisma } from '@lib/db'
 import * as crypto from 'crypto'
-import { addDays, getWeek, startOfWeek } from 'date-fns'
+import { addDays, getISOWeek, startOfWeek } from 'date-fns'
 import { GraphQLError } from 'graphql'
 
 import {
@@ -1194,6 +1194,17 @@ export async function removeSetFromExercise(
   })
 }
 
+/**
+ * Get the start of the current week in UTC
+ * This ensures consistent week starts regardless of server timezone
+ */
+function getUTCWeekStart(date: Date = new Date()): Date {
+  // Get the current week start in UTC
+  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
+  const weekStart = startOfWeek(utcDate, { weekStartsOn: 1 })
+  return new Date(weekStart.getTime() - date.getTimezoneOffset() * 60000)
+}
+
 export async function getQuickWorkoutPlan(context: GQLContext) {
   const user = context.user
   if (!user) {
@@ -1209,6 +1220,10 @@ export async function getQuickWorkoutPlan(context: GQLContext) {
 
   if (!plan) {
     console.info('[getQuickWorkoutPlan] Creating new quick workout plan')
+
+    // Use UTC-based week start calculation
+    const weekStart = getUTCWeekStart()
+
     // Create a new quick workout plan
     await prisma.trainingPlan.create({
       data: {
@@ -1219,10 +1234,10 @@ export async function getQuickWorkoutPlan(context: GQLContext) {
         isDraft: false,
         weeks: {
           create: {
-            name: `Week ${getWeek(startOfWeek(new Date(), { weekStartsOn: 1 }))}`,
+            name: `Week ${getISOWeek(weekStart)}`,
             weekNumber: 1,
             isExtra: true,
-            scheduledAt: startOfWeek(new Date(), { weekStartsOn: 1 }),
+            scheduledAt: weekStart,
 
             days: {
               createMany: {
@@ -1230,10 +1245,7 @@ export async function getQuickWorkoutPlan(context: GQLContext) {
                   dayOfWeek: i,
                   isRestDay: false,
                   isExtra: true,
-                  scheduledAt: addDays(
-                    startOfWeek(new Date(), { weekStartsOn: 1 }),
-                    i,
-                  ),
+                  scheduledAt: addDays(weekStart, i),
                 })),
               },
             },

@@ -180,7 +180,7 @@
   }
   user-select: none;
   background-color: var(--masked-placeholder-text);
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-lg);
 }
 
 @utility flex-center {

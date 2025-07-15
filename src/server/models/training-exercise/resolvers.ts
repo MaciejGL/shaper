@@ -54,8 +54,8 @@ export const Mutation: GQLMutationResolvers = {
   swapExercise: async (_, { exerciseId, substituteId }, context) => {
     return swapExercise(exerciseId, substituteId, context)
   },
-  addExercisesToQuickWorkout: async (_, { exerciseIds }, context) => {
-    return addExercisesToQuickWorkout(exerciseIds, context)
+  addExercisesToQuickWorkout: async (_, { exercises }, context) => {
+    return addExercisesToQuickWorkout(exercises, context)
   },
 
   // TRAINER

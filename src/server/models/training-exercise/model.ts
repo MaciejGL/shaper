@@ -8,6 +8,7 @@ import {
 } from '@prisma/client'
 
 import {
+  GQLEquipment,
   GQLExerciseType,
   GQLSubstitute,
   GQLTrainingExercise,
@@ -101,6 +102,10 @@ export default class TrainingExercise implements GQLTrainingExercise {
 
   get baseId() {
     return this.data.baseId
+  }
+
+  get equipment() {
+    return this.data.base?.equipment as GQLEquipment | null
   }
 
   get muscleGroups() {

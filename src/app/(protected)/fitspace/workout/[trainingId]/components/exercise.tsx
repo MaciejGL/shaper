@@ -473,7 +473,7 @@ export function ExerciseSelector({
                   )}
                 />
                 <p>
-                  {index + 1}.{exercise.substitutedBy?.name || exercise.name}
+                  {index + 1}. {exercise.substitutedBy?.name || exercise.name}
                 </p>
                 {exercise.substitutedBy?.completedAt || exercise.completedAt ? (
                   <BadgeCheckIcon className="self-start ml-auto mt-0.5 text-green-500" />

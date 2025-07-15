@@ -39,7 +39,7 @@ type TrainingExercise {
 
   dayId: ID!
   baseId: ID
-
+  equipment: Equipment
   createdAt: String!
   updatedAt: String!
 }
@@ -76,7 +76,14 @@ type Mutation {
   addSetExerciseForm(input: AddSetExerciseFormInput!): ExerciseSet!
   removeSetExerciseForm(setId: ID!): Boolean!
   swapExercise(exerciseId: ID!, substituteId: ID!): Substitute!
-  addExercisesToQuickWorkout(exerciseIds: [ID!]!): TrainingPlan!
+  addExercisesToQuickWorkout(
+    exercises: [QuickWorkoutExerciseInput!]!
+  ): TrainingPlan!
+}
+
+input QuickWorkoutExerciseInput {
+  exerciseId: ID!
+  order: Int!
 }
 
 input AddSetExerciseFormInput {

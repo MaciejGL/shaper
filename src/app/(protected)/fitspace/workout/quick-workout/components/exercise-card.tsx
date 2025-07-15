@@ -8,6 +8,7 @@ import { translateEquipment } from '@/utils/translate-equipment'
 
 export type Exercise = Pick<GQLBaseExercise, 'id' | 'name' | 'equipment'> & {
   muscleGroups: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
+  completedAt?: string | null
 }
 
 type ExerciseCardProps = {
@@ -15,6 +16,8 @@ type ExerciseCardProps = {
   selectedExercises?: string[]
   onExerciseSelect?: (exerciseId: string) => void
   onExerciseRemove?: (exerciseId: string) => void
+  loading?: boolean
+  isDraggable?: boolean
 }
 
 export function ExerciseCard({
@@ -22,6 +25,8 @@ export function ExerciseCard({
   selectedExercises,
   onExerciseSelect,
   onExerciseRemove,
+  isDraggable,
+  loading,
 }: ExerciseCardProps) {
   return (
     <div
@@ -42,7 +47,7 @@ export function ExerciseCard({
           : undefined
       }
     >
-      {onExerciseRemove && (
+      {isDraggable && (
         <div className="flex-shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing">
           <GripVertical className="h-4 w-4" />
         </div>
@@ -62,6 +67,7 @@ export function ExerciseCard({
                 onClick={() => onExerciseRemove(exercise.id)}
                 iconOnly={<XIcon />}
                 className="opacity-70 group-hover/exercise-card:opacity-100 transition-opacity"
+                loading={loading}
               >
                 Remove
               </Button>

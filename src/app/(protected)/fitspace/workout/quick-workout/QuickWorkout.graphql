@@ -25,14 +25,25 @@ query FitspaceGetUserQuickWorkoutPlan {
 
     weeks {
       id
+      scheduledAt
       days {
         id
         dayOfWeek
         isRestDay
+        scheduledAt
         exercises {
           id
           name
           baseId
+          order
+          completedAt
+          equipment
+          muscleGroups {
+            id
+            name
+            alias
+            groupSlug
+          }
           sets {
             id
             order
@@ -61,9 +72,9 @@ mutation AssignQuickWorkoutPlan($input: AssignTrainingPlanToClientInput!) {
   assignTrainingPlanToClient(input: $input)
 }
 
-# Add exercise to the quick workout day
-mutation AddExercisesToQuickWorkout($exerciseIds: [ID!]!) {
-  addExercisesToQuickWorkout(exerciseIds: $exerciseIds) {
+# Add exercises to the quick workout day with order information
+mutation AddExercisesToQuickWorkout($exercises: [QuickWorkoutExerciseInput!]!) {
+  addExercisesToQuickWorkout(exercises: $exercises) {
     id
   }
 }

@@ -245,6 +245,8 @@ export function AddExerciseModal({
             <div className="mt-2 px-4">
               <p className="text-md font-medium  mb-2">3. Choose an exercise</p>
               <ExercisesList
+                searchTerm={searchTerm}
+                onSearch={setSearchTerm}
                 selectedExercises={selectedExercises}
                 onExerciseSelect={handleExerciseSelect}
                 filteredExercises={filteredExercises}
