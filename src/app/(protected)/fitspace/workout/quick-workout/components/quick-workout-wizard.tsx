@@ -7,6 +7,8 @@ import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 
+import { scrollToTop } from '../utils/scroll-utils'
+
 import type { WorkoutCreationLandingProps } from './workout-creation-landing'
 
 // Define different step flows
@@ -137,6 +139,7 @@ export function QuickWorkoutWizard({
       const newStep = currentStep + 1
       setCurrentStep(newStep)
       onStepChange?.(newStep)
+      scrollToTop()
     }
   }
 
@@ -145,22 +148,27 @@ export function QuickWorkoutWizard({
       const newStep = currentStep - 1
       setCurrentStep(newStep)
       onStepChange?.(newStep)
+      scrollToTop()
     } else if (isOnLanding && hasExistingWorkout) {
       // From landing page, go back to existing workout view
       onStepChange?.(-1)
+      scrollToTop()
     } else if (hasExistingWorkout) {
       // From step 0 of a flow, go back to existing workout view
       onStepChange?.(-1)
+      scrollToTop()
     } else if (workoutFlow !== null && onFlowChange) {
       // Go back to landing page from step 0 of any flow (when landing is available)
       onFlowChange(null)
       setCurrentStep(0)
+      scrollToTop()
     }
   }
 
   const handleFlowSelection = (flow: WorkoutFlow) => {
     onFlowChange?.(flow)
     setCurrentStep(0) // Reset to first step of the new flow
+    scrollToTop()
   }
 
   const handleFinish = () => {

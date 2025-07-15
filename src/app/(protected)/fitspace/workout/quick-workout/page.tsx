@@ -28,6 +28,7 @@ import {
 import { WorkoutCreationLanding } from './components/workout-creation-landing'
 import { useAiWorkoutGeneration } from './hooks/use-ai-workout-generation'
 import { useManualWorkout } from './hooks/use-manual-workout'
+import { scrollToTop } from './utils/scroll-utils'
 import {
   getTodaysWorkoutExercises,
   hasTodaysWorkoutExercises,
@@ -153,6 +154,7 @@ export default function QuickWorkoutPage() {
         setShowWizard(false)
         setWorkoutFlow(null)
         setIsAddingToExisting(false) // Reset adding to existing flag
+        scrollToTop()
       } else {
         // If no existing workout, this shouldn't happen, but stay in wizard
         console.warn('Attempted to navigate back with no existing workout')
@@ -305,6 +307,7 @@ export default function QuickWorkoutPage() {
     setShowWizard(true)
     setWorkoutFlow(null) // Reset flow to show landing
     setIsAddingToExisting(false) // Reset adding to existing flag
+    scrollToTop()
   }
 
   // Handle adding more exercises (goes directly to manual flow)
@@ -312,6 +315,7 @@ export default function QuickWorkoutPage() {
     setShowWizard(true)
     setWorkoutFlow('manual') // Set to manual flow directly
     setIsAddingToExisting(true) // Set flag to indicate adding to existing
+    scrollToTop()
   }
 
   // Show loading state
