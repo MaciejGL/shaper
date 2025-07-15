@@ -12,19 +12,16 @@ export function translateEquipment(equipment: GQLEquipment) {
       return 'Bodyweight'
     case GQLEquipment.Cable:
       return 'Cable'
-    case GQLEquipment.MedicineBall:
-      return 'Medicine Ball'
-    case GQLEquipment.Wheel:
-      return 'Wheel'
+
     case GQLEquipment.Band:
       return 'Band'
     case GQLEquipment.Kettlebell:
       return 'Kettlebell'
-    case GQLEquipment.TrapBar:
-      return 'Trap Bar'
     case GQLEquipment.SmithMachine:
       return 'Smith Machine'
     case GQLEquipment.Other:
+      return 'Other'
+    default:
       return 'Other'
   }
 }

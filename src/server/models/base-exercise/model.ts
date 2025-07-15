@@ -126,7 +126,29 @@ export default class BaseExercise implements GQLBaseExercise {
   }
 
   get equipment() {
-    return this.data.equipment as GQLEquipment
+    switch (this.data.equipment) {
+      case 'BAND':
+        return GQLEquipment.Band
+      case 'BARBELL':
+        return GQLEquipment.Barbell
+      case 'BODYWEIGHT':
+        return GQLEquipment.Bodyweight
+      case 'CABLE':
+        return GQLEquipment.Cable
+      case 'DUMBBELL':
+        return GQLEquipment.Dumbbell
+      case 'KETTLEBELL':
+        return GQLEquipment.Kettlebell
+      case 'MACHINE':
+        return GQLEquipment.Machine
+      case 'SMITH_MACHINE':
+        return GQLEquipment.SmithMachine
+      case 'MEDICINE_BALL':
+      case 'OTHER':
+        return GQLEquipment.Other
+      default:
+        return GQLEquipment.Other
+    }
   }
 
   get type() {

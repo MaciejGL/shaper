@@ -13,17 +13,25 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: cn(
-          'bg-primary text-primary-foreground hover:bg-primary/90 data-[loading=true]:bg-primary/80 disabled:bg-primary/50',
+          'bg-primary text-primary-foreground hover:bg-primary/90',
+          'data-[loading=true]:bg-primary/80 data-[loading=true]:text-primary/70 disabled:bg-primary/50 data-[loading=true]:dark:bg-primary/80 data-[loading=true]:dark:text-primary/70 disabled:dark:bg-primary/50',
         ),
         destructive: cn(
-          'hover:bg-accent text-destructive/75 hover:text-destructive bg-destructive/10 data-[loading=true]:bg-destructive/80 disabled:bg-destructive/50',
+          'hover:bg-accent text-destructive/75 hover:text-destructive bg-destructive/10',
+          'data-[loading=true]:bg-destructive/80 disabled:bg-destructive/50',
         ),
-        outline:
-          'border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 data-[loading=true]:bg-input/30 data-[loading=true]:text-input/70 disabled:bg-input/50',
-        secondary:
-          'bg-secondary hover:bg-secondary/80 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80 data-[loading=true]:bg-secondary/80 data-[loading=true]:text-secondary/70 disabled:bg-secondary/50',
-        ghost:
+        outline: cn(
+          'border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+          'data-[loading=true]:bg-input/30 data-[loading=true]:text-input/70 disabled:bg-input/50 data-[loading=true]:dark:bg-input/30 data-[loading=true]:dark:text-input/70 disabled:dark:bg-input/50',
+        ),
+        secondary: cn(
+          'bg-secondary hover:bg-secondary/80 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80',
+          'data-[loading=true]:bg-secondary/80 data-[loading=true]:text-secondary-foreground/50 disabled:bg-secondary/50 data-[loading=true]:dark:bg-secondary/80 data-[loading=true]:dark:text-secondary-foreground/50 disabled:dark:bg-secondary/50',
+        ),
+        ghost: cn(
           'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 data-[loading=true]:bg-accent/50 disabled:bg-accent/50',
+          'data-[loading=true]:bg-accent/50 data-[loading=true]:text-accent/70 disabled:bg-accent/50 data-[loading=true]:dark:bg-accent/50 data-[loading=true]:dark:text-accent/70 disabled:dark:bg-accent/50',
+        ),
         link: 'text-primary underline-offset-4 hover:underline disabled:text-primary/50',
         variantless:
           'bg-transparent text-primary hover:bg-transparent shadow-none disabled:text-primary/50',
@@ -91,7 +99,7 @@ function Button({
       {iconOnly && iconOnly}
       {iconEnd && <span>{iconEnd}</span>}
       {loading && (
-        <Loader2Icon className="size-[70%] animate-spin absolute z-[99999] inset-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
+        <Loader2Icon className="size-[70%] animate-spin absolute z-10 inset-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
       )}
     </Comp>
   )

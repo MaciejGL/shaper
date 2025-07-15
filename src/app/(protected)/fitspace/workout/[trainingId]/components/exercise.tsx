@@ -1,13 +1,16 @@
+import { DropdownMenuPortal } from '@radix-ui/react-dropdown-menu'
 import { useQueryClient } from '@tanstack/react-query'
 import { debounce } from 'lodash'
 import {
   ArrowLeftRight,
+  ArrowRight,
   BadgeCheckIcon,
   Check,
   ChevronDown,
   FlameIcon,
   GaugeIcon,
   InfoIcon,
+  ListChecksIcon,
   MoreHorizontalIcon,
   NotebookTextIcon,
   PlusIcon,
@@ -216,11 +219,49 @@ function ExerciseHeader({
 
   return (
     <div>
-      <ExerciseSelector
-        exercise={exercise}
-        activeExerciseId={activeExerciseId}
-        setActiveExerciseId={setActiveExerciseId}
-      />
+      <div className="flex items-center justify-between gap-2">
+        <ExerciseSelector
+          exercise={exercise}
+          activeExerciseId={activeExerciseId}
+          setActiveExerciseId={setActiveExerciseId}
+        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="secondary" iconOnly={<MoreHorizontalIcon />} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem
+              onClick={() => handleMarkAsCompleted(!isCompleted)}
+            >
+              <Check
+                className={cn(
+                  'transition-all duration-200',
+                  isCompleted ? 'text-green-500' : 'text-muted-foreground',
+                )}
+              />
+              {isCompleted ? 'Mark as incomplete' : 'Mark as completed'}
+            </DropdownMenuItem>
+            {exercise.instructions && (
+              <DropdownMenuItem onClick={() => setIsInstructionsOpen(true)}>
+                <NotebookTextIcon /> Instructions
+              </DropdownMenuItem>
+            )}
+            {exercise.substitutes.length > 0 && (
+              <DropdownMenuItem onClick={() => setIsSwapExerciseOpen(true)}>
+                <Replace /> Swap exercise
+              </DropdownMenuItem>
+            )}
+            {exercise.isExtra && (
+              <DropdownMenuItem
+                onClick={handleRemoveExercise}
+                loading={isRemoving}
+              >
+                <TrashIcon /> Remove exercise
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
       {isSuperset && (
         <div className="mt-2">
           <SupersetsNavigation
@@ -277,42 +318,6 @@ function ExerciseHeader({
             }
           />
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" iconOnly={<MoreHorizontalIcon />} />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem
-                onClick={() => handleMarkAsCompleted(!isCompleted)}
-              >
-                <Check
-                  className={cn(
-                    'transition-all duration-200',
-                    isCompleted ? 'text-green-500' : 'text-muted-foreground',
-                  )}
-                />
-                {isCompleted ? 'Mark as incomplete' : 'Mark as completed'}
-              </DropdownMenuItem>
-              {exercise.instructions && (
-                <DropdownMenuItem onClick={() => setIsInstructionsOpen(true)}>
-                  <NotebookTextIcon /> Instructions
-                </DropdownMenuItem>
-              )}
-              {exercise.substitutes.length > 0 && (
-                <DropdownMenuItem onClick={() => setIsSwapExerciseOpen(true)}>
-                  <Replace /> Swap exercise
-                </DropdownMenuItem>
-              )}
-              {exercise.isExtra && (
-                <DropdownMenuItem
-                  onClick={handleRemoveExercise}
-                  loading={isRemoving}
-                >
-                  <TrashIcon /> Remove exercise
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
           <Dialog
             open={isInstructionsOpen}
             onOpenChange={setIsInstructionsOpen}
@@ -428,7 +433,7 @@ export function ExerciseSelector({
       <DropdownMenuTrigger className="group/dropdown" asChild>
         <Button
           variant="secondary"
-          className={cn('w-full justify-between bg-secondary', className)}
+          className={cn('grow justify-between bg-secondary', className)}
           iconEnd={
             <ChevronDown
               className={cn(
@@ -460,22 +465,31 @@ export function ExerciseSelector({
               disabled={exercise.id === activeExerciseId}
               onClick={() => setActiveExerciseId(exercise.id)}
             >
-              <div className="text-sm flex justify-between w-full gap-4">
-                {index + 1}. {exercise.substitutedBy?.name || exercise.name}
+              <div className="text-sm grid grid-cols-[auto_1fr_auto] items-center w-full gap-2">
+                <ArrowRight
+                  className={cn(
+                    'text-primary size-4 opacity-0',
+                    activeExerciseId === exercise.id && 'opacity-100',
+                  )}
+                />
+                <p>
+                  {index + 1}.{exercise.substitutedBy?.name || exercise.name}
+                </p>
                 {exercise.substitutedBy?.completedAt || exercise.completedAt ? (
                   <BadgeCheckIcon className="self-start ml-auto mt-0.5 text-green-500" />
                 ) : null}
               </div>
             </DropdownMenuItem>
-            <DropdownMenuSeparator className="last:hidden mx-2" />
           </React.Fragment>
         ))}
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           disabled={activeExerciseId === 'summary'}
           onClick={() => setActiveExerciseId('summary')}
         >
-          <div className="text-sm flex justify-between w-full gap-4">
-            Summary
+          <div className="text-sm grid grid-cols-[auto_1fr] items-center w-full gap-2">
+            <ListChecksIcon className={cn('text-primary size-4')} />
+            <p>Summary</p>
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -569,19 +583,13 @@ function ExerciseSets({
         })}
         <Button
           variant="secondary"
-          size={
-            (exercise.substitutedBy?.sets || exercise.sets).length > 0
-              ? 'icon-sm'
-              : 'sm'
-          }
-          iconOnly={<PlusIcon />}
+          size="sm"
+          iconStart={<PlusIcon />}
           loading={isAddingSet}
           onClick={handleAddSet}
-          className={cn(
-            (exercise.substitutedBy?.sets || exercise.sets).length > 0 &&
-              'ml-auto',
-          )}
-        />
+        >
+          Add set
+        </Button>
       </div>
     </div>
   )
@@ -800,11 +808,13 @@ function ExerciseSet({
                     className="self-center"
                   />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={handleRemoveSet}>
-                    <TrashIcon /> Remove set
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
+                <DropdownMenuPortal>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={handleRemoveSet}>
+                      <TrashIcon /> Remove set
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenuPortal>
               </DropdownMenu>
             )}
           </div>

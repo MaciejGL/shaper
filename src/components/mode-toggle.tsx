@@ -2,20 +2,25 @@
 
 import { Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
+import { useState } from 'react'
 import * as React from 'react'
 
 import { Switch } from './ui/switch'
 
 export function ModeToggle() {
-  const { setTheme, theme } = useTheme()
+  const { setTheme, theme, systemTheme } = useTheme()
+  const [isDark, setIsDark] = useState(systemTheme === 'dark')
 
   return (
     <div className="flex items-center gap-2">
       <div className="relative">
         <Switch
           id="mode"
-          checked={theme === 'dark'}
-          onCheckedChange={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          checked={isDark}
+          onCheckedChange={() => {
+            setIsDark(!isDark)
+            setTheme(isDark ? 'light' : 'dark')
+          }}
           size="lg"
           className="relative"
         />
