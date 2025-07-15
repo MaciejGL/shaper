@@ -515,9 +515,64 @@ function ExerciseSets({
 }) {
   const { trainingId } = useParams<{ trainingId: string }>()
   const invalidateQuery = useInvalidateQuery()
+  const queryClient = useQueryClient()
   const { mutateAsync: addSet, isPending: isAddingSet } =
     useFitspaceAddSetMutation({
-      onSuccess: () => {
+      onSuccess: (data) => {
+        // Manually update the cache with the new set
+        queryClient.setQueryData(
+          useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+          (old: GQLFitspaceGetWorkoutQuery) => {
+            if (!old?.getWorkout?.plan || !data?.addSet) return old
+
+            const newWorkout = JSON.parse(
+              JSON.stringify(old),
+            ) as NonNullable<GQLFitspaceGetWorkoutQuery>
+            if (!newWorkout.getWorkout?.plan) return newWorkout
+
+            // Find the exercise and add the new set
+            newWorkout.getWorkout.plan.weeks.forEach((week) => {
+              week.days.forEach((day) => {
+                day.exercises.forEach((exerciseItem) => {
+                  const targetExerciseId =
+                    exercise.substitutedBy?.id || exercise.id
+                  const currentExerciseId =
+                    exerciseItem.substitutedBy?.id || exerciseItem.id
+
+                  if (currentExerciseId === targetExerciseId) {
+                    const setsToUpdate =
+                      exerciseItem.substitutedBy?.sets || exerciseItem.sets
+
+                    // Get the last set to inherit target values from
+                    const lastSet = setsToUpdate[setsToUpdate.length - 1]
+
+                    // Create a properly structured set with correct order and isExtra = true
+                    const newSet = {
+                      ...data.addSet,
+                      order: setsToUpdate.length + 1,
+                      isExtra: true,
+                      // Inherit target values from the last set
+                      reps: lastSet?.reps || null,
+                      minReps: lastSet?.minReps || null,
+                      maxReps: lastSet?.maxReps || null,
+                      weight: lastSet?.weight || null,
+                      rpe: lastSet?.rpe || null,
+                      // Always null for new sets
+                      log: null,
+                      completedAt: null,
+                    }
+
+                    setsToUpdate.push(newSet)
+                  }
+                })
+              })
+            })
+
+            return newWorkout
+          },
+        )
+      },
+      onSettled: () => {
         invalidateQuery({
           queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
         })
@@ -668,14 +723,54 @@ function ExerciseSet({
       }
     },
     onSettled: () => {
-      invalidateQuery({ queryKey: ['FitspaceGetWorkout'] })
+      invalidateQuery({
+        queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+      })
     },
   })
 
   const { mutateAsync: removeSet, isPending: isRemovingSet } =
     useFitspaceRemoveSetMutation({
-      onSuccess: () => {
-        invalidateQuery({ queryKey: ['FitspaceGetWorkout'] })
+      onSuccess: (data, variables) => {
+        // Update cache after successful removal
+        queryClient.setQueryData(
+          useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+          (old: GQLFitspaceGetWorkoutQuery) => {
+            if (!old?.getWorkout?.plan) return old
+
+            const newWorkout = JSON.parse(
+              JSON.stringify(old),
+            ) as NonNullable<GQLFitspaceGetWorkoutQuery>
+            if (!newWorkout.getWorkout?.plan) return newWorkout
+
+            // Find and remove the set from the workout data
+            newWorkout.getWorkout.plan.weeks.forEach((week) => {
+              week.days.forEach((day) => {
+                day.exercises.forEach((exercise) => {
+                  const setsToUpdate =
+                    exercise.substitutedBy?.sets || exercise.sets
+                  const setIndex = setsToUpdate.findIndex(
+                    (s) => s.id === variables.setId,
+                  )
+                  if (setIndex !== -1) {
+                    setsToUpdate.splice(setIndex, 1)
+                    // Reorder remaining sets
+                    setsToUpdate.forEach((remainingSet, index) => {
+                      remainingSet.order = index + 1
+                    })
+                  }
+                })
+              })
+            })
+
+            return newWorkout
+          },
+        )
+      },
+      onSettled: () => {
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+        })
       },
     })
 
