@@ -759,6 +759,7 @@ export type GQLMutation = {
   batchLogMealFood: Scalars['Boolean']['output'];
   bulkUpdatePlanPermissions: Array<GQLPlanCollaboratorSummary>;
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
+  clearTodaysWorkout: Scalars['Boolean']['output'];
   closePlan: Scalars['Boolean']['output'];
   completeMeal: Scalars['Boolean']['output'];
   createCoachingRequest: GQLCoachingRequest;
@@ -2463,6 +2464,11 @@ export type GQLFitspaceRemoveExerciseFromWorkoutMutationVariables = Exact<{
 
 
 export type GQLFitspaceRemoveExerciseFromWorkoutMutation = { __typename?: 'Mutation', removeExerciseFromWorkout: boolean };
+
+export type GQLFitspaceClearTodaysWorkoutMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLFitspaceClearTodaysWorkoutMutation = { __typename?: 'Mutation', clearTodaysWorkout: boolean };
 
 export type GQLFitspaceAddSetMutationVariables = Exact<{
   exerciseId: Scalars['ID']['input'];
@@ -5745,6 +5751,30 @@ useFitspaceRemoveExerciseFromWorkoutMutation.getKey = () => ['FitspaceRemoveExer
 
 
 useFitspaceRemoveExerciseFromWorkoutMutation.fetcher = (variables: GQLFitspaceRemoveExerciseFromWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceRemoveExerciseFromWorkoutMutation, GQLFitspaceRemoveExerciseFromWorkoutMutationVariables>(FitspaceRemoveExerciseFromWorkoutDocument, variables, options);
+
+export const FitspaceClearTodaysWorkoutDocument = `
+    mutation FitspaceClearTodaysWorkout {
+  clearTodaysWorkout
+}
+    `;
+
+export const useFitspaceClearTodaysWorkoutMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceClearTodaysWorkoutMutation, TError, GQLFitspaceClearTodaysWorkoutMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceClearTodaysWorkoutMutation, TError, GQLFitspaceClearTodaysWorkoutMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceClearTodaysWorkout'],
+    mutationFn: (variables?: GQLFitspaceClearTodaysWorkoutMutationVariables) => fetchData<GQLFitspaceClearTodaysWorkoutMutation, GQLFitspaceClearTodaysWorkoutMutationVariables>(FitspaceClearTodaysWorkoutDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceClearTodaysWorkoutMutation.getKey = () => ['FitspaceClearTodaysWorkout'];
+
+
+useFitspaceClearTodaysWorkoutMutation.fetcher = (variables?: GQLFitspaceClearTodaysWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceClearTodaysWorkoutMutation, GQLFitspaceClearTodaysWorkoutMutationVariables>(FitspaceClearTodaysWorkoutDocument, variables, options);
 
 export const FitspaceAddSetDocument = `
     mutation FitspaceAddSet($exerciseId: ID!) {

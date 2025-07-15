@@ -1,5 +1,7 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
+import { isToday } from 'date-fns'
 import { motion } from 'framer-motion'
 import { ListPlusIcon, PlusIcon } from 'lucide-react'
 import { useState } from 'react'
@@ -10,7 +12,8 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import {
   GQLFitspaceGetUserQuickWorkoutPlanQuery,
-  useFitspaceRemoveExerciseFromWorkoutMutation,
+  useFitspaceClearTodaysWorkoutMutation,
+  useFitspaceGetUserQuickWorkoutPlanQuery,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 
@@ -33,15 +36,77 @@ export function ExistingWorkoutView({
 }: ExistingWorkoutViewProps) {
   const [isClearing, setIsClearing] = useState(false)
   const invalidateQuery = useInvalidateQuery()
+  const queryClient = useQueryClient()
 
-  const { mutateAsync: removeExercise } =
-    useFitspaceRemoveExerciseFromWorkoutMutation({
-      onSuccess: () => {
-        invalidateQuery({
-          queryKey: ['getQuickWorkoutPlan'],
-        })
-      },
-    })
+  const { mutateAsync: clearWorkout } = useFitspaceClearTodaysWorkoutMutation({
+    onMutate: async () => {
+      // Cancel any outgoing refetches so they don't overwrite our optimistic update
+      await queryClient.cancelQueries({
+        queryKey: useFitspaceGetUserQuickWorkoutPlanQuery.getKey(),
+      })
+
+      // Snapshot the previous value
+      const previousData =
+        queryClient.getQueryData<GQLFitspaceGetUserQuickWorkoutPlanQuery>(
+          useFitspaceGetUserQuickWorkoutPlanQuery.getKey(),
+        )
+
+      // Optimistically update to remove today's exercises
+      if (previousData?.getQuickWorkoutPlan) {
+        const updatedData = {
+          ...previousData,
+          getQuickWorkoutPlan: {
+            ...previousData.getQuickWorkoutPlan,
+            weeks: previousData.getQuickWorkoutPlan.weeks.map((week) => ({
+              ...week,
+              days: week.days.map((day) => {
+                // Clear exercises for today's day
+                if (day.scheduledAt && isToday(new Date(day.scheduledAt))) {
+                  return {
+                    ...day,
+                    exercises: [],
+                  }
+                }
+                return day
+              }),
+            })),
+          },
+        }
+
+        queryClient.setQueryData<GQLFitspaceGetUserQuickWorkoutPlanQuery>(
+          useFitspaceGetUserQuickWorkoutPlanQuery.getKey(),
+          updatedData,
+        )
+      }
+
+      // Return a context object with the snapshotted value
+      return { previousData }
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousData) {
+        queryClient.setQueryData(
+          useFitspaceGetUserQuickWorkoutPlanQuery.getKey(),
+          context.previousData,
+        )
+      }
+    },
+    onSuccess: () => {
+      // Invalidate all related queries
+      invalidateQuery({
+        queryKey: useFitspaceGetUserQuickWorkoutPlanQuery.getKey(),
+      })
+      invalidateQuery({
+        queryKey: ['FitspaceGetWorkout'],
+      })
+      invalidateQuery({
+        queryKey: ['FitspaceMyPlans'],
+      })
+      invalidateQuery({
+        queryKey: ['FitspaceDashboardGetWorkout'],
+      })
+    },
+  })
 
   const todaysWorkout = quickWorkoutPlan
     ? getTodaysWorkoutExercises(quickWorkoutPlan)
@@ -60,14 +125,8 @@ export function ExistingWorkoutView({
 
     setIsClearing(true)
     try {
-      // Remove all exercises from today's workout
-      await Promise.all(
-        exercises.map((exercise) =>
-          removeExercise({ exerciseId: exercise.id }),
-        ),
-      )
+      await clearWorkout({})
 
-      toast.success('Workout cleared successfully')
       onCreateNewWorkout() // Switch to wizard after clearing
     } catch (error) {
       console.error('Failed to clear workout:', error)

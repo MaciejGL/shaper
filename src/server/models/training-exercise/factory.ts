@@ -460,6 +460,103 @@ export const removeExerciseFromWorkout = async (
   return true
 }
 
+export const clearTodaysWorkout = async (context: GQLContext) => {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  // Find the user's quick workout plan
+  const quickWorkoutPlan = await prisma.trainingPlan.findFirst({
+    where: {
+      assignedToId: user.user.id,
+      createdById: user.user.id,
+    },
+    include: {
+      weeks: {
+        include: {
+          days: {
+            include: {
+              exercises: {
+                where: {
+                  isExtra: true,
+                },
+                orderBy: {
+                  order: 'asc',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!quickWorkoutPlan) {
+    throw new GraphQLError('Quick workout plan not found')
+  }
+
+  // Find today's day using the same logic as getTodaysWorkoutExercises
+  const today = startOfToday()
+  const todaysDay = quickWorkoutPlan.weeks
+    .flatMap((week) => week.days)
+    .find((day) => day.scheduledAt && isSameDay(day.scheduledAt, today))
+
+  if (!todaysDay) {
+    throw new GraphQLError("Today's workout day not found")
+  }
+
+  if (todaysDay.exercises.length === 0) {
+    return true // Nothing to clear
+  }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    quickWorkoutPlan.id,
+    CollaborationAction.EDIT,
+    "clear today's workout",
+  )
+
+  // Remove all exercises from today's workout in a transaction
+  await prisma.$transaction(async (tx) => {
+    await tx.trainingExercise.deleteMany({
+      where: {
+        dayId: todaysDay.id,
+        isExtra: true,
+      },
+    })
+
+    // Check if all exercises are removed and mark day as completed if needed
+    const remainingExercises = await tx.trainingExercise.findMany({
+      where: {
+        dayId: todaysDay.id,
+      },
+    })
+
+    if (remainingExercises.length === 0) {
+      await tx.trainingDay.update({
+        where: { id: todaysDay.id },
+        data: { completedAt: null },
+      })
+    }
+
+    const allExercisesCompleted = remainingExercises.every(
+      (exercise) => exercise.completedAt,
+    )
+
+    if (allExercisesCompleted) {
+      await tx.trainingDay.update({
+        where: { id: todaysDay.id },
+        data: { completedAt: new Date() },
+      })
+    }
+  })
+
+  return true
+}
+
 export const addSet = async (exerciseId: string, context: GQLContext) => {
   const user = context.user
   if (!user) {
@@ -1236,6 +1333,19 @@ export const addExercisesToQuickWorkout = async (
     throw new GraphQLError('Day not found')
   }
 
+  // Get current exercises to ensure proper ordering
+  const existingExercises = await prisma.trainingExercise.findMany({
+    where: {
+      dayId: currentDay.id,
+      isExtra: true,
+    },
+    select: { order: true },
+    orderBy: { order: 'desc' },
+    take: 1,
+  })
+
+  const maxExistingOrder = existingExercises[0]?.order || 0
+
   // Extract exercise IDs for database query
   const exerciseIds = exercises.map((ex) => ex.exerciseId)
 
@@ -1249,7 +1359,7 @@ export const addExercisesToQuickWorkout = async (
   const baseExerciseMap = new Map(baseExercises.map((ex) => [ex.id, ex]))
 
   const trainingExercises = await prisma.trainingExercise.createManyAndReturn({
-    data: exercises.map((exerciseInput) => {
+    data: exercises.map((exerciseInput, index) => {
       const baseExercise = baseExerciseMap.get(exerciseInput.exerciseId)
       if (!baseExercise) {
         throw new GraphQLError(
@@ -1257,10 +1367,16 @@ export const addExercisesToQuickWorkout = async (
         )
       }
 
+      // Ensure order is always after existing exercises to prevent conflicts
+      const safeOrder = Math.max(
+        exerciseInput.order,
+        maxExistingOrder + index + 1,
+      )
+
       return {
         baseId: baseExercise.id,
         name: baseExercise.name,
-        order: exerciseInput.order, // Use the provided order from UI
+        order: safeOrder, // Use safe order to prevent conflicts
         instructions: baseExercise.description,
         additionalInstructions: baseExercise.additionalInstructions,
         type: baseExercise.type,

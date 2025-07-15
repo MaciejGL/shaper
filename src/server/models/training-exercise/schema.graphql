@@ -69,6 +69,7 @@ type Mutation {
   ): [TrainingExercise!]!
   addAiExerciseToWorkout(input: AddAiExerciseToWorkoutInput!): TrainingExercise!
   removeExerciseFromWorkout(exerciseId: ID!): Boolean!
+  clearTodaysWorkout: Boolean!
   addSet(exerciseId: ID!): ExerciseSet!
   removeSet(setId: ID!): Boolean!
   getAiExerciseSuggestions(dayId: ID!): [AiExerciseSuggestion!]!

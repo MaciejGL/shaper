@@ -83,7 +83,7 @@ export function QuickWorkoutWizard({
   const progress = ((currentStep + 1) / STEPS.length) * 100
 
   return (
-    <div className="bg-background">
+    <div className="bg-background -mt-2">
       {/* Header with Progress */}
       <div className="sticky top-[-8px] z-50 bg-background px-2">
         <div className="container py-4 space-y-4">
@@ -139,8 +139,8 @@ export function QuickWorkoutWizard({
       </div>
 
       {/* Bottom Navigation */}
-      <div className="bg-background sticky bottom-[72px] -mx-2 px-2 z-50">
-        <div className="container py-4">
+      <div className="bg-background sticky bottom-[64px] -mx-2 px-2 z-50">
+        <div className="py-4">
           <div className="flex justify-between gap-4">
             <Button
               variant="secondary"

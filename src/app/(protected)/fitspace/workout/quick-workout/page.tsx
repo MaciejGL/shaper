@@ -54,6 +54,9 @@ export default function QuickWorkoutPage() {
         invalidateQuery({
           queryKey: useFitspaceGetUserQuickWorkoutPlanQuery.getKey(),
         })
+        invalidateQuery({
+          queryKey: ['FitspaceGetWorkout'],
+        })
       },
     })
 
@@ -124,10 +127,13 @@ export default function QuickWorkoutPage() {
 
   const handleAddExercise = async () => {
     try {
+      // Get the current number of exercises in today's workout to maintain proper ordering
+      const existingExercisesCount = todaysWorkout?.exercises.length || 0
+
       await addExercises({
         exercises: selectedExercises.map((exercise, index) => ({
           exerciseId: exercise.id,
-          order: index + 1, // Use 1-based ordering to match the user's visual sequence
+          order: existingExercisesCount + index + 1, // Append new exercises after existing ones
         })),
       })
 
@@ -189,7 +195,7 @@ export default function QuickWorkoutPage() {
     : null
 
   return (
-    <div className="pb-[80px] space-y-6">
+    <div className="pb-[64px] space-y-6">
       {isLoadingQuickWorkoutPlan ? (
         <QuickWorkoutWizardSkeleton />
       ) : shouldShowWizard ? (
@@ -254,13 +260,12 @@ export default function QuickWorkoutPage() {
                 </div>
               )}
               {(todaysWorkout?.exercises.length ?? 0) > 0 && (
-                <div className="mb-2">
-                  <p className="text-md font-medium">New exercises</p>
-                  {selectedExercises.length === 0 && (
-                    <div className="text-sm text-muted-foreground bg-card p-4 rounded-lg mt-2">
-                      You haven't selected any new exercises yet.
-                    </div>
-                  )}
+                <p className="text-md font-medium mb-2">New exercises</p>
+              )}
+
+              {selectedExercises.length === 0 && (
+                <div className="text-sm text-muted-foreground bg-card p-4 rounded-lg mt-2">
+                  You haven't selected any new exercises yet.
                 </div>
               )}
 
