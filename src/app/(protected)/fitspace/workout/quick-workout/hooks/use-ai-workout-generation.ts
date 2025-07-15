@@ -83,6 +83,18 @@ export function useAiWorkoutGeneration() {
     handleGenerateAiWorkout()
   }
 
+  // Handle exercise reordering
+  const handleExercisesReorder = (
+    exercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'],
+  ) => {
+    if (aiWorkoutResult) {
+      setAiWorkoutResult({
+        ...aiWorkoutResult,
+        exercises: exercises,
+      })
+    }
+  }
+
   return {
     // State
     aiInputData,
@@ -94,5 +106,6 @@ export function useAiWorkoutGeneration() {
     setAiInputData,
     handleGenerateAiWorkout,
     handleRetryAiGeneration,
+    handleExercisesReorder,
   }
 }

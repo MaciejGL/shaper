@@ -48,6 +48,7 @@ export default function QuickWorkoutPage() {
     setAiInputData,
     handleGenerateAiWorkout,
     handleRetryAiGeneration,
+    handleExercisesReorder,
   } = useAiWorkoutGeneration()
 
   // Create workout mutation
@@ -430,6 +431,7 @@ export default function QuickWorkoutPage() {
       isLoading={isGeneratingAiWorkout}
       error={aiGenerationError}
       onRetry={handleRetryAiGeneration}
+      onExercisesReorder={handleExercisesReorder}
     />
   )
 

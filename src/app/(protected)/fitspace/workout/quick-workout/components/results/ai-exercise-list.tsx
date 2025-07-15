@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { Reorder, motion } from 'framer-motion'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -11,9 +11,16 @@ import { translateEquipment } from '@/utils/translate-equipment'
 interface AiExerciseListProps {
   exercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises']
   className?: string
+  onReorderExercises?: (
+    exercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'],
+  ) => void
 }
 
-export function AiExerciseList({ exercises, className }: AiExerciseListProps) {
+export function AiExerciseList({
+  exercises,
+  className,
+  onReorderExercises,
+}: AiExerciseListProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -27,18 +34,42 @@ export function AiExerciseList({ exercises, className }: AiExerciseListProps) {
         </h3>
       </div>
 
-      <div className="space-y-3">
-        {exercises.map((workoutExercise, index) => (
-          <motion.div
-            key={workoutExercise.exercise.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, delay: index * 0.05 }}
-          >
-            <ExerciseCard workoutExercise={workoutExercise} index={index} />
-          </motion.div>
-        ))}
-      </div>
+      {onReorderExercises ? (
+        <Reorder.Group
+          axis="y"
+          values={exercises}
+          onReorder={onReorderExercises}
+          className="space-y-3"
+        >
+          {exercises.map((workoutExercise, index) => (
+            <Reorder.Item
+              key={workoutExercise.exercise.id}
+              value={workoutExercise}
+              dragElastic={0.1}
+              className="cursor-grab active:cursor-grabbing"
+            >
+              <ExerciseCard
+                workoutExercise={workoutExercise}
+                index={index}
+                isDraggable
+              />
+            </Reorder.Item>
+          ))}
+        </Reorder.Group>
+      ) : (
+        <div className="space-y-3">
+          {exercises.map((workoutExercise, index) => (
+            <motion.div
+              key={workoutExercise.exercise.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: index * 0.05 }}
+            >
+              <ExerciseCard workoutExercise={workoutExercise} index={index} />
+            </motion.div>
+          ))}
+        </div>
+      )}
     </motion.div>
   )
 }
@@ -46,13 +77,20 @@ export function AiExerciseList({ exercises, className }: AiExerciseListProps) {
 interface ExerciseCardProps {
   workoutExercise: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'][number]
   index: number
+  isDraggable?: boolean
 }
 
-function ExerciseCard({ workoutExercise, index }: ExerciseCardProps) {
+function ExerciseCard({
+  workoutExercise,
+  index,
+  isDraggable = false,
+}: ExerciseCardProps) {
   const { exercise, sets, aiMeta } = workoutExercise
 
   return (
-    <Card className="shadow-sm hover:shadow-md transition-all duration-200 py-0">
+    <Card
+      className={`shadow-sm hover:shadow-md transition-all duration-200 py-0 ${isDraggable ? 'hover:shadow-lg' : ''}`}
+    >
       <CardContent className="p-4">
         <div className="flex gap-4">
           {/* Exercise Number */}
@@ -103,6 +141,20 @@ function ExerciseCard({ workoutExercise, index }: ExerciseCardProps) {
 
             {/* AI Explanation */}
           </div>
+
+          {/* Drag indicator for draggable items */}
+          {isDraggable && (
+            <div className="flex items-center text-muted-foreground">
+              <div className="grid grid-cols-2 gap-0.5 w-4 h-4">
+                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
+                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
+                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
+                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
+                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
+                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
+import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { GQLFitspaceGenerateAiWorkoutMutation } from '@/generated/graphql-client'
@@ -15,6 +16,9 @@ interface AiResultsStepProps {
   isLoading?: boolean
   error?: string | null
   onRetry?: () => void
+  onExercisesReorder?: (
+    exercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'],
+  ) => void
 }
 
 export function AiResultsStep({
@@ -23,8 +27,25 @@ export function AiResultsStep({
   isLoading = false,
   error = null,
   onRetry,
+  onExercisesReorder,
 }: AiResultsStepProps) {
-  const exercises = data?.exercises || []
+  const [exercises, setExercises] = useState<
+    GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises']
+  >([])
+
+  // Update local exercises state when data changes
+  useEffect(() => {
+    if (data?.exercises) {
+      setExercises(data.exercises)
+    }
+  }, [data?.exercises])
+
+  const handleReorderExercises = (
+    reorderedExercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'],
+  ) => {
+    setExercises(reorderedExercises)
+    onExercisesReorder?.(reorderedExercises)
+  }
 
   if (isLoading) {
     return <LoadingState inputData={inputData} />
@@ -44,7 +65,10 @@ export function AiResultsStep({
       <WorkoutSummaryCard data={data} />
 
       {/* Exercise List */}
-      <AiExerciseList exercises={exercises} />
+      <AiExerciseList
+        exercises={exercises}
+        onReorderExercises={handleReorderExercises}
+      />
     </div>
   )
 }
