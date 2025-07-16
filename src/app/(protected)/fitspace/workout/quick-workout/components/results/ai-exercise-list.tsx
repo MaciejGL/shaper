@@ -1,6 +1,7 @@
 'use client'
 
-import { Reorder, motion } from 'framer-motion'
+import { DragControls, Reorder, motion, useDragControls } from 'framer-motion'
+import { GripIcon } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -28,12 +29,6 @@ export function AiExerciseList({
       transition={{ duration: 0.3, delay: 0.1 }}
       className={`space-y-4 ${className}`}
     >
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">
-          Exercises ({exercises.length})
-        </h3>
-      </div>
-
       {onReorderExercises ? (
         <Reorder.Group
           axis="y"
@@ -42,18 +37,11 @@ export function AiExerciseList({
           className="space-y-3"
         >
           {exercises.map((workoutExercise, index) => (
-            <Reorder.Item
+            <DraggableExerciseItem
               key={workoutExercise.exercise.id}
-              value={workoutExercise}
-              dragElastic={0.1}
-              className="cursor-grab active:cursor-grabbing"
-            >
-              <ExerciseCard
-                workoutExercise={workoutExercise}
-                index={index}
-                isDraggable
-              />
-            </Reorder.Item>
+              workoutExercise={workoutExercise}
+              index={index}
+            />
           ))}
         </Reorder.Group>
       ) : (
@@ -74,18 +62,48 @@ export function AiExerciseList({
   )
 }
 
+interface DraggableExerciseItemProps {
+  workoutExercise: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'][number]
+  index: number
+}
+
+function DraggableExerciseItem({
+  workoutExercise,
+  index,
+}: DraggableExerciseItemProps) {
+  const dragControls = useDragControls()
+
+  return (
+    <Reorder.Item
+      value={workoutExercise}
+      dragControls={dragControls}
+      dragElastic={0.1}
+      dragListener={false}
+    >
+      <ExerciseCard
+        workoutExercise={workoutExercise}
+        index={index}
+        isDraggable
+        dragControls={dragControls}
+      />
+    </Reorder.Item>
+  )
+}
+
 interface ExerciseCardProps {
   workoutExercise: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'][number]
   index: number
   isDraggable?: boolean
+  dragControls?: DragControls
 }
 
 function ExerciseCard({
   workoutExercise,
   index,
   isDraggable = false,
+  dragControls,
 }: ExerciseCardProps) {
-  const { exercise, sets, aiMeta } = workoutExercise
+  const { exercise, sets } = workoutExercise
 
   return (
     <Card
@@ -104,9 +122,9 @@ function ExerciseCard({
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <h4 className="font-semibold text-lg">{exercise.name}</h4>
-                <p className="text-sm text-muted-foreground">
-                  {aiMeta.explanation}
-                </p>
+                {/* <p className="text-sm text-muted-foreground">
+                  {exercise.description}
+                </p> */}
               </div>
               {exercise.videoUrl && <VideoPreview url={exercise.videoUrl} />}
             </div>
@@ -142,17 +160,13 @@ function ExerciseCard({
             {/* AI Explanation */}
           </div>
 
-          {/* Drag indicator for draggable items */}
-          {isDraggable && (
-            <div className="flex items-center text-muted-foreground">
-              <div className="grid grid-cols-2 gap-0.5 w-4 h-4">
-                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
-                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
-                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
-                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
-                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
-                <div className="w-1 h-1 bg-current rounded-full opacity-40"></div>
-              </div>
+          {/* Drag handle for draggable items */}
+          {isDraggable && dragControls && (
+            <div
+              className="flex items-center text-muted-foreground cursor-grab active:cursor-grabbing touch-none select-none p-2 -m-2 hover:bg-muted/50 rounded transition-colors"
+              onPointerDown={(e) => dragControls.start(e)}
+            >
+              <GripIcon className="w-4 h-4" />
             </div>
           )}
         </div>

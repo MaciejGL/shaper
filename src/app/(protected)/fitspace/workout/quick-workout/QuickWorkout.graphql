@@ -120,14 +120,8 @@ mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
         rpe
       }
       order
-      aiMeta {
-        explanation
-      }
     }
-    aiMeta {
-      summary
-      reasoning
-    }
+
     totalDuration
   }
 }

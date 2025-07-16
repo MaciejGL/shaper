@@ -877,7 +877,10 @@ Generate the workout based on these preferences.`,
   /* 5. Map AI response to final workout structure */
   const workoutExercises = baseExercises
     .map((exercise, index) => {
-      const aiExercise = aiResponse.exercises.find((e) => e.id === exercise.id)!
+      const aiExercise = aiResponse.exercises.find((e) => e.id === exercise.id)
+      if (!aiExercise) {
+        return null
+      }
 
       return {
         exercise: new BaseExercise(exercise, context),
@@ -886,19 +889,14 @@ Generate the workout based on these preferences.`,
           rpe: aiExercise.rpe,
         })),
         order: index + 1, // Generate order since it's not in the AI response
-        aiMeta: {
-          explanation:
-            aiExercise.explanation ||
-            `Selected for targeting ${exercise.muscleGroups.map((mg) => mg.name).join(', ')}`,
-        },
       }
     })
-    .sort((a, b) => a.order - b.order) // Ensure proper ordering
+    .sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0)) // Ensure proper ordering
 
   // Calculate duration based on sets: 45s per set + 90s break between sets
   // Sum all sets across all exercises, then apply the formula
   const totalSets = workoutExercises.reduce(
-    (sum, exercise) => sum + exercise.sets.length,
+    (sum, exercise) => sum + (exercise?.sets.length ?? 0),
     0,
   )
   const estimatedDuration = Math.round(totalSets * 0.75 + (totalSets - 1) * 1.5) // 45s per set + 90s break (in minutes)
@@ -906,15 +904,9 @@ Generate the workout based on these preferences.`,
   const finalResult = {
     exercises: workoutExercises,
     totalDuration: estimatedDuration,
-    aiMeta: {
-      summary:
-        aiResponse.summary?.trim() ||
-        `Generated ${workoutExercises.length} exercise workout targeting ${selectedMuscleGroups.length > 0 ? selectedMuscleGroups.join(', ') : 'all muscle groups'} with ${repFocusText} focus.`,
-      reasoning:
-        aiResponse.reasoning?.trim() ||
-        `Selected exercises based on your preferences: ${muscleGroupsText}, ${equipmentText}, targeting ${rpeText} RPE with ${repFocusText} focus.`,
-    },
   }
+
+  console.info('finalResult', finalResult)
 
   return finalResult
 }

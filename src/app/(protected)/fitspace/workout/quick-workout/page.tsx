@@ -1,9 +1,8 @@
 'use client'
 
+import { useRouter } from 'next/router'
 import { useMemo, useState } from 'react'
 
-import { CardSkeleton } from '@/components/card-skeleton'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
   GQLTrainingPlan,
   useFitspaceCreateQuickWorkoutMutation,
@@ -23,6 +22,7 @@ import { ManualMuscleGroupsStep } from './components/manual-muscle-groups-step'
 import { ManualReviewStep } from './components/manual-review-step'
 import {
   QuickWorkoutWizard,
+  QuickWorkoutWizardSkeleton,
   WorkoutFlow,
 } from './components/quick-workout-wizard'
 import { WorkoutCreationLanding } from './components/workout-creation-landing'
@@ -141,9 +141,9 @@ export default function QuickWorkoutPage() {
     canProceedToReview,
   } = useManualWorkout({ allExercises })
 
+  const router = useRouter()
   // Loading state
   const isLoading = isLoadingExercises || isLoadingPlan
-
   const shouldShowWizard = showWizard || !hasExistingWorkout
 
   // Step change handler for AI flow and navigation
@@ -207,7 +207,7 @@ export default function QuickWorkoutPage() {
 
       // Navigate to the workout
       if (quickWorkoutPlan?.id) {
-        window.location.href = `/fitspace/workout/${quickWorkoutPlan.id}`
+        router.push(`/fitspace/workout/${quickWorkoutPlan.id}`)
       }
     } catch (error) {
       console.error('Failed to create workout:', error)
@@ -265,7 +265,7 @@ export default function QuickWorkoutPage() {
 
       // Navigate to the workout
       if (quickWorkoutPlan?.id) {
-        window.location.href = `/fitspace/workout/${quickWorkoutPlan.id}`
+        router.push(`/fitspace/workout/${quickWorkoutPlan.id}`)
       }
     } catch (error) {
       console.error('Failed to create workout:', error)
@@ -321,38 +321,7 @@ export default function QuickWorkoutPage() {
 
   // Show loading state
   if (isLoading) {
-    return (
-      <div className="min-h-screen pb-[80px]">
-        <div className="flex flex-col min-h-screen justify-center items-center p-4">
-          <div className="max-w-lg w-full space-y-6">
-            {/* Loading header */}
-            <div className="text-center space-y-4">
-              <Skeleton className="w-24 h-24 rounded-full mx-auto" />
-              <div className="space-y-2">
-                <Skeleton className="h-8 w-48 mx-auto" />
-                <Skeleton className="h-4 w-64 mx-auto" />
-              </div>
-            </div>
-
-            {/* Loading content */}
-            <div className="space-y-4">
-              <CardSkeleton />
-              <CardSkeleton />
-              <CardSkeleton />
-            </div>
-
-            {/* Loading buttons */}
-            <div className="space-y-3">
-              <Skeleton className="h-12 w-full" />
-              <div className="flex gap-3">
-                <Skeleton className="h-10 flex-1" />
-                <Skeleton className="h-10 flex-1" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
+    return <QuickWorkoutWizardSkeleton />
   }
 
   // Manual components

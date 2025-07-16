@@ -8,7 +8,6 @@ import { GQLFitspaceGenerateAiWorkoutMutation } from '@/generated/graphql-client
 import { AiWorkoutInputData } from './ai-workout-input'
 import { WorkoutSummary } from './controls/workout-summary'
 import { AiExerciseList } from './results/ai-exercise-list'
-import { WorkoutSummaryCard } from './results/workout-summary-card'
 
 interface AiResultsStepProps {
   data: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout'] | null
@@ -61,9 +60,6 @@ export function AiResultsStep({
 
   return (
     <div className="space-y-6">
-      {/* Workout Summary */}
-      <WorkoutSummaryCard data={data} />
-
       {/* Exercise List */}
       <AiExerciseList
         exercises={exercises}

@@ -157,21 +157,13 @@ export type GQLAiMeta = {
 
 export type GQLAiWorkoutExercise = {
   __typename?: 'AiWorkoutExercise';
-  aiMeta: GQLAiMeta;
   exercise: GQLBaseExercise;
   order: Scalars['Int']['output'];
   sets: Array<Maybe<GQLSuggestedSets>>;
 };
 
-export type GQLAiWorkoutMeta = {
-  __typename?: 'AiWorkoutMeta';
-  reasoning: Scalars['String']['output'];
-  summary: Scalars['String']['output'];
-};
-
 export type GQLAiWorkoutResult = {
   __typename?: 'AiWorkoutResult';
-  aiMeta: GQLAiWorkoutMeta;
   exercises: Array<GQLAiWorkoutExercise>;
   totalDuration?: Maybe<Scalars['Int']['output']>;
 };
@@ -2585,7 +2577,7 @@ export type GQLFitspaceGenerateAiWorkoutMutationVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceGenerateAiWorkoutMutation = { __typename?: 'Mutation', generateAiWorkout: { __typename?: 'AiWorkoutResult', totalDuration?: number | undefined | null, exercises: Array<{ __typename?: 'AiWorkoutExercise', order: number, exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null>, aiMeta: { __typename?: 'AiMeta', explanation: string } }>, aiMeta: { __typename?: 'AiWorkoutMeta', summary: string, reasoning: string } } };
+export type GQLFitspaceGenerateAiWorkoutMutation = { __typename?: 'Mutation', generateAiWorkout: { __typename?: 'AiWorkoutResult', totalDuration?: number | undefined | null, exercises: Array<{ __typename?: 'AiWorkoutExercise', order: number, exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null> }> } };
 
 export type GQLCreateQuickWorkoutPlanMutationVariables = Exact<{
   input: GQLCreateTrainingPlanInput;
@@ -6168,13 +6160,6 @@ export const FitspaceGenerateAiWorkoutDocument = `
         rpe
       }
       order
-      aiMeta {
-        explanation
-      }
-    }
-    aiMeta {
-      summary
-      reasoning
     }
     totalDuration
   }

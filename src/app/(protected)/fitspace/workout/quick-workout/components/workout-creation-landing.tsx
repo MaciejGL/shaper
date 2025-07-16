@@ -52,31 +52,11 @@ export function WorkoutCreationLanding({
                   onClick={onSelectAI}
                   variant="link"
                   iconOnly={<ChevronRight />}
-                  // className="self-start"
                 >
                   Start Quick Workout
                 </Button>
               </div>
             </CardHeader>
-            {/* <CardContent className="pt-0">
-              <div className="flex flex-wrap flex-col gap-2 text-xs text-muted-foreground items-center">
-                <Badge variant="secondary" size="lg" className="w-full">
-                  1. Select muscle groups
-                </Badge>
-                <ArrowDown className="size-2.5 text-muted-foreground/50" />
-                <Badge variant="secondary" size="lg" className="w-full">
-                  2. Select available equipment
-                </Badge>
-                <ArrowDown className="size-2.5 text-muted-foreground/50" />
-                <Badge variant="gradient" size="lg" className="w-full">
-                  3. Set preferences and generate workout
-                </Badge>
-                <ArrowDown className="size-2.5 text-muted-foreground/50" />
-                <Badge variant="primary" size="lg" className="w-full">
-                  4. Review and start
-                </Badge>
-              </div>
-            </CardContent> */}
           </Card>
         </motion.div>
         {/* Manual Creation Option */}
@@ -106,33 +86,11 @@ export function WorkoutCreationLanding({
                   onClick={onSelectManual}
                   variant="link"
                   iconOnly={<ChevronRight />}
-                  // className="self-start"
                 >
                   Start Manual Creation
                 </Button>
               </div>
             </CardHeader>
-            {/* <CardContent className="pt-0">
-              <div className="space-y-3">
-                <div className="flex flex-wrap flex-col gap-2 text-xs text-muted-foreground items-center">
-                  <Badge variant="secondary" size="lg" className="w-full">
-                    1. Select muscle groups
-                  </Badge>
-                  <ArrowDown className="size-2.5 text-muted-foreground/50" />
-                  <Badge variant="secondary" size="lg" className="w-full">
-                    2. Select available equipment
-                  </Badge>
-                  <ArrowDown className="size-2.5 text-muted-foreground/50" />
-                  <Badge variant="secondary" size="lg" className="w-full">
-                    3. Select preferred exercises
-                  </Badge>
-                  <ArrowDown className="size-2.5 text-muted-foreground/50" />
-                  <Badge variant="primary" size="lg" className="w-full">
-                    4. Review and start workout
-                  </Badge>
-                </div>
-              </div>
-            </CardContent> */}
           </Card>
         </motion.div>
       </div>

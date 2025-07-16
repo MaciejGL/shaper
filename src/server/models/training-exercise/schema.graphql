@@ -182,16 +182,9 @@ type AiWorkoutExercise {
   exercise: BaseExercise!
   sets: [SuggestedSets]!
   order: Int!
-  aiMeta: AiMeta!
 }
 
 type AiWorkoutResult {
   exercises: [AiWorkoutExercise!]!
   totalDuration: Int
-  aiMeta: AiWorkoutMeta!
-}
-
-type AiWorkoutMeta {
-  summary: String!
-  reasoning: String!
 }
