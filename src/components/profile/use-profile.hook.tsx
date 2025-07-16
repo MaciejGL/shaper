@@ -45,9 +45,9 @@ export function useProfile() {
   })
 
   const getGender = (sex?: string | null) => {
-    if (sex === 'male') return 'Male'
-    if (sex === 'female') return 'Female'
-    if (sex === 'other') return 'Other'
+    if (sex?.toLowerCase() === 'male') return 'Male'
+    if (sex?.toLowerCase() === 'female') return 'Female'
+    if (sex?.toLowerCase() === 'other') return 'Other'
 
     return null
   }
