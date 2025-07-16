@@ -1,9 +1,4 @@
-import {
-  BicepsFlexedIcon,
-  MoreVertical,
-  ReplaceAllIcon,
-  Trash2,
-} from 'lucide-react'
+import { BicepsFlexedIcon, Copy, MoreVertical, Trash2 } from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
@@ -33,11 +28,10 @@ interface MoveExercisesDropdownProps {
 }
 
 export function DayDropdownMenu({
-  sourceDayId,
   sourceWeekIndex,
   sourceDayIndex,
   disabled = false,
-}: MoveExercisesDropdownProps) {
+}: Omit<MoveExercisesDropdownProps, 'sourceDayId'>) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -53,10 +47,9 @@ export function DayDropdownMenu({
           sourceWeekIndex={sourceWeekIndex}
           sourceDayIndex={sourceDayIndex}
         />
-        <MoveDropdownItem
-          sourceDayId={sourceDayId}
-          sourceWeekIndex={sourceWeekIndex}
-          sourceDayIndex={sourceDayIndex}
+        <CopyDayDropdownItem
+          targetWeekIndex={sourceWeekIndex}
+          targetDayIndex={sourceDayIndex}
         />
         <RemoveAllExercisesItem sourceDayIndex={sourceDayIndex} />
       </DropdownMenuContent>
@@ -128,57 +121,118 @@ function WorkoutTypeDropdown({
   )
 }
 
-function MoveDropdownItem({
-  sourceDayId,
-  sourceWeekIndex,
-  sourceDayIndex,
+function CopyDayDropdownItem({
+  targetWeekIndex,
+  targetDayIndex,
 }: {
-  sourceDayId: string
-  sourceWeekIndex: number
-  sourceDayIndex: number
+  targetWeekIndex: number
+  targetDayIndex: number
 }) {
-  const { formData, moveExercisesToDay } = useTrainingPlan()
+  const { formData, copyExercisesFromDay } = useTrainingPlan()
 
   if (!formData || !formData.weeks || formData.weeks.length === 0) {
     return null
   }
 
-  // Check if source day has exercises to move
-  const sourceDay = formData.weeks[sourceWeekIndex]?.days[sourceDayIndex]
-  const hasExercisesToMove =
-    sourceDay?.exercises && sourceDay.exercises.length > 0
+  const targetDay = formData.weeks[targetWeekIndex]?.days[targetDayIndex]
 
-  if (!hasExercisesToMove) {
+  const handleCopyExercises = (sourceDayId: string) => {
+    if (targetDay?.id) {
+      copyExercisesFromDay(sourceDayId, targetDay.id)
+    }
+  }
+
+  const isDisabled =
+    formData.weeks[targetWeekIndex]?.days[targetDayIndex]?.exercises?.length > 0
+
+  return (
+    <>
+      <DropdownMenuSeparator />
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger
+          className="flex items-center gap-2"
+          disabled={isDisabled}
+        >
+          <Copy className="size-4" />
+          Copy Day
+        </DropdownMenuSubTrigger>
+        <DropdownMenuPortal>
+          <DropdownMenuSubContent>
+            {formData.weeks.map((week, weekIndex) => (
+              <WeekSubmenu
+                key={week.id}
+                week={week}
+                weekIndex={weekIndex}
+                targetWeekIndex={targetWeekIndex}
+                targetDayIndex={targetDayIndex}
+                onCopyExercises={handleCopyExercises}
+              />
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuPortal>
+      </DropdownMenuSub>
+    </>
+  )
+}
+
+function WeekSubmenu({
+  week,
+  weekIndex,
+  targetWeekIndex,
+  targetDayIndex,
+  onCopyExercises,
+}: {
+  week: NonNullable<ReturnType<typeof useTrainingPlan>['formData']>['weeks'][0]
+  weekIndex: number
+  targetWeekIndex: number
+  targetDayIndex: number
+  onCopyExercises: (sourceDayId: string) => void
+}) {
+  // Filter days that have exercises and are not the target day
+  const availableDays = week.days.filter((day, dayIndex) => {
+    // Exclude rest days
+    if (day.isRestDay) return false
+
+    // Exclude days without exercises
+    if (!day.exercises || day.exercises.length === 0) return false
+
+    // Exclude the target day (same week and day)
+    if (weekIndex === targetWeekIndex && dayIndex === targetDayIndex)
+      return false
+
+    return true
+  })
+
+  // If no available days, don't show this week
+  if (availableDays.length === 0) {
     return null
   }
 
-  return formData.weeks.map((week, weekIndex) => (
-    <DropdownMenuSub key={week.id}>
-      <DropdownMenuSubTrigger className="flex items-center gap-2">
-        <ReplaceAllIcon className="size-4" />
-        Move Exercises
-      </DropdownMenuSubTrigger>
+  const weekDisplayName = week.name || `Week ${week.weekNumber}`
+
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>{weekDisplayName}</DropdownMenuSubTrigger>
       <DropdownMenuPortal>
         <DropdownMenuSubContent>
-          {week.days.map((day, dayIndex) => {
-            const isSourceDay =
-              weekIndex === sourceWeekIndex && dayIndex === sourceDayIndex
-            const isCompletedDay = Boolean(day.completedAt)
+          <DropdownMenuLabel className="text-xs text-muted-foreground">
+            Select day to copy from
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {availableDays.map((day) => {
             const dayName = dayNames[day.dayOfWeek]
             const exerciseCount = day.exercises?.length || 0
 
             return (
               <DropdownMenuItem
                 key={day.id}
-                disabled={isSourceDay || isCompletedDay || exerciseCount > 0}
-                onClick={() => moveExercisesToDay(sourceDayId, day.id)}
-                className="flex justify-between items-center"
+                onClick={() => onCopyExercises(day.id)}
+                className="flex flex-col items-start gap-1"
               >
-                <div className="flex flex-col">
-                  <span className="font-medium">{dayName}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {day.isRestDay ? 'Rest day' : `${exerciseCount} exercises`}
-                  </span>
+                <div className="font-medium">{dayName}</div>
+                <div className="text-xs text-muted-foreground">
+                  {exerciseCount} exercise{exerciseCount !== 1 ? 's' : ''}
+                  {day.workoutType && ` • ${day.workoutType}`}
                 </div>
               </DropdownMenuItem>
             )
@@ -186,7 +240,7 @@ function MoveDropdownItem({
         </DropdownMenuSubContent>
       </DropdownMenuPortal>
     </DropdownMenuSub>
-  ))
+  )
 }
 
 function RemoveAllExercisesItem({

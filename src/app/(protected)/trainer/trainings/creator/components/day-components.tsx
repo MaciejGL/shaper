@@ -60,7 +60,6 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
         {/* Move exercises dropdown - only show if day has exercises and not disabled */}
         {day?.id && !isDisabled && (
           <DayDropdownMenu
-            sourceDayId={day.id}
             sourceWeekIndex={activeWeek}
             sourceDayIndex={dayIndex}
             disabled={isDisabled}

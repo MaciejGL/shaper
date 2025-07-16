@@ -294,6 +294,11 @@ export enum GQLCollaborationPermission {
   View = 'VIEW'
 }
 
+export type GQLCopyExercisesFromDayInput = {
+  sourceDayId: Scalars['ID']['input'];
+  targetDayId: Scalars['ID']['input'];
+};
+
 export type GQLCreateExerciseInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   equipment?: InputMaybe<GQLEquipment>;
@@ -791,6 +796,7 @@ export type GQLMutation = {
   clearTodaysWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
   closePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   completeMeal: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  copyExercisesFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   createCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
   createDraftMealTemplate: EntireFieldWrapper<GQLMealPlan>;
   createDraftTemplate: EntireFieldWrapper<GQLTrainingPlan>;
@@ -983,6 +989,11 @@ export type GQLMutationClosePlanArgs = {
 
 export type GQLMutationCompleteMealArgs = {
   mealId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationCopyExercisesFromDayArgs = {
+  input: GQLCopyExercisesFromDayInput;
 };
 
 
@@ -2316,6 +2327,7 @@ export type GQLResolversTypes = {
   CollaborationInvitationAction: GQLCollaborationInvitationAction;
   CollaborationInvitationStatus: GQLCollaborationInvitationStatus;
   CollaborationPermission: GQLCollaborationPermission;
+  CopyExercisesFromDayInput: GQLCopyExercisesFromDayInput;
   CreateExerciseInput: GQLCreateExerciseInput;
   CreateExerciseSetInput: GQLCreateExerciseSetInput;
   CreateMealDayInput: GQLCreateMealDayInput;
@@ -2462,6 +2474,7 @@ export type GQLResolversParentTypes = {
   BulkUpdatePlanPermissionsInput: GQLBulkUpdatePlanPermissionsInput;
   CoachingRequest: GQLCoachingRequest;
   CollaborationInvitation: GQLCollaborationInvitation;
+  CopyExercisesFromDayInput: GQLCopyExercisesFromDayInput;
   CreateExerciseInput: GQLCreateExerciseInput;
   CreateExerciseSetInput: GQLCreateExerciseSetInput;
   CreateMealDayInput: GQLCreateMealDayInput;
@@ -2917,6 +2930,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   clearTodaysWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   closePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationClosePlanArgs, 'planId'>>;
   completeMeal?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCompleteMealArgs, 'mealId'>>;
+  copyExercisesFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCopyExercisesFromDayArgs, 'input'>>;
   createCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationCreateCoachingRequestArgs, 'recipientEmail'>>;
   createDraftMealTemplate?: Resolver<GQLResolversTypes['MealPlan'], ParentType, ContextType>;
   createDraftTemplate?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;

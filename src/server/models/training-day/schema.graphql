@@ -67,9 +67,15 @@ input MoveExercisesToDayInput {
   targetDayId: ID!
 }
 
+input CopyExercisesFromDayInput {
+  sourceDayId: ID!
+  targetDayId: ID!
+}
+
 type Mutation {
   logWorkoutSessionEvent(dayId: ID!, event: WorkoutSessionEvent!): ID!
   logWorkoutProgress(dayId: ID!, tick: Int!): ID!
   updateTrainingDayData(input: UpdateTrainingDayDataInput!): Boolean!
   moveExercisesToDay(input: MoveExercisesToDayInput!): Boolean!
+  copyExercisesFromDay(input: CopyExercisesFromDayInput!): Boolean!
 }

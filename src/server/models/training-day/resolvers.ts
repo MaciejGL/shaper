@@ -6,7 +6,7 @@ import {
   GQLWorkoutSessionEvent,
 } from '@/generated/graphql-server'
 
-import { moveExercisesToDay } from './factory'
+import { copyExercisesFromDay, moveExercisesToDay } from './factory'
 import TrainingDay from './model'
 
 export const Query: GQLQueryResolvers = {
@@ -137,5 +137,8 @@ export const Mutation: GQLMutationResolvers = {
   },
   moveExercisesToDay: async (_, { input }, context) => {
     return await moveExercisesToDay(input, context)
+  },
+  copyExercisesFromDay: async (_, { input }, context) => {
+    return await copyExercisesFromDay(input, context)
   },
 }

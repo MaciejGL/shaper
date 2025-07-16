@@ -292,6 +292,11 @@ export enum GQLCollaborationPermission {
   View = 'VIEW'
 }
 
+export type GQLCopyExercisesFromDayInput = {
+  sourceDayId: Scalars['ID']['input'];
+  targetDayId: Scalars['ID']['input'];
+};
+
 export type GQLCreateExerciseInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   equipment?: InputMaybe<GQLEquipment>;
@@ -789,6 +794,7 @@ export type GQLMutation = {
   clearTodaysWorkout: Scalars['Boolean']['output'];
   closePlan: Scalars['Boolean']['output'];
   completeMeal: Scalars['Boolean']['output'];
+  copyExercisesFromDay: Scalars['Boolean']['output'];
   createCoachingRequest: GQLCoachingRequest;
   createDraftMealTemplate: GQLMealPlan;
   createDraftTemplate: GQLTrainingPlan;
@@ -981,6 +987,11 @@ export type GQLMutationClosePlanArgs = {
 
 export type GQLMutationCompleteMealArgs = {
   mealId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationCopyExercisesFromDayArgs = {
+  input: GQLCopyExercisesFromDayInput;
 };
 
 
@@ -3099,6 +3110,13 @@ export type GQLMoveExercisesToDayMutationVariables = Exact<{
 
 
 export type GQLMoveExercisesToDayMutation = { __typename?: 'Mutation', moveExercisesToDay: boolean };
+
+export type GQLCopyExercisesFromDayMutationVariables = Exact<{
+  input: GQLCopyExercisesFromDayInput;
+}>;
+
+
+export type GQLCopyExercisesFromDayMutation = { __typename?: 'Mutation', copyExercisesFromDay: boolean };
 
 export type GQLCreateDraftTemplateMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -9344,6 +9362,30 @@ useMoveExercisesToDayMutation.getKey = () => ['MoveExercisesToDay'];
 
 
 useMoveExercisesToDayMutation.fetcher = (variables: GQLMoveExercisesToDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLMoveExercisesToDayMutation, GQLMoveExercisesToDayMutationVariables>(MoveExercisesToDayDocument, variables, options);
+
+export const CopyExercisesFromDayDocument = `
+    mutation CopyExercisesFromDay($input: CopyExercisesFromDayInput!) {
+  copyExercisesFromDay(input: $input)
+}
+    `;
+
+export const useCopyExercisesFromDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCopyExercisesFromDayMutation, TError, GQLCopyExercisesFromDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCopyExercisesFromDayMutation, TError, GQLCopyExercisesFromDayMutationVariables, TContext>(
+      {
+    mutationKey: ['CopyExercisesFromDay'],
+    mutationFn: (variables?: GQLCopyExercisesFromDayMutationVariables) => fetchData<GQLCopyExercisesFromDayMutation, GQLCopyExercisesFromDayMutationVariables>(CopyExercisesFromDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCopyExercisesFromDayMutation.getKey = () => ['CopyExercisesFromDay'];
+
+
+useCopyExercisesFromDayMutation.fetcher = (variables: GQLCopyExercisesFromDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCopyExercisesFromDayMutation, GQLCopyExercisesFromDayMutationVariables>(CopyExercisesFromDayDocument, variables, options);
 
 export const CreateDraftTemplateDocument = `
     mutation CreateDraftTemplate {

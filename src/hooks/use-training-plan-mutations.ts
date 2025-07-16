@@ -16,6 +16,7 @@ import {
   useAddExerciseToDayMutation,
   useAddSetToExerciseMutation,
   useAddTrainingWeekMutation,
+  useCopyExercisesFromDayMutation,
   useDuplicateTrainingWeekMutation,
   useGetTemplateTrainingPlanByIdQuery,
   useMoveExerciseMutation,
@@ -587,6 +588,72 @@ export function useTrainingPlanMutations(trainingId?: string) {
         },
       }
     },
+
+    copyExercisesFromDay: (
+      oldData: GQLGetTemplateTrainingPlanByIdQuery,
+      variables: { input: { sourceDayId: string; targetDayId: string } },
+    ) => {
+      if (!oldData?.getTrainingPlanById?.weeks) return oldData
+
+      const { sourceDayId, targetDayId } = variables.input
+      const newWeeks = oldData.getTrainingPlanById.weeks.map((week) => ({
+        ...week,
+        days: week.days.map((day) => ({
+          ...day,
+          exercises: [...day.exercises],
+        })),
+      }))
+
+      // Find source and target days
+      let sourceDay:
+        | GQLGetTemplateTrainingPlanByIdQuery['getTrainingPlanById']['weeks'][number]['days'][number]
+        | null = null
+      let targetDay:
+        | GQLGetTemplateTrainingPlanByIdQuery['getTrainingPlanById']['weeks'][number]['days'][number]
+        | null = null
+
+      for (const week of newWeeks) {
+        for (const day of week.days) {
+          if (day.id === sourceDayId) {
+            sourceDay = day
+          }
+          if (day.id === targetDayId) {
+            targetDay = day
+          }
+        }
+      }
+
+      if (!sourceDay || !targetDay || sourceDay.exercises.length === 0) {
+        return oldData
+      }
+
+      // Copy all exercises from source to target (keep them in source)
+      const exercisesToCopy = [...sourceDay.exercises]
+
+      // Add exercises to target day, reordering them
+      const maxOrder = targetDay.exercises.length
+      const copiedExercises = exercisesToCopy.map((exercise, index) => ({
+        ...exercise,
+        id: `temp-${exercise.id}-${Date.now()}-${index}`, // Temporary ID for optimistic update
+        order: maxOrder + index + 1,
+      }))
+
+      targetDay.exercises = [...targetDay.exercises, ...copiedExercises]
+
+      // If target day was a rest day, set it to not be a rest day
+      if (targetDay.isRestDay && sourceDay.workoutType) {
+        targetDay.isRestDay = false
+        targetDay.workoutType = sourceDay.workoutType
+      }
+
+      return {
+        ...oldData,
+        getTrainingPlanById: {
+          ...oldData.getTrainingPlanById,
+          weeks: newWeeks,
+        },
+      }
+    },
   }
 
   // Mutation wrappers with optimistic updates
@@ -601,6 +668,7 @@ export function useTrainingPlanMutations(trainingId?: string) {
   const updateDayMutation = useUpdateTrainingDayDataMutation()
   const moveExerciseMutation = useMoveExerciseMutation()
   const moveExercisesToDayMutation = useMoveExercisesToDayMutation()
+  const copyExercisesFromDayMutation = useCopyExercisesFromDayMutation()
 
   const updateDetailsOptimistic = useOptimisticMutation({
     queryKey: trainingPlanQueryKey,
@@ -666,6 +734,12 @@ export function useTrainingPlanMutations(trainingId?: string) {
     queryKey: trainingPlanQueryKey,
     mutationFn: moveExercisesToDayMutation.mutateAsync,
     updateFn: optimisticUpdaters.moveExercisesToDay,
+  })
+
+  const copyExercisesFromDayOptimistic = useOptimisticMutation({
+    queryKey: trainingPlanQueryKey,
+    mutationFn: copyExercisesFromDayMutation.mutateAsync,
+    updateFn: optimisticUpdaters.copyExercisesFromDay,
   })
 
   // Simple wrapper functions that match the old context-based API
@@ -916,6 +990,19 @@ export function useTrainingPlanMutations(trainingId?: string) {
     debouncedInvalidateQueries()
 
     return moveExercisesToDayOptimistic.optimisticMutate({
+      input: {
+        sourceDayId,
+        targetDayId,
+      },
+    })
+  }
+
+  const copyExercisesFromDay = (sourceDayId: string, targetDayId: string) => {
+    if (!trainingId) return Promise.reject('No training ID')
+
+    debouncedInvalidateQueries()
+
+    return copyExercisesFromDayOptimistic.optimisticMutate({
       input: {
         sourceDayId,
         targetDayId,
@@ -1198,6 +1285,7 @@ export function useTrainingPlanMutations(trainingId?: string) {
     updateDay,
     moveExercise,
     moveExercisesToDay,
+    copyExercisesFromDay,
     addWeek,
     removeWeek,
     cloneWeek,
