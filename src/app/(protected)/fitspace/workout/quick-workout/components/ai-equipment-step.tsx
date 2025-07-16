@@ -6,8 +6,7 @@ import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
 import { GQLEquipment } from '@/generated/graphql-client'
 
 import { EquipmentFilters } from '../../[trainingId]/components/equipment-filters'
-
-import type { AiWorkoutInputData } from './ai-workout-input'
+import type { AiWorkoutInputData } from '../hooks/use-ai-workout-generation'
 
 interface AiEquipmentStepProps {
   data: AiWorkoutInputData

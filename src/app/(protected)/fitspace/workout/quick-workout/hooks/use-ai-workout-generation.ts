@@ -1,17 +1,24 @@
 import { useState } from 'react'
 
 import {
+  GQLEquipment,
   GQLFitspaceGenerateAiWorkoutMutation,
   GQLRepFocus,
   GQLRpeRange,
   useFitspaceGenerateAiWorkoutMutation,
 } from '@/generated/graphql-client'
 
-import type {
-  AiWorkoutInputData,
-  RepFocus,
-  RpeRange,
-} from '../components/ai-workout-input'
+export type RpeRange = '6-7' | '7-8' | '8-10'
+export type RepFocus = 'strength' | 'hypertrophy' | 'endurance'
+
+export interface AiWorkoutInputData {
+  selectedMuscleGroups: string[]
+  selectedEquipment: GQLEquipment[]
+  exerciseCount: number
+  maxSetsPerExercise: number
+  rpeRange: RpeRange
+  repFocus: RepFocus
+}
 
 export function useAiWorkoutGeneration() {
   // AI workout input state

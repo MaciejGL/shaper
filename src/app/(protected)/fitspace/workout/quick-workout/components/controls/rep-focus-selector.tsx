@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card'
 import { RadioOption } from '@/components/ui/radio-option'
 
-import type { RepFocus } from '../ai-workout-input'
+import type { RepFocus } from '../../hooks/use-ai-workout-generation'
 
 interface RepFocusSelectorProps {
   value: RepFocus

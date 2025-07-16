@@ -145,6 +145,50 @@ export type GQLAddTrainingWeekInput = {
   weekNumber: Scalars['Int']['input'];
 };
 
+export type GQLAdminUserFilters = {
+  dateFrom?: InputMaybe<Scalars['String']['input']>;
+  dateTo?: InputMaybe<Scalars['String']['input']>;
+  hasProfile?: InputMaybe<Scalars['Boolean']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  role?: InputMaybe<GQLUserRole>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GQLAdminUserListItem = {
+  __typename?: 'AdminUserListItem';
+  clientCount: EntireFieldWrapper<Scalars['Int']['output']>;
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  email: EntireFieldWrapper<Scalars['String']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  isActive: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  lastLoginAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  name?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
+  role: EntireFieldWrapper<GQLUserRole>;
+  sessionCount: EntireFieldWrapper<Scalars['Int']['output']>;
+  trainer?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
+export type GQLAdminUserListResponse = {
+  __typename?: 'AdminUserListResponse';
+  hasMore: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  total: EntireFieldWrapper<Scalars['Int']['output']>;
+  users: EntireFieldWrapper<Array<GQLAdminUserListItem>>;
+};
+
+export type GQLAdminUserStats = {
+  __typename?: 'AdminUserStats';
+  activeUsers: EntireFieldWrapper<Scalars['Int']['output']>;
+  inactiveUsers: EntireFieldWrapper<Scalars['Int']['output']>;
+  recentSignups: EntireFieldWrapper<Scalars['Int']['output']>;
+  totalAdmins: EntireFieldWrapper<Scalars['Int']['output']>;
+  totalClients: EntireFieldWrapper<Scalars['Int']['output']>;
+  totalTrainers: EntireFieldWrapper<Scalars['Int']['output']>;
+  totalUsers: EntireFieldWrapper<Scalars['Int']['output']>;
+  usersWithoutProfiles: EntireFieldWrapper<Scalars['Int']['output']>;
+};
+
 export type GQLAiExerciseSuggestion = {
   __typename?: 'AiExerciseSuggestion';
   aiMeta: EntireFieldWrapper<GQLAiMeta>;
@@ -782,6 +826,7 @@ export type GQLMutation = {
   __typename?: 'Mutation';
   acceptCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   activatePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  activateUser: EntireFieldWrapper<Scalars['Boolean']['output']>;
   addAiExerciseToWorkout: EntireFieldWrapper<GQLTrainingExercise>;
   addBodyMeasurement: EntireFieldWrapper<GQLUserBodyMeasure>;
   addCustomFoodToMeal: EntireFieldWrapper<GQLMealFoodLog>;
@@ -802,6 +847,7 @@ export type GQLMutation = {
   bulkUpdatePlanPermissions: EntireFieldWrapper<Array<GQLPlanCollaboratorSummary>>;
   cancelCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   clearTodaysWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  clearUserSessions: EntireFieldWrapper<Scalars['Boolean']['output']>;
   closePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   completeMeal: EntireFieldWrapper<Scalars['Boolean']['output']>;
   copyExercisesFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -815,6 +861,7 @@ export type GQLMutation = {
   createQuickWorkout: EntireFieldWrapper<GQLTrainingPlan>;
   createReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   createTrainingPlan: EntireFieldWrapper<GQLCreateTrainingPlanPayload>;
+  deactivateUser: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteBodyMeasurement: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteNote: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -879,6 +926,7 @@ export type GQLMutation = {
   updateTrainingPlanCollaboratorPermission: EntireFieldWrapper<GQLTrainingPlanCollaborator>;
   updateTrainingPlanDetails: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateTrainingWeekDetails: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  updateUserRole: EntireFieldWrapper<GQLAdminUserListItem>;
 };
 
 
@@ -891,6 +939,11 @@ export type GQLMutationActivatePlanArgs = {
   planId: Scalars['ID']['input'];
   resume: Scalars['Boolean']['input'];
   startDate: Scalars['String']['input'];
+};
+
+
+export type GQLMutationActivateUserArgs = {
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -989,6 +1042,11 @@ export type GQLMutationCancelCoachingRequestArgs = {
 };
 
 
+export type GQLMutationClearUserSessionsArgs = {
+  userId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationClosePlanArgs = {
   planId: Scalars['ID']['input'];
 };
@@ -1042,6 +1100,11 @@ export type GQLMutationCreateReviewArgs = {
 
 export type GQLMutationCreateTrainingPlanArgs = {
   input: GQLCreateTrainingPlanInput;
+};
+
+
+export type GQLMutationDeactivateUserArgs = {
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -1374,6 +1437,11 @@ export type GQLMutationUpdateTrainingWeekDetailsArgs = {
   input: GQLUpdateTrainingWeekDetailsInput;
 };
 
+
+export type GQLMutationUpdateUserRoleArgs = {
+  input: GQLUpdateUserRoleInput;
+};
+
 export type GQLMyMealPlansPayload = {
   __typename?: 'MyMealPlansPayload';
   activePlan?: EntireFieldWrapper<Maybe<GQLMealPlan>>;
@@ -1476,6 +1544,9 @@ export type GQLPlanWithPermissions = {
 
 export type GQLQuery = {
   __typename?: 'Query';
+  adminUserById?: EntireFieldWrapper<Maybe<GQLAdminUserListItem>>;
+  adminUserList: EntireFieldWrapper<GQLAdminUserListResponse>;
+  adminUserStats: EntireFieldWrapper<GQLAdminUserStats>;
   allPlansWithPermissions: EntireFieldWrapper<Array<GQLPlanWithPermissions>>;
   availablePlansForTeamMember: EntireFieldWrapper<Array<GQLAvailablePlan>>;
   bodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
@@ -1529,6 +1600,18 @@ export type GQLQuery = {
   userExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
   userPublic?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
   userWithAllData?: EntireFieldWrapper<Maybe<GQLUser>>;
+};
+
+
+export type GQLQueryAdminUserByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryAdminUserListArgs = {
+  filters?: InputMaybe<GQLAdminUserFilters>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2094,6 +2177,11 @@ export type GQLUpdateTrainingWeekInput = {
   weekNumber: Scalars['Int']['input'];
 };
 
+export type GQLUpdateUserRoleInput = {
+  newRole: GQLUserRole;
+  userId: Scalars['ID']['input'];
+};
+
 export type GQLUser = {
   __typename?: 'User';
   clients: EntireFieldWrapper<Array<GQLUserPublic>>;
@@ -2312,6 +2400,10 @@ export type GQLResolversTypes = {
   AddSubstituteExerciseInput: GQLAddSubstituteExerciseInput;
   AddTrainingPlanCollaboratorInput: GQLAddTrainingPlanCollaboratorInput;
   AddTrainingWeekInput: GQLAddTrainingWeekInput;
+  AdminUserFilters: GQLAdminUserFilters;
+  AdminUserListItem: ResolverTypeWrapper<GQLAdminUserListItem>;
+  AdminUserListResponse: ResolverTypeWrapper<GQLAdminUserListResponse>;
+  AdminUserStats: ResolverTypeWrapper<GQLAdminUserStats>;
   AiExerciseSuggestion: ResolverTypeWrapper<GQLAiExerciseSuggestion>;
   AiMeta: ResolverTypeWrapper<GQLAiMeta>;
   AiWorkoutExercise: ResolverTypeWrapper<GQLAiWorkoutExercise>;
@@ -2437,6 +2529,7 @@ export type GQLResolversTypes = {
   UpdateTrainingPlanInput: GQLUpdateTrainingPlanInput;
   UpdateTrainingWeekDetailsInput: GQLUpdateTrainingWeekDetailsInput;
   UpdateTrainingWeekInput: GQLUpdateTrainingWeekInput;
+  UpdateUserRoleInput: GQLUpdateUserRoleInput;
   User: ResolverTypeWrapper<GQLUser>;
   UserBodyMeasure: ResolverTypeWrapper<GQLUserBodyMeasure>;
   UserProfile: ResolverTypeWrapper<GQLUserProfile>;
@@ -2463,6 +2556,10 @@ export type GQLResolversParentTypes = {
   AddSubstituteExerciseInput: GQLAddSubstituteExerciseInput;
   AddTrainingPlanCollaboratorInput: GQLAddTrainingPlanCollaboratorInput;
   AddTrainingWeekInput: GQLAddTrainingWeekInput;
+  AdminUserFilters: GQLAdminUserFilters;
+  AdminUserListItem: GQLAdminUserListItem;
+  AdminUserListResponse: GQLAdminUserListResponse;
+  AdminUserStats: GQLAdminUserStats;
   AiExerciseSuggestion: GQLAiExerciseSuggestion;
   AiMeta: GQLAiMeta;
   AiWorkoutExercise: GQLAiWorkoutExercise;
@@ -2576,12 +2673,48 @@ export type GQLResolversParentTypes = {
   UpdateTrainingPlanInput: GQLUpdateTrainingPlanInput;
   UpdateTrainingWeekDetailsInput: GQLUpdateTrainingWeekDetailsInput;
   UpdateTrainingWeekInput: GQLUpdateTrainingWeekInput;
+  UpdateUserRoleInput: GQLUpdateUserRoleInput;
   User: GQLUser;
   UserBodyMeasure: GQLUserBodyMeasure;
   UserProfile: GQLUserProfile;
   UserPublic: GQLUserPublic;
   UserSession: GQLUserSession;
   VolumeEntry: GQLVolumeEntry;
+};
+
+export type GQLAdminUserListItemResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AdminUserListItem'] = GQLResolversParentTypes['AdminUserListItem']> = {
+  clientCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  isActive?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  lastLoginAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  name?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  profile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType>;
+  role?: Resolver<GQLResolversTypes['UserRole'], ParentType, ContextType>;
+  sessionCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  trainer?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLAdminUserListResponseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AdminUserListResponse'] = GQLResolversParentTypes['AdminUserListResponse']> = {
+  hasMore?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  total?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  users?: Resolver<Array<GQLResolversTypes['AdminUserListItem']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLAdminUserStatsResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AdminUserStats'] = GQLResolversParentTypes['AdminUserStats']> = {
+  activeUsers?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  inactiveUsers?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  recentSignups?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  totalAdmins?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  totalClients?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  totalTrainers?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  totalUsers?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  usersWithoutProfiles?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type GQLAiExerciseSuggestionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiExerciseSuggestion'] = GQLResolversParentTypes['AiExerciseSuggestion']> = {
@@ -2924,6 +3057,7 @@ export type GQLMuscleGroupCategoryResolvers<ContextType = GQLContext, ParentType
 export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Mutation'] = GQLResolversParentTypes['Mutation']> = {
   acceptCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationAcceptCoachingRequestArgs, 'id'>>;
   activatePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationActivatePlanArgs, 'planId' | 'resume' | 'startDate'>>;
+  activateUser?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationActivateUserArgs, 'userId'>>;
   addAiExerciseToWorkout?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationAddAiExerciseToWorkoutArgs, 'input'>>;
   addBodyMeasurement?: Resolver<GQLResolversTypes['UserBodyMeasure'], ParentType, ContextType, RequireFields<GQLMutationAddBodyMeasurementArgs, 'input'>>;
   addCustomFoodToMeal?: Resolver<GQLResolversTypes['MealFoodLog'], ParentType, ContextType, RequireFields<GQLMutationAddCustomFoodToMealArgs, 'input'>>;
@@ -2944,6 +3078,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   bulkUpdatePlanPermissions?: Resolver<Array<GQLResolversTypes['PlanCollaboratorSummary']>, ParentType, ContextType, RequireFields<GQLMutationBulkUpdatePlanPermissionsArgs, 'input'>>;
   cancelCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationCancelCoachingRequestArgs, 'id'>>;
   clearTodaysWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  clearUserSessions?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationClearUserSessionsArgs, 'userId'>>;
   closePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationClosePlanArgs, 'planId'>>;
   completeMeal?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCompleteMealArgs, 'mealId'>>;
   copyExercisesFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCopyExercisesFromDayArgs, 'input'>>;
@@ -2957,6 +3092,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   createQuickWorkout?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLMutationCreateQuickWorkoutArgs, 'input'>>;
   createReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCreateReviewArgs, 'input'>>;
   createTrainingPlan?: Resolver<GQLResolversTypes['CreateTrainingPlanPayload'], ParentType, ContextType, RequireFields<GQLMutationCreateTrainingPlanArgs, 'input'>>;
+  deactivateUser?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeactivateUserArgs, 'userId'>>;
   deleteBodyMeasurement?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteBodyMeasurementArgs, 'id'>>;
   deleteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteExerciseArgs, 'id'>>;
   deleteNote?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteNoteArgs, 'id'>>;
@@ -3021,6 +3157,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateTrainingPlanCollaboratorPermission?: Resolver<GQLResolversTypes['TrainingPlanCollaborator'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingPlanCollaboratorPermissionArgs, 'input'>>;
   updateTrainingPlanDetails?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingPlanDetailsArgs, 'input'>>;
   updateTrainingWeekDetails?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingWeekDetailsArgs, 'input'>>;
+  updateUserRole?: Resolver<GQLResolversTypes['AdminUserListItem'], ParentType, ContextType, RequireFields<GQLMutationUpdateUserRoleArgs, 'input'>>;
 };
 
 export type GQLMyMealPlansPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MyMealPlansPayload'] = GQLResolversParentTypes['MyMealPlansPayload']> = {
@@ -3100,6 +3237,9 @@ export type GQLPlanWithPermissionsResolvers<ContextType = GQLContext, ParentType
 };
 
 export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Query'] = GQLResolversParentTypes['Query']> = {
+  adminUserById?: Resolver<Maybe<GQLResolversTypes['AdminUserListItem']>, ParentType, ContextType, RequireFields<GQLQueryAdminUserByIdArgs, 'id'>>;
+  adminUserList?: Resolver<GQLResolversTypes['AdminUserListResponse'], ParentType, ContextType, Partial<GQLQueryAdminUserListArgs>>;
+  adminUserStats?: Resolver<GQLResolversTypes['AdminUserStats'], ParentType, ContextType>;
   allPlansWithPermissions?: Resolver<Array<GQLResolversTypes['PlanWithPermissions']>, ParentType, ContextType, RequireFields<GQLQueryAllPlansWithPermissionsArgs, 'userId'>>;
   availablePlansForTeamMember?: Resolver<Array<GQLResolversTypes['AvailablePlan']>, ParentType, ContextType, RequireFields<GQLQueryAvailablePlansForTeamMemberArgs, 'userId'>>;
   bodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
@@ -3406,6 +3546,9 @@ export type GQLVolumeEntryResolvers<ContextType = GQLContext, ParentType extends
 };
 
 export type GQLResolvers<ContextType = GQLContext> = {
+  AdminUserListItem?: GQLAdminUserListItemResolvers<ContextType>;
+  AdminUserListResponse?: GQLAdminUserListResponseResolvers<ContextType>;
+  AdminUserStats?: GQLAdminUserStatsResolvers<ContextType>;
   AiExerciseSuggestion?: GQLAiExerciseSuggestionResolvers<ContextType>;
   AiMeta?: GQLAiMetaResolvers<ContextType>;
   AiWorkoutExercise?: GQLAiWorkoutExerciseResolvers<ContextType>;

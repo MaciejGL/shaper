@@ -5,7 +5,8 @@ import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { GQLFitspaceGenerateAiWorkoutMutation } from '@/generated/graphql-client'
 
-import { AiWorkoutInputData } from './ai-workout-input'
+import type { AiWorkoutInputData } from '../hooks/use-ai-workout-generation'
+
 import { WorkoutSummary } from './controls/workout-summary'
 import { AiExerciseList } from './results/ai-exercise-list'
 

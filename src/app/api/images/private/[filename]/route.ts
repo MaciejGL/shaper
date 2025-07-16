@@ -5,7 +5,7 @@ import { getCurrentUser } from '@/lib/getUser'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { filename: string } },
+  { params }: { params: Promise<{ filename: string }> },
 ) {
   try {
     // Check authentication
@@ -17,7 +17,8 @@ export async function GET(
       )
     }
 
-    const filename = decodeURIComponent(params.filename)
+    const { filename: rawFilename } = await params
+    const filename = decodeURIComponent(rawFilename)
 
     // Security: Check if user owns this image
     // Progress photos should contain the user ID in the path

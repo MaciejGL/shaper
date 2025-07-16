@@ -29,9 +29,72 @@ type UserSession {
   createdAt: String!
 }
 
+type AdminUserStats {
+  totalUsers: Int!
+  totalClients: Int!
+  totalTrainers: Int!
+  totalAdmins: Int!
+  activeUsers: Int!
+  inactiveUsers: Int!
+  usersWithoutProfiles: Int!
+  recentSignups: Int!
+}
+
+type AdminUserListItem {
+  id: ID!
+  email: String!
+  name: String
+  role: UserRole!
+  createdAt: String!
+  updatedAt: String!
+  lastLoginAt: String
+  sessionCount: Int!
+  profile: UserProfile
+  trainer: UserPublic
+  clientCount: Int!
+  isActive: Boolean!
+}
+
+type AdminUserListResponse {
+  users: [AdminUserListItem!]!
+  total: Int!
+  hasMore: Boolean!
+}
+
+input AdminUserFilters {
+  role: UserRole
+  search: String
+  isActive: Boolean
+  hasProfile: Boolean
+  dateFrom: String
+  dateTo: String
+}
+
+input UpdateUserRoleInput {
+  userId: ID!
+  newRole: UserRole!
+}
+
 type Query {
   user: User
   userWithAllData: User
   userBasic: User
   myClients: [UserPublic!]!
+
+  # Admin-only queries
+  adminUserStats: AdminUserStats!
+  adminUserList(
+    filters: AdminUserFilters
+    limit: Int
+    offset: Int
+  ): AdminUserListResponse!
+  adminUserById(id: ID!): AdminUserListItem
+}
+
+type Mutation {
+  # Admin-only mutations
+  updateUserRole(input: UpdateUserRoleInput!): AdminUserListItem!
+  deactivateUser(userId: ID!): Boolean!
+  activateUser(userId: ID!): Boolean!
+  clearUserSessions(userId: ID!): Boolean!
 }

@@ -2,6 +2,7 @@ import {
   BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
   ExerciseSetLog as PrismaExerciseSetLog,
+  Image as PrismaImage,
   MuscleGroup as PrismaMuscleGroup,
   TrainingDay as PrismaTrainingDay,
   TrainingExercise as PrismaTrainingExercise,
@@ -32,6 +33,7 @@ export default class TrainingDay implements GQLTrainingDay {
         })[]
         base?: PrismaBaseExercise & {
           muscleGroups: PrismaMuscleGroup[]
+          images: PrismaImage[]
         }
       })[]
     },

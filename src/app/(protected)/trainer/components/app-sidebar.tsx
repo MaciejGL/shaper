@@ -9,10 +9,12 @@ import {
   HandshakeIcon,
   LayoutDashboardIcon,
   PlusCircleIcon,
+  ShieldIcon,
   UserRoundCogIcon,
   Users2Icon,
   UtensilsIcon,
 } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useMemo } from 'react'
@@ -102,6 +104,7 @@ const placeholderMealPlans = {
 }
 
 export function AppSidebar() {
+  const { data: session } = useSession()
   const queryClient = useQueryClient()
   const router = useRouter()
   const { data: clients, isPlaceholderData: isPlaceholderClients } =
@@ -262,6 +265,9 @@ export function AppSidebar() {
     ],
   )
 
+  const isAdmin =
+    session?.user?.email === process.env.NEXT_PUBLIC_TEST_TRAINER_EMAIL
+
   const footerItems = [
     {
       title: TRAINER_LINKS.profile.label,
@@ -269,7 +275,13 @@ export function AppSidebar() {
       icon: UserRoundCogIcon,
       disabled: TRAINER_LINKS.profile.disabled,
     },
-  ]
+    isAdmin && {
+      title: 'Admin',
+      url: '/admin',
+      icon: ShieldIcon,
+      disabled: false,
+    },
+  ].filter(Boolean) as SidebarItemType[]
 
   return (
     <Sidebar variant="inset" collapsible="icon">

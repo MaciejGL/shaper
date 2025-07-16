@@ -58,6 +58,7 @@ export const getTrainingExercise = async (
       },
       base: {
         include: {
+          images: true,
           muscleGroups: true,
           substitutes: {
             include: {

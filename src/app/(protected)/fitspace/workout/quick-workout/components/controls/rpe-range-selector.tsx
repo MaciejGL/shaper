@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/card'
 import { RadioOption } from '@/components/ui/radio-option'
 
-import type { RpeRange } from '../ai-workout-input'
+import type { RpeRange } from '../../hooks/use-ai-workout-generation'
 
 interface RpeRangeSelectorProps {
   value: RpeRange

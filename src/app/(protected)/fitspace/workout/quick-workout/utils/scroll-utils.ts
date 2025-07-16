@@ -25,22 +25,3 @@ export function scrollToTop() {
     })
   }
 }
-
-/**
- * Instantly scrolls to the top of the scrollable container
- */
-export function scrollToTopInstant() {
-  const container = getScrollableContainer()
-  if (container) {
-    container.scrollTo({
-      top: 0,
-      behavior: 'instant',
-    })
-  } else {
-    // Fallback to window scroll if container not found
-    window.scrollTo({
-      top: 0,
-      behavior: 'instant',
-    })
-  }
-}

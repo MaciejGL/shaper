@@ -143,6 +143,50 @@ export type GQLAddTrainingWeekInput = {
   weekNumber: Scalars['Int']['input'];
 };
 
+export type GQLAdminUserFilters = {
+  dateFrom?: InputMaybe<Scalars['String']['input']>;
+  dateTo?: InputMaybe<Scalars['String']['input']>;
+  hasProfile?: InputMaybe<Scalars['Boolean']['input']>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  role?: InputMaybe<GQLUserRole>;
+  search?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GQLAdminUserListItem = {
+  __typename?: 'AdminUserListItem';
+  clientCount: Scalars['Int']['output'];
+  createdAt: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  lastLoginAt?: Maybe<Scalars['String']['output']>;
+  name?: Maybe<Scalars['String']['output']>;
+  profile?: Maybe<GQLUserProfile>;
+  role: GQLUserRole;
+  sessionCount: Scalars['Int']['output'];
+  trainer?: Maybe<GQLUserPublic>;
+  updatedAt: Scalars['String']['output'];
+};
+
+export type GQLAdminUserListResponse = {
+  __typename?: 'AdminUserListResponse';
+  hasMore: Scalars['Boolean']['output'];
+  total: Scalars['Int']['output'];
+  users: Array<GQLAdminUserListItem>;
+};
+
+export type GQLAdminUserStats = {
+  __typename?: 'AdminUserStats';
+  activeUsers: Scalars['Int']['output'];
+  inactiveUsers: Scalars['Int']['output'];
+  recentSignups: Scalars['Int']['output'];
+  totalAdmins: Scalars['Int']['output'];
+  totalClients: Scalars['Int']['output'];
+  totalTrainers: Scalars['Int']['output'];
+  totalUsers: Scalars['Int']['output'];
+  usersWithoutProfiles: Scalars['Int']['output'];
+};
+
 export type GQLAiExerciseSuggestion = {
   __typename?: 'AiExerciseSuggestion';
   aiMeta: GQLAiMeta;
@@ -780,6 +824,7 @@ export type GQLMutation = {
   __typename?: 'Mutation';
   acceptCoachingRequest?: Maybe<GQLCoachingRequest>;
   activatePlan: Scalars['Boolean']['output'];
+  activateUser: Scalars['Boolean']['output'];
   addAiExerciseToWorkout: GQLTrainingExercise;
   addBodyMeasurement: GQLUserBodyMeasure;
   addCustomFoodToMeal: GQLMealFoodLog;
@@ -800,6 +845,7 @@ export type GQLMutation = {
   bulkUpdatePlanPermissions: Array<GQLPlanCollaboratorSummary>;
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   clearTodaysWorkout: Scalars['Boolean']['output'];
+  clearUserSessions: Scalars['Boolean']['output'];
   closePlan: Scalars['Boolean']['output'];
   completeMeal: Scalars['Boolean']['output'];
   copyExercisesFromDay: Scalars['Boolean']['output'];
@@ -813,6 +859,7 @@ export type GQLMutation = {
   createQuickWorkout: GQLTrainingPlan;
   createReview: Scalars['Boolean']['output'];
   createTrainingPlan: GQLCreateTrainingPlanPayload;
+  deactivateUser: Scalars['Boolean']['output'];
   deleteBodyMeasurement: Scalars['Boolean']['output'];
   deleteExercise: Scalars['Boolean']['output'];
   deleteNote: Scalars['Boolean']['output'];
@@ -877,6 +924,7 @@ export type GQLMutation = {
   updateTrainingPlanCollaboratorPermission: GQLTrainingPlanCollaborator;
   updateTrainingPlanDetails: Scalars['Boolean']['output'];
   updateTrainingWeekDetails: Scalars['Boolean']['output'];
+  updateUserRole: GQLAdminUserListItem;
 };
 
 
@@ -889,6 +937,11 @@ export type GQLMutationActivatePlanArgs = {
   planId: Scalars['ID']['input'];
   resume: Scalars['Boolean']['input'];
   startDate: Scalars['String']['input'];
+};
+
+
+export type GQLMutationActivateUserArgs = {
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -987,6 +1040,11 @@ export type GQLMutationCancelCoachingRequestArgs = {
 };
 
 
+export type GQLMutationClearUserSessionsArgs = {
+  userId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationClosePlanArgs = {
   planId: Scalars['ID']['input'];
 };
@@ -1040,6 +1098,11 @@ export type GQLMutationCreateReviewArgs = {
 
 export type GQLMutationCreateTrainingPlanArgs = {
   input: GQLCreateTrainingPlanInput;
+};
+
+
+export type GQLMutationDeactivateUserArgs = {
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -1372,6 +1435,11 @@ export type GQLMutationUpdateTrainingWeekDetailsArgs = {
   input: GQLUpdateTrainingWeekDetailsInput;
 };
 
+
+export type GQLMutationUpdateUserRoleArgs = {
+  input: GQLUpdateUserRoleInput;
+};
+
 export type GQLMyMealPlansPayload = {
   __typename?: 'MyMealPlansPayload';
   activePlan?: Maybe<GQLMealPlan>;
@@ -1474,6 +1542,9 @@ export type GQLPlanWithPermissions = {
 
 export type GQLQuery = {
   __typename?: 'Query';
+  adminUserById?: Maybe<GQLAdminUserListItem>;
+  adminUserList: GQLAdminUserListResponse;
+  adminUserStats: GQLAdminUserStats;
   allPlansWithPermissions: Array<GQLPlanWithPermissions>;
   availablePlansForTeamMember: Array<GQLAvailablePlan>;
   bodyMeasures: Array<GQLUserBodyMeasure>;
@@ -1527,6 +1598,18 @@ export type GQLQuery = {
   userExercises: Array<GQLBaseExercise>;
   userPublic?: Maybe<GQLUserPublic>;
   userWithAllData?: Maybe<GQLUser>;
+};
+
+
+export type GQLQueryAdminUserByIdArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryAdminUserListArgs = {
+  filters?: InputMaybe<GQLAdminUserFilters>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2090,6 +2173,11 @@ export type GQLUpdateTrainingWeekInput = {
   id: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   weekNumber: Scalars['Int']['input'];
+};
+
+export type GQLUpdateUserRoleInput = {
+  newRole: GQLUserRole;
+  userId: Scalars['ID']['input'];
 };
 
 export type GQLUser = {

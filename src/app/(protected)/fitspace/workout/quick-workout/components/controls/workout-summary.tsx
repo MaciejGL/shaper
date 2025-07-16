@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { GQLEquipment } from '@/generated/graphql-client'
 import { translateEquipment } from '@/utils/translate-equipment'
 
-import type { RepFocus, RpeRange } from '../ai-workout-input'
+import type { RepFocus, RpeRange } from '../../hooks/use-ai-workout-generation'
 
 interface WorkoutSummaryProps {
   exerciseCount: number

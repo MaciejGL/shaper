@@ -1,6 +1,11 @@
 'use client'
 
-import type { AiWorkoutInputData, RepFocus, RpeRange } from './ai-workout-input'
+import type {
+  AiWorkoutInputData,
+  RepFocus,
+  RpeRange,
+} from '../hooks/use-ai-workout-generation'
+
 import { ExerciseCountControl } from './controls/exercise-count-control'
 import { MaxSetsControl } from './controls/max-sets-control'
 import { RepFocusSelector } from './controls/rep-focus-selector'

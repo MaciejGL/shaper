@@ -201,6 +201,7 @@ const placeholderExercises = [
     videoUrl: '',
     equipment: GQLEquipment.Barbell,
     isPublic: false,
+    images: [],
     muscleGroups: [
       {
         id: '2',
@@ -218,6 +219,7 @@ const placeholderExercises = [
     videoUrl: '',
     equipment: GQLEquipment.Barbell,
     isPublic: false,
+    images: [],
     muscleGroups: [
       {
         id: '2',
@@ -235,6 +237,7 @@ const placeholderExercises = [
     videoUrl: '',
     equipment: GQLEquipment.Barbell,
     isPublic: false,
+    images: [],
     muscleGroups: [
       {
         id: '2',

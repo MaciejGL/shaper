@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { EnhancedBodyView } from '@/components/human-body/enhanced-body-view'
 import { GQLMuscleGroup } from '@/generated/graphql-client'
 
-import type { AiWorkoutInputData } from './ai-workout-input'
+import type { AiWorkoutInputData } from '../hooks/use-ai-workout-generation'
 
 interface AiMuscleGroupsStepProps {
   muscleGroups: Pick<GQLMuscleGroup, 'id' | 'alias' | 'groupSlug'>[]
