@@ -8,6 +8,32 @@ query QuickWorkoutExercises($where: ExerciseWhereInput) {
     equipment
     type
     description
+    images {
+      id
+      url
+      order
+    }
+    muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+  }
+
+  publicExercises(where: $where) {
+    id
+    name
+    description
+    videoUrl
+    equipment
+    type
+    description
+    images {
+      id
+      url
+      order
+    }
     muscleGroups {
       id
       name
@@ -38,6 +64,11 @@ query FitspaceGetUserQuickWorkoutPlan {
           order
           completedAt
           equipment
+          images {
+            id
+            url
+            order
+          }
           muscleGroups {
             id
             name
@@ -73,12 +104,18 @@ mutation FitspaceCreateQuickWorkout($input: CreateQuickWorkoutInput!) {
         dayOfWeek
         isRestDay
         scheduledAt
+
         exercises {
           id
           name
           order
           isExtra
           baseId
+          images {
+            id
+            url
+            order
+          }
           muscleGroups {
             id
             alias

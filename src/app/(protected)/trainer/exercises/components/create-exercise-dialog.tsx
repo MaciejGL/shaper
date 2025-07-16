@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { MultiImageUpload } from '@/components/ui/multi-image-upload'
 import {
   Select,
   SelectContent,
@@ -56,6 +57,7 @@ export type CreateExerciseFormData = {
   videoUrl?: string | null
   muscleGroups: { id: string }[]
   substituteIds: string[]
+  imageUrls: string[]
 }
 
 export function CreateExerciseDialog({
@@ -74,6 +76,7 @@ export function CreateExerciseDialog({
     videoUrl: exercise?.videoUrl ?? '',
     muscleGroups: exercise?.muscleGroups.map((mg) => ({ id: mg.id })) ?? [],
     substituteIds: [],
+    imageUrls: [],
   })
 
   // Load existing substitute IDs when editing
@@ -99,6 +102,16 @@ export function CreateExerciseDialog({
       setFormData((prev) => ({
         ...prev,
         substituteIds: existingSubstituteIds,
+      }))
+    }
+    // Load existing images if available
+    if (exerciseWithSubstitutes?.exercise?.images) {
+      const existingImageUrls = exerciseWithSubstitutes.exercise.images.map(
+        (img) => img.url,
+      )
+      setFormData((prev) => ({
+        ...prev,
+        imageUrls: existingImageUrls,
       }))
     }
   }, [exerciseWithSubstitutes])
@@ -158,6 +171,7 @@ export function CreateExerciseDialog({
             ...formData,
             muscleGroups: formData.muscleGroups.map((mg) => mg.id),
             substituteIds: formData.substituteIds,
+            imageUrls: formData.imageUrls,
           },
         })
       } else {
@@ -166,6 +180,7 @@ export function CreateExerciseDialog({
             ...formData,
             muscleGroups: formData.muscleGroups.map((mg) => mg.id),
             substituteIds: formData.substituteIds,
+            imageUrls: formData.imageUrls,
           },
         })
       }
@@ -177,6 +192,7 @@ export function CreateExerciseDialog({
         videoUrl: '',
         muscleGroups: [],
         substituteIds: [],
+        imageUrls: [],
       })
     } catch (error) {
       console.error(error)
@@ -344,6 +360,19 @@ export function CreateExerciseDialog({
                 setFormData((prev) => ({ ...prev, substituteIds }))
               }}
               isLoading={isLoadingExerciseWithSubstitutes}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Exercise Images</Label>
+            <MultiImageUpload
+              imageType="exercise"
+              currentImageUrls={formData.imageUrls}
+              onImagesChange={(imageUrls: string[]) => {
+                setFormData((prev) => ({ ...prev, imageUrls }))
+              }}
+              maxImages={4}
+              disabled={isCreatingExercise || isUpdatingExercise}
             />
           </div>
         </form>

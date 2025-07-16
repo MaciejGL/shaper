@@ -88,6 +88,7 @@ export default function QuickWorkoutPage() {
         name: ex.name,
         equipment: ex.equipment,
         completedAt: ex.completedAt,
+        images: ex.images,
         muscleGroups: ex.muscleGroups.map((mg) => ({
           id: mg.id,
           alias: mg.alias,
@@ -116,6 +117,7 @@ export default function QuickWorkoutPage() {
       id: ex.id,
       name: ex.name,
       equipment: ex.equipment,
+      images: ex.images,
       muscleGroups: ex.muscleGroups.map((mg) => ({
         id: mg.id,
         alias: mg.alias,

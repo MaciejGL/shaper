@@ -60,8 +60,15 @@ export function generateFileName(
 
   if (type === 'avatar') {
     return `${folder}/${userId}/${timestamp}-${sanitizedName}`
-  } else if (type === 'exercise' && id) {
-    return `${folder}/${id}/${timestamp}-${sanitizedName}`
+  } else if (type === 'exercise') {
+    // For exercise images:
+    // - If we have an exerciseId (editing), use it for organization
+    // - If no exerciseId (creating), use userId/temp folder
+    if (id) {
+      return `${folder}/${id}/${timestamp}-${sanitizedName}`
+    } else {
+      return `${folder}/temp/${userId}/${timestamp}-${sanitizedName}`
+    }
   } else if (type === 'progress') {
     return `${folder}/${userId}/${timestamp}-${sanitizedName}`
   }
@@ -132,6 +139,34 @@ export async function deleteImage(fileName: string): Promise<void> {
   })
 
   await s3Client.send(command)
+}
+
+// Extract S3 file key from image URL
+export function extractFileKeyFromUrl(imageUrl: string): string {
+  const cloudFrontDomain = process.env.AWS_CLOUDFRONT_DOMAIN
+  const s3Domain = `${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'eu-north-1'}.amazonaws.com`
+
+  // Remove protocol and domain to get the file key
+  if (cloudFrontDomain && imageUrl.includes(cloudFrontDomain)) {
+    return imageUrl.replace(`https://${cloudFrontDomain}/`, '')
+  } else if (imageUrl.includes(s3Domain)) {
+    return imageUrl.replace(`https://${s3Domain}/`, '')
+  }
+
+  // If it's already just a file key, return as is
+  return imageUrl
+}
+
+// Delete multiple images from S3
+export async function deleteImages(imageUrls: string[]): Promise<void> {
+  if (imageUrls.length === 0) return
+
+  const deletePromises = imageUrls.map(async (url) => {
+    const fileKey = extractFileKeyFromUrl(url)
+    return deleteImage(fileKey)
+  })
+
+  await Promise.all(deletePromises)
 }
 
 // Validate image file

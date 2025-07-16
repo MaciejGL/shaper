@@ -126,6 +126,11 @@ query FitspaceGetExercises {
       videoUrl
       equipment
       isPublic
+      images {
+        id
+        url
+        order
+      }
       muscleGroups {
         id
         alias
@@ -139,6 +144,11 @@ query FitspaceGetExercises {
       videoUrl
       equipment
       isPublic
+      images {
+        id
+        url
+        order
+      }
       muscleGroups {
         id
         alias

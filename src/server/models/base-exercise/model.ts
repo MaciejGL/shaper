@@ -1,6 +1,7 @@
 import {
   BaseExercise as PrismaBaseExercise,
   BaseExerciseSubstitute as PrismaBaseExerciseSubstitute,
+  Image as PrismaImage,
   MuscleGroup as PrismaMuscleGroup,
   MuscleGroupCategory as PrismaMuscleGroupCategory,
 } from '@prisma/client'
@@ -15,6 +16,7 @@ import {
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
+import Image from '../image/model'
 import MuscleGroupCategory from '../muscle-group-category/model'
 import MuscleGroup from '../muscle-group/model'
 import UserPublic from '../user-public/model'
@@ -87,6 +89,7 @@ export default class BaseExercise implements GQLBaseExercise {
       muscleGroups: (PrismaMuscleGroup & {
         category: PrismaMuscleGroupCategory
       })[]
+      images?: PrismaImage[]
       substitutes?: (PrismaBaseExerciseSubstitute & {
         substitute: PrismaBaseExercise & {
           muscleGroups: (PrismaMuscleGroup & {
@@ -277,5 +280,16 @@ export default class BaseExercise implements GQLBaseExercise {
     return substitutedBy.map(
       (substitute) => new BaseExerciseSubstitute(substitute, this.context),
     )
+  }
+
+  async images() {
+    if (this.data.images) {
+      return this.data.images.map((image) => new Image(image, this.context))
+    } else {
+      console.error(
+        `[BaseExercise] No images found for exercise ${this.id}. Skipping.`,
+      )
+      return []
+    }
   }
 }

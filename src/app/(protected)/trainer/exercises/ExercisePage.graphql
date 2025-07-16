@@ -34,6 +34,11 @@ query TrainerExercises($where: ExerciseWhereInput) {
     equipment
     isPublic
     videoUrl
+    images {
+      id
+      url
+      order
+    }
     muscleGroups {
       id
       name
@@ -49,6 +54,11 @@ query TrainerExercises($where: ExerciseWhereInput) {
     videoUrl
     equipment
     isPublic
+    images {
+      id
+      url
+      order
+    }
     muscleGroups {
       id
       name

@@ -1,14 +1,20 @@
 import { CheckIcon, GripVertical, XIcon } from 'lucide-react'
+import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { GQLBaseExercise, GQLMuscleGroup } from '@/generated/graphql-client'
+import {
+  GQLBaseExercise,
+  GQLImage,
+  GQLMuscleGroup,
+} from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 import { translateEquipment } from '@/utils/translate-equipment'
 
 export type Exercise = Pick<GQLBaseExercise, 'id' | 'name' | 'equipment'> & {
   muscleGroups: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
   completedAt?: string | null
+  images: Pick<GQLImage, 'id' | 'url' | 'order'>[]
 }
 
 type ExerciseCardProps = {
@@ -28,6 +34,8 @@ export function ExerciseCard({
   isDraggable,
   loading,
 }: ExerciseCardProps) {
+  const firstImage = exercise.images.find((image) => image.order === 0)
+
   return (
     <div
       className={cn(
@@ -51,6 +59,15 @@ export function ExerciseCard({
         <div className="flex-shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing">
           <GripVertical className="h-4 w-4" />
         </div>
+      )}
+      {firstImage && (
+        <Image
+          src={firstImage.url}
+          alt={exercise.name}
+          width={60}
+          height={60}
+          className="rounded-lg"
+        />
       )}
       <div className="flex-1">
         <div className="flex items-start justify-between gap-2 mb-1">

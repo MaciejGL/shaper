@@ -139,6 +139,12 @@ export function ExerciseCard({
                   Video
                 </Badge>
               )}
+              {exercise.images.length > 0 && (
+                <Badge variant="outline" isLoading={isLoading}>
+                  {exercise.images.length} image
+                  {exercise.images.length > 1 ? 's' : ''}
+                </Badge>
+              )}
             </div>
             <div className="flex flex-wrap gap-1">
               {exercise.muscleGroups.slice(0, 3).map((muscle) => (

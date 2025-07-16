@@ -1,0 +1,9 @@
+type Image {
+  id: ID!
+  url: String!
+  order: Int!
+  entityType: String!
+  entityId: ID!
+  createdAt: String!
+  updatedAt: String!
+}

@@ -1,6 +1,7 @@
 import {
   GQLBaseExercise,
   GQLEquipment,
+  GQLImage,
   GQLMuscleGroup,
 } from '@/generated/graphql-client'
 
@@ -11,6 +12,7 @@ import { Exercise } from '../components/exercise-card'
  */
 type GraphQLExercise = Pick<GQLBaseExercise, 'id' | 'name' | 'equipment'> & {
   muscleGroups: Pick<GQLMuscleGroup, 'id' | 'alias' | 'groupSlug'>[]
+  images: Pick<GQLImage, 'id' | 'url' | 'order'>[]
 }
 
 /**
@@ -53,6 +55,7 @@ export function filterExercises({
       id: ex.id,
       name: ex.name,
       equipment: ex.equipment,
+      images: ex.images,
       muscleGroups: ex.muscleGroups.map((mg) => ({
         id: mg.id,
         alias: mg.alias,

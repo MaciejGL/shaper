@@ -8,6 +8,7 @@ import {
   GQLMutationResolvers,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
+import { deleteImages } from '@/lib/aws/s3'
 import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from './model'
@@ -43,6 +44,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         name: 'asc',
       },
       include: {
+        images: true,
         muscleGroups: {
           include: {
             category: true,
@@ -81,6 +83,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         name: 'asc',
       },
       include: {
+        images: true,
         muscleGroups: {
           include: {
             category: true,
@@ -105,6 +108,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           isPublic: true,
         },
         include: {
+          images: true,
           muscleGroups: {
             include: {
               category: true,
@@ -121,6 +125,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
             },
           },
           include: {
+            images: true,
             muscleGroups: {
               include: {
                 category: true,
@@ -145,6 +150,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     const exercise = await prisma.baseExercise.findUnique({
       where: { id },
       include: {
+        images: true,
         muscleGroups: {
           include: {
             category: true,
@@ -357,6 +363,18 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       })
     }
 
+    // Add images if provided
+    if (input.imageUrls && input.imageUrls.length > 0) {
+      await prisma.image.createMany({
+        data: input.imageUrls.map((url, index) => ({
+          url,
+          order: index,
+          entityType: 'exercise',
+          entityId: exercise.id,
+        })),
+      })
+    }
+
     return true
   },
   updateExercise: async (_, { id, input }, context) => {
@@ -432,6 +450,44 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       }
     }
 
+    // Update images if provided
+    if (input.imageUrls !== undefined) {
+      // Get existing images to clean up from S3
+      const existingImages = await prisma.image.findMany({
+        where: {
+          entityType: 'exercise',
+          entityId: id,
+        },
+        select: { url: true },
+      })
+
+      // Delete existing images from S3
+      if (existingImages.length > 0) {
+        const existingImageUrls = existingImages.map((img) => img.url)
+        await deleteImages(existingImageUrls)
+      }
+
+      // Remove existing images from database
+      await prisma.image.deleteMany({
+        where: {
+          entityType: 'exercise',
+          entityId: id,
+        },
+      })
+
+      // Add new images
+      if (input.imageUrls && input.imageUrls.length > 0) {
+        await prisma.image.createMany({
+          data: input.imageUrls.map((url, index) => ({
+            url,
+            order: index,
+            entityType: 'exercise',
+            entityId: id,
+          })),
+        })
+      }
+    }
+
     return true
   },
   deleteExercise: async (_, { id }, context) => {
@@ -452,6 +508,22 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       throw new GraphQLError('Exercise not found or access denied')
     }
 
+    // Get exercise images to clean up from S3
+    const exerciseImages = await prisma.image.findMany({
+      where: {
+        entityType: 'exercise',
+        entityId: id,
+      },
+      select: { url: true },
+    })
+
+    // Delete images from S3
+    if (exerciseImages.length > 0) {
+      const imageUrls = exerciseImages.map((img) => img.url)
+      await deleteImages(imageUrls)
+    }
+
+    // Delete the exercise (this will cascade delete images via foreign key)
     await prisma.baseExercise.delete({
       where: { id },
     })

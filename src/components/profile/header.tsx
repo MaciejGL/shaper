@@ -4,7 +4,10 @@ import { AvatarUpload } from '@/components/ui/avatar-upload'
 import { Profile } from './types'
 
 type HeaderProps = {
-  profile: Pick<Profile, 'firstName' | 'lastName' | 'avatarUrl' | 'sex'>
+  profile: Pick<
+    Profile,
+    'firstName' | 'lastName' | 'avatarUrl' | 'sex' | 'email'
+  >
   isEditing: boolean
   onAvatarChange: (avatarUrl: string) => void
 }
@@ -20,7 +23,7 @@ export function Header({ profile, isEditing, onAvatarChange }: HeaderProps) {
 
   return (
     <div className="mx-auto">
-      <div className="flex flex-col items-center mb-6 md:flex-row md:items-start md:gap-6">
+      <div className="flex flex-col items-center mb-6 md:flex-row md:justify-center md:gap-6">
         <div className="relative mb-4 md:mb-0">
           {isEditing ? (
             <AvatarUpload
@@ -44,6 +47,7 @@ export function Header({ profile, isEditing, onAvatarChange }: HeaderProps) {
         {profile?.firstName && profile?.lastName && (
           <div className="text-center md:text-left flex-1">
             <h2 className="text-2xl font-bold">{`${profile.firstName} ${profile.lastName}`}</h2>
+            <p className="text-sm text-muted-foreground">{profile.email}</p>
           </div>
         )}
       </div>

@@ -201,6 +201,7 @@ export type GQLBaseExercise = {
   description?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   equipment?: EntireFieldWrapper<Maybe<GQLEquipment>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
+  images: EntireFieldWrapper<Array<GQLImage>>;
   isPublic: EntireFieldWrapper<Scalars['Boolean']['output']>;
   muscleGroupCategories: EntireFieldWrapper<Array<GQLMuscleGroupCategory>>;
   muscleGroups: EntireFieldWrapper<Array<GQLMuscleGroup>>;
@@ -302,6 +303,7 @@ export type GQLCopyExercisesFromDayInput = {
 export type GQLCreateExerciseInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   equipment?: InputMaybe<GQLEquipment>;
+  imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
@@ -574,6 +576,17 @@ export enum GQLGoal {
   LoseWeight = 'LOSE_WEIGHT',
   Maintain = 'MAINTAIN'
 }
+
+export type GQLImage = {
+  __typename?: 'Image';
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  entityId: EntireFieldWrapper<Scalars['ID']['output']>;
+  entityType: EntireFieldWrapper<Scalars['String']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  order: EntireFieldWrapper<Scalars['Int']['output']>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  url: EntireFieldWrapper<Scalars['String']['output']>;
+};
 
 export type GQLLogSetInput = {
   loggedReps?: InputMaybe<Scalars['Int']['input']>;
@@ -1814,6 +1827,7 @@ export type GQLTrainingExercise = {
   dayId: EntireFieldWrapper<Scalars['ID']['output']>;
   equipment?: EntireFieldWrapper<Maybe<GQLEquipment>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
+  images: EntireFieldWrapper<Array<GQLImage>>;
   instructions?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   isExtra: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isPublic: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1927,6 +1941,7 @@ export type GQLUpdateExerciseFormInput = {
 export type GQLUpdateExerciseInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   equipment?: InputMaybe<GQLEquipment>;
+  imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
@@ -2353,6 +2368,7 @@ export type GQLResolversTypes = {
   GetWorkoutPayload: ResolverTypeWrapper<GQLGetWorkoutPayload>;
   Goal: GQLGoal;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
+  Image: ResolverTypeWrapper<GQLImage>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   LogSetInput: GQLLogSetInput;
   Meal: ResolverTypeWrapper<GQLMeal>;
@@ -2494,6 +2510,7 @@ export type GQLResolversParentTypes = {
   GetMealPlanPayload: GQLGetMealPlanPayload;
   GetWorkoutPayload: GQLGetWorkoutPayload;
   ID: Scalars['ID']['output'];
+  Image: GQLImage;
   Int: Scalars['Int']['output'];
   LogSetInput: GQLLogSetInput;
   Meal: GQLMeal;
@@ -2610,6 +2627,7 @@ export type GQLBaseExerciseResolvers<ContextType = GQLContext, ParentType extend
   description?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   equipment?: Resolver<Maybe<GQLResolversTypes['Equipment']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  images?: Resolver<Array<GQLResolversTypes['Image']>, ParentType, ContextType>;
   isPublic?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   muscleGroupCategories?: Resolver<Array<GQLResolversTypes['MuscleGroupCategory']>, ParentType, ContextType>;
   muscleGroups?: Resolver<Array<GQLResolversTypes['MuscleGroup']>, ParentType, ContextType>;
@@ -2733,6 +2751,17 @@ export type GQLGetMealPlanPayloadResolvers<ContextType = GQLContext, ParentType 
 
 export type GQLGetWorkoutPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetWorkoutPayload'] = GQLResolversParentTypes['GetWorkoutPayload']> = {
   plan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLImageResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Image'] = GQLResolversParentTypes['Image']> = {
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  entityId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  entityType?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  order?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  url?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -3198,6 +3227,7 @@ export type GQLTrainingExerciseResolvers<ContextType = GQLContext, ParentType ex
   dayId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   equipment?: Resolver<Maybe<GQLResolversTypes['Equipment']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  images?: Resolver<Array<GQLResolversTypes['Image']>, ParentType, ContextType>;
   instructions?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   isExtra?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isPublic?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
@@ -3395,6 +3425,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   GetExercisesResponse?: GQLGetExercisesResponseResolvers<ContextType>;
   GetMealPlanPayload?: GQLGetMealPlanPayloadResolvers<ContextType>;
   GetWorkoutPayload?: GQLGetWorkoutPayloadResolvers<ContextType>;
+  Image?: GQLImageResolvers<ContextType>;
   Meal?: GQLMealResolvers<ContextType>;
   MealDay?: GQLMealDayResolvers<ContextType>;
   MealFood?: GQLMealFoodResolvers<ContextType>;

@@ -16,6 +16,12 @@ query GetExerciseWithSubstitutes($id: ID!) {
     name
     description
     equipment
+    images {
+      id
+      url
+      order
+      createdAt
+    }
     substitutes {
       id
       originalId

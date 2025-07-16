@@ -36,6 +36,7 @@ type TrainingExercise {
   substitutes: [BaseExerciseSubstitute!]!
   substitutedBy: Substitute
   videoUrl: String
+  images: [Image!]!
 
   dayId: ID!
   baseId: ID

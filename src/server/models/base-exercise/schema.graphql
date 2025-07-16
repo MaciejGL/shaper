@@ -14,6 +14,7 @@ type BaseExercise {
   updatedAt: String!
   substitutes: [BaseExerciseSubstitute!]!
   canBeSubstitutedBy: [BaseExerciseSubstitute!]!
+  images: [Image!]!
 }
 
 type BaseExerciseSubstitute {
@@ -79,6 +80,7 @@ input CreateExerciseInput {
   equipment: Equipment
   muscleGroups: [ID!]!
   substituteIds: [ID!]
+  imageUrls: [String!]
 }
 
 input UpdateExerciseInput {
@@ -88,6 +90,7 @@ input UpdateExerciseInput {
   equipment: Equipment
   muscleGroups: [ID!]!
   substituteIds: [ID!]
+  imageUrls: [String!]
 }
 
 input AddSubstituteExerciseInput {

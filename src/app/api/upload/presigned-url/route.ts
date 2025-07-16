@@ -56,13 +56,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // For exercise images, relatedId (exerciseId) is required
-    if (imageType === 'exercise' && !relatedId) {
-      return NextResponse.json(
-        { error: 'exerciseId is required for exercise images' },
-        { status: 400 },
-      )
-    }
+    // For exercise images, relatedId (exerciseId) is optional during creation
+    // but recommended for updates to maintain file organization
+    // Note: Images uploaded without relatedId during exercise creation
+    // will be linked to the exercise when it's created via the GraphQL mutation
 
     // Generate unique file name
     const s3FileName = generateFileName(
