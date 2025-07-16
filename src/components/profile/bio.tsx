@@ -1,4 +1,3 @@
-import { ReadOnlyField } from '@/components/read-only-field'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,16 +19,14 @@ export function Bio({ isEditing, profile, handleChange }: BioProps) {
       <CardContent>
         <div className="space-y-2">
           <Label htmlFor="bio">Bio</Label>
-          {isEditing ? (
-            <Textarea
-              id="bio"
-              className="min-h-[100px]"
-              value={profile?.bio ?? ''}
-              onChange={(e) => handleChange('bio', e.target.value)}
-            />
-          ) : (
-            <ReadOnlyField value={profile?.bio ?? ''} />
-          )}
+          <Textarea
+            variant="ghost"
+            id="bio"
+            className="min-h-[100px]"
+            value={profile?.bio ?? ''}
+            onChange={(e) => handleChange('bio', e.target.value)}
+            disabled={!isEditing}
+          />
         </div>
       </CardContent>
     </Card>

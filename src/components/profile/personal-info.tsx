@@ -1,6 +1,3 @@
-import { format } from 'date-fns'
-
-import { ReadOnlyField } from '@/components/read-only-field'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -38,101 +35,86 @@ export function PersonalInfo({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="firstName">First Name</Label>
-            {isEditing ? (
-              <Input
-                id="firstName"
-                value={profile?.firstName ?? ''}
-                onChange={(e) => handleChange('firstName', e.target.value)}
-              />
-            ) : (
-              <ReadOnlyField value={profile?.firstName ?? ''} />
-            )}
+
+            <Input
+              variant="ghost"
+              id="firstName"
+              value={profile?.firstName ?? ''}
+              onChange={(e) => handleChange('firstName', e.target.value)}
+              disabled={!isEditing}
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="lastName">Last Name</Label>
-            {isEditing ? (
-              <Input
-                id="lastName"
-                value={profile?.lastName ?? ''}
-                onChange={(e) => handleChange('lastName', e.target.value)}
-              />
-            ) : (
-              <ReadOnlyField value={profile?.lastName ?? ''} />
-            )}
+
+            <Input
+              variant="ghost"
+              id="lastName"
+              value={profile?.lastName ?? ''}
+              onChange={(e) => handleChange('lastName', e.target.value)}
+              disabled={!isEditing}
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            {isEditing ? (
-              <Input
-                id="email"
-                type="email"
-                value={profile?.email ?? ''}
-                onChange={(e) => handleChange('email', e.target.value)}
-              />
-            ) : (
-              <ReadOnlyField value={profile?.email ?? ''} />
-            )}
+
+            <Input
+              variant="ghost"
+              id="email"
+              type="email"
+              value={profile?.email ?? ''}
+              onChange={(e) => handleChange('email', e.target.value)}
+              disabled={!isEditing}
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
-            {isEditing ? (
-              <Input
-                id="phone"
-                value={profile?.phone ?? ''}
-                onChange={(e) => handleChange('phone', e.target.value)}
-              />
-            ) : (
-              <ReadOnlyField value={profile?.phone ?? ''} />
-            )}
+            <Input
+              variant="ghost"
+              id="phone"
+              value={profile?.phone ?? ''}
+              onChange={(e) => handleChange('phone', e.target.value)}
+              disabled={!isEditing}
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="dob">Date of Birth</Label>
-            {isEditing ? (
-              <DatePicker
-                date={
-                  profile?.birthday ? new Date(profile.birthday) : undefined
-                }
-                dateFormat="d MMM yyyy"
-                setDate={(date) =>
-                  date && handleChange('birthday', date.toISOString())
-                }
-              />
-            ) : (
-              <ReadOnlyField
-                value={
-                  profile?.birthday
-                    ? format(profile.birthday, 'd MMM yyyy')
-                    : ''
-                }
-              />
-            )}
+            <DatePicker
+              date={profile?.birthday ? new Date(profile.birthday) : undefined}
+              dateFormat="d MMM yyyy"
+              setDate={(date) =>
+                date && handleChange('birthday', date.toISOString())
+              }
+              buttonProps={{
+                disabled: !isEditing,
+                className: !isEditing ? 'opacity-50  [&>svg]:opacity-50' : '',
+              }}
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="sex">Gender</Label>
-            {isEditing ? (
-              <Select
-                value={profile?.sex ?? ''}
-                onValueChange={(value) => handleChange('sex', value)}
-              >
-                <SelectTrigger id="sex">
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Male">Male</SelectItem>
-                  <SelectItem value="Female">Female</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
-                  <SelectItem value="Prefer not to say">
-                    Prefer not to say
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            ) : (
-              <ReadOnlyField value={profile?.sex ?? ''} />
-            )}
+
+            <Select
+              value={profile?.sex ?? ''}
+              onValueChange={(value) => handleChange('sex', value)}
+              disabled={!isEditing}
+            >
+              <SelectTrigger id="sex" className="w-full" variant="ghost">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Male">Male</SelectItem>
+                <SelectItem value="Female">Female</SelectItem>
+                <SelectItem value="Other">Other</SelectItem>
+                <SelectItem value="Prefer not to say">
+                  Prefer not to say
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </CardContent>

@@ -17,8 +17,8 @@ export default function ProfilePage() {
     useProfile()
 
   return (
-    <div className="container max-w-3xl mx-auto mb-16 relative">
-      <div className="sticky top-[24px] right-0 z-10 flex justify-end">
+    <div className="container max-w-3xl mx-auto mb-16 relative pb-16">
+      <div className="sticky top-[16px] right-0 z-10 flex justify-end">
         <AnimatePresence mode="wait">
           {!isEditing ? (
             <motion.div
@@ -47,7 +47,7 @@ export default function ProfilePage() {
               <div className="flex gap-2">
                 <Button
                   onClick={toggleEdit}
-                  variant="outline"
+                  variant="secondary"
                   size="icon-md"
                   disabled={isSaving}
                 >
@@ -85,7 +85,6 @@ export default function ProfilePage() {
         handleChange={handleChange}
       />
 
-      {/* Bio */}
       <Bio
         isEditing={isEditing}
         profile={profile}
