@@ -9,6 +9,9 @@ import {
   useActivatePlanMutation,
   useClosePlanMutation,
   useDeletePlanMutation,
+  useFitspaceGetCurrentWorkoutIdQuery,
+  useFitspaceMyPlansQuery,
+  useGetTrainingPlanPreviewByIdQuery,
   usePausePlanMutation,
 } from '@/generated/graphql-client'
 
@@ -32,18 +35,25 @@ export function usePlanAction() {
 
   const queryClient = useQueryClient()
   const invalidateQueries = () => {
-    queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] })
-    queryClient.invalidateQueries({ queryKey: ['FitspaceGetCurrentWorkoutId'] })
     queryClient.invalidateQueries({
-      queryKey: ['FitspaceGetTrainingPlanPreviewById'],
+      queryKey: useFitspaceMyPlansQuery.getKey(),
     })
+    queryClient.invalidateQueries({
+      queryKey: useFitspaceGetCurrentWorkoutIdQuery.getKey(),
+    })
+    if (dialogState.plan?.id) {
+      queryClient.invalidateQueries({
+        queryKey: useGetTrainingPlanPreviewByIdQuery.getKey({
+          id: dialogState.plan.id,
+        }),
+      })
+    }
   }
   const { mutateAsync: activatePlan, isPending: isActivatingPlan } =
     useActivatePlanMutation({
       onSuccess: () => {
         invalidateQueries()
         toast.success('Plan activated')
-        // setTab(PlanTab.Active)
         router.refresh()
       },
     })

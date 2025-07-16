@@ -11,15 +11,13 @@ import {
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
-import { BodyComposition } from './components/body-composition'
+// import { BodyComposition } from './components/body-composition'
 import { BodyMeasurements } from './components/body-measurements'
 import { SelectedExercisesProgress } from './components/selected-exercises-progress'
 
 export default function ProgressPage() {
   const { data: userData } = useProgressUserQuery()
   const [userId, setUserId] = useState<string | null>(null)
-
-  // Use the generated FitspaceGoalProgress query hook
 
   useEffect(() => {
     // Get user ID from the user data
@@ -50,12 +48,12 @@ export default function ProgressPage() {
           >
             Body Measures
           </TabsTrigger>
-          <TabsTrigger
+          {/* <TabsTrigger
             value="body-composition"
             className="flex items-center gap-2"
           >
             BMI & BMR
-          </TabsTrigger>
+          </TabsTrigger> */}
           <TabsTrigger value="exercises" className="flex items-center gap-2">
             Exercises
           </TabsTrigger>
@@ -65,9 +63,9 @@ export default function ProgressPage() {
           <BodyMeasurements />
         </TabsContent>
 
-        <TabsContent value="body-composition">
+        {/* <TabsContent value="body-composition">
           <BodyComposition />
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="exercises">
           <SelectedExercisesProgress
