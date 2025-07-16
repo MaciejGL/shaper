@@ -3,20 +3,27 @@ import { useCallback, useEffect } from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { GQLProfileQuery, useProfileQuery } from '@/generated/graphql-client'
+import {
+  GQLProfileQuery,
+  useProfileQuery,
+  useUserBasicQuery,
+} from '@/generated/graphql-client'
 import { useUpdateProfileMutation } from '@/generated/graphql-client'
+import { useInvalidateQuery } from '@/lib/invalidate-query'
 
 import { Profile } from './types'
 
 export function useProfile() {
   const [isEditing, setIsEditing] = useState(false)
-  const { data, refetch } = useProfileQuery()
+  const { data } = useProfileQuery()
+  const invalidateQueries = useInvalidateQuery()
   const { mutateAsync: updateProfile, isPending: isSaving } =
     useUpdateProfileMutation({
       onSuccess: () => {
         setIsEditing(false)
         toast.success('Profile updated successfully')
-        refetch()
+        invalidateQueries({ queryKey: useProfileQuery.getKey() })
+        invalidateQueries({ queryKey: useUserBasicQuery.getKey() })
       },
     })
 
