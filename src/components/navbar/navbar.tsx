@@ -207,9 +207,10 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
+          className="rounded-full"
           iconOnly={
             <UserAvatar
-              className="size-6"
+              className="size-8"
               imageUrl={user?.user.profile?.avatarUrl}
               firstName={user?.user.profile?.firstName ?? ''}
               lastName={user?.user.profile?.lastName ?? ''}
