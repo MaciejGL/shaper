@@ -1,3 +1,5 @@
+import { format } from 'date-fns'
+
 import { ReadOnlyField } from '@/components/read-only-field'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -9,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+
+import { DatePicker } from '../date-picker'
 
 import { Profile } from './types'
 
@@ -87,14 +91,23 @@ export function PersonalInfo({
           <div className="space-y-2">
             <Label htmlFor="dob">Date of Birth</Label>
             {isEditing ? (
-              <Input
-                id="dob"
-                type="date"
-                value={profile?.birthday ?? ''}
-                onChange={(e) => handleChange('birthday', e.target.value)}
+              <DatePicker
+                date={
+                  profile?.birthday ? new Date(profile.birthday) : undefined
+                }
+                dateFormat="d MMM yyyy"
+                setDate={(date) =>
+                  date && handleChange('birthday', date.toISOString())
+                }
               />
             ) : (
-              <ReadOnlyField value={profile?.birthday ?? ''} />
+              <ReadOnlyField
+                value={
+                  profile?.birthday
+                    ? format(profile.birthday, 'd MMM yyyy')
+                    : ''
+                }
+              />
             )}
           </div>
 
