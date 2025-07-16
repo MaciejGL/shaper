@@ -29,6 +29,7 @@ import {
   CollaborationAction,
   checkTrainingPlanPermission,
 } from '@/lib/permissions/collaboration-permissions'
+import { getWeekStartUTC } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
 import { createNotification } from '../notification/factory'
@@ -1245,12 +1246,22 @@ export async function activatePlan(
   }
 
   if (resume) {
-    const baseStartDate = new Date(startDate)
+    const resumeDate = new Date(startDate)
+    const firstUnfinishedWeek = fullPlan.weeks.find((week) => !week.completedAt)
 
-    // Filter unfinished weeks (completed weeks keep their original scheduling)
-    const unfinishedWeeks = fullPlan.weeks.filter((week) => !week.completedAt)
+    if (!firstUnfinishedWeek) {
+      throw new Error('No unfinished weeks found to resume')
+    }
 
-    // Use bulk operations for resume case
+    // Calculate when Week 1 should start so that the first unfinished week starts on resumeDate
+    // If first unfinished week is weekNumber 5, and we want it on resumeDate
+    // Then Week 1 should start: resumeDate - (5-1) weeks = resumeDate - 4 weeks
+    const firstUnfinishedWeekIndex = firstUnfinishedWeek.weekNumber - 1 // Convert to 0-based index
+    const planStartDate = addWeeks(
+      getWeekStartUTC(resumeDate),
+      -firstUnfinishedWeekIndex,
+    )
+
     const operations = [
       // Deactivate other plans
       prisma.trainingPlan.updateMany({
@@ -1262,42 +1273,41 @@ export async function activatePlan(
         data: { active: false },
       }),
 
-      // Activate current plan
+      // Activate current plan with calculated startDate (aligned with Week 1)
       prisma.trainingPlan.update({
         where: { id: fullPlan.id, assignedToId: user.user.id },
-        data: { active: true, startDate: baseStartDate },
+        data: { active: true, startDate: planStartDate },
       }),
-    ]
 
-    // Only reschedule unfinished weeks starting from the new start date
-    if (unfinishedWeeks.length > 0) {
-      // Bulk update unfinished weeks scheduling
-      operations.push(
-        ...unfinishedWeeks.map((week, unfinishedWeekIndex) =>
-          prisma.trainingWeek.updateMany({
-            where: { id: week.id },
-            data: { scheduledAt: addWeeks(baseStartDate, unfinishedWeekIndex) },
+      // Update ALL weeks scheduling using weekIndex (0-based) like regular activation
+      ...fullPlan.weeks.map((week, weekIndex) =>
+        prisma.trainingWeek.updateMany({
+          where: { id: week.id },
+          data: {
+            scheduledAt: week.completedAt
+              ? week.scheduledAt // Keep completed weeks at their original schedule
+              : addWeeks(planStartDate, weekIndex), // Reschedule unfinished weeks with proper 7-day spacing
+          },
+        }),
+      ),
+
+      // Update ALL days scheduling using weekIndex (0-based) like regular activation
+      ...fullPlan.weeks.flatMap((week, weekIndex) =>
+        week.days.map((day) =>
+          prisma.trainingDay.updateMany({
+            where: { id: day.id },
+            data: {
+              scheduledAt: week.completedAt
+                ? day.scheduledAt // Keep completed days at their original schedule
+                : addDays(
+                    getWeekStartUTC(addWeeks(planStartDate, weekIndex)),
+                    day.dayOfWeek,
+                  ), // Reschedule unfinished days with proper alignment
+            },
           }),
         ),
-      )
-
-      // Bulk update days scheduling for unfinished weeks only
-      operations.push(
-        ...unfinishedWeeks.flatMap((week, unfinishedWeekIndex) =>
-          week.days.map((day) =>
-            prisma.trainingDay.updateMany({
-              where: { id: day.id },
-              data: {
-                scheduledAt: addDays(
-                  addWeeks(baseStartDate, unfinishedWeekIndex),
-                  day.dayOfWeek,
-                ),
-              },
-            }),
-          ),
-        ),
-      )
-    }
+      ),
+    ]
 
     await Promise.all(operations)
 

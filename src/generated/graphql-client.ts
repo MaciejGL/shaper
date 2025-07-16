@@ -2092,6 +2092,7 @@ export type GQLUpdateProfileInput = {
   lastName?: InputMaybe<Scalars['String']['input']>;
   phone?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Scalars['String']['input']>;
+  weekStartsOn?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
@@ -2235,6 +2236,7 @@ export type GQLUserProfile = {
   phone?: Maybe<Scalars['String']['output']>;
   sex?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
+  weekStartsOn?: Maybe<Scalars['Int']['output']>;
   weight?: Maybe<Scalars['Float']['output']>;
 };
 

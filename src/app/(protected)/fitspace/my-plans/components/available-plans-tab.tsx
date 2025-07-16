@@ -150,7 +150,7 @@ function PlanHeader({
         <DropdownMenuContent>
           <DropdownMenuItem onClick={() => handlePlanAction('activate', plan)}>
             <SparklesIcon className="size-4 mr-2" />
-            Activate
+            {plan.startDate ? 'Resume Plan' : 'Activate Plan'}
           </DropdownMenuItem>
           <Link href={`/fitspace/training-preview/${plan.id}`}>
             <DropdownMenuItem>

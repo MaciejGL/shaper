@@ -39,6 +39,7 @@ type UserProfile {
   activityLevel: ActivityLevel
   goals: [Goal!]!
   bio: String
+  weekStartsOn: Int
 
   createdAt: String!
   updatedAt: String!
@@ -93,6 +94,7 @@ input UpdateProfileInput {
   activityLevel: ActivityLevel
   goals: [Goal!]
   bio: String
+  weekStartsOn: Int
 }
 
 input AddBodyMeasurementInput {

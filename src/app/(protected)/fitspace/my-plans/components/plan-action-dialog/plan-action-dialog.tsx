@@ -154,7 +154,7 @@ export function PlanActionDialog({
           </Button>
           <Button
             onClick={() => onConfirm({ startDate })}
-            disabled={action === 'activate' && !startDate}
+            disabled={action === 'activate' && !startDate && !isPaused}
             loading={isLoading}
           >
             {config.confirmText}

@@ -2094,6 +2094,7 @@ export type GQLUpdateProfileInput = {
   lastName?: InputMaybe<Scalars['String']['input']>;
   phone?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Scalars['String']['input']>;
+  weekStartsOn?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
@@ -2237,6 +2238,7 @@ export type GQLUserProfile = {
   phone?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   sex?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  weekStartsOn?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
 };
 
@@ -3503,6 +3505,7 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   phone?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   sex?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  weekStartsOn?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

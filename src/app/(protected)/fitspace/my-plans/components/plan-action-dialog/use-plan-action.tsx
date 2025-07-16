@@ -98,10 +98,15 @@ export function usePlanAction() {
 
   const handleConfirmAction = async (data: { startDate?: Date }) => {
     if (!dialogState.plan) return
-    if (dialogState.action === 'activate' && data.startDate) {
+    if (
+      (dialogState.action === 'activate' && data.startDate) ||
+      (dialogState.action === 'activate' && dialogState.plan.startDate)
+    ) {
       await activatePlan({
         planId: dialogState.plan.id,
-        startDate: format(data.startDate, 'yyyy-MM-dd'),
+        startDate: data.startDate
+          ? format(data.startDate, 'yyyy-MM-dd')
+          : format(new Date(), 'yyyy-MM-dd'),
         resume: dialogState.plan.startDate ? true : false,
       })
     } else if (dialogState.action === 'pause') {
