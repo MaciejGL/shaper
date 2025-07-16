@@ -1,3 +1,5 @@
+import { notFound } from 'next/navigation'
+
 import { Main } from '@/components/main'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { GQLUserRole } from '@/generated/graphql-server'
@@ -14,6 +16,8 @@ export default async function ProtectedLayout({
 }) {
   const user = await getCurrentUser()
   requireAuth(GQLUserRole.Trainer, user)
+
+  return notFound()
 
   return (
     <SidebarProvider>
