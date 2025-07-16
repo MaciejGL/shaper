@@ -143,7 +143,6 @@ type MealFood {
   addedBy: UserPublic # User who added this food (null for trainer-planned foods)
   # Logging information
   log: MealFoodLog # User-specific latest log entry
-  logs: [MealFoodLog!]! # All logging instances for this food
   latestLog: MealFoodLog # Generic latest log entry (for convenience)
   # Relationships (only available in certain contexts to avoid circular refs)
   meal: Meal

@@ -685,7 +685,6 @@ export type GQLMealFood = {
   isCustomAddition: Scalars['Boolean']['output'];
   latestLog?: Maybe<GQLMealFoodLog>;
   log?: Maybe<GQLMealFoodLog>;
-  logs: Array<GQLMealFoodLog>;
   meal?: Maybe<GQLMeal>;
   name: Scalars['String']['output'];
   openFoodFactsId?: Maybe<Scalars['String']['output']>;
@@ -2330,14 +2329,14 @@ export type GQLGetActiveMealPlanQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetActiveMealPlanQuery = { __typename?: 'Query', getActiveMealPlan?: { __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, active: boolean, startDate?: string | undefined | null, endDate?: string | undefined | null, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, weeks: Array<{ __typename?: 'MealWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'MealDay', id: string, dayOfWeek: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, targetCalories?: number | undefined | null, targetProtein?: number | undefined | null, targetCarbs?: number | undefined | null, targetFat?: number | undefined | null, meals: Array<{ __typename?: 'Meal', id: string, name: string, dateTime: string, instructions?: string | undefined | null, completedAt?: string | undefined | null, plannedCalories: number, plannedProtein: number, plannedCarbs: number, plannedFat: number, foods: Array<{ __typename?: 'MealFood', id: string, name: string, quantity: number, unit: string, addedAt: string, caloriesPer100g?: number | undefined | null, proteinPer100g?: number | undefined | null, carbsPer100g?: number | undefined | null, fatPer100g?: number | undefined | null, fiberPer100g?: number | undefined | null, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number, totalFiber: number, openFoodFactsId?: string | undefined | null, productData?: string | undefined | null, isCustomAddition: boolean, addedBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null, log?: { __typename?: 'MealFoodLog', id: string, quantity: number, loggedQuantity: number, unit: string, loggedAt: string, notes?: string | undefined | null, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, fiber?: number | undefined | null, mealFood: { __typename?: 'MealFood', id: string, name: string }, user: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } } | undefined | null, logs: Array<{ __typename?: 'MealFoodLog', id: string, quantity: number, loggedQuantity: number, unit: string, loggedAt: string, notes?: string | undefined | null, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, fiber?: number | undefined | null }> }> }> }> }> } | undefined | null };
+export type GQLGetActiveMealPlanQuery = { __typename?: 'Query', getActiveMealPlan?: { __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, active: boolean, startDate?: string | undefined | null, endDate?: string | undefined | null, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, weeks: Array<{ __typename?: 'MealWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'MealDay', id: string, dayOfWeek: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, targetCalories?: number | undefined | null, targetProtein?: number | undefined | null, targetCarbs?: number | undefined | null, targetFat?: number | undefined | null, meals: Array<{ __typename?: 'Meal', id: string, name: string, dateTime: string, instructions?: string | undefined | null, completedAt?: string | undefined | null, plannedCalories: number, plannedProtein: number, plannedCarbs: number, plannedFat: number, foods: Array<{ __typename?: 'MealFood', id: string, name: string, quantity: number, unit: string, addedAt: string, caloriesPer100g?: number | undefined | null, proteinPer100g?: number | undefined | null, carbsPer100g?: number | undefined | null, fatPer100g?: number | undefined | null, fiberPer100g?: number | undefined | null, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number, totalFiber: number, openFoodFactsId?: string | undefined | null, productData?: string | undefined | null, isCustomAddition: boolean, addedBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null, log?: { __typename?: 'MealFoodLog', id: string, quantity: number, loggedQuantity: number, unit: string, loggedAt: string, notes?: string | undefined | null, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, fiber?: number | undefined | null, mealFood: { __typename?: 'MealFood', id: string, name: string }, user: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } } | undefined | null }> }> }> }> } | undefined | null };
 
 export type GQLGetDefaultMealPlanQueryVariables = Exact<{
   date?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GQLGetDefaultMealPlanQuery = { __typename?: 'Query', getDefaultMealPlan: { __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, active: boolean, startDate?: string | undefined | null, endDate?: string | undefined | null, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, weeks: Array<{ __typename?: 'MealWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'MealDay', id: string, dayOfWeek: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, targetCalories?: number | undefined | null, targetProtein?: number | undefined | null, targetCarbs?: number | undefined | null, targetFat?: number | undefined | null, meals: Array<{ __typename?: 'Meal', id: string, name: string, dateTime: string, instructions?: string | undefined | null, completedAt?: string | undefined | null, plannedCalories: number, plannedProtein: number, plannedCarbs: number, plannedFat: number, foods: Array<{ __typename?: 'MealFood', id: string, name: string, quantity: number, unit: string, addedAt: string, caloriesPer100g?: number | undefined | null, proteinPer100g?: number | undefined | null, carbsPer100g?: number | undefined | null, fatPer100g?: number | undefined | null, fiberPer100g?: number | undefined | null, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number, totalFiber: number, openFoodFactsId?: string | undefined | null, productData?: string | undefined | null, isCustomAddition: boolean, addedBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null, log?: { __typename?: 'MealFoodLog', id: string, quantity: number, loggedQuantity: number, unit: string, loggedAt: string, notes?: string | undefined | null, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, fiber?: number | undefined | null, mealFood: { __typename?: 'MealFood', id: string, name: string }, user: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } } | undefined | null, logs: Array<{ __typename?: 'MealFoodLog', id: string, quantity: number, loggedQuantity: number, unit: string, loggedAt: string, notes?: string | undefined | null, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, fiber?: number | undefined | null }> }> }> }> }> } };
+export type GQLGetDefaultMealPlanQuery = { __typename?: 'Query', getDefaultMealPlan: { __typename?: 'MealPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, active: boolean, startDate?: string | undefined | null, endDate?: string | undefined | null, dailyCalories?: number | undefined | null, dailyProtein?: number | undefined | null, dailyCarbs?: number | undefined | null, dailyFat?: number | undefined | null, weeks: Array<{ __typename?: 'MealWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'MealDay', id: string, dayOfWeek: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, targetCalories?: number | undefined | null, targetProtein?: number | undefined | null, targetCarbs?: number | undefined | null, targetFat?: number | undefined | null, meals: Array<{ __typename?: 'Meal', id: string, name: string, dateTime: string, instructions?: string | undefined | null, completedAt?: string | undefined | null, plannedCalories: number, plannedProtein: number, plannedCarbs: number, plannedFat: number, foods: Array<{ __typename?: 'MealFood', id: string, name: string, quantity: number, unit: string, addedAt: string, caloriesPer100g?: number | undefined | null, proteinPer100g?: number | undefined | null, carbsPer100g?: number | undefined | null, fatPer100g?: number | undefined | null, fiberPer100g?: number | undefined | null, totalCalories: number, totalProtein: number, totalCarbs: number, totalFat: number, totalFiber: number, openFoodFactsId?: string | undefined | null, productData?: string | undefined | null, isCustomAddition: boolean, addedBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null, log?: { __typename?: 'MealFoodLog', id: string, quantity: number, loggedQuantity: number, unit: string, loggedAt: string, notes?: string | undefined | null, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, fiber?: number | undefined | null, mealFood: { __typename?: 'MealFood', id: string, name: string }, user: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } } | undefined | null }> }> }> }> } };
 
 export type GQLBatchLogMealFoodMutationVariables = Exact<{
   input: GQLBatchLogMealFoodInput;
@@ -3778,19 +3777,6 @@ export const GetActiveMealPlanDocument = `
                 lastName
               }
             }
-            logs {
-              id
-              quantity
-              loggedQuantity
-              unit
-              loggedAt
-              notes
-              calories
-              protein
-              carbs
-              fat
-              fiber
-            }
           }
           plannedCalories
           plannedProtein
@@ -3927,19 +3913,6 @@ export const GetDefaultMealPlanDocument = `
                 firstName
                 lastName
               }
-            }
-            logs {
-              id
-              quantity
-              loggedQuantity
-              unit
-              loggedAt
-              notes
-              calories
-              protein
-              carbs
-              fat
-              fiber
             }
           }
           plannedCalories

@@ -105,11 +105,6 @@ export default class MealFood implements GQLMealFood {
     return per100g * factor
   }
 
-  async logs() {
-    if (!this.data.logs) return []
-    return this.data.logs.map((log) => new MealFoodLog(log, this.context))
-  }
-
   async addedBy() {
     if (!this.data.addedBy) return null
     return new UserPublic(this.data.addedBy, this.context)

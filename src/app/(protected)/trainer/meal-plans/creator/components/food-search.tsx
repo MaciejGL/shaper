@@ -16,6 +16,7 @@ import {
   type EditableFood,
   useMealPlanContext,
 } from '@/context/meal-plan-context/meal-plan-context'
+import { useDebounce } from '@/hooks/use-debounce'
 import { SearchResult, searchFoods } from '@/lib/food-search'
 
 import { FoodSearchLoading } from './food-search-loading'
@@ -29,22 +30,6 @@ interface FoodSearchProps {
   setFoods: Dispatch<SetStateAction<EditableFood[]>>
   setHasChanges: Dispatch<SetStateAction<boolean>>
   canEdit: boolean
-}
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value)
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-
-    return () => {
-      clearTimeout(handler)
-    }
-  }, [value, delay])
-
-  return debouncedValue
 }
 
 export default function FoodSearch({

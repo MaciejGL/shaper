@@ -1,9 +1,8 @@
 'use client'
 
-import { useQueryClient } from '@tanstack/react-query'
 import { ScanBarcodeIcon, SearchIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FoodSearchLoading } from '@/app/(protected)/trainer/meal-plans/creator/components/food-search-loading'
@@ -17,11 +16,7 @@ import {
   DrawerTitle,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
-import {
-  useAddCustomFoodToMealMutation,
-  useGetActiveMealPlanQuery,
-  useGetDefaultMealPlanQuery,
-} from '@/generated/graphql-client'
+import { useDebounce } from '@/hooks/use-debounce'
 import { SearchResult, searchFoods } from '@/lib/food-search'
 import { createTimestampWithDateAndCurrentTime } from '@/lib/utc-date-utils'
 import { cn } from '@/lib/utils'
@@ -37,23 +32,6 @@ interface CustomFoodSearchDrawerProps {
   selectedMeal?: SelectedMeal | null
 }
 
-// Local useDebounce implementation (copied from food-search.tsx)
-function useDebounce<T>(value: T, delay: number): T {
-  const [debouncedValue, setDebouncedValue] = useState<T>(value)
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value)
-    }, delay)
-
-    return () => {
-      clearTimeout(handler)
-    }
-  }, [value, delay])
-
-  return debouncedValue
-}
-
 export function CustomFoodSearchDrawer({
   isOpen,
   onClose,
@@ -61,32 +39,13 @@ export function CustomFoodSearchDrawer({
   onFoodAdded,
   selectedMeal,
 }: CustomFoodSearchDrawerProps) {
-  const { handleRemoveLogItem } = useMealLogging()
+  const { handleRemoveLogItem, handleAddCustomFood } = useMealLogging()
   const [date] = useQueryState('date') // Get current date from URL
   const [searchTerm, setSearchTerm] = useState('')
   const debouncedQuery = useDebounce(searchTerm, 500)
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
-  // Track which specific food item is being added
-
-  const queryClient = useQueryClient()
-
-  // Use the appropriate mutation hooks
-  const { mutateAsync: addCustomFoodToMeal } = useAddCustomFoodToMealMutation({
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: useGetActiveMealPlanQuery.getKey(),
-      })
-      queryClient.invalidateQueries({
-        queryKey: useGetDefaultMealPlanQuery.getKey(),
-      })
-      onFoodAdded?.()
-    },
-    onError: (error) => {
-      console.error('Error adding food to meal:', error)
-      toast.error('Failed to add food to meal')
-    },
-  })
+  // Track which foods have been added recently for immediate UI feedback
 
   // Handle search
   const handleSearch = useCallback(
@@ -111,25 +70,28 @@ export function CustomFoodSearchDrawer({
 
   // Handle adding food to meal
   const addFood = async (foodItem: SearchResult) => {
-    // Set which food item is being added
+    // Get unique identifier for this food (prefer openFoodFactsId, fallback to name)
 
     try {
-      // Add directly to the current meal (Personal Food Log)
-      await addCustomFoodToMeal({
-        input: {
-          mealId,
-          name: foodItem.name,
-          quantity: 100, // Default to 100g
-          unit: 'g',
-          caloriesPer100g: foodItem.caloriesPer100g,
-          proteinPer100g: foodItem.proteinPer100g,
-          carbsPer100g: foodItem.carbsPer100g,
-          fatPer100g: foodItem.fatPer100g,
-          fiberPer100g: foodItem.fiberPer100g,
-          openFoodFactsId: foodItem.openFoodFactsId,
-          loggedAt: createTimestampWithDateAndCurrentTime(date), // Date being viewed + current time
-        },
+      // Mark as recently added immediately for UI feedback
+
+      // Add directly to the current meal using the hook
+      await handleAddCustomFood({
+        mealId,
+        name: foodItem.name,
+        quantity: 100, // Default to 100g
+        unit: 'g',
+        caloriesPer100g: foodItem.caloriesPer100g,
+        proteinPer100g: foodItem.proteinPer100g,
+        carbsPer100g: foodItem.carbsPer100g,
+        fatPer100g: foodItem.fatPer100g,
+        fiberPer100g: foodItem.fiberPer100g,
+        openFoodFactsId: foodItem.openFoodFactsId,
+        loggedAt: createTimestampWithDateAndCurrentTime(date), // Date being viewed + current time
       })
+
+      // Call onFoodAdded callback if provided
+      onFoodAdded?.()
     } catch (error) {
       // Error handling is already done in the hook's onError callback
       console.error('Error adding food:', error)

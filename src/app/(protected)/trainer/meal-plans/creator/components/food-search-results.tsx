@@ -14,6 +14,7 @@ type FoodSearchResultsProps = {
   addFood: (food: SearchResult) => void
   removeFood?: (foodId: string) => void
   selectedMeal?: SelectedMeal | null
+  recentlyAddedFoods?: Set<string>
 }
 
 export function FoodSearchResults({
@@ -21,6 +22,7 @@ export function FoodSearchResults({
   addFood,
   removeFood,
   selectedMeal,
+  recentlyAddedFoods,
 }: FoodSearchResultsProps) {
   const [loadingIds, setLoadingIds] = useState<string[]>([])
   const variants = {
@@ -53,6 +55,8 @@ export function FoodSearchResults({
         )?.openFoodFactsId
         const foodId = food.openFoodFactsId || food.name
         const isAlreadyInMeal = selectedFoodOPId
+        const isRecentlyAdded = recentlyAddedFoods?.has(foodId)
+
         return (
           <motion.div variants={itemVariants} key={index}>
             <Card key={food.name} className="p-3 dark:bg-card-on-card">
@@ -61,7 +65,7 @@ export function FoodSearchResults({
                   <div className="grid grid-cols-[1fr_auto] items-center overflow-hidden gap-2">
                     <p className="font-medium truncate text-sm">{food.name}</p>
                     <div>
-                      {isAlreadyInMeal && removeFood ? (
+                      {(isAlreadyInMeal || isRecentlyAdded) && removeFood ? (
                         <Button
                           size="sm"
                           variant="secondary"

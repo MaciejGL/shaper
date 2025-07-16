@@ -166,8 +166,7 @@ export function MealLoggingDrawer({
 
     try {
       await handleRemoveLogItem(foodId)
-      // Wait for the mutation to complete using the global state
-      // Since handleRemoveLogItem doesn't return a promise, we need to handle this differently
+      // Now waits for mutation success and quick cache update
     } catch (error) {
       console.error('Error removing food:', error)
     } finally {
@@ -267,18 +266,20 @@ export function MealLoggingDrawer({
                         {food.unit}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <Button
-                        variant="secondary"
-                        size="icon-sm"
-                        iconOnly={<X />}
-                        onClick={() => handleRemoveLog(food.id)}
-                        disabled={removingItemIds.includes(food.id)}
-                        loading={removingItemIds.includes(food.id)}
-                      >
-                        Remove
-                      </Button>
-                    </div>
+                    {food.isCustomAddition && (
+                      <div className="text-right">
+                        <Button
+                          variant="secondary"
+                          size="icon-sm"
+                          iconOnly={<X />}
+                          onClick={() => handleRemoveLog(food.id)}
+                          disabled={removingItemIds.includes(food.id)}
+                          loading={removingItemIds.includes(food.id)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-col gap-2">
                     <div className="flex gap-1">

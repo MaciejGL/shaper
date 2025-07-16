@@ -28,11 +28,7 @@ import {
   CollaborationAction,
   checkMealPlanPermission,
 } from '@/lib/permissions/collaboration-permissions'
-import {
-  compareWeeksUTC,
-  getStartOfWeekUTC,
-  getWeekBoundariesUTC,
-} from '@/lib/utc-date-utils'
+import { compareWeeksUTC, getStartOfWeekUTC } from '@/lib/utc-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
 import MealFoodLog from '../meal-food-log/model'
@@ -325,20 +321,12 @@ export async function getActiveMealPlan(
     throw new Error('User not found')
   }
 
-  // Handle date parameter - client now sends exact week start in UTC
-  let weekStart: Date, weekEnd: Date
-
-  if (args.date) {
-    // Client sends exact week start in UTC, use it directly
-    weekStart = new Date(args.date)
-    // Calculate week end from the start
-    weekEnd = new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000) // Add 6 days
-  } else {
-    // No date provided, use current week boundaries
-    const { gte, lte } = getWeekBoundariesUTC(new Date())
-    weekStart = gte
-    weekEnd = lte
-  }
+  const weekStart = startOfWeek(new Date(args.date ?? ''), {
+    weekStartsOn: 1,
+  })
+  const weekEnd = endOfWeek(new Date(args.date ?? ''), {
+    weekStartsOn: 1,
+  })
 
   // Get active assigned plan OR completed plans within the requested date range
   const activePlan = await prisma.mealPlan.findFirst({
@@ -359,6 +347,7 @@ export async function getActiveMealPlan(
         },
       ],
     },
+
     include: {
       createdBy: true,
       assignedTo: true,
@@ -376,6 +365,14 @@ export async function getActiveMealPlan(
                     include: {
                       addedBy: true, // Include the user who added the food
                       logs: {
+                        where: {
+                          loggedAt: args.date
+                            ? {
+                                gte: weekStart,
+                                lte: weekEnd,
+                              }
+                            : undefined,
+                        },
                         orderBy: { loggedAt: 'desc' },
                         include: {
                           user: true,

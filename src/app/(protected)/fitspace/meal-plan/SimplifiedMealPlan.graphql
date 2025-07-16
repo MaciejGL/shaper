@@ -87,21 +87,6 @@ query GetActiveMealPlan($date: String) {
                 lastName
               }
             }
-
-            # All logs for this food
-            logs {
-              id
-              quantity
-              loggedQuantity
-              unit
-              loggedAt
-              notes
-              calories
-              protein
-              carbs
-              fat
-              fiber
-            }
           }
 
           # Calculated totals
@@ -203,21 +188,6 @@ query GetDefaultMealPlan($date: String) {
                 firstName
                 lastName
               }
-            }
-
-            # All logs for this food
-            logs {
-              id
-              quantity
-              loggedQuantity
-              unit
-              loggedAt
-              notes
-              calories
-              protein
-              carbs
-              fat
-              fiber
             }
           }
 

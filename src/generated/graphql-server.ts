@@ -687,7 +687,6 @@ export type GQLMealFood = {
   isCustomAddition: EntireFieldWrapper<Scalars['Boolean']['output']>;
   latestLog?: EntireFieldWrapper<Maybe<GQLMealFoodLog>>;
   log?: EntireFieldWrapper<Maybe<GQLMealFoodLog>>;
-  logs: EntireFieldWrapper<Array<GQLMealFoodLog>>;
   meal?: EntireFieldWrapper<Maybe<GQLMeal>>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
   openFoodFactsId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -2948,7 +2947,6 @@ export type GQLMealFoodResolvers<ContextType = GQLContext, ParentType extends GQ
   isCustomAddition?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   latestLog?: Resolver<Maybe<GQLResolversTypes['MealFoodLog']>, ParentType, ContextType>;
   log?: Resolver<Maybe<GQLResolversTypes['MealFoodLog']>, ParentType, ContextType>;
-  logs?: Resolver<Array<GQLResolversTypes['MealFoodLog']>, ParentType, ContextType>;
   meal?: Resolver<Maybe<GQLResolversTypes['Meal']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   openFoodFactsId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
