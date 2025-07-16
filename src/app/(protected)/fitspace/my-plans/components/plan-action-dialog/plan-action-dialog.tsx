@@ -42,6 +42,8 @@ export function PlanActionDialog({
 
   if (!action || !plan) return null
 
+  const isPaused = plan.startDate
+
   const actionConfig: Record<
     PlanAction,
     {
@@ -52,9 +54,11 @@ export function PlanActionDialog({
     }
   > = {
     activate: {
-      title: 'Activate Plan',
-      description: `Are you sure you want to activate "${plan.title}"? This will become your active training plan.`,
-      confirmText: 'Activate Plan',
+      title: isPaused ? 'Resume Plan' : 'Activate Plan',
+      description: isPaused
+        ? `Are you sure you want to resume "${plan.title}"? This will become your active training plan.`
+        : `Are you sure you want to activate "${plan.title}"? This will become your active training plan.`,
+      confirmText: isPaused ? 'Resume Plan' : 'Activate Plan',
       icon: <BicepsFlexed className="size-4" />,
     },
     pause: {
@@ -90,7 +94,7 @@ export function PlanActionDialog({
           <DialogDescription>{config.description}</DialogDescription>
         </DialogHeader>
 
-        {action === 'activate' && (
+        {action === 'activate' && !isPaused && (
           <div className="space-y-4 py-4">
             {/* Start Date Selection */}
             <div className="space-y-2">

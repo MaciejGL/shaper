@@ -213,6 +213,7 @@ function Actions({
   handlePlanAction: (action: PlanAction, plan: AvailablePlan) => void
   plan: AvailablePlan
 }) {
+  const isPaused = plan.startDate
   return (
     <div className="flex gap-2 pt-2 self-end">
       <Button
@@ -220,7 +221,7 @@ function Actions({
         onClick={() => handlePlanAction('activate', plan)}
         iconStart={<BicepsFlexed />}
       >
-        Activate Plan
+        {isPaused ? 'Resume Plan' : 'Activate Plan'}
       </Button>
     </div>
   )

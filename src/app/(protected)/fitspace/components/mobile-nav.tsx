@@ -18,17 +18,19 @@ import { Icon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
+import { useFitspaceGetActivePlanIdQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
 import { AddMeasurementModal } from '../progress/components/add-measurement-modal'
 import { MeasurementFieldEnum } from '../progress/components/measurement-constants'
 
-export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
+export function MobileNav() {
   const pathname = usePathname()
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const [clickedItem, setClickedItem] = useState<string | null>(null)
+  const { data, isLoading } = useFitspaceGetActivePlanIdQuery()
 
-  // Clear clicked item when pathname changes
+  const currentWorkoutId = data?.getActivePlanId
   useEffect(() => {
     setClickedItem(null)
   }, [pathname])
@@ -52,6 +54,7 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
         icon: Dumbbell,
         label: 'Workout',
         prefetch: true,
+        disabled: isLoading,
       },
       {
         href: '/fitspace/meal-plan',
@@ -75,7 +78,7 @@ export function MobileNav({ currentWorkoutId }: { currentWorkoutId?: string }) {
         },
       },
     ],
-    [currentWorkoutId],
+    [currentWorkoutId, isLoading],
   )
 
   return (

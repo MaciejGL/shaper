@@ -1247,8 +1247,11 @@ export async function activatePlan(
   if (resume) {
     const baseStartDate = new Date(startDate)
 
-    // Use bulk operations for resume case too
-    await Promise.all([
+    // Filter unfinished weeks (completed weeks keep their original scheduling)
+    const unfinishedWeeks = fullPlan.weeks.filter((week) => !week.completedAt)
+
+    // Use bulk operations for resume case
+    const operations = [
       // Deactivate other plans
       prisma.trainingPlan.updateMany({
         where: {
@@ -1264,30 +1267,39 @@ export async function activatePlan(
         where: { id: fullPlan.id, assignedToId: user.user.id },
         data: { active: true, startDate: baseStartDate },
       }),
+    ]
 
-      // Bulk update weeks scheduling
-      ...fullPlan.weeks.map((week, weekIndex) =>
-        prisma.trainingWeek.updateMany({
-          where: { id: week.id },
-          data: { scheduledAt: addWeeks(baseStartDate, weekIndex) },
-        }),
-      ),
-
-      // Bulk update days scheduling
-      ...fullPlan.weeks.flatMap((week, weekIndex) =>
-        week.days.map((day) =>
-          prisma.trainingDay.updateMany({
-            where: { id: day.id },
-            data: {
-              scheduledAt: addDays(
-                addWeeks(baseStartDate, weekIndex),
-                day.dayOfWeek,
-              ),
-            },
+    // Only reschedule unfinished weeks starting from the new start date
+    if (unfinishedWeeks.length > 0) {
+      // Bulk update unfinished weeks scheduling
+      operations.push(
+        ...unfinishedWeeks.map((week, unfinishedWeekIndex) =>
+          prisma.trainingWeek.updateMany({
+            where: { id: week.id },
+            data: { scheduledAt: addWeeks(baseStartDate, unfinishedWeekIndex) },
           }),
         ),
-      ),
-    ])
+      )
+
+      // Bulk update days scheduling for unfinished weeks only
+      operations.push(
+        ...unfinishedWeeks.flatMap((week, unfinishedWeekIndex) =>
+          week.days.map((day) =>
+            prisma.trainingDay.updateMany({
+              where: { id: day.id },
+              data: {
+                scheduledAt: addDays(
+                  addWeeks(baseStartDate, unfinishedWeekIndex),
+                  day.dayOfWeek,
+                ),
+              },
+            }),
+          ),
+        ),
+      )
+    }
+
+    await Promise.all(operations)
 
     return true
   }

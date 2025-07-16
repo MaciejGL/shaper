@@ -9,6 +9,7 @@ import {
   useActivatePlanMutation,
   useClosePlanMutation,
   useDeletePlanMutation,
+  useFitspaceGetActivePlanIdQuery,
   useFitspaceGetCurrentWorkoutIdQuery,
   useFitspaceMyPlansQuery,
   useGetTrainingPlanPreviewByIdQuery,
@@ -41,6 +42,9 @@ export function usePlanAction() {
     queryClient.invalidateQueries({
       queryKey: useFitspaceGetCurrentWorkoutIdQuery.getKey(),
     })
+    queryClient.invalidateQueries({
+      queryKey: useFitspaceGetActivePlanIdQuery.getKey(),
+    })
     if (dialogState.plan?.id) {
       queryClient.invalidateQueries({
         queryKey: useGetTrainingPlanPreviewByIdQuery.getKey({
@@ -55,6 +59,7 @@ export function usePlanAction() {
         invalidateQueries()
         toast.success('Plan activated')
         router.refresh()
+        router.push('/fitspace/my-plans?tab=active')
       },
     })
   const { mutateAsync: pausePlan, isPending: isPausingPlan } =
@@ -62,6 +67,7 @@ export function usePlanAction() {
       onSuccess: () => {
         invalidateQueries()
         toast.success('Plan paused')
+        router.push('/fitspace/my-plans?tab=available')
       },
     })
   const { mutateAsync: closePlan, isPending: isClosingPlan } =
@@ -69,6 +75,7 @@ export function usePlanAction() {
       onSuccess: () => {
         invalidateQueries()
         toast.success('Plan closed')
+        router.push('/fitspace/my-plans?tab=available')
       },
     })
   const { mutateAsync: deletePlan, isPending: isDeletingPlan } =
