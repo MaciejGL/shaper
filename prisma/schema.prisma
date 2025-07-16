@@ -72,6 +72,8 @@ model UserProfile {
   height        Float?
   weight        Float?
   goals         String[]
+  timezone      String?           @default("UTC") // User's timezone (e.g., "America/New_York")
+  weekStartsOn  Int?              @default(1)     // 0 = Sunday, 1 = Monday
   bodyMeasures  UserBodyMeasure[]
   user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
