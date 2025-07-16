@@ -212,10 +212,6 @@ mutation RemoveSetFromExercise($setId: ID!) {
   removeSetFromExercise(setId: $setId)
 }
 
-mutation MoveExercisesToDay($input: MoveExercisesToDayInput!) {
-  moveExercisesToDay(input: $input)
-}
-
 mutation CopyExercisesFromDay($input: CopyExercisesFromDayInput!) {
   copyExercisesFromDay(input: $input)
 }
