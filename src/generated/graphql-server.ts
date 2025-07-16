@@ -829,6 +829,7 @@ export type GQLMutation = {
   moveExercisesToDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   pausePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   rejectCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
+  removeAllExercisesFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeExerciseFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeExerciseFromWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeMealLog: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1168,6 +1169,11 @@ export type GQLMutationPausePlanArgs = {
 
 export type GQLMutationRejectCoachingRequestArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveAllExercisesFromDayArgs = {
+  input: GQLRemoveAllExercisesFromDayInput;
 };
 
 
@@ -1682,6 +1688,10 @@ export type GQLQuickWorkoutSetInput = {
   reps?: InputMaybe<Scalars['Int']['input']>;
   rpe?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type GQLRemoveAllExercisesFromDayInput = {
+  dayId: Scalars['ID']['input'];
 };
 
 export type GQLRemoveMealPlanCollaboratorInput = {
@@ -2371,6 +2381,7 @@ export type GQLResolversTypes = {
   Query: ResolverTypeWrapper<{}>;
   QuickWorkoutExerciseInput: GQLQuickWorkoutExerciseInput;
   QuickWorkoutSetInput: GQLQuickWorkoutSetInput;
+  RemoveAllExercisesFromDayInput: GQLRemoveAllExercisesFromDayInput;
   RemoveMealPlanCollaboratorInput: GQLRemoveMealPlanCollaboratorInput;
   RemoveSubstituteExerciseInput: GQLRemoveSubstituteExerciseInput;
   RemoveTrainingPlanCollaboratorInput: GQLRemoveTrainingPlanCollaboratorInput;
@@ -2510,6 +2521,7 @@ export type GQLResolversParentTypes = {
   Query: {};
   QuickWorkoutExerciseInput: GQLQuickWorkoutExerciseInput;
   QuickWorkoutSetInput: GQLQuickWorkoutSetInput;
+  RemoveAllExercisesFromDayInput: GQLRemoveAllExercisesFromDayInput;
   RemoveMealPlanCollaboratorInput: GQLRemoveMealPlanCollaboratorInput;
   RemoveSubstituteExerciseInput: GQLRemoveSubstituteExerciseInput;
   RemoveTrainingPlanCollaboratorInput: GQLRemoveTrainingPlanCollaboratorInput;
@@ -2943,6 +2955,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   moveExercisesToDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationMoveExercisesToDayArgs, 'input'>>;
   pausePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationPausePlanArgs, 'planId'>>;
   rejectCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationRejectCoachingRequestArgs, 'id'>>;
+  removeAllExercisesFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveAllExercisesFromDayArgs, 'input'>>;
   removeExerciseFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveExerciseFromDayArgs, 'exerciseId'>>;
   removeExerciseFromWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveExerciseFromWorkoutArgs, 'exerciseId'>>;
   removeMealLog?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveMealLogArgs, 'foodId'>>;

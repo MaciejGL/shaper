@@ -1,6 +1,12 @@
-import { BicepsFlexedIcon, MoreVertical, ReplaceAllIcon } from 'lucide-react'
+import {
+  BicepsFlexedIcon,
+  MoreVertical,
+  ReplaceAllIcon,
+  Trash2,
+} from 'lucide-react'
 import React, { useCallback, useEffect, useState } from 'react'
 
+import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -52,6 +58,7 @@ export function DayDropdownMenu({
           sourceWeekIndex={sourceWeekIndex}
           sourceDayIndex={sourceDayIndex}
         />
+        <RemoveAllExercisesItem sourceDayIndex={sourceDayIndex} />
       </DropdownMenuContent>
     </DropdownMenu>
   )
@@ -180,4 +187,54 @@ function MoveDropdownItem({
       </DropdownMenuPortal>
     </DropdownMenuSub>
   ))
+}
+
+function RemoveAllExercisesItem({
+  sourceDayIndex,
+}: {
+  sourceDayIndex: number
+}) {
+  const { formData, removeAllExercisesFromDay, activeWeek } = useTrainingPlan()
+  const { openModal } = useConfirmationModalContext()
+
+  if (!formData || !formData.weeks || formData.weeks.length === 0) {
+    return null
+  }
+
+  // Check if source day has exercises to remove
+  const sourceDay = formData.weeks[activeWeek]?.days[sourceDayIndex]
+  const hasExercisesToRemove =
+    sourceDay?.exercises && sourceDay.exercises.length > 0
+
+  if (!hasExercisesToRemove) {
+    return null
+  }
+
+  const exerciseCount = sourceDay?.exercises?.length || 0
+  const dayName = dayNames[sourceDay?.dayOfWeek || 0]
+
+  const handleRemoveAllExercises = () => {
+    openModal({
+      title: 'Remove All Exercises',
+      description: `Are you sure you want to remove all ${exerciseCount} exercise${exerciseCount !== 1 ? 's' : ''} from ${dayName}? This action cannot be undone.`,
+      confirmText: 'Remove All',
+      variant: 'destructive',
+      onConfirm: () => {
+        removeAllExercisesFromDay(activeWeek, sourceDayIndex)
+      },
+    })
+  }
+
+  return (
+    <>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem
+        onClick={handleRemoveAllExercises}
+        className="flex items-center gap-2 text-destructive focus:text-destructive"
+      >
+        <Trash2 className="size-4" />
+        Remove All Exercises
+      </DropdownMenuItem>
+    </>
+  )
 }

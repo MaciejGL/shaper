@@ -106,6 +106,7 @@ type Mutation {
   addTrainingWeek(input: AddTrainingWeekInput!): ID!
   addExerciseToDay(input: AddExerciseToDayInput!): ID!
   removeExerciseFromDay(exerciseId: ID!): Boolean!
+  removeAllExercisesFromDay(input: RemoveAllExercisesFromDayInput!): Boolean!
   moveExercise(input: MoveExerciseInput!): Boolean!
   addSetToExercise(input: AddSetToExerciseInput!): ID!
   removeSetFromExercise(setId: ID!): Boolean!
@@ -249,6 +250,10 @@ input AddExerciseToDayInput {
   type: ExerciseType
   warmupSets: Int
   baseId: ID
+}
+
+input RemoveAllExercisesFromDayInput {
+  dayId: ID!
 }
 
 input AddSetToExerciseInput {

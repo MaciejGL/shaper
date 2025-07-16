@@ -78,6 +78,7 @@ export interface TrainingPlanContextType {
     dayIndex: number,
     exerciseIndex: number,
   ) => void
+  removeAllExercisesFromDay: (weekIndex: number, dayIndex: number) => void
   addSet: (
     weekIndex: number,
     dayIndex: number,

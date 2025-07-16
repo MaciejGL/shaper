@@ -849,6 +849,79 @@ export async function removeExerciseFromDay(
 }
 
 /**
+ * Remove all exercises from a training day
+ */
+export async function removeAllExercisesFromDay(
+  input: { dayId: string },
+  context: GQLContext,
+) {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  // Get day with exercises and plan ID for permission check
+  const day = await prisma.trainingDay.findUnique({
+    where: { id: input.dayId },
+    include: {
+      exercises: {
+        select: { id: true, completedAt: true },
+      },
+      week: {
+        include: { plan: { select: { id: true } } },
+      },
+    },
+  })
+
+  if (!day) {
+    throw new GraphQLError('Training day not found')
+  }
+
+  // Check collaboration permissions
+  await checkTrainingPlanPermission(
+    context,
+    user.user.id,
+    day.week.plan.id,
+    CollaborationAction.EDIT,
+    'remove all exercises from day',
+  )
+
+  // Prevent removing exercises from completed day or week
+  if (isEditPlanNotAllowed(user, day.completedAt)) {
+    throw new GraphQLError(
+      'Cannot remove exercises from completed training day',
+    )
+  }
+  if (isEditPlanNotAllowed(user, day.week.completedAt)) {
+    throw new GraphQLError(
+      'Cannot remove exercises from completed training week',
+    )
+  }
+
+  // Check if any exercises are completed
+  const hasCompletedExercises = day.exercises.some((exercise) =>
+    isEditPlanNotAllowed(user, exercise.completedAt),
+  )
+  if (hasCompletedExercises) {
+    throw new GraphQLError(
+      'Cannot remove all exercises: some exercises are already completed',
+    )
+  }
+
+  // If no exercises exist, return success
+  if (day.exercises.length === 0) {
+    return true
+  }
+
+  // Delete all exercises from the day (cascade delete will handle sets)
+  await prisma.trainingExercise.deleteMany({
+    where: { dayId: input.dayId },
+  })
+
+  return true
+}
+
+/**
  * Move an exercise to a new order position, optionally to a different day
  * Properly handles reordering of all affected exercises
  */

@@ -827,6 +827,7 @@ export type GQLMutation = {
   moveExercisesToDay: Scalars['Boolean']['output'];
   pausePlan: Scalars['Boolean']['output'];
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
+  removeAllExercisesFromDay: Scalars['Boolean']['output'];
   removeExerciseFromDay: Scalars['Boolean']['output'];
   removeExerciseFromWorkout: Scalars['Boolean']['output'];
   removeMealLog: Scalars['Boolean']['output'];
@@ -1166,6 +1167,11 @@ export type GQLMutationPausePlanArgs = {
 
 export type GQLMutationRejectCoachingRequestArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveAllExercisesFromDayArgs = {
+  input: GQLRemoveAllExercisesFromDayInput;
 };
 
 
@@ -1680,6 +1686,10 @@ export type GQLQuickWorkoutSetInput = {
   reps?: InputMaybe<Scalars['Int']['input']>;
   rpe?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type GQLRemoveAllExercisesFromDayInput = {
+  dayId: Scalars['ID']['input'];
 };
 
 export type GQLRemoveMealPlanCollaboratorInput = {
@@ -3054,6 +3064,13 @@ export type GQLRemoveExerciseFromDayMutationVariables = Exact<{
 
 
 export type GQLRemoveExerciseFromDayMutation = { __typename?: 'Mutation', removeExerciseFromDay: boolean };
+
+export type GQLRemoveAllExercisesFromDayMutationVariables = Exact<{
+  input: GQLRemoveAllExercisesFromDayInput;
+}>;
+
+
+export type GQLRemoveAllExercisesFromDayMutation = { __typename?: 'Mutation', removeAllExercisesFromDay: boolean };
 
 export type GQLMoveExerciseMutationVariables = Exact<{
   input: GQLMoveExerciseInput;
@@ -9207,6 +9224,30 @@ useRemoveExerciseFromDayMutation.getKey = () => ['RemoveExerciseFromDay'];
 
 
 useRemoveExerciseFromDayMutation.fetcher = (variables: GQLRemoveExerciseFromDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveExerciseFromDayMutation, GQLRemoveExerciseFromDayMutationVariables>(RemoveExerciseFromDayDocument, variables, options);
+
+export const RemoveAllExercisesFromDayDocument = `
+    mutation RemoveAllExercisesFromDay($input: RemoveAllExercisesFromDayInput!) {
+  removeAllExercisesFromDay(input: $input)
+}
+    `;
+
+export const useRemoveAllExercisesFromDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveAllExercisesFromDayMutation, TError, GQLRemoveAllExercisesFromDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveAllExercisesFromDayMutation, TError, GQLRemoveAllExercisesFromDayMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveAllExercisesFromDay'],
+    mutationFn: (variables?: GQLRemoveAllExercisesFromDayMutationVariables) => fetchData<GQLRemoveAllExercisesFromDayMutation, GQLRemoveAllExercisesFromDayMutationVariables>(RemoveAllExercisesFromDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveAllExercisesFromDayMutation.getKey = () => ['RemoveAllExercisesFromDay'];
+
+
+useRemoveAllExercisesFromDayMutation.fetcher = (variables: GQLRemoveAllExercisesFromDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveAllExercisesFromDayMutation, GQLRemoveAllExercisesFromDayMutationVariables>(RemoveAllExercisesFromDayDocument, variables, options);
 
 export const MoveExerciseDocument = `
     mutation MoveExercise($input: MoveExerciseInput!) {

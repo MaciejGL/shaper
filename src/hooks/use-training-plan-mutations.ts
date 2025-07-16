@@ -20,6 +20,7 @@ import {
   useGetTemplateTrainingPlanByIdQuery,
   useMoveExerciseMutation,
   useMoveExercisesToDayMutation,
+  useRemoveAllExercisesFromDayMutation,
   useRemoveExerciseFromDayMutation,
   useRemoveSetFromExerciseMutation,
   useRemoveTrainingWeekMutation,
@@ -253,6 +254,35 @@ export function useTrainingPlanMutations(trainingId?: string) {
               ...ex,
               order: ex.order > deletedOrder ? ex.order - 1 : ex.order,
             }))
+            break
+          }
+        }
+      }
+
+      return {
+        ...oldData,
+        getTrainingPlanById: {
+          ...oldData.getTrainingPlanById,
+          weeks: newWeeks,
+        },
+      }
+    },
+
+    removeAllExercisesFromDay: (
+      oldData: GQLGetTemplateTrainingPlanByIdQuery,
+      variables: { input: { dayId: string } },
+    ) => {
+      if (!oldData?.getTrainingPlanById?.weeks) return oldData
+
+      // Find day by dayId from variables
+      const dayId = variables.input.dayId
+      const newWeeks = [...oldData.getTrainingPlanById.weeks]
+
+      // Find and clear all exercises from the day
+      for (const week of newWeeks) {
+        for (const day of week.days) {
+          if (day.id === dayId) {
+            day.exercises = []
             break
           }
         }
@@ -564,6 +594,7 @@ export function useTrainingPlanMutations(trainingId?: string) {
   const addExerciseMutation = useAddExerciseToDayMutation()
   const updateExerciseMutation = useUpdateTrainingExerciseMutation()
   const removeExerciseMutation = useRemoveExerciseFromDayMutation()
+  const removeAllExercisesMutation = useRemoveAllExercisesFromDayMutation()
   const addSetMutation = useAddSetToExerciseMutation()
   const updateSetMutation = useUpdateExerciseSetMutation()
   const removeSetMutation = useRemoveSetFromExerciseMutation()
@@ -593,6 +624,12 @@ export function useTrainingPlanMutations(trainingId?: string) {
     queryKey: trainingPlanQueryKey,
     mutationFn: removeExerciseMutation.mutateAsync,
     updateFn: optimisticUpdaters.removeExercise,
+  })
+
+  const removeAllExercisesOptimistic = useOptimisticMutation({
+    queryKey: trainingPlanQueryKey,
+    mutationFn: removeAllExercisesMutation.mutateAsync,
+    updateFn: optimisticUpdaters.removeAllExercisesFromDay,
   })
 
   const addSetOptimistic = useOptimisticMutation({
@@ -722,6 +759,22 @@ export function useTrainingPlanMutations(trainingId?: string) {
 
     return removeExerciseOptimistic.optimisticMutate({
       exerciseId: exercise.id,
+    })
+  }
+
+  const removeAllExercisesFromDay = (weekIndex: number, dayIndex: number) => {
+    const data =
+      queryClient.getQueryData<GQLGetTemplateTrainingPlanByIdQuery>(
+        trainingPlanQueryKey,
+      )
+    const day = data?.getTrainingPlanById?.weeks?.[weekIndex]?.days?.[dayIndex]
+
+    if (!day) return Promise.reject('Day not found')
+
+    debouncedInvalidateQueries()
+
+    return removeAllExercisesOptimistic.optimisticMutate({
+      input: { dayId: day.id },
     })
   }
 
@@ -1138,6 +1191,7 @@ export function useTrainingPlanMutations(trainingId?: string) {
     updateExercise,
     addExercise,
     removeExercise,
+    removeAllExercisesFromDay,
     addSet,
     updateSet,
     removeSet,
