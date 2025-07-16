@@ -1,7 +1,7 @@
 import { FlameIcon } from 'lucide-react'
 
 import { Badge, BadgeProps } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
+import { cn, formatNumber } from '@/lib/utils'
 
 export function MacroBadge({
   macro,
@@ -14,7 +14,7 @@ export function MacroBadge({
   size?: BadgeProps['size']
   className?: string
 }) {
-  const formattedValue = value.toFixed(0)
+  const formattedValue = formatNumber(value)
   if (macro === 'protein') {
     return (
       <Badge
@@ -97,7 +97,7 @@ export function BigMacroBadge({
   const sharedClasses = cn(
     'flex flex-col items-center justify-center p-3 rounded-lg shrink-0 size-[4.625rem]',
   )
-  const formattedValue = value.toFixed(0)
+  const formattedValue = formatNumber(value)
   if (macro === 'protein') {
     return (
       <Badge className={cn(sharedClasses, 'bg-green-500/20', className)}>

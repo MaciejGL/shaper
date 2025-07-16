@@ -1,5 +1,7 @@
 import { FlameIcon } from 'lucide-react'
 
+import { formatNumber } from '@/lib/utils'
+
 import { MealCardProps } from './meal-card'
 
 export function FoodItem({
@@ -27,20 +29,20 @@ export function FoodItem({
       </div>
       <div className="flex gap-1">
         <span className="text-xs text-muted-foreground flex items-center">
-          {Math.round(food.totalCalories)}
-          <FlameIcon className="size-3" />
+          {formatNumber(Math.round(food.totalCalories))}
+          <FlameIcon className="size-2.5" />
         </span>
         <span className="text-xs text-muted-foreground">•</span>
         <span className="text-xs text-muted-foreground">
-          {Math.round(food.totalProtein)}P
+          {formatNumber(Math.round(food.totalProtein))}P
         </span>
         <span className="text-xs text-muted-foreground">•</span>
         <span className="text-xs text-muted-foreground">
-          {Math.round(food.totalCarbs)}C
+          {formatNumber(Math.round(food.totalCarbs))}C
         </span>
         <span className="text-xs text-muted-foreground">•</span>
         <span className="text-xs text-muted-foreground">
-          {Math.round(food.totalFat)}F
+          {formatNumber(Math.round(food.totalFat))}F
         </span>
       </div>
     </button>

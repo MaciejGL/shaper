@@ -7,6 +7,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
+import { formatNumber } from '@/lib/utils'
 
 const chartConfig = {
   kcal: {
@@ -46,22 +47,22 @@ export function ChartPieDonutText({
   const chartData = [
     {
       macro: 'protein',
-      value: Number(totalProtein?.toFixed(0)) || 1,
+      value: Number(totalProtein) || 1,
       fill: 'var(--color-green-500)',
     },
     {
       macro: 'carbs',
-      value: Number(totalCarbs?.toFixed(0)) || 1,
+      value: Number(totalCarbs) || 1,
       fill: 'var(--color-blue-500)',
     },
     {
       macro: 'fat',
-      value: Number(totalFat?.toFixed(0)) || 1,
+      value: Number(totalFat) || 1,
       fill: 'var(--color-yellow-500)',
     },
     {
       macro: 'fiber',
-      value: Number(totalFiber?.toFixed(0)) || 1,
+      value: Number(totalFiber) || 1,
       fill: 'var(--color-violet-500)',
     },
   ]
@@ -98,7 +99,7 @@ export function ChartPieDonutText({
                         y={viewBox.cy}
                         className="fill-foreground text-3xl font-bold"
                       >
-                        {totalCalorie?.toFixed(0)}
+                        {formatNumber(totalCalorie)}
                       </tspan>
                       <tspan
                         x={viewBox.cx}

@@ -13,7 +13,7 @@ import {
 import { useAutoSyncedInput } from '@/hooks/use-auto-synced-input'
 import { useMealPlanDetailsMutation } from '@/hooks/use-meal-plan-details-mutation'
 import { formatNumberInput } from '@/lib/format-tempo'
-import { cn } from '@/lib/utils'
+import { cn, formatNumber } from '@/lib/utils'
 
 import { getDayName } from '../../../trainings/creator/utils'
 
@@ -359,10 +359,10 @@ function MealPlanCreatorContent() {
                     'text-md text-muted-foreground',
                     selectedDay === index && 'text-muted',
                     eachDayNutrients[index] > (mealPlan?.dailyCalories || 0) &&
-                      'text-amber-500',
+                      'text-amber-600',
                   )}
                 >
-                  {eachDayNutrients[index].toFixed(0)} kcal
+                  {formatNumber(eachDayNutrients[index])} kcal
                 </span>
               </Button>
             ))}
@@ -371,10 +371,10 @@ function MealPlanCreatorContent() {
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-medium">
-                  {totalNutrients.kcal.toFixed(0)} kcal{' '}
+                  {formatNumber(totalNutrients.kcal)} kcal{' '}
                   {macroPercentage.caloriesExceeded > 0 && (
                     <span className="text-xs text-destructive/80">
-                      ({macroPercentage.caloriesExceeded.toFixed(0)} kcal)
+                      ({formatNumber(macroPercentage.caloriesExceeded)} kcal)
                     </span>
                   )}
                 </h2>
@@ -382,11 +382,11 @@ function MealPlanCreatorContent() {
               <div className="flex items-center gap-2">
                 <div className="w-6 h-4 bg-green-500 rounded-sm" />
                 <p className="text-sm">
-                  {totalNutrients.protein.toFixed(0)}g protein
+                  {formatNumber(totalNutrients.protein)}g protein
                   {macroPercentage.proteinExceeded > 0 && (
                     <span className="text-xs text-destructive/80">
                       {' '}
-                      ({macroPercentage.proteinExceeded}g)
+                      ({formatNumber(macroPercentage.proteinExceeded)}g)
                     </span>
                   )}
                 </p>
@@ -394,11 +394,11 @@ function MealPlanCreatorContent() {
               <div className="flex items-center gap-2">
                 <div className="w-6 h-4 bg-blue-500 rounded-sm" />
                 <p className="text-sm">
-                  {totalNutrients.carbs.toFixed(0)}g carbs
+                  {formatNumber(totalNutrients.carbs)}g carbs
                   {macroPercentage.carbsExceeded > 0 && (
                     <span className="text-xs text-destructive/80">
                       {' '}
-                      ({macroPercentage.carbsExceeded}g)
+                      ({formatNumber(macroPercentage.carbsExceeded)}g)
                     </span>
                   )}
                 </p>
@@ -406,11 +406,11 @@ function MealPlanCreatorContent() {
               <div className="flex items-center gap-2">
                 <div className="w-6 h-4 bg-yellow-500 rounded-sm" />
                 <p className="text-sm">
-                  {totalNutrients.fat.toFixed(0)}g fat
+                  {formatNumber(totalNutrients.fat)}g fat
                   {macroPercentage.fatExceeded > 0 && (
                     <span className="text-xs text-destructive/80">
                       {' '}
-                      ({macroPercentage.fatExceeded}g)
+                      ({formatNumber(macroPercentage.fatExceeded)}g)
                     </span>
                   )}
                 </p>
@@ -418,7 +418,7 @@ function MealPlanCreatorContent() {
               <div className="flex items-center gap-2">
                 <div className="w-6 h-4 bg-violet-500 rounded-sm" />
                 <p className="text-sm">
-                  {totalNutrients.fiber.toFixed(0)}g fiber
+                  {formatNumber(totalNutrients.fiber)}g fiber
                 </p>
               </div>
             </div>

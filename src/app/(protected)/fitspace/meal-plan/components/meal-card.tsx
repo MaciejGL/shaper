@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { formatNumber } from '@/lib/utils'
 
 import { FoodItem } from './food-item'
 import { useMealLogging } from './use-meal-logging'
@@ -252,46 +253,42 @@ export function MealCard({
   )
 }
 
-function MealTotals({
+export function MealTotals({
   loggedTotals,
   plannedTotals,
   hasLogs,
 }: {
-  loggedTotals: {
+  loggedTotals?: {
     calories: number
     protein: number
     carbs: number
     fat: number
   }
-  plannedTotals: {
+  plannedTotals?: {
     calories: number
     protein: number
     carbs: number
     fat: number
   }
-  hasLogs: boolean
+  hasLogs?: boolean
 }) {
   const totalsToShow = hasLogs ? loggedTotals : plannedTotals
 
   return (
     <div className="flex gap-2">
       <p className="text-sm font-medium flex items-center text-primary">
-        {Math.round(totalsToShow.calories)}
+        {formatNumber(Math.round(totalsToShow?.calories ?? 0))}
         <FlameIcon className="size-3" />
       </p>
       <p className="text-sm font-medium text-green-600">
-        {Math.round(totalsToShow.protein)}P
+        {formatNumber(Math.round(totalsToShow?.protein ?? 0))}P
       </p>
       <p className="text-sm font-medium text-blue-600">
-        {Math.round(totalsToShow.carbs)}C
+        {formatNumber(Math.round(totalsToShow?.carbs ?? 0))}C
       </p>
       <p className="text-sm font-medium text-yellow-600">
-        {Math.round(totalsToShow.fat)}F
+        {formatNumber(Math.round(totalsToShow?.fat ?? 0))}F
       </p>
-      {/* <MacroBadge macro="calories" value={Math.round(totalsToShow.calories)} />
-      <MacroBadge macro="protein" value={Math.round(totalsToShow.protein)} />
-      <MacroBadge macro="carbs" value={Math.round(totalsToShow.carbs)} />
-      <MacroBadge macro="fat" value={Math.round(totalsToShow.fat)} /> */}
     </div>
   )
 }

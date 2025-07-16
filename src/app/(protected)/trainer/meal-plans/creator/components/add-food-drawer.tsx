@@ -34,9 +34,9 @@ export function AddFoodDrawer({
   const { openModal } = useConfirmationModalContext()
   const [foods, setFoods] = useState<EditableFood[]>([])
   const [hasChanges, setHasChanges] = useState(false)
-  const [instructions, setInstructions] = useState('')
   const [isSaving, setIsSaving] = useState(false)
   const meal = getMealByHour(dayId, selectedHour)
+  const [instructions, setInstructions] = useState(meal?.instructions || '')
 
   const mealNutrients = useMemo(
     () => getMealNutrients(meal?.foods || []),
@@ -147,14 +147,17 @@ export function AddFoodDrawer({
 
           {/* Added Foods */}
           {foods.length > 0 && (
-            <div>
+            <div className="space-y-6">
               <Textarea
                 id="instructions"
                 label="Instructions"
                 placeholder="Instructions"
                 variant="ghost"
                 value={instructions}
-                onChange={(e) => setInstructions(e.target.value)}
+                onChange={(e) => {
+                  setInstructions(e.target.value)
+                  setHasChanges(true)
+                }}
               />
 
               <AddedFoods
