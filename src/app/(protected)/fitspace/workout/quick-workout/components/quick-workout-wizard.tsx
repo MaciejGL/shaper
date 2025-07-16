@@ -182,10 +182,10 @@ export function QuickWorkoutWizard({
     : ((currentStep + 1) / currentSteps.length) * 100
 
   return (
-    <div className="bg-background -mt-2">
+    <div className="bg-background pt-[60px] pb-[80px]">
       {/* Header with Progress */}
       {!isOnLanding && (
-        <div className="sticky top-[-8px] z-50 bg-background px-2">
+        <div className="sticky top-[-8px] left-0 right-0 z-50 bg-background px-2">
           <div className="container py-4 space-y-4">
             <div className="text-center mx-auto">
               <p className="text-sm text-muted-foreground">
@@ -227,8 +227,8 @@ export function QuickWorkoutWizard({
 
       {/* Bottom Navigation */}
       {!isOnLanding && (
-        <div className="bg-background sticky bottom-[64px] -mx-2 px-2 z-50">
-          <div className="py-4">
+        <div className="bg-background fixed bottom-[72px] left-0 right-0 px-2 z-50">
+          <div className="py-2 max-w-screen-sm mx-auto">
             <div className="flex justify-between gap-4">
               <Button
                 variant="secondary"

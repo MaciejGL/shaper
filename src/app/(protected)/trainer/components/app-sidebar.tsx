@@ -184,7 +184,9 @@ export function AppSidebar() {
         icon: Users2Icon,
         disabled: TRAINER_LINKS.clients.disabled,
         subItems: clients?.myClients.map((client) => ({
-          title: `${client.firstName} ${client.lastName}`,
+          title: client.firstName
+            ? `${client.firstName} ${client.lastName}`
+            : client.email,
           url: TRAINER_LINKS.clients.href + `/${client.id}`,
           icon: UserRoundCogIcon,
           disabled: false,

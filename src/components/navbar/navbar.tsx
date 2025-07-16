@@ -1,5 +1,6 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import {
   LayoutDashboardIcon,
   LayoutListIcon,
@@ -16,6 +17,7 @@ import { usePathname } from 'next/navigation'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
 import { useNotificationsQuery } from '@/generated/graphql-client'
+import { useScrollVisibility } from '@/hooks/use-scroll-visibility'
 import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
@@ -51,6 +53,7 @@ export const Navbar = ({
   user?: UserWithSession | null
   withSidebar?: boolean
 }) => {
+  const { isVisible } = useScrollVisibility()
   const { data: notifications } = useNotificationsQuery(
     {
       userId: user!.user.id!,
@@ -67,8 +70,24 @@ export const Navbar = ({
       ? TRAINER_LINKS.dashboard.href
       : CLIENT_LINKS.dashboard.href
 
+  const isFitspace = usePathname().startsWith('/fitspace')
+
   return (
-    <div
+    <motion.div
+      initial={
+        isFitspace ? { opacity: 0, y: 0, height: 60, padding: '12px 16px' } : {}
+      }
+      animate={
+        isFitspace
+          ? {
+              opacity: isVisible ? 1 : 0,
+              y: isVisible ? 0 : -100,
+              height: isVisible ? 60 : 0,
+              padding: isVisible ? '12px 16px' : '0px 16px',
+            }
+          : {}
+      }
+      transition={{ duration: 0.3 }}
       className={cn(
         'py-3 px-4 flex justify-between items-center bg-transparent',
       )}
@@ -91,7 +110,7 @@ export const Navbar = ({
         )}
         <NavbarUser user={user} />
       </div>
-    </div>
+    </motion.div>
   )
 }
 

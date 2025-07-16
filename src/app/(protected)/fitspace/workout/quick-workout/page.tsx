@@ -321,7 +321,11 @@ export default function QuickWorkoutPage() {
 
   // Show loading state
   if (isLoading) {
-    return <QuickWorkoutWizardSkeleton />
+    return (
+      <div className="min-h-screen pb-[80px] max-w-screen-sm mx-auto">
+        <QuickWorkoutWizardSkeleton />
+      </div>
+    )
   }
 
   // Manual components
@@ -405,7 +409,7 @@ export default function QuickWorkoutPage() {
   )
 
   return (
-    <div className="min-h-screen pb-[80px]">
+    <div className="min-h-screen pb-[80px] max-w-screen-sm mx-auto">
       {shouldShowWizard ? (
         <QuickWorkoutWizard
           showLanding={workoutFlow === null}
