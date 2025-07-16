@@ -65,7 +65,11 @@ export default function ProfilePage() {
           )}
         </AnimatePresence>
       </div>
-      <Header profile={profile} isEditing={isEditing} />
+      <Header
+        profile={profile}
+        isEditing={isEditing}
+        onAvatarChange={(avatarUrl) => handleChange('avatarUrl', avatarUrl)}
+      />
 
       <PersonalInfo
         isEditing={isEditing}

@@ -52,7 +52,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         phone: rest.phone || null,
         birthday: rest.birthday || null,
         sex: rest.sex || null,
-        // avatarUrl: rest.avatarUrl || null,
+        avatarUrl: rest.avatarUrl || null,
         height: rest.height || null,
         weight: rest.weight || null,
         fitnessLevel: rest.fitnessLevel || null,
