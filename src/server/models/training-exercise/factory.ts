@@ -891,6 +891,7 @@ Generate the workout based on these preferences.`,
         order: index + 1, // Generate order since it's not in the AI response
       }
     })
+    .filter((exercise) => exercise !== null)
     .sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0)) // Ensure proper ordering
 
   // Calculate duration based on sets: 45s per set + 90s break between sets
