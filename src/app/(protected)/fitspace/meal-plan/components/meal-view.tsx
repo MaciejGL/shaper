@@ -75,7 +75,7 @@ export function MealView() {
       >
         {isShowingActivePlan && activePlan && defaultPlan ? (
           // Show tabs when user has active plan
-          <Tabs defaultValue="plan" className="w-full">
+          <Tabs defaultValue="plan" className="w-full pb-32">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="plan" className="flex items-center gap-2">
                 <Calendar className="size-4" />

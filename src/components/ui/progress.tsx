@@ -26,6 +26,7 @@ function Progress({
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
         className={cn('bg-primary h-full w-full flex-1 transition-all', {
+          'bg-transparent': fallbackValue === 0,
           'bg-amber-50': fallbackValue >= 10,
           'bg-amber-100': fallbackValue >= 20,
           'bg-amber-200': fallbackValue >= 30,

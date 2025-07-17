@@ -1,4 +1,5 @@
 import { format } from 'date-fns'
+import { AnimatePresence, motion } from 'framer-motion'
 import {
   CheckSquare2Icon,
   Edit3Icon,
@@ -7,7 +8,7 @@ import {
   SquareIcon,
   XIcon,
 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,6 +16,51 @@ import { formatNumber } from '@/lib/utils'
 
 import { FoodItem } from './food-item'
 import { useMealLogging } from './use-meal-logging'
+
+// Animated wrapper for food items
+function AnimatedFoodItem({
+  children,
+  id,
+  isFirstRender,
+}: {
+  children: React.ReactNode
+  id: string
+  isFirstRender: boolean
+}) {
+  return (
+    <motion.div
+      key={id}
+      initial={
+        isFirstRender
+          ? false
+          : {
+              opacity: 0,
+              scale: 0.8,
+              height: 0,
+            }
+      }
+      animate={{
+        opacity: 1,
+        scale: 1,
+        height: 'auto',
+      }}
+      exit={{
+        opacity: 0,
+        scale: 0.95,
+        height: 0,
+      }}
+      transition={{
+        type: 'spring',
+        stiffness: 200,
+        damping: 25,
+        duration: 0.25,
+      }}
+      className="overflow-hidden w-full"
+    >
+      {children}
+    </motion.div>
+  )
+}
 
 export interface MealCardProps {
   meal: {
@@ -113,6 +159,7 @@ export function MealCard({
   const [optimisticCompletedState, setOptimisticCompletedState] = useState<
     boolean | null
   >(null)
+  const isFirstRender = useRef(true)
 
   // Clear optimistic state when actual data matches our optimistic expectation
   useEffect(() => {
@@ -123,6 +170,11 @@ export function MealCard({
       setOptimisticCompletedState(null)
     }
   }, [meal.completedAt, optimisticCompletedState])
+
+  // Set isFirstRender to false after the first render
+  useEffect(() => {
+    isFirstRender.current = false
+  }, [])
 
   // Use optimistic state if available, otherwise use actual state
   const isCompleted =
@@ -200,10 +252,18 @@ export function MealCard({
             )}
           </div>
         </div>
-        <div className="flex flex-col gap-2">
-          {meal.foods.map((food) => (
-            <FoodItem key={food.id} food={food} onClick={() => onClick?.()} />
-          ))}
+        <div className="flex flex-col">
+          <AnimatePresence>
+            {meal.foods.map((food) => (
+              <AnimatedFoodItem
+                key={food.id}
+                id={food.id}
+                isFirstRender={isFirstRender.current}
+              >
+                <FoodItem food={food} onClick={() => onClick?.()} />
+              </AnimatedFoodItem>
+            ))}
+          </AnimatePresence>
 
           {isDefaultPlan && (
             <Button
@@ -218,40 +278,47 @@ export function MealCard({
           )}
         </div>
       </div>
-      <div className="flex flex-col gap-2">
-        <Badge variant="outline" className="rounded-full font-mono">
+      <div className="flex flex-col">
+        <Badge variant="outline" className="rounded-full font-mono mb-2">
           {format(new Date(meal.dateTime), 'HH:mm')}
         </Badge>
-        {meal.foods.map((food) => (
-          <div
-            key={food.id}
-            className="flex items-center justify-center h-[56px]"
-          >
-            {food.isCustomAddition && (
-              <Button
-                variant="ghost"
-                size="icon-xs"
-                className="text-muted-foreground"
-                iconOnly={<XIcon />}
-                loading={removingFoodIds.has(food.id)}
-                onClick={async () => {
-                  try {
-                    setRemovingFoodIds((prev) => new Set([...prev, food.id]))
-                    await handleRemoveLogItem(food.id)
-                  } catch (error) {
-                    console.error(error)
-                  } finally {
-                    setRemovingFoodIds((prev) => {
-                      const newSet = new Set(prev)
-                      newSet.delete(food.id)
-                      return newSet
-                    })
-                  }
-                }}
-              />
-            )}
-          </div>
-        ))}
+        <AnimatePresence>
+          {meal.foods.map((food) => (
+            <AnimatedFoodItem
+              key={food.id}
+              id={food.id}
+              isFirstRender={isFirstRender.current}
+            >
+              <div className="flex items-center justify-center h-[56px] mb-2">
+                {food.isCustomAddition && (
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    className="text-muted-foreground"
+                    iconOnly={<XIcon />}
+                    loading={removingFoodIds.has(food.id)}
+                    onClick={async () => {
+                      try {
+                        setRemovingFoodIds(
+                          (prev) => new Set([...prev, food.id]),
+                        )
+                        await handleRemoveLogItem(food.id)
+                      } catch (error) {
+                        console.error(error)
+                      } finally {
+                        setRemovingFoodIds((prev) => {
+                          const newSet = new Set(prev)
+                          newSet.delete(food.id)
+                          return newSet
+                        })
+                      }
+                    }}
+                  />
+                )}
+              </div>
+            </AnimatedFoodItem>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   )

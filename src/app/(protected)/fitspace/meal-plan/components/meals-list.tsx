@@ -64,7 +64,7 @@ export function MealsList({
 
   return (
     <>
-      <div className="space-y-6">
+      <div className="space-y-6 grow">
         {planMeals.map((meal) => {
           return (
             <MealCard
@@ -80,7 +80,7 @@ export function MealsList({
           )
         })}
         {planMeals.length === 0 && (
-          <div className="text-center text-sm text-muted-foreground">
+          <div className="text-center text-sm text-muted-foreground min-h-[45dvh]">
             No meals found
           </div>
         )}

@@ -14,7 +14,7 @@ export function FoodItem({
   return (
     <button
       key={food.id}
-      className="bg-card p-2 rounded-lg space-y-1 h-[56px] overflow-hidden"
+      className="bg-card p-2 rounded-lg space-y-1 h-[56px] overflow-hidden w-full mb-2"
       onClick={() => {
         onClick?.()
       }}

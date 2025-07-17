@@ -49,7 +49,7 @@ export default function MealPlanPage() {
       <div className="flex flex-col h-full w-full">
         <Navigation />
 
-        <div className="pb-24 pt-4 w-full max-w-sm mx-auto grow">
+        <div className="pt-4 w-full max-w-sm mx-auto grow h-full">
           {isLoading && (
             <div className="flex justify-center items-center h-[50vh]">
               <Loader />
