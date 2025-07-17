@@ -587,3 +587,40 @@ model FoodProduct {
   @@index([name])
   @@index([lastUpdated])
 }
+
+// USDA FoodData Central local data storage
+model USDAFood {
+  id              String   @id @default(uuid())
+  fdcId           Int      @unique
+  description     String
+  dataType        String   // Foundation Foods, SR Legacy, etc.
+  foodCategory    String?  
+  brandOwner      String?
+  brandName       String?
+  ingredients     String?
+  servingSize     Float?
+  servingSizeUnit String?
+  publishedDate   DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Nutrition data per 100g
+  caloriesPer100g Float?
+  proteinPer100g  Float?
+  carbsPer100g    Float?
+  fatPer100g      Float?
+  fiberPer100g    Float?
+  sugarPer100g    Float?
+  sodiumPer100g   Float?
+
+  // Additional key nutrients
+  calciumPer100g   Float?
+  ironPer100g      Float?
+  potassiumPer100g Float?
+  vitaminCPer100g  Float?
+
+  @@index([description], map: "usda_food_description_idx")
+  @@index([dataType], map: "usda_food_data_type_idx")
+  @@index([foodCategory], map: "usda_food_category_idx")
+  @@index([fdcId], map: "usda_food_fdc_id_idx")
+}
