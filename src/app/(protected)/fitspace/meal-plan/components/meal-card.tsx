@@ -278,7 +278,7 @@ export function MealTotals({
     <div className="flex gap-2">
       <p className="text-sm font-medium flex items-center text-primary">
         {formatNumber(Math.round(totalsToShow?.calories ?? 0))}
-        <FlameIcon className="size-3" />
+        <FlameIcon className="size-3 text-orange-500" />
       </p>
       <p className="text-sm font-medium text-green-600">
         {formatNumber(Math.round(totalsToShow?.protein ?? 0))}P

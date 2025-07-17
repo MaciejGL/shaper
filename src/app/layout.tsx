@@ -19,8 +19,11 @@ export const viewport: Viewport = {
   themeColor: '#000000',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // Allow zoom for better camera functionality (important for camera focus)
+  maximumScale: 5,
+  userScalable: true,
+  // Improve camera rendering on mobile
+  viewportFit: 'cover',
 }
 
 export const metadata: Metadata = {

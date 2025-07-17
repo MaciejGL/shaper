@@ -38,15 +38,17 @@ export function QuantityControls({
   return (
     <div className="flex items-center gap-1">
       <Button
-        variant="secondary"
-        size="icon-sm"
+        variant="outline"
+        size="sm"
         onClick={handleDecrement}
         disabled={disabled || value <= min}
-        iconOnly={<Minus />}
-      />
+      >
+        <Minus className="size-3" />
+        {step > 1 && <span className="text-sm">{step}</span>}
+      </Button>
       <Input
         id={id}
-        variant="secondary"
+        variant="outline"
         value={value}
         onChange={(e) => {
           const newValue = formatNumberInput(e)
@@ -61,12 +63,13 @@ export function QuantityControls({
         iconEnd={<span className="text-sm">{unit}</span>}
       />
       <Button
-        variant="secondary"
-        size="icon-sm"
+        variant="outline"
+        size="sm"
         onClick={handleIncrement}
         disabled={disabled || (max !== undefined && value >= max)}
       >
         <Plus className="size-3" />
+        {step > 1 && <span className="text-sm">{step}</span>}
       </Button>
     </div>
   )

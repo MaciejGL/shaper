@@ -298,6 +298,7 @@ function KanbanExerciseSets({
   disabled,
 }: KanbanExerciseSetsProps) {
   const isExerciseDisabled = Boolean(isExerciseCompleted)
+
   return (
     <div className="space-y-2">
       <div className="flex justify-between items-end">
@@ -387,7 +388,7 @@ function KanbanExerciseSets({
                     min="1"
                     error={
                       set.minReps && set.maxReps && set.minReps > set.maxReps
-                        ? 'Min reps must be less than max reps'
+                        ? 'Max reps must be greater than min reps'
                         : undefined
                     }
                     value={set.maxReps || ''}
