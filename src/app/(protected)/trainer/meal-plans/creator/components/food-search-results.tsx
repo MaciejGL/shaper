@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 import { MealTotals } from '@/app/(protected)/fitspace/meal-plan/components/meal-card'
 import { SelectedMeal } from '@/app/(protected)/fitspace/meal-plan/components/meal-logging-drawer'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { SearchResult } from '@/lib/food-search'
@@ -116,6 +117,24 @@ export function FoodSearchResults({
                       }}
                     />
                   </div>
+                  <Badge variant="secondary">
+                    {/* Show flag based on food source */}
+                    {food.source === 'usda' ? (
+                      <span className="mr-1" role="img" aria-label="USA Flag">
+                        🇺🇸
+                      </span>
+                    ) : (
+                      <span
+                        className="mr-1"
+                        role="img"
+                        aria-label="Norway Flag"
+                      >
+                        🇳🇴
+                      </span>
+                    )}
+                    {/* Display source in formatted style: "USDA" or "Open Food Facts" with space */}
+                    {food.source === 'usda' ? 'USDA' : 'Open Food Facts'}
+                  </Badge>
                 </div>
               </div>
             </Card>

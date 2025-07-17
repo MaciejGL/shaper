@@ -17,10 +17,35 @@ import {
   useMealPlanContext,
 } from '@/context/meal-plan-context/meal-plan-context'
 import { useDebounce } from '@/hooks/use-debounce'
-import { SearchResult, searchFoods } from '@/lib/food-search'
+import { SearchResult } from '@/lib/food-search'
 
 import { FoodSearchLoading } from './food-search-loading'
 import { FoodSearchResults } from './food-search-results'
+
+// ============================================================================
+// SEARCH FUNCTION (Simplified - API returns SearchResult[] directly)
+// ============================================================================
+
+/**
+ * Search foods using the API route (server-side)
+ * API now returns SearchResult[] directly - no conversion needed!
+ */
+async function searchFoodsAPI(query: string): Promise<SearchResult[]> {
+  const response = await fetch(
+    `/api/food/search?q=${encodeURIComponent(query)}`,
+  )
+  if (!response.ok) {
+    throw new Error('API search failed')
+  }
+
+  const data = await response.json()
+
+  return data
+}
+
+// ============================================================================
+// COMPONENT
+// ============================================================================
 
 interface FoodSearchProps {
   dayId: string
@@ -111,7 +136,7 @@ export default function FoodSearch({
     [canEdit, foods, setFoods, setHasChanges, setSearchTerm, setSearchResults],
   )
 
-  // Handle search
+  // Handle search using API route (server-side)
   const handleSearch = useCallback(async (term: string) => {
     if (term.length < 2) {
       setSearchResults([])
@@ -120,10 +145,10 @@ export default function FoodSearch({
 
     setIsSearching(true)
     try {
-      const results = await searchFoods(term)
+      const results = await searchFoodsAPI(term)
       setSearchResults(results || [])
     } catch (error) {
-      console.error('Search error:', error)
+      console.error('❌ Client search error:', error)
       toast.error('Failed to search foods')
     } finally {
       setIsSearching(false)

@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { useDebounce } from '@/hooks/use-debounce'
-import { SearchResult, searchFoods } from '@/lib/food-search'
+import { SearchResult } from '@/lib/food-search'
 import { createTimestampWithDateAndCurrentTime } from '@/lib/utc-date-utils'
 import { cn } from '@/lib/utils'
 
@@ -53,6 +53,21 @@ export function CustomFoodSearchDrawer({
   const [isLookingUpBarcode, setIsLookingUpBarcode] = useState(false)
   const [scannedFood, setScannedFood] = useState<SearchResult | null>(null)
 
+  // Search foods using the API route (server-side)
+  // API now returns SearchResult[] directly - no conversion needed!
+  const searchFoodsAPI = async (query: string): Promise<SearchResult[]> => {
+    const response = await fetch(
+      `/api/food/search?q=${encodeURIComponent(query)}`,
+    )
+    if (!response.ok) {
+      throw new Error('API search failed')
+    }
+
+    const searchResults: SearchResult[] = await response.json()
+
+    return searchResults
+  }
+
   // Handle search
   const handleSearch = useCallback(
     async (term: string) => {
@@ -62,7 +77,7 @@ export function CustomFoodSearchDrawer({
 
       setIsSearching(true)
       try {
-        const results = await searchFoods(term)
+        const results = await searchFoodsAPI(term)
         setSearchResults(results || [])
       } catch (error) {
         console.error('Search error:', error)
@@ -102,6 +117,7 @@ export function CustomFoodSearchDrawer({
       // Create SearchResult-like object from barcode lookup
       const foodItem: SearchResult = {
         name: productInfo.product_name || 'Unknown Product',
+        source: 'openfoodfacts',
         caloriesPer100g: nutriments['energy-kcal_100g'] || 0,
         proteinPer100g: nutriments['proteins_100g'] || 0,
         carbsPer100g: nutriments['carbohydrates_100g'] || 0,
