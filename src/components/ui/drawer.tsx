@@ -3,12 +3,110 @@
 import * as React from 'react'
 import { Drawer as DrawerPrimitive } from 'vaul'
 
+import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 
 function Drawer({
+  open,
+  onOpenChange,
+  onClose,
   ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Root>) {
-  return <DrawerPrimitive.Root data-slot="drawer" {...props} />
+}: React.ComponentProps<typeof DrawerPrimitive.Root> & {
+  onClose?: () => void
+}) {
+  const isMobile = useIsMobile()
+  const historyPushedRef = React.useRef(false)
+  const isClosingFromPopstateRef = React.useRef(false)
+  const closeTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+
+  // Create a unified close handler that works with both onOpenChange and onClose patterns
+  const handleDrawerClose = React.useCallback(() => {
+    if (onOpenChange) {
+      onOpenChange(false)
+    } else if (onClose) {
+      onClose()
+    }
+  }, [onOpenChange, onClose])
+
+  // Handle back button behavior on mobile
+  React.useEffect(() => {
+    if (!isMobile) return
+    const handlePopstate = () => {
+      // If drawer is open when popstate fires, close it with animation delay
+      if (open && historyPushedRef.current) {
+        // Prevent default navigation by pushing state back
+        window.history.pushState({ drawerOpen: true }, '')
+
+        // Mark as closing from popstate to prevent cleanup interference
+        isClosingFromPopstateRef.current = true
+
+        // Start closing animation
+        handleDrawerClose()
+
+        // After animation completes, go back in history
+        closeTimeoutRef.current = setTimeout(() => {
+          if (historyPushedRef.current) {
+            historyPushedRef.current = false
+            isClosingFromPopstateRef.current = false
+            window.history.back()
+          }
+          closeTimeoutRef.current = null
+        }, 200) // Allow 200ms for closing animation
+      }
+    }
+
+    if (open && !historyPushedRef.current) {
+      // Push history state when drawer opens
+      window.history.pushState({ drawerOpen: true }, '')
+      historyPushedRef.current = true
+
+      // Add popstate listener
+      window.addEventListener('popstate', handlePopstate)
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handlePopstate)
+      // Clear any pending timeout
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current)
+        closeTimeoutRef.current = null
+      }
+    }
+  }, [isMobile, open, handleDrawerClose])
+
+  // Reset tracking when drawer closes
+  React.useEffect(() => {
+    if (
+      !open &&
+      historyPushedRef.current &&
+      !isClosingFromPopstateRef.current
+    ) {
+      // Reset refs when drawer closes normally (not from back button)
+      historyPushedRef.current = false
+      isClosingFromPopstateRef.current = false
+
+      // Clear any pending timeout
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current)
+        closeTimeoutRef.current = null
+      }
+    }
+  }, [open])
+
+  return (
+    <DrawerPrimitive.Root
+      data-slot="drawer"
+      open={open}
+      onOpenChange={(newOpen) => {
+        if (!newOpen) {
+          handleDrawerClose()
+        } else if (onOpenChange) {
+          onOpenChange(newOpen)
+        }
+      }}
+      {...props}
+    />
+  )
 }
 
 function DrawerTrigger({
