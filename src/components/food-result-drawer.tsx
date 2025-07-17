@@ -30,7 +30,7 @@ export function FoodResultDrawer({
   foodItem,
   onAddToMeal,
 }: FoodResultDrawerProps) {
-  const [quantity, setQuantity] = useState(100) // Default 100g
+  const [quantity, setQuantity] = useState(100)
   const [isAdding, setIsAdding] = useState(false)
 
   const handleAddToMeal = async () => {
@@ -39,10 +39,8 @@ export function FoodResultDrawer({
     setIsAdding(true)
     try {
       await onAddToMeal(foodItem, quantity)
-      // Parent component handles closing all drawers on success
     } catch (error) {
       console.error('Error adding food to meal:', error)
-      // Keep drawer open on error so user can try again
     } finally {
       setIsAdding(false)
     }

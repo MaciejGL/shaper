@@ -2,12 +2,11 @@ import { motion } from 'framer-motion'
 import { PlusIcon, XIcon } from 'lucide-react'
 import { useState } from 'react'
 
+import { MealTotals } from '@/app/(protected)/fitspace/meal-plan/components/meal-card'
 import { SelectedMeal } from '@/app/(protected)/fitspace/meal-plan/components/meal-logging-drawer'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { SearchResult } from '@/lib/food-search'
-
-import { MacroBadge } from './macro-badge'
 
 type FoodSearchResultsProps = {
   searchResults: SearchResult[]
@@ -108,25 +107,13 @@ export function FoodSearchResults({
                   </div>
                   <div className="flex items-center gap-2">
                     <p className="text-xs text-muted-foreground">Per 100g:</p>
-                    <MacroBadge
-                      macro="calories"
-                      size="sm"
-                      value={food.caloriesPer100g || 0}
-                    />
-                    <MacroBadge
-                      macro="protein"
-                      size="sm"
-                      value={food.proteinPer100g || 0}
-                    />
-                    <MacroBadge
-                      macro="carbs"
-                      size="sm"
-                      value={food.carbsPer100g || 0}
-                    />
-                    <MacroBadge
-                      macro="fat"
-                      size="sm"
-                      value={food.fatPer100g || 0}
+                    <MealTotals
+                      plannedTotals={{
+                        calories: food.caloriesPer100g || 0,
+                        protein: food.proteinPer100g || 0,
+                        carbs: food.carbsPer100g || 0,
+                        fat: food.fatPer100g || 0,
+                      }}
                     />
                   </div>
                 </div>

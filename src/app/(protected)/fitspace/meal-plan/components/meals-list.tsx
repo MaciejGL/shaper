@@ -34,7 +34,12 @@ export function MealsList({
 
   const { handleBatchLogMeal, isBatchLoggingFood } = useMealLogging()
 
-  const handleMealClick = (meal: Meal) => {
+  const handleMealClick = (meal?: Meal | null) => {
+    if (!meal) {
+      setSelectedMealId(null)
+      setDrawerOpen(false)
+      return
+    }
     setSelectedMealId(meal.id)
     setDrawerOpen(true)
   }
@@ -96,6 +101,11 @@ export function MealsList({
           isOpen={customFoodDrawerOpen}
           onClose={() => setCustomFoodDrawerOpen(false)}
           mealId={selectedMealId}
+          onShowMeal={() =>
+            handleMealClick(
+              planMeals.find((meal) => meal.id === selectedMealId) || null,
+            )
+          }
           selectedMeal={
             planMeals.find((meal) => meal.id === selectedMealId) || null
           }
