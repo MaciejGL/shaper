@@ -624,3 +624,68 @@ model USDAFood {
   @@index([foodCategory], map: "usda_food_category_idx")
   @@index([fdcId], map: "usda_food_fdc_id_idx")
 }
+
+// OpenFoodFacts local data storage
+model OpenFoodFactsProduct {
+  id              String   @id @default(uuid())
+  code            String   @unique  // Barcode/product code
+  productName     String   // Product name
+  brands          String?  // Brand names (comma separated)
+  categories      String?  // Categories (comma separated)
+  origins         String?  // Origins/countries of ingredients
+  countries       String?  // Countries where sold
+  labels          String?  // Labels (organic, fair trade, etc.)
+  packaging       String?  // Packaging information
+  ingredients     String?  // Ingredients list
+  allergens       String?  // Allergen information
+  traces          String?  // May contain traces of...
+  
+  // Serving information
+  servingSize     String?  // Serving size text
+  servingQuantity Float?   // Serving quantity number
+  
+  // Nutrition data per 100g (matching OpenFoodFacts field names)
+  energyKcal100g      Float?  // energy-kcal_100g
+  proteins100g        Float?  // proteins_100g  
+  carbohydrates100g   Float?  // carbohydrates_100g
+  fat100g             Float?  // fat_100g
+  fiber100g           Float?  // fiber_100g
+  sugars100g          Float?  // sugars_100g
+  salt100g            Float?  // salt_100g (note: OpenFoodFacts uses salt, not sodium)
+  
+  // Additional key nutrients
+  saturatedFat100g    Float?  // saturated-fat_100g
+  sodium100g          Float?  // Calculated from salt (salt_100g * 0.4)
+  
+  // Quality indicators
+  nutriScore          String?  // Nutri-Score grade (A, B, C, D, E)
+  novaGroup           Int?     // NOVA group (1-4)
+  ecoScore            String?  // Eco-Score grade
+  
+  // Data quality
+  completeness        Float?   // Data completeness score
+  lastModified        DateTime? // Last modification date from OpenFoodFacts
+  scansN              Int?     // Number of scans (popularity indicator)
+  uniqueScansN        Int?     // Number of unique scans
+  
+  // Images
+  imageUrl            String?  // Main product image
+  imageFrontUrl       String?  // Front image
+  imageIngredientsUrl String?  // Ingredients image
+  imageNutritionUrl   String?  // Nutrition facts image
+  
+  // Administrative
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  importedAt          DateTime @default(now()) // When this record was imported to our DB
+  
+  @@index([productName], map: "off_product_name_idx")
+  @@index([brands], map: "off_brands_idx") 
+  @@index([categories], map: "off_categories_idx")
+  @@index([countries], map: "off_countries_idx")
+  @@index([code], map: "off_code_idx")
+  @@index([nutriScore], map: "off_nutri_score_idx")
+  @@index([lastModified], map: "off_last_modified_idx")
+  @@index([scansN], map: "off_scans_idx")
+  @@index([completeness], map: "off_completeness_idx")
+}
