@@ -36,11 +36,11 @@ const PARSED_DIR = path.join(DATA_DIR, 'parsed')
 const BATCH_SIZE = 1000
 
 async function clearExistingUSDAData(): Promise<void> {
-  console.log('🗑️  Clearing existing USDA data...')
+  console.info('🗑️  Clearing existing USDA data...')
 
   try {
     const deletedFoods = await prisma.uSDAFood.deleteMany({})
-    console.log(`✅ Cleared ${deletedFoods.count} USDA foods`)
+    console.info(`✅ Cleared ${deletedFoods.count} USDA foods`)
   } catch (error) {
     console.error('❌ Error clearing existing data:', error)
     throw error
@@ -48,7 +48,7 @@ async function clearExistingUSDAData(): Promise<void> {
 }
 
 async function importFoodsInBatches(foods: ParsedFood[]): Promise<void> {
-  console.log(
+  console.info(
     `📥 Importing ${foods.length} foods in batches of ${BATCH_SIZE}...`,
   )
 
@@ -59,7 +59,7 @@ async function importFoodsInBatches(foods: ParsedFood[]): Promise<void> {
     const end = start + BATCH_SIZE
     const batch = foods.slice(start, end)
 
-    console.log(
+    console.info(
       `  📦 Processing batch ${i + 1}/${totalBatches} (${batch.length} foods)`,
     )
 
@@ -94,7 +94,7 @@ async function importFoodsInBatches(foods: ParsedFood[]): Promise<void> {
 
       // Progress indicator
       const progress = (((i + 1) / totalBatches) * 100).toFixed(1)
-      console.log(`  ✅ Batch ${i + 1} completed (${progress}%)`)
+      console.info(`  ✅ Batch ${i + 1} completed (${progress}%)`)
     } catch (error) {
       console.error(`❌ Error importing batch ${i + 1}:`, error)
       throw error
@@ -106,17 +106,30 @@ async function loadParsedData(): Promise<ParsedFood[]> {
   const combinedPath = path.join(PARSED_DIR, 'combined_foods.json')
 
   try {
-    console.log(`📂 Loading parsed data from ${combinedPath}...`)
     const fileContent = await fs.readFile(combinedPath, 'utf-8')
     const data = JSON.parse(fileContent) as ParsedFood[]
 
-    console.log(`✅ Loaded ${data.length} foods from parsed data`)
-    return data
+    // Filter to only include foods with meaningful nutrition data
+    const filteredData = data.filter((food) => {
+      // Keep foods that have at least calories or basic macronutrients
+      return (
+        food.caloriesPer100g != null &&
+        food.proteinPer100g != null &&
+        food.carbsPer100g != null &&
+        food.fatPer100g != null
+      )
+    })
+
+    console.info(
+      `🔍 Filtered to ${filteredData.length} foods with nutrition data`,
+    )
+    console.info(
+      `   📊 Removed ${data.length - filteredData.length} foods without nutrition data`,
+    )
+
+    return filteredData
   } catch (error) {
     console.error(`❌ Error loading parsed data from ${combinedPath}:`, error)
-
-    // Try to load individual files if combined file doesn't exist
-    console.log('🔄 Attempting to load individual dataset files...')
 
     const foundationPath = path.join(PARSED_DIR, 'foundation_foods.json')
     const srLegacyPath = path.join(PARSED_DIR, 'sr_legacy.json')
@@ -127,7 +140,6 @@ async function loadParsedData(): Promise<ParsedFood[]> {
       const foundationContent = await fs.readFile(foundationPath, 'utf-8')
       const foundationData = JSON.parse(foundationContent) as ParsedFood[]
       allFoods.push(...foundationData)
-      console.log(`✅ Loaded ${foundationData.length} Foundation Foods`)
     } catch (error) {
       console.warn('⚠️  Foundation Foods file not found:', foundationPath)
     }
@@ -136,7 +148,6 @@ async function loadParsedData(): Promise<ParsedFood[]> {
       const srLegacyContent = await fs.readFile(srLegacyPath, 'utf-8')
       const srLegacyData = JSON.parse(srLegacyContent) as ParsedFood[]
       allFoods.push(...srLegacyData)
-      console.log(`✅ Loaded ${srLegacyData.length} SR Legacy Foods`)
     } catch (error) {
       console.warn('⚠️  SR Legacy file not found:', srLegacyPath)
     }
@@ -147,30 +158,74 @@ async function loadParsedData(): Promise<ParsedFood[]> {
       )
     }
 
-    return allFoods
+    // Filter to only include foods with meaningful nutrition data
+    const filteredFoods = allFoods.filter((food) => {
+      // Keep foods that have at least calories or basic macronutrients
+      return (
+        food.caloriesPer100g != null ||
+        food.proteinPer100g != null ||
+        food.carbsPer100g != null ||
+        food.fatPer100g != null
+      )
+    })
+
+    console.info(
+      `🔍 Filtered to ${filteredFoods.length} foods with nutrition data`,
+    )
+    console.info(
+      `   📊 Removed ${allFoods.length - filteredFoods.length} foods without nutrition data`,
+    )
+
+    return filteredFoods
   }
 }
 
 async function verifyImport(): Promise<void> {
-  console.log('\n🔍 Verifying import...')
-
   try {
     const foodCount = await prisma.uSDAFood.count()
 
-    console.log(`✅ Successfully imported:`)
-    console.log(`   📊 ${foodCount.toLocaleString()} USDA foods`)
+    // Get breakdown by data type
+    const srLegacyCount = await prisma.uSDAFood.count({
+      where: { dataType: 'sr_legacy_food' },
+    })
+    const foundationCount = await prisma.uSDAFood.count({
+      where: { dataType: 'foundation_food' },
+    })
+
+    // Count foods with complete nutrition profiles
+    const withCaloriesCount = await prisma.uSDAFood.count({
+      where: { caloriesPer100g: { not: null } },
+    })
+
+    console.info(`✅ Successfully imported:`)
+    console.info(
+      `   📊 ${foodCount.toLocaleString()} USDA foods with nutrition data`,
+    )
+    console.info(
+      `   🥗 ${srLegacyCount.toLocaleString()} SR Legacy foods (complete nutrition)`,
+    )
+    console.info(
+      `   🧪 ${foundationCount.toLocaleString()} Foundation foods (experimental data)`,
+    )
+    console.info(
+      `   🔥 ${withCaloriesCount.toLocaleString()} foods with calorie information`,
+    )
 
     // Test search functionality
     const sampleFoods = await prisma.uSDAFood.findMany({
       take: 5,
       orderBy: { fdcId: 'asc' },
+      where: { caloriesPer100g: { not: null } },
     })
 
-    console.log('\n📄 Sample imported foods:')
+    console.info('\n📄 Sample imported foods with nutrition data:')
     sampleFoods.forEach((food) => {
-      console.log(`   • ${food.description} (FDC ID: ${food.fdcId})`)
-      console.log(`     Calories: ${food.caloriesPer100g}kcal/100g`)
-      console.log(`     Data Type: ${food.dataType}`)
+      console.info(`   • ${food.description} (FDC ID: ${food.fdcId})`)
+      console.info(`     Calories: ${food.caloriesPer100g}kcal/100g`)
+      console.info(
+        `     Protein: ${food.proteinPer100g}g, Carbs: ${food.carbsPer100g}g, Fat: ${food.fatPer100g}g`,
+      )
+      console.info(`     Data Type: ${food.dataType}`)
     })
   } catch (error) {
     console.error('❌ Error verifying import:', error)
@@ -179,7 +234,7 @@ async function verifyImport(): Promise<void> {
 }
 
 async function main(): Promise<void> {
-  console.log('🚀 Starting USDA data import to PostgreSQL...')
+  console.info('🚀 Starting USDA data import to PostgreSQL...')
 
   try {
     // Load the parsed data
@@ -201,11 +256,11 @@ async function main(): Promise<void> {
     // Verify the import
     await verifyImport()
 
-    console.log('\n✅ USDA data import completed successfully!')
-    console.log('\nNext steps:')
-    console.log('1. Update the food search service to query local USDA data')
-    console.log('2. Test search performance with the new local data')
-    console.log('3. Update the UI to show data source indicators')
+    console.info('\n✅ USDA data import completed successfully!')
+    console.info('\nNext steps:')
+    console.info('1. Update the food search service to query local USDA data')
+    console.info('2. Test search performance with the new local data')
+    console.info('3. Update the UI to show data source indicators')
   } catch (error) {
     console.error('\n❌ Import failed:', error)
     process.exit(1)

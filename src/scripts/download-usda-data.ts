@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { createWriteStream } from 'fs'
 import path from 'path'
+import { Readable } from 'stream'
 import { pipeline } from 'stream/promises'
 import { Extract } from 'unzipper'
 
@@ -29,12 +30,12 @@ async function ensureDirectoryExists(dir: string) {
     await fs.access(dir)
   } catch {
     await fs.mkdir(dir, { recursive: true })
-    console.log(`Created directory: ${dir}`)
+    console.info(`Created directory: ${dir}`)
   }
 }
 
 async function downloadFile(url: string, outputPath: string): Promise<void> {
-  console.log(`Downloading: ${url}`)
+  console.info(`Downloading: ${url}`)
 
   const response = await fetch(url)
   if (!response.ok) {
@@ -47,15 +48,16 @@ async function downloadFile(url: string, outputPath: string): Promise<void> {
     throw new Error('Response body is null')
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await pipeline(response.body as any, fileStream)
-  console.log(`Downloaded: ${outputPath}`)
+  console.info(`Downloaded: ${outputPath}`)
 }
 
 async function extractZipFile(
   zipPath: string,
   extractTo: string,
 ): Promise<void> {
-  console.log(`Extracting: ${zipPath} to ${extractTo}`)
+  console.info(`Extracting: ${zipPath} to ${extractTo}`)
 
   const zip = await fs.readFile(zipPath)
 
@@ -63,15 +65,14 @@ async function extractZipFile(
     const extract = Extract({ path: extractTo })
 
     extract.on('close', () => {
-      console.log(`Extracted: ${zipPath}`)
+      console.info(`Extracted: ${zipPath}`)
       resolve()
     })
 
     extract.on('error', reject)
 
     // Create a readable stream from the zip buffer
-    const stream = require('stream')
-    const readable = new stream.Readable()
+    const readable = new Readable()
     readable.push(zip)
     readable.push(null)
 
@@ -91,7 +92,7 @@ async function downloadAndExtractDataset(
   // Check if already downloaded
   try {
     await fs.access(downloadPath)
-    console.log(`File already exists: ${downloadPath}`)
+    console.info(`File already exists: ${downloadPath}`)
   } catch {
     // Download if doesn't exist
     await downloadFile(dataset.url, downloadPath)
@@ -100,7 +101,7 @@ async function downloadAndExtractDataset(
   // Check if already extracted
   try {
     await fs.access(extractPath)
-    console.log(`Already extracted: ${extractPath}`)
+    console.info(`Already extracted: ${extractPath}`)
   } catch {
     // Extract if doesn't exist
     await ensureDirectoryExists(extractPath)
@@ -109,7 +110,7 @@ async function downloadAndExtractDataset(
 }
 
 async function downloadUSDAData(): Promise<void> {
-  console.log('🥬 Starting USDA FoodData Central bulk data download...\n')
+  console.info('🥬 Starting USDA FoodData Central bulk data download...\n')
 
   try {
     // Ensure directories exist
@@ -117,16 +118,16 @@ async function downloadUSDAData(): Promise<void> {
     await ensureDirectoryExists(EXTRACTED_DIR)
 
     // Download and extract each dataset
-    for (const [key, dataset] of Object.entries(DATASETS)) {
-      console.log(`\n📦 Processing ${dataset.name}...`)
+    for (const dataset of Object.values(DATASETS)) {
+      console.info(`\n📦 Processing ${dataset.name}...`)
       await downloadAndExtractDataset(dataset)
     }
 
-    console.log('\n✅ USDA data download and extraction completed!')
-    console.log(`\nData location: ${DATA_DIR}`)
-    console.log('Next steps:')
-    console.log('1. Run the data parser script to process CSV files')
-    console.log(
+    console.info('\n✅ USDA data download and extraction completed!')
+    console.info(`\nData location: ${DATA_DIR}`)
+    console.info('Next steps:')
+    console.info('1. Run the data parser script to process CSV files')
+    console.info(
       '2. Run the database import script to load data into PostgreSQL',
     )
   } catch (error) {

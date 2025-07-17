@@ -106,6 +106,30 @@ async function parseCSV<T>(filePath: string): Promise<T[]> {
   })
 }
 
+async function walkDirectory(dirPath: string): Promise<string[]> {
+  const files: string[] = []
+
+  try {
+    const entries = await fs.readdir(dirPath, { withFileTypes: true })
+
+    for (const entry of entries) {
+      const fullPath = path.join(dirPath, entry.name)
+
+      if (entry.isDirectory()) {
+        // Recursively walk subdirectories
+        const subFiles = await walkDirectory(fullPath)
+        files.push(...subFiles)
+      } else if (entry.isFile()) {
+        files.push(fullPath)
+      }
+    }
+  } catch (error) {
+    // Directory doesn't exist or can't be read
+  }
+
+  return files
+}
+
 async function findDatasetFiles(): Promise<{
   foundationFoods: string[]
   srLegacy: string[]
@@ -117,21 +141,19 @@ async function findDatasetFiles(): Promise<{
   let srLegacy: string[] = []
 
   try {
-    const foundationContents = await fs.readdir(foundationDir, {
-      recursive: true,
-    })
-    foundationFoods = foundationContents
-      .filter((file) => typeof file === 'string')
-      .map((file) => path.join(foundationDir, file))
+    console.info(
+      `🔍 Searching for Foundation Foods CSV files in ${foundationDir}...`,
+    )
+    foundationFoods = await walkDirectory(foundationDir)
+    console.info(`✅ Found ${foundationFoods.length} foundation files`)
   } catch (error) {
     console.warn('Foundation Foods directory not found:', error)
   }
 
   try {
-    const srContents = await fs.readdir(srLegacyDir, { recursive: true })
-    srLegacy = srContents
-      .filter((file) => typeof file === 'string')
-      .map((file) => path.join(srLegacyDir, file))
+    console.info(`🔍 Searching for SR Legacy CSV files in ${srLegacyDir}...`)
+    srLegacy = await walkDirectory(srLegacyDir)
+    console.info(`✅ Found ${srLegacy.length} SR Legacy files`)
   } catch (error) {
     console.warn('SR Legacy directory not found:', error)
   }
@@ -143,16 +165,17 @@ async function parseDataset(
   datasetFiles: string[],
   datasetName: string,
 ): Promise<ParsedFood[]> {
-  console.log(`\n📊 Parsing ${datasetName} dataset...`)
+  console.info(`\n📊 Parsing ${datasetName} dataset...`)
 
   // Find the required CSV files
   const foodFile = datasetFiles.find((file) => file.endsWith('food.csv'))
   const foodNutrientFile = datasetFiles.find((file) =>
     file.endsWith('food_nutrient.csv'),
   )
-  const nutrientFile = datasetFiles.find((file) =>
-    file.endsWith('nutrient.csv'),
-  )
+  const nutrientFile = datasetFiles.find((file) => {
+    const filename = path.basename(file)
+    return filename === 'nutrient.csv'
+  })
 
   if (!foodFile || !foodNutrientFile || !nutrientFile) {
     console.error(`❌ Missing required files for ${datasetName}:`)
@@ -162,16 +185,18 @@ async function parseDataset(
     return []
   }
 
-  console.log(`📄 Parsing ${path.basename(foodFile)}...`)
+  console.info(`📄 Parsing ${path.basename(foodFile)} (${foodFile})...`)
   const foods = await parseCSV<RawFood>(foodFile)
 
-  console.log(`📄 Parsing ${path.basename(nutrientFile)}...`)
+  console.info(`📄 Parsing ${path.basename(nutrientFile)} (${nutrientFile})...`)
   const nutrients = await parseCSV<RawNutrient>(nutrientFile)
 
-  console.log(`📄 Parsing ${path.basename(foodNutrientFile)}...`)
+  console.info(
+    `📄 Parsing ${path.basename(foodNutrientFile)} (${foodNutrientFile})...`,
+  )
   const foodNutrients = await parseCSV<RawFoodNutrient>(foodNutrientFile)
 
-  console.log(
+  console.info(
     `✅ Parsed ${foods.length} foods, ${nutrients.length} nutrients, ${foodNutrients.length} food-nutrient relationships`,
   )
 
@@ -239,20 +264,21 @@ async function parseDataset(
     parsedFoods.push(parsedFood)
   }
 
-  console.log(`✅ Processed ${parsedFoods.length} foods from ${datasetName}`)
+  console.info(`✅ Processed ${parsedFoods.length} foods from ${datasetName}`)
   return parsedFoods
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function saveJsonFile(filePath: string, data: any): Promise<void> {
   await fs.writeFile(filePath, JSON.stringify(data, null, 2))
   const stats = await fs.stat(filePath)
-  console.log(
+  console.info(
     `💾 Saved ${filePath} (${(stats.size / 1024 / 1024).toFixed(2)} MB)`,
   )
 }
 
 async function main(): Promise<void> {
-  console.log('🚀 Starting USDA data parsing...')
+  console.info('🚀 Starting USDA data parsing...')
 
   try {
     await ensureDirectoryExists(PARSED_DIR)
@@ -309,14 +335,14 @@ async function main(): Promise<void> {
       const summaryPath = path.join(PARSED_DIR, 'parsing_summary.json')
       await saveJsonFile(summaryPath, summary)
 
-      console.log('\n✅ Data parsing completed successfully!')
-      console.log(`📊 Total foods processed: ${summary.totalFoods}`)
-      console.log(`📁 Files saved in: ${PARSED_DIR}`)
-      console.log('\nNext steps:')
-      console.log(
+      console.info('\n✅ Data parsing completed successfully!')
+      console.info(`📊 Total foods processed: ${summary.totalFoods}`)
+      console.info(`📁 Files saved in: ${PARSED_DIR}`)
+      console.info('\nNext steps:')
+      console.info(
         '1. Run the database import script to load data into PostgreSQL',
       )
-      console.log('2. Update the food search service to query local USDA data')
+      console.info('2. Update the food search service to query local USDA data')
     } else {
       console.error('❌ No data was parsed. Please check the extracted files.')
     }
