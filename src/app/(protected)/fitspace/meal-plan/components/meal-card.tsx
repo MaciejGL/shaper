@@ -109,7 +109,7 @@ export function MealCard({
     isCompletingMeal,
     isUncompletingMeal,
   } = useMealLogging()
-  const [removingFoodId, setRemovingFoodId] = useState<string | null>(null)
+  const [removingFoodIds, setRemovingFoodIds] = useState<Set<string>>(new Set())
   const [optimisticCompletedState, setOptimisticCompletedState] = useState<
     boolean | null
   >(null)
@@ -233,15 +233,19 @@ export function MealCard({
                 size="icon-xs"
                 className="text-muted-foreground"
                 iconOnly={<XIcon />}
-                loading={removingFoodId === food.id}
+                loading={removingFoodIds.has(food.id)}
                 onClick={async () => {
                   try {
-                    setRemovingFoodId(food.id)
+                    setRemovingFoodIds((prev) => new Set([...prev, food.id]))
                     await handleRemoveLogItem(food.id)
                   } catch (error) {
                     console.error(error)
                   } finally {
-                    setRemovingFoodId(null)
+                    setRemovingFoodIds((prev) => {
+                      const newSet = new Set(prev)
+                      newSet.delete(food.id)
+                      return newSet
+                    })
                   }
                 }}
               />
