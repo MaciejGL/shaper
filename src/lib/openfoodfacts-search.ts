@@ -152,19 +152,19 @@ export class OpenFoodFactsSearchService {
                 {
                   productName: {
                     contains: query,
-                    mode: 'insensitive',
+                    mode: 'insensitive' as const,
                   },
                 },
                 {
                   brands: {
                     contains: query,
-                    mode: 'insensitive',
+                    mode: 'insensitive' as const,
                   },
                 },
                 {
                   categories: {
                     contains: query,
-                    mode: 'insensitive',
+                    mode: 'insensitive' as const,
                   },
                 },
               ],
@@ -218,6 +218,7 @@ export class OpenFoodFactsSearchService {
     limit = 20,
   ): Promise<OpenFoodFactsSearchResult[]> {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const whereClause: any = {
         AND: [
           // Category filter
@@ -328,6 +329,7 @@ export class OpenFoodFactsSearchService {
     limit = 20,
   ): Promise<OpenFoodFactsSearchResult[]> {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const whereClause: any = {
         scansN: { not: null, gt: 0 },
         // Only include products with nutrition data

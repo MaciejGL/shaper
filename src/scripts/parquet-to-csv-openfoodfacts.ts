@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Direct Parquet to CSV conversion for OpenFoodFacts data
 // Skips JSON intermediate step for better performance and memory usage
 import { randomUUID } from 'crypto'

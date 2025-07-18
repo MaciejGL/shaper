@@ -196,6 +196,7 @@ function parseNutrientValue(value: string | undefined): number | undefined {
   return isNaN(num) ? undefined : num
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function escapeCSVValue(value: any): string {
   if (value === null || value === undefined) return ''
 

@@ -41,7 +41,7 @@ async function downloadFile(url: string, outputPath: string): Promise<void> {
 
           file.on('finish', () => {
             file.close()
-            console.log('\n✅ Download completed successfully')
+            console.info('\n✅ Download completed successfully')
             resolve()
           })
 
@@ -53,7 +53,7 @@ async function downloadFile(url: string, outputPath: string): Promise<void> {
           // Handle redirects
           const redirectUrl = response.headers.location
           if (redirectUrl) {
-            console.log(`Following redirect to: ${redirectUrl}`)
+            console.info(`Following redirect to: ${redirectUrl}`)
             downloadFile(redirectUrl, outputPath).then(resolve).catch(reject)
           } else {
             reject(new Error('Redirect without location header'))
@@ -76,7 +76,7 @@ async function ensureDataDirectory(): Promise<void> {
   try {
     await fs.access(DOWNLOADS_DIR)
   } catch {
-    console.log('📁 Creating data directories...')
+    console.info('📁 Creating data directories...')
     await fs.mkdir(DOWNLOADS_DIR, { recursive: true })
   }
 }
@@ -91,7 +91,7 @@ async function checkFileSize(filePath: string): Promise<number> {
 }
 
 export async function downloadOpenFoodFactsData(): Promise<void> {
-  console.log('🚀 Starting OpenFoodFacts data download...')
+  console.info('🚀 Starting OpenFoodFacts data download...')
 
   try {
     await ensureDataDirectory()
@@ -99,7 +99,7 @@ export async function downloadOpenFoodFactsData(): Promise<void> {
     // Check if file already exists
     const existingSize = await checkFileSize(PARQUET_FILE_PATH)
     if (existingSize > 0) {
-      console.log(
+      console.info(
         `📦 Existing file found (${(existingSize / 1024 / 1024).toFixed(1)} MB)`,
       )
 
@@ -126,25 +126,25 @@ export async function downloadOpenFoodFactsData(): Promise<void> {
         })
 
         if (choice !== 'yes' && choice !== 'y') {
-          console.log('✅ Using existing file')
+          console.info('✅ Using existing file')
           return
         }
       } else {
         // Non-interactive mode (API) or force flag - automatically re-download
-        console.log(
+        console.info(
           '🔄 Non-interactive mode detected - automatically re-downloading...',
         )
       }
     }
 
-    console.log('📥 Downloading OpenFoodFacts parquet file...')
-    console.log(`🔗 URL: ${OPENFOODFACTS_URL}`)
+    console.info('📥 Downloading OpenFoodFacts parquet file...')
+    console.info(`🔗 URL: ${OPENFOODFACTS_URL}`)
 
     await downloadFile(OPENFOODFACTS_URL, PARQUET_FILE_PATH)
 
     // Verify the downloaded file
     const finalSize = await checkFileSize(PARQUET_FILE_PATH)
-    console.log(
+    console.info(
       `📊 Final file size: ${(finalSize / 1024 / 1024).toFixed(1)} MB`,
     )
 
@@ -152,8 +152,8 @@ export async function downloadOpenFoodFactsData(): Promise<void> {
       throw new Error('Downloaded file is empty')
     }
 
-    console.log('✅ OpenFoodFacts data downloaded successfully!')
-    console.log(`📁 File saved to: ${PARQUET_FILE_PATH}`)
+    console.info('✅ OpenFoodFacts data downloaded successfully!')
+    console.info(`📁 File saved to: ${PARQUET_FILE_PATH}`)
   } catch (error) {
     console.error('❌ Error downloading OpenFoodFacts data:', error)
     throw error
@@ -164,7 +164,7 @@ export async function downloadOpenFoodFactsData(): Promise<void> {
 if (require.main === module) {
   downloadOpenFoodFactsData()
     .then(() => {
-      console.log('🎉 Download process completed!')
+      console.info('🎉 Download process completed!')
       process.exit(0)
     })
     .catch((error) => {

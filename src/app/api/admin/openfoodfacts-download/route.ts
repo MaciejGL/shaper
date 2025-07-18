@@ -58,7 +58,7 @@ function runDownloadProcessWithProgress() {
     // Parse stdout for progress updates
     scriptProcess.stdout.on('data', (data) => {
       const output = data.toString()
-      console.log('Download stdout:', output)
+      console.info('Download stdout:', output)
 
       // Parse download progress from the script output
       // Format: "Downloading: 25.3% (1024.5/4014.1 MB)"
@@ -118,7 +118,7 @@ function runDownloadProcessWithProgress() {
 
     // Handle process completion
     scriptProcess.on('close', (code) => {
-      console.log(`Download process exited with code ${code}`)
+      console.info(`Download process exited with code ${code}`)
 
       if (code !== 0) {
         updateImportStatus({

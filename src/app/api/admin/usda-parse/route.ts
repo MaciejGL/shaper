@@ -59,7 +59,7 @@ function runCSVConversionProcessWithProgress() {
     // Parse stdout for progress updates
     scriptProcess.stdout.on('data', (data) => {
       const output = data.toString()
-      console.log('USDA CSV stdout:', output)
+      console.info('USDA CSV stdout:', output)
 
       // Look for dataset processing progress
       if (output.includes('Processing') && output.includes('dataset')) {
@@ -190,7 +190,7 @@ function runCSVConversionProcessWithProgress() {
 
     // Handle process completion
     scriptProcess.on('close', (code) => {
-      console.log(`USDA CSV process exited with code ${code}`)
+      console.info(`USDA CSV process exited with code ${code}`)
 
       if (code !== 0) {
         updateImportStatus({
