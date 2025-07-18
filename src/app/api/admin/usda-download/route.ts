@@ -4,7 +4,7 @@ import { promisify } from 'util'
 
 import { requireAdminUser } from '@/lib/admin-auth'
 
-import { updateImportStatus } from '../usda-import-status/route'
+import { updateImportStatus } from '../usda-import-status/utils'
 
 const execAsync = promisify(exec)
 

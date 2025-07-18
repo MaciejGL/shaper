@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 
 import { requireAdminUser } from '@/lib/admin-auth'
 
-import { updateImportStatus } from '../usda-import-status/route'
+import { updateImportStatus } from '../usda-import-status/utils'
 
 export async function POST() {
   try {
