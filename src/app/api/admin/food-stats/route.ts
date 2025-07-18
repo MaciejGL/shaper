@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
+import { openFoodFactsSearchService } from '@/lib/openfoodfacts-search'
 
 export async function GET() {
   try {
@@ -22,13 +23,22 @@ export async function GET() {
       select: { createdAt: true },
     })
 
-    // Get OpenFoodFacts cache statistics
-    const totalOpenFoodFacts = await prisma.foodProduct.count()
+    // Get OpenFoodFacts cache statistics (old API cache)
+    const totalCachedOpenFoodFacts = await prisma.foodProduct.count()
 
     const lastCachedOpenFoodFacts = await prisma.foodProduct.findFirst({
       orderBy: { lastUpdated: 'desc' },
       select: { lastUpdated: true },
     })
+
+    // Get local OpenFoodFacts bulk data statistics
+    const openFoodFactsStats = await openFoodFactsSearchService.getStats()
+
+    const lastImportedOpenFoodFacts =
+      await prisma.openFoodFactsProduct.findFirst({
+        orderBy: { importedAt: 'desc' },
+        select: { importedAt: true },
+      })
 
     // Process data types
     const dataTypes = {
@@ -61,7 +71,17 @@ export async function GET() {
         dataTypes,
       },
       openFoodFacts: {
-        cachedProducts: totalOpenFoodFacts,
+        // Local bulk data statistics
+        totalProducts: openFoodFactsStats.total,
+        withNutrition: openFoodFactsStats.withNutrition,
+        withImages: openFoodFactsStats.withImages,
+        withNutriScore: openFoodFactsStats.withNutriScore,
+        completionRate: openFoodFactsStats.completionRate,
+        avgCompleteness: openFoodFactsStats.avgCompleteness,
+        lastImported:
+          lastImportedOpenFoodFacts?.importedAt?.toISOString() || null,
+        // Legacy API cache data
+        cachedProducts: totalCachedOpenFoodFacts,
         lastCached: lastCachedOpenFoodFacts?.lastUpdated?.toISOString() || null,
       },
     }

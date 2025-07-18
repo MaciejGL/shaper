@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server'
 
-import type { OpenFoodFactsProduct, SearchResult } from '@/lib/food-search'
+import type { SearchResult } from '@/lib/food-search'
 import { getCurrentUser } from '@/lib/getUser'
-import { openFoodFactsClient } from '@/lib/open-food-facts/client'
+import {
+  type OpenFoodFactsSearchResult,
+  openFoodFactsSearchService,
+} from '@/lib/openfoodfacts-search'
 import {
   FoodSearchCacheKeys,
   FoodSearchCacheTTL,
@@ -34,25 +37,23 @@ function convertUSDAToSearchResult(usda: USDASearchResult): SearchResult {
 }
 
 /**
- * Convert OpenFoodFacts product to SearchResult format
+ * Convert local OpenFoodFacts search result to SearchResult format
  */
 function convertOpenFoodFactsToSearchResult(
-  product: OpenFoodFactsProduct,
+  product: OpenFoodFactsSearchResult,
 ): SearchResult {
   return {
-    name: product.product_name,
+    name: product.name,
     source: 'openfoodfacts',
     openFoodFactsId: product.code,
     brands: product.brands,
-    caloriesPer100g: Number(product.nutriments?.['energy-kcal_100g']) || 0,
-    proteinPer100g: Number(product.nutriments?.proteins_100g) || 0,
-    carbsPer100g: Number(product.nutriments?.carbohydrates_100g) || 0,
-    fatPer100g: Number(product.nutriments?.fat_100g) || 0,
-    fiberPer100g: Number(product.nutriments?.fiber_100g) || 0,
-    servingQuantity: product.serving_quantity
-      ? Number(product.serving_quantity)
-      : undefined,
-    servingSize: product.serving_size || undefined,
+    caloriesPer100g: product.caloriesPer100g || 0,
+    proteinPer100g: product.proteinPer100g || 0,
+    carbsPer100g: product.carbsPer100g || 0,
+    fatPer100g: product.fatPer100g || 0,
+    fiberPer100g: product.fiberPer100g || 0,
+    servingQuantity: product.servingQuantity,
+    servingSize: product.servingSize,
   }
 }
 
@@ -84,8 +85,8 @@ export async function GET(request: Request) {
         return NextResponse.json({ product: cachedProduct })
       }
 
-      // Cache miss - fetch from API
-      const product = await openFoodFactsClient.getProduct(barcode)
+      // Cache miss - search local database
+      const product = await openFoodFactsSearchService.getProductByCode(barcode)
 
       if (product) {
         // Cache the result for future requests
@@ -108,10 +109,10 @@ export async function GET(request: Request) {
 
       // Cache miss - perform hybrid search
       const [usdaResults, openFoodFactsResults] = await Promise.allSettled([
-        // Search USDA database (server-side, can use Prisma)
+        // Search USDA database (local)
         usdaSearchService.searchFoods(query, 10),
-        // Search OpenFoodFacts API
-        openFoodFactsClient.searchProducts(query),
+        // Search OpenFoodFacts database (local)
+        openFoodFactsSearchService.searchProducts(query, 10),
       ])
 
       // Convert and combine results with USDA prioritized
