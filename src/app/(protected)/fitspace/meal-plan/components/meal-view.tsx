@@ -75,7 +75,7 @@ export function MealView() {
       >
         {isShowingActivePlan && activePlan && defaultPlan ? (
           // Show tabs when user has active plan
-          <Tabs defaultValue="plan" className="w-full pb-32">
+          <Tabs defaultValue="plan" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="plan" className="flex items-center gap-2">
                 <Calendar className="size-4" />
@@ -87,7 +87,7 @@ export function MealView() {
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="plan" className="mt-6">
+            <TabsContent value="plan" className="mt-6 pb-[190px]">
               {/* Show structured meal plan - no custom food additions */}
               <MealsList
                 planMeals={activeDay.meals || []}
@@ -95,7 +95,7 @@ export function MealView() {
               />
             </TabsContent>
 
-            <TabsContent value="custom" className="mt-6">
+            <TabsContent value="custom" className="mt-6 pb-[190px]">
               {/* Show default plan meals where user can add custom foods */}
               <MealsList
                 planMeals={defaultPlanDay?.meals || []}
@@ -105,7 +105,7 @@ export function MealView() {
           </Tabs>
         ) : (
           // Show single plan (default plan) when no active plan
-          <div className="pr-1">
+          <div className="pr-1 pb-[190px]">
             {/* Show meals from current plan based on date logic */}
             <MealsList
               planMeals={activeDay.meals || []}

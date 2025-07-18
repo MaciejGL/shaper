@@ -111,8 +111,8 @@ export async function GET(request: Request) {
       const [usdaResults, openFoodFactsResults] = await Promise.allSettled([
         // Search USDA database (local)
         usdaSearchService.searchFoods(query, 10),
-        // Search OpenFoodFacts database (local)
-        openFoodFactsSearchService.searchProducts(query, 10),
+        // Search OpenFoodFacts database (local) with country preference
+        openFoodFactsSearchService.searchProducts(query, 10, 'Norway'),
       ])
 
       // Convert and combine results with USDA prioritized

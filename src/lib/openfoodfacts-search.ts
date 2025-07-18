@@ -134,16 +134,19 @@ export class OpenFoodFactsSearchService {
    * Search OpenFoodFacts products in local database with intelligent filtering and ordering
    * @param query - Search term (minimum 2 characters)
    * @param limit - Maximum number of results (default: 10)
+   * @param country - Preferred country for results (default: 'Norway')
    * @returns Promise<OpenFoodFactsSearchResult[]> - Array of matching products
    */
   async searchProducts(
     query: string,
     limit = 10,
+    country = 'Norway',
   ): Promise<OpenFoodFactsSearchResult[]> {
     if (query.length < 2) return []
 
     try {
-      const products = await prisma.openFoodFactsProduct.findMany({
+      // First try: Search with country preference
+      let products = await prisma.openFoodFactsProduct.findMany({
         where: {
           AND: [
             // Search terms filter
@@ -169,6 +172,13 @@ export class OpenFoodFactsSearchService {
                 },
               ],
             },
+            // Country preference filter
+            {
+              countries: {
+                contains: country,
+                mode: 'insensitive' as const,
+              },
+            },
             // Nutrition data filter
             getNutritionDataFilter(),
           ],
@@ -176,6 +186,54 @@ export class OpenFoodFactsSearchService {
         take: limit,
         orderBy: getSearchOrdering(),
       })
+
+      // If we don't get enough results with country filter, expand search globally
+      if (products.length < Math.min(5, limit)) {
+        const globalProducts = await prisma.openFoodFactsProduct.findMany({
+          where: {
+            AND: [
+              // Search terms filter (same as above)
+              {
+                OR: [
+                  {
+                    productName: {
+                      contains: query,
+                      mode: 'insensitive' as const,
+                    },
+                  },
+                  {
+                    brands: {
+                      contains: query,
+                      mode: 'insensitive' as const,
+                    },
+                  },
+                  {
+                    categories: {
+                      contains: query,
+                      mode: 'insensitive' as const,
+                    },
+                  },
+                ],
+              },
+              // Exclude products we already have
+              products.length > 0
+                ? {
+                    id: {
+                      notIn: products.map((p) => p.id),
+                    },
+                  }
+                : {},
+              // Nutrition data filter
+              getNutritionDataFilter(),
+            ],
+          },
+          take: limit - products.length,
+          orderBy: getSearchOrdering(),
+        })
+
+        // Combine results: country-specific first, then global
+        products = [...products, ...globalProducts]
+      }
 
       return products.map(transformOpenFoodFactsProductToResult)
     } catch (error) {
@@ -210,12 +268,14 @@ export class OpenFoodFactsSearchService {
    * @param category - Category name to search within
    * @param additionalQuery - Optional additional search term
    * @param limit - Maximum number of results (default: 20)
+   * @param country - Preferred country for results (default: 'Norway')
    * @returns Promise<OpenFoodFactsSearchResult[]> - Array of matching products
    */
   async searchByCategory(
     category: string,
     additionalQuery?: string,
     limit = 20,
+    country = 'Norway',
   ): Promise<OpenFoodFactsSearchResult[]> {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -225,6 +285,13 @@ export class OpenFoodFactsSearchService {
           {
             categories: {
               contains: category,
+              mode: 'insensitive',
+            },
+          },
+          // Country preference filter
+          {
+            countries: {
+              contains: country,
               mode: 'insensitive',
             },
           },
@@ -322,16 +389,23 @@ export class OpenFoodFactsSearchService {
    * Get popular products (based on scan count) with optional category filter
    * @param category - Optional category filter
    * @param limit - Maximum number of results (default: 20)
+   * @param country - Preferred country for results (default: 'Norway')
    * @returns Promise<OpenFoodFactsSearchResult[]> - Array of popular products
    */
   async getPopularProducts(
     category?: string,
     limit = 20,
+    country = 'Norway',
   ): Promise<OpenFoodFactsSearchResult[]> {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const whereClause: any = {
         scansN: { not: null, gt: 0 },
+        // Country preference filter
+        countries: {
+          contains: country,
+          mode: 'insensitive',
+        },
         // Only include products with nutrition data
         ...getNutritionDataFilter(),
       }

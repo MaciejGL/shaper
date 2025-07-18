@@ -172,7 +172,7 @@ export function AddFoodDrawer({
 
           {foods.length === 0 && (
             <div className="text-center text-muted-foreground py-8">
-              Search for foods to add to this meal
+              No foods added yet
             </div>
           )}
         </div>

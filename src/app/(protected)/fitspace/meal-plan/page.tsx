@@ -45,8 +45,12 @@ export default function MealPlanPage() {
   const defaultPlan = defaultPlanData?.getDefaultMealPlan
 
   return (
-    <MealPlanProvider activePlan={activePlan} defaultPlan={defaultPlan}>
-      <div className="flex flex-col h-full w-full">
+    <MealPlanProvider
+      activePlan={activePlan}
+      defaultPlan={defaultPlan}
+      isLoading={isLoading}
+    >
+      <div className="flex flex-col h-full w-full pb-32">
         <Navigation />
 
         <div className="pt-4 w-full max-w-sm mx-auto grow h-full">

@@ -52,7 +52,7 @@ export function CustomFoodSearchDrawer({
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [isLookingUpBarcode, setIsLookingUpBarcode] = useState(false)
   const [scannedFood, setScannedFood] = useState<SearchResult | null>(null)
-
+  const [barcode, setBarcode] = useState<string | null>(null)
   // Search foods using the API route (server-side)
   // API now returns SearchResult[] directly - no conversion needed!
   const searchFoodsAPI = async (query: string): Promise<SearchResult[]> => {
@@ -95,6 +95,7 @@ export function CustomFoodSearchDrawer({
   const handleBarcodeScanned = async (barcode: string) => {
     try {
       setIsLookingUpBarcode(true)
+      setBarcode(barcode)
 
       // Look up product using existing API endpoint
       const response = await fetch(`/api/food/search?barcode=${barcode}`)
@@ -105,25 +106,24 @@ export function CustomFoodSearchDrawer({
       }
 
       const product = data.product
-      if (!product || !product.product) {
+      if (!product) {
         toast.error('Product not found. Please try searching manually.')
         return
       }
 
-      // Extract product data from OpenFoodFacts format
-      const productInfo = product.product
-      const nutriments = productInfo.nutriments || {}
-
-      // Create SearchResult-like object from barcode lookup
+      // Create SearchResult object from database product
       const foodItem: SearchResult = {
-        name: productInfo.product_name || 'Unknown Product',
+        name: product.name || 'Unknown Product',
         source: 'openfoodfacts',
-        caloriesPer100g: nutriments['energy-kcal_100g'] || 0,
-        proteinPer100g: nutriments['proteins_100g'] || 0,
-        carbsPer100g: nutriments['carbohydrates_100g'] || 0,
-        fatPer100g: nutriments['fat_100g'] || 0,
-        fiberPer100g: nutriments['fiber_100g'] || 0,
+        caloriesPer100g: product.caloriesPer100g || 0,
+        proteinPer100g: product.proteinPer100g || 0,
+        carbsPer100g: product.carbsPer100g || 0,
+        fatPer100g: product.fatPer100g || 0,
+        fiberPer100g: product.fiberPer100g || 0,
         openFoodFactsId: product.code || barcode,
+        brands: product.brands,
+        servingQuantity: product.servingQuantity,
+        servingSize: product.servingSize,
       }
 
       // Show scanned food in the main search area
@@ -131,6 +131,8 @@ export function CustomFoodSearchDrawer({
       // Clear search results to focus on scanned item
       setSearchResults([])
       setSearchTerm('')
+      // Clear barcode state since we found a product
+      setBarcode(null)
     } catch (error) {
       console.error('Error looking up barcode:', error)
       toast.error(
@@ -193,6 +195,7 @@ export function CustomFoodSearchDrawer({
     setSearchTerm('')
     setSearchResults([])
     setScannedFood(null)
+    setBarcode(null)
     onClose()
   }
 
@@ -211,7 +214,12 @@ export function CustomFoodSearchDrawer({
 
           <div className="flex-1 overflow-y-auto p-4">
             <div className="space-y-4">
-              {/* Show loading state */}
+              {/* Show no product found message only when barcode lookup has failed */}
+              {barcode && !isLookingUpBarcode && !scannedFood && (
+                <div className="text-center text-muted-foreground py-4">
+                  No product found for barcode: {barcode}
+                </div>
+              )}
               {(isSearching || isLookingUpBarcode) && <FoodSearchLoading />}
 
               {/* Show scanned food result */}
@@ -294,7 +302,7 @@ export function CustomFoodSearchDrawer({
       {/* Barcode Scanner Drawer */}
       {isScannerOpen && (
         <BarcodeScanner
-          onClose={handleClose}
+          onClose={() => setIsScannerOpen(false)}
           onCloseScanner={() => {
             setIsScannerOpen(false)
           }}

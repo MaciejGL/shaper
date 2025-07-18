@@ -28,6 +28,7 @@ interface MealPlanContextType {
   currentPlan: MealPlan | null // The plan currently being shown based on date logic
   activeDay: MealDay | null
   isShowingActivePlan: boolean
+  isLoading: boolean
 }
 
 const MealPlanContext = createContext<MealPlanContextType | null>(null)
@@ -44,12 +45,14 @@ interface MealPlanProviderProps {
   children: React.ReactNode
   activePlan: MealPlan | null | undefined
   defaultPlan: MealPlan | null | undefined
+  isLoading?: boolean
 }
 
 export function MealPlanProvider({
   children,
   activePlan,
   defaultPlan,
+  isLoading = false,
 }: MealPlanProviderProps) {
   const [date] = useQueryState('date')
 
@@ -98,8 +101,16 @@ export function MealPlanProvider({
       currentPlan,
       activeDay,
       isShowingActivePlan,
+      isLoading,
     }),
-    [activePlan, defaultPlan, currentPlan, activeDay, isShowingActivePlan],
+    [
+      activePlan,
+      defaultPlan,
+      currentPlan,
+      activeDay,
+      isShowingActivePlan,
+      isLoading,
+    ],
   )
 
   return (

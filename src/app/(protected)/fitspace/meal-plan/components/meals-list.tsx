@@ -3,12 +3,13 @@ import { useState } from 'react'
 import { CustomFoodSearchDrawer } from './custom-food-search-drawer'
 import { MealCard } from './meal-card'
 import { MealLoggingDrawer } from './meal-logging-drawer'
-import { Meal } from './meal-plan-context'
+import { Meal, useMealPlan } from './meal-plan-context'
 import { useMealLogging } from './use-meal-logging'
 
 interface MealsListProps {
   planMeals: Meal[]
   allowCustomFood?: boolean // Controls whether custom food additions are allowed
+  isLoading?: boolean
 }
 
 interface FoodQuantity {
@@ -31,6 +32,7 @@ export function MealsList({
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [customFoodDrawerOpen, setCustomFoodDrawerOpen] = useState(false)
+  const { isLoading } = useMealPlan()
 
   const { handleBatchLogMeal, isBatchLoggingFood } = useMealLogging()
 
@@ -79,7 +81,7 @@ export function MealsList({
             />
           )
         })}
-        {planMeals.length === 0 && (
+        {planMeals.length === 0 && !isLoading && (
           <div className="text-center text-sm text-muted-foreground min-h-[45dvh]">
             No meals found
           </div>
