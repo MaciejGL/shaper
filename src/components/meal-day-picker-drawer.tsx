@@ -71,6 +71,7 @@ export function MealDayPickerDrawer({
             selected={value}
             onSelect={handleDateSelect}
             initialFocus
+            className="bg-transparent"
           />
         </div>
       </DrawerContent>
