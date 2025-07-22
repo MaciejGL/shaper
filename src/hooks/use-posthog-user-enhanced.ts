@@ -71,11 +71,26 @@ export function usePostHogUserEnhanced() {
         setHasIdentified(true)
       }
     } else if (status === 'unauthenticated') {
-      // User is logged out - reset PostHog tracking
+      // User is logged out - reset PostHog tracking and clear any cached data
       if (lastUserIdRef.current || hasIdentified) {
         resetUser()
         lastUserIdRef.current = null
         setHasIdentified(false)
+
+        // Clear any localStorage items that might cause auth state conflicts
+        try {
+          // Clear NextAuth session storage
+          const nextAuthKeys = Object.keys(localStorage).filter(
+            (key) =>
+              key.startsWith('next-auth') ||
+              key.startsWith('__Secure-next-auth') ||
+              key.includes('session'),
+          )
+          nextAuthKeys.forEach((key) => localStorage.removeItem(key))
+        } catch (error) {
+          // Ignore localStorage errors
+          console.error('Storage cleanup error (safe to ignore):', error)
+        }
       }
     }
   }, [user, status, hasIdentified])

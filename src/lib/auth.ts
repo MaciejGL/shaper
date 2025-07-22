@@ -64,7 +64,31 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 
   pages: {
-    signIn: '/fitspace/dashboard',
+    signIn: '/login',
     signOut: '/login',
+  },
+
+  callbacks: {
+    async jwt({ token, user }) {
+      // Persist user data in the token
+      if (user) {
+        token.user = user
+      }
+      return token
+    },
+    async session({ session, token }) {
+      // Send properties to the client
+      if (token.user) {
+        session.user = token.user
+      }
+      return session
+    },
+  },
+
+  events: {
+    async signOut() {
+      // Clear any additional session data on logout
+      // This ensures a clean logout state
+    },
   },
 } satisfies NextAuthOptions

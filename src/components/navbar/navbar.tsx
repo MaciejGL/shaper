@@ -188,7 +188,7 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
           />
           <NavLink
             href="#"
-            onClick={() => signOut()}
+            onClick={() => signOut({ callbackUrl: '/login', redirect: true })}
             icon={<LogOutIcon className="h-5 w-5" />}
             label="Logout"
           />
@@ -269,7 +269,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
         <DropdownMenuItem asChild>
           <NavLink
             href="#"
-            onClick={() => signOut()}
+            onClick={() => signOut({ callbackUrl: '/login', redirect: true })}
             icon={<LogOutIcon className="size-4" />}
             label="Logout"
           />

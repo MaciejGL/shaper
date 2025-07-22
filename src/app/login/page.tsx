@@ -10,15 +10,22 @@ import { getCurrentUser } from '@/lib/getUser'
 import { LoginCard } from './components/login-card'
 
 export default async function RequestOtpPage() {
-  const user = await getCurrentUser()
+  try {
+    const user = await getCurrentUser()
 
-  if (user?.user.role) {
-    const role = user.user.role
-    if (role === GQLUserRole.Client) {
-      redirect('/fitspace/dashboard')
-    } else if (role === GQLUserRole.Trainer) {
-      redirect('/trainer/dashboard')
+    // Only redirect if we have a complete, valid user session
+    if (user?.user?.id && user?.user?.role && user?.session) {
+      const role = user.user.role
+      if (role === GQLUserRole.Client) {
+        redirect('/fitspace/dashboard')
+      } else if (role === GQLUserRole.Trainer) {
+        redirect('/trainer/dashboard')
+      }
     }
+  } catch (error) {
+    // If there's any error getting the user (during logout transitions),
+    // just show the login page instead of crashing
+    console.error('Auth check error (expected during logout):', error)
   }
 
   return (

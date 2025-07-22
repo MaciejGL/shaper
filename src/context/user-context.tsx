@@ -1,7 +1,8 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { useSession } from 'next-auth/react'
-import { createContext, useContext } from 'react'
+import { createContext, useContext, useEffect } from 'react'
 
 import {
   GQLUserBasicQuery,
@@ -21,6 +22,7 @@ interface UserProviderProps {
 
 export function UserProvider({ children }: UserProviderProps) {
   const session = useSession()
+  const queryClient = useQueryClient()
 
   const { data } = useUserBasicQuery(
     {},
@@ -32,9 +34,40 @@ export function UserProvider({ children }: UserProviderProps) {
     },
   )
 
+  // Clear user query cache when user logs out
+  useEffect(() => {
+    if (session.status === 'unauthenticated') {
+      // Clear all user-related queries to prevent stale data
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey
+          return (
+            Array.isArray(queryKey) &&
+            (queryKey.includes('userBasic') ||
+              queryKey.includes('user') ||
+              queryKey.includes('notifications') ||
+              queryKey.includes('getWorkout') ||
+              queryKey.includes('fitspace'))
+          )
+        },
+      })
+
+      // Remove cached queries entirely for a clean logout
+      queryClient.removeQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey
+          return (
+            Array.isArray(queryKey) &&
+            (queryKey.includes('userBasic') || queryKey.includes('user'))
+          )
+        },
+      })
+    }
+  }, [session.status, queryClient])
+
   const contextValue: UserContextType = {
     session,
-    user: data?.userBasic,
+    user: session.status === 'authenticated' ? data?.userBasic : undefined,
   }
 
   return (
