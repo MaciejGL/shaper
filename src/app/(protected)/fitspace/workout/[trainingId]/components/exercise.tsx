@@ -639,6 +639,7 @@ function ExerciseSets({
         <Button
           variant="secondary"
           size="sm"
+          className="w-max"
           iconStart={<PlusIcon />}
           loading={isAddingSet}
           onClick={handleAddSet}

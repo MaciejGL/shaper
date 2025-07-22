@@ -284,6 +284,7 @@ export function QuickWorkoutWizard({
                   loading={isAdding}
                   iconStart={<Check />}
                   className="flex-1"
+                  disabled={isAdding || !canProceedFromStep(currentStep)}
                 >
                   Start Workout
                 </Button>

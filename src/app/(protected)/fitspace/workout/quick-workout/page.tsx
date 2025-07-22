@@ -293,7 +293,19 @@ export default function QuickWorkoutPage() {
           return true
       }
     }
-    return true // AI flow or default
+
+    if (workoutFlow === 'ai') {
+      switch (step) {
+        case 3: // ai-results step - ensure AI has generated workout
+          return (
+            !!aiWorkoutResult && !isGeneratingAiWorkout && !aiGenerationError
+          )
+        default:
+          return true
+      }
+    }
+
+    return true // default
   }
 
   // Handle workflow selection
