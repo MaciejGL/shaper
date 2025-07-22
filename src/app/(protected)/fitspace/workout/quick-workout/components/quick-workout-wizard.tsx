@@ -182,7 +182,7 @@ export function QuickWorkoutWizard({
     : ((currentStep + 1) / currentSteps.length) * 100
 
   return (
-    <div className="bg-background pt-[60px] pb-[80px]">
+    <div className="bg-background pb-[80px]">
       {/* Header with Progress */}
       {!isOnLanding && (
         <div className="sticky top-[-8px] left-0 right-0 z-50 bg-background px-2">

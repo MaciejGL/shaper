@@ -93,7 +93,7 @@ export function EquipmentFilters({
             )}
             onClick={() => onEquipmentToggle(equipmentItem)}
           >
-            <CardContent className="p-4 text-center space-y-2">
+            <CardContent className="px-2 text-center space-y-2">
               <div
                 className={cn(
                   'mx-auto text-black',
