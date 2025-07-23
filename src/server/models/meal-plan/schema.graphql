@@ -193,7 +193,7 @@ type Mutation {
   fitspaceDeleteMealPlan(planId: ID!): Boolean!
 
   # New batch meal operation - replaces individual food operations
-  saveMeal(input: SaveMealInput!): Boolean!
+  saveMeal(input: SaveMealInput!): Meal!
 
   # Meal logging operations
   batchLogMealFood(input: BatchLogMealFoodInput!): Boolean!
@@ -277,6 +277,7 @@ input AssignMealPlanToClientInput {
 input SaveMealInput {
   dayId: ID!
   hour: Int! # Hour of the day (7-23)
+  timezone: String! # User's timezone (e.g., "Europe/Oslo", "America/New_York")
   foods: [MealFoodInput!]! # Complete list of foods for this meal
   instructions: String
 }

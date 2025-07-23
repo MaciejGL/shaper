@@ -1019,7 +1019,7 @@ function ExerciseNotebook({ exercise }: { exercise: WorkoutExercise }) {
         <div className="flex items-center gap-1 relative">
           <Button variant="secondary" iconOnly={<NotebookPenIcon />} />
           {notesCount > 0 && (
-            <div className="text-xs absolute -top-1 -right-1 bg-amber-500 rounded-full size-4 shrink-0 flex items-center justify-center">
+            <div className="text-xs absolute -top-1 -right-1 bg-amber-500/60 rounded-full size-4 shrink-0 flex items-center justify-center">
               {notesCount}
             </div>
           )}

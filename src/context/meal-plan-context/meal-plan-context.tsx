@@ -120,7 +120,7 @@ export function MealPlanProvider({
           if (day.id === dayId) {
             return (
               day.meals.find(
-                (meal) => new Date(meal.dateTime).getHours() === hour,
+                (meal) => new Date(meal.dateTime).getUTCHours() === hour,
               ) || null
             )
           }
@@ -161,6 +161,7 @@ export function MealPlanProvider({
           input: {
             dayId,
             hour,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             instructions,
             foods: mealFoods,
           },

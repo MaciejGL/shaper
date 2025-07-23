@@ -32,6 +32,7 @@ import { compareWeeksUTC, getStartOfWeekUTC } from '@/lib/utc-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
 import MealFoodLog from '../meal-food-log/model'
+import Meal from '../meal/model'
 import { createNotification } from '../notification/factory'
 
 import MealPlan from './model'
@@ -1297,10 +1298,16 @@ export async function saveMeal(
     )
 
     // Create the target datetime for this hour
-    const mealDateTime = new Date(new Date().setHours(hour, 0, 0, 0))
+    // Store as UTC with the logical hour - consistent with existing meals
+    // This way the hour represents the intended meal time regardless of timezone
+    const mealDateTime = new Date(
+      `2024-01-01T${hour.toString().padStart(2, '0')}:00:00.000Z`,
+    )
 
-    // Find or create meal for this hour
-    let meal = day.meals.find((m) => new Date(m.dateTime).getHours() === hour)
+    // Find or create meal for this hour using UTC hour comparison
+    let meal = day.meals.find(
+      (m) => new Date(m.dateTime).getUTCHours() === hour,
+    )
 
     if (!meal) {
       // Create new meal with smart naming
@@ -1393,7 +1400,21 @@ export async function saveMeal(
       },
     })
 
-    return true
+    // Fetch the updated meal with foods to return
+    const updatedMeal = await prisma.meal.findUnique({
+      where: { id: meal.id },
+      include: {
+        foods: {
+          orderBy: { createdAt: 'asc' },
+        },
+      },
+    })
+
+    if (!updatedMeal) {
+      throw new GraphQLError('Meal not found after save')
+    }
+
+    return new Meal(updatedMeal, context)
   } catch (error) {
     console.error('Error saving meal:', error)
     throw new GraphQLError('Failed to save meal')

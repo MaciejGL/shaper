@@ -915,7 +915,7 @@ export type GQLMutation = {
   removeTrainingWeek: Scalars['Boolean']['output'];
   removeWeek: Scalars['Boolean']['output'];
   respondToCollaborationInvitation: GQLCollaborationInvitation;
-  saveMeal: Scalars['Boolean']['output'];
+  saveMeal: GQLMeal;
   sendCollaborationInvitation: GQLCollaborationInvitation;
   swapExercise: GQLSubstitute;
   uncompleteMeal: Scalars['Boolean']['output'];
@@ -1882,6 +1882,7 @@ export type GQLSaveMealInput = {
   foods: Array<GQLMealFoodInput>;
   hour: Scalars['Int']['input'];
   instructions?: InputMaybe<Scalars['String']['input']>;
+  timezone: Scalars['String']['input'];
 };
 
 export type GQLSendCollaborationInvitationInput = {
@@ -3070,7 +3071,7 @@ export type GQLSaveMealMutationVariables = Exact<{
 }>;
 
 
-export type GQLSaveMealMutation = { __typename?: 'Mutation', saveMeal: boolean };
+export type GQLSaveMealMutation = { __typename?: 'Mutation', saveMeal: { __typename?: 'Meal', id: string, name: string, dateTime: string, instructions?: string | undefined | null, foods: Array<{ __typename?: 'MealFood', id: string, name: string, quantity: number, unit: string, caloriesPer100g?: number | undefined | null, proteinPer100g?: number | undefined | null, carbsPer100g?: number | undefined | null, fatPer100g?: number | undefined | null, fiberPer100g?: number | undefined | null, openFoodFactsId?: string | undefined | null, addedAt: string }> } };
 
 export type GQLUpdateMealPlanDetailsMutationVariables = Exact<{
   input: GQLUpdateMealPlanDetailsInput;
@@ -8834,7 +8835,25 @@ useRemoveMealPlanFromClientMutation.fetcher = (variables: GQLRemoveMealPlanFromC
 
 export const SaveMealDocument = `
     mutation SaveMeal($input: SaveMealInput!) {
-  saveMeal(input: $input)
+  saveMeal(input: $input) {
+    id
+    name
+    dateTime
+    instructions
+    foods {
+      id
+      name
+      quantity
+      unit
+      caloriesPer100g
+      proteinPer100g
+      carbsPer100g
+      fatPer100g
+      fiberPer100g
+      openFoodFactsId
+      addedAt
+    }
+  }
 }
     `;
 

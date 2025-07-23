@@ -172,7 +172,25 @@ mutation RemoveMealPlanFromClient($planId: ID!, $clientId: ID!) {
 
 # New batch meal operation
 mutation SaveMeal($input: SaveMealInput!) {
-  saveMeal(input: $input)
+  saveMeal(input: $input) {
+    id
+    name
+    dateTime
+    instructions
+    foods {
+      id
+      name
+      quantity
+      unit
+      caloriesPer100g
+      proteinPer100g
+      carbsPer100g
+      fatPer100g
+      fiberPer100g
+      openFoodFactsId
+      addedAt
+    }
+  }
 }
 
 mutation UpdateMealPlanDetails($input: UpdateMealPlanDetailsInput!) {
