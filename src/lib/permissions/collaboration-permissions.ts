@@ -54,6 +54,15 @@ export class CollaborationPermissions {
         }
       }
 
+      if (trainingPlan.assignedToId === userId) {
+        return {
+          hasPermission: true,
+          isCreator: true,
+          reason: 'Assigned to user',
+          userPermission: GQLCollaborationPermission.Edit,
+        }
+      }
+
       return this.evaluateTrainingPlanPermission(userId, trainingPlan, action)
     } catch (error) {
       console.error('Error checking training plan permission:', error)
