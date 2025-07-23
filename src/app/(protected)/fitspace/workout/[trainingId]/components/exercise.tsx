@@ -732,7 +732,7 @@ function ExerciseSet({
 
   const { mutateAsync: removeSet, isPending: isRemovingSet } =
     useFitspaceRemoveSetMutation({
-      onSuccess: (data, variables) => {
+      onMutate: (variables) => {
         // Update cache after successful removal
         queryClient.setQueryData(
           useFitspaceGetWorkoutQuery.getKey({ trainingId }),
