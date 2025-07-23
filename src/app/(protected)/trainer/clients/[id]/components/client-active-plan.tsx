@@ -52,7 +52,7 @@ export function ClientActivePlan({
           <TabsContent value="progress" className="mt-2">
             <div className="space-y-6">
               <ProgressOverview plan={activePlan} />
-              <WeeklyProgress plan={activePlan} />
+              <WeeklyProgress plan={activePlan} clientId={client.id} />
             </div>
           </TabsContent>
 

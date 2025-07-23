@@ -4,6 +4,14 @@ query GetNotes($relatedTo: ID) {
     text
     createdAt
     updatedAt
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
   }
 }
 
@@ -13,6 +21,65 @@ query GetNote($id: ID!, $relatedTo: ID) {
     text
     createdAt
     updatedAt
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+
+query GetExerciseNotes($exerciseName: String!) {
+  exerciseNotes(exerciseName: $exerciseName) {
+    id
+    text
+    createdAt
+    updatedAt
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+
+query GetClientSharedNotes($clientId: String!) {
+  clientSharedNotes(clientId: $clientId) {
+    id
+    text
+    relatedTo
+    createdAt
+    updatedAt
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+
+query GetNoteReplies($noteId: String!) {
+  noteReplies(noteId: $noteId) {
+    id
+    text
+    createdAt
+    updatedAt
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
   }
 }
 
@@ -20,6 +87,44 @@ mutation CreateNote($input: CreateNoteInput!) {
   createNote(input: $input) {
     id
     text
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+
+mutation CreateExerciseNote($input: CreateExerciseNoteInput!) {
+  createExerciseNote(input: $input) {
+    id
+    text
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+
+mutation CreateNoteReply($input: CreateNoteReplyInput!) {
+  createNoteReply(input: $input) {
+    id
+    text
+    createdAt
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
   }
 }
 
@@ -27,6 +132,14 @@ mutation UpdateNote($input: UpdateNoteInput!) {
   updateNote(input: $input) {
     id
     text
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
   }
 }
 

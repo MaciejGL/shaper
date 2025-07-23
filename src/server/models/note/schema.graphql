@@ -4,25 +4,47 @@ type Note {
   relatedTo: ID
   createdAt: String!
   updatedAt: String!
+  shareWithTrainer: Boolean
+  parentNoteId: ID
+  replies: [Note!]!
+  createdBy: UserPublic!
 }
 
 type Query {
   notes(relatedTo: ID): [Note!]!
   note(id: ID!, relatedTo: ID): Note
+  exerciseNotes(exerciseName: String!): [Note!]!
+  clientSharedNotes(clientId: String!): [Note!]!
+  noteReplies(noteId: String!): [Note!]!
 }
 
 input CreateNoteInput {
   note: String!
   relatedTo: ID
+  shareWithTrainer: Boolean
 }
 
 input UpdateNoteInput {
   id: ID!
   note: String!
+  shareWithTrainer: Boolean
+}
+
+input CreateExerciseNoteInput {
+  exerciseId: String!
+  note: String!
+  shareWithTrainer: Boolean
+}
+
+input CreateNoteReplyInput {
+  parentNoteId: String!
+  text: String!
 }
 
 type Mutation {
   createNote(input: CreateNoteInput!): Note!
   updateNote(input: UpdateNoteInput!): Note!
   deleteNote(id: ID!): Boolean!
+  createExerciseNote(input: CreateExerciseNoteInput!): Note!
+  createNoteReply(input: CreateNoteReplyInput!): Note!
 }

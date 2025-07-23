@@ -352,6 +352,12 @@ export type GQLCreateExerciseInput = {
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
 
+export type GQLCreateExerciseNoteInput = {
+  exerciseId: Scalars['String']['input'];
+  note: Scalars['String']['input'];
+  shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type GQLCreateExerciseSetInput = {
   maxReps?: InputMaybe<Scalars['Int']['input']>;
   minReps?: InputMaybe<Scalars['Int']['input']>;
@@ -418,6 +424,12 @@ export type GQLCreateMealWeekInput = {
 export type GQLCreateNoteInput = {
   note: Scalars['String']['input'];
   relatedTo?: InputMaybe<Scalars['ID']['input']>;
+  shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type GQLCreateNoteReplyInput = {
+  parentNoteId: Scalars['String']['input'];
+  text: Scalars['String']['input'];
 };
 
 export type GQLCreateNotificationInput = {
@@ -852,8 +864,10 @@ export type GQLMutation = {
   createDraftMealTemplate: GQLMealPlan;
   createDraftTemplate: GQLTrainingPlan;
   createExercise: Scalars['Boolean']['output'];
+  createExerciseNote: GQLNote;
   createMealPlan: GQLCreateMealPlanPayload;
   createNote: GQLNote;
+  createNoteReply: GQLNote;
   createNotification: GQLNotification;
   createQuickWorkout: GQLTrainingPlan;
   createReview: Scalars['Boolean']['output'];
@@ -1070,6 +1084,11 @@ export type GQLMutationCreateExerciseArgs = {
 };
 
 
+export type GQLMutationCreateExerciseNoteArgs = {
+  input: GQLCreateExerciseNoteInput;
+};
+
+
 export type GQLMutationCreateMealPlanArgs = {
   input: GQLCreateMealPlanInput;
 };
@@ -1077,6 +1096,11 @@ export type GQLMutationCreateMealPlanArgs = {
 
 export type GQLMutationCreateNoteArgs = {
   input: GQLCreateNoteInput;
+};
+
+
+export type GQLMutationCreateNoteReplyArgs = {
+  input: GQLCreateNoteReplyInput;
 };
 
 
@@ -1457,8 +1481,12 @@ export type GQLMyPlansPayload = {
 export type GQLNote = {
   __typename?: 'Note';
   createdAt: Scalars['String']['output'];
+  createdBy: GQLUserPublic;
   id: Scalars['ID']['output'];
+  parentNoteId?: Maybe<Scalars['ID']['output']>;
   relatedTo?: Maybe<Scalars['ID']['output']>;
+  replies: Array<GQLNote>;
+  shareWithTrainer?: Maybe<Scalars['Boolean']['output']>;
   text: Scalars['String']['output'];
   updatedAt: Scalars['String']['output'];
 };
@@ -1548,9 +1576,11 @@ export type GQLQuery = {
   availablePlansForTeamMember: Array<GQLAvailablePlan>;
   bodyMeasures: Array<GQLUserBodyMeasure>;
   clientBodyMeasures: Array<GQLUserBodyMeasure>;
+  clientSharedNotes: Array<GQLNote>;
   coachingRequest?: Maybe<GQLCoachingRequest>;
   coachingRequests: Array<GQLCoachingRequest>;
   exercise?: Maybe<GQLBaseExercise>;
+  exerciseNotes: Array<GQLNote>;
   exercisesProgressByUser: Array<GQLExerciseProgress>;
   getActiveMealPlan?: Maybe<GQLMealPlan>;
   getActivePlanId?: Maybe<Scalars['ID']['output']>;
@@ -1585,6 +1615,7 @@ export type GQLQuery = {
   myTrainer?: Maybe<GQLUserPublic>;
   myTrainingPlanCollaborations: Array<GQLTrainingPlanCollaborator>;
   note?: Maybe<GQLNote>;
+  noteReplies: Array<GQLNote>;
   notes: Array<GQLNote>;
   notification?: Maybe<GQLNotification>;
   notifications: Array<GQLNotification>;
@@ -1627,6 +1658,11 @@ export type GQLQueryClientBodyMeasuresArgs = {
 };
 
 
+export type GQLQueryClientSharedNotesArgs = {
+  clientId: Scalars['String']['input'];
+};
+
+
 export type GQLQueryCoachingRequestArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1634,6 +1670,11 @@ export type GQLQueryCoachingRequestArgs = {
 
 export type GQLQueryExerciseArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryExerciseNotesArgs = {
+  exerciseName: Scalars['String']['input'];
 };
 
 
@@ -1727,6 +1768,11 @@ export type GQLQueryMuscleGroupCategoryArgs = {
 export type GQLQueryNoteArgs = {
   id: Scalars['ID']['input'];
   relatedTo?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type GQLQueryNoteRepliesArgs = {
+  noteId: Scalars['String']['input'];
 };
 
 
@@ -2067,6 +2113,7 @@ export type GQLUpdateMealPlanDetailsInput = {
 export type GQLUpdateNoteInput = {
   id: Scalars['ID']['input'];
   note: Scalars['String']['input'];
+  shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type GQLUpdateNotificationInput = {
@@ -3275,7 +3322,7 @@ export type GQLGetNotesQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetNotesQuery = { __typename?: 'Query', notes: Array<{ __typename?: 'Note', id: string, text: string, createdAt: string, updatedAt: string }> };
+export type GQLGetNotesQuery = { __typename?: 'Query', notes: Array<{ __typename?: 'Note', id: string, text: string, createdAt: string, updatedAt: string, shareWithTrainer?: boolean | undefined | null, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } }> };
 
 export type GQLGetNoteQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -3283,21 +3330,56 @@ export type GQLGetNoteQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetNoteQuery = { __typename?: 'Query', note?: { __typename?: 'Note', id: string, text: string, createdAt: string, updatedAt: string } | undefined | null };
+export type GQLGetNoteQuery = { __typename?: 'Query', note?: { __typename?: 'Note', id: string, text: string, createdAt: string, updatedAt: string, shareWithTrainer?: boolean | undefined | null, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } } | undefined | null };
+
+export type GQLGetExerciseNotesQueryVariables = Exact<{
+  exerciseName: Scalars['String']['input'];
+}>;
+
+
+export type GQLGetExerciseNotesQuery = { __typename?: 'Query', exerciseNotes: Array<{ __typename?: 'Note', id: string, text: string, createdAt: string, updatedAt: string, shareWithTrainer?: boolean | undefined | null, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } }> };
+
+export type GQLGetClientSharedNotesQueryVariables = Exact<{
+  clientId: Scalars['String']['input'];
+}>;
+
+
+export type GQLGetClientSharedNotesQuery = { __typename?: 'Query', clientSharedNotes: Array<{ __typename?: 'Note', id: string, text: string, relatedTo?: string | undefined | null, createdAt: string, updatedAt: string, shareWithTrainer?: boolean | undefined | null, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } }> };
+
+export type GQLGetNoteRepliesQueryVariables = Exact<{
+  noteId: Scalars['String']['input'];
+}>;
+
+
+export type GQLGetNoteRepliesQuery = { __typename?: 'Query', noteReplies: Array<{ __typename?: 'Note', id: string, text: string, createdAt: string, updatedAt: string, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } }> };
 
 export type GQLCreateNoteMutationVariables = Exact<{
   input: GQLCreateNoteInput;
 }>;
 
 
-export type GQLCreateNoteMutation = { __typename?: 'Mutation', createNote: { __typename?: 'Note', id: string, text: string } };
+export type GQLCreateNoteMutation = { __typename?: 'Mutation', createNote: { __typename?: 'Note', id: string, text: string, shareWithTrainer?: boolean | undefined | null, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } } };
+
+export type GQLCreateExerciseNoteMutationVariables = Exact<{
+  input: GQLCreateExerciseNoteInput;
+}>;
+
+
+export type GQLCreateExerciseNoteMutation = { __typename?: 'Mutation', createExerciseNote: { __typename?: 'Note', id: string, text: string, shareWithTrainer?: boolean | undefined | null, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } } };
+
+export type GQLCreateNoteReplyMutationVariables = Exact<{
+  input: GQLCreateNoteReplyInput;
+}>;
+
+
+export type GQLCreateNoteReplyMutation = { __typename?: 'Mutation', createNoteReply: { __typename?: 'Note', id: string, text: string, createdAt: string, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } } };
 
 export type GQLUpdateNoteMutationVariables = Exact<{
   input: GQLUpdateNoteInput;
 }>;
 
 
-export type GQLUpdateNoteMutation = { __typename?: 'Mutation', updateNote: { __typename?: 'Note', id: string, text: string } };
+export type GQLUpdateNoteMutation = { __typename?: 'Mutation', updateNote: { __typename?: 'Note', id: string, text: string, shareWithTrainer?: boolean | undefined | null, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } } };
 
 export type GQLDeleteNoteMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -9902,6 +9984,14 @@ export const GetNotesDocument = `
     text
     createdAt
     updatedAt
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
   }
 }
     `;
@@ -9955,6 +10045,14 @@ export const GetNoteDocument = `
     text
     createdAt
     updatedAt
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
   }
 }
     `;
@@ -10001,11 +10099,202 @@ useInfiniteGetNoteQuery.getKey = (variables: GQLGetNoteQueryVariables) => ['GetN
 
 useGetNoteQuery.fetcher = (variables: GQLGetNoteQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetNoteQuery, GQLGetNoteQueryVariables>(GetNoteDocument, variables, options);
 
+export const GetExerciseNotesDocument = `
+    query GetExerciseNotes($exerciseName: String!) {
+  exerciseNotes(exerciseName: $exerciseName) {
+    id
+    text
+    createdAt
+    updatedAt
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+    `;
+
+export const useGetExerciseNotesQuery = <
+      TData = GQLGetExerciseNotesQuery,
+      TError = unknown
+    >(
+      variables: GQLGetExerciseNotesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetExerciseNotesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetExerciseNotesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetExerciseNotesQuery, TError, TData>(
+      {
+    queryKey: ['GetExerciseNotes', variables],
+    queryFn: fetchData<GQLGetExerciseNotesQuery, GQLGetExerciseNotesQueryVariables>(GetExerciseNotesDocument, variables),
+    ...options
+  }
+    )};
+
+useGetExerciseNotesQuery.getKey = (variables: GQLGetExerciseNotesQueryVariables) => ['GetExerciseNotes', variables];
+
+export const useInfiniteGetExerciseNotesQuery = <
+      TData = InfiniteData<GQLGetExerciseNotesQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetExerciseNotesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetExerciseNotesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetExerciseNotesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetExerciseNotesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetExerciseNotes.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetExerciseNotesQuery, GQLGetExerciseNotesQueryVariables>(GetExerciseNotesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetExerciseNotesQuery.getKey = (variables: GQLGetExerciseNotesQueryVariables) => ['GetExerciseNotes.infinite', variables];
+
+
+useGetExerciseNotesQuery.fetcher = (variables: GQLGetExerciseNotesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetExerciseNotesQuery, GQLGetExerciseNotesQueryVariables>(GetExerciseNotesDocument, variables, options);
+
+export const GetClientSharedNotesDocument = `
+    query GetClientSharedNotes($clientId: String!) {
+  clientSharedNotes(clientId: $clientId) {
+    id
+    text
+    relatedTo
+    createdAt
+    updatedAt
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+    `;
+
+export const useGetClientSharedNotesQuery = <
+      TData = GQLGetClientSharedNotesQuery,
+      TError = unknown
+    >(
+      variables: GQLGetClientSharedNotesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetClientSharedNotesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetClientSharedNotesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetClientSharedNotesQuery, TError, TData>(
+      {
+    queryKey: ['GetClientSharedNotes', variables],
+    queryFn: fetchData<GQLGetClientSharedNotesQuery, GQLGetClientSharedNotesQueryVariables>(GetClientSharedNotesDocument, variables),
+    ...options
+  }
+    )};
+
+useGetClientSharedNotesQuery.getKey = (variables: GQLGetClientSharedNotesQueryVariables) => ['GetClientSharedNotes', variables];
+
+export const useInfiniteGetClientSharedNotesQuery = <
+      TData = InfiniteData<GQLGetClientSharedNotesQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetClientSharedNotesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetClientSharedNotesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetClientSharedNotesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetClientSharedNotesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetClientSharedNotes.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetClientSharedNotesQuery, GQLGetClientSharedNotesQueryVariables>(GetClientSharedNotesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetClientSharedNotesQuery.getKey = (variables: GQLGetClientSharedNotesQueryVariables) => ['GetClientSharedNotes.infinite', variables];
+
+
+useGetClientSharedNotesQuery.fetcher = (variables: GQLGetClientSharedNotesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetClientSharedNotesQuery, GQLGetClientSharedNotesQueryVariables>(GetClientSharedNotesDocument, variables, options);
+
+export const GetNoteRepliesDocument = `
+    query GetNoteReplies($noteId: String!) {
+  noteReplies(noteId: $noteId) {
+    id
+    text
+    createdAt
+    updatedAt
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+    `;
+
+export const useGetNoteRepliesQuery = <
+      TData = GQLGetNoteRepliesQuery,
+      TError = unknown
+    >(
+      variables: GQLGetNoteRepliesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetNoteRepliesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetNoteRepliesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetNoteRepliesQuery, TError, TData>(
+      {
+    queryKey: ['GetNoteReplies', variables],
+    queryFn: fetchData<GQLGetNoteRepliesQuery, GQLGetNoteRepliesQueryVariables>(GetNoteRepliesDocument, variables),
+    ...options
+  }
+    )};
+
+useGetNoteRepliesQuery.getKey = (variables: GQLGetNoteRepliesQueryVariables) => ['GetNoteReplies', variables];
+
+export const useInfiniteGetNoteRepliesQuery = <
+      TData = InfiniteData<GQLGetNoteRepliesQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetNoteRepliesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetNoteRepliesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetNoteRepliesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetNoteRepliesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetNoteReplies.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetNoteRepliesQuery, GQLGetNoteRepliesQueryVariables>(GetNoteRepliesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetNoteRepliesQuery.getKey = (variables: GQLGetNoteRepliesQueryVariables) => ['GetNoteReplies.infinite', variables];
+
+
+useGetNoteRepliesQuery.fetcher = (variables: GQLGetNoteRepliesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetNoteRepliesQuery, GQLGetNoteRepliesQueryVariables>(GetNoteRepliesDocument, variables, options);
+
 export const CreateNoteDocument = `
     mutation CreateNote($input: CreateNoteInput!) {
   createNote(input: $input) {
     id
     text
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
   }
 }
     `;
@@ -10028,11 +10317,89 @@ useCreateNoteMutation.getKey = () => ['CreateNote'];
 
 useCreateNoteMutation.fetcher = (variables: GQLCreateNoteMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateNoteMutation, GQLCreateNoteMutationVariables>(CreateNoteDocument, variables, options);
 
+export const CreateExerciseNoteDocument = `
+    mutation CreateExerciseNote($input: CreateExerciseNoteInput!) {
+  createExerciseNote(input: $input) {
+    id
+    text
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+    `;
+
+export const useCreateExerciseNoteMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateExerciseNoteMutation, TError, GQLCreateExerciseNoteMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateExerciseNoteMutation, TError, GQLCreateExerciseNoteMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateExerciseNote'],
+    mutationFn: (variables?: GQLCreateExerciseNoteMutationVariables) => fetchData<GQLCreateExerciseNoteMutation, GQLCreateExerciseNoteMutationVariables>(CreateExerciseNoteDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateExerciseNoteMutation.getKey = () => ['CreateExerciseNote'];
+
+
+useCreateExerciseNoteMutation.fetcher = (variables: GQLCreateExerciseNoteMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateExerciseNoteMutation, GQLCreateExerciseNoteMutationVariables>(CreateExerciseNoteDocument, variables, options);
+
+export const CreateNoteReplyDocument = `
+    mutation CreateNoteReply($input: CreateNoteReplyInput!) {
+  createNoteReply(input: $input) {
+    id
+    text
+    createdAt
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+    `;
+
+export const useCreateNoteReplyMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateNoteReplyMutation, TError, GQLCreateNoteReplyMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateNoteReplyMutation, TError, GQLCreateNoteReplyMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateNoteReply'],
+    mutationFn: (variables?: GQLCreateNoteReplyMutationVariables) => fetchData<GQLCreateNoteReplyMutation, GQLCreateNoteReplyMutationVariables>(CreateNoteReplyDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateNoteReplyMutation.getKey = () => ['CreateNoteReply'];
+
+
+useCreateNoteReplyMutation.fetcher = (variables: GQLCreateNoteReplyMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateNoteReplyMutation, GQLCreateNoteReplyMutationVariables>(CreateNoteReplyDocument, variables, options);
+
 export const UpdateNoteDocument = `
     mutation UpdateNote($input: UpdateNoteInput!) {
   updateNote(input: $input) {
     id
     text
+    shareWithTrainer
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
   }
 }
     `;

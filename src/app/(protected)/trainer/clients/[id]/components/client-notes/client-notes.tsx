@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   GQLGetNotesQuery,
+  GQLUserRole,
   useCreateNoteMutation,
   useDeleteNoteMutation,
   useGetNotesQuery,
@@ -175,18 +176,39 @@ const placeholderNotes: GQLGetNotesQuery = {
       text: 'Top secret note about the client',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      createdBy: {
+        id: '1',
+        firstName: 'John',
+        lastName: 'Doe',
+        image: 'https://via.placeholder.com/150',
+        role: GQLUserRole.Trainer,
+      },
     },
     {
       id: '2',
       text: 'Top secret note about the client, Top secret note about the client Top secret note about the client',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      createdBy: {
+        id: '1',
+        firstName: 'John',
+        lastName: 'Doe',
+        image: 'https://via.placeholder.com/150',
+        role: GQLUserRole.Trainer,
+      },
     },
     {
       id: '3',
       text: 'Top secret note about the client',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
+      createdBy: {
+        id: '1',
+        firstName: 'John',
+        lastName: 'Doe',
+        image: 'https://via.placeholder.com/150',
+        role: GQLUserRole.Trainer,
+      },
     },
   ],
 }

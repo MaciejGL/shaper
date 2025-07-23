@@ -12,6 +12,7 @@ import {
   InfoIcon,
   ListChecksIcon,
   MoreHorizontalIcon,
+  NotebookPenIcon,
   NotebookTextIcon,
   PlusIcon,
   Replace,
@@ -33,7 +34,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Drawer, SimpleDrawerContent } from '@/components/ui/drawer'
+import {
+  Drawer,
+  DrawerTrigger,
+  SimpleDrawerContent,
+} from '@/components/ui/drawer'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,6 +71,7 @@ import { convertSecondsToTimeString } from '@/lib/convert-seconds-time-to-string
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
 
+import { ExerciseNotes, useExerciseNotesCount } from './exercise-notes'
 import { WorkoutExercise } from './workout-page.client'
 
 interface ExerciseProps {
@@ -299,6 +305,7 @@ function ExerciseHeader({
           )}
         </div>
         <div className="flex gap-2">
+          <ExerciseNotebook exercise={exercise} />
           {(exercise.substitutedBy?.videoUrl || exercise.videoUrl) && (
             <VideoPreview
               variant="secondary"
@@ -1000,5 +1007,33 @@ function SupersetsNavigation({
         </Button>
       )}
     </div>
+  )
+}
+
+function ExerciseNotebook({ exercise }: { exercise: WorkoutExercise }) {
+  const notesCount = useExerciseNotesCount(exercise)
+
+  return (
+    <Drawer>
+      <DrawerTrigger asChild>
+        <div className="flex items-center gap-1 relative">
+          <Button variant="secondary" iconOnly={<NotebookPenIcon />} />
+          {notesCount > 0 && (
+            <div className="text-xs absolute -top-1 -right-1 bg-amber-500 rounded-full size-4 shrink-0 flex items-center justify-center">
+              {notesCount}
+            </div>
+          )}
+        </div>
+      </DrawerTrigger>
+      <SimpleDrawerContent
+        title="Exercise Notes"
+        headerIcon={<NotebookPenIcon />}
+        className="max-h-[80vh] flex flex-col"
+      >
+        <div className="flex-1 overflow-y-auto">
+          <ExerciseNotes exercise={exercise} />
+        </div>
+      </SimpleDrawerContent>
+    </Drawer>
   )
 }
