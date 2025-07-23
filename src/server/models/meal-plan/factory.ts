@@ -377,7 +377,6 @@ export async function getActiveMealPlan(
                         orderBy: { loggedAt: 'desc' },
                         include: {
                           user: true,
-                          mealFood: true, // Include the mealFood relationship
                         },
                       },
                     },
@@ -1390,10 +1389,13 @@ export async function saveMeal(
         })
       }
     }
-    // Remove empty meals only from the current day to avoid affecting other meal plans
+
+    // Remove empty meals only from the current day, but exclude the meal we just worked on
+    // This prevents deleting the meal we're about to return, even if it becomes empty
     await prisma.meal.deleteMany({
       where: {
         dayId: dayId,
+        id: { not: meal.id }, // Exclude the current meal
         foods: {
           none: {},
         },
