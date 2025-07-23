@@ -193,7 +193,7 @@ type Mutation {
   fitspaceDeleteMealPlan(planId: ID!): Boolean!
 
   # New batch meal operation - replaces individual food operations
-  saveMeal(input: SaveMealInput!): Meal!
+  saveMeal(input: SaveMealInput!): Meal
 
   # Meal logging operations
   batchLogMealFood(input: BatchLogMealFoodInput!): Boolean!

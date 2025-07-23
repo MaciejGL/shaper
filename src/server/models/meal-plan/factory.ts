@@ -1350,6 +1350,14 @@ export async function saveMeal(
       }
     }
 
+    if (foods.length === 0) {
+      await prisma.meal.delete({
+        where: { id: meal.id },
+      })
+
+      return undefined
+    }
+
     // Add or update foods
     for (const food of foods) {
       if (food.id) {

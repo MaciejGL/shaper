@@ -915,7 +915,7 @@ export type GQLMutation = {
   removeTrainingWeek: Scalars['Boolean']['output'];
   removeWeek: Scalars['Boolean']['output'];
   respondToCollaborationInvitation: GQLCollaborationInvitation;
-  saveMeal: GQLMeal;
+  saveMeal?: Maybe<GQLMeal>;
   sendCollaborationInvitation: GQLCollaborationInvitation;
   swapExercise: GQLSubstitute;
   uncompleteMeal: Scalars['Boolean']['output'];
@@ -3071,7 +3071,7 @@ export type GQLSaveMealMutationVariables = Exact<{
 }>;
 
 
-export type GQLSaveMealMutation = { __typename?: 'Mutation', saveMeal: { __typename?: 'Meal', id: string, name: string, dateTime: string, instructions?: string | undefined | null, foods: Array<{ __typename?: 'MealFood', id: string, name: string, quantity: number, unit: string, caloriesPer100g?: number | undefined | null, proteinPer100g?: number | undefined | null, carbsPer100g?: number | undefined | null, fatPer100g?: number | undefined | null, fiberPer100g?: number | undefined | null, openFoodFactsId?: string | undefined | null, addedAt: string }> } };
+export type GQLSaveMealMutation = { __typename?: 'Mutation', saveMeal?: { __typename?: 'Meal', id: string, name: string, dateTime: string, instructions?: string | undefined | null, foods: Array<{ __typename?: 'MealFood', id: string, name: string, quantity: number, unit: string, caloriesPer100g?: number | undefined | null, proteinPer100g?: number | undefined | null, carbsPer100g?: number | undefined | null, fatPer100g?: number | undefined | null, fiberPer100g?: number | undefined | null, openFoodFactsId?: string | undefined | null, addedAt: string }> } | undefined | null };
 
 export type GQLUpdateMealPlanDetailsMutationVariables = Exact<{
   input: GQLUpdateMealPlanDetailsInput;
