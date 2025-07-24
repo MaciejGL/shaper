@@ -72,7 +72,7 @@ model UserProfile {
   height        Float?
   weight        Float?
   goals         String[]
-  weekStartsOn  Int?              @default(1)     // 0 = Sunday, 1 = Monday
+  weekStartsOn  Int?              @default(1) // 0 = Sunday, 1 = Monday
   bodyMeasures  UserBodyMeasure[]
   user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -300,17 +300,17 @@ model BaseExercise {
 }
 
 model Image {
-  id          String   @id @default(uuid())
-  url         String
-  order       Int      @default(0)
-  entityType  String   // 'exercise', 'user_progress', etc.
-  entityId    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id         String   @id @default(uuid())
+  url        String
+  order      Int      @default(0)
+  entityType String // 'exercise', 'user_progress', etc.
+  entityId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   // Relations for different entity types
-  exercise    BaseExercise? @relation("ExerciseImages", fields: [entityId], references: [id], map: "exercise_image_fk")
-  
+  exercise BaseExercise? @relation("ExerciseImages", fields: [entityId], references: [id], map: "exercise_image_fk")
+
   @@index([entityType, entityId])
   @@index([order])
 }
@@ -590,19 +590,19 @@ model FoodProduct {
 
 // USDA FoodData Central local data storage
 model USDAFood {
-  id              String   @id @default(uuid())
-  fdcId           Int      @unique
+  id              String    @id @default(uuid())
+  fdcId           Int       @unique
   description     String
-  dataType        String   // Foundation Foods, SR Legacy, etc.
-  foodCategory    String?  
+  dataType        String // Foundation Foods, SR Legacy, etc.
+  foodCategory    String?
   brandOwner      String?
   brandName       String?
   ingredients     String?
   servingSize     Float?
   servingSizeUnit String?
   publishedDate   DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   // Nutrition data per 100g
   caloriesPer100g Float?
@@ -623,64 +623,67 @@ model USDAFood {
   @@index([dataType], map: "usda_food_data_type_idx")
   @@index([foodCategory], map: "usda_food_category_idx")
   @@index([fdcId], map: "usda_food_fdc_id_idx")
+  // Performance optimization indexes
+  @@index([dataType, description], map: "usda_food_search_quality_idx")
+  @@index([caloriesPer100g, proteinPer100g, carbsPer100g, fatPer100g], map: "usda_nutrition_filter_idx")
 }
 
 // OpenFoodFacts local data storage
 model OpenFoodFactsProduct {
-  id              String   @id @default(uuid())
-  code            String   @unique  // Barcode/product code
-  productName     String   // Product name
-  brands          String?  // Brand names (comma separated)
-  categories      String?  // Categories (comma separated)
-  origins         String?  // Origins/countries of ingredients
-  countries       String?  // Countries where sold
-  labels          String?  // Labels (organic, fair trade, etc.)
-  packaging       String?  // Packaging information
-  ingredients     String?  // Ingredients list
-  allergens       String?  // Allergen information
-  traces          String?  // May contain traces of...
-  
+  id          String  @id @default(uuid())
+  code        String  @unique // Barcode/product code
+  productName String // Product name
+  brands      String? // Brand names (comma separated)
+  categories  String? // Categories (comma separated)
+  origins     String? // Origins/countries of ingredients
+  countries   String? // Countries where sold
+  labels      String? // Labels (organic, fair trade, etc.)
+  packaging   String? // Packaging information
+  ingredients String? // Ingredients list
+  allergens   String? // Allergen information
+  traces      String? // May contain traces of...
+
   // Serving information
-  servingSize     String?  // Serving size text
-  servingQuantity Float?   // Serving quantity number
-  
+  servingSize     String? // Serving size text
+  servingQuantity Float? // Serving quantity number
+
   // Nutrition data per 100g (matching OpenFoodFacts field names)
-  energyKcal100g      Float?  // energy-kcal_100g
-  proteins100g        Float?  // proteins_100g  
-  carbohydrates100g   Float?  // carbohydrates_100g
-  fat100g             Float?  // fat_100g
-  fiber100g           Float?  // fiber_100g
-  sugars100g          Float?  // sugars_100g
-  salt100g            Float?  // salt_100g (note: OpenFoodFacts uses salt, not sodium)
-  
+  energyKcal100g    Float? // energy-kcal_100g
+  proteins100g      Float? // proteins_100g  
+  carbohydrates100g Float? // carbohydrates_100g
+  fat100g           Float? // fat_100g
+  fiber100g         Float? // fiber_100g
+  sugars100g        Float? // sugars_100g
+  salt100g          Float? // salt_100g (note: OpenFoodFacts uses salt, not sodium)
+
   // Additional key nutrients
-  saturatedFat100g    Float?  // saturated-fat_100g
-  sodium100g          Float?  // Calculated from salt (salt_100g * 0.4)
-  
+  saturatedFat100g Float? // saturated-fat_100g
+  sodium100g       Float? // Calculated from salt (salt_100g * 0.4)
+
   // Quality indicators
-  nutriScore          String?  // Nutri-Score grade (A, B, C, D, E)
-  novaGroup           Int?     // NOVA group (1-4)
-  ecoScore            String?  // Eco-Score grade
-  
+  nutriScore String? // Nutri-Score grade (A, B, C, D, E)
+  novaGroup  Int? // NOVA group (1-4)
+  ecoScore   String? // Eco-Score grade
+
   // Data quality
-  completeness        Float?   // Data completeness score
-  lastModified        DateTime? // Last modification date from OpenFoodFacts
-  scansN              Int?     // Number of scans (popularity indicator)
-  uniqueScansN        Int?     // Number of unique scans
-  
+  completeness Float? // Data completeness score
+  lastModified DateTime? // Last modification date from OpenFoodFacts
+  scansN       Int? // Number of scans (popularity indicator)
+  uniqueScansN Int? // Number of unique scans
+
   // Images
-  imageUrl            String?  // Main product image
-  imageFrontUrl       String?  // Front image
-  imageIngredientsUrl String?  // Ingredients image
-  imageNutritionUrl   String?  // Nutrition facts image
-  
+  imageUrl            String? // Main product image
+  imageFrontUrl       String? // Front image
+  imageIngredientsUrl String? // Ingredients image
+  imageNutritionUrl   String? // Nutrition facts image
+
   // Administrative
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  importedAt          DateTime @default(now()) // When this record was imported to our DB
-  
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  importedAt DateTime @default(now()) // When this record was imported to our DB
+
   @@index([productName], map: "off_product_name_idx")
-  @@index([brands], map: "off_brands_idx") 
+  @@index([brands], map: "off_brands_idx")
   @@index([categories], map: "off_categories_idx")
   @@index([countries], map: "off_countries_idx")
   @@index([code], map: "off_code_idx")
@@ -688,4 +691,8 @@ model OpenFoodFactsProduct {
   @@index([lastModified], map: "off_last_modified_idx")
   @@index([scansN], map: "off_scans_idx")
   @@index([completeness], map: "off_completeness_idx")
+  // Performance optimization indexes
+  @@index([completeness(sort: Desc), scansN(sort: Desc), productName], map: "off_search_quality_idx")
+  @@index([energyKcal100g, proteins100g, carbohydrates100g, fat100g], map: "off_nutrition_filter_idx")
+  @@index([countries, productName], map: "off_country_search_idx")
 }

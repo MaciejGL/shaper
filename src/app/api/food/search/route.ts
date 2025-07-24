@@ -98,8 +98,7 @@ export async function GET(request: Request) {
 
     if (query) {
       // Handle hybrid text search (USDA + OpenFoodFacts) with caching
-      const normalizedQuery = query.trim().toLowerCase()
-      const cacheKey = FoodSearchCacheKeys.searchResults(normalizedQuery)
+      const cacheKey = FoodSearchCacheKeys.searchResults(query)
 
       // Try to get from cache first
       const cachedResults = await getFromCache(cacheKey)
