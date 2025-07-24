@@ -122,46 +122,51 @@ export async function GET(request: Request) {
         return NextResponse.json(cachedResults)
       }
 
-      // Cache miss - perform SMART TIERED search for better performance
+      // Cache miss - perform PARALLEL search for maximum speed
       const results: SearchResult[] = []
 
-      // Phase 1: Quick USDA search (most reliable nutrition data)
-      // This is typically faster and has more complete nutrition info
-      const usdaResults = await usdaSearchService.searchFoods(query, 12)
-      if (usdaResults.length > 0) {
-        const convertedUSDA = usdaResults.map(convertUSDAToSearchResult)
+      console.info(
+        `🚀 Starting parallel search for "${query}" in ${country} (10 USDA + 10 OFF)`,
+      )
+      const searchStart = Date.now()
+
+      // Run both searches in parallel for maximum performance
+      const [usdaResult, offResult] = await Promise.allSettled([
+        // USDA search (most reliable nutrition data)
+        usdaSearchService.searchFoods(query, 10),
+        // OpenFoodFacts search (broader product variety)
+        openFoodFactsSearchService.searchProducts(query, 10, country),
+      ])
+
+      const searchTime = Date.now() - searchStart
+
+      // Process USDA results
+      if (usdaResult.status === 'fulfilled' && usdaResult.value.length > 0) {
+        const convertedUSDA = usdaResult.value.map(convertUSDAToSearchResult)
         results.push(...convertedUSDA)
+        console.info(`✅ USDA: ${usdaResult.value.length} results`)
+      } else if (usdaResult.status === 'rejected') {
+        console.error(`❌ USDA search failed:`, usdaResult.reason)
+      } else {
+        console.info(`ℹ️ USDA: 0 results`)
       }
 
-      // Phase 2: Only search OpenFoodFacts if we need more results
-      // This saves ~200-500ms when USDA has sufficient results
-      if (results.length < 8) {
-        const remainingSlots = 20 - results.length
-
-        const offStart = Date.now()
-
-        try {
-          const offResults = await openFoodFactsSearchService.searchProducts(
-            query,
-            remainingSlots,
-            country,
-          )
-
-          if (offResults.length > 0) {
-            const convertedOFF = offResults.map(
-              convertOpenFoodFactsToSearchResult,
-            )
-            results.push(...convertedOFF)
-          }
-        } catch (error) {
-          const offTime = Date.now() - offStart
-          console.error(
-            `❌ OpenFoodFacts search failed after ${offTime}ms:`,
-            error,
-          )
-          // Continue with USDA results only - graceful degradation
-        }
+      // Process OpenFoodFacts results
+      if (offResult.status === 'fulfilled' && offResult.value.length > 0) {
+        const convertedOFF = offResult.value.map(
+          convertOpenFoodFactsToSearchResult,
+        )
+        results.push(...convertedOFF)
+        console.info(`✅ OpenFoodFacts: ${offResult.value.length} results`)
+      } else if (offResult.status === 'rejected') {
+        console.error(`❌ OpenFoodFacts search failed:`, offResult.reason)
+      } else {
+        console.info(`ℹ️ OpenFoodFacts: 0 results`)
       }
+
+      console.info(
+        `🚀 Parallel search completed in ${searchTime}ms, total: ${results.length} results`,
+      )
 
       const finalResults = results.slice(0, 20)
 

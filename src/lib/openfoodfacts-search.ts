@@ -101,23 +101,23 @@ function transformOpenFoodFactsProductToResult(
 
 export class OpenFoodFactsSearchService {
   /**
-   * Search OpenFoodFacts products in local database with intelligent filtering and ordering
+   * Search OpenFoodFacts products in local database with strict country filtering
    *
-   * PERFORMANCE STRATEGY:
-   * 1. Fast database query without country filter (uses productName index)
-   * 2. Post-processing to prioritize country-specific results
-   * 3. This avoids slow database queries while still prioritizing local products
+   * FILTERING STRATEGY:
+   * 1. Database-level country filtering for precise results
+   * 2. Only returns products from the specified country
+   * 3. Fallback search without nutrition filter if no results found
    *
    * @param query - Search term (minimum 2 characters)
    * @param limit - Maximum number of results (default: 10)
-   * @param country - Preferred country for results (default: 'Norway')
-   * @returns Promise<OpenFoodFactsSearchResult[]> - Array of matching products
+   * @param country - Country to limit results to (default: 'Norway')
+   * @returns Promise<OpenFoodFactsSearchResult[]> - Array of matching products from specified country only
    *
    * @example
-   * // Default Norway search
+   * // Default Norway search - only Norwegian products
    * await searchProducts('porridge')
    *
-   * // Search for specific country
+   * // Search for specific country - only Swedish products
    * await searchProducts('porridge', 10, 'Sweden')
    */
   async searchProducts(
@@ -130,14 +130,27 @@ export class OpenFoodFactsSearchService {
     try {
       let products = await prisma.openFoodFactsProduct.findMany({
         where: {
-          productName: {
-            contains: query,
-            mode: 'insensitive' as const,
-          },
-          // Simple nutrition filter - at least calories OR protein
-          OR: [
-            { energyKcal100g: { not: null } },
-            { proteins100g: { not: null } },
+          AND: [
+            {
+              productName: {
+                contains: query,
+                mode: 'insensitive' as const,
+              },
+            },
+            // STRICT COUNTRY FILTER: Only Norwegian products
+            {
+              countries: {
+                contains: country,
+                mode: 'insensitive',
+              },
+            },
+            // Simple nutrition filter - at least calories OR protein
+            {
+              OR: [
+                { energyKcal100g: { not: null } },
+                { proteins100g: { not: null } },
+              ],
+            },
           ],
         },
         take: limit,
@@ -147,14 +160,28 @@ export class OpenFoodFactsSearchService {
         },
       })
 
-      // If no results with nutrition filter, try without it as fallback
+      // If no results with nutrition filter, try without nutrition filter but keep country filter
       if (products.length === 0) {
+        console.info(
+          `🔄 No results with nutrition filter, trying broader search for ${country}...`,
+        )
         products = await prisma.openFoodFactsProduct.findMany({
           where: {
-            productName: {
-              contains: query,
-              mode: 'insensitive' as const,
-            },
+            AND: [
+              {
+                productName: {
+                  contains: query,
+                  mode: 'insensitive' as const,
+                },
+              },
+              // STRICT COUNTRY FILTER: Still only Norwegian products
+              {
+                countries: {
+                  contains: country,
+                  mode: 'insensitive',
+                },
+              },
+            ],
           },
           take: limit,
           orderBy: {
@@ -163,34 +190,12 @@ export class OpenFoodFactsSearchService {
         })
       }
 
-      // FAST POST-PROCESSING: Prioritize country-specific results without slowing down the query
-      let finalProducts = products
+      console.info(
+        `🇳🇴 Country-filtered search for "${country}": ${products.length} results`,
+      )
 
-      if (country && products.length > 0) {
-        const countryProducts: typeof products = []
-        const otherProducts: typeof products = []
-
-        for (const product of products) {
-          if (
-            product.countries?.toLowerCase().includes(country.toLowerCase())
-          ) {
-            countryProducts.push(product)
-          } else {
-            otherProducts.push(product)
-          }
-        }
-
-        // Combine: country-specific first, then others, up to the limit
-        finalProducts = [
-          ...countryProducts,
-          ...otherProducts.slice(
-            0,
-            Math.max(0, limit - countryProducts.length),
-          ),
-        ].slice(0, limit)
-      }
-
-      return finalProducts.map(transformOpenFoodFactsProductToResult)
+      // No post-processing needed since we filter at database level
+      return products.map(transformOpenFoodFactsProductToResult)
     } catch (error) {
       console.error('OpenFoodFacts search error:', error)
       return []
@@ -218,14 +223,14 @@ export class OpenFoodFactsSearchService {
   }
 
   /**
-   * Search products by category with optional additional filters
-   * Uses the same performance strategy as main search: fast query + post-processing
+   * Search products by category with strict country filtering
+   * Uses database-level filtering to ensure only country-specific results
    *
    * @param category - Category name to search within
    * @param additionalQuery - Optional additional search term
    * @param limit - Maximum number of results (default: 20)
-   * @param country - Preferred country for results (default: 'Norway')
-   * @returns Promise<OpenFoodFactsSearchResult[]> - Array of matching products
+   * @param country - Country to limit results to (default: 'Norway')
+   * @returns Promise<OpenFoodFactsSearchResult[]> - Array of matching products from specified country only
    */
   async searchByCategory(
     category: string,
@@ -234,13 +239,20 @@ export class OpenFoodFactsSearchService {
     country = 'Norway',
   ): Promise<OpenFoodFactsSearchResult[]> {
     try {
-      // FAST QUERY: Skip country filtering for performance
+      // STRICT COUNTRY-FILTERED QUERY
       const whereClause: Prisma.OpenFoodFactsProductWhereInput = {
         AND: [
           // Category filter
           {
             categories: {
               contains: category,
+              mode: 'insensitive',
+            },
+          },
+          // STRICT COUNTRY FILTER: Only products from specified country
+          {
+            countries: {
+              contains: country,
               mode: 'insensitive',
             },
           },
@@ -278,38 +290,19 @@ export class OpenFoodFactsSearchService {
         })
       }
 
-      let products = await prisma.openFoodFactsProduct.findMany({
+      const products = await prisma.openFoodFactsProduct.findMany({
         where: whereClause,
-        take: limit * 2, // Get more to allow for country filtering
+        take: limit, // No need to get extra since we filter at database level
         orderBy: {
           productName: 'asc',
         },
       })
 
-      // FAST POST-PROCESSING: Prioritize country-specific results
-      if (country && products.length > 0) {
-        const countryProducts: typeof products = []
-        const otherProducts: typeof products = []
+      console.info(
+        `🇳🇴 Category search for "${category}" in ${country}: ${products.length} results`,
+      )
 
-        for (const product of products) {
-          if (
-            product.countries?.toLowerCase().includes(country.toLowerCase())
-          ) {
-            countryProducts.push(product)
-          } else {
-            otherProducts.push(product)
-          }
-        }
-
-        products = [
-          ...countryProducts,
-          ...otherProducts.slice(
-            0,
-            Math.max(0, limit - countryProducts.length),
-          ),
-        ].slice(0, limit)
-      }
-
+      // No post-processing needed since we filter at database level
       return products.map(transformOpenFoodFactsProductToResult)
     } catch (error) {
       console.error('OpenFoodFacts category search error:', error)
