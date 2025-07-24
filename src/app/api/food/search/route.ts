@@ -138,9 +138,6 @@ export async function GET(request: Request) {
       if (results.length < 8) {
         const remainingSlots = 20 - results.length
 
-        console.log(
-          `🔍 Searching OpenFoodFacts for "${query}" in ${country} (need ${remainingSlots} more results)`,
-        )
         const offStart = Date.now()
 
         try {
@@ -148,11 +145,6 @@ export async function GET(request: Request) {
             query,
             remainingSlots,
             country,
-          )
-
-          const offTime = Date.now() - offStart
-          console.log(
-            `✅ OpenFoodFacts search completed in ${offTime}ms, found ${offResults.length} results`,
           )
 
           if (offResults.length > 0) {
@@ -181,11 +173,6 @@ export async function GET(request: Request) {
           FoodSearchCacheTTL.searchResults,
         )
       }
-
-      const totalTime = Date.now() - totalStart
-      console.log(
-        `🚀 Total search time for "${query}" in ${country}: ${totalTime}ms`,
-      )
 
       return NextResponse.json(finalResults)
     }

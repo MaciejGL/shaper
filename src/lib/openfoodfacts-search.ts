@@ -128,13 +128,6 @@ export class OpenFoodFactsSearchService {
     if (query.length < 2) return []
 
     try {
-      const searchStart = Date.now()
-
-      // OPTIMIZED FOR SPEED: Use simple product name search first
-      console.log(
-        `🔍 Searching OpenFoodFacts database for "${query}" (country: ${country})...`,
-      )
-
       let products = await prisma.openFoodFactsProduct.findMany({
         where: {
           productName: {
@@ -156,9 +149,6 @@ export class OpenFoodFactsSearchService {
 
       // If no results with nutrition filter, try without it as fallback
       if (products.length === 0) {
-        console.log(
-          `🔄 No results with nutrition filter, trying broader search...`,
-        )
         products = await prisma.openFoodFactsProduct.findMany({
           where: {
             productName: {
@@ -198,16 +188,7 @@ export class OpenFoodFactsSearchService {
             Math.max(0, limit - countryProducts.length),
           ),
         ].slice(0, limit)
-
-        console.log(
-          `🇳🇴 Country filter "${country}": ${countryProducts.length} local + ${finalProducts.length - countryProducts.length} international`,
-        )
       }
-
-      const searchTime = Date.now() - searchStart
-      console.log(
-        `🔍 OpenFoodFacts search "${query}": ${finalProducts.length} results in ${searchTime}ms`,
-      )
 
       return finalProducts.map(transformOpenFoodFactsProductToResult)
     } catch (error) {
@@ -253,8 +234,6 @@ export class OpenFoodFactsSearchService {
     country = 'Norway',
   ): Promise<OpenFoodFactsSearchResult[]> {
     try {
-      const searchStart = Date.now()
-
       // FAST QUERY: Skip country filtering for performance
       const whereClause: Prisma.OpenFoodFactsProductWhereInput = {
         AND: [
@@ -329,16 +308,7 @@ export class OpenFoodFactsSearchService {
             Math.max(0, limit - countryProducts.length),
           ),
         ].slice(0, limit)
-
-        console.log(
-          `🏷️ Category "${category}" in "${country}": ${countryProducts.length} local + ${products.length - countryProducts.length} international`,
-        )
       }
-
-      const searchTime = Date.now() - searchStart
-      console.log(
-        `🔍 Category search "${category}": ${products.length} results in ${searchTime}ms`,
-      )
 
       return products.map(transformOpenFoodFactsProductToResult)
     } catch (error) {
