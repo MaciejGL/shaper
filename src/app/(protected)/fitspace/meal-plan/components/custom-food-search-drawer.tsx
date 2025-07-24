@@ -2,7 +2,7 @@
 
 import { ScanBarcodeIcon, SearchIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FoodSearchLoading } from '@/app/(protected)/trainer/meal-plans/creator/components/food-search-loading'
@@ -46,50 +46,84 @@ export function CustomFoodSearchDrawer({
   const { handleRemoveLogItem, handleAddCustomFood } = useMealLogging()
   const [date] = useQueryState('date') // Get current date from URL
   const [searchTerm, setSearchTerm] = useState('')
-  const debouncedQuery = useDebounce(searchTerm, 500)
+  const debouncedQuery = useDebounce(searchTerm, 750) // Increased debounce for fewer API calls
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [isScannerOpen, setIsScannerOpen] = useState(false)
   const [isLookingUpBarcode, setIsLookingUpBarcode] = useState(false)
   const [scannedFood, setScannedFood] = useState<SearchResult | null>(null)
   const [barcode, setBarcode] = useState<string | null>(null)
-  // Search foods using the API route (server-side)
+
+  // Ref to track current search request so we can abort it if user types again
+  const currentSearchController = useRef<AbortController | null>(null)
+  // Search foods using the API route (server-side) with abort signal support
   // API now returns SearchResult[] directly - no conversion needed!
-  const searchFoodsAPI = async (query: string): Promise<SearchResult[]> => {
+  const searchFoodsAPI = async (
+    query: string,
+    signal?: AbortSignal,
+  ): Promise<SearchResult[]> => {
     const response = await fetch(
       `/api/food/search?q=${encodeURIComponent(query)}`,
+      {
+        signal, // Pass abort signal to cancel request if needed
+      },
     )
     if (!response.ok) {
       throw new Error('API search failed')
     }
 
     const searchResults: SearchResult[] = await response.json()
-
     return searchResults
   }
 
-  // Handle search
-  const handleSearch = useCallback(
-    async (term: string) => {
-      if (debouncedQuery.length < 2 || searchTerm.length < 2) {
+  // Handle search with request cancellation
+  const handleSearch = useCallback(async (term: string) => {
+    if (term.length < 2) {
+      setSearchResults([])
+      setIsSearching(false)
+      return
+    }
+
+    // Cancel any ongoing search request
+    if (currentSearchController.current) {
+      currentSearchController.current.abort()
+    }
+
+    // Create new abort controller for this search
+    const controller = new AbortController()
+    currentSearchController.current = controller
+
+    setIsSearching(true)
+    try {
+      const results = await searchFoodsAPI(term, controller.signal)
+
+      // Only update results if this request wasn't aborted
+      if (!controller.signal.aborted) {
+        setSearchResults(results || [])
+      }
+    } catch (error) {
+      // Don't show error if request was just aborted (user typed again)
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('🔄 Search request aborted - user typed again')
         return
       }
 
-      setIsSearching(true)
-      try {
-        const results = await searchFoodsAPI(term)
-        setSearchResults(results || [])
-      } catch (error) {
-        console.error('Search error:', error)
-        toast.error('Failed to search foods')
-      } finally {
+      console.error('❌ Search error:', error)
+      toast.error('Failed to search foods')
+    } finally {
+      // Only set loading to false if this request wasn't aborted
+      if (!controller.signal.aborted) {
         setScannedFood(null)
         setIsLookingUpBarcode(false)
         setIsSearching(false)
       }
-    },
-    [debouncedQuery, searchTerm],
-  )
+
+      // Clean up controller reference if it's still the current one
+      if (currentSearchController.current === controller) {
+        currentSearchController.current = null
+      }
+    }
+  }, [])
 
   // Handle barcode scan result
   const handleBarcodeScanned = async (barcode: string) => {
@@ -185,17 +219,40 @@ export function CustomFoodSearchDrawer({
   }
 
   // Trigger search when debounced query changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (debouncedQuery && debouncedQuery.trim().length > 2) {
       handleSearch(debouncedQuery.trim())
+    } else {
+      // Clear results and cancel any ongoing search when query is too short
+      setSearchResults([])
+      setIsSearching(false)
+      if (currentSearchController.current) {
+        currentSearchController.current.abort()
+        currentSearchController.current = null
+      }
     }
   }, [debouncedQuery, handleSearch])
+
+  // Cleanup: abort any ongoing search request when component unmounts
+  useEffect(() => {
+    return () => {
+      if (currentSearchController.current) {
+        currentSearchController.current.abort()
+      }
+    }
+  }, [])
 
   const handleClose = () => {
     setSearchTerm('')
     setSearchResults([])
     setScannedFood(null)
     setBarcode(null)
+    setIsSearching(false)
+    // Cancel any ongoing search when drawer closes
+    if (currentSearchController.current) {
+      currentSearchController.current.abort()
+      currentSearchController.current = null
+    }
     onClose()
   }
 
@@ -272,6 +329,13 @@ export function CustomFoodSearchDrawer({
               className="w-full grow"
               onFocusCapture={() => {
                 setSearchTerm('')
+                setSearchResults([])
+                setIsSearching(false)
+                // Cancel any ongoing search when input is cleared
+                if (currentSearchController.current) {
+                  currentSearchController.current.abort()
+                  currentSearchController.current = null
+                }
               }}
             />
 

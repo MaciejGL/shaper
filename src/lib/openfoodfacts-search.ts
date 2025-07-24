@@ -1,4 +1,4 @@
-import type { OpenFoodFactsProduct } from '@prisma/client'
+import type { OpenFoodFactsProduct, Prisma } from '@prisma/client'
 
 import { prisma } from '@/lib/db'
 
@@ -95,36 +95,6 @@ function transformOpenFoodFactsProductToResult(
   }
 }
 
-/**
- * Get filter for products with meaningful nutrition data
- * Only includes products that have at least calories or other key nutrients
- */
-function getNutritionDataFilter() {
-  return {
-    OR: [
-      { energyKcal100g: { not: null } },
-      { proteins100g: { not: null } },
-      { carbohydrates100g: { not: null } },
-      { fat100g: { not: null } },
-    ],
-  }
-}
-
-/**
- * Get ordering strategy for search results
- * Prioritizes products with higher data quality and popularity
- */
-function getSearchOrdering() {
-  return [
-    // First by completeness (higher data quality)
-    { completeness: 'desc' as const },
-    // Then by scan count (popularity indicator)
-    { scansN: 'desc' as const },
-    // Finally by name for consistency
-    { productName: 'asc' as const },
-  ]
-}
-
 // ============================================================================
 // SEARCH SERVICE CLASS
 // ============================================================================
@@ -132,10 +102,23 @@ function getSearchOrdering() {
 export class OpenFoodFactsSearchService {
   /**
    * Search OpenFoodFacts products in local database with intelligent filtering and ordering
+   *
+   * PERFORMANCE STRATEGY:
+   * 1. Fast database query without country filter (uses productName index)
+   * 2. Post-processing to prioritize country-specific results
+   * 3. This avoids slow database queries while still prioritizing local products
+   *
    * @param query - Search term (minimum 2 characters)
    * @param limit - Maximum number of results (default: 10)
    * @param country - Preferred country for results (default: 'Norway')
    * @returns Promise<OpenFoodFactsSearchResult[]> - Array of matching products
+   *
+   * @example
+   * // Default Norway search
+   * await searchProducts('porridge')
+   *
+   * // Search for specific country
+   * await searchProducts('porridge', 10, 'Sweden')
    */
   async searchProducts(
     query: string,
@@ -145,100 +128,90 @@ export class OpenFoodFactsSearchService {
     if (query.length < 2) return []
 
     try {
-      // First try: Search with country preference
+      const searchStart = Date.now()
+
+      // OPTIMIZED FOR SPEED: Use simple product name search first
+      console.log(
+        `🔍 Searching OpenFoodFacts database for "${query}" (country: ${country})...`,
+      )
+
       let products = await prisma.openFoodFactsProduct.findMany({
         where: {
-          AND: [
-            // Search terms filter
-            {
-              OR: [
-                {
-                  productName: {
-                    contains: query,
-                    mode: 'insensitive' as const,
-                  },
-                },
-                {
-                  brands: {
-                    contains: query,
-                    mode: 'insensitive' as const,
-                  },
-                },
-                {
-                  categories: {
-                    contains: query,
-                    mode: 'insensitive' as const,
-                  },
-                },
-              ],
-            },
-            // Country preference filter
-            {
-              countries: {
-                contains: country,
-                mode: 'insensitive' as const,
-              },
-            },
-            // Nutrition data filter
-            getNutritionDataFilter(),
+          productName: {
+            contains: query,
+            mode: 'insensitive' as const,
+          },
+          // Simple nutrition filter - at least calories OR protein
+          OR: [
+            { energyKcal100g: { not: null } },
+            { proteins100g: { not: null } },
           ],
         },
         take: limit,
-        orderBy: getSearchOrdering(),
+        // Simple ordering for speed
+        orderBy: {
+          productName: 'asc',
+        },
       })
 
-      // If we don't get enough results with country filter, expand search globally
-      if (products.length < Math.min(5, limit)) {
-        const globalProducts = await prisma.openFoodFactsProduct.findMany({
+      // If no results with nutrition filter, try without it as fallback
+      if (products.length === 0) {
+        console.log(
+          `🔄 No results with nutrition filter, trying broader search...`,
+        )
+        products = await prisma.openFoodFactsProduct.findMany({
           where: {
-            AND: [
-              // Search terms filter (same as above)
-              {
-                OR: [
-                  {
-                    productName: {
-                      contains: query,
-                      mode: 'insensitive' as const,
-                    },
-                  },
-                  {
-                    brands: {
-                      contains: query,
-                      mode: 'insensitive' as const,
-                    },
-                  },
-                  {
-                    categories: {
-                      contains: query,
-                      mode: 'insensitive' as const,
-                    },
-                  },
-                ],
-              },
-              // Exclude products we already have
-              products.length > 0
-                ? {
-                    id: {
-                      notIn: products.map((p) => p.id),
-                    },
-                  }
-                : {},
-              // Nutrition data filter
-              getNutritionDataFilter(),
-            ],
+            productName: {
+              contains: query,
+              mode: 'insensitive' as const,
+            },
           },
-          take: limit - products.length,
-          orderBy: getSearchOrdering(),
+          take: limit,
+          orderBy: {
+            productName: 'asc',
+          },
         })
-
-        // Combine results: country-specific first, then global
-        products = [...products, ...globalProducts]
       }
 
-      return products.map(transformOpenFoodFactsProductToResult)
+      // FAST POST-PROCESSING: Prioritize country-specific results without slowing down the query
+      let finalProducts = products
+
+      if (country && products.length > 0) {
+        const countryProducts: typeof products = []
+        const otherProducts: typeof products = []
+
+        for (const product of products) {
+          if (
+            product.countries?.toLowerCase().includes(country.toLowerCase())
+          ) {
+            countryProducts.push(product)
+          } else {
+            otherProducts.push(product)
+          }
+        }
+
+        // Combine: country-specific first, then others, up to the limit
+        finalProducts = [
+          ...countryProducts,
+          ...otherProducts.slice(
+            0,
+            Math.max(0, limit - countryProducts.length),
+          ),
+        ].slice(0, limit)
+
+        console.log(
+          `🇳🇴 Country filter "${country}": ${countryProducts.length} local + ${finalProducts.length - countryProducts.length} international`,
+        )
+      }
+
+      const searchTime = Date.now() - searchStart
+      console.log(
+        `🔍 OpenFoodFacts search "${query}": ${finalProducts.length} results in ${searchTime}ms`,
+      )
+
+      return finalProducts.map(transformOpenFoodFactsProductToResult)
     } catch (error) {
       console.error('OpenFoodFacts search error:', error)
-      // Return empty results instead of throwing to allow graceful fallback
       return []
     }
   }
@@ -265,6 +238,8 @@ export class OpenFoodFactsSearchService {
 
   /**
    * Search products by category with optional additional filters
+   * Uses the same performance strategy as main search: fast query + post-processing
+   *
    * @param category - Category name to search within
    * @param additionalQuery - Optional additional search term
    * @param limit - Maximum number of results (default: 20)
@@ -278,8 +253,10 @@ export class OpenFoodFactsSearchService {
     country = 'Norway',
   ): Promise<OpenFoodFactsSearchResult[]> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const whereClause: any = {
+      const searchStart = Date.now()
+
+      // FAST QUERY: Skip country filtering for performance
+      const whereClause: Prisma.OpenFoodFactsProductWhereInput = {
         AND: [
           // Category filter
           {
@@ -288,20 +265,22 @@ export class OpenFoodFactsSearchService {
               mode: 'insensitive',
             },
           },
-          // Country preference filter
-          {
-            countries: {
-              contains: country,
-              mode: 'insensitive',
-            },
-          },
           // Nutrition data filter
-          getNutritionDataFilter(),
+          {
+            OR: [
+              { energyKcal100g: { not: null } },
+              { proteins100g: { not: null } },
+            ],
+          },
         ],
       }
 
       // Add additional query filter if provided
-      if (additionalQuery && additionalQuery.length >= 2) {
+      if (
+        additionalQuery &&
+        additionalQuery.length >= 2 &&
+        Array.isArray(whereClause.AND)
+      ) {
         whereClause.AND.push({
           OR: [
             {
@@ -320,11 +299,46 @@ export class OpenFoodFactsSearchService {
         })
       }
 
-      const products = await prisma.openFoodFactsProduct.findMany({
+      let products = await prisma.openFoodFactsProduct.findMany({
         where: whereClause,
-        take: limit,
-        orderBy: getSearchOrdering(),
+        take: limit * 2, // Get more to allow for country filtering
+        orderBy: {
+          productName: 'asc',
+        },
       })
+
+      // FAST POST-PROCESSING: Prioritize country-specific results
+      if (country && products.length > 0) {
+        const countryProducts: typeof products = []
+        const otherProducts: typeof products = []
+
+        for (const product of products) {
+          if (
+            product.countries?.toLowerCase().includes(country.toLowerCase())
+          ) {
+            countryProducts.push(product)
+          } else {
+            otherProducts.push(product)
+          }
+        }
+
+        products = [
+          ...countryProducts,
+          ...otherProducts.slice(
+            0,
+            Math.max(0, limit - countryProducts.length),
+          ),
+        ].slice(0, limit)
+
+        console.log(
+          `🏷️ Category "${category}" in "${country}": ${countryProducts.length} local + ${products.length - countryProducts.length} international`,
+        )
+      }
+
+      const searchTime = Date.now() - searchStart
+      console.log(
+        `🔍 Category search "${category}": ${products.length} results in ${searchTime}ms`,
+      )
 
       return products.map(transformOpenFoodFactsProductToResult)
     } catch (error) {
@@ -407,7 +421,12 @@ export class OpenFoodFactsSearchService {
           mode: 'insensitive',
         },
         // Only include products with nutrition data
-        ...getNutritionDataFilter(),
+        OR: [
+          { energyKcal100g: { not: null } },
+          { proteins100g: { not: null } },
+          { carbohydrates100g: { not: null } },
+          { fat100g: { not: null } },
+        ],
       }
 
       if (category) {

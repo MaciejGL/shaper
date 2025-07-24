@@ -34,15 +34,23 @@ export interface SearchResult {
  * Main search function that uses the optimized API endpoint
  * The API endpoint handles both USDA and OpenFoodFacts searches using local databases
  * @param query - The search term
+ * @param country - Optional country filter (defaults to Norway on backend)
  * @returns Promise<SearchResult[]> - Array of search results from both sources
  */
-export async function searchFoods(query: string): Promise<SearchResult[]> {
+export async function searchFoods(
+  query: string,
+  country?: string,
+): Promise<SearchResult[]> {
   if (query.length < 2) return []
 
   try {
-    const response = await fetch(
-      `/api/food/search?q=${encodeURIComponent(query)}`,
-    )
+    const url = new URL('/api/food/search', window.location.origin)
+    url.searchParams.set('q', query)
+    if (country) {
+      url.searchParams.set('country', country)
+    }
+
+    const response = await fetch(url.toString())
 
     if (!response.ok) {
       throw new Error(`Search failed: ${response.status}`)

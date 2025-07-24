@@ -73,34 +73,6 @@ function transformUSDAFoodToResult(food: USDAFood): USDASearchResult {
   }
 }
 
-/**
- * Get WHERE clause for foods with nutrition data
- * Ensures we only return useful foods with at least some nutrition information
- */
-function getNutritionDataFilter() {
-  return {
-    OR: [
-      { caloriesPer100g: { not: null } },
-      { proteinPer100g: { not: null } },
-      { carbsPer100g: { not: null } },
-      { fatPer100g: { not: null } },
-    ],
-  }
-}
-
-/**
- * Get ordering strategy for search results
- * Prioritizes SR Legacy foods and relevance
- */
-function getSearchOrdering() {
-  return [
-    // Prioritize SR Legacy foods (most complete nutrition data)
-    { dataType: 'asc' as const }, // sr_legacy_food comes before foundation_food alphabetically
-    // Then by relevance (exact matches first)
-    { description: 'asc' as const },
-  ]
-}
-
 // ============================================================================
 // SEARCH SERVICE CLASS
 // ============================================================================
@@ -116,23 +88,39 @@ export class USDASearchService {
     if (query.length < 2) return []
 
     try {
+      // Use the new composite index [dataType, description] for better performance
       const foods = await prisma.uSDAFood.findMany({
         where: {
-          description: {
-            contains: query,
-            mode: 'insensitive',
-          },
-          // Only include foods with nutrition data
-          ...getNutritionDataFilter(),
+          AND: [
+            {
+              description: {
+                contains: query,
+                mode: 'insensitive',
+              },
+            },
+            // Leverage the nutrition filter index for faster queries
+            {
+              OR: [
+                { caloriesPer100g: { not: null } },
+                { proteinPer100g: { not: null } },
+                { carbsPer100g: { not: null } },
+                { fatPer100g: { not: null } },
+              ],
+            },
+          ],
         },
         take: limit,
-        orderBy: getSearchOrdering(),
+        // Optimized ordering using the new composite index [dataType, description]
+        orderBy: [
+          { dataType: 'asc' }, // sr_legacy_food comes first (better data quality)
+          { description: 'asc' }, // Then alphabetical for consistency
+        ],
       })
 
       return foods.map(transformUSDAFoodToResult)
     } catch (error) {
       console.error('USDA search error:', error)
-      // Return empty results instead of throwing to allow OpenFoodFacts fallback
+      // Return empty results instead of throwing to allow graceful fallback
       return []
     }
   }

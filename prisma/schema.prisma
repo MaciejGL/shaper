@@ -695,4 +695,7 @@ model OpenFoodFactsProduct {
   @@index([completeness(sort: Desc), scansN(sort: Desc), productName], map: "off_search_quality_idx")
   @@index([energyKcal100g, proteins100g, carbohydrates100g, fat100g], map: "off_nutrition_filter_idx")
   @@index([countries, productName], map: "off_country_search_idx")
+  // Fast search index for common product name searches with nutrition filter
+  @@index([productName, energyKcal100g], map: "off_fast_search_idx")
+  @@index([productName, proteins100g], map: "off_protein_search_idx")
 }

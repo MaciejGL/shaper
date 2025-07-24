@@ -7,6 +7,7 @@ import {
   SetStateAction,
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from 'react'
 import { toast } from 'sonner'
@@ -27,19 +28,25 @@ import { FoodSearchResults } from './food-search-results'
 // ============================================================================
 
 /**
- * Search foods using the API route (server-side)
+ * Search foods using the API route (server-side) with abort signal support
  * API now returns SearchResult[] directly - no conversion needed!
  */
-async function searchFoodsAPI(query: string): Promise<SearchResult[]> {
+async function searchFoodsAPI(
+  query: string,
+  signal?: AbortSignal,
+): Promise<SearchResult[]> {
   const response = await fetch(
     `/api/food/search?q=${encodeURIComponent(query)}`,
+    {
+      signal, // Pass abort signal to cancel request if needed
+    },
   )
+
   if (!response.ok) {
     throw new Error('API search failed')
   }
 
   const data = await response.json()
-
   return data
 }
 
@@ -69,9 +76,12 @@ export default function FoodSearch({
 
   // Local state for editing
   const [searchTerm, setSearchTerm] = useState('')
-  const debouncedQuery = useDebounce(searchTerm, 500)
+  const debouncedQuery = useDebounce(searchTerm, 750) // Increased debounce for fewer API calls
   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
+
+  // Ref to track current search request so we can abort it if user types again
+  const currentSearchController = useRef<AbortController | null>(null)
 
   // Load existing foods when component mounts
   useEffect(() => {
@@ -132,36 +142,86 @@ export default function FoodSearch({
       setHasChanges(true)
       setSearchTerm('')
       setSearchResults([])
+      setIsSearching(false)
+      // Cancel any ongoing search when food is added
+      if (currentSearchController.current) {
+        currentSearchController.current.abort()
+        currentSearchController.current = null
+      }
     },
-    [canEdit, foods, setFoods, setHasChanges, setSearchTerm, setSearchResults],
+    [canEdit, foods, setFoods, setHasChanges],
   )
 
-  // Handle search using API route (server-side)
+  // Handle search using API route (server-side) with request cancellation
   const handleSearch = useCallback(async (term: string) => {
     if (term.length < 2) {
       setSearchResults([])
+      setIsSearching(false)
       return
     }
 
+    // Cancel any ongoing search request
+    if (currentSearchController.current) {
+      currentSearchController.current.abort()
+    }
+
+    // Create new abort controller for this search
+    const controller = new AbortController()
+    currentSearchController.current = controller
+
     setIsSearching(true)
     try {
-      const results = await searchFoodsAPI(term)
-      setSearchResults(results || [])
+      const results = await searchFoodsAPI(term, controller.signal)
+
+      // Only update results if this request wasn't aborted
+      if (!controller.signal.aborted) {
+        setSearchResults(results || [])
+      }
     } catch (error) {
+      // Don't show error if request was just aborted (user typed again)
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.error('🔄 Search request aborted - user typed again')
+        return
+      }
+
       console.error('❌ Client search error:', error)
       toast.error('Failed to search foods')
     } finally {
-      setIsSearching(false)
+      // Only set loading to false if this request wasn't aborted
+      if (!controller.signal.aborted) {
+        setIsSearching(false)
+      }
+
+      // Clean up controller reference if it's still the current one
+      if (currentSearchController.current === controller) {
+        currentSearchController.current = null
+      }
     }
   }, [])
 
+  // Trigger search when debounced query changes
   useEffect(() => {
     if (debouncedQuery && debouncedQuery.trim().length > 2) {
       handleSearch(debouncedQuery.trim())
     } else {
+      // Clear results and cancel any ongoing search when query is too short
       setSearchResults([])
+      setIsSearching(false)
+      if (currentSearchController.current) {
+        currentSearchController.current.abort()
+        currentSearchController.current = null
+      }
     }
   }, [debouncedQuery, handleSearch])
+
+  // Cleanup: abort any ongoing search request when component unmounts
+  useEffect(() => {
+    return () => {
+      if (currentSearchController.current) {
+        currentSearchController.current.abort()
+      }
+    }
+  }, [])
 
   const variants = {
     enter: {
@@ -184,7 +244,19 @@ export default function FoodSearch({
         }}
         iconStart={<Search />}
         iconEnd={
-          <XIcon className="cursor-pointer" onClick={() => setSearchTerm('')} />
+          <XIcon
+            className="cursor-pointer"
+            onClick={() => {
+              setSearchTerm('')
+              setSearchResults([])
+              setIsSearching(false)
+              // Cancel any ongoing search when user manually clears
+              if (currentSearchController.current) {
+                currentSearchController.current.abort()
+                currentSearchController.current = null
+              }
+            }}
+          />
         }
         disabled={!canEdit}
       />

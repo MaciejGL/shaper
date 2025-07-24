@@ -61,10 +61,26 @@ function convertOpenFoodFactsToSearchResult(
 // API ROUTE HANDLER
 // ============================================================================
 
+/**
+ * Food search API endpoint
+ *
+ * Query Parameters:
+ * - q: Search query (required for text search)
+ * - barcode: Product barcode (for barcode lookup)
+ * - country: Country preference for results (default: 'Norway')
+ *
+ * Examples:
+ * - /api/food/search?q=porridge
+ * - /api/food/search?q=chicken&country=Sweden
+ * - /api/food/search?barcode=1234567890
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const query = searchParams.get('q')
   const barcode = searchParams.get('barcode')
+  const country = searchParams.get('country') || 'Norway' // Default to Norway
+
+  const totalStart = Date.now()
 
   try {
     const user = await getCurrentUser()
@@ -106,38 +122,58 @@ export async function GET(request: Request) {
         return NextResponse.json(cachedResults)
       }
 
-      // Cache miss - perform hybrid search
-      const [usdaResults, openFoodFactsResults] = await Promise.allSettled([
-        // Search USDA database (local)
-        usdaSearchService.searchFoods(query, 10),
-        // Search OpenFoodFacts database (local) with country preference
-        openFoodFactsSearchService.searchProducts(query, 10, 'Norway'),
-      ])
-
-      // Convert and combine results with USDA prioritized
+      // Cache miss - perform SMART TIERED search for better performance
       const results: SearchResult[] = []
 
-      // Add USDA results first (highest priority - complete nutrition data)
-      if (usdaResults.status === 'fulfilled' && usdaResults.value.length > 0) {
-        const convertedUSDA = usdaResults.value.map(convertUSDAToSearchResult)
+      // Phase 1: Quick USDA search (most reliable nutrition data)
+      // This is typically faster and has more complete nutrition info
+      const usdaResults = await usdaSearchService.searchFoods(query, 12)
+      if (usdaResults.length > 0) {
+        const convertedUSDA = usdaResults.map(convertUSDAToSearchResult)
         results.push(...convertedUSDA)
       }
 
-      // Add OpenFoodFacts results (brand products, international foods)
-      if (
-        openFoodFactsResults.status === 'fulfilled' &&
-        openFoodFactsResults.value &&
-        openFoodFactsResults.value.length > 0
-      ) {
-        const convertedOFF = openFoodFactsResults.value.map(
-          convertOpenFoodFactsToSearchResult,
+      // Phase 2: Only search OpenFoodFacts if we need more results
+      // This saves ~200-500ms when USDA has sufficient results
+      if (results.length < 8) {
+        const remainingSlots = 20 - results.length
+
+        console.log(
+          `🔍 Searching OpenFoodFacts for "${query}" in ${country} (need ${remainingSlots} more results)`,
         )
-        results.push(...convertedOFF)
+        const offStart = Date.now()
+
+        try {
+          const offResults = await openFoodFactsSearchService.searchProducts(
+            query,
+            remainingSlots,
+            country,
+          )
+
+          const offTime = Date.now() - offStart
+          console.log(
+            `✅ OpenFoodFacts search completed in ${offTime}ms, found ${offResults.length} results`,
+          )
+
+          if (offResults.length > 0) {
+            const convertedOFF = offResults.map(
+              convertOpenFoodFactsToSearchResult,
+            )
+            results.push(...convertedOFF)
+          }
+        } catch (error) {
+          const offTime = Date.now() - offStart
+          console.error(
+            `❌ OpenFoodFacts search failed after ${offTime}ms:`,
+            error,
+          )
+          // Continue with USDA results only - graceful degradation
+        }
       }
 
-      const finalResults = results.slice(0, 20) // Limit to 20 results
+      const finalResults = results.slice(0, 20)
 
-      // Cache the converted results for future requests
+      // Cache the results with longer TTL for better hit rates
       if (finalResults.length > 0) {
         await setInCache(
           cacheKey,
@@ -146,7 +182,11 @@ export async function GET(request: Request) {
         )
       }
 
-      // Return SearchResult[] directly (no more conversion needed frontend)
+      const totalTime = Date.now() - totalStart
+      console.log(
+        `🚀 Total search time for "${query}" in ${country}: ${totalTime}ms`,
+      )
+
       return NextResponse.json(finalResults)
     }
 
@@ -155,7 +195,8 @@ export async function GET(request: Request) {
       { status: 400 },
     )
   } catch (error) {
-    console.error('❌ API Food search error:', error)
+    const totalTime = Date.now() - totalStart
+    console.error(`❌ API Food search error after ${totalTime}ms:`, error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 },
