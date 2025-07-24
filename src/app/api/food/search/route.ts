@@ -79,6 +79,7 @@ export async function GET(request: Request) {
   const query = searchParams.get('q')
   const barcode = searchParams.get('barcode')
   const country = searchParams.get('country') || 'Norway' // Default to Norway
+  const limit = 40
 
   const totalStart = Date.now()
 
@@ -133,9 +134,13 @@ export async function GET(request: Request) {
       // Run both searches in parallel for maximum performance
       const [usdaResult, offResult] = await Promise.allSettled([
         // USDA search (most reliable nutrition data)
-        usdaSearchService.searchFoods(query, 10),
+        usdaSearchService.searchFoods(query, Math.floor(limit / 2)),
         // OpenFoodFacts search (broader product variety)
-        openFoodFactsSearchService.searchProducts(query, 10, country),
+        openFoodFactsSearchService.searchProducts(
+          query,
+          Math.floor(limit / 2),
+          country,
+        ),
       ])
 
       const searchTime = Date.now() - searchStart
@@ -168,7 +173,7 @@ export async function GET(request: Request) {
         `🚀 Parallel search completed in ${searchTime}ms, total: ${results.length} results`,
       )
 
-      const finalResults = results.slice(0, 20)
+      const finalResults = results.slice(0, limit)
 
       // Cache the results with longer TTL for better hit rates
       if (finalResults.length > 0) {

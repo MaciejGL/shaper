@@ -138,12 +138,12 @@ export class OpenFoodFactsSearchService {
               },
             },
             // STRICT COUNTRY FILTER: Only Norwegian products
-            {
-              countries: {
-                contains: country,
-                mode: 'insensitive',
-              },
-            },
+            // {
+            //   countries: {
+            //     contains: country,
+            //     mode: 'insensitive',
+            //   },
+            // },
             // Simple nutrition filter - at least calories OR protein
             {
               OR: [
@@ -175,12 +175,12 @@ export class OpenFoodFactsSearchService {
                 },
               },
               // STRICT COUNTRY FILTER: Still only Norwegian products
-              {
-                countries: {
-                  contains: country,
-                  mode: 'insensitive',
-                },
-              },
+              // {
+              //   countries: {
+              //     contains: country,
+              //     mode: 'insensitive',
+              //   },
+              // },
             ],
           },
           take: limit,
