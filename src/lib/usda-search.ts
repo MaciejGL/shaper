@@ -97,6 +97,9 @@ export class USDASearchService {
                 contains: query,
                 mode: 'insensitive',
               },
+              dataType: {
+                in: ['foundation_food'],
+              },
             },
             // Leverage the nutrition filter index for faster queries
             {

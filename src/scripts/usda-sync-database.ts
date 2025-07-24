@@ -16,7 +16,7 @@ const BATCH_SIZE = 250 // Reduced for stability with large datasets
 const PAUSE_BETWEEN_BATCHES = 200 // Pause to reduce database load
 
 // START_FROM_RECORD allows resuming from a specific position (useful for debugging)
-const START_FROM_RECORD = parseInt(process.env.START_FROM_RECORD || '0')
+const START_FROM_RECORD = 0
 
 // Single Prisma instance with sync-optimized connection settings
 const prisma = new PrismaClient({
@@ -71,7 +71,7 @@ function parseIntSafe(value?: string): number | undefined {
 }
 
 async function findLatestCSVFile(): Promise<string> {
-  const csvPath = path.join(PARSED_DIR, 'usda_foods.csv')
+  const csvPath = path.join(PARSED_DIR, 'usda_foods_foundation_only.csv')
 
   try {
     await fs.access(csvPath)

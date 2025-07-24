@@ -161,13 +161,10 @@ async function walkDirectory(dirPath: string): Promise<string[]> {
 
 async function findDatasetFiles(): Promise<{
   foundationFoods: string[]
-  srLegacy: string[]
 }> {
   const foundationDir = path.join(EXTRACTED_DIR, 'foundation_foods')
-  const srLegacyDir = path.join(EXTRACTED_DIR, 'sr_legacy')
 
   let foundationFoods: string[] = []
-  let srLegacy: string[] = []
 
   try {
     console.info(
@@ -179,15 +176,7 @@ async function findDatasetFiles(): Promise<{
     console.warn('Foundation Foods directory not found:', error)
   }
 
-  try {
-    console.info(`🔍 Searching for SR Legacy CSV files in ${srLegacyDir}...`)
-    srLegacy = await walkDirectory(srLegacyDir)
-    console.info(`✅ Found ${srLegacy.length} SR Legacy files`)
-  } catch (error) {
-    console.warn('SR Legacy directory not found:', error)
-  }
-
-  return { foundationFoods, srLegacy }
+  return { foundationFoods }
 }
 
 function parseNutrientValue(value: string | undefined): number | undefined {
@@ -326,28 +315,55 @@ async function parseDatasetToCSV(
       foodCategory: rawFood.category?.trim() || undefined,
 
       // Extract nutrition values
-      caloriesPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.ENERGY_KCAL),
-      proteinPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.PROTEIN),
-      carbsPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.CARBS),
-      fatPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.FAT),
-      fiberPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.FIBER),
-      sugarPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.SUGAR),
-      sodiumPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.SODIUM),
-      calciumPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.CALCIUM),
-      ironPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.IRON),
-      potassiumPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.POTASSIUM),
-      vitaminCPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.VITAMIN_C),
+      proteinPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.PROTEIN) ?? 0,
+      carbsPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.CARBS) ?? 0,
+      fatPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.FAT) ?? 0,
+      fiberPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.FIBER) ?? 0,
+      sugarPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.SUGAR) ?? 0,
+      sodiumPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.SODIUM) ?? 0,
+      calciumPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.CALCIUM) ?? 0,
+      ironPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.IRON) ?? 0,
+      potassiumPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.POTASSIUM) ?? 0,
+      vitaminCPer100g: foodNutrients.get(ESSENTIAL_NUTRIENTS.VITAMIN_C) ?? 0,
+    }
+
+    // Calculate calories if missing but macros are available
+    const originalCalories = foodNutrients.get(ESSENTIAL_NUTRIENTS.ENERGY_KCAL)
+    if (
+      !originalCalories &&
+      (parsedFood.proteinPer100g ||
+        parsedFood.carbsPer100g ||
+        parsedFood.fatPer100g)
+    ) {
+      // Standard caloric values: Protein = 4 kcal/g, Carbs = 4 kcal/g, Fat = 9 kcal/g
+      const calculatedCalories =
+        (parsedFood.proteinPer100g || 0) * 4 +
+        (parsedFood.carbsPer100g || 0) * 4 +
+        (parsedFood.fatPer100g || 0) * 9
+
+      parsedFood.caloriesPer100g = Math.round(calculatedCalories * 100) / 100 // Round to 2 decimal places
+    } else {
+      parsedFood.caloriesPer100g = originalCalories ?? 0
     }
 
     processedCount++
 
-    // Filter to only include foods with meaningful nutrition data
+    // Filter to only include foundation foods with meaningful nutrition data
     if (
-      parsedFood.caloriesPer100g != null &&
-      parsedFood.proteinPer100g != null &&
-      parsedFood.carbsPer100g != null &&
-      parsedFood.fatPer100g != null
+      parsedFood.dataType === 'foundation_food' &&
+      ((parsedFood.caloriesPer100g ?? 0) > 0 ||
+        (parsedFood.proteinPer100g ?? 0) > 0 ||
+        (parsedFood.carbsPer100g ?? 0) > 0 ||
+        (parsedFood.fatPer100g ?? 0) > 0)
     ) {
+      // Clean up description by removing unwanted text
+      parsedFood.description = parsedFood.description
+        .replace(
+          /\s*\(Includes foods for USDA's Food Distribution Program\)/gi,
+          '',
+        )
+        .trim()
+
       // Convert to CSV and write directly
       const csvRow = convertToCSVRow(parsedFood)
       csvStream.write(csvRow + '\n')
@@ -377,45 +393,39 @@ async function main(): Promise<void> {
     await ensureDirectoryExists(PARSED_DIR)
 
     // Find all dataset files
-    const { foundationFoods, srLegacy } = await findDatasetFiles()
+    const { foundationFoods } = await findDatasetFiles()
 
-    if (foundationFoods.length === 0 && srLegacy.length === 0) {
-      console.error('❌ No USDA dataset files found.')
+    if (foundationFoods.length === 0) {
+      console.error('❌ No Foundation Foods dataset files found.')
       console.error('Please run the download script first:')
       console.error('npx tsx src/scripts/download-usda-data.ts')
       process.exit(1)
     }
 
     // Create CSV file path
-    const csvPath = path.join(PARSED_DIR, 'usda_foods.csv')
+    const csvPath = path.join(PARSED_DIR, 'usda_foods_foundation_only.csv')
     const csvStream = createWriteStream(csvPath, { encoding: 'utf8' })
 
     // Write CSV header
     csvStream.write(CSV_COLUMNS.join(',') + '\n')
     console.info(`📄 CSV header written to: ${csvPath}`)
+    console.info(
+      'ℹ️  Processing ONLY Foundation Foods (foundation_food data type)',
+    )
+    console.info(
+      'ℹ️  Cleaning up descriptions, calculating missing calories from macros, and requiring some nutrition data',
+    )
 
     let totalValidFoods = 0
     const startTime = Date.now()
 
-    // Process Foundation Foods
-    if (foundationFoods.length > 0) {
-      const foundationCount = await parseDatasetToCSV(
-        foundationFoods,
-        'Foundation Foods',
-        csvStream,
-      )
-      totalValidFoods += foundationCount
-    }
-
-    // Process SR Legacy
-    if (srLegacy.length > 0) {
-      const srLegacyCount = await parseDatasetToCSV(
-        srLegacy,
-        'SR Legacy',
-        csvStream,
-      )
-      totalValidFoods += srLegacyCount
-    }
+    // Process Foundation Foods only
+    const foundationCount = await parseDatasetToCSV(
+      foundationFoods,
+      'Foundation Foods (foundation_food only)',
+      csvStream,
+    )
+    totalValidFoods += foundationCount
 
     // Close CSV stream
     csvStream.end()
@@ -426,13 +436,11 @@ async function main(): Promise<void> {
     // Create summary
     const summary = {
       totalFoods: totalValidFoods,
-      foundationFoods:
-        foundationFoods.length > 0
-          ? Math.floor(totalValidFoods * 0.6) // Rough estimate
-          : 0,
-      srLegacy: srLegacy.length > 0 ? Math.floor(totalValidFoods * 0.4) : 0, // Rough estimate
+      foundationFoods: totalValidFoods, // All foods are foundation foods now
+      srLegacy: 0, // No SR Legacy foods included
       csvFile: csvPath,
       parsedAt: new Date().toISOString(),
+      note: 'Only foundation_food data type included in this export',
     }
 
     const summaryPath = path.join(PARSED_DIR, 'parsing_summary.json')
