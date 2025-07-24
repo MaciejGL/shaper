@@ -112,7 +112,7 @@ export class USDASearchService {
         take: limit,
         // Optimized ordering using the new composite index [dataType, description]
         orderBy: [
-          { dataType: 'asc' }, // sr_legacy_food comes first (better data quality)
+          { dataType: 'desc' }, // sr_legacy_food comes first (better data quality)
           { description: 'asc' }, // Then alphabetical for consistency
         ],
       })
