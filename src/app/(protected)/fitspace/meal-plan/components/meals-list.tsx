@@ -32,7 +32,7 @@ export function MealsList({
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [customFoodDrawerOpen, setCustomFoodDrawerOpen] = useState(false)
-  const { isLoading } = useMealPlan()
+  const { isLoadingActive, isLoadingDefault } = useMealPlan()
 
   const { handleBatchLogMeal, isBatchLoggingFood } = useMealLogging()
 
@@ -81,7 +81,7 @@ export function MealsList({
             />
           )
         })}
-        {planMeals.length === 0 && !isLoading && (
+        {planMeals.length === 0 && !isLoadingActive && !isLoadingDefault && (
           <div className="text-center text-sm text-muted-foreground min-h-[45dvh]">
             No meals found
           </div>
