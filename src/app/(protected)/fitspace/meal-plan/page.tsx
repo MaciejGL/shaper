@@ -4,7 +4,6 @@ import { format } from 'date-fns'
 import { useQueryState } from 'nuqs'
 import { useEffect, useMemo } from 'react'
 
-import { Loader } from '@/components/loader'
 import {
   useGetActiveMealPlanQuery,
   useGetDefaultMealPlanQuery,
@@ -39,8 +38,6 @@ export default function MealPlanPage() {
       date: dateParam,
     })
 
-  const isLoading = isLoadingActive || isLoadingDefault
-
   const activePlan = activePlanData?.getActiveMealPlan
   const defaultPlan = defaultPlanData?.getDefaultMealPlan
 
@@ -48,17 +45,13 @@ export default function MealPlanPage() {
     <MealPlanProvider
       activePlan={activePlan}
       defaultPlan={defaultPlan}
-      isLoading={isLoading}
+      isLoadingActive={isLoadingActive}
+      isLoadingDefault={isLoadingDefault}
     >
       <div className="flex flex-col h-full w-full pb-32">
         <Navigation />
 
         <div className="pt-4 w-full max-w-sm mx-auto grow h-full">
-          {isLoading && (
-            <div className="flex justify-center items-center h-[50vh]">
-              <Loader />
-            </div>
-          )}
           <MealView />
         </div>
       </div>

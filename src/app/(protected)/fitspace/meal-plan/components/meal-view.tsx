@@ -1,4 +1,4 @@
-import { Calendar, Plus } from 'lucide-react'
+import { Calendar, Loader, Plus } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { startTransition, useMemo, useState } from 'react'
 
@@ -14,8 +14,14 @@ import { useMealPlan } from './meal-plan-context'
 import { MealsList } from './meals-list'
 
 export function MealView() {
-  const { activeDay, activePlan, defaultPlan, isShowingActivePlan } =
-    useMealPlan()
+  const {
+    activeDay,
+    activePlan,
+    defaultPlan,
+    isShowingActivePlan,
+    isLoadingActive,
+    isLoadingDefault,
+  } = useMealPlan()
   const [date, setDate] = useQueryState('date')
   const [animationVariant, setAnimationVariant] = useState<
     'slideFromLeft' | 'slideFromRight'
@@ -89,6 +95,11 @@ export function MealView() {
 
             <TabsContent value="plan" className="mt-6 pb-[190px]">
               {/* Show structured meal plan - no custom food additions */}
+              {isLoadingActive && (
+                <div className="flex justify-center items-center h-[50vh]">
+                  <Loader />
+                </div>
+              )}
               <MealsList
                 planMeals={activeDay.meals || []}
                 allowCustomFood={false}
@@ -97,6 +108,11 @@ export function MealView() {
 
             <TabsContent value="custom" className="mt-6 pb-[190px]">
               {/* Show default plan meals where user can add custom foods */}
+              {isLoadingDefault && (
+                <div className="flex justify-center items-center h-[50vh]">
+                  <Loader />
+                </div>
+              )}
               <MealsList
                 planMeals={defaultPlanDay?.meals || []}
                 allowCustomFood={true}
