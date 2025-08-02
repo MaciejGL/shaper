@@ -8,23 +8,16 @@ import { useFitspaceMyPlansQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
-import { ActivePlanTab } from './components/active-plan-tab/active-plan-tab'
-import { AvailablePlansTab } from './components/available-plans-tab'
-import { CompletedPlansTab } from './components/completed-plans-tab'
 import { PlanActionDialog } from './components/plan-action-dialog/plan-action-dialog'
 import { usePlanAction } from './components/plan-action-dialog/use-plan-action'
+import { PlansTab } from './components/plans-tab'
 import { QuickWorkoutPlanTab } from './components/quick-workout-plan-tab/quick-workout-plan-tab'
 import { PlanTab } from './types'
 
 export default function MyPlansPage() {
   const [tab, setTab] = useQueryState<PlanTab>(
     'tab',
-    parseAsStringEnum<PlanTab>([
-      PlanTab.Active,
-      PlanTab.Available,
-      PlanTab.Completed,
-      PlanTab.QuickWorkout,
-    ]),
+    parseAsStringEnum<PlanTab>([PlanTab.Plans, PlanTab.QuickWorkout]),
   )
 
   const {
@@ -50,26 +43,21 @@ export default function MyPlansPage() {
 
       {/* Plans Tabs */}
       <Tabs
-        value={tab ?? (activePlan ? PlanTab.Active : PlanTab.QuickWorkout)}
+        value={tab ?? (activePlan ? PlanTab.Plans : PlanTab.QuickWorkout)}
         onValueChange={(value) => setTab(value as PlanTab)}
         className="w-full"
       >
         <div className="overflow-x-auto hide-scrollbar -mx-2 px-2">
-          <TabsList className="grid grid-cols-4 w-max mb-4">
+          <TabsList className="grid grid-cols-2 w-max mb-4">
             <TabsTrigger size="lg" value={PlanTab.QuickWorkout}>
-              Quick Workouts
+              Workouts
             </TabsTrigger>
-            <TabsTrigger size="lg" value={PlanTab.Active}>
-              Active
-            </TabsTrigger>
-            <TabsTrigger size="lg" value={PlanTab.Available}>
-              Available
-            </TabsTrigger>
-            <TabsTrigger size="lg" value={PlanTab.Completed}>
-              Completed
+            <TabsTrigger size="lg" value={PlanTab.Plans}>
+              Plans
             </TabsTrigger>
           </TabsList>
         </div>
+
         {/* Quick Workout Plan */}
         <TabsContent value={PlanTab.QuickWorkout} className="space-y-4">
           <QuickWorkoutPlanTab
@@ -78,33 +66,18 @@ export default function MyPlansPage() {
           />
         </TabsContent>
 
-        {/* Active Plans */}
-        <TabsContent value={PlanTab.Active} className="space-y-4">
-          <ActivePlanTab
-            plan={activePlan}
-            handlePlanAction={handlePlanAction}
-            loading={isLoadingPlans}
-          />
-        </TabsContent>
-
-        {/* Available Plans */}
-        <TabsContent value={PlanTab.Available} className="space-y-4">
-          <AvailablePlansTab
-            availablePlans={availablePlans ?? []}
-            handlePlanAction={handlePlanAction}
-            loading={isLoadingPlans}
-          />
-        </TabsContent>
-
-        {/* Completed Plans */}
-        <TabsContent value={PlanTab.Completed} className="space-y-4">
-          <CompletedPlansTab
-            completedPlans={completedPlans ?? []}
+        {/* Training Plans - Unified View */}
+        <TabsContent value={PlanTab.Plans} className="space-y-4">
+          <PlansTab
+            activePlan={activePlan}
+            availablePlans={availablePlans}
+            completedPlans={completedPlans}
             handlePlanAction={handlePlanAction}
             loading={isLoadingPlans}
           />
         </TabsContent>
       </Tabs>
+
       {/* Action Dialog */}
       <PlanActionDialog
         isOpen={dialogState.isOpen}

@@ -8,11 +8,15 @@ import './globals.css'
 const inter = Inter({
   variable: '--font-inter',
   subsets: ['latin'],
+  display: 'swap', // Add this
+  preload: true, // Add this
 })
 
 const interTight = Inter_Tight({
   variable: '--font-inter-tight',
   subsets: ['latin'],
+  display: 'swap', // Add this
+  preload: true, // Add this
 })
 
 export const viewport: Viewport = {

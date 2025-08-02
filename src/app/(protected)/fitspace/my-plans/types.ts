@@ -12,7 +12,42 @@ export type QuickWorkoutPlan =
 
 export enum PlanTab {
   QuickWorkout = 'quick-workout',
+  Plans = 'plans',
+}
+
+// Unified plan type for the new design
+export type UnifiedPlan = ActivePlan | AvailablePlan | CompletedPlan
+
+// Plan status for badge display
+export enum PlanStatus {
   Active = 'active',
-  Available = 'available',
+  Paused = 'paused',
+  Template = 'template',
   Completed = 'completed',
+}
+
+// Helper function to determine plan status
+export function getPlanStatus(
+  plan: UnifiedPlan,
+  isActive: boolean = false,
+): PlanStatus {
+  if (!plan) return PlanStatus.Template
+
+  // Check if it's a completed plan
+  if ('completedAt' in plan && plan.completedAt) {
+    return PlanStatus.Completed
+  }
+
+  // Check if it's an active plan
+  if (isActive) {
+    return PlanStatus.Active
+  }
+
+  // Check if it's paused (has startDate but not currently active)
+  if ('startDate' in plan && plan.startDate) {
+    return PlanStatus.Paused
+  }
+
+  // Default to template for available plans
+  return PlanStatus.Template
 }
