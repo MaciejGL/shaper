@@ -1,95 +1,49 @@
-import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-
-import { cn } from '@/lib/utils'
+import { useState } from 'react'
 
 export function CollapsibleText({
   text,
-  maxLines = 4,
+  maxWords = 30,
 }: {
   text?: string | null
-  maxLines?: number
+  maxWords?: number
 }) {
-  const [fullHeight, setFullHeight] = useState(0)
   const [isExpanded, setIsExpanded] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  const isSmallerThanMaxLines = fullHeight <= maxLines * 20
-  const initialHeight = isSmallerThanMaxLines ? fullHeight : maxLines * 20
-
-  useEffect(() => {
-    if (ref.current) {
-      const height = ref.current.scrollHeight
-      setFullHeight(height)
-    }
-  }, [text])
 
   if (!text) return null
 
+  // Split text into words
+  const words = text.split(' ')
+
+  // If text is shorter than max words, show it all
+  if (words.length <= maxWords) {
+    return <p className="text-sm text-foreground whitespace-pre-wrap">{text}</p>
+  }
+
+  // Create truncated and remaining text
+  const truncatedText = words.slice(0, maxWords).join(' ')
+  const remainingText = words.slice(maxWords).join(' ')
+
   return (
-    <div>
-      <AnimatePresence key={'text'} mode="wait">
-        <p
-          className="absolute z-[-1] text-sm invisible whitespace-pre-wrap"
-          ref={ref}
-          style={{ height: `${fullHeight}px` }}
-        >
-          {text}
-        </p>
-        {isExpanded ? (
-          <motion.p
-            key={'expanded'}
-            initial={{ height: `${initialHeight}px` }}
-            animate={{ height: 'auto' }}
-            exit={{ height: `${initialHeight}px` }}
-            transition={{
-              type: 'spring',
-              stiffness: 200,
-              damping: 20,
-              mass: 0.5,
-              duration: 0.15,
-            }}
-            className={cn(
-              'text-sm text-foreground- whitespace-pre-wrap overflow-hidden',
-            )}
+    <p className="text-sm text-foreground">
+      <span className="whitespace-pre-wrap">
+        {truncatedText}
+        {!isExpanded && '...'}
+        {isExpanded && (
+          <span
+            className="whitespace-pre-wrap transition-opacity duration-300 ease-in-out"
+            style={{ opacity: isExpanded ? 1 : 0 }}
           >
-            {text}
-          </motion.p>
-        ) : (
-          <motion.p
-            key="preview"
-            transition={{
-              type: 'spring',
-              stiffness: 200,
-              damping: 20,
-              mass: 0.5,
-              duration: 0.15,
-            }}
-            style={{
-              height: `${initialHeight}px`,
-            }}
-            className={cn(
-              'text-sm text-foreground whitespace-pre-wrap overflow-hidden',
-            )}
-          >
-            {text}
-          </motion.p>
+            {' '}
+            {remainingText}
+          </span>
         )}
-      </AnimatePresence>
-      {!isSmallerThanMaxLines && (
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="text-xs text-muted-foreground flex items-center gap-1 hover:text-primary cursor-pointer ml-auto mt-1"
-        >
-          {isExpanded ? 'Show Less' : 'Read More'}
-          <ChevronDown
-            className={cn(
-              'size-3',
-              isExpanded && 'rotate-180 transition-transform',
-            )}
-          />
-        </button>
-      )}
-    </div>
+      </span>{' '}
+      <button
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 font-medium cursor-pointer transition-colors duration-200"
+      >
+        {isExpanded ? 'Show Less' : 'Read More'}
+      </button>
+    </p>
   )
 }

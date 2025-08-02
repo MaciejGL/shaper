@@ -37,7 +37,7 @@ export function PlanDetails({ assignedPlan }: PlanAssignmentProps) {
             </div>
           </div>
           <div className="max-w-2xl">
-            <CollapsibleText maxLines={6} text={assignedPlan.description} />
+            <CollapsibleText maxWords={40} text={assignedPlan.description} />
           </div>
         </CardContent>
       </Card>

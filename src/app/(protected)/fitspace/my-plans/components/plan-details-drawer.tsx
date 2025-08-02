@@ -117,7 +117,7 @@ export function PlanDetailsDrawer({
           {plan.description && (
             <div className="space-y-2">
               <h3 className="font-medium">Description</h3>
-              <CollapsibleText text={plan.description} maxLines={10} />
+              <CollapsibleText text={plan.description} maxWords={50} />
             </div>
           )}
 
