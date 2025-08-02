@@ -37,6 +37,7 @@ model User {
   createdPlans                     TrainingPlan[]             @relation("CreatedPlans")
   addedTrainingPlanCollaborators   TrainingPlanCollaborator[] @relation("AddedTrainingPlanCollaborators")
   trainingPlanCollaborations       TrainingPlanCollaborator[] @relation("TrainingPlanCollaborations")
+  createdFavouriteWorkouts         FavouriteWorkout[]         @relation("CreatedFavouriteWorkouts")
   trainer                          User?                      @relation("TrainerClients", fields: [trainerId], references: [id])
   clients                          User[]                     @relation("TrainerClients")
   profile                          UserProfile?
@@ -295,6 +296,7 @@ model BaseExercise {
   substitutes            BaseExerciseSubstitute[] @relation("OriginalExercise")
   substitutedBy          BaseExerciseSubstitute[] @relation("SubstituteExercise")
   trainingExercises      TrainingExercise[]
+  favouriteWorkoutExercises FavouriteWorkoutExercise[]
   muscleGroups           MuscleGroup[]            @relation("ExerciseMuscleGroups")
   images                 Image[]                  @relation("ExerciseImages")
 }
@@ -698,4 +700,51 @@ model OpenFoodFactsProduct {
   // Fast search index for common product name searches with nutrition filter
   @@index([productName, energyKcal100g], map: "off_fast_search_idx")
   @@index([productName, proteins100g], map: "off_protein_search_idx")
+}
+
+// Favourite Workout Models
+model FavouriteWorkout {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  createdBy   User     @relation("CreatedFavouriteWorkouts", fields: [createdById], references: [id])
+  exercises   FavouriteWorkoutExercise[]
+  
+  @@index([createdById])
+}
+
+model FavouriteWorkoutExercise {
+  id                     String            @id @default(uuid())
+  name                   String
+  order                  Int
+  baseId                 String?
+  favouriteWorkoutId     String
+  restSeconds            Int?
+  instructions           String?
+  
+  base                   BaseExercise?     @relation(fields: [baseId], references: [id])
+  favouriteWorkout       FavouriteWorkout  @relation(fields: [favouriteWorkoutId], references: [id], onDelete: Cascade)
+  sets                   FavouriteWorkoutSet[]
+  
+  @@index([favouriteWorkoutId])
+  @@index([baseId])
+}
+
+model FavouriteWorkoutSet {
+  id          String   @id @default(uuid())
+  order       Int
+  reps        Int?
+  minReps     Int?
+  maxReps     Int?
+  weight      Float?
+  rpe         Int?
+  exerciseId  String
+  
+  exercise    FavouriteWorkoutExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  
+  @@index([exerciseId])
 }
