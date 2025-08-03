@@ -1,7 +1,5 @@
 'use client'
 
-import { AlertTriangle } from 'lucide-react'
-
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -37,17 +35,10 @@ export function DeleteFavouriteDialog({
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent dialogTitle="Delete Favourite Workout">
         <DialogHeader>
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-red-600" />
-            </div>
-            <div>
-              <DialogTitle>Delete Favourite Workout</DialogTitle>
-              <DialogDescription>
-                Are you sure you want to delete "{favourite.title}"?
-              </DialogDescription>
-            </div>
-          </div>
+          <DialogTitle>Delete Favourite Workout</DialogTitle>
+          <DialogDescription>
+            Are you sure you want to delete "{favourite.title}"?
+          </DialogDescription>
         </DialogHeader>
 
         <div className="bg-muted/50 p-4 rounded-lg">
@@ -64,15 +55,16 @@ export function DeleteFavouriteDialog({
         </div>
 
         <div className="flex justify-end gap-2 pt-4">
-          <Button variant="outline" onClick={onClose} disabled={isDeleting}>
+          <Button variant="secondary" onClick={onClose} disabled={isDeleting}>
             Cancel
           </Button>
           <Button
             variant="destructive"
             onClick={onConfirm}
             disabled={isDeleting}
+            loading={isDeleting}
           >
-            {isDeleting ? 'Deleting...' : 'Delete Favourite'}
+            Delete Favourite
           </Button>
         </div>
       </DialogContent>

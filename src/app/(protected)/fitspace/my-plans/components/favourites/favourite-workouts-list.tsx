@@ -67,15 +67,6 @@ export function FavouriteWorkoutsList({
         </Button>
       </div>
 
-      {/* Workout Status Message */}
-      {workoutStatus.status !== 'can-start' && (
-        <div className="p-4 rounded-lg bg-muted/50 border">
-          <p className="text-sm text-muted-foreground">
-            {workoutStatus.message}
-          </p>
-        </div>
-      )}
-
       {favouriteWorkouts.length === 0 ? (
         <EmptyFavouritesState
           onCreateNew={() => setIsCreateModalOpen(true)}

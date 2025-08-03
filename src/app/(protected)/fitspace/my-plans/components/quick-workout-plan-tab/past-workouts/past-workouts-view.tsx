@@ -1,9 +1,15 @@
 'use client'
 
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import {
+  BicepsFlexedIcon,
+  Calendar,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 
 import { QuickWorkoutPlan } from '../../../types'
 
@@ -39,33 +45,23 @@ export function PastWorkoutsView({ plan, loading }: PastWorkoutsViewProps) {
     )
   }
 
-  if (!plan?.weeks || plan.weeks.length === 0) {
+  if (
+    weeksWithCompletedWorkouts.length === 0 ||
+    !plan?.weeks ||
+    plan.weeks.length === 0
+  ) {
     return (
-      <div className="text-center py-12 bg-card rounded-lg border border-dashed">
-        <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
-          <span className="text-2xl">📋</span>
-        </div>
-        <h3 className="text-lg font-semibold mb-2">No Past Workouts</h3>
-        <p className="text-muted-foreground">
-          Complete some workouts to see your history here.
-        </p>
-      </div>
-    )
-  }
-
-  if (weeksWithCompletedWorkouts.length === 0) {
-    return (
-      <div className="text-center py-12 bg-card rounded-lg border border-dashed">
-        <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
-          <span className="text-2xl">💪</span>
-        </div>
-        <h3 className="text-lg font-semibold mb-2">
-          No Completed Workouts Yet
-        </h3>
-        <p className="text-muted-foreground">
-          Start and complete workouts to build your workout history.
-        </p>
-      </div>
+      <Card>
+        <CardContent className="py-6 text-center">
+          <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+            <BicepsFlexedIcon className="text-amber-500" />
+          </div>
+          <h3 className="font-semibold mb-2">No Completed Workouts Yet</h3>
+          <p className="text-muted-foreground text-sm">
+            Start and complete workouts to build your workout history.
+          </p>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -136,15 +132,19 @@ export function PastWorkoutsView({ plan, loading }: PastWorkoutsViewProps) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-8 bg-card rounded-lg border border-dashed">
-          <div className="mx-auto w-10 h-10 bg-muted rounded-full flex items-center justify-center mb-3">
-            <span className="text-xl">📅</span>
-          </div>
-          <h4 className="font-medium mb-1">No completed workouts this week</h4>
-          <p className="text-sm text-muted-foreground">
-            Try navigating to a different week to see your workout history.
-          </p>
-        </div>
+        <Card>
+          <CardContent className="py-6 text-center">
+            <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+              <Calendar className="text-amber-500" />
+            </div>
+            <h4 className="font-medium mb-1">
+              No completed workouts this week
+            </h4>
+            <p className="text-sm text-muted-foreground">
+              Try navigating to a different week to see your workout history.
+            </p>
+          </CardContent>
+        </Card>
       )}
     </div>
   )

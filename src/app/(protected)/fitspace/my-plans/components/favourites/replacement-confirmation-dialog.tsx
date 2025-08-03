@@ -37,8 +37,12 @@ export function ReplacementConfirmationDialog({
           <Button variant="secondary" onClick={onClose} disabled={isStarting}>
             Cancel
           </Button>
-          <Button onClick={onConfirm} disabled={isStarting}>
-            {isStarting ? 'Starting...' : 'Replace & Start'}
+          <Button
+            onClick={onConfirm}
+            disabled={isStarting}
+            loading={isStarting}
+          >
+            Replace & Start
           </Button>
         </div>
       </DialogContent>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { GQLEquipment } from '@/generated/graphql-client'
 
@@ -23,6 +23,13 @@ export function useManualWorkout({
   const [selectedExercises, setSelectedExercises] = useState<string[]>(
     initialSelectedExercises,
   )
+
+  // Sync selected exercises when initial data changes
+  useEffect(() => {
+    if (initialSelectedExercises.length > 0) {
+      setSelectedExercises(initialSelectedExercises)
+    }
+  }, [initialSelectedExercises])
 
   // Derived state - filtered exercises
   const filteredExercises = useMemo(() => {

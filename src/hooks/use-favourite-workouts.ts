@@ -58,22 +58,40 @@ export function useStartWorkoutFromFavourite() {
   const router = useRouter()
 
   return useStartWorkoutFromFavouriteMutation({
-    onSuccess: (data) => {
-      // Invalidate relevant queries to update UI
-      queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] })
-      queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] })
+    onSuccess: async (data) => {
+      if (!data.startWorkoutFromFavourite) return
 
-      // Navigate to the workout
-      if (data.startWorkoutFromFavourite) {
-        // Parse the return format: planId|weekId|dayId
-        const parts = data.startWorkoutFromFavourite.split('|')
-        if (parts.length === 3) {
-          const [planId, weekId, dayId] = parts
-          router.push(`/fitspace/workout/${planId}?week=${weekId}&day=${dayId}`)
-        } else {
-          // Fallback to old format (just plan ID)
-          router.push(`/fitspace/workout/${data.startWorkoutFromFavourite}`)
-        }
+      // Parse the return format: planId|weekId|dayId
+      const parts = data.startWorkoutFromFavourite.split('|')
+      let planId: string
+
+      if (parts.length === 3) {
+        planId = parts[0]
+      } else {
+        // Fallback to old format (just plan ID)
+        planId = data.startWorkoutFromFavourite
+      }
+
+      // Invalidate and wait for the specific workout query to refetch
+      await queryClient.invalidateQueries({
+        queryKey: ['FitspaceGetWorkout', { trainingId: planId }],
+      })
+      await queryClient.refetchQueries({
+        queryKey: ['FitspaceGetWorkout', { trainingId: planId }],
+      })
+
+      // Also invalidate other queries
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] }),
+        queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
+      ])
+
+      // Now navigate with fresh data guaranteed
+      if (parts.length === 3) {
+        const [, weekId, dayId] = parts
+        router.push(`/fitspace/workout/${planId}?week=${weekId}&day=${dayId}`)
+      } else {
+        router.push(`/fitspace/workout/${planId}`)
       }
     },
   })
@@ -135,7 +153,7 @@ export function useFavouriteWorkoutStatus(): WorkoutStatusAnalysis {
         canStart: true,
         needsConfirmation: true,
         message:
-          'You have a quick workout planned for today. Starting a favourite will replace it.',
+          'You have a workout planned for today. Starting a favourite will replace it.',
         todaysWorkout: todaysDay,
       }
     }

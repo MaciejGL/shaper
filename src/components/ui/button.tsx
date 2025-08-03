@@ -103,7 +103,12 @@ function Button({
       {iconOnly && iconOnly}
       {iconEnd && <span>{iconEnd}</span>}
       {loading && (
-        <Loader2Icon className="size-[70%] animate-spin absolute z-10 inset-1/2 -translate-x-1/2 -translate-y-1/2 text-primary" />
+        <Loader2Icon
+          className={cn(
+            'size-[70%] animate-spin absolute z-10 inset-1/2 -translate-x-1/2 -translate-y-1/2 text-primary',
+            variant === 'default' && 'text-primary',
+          )}
+        />
       )}
     </Comp>
   )

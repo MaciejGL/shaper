@@ -1,7 +1,7 @@
 'use client'
 
 import { formatDistanceToNow } from 'date-fns'
-import { Clock, Dumbbell, Edit, Heart, Play, Trash2 } from 'lucide-react'
+import { Clock, Dumbbell, Edit, MoreVertical, Play, Trash2 } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
@@ -86,7 +85,6 @@ export function FavouriteWorkoutCard({
         <div className="flex items-start justify-between">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
-              <Heart className="w-4 h-4 text-red-500 fill-current" />
               <h3 className="font-semibold truncate">{favourite.title}</h3>
             </div>
             {favourite.description && (
@@ -98,7 +96,7 @@ export function FavouriteWorkoutCard({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm">
-                <Edit className="w-4 h-4" />
+                <MoreVertical className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -106,7 +104,6 @@ export function FavouriteWorkoutCard({
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Workout
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onDelete} className="text-destructive">
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete Workout
