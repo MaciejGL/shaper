@@ -1,11 +1,18 @@
 'use client'
 
 import { formatDistanceToNow } from 'date-fns'
-import { Clock, Dumbbell, Edit, MoreVertical, Play, Trash2 } from 'lucide-react'
+import {
+  ChevronRight,
+  Clock,
+  Dumbbell,
+  Edit,
+  MoreVertical,
+  Trash2,
+} from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,7 +72,7 @@ export function FavouriteWorkoutCard({
     if (workoutStatus.needsConfirmation) {
       return {
         disabled: false,
-        variant: 'outline' as const,
+        variant: 'secondary' as const,
         text: 'Replace & Start',
       }
     }
@@ -134,40 +141,32 @@ export function FavouriteWorkoutCard({
         {/* Exercise Preview */}
         {totalExercises > 0 && (
           <div className="space-y-1">
-            <p className="text-xs font-medium text-muted-foreground">
-              EXERCISES
-            </p>
             <div className="text-sm space-y-1">
-              {favourite.exercises.slice(0, 3).map((exercise) => (
-                <div key={exercise.id} className="truncate">
-                  {exercise.name}
-                </div>
+              {favourite.exercises.map((exercise, index) => (
+                <Badge key={exercise.id} variant="secondary" size="lg">
+                  {index + 1}. {exercise.name}
+                </Badge>
               ))}
-              {totalExercises > 3 && (
-                <div className="text-muted-foreground">
-                  +{totalExercises - 3} more exercises
-                </div>
-              )}
             </div>
           </div>
         )}
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-2 border-t">
-          <span className="text-xs text-muted-foreground">
-            Created {createdAgo}
-          </span>
-          <Button
-            onClick={onStart}
-            size="sm"
-            variant={buttonProps.variant}
-            disabled={buttonProps.disabled}
-          >
-            <Play className="w-4 h-4 mr-1" />
-            {buttonProps.text}
-          </Button>
-        </div>
       </CardContent>
+      <CardFooter className="flex items-center justify-between">
+        <span className="text-xs text-muted-foreground">
+          Created {createdAgo}
+        </span>
+        <Button
+          onClick={onStart}
+          size="sm"
+          variant={buttonProps.variant}
+          disabled={buttonProps.disabled}
+          iconEnd={<ChevronRight />}
+        >
+          {buttonProps.text}
+        </Button>
+      </CardFooter>
     </Card>
   )
 }

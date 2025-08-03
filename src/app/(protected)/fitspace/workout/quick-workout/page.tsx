@@ -4,11 +4,13 @@ import { useRouter } from 'next/navigation'
 import { useMemo, useState } from 'react'
 
 import {
+  GQLEquipment,
   GQLTrainingPlan,
   useFitspaceCreateQuickWorkoutMutation,
   useFitspaceGetExercisesQuery,
   useFitspaceGetUserQuickWorkoutPlanQuery,
 } from '@/generated/graphql-client'
+import { useStartWorkoutFromFavourite } from '@/hooks/use-favourite-workouts'
 
 import { AiEquipmentStep } from './components/ai-equipment-step'
 import { AiMuscleGroupsStep } from './components/ai-muscle-groups-step'
@@ -16,13 +18,13 @@ import { AiParametersStep } from './components/ai-parameters-step'
 import { AiResultsStep } from './components/ai-results-step'
 import type { Exercise } from './components/exercise-card'
 import { ExistingWorkoutView } from './components/existing-workout-view'
+import { FavouritesStep } from './components/favourites-step'
 import { ManualEquipmentStep } from './components/manual-equipment-step'
 import { ManualExercisesStep } from './components/manual-exercises-step'
 import { ManualMuscleGroupsStep } from './components/manual-muscle-groups-step'
 import { ManualReviewStep } from './components/manual-review-step'
 import {
   QuickWorkoutWizard,
-  QuickWorkoutWizardSkeleton,
   WorkoutFlow,
 } from './components/quick-workout-wizard'
 import { WorkoutCreationLanding } from './components/workout-creation-landing'
@@ -38,6 +40,7 @@ export default function QuickWorkoutPage() {
   const [showWizard, setShowWizard] = useState(false)
   const [workoutFlow, setWorkoutFlow] = useState<WorkoutFlow>(null)
   const [isAddingToExisting, setIsAddingToExisting] = useState(false)
+  const router = useRouter()
 
   // AI workout generation hook
   const {
@@ -51,14 +54,19 @@ export default function QuickWorkoutPage() {
     handleExercisesReorder,
   } = useAiWorkoutGeneration()
 
+  // Favourites workout hook
+  const {
+    mutateAsync: startFromFavourite,
+    isPending: isStartingFromFavourite,
+  } = useStartWorkoutFromFavourite()
+
   // Create workout mutation
   const { mutateAsync: createQuickWorkout, isPending: isCreatingWorkout } =
     useFitspaceCreateQuickWorkoutMutation()
 
   // Data fetching
-  const { data: exercisesData, isLoading: isLoadingExercises } =
-    useFitspaceGetExercisesQuery()
-  const { data: quickWorkoutPlanData, isLoading: isLoadingPlan } =
+  const { data: exercisesData } = useFitspaceGetExercisesQuery()
+  const { data: quickWorkoutPlanData } =
     useFitspaceGetUserQuickWorkoutPlanQuery(
       {},
       {
@@ -142,11 +150,6 @@ export default function QuickWorkoutPage() {
     handleReorderExercises,
     canProceedToReview,
   } = useManualWorkout({ allExercises })
-
-  const router = useRouter()
-  // Loading state
-  const isLoading = isLoadingExercises || isLoadingPlan
-  const shouldShowWizard = showWizard || !hasExistingWorkout
 
   // Step change handler for AI flow and navigation
   const handleStepChange = (step: number) => {
@@ -274,15 +277,6 @@ export default function QuickWorkoutPage() {
     }
   }
 
-  // Unified finish handler
-  const handleFinish = () => {
-    if (workoutFlow === 'ai') {
-      return handleFinishAI()
-    } else if (workoutFlow === 'manual') {
-      return handleFinishManual()
-    }
-  }
-
   // Step validation
   const canProceedFromStep = (step: number) => {
     if (workoutFlow === 'manual') {
@@ -317,6 +311,24 @@ export default function QuickWorkoutPage() {
     setWorkoutFlow('ai')
   }
 
+  const handleSelectFavourites = () => {
+    setWorkoutFlow('favourites')
+  }
+
+  // Handle favourites selection
+  const handleFavouriteSelection = async (favouriteId: string) => {
+    try {
+      await startFromFavourite({
+        input: {
+          favouriteWorkoutId: favouriteId,
+          replaceExisting: true,
+        },
+      })
+    } catch (error) {
+      console.error('Failed to start workout from favourite:', error)
+    }
+  }
+
   // Handle creating new workout (goes to landing to choose AI/manual)
   const handleCreateNewWorkout = () => {
     setShowWizard(true)
@@ -325,24 +337,26 @@ export default function QuickWorkoutPage() {
     scrollToTop()
   }
 
-  // Handle adding more exercises (goes directly to manual flow)
+  // Handle adding more exercises to existing workout
   const handleAddMoreExercises = () => {
     setShowWizard(true)
-    setWorkoutFlow('manual') // Set to manual flow directly
-    setIsAddingToExisting(true) // Set flag to indicate adding to existing
+    setWorkoutFlow('manual') // Default to manual for adding exercises
+    setIsAddingToExisting(true) // Set adding to existing flag
     scrollToTop()
   }
 
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen pb-[80px] max-w-screen-sm mx-auto">
-        <QuickWorkoutWizardSkeleton />
-      </div>
-    )
+  // Handle finishing the workout creation (common for both AI and manual)
+  const handleFinish = async () => {
+    if (workoutFlow === 'ai') {
+      await handleFinishAI()
+    } else if (workoutFlow === 'manual') {
+      await handleFinishManual()
+    }
   }
 
-  // Manual components
+  const shouldShowWizard = showWizard || !hasExistingWorkout
+
+  // Generate component instances
   const manualMuscleGroupsComponent = (
     <ManualMuscleGroupsStep
       muscleGroups={allMuscleGroups}
@@ -359,9 +373,7 @@ export default function QuickWorkoutPage() {
   const manualEquipmentComponent = (
     <ManualEquipmentStep
       selectedEquipment={selectedEquipment}
-      onEquipmentToggle={(
-        equipment: import('@/generated/graphql-client').GQLEquipment,
-      ) => {
+      onEquipmentToggle={(equipment: GQLEquipment) => {
         const newSelection = selectedEquipment.includes(equipment)
           ? selectedEquipment.filter((e) => e !== equipment)
           : [...selectedEquipment, equipment]
@@ -377,7 +389,7 @@ export default function QuickWorkoutPage() {
       onExerciseSelect={handleExerciseSelect}
       searchTerm={searchTerm}
       onSearchChange={setSearchTerm}
-      existingExercises={existingExercises} // Pass existing exercises
+      existingExercises={existingExercises}
       selectedMuscleGroups={selectedMuscleGroups}
       onMuscleGroupChange={setSelectedMuscleGroups}
       selectedEquipment={selectedEquipment}
@@ -394,7 +406,6 @@ export default function QuickWorkoutPage() {
     />
   )
 
-  // AI components
   const aiMuscleGroupsComponent = (
     <AiMuscleGroupsStep
       data={aiInputData}
@@ -422,6 +433,13 @@ export default function QuickWorkoutPage() {
     />
   )
 
+  const favouritesComponent = (
+    <FavouritesStep
+      onSelectFavourite={handleFavouriteSelection}
+      isStarting={isStartingFromFavourite}
+    />
+  )
+
   return (
     <div className="min-h-screen pb-[80px] max-w-screen-sm mx-auto">
       {shouldShowWizard ? (
@@ -431,7 +449,7 @@ export default function QuickWorkoutPage() {
           onFlowChange={setWorkoutFlow}
           hasExistingWorkout={hasExistingWorkout}
           canProceedFromStep={canProceedFromStep}
-          isAdding={isCreatingWorkout}
+          isAdding={isCreatingWorkout || isStartingFromFavourite}
           onFinish={handleFinish}
           onStepChange={handleStepChange}
           // Landing component
@@ -439,6 +457,7 @@ export default function QuickWorkoutPage() {
             <WorkoutCreationLanding
               onSelectManual={handleSelectManual}
               onSelectAI={handleSelectAI}
+              onSelectFavourites={handleSelectFavourites}
             />
           }
           // Manual flow components
@@ -451,6 +470,8 @@ export default function QuickWorkoutPage() {
           aiEquipmentComponent={aiEquipmentComponent}
           aiParametersComponent={aiParametersComponent}
           aiResultsComponent={aiResultsComponent}
+          // Favourites flow components
+          favouritesComponent={favouritesComponent}
         />
       ) : (
         <ExistingWorkoutView

@@ -58,13 +58,21 @@ const AI_STEPS = [
   },
 ]
 
+const FAVOURITES_STEPS = [
+  {
+    id: 'favourites',
+    title: 'Select Favourite',
+    description: 'Choose a workout from your favourites',
+  },
+]
+
 const LANDING_STEP = {
   id: 'landing',
   title: 'Create Your Workout',
   description: "Choose how you'd like to build your workout",
 }
 
-export type WorkoutFlow = 'manual' | 'ai' | null
+export type WorkoutFlow = 'manual' | 'ai' | 'favourites' | null
 
 interface QuickWorkoutWizardProps {
   // Component props for each step
@@ -77,6 +85,7 @@ interface QuickWorkoutWizardProps {
   aiEquipmentComponent?: React.ReactNode
   aiParametersComponent?: React.ReactNode
   aiResultsComponent?: React.ReactNode
+  favouritesComponent?: React.ReactNode
 
   // Flow control
   hasExistingWorkout?: boolean
@@ -105,6 +114,7 @@ export function QuickWorkoutWizard({
   aiEquipmentComponent,
   aiParametersComponent,
   aiResultsComponent,
+  favouritesComponent,
   hasExistingWorkout = false,
   showLanding = false,
   workoutFlow = null,
@@ -127,6 +137,8 @@ export function QuickWorkoutWizard({
         return MANUAL_STEPS
       case 'ai':
         return AI_STEPS
+      case 'favourites':
+        return FAVOURITES_STEPS
       default:
         return MANUAL_STEPS // fallback
     }
@@ -311,6 +323,7 @@ export function QuickWorkoutWizard({
         const landingWithProps = React.cloneElement(landingComponent, {
           onSelectManual: () => handleFlowSelection('manual'),
           onSelectAI: () => handleFlowSelection('ai'),
+          onSelectFavourites: () => handleFlowSelection('favourites'),
         })
         return <StepContainer>{landingWithProps}</StepContainer>
       }
@@ -346,6 +359,17 @@ export function QuickWorkoutWizard({
           return <StepContainer>{aiParametersComponent}</StepContainer>
         case 'ai-results':
           return <StepContainer>{aiResultsComponent}</StepContainer>
+        default:
+          return null
+      }
+    }
+
+    // Favourites flow steps
+    if (workoutFlow === 'favourites') {
+      const stepId = currentSteps[currentStep].id
+      switch (stepId) {
+        case 'favourites':
+          return <StepContainer>{favouritesComponent}</StepContainer>
         default:
           return null
       }

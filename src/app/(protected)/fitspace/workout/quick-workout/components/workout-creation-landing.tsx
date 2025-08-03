@@ -1,24 +1,31 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ChevronRight, ListTodoIcon, SparklesIcon } from 'lucide-react'
+import {
+  BookmarkIcon,
+  ChevronRight,
+  ListTodoIcon,
+  SparklesIcon,
+} from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
   Card,
+  CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 
 export interface WorkoutCreationLandingProps {
   onSelectManual: () => void
   onSelectAI: () => void
+  onSelectFavourites?: () => void
 }
 
 export function WorkoutCreationLanding({
   onSelectManual,
   onSelectAI,
+  onSelectFavourites,
 }: WorkoutCreationLandingProps) {
   return (
     <div className="space-y-6 pb-12">
@@ -35,7 +42,7 @@ export function WorkoutCreationLanding({
             variant="gradient"
             onClick={onSelectAI}
           >
-            <CardHeader>
+            <CardContent>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-700 dark:to-amber-500 rounded-lg">
                   <SparklesIcon className="size-5 text-amber-600 dark:text-amber-200" />
@@ -56,9 +63,45 @@ export function WorkoutCreationLanding({
                   Start Quick Workout
                 </Button>
               </div>
-            </CardHeader>
+            </CardContent>
           </Card>
         </motion.div>
+
+        {/* Favourites Option - Only show if onSelectFavourites is provided */}
+        {onSelectFavourites && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
+          >
+            <Card
+              className="cursor-pointer transition-all"
+              onClick={onSelectFavourites}
+            >
+              <CardContent>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-card-on-card rounded-lg">
+                    <BookmarkIcon className="size-5" />
+                  </div>
+                  <div className="flex-1">
+                    <CardTitle className="text-lg">From Favourites</CardTitle>
+                    <CardDescription>
+                      Select from your saved workouts
+                    </CardDescription>
+                  </div>
+                  <Button
+                    onClick={onSelectFavourites}
+                    variant="link"
+                    iconOnly={<ChevronRight />}
+                  >
+                    Select Favourite
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Manual Creation Option */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -69,7 +112,7 @@ export function WorkoutCreationLanding({
             className="cursor-pointer transition-all"
             onClick={onSelectManual}
           >
-            <CardHeader>
+            <CardContent>
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-card-on-card rounded-lg">
                   <ListTodoIcon className="size-5" />
@@ -90,7 +133,7 @@ export function WorkoutCreationLanding({
                   Start Manual Creation
                 </Button>
               </div>
-            </CardHeader>
+            </CardContent>
           </Card>
         </motion.div>
       </div>

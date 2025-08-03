@@ -235,7 +235,7 @@ export function CreateFavouriteModal({
 
             <div className="space-y-4">
               <Input
-                label="Workout Name (optional)"
+                label="Workout Name"
                 id="title"
                 placeholder="e.g., Morning Push Routine"
                 value={title}
@@ -248,16 +248,6 @@ export function CreateFavouriteModal({
               onSelectManual={handleSelectManual}
               onSelectAI={handleSelectAI}
             />
-
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="px-4 py-2 border border-border rounded-md hover:bg-muted"
-              >
-                Cancel
-              </button>
-            </div>
           </div>
         </DialogContent>
       </Dialog>

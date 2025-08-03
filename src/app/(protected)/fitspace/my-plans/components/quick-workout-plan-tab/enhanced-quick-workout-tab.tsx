@@ -1,6 +1,6 @@
 'use client'
 
-import { HistoryIcon, StarIcon } from 'lucide-react'
+import { BookmarkIcon, HistoryIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -157,7 +157,7 @@ export function EnhancedQuickWorkoutTab({
       >
         <TabsList className="grid grid-cols-2 w-full mb-6">
           <TabsTrigger value={WorkoutTabView.Favourites}>
-            <StarIcon /> Favourites
+            <BookmarkIcon /> Favourites
           </TabsTrigger>
           <TabsTrigger value={WorkoutTabView.PastWorkouts}>
             <HistoryIcon /> Past Workouts
