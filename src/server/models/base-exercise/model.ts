@@ -134,6 +134,8 @@ export default class BaseExercise implements GQLBaseExercise {
         return GQLEquipment.Band
       case 'BARBELL':
         return GQLEquipment.Barbell
+      case 'EZ_BAR':
+        return GQLEquipment.EzBar
       case 'BODYWEIGHT':
         return GQLEquipment.Bodyweight
       case 'CABLE':
@@ -147,6 +149,19 @@ export default class BaseExercise implements GQLBaseExercise {
       case 'SMITH_MACHINE':
         return GQLEquipment.SmithMachine
       case 'MEDICINE_BALL':
+        return GQLEquipment.MedicineBall
+      case 'EXERCISE_BALL':
+        return GQLEquipment.ExerciseBall
+      case 'PULL_UP_BAR':
+        return GQLEquipment.PullUpBar
+      case 'BENCH':
+        return GQLEquipment.Bench
+      case 'INCLINE_BENCH':
+        return GQLEquipment.InclineBench
+      case 'MAT':
+        return GQLEquipment.Mat
+      case 'FOAM_ROLLER':
+        return GQLEquipment.FoamRoller
       case 'OTHER':
         return GQLEquipment.Other
       default:
@@ -291,5 +306,38 @@ export default class BaseExercise implements GQLBaseExercise {
       )
       return []
     }
+  }
+
+  // V2 Exercise Integration Field Getters
+  get version() {
+    return this.data.version
+  }
+
+  get dataSource() {
+    return this.data.dataSource
+  }
+
+  get sourceId() {
+    return this.data.sourceId
+  }
+
+  get importedAt() {
+    return this.data.importedAt?.toISOString() || null
+  }
+
+  get difficulty() {
+    return this.data.difficulty
+  }
+
+  get instructions() {
+    return this.data.instructions
+  }
+
+  get tips() {
+    return this.data.tips
+  }
+
+  get isPremium() {
+    return this.data.isPremium
   }
 }

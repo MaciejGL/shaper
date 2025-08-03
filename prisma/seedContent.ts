@@ -15,6 +15,7 @@ export async function seedMuscleGroups() {
       muscles: [
         { name: 'Pectoralis Major', alias: 'Chest', groupSlug: 'chest' },
         { name: 'Pectoralis Minor', alias: 'Inner Chest', groupSlug: 'chest' },
+        { name: 'Serratus Anterior', alias: 'Serratus', groupSlug: 'chest' }, // Added for V2 exercises
       ],
     },
     {
@@ -45,6 +46,7 @@ export async function seedMuscleGroups() {
         { name: 'Hamstrings', alias: 'Hams', groupSlug: 'legs' },
         { name: 'Gluteus Maximus', alias: 'Glutes', groupSlug: 'legs' },
         { name: 'Adductors', alias: 'Inner Thigh', groupSlug: 'legs' },
+        { name: 'Abductors', alias: 'Hip Abductors', groupSlug: 'legs' }, // Added for V2 exercises
         { name: 'Calves', alias: 'Calves', groupSlug: 'legs' },
         { name: 'Shin', alias: 'Shin', groupSlug: 'legs' },
       ],

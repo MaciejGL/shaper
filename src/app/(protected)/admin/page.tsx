@@ -1,8 +1,9 @@
-import { Cloud, Users, Utensils } from 'lucide-react'
+import { Cloud, Dumbbell, Users, Utensils } from 'lucide-react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 import { AwsTab } from './components/aws-tab'
+import { ExercisesTab } from './components/exercises-tab'
 import { FoodsTab } from './components/foods-tab'
 import { UsersTab } from './components/users-tab'
 
@@ -15,6 +16,10 @@ export default function AdminPage() {
           <TabsTrigger value="users">
             <Users className="h-4 w-4" />
             User Management
+          </TabsTrigger>
+          <TabsTrigger value="exercises">
+            <Dumbbell className="h-4 w-4" />
+            Exercise Management
           </TabsTrigger>
           <TabsTrigger value="foods">
             <Utensils className="h-4 w-4" />
@@ -30,6 +35,10 @@ export default function AdminPage() {
 
         <TabsContent value="users" className="mt-6">
           <UsersTab />
+        </TabsContent>
+
+        <TabsContent value="exercises" className="mt-6">
+          <ExercisesTab />
         </TabsContent>
 
         <TabsContent value="foods" className="mt-6">

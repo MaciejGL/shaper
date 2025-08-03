@@ -242,17 +242,25 @@ export type GQLBaseExercise = {
   canBeSubstitutedBy: EntireFieldWrapper<Array<GQLBaseExerciseSubstitute>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   createdBy?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
+  dataSource?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   description?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  difficulty?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   equipment?: EntireFieldWrapper<Maybe<GQLEquipment>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   images: EntireFieldWrapper<Array<GQLImage>>;
+  importedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  instructions?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  isPremium: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isPublic: EntireFieldWrapper<Scalars['Boolean']['output']>;
   muscleGroupCategories: EntireFieldWrapper<Array<GQLMuscleGroupCategory>>;
   muscleGroups: EntireFieldWrapper<Array<GQLMuscleGroup>>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
+  sourceId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   substitutes: EntireFieldWrapper<Array<GQLBaseExerciseSubstitute>>;
+  tips?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   type?: EntireFieldWrapper<Maybe<GQLExerciseType>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  version: EntireFieldWrapper<Scalars['Int']['output']>;
   videoUrl?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
 };
 
@@ -547,12 +555,20 @@ export type GQLDuplicateTrainingWeekInput = {
 export enum GQLEquipment {
   Band = 'BAND',
   Barbell = 'BARBELL',
+  Bench = 'BENCH',
   Bodyweight = 'BODYWEIGHT',
   Cable = 'CABLE',
   Dumbbell = 'DUMBBELL',
+  ExerciseBall = 'EXERCISE_BALL',
+  EzBar = 'EZ_BAR',
+  FoamRoller = 'FOAM_ROLLER',
+  InclineBench = 'INCLINE_BENCH',
   Kettlebell = 'KETTLEBELL',
   Machine = 'MACHINE',
+  Mat = 'MAT',
+  MedicineBall = 'MEDICINE_BALL',
   Other = 'OTHER',
+  PullUpBar = 'PULL_UP_BAR',
   SmithMachine = 'SMITH_MACHINE'
 }
 
@@ -2953,17 +2969,25 @@ export type GQLBaseExerciseResolvers<ContextType = GQLContext, ParentType extend
   canBeSubstitutedBy?: Resolver<Array<GQLResolversTypes['BaseExerciseSubstitute']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   createdBy?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
+  dataSource?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   description?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  difficulty?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   equipment?: Resolver<Maybe<GQLResolversTypes['Equipment']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   images?: Resolver<Array<GQLResolversTypes['Image']>, ParentType, ContextType>;
+  importedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  instructions?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  isPremium?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isPublic?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   muscleGroupCategories?: Resolver<Array<GQLResolversTypes['MuscleGroupCategory']>, ParentType, ContextType>;
   muscleGroups?: Resolver<Array<GQLResolversTypes['MuscleGroup']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  sourceId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   substitutes?: Resolver<Array<GQLResolversTypes['BaseExerciseSubstitute']>, ParentType, ContextType>;
+  tips?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   type?: Resolver<Maybe<GQLResolversTypes['ExerciseType']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  version?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   videoUrl?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

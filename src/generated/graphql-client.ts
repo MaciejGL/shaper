@@ -240,17 +240,25 @@ export type GQLBaseExercise = {
   canBeSubstitutedBy: Array<GQLBaseExerciseSubstitute>;
   createdAt: Scalars['String']['output'];
   createdBy?: Maybe<GQLUserPublic>;
+  dataSource?: Maybe<Scalars['String']['output']>;
   description?: Maybe<Scalars['String']['output']>;
+  difficulty?: Maybe<Scalars['String']['output']>;
   equipment?: Maybe<GQLEquipment>;
   id: Scalars['ID']['output'];
   images: Array<GQLImage>;
+  importedAt?: Maybe<Scalars['String']['output']>;
+  instructions?: Maybe<Scalars['String']['output']>;
+  isPremium: Scalars['Boolean']['output'];
   isPublic: Scalars['Boolean']['output'];
   muscleGroupCategories: Array<GQLMuscleGroupCategory>;
   muscleGroups: Array<GQLMuscleGroup>;
   name: Scalars['String']['output'];
+  sourceId?: Maybe<Scalars['String']['output']>;
   substitutes: Array<GQLBaseExerciseSubstitute>;
+  tips?: Maybe<Scalars['String']['output']>;
   type?: Maybe<GQLExerciseType>;
   updatedAt: Scalars['String']['output'];
+  version: Scalars['Int']['output'];
   videoUrl?: Maybe<Scalars['String']['output']>;
 };
 
@@ -545,12 +553,20 @@ export type GQLDuplicateTrainingWeekInput = {
 export enum GQLEquipment {
   Band = 'BAND',
   Barbell = 'BARBELL',
+  Bench = 'BENCH',
   Bodyweight = 'BODYWEIGHT',
   Cable = 'CABLE',
   Dumbbell = 'DUMBBELL',
+  ExerciseBall = 'EXERCISE_BALL',
+  EzBar = 'EZ_BAR',
+  FoamRoller = 'FOAM_ROLLER',
+  InclineBench = 'INCLINE_BENCH',
   Kettlebell = 'KETTLEBELL',
   Machine = 'MACHINE',
+  Mat = 'MAT',
+  MedicineBall = 'MEDICINE_BALL',
   Other = 'OTHER',
+  PullUpBar = 'PULL_UP_BAR',
   SmithMachine = 'SMITH_MACHINE'
 }
 
