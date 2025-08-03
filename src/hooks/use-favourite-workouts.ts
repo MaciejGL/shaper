@@ -1,12 +1,16 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { isToday } from 'date-fns'
+import { useRouter } from 'next/navigation'
 
 import {
   GQLCreateFavouriteWorkoutInput,
   GQLFitspaceGenerateAiWorkoutMutation,
+  GQLFitspaceMyPlansQuery,
   GQLStartWorkoutFromFavouriteInput,
   GQLUpdateFavouriteWorkoutInput,
   useCreateFavouriteWorkoutMutation,
   useDeleteFavouriteWorkoutMutation,
+  useFitspaceMyPlansQuery,
   useGetFavouriteWorkoutsQuery,
   useStartWorkoutFromFavouriteMutation,
   useUpdateFavouriteWorkoutMutation,
@@ -50,7 +54,100 @@ export function useDeleteFavouriteWorkout() {
 }
 
 export function useStartWorkoutFromFavourite() {
-  return useStartWorkoutFromFavouriteMutation()
+  const queryClient = useQueryClient()
+  const router = useRouter()
+
+  return useStartWorkoutFromFavouriteMutation({
+    onSuccess: (data) => {
+      // Invalidate relevant queries to update UI
+      queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] })
+      queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] })
+
+      // Navigate to the workout
+      if (data.startWorkoutFromFavourite) {
+        // Parse the return format: planId|weekId|dayId
+        const parts = data.startWorkoutFromFavourite.split('|')
+        if (parts.length === 3) {
+          const [planId, weekId, dayId] = parts
+          router.push(`/fitspace/workout/${planId}?week=${weekId}&day=${dayId}`)
+        } else {
+          // Fallback to old format (just plan ID)
+          router.push(`/fitspace/workout/${data.startWorkoutFromFavourite}`)
+        }
+      }
+    },
+  })
+}
+
+// Types for workout status analysis
+export type WorkoutStatus =
+  | 'can-start' // No active plan or rest day - can start favourite workout
+  | 'has-workout' // Has existing workout today - needs confirmation
+  | 'active-plan-workout' // Active plan with workout today - should disable
+  | 'rest-day' // Rest day in active plan - can start with confirmation
+
+export interface WorkoutStatusAnalysis {
+  status: WorkoutStatus
+  canStart: boolean
+  needsConfirmation: boolean
+  message: string
+  activePlan?: NonNullable<
+    GQLFitspaceMyPlansQuery['getMyPlansOverviewFull']
+  >['activePlan']
+  todaysWorkout?: NonNullable<
+    NonNullable<
+      NonNullable<GQLFitspaceMyPlansQuery>['getMyPlansOverviewFull']
+    >['quickWorkoutPlan']
+  >['weeks'][number]['days'][number]
+}
+
+/**
+ * Hook to analyze user's current workout status for starting favourite workouts
+ */
+export function useFavouriteWorkoutStatus(): WorkoutStatusAnalysis {
+  const { data: plansData } = useFitspaceMyPlansQuery()
+
+  const activePlan = plansData?.getMyPlansOverviewFull?.activePlan
+  const quickWorkoutPlan = plansData?.getMyPlansOverviewFull?.quickWorkoutPlan
+
+  // If user has an active assigned plan (from trainer/premade), always disable favourite workouts
+  if (activePlan) {
+    return {
+      status: 'active-plan-workout',
+      canStart: false,
+      needsConfirmation: false,
+      message:
+        'You have an active training plan. Complete your plan first, then use quick workouts for extra training.',
+      activePlan,
+    }
+  }
+
+  // No active assigned plan - check quick workout plan for today's schedule
+  if (quickWorkoutPlan?.weeks) {
+    // Check if today has exercises in quick workout plan
+    const todaysDay = quickWorkoutPlan.weeks
+      .flatMap((week) => week.days)
+      .find((day) => day.scheduledAt && isToday(new Date(day.scheduledAt)))
+
+    if (todaysDay?.exercises && todaysDay.exercises.length > 0) {
+      return {
+        status: 'has-workout',
+        canStart: true,
+        needsConfirmation: true,
+        message:
+          'You have a quick workout planned for today. Starting a favourite will replace it.',
+        todaysWorkout: todaysDay,
+      }
+    }
+  }
+
+  // No active plan and no quick workout scheduled for today - ready to start
+  return {
+    status: 'can-start',
+    canStart: true,
+    needsConfirmation: false,
+    message: 'Ready to start your favourite workout!',
+  }
 }
 
 // Consolidated hook for all favourite workout operations

@@ -19,6 +19,19 @@ export interface UserDatePreferences {
  */
 
 /**
+ * Get UTC week start (Monday = 0) for quick workout plans
+ * This is used specifically for training plans that follow Monday-Sunday weeks
+ * Returns the Monday of the week containing the given date, in UTC
+ */
+export function getUTCWeekStart(date: Date = new Date()): Date {
+  const weekStart = new Date(date)
+  weekStart.setUTCDate(date.getUTCDate() - ((date.getUTCDay() + 6) % 7))
+  weekStart.setUTCHours(0, 0, 0, 0)
+
+  return new Date(weekStart.getTime() - date.getTimezoneOffset() * 60000)
+}
+
+/**
  * Convert a date string (YYYY-MM-DD) to UTC midnight
  * Respects user's timezone for determining "midnight"
  */

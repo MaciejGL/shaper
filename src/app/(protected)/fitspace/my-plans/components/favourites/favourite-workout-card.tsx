@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
+import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
 
 interface FavouriteWorkoutCardProps {
@@ -23,6 +24,7 @@ interface FavouriteWorkoutCardProps {
   onStart: () => void
   onEdit: () => void
   onDelete: () => void
+  workoutStatus: WorkoutStatusAnalysis
 }
 
 export function FavouriteWorkoutCard({
@@ -30,6 +32,7 @@ export function FavouriteWorkoutCard({
   onStart,
   onEdit,
   onDelete,
+  workoutStatus,
 }: FavouriteWorkoutCardProps) {
   const totalExercises = favourite.exercises.length
   const totalSets = favourite.exercises.reduce(
@@ -49,6 +52,33 @@ export function FavouriteWorkoutCard({
   const createdAgo = formatDistanceToNow(new Date(favourite.createdAt), {
     addSuffix: true,
   })
+
+  // Determine button state based on workout status
+  const getStartButtonProps = () => {
+    if (!workoutStatus.canStart) {
+      return {
+        disabled: true,
+        variant: 'secondary' as const,
+        text: 'Not Available',
+      }
+    }
+
+    if (workoutStatus.needsConfirmation) {
+      return {
+        disabled: false,
+        variant: 'outline' as const,
+        text: 'Replace & Start',
+      }
+    }
+
+    return {
+      disabled: false,
+      variant: 'default' as const,
+      text: 'Start Workout',
+    }
+  }
+
+  const buttonProps = getStartButtonProps()
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -130,9 +160,14 @@ export function FavouriteWorkoutCard({
           <span className="text-xs text-muted-foreground">
             Created {createdAgo}
           </span>
-          <Button onClick={onStart} size="sm">
+          <Button
+            onClick={onStart}
+            size="sm"
+            variant={buttonProps.variant}
+            disabled={buttonProps.disabled}
+          >
             <Play className="w-4 h-4 mr-1" />
-            Start Workout
+            {buttonProps.text}
           </Button>
         </div>
       </CardContent>

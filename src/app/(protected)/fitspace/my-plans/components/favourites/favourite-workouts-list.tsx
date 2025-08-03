@@ -7,6 +7,7 @@ import { CardSkeleton } from '@/components/card-skeleton'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
+import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 
 import { CreateFavouriteModal } from './create-favourite-modal'
 import { FavouriteWorkoutCard } from './favourite-workout-card'
@@ -24,6 +25,7 @@ interface FavouriteWorkoutsListProps {
   ) => void
   onDeleteWorkout: (favouriteId: string) => void
   onRefetch: () => void
+  workoutStatus: WorkoutStatusAnalysis
 }
 
 export function FavouriteWorkoutsList({
@@ -33,6 +35,7 @@ export function FavouriteWorkoutsList({
   onEditWorkout,
   onDeleteWorkout,
   onRefetch,
+  workoutStatus,
 }: FavouriteWorkoutsListProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
@@ -64,8 +67,20 @@ export function FavouriteWorkoutsList({
         </Button>
       </div>
 
+      {/* Workout Status Message */}
+      {workoutStatus.status !== 'can-start' && (
+        <div className="p-4 rounded-lg bg-muted/50 border">
+          <p className="text-sm text-muted-foreground">
+            {workoutStatus.message}
+          </p>
+        </div>
+      )}
+
       {favouriteWorkouts.length === 0 ? (
-        <EmptyFavouritesState onCreateNew={() => setIsCreateModalOpen(true)} />
+        <EmptyFavouritesState
+          onCreateNew={() => setIsCreateModalOpen(true)}
+          workoutStatus={workoutStatus}
+        />
       ) : (
         <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
           {favouriteWorkouts.map((favourite) => (
@@ -75,6 +90,7 @@ export function FavouriteWorkoutsList({
               onStart={() => onStartWorkout(favourite.id)}
               onEdit={() => onEditWorkout(favourite)}
               onDelete={() => onDeleteWorkout(favourite.id)}
+              workoutStatus={workoutStatus}
             />
           ))}
         </div>
@@ -92,7 +108,18 @@ export function FavouriteWorkoutsList({
   )
 }
 
-function EmptyFavouritesState({ onCreateNew }: { onCreateNew: () => void }) {
+function EmptyFavouritesState({
+  onCreateNew,
+  workoutStatus,
+}: {
+  onCreateNew: () => void
+  workoutStatus: WorkoutStatusAnalysis
+}) {
+  const canStartMessage =
+    workoutStatus.status === 'active-plan-workout'
+      ? 'You have a workout scheduled in your training plan today.'
+      : workoutStatus.message
+
   return (
     <Card>
       <CardContent className="flex flex-col items-center justify-center text-center py-6">
@@ -106,6 +133,11 @@ function EmptyFavouritesState({ onCreateNew }: { onCreateNew: () => void }) {
           Create your first favourite workout to quickly start your preferred
           exercise routines.
         </p>
+        {workoutStatus.status === 'active-plan-workout' && (
+          <p className="text-sm text-muted-foreground mb-4 max-w-sm mx-auto">
+            {canStartMessage}
+          </p>
+        )}
         <Button onClick={onCreateNew} iconStart={<Plus />}>
           Create
         </Button>

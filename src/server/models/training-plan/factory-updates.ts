@@ -1,6 +1,6 @@
 import { prisma } from '@lib/db'
 import * as crypto from 'crypto'
-import { addDays, getISOWeek, startOfWeek } from 'date-fns'
+import { addDays, getISOWeek } from 'date-fns'
 import { GraphQLError } from 'graphql'
 
 import {
@@ -22,6 +22,7 @@ import {
   CollaborationAction,
   checkTrainingPlanPermission,
 } from '@/lib/permissions/collaboration-permissions'
+import { getUTCWeekStart } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
 import { getFullPlanById } from '../training-utils.server'
@@ -1265,17 +1266,6 @@ export async function removeSetFromExercise(
 
     return true
   })
-}
-
-/**
- * Get the start of the current week in UTC
- * This ensures consistent week starts regardless of server timezone
- */
-function getUTCWeekStart(date: Date = new Date()): Date {
-  // Get the current week start in UTC
-  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
-  const weekStart = startOfWeek(utcDate, { weekStartsOn: 1 })
-  return new Date(weekStart.getTime() - date.getTimezoneOffset() * 60000)
 }
 
 export async function getQuickWorkoutPlan(context: GQLContext) {

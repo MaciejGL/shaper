@@ -7,10 +7,12 @@ import { filterExercises } from '../utils/exercise-filters'
 
 interface UseManualWorkoutOptions {
   allExercises?: Exercise[]
+  initialSelectedExercises?: string[]
 }
 
 export function useManualWorkout({
   allExercises = [],
+  initialSelectedExercises = [],
 }: UseManualWorkoutOptions) {
   // Filter state
   const [searchTerm, setSearchTerm] = useState('')
@@ -18,7 +20,9 @@ export function useManualWorkout({
   const [selectedEquipment, setSelectedEquipment] = useState<GQLEquipment[]>([])
 
   // Selection state
-  const [selectedExercises, setSelectedExercises] = useState<string[]>([])
+  const [selectedExercises, setSelectedExercises] = useState<string[]>(
+    initialSelectedExercises,
+  )
 
   // Derived state - filtered exercises
   const filteredExercises = useMemo(() => {

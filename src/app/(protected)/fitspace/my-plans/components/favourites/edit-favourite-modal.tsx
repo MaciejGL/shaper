@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import {
   GQLFavouriteWorkout,
   useFitspaceGetExercisesQuery,
@@ -11,6 +12,7 @@ import {
   FavouriteWorkoutWizardData,
   useUpdateFavouriteFromWizard,
 } from '@/hooks/use-favourite-workouts'
+import { cn } from '@/lib/utils'
 
 import { AiEquipmentStep } from '../../../workout/quick-workout/components/ai-equipment-step'
 import { AiMuscleGroupsStep } from '../../../workout/quick-workout/components/ai-muscle-groups-step'
@@ -68,6 +70,14 @@ export function EditFavouriteModal({
     ]
   }, [exercisesData])
 
+  // Extract initial exercise IDs from favourite
+  const initialSelectedExercises = useMemo(() => {
+    if (!favourite?.exercises) return []
+    return favourite.exercises
+      .filter((ex) => ex.baseId) // Only include exercises with baseId
+      .map((ex) => ex.baseId!)
+  }, [favourite])
+
   // Manual workout hooks
   const {
     selectedMuscleGroups,
@@ -83,7 +93,7 @@ export function EditFavouriteModal({
     handleRemoveExercise,
     canProceedToReview,
     filteredExercises,
-  } = useManualWorkout({ allExercises })
+  } = useManualWorkout({ allExercises, initialSelectedExercises })
 
   // AI workflow hooks
   const {
@@ -92,6 +102,7 @@ export function EditFavouriteModal({
     aiWorkoutResult,
     isGeneratingAiWorkout,
     aiGenerationError,
+    handleGenerateAiWorkout,
     handleRetryAiGeneration,
     handleExercisesReorder,
   } = useAiWorkoutGeneration()
@@ -105,14 +116,23 @@ export function EditFavouriteModal({
       setTitle(favourite.title)
       setDescription(favourite.description || '')
 
-      // Note: Cannot pre-populate selected exercises with current hook structure
-      // User will need to re-select exercises when editing
+      // Exercises are now pre-populated via initialSelectedExercises in useManualWorkout
 
       // Reset other state
       setWorkoutFlow('manual')
       setShowTitleStep(true)
     }
   }, [favourite, open])
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!open) {
+      setTitle('')
+      setDescription('')
+      setShowTitleStep(true)
+      setWorkoutFlow('manual')
+    }
+  }, [open])
 
   // Handle workflow selection (for switching between manual and AI)
   const handleSelectManual = () => {
@@ -132,6 +152,18 @@ export function EditFavouriteModal({
       setShowTitleStep(true)
     }
     setWorkoutFlow(flow)
+  }
+
+  // Handle step changes - trigger AI generation when reaching AI results step
+  const handleStepChange = (step: number) => {
+    if (
+      workoutFlow === 'ai' &&
+      step === 3 &&
+      !aiWorkoutResult &&
+      !isGeneratingAiWorkout
+    ) {
+      handleGenerateAiWorkout()
+    }
   }
 
   // Handle updating favourite from manual data
@@ -292,12 +324,9 @@ export function EditFavouriteModal({
   if (showTitleStep) {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent
-          className="max-w-md"
-          dialogTitle="Edit Favourite Workout"
-        >
+        <DialogContent fullScreen dialogTitle="Edit Favourite Workout">
           <div className="space-y-6">
-            <div className="text-center space-y-2">
+            <div className="text-center space-y-2 mt-4">
               <h2 className="text-2xl font-bold">Edit Favourite Workout</h2>
               <p className="text-muted-foreground">
                 Update your workout details and exercises
@@ -305,36 +334,15 @@ export function EditFavouriteModal({
             </div>
 
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label htmlFor="edit-title" className="text-sm font-medium">
-                  Workout Name *
-                </label>
-                <input
-                  id="edit-title"
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background"
-                  placeholder="e.g., Morning Push Routine"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  autoFocus
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label
-                  htmlFor="edit-description"
-                  className="text-sm font-medium"
-                >
-                  Description (optional)
-                </label>
-                <textarea
-                  id="edit-description"
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background"
-                  placeholder="Describe your workout routine..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                />
-              </div>
+              <Input
+                label="Workout Name *"
+                id="edit-title"
+                className="w-full px-3 py-2 border border-border rounded-md bg-background"
+                placeholder="e.g., Morning Push Routine"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                autoFocus
+              />
             </div>
 
             {/* Current exercises preview */}
@@ -387,17 +395,17 @@ export function EditFavouriteModal({
   // Workout update wizard
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent
-        className="max-w-4xl max-h-[90vh] overflow-hidden p-0"
-        dialogTitle="Edit Favourite Workout"
-      >
-        <div className="h-[90vh] overflow-y-auto">
+      <DialogContent fullScreen dialogTitle="Edit Favourite Workout">
+        <div className="h-full relative">
           <QuickWorkoutWizard
             workoutFlow={workoutFlow}
             onFlowChange={handleFlowChange}
             canProceedFromStep={canProceedFromStep}
             isAdding={isUpdating}
             onFinish={handleFinish}
+            onStepChange={handleStepChange}
+            footerClassName={cn('sticky bottom-[-24px]')}
+            finishButtonText="Update Favourite"
             // Manual flow components (reuse existing)
             muscleGroupsComponent={
               <ManualMuscleGroupsStep

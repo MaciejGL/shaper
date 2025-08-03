@@ -92,6 +92,7 @@ interface QuickWorkoutWizardProps {
   onFinish?: () => void
   onStepChange?: (step: number) => void
   footerClassName?: string
+  finishButtonText?: string
 }
 
 export function QuickWorkoutWizard({
@@ -113,6 +114,7 @@ export function QuickWorkoutWizard({
   onFinish,
   onStepChange,
   footerClassName,
+  finishButtonText = 'Start Workout',
 }: QuickWorkoutWizardProps) {
   // Determine the current step sequence based on flow
   const getSteps = () => {
@@ -291,7 +293,7 @@ export function QuickWorkoutWizard({
                   className="flex-1"
                   disabled={isAdding || !canProceedFromStep(currentStep)}
                 >
-                  Start Workout
+                  {finishButtonText}
                 </Button>
               )}
             </div>

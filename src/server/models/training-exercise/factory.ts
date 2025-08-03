@@ -6,7 +6,6 @@ import {
   isSameDay,
   isSameWeek,
   startOfToday,
-  startOfWeek,
 } from 'date-fns'
 import { GraphQLError } from 'graphql'
 
@@ -29,6 +28,7 @@ import {
   CollaborationAction,
   checkTrainingPlanPermission,
 } from '@/lib/permissions/collaboration-permissions'
+import { getUTCWeekStart } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from '../base-exercise/model'
@@ -1398,17 +1398,6 @@ export const swapExercise = async (
   })
 
   return new ExerciseSubstitute(newSubstitution, context)
-}
-
-/**
- * Get the start of the current week in UTC
- * This ensures consistent week starts regardless of server timezone
- */
-function getUTCWeekStart(date: Date = new Date()): Date {
-  // Get the current week start in UTC
-  const utcDate = new Date(date.getTime() + date.getTimezoneOffset() * 60000)
-  const weekStart = startOfWeek(utcDate, { weekStartsOn: 1 })
-  return new Date(weekStart.getTime() - date.getTimezoneOffset() * 60000)
 }
 
 export const addExercisesToQuickWorkout = async (

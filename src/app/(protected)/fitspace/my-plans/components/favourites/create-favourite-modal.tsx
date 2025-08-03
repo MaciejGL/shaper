@@ -89,6 +89,7 @@ export function CreateFavouriteModal({
     aiWorkoutResult,
     isGeneratingAiWorkout,
     aiGenerationError,
+    handleGenerateAiWorkout,
     handleRetryAiGeneration,
     handleExercisesReorder,
   } = useAiWorkoutGeneration()
@@ -120,15 +121,29 @@ export function CreateFavouriteModal({
     setWorkoutFlow(flow)
   }
 
+  // Handle step changes - trigger AI generation when reaching AI results step
+  const handleStepChange = (step: number) => {
+    if (
+      workoutFlow === 'ai' &&
+      step === 3 &&
+      !aiWorkoutResult &&
+      !isGeneratingAiWorkout
+    ) {
+      handleGenerateAiWorkout()
+    }
+  }
+
   // Handle creating favourite from manual data
   const handleFinishManual = async () => {
-    if (!title.trim() || selectedExercises.length === 0) {
-      console.error('Missing title or exercises')
+    if (selectedExercises.length === 0) {
+      console.error('Missing exercises')
       return
     }
 
     try {
-      await createFromManual({ title: title.trim() }, selectedExercises)
+      const workoutTitle = title.trim() || 'My Workout'
+
+      await createFromManual({ title: workoutTitle }, selectedExercises)
 
       handleSuccess()
     } catch (error) {
@@ -138,13 +153,15 @@ export function CreateFavouriteModal({
 
   // Handle creating favourite from AI data
   const handleFinishAI = async () => {
-    if (!title.trim() || !aiWorkoutResult) {
-      console.error('Missing title or AI workout result')
+    if (!aiWorkoutResult) {
+      console.error('Missing AI workout result')
       return
     }
 
     try {
-      await createFromAI({ title: title.trim() }, aiWorkoutResult)
+      const workoutTitle = title.trim() || 'AI Workout'
+
+      await createFromAI({ title: workoutTitle }, aiWorkoutResult)
 
       handleSuccess()
     } catch (error) {
@@ -218,7 +235,7 @@ export function CreateFavouriteModal({
 
             <div className="space-y-4">
               <Input
-                label="Workout Name *"
+                label="Workout Name (optional)"
                 id="title"
                 placeholder="e.g., Morning Push Routine"
                 value={title}
@@ -258,7 +275,9 @@ export function CreateFavouriteModal({
             canProceedFromStep={canProceedFromStep}
             isAdding={isCreating}
             onFinish={handleFinish}
+            onStepChange={handleStepChange}
             footerClassName={cn('sticky bottom-[-24px]')}
+            finishButtonText="Add to Favourites"
             // Manual flow components (reuse existing)
             muscleGroupsComponent={
               <ManualMuscleGroupsStep
