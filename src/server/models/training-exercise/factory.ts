@@ -18,6 +18,7 @@ import {
   GQLWorkoutSessionEvent,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { getExerciseVersionWhereClause } from '@/lib/exercise-version-filter'
 import {
   QUICK_WORKOUT_ASSISTANT_ID,
   createAssistantThread,
@@ -859,7 +860,10 @@ Generate the workout based on these preferences.`,
     where: {
       id: { in: requestedExerciseIds },
       OR: [
-        { isPublic: true }, // Public exercises
+        {
+          isPublic: true,
+          ...getExerciseVersionWhereClause(), // Apply environment version filter to public exercises
+        },
         { createdById: context.user?.user.trainerId }, // Trainer's exercises (if user has a trainer)
       ],
     },

@@ -9,6 +9,7 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { deleteImages } from '@/lib/aws/s3'
+import { getExerciseVersionWhereClause } from '@/lib/exercise-version-filter'
 import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from './model'
@@ -63,6 +64,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     const whereClause: Prisma.BaseExerciseWhereInput = {
       createdBy: null,
       isPublic: true,
+      ...getExerciseVersionWhereClause(), // Apply environment version filter
     }
 
     if (where?.equipment) {
@@ -101,11 +103,14 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
+    const versionFilter = getExerciseVersionWhereClause()
+
     const [publicExercises, trainerExercises] = await Promise.all([
       prisma.baseExercise.findMany({
         where: {
           createdBy: null,
           isPublic: true,
+          ...versionFilter, // Apply environment version filter
         },
         include: {
           images: true,
@@ -344,7 +349,10 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
           id: { in: input.substituteIds },
           OR: [
             { createdById: user.user.id }, // User's own exercises
-            { isPublic: true }, // Public exercises
+            {
+              isPublic: true,
+              ...getExerciseVersionWhereClause(), // Apply environment version filter to public exercises
+            },
           ],
         },
       })
@@ -430,7 +438,10 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
             id: { in: input.substituteIds },
             OR: [
               { createdById: user.user.id }, // User's own exercises
-              { isPublic: true }, // Public exercises
+              {
+                isPublic: true,
+                ...getExerciseVersionWhereClause(), // Apply environment version filter to public exercises
+              },
             ],
           },
         })
@@ -555,7 +566,10 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         id: input.substituteId,
         OR: [
           { createdById: user.user.id }, // User's own exercises
-          { isPublic: true }, // Public exercises
+          {
+            isPublic: true,
+            ...getExerciseVersionWhereClause(), // Apply environment version filter to public exercises
+          },
         ],
       },
     })
