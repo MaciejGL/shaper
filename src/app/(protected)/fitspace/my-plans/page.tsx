@@ -3,7 +3,7 @@
 import { LayoutList } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import { useFitspaceMyPlansQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
@@ -11,7 +11,7 @@ import { DashboardHeader } from '../../trainer/components/dashboard-header'
 import { PlanActionDialog } from './components/plan-action-dialog/plan-action-dialog'
 import { usePlanAction } from './components/plan-action-dialog/use-plan-action'
 import { PlansTab } from './components/plans-tab'
-import { QuickWorkoutPlanTab } from './components/quick-workout-plan-tab/quick-workout-plan-tab'
+import { EnhancedQuickWorkoutTab } from './components/quick-workout-plan-tab/enhanced-quick-workout-tab'
 import { PlanTab } from './types'
 
 export default function MyPlansPage() {
@@ -47,20 +47,18 @@ export default function MyPlansPage() {
         onValueChange={(value) => setTab(value as PlanTab)}
         className="w-full"
       >
-        <div className="overflow-x-auto hide-scrollbar -mx-2 px-2">
-          <TabsList className="grid grid-cols-2 w-max mb-4">
-            <TabsTrigger size="lg" value={PlanTab.QuickWorkout}>
-              Workouts
-            </TabsTrigger>
-            <TabsTrigger size="lg" value={PlanTab.Plans}>
-              Plans
-            </TabsTrigger>
-          </TabsList>
-        </div>
+        <PrimaryTabList
+          options={[
+            { label: 'Workouts', value: PlanTab.QuickWorkout },
+            { label: 'Plans', value: PlanTab.Plans },
+          ]}
+          onClick={setTab}
+          active={tab ?? (activePlan ? PlanTab.Plans : PlanTab.QuickWorkout)}
+        />
 
-        {/* Quick Workout Plan */}
+        {/* Enhanced Quick Workout Plan with Favourites */}
         <TabsContent value={PlanTab.QuickWorkout} className="space-y-4">
-          <QuickWorkoutPlanTab
+          <EnhancedQuickWorkoutTab
             plan={quickWorkoutPlan}
             loading={isLoadingPlans}
           />

@@ -367,6 +367,30 @@ export type GQLCreateExerciseSetInput = {
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type GQLCreateFavouriteWorkoutExerciseInput = {
+  baseId?: InputMaybe<Scalars['ID']['input']>;
+  instructions?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  order: Scalars['Int']['input'];
+  restSeconds?: InputMaybe<Scalars['Int']['input']>;
+  sets: Array<GQLCreateFavouriteWorkoutSetInput>;
+};
+
+export type GQLCreateFavouriteWorkoutInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  exercises: Array<GQLCreateFavouriteWorkoutExerciseInput>;
+  title: Scalars['String']['input'];
+};
+
+export type GQLCreateFavouriteWorkoutSetInput = {
+  maxReps?: InputMaybe<Scalars['Int']['input']>;
+  minReps?: InputMaybe<Scalars['Int']['input']>;
+  order: Scalars['Int']['input'];
+  reps?: InputMaybe<Scalars['Int']['input']>;
+  rpe?: InputMaybe<Scalars['Int']['input']>;
+  weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
 export type GQLCreateMealDayInput = {
   dayOfWeek: Scalars['Int']['input'];
   meals?: InputMaybe<Array<GQLCreateMealInput>>;
@@ -587,6 +611,42 @@ export enum GQLExerciseType {
 export type GQLExerciseWhereInput = {
   equipment?: InputMaybe<GQLEquipment>;
   muscleGroups?: InputMaybe<Array<Scalars['ID']['input']>>;
+};
+
+export type GQLFavouriteWorkout = {
+  __typename?: 'FavouriteWorkout';
+  createdAt: Scalars['String']['output'];
+  createdById: Scalars['ID']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  exercises: Array<GQLFavouriteWorkoutExercise>;
+  id: Scalars['ID']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export type GQLFavouriteWorkoutExercise = {
+  __typename?: 'FavouriteWorkoutExercise';
+  base?: Maybe<GQLBaseExercise>;
+  baseId?: Maybe<Scalars['ID']['output']>;
+  favouriteWorkoutId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  instructions?: Maybe<Scalars['String']['output']>;
+  name: Scalars['String']['output'];
+  order: Scalars['Int']['output'];
+  restSeconds?: Maybe<Scalars['Int']['output']>;
+  sets: Array<GQLFavouriteWorkoutSet>;
+};
+
+export type GQLFavouriteWorkoutSet = {
+  __typename?: 'FavouriteWorkoutSet';
+  exerciseId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  maxReps?: Maybe<Scalars['Int']['output']>;
+  minReps?: Maybe<Scalars['Int']['output']>;
+  order: Scalars['Int']['output'];
+  reps?: Maybe<Scalars['Int']['output']>;
+  rpe?: Maybe<Scalars['Int']['output']>;
+  weight?: Maybe<Scalars['Float']['output']>;
 };
 
 export enum GQLFitnessLevel {
@@ -865,6 +925,7 @@ export type GQLMutation = {
   createDraftTemplate: GQLTrainingPlan;
   createExercise: Scalars['Boolean']['output'];
   createExerciseNote: GQLNote;
+  createFavouriteWorkout: GQLFavouriteWorkout;
   createMealPlan: GQLCreateMealPlanPayload;
   createNote: GQLNote;
   createNoteReply: GQLNote;
@@ -875,6 +936,7 @@ export type GQLMutation = {
   deactivateUser: Scalars['Boolean']['output'];
   deleteBodyMeasurement: Scalars['Boolean']['output'];
   deleteExercise: Scalars['Boolean']['output'];
+  deleteFavouriteWorkout: Scalars['Boolean']['output'];
   deleteNote: Scalars['Boolean']['output'];
   deleteNotification: Scalars['Boolean']['output'];
   deletePlan: Scalars['Boolean']['output'];
@@ -917,12 +979,14 @@ export type GQLMutation = {
   respondToCollaborationInvitation: GQLCollaborationInvitation;
   saveMeal?: Maybe<GQLMeal>;
   sendCollaborationInvitation: GQLCollaborationInvitation;
+  startWorkoutFromFavourite: Scalars['ID']['output'];
   swapExercise: GQLSubstitute;
   uncompleteMeal: Scalars['Boolean']['output'];
   updateBodyMeasurement: GQLUserBodyMeasure;
   updateExercise: Scalars['Boolean']['output'];
   updateExerciseForm: GQLTrainingExercise;
   updateExerciseSet: Scalars['Boolean']['output'];
+  updateFavouriteWorkout: GQLFavouriteWorkout;
   updateMealPlanCollaboratorPermission: GQLMealPlanCollaborator;
   updateMealPlanDetails: Scalars['Boolean']['output'];
   updateNote: GQLNote;
@@ -1089,6 +1153,11 @@ export type GQLMutationCreateExerciseNoteArgs = {
 };
 
 
+export type GQLMutationCreateFavouriteWorkoutArgs = {
+  input: GQLCreateFavouriteWorkoutInput;
+};
+
+
 export type GQLMutationCreateMealPlanArgs = {
   input: GQLCreateMealPlanInput;
 };
@@ -1135,6 +1204,11 @@ export type GQLMutationDeleteBodyMeasurementArgs = {
 
 
 export type GQLMutationDeleteExerciseArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDeleteFavouriteWorkoutArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1357,6 +1431,11 @@ export type GQLMutationSendCollaborationInvitationArgs = {
 };
 
 
+export type GQLMutationStartWorkoutFromFavouriteArgs = {
+  input: GQLStartWorkoutFromFavouriteInput;
+};
+
+
 export type GQLMutationSwapExerciseArgs = {
   exerciseId: Scalars['ID']['input'];
   substituteId: Scalars['ID']['input'];
@@ -1386,6 +1465,11 @@ export type GQLMutationUpdateExerciseFormArgs = {
 
 export type GQLMutationUpdateExerciseSetArgs = {
   input: GQLUpdateExerciseSetInput;
+};
+
+
+export type GQLMutationUpdateFavouriteWorkoutArgs = {
+  input: GQLUpdateFavouriteWorkoutInput;
 };
 
 
@@ -1592,6 +1676,8 @@ export type GQLQuery = {
   getCurrentWorkoutWeek?: Maybe<GQLCurrentWorkoutWeekPayload>;
   getDefaultMealPlan: GQLMealPlan;
   getExercises: GQLGetExercisesResponse;
+  getFavouriteWorkout?: Maybe<GQLFavouriteWorkout>;
+  getFavouriteWorkouts: Array<GQLFavouriteWorkout>;
   getMealPlanById: GQLMealPlan;
   getMealPlanTemplates: Array<GQLMealPlan>;
   getMyMealPlansOverview: GQLMyMealPlansPayload;
@@ -1715,6 +1801,11 @@ export type GQLQueryGetCollaborationTemplatesArgs = {
 
 export type GQLQueryGetDefaultMealPlanArgs = {
   date?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type GQLQueryGetFavouriteWorkoutArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1888,6 +1979,11 @@ export type GQLSaveMealInput = {
 export type GQLSendCollaborationInvitationInput = {
   message?: InputMaybe<Scalars['String']['input']>;
   recipientEmail: Scalars['String']['input'];
+};
+
+export type GQLStartWorkoutFromFavouriteInput = {
+  favouriteWorkoutId: Scalars['ID']['input'];
+  replaceExisting?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type GQLSubstitute = {
@@ -2086,6 +2182,33 @@ export type GQLUpdateExerciseSetFormInput = {
 
 export type GQLUpdateExerciseSetInput = {
   id: Scalars['ID']['input'];
+  maxReps?: InputMaybe<Scalars['Int']['input']>;
+  minReps?: InputMaybe<Scalars['Int']['input']>;
+  order: Scalars['Int']['input'];
+  reps?: InputMaybe<Scalars['Int']['input']>;
+  rpe?: InputMaybe<Scalars['Int']['input']>;
+  weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type GQLUpdateFavouriteWorkoutExerciseInput = {
+  baseId?: InputMaybe<Scalars['ID']['input']>;
+  id?: InputMaybe<Scalars['ID']['input']>;
+  instructions?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+  order: Scalars['Int']['input'];
+  restSeconds?: InputMaybe<Scalars['Int']['input']>;
+  sets: Array<GQLUpdateFavouriteWorkoutSetInput>;
+};
+
+export type GQLUpdateFavouriteWorkoutInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  exercises?: InputMaybe<Array<GQLUpdateFavouriteWorkoutExerciseInput>>;
+  id: Scalars['ID']['input'];
+  title?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GQLUpdateFavouriteWorkoutSetInput = {
+  id?: InputMaybe<Scalars['ID']['input']>;
   maxReps?: InputMaybe<Scalars['Int']['input']>;
   minReps?: InputMaybe<Scalars['Int']['input']>;
   order: Scalars['Int']['input'];
@@ -2453,6 +2576,46 @@ export type GQLFitspaceDeleteMealPlanMutationVariables = Exact<{
 
 
 export type GQLFitspaceDeleteMealPlanMutation = { __typename?: 'Mutation', fitspaceDeleteMealPlan: boolean };
+
+export type GQLGetFavouriteWorkoutsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetFavouriteWorkoutsQuery = { __typename?: 'Query', getFavouriteWorkouts: Array<{ __typename?: 'FavouriteWorkout', id: string, title: string, description?: string | undefined | null, createdById: string, createdAt: string, updatedAt: string, exercises: Array<{ __typename?: 'FavouriteWorkoutExercise', id: string, name: string, order: number, baseId?: string | undefined | null, favouriteWorkoutId: string, restSeconds?: number | undefined | null, instructions?: string | undefined | null, base?: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }>, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }> } | undefined | null, sets: Array<{ __typename?: 'FavouriteWorkoutSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> };
+
+export type GQLGetFavouriteWorkoutQueryVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetFavouriteWorkoutQuery = { __typename?: 'Query', getFavouriteWorkout?: { __typename?: 'FavouriteWorkout', id: string, title: string, description?: string | undefined | null, createdById: string, createdAt: string, updatedAt: string, exercises: Array<{ __typename?: 'FavouriteWorkoutExercise', id: string, name: string, order: number, baseId?: string | undefined | null, favouriteWorkoutId: string, restSeconds?: number | undefined | null, instructions?: string | undefined | null, base?: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }>, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }> } | undefined | null, sets: Array<{ __typename?: 'FavouriteWorkoutSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> } | undefined | null };
+
+export type GQLCreateFavouriteWorkoutMutationVariables = Exact<{
+  input: GQLCreateFavouriteWorkoutInput;
+}>;
+
+
+export type GQLCreateFavouriteWorkoutMutation = { __typename?: 'Mutation', createFavouriteWorkout: { __typename?: 'FavouriteWorkout', id: string, title: string, description?: string | undefined | null, createdAt: string, exercises: Array<{ __typename?: 'FavouriteWorkoutExercise', id: string, name: string, order: number, baseId?: string | undefined | null, restSeconds?: number | undefined | null, instructions?: string | undefined | null, sets: Array<{ __typename?: 'FavouriteWorkoutSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> } };
+
+export type GQLUpdateFavouriteWorkoutMutationVariables = Exact<{
+  input: GQLUpdateFavouriteWorkoutInput;
+}>;
+
+
+export type GQLUpdateFavouriteWorkoutMutation = { __typename?: 'Mutation', updateFavouriteWorkout: { __typename?: 'FavouriteWorkout', id: string, title: string, description?: string | undefined | null, updatedAt: string, exercises: Array<{ __typename?: 'FavouriteWorkoutExercise', id: string, name: string, order: number, baseId?: string | undefined | null, restSeconds?: number | undefined | null, instructions?: string | undefined | null, sets: Array<{ __typename?: 'FavouriteWorkoutSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> } };
+
+export type GQLDeleteFavouriteWorkoutMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLDeleteFavouriteWorkoutMutation = { __typename?: 'Mutation', deleteFavouriteWorkout: boolean };
+
+export type GQLStartWorkoutFromFavouriteMutationVariables = Exact<{
+  input: GQLStartWorkoutFromFavouriteInput;
+}>;
+
+
+export type GQLStartWorkoutFromFavouriteMutation = { __typename?: 'Mutation', startWorkoutFromFavourite: string };
 
 export type GQLFitspaceMyPlansQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -4446,6 +4609,334 @@ useFitspaceDeleteMealPlanMutation.getKey = () => ['FitspaceDeleteMealPlan'];
 
 
 useFitspaceDeleteMealPlanMutation.fetcher = (variables: GQLFitspaceDeleteMealPlanMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceDeleteMealPlanMutation, GQLFitspaceDeleteMealPlanMutationVariables>(FitspaceDeleteMealPlanDocument, variables, options);
+
+export const GetFavouriteWorkoutsDocument = `
+    query GetFavouriteWorkouts {
+  getFavouriteWorkouts {
+    id
+    title
+    description
+    createdById
+    createdAt
+    updatedAt
+    exercises {
+      id
+      name
+      order
+      baseId
+      favouriteWorkoutId
+      restSeconds
+      instructions
+      base {
+        id
+        name
+        description
+        videoUrl
+        equipment
+        isPublic
+        additionalInstructions
+        type
+        muscleGroups {
+          id
+          name
+          alias
+          groupSlug
+        }
+        images {
+          id
+          url
+          order
+        }
+      }
+      sets {
+        id
+        order
+        reps
+        minReps
+        maxReps
+        weight
+        rpe
+      }
+    }
+  }
+}
+    `;
+
+export const useGetFavouriteWorkoutsQuery = <
+      TData = GQLGetFavouriteWorkoutsQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetFavouriteWorkoutsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetFavouriteWorkoutsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetFavouriteWorkoutsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetFavouriteWorkoutsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetFavouriteWorkouts'] : ['GetFavouriteWorkouts', variables],
+    queryFn: fetchData<GQLGetFavouriteWorkoutsQuery, GQLGetFavouriteWorkoutsQueryVariables>(GetFavouriteWorkoutsDocument, variables),
+    ...options
+  }
+    )};
+
+useGetFavouriteWorkoutsQuery.getKey = (variables?: GQLGetFavouriteWorkoutsQueryVariables) => variables === undefined ? ['GetFavouriteWorkouts'] : ['GetFavouriteWorkouts', variables];
+
+export const useInfiniteGetFavouriteWorkoutsQuery = <
+      TData = InfiniteData<GQLGetFavouriteWorkoutsQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetFavouriteWorkoutsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetFavouriteWorkoutsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetFavouriteWorkoutsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetFavouriteWorkoutsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetFavouriteWorkouts.infinite'] : ['GetFavouriteWorkouts.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetFavouriteWorkoutsQuery, GQLGetFavouriteWorkoutsQueryVariables>(GetFavouriteWorkoutsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetFavouriteWorkoutsQuery.getKey = (variables?: GQLGetFavouriteWorkoutsQueryVariables) => variables === undefined ? ['GetFavouriteWorkouts.infinite'] : ['GetFavouriteWorkouts.infinite', variables];
+
+
+useGetFavouriteWorkoutsQuery.fetcher = (variables?: GQLGetFavouriteWorkoutsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetFavouriteWorkoutsQuery, GQLGetFavouriteWorkoutsQueryVariables>(GetFavouriteWorkoutsDocument, variables, options);
+
+export const GetFavouriteWorkoutDocument = `
+    query GetFavouriteWorkout($id: ID!) {
+  getFavouriteWorkout(id: $id) {
+    id
+    title
+    description
+    createdById
+    createdAt
+    updatedAt
+    exercises {
+      id
+      name
+      order
+      baseId
+      favouriteWorkoutId
+      restSeconds
+      instructions
+      base {
+        id
+        name
+        description
+        videoUrl
+        equipment
+        isPublic
+        additionalInstructions
+        type
+        muscleGroups {
+          id
+          name
+          alias
+          groupSlug
+        }
+        images {
+          id
+          url
+          order
+        }
+      }
+      sets {
+        id
+        order
+        reps
+        minReps
+        maxReps
+        weight
+        rpe
+      }
+    }
+  }
+}
+    `;
+
+export const useGetFavouriteWorkoutQuery = <
+      TData = GQLGetFavouriteWorkoutQuery,
+      TError = unknown
+    >(
+      variables: GQLGetFavouriteWorkoutQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetFavouriteWorkoutQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetFavouriteWorkoutQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetFavouriteWorkoutQuery, TError, TData>(
+      {
+    queryKey: ['GetFavouriteWorkout', variables],
+    queryFn: fetchData<GQLGetFavouriteWorkoutQuery, GQLGetFavouriteWorkoutQueryVariables>(GetFavouriteWorkoutDocument, variables),
+    ...options
+  }
+    )};
+
+useGetFavouriteWorkoutQuery.getKey = (variables: GQLGetFavouriteWorkoutQueryVariables) => ['GetFavouriteWorkout', variables];
+
+export const useInfiniteGetFavouriteWorkoutQuery = <
+      TData = InfiniteData<GQLGetFavouriteWorkoutQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetFavouriteWorkoutQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetFavouriteWorkoutQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetFavouriteWorkoutQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetFavouriteWorkoutQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetFavouriteWorkout.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetFavouriteWorkoutQuery, GQLGetFavouriteWorkoutQueryVariables>(GetFavouriteWorkoutDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetFavouriteWorkoutQuery.getKey = (variables: GQLGetFavouriteWorkoutQueryVariables) => ['GetFavouriteWorkout.infinite', variables];
+
+
+useGetFavouriteWorkoutQuery.fetcher = (variables: GQLGetFavouriteWorkoutQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetFavouriteWorkoutQuery, GQLGetFavouriteWorkoutQueryVariables>(GetFavouriteWorkoutDocument, variables, options);
+
+export const CreateFavouriteWorkoutDocument = `
+    mutation CreateFavouriteWorkout($input: CreateFavouriteWorkoutInput!) {
+  createFavouriteWorkout(input: $input) {
+    id
+    title
+    description
+    createdAt
+    exercises {
+      id
+      name
+      order
+      baseId
+      restSeconds
+      instructions
+      sets {
+        id
+        order
+        reps
+        minReps
+        maxReps
+        weight
+        rpe
+      }
+    }
+  }
+}
+    `;
+
+export const useCreateFavouriteWorkoutMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateFavouriteWorkoutMutation, TError, GQLCreateFavouriteWorkoutMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateFavouriteWorkoutMutation, TError, GQLCreateFavouriteWorkoutMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateFavouriteWorkout'],
+    mutationFn: (variables?: GQLCreateFavouriteWorkoutMutationVariables) => fetchData<GQLCreateFavouriteWorkoutMutation, GQLCreateFavouriteWorkoutMutationVariables>(CreateFavouriteWorkoutDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateFavouriteWorkoutMutation.getKey = () => ['CreateFavouriteWorkout'];
+
+
+useCreateFavouriteWorkoutMutation.fetcher = (variables: GQLCreateFavouriteWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateFavouriteWorkoutMutation, GQLCreateFavouriteWorkoutMutationVariables>(CreateFavouriteWorkoutDocument, variables, options);
+
+export const UpdateFavouriteWorkoutDocument = `
+    mutation UpdateFavouriteWorkout($input: UpdateFavouriteWorkoutInput!) {
+  updateFavouriteWorkout(input: $input) {
+    id
+    title
+    description
+    updatedAt
+    exercises {
+      id
+      name
+      order
+      baseId
+      restSeconds
+      instructions
+      sets {
+        id
+        order
+        reps
+        minReps
+        maxReps
+        weight
+        rpe
+      }
+    }
+  }
+}
+    `;
+
+export const useUpdateFavouriteWorkoutMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateFavouriteWorkoutMutation, TError, GQLUpdateFavouriteWorkoutMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateFavouriteWorkoutMutation, TError, GQLUpdateFavouriteWorkoutMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateFavouriteWorkout'],
+    mutationFn: (variables?: GQLUpdateFavouriteWorkoutMutationVariables) => fetchData<GQLUpdateFavouriteWorkoutMutation, GQLUpdateFavouriteWorkoutMutationVariables>(UpdateFavouriteWorkoutDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateFavouriteWorkoutMutation.getKey = () => ['UpdateFavouriteWorkout'];
+
+
+useUpdateFavouriteWorkoutMutation.fetcher = (variables: GQLUpdateFavouriteWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateFavouriteWorkoutMutation, GQLUpdateFavouriteWorkoutMutationVariables>(UpdateFavouriteWorkoutDocument, variables, options);
+
+export const DeleteFavouriteWorkoutDocument = `
+    mutation DeleteFavouriteWorkout($id: ID!) {
+  deleteFavouriteWorkout(id: $id)
+}
+    `;
+
+export const useDeleteFavouriteWorkoutMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDeleteFavouriteWorkoutMutation, TError, GQLDeleteFavouriteWorkoutMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDeleteFavouriteWorkoutMutation, TError, GQLDeleteFavouriteWorkoutMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteFavouriteWorkout'],
+    mutationFn: (variables?: GQLDeleteFavouriteWorkoutMutationVariables) => fetchData<GQLDeleteFavouriteWorkoutMutation, GQLDeleteFavouriteWorkoutMutationVariables>(DeleteFavouriteWorkoutDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDeleteFavouriteWorkoutMutation.getKey = () => ['DeleteFavouriteWorkout'];
+
+
+useDeleteFavouriteWorkoutMutation.fetcher = (variables: GQLDeleteFavouriteWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteFavouriteWorkoutMutation, GQLDeleteFavouriteWorkoutMutationVariables>(DeleteFavouriteWorkoutDocument, variables, options);
+
+export const StartWorkoutFromFavouriteDocument = `
+    mutation StartWorkoutFromFavourite($input: StartWorkoutFromFavouriteInput!) {
+  startWorkoutFromFavourite(input: $input)
+}
+    `;
+
+export const useStartWorkoutFromFavouriteMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLStartWorkoutFromFavouriteMutation, TError, GQLStartWorkoutFromFavouriteMutationVariables, TContext>) => {
+    
+    return useMutation<GQLStartWorkoutFromFavouriteMutation, TError, GQLStartWorkoutFromFavouriteMutationVariables, TContext>(
+      {
+    mutationKey: ['StartWorkoutFromFavourite'],
+    mutationFn: (variables?: GQLStartWorkoutFromFavouriteMutationVariables) => fetchData<GQLStartWorkoutFromFavouriteMutation, GQLStartWorkoutFromFavouriteMutationVariables>(StartWorkoutFromFavouriteDocument, variables)(),
+    ...options
+  }
+    )};
+
+useStartWorkoutFromFavouriteMutation.getKey = () => ['StartWorkoutFromFavourite'];
+
+
+useStartWorkoutFromFavouriteMutation.fetcher = (variables: GQLStartWorkoutFromFavouriteMutationVariables, options?: RequestInit['headers']) => fetchData<GQLStartWorkoutFromFavouriteMutation, GQLStartWorkoutFromFavouriteMutationVariables>(StartWorkoutFromFavouriteDocument, variables, options);
 
 export const FitspaceMyPlansDocument = `
     query FitspaceMyPlans {

@@ -84,9 +84,9 @@ export function PlanCard({
               )}
             </div>
             <div className="flex items-center justify-between">
-              <PlanAuthor
-                createdBy={'createdBy' in plan ? plan.createdBy : undefined}
-              />
+              {'createdBy' in plan && (
+                <PlanAuthor size="md" createdBy={plan.createdBy} />
+              )}
               <PlanRating plan={plan} />
             </div>
           </div>

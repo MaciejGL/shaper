@@ -6,6 +6,8 @@ import * as React from 'react'
 
 import { cn } from '@/lib/utils'
 
+import { Button } from './button'
+
 function Tabs({
   className,
   ...props
@@ -118,4 +120,70 @@ function TabsContent({
   )
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+function PrimaryTabList<T extends string>({
+  options,
+  onClick,
+  active,
+}: {
+  options: { label: string; value: T; icon?: React.ReactNode }[]
+  onClick: (value: T) => void
+  active: T
+}) {
+  const containerRef = React.useRef<HTMLDivElement>(null)
+  const [underlineStyle, setUnderlineStyle] = React.useState({
+    width: 0,
+    left: 0,
+  })
+
+  React.useEffect(() => {
+    if (!containerRef.current) return
+
+    const activeButton = containerRef.current.querySelector(
+      `[data-value="${active}"]`,
+    ) as HTMLElement
+
+    if (activeButton) {
+      const containerRect = containerRef.current.getBoundingClientRect()
+      const buttonRect = activeButton.getBoundingClientRect()
+
+      setUnderlineStyle({
+        width: buttonRect.width,
+        left: buttonRect.left - containerRect.left,
+      })
+    }
+  }, [active])
+
+  return (
+    <div ref={containerRef} className="relative flex gap-2 mb-2 border-b">
+      {options.map((option) => (
+        <Button
+          key={option.value}
+          data-value={option.value}
+          variant="link"
+          size="lg"
+          onClick={() => onClick(option.value)}
+          className={cn(
+            'relative rounded-none transition-colors duration-200',
+            active === option.value
+              ? 'text-foreground'
+              : 'text-muted-foreground',
+          )}
+          iconStart={option.icon}
+        >
+          {option.label}
+        </Button>
+      ))}
+
+      {/* Animated underline */}
+      <div
+        className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300 ease-out"
+        style={{
+          width: underlineStyle.width,
+          transform: `translateX(${underlineStyle.left}px)`,
+        }}
+      />
+    </div>
+  )
+}
+
+export { Tabs, TabsList, TabsTrigger, TabsContent, PrimaryTabList }

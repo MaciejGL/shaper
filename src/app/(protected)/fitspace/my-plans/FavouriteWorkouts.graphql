@@ -1,0 +1,165 @@
+# Get all favourite workouts for the current user
+query GetFavouriteWorkouts {
+  getFavouriteWorkouts {
+    id
+    title
+    description
+    createdById
+    createdAt
+    updatedAt
+    exercises {
+      id
+      name
+      order
+      baseId
+      favouriteWorkoutId
+      restSeconds
+      instructions
+      base {
+        id
+        name
+        description
+        videoUrl
+        equipment
+        isPublic
+        additionalInstructions
+        type
+        muscleGroups {
+          id
+          name
+          alias
+          groupSlug
+        }
+        images {
+          id
+          url
+          order
+        }
+      }
+      sets {
+        id
+        order
+        reps
+        minReps
+        maxReps
+        weight
+        rpe
+      }
+    }
+  }
+}
+
+# Get a specific favourite workout by ID
+query GetFavouriteWorkout($id: ID!) {
+  getFavouriteWorkout(id: $id) {
+    id
+    title
+    description
+    createdById
+    createdAt
+    updatedAt
+    exercises {
+      id
+      name
+      order
+      baseId
+      favouriteWorkoutId
+      restSeconds
+      instructions
+      base {
+        id
+        name
+        description
+        videoUrl
+        equipment
+        isPublic
+        additionalInstructions
+        type
+        muscleGroups {
+          id
+          name
+          alias
+          groupSlug
+        }
+        images {
+          id
+          url
+          order
+        }
+      }
+      sets {
+        id
+        order
+        reps
+        minReps
+        maxReps
+        weight
+        rpe
+      }
+    }
+  }
+}
+
+# Create a new favourite workout
+mutation CreateFavouriteWorkout($input: CreateFavouriteWorkoutInput!) {
+  createFavouriteWorkout(input: $input) {
+    id
+    title
+    description
+    createdAt
+    exercises {
+      id
+      name
+      order
+      baseId
+      restSeconds
+      instructions
+      sets {
+        id
+        order
+        reps
+        minReps
+        maxReps
+        weight
+        rpe
+      }
+    }
+  }
+}
+
+# Update an existing favourite workout
+mutation UpdateFavouriteWorkout($input: UpdateFavouriteWorkoutInput!) {
+  updateFavouriteWorkout(input: $input) {
+    id
+    title
+    description
+    updatedAt
+    exercises {
+      id
+      name
+      order
+      baseId
+      restSeconds
+      instructions
+      sets {
+        id
+        order
+        reps
+        minReps
+        maxReps
+        weight
+        rpe
+      }
+    }
+  }
+}
+
+# Delete a favourite workout
+mutation DeleteFavouriteWorkout($id: ID!) {
+  deleteFavouriteWorkout(id: $id)
+}
+
+# Start a workout from a favourite
+mutation StartWorkoutFromFavourite($input: StartWorkoutFromFavouriteInput!) {
+  startWorkoutFromFavourite(input: $input)
+}
