@@ -91,6 +91,7 @@ interface QuickWorkoutWizardProps {
   // Callbacks
   onFinish?: () => void
   onStepChange?: (step: number) => void
+  footerClassName?: string
 }
 
 export function QuickWorkoutWizard({
@@ -111,6 +112,7 @@ export function QuickWorkoutWizard({
   isAdding = false,
   onFinish,
   onStepChange,
+  footerClassName,
 }: QuickWorkoutWizardProps) {
   // Determine the current step sequence based on flow
   const getSteps = () => {
@@ -185,16 +187,14 @@ export function QuickWorkoutWizard({
     <div className="bg-background pb-[80px]">
       {/* Header with Progress */}
       {!isOnLanding && (
-        <div className="sticky top-[-8px] left-0 right-0 z-50 bg-background px-2">
-          <div className="container py-4 space-y-4">
-            <div className="text-center mx-auto">
-              <p className="text-sm text-muted-foreground">
-                Step {currentStep + 1} of {currentSteps.length}
-              </p>
-              <div className="w-10" /> {/* Spacer for centering */}
-            </div>
-            <Progress value={progress} className="h-2" />
+        <div className="container py-4 space-y-4">
+          <div className="text-center mx-auto">
+            <p className="text-sm text-muted-foreground">
+              Step {currentStep + 1} of {currentSteps.length}
+            </p>
+            <div className="w-10" /> {/* Spacer for centering */}
           </div>
+          <Progress value={progress} className="h-2" />
         </div>
       )}
 
@@ -227,7 +227,12 @@ export function QuickWorkoutWizard({
 
       {/* Bottom Navigation */}
       {!isOnLanding && (
-        <div className="bg-background fixed bottom-[72px] left-0 right-0 px-2 z-50">
+        <div
+          className={cn(
+            'bg-background fixed bottom-[72px] left-0 right-0 px-2 z-50',
+            footerClassName,
+          )}
+        >
           <div className="py-2 max-w-screen-sm mx-auto">
             <div className="flex justify-between gap-4">
               <Button

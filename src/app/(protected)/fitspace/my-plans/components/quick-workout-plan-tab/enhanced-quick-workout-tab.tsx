@@ -15,6 +15,7 @@ import {
 
 import { QuickWorkoutPlan } from '../../types'
 import { DeleteFavouriteDialog } from '../favourites/delete-favourite-dialog'
+import { EditFavouriteModal } from '../favourites/edit-favourite-modal'
 import { FavouriteWorkoutsList } from '../favourites/favourite-workouts-list'
 
 import { PastWorkoutsView } from './past-workouts/past-workouts-view'
@@ -38,6 +39,9 @@ export function EnhancedQuickWorkoutTab({
   )
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [favouriteToDelete, setFavouriteToDelete] =
+    useState<GQLFavouriteWorkout | null>(null)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [favouriteToEdit, setFavouriteToEdit] =
     useState<GQLFavouriteWorkout | null>(null)
 
   // Favourite workouts hooks
@@ -68,8 +72,8 @@ export function EnhancedQuickWorkoutTab({
       NonNullable<GQLGetFavouriteWorkoutsQuery>['getFavouriteWorkouts']
     >[number],
   ) => {
-    // TODO: Open edit modal with favourite data
-    console.log('Edit favourite:', favourite)
+    setFavouriteToEdit(favourite as GQLFavouriteWorkout)
+    setEditDialogOpen(true)
   }
 
   const handleDeleteFavourite = (favouriteId: string) => {
@@ -99,6 +103,11 @@ export function EnhancedQuickWorkoutTab({
   const handleCloseDeleteDialog = () => {
     setDeleteDialogOpen(false)
     setFavouriteToDelete(null)
+  }
+
+  const handleCloseEditDialog = () => {
+    setEditDialogOpen(false)
+    setFavouriteToEdit(null)
   }
 
   return (
@@ -142,6 +151,17 @@ export function EnhancedQuickWorkoutTab({
         onClose={handleCloseDeleteDialog}
         onConfirm={handleConfirmDelete}
         isDeleting={favouriteOperations.isDeleting}
+      />
+
+      {/* Edit Favourite Modal */}
+      <EditFavouriteModal
+        open={editDialogOpen}
+        favourite={favouriteToEdit}
+        onClose={handleCloseEditDialog}
+        onSuccess={() => {
+          refetch()
+          handleCloseEditDialog()
+        }}
       />
     </div>
   )

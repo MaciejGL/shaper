@@ -4,6 +4,7 @@ import { formatDate } from 'date-fns'
 
 import { dayNames } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 
 import { QuickWorkoutPlan } from '../../../types'
 
@@ -20,8 +21,8 @@ export function PastWorkoutCard({ workout }: PastWorkoutCardProps) {
     : null
 
   return (
-    <div className="bg-card rounded-lg border p-4">
-      <div className="flex justify-between items-start mb-3">
+    <Card>
+      <CardHeader className="flex justify-between items-start mb-3">
         <div>
           <h4 className="font-medium">{dayNames[workout.dayOfWeek]}</h4>
           {completedDate && (
@@ -31,20 +32,20 @@ export function PastWorkoutCard({ workout }: PastWorkoutCardProps) {
           )}
         </div>
         {completedDate && <Badge variant="success">Completed</Badge>}
-      </div>
+      </CardHeader>
 
-      <div className="space-y-2">
+      <CardContent className="space-y-2">
         <p className="text-sm font-medium text-muted-foreground">
-          EXERCISES ({workout.exercises.length})
+          Exercises ({workout.exercises.length})
         </p>
         <div className="space-y-1">
-          {workout.exercises.map((exercise) => (
+          {workout.exercises.map((exercise, index) => (
             <div key={exercise.id} className="text-sm">
-              {exercise.name} ({exercise.sets.length} sets)
+              {index + 1}. {exercise.name} ({exercise.sets.length} sets)
             </div>
           ))}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   )
 }

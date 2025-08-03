@@ -99,7 +99,7 @@ export function PastWorkoutsView({ plan, loading }: PastWorkoutsViewProps) {
           </p>
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
+              variant="secondary"
               size="icon-sm"
               onClick={goToPreviousWeek}
               disabled={!canGoToPreviousWeek}
@@ -111,7 +111,7 @@ export function PastWorkoutsView({ plan, loading }: PastWorkoutsViewProps) {
             </span>
 
             <Button
-              variant="outline"
+              variant="secondary"
               size="icon-sm"
               onClick={goToNextWeek}
               disabled={!canGoToNextWeek}

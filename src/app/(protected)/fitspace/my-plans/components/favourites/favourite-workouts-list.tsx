@@ -1,10 +1,11 @@
 'use client'
 
-import { Plus } from 'lucide-react'
+import { Dumbbell, Plus } from 'lucide-react'
 import { useState } from 'react'
 
 import { CardSkeleton } from '@/components/card-skeleton'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
 
 import { CreateFavouriteModal } from './create-favourite-modal'
@@ -58,9 +59,8 @@ export function FavouriteWorkoutsList({
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Favourite Workouts</h3>
-        <Button onClick={() => setIsCreateModalOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Create Favourite
+        <Button onClick={() => setIsCreateModalOpen(true)} iconStart={<Plus />}>
+          Create
         </Button>
       </div>
 
@@ -94,19 +94,22 @@ export function FavouriteWorkoutsList({
 
 function EmptyFavouritesState({ onCreateNew }: { onCreateNew: () => void }) {
   return (
-    <div className="text-center py-12 bg-card rounded-lg border border-dashed">
-      <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
-        <Plus className="w-6 h-6 text-muted-foreground" />
-      </div>
-      <h3 className="text-lg font-semibold mb-2">No Favourite Workouts Yet</h3>
-      <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-        Create your first favourite workout to quickly start your preferred
-        exercise routines.
-      </p>
-      <Button onClick={onCreateNew}>
-        <Plus className="w-4 h-4 mr-2" />
-        Create Your First Favourite
-      </Button>
-    </div>
+    <Card>
+      <CardContent className="flex flex-col items-center justify-center text-center py-6">
+        <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+          <Dumbbell className="w-6 h-6 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-semibold mb-2">
+          No Favourite Workouts Yet
+        </h3>
+        <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
+          Create your first favourite workout to quickly start your preferred
+          exercise routines.
+        </p>
+        <Button onClick={onCreateNew} iconStart={<Plus />}>
+          Create
+        </Button>
+      </CardContent>
+    </Card>
   )
 }

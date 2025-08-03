@@ -1,15 +1,16 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
-import { useFitspaceGetExercisesQuery } from '@/generated/graphql-client'
 import {
-  useCreateFavouriteFromAI,
-  useCreateFavouriteFromManual,
+  GQLFavouriteWorkout,
+  useFitspaceGetExercisesQuery,
+} from '@/generated/graphql-client'
+import {
+  FavouriteWorkoutWizardData,
+  useUpdateFavouriteFromWizard,
 } from '@/hooks/use-favourite-workouts'
-import { cn } from '@/lib/utils'
 
 import { AiEquipmentStep } from '../../../workout/quick-workout/components/ai-equipment-step'
 import { AiMuscleGroupsStep } from '../../../workout/quick-workout/components/ai-muscle-groups-step'
@@ -20,30 +21,31 @@ import { ManualExercisesStep } from '../../../workout/quick-workout/components/m
 // Import step components
 import { ManualMuscleGroupsStep } from '../../../workout/quick-workout/components/manual-muscle-groups-step'
 import { ManualReviewStep } from '../../../workout/quick-workout/components/manual-review-step'
-// Import workflow components
 import {
   QuickWorkoutWizard,
   WorkoutFlow,
 } from '../../../workout/quick-workout/components/quick-workout-wizard'
 import { WorkoutCreationLanding } from '../../../workout/quick-workout/components/workout-creation-landing'
 import { useAiWorkoutGeneration } from '../../../workout/quick-workout/hooks/use-ai-workout-generation'
-// Import hooks
 import { useManualWorkout } from '../../../workout/quick-workout/hooks/use-manual-workout'
 
-interface CreateFavouriteModalProps {
+interface EditFavouriteModalProps {
   open: boolean
+  favourite: GQLFavouriteWorkout | null
   onClose: () => void
   onSuccess: () => void
 }
 
-export function CreateFavouriteModal({
+export function EditFavouriteModal({
   open,
+  favourite,
   onClose,
   onSuccess,
-}: CreateFavouriteModalProps) {
-  // Workout flow state
-  const [workoutFlow, setWorkoutFlow] = useState<WorkoutFlow>(null)
+}: EditFavouriteModalProps) {
+  // Edit state
+  const [workoutFlow, setWorkoutFlow] = useState<WorkoutFlow>('manual') // Default to manual for editing
   const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [showTitleStep, setShowTitleStep] = useState(true)
 
   // Data fetching
@@ -58,6 +60,7 @@ export function CreateFavouriteModal({
     )
   }, [exercisesData])
 
+  // All exercises data for manual flow
   const allExercises = useMemo(() => {
     return [
       ...(exercisesData?.getExercises.trainerExercises || []),
@@ -65,7 +68,7 @@ export function CreateFavouriteModal({
     ]
   }, [exercisesData])
 
-  // Manual workout data hooks (reuse existing logic)
+  // Manual workout hooks
   const {
     selectedMuscleGroups,
     setSelectedMuscleGroups,
@@ -93,14 +96,25 @@ export function CreateFavouriteModal({
     handleExercisesReorder,
   } = useAiWorkoutGeneration()
 
-  // Favourite creation hooks
-  const { createFromManual, isCreating: isCreatingManual } =
-    useCreateFavouriteFromManual()
-  const { createFromAI, isCreating: isCreatingAI } = useCreateFavouriteFromAI()
+  // Update hook
+  const { updateFromWizard, isUpdating } = useUpdateFavouriteFromWizard()
 
-  const isCreating = isCreatingManual || isCreatingAI
+  // Populate form when favourite changes
+  useEffect(() => {
+    if (favourite && open) {
+      setTitle(favourite.title)
+      setDescription(favourite.description || '')
 
-  // Handle workflow selection
+      // Note: Cannot pre-populate selected exercises with current hook structure
+      // User will need to re-select exercises when editing
+
+      // Reset other state
+      setWorkoutFlow('manual')
+      setShowTitleStep(true)
+    }
+  }, [favourite, open])
+
+  // Handle workflow selection (for switching between manual and AI)
   const handleSelectManual = () => {
     setWorkoutFlow('manual')
     setShowTitleStep(false)
@@ -120,35 +134,104 @@ export function CreateFavouriteModal({
     setWorkoutFlow(flow)
   }
 
-  // Handle creating favourite from manual data
+  // Handle updating favourite from manual data
   const handleFinishManual = async () => {
-    if (!title.trim() || selectedExercises.length === 0) {
-      console.error('Missing title or exercises')
+    if (!title.trim() || !favourite || selectedExercises.length === 0) {
+      console.error('Missing title, favourite, or exercises')
       return
     }
 
     try {
-      await createFromManual({ title: title.trim() }, selectedExercises)
+      // Convert selected exercises to workout data format
+      const exercises = selectedExercises.map((exerciseId, index) => ({
+        exerciseId,
+        order: index + 1,
+        name:
+          allExercises.find((ex) => ex.id === exerciseId)?.name ||
+          `Exercise ${index + 1}`,
+        baseId: exerciseId,
+        restSeconds: undefined,
+        instructions: undefined,
+        sets: [
+          {
+            order: 1,
+            reps: undefined,
+            minReps: undefined,
+            maxReps: undefined,
+            weight: undefined,
+            rpe: undefined,
+          },
+          {
+            order: 2,
+            reps: undefined,
+            minReps: undefined,
+            maxReps: undefined,
+            weight: undefined,
+            rpe: undefined,
+          },
+          {
+            order: 3,
+            reps: undefined,
+            minReps: undefined,
+            maxReps: undefined,
+            weight: undefined,
+            rpe: undefined,
+          },
+        ],
+      }))
 
+      const workoutData: FavouriteWorkoutWizardData = {
+        title: title.trim(),
+        description: description.trim() || undefined,
+        exercises,
+      }
+
+      await updateFromWizard(favourite.id, workoutData)
       handleSuccess()
     } catch (error) {
-      console.error('Failed to create favourite workout:', error)
+      console.error('Failed to update favourite workout:', error)
     }
   }
 
-  // Handle creating favourite from AI data
+  // Handle updating favourite from AI data
   const handleFinishAI = async () => {
-    if (!title.trim() || !aiWorkoutResult) {
-      console.error('Missing title or AI workout result')
+    if (!title.trim() || !favourite || !aiWorkoutResult) {
+      console.error('Missing title, favourite, or AI workout result')
       return
     }
 
     try {
-      await createFromAI({ title: title.trim() }, aiWorkoutResult)
+      // Convert AI result to workout data format
+      const exercises = aiWorkoutResult.exercises.map(
+        (aiExercise, index: number) => ({
+          exerciseId: aiExercise.exercise.id,
+          order: index + 1,
+          name: aiExercise.exercise.name,
+          baseId: aiExercise.exercise.id,
+          restSeconds: undefined,
+          instructions: undefined,
+          sets:
+            aiExercise.sets?.map((aiSet, setIndex: number) => ({
+              order: setIndex + 1,
+              reps: aiSet?.reps || undefined,
+              minReps: undefined,
+              maxReps: undefined,
+              rpe: aiSet?.rpe || undefined,
+              weight: undefined,
+            })) || [],
+        }),
+      )
 
+      const workoutData: FavouriteWorkoutWizardData = {
+        title: title.trim(),
+        description: description.trim() || undefined,
+        exercises,
+      }
+
+      await updateFromWizard(favourite.id, workoutData)
       handleSuccess()
     } catch (error) {
-      console.error('Failed to create favourite workout:', error)
+      console.error('Failed to update favourite workout:', error)
     }
   }
 
@@ -192,45 +275,99 @@ export function CreateFavouriteModal({
   }
 
   const handleClose = () => {
-    // Reset all state
+    // Reset state
     setTitle('')
-    setWorkoutFlow(null)
+    setDescription('')
+    setWorkoutFlow('manual')
     setShowTitleStep(true)
 
-    // Reset wizard data would be nice but hooks don't expose reset functions
-    // This will be handled when the modal reopens
-
     onClose()
+  }
+
+  if (!favourite) {
+    return null
   }
 
   // Title and description step
   if (showTitleStep) {
     return (
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent fullScreen dialogTitle="Create Favourite Workout">
+        <DialogContent
+          className="max-w-md"
+          dialogTitle="Edit Favourite Workout"
+        >
           <div className="space-y-6">
-            <div className="text-center space-y-2 mt-4">
-              <h2 className="text-2xl font-bold">Create Favourite Workout</h2>
+            <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold">Edit Favourite Workout</h2>
               <p className="text-muted-foreground">
-                Give your workout a name and choose how to build it
+                Update your workout details and exercises
               </p>
             </div>
 
             <div className="space-y-4">
-              <Input
-                label="Workout Name *"
-                id="title"
-                placeholder="e.g., Morning Push Routine"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
+              <div className="space-y-2">
+                <label htmlFor="edit-title" className="text-sm font-medium">
+                  Workout Name *
+                </label>
+                <input
+                  id="edit-title"
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background"
+                  placeholder="e.g., Morning Push Routine"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  autoFocus
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="edit-description"
+                  className="text-sm font-medium"
+                >
+                  Description (optional)
+                </label>
+                <textarea
+                  id="edit-description"
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background"
+                  placeholder="Describe your workout routine..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            {/* Current exercises preview */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Current Exercises</label>
+              <div className="bg-muted rounded-md p-3 max-h-32 overflow-y-auto">
+                {favourite.exercises.length > 0 ? (
+                  <div className="space-y-1">
+                    {favourite.exercises.map((exercise, index) => (
+                      <div
+                        key={exercise.id}
+                        className="text-sm text-muted-foreground"
+                      >
+                        {index + 1}. {exercise.name}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No exercises</p>
+                )}
+              </div>
             </div>
 
             {/* Workout Creation Options */}
-            <WorkoutCreationLanding
-              onSelectManual={handleSelectManual}
-              onSelectAI={handleSelectAI}
-            />
+            <div className="space-y-3">
+              <label className="text-sm font-medium">
+                How would you like to update exercises?
+              </label>
+              <WorkoutCreationLanding
+                onSelectManual={handleSelectManual}
+                onSelectAI={handleSelectAI}
+              />
+            </div>
 
             <div className="flex justify-end gap-2">
               <button
@@ -247,18 +384,20 @@ export function CreateFavouriteModal({
     )
   }
 
-  // Workout creation wizard
+  // Workout update wizard
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent fullScreen dialogTitle="Create Favourite Workout">
-        <div className="h-full relative">
+      <DialogContent
+        className="max-w-4xl max-h-[90vh] overflow-hidden p-0"
+        dialogTitle="Edit Favourite Workout"
+      >
+        <div className="h-[90vh] overflow-y-auto">
           <QuickWorkoutWizard
             workoutFlow={workoutFlow}
             onFlowChange={handleFlowChange}
             canProceedFromStep={canProceedFromStep}
-            isAdding={isCreating}
+            isAdding={isUpdating}
             onFinish={handleFinish}
-            footerClassName={cn('sticky bottom-[-24px]')}
             // Manual flow components (reuse existing)
             muscleGroupsComponent={
               <ManualMuscleGroupsStep
