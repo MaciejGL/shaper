@@ -1,4 +1,6 @@
 import { GQLBodyMeasuresQuery } from '@/generated/graphql-client'
+import { useCircumferenceConversion } from '@/hooks/use-circumference-conversion'
+import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
 import {
   MeasurementField,
@@ -23,6 +25,22 @@ export function MeasurementHistoryList({
   isOnCard = false,
 }: MeasurementHistoryListProps) {
   const { measurementsByMonth } = useBodyMeasurements(measurements)
+  const { weightUnit } = useWeightConversion()
+  const { circumferenceUnit } = useCircumferenceConversion()
+
+  // List of circumference measurement fields
+  const circumferenceFields = [
+    'chest',
+    'waist',
+    'hips',
+    'neck',
+    'bicepsLeft',
+    'bicepsRight',
+    'thighLeft',
+    'thighRight',
+    'calfLeft',
+    'calfRight',
+  ]
 
   const monthsToShow = maxMonths
     ? measurementsByMonth.slice(0, maxMonths)
@@ -61,7 +79,12 @@ export function MeasurementHistoryList({
                           {
                             key: focusField,
                             label: fieldInfo.label,
-                            unit: fieldInfo.unit,
+                            unit:
+                              focusField === 'weight'
+                                ? weightUnit
+                                : circumferenceFields.includes(focusField)
+                                  ? circumferenceUnit
+                                  : fieldInfo.unit,
                           },
                         ]
                       : undefined

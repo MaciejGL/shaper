@@ -19,6 +19,8 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { useProfileQuery } from '@/generated/graphql-client'
+import { useHeightConversion } from '@/hooks/use-height-conversion'
+import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { cn, formatNumber } from '@/lib/utils'
 import { calculateBMR } from '@/lib/workout/calculate-calories-burned'
 
@@ -95,6 +97,8 @@ export function BodyCompositionMetrics() {
   const { data: profileData } = useProfileQuery()
   const { getLatestMeasurement, getEstimatedBodyFat } =
     useBodyMeasurementsContext()
+  const { formatDisplayWeight } = useWeightConversion()
+  const { formatDisplayHeight } = useHeightConversion()
 
   const metrics = useMemo(() => {
     const profile = profileData?.profile
@@ -164,7 +168,7 @@ export function BodyCompositionMetrics() {
                 {metrics.bmiCategory.category}
               </Badge>
             </div>
-            <CardDescription>BMI = Weight (kg) ÷ Height² (m)</CardDescription>
+            <CardDescription>BMI = Weight ÷ Height² (m)</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold mb-2">
@@ -177,11 +181,15 @@ export function BodyCompositionMetrics() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Weight:</span>
-                <span className="font-medium">{metrics.weight} kg</span>
+                <span className="font-medium">
+                  {formatDisplayWeight(metrics.weight)}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Height:</span>
-                <span className="font-medium">{metrics.height} cm</span>
+                <span className="font-medium">
+                  {formatDisplayHeight(metrics.height)}
+                </span>
               </div>
             </div>
           </CardContent>

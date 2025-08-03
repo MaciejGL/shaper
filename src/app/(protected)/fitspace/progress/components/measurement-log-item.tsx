@@ -3,6 +3,8 @@ import { Pencil } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { GQLBodyMeasuresQuery } from '@/generated/graphql-client'
+import { useCircumferenceConversion } from '@/hooks/use-circumference-conversion'
+import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { cn } from '@/lib/utils'
 
 import { AddMeasurementModal } from './add-measurement-modal'
@@ -24,6 +26,23 @@ export function MeasurementLogItem({
   relevantFields,
   isOnCard = false,
 }: MeasurementLogItemProps) {
+  const { toDisplayWeight, weightUnit } = useWeightConversion()
+  const { toDisplayCircumference, circumferenceUnit } =
+    useCircumferenceConversion()
+
+  // List of circumference measurement fields
+  const circumferenceFields = [
+    'chest',
+    'waist',
+    'hips',
+    'neck',
+    'bicepsLeft',
+    'bicepsRight',
+    'thighLeft',
+    'thighRight',
+    'calfLeft',
+    'calfRight',
+  ]
   // Count non-null measurements
   const measurementCount = [
     measurement.weight,
@@ -65,8 +84,12 @@ export function MeasurementLogItem({
               <div key={field.key} className="flex items-center gap-2">
                 <span className="text-sm">{field.label}:</span>{' '}
                 <span className="font-medium text-sm">
-                  {measurement[field.key]}
-                  {field.unit}
+                  {field.key === 'weight' && measurement[field.key]
+                    ? `${toDisplayWeight(measurement[field.key] as number)?.toFixed(1)} ${weightUnit}`
+                    : circumferenceFields.includes(field.key) &&
+                        measurement[field.key]
+                      ? `${toDisplayCircumference(measurement[field.key] as number)?.toFixed(1)} ${circumferenceUnit}`
+                      : `${measurement[field.key]}${field.unit}`}
                 </span>
               </div>
             ))}

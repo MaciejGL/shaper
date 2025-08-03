@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { WeightInput } from '@/components/ui/weight-input'
 import {
   GQLBodyMeasuresQuery,
   useAddBodyMeasurementMutation,
@@ -162,7 +163,12 @@ export function AddMeasurementModal({
     {
       title: 'Weight & Body Fat',
       fields: [
-        { name: 'weight' as const, label: 'Weight', unit: 'kg', step: '0.01' },
+        {
+          name: 'weight' as const,
+          label: 'Weight',
+          unit: 'dynamic',
+          step: '0.01',
+        },
         {
           name: 'bodyFat' as const,
           label: 'Body Fat',
@@ -299,21 +305,48 @@ export function AddMeasurementModal({
             <div key={group.title} className="space-y-3">
               <h3 className="font-medium text-lg">{group.title}</h3>
               <div className="grid grid-cols-2 gap-4">
-                {group.fields.map((field) => (
-                  <Input
-                    key={field.name}
-                    id={field.name}
-                    type="number"
-                    step={field.step}
-                    iconEnd={field.unit}
-                    label={field.label}
-                    variant="secondary"
-                    value={form[field.name]}
-                    onChange={(e) =>
-                      setForm({ ...form, [field.name]: e.target.value })
-                    }
-                  />
-                ))}
+                {group.fields.map((field) => {
+                  // Special handling for weight field to use WeightInput with unit conversion
+                  if (field.name === 'weight') {
+                    return (
+                      <WeightInput
+                        key={field.name}
+                        id={field.name}
+                        label={field.label}
+                        weightInKg={
+                          form[field.name]
+                            ? parseFloat(form[field.name] || '0')
+                            : null
+                        }
+                        onWeightChange={(weightInKg) =>
+                          setForm({
+                            ...form,
+                            [field.name]: weightInKg?.toString() || '',
+                          })
+                        }
+                        showLabel={true}
+                        decimals={2}
+                      />
+                    )
+                  }
+
+                  // Regular input for all other measurement fields
+                  return (
+                    <Input
+                      key={field.name}
+                      id={field.name}
+                      type="number"
+                      step={field.step}
+                      iconEnd={field.unit}
+                      label={field.label}
+                      variant="secondary"
+                      value={form[field.name]}
+                      onChange={(e) =>
+                        setForm({ ...form, [field.name]: e.target.value || '' })
+                      }
+                    />
+                  )
+                })}
               </div>
             </div>
           ))}

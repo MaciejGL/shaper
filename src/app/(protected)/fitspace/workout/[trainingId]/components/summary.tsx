@@ -21,6 +21,7 @@ import {
   useFitspaceMarkWorkoutAsCompletedMutation,
   useProfileQuery,
 } from '@/generated/graphql-client'
+import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { calculateCaloriesBurned } from '@/lib/workout/calculate-calories-burned'
 
 export function Summary({
@@ -34,6 +35,7 @@ export function Summary({
 }) {
   const router = useRouter()
   const { age, weightKg, heightCm, sex } = useProfileMetrics()
+  const { toDisplayWeight, weightUnit } = useWeightConversion()
   const [displayedCalories, setDisplayedCalories] = useState({
     moderate: 0,
     high: 0,
@@ -179,8 +181,8 @@ export function Summary({
                 icon={<DumbbellIcon className="h-4 w-4 text-green-600" />}
               />
               <StatsItem
-                value={displayedWeight}
-                label="Total volume (kg)"
+                value={toDisplayWeight(displayedWeight)?.toFixed(1) || 0}
+                label={`Total volume (${weightUnit})`}
                 icon={<WeightIcon className="h-4 w-4 text-blue-600" />}
               />
             </div>

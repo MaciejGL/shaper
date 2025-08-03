@@ -16,6 +16,21 @@ fragment ProfileFragment on UserProfile {
   createdAt
   updatedAt
   email
+  # User Preferences
+  weekStartsOn
+  weightUnit
+  heightUnit
+  theme
+  timeFormat
+  notificationPreferences {
+    workoutReminders
+    mealReminders
+    progressUpdates
+    collaborationNotifications
+    systemNotifications
+    emailNotifications
+    pushNotifications
+  }
 }
 
 query Profile {

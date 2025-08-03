@@ -23,6 +23,37 @@ enum Goal {
   INCREASE_ENDURANCE
 }
 
+enum WeightUnit {
+  kg
+  lbs
+}
+
+enum HeightUnit {
+  cm
+  ft
+}
+
+enum Theme {
+  light
+  dark
+  system
+}
+
+enum TimeFormat {
+  h12
+  h24
+}
+
+type NotificationPreferences {
+  workoutReminders: Boolean!
+  mealReminders: Boolean!
+  progressUpdates: Boolean!
+  collaborationNotifications: Boolean!
+  systemNotifications: Boolean!
+  emailNotifications: Boolean!
+  pushNotifications: Boolean!
+}
+
 type UserProfile {
   id: ID!
   firstName: String
@@ -39,7 +70,14 @@ type UserProfile {
   activityLevel: ActivityLevel
   goals: [Goal!]!
   bio: String
+
+  # User Preferences
   weekStartsOn: Int
+  weightUnit: WeightUnit!
+  heightUnit: HeightUnit!
+  theme: Theme!
+  timeFormat: TimeFormat!
+  notificationPreferences: NotificationPreferences!
 
   createdAt: String!
   updatedAt: String!
@@ -79,6 +117,16 @@ type Query {
   clientBodyMeasures(clientId: ID!): [UserBodyMeasure!]!
 }
 
+input NotificationPreferencesInput {
+  workoutReminders: Boolean
+  mealReminders: Boolean
+  progressUpdates: Boolean
+  collaborationNotifications: Boolean
+  systemNotifications: Boolean
+  emailNotifications: Boolean
+  pushNotifications: Boolean
+}
+
 input UpdateProfileInput {
   firstName: String
   lastName: String
@@ -95,6 +143,11 @@ input UpdateProfileInput {
   goals: [Goal!]
   bio: String
   weekStartsOn: Int
+  weightUnit: WeightUnit
+  heightUnit: HeightUnit
+  theme: Theme
+  timeFormat: TimeFormat
+  notificationPreferences: NotificationPreferencesInput
 }
 
 input AddBodyMeasurementInput {

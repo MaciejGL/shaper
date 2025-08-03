@@ -73,7 +73,20 @@ model UserProfile {
   height        Float?
   weight        Float?
   goals         String[]
+  // User Preferences
   weekStartsOn  Int?              @default(1) // 0 = Sunday, 1 = Monday
+  weightUnit    String?           @default("kg") // "kg" | "lbs"
+  heightUnit    String?           @default("cm") // "cm" | "ft"
+  theme         String?           @default("system") // "light" | "dark" | "system"
+  timeFormat    String?           @default("24h") // "12h" | "24h"
+  // Notification Preferences
+  workoutReminders              Boolean? @default(true)
+  mealReminders                 Boolean? @default(true)
+  progressUpdates               Boolean? @default(true)
+  collaborationNotifications    Boolean? @default(true)
+  systemNotifications           Boolean? @default(true)
+  emailNotifications            Boolean? @default(true)
+  pushNotifications             Boolean? @default(false) // Disabled for now as requested
   bodyMeasures  UserBodyMeasure[]
   user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

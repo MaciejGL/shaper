@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
 import { ExerciseChartControls } from './exercise-chart-controls'
 import { ExerciseLogsContent } from './exercise-logs-drawer-content'
@@ -63,6 +64,7 @@ export function ExerciseProgressChart({
   const [activeChart, setActiveChart] = useState<ChartType>('oneRM')
   const chartData = useChartData(exercise, timePeriod)
   const improvement = useExerciseImprovement(exercise, timePeriod)
+  const { weightUnit } = useWeightConversion()
 
   if (!exercise) {
     return null
@@ -179,7 +181,7 @@ export function ExerciseProgressChart({
 
   const chartConfig = {
     oneRM: {
-      label: '1RM (kg)',
+      label: `1RM (${weightUnit})`,
       color: 'var(--chart-1)',
     },
     volume: {

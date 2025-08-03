@@ -22,6 +22,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { WeightInput } from '@/components/ui/weight-input'
 import {
   useAddSetExerciseFormMutation,
   useGetExerciseFormDataQuery,
@@ -533,22 +534,24 @@ export function OptimizedExerciseForm({
                               <span className="text-xs opacity-50 mt-3">x</span>
                             </div>
                             <div>
-                              <Label className="text-xs">Weight</Label>
-                              <Input
+                              <WeightInput
                                 id={`weight-${set.id}`}
-                                type="number"
-                                min="0"
-                                step="0.5"
-                                value={set.weight}
-                                onChange={(e) =>
+                                weightInKg={
+                                  set.weight
+                                    ? parseFloat(set.weight.toString())
+                                    : null
+                                }
+                                onWeightChange={(weightInKg) =>
                                   handleSetChange(
                                     set.id,
                                     'weight',
-                                    e.target.value,
+                                    weightInKg?.toString() || '',
                                   )
                                 }
                                 className="w-24"
                                 placeholder="Weight"
+                                showLabel={true}
+                                label="Weight"
                               />
                             </div>
                             <div className="flex items-center justify-center">

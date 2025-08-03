@@ -1,3 +1,5 @@
+import { useWeightConversion } from '@/hooks/use-weight-conversion'
+
 import { AddMeasurementModal } from './add-measurement-modal'
 import { useBodyMeasurementsContext } from './body-measurements-context'
 import { MeasurementCategoryDrawer } from './measurement-category-drawer'
@@ -13,6 +15,8 @@ export function MeasurementsOverview() {
     getEstimatedBodyFat,
     onMeasurementAdded,
   } = useBodyMeasurementsContext()
+
+  const { toDisplayWeight, weightUnit } = useWeightConversion()
 
   const estimatedBodyFat = getEstimatedBodyFat()
   const manualBodyFat = getLatestMeasurement('bodyFat')
@@ -40,8 +44,10 @@ export function MeasurementsOverview() {
           <button className="text-left">
             <StatCard
               label="Weight"
-              value={getLatestMeasurement('weight')}
-              unit="kg"
+              value={
+                toDisplayWeight(getLatestMeasurement('weight')) || undefined
+              }
+              unit={weightUnit}
               trend={getTrend('weight')}
             />
           </button>

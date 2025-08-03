@@ -709,6 +709,11 @@ export enum GQLGoal {
   Maintain = 'MAINTAIN'
 }
 
+export enum GQLHeightUnit {
+  Cm = 'cm',
+  Ft = 'ft'
+}
+
 export type GQLImage = {
   __typename?: 'Image';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -1608,6 +1613,27 @@ export type GQLNotification = {
   type: EntireFieldWrapper<GQLNotificationType>;
 };
 
+export type GQLNotificationPreferences = {
+  __typename?: 'NotificationPreferences';
+  collaborationNotifications: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  emailNotifications: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  mealReminders: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  progressUpdates: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  pushNotifications: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  systemNotifications: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  workoutReminders: EntireFieldWrapper<Scalars['Boolean']['output']>;
+};
+
+export type GQLNotificationPreferencesInput = {
+  collaborationNotifications?: InputMaybe<Scalars['Boolean']['input']>;
+  emailNotifications?: InputMaybe<Scalars['Boolean']['input']>;
+  mealReminders?: InputMaybe<Scalars['Boolean']['input']>;
+  progressUpdates?: InputMaybe<Scalars['Boolean']['input']>;
+  pushNotifications?: InputMaybe<Scalars['Boolean']['input']>;
+  systemNotifications?: InputMaybe<Scalars['Boolean']['input']>;
+  workoutReminders?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export enum GQLNotificationType {
   CoachingRequest = 'COACHING_REQUEST',
   CoachingRequestAccepted = 'COACHING_REQUEST_ACCEPTED',
@@ -2045,6 +2071,17 @@ export type GQLTeamMember = {
   user: EntireFieldWrapper<GQLUserPublic>;
 };
 
+export enum GQLTheme {
+  Dark = 'dark',
+  Light = 'light',
+  System = 'system'
+}
+
+export enum GQLTimeFormat {
+  H12 = 'h12',
+  H24 = 'h24'
+}
+
 export type GQLTrainingDay = {
   __typename?: 'TrainingDay';
   completedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -2279,11 +2316,16 @@ export type GQLUpdateProfileInput = {
   fitnessLevel?: InputMaybe<GQLFitnessLevel>;
   goals?: InputMaybe<Array<GQLGoal>>;
   height?: InputMaybe<Scalars['Float']['input']>;
+  heightUnit?: InputMaybe<GQLHeightUnit>;
   lastName?: InputMaybe<Scalars['String']['input']>;
+  notificationPreferences?: InputMaybe<GQLNotificationPreferencesInput>;
   phone?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Scalars['String']['input']>;
+  theme?: InputMaybe<GQLTheme>;
+  timeFormat?: InputMaybe<GQLTimeFormat>;
   weekStartsOn?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
+  weightUnit?: InputMaybe<GQLWeightUnit>;
 };
 
 export type GQLUpdateReviewInput = {
@@ -2421,13 +2463,18 @@ export type GQLUserProfile = {
   fitnessLevel?: EntireFieldWrapper<Maybe<GQLFitnessLevel>>;
   goals: EntireFieldWrapper<Array<GQLGoal>>;
   height?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  heightUnit: EntireFieldWrapper<GQLHeightUnit>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   lastName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  notificationPreferences: EntireFieldWrapper<GQLNotificationPreferences>;
   phone?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   sex?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  theme: EntireFieldWrapper<GQLTheme>;
+  timeFormat: EntireFieldWrapper<GQLTimeFormat>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
   weekStartsOn?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  weightUnit: EntireFieldWrapper<GQLWeightUnit>;
 };
 
 export type GQLUserPublic = {
@@ -2473,6 +2520,11 @@ export type GQLVolumeEntry = {
   totalVolume: EntireFieldWrapper<Scalars['Float']['output']>;
   week: EntireFieldWrapper<Scalars['String']['output']>;
 };
+
+export enum GQLWeightUnit {
+  Kg = 'kg',
+  Lbs = 'lbs'
+}
 
 export enum GQLWorkoutSessionEvent {
   Complete = 'COMPLETE',
@@ -2657,6 +2709,7 @@ export type GQLResolversTypes = {
   GetMealPlanPayload: ResolverTypeWrapper<GQLGetMealPlanPayload>;
   GetWorkoutPayload: ResolverTypeWrapper<GQLGetWorkoutPayload>;
   Goal: GQLGoal;
+  HeightUnit: GQLHeightUnit;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Image: ResolverTypeWrapper<GQLImage>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
@@ -2678,6 +2731,8 @@ export type GQLResolversTypes = {
   MyPlansPayload: ResolverTypeWrapper<GQLMyPlansPayload>;
   Note: ResolverTypeWrapper<GQLNote>;
   Notification: ResolverTypeWrapper<GQLNotification>;
+  NotificationPreferences: ResolverTypeWrapper<GQLNotificationPreferences>;
+  NotificationPreferencesInput: GQLNotificationPreferencesInput;
   NotificationType: GQLNotificationType;
   OneRmEntry: ResolverTypeWrapper<GQLOneRmEntry>;
   OneRmLog: ResolverTypeWrapper<GQLOneRmLog>;
@@ -2703,6 +2758,8 @@ export type GQLResolversTypes = {
   SuggestedSets: ResolverTypeWrapper<GQLSuggestedSets>;
   SuggestedSetsInput: GQLSuggestedSetsInput;
   TeamMember: ResolverTypeWrapper<GQLTeamMember>;
+  Theme: GQLTheme;
+  TimeFormat: GQLTimeFormat;
   TrainingDay: ResolverTypeWrapper<GQLTrainingDay>;
   TrainingExercise: ResolverTypeWrapper<GQLTrainingExercise>;
   TrainingPlan: ResolverTypeWrapper<GQLTrainingPlan>;
@@ -2739,6 +2796,7 @@ export type GQLResolversTypes = {
   UserRole: GQLUserRole;
   UserSession: ResolverTypeWrapper<GQLUserSession>;
   VolumeEntry: ResolverTypeWrapper<GQLVolumeEntry>;
+  WeightUnit: GQLWeightUnit;
   WorkoutSessionEvent: GQLWorkoutSessionEvent;
   WorkoutType: GQLWorkoutType;
 };
@@ -2837,6 +2895,8 @@ export type GQLResolversParentTypes = {
   MyPlansPayload: GQLMyPlansPayload;
   Note: GQLNote;
   Notification: GQLNotification;
+  NotificationPreferences: GQLNotificationPreferences;
+  NotificationPreferencesInput: GQLNotificationPreferencesInput;
   OneRmEntry: GQLOneRmEntry;
   OneRmLog: GQLOneRmLog;
   PlanCollaboratorSummary: GQLPlanCollaboratorSummary;
@@ -3466,6 +3526,17 @@ export type GQLNotificationResolvers<ContextType = GQLContext, ParentType extend
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLNotificationPreferencesResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['NotificationPreferences'] = GQLResolversParentTypes['NotificationPreferences']> = {
+  collaborationNotifications?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  emailNotifications?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  mealReminders?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  progressUpdates?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  pushNotifications?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  systemNotifications?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  workoutReminders?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLOneRmEntryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['OneRmEntry'] = GQLResolversParentTypes['OneRmEntry']> = {
   average1RM?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   date?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -3772,13 +3843,18 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   fitnessLevel?: Resolver<Maybe<GQLResolversTypes['FitnessLevel']>, ParentType, ContextType>;
   goals?: Resolver<Array<GQLResolversTypes['Goal']>, ParentType, ContextType>;
   height?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  heightUnit?: Resolver<GQLResolversTypes['HeightUnit'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   lastName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  notificationPreferences?: Resolver<GQLResolversTypes['NotificationPreferences'], ParentType, ContextType>;
   phone?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   sex?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  theme?: Resolver<GQLResolversTypes['Theme'], ParentType, ContextType>;
+  timeFormat?: Resolver<GQLResolversTypes['TimeFormat'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weekStartsOn?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  weightUnit?: Resolver<GQLResolversTypes['WeightUnit'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -3861,6 +3937,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   MyPlansPayload?: GQLMyPlansPayloadResolvers<ContextType>;
   Note?: GQLNoteResolvers<ContextType>;
   Notification?: GQLNotificationResolvers<ContextType>;
+  NotificationPreferences?: GQLNotificationPreferencesResolvers<ContextType>;
   OneRmEntry?: GQLOneRmEntryResolvers<ContextType>;
   OneRmLog?: GQLOneRmLogResolvers<ContextType>;
   PlanCollaboratorSummary?: GQLPlanCollaboratorSummaryResolvers<ContextType>;

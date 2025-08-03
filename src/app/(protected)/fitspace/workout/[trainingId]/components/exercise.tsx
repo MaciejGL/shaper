@@ -67,11 +67,13 @@ import {
   useFitspaceSwapExerciseMutation,
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
+import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { convertSecondsToTimeString } from '@/lib/convert-seconds-time-to-string'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
 
 import { ExerciseNotes, useExerciseNotesCount } from './exercise-notes'
+import { ExerciseWeightInput } from './exercise-weight-input'
 import { WorkoutExercise } from './workout-page.client'
 
 interface ExerciseProps {
@@ -675,6 +677,7 @@ function ExerciseSet({
   const [reps, setReps] = useState('')
   const [weight, setWeight] = useState('')
   const hasUserEdited = useRef(false)
+  const { toDisplayWeight } = useWeightConversion()
   const invalidateQuery = useInvalidateQuery()
   const queryClient = useQueryClient()
 
@@ -858,7 +861,7 @@ function ExerciseSet({
               {repRange}
             </div>
             <div className="text-xs text-muted-foreground text-center min-w-[96px]">
-              {set.weight}
+              {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : ''}
             </div>
             <div className="" />
           </div>
@@ -884,14 +887,19 @@ function ExerciseSet({
               placeholder={thisSet?.log?.reps?.toString() || ''}
               className="min-w-[96px] text-center"
             />
-            <Input
-              id={`set-${set.id}-weight`}
-              value={weight}
-              onChange={(e) => handleInputChange(e, 'weight')}
-              variant="secondary"
-              inputMode="decimal"
-              placeholder={thisSet?.log?.weight?.toString() || ''}
-              className="min-w-[96px] text-center"
+            <ExerciseWeightInput
+              setId={set.id}
+              weightInKg={weight ? parseFloat(weight) : null}
+              onWeightChange={(weightInKg) => {
+                hasUserEdited.current = true
+                setWeight(weightInKg?.toString() || '')
+              }}
+              placeholder={
+                thisSet?.log?.weight
+                  ? toDisplayWeight(thisSet.log.weight)?.toString()
+                  : ''
+              }
+              disabled={false}
             />
             <div className="text-sm text-muted-foreground text-center">
               {set.rpe}

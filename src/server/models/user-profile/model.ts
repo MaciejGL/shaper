@@ -8,7 +8,12 @@ import {
   GQLActivityLevel,
   GQLFitnessLevel,
   GQLGoal,
+  GQLHeightUnit,
+  GQLNotificationPreferences,
+  GQLTheme,
+  GQLTimeFormat,
   GQLUserProfile,
+  GQLWeightUnit,
 } from '@/generated/graphql-server'
 
 import UserBodyMeasure from '../user-body-measure/model'
@@ -137,5 +142,33 @@ export default class UserProfile implements GQLUserProfile {
 
   get updatedAt() {
     return this.data.updatedAt.toISOString()
+  }
+
+  get weightUnit(): GQLWeightUnit {
+    return (this.data.weightUnit as GQLWeightUnit) || GQLWeightUnit.Kg
+  }
+
+  get heightUnit(): GQLHeightUnit {
+    return (this.data.heightUnit as GQLHeightUnit) || GQLHeightUnit.Cm
+  }
+
+  get theme(): GQLTheme {
+    return (this.data.theme as GQLTheme) || GQLTheme.System
+  }
+
+  get timeFormat(): GQLTimeFormat {
+    return (this.data.timeFormat as GQLTimeFormat) || GQLTimeFormat.H24
+  }
+
+  get notificationPreferences(): GQLNotificationPreferences {
+    return {
+      workoutReminders: this.data.workoutReminders ?? true,
+      mealReminders: this.data.mealReminders ?? true,
+      progressUpdates: this.data.progressUpdates ?? true,
+      collaborationNotifications: this.data.collaborationNotifications ?? true,
+      systemNotifications: this.data.systemNotifications ?? true,
+      emailNotifications: this.data.emailNotifications ?? true,
+      pushNotifications: this.data.pushNotifications ?? false,
+    }
   }
 }

@@ -1,3 +1,6 @@
+import { useCircumferenceConversion } from '@/hooks/use-circumference-conversion'
+import { useWeightConversion } from '@/hooks/use-weight-conversion'
+
 import { useBodyMeasurementsContext } from './body-measurements-context'
 import { MeasurementCategoryDrawer } from './measurement-category-drawer'
 import { measurementCategories } from './measurement-constants'
@@ -6,6 +9,23 @@ import { StatCard } from './stat-card'
 export function DetailedMeasurements() {
   const { bodyMeasures, getLatestMeasurement, getTrend, onMeasurementAdded } =
     useBodyMeasurementsContext()
+  const { toDisplayWeight, weightUnit } = useWeightConversion()
+  const { toDisplayCircumference, circumferenceUnit } =
+    useCircumferenceConversion()
+
+  // List of circumference measurement fields
+  const circumferenceFields = [
+    'chest',
+    'waist',
+    'hips',
+    'neck',
+    'bicepsLeft',
+    'bicepsRight',
+    'thighLeft',
+    'thighRight',
+    'calfLeft',
+    'calfRight',
+  ]
 
   if (bodyMeasures.length === 0) {
     return null
@@ -42,8 +62,24 @@ export function DetailedMeasurements() {
                     <button className="text-left">
                       <StatCard
                         label={field.label}
-                        value={getLatestMeasurement(field.key)}
-                        unit={field.unit}
+                        value={
+                          field.key === 'weight'
+                            ? toDisplayWeight(
+                                getLatestMeasurement(field.key),
+                              ) || undefined
+                            : circumferenceFields.includes(field.key)
+                              ? toDisplayCircumference(
+                                  getLatestMeasurement(field.key),
+                                ) || undefined
+                              : getLatestMeasurement(field.key)
+                        }
+                        unit={
+                          field.key === 'weight'
+                            ? weightUnit
+                            : circumferenceFields.includes(field.key)
+                              ? circumferenceUnit
+                              : field.unit
+                        }
                         trend={getTrend(field.key)}
                       />
                     </button>

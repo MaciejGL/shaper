@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
+import { HeightInput } from '@/components/ui/height-input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -8,6 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { WeightInput } from '@/components/ui/weight-input'
 import { GQLActivityLevel, GQLFitnessLevel } from '@/generated/graphql-client'
 
 import { Profile } from './types'
@@ -30,28 +31,26 @@ export function PhysicalStats({
       <CardContent className="grid gap-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="height">Height (cm)</Label>
-
-            <Input
+            <HeightInput
               id="height"
-              type="number"
-              variant="ghost"
-              value={profile?.height ?? ''}
-              onChange={(e) => handleChange('height', e.target.value)}
+              heightInCm={profile?.height ?? null}
+              onHeightChange={(heightInCm: number | null) =>
+                handleChange('height', heightInCm?.toString() ?? '')
+              }
               disabled={!isEditing}
+              showLabel={true}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="weight">Weight (kg)</Label>
-
-            <Input
+            <WeightInput
               id="weight"
-              type="number"
-              variant="ghost"
-              value={profile?.weight ?? ''}
-              onChange={(e) => handleChange('weight', e.target.value)}
+              weightInKg={profile?.weight ?? null}
+              onWeightChange={(weightInKg: number | null) =>
+                handleChange('weight', weightInKg?.toString() ?? '')
+              }
               disabled={!isEditing}
+              showLabel={true}
             />
           </div>
 

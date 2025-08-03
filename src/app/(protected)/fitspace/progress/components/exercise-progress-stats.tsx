@@ -1,6 +1,7 @@
 import { BicepsFlexed, TrendingDown, TrendingUp } from 'lucide-react'
 
 import { StatsItem } from '@/components/stats-item'
+import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { formatNumber } from '@/lib/utils'
 
 interface ExerciseProgressStatsProps {
@@ -12,13 +13,15 @@ export function ExerciseProgressStats({
   currentOneRM,
   improvement,
 }: ExerciseProgressStatsProps) {
+  const { toDisplayWeight, weightUnit } = useWeightConversion()
   return (
     <div className="mt-2 grid grid-cols-2 gap-2 w-full pr-3">
       <StatsItem
         label="Current 1RM"
         value={
           <p className="text-md font-medium flex items-center gap-1">
-            {formatNumber(currentOneRM, 1)} <span className="text-sm">kg</span>
+            {formatNumber(toDisplayWeight(currentOneRM) || 0, 1)}{' '}
+            <span className="text-sm">{weightUnit}</span>
           </p>
         }
         icon={<BicepsFlexed className="text-amber-500 size-4" />}

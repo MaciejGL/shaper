@@ -5,6 +5,7 @@ import Image from 'next/image'
 
 import { CardDescription, CardTitle } from '@/components/ui/card'
 import { CardHeader } from '@/components/ui/card'
+import { HeightDisplay } from '@/components/ui/height-display'
 import { GQLGetClientByIdQuery } from '@/generated/graphql-client'
 import { getAvatar } from '@/lib/get-avatar'
 
@@ -39,7 +40,7 @@ export function ClientCardHeader({
         </div>
         <div className="flex items-center gap-2">
           <RulerIcon className="h-4 w-4" />
-          {client.height} cm
+          <HeightDisplay heightInCm={client.height} />
         </div>
         <div className="flex items-center gap-2">
           <Calendar className="h-4 w-4" />

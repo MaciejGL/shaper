@@ -1,3 +1,4 @@
+import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { formatNumber } from '@/lib/utils'
 
 interface LogItemsProps {
@@ -52,6 +53,7 @@ export function ExerciseLogItem({
   sets: ExerciseSet[]
   actions: React.ReactNode
 }) {
+  const { toDisplayWeight, weightUnit } = useWeightConversion()
   return (
     <div
       className={
@@ -65,8 +67,8 @@ export function ExerciseLogItem({
           <div className="grid grid-cols-[auto_1fr_1fr_1fr] gap-2 text-xs text-muted-foreground mb-1 px-1">
             <span>Set</span>
             <span className="text-center">Reps</span>
-            <span className="text-center">Weight (kg)</span>
-            <span className="text-center">Est. 1RM (kg)</span>
+            <span className="text-center">Weight ({weightUnit})</span>
+            <span className="text-center">Est. 1RM ({weightUnit})</span>
           </div>
           <div className="space-y-1">
             {sets.map((set, index) => (
@@ -77,10 +79,10 @@ export function ExerciseLogItem({
                 <span className="text-muted-foreground">{index + 1}</span>
                 <span className="text-center">{set.reps}</span>
                 <span className="text-center">
-                  {formatNumber(set.weight, 0)}
+                  {formatNumber(toDisplayWeight(set.weight) || 0, 1)}
                 </span>
                 <span className="text-center">
-                  {formatNumber(set.estimatedRM, 1)}
+                  {formatNumber(toDisplayWeight(set.estimatedRM) || 0, 1)}
                 </span>
               </div>
             ))}

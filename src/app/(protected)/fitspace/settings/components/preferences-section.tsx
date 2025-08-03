@@ -1,6 +1,12 @@
 'use client'
 
-import { CalendarIcon, ClockIcon, SunIcon, WeightIcon } from 'lucide-react'
+import {
+  CalendarIcon,
+  ClockIcon,
+  RulerIcon,
+  SunIcon,
+  WeightIcon,
+} from 'lucide-react'
 
 import { Label } from '@/components/ui/label'
 import {
@@ -11,12 +17,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useUserPreferences } from '@/context/user-preferences-context'
+import { WeekStartDay } from '@/lib/date-utils'
 
 export function PreferencesSection() {
   const {
     preferences,
     setWeekStartsOn,
     setWeightUnit,
+    setHeightUnit,
     setTheme,
     setTimeFormat,
   } = useUserPreferences()
@@ -26,13 +34,14 @@ export function PreferencesSection() {
       {/* Weight Unit */}
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
+          <div className="w-2 h-2 bg-blue-500 rounded-full" />
           <WeightIcon className="size-4 text-blue-500" />
           <Label htmlFor="weight-unit" className="text-sm font-medium">
             Weight Unit
           </Label>
         </div>
         <Select value={preferences.weightUnit} onValueChange={setWeightUnit}>
-          <SelectTrigger variant="ghost">
+          <SelectTrigger className="rounded-lg border-muted-foreground/20">
             <SelectValue placeholder="Select weight unit" />
           </SelectTrigger>
           <SelectContent>
@@ -40,14 +49,40 @@ export function PreferencesSection() {
             <SelectItem value="lbs">Pounds (lbs)</SelectItem>
           </SelectContent>
         </Select>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          Choose your preferred unit for displaying weights
+        <p className="text-xs text-muted-foreground">
+          Choose your preferred unit for displaying weights throughout the
+          entire app
+        </p>
+      </div>
+
+      {/* Height Unit */}
+      <div className="space-y-3">
+        <div className="flex items-center space-x-2">
+          <div className="w-2 h-2 bg-orange-500 rounded-full" />
+          <RulerIcon className="size-4 text-orange-500" />
+          <Label htmlFor="height-unit" className="text-sm font-medium">
+            Height Unit
+          </Label>
+        </div>
+        <Select value={preferences.heightUnit} onValueChange={setHeightUnit}>
+          <SelectTrigger className="rounded-lg border-muted-foreground/20">
+            <SelectValue placeholder="Select height unit" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="cm">Centimeters (cm)</SelectItem>
+            <SelectItem value="ft">Feet & Inches (ft/in)</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Choose your preferred unit for displaying heights throughout the
+          entire app
         </p>
       </div>
 
       {/* Week Start Day */}
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
+          <div className="w-2 h-2 bg-green-500 rounded-full" />
           <CalendarIcon className="size-4 text-green-500" />
           <Label htmlFor="week-start" className="text-sm font-medium">
             Week Starts On
@@ -55,53 +90,34 @@ export function PreferencesSection() {
         </div>
         <Select
           value={preferences.weekStartsOn.toString()}
-          onValueChange={(value) => setWeekStartsOn(parseInt(value) as 0 | 1)}
+          onValueChange={(value) =>
+            setWeekStartsOn(parseInt(value) as WeekStartDay)
+          }
         >
-          <SelectTrigger variant="ghost">
-            <SelectValue />
+          <SelectTrigger className="rounded-lg border-muted-foreground/20">
+            <SelectValue placeholder="Select start day" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="1">Monday</SelectItem>
             <SelectItem value="0">Sunday</SelectItem>
           </SelectContent>
         </Select>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          Choose which day starts your week in calendars and planning
-        </p>
-      </div>
-
-      {/* Time Format */}
-      <div className="space-y-3">
-        <div className="flex items-center space-x-2">
-          <ClockIcon className="size-4 text-purple-500" />
-          <Label htmlFor="time-format" className="text-sm font-medium">
-            Time Format
-          </Label>
-        </div>
-        <Select value={preferences.timeFormat} onValueChange={setTimeFormat}>
-          <SelectTrigger variant="ghost">
-            <SelectValue placeholder="Select time format" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="24h">24 Hour (14:30)</SelectItem>
-            <SelectItem value="12h">12 Hour (2:30 PM)</SelectItem>
-          </SelectContent>
-        </Select>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          Choose your preferred time display format
+        <p className="text-xs text-muted-foreground">
+          Choose which day of the week to start your calendar view
         </p>
       </div>
 
       {/* Theme */}
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
-          <SunIcon className="size-4 text-amber-500" />
+          <div className="w-2 h-2 bg-purple-500 rounded-full" />
+          <SunIcon className="size-4 text-purple-500" />
           <Label htmlFor="theme" className="text-sm font-medium">
             Theme
           </Label>
         </div>
         <Select value={preferences.theme} onValueChange={setTheme}>
-          <SelectTrigger variant="ghost">
+          <SelectTrigger className="rounded-lg border-muted-foreground/20">
             <SelectValue placeholder="Select theme" />
           </SelectTrigger>
           <SelectContent>
@@ -110,8 +126,31 @@ export function PreferencesSection() {
             <SelectItem value="system">System</SelectItem>
           </SelectContent>
         </Select>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          Choose your preferred app theme
+        <p className="text-xs text-muted-foreground">
+          Choose your preferred color theme for the application
+        </p>
+      </div>
+
+      {/* Time Format */}
+      <div className="space-y-3">
+        <div className="flex items-center space-x-2">
+          <div className="w-2 h-2 bg-amber-500 rounded-full" />
+          <ClockIcon className="size-4 text-amber-500" />
+          <Label htmlFor="time-format" className="text-sm font-medium">
+            Time Format
+          </Label>
+        </div>
+        <Select value={preferences.timeFormat} onValueChange={setTimeFormat}>
+          <SelectTrigger className="rounded-lg border-muted-foreground/20">
+            <SelectValue placeholder="Select time format" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="12h">12 Hour (AM/PM)</SelectItem>
+            <SelectItem value="24h">24 Hour</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Choose your preferred time format for displaying times
         </p>
       </div>
     </div>

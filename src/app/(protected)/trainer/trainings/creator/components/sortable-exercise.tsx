@@ -50,6 +50,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
+import { WeightInput } from '@/components/ui/weight-input'
 import { VideoPreview } from '@/components/video-preview'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import {
@@ -414,37 +415,21 @@ function KanbanExerciseSets({
                 </div>
               </div>
               <div>
-                {set.order === 1 && (
-                  <Label
-                    htmlFor={`weight-${set.order}`}
-                    className="text-sm mb-1"
-                  >
-                    Weight
-                  </Label>
-                )}
-                <Input
+                <WeightInput
                   id={`weight-${set.order}`}
-                  variant="ghost"
-                  type="number"
-                  min="0"
-                  step="2.5"
-                  value={set.weight ?? ''}
+                  weightInKg={set.weight ?? null}
+                  showLabel={set.order === 1}
+                  label={set.order === 1 ? 'Weight' : undefined}
                   disabled={
                     isTemporaryId(set.id) ||
                     isExerciseDisabled ||
                     Boolean(set.completedAt) ||
                     disabled
                   }
-                  onChange={(e) => {
+                  onWeightChange={(weightInKg) => {
                     // Don't update sets with temporary IDs to prevent API errors
                     if (!set.id || isTemporaryId(set.id)) return
-                    onUpdateSet(
-                      index,
-                      'weight',
-                      e.target.value === ''
-                        ? undefined
-                        : Number.parseFloat(e.target.value),
-                    )
+                    onUpdateSet(index, 'weight', weightInKg ?? undefined)
                   }}
                   className="max-w-32"
                 />

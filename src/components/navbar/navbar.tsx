@@ -23,7 +23,6 @@ import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
 import { AnimatedLogo, AnimatedLogoText } from '../animated-logo'
-import { ModeToggle } from '../mode-toggle'
 import { Button } from '../ui/button'
 import { ButtonLink } from '../ui/button-link'
 import {
@@ -150,7 +149,6 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
       </DrawerTrigger>
       <DrawerContent dialogTitle="Trainer Menu">
         <DrawerHeader>
-          <ModeToggle />
           <div className="flex flex-col items-center gap-2">
             <UserAvatar
               imageUrl={user?.user.profile?.avatarUrl}
@@ -287,7 +285,6 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <div className="flex flex-col gap-2 px-4 py-4">
-          <ModeToggle />
           <SwapAccountButton />
         </div>
       </DropdownMenuContent>
