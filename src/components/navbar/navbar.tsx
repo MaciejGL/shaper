@@ -8,6 +8,7 @@ import {
   LogOutIcon,
   MenuIcon,
   NotebookTextIcon,
+  Settings,
   UserRoundCogIcon,
   Users2Icon,
 } from 'lucide-react'
@@ -265,6 +266,16 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
             label={CLIENT_LINKS.profile.label}
           />
         </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <NavLink
+            href={CLIENT_LINKS.settings.href}
+            icon={<Settings className="size-4" />}
+            label={CLIENT_LINKS.settings.label}
+          />
+        </DropdownMenuItem>
+
+        <DropdownMenuSeparator />
 
         <DropdownMenuItem asChild>
           <NavLink

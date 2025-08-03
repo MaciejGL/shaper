@@ -11,18 +11,36 @@ import {
 
 import { DEFAULT_WEEK_START, WeekStartDay } from '@/lib/date-utils'
 
+export type WeightUnit = 'kg' | 'lbs'
+export type ThemePreference = 'light' | 'dark' | 'system'
+export type TimeFormat = '12h' | '24h'
+
+export interface NotificationPreferences {
+  workoutReminders: boolean
+  mealReminders: boolean
+  progressUpdates: boolean
+  collaborationNotifications: boolean
+  systemNotifications: boolean
+  emailNotifications: boolean
+  pushNotifications: boolean
+}
+
 interface UserPreferences {
   weekStartsOn: WeekStartDay
-  // Future preferences can be added here:
-  // timeFormat: '12h' | '24h'
-  // dateFormat: 'MM/dd/yyyy' | 'dd/MM/yyyy' | 'yyyy-MM-dd'
-  // theme: 'light' | 'dark' | 'system'
+  weightUnit: WeightUnit
+  theme: ThemePreference
+  timeFormat: TimeFormat
+  notifications: NotificationPreferences
 }
 
 interface UserPreferencesContextType {
   preferences: UserPreferences
   updatePreferences: (updates: Partial<UserPreferences>) => void
   setWeekStartsOn: (weekStartsOn: WeekStartDay) => void
+  setWeightUnit: (weightUnit: WeightUnit) => void
+  setTheme: (theme: ThemePreference) => void
+  setTimeFormat: (timeFormat: TimeFormat) => void
+  setNotifications: (notifications: Partial<NotificationPreferences>) => void
 }
 
 const UserPreferencesContext = createContext<UserPreferencesContextType | null>(
@@ -30,6 +48,24 @@ const UserPreferencesContext = createContext<UserPreferencesContextType | null>(
 )
 
 const PREFERENCES_KEY = 'user-preferences'
+
+const DEFAULT_NOTIFICATIONS: NotificationPreferences = {
+  workoutReminders: true,
+  mealReminders: true,
+  progressUpdates: true,
+  collaborationNotifications: true,
+  systemNotifications: true,
+  emailNotifications: true,
+  pushNotifications: true,
+}
+
+const DEFAULT_PREFERENCES: UserPreferences = {
+  weekStartsOn: DEFAULT_WEEK_START,
+  weightUnit: 'kg',
+  theme: 'system',
+  timeFormat: '24h',
+  notifications: DEFAULT_NOTIFICATIONS,
+}
 
 export function useUserPreferences() {
   const context = useContext(UserPreferencesContext)
@@ -51,7 +87,7 @@ export function UserPreferencesProvider({
   initialPreferences = {},
 }: UserPreferencesProviderProps) {
   const [preferences, setPreferences] = useState<UserPreferences>({
-    weekStartsOn: DEFAULT_WEEK_START,
+    ...DEFAULT_PREFERENCES,
     ...initialPreferences,
   })
 
@@ -90,13 +126,55 @@ export function UserPreferencesProvider({
     [updatePreferences],
   )
 
+  const setWeightUnit = useCallback(
+    (weightUnit: WeightUnit) => {
+      updatePreferences({ weightUnit })
+    },
+    [updatePreferences],
+  )
+
+  const setTheme = useCallback(
+    (theme: ThemePreference) => {
+      updatePreferences({ theme })
+    },
+    [updatePreferences],
+  )
+
+  const setTimeFormat = useCallback(
+    (timeFormat: TimeFormat) => {
+      updatePreferences({ timeFormat })
+    },
+    [updatePreferences],
+  )
+
+  const setNotifications = useCallback(
+    (notificationUpdates: Partial<NotificationPreferences>) => {
+      updatePreferences({
+        notifications: { ...preferences.notifications, ...notificationUpdates },
+      })
+    },
+    [updatePreferences, preferences.notifications],
+  )
+
   const value = useMemo(
     () => ({
       preferences,
       updatePreferences,
       setWeekStartsOn,
+      setWeightUnit,
+      setTheme,
+      setTimeFormat,
+      setNotifications,
     }),
-    [preferences, updatePreferences, setWeekStartsOn],
+    [
+      preferences,
+      updatePreferences,
+      setWeekStartsOn,
+      setWeightUnit,
+      setTheme,
+      setTimeFormat,
+      setNotifications,
+    ],
   )
 
   return (

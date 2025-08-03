@@ -958,6 +958,7 @@ export type GQLMutation = {
   deletePlan: Scalars['Boolean']['output'];
   deleteReview: Scalars['Boolean']['output'];
   deleteTrainingPlan: Scalars['Boolean']['output'];
+  deleteUserAccount: Scalars['Boolean']['output'];
   duplicateMealPlan: Scalars['ID']['output'];
   duplicateTrainingPlan: Scalars['ID']['output'];
   duplicateTrainingWeek: Scalars['ID']['output'];
@@ -992,6 +993,7 @@ export type GQLMutation = {
   removeTrainingPlanFromClient: Scalars['Boolean']['output'];
   removeTrainingWeek: Scalars['Boolean']['output'];
   removeWeek: Scalars['Boolean']['output'];
+  resetUserLogs: Scalars['Boolean']['output'];
   respondToCollaborationInvitation: GQLCollaborationInvitation;
   saveMeal?: Maybe<GQLMeal>;
   sendCollaborationInvitation: GQLCollaborationInvitation;
@@ -2764,6 +2766,16 @@ export type GQLSelectedExercisesProgressQueryVariables = Exact<{
 
 
 export type GQLSelectedExercisesProgressQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', averageRpe?: number | undefined | null, totalSets?: number | undefined | null, lastPerformed?: string | undefined | null, baseExercise?: { __typename?: 'BaseExercise', id: string, name: string, muscleGroups: Array<{ __typename?: 'MuscleGroup', alias?: string | undefined | null, name: string, groupSlug: string, category: { __typename?: 'MuscleGroupCategory', name: string } }> } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }>, totalVolumeProgress: Array<{ __typename?: 'VolumeEntry', week: string, totalVolume: number, totalSets: number }> }> };
+
+export type GQLResetUserLogsMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLResetUserLogsMutation = { __typename?: 'Mutation', resetUserLogs: boolean };
+
+export type GQLDeleteUserAccountMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLDeleteUserAccountMutation = { __typename?: 'Mutation', deleteUserAccount: boolean };
 
 export type GQLGetTrainingPlanPreviewByIdQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5788,6 +5800,54 @@ useInfiniteSelectedExercisesProgressQuery.getKey = (variables: GQLSelectedExerci
 
 
 useSelectedExercisesProgressQuery.fetcher = (variables: GQLSelectedExercisesProgressQueryVariables, options?: RequestInit['headers']) => fetchData<GQLSelectedExercisesProgressQuery, GQLSelectedExercisesProgressQueryVariables>(SelectedExercisesProgressDocument, variables, options);
+
+export const ResetUserLogsDocument = `
+    mutation ResetUserLogs {
+  resetUserLogs
+}
+    `;
+
+export const useResetUserLogsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLResetUserLogsMutation, TError, GQLResetUserLogsMutationVariables, TContext>) => {
+    
+    return useMutation<GQLResetUserLogsMutation, TError, GQLResetUserLogsMutationVariables, TContext>(
+      {
+    mutationKey: ['ResetUserLogs'],
+    mutationFn: (variables?: GQLResetUserLogsMutationVariables) => fetchData<GQLResetUserLogsMutation, GQLResetUserLogsMutationVariables>(ResetUserLogsDocument, variables)(),
+    ...options
+  }
+    )};
+
+useResetUserLogsMutation.getKey = () => ['ResetUserLogs'];
+
+
+useResetUserLogsMutation.fetcher = (variables?: GQLResetUserLogsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLResetUserLogsMutation, GQLResetUserLogsMutationVariables>(ResetUserLogsDocument, variables, options);
+
+export const DeleteUserAccountDocument = `
+    mutation DeleteUserAccount {
+  deleteUserAccount
+}
+    `;
+
+export const useDeleteUserAccountMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDeleteUserAccountMutation, TError, GQLDeleteUserAccountMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDeleteUserAccountMutation, TError, GQLDeleteUserAccountMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteUserAccount'],
+    mutationFn: (variables?: GQLDeleteUserAccountMutationVariables) => fetchData<GQLDeleteUserAccountMutation, GQLDeleteUserAccountMutationVariables>(DeleteUserAccountDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDeleteUserAccountMutation.getKey = () => ['DeleteUserAccount'];
+
+
+useDeleteUserAccountMutation.fetcher = (variables?: GQLDeleteUserAccountMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteUserAccountMutation, GQLDeleteUserAccountMutationVariables>(DeleteUserAccountDocument, variables, options);
 
 export const GetTrainingPlanPreviewByIdDocument = `
     query GetTrainingPlanPreviewById($id: ID!) {

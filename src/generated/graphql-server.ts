@@ -960,6 +960,7 @@ export type GQLMutation = {
   deletePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  deleteUserAccount: EntireFieldWrapper<Scalars['Boolean']['output']>;
   duplicateMealPlan: EntireFieldWrapper<Scalars['ID']['output']>;
   duplicateTrainingPlan: EntireFieldWrapper<Scalars['ID']['output']>;
   duplicateTrainingWeek: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -994,6 +995,7 @@ export type GQLMutation = {
   removeTrainingPlanFromClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeTrainingWeek: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeWeek: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  resetUserLogs: EntireFieldWrapper<Scalars['Boolean']['output']>;
   respondToCollaborationInvitation: EntireFieldWrapper<GQLCollaborationInvitation>;
   saveMeal?: EntireFieldWrapper<Maybe<GQLMeal>>;
   sendCollaborationInvitation: EntireFieldWrapper<GQLCollaborationInvitation>;
@@ -3359,6 +3361,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   deletePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeletePlanArgs, 'planId'>>;
   deleteReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteReviewArgs, 'input'>>;
   deleteTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteTrainingPlanArgs, 'id'>>;
+  deleteUserAccount?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   duplicateMealPlan?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateMealPlanArgs, 'id'>>;
   duplicateTrainingPlan?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingPlanArgs, 'id'>>;
   duplicateTrainingWeek?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationDuplicateTrainingWeekArgs, 'input'>>;
@@ -3393,6 +3396,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   removeTrainingPlanFromClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingPlanFromClientArgs, 'clientId' | 'planId'>>;
   removeTrainingWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingWeekArgs, 'weekId'>>;
   removeWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveWeekArgs, 'planId' | 'weekId'>>;
+  resetUserLogs?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   respondToCollaborationInvitation?: Resolver<GQLResolversTypes['CollaborationInvitation'], ParentType, ContextType, RequireFields<GQLMutationRespondToCollaborationInvitationArgs, 'input'>>;
   saveMeal?: Resolver<Maybe<GQLResolversTypes['Meal']>, ParentType, ContextType, RequireFields<GQLMutationSaveMealArgs, 'input'>>;
   sendCollaborationInvitation?: Resolver<GQLResolversTypes['CollaborationInvitation'], ParentType, ContextType, RequireFields<GQLMutationSendCollaborationInvitationArgs, 'input'>>;

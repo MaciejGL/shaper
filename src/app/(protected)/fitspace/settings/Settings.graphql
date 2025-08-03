@@ -1,0 +1,7 @@
+mutation ResetUserLogs {
+  resetUserLogs
+}
+
+mutation DeleteUserAccount {
+  deleteUserAccount
+}

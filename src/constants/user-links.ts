@@ -42,4 +42,5 @@ export const CLIENT_LINKS = {
     label: 'Explore',
   },
   profile: { href: '/fitspace/profile', label: 'Profile', disabled: false },
+  settings: { href: '/fitspace/settings', label: 'Settings', disabled: false },
 }

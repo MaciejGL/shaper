@@ -97,4 +97,8 @@ type Mutation {
   deactivateUser(userId: ID!): Boolean!
   activateUser(userId: ID!): Boolean!
   clearUserSessions(userId: ID!): Boolean!
+
+  # User account management
+  resetUserLogs: Boolean!
+  deleteUserAccount: Boolean!
 }
