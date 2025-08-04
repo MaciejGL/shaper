@@ -15,6 +15,7 @@ import {
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
 import { useNotificationsQuery } from '@/generated/graphql-client'
@@ -201,8 +202,9 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
 }
 
 function ClientNavbar({ user }: { user?: UserWithSession | null }) {
+  const [isOpen, setIsOpen] = useState(false)
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -240,6 +242,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
             href={CLIENT_LINKS.dashboard.href}
             icon={<LayoutDashboardIcon className="size-4" />}
             label={CLIENT_LINKS.dashboard.label}
+            onClick={() => setIsOpen(false)}
           />
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -247,6 +250,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
             href={CLIENT_LINKS.myPlans.href}
             icon={<LayoutListIcon className="size-4" />}
             label={CLIENT_LINKS.myPlans.label}
+            onClick={() => setIsOpen(false)}
           />
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
@@ -254,6 +258,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
             href={CLIENT_LINKS.workout.href}
             icon={<NotebookTextIcon className="size-4" />}
             label={CLIENT_LINKS.workout.label}
+            onClick={() => setIsOpen(false)}
           />
         </DropdownMenuItem>
 
@@ -262,6 +267,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
             href={CLIENT_LINKS.profile.href}
             icon={<UserRoundCogIcon className="size-4" />}
             label={CLIENT_LINKS.profile.label}
+            onClick={() => setIsOpen(false)}
           />
         </DropdownMenuItem>
 
@@ -270,6 +276,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
             href={CLIENT_LINKS.settings.href}
             icon={<Settings className="size-4" />}
             label={CLIENT_LINKS.settings.label}
+            onClick={() => setIsOpen(false)}
           />
         </DropdownMenuItem>
 
