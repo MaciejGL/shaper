@@ -83,8 +83,8 @@ export function MobileNav() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar shadow-neuro-light dark:shadow-neuro-dark">
-        <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar rounded-t-lg">
+        <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
@@ -113,7 +113,7 @@ export function MobileNav() {
                 href={item.href}
                 onClick={() => setClickedItem(item.label)}
                 className={cn(
-                  'flex flex-col items-center justify-center p-2 rounded-xl transition-colors min-w-[40px]',
+                  'flex flex-col items-center justify-center p-2 rounded-lg transition-colors',
                   isHighlighted
                     ? 'text-primary bg-zinc-200 dark:bg-zinc-800'
                     : 'text-muted-foreground hover:text-foreground',

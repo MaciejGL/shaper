@@ -208,7 +208,7 @@ export function MealCard({
   const hasFoods = meal.foods.length > 0
 
   return (
-    <div className="grid grid-cols-[1fr_50px] gap-3">
+    <div className="grid grid-cols-[1fr_minmax(min-content,max-content)] gap-3">
       <div className="min-w-0">
         <div className="flex items-center gap-2 justify-between mb-1">
           <MealTotals
@@ -279,7 +279,7 @@ export function MealCard({
           )}
         </div>
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col items-end">
         <Badge variant="outline" className="rounded-full font-mono mb-2">
           {formatTime(new Date(meal.dateTime))}
         </Badge>
