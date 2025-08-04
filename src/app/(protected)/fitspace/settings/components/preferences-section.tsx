@@ -28,6 +28,34 @@ export function PreferencesSection() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Training View */}
+      <div className="space-y-3">
+        <div className="flex items-center space-x-2">
+          <DumbbellIcon className="size-4 text-purple-500" />
+          <Label htmlFor="training-view" className="text-sm font-medium">
+            Training View
+          </Label>
+        </div>
+        <RadioButtons
+          value={preferences.trainingView}
+          onValueChange={setTrainingView}
+          options={[
+            {
+              value: GQLTrainingView.Simple,
+              label: 'Simple',
+              description: 'Quick completion',
+            },
+            {
+              value: GQLTrainingView.Advanced,
+              label: 'Advanced',
+              description: 'Detailed logging',
+            },
+          ]}
+          description={`Simple: Mark exercises as complete without detailed logging.
+
+          Advanced: Full workout tracking with sets, reps, and weights.`}
+        />
+      </div>
       {/* Weight Unit */}
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
@@ -88,27 +116,6 @@ export function PreferencesSection() {
         />
       </div>
 
-      {/* Theme */}
-      <div className="space-y-3">
-        <div className="flex items-center space-x-2">
-          <SunIcon className="size-4 text-purple-500" />
-          <Label htmlFor="theme" className="text-sm font-medium">
-            Theme
-          </Label>
-        </div>
-        <RadioButtons
-          value={preferences.theme}
-          onValueChange={setTheme}
-          options={[
-            { value: 'light', label: 'Light' },
-            { value: 'dark', label: 'Dark' },
-            { value: 'system', label: 'System' },
-          ]}
-          columns={3}
-          description="Choose your preferred color theme for the application"
-        />
-      </div>
-
       {/* Time Format */}
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
@@ -128,32 +135,24 @@ export function PreferencesSection() {
         />
       </div>
 
-      {/* Training View */}
+      {/* Theme */}
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
-          <DumbbellIcon className="size-4 text-purple-500" />
-          <Label htmlFor="training-view" className="text-sm font-medium">
-            Training View
+          <SunIcon className="size-4 text-purple-500" />
+          <Label htmlFor="theme" className="text-sm font-medium">
+            Theme
           </Label>
         </div>
         <RadioButtons
-          value={preferences.trainingView}
-          onValueChange={setTrainingView}
+          value={preferences.theme}
+          onValueChange={setTheme}
           options={[
-            {
-              value: GQLTrainingView.Simple,
-              label: 'Simple',
-              description: 'Quick completion',
-            },
-            {
-              value: GQLTrainingView.Advanced,
-              label: 'Advanced',
-              description: 'Detailed logging',
-            },
+            { value: 'light', label: 'Light' },
+            { value: 'dark', label: 'Dark' },
+            { value: 'system', label: 'System' },
           ]}
-          description={`Simple: Mark exercises as complete without detailed logging.
-
-          Advanced: Full workout tracking with sets, reps, and weights.`}
+          columns={3}
+          description="Choose your preferred color theme for the application"
         />
       </div>
     </div>
