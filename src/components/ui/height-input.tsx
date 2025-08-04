@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -38,7 +38,7 @@ export const HeightInput = forwardRef<HTMLInputElement, HeightInputProps>(
     const [feetValue, setFeetValue] = useState('')
     const [inchesValue, setInchesValue] = useState('')
 
-    const updateInputValues = () => {
+    const updateInputValues = useCallback(() => {
       if (heightInCm == null) {
         setCmValue('')
         setFeetValue('')
@@ -53,11 +53,11 @@ export const HeightInput = forwardRef<HTMLInputElement, HeightInputProps>(
         setFeetValue(feet.toString())
         setInchesValue(inches.toString())
       }
-    }
+    }, [heightInCm, heightUnit])
 
     useEffect(() => {
       updateInputValues()
-    }, [heightInCm, heightUnit])
+    }, [heightInCm, heightUnit, updateInputValues])
 
     const handleCmChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value

@@ -1,4 +1,3 @@
-import { format } from 'date-fns'
 import { ChefHat, FlameIcon, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -8,6 +7,7 @@ import {
   DrawerTitle,
   SimpleDrawerContent,
 } from '@/components/ui/drawer'
+import { useTimeFormatting } from '@/hooks/use-time-formatting'
 import { cn } from '@/lib/utils'
 
 import { MealHeaderInfo } from './meal-header-info'
@@ -98,7 +98,7 @@ export function MealLoggingDrawer({
   const [foodQuantities, setFoodQuantities] = useState<FoodQuantity[]>([])
   const [removingItemIds, setRemovingItemIds] = useState<string[]>([])
   const { handleRemoveLogItem } = useMealLogging()
-
+  const { formatTime } = useTimeFormatting()
   // Initialize quantities when meal changes
   useEffect(() => {
     if (!meal) return
@@ -188,7 +188,7 @@ export function MealLoggingDrawer({
               </DrawerTitle>
               <div>
                 <p className="text-sm text-muted-foreground">
-                  {format(new Date(meal.dateTime), 'h:mm a')}
+                  {formatTime(new Date(meal.dateTime))}
                 </p>
               </div>
             </div>

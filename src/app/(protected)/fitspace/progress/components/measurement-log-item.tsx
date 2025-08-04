@@ -1,9 +1,9 @@
-import { format } from 'date-fns'
 import { Pencil } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { GQLBodyMeasuresQuery } from '@/generated/graphql-client'
 import { useCircumferenceConversion } from '@/hooks/use-circumference-conversion'
+import { useTimeFormatting } from '@/hooks/use-time-formatting'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { cn } from '@/lib/utils'
 
@@ -29,6 +29,7 @@ export function MeasurementLogItem({
   const { toDisplayWeight, weightUnit } = useWeightConversion()
   const { toDisplayCircumference, circumferenceUnit } =
     useCircumferenceConversion()
+  const { formatDateTime } = useTimeFormatting()
 
   // List of circumference measurement fields
   const circumferenceFields = [
@@ -64,7 +65,7 @@ export function MeasurementLogItem({
       ? '1 measurement'
       : `${measurementCount} measurements`
   const date = new Date(measurement.measuredAt)
-  const formattedDate = format(date, 'eee, d MMM HH:mm')
+  const formattedDate = formatDateTime(date, { includeDay: true })
 
   return (
     <div

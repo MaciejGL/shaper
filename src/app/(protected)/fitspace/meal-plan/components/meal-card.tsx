@@ -1,4 +1,3 @@
-import { format } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   CheckSquare2Icon,
@@ -12,6 +11,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useTimeFormatting } from '@/hooks/use-time-formatting'
 import { formatNumber } from '@/lib/utils'
 
 import { FoodItem } from './food-item'
@@ -148,6 +148,7 @@ export function MealCard({
   onAddCustomFood,
   isDefaultPlan,
 }: MealCardProps) {
+  const { formatTime } = useTimeFormatting()
   const {
     handleRemoveLogItem,
     handleCompleteMeal,
@@ -280,7 +281,7 @@ export function MealCard({
       </div>
       <div className="flex flex-col">
         <Badge variant="outline" className="rounded-full font-mono mb-2">
-          {format(new Date(meal.dateTime), 'HH:mm')}
+          {formatTime(new Date(meal.dateTime))}
         </Badge>
         <AnimatePresence>
           {meal.foods.map((food) => (

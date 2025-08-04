@@ -1,5 +1,6 @@
-import { format } from 'date-fns'
 import { Clock } from 'lucide-react'
+
+import { useTimeFormatting } from '@/hooks/use-time-formatting'
 
 import { FoodItem } from './food-item'
 
@@ -23,13 +24,15 @@ interface MealCardProps {
 }
 
 export function MealCard({ meal }: MealCardProps) {
+  const { formatTime } = useTimeFormatting()
+
   return (
     <div className="bg-muted/50 rounded p-2">
       <div className="flex items-center justify-between mb-2">
         <div className="font-medium text-sm">{meal.name}</div>
         <div className="flex items-center gap-1 text-xs text-muted-foreground">
           <Clock className="size-3" />
-          {format(new Date(meal.dateTime), 'HH:mm')}
+          {formatTime(new Date(meal.dateTime))}
         </div>
       </div>
 
