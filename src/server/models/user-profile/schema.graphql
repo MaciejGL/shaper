@@ -44,6 +44,11 @@ enum TimeFormat {
   h24
 }
 
+enum TrainingView {
+  SIMPLE
+  ADVANCED
+}
+
 type NotificationPreferences {
   workoutReminders: Boolean!
   mealReminders: Boolean!
@@ -77,6 +82,7 @@ type UserProfile {
   heightUnit: HeightUnit!
   theme: Theme!
   timeFormat: TimeFormat!
+  trainingView: TrainingView!
   notificationPreferences: NotificationPreferences!
 
   createdAt: String!
@@ -147,6 +153,7 @@ input UpdateProfileInput {
   heightUnit: HeightUnit
   theme: Theme
   timeFormat: TimeFormat
+  trainingView: TrainingView
   notificationPreferences: NotificationPreferencesInput
 }
 

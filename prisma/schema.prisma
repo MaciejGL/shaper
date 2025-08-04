@@ -79,6 +79,7 @@ model UserProfile {
   heightUnit    String?           @default("cm") // "cm" | "ft"
   theme         String?           @default("system") // "light" | "dark" | "system"
   timeFormat    String?           @default("24h") // "12h" | "24h"
+  trainingView  String?           @default("advanced") // "simple" | "advanced"
   // Notification Preferences
   workoutReminders              Boolean? @default(true)
   mealReminders                 Boolean? @default(true)

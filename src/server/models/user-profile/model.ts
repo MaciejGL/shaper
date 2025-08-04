@@ -12,6 +12,7 @@ import {
   GQLNotificationPreferences,
   GQLTheme,
   GQLTimeFormat,
+  GQLTrainingView,
   GQLUserProfile,
   GQLWeightUnit,
 } from '@/generated/graphql-server'
@@ -158,6 +159,17 @@ export default class UserProfile implements GQLUserProfile {
 
   get timeFormat(): GQLTimeFormat {
     return (this.data.timeFormat as GQLTimeFormat) || GQLTimeFormat.H24
+  }
+
+  get trainingView() {
+    switch (this.data.trainingView) {
+      case GQLTrainingView.Simple:
+        return GQLTrainingView.Simple
+      case GQLTrainingView.Advanced:
+        return GQLTrainingView.Advanced
+      default:
+        return GQLTrainingView.Simple
+    }
   }
 
   get notificationPreferences(): GQLNotificationPreferences {

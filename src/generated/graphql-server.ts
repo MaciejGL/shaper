@@ -2173,6 +2173,11 @@ export type GQLTrainingPlanCollaborator = {
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
+export enum GQLTrainingView {
+  Advanced = 'ADVANCED',
+  Simple = 'SIMPLE'
+}
+
 export type GQLTrainingWeek = {
   __typename?: 'TrainingWeek';
   completedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -2323,6 +2328,7 @@ export type GQLUpdateProfileInput = {
   sex?: InputMaybe<Scalars['String']['input']>;
   theme?: InputMaybe<GQLTheme>;
   timeFormat?: InputMaybe<GQLTimeFormat>;
+  trainingView?: InputMaybe<GQLTrainingView>;
   weekStartsOn?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
   weightUnit?: InputMaybe<GQLWeightUnit>;
@@ -2471,6 +2477,7 @@ export type GQLUserProfile = {
   sex?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   theme: EntireFieldWrapper<GQLTheme>;
   timeFormat: EntireFieldWrapper<GQLTimeFormat>;
+  trainingView: EntireFieldWrapper<GQLTrainingView>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
   weekStartsOn?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
@@ -2764,6 +2771,7 @@ export type GQLResolversTypes = {
   TrainingExercise: ResolverTypeWrapper<GQLTrainingExercise>;
   TrainingPlan: ResolverTypeWrapper<GQLTrainingPlan>;
   TrainingPlanCollaborator: ResolverTypeWrapper<GQLTrainingPlanCollaborator>;
+  TrainingView: GQLTrainingView;
   TrainingWeek: ResolverTypeWrapper<GQLTrainingWeek>;
   UpdateBodyMeasurementInput: GQLUpdateBodyMeasurementInput;
   UpdateExerciseFormInput: GQLUpdateExerciseFormInput;
@@ -3851,6 +3859,7 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   sex?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   theme?: Resolver<GQLResolversTypes['Theme'], ParentType, ContextType>;
   timeFormat?: Resolver<GQLResolversTypes['TimeFormat'], ParentType, ContextType>;
+  trainingView?: Resolver<GQLResolversTypes['TrainingView'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   weekStartsOn?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;

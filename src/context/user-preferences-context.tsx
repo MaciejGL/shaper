@@ -14,6 +14,7 @@ import {
   GQLHeightUnit,
   GQLTheme,
   GQLTimeFormat,
+  GQLTrainingView,
   type GQLUpdateProfileInput,
   GQLWeightUnit,
   useProfileQuery,
@@ -25,6 +26,7 @@ export type WeightUnit = 'kg' | 'lbs'
 export type HeightUnit = 'cm' | 'ft'
 export type ThemePreference = 'light' | 'dark' | 'system'
 export type TimeFormat = '12h' | '24h'
+export type TrainingView = GQLTrainingView
 
 export interface NotificationPreferences {
   workoutReminders: boolean
@@ -42,6 +44,7 @@ interface UserPreferences {
   heightUnit: HeightUnit
   theme: ThemePreference
   timeFormat: TimeFormat
+  trainingView: TrainingView
   notifications: NotificationPreferences
 }
 
@@ -53,6 +56,7 @@ interface UserPreferencesContextType {
   setHeightUnit: (heightUnit: HeightUnit) => void
   setTheme: (theme: ThemePreference) => void
   setTimeFormat: (timeFormat: TimeFormat) => void
+  setTrainingView: (trainingView: TrainingView) => void
   setNotifications: (notifications: Partial<NotificationPreferences>) => void
   isLoading: boolean
 }
@@ -77,6 +81,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   heightUnit: 'cm',
   theme: 'system',
   timeFormat: '24h',
+  trainingView: GQLTrainingView.Simple,
   notifications: DEFAULT_NOTIFICATIONS,
 }
 
@@ -135,6 +140,7 @@ export function UserPreferencesProvider({
         heightUnit,
         theme,
         timeFormat,
+        trainingView: profile.trainingView,
         notifications: {
           workoutReminders:
             profile.notificationPreferences?.workoutReminders ?? true,
@@ -190,6 +196,9 @@ export function UserPreferencesProvider({
         if (updates.timeFormat !== undefined) {
           input.timeFormat =
             updates.timeFormat === '12h' ? GQLTimeFormat.H12 : GQLTimeFormat.H24
+        }
+        if (updates.trainingView !== undefined) {
+          input.trainingView = updates.trainingView
         }
         if (updates.notifications !== undefined) {
           input.notificationPreferences = updates.notifications
@@ -252,6 +261,13 @@ export function UserPreferencesProvider({
     [updatePreferences],
   )
 
+  const setTrainingView = useCallback(
+    (trainingView: TrainingView) => {
+      updatePreferences({ trainingView })
+    },
+    [updatePreferences],
+  )
+
   const setNotifications = useCallback(
     (notificationUpdates: Partial<NotificationPreferences>) => {
       updatePreferences({
@@ -270,6 +286,7 @@ export function UserPreferencesProvider({
       setHeightUnit,
       setTheme,
       setTimeFormat,
+      setTrainingView,
       setNotifications,
       isLoading: profileLoading,
     }),
@@ -281,6 +298,7 @@ export function UserPreferencesProvider({
       setHeightUnit,
       setTheme,
       setTimeFormat,
+      setTrainingView,
       setNotifications,
       profileLoading,
     ],

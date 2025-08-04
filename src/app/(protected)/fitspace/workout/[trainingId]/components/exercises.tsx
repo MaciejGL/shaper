@@ -1,4 +1,4 @@
-import { BadgeCheckIcon, ChevronLeft } from 'lucide-react'
+import { BadgeCheckIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import React, { startTransition, useEffect, useState } from 'react'
 
@@ -6,20 +6,20 @@ import { AnimateChangeInHeight } from '@/components/animations/animated-height-c
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { SwipeableWrapper } from '@/components/swipeable-wrapper'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { useWorkout } from '@/context/workout-context/workout-context'
+import { useTrainingView } from '@/hooks/use-training-view'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
-import { AddExerciseModal } from './add-exercise-modal'
-import { AiSuggestion } from './ai-suggestion'
-import { Exercise, ExerciseSelector } from './exercise'
+import { Exercise } from './exercise'
 import { ExercisesPagination } from './exercises-pagaination'
 import { RestDay } from './rest-day'
+import { SimpleExerciseList } from './simple-exercise-list'
 import { Summary } from './summary'
 
 export function Exercises() {
   const { activeDay } = useWorkout()
+  const { isSimpleView } = useTrainingView()
   const [activeExerciseId, setActiveExerciseId] = useQueryState('exercise')
   const [animationVariant, setAnimationVariant] = useState<
     'slideFromLeft' | 'slideFromRight'
@@ -52,6 +52,7 @@ export function Exercises() {
   }, 0)
 
   const progressPercentage = (completedSets / totalSets) * 100
+  const exercises = activeDay.exercises
 
   const handlePaginationClick = (
     exerciseId: string | null,
@@ -94,8 +95,6 @@ export function Exercises() {
     }
   }
 
-  const exercises = activeDay.exercises
-
   return (
     <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
       {!activeDay.isRestDay && (
@@ -115,6 +114,24 @@ export function Exercises() {
 
       {activeDay.isRestDay ? (
         <RestDay />
+      ) : activeExerciseId === 'summary' || !selectedExercise ? (
+        <Summary
+          open={true}
+          onContinue={() => {
+            if (isSimpleView) {
+              // In simple view, go back to exercise list
+              setActiveExerciseId(null)
+            } else {
+              // In advanced view, go to last exercise
+              handlePaginationClick(exercises.at(-1)?.id ?? null, 'prev')
+            }
+          }}
+          continueButtonText={isSimpleView ? 'Back to Workout' : 'Back'}
+        />
+      ) : isSimpleView ? (
+        <SimpleExerciseList
+          onShowSummary={() => setActiveExerciseId('summary')}
+        />
       ) : selectedExercise ? (
         <div className="relative">
           <SwipeableWrapper
@@ -149,88 +166,8 @@ export function Exercises() {
             <ExercisesPagination onClick={handlePaginationClick} />
           )}
         </div>
-      ) : (
-        <div className="relative">
-          <SwipeableWrapper
-            onSwipeLeft={() => {}} // No next from summary
-            onSwipeRight={handleSwipeRight}
-          >
-            <AnimateChangeInHeight
-              transition={{
-                type: 'tween',
-                stiffness: 80,
-                damping: 10,
-                mass: 0.5,
-                duration: 0.05,
-              }}
-            >
-              <AnimatedPageTransition
-                id={'results'}
-                variant={animationVariant}
-                mode="wait"
-                className="w-full"
-              >
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="secondary"
-                    iconStart={<ChevronLeft />}
-                    className="w-max"
-                    onClick={() => {
-                      handlePaginationClick(
-                        exercises.at(-1)?.id ?? null,
-                        'prev',
-                      )
-                    }}
-                  >
-                    Exercises
-                  </Button>
-                  <ExerciseSelector
-                    activeExerciseId={'summary'}
-                    setActiveExerciseId={setActiveExerciseId}
-                    className="w-auto grow"
-                  />
-                </div>
-                <Results
-                  handlePaginationClick={handlePaginationClick}
-                  lastExerciseId={exercises.at(-1)?.id ?? null}
-                />
-              </AnimatedPageTransition>
-            </AnimateChangeInHeight>
-          </SwipeableWrapper>
-        </div>
-      )}
+      ) : null}
     </AnimatedPageTransition>
-  )
-}
-
-function Results({
-  handlePaginationClick,
-  lastExerciseId,
-}: {
-  handlePaginationClick: (
-    exerciseId: string | null,
-    type: 'prev' | 'next',
-  ) => void
-  lastExerciseId: string | null
-}) {
-  return (
-    <div className="flex flex-col h-full pt-4">
-      <div className="flex flex-col gap-2 mt-8 mb-6">
-        <p className="text-sm text-muted-foreground">
-          More in the tank or enough for today?
-        </p>
-
-        <div className="grid grid-cols-2 gap-2 mt-2 mb-6 w-full">
-          <AddExerciseModal handlePaginationClick={handlePaginationClick} />
-          <AiSuggestion />
-        </div>
-        <Summary
-          open={true}
-          onContinue={() => handlePaginationClick(lastExerciseId, 'prev')}
-          continueButtonText="Back"
-        />
-      </div>
-    </div>
   )
 }
 

@@ -3,6 +3,7 @@
 import {
   CalendarIcon,
   ClockIcon,
+  DumbbellIcon,
   RulerIcon,
   SunIcon,
   WeightIcon,
@@ -17,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useUserPreferences } from '@/context/user-preferences-context'
+import { GQLTrainingView } from '@/generated/graphql-client'
 import { WeekStartDay } from '@/lib/date-utils'
 
 export function PreferencesSection() {
@@ -27,6 +29,7 @@ export function PreferencesSection() {
     setHeightUnit,
     setTheme,
     setTimeFormat,
+    setTrainingView,
   } = useUserPreferences()
 
   return (
@@ -151,6 +154,38 @@ export function PreferencesSection() {
         </Select>
         <p className="text-xs text-muted-foreground">
           Choose your preferred time format for displaying times
+        </p>
+      </div>
+
+      {/* Training View */}
+      <div className="space-y-3">
+        <div className="flex items-center space-x-2">
+          <div className="w-2 h-2 bg-purple-500 rounded-full" />
+          <DumbbellIcon className="size-4 text-purple-500" />
+          <Label htmlFor="training-view" className="text-sm font-medium">
+            Training View
+          </Label>
+        </div>
+        <Select
+          value={preferences.trainingView}
+          onValueChange={setTrainingView}
+        >
+          <SelectTrigger className="rounded-lg border-muted-foreground/20">
+            <SelectValue placeholder="Select training view" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={GQLTrainingView.Simple}>
+              Simple (Quick Completion)
+            </SelectItem>
+            <SelectItem value={GQLTrainingView.Advanced}>
+              Advanced (Detailed Logging)
+            </SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-xs text-muted-foreground">
+          Simple: Mark exercises as complete without detailed logging.
+          <br />
+          Advanced: Full workout tracking with sets, reps, and weights.
         </p>
       </div>
     </div>

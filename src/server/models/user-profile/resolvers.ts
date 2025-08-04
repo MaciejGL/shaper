@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client'
+
 import {
   GQLMutationResolvers,
   GQLQueryResolvers,
@@ -45,7 +47,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     }
 
     // Build data object with only provided fields
-    const updateData: any = {
+    const updateData: Prisma.UserProfileUpdateInput = {
       user: {
         update: {
           email: emailToUpdate,
@@ -80,6 +82,8 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     if (rest.heightUnit !== undefined) updateData.heightUnit = rest.heightUnit
     if (rest.theme !== undefined) updateData.theme = rest.theme
     if (rest.timeFormat !== undefined) updateData.timeFormat = rest.timeFormat
+    if (rest.trainingView !== undefined)
+      updateData.trainingView = rest.trainingView
 
     // Notification preferences
     if (rest.notificationPreferences?.workoutReminders !== undefined) {
