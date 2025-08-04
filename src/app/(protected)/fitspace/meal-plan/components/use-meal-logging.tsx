@@ -3,6 +3,7 @@ import { useQueryState } from 'nuqs'
 import { useMemo } from 'react'
 import { toast } from 'sonner'
 
+import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLAddCustomFoodToMealMutation,
   GQLGetDefaultMealPlanQuery,
@@ -34,6 +35,7 @@ interface FoodQuantity {
 }
 
 export function useMealLogging() {
+  const { preferences } = useUserPreferences()
   const queryClient = useQueryClient()
   const [date] = useQueryState('date') // Get current date from URL
 
@@ -45,9 +47,9 @@ export function useMealLogging() {
 
   const dateParam = useMemo(() => {
     return date
-      ? toISOString(getStartOfWeekUTC(date))
-      : toISOString(getStartOfWeekUTC(new Date()))
-  }, [date])
+      ? toISOString(getStartOfWeekUTC(date, preferences.weekStartsOn))
+      : toISOString(getStartOfWeekUTC(new Date(), preferences.weekStartsOn))
+  }, [date, preferences.weekStartsOn])
   const defaultMealPlanKey = useMemo(
     () => useGetDefaultMealPlanQuery.getKey({ date: dateParam }),
     [dateParam],

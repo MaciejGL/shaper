@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { useQueryState } from 'nuqs'
 import { useEffect, useMemo } from 'react'
 
+import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   useGetActiveMealPlanQuery,
   useGetDefaultMealPlanQuery,
@@ -15,6 +16,7 @@ import { MealView } from './components/meal-view'
 import { Navigation } from './components/navigation'
 
 export default function MealPlanPage() {
+  const { preferences } = useUserPreferences()
   const now = useMemo(() => format(new Date(), 'yyyy-MM-dd'), [])
   const [date, setDate] = useQueryState('date')
   useEffect(() => {
@@ -24,8 +26,8 @@ export default function MealPlanPage() {
   }, [date, now, setDate])
 
   const dateParam = date
-    ? toISOString(getStartOfWeekUTC(date))
-    : toISOString(getStartOfWeekUTC(new Date()))
+    ? toISOString(getStartOfWeekUTC(date, preferences.weekStartsOn))
+    : toISOString(getStartOfWeekUTC(new Date(), preferences.weekStartsOn))
 
   // Always fetch both plans - let UI decide which to show
   const { data: activePlanData, isLoading: isLoadingActive } =

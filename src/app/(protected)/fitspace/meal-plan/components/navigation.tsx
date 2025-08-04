@@ -8,7 +8,8 @@ import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { MealDayPickerDrawer } from '@/components/meal-day-picker-drawer'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { getDayOfWeek, getWeekDays, isDayMatch } from '@/lib/date-utils'
+import { useUserPreferences } from '@/context/user-preferences-context'
+import { getDayOfWeek, getWeekDays, isMealPlanDayMatch } from '@/lib/date-utils'
 import {
   formatUTCDate,
   getStartOfWeekUTC,
@@ -67,7 +68,7 @@ function getCombinedDailyTotals(
   // Add meals from active plan if available
   if (activePlan) {
     const activePlanDay = activePlan.weeks.at(0)?.days.find((planDay) => {
-      return isDayMatch(date, planDay.dayOfWeek)
+      return isMealPlanDayMatch(date, planDay.dayOfWeek)
     })
     if (activePlanDay?.meals) {
       combinedMeals = [...combinedMeals, ...activePlanDay.meals]
@@ -77,7 +78,7 @@ function getCombinedDailyTotals(
   // Add meals from default plan if available
   if (defaultPlan) {
     const defaultPlanDay = defaultPlan.weeks.at(0)?.days.find((planDay) => {
-      return isDayMatch(date, planDay.dayOfWeek)
+      return isMealPlanDayMatch(date, planDay.dayOfWeek)
     })
     if (defaultPlanDay?.meals) {
       combinedMeals = [...combinedMeals, ...defaultPlanDay.meals]
@@ -131,7 +132,7 @@ function Day({ day }: { day: string }) {
   const planDay = useMemo(() => {
     if (!currentPlan) return null
     return currentPlan.weeks.at(0)?.days.find((planDay) => {
-      return isDayMatch(day, planDay.dayOfWeek)
+      return isMealPlanDayMatch(day, planDay.dayOfWeek)
     })
   }, [currentPlan, day])
 
@@ -182,12 +183,13 @@ function Day({ day }: { day: string }) {
 }
 
 function DaySelector() {
+  const { preferences } = useUserPreferences()
   const [date] = useQueryState('date')
 
   const days = useMemo(() => {
     if (!date) return []
-    return getWeekDays(date)
-  }, [date])
+    return getWeekDays(date, preferences.weekStartsOn)
+  }, [date, preferences.weekStartsOn])
 
   return (
     <div className="flex gap-[4px] w-full justify-between mt-2">
@@ -199,13 +201,14 @@ function DaySelector() {
 }
 
 function WeekSelector() {
+  const { preferences } = useUserPreferences()
   const [date, setDate] = useQueryState('date')
 
   const selectedWeek = useMemo(() => {
-    if (!date) return getStartOfWeekUTC(new Date())
-    // Always return the Monday of the week for the selected date in UTC
-    return getStartOfWeekUTC(date)
-  }, [date])
+    if (!date) return getStartOfWeekUTC(new Date(), preferences.weekStartsOn)
+    // Return the week start for the selected date in UTC based on user preference
+    return getStartOfWeekUTC(date, preferences.weekStartsOn)
+  }, [date, preferences.weekStartsOn])
 
   const handleWeekChange = (newWeekStart: Date) => {
     // newWeekStart is already the Monday of the selected week from WeekPicker

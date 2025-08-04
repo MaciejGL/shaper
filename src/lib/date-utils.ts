@@ -220,6 +220,19 @@ export function isThisWeek(
 }
 
 /**
+ * Check if a date matches a meal plan dayOfWeek (which uses template format: 0=Monday)
+ * This is different from isDayMatch which uses user preference format
+ */
+export function isMealPlanDayMatch(
+  selectedDateString: string,
+  templateDayOfWeek: number, // 0=Monday, 1=Tuesday, ..., 6=Sunday (template format)
+): boolean {
+  // Always use Monday-first (template format) for meal plan day matching
+  const selectedDayOfWeek = getDayOfWeek(selectedDateString, 1)
+  return selectedDayOfWeek === templateDayOfWeek
+}
+
+/**
  * Calculates the correct scheduled date for a training day based on user's week start preference
  * Used when activating training plans to set the correct scheduledAt dates
  */

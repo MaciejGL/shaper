@@ -322,11 +322,14 @@ export async function getActiveMealPlan(
     throw new Error('User not found')
   }
 
+  // Get user's week start preference from context (avoid DB call)
+  const weekStartsOn = (user.user.profile?.weekStartsOn ?? 1) as 0 | 1
+
   const weekStart = startOfWeek(new Date(args.date ?? ''), {
-    weekStartsOn: 1,
+    weekStartsOn,
   })
   const weekEnd = endOfWeek(new Date(args.date ?? ''), {
-    weekStartsOn: 1,
+    weekStartsOn,
   })
 
   // Get active assigned plan OR completed plans within the requested date range
@@ -951,11 +954,14 @@ async function createDefaultMealPlan(
   userId: string,
   dateFilter?: string,
 ) {
+  // Get user's week start preference from context (avoid DB call)
+  const weekStartsOn = (context.user?.user.profile?.weekStartsOn ?? 1) as 0 | 1
+
   const weekStart = startOfWeek(new Date(dateFilter ?? ''), {
-    weekStartsOn: 1,
+    weekStartsOn,
   })
   const weekEnd = endOfWeek(new Date(dateFilter ?? ''), {
-    weekStartsOn: 1,
+    weekStartsOn,
   })
 
   const defaultMealPlan = await prisma.mealPlan.create({
@@ -1022,11 +1028,14 @@ export async function getOrCreateDefaultMealPlan(
     throw new Error('User not found')
   }
 
+  // Get user's week start preference from context (avoid DB call)
+  const weekStartsOn = (user.user.profile?.weekStartsOn ?? 1) as 0 | 1
+
   const weekStart = startOfWeek(new Date(dateFilter ?? ''), {
-    weekStartsOn: 1,
+    weekStartsOn,
   })
   const weekEnd = endOfWeek(new Date(dateFilter ?? ''), {
-    weekStartsOn: 1,
+    weekStartsOn,
   })
 
   try {

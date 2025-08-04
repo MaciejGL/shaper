@@ -7,7 +7,7 @@ import {
   GQLGetActiveMealPlanQuery,
   GQLGetDefaultMealPlanQuery,
 } from '@/generated/graphql-client'
-import { isDayMatch } from '@/lib/date-utils'
+import { isMealPlanDayMatch } from '@/lib/date-utils'
 import { compareWeeksUTC } from '@/lib/utc-date-utils'
 
 // Type definitions for the meal plan data
@@ -93,7 +93,8 @@ export function MealPlanProvider({
   const activeDay = useMemo(() => {
     if (!activeWeek || !date) return null
     return (
-      activeWeek.days.find((day) => isDayMatch(date, day.dayOfWeek)) || null
+      activeWeek.days.find((day) => isMealPlanDayMatch(date, day.dayOfWeek)) ||
+      null
     )
   }, [activeWeek, date])
 

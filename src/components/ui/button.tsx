@@ -104,9 +104,11 @@ function Button({
       {iconEnd && <span>{iconEnd}</span>}
       {loading && (
         <Loader2Icon
+          data-loading={loading}
           className={cn(
-            'size-[70%] animate-spin absolute z-10 inset-1/2 -translate-x-1/2 -translate-y-1/2 text-primary',
-            variant === 'default' && 'text-primary',
+            'size-[70%] animate-spin absolute z-10 inset-1/2 -translate-x-1/2 -translate-y-1/2',
+            variant === 'default' &&
+              'data-[loading=true]:text-white dark:data-[loading=true]:text-primary',
           )}
         />
       )}

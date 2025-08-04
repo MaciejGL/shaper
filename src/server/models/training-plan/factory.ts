@@ -1244,12 +1244,8 @@ export async function activatePlan(
     throw new Error('User not found')
   }
 
-  // Fetch user's week start preference
-  const userProfile = await prisma.userProfile.findUnique({
-    where: { userId: user.user.id },
-    select: { weekStartsOn: true },
-  })
-  const weekStartsOn = (userProfile?.weekStartsOn ?? 1) as 0 | 1
+  // Get user's week start preference from context (avoid DB call)
+  const weekStartsOn = (user.user.profile?.weekStartsOn ?? 1) as 0 | 1
 
   const fullPlan = await getFullPlanById(planId)
 
