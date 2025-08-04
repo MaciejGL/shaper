@@ -41,8 +41,8 @@ export function PreferencesSection() {
           value={preferences.weightUnit}
           onValueChange={setWeightUnit}
           options={[
-            { value: 'kg', label: 'Kilograms', description: 'kg' },
-            { value: 'lbs', label: 'Pounds', description: 'lbs' },
+            { value: 'kg', label: 'Kilograms' },
+            { value: 'lbs', label: 'Pounds' },
           ]}
           description="Choose your preferred unit for displaying weights throughout the entire app"
         />
@@ -60,8 +60,8 @@ export function PreferencesSection() {
           value={preferences.heightUnit}
           onValueChange={setHeightUnit}
           options={[
-            { value: 'cm', label: 'Centimeters', description: 'cm' },
-            { value: 'ft', label: 'Feet & Inches', description: 'ft/in' },
+            { value: 'cm', label: 'Centimeters' },
+            { value: 'ft', label: 'Feet & Inches' },
           ]}
           description="Choose your preferred unit for displaying heights throughout the entire app"
         />
@@ -121,7 +121,7 @@ export function PreferencesSection() {
           value={preferences.timeFormat}
           onValueChange={setTimeFormat}
           options={[
-            { value: '12h', label: '12 Hour', description: '(AM/PM)' },
+            { value: '12h', label: '12 Hour' },
             { value: '24h', label: '24 Hour' },
           ]}
           description="Choose your preferred time format for displaying times"

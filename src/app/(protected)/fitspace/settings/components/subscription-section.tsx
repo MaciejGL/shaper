@@ -9,7 +9,7 @@ export function SubscriptionSection() {
   return (
     <div className="space-y-8">
       {/* Current Plan */}
-      <div className="flex items-center justify-between p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-600/50 rounded-lg">
+      <div className="flex items-center justify-between shadow-xs p-6 bg-zinc-300 dark:bg-gradient-to-r dark:from-gray-700/50 dark:to-gray-600/50 rounded-lg">
         <div className="space-y-1">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             Current Plan
@@ -88,7 +88,7 @@ export function SubscriptionSection() {
       </div>
 
       {/* Billing Information */}
-      <div className="p-6 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+      <div className="p-6 bg-zinc-300 dark:bg-gray-800/50 rounded-lg">
         <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
           Billing Information
         </h4>

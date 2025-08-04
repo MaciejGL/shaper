@@ -69,7 +69,8 @@ export function RadioButtons<T extends string>({
             key={option.value}
             htmlFor={option.value}
             className={cn(
-              'flex items-center gap-2 px-4 py-3 rounded-md bg-card-on-card cursor-pointer transition-colors hover:bg-card-on-card/80',
+              'flex items-center gap-2 px-4 py-3 rounded-md cursor-pointer transition-colors',
+              'bg-card-on-card dark:hover:bg-card-on-card/80',
               value === option.value && 'bg-primary/10',
               itemClassName,
             )}
@@ -82,7 +83,7 @@ export function RadioButtons<T extends string>({
             <div className="flex-1">
               <span className="text-sm font-medium">{option.label}</span>
               {option.description && (
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground">
                   {option.description}
                 </p>
               )}

@@ -27,6 +27,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <UserPreferencesProvider>
             <ThemeProvider
               attribute="class"
+              defaultTheme="system"
               enableSystem
               disableTransitionOnChange
             >

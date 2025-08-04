@@ -1,6 +1,6 @@
 'use client'
 
-import { Bell, CreditCard, Shield, Sliders } from 'lucide-react'
+import { Bell, CreditCard, Sliders } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UserWithSession } from '@/types/UserWithSession'
@@ -78,26 +78,8 @@ export function SettingsContent({ user }: SettingsContentProps) {
       </Card>
 
       {/* Account Management */}
-      <Card className="border-0 shadow-xl bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 backdrop-blur-sm">
-        <CardHeader className="pb-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-xl text-red-600 dark:text-red-400">
-                Account Management
-              </CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Manage your account data and privacy
-              </p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <AccountSection user={user} />
-        </CardContent>
-      </Card>
+
+      <AccountSection user={user} />
     </div>
   )
 }

@@ -1,12 +1,12 @@
 'use client'
 
-import { useTheme } from 'next-themes'
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react'
 
@@ -58,6 +58,7 @@ interface UserPreferencesContextType {
   setTimeFormat: (timeFormat: TimeFormat) => void
   setTrainingView: (trainingView: TrainingView) => void
   setNotifications: (notifications: Partial<NotificationPreferences>) => void
+  registerThemeSetter: (setTheme: (theme: string) => void) => void
   isLoading: boolean
 }
 
@@ -108,8 +109,8 @@ export function UserPreferencesProvider({
   const { data: profileData, isLoading: profileLoading } = useProfileQuery()
   const { mutateAsync: updateProfile } = useUpdateProfileMutation()
 
-  // Sync with next-themes
-  const { setTheme: setNextTheme } = useTheme()
+  // Store theme setter function from ThemeProvider child
+  const themeSetterRef = useRef<((theme: string) => void) | null>(null)
 
   const [preferences, setPreferences] = useState<UserPreferences>({
     ...DEFAULT_PREFERENCES,
@@ -160,10 +161,20 @@ export function UserPreferencesProvider({
 
       setPreferences(dbPreferences)
 
-      // Sync theme with next-themes
-      setNextTheme(theme)
+      // Sync theme with next-themes if available
+      if (themeSetterRef.current) {
+        themeSetterRef.current(theme)
+      }
     }
-  }, [profileData, setNextTheme])
+  }, [profileData])
+
+  // Function to register theme setter from child ThemeProvider
+  const registerThemeSetter = useCallback(
+    (setTheme: (theme: string) => void) => {
+      themeSetterRef.current = setTheme
+    },
+    [],
+  )
 
   const updatePreferences = useCallback(
     async (updates: Partial<UserPreferences>) => {
@@ -249,9 +260,11 @@ export function UserPreferencesProvider({
       // Update database preferences
       updatePreferences({ theme })
       // Immediately sync with next-themes for instant visual update
-      setNextTheme(theme)
+      if (themeSetterRef.current) {
+        themeSetterRef.current(theme)
+      }
     },
-    [updatePreferences, setNextTheme],
+    [updatePreferences],
   )
 
   const setTimeFormat = useCallback(
@@ -288,6 +301,7 @@ export function UserPreferencesProvider({
       setTimeFormat,
       setTrainingView,
       setNotifications,
+      registerThemeSetter,
       isLoading: profileLoading,
     }),
     [
@@ -300,6 +314,7 @@ export function UserPreferencesProvider({
       setTimeFormat,
       setTrainingView,
       setNotifications,
+      registerThemeSetter,
       profileLoading,
     ],
   )

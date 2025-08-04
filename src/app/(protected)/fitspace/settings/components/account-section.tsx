@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   useDeleteUserAccountMutation,
   useResetUserLogsMutation,
@@ -85,67 +86,81 @@ export function AccountSection({}: AccountSectionProps) {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Reset Account Data */}
-      <div className="p-6 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20  rounded-lg">
-        <div className="flex items-start space-x-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center flex-shrink-0">
-            <RotateCcw className="w-6 h-6 text-white" />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <Card className="border-0 shadow-xl bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 backdrop-blur-sm">
+        {/* Reset Account Data */}
+        <CardHeader>
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+              <RotateCcw className="size-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Reset Account Data</CardTitle>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                This will permanently delete all your logs
+              </p>
+            </div>
           </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-              Reset Account Data
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              This will permanently delete all your:
-            </p>
-            <ul className="list-disc list-inside mb-4 text-sm text-gray-600 dark:text-gray-400">
-              <li className="font-medium">Workout logs</li>
-              <li className="font-medium">Exercise data</li>
-              <li className="font-medium">Progress tracking</li>
-              <li className="font-medium">Meal logs</li>
-            </ul>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-start space-x-4">
+            <div className="flex-1">
+              <ul className="list-disc list-inside mb-4 text-sm text-gray-600 dark:text-gray-400">
+                <li className="font-medium">Workout logs</li>
+                <li className="font-medium">Exercise data</li>
+                <li className="font-medium">Progress tracking</li>
+                <li className="font-medium">Meal logs</li>
+              </ul>
 
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Your assigned plans, favorite workouts, profile and preferences
-              will remain intact.
-            </p>
-            <Button
-              onClick={handleResetLogs}
-              disabled={isResetting}
-              loading={isResetting}
-            >
-              Reset Logs
-            </Button>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                Your assigned plans, favorite workouts, profile and preferences
+                will remain intact.
+              </p>
+              <Button
+                onClick={handleResetLogs}
+                disabled={isResetting}
+                loading={isResetting}
+                className="ml-auto"
+              >
+                Reset Logs
+              </Button>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
+      <Card className="border-0 shadow-xl bg-gradient-to-br from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 backdrop-blur-sm">
+        <CardHeader>
+          <div className="flex items-center space-x-3">
+            <div className="size-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Trash2 className="size-5 text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-xl">Delete Account</CardTitle>
+            </div>
+          </div>
+        </CardHeader>
 
-      {/* Delete Account */}
-      <div className="p-6 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 rounded-lg">
-        <div className="flex items-start space-x-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
-            <Trash2 className="w-6 h-6 text-white" />
+        {/* Delete Account */}
+        <CardContent className="pt-0">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            This will permanently delete your account and all associated data.
+            This action cannot be undone.
+          </p>
+          <div className="flex items-start space-x-4">
+            <div className="flex-1">
+              <Button
+                variant="destructive"
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+                loading={isDeleting}
+                className="ml-auto"
+              >
+                Delete Account
+              </Button>
+            </div>
           </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">
-              Delete Account
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              This will permanently delete your account and all associated data.
-              This action cannot be undone.
-            </p>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteAccount}
-              disabled={isDeleting}
-              loading={isDeleting}
-            >
-              Delete Account
-            </Button>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
