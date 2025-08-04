@@ -172,6 +172,10 @@ export default class UserProfile implements GQLUserProfile {
     }
   }
 
+  get weekStartsOn() {
+    return this.data.weekStartsOn
+  }
+
   get notificationPreferences(): GQLNotificationPreferences {
     return {
       workoutReminders: this.data.workoutReminders ?? true,

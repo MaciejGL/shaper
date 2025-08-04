@@ -135,7 +135,7 @@ export function UserPreferencesProvider({
         profile.timeFormat === 'h12' ? '12h' : '24h'
 
       const dbPreferences: UserPreferences = {
-        weekStartsOn: (profile.weekStartsOn ||
+        weekStartsOn: (profile.weekStartsOn ??
           DEFAULT_WEEK_START) as WeekStartDay,
         weightUnit,
         heightUnit,

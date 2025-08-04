@@ -1,6 +1,7 @@
 import { formatDate } from 'date-fns'
 
 import { GQLWorkoutType } from '@/generated/graphql-client'
+import { WeekStartDay } from '@/lib/date-utils'
 
 export interface Exercise {
   id: string
@@ -67,15 +68,22 @@ export function getDayName(
   dayOfWeek: number,
   options: {
     short?: boolean
+    weekStartsOn?: WeekStartDay // Kept for backwards compatibility but not used
   } = {},
 ): string {
-  // Create a date for Monday (1) and add days to get to target day
-  const date = new Date()
-  const currentDay = date.getDay() // 0-6 (Sunday-Saturday)
+  const { short = false } = options
 
-  date.setDate(date.getDate() - currentDay + 1) // Set to Monday
-  date.setDate(date.getDate() + dayOfWeek) // Add days to get to target day
-  return formatDate(date, options.short ? 'EEE' : 'EEEE')
+  // System uses Monday-based numbering: 0=Monday, 1=Tuesday, ..., 6=Sunday
+  // Convert to JavaScript's getDay() format: 0=Sunday, 1=Monday, ..., 6=Saturday
+  const jsDay = dayOfWeek === 6 ? 0 : dayOfWeek + 1
+
+  // Create a date and set it to the target day of week
+  const date = new Date()
+  const currentDay = date.getDay()
+  const diff = jsDay - currentDay
+  date.setDate(date.getDate() + diff)
+
+  return formatDate(date, short ? 'EEE' : 'EEEE')
 }
 
 export type WorkoutTypeGroup = {
