@@ -1,4 +1,4 @@
-import { formatDate, isThisISOWeek } from 'date-fns'
+import { formatDate } from 'date-fns'
 import { BadgeCheckIcon, ChevronLeft } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 import { useQueryState } from 'nuqs'
@@ -12,8 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import { useTrackWorkoutSession } from '@/hooks/use-track-workout-session'
+import { isThisWeek, sortDaysForDisplay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 import { WorkoutDay } from './workout-page.client'
@@ -103,11 +105,19 @@ function Day({ day }: { day: WorkoutDay }) {
 
 function DaySelector() {
   const { activeWeek } = useWorkout()
+  const { preferences } = useUserPreferences()
+
   if (!activeWeek) return null
-  const days = activeWeek.days
+
+  // Sort days according to user's week start preference
+  const sortedDays = sortDaysForDisplay(
+    activeWeek.days,
+    preferences.weekStartsOn,
+  )
+
   return (
     <div className="flex gap-[4px] w-full justify-between mt-2">
-      {days.map((day) => (
+      {sortedDays.map((day) => (
         <Day key={day.id} day={day} />
       ))}
     </div>
@@ -121,6 +131,7 @@ function WeekSelector() {
     activeDay,
     setActiveWeekId: setActiveWeekIdContext,
   } = useWorkout()
+  const { preferences } = useUserPreferences()
   const [activeWeekId, setActiveWeekId] = useQueryState('week')
   const [, setActiveDayId] = useQueryState('day')
   if (!plan || !activeWeek) return null
@@ -178,7 +189,8 @@ function WeekSelector() {
                   data-icon="mark"
                   className="text-green-500 size-3"
                 />
-              ) : week.scheduledAt && isThisISOWeek(week.scheduledAt) ? (
+              ) : week.scheduledAt &&
+                isThisWeek(week.scheduledAt, preferences.weekStartsOn) ? (
                 '(current)'
               ) : (
                 ''

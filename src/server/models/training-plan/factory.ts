@@ -26,9 +26,14 @@ import {
   GQLQueryGetTrainingPlanByIdArgs,
 } from '@/generated/graphql-server'
 import {
+  calculateTrainingDayScheduledDate,
+  translateDayOfWeekForUser,
+} from '@/lib/date-utils'
+import {
   CollaborationAction,
   checkTrainingPlanPermission,
 } from '@/lib/permissions/collaboration-permissions'
+import { parseUTCDate } from '@/lib/server-date-utils'
 import { getWeekStartUTC } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
@@ -1239,6 +1244,13 @@ export async function activatePlan(
     throw new Error('User not found')
   }
 
+  // Fetch user's week start preference
+  const userProfile = await prisma.userProfile.findUnique({
+    where: { userId: user.user.id },
+    select: { weekStartsOn: true },
+  })
+  const weekStartsOn = (userProfile?.weekStartsOn ?? 1) as 0 | 1
+
   const fullPlan = await getFullPlanById(planId)
 
   if (!fullPlan) {
@@ -1246,7 +1258,7 @@ export async function activatePlan(
   }
 
   if (resume) {
-    const resumeDate = new Date(startDate)
+    const resumeDate = parseUTCDate(startDate, 'UTC')
     const firstUnfinishedWeek = fullPlan.weeks.find((week) => !week.completedAt)
 
     if (!firstUnfinishedWeek) {
@@ -1291,21 +1303,28 @@ export async function activatePlan(
         }),
       ),
 
-      // Update ALL days scheduling using weekIndex (0-based) like regular activation
+      // Update ALL days scheduling and translate dayOfWeek for user preference
       ...fullPlan.weeks.flatMap((week, weekIndex) =>
-        week.days.map((day) =>
-          prisma.trainingDay.updateMany({
+        week.days.map((day) => {
+          const translatedDayOfWeek = translateDayOfWeekForUser(
+            day.dayOfWeek,
+            weekStartsOn,
+          )
+          return prisma.trainingDay.update({
             where: { id: day.id },
             data: {
+              dayOfWeek: translatedDayOfWeek, // Update to user-preference-relative dayOfWeek
               scheduledAt: week.completedAt
                 ? day.scheduledAt // Keep completed days at their original schedule
-                : addDays(
-                    getWeekStartUTC(addWeeks(planStartDate, weekIndex)),
-                    day.dayOfWeek,
-                  ), // Reschedule unfinished days with proper alignment
+                : calculateTrainingDayScheduledDate(
+                    planStartDate,
+                    weekIndex,
+                    translatedDayOfWeek, // Use translated dayOfWeek for scheduling
+                    weekStartsOn,
+                  ), // Reschedule unfinished days with proper alignment based on user preference
             },
-          }),
-        ),
+          })
+        }),
       ),
     ]
 
@@ -1340,8 +1359,27 @@ export async function activatePlan(
           throw new Error('Failed to duplicate plan')
         }
 
-        // Optimize: Calculate scheduling from original plan instead of fetching duplicated plan
-        const baseStartDate = new Date(startDate)
+        // Fetch the duplicated plan structure with all IDs for individual updates
+        const duplicatedPlan = await tx.trainingPlan.findUnique({
+          where: { id: duplicated.id },
+          include: {
+            weeks: {
+              include: {
+                days: {
+                  orderBy: { dayOfWeek: 'asc' },
+                },
+              },
+              orderBy: { weekNumber: 'asc' },
+            },
+          },
+        })
+
+        if (!duplicatedPlan) {
+          throw new Error('Failed to fetch duplicated plan')
+        }
+
+        // Use the week start date as calculated by the client (already aligned with user preference)
+        const baseStartDate = parseUTCDate(startDate, 'UTC')
 
         // Use bulk operations for much better performance
         await Promise.all([
@@ -1352,35 +1390,42 @@ export async function activatePlan(
           }),
 
           // Bulk update all weeks scheduling
-          ...fullPlan.weeks.map((week, weekIndex) =>
-            tx.trainingWeek.updateMany({
-              where: {
-                planId: duplicated.id,
-                weekNumber: week.weekNumber,
-              },
+          ...duplicatedPlan.weeks.map((week, weekIndex) =>
+            tx.trainingWeek.update({
+              where: { id: week.id },
               data: { scheduledAt: addWeeks(baseStartDate, weekIndex) },
             }),
           ),
 
-          // Bulk update all days scheduling
-          ...fullPlan.weeks.flatMap((week, weekIndex) =>
-            week.days.map((day) =>
-              tx.trainingDay.updateMany({
-                where: {
-                  week: {
-                    planId: duplicated.id,
-                    weekNumber: week.weekNumber,
-                  },
-                  dayOfWeek: day.dayOfWeek,
-                },
+          // Individual updates for each day to avoid collisions
+          ...duplicatedPlan.weeks.flatMap((week, weekIndex) =>
+            week.days.map((duplicatedDay, dayIndex) => {
+              // Get the corresponding original day
+              const originalDay = fullPlan.weeks[weekIndex]?.days[dayIndex]
+              if (!originalDay) {
+                throw new Error(
+                  `Original day not found for weekIndex ${weekIndex}, dayIndex ${dayIndex}`,
+                )
+              }
+
+              const translatedDayOfWeek = translateDayOfWeekForUser(
+                originalDay.dayOfWeek,
+                weekStartsOn,
+              )
+
+              return tx.trainingDay.update({
+                where: { id: duplicatedDay.id },
                 data: {
-                  scheduledAt: addDays(
-                    addWeeks(baseStartDate, weekIndex),
-                    day.dayOfWeek,
+                  dayOfWeek: translatedDayOfWeek,
+                  scheduledAt: calculateTrainingDayScheduledDate(
+                    baseStartDate,
+                    weekIndex,
+                    translatedDayOfWeek,
+                    weekStartsOn,
                   ),
                 },
-              }),
-            ),
+              })
+            }),
           ),
         ])
       },

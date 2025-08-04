@@ -3,6 +3,7 @@ import { Calendar, DumbbellIcon } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLFitspaceDashboardGetWorkoutQuery } from '@/generated/graphql-client'
 import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
 
@@ -15,7 +16,11 @@ export type TodaysSessionProps = {
 }
 
 export function TodaysSession({ plan }: TodaysSessionProps) {
-  const { currentDay } = getCurrentWeekAndDay(plan?.weeks)
+  const { preferences } = useUserPreferences()
+  const { currentDay } = getCurrentWeekAndDay(
+    plan?.weeks,
+    preferences.weekStartsOn,
+  )
   if (!plan) {
     return (
       <Card className="@container/todays-session" variant="secondary">

@@ -11,6 +11,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import { cn } from '@/lib/utils'
 
 interface WeekPickerProps {
@@ -26,27 +27,33 @@ export function WeekPicker({
   className,
   placeholder = 'Select week',
 }: WeekPickerProps) {
+  const { preferences } = useUserPreferences()
   const [isOpen, setIsOpen] = useState(false)
 
   const handleDateSelect = (date: Date | undefined) => {
     if (date) {
-      // Get the start of the week (Monday)
-      const weekStart = startOfWeek(date, { weekStartsOn: 1 })
+      // Get the start of the week based on user preference
+      const weekStart = startOfWeek(date, {
+        weekStartsOn: preferences.weekStartsOn,
+      })
       onChange(weekStart)
       setIsOpen(false)
     }
   }
 
   const formatWeekRange = (date: Date) => {
-    const weekStart = startOfWeek(date, { weekStartsOn: 1 })
+    const weekStart = startOfWeek(date, {
+      weekStartsOn: preferences.weekStartsOn,
+    })
     const weekEnd = addWeeks(weekStart, 1)
-    weekEnd.setDate(weekEnd.getDate() - 1) // Get Sunday
+    weekEnd.setDate(weekEnd.getDate() - 1) // Get last day of week
 
     return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`
   }
 
   const isCurrentWeek =
-    value && isSameWeek(value, new Date(), { weekStartsOn: 1 })
+    value &&
+    isSameWeek(value, new Date(), { weekStartsOn: preferences.weekStartsOn })
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen} modal>
@@ -78,8 +85,7 @@ export function WeekPicker({
         <Calendar
           mode="single"
           showWeekNumber
-          ISOWeek
-          weekStartsOn={1}
+          weekStartsOn={preferences.weekStartsOn}
           selected={value}
           onSelect={handleDateSelect}
           initialFocus

@@ -13,6 +13,7 @@ import {
   PopoverPortal,
   PopoverTrigger,
 } from '@/components/ui/popover'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import { cn } from '@/lib/utils'
 
 type DatePickerProps = {
@@ -32,6 +33,7 @@ export function DatePicker({
   dateFormat = 'd. MMM yyyy',
   buttonProps,
 }: DatePickerProps) {
+  const { preferences } = useUserPreferences()
   const [open, setOpen] = React.useState(false)
   const { className: buttonClassName, ...rest } = buttonProps || {}
 
@@ -63,6 +65,7 @@ export function DatePicker({
               mode="single"
               selected={date}
               captionLayout="dropdown"
+              weekStartsOn={preferences.weekStartsOn}
               onSelect={(date) => {
                 setDate(date)
                 setOpen(false)

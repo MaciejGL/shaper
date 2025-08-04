@@ -15,8 +15,10 @@ import { useRef } from 'react'
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { StatsItem } from '@/components/stats-item'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLFitspaceDashboardGetWorkoutQuery } from '@/generated/graphql-client'
 import { useScrollToItem } from '@/hooks/use-scroll-to-item'
+import { sortDaysForDisplay } from '@/lib/date-utils'
 import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
 import { cn } from '@/lib/utils'
 
@@ -27,18 +29,30 @@ export type DashboardStatsProps = {
 }
 
 export function DashboardStats({ plan }: DashboardStatsProps) {
-  const { currentWeek, currentDay } = getCurrentWeekAndDay(plan?.weeks)
+  const { preferences } = useUserPreferences()
+  const { currentWeek, currentDay } = getCurrentWeekAndDay(
+    plan?.weeks,
+    preferences.weekStartsOn,
+  )
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  const currentDayIndex = currentDay?.dayOfWeek ?? 0
+  // Sort days based on user preference
+  const sortedDays = currentWeek
+    ? sortDaysForDisplay(currentWeek.days, preferences.weekStartsOn)
+    : []
+
+  // Find the current day index in the sorted array for scroll positioning
+  const currentDayIndex = currentDay
+    ? sortedDays.findIndex((day) => day.id === currentDay.id)
+    : 0
 
   useScrollToItem({
     containerRef: scrollContainerRef,
     currentIndex: currentDayIndex,
-    itemCount: currentWeek?.days.length ?? 0,
+    itemCount: sortedDays.length,
     itemWidth: 80 + 8, // min-w-[5rem] (80px) + gap-2 (8px)
     itemSelector: '.day-card',
-    dependencies: [plan?.id, currentDay?.dayOfWeek],
+    dependencies: [plan?.id, currentDay?.id, preferences.weekStartsOn],
     scrollDelay: 100,
   })
 
@@ -89,7 +103,7 @@ export function DashboardStats({ plan }: DashboardStatsProps) {
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               <div className="flex gap-2">
-                {currentWeek.days.map((day, index) => {
+                {sortedDays.map((day, index) => {
                   return (
                     <Link
                       href={

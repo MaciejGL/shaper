@@ -20,6 +20,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuPortal,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
@@ -173,39 +174,61 @@ function PlanActionDropdown({
           disabled={loading}
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {!isCompleted && (
-          <>
-            {isActive ? (
-              <DropdownMenuItem onClick={() => onAction('pause', plan)}>
-                <PauseIcon className="size-4 mr-2" />
-                Pause Plan
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem onClick={() => onAction('activate', plan)}>
-                <SparklesIcon className="size-4 mr-2" />
-                {isPaused ? 'Resume Plan' : 'Activate Plan'}
-              </DropdownMenuItem>
-            )}
-            {isActive && (
-              <DropdownMenuItem onClick={() => onAction('close', plan)}>
-                <CheckCircle className="size-4 mr-2" />
-                Complete Plan
-              </DropdownMenuItem>
-            )}
-          </>
-        )}
-        <Link href={`/fitspace/training-preview/${plan?.id}`}>
-          <DropdownMenuItem>
-            <LayoutDashboard className="size-4 mr-2" />
-            Plan Overview
+      <DropdownMenuPortal>
+        <DropdownMenuContent align="end">
+          {!isCompleted && (
+            <>
+              {isActive ? (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onAction('pause', plan)
+                  }}
+                >
+                  <PauseIcon className="size-4 mr-2" />
+                  Pause Plan
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onAction('activate', plan)
+                  }}
+                >
+                  <SparklesIcon className="size-4 mr-2" />
+                  {isPaused ? 'Resume Plan' : 'Activate Plan'}
+                </DropdownMenuItem>
+              )}
+              {isActive && (
+                <DropdownMenuItem
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onAction('close', plan)
+                  }}
+                >
+                  <CheckCircle className="size-4 mr-2" />
+                  Complete Plan
+                </DropdownMenuItem>
+              )}
+            </>
+          )}
+          <Link href={`/fitspace/training-preview/${plan?.id}`}>
+            <DropdownMenuItem>
+              <LayoutDashboard className="size-4 mr-2" />
+              Plan Overview
+            </DropdownMenuItem>
+          </Link>
+          <DropdownMenuItem
+            onClick={(e) => {
+              e.stopPropagation()
+              onAction('delete', plan)
+            }}
+          >
+            <Trash className="size-4 mr-2" />
+            Delete Plan
           </DropdownMenuItem>
-        </Link>
-        <DropdownMenuItem onClick={() => onAction('delete', plan)}>
-          <Trash className="size-4 mr-2" />
-          Delete Plan
-        </DropdownMenuItem>
-      </DropdownMenuContent>
+        </DropdownMenuContent>
+      </DropdownMenuPortal>
     </DropdownMenu>
   )
 }

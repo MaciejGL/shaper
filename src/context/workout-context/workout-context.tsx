@@ -11,6 +11,7 @@ import {
 } from 'react'
 
 import { WorkoutExercise } from '@/app/(protected)/fitspace/workout/[trainingId]/components/workout-page.client'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLFitspaceGetWorkoutQuery } from '@/generated/graphql-client'
 import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
 
@@ -41,17 +42,28 @@ export function WorkoutProvider({
   children: ReactNode
   plan?: NonNullable<GQLFitspaceGetWorkoutQuery['getWorkout']>['plan']
 }) {
+  const { preferences } = useUserPreferences()
   const [activeWeekId, setActiveWeekId] = useQueryState('week')
   const [activeDayId, setActiveDayId] = useQueryState('day')
 
   useEffect(() => {
     if (!activeWeekId || !activeDayId) {
-      const { currentWeek, currentDay } = getCurrentWeekAndDay(plan?.weeks)
+      const { currentWeek, currentDay } = getCurrentWeekAndDay(
+        plan?.weeks,
+        preferences.weekStartsOn,
+      )
 
       setActiveWeekId(currentWeek?.id ?? '')
       setActiveDayId(currentDay?.id ?? '')
     }
-  }, [plan, activeWeekId, activeDayId, setActiveWeekId, setActiveDayId])
+  }, [
+    plan,
+    activeWeekId,
+    activeDayId,
+    setActiveWeekId,
+    setActiveDayId,
+    preferences.weekStartsOn,
+  ])
 
   const handleSetActiveWeek = useCallback(
     (weekId: string) => {

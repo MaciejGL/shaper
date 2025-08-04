@@ -14,7 +14,9 @@ import {
 } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLGetTrainingPlanPreviewByIdQuery } from '@/generated/graphql-client'
+import { sortDaysForDisplay } from '@/lib/date-utils'
 import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
 
 type WorkoutsProps = {
@@ -23,6 +25,7 @@ type WorkoutsProps = {
 }
 
 export function Workouts({ plan, isDemo }: WorkoutsProps) {
+  const { preferences } = useUserPreferences()
   const [selectedWeek, setSelectedWeek] = useState<number>(0)
   const [selectedDay, setSelectedDay] = useState<string>(
     plan.weeks[selectedWeek].days.find((day) => !day.isRestDay)?.id ?? '',
@@ -51,14 +54,20 @@ export function Workouts({ plan, isDemo }: WorkoutsProps) {
       </div>
       <Tabs value={selectedDay} onValueChange={setSelectedDay}>
         <TabsList className="w-full">
-          {plan.weeks[selectedWeek].days.map((day) => (
+          {sortDaysForDisplay(
+            plan.weeks[selectedWeek].days,
+            preferences.weekStartsOn,
+          ).map((day) => (
             <TabsTrigger key={day.id} value={day.id} disabled={day.isRestDay}>
               {getDayName(day.dayOfWeek, { short: true })}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        {plan.weeks[selectedWeek].days.map((day) => (
+        {sortDaysForDisplay(
+          plan.weeks[selectedWeek].days,
+          preferences.weekStartsOn,
+        ).map((day) => (
           <TabsContent
             key={day.id}
             value={day.id}
