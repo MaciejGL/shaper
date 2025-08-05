@@ -2,27 +2,100 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { RotateCcw, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import {
   useDeleteUserAccountMutation,
   useResetUserLogsMutation,
 } from '@/generated/graphql-client'
-import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
-import { UserWithSession } from '@/types/UserWithSession'
 
-interface AccountSectionProps {
-  user: UserWithSession
+interface AccountSectionProps {}
+
+// Custom validation component for destructive actions
+function DestructiveActionValidator({
+  expectedText,
+  onValidationChange,
+  actionType,
+}: {
+  expectedText: string
+  onValidationChange: (isValid: boolean) => void
+  actionType: string
+}) {
+  const [inputValue, setInputValue] = useState('')
+  const isValid = inputValue.toLowerCase() === expectedText.toLowerCase()
+
+  // Notify parent of validation state changes
+  useEffect(() => {
+    onValidationChange(isValid)
+  }, [isValid, onValidationChange])
+
+  // Initialize confirm button as disabled when modal opens
+  useEffect(() => {
+    const initializeConfirmButton = () => {
+      const confirmButton = document.querySelector(
+        '[data-confirm-button]',
+      ) as HTMLButtonElement
+      if (confirmButton) {
+        confirmButton.disabled = true
+        confirmButton.style.opacity = '0.5'
+        confirmButton.style.cursor = 'not-allowed'
+      }
+    }
+
+    // Use a small delay to ensure the modal is fully rendered
+    const timeoutId = setTimeout(initializeConfirmButton, 100)
+
+    return () => clearTimeout(timeoutId)
+  }, [])
+
+  // Update confirm button state when validation changes
+  useEffect(() => {
+    const updateConfirmButton = () => {
+      const confirmButton = document.querySelector(
+        '[data-confirm-button]',
+      ) as HTMLButtonElement
+      if (confirmButton) {
+        confirmButton.disabled = !isValid
+        confirmButton.style.opacity = isValid ? '1' : '0.5'
+        confirmButton.style.cursor = isValid ? 'pointer' : 'not-allowed'
+      }
+    }
+
+    // Use a small delay to ensure the modal is fully rendered
+    const timeoutId = setTimeout(updateConfirmButton, 100)
+
+    return () => clearTimeout(timeoutId)
+  }, [isValid])
+
+  return (
+    <div className="space-y-3">
+      <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+        <p className="text-sm text-destructive font-medium">
+          This action cannot be undone. To confirm, type "{expectedText}" below:
+        </p>
+      </div>
+      <Input
+        id={`confirm-${actionType}`}
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
+        placeholder={`Type "${expectedText}" to confirm`}
+        className={isValid ? 'border-green-500' : ''}
+        autoComplete="off"
+      />
+    </div>
+  )
 }
 
 export function AccountSection({}: AccountSectionProps) {
   const [isResetting, setIsResetting] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
 
-  const { openModal } = useConfirmationModal()
+  const { openModal } = useConfirmationModalContext()
   const queryClient = useQueryClient()
 
   const { mutateAsync: resetLogs } = useResetUserLogsMutation({
@@ -50,13 +123,29 @@ export function AccountSection({}: AccountSectionProps) {
   })
 
   const handleResetLogs = () => {
+    let isValidationPassed = false
+
     openModal({
       title: 'Reset Account Logs',
       description:
-        'This will permanently delete all your workout logs, exercise data, progress tracking, and meal logs. Your profile and preferences will remain intact. This action cannot be undone.',
+        'This will permanently delete all your workout logs, exercise data, progress tracking, and meal logs. Your profile and preferences will remain intact.',
       confirmText: 'Reset Logs',
       variant: 'destructive',
+      children: (
+        <DestructiveActionValidator
+          expectedText="reset"
+          actionType="reset"
+          onValidationChange={(isValid) => {
+            isValidationPassed = isValid
+          }}
+        />
+      ),
       onConfirm: async () => {
+        if (!isValidationPassed) {
+          toast.error('Please type "reset" to confirm this action')
+          return
+        }
+
         setIsResetting(true)
         try {
           await resetLogs({})
@@ -68,13 +157,29 @@ export function AccountSection({}: AccountSectionProps) {
   }
 
   const handleDeleteAccount = () => {
+    let isValidationPassed = false
+
     openModal({
       title: 'Delete Account',
       description:
-        'This will permanently delete your account and all associated data including workouts, meals, progress, and preferences. This action cannot be undone.',
+        'This will permanently delete your account and all associated data including workouts, meals, progress, and preferences.',
       confirmText: 'Delete Account',
       variant: 'destructive',
+      children: (
+        <DestructiveActionValidator
+          expectedText="delete"
+          actionType="delete"
+          onValidationChange={(isValid) => {
+            isValidationPassed = isValid
+          }}
+        />
+      ),
       onConfirm: async () => {
+        if (!isValidationPassed) {
+          toast.error('Please type "delete" to confirm this action')
+          return
+        }
+
         setIsDeleting(true)
         try {
           await deleteAccount({})

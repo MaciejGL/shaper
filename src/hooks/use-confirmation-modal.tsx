@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState } from 'react'
+import React, { useCallback, useRef, useState } from 'react'
 
 export interface UseConfirmationModalProps {
   title: string
@@ -10,6 +10,7 @@ export interface UseConfirmationModalProps {
   variant?: 'default' | 'destructive'
   onConfirm: () => void | Promise<void>
   onCancel?: () => void
+  children?: React.ReactNode
 }
 
 export function useConfirmationModal() {

@@ -3,18 +3,15 @@
 import { Bell, CreditCard, Sliders } from 'lucide-react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { UserWithSession } from '@/types/UserWithSession'
 
 import { AccountSection } from './account-section'
 import { NotificationSection } from './notification-section'
 import { PreferencesSection } from './preferences-section'
 import { SubscriptionSection } from './subscription-section'
 
-interface SettingsContentProps {
-  user: UserWithSession
-}
+interface SettingsContentProps {}
 
-export function SettingsContent({ user }: SettingsContentProps) {
+export function SettingsContent({}: SettingsContentProps) {
   return (
     <div className="space-y-8 pb-24">
       {/* Preferences Section */}
@@ -79,7 +76,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
 
       {/* Account Management */}
 
-      <AccountSection user={user} />
+      <AccountSection />
     </div>
   )
 }

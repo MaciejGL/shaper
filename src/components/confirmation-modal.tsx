@@ -104,6 +104,7 @@ export function ConfirmationModal({
             onClick={handleConfirm}
             disabled={isLoading}
             variant={variant}
+            data-confirm-button
           >
             {isLoading ? 'Loading...' : confirmText}
           </Button>
@@ -176,7 +177,9 @@ export function ConfirmationModalProvider({
           onConfirm={handleConfirm}
           onCancel={handleCancel}
           isLoading={isLoading}
-        />
+        >
+          {modalProps.children}
+        </ConfirmationModal>
       )}
     </ConfirmationModalContext.Provider>
   )

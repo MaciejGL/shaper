@@ -24,7 +24,7 @@ export default async function SettingsPage() {
           Customize your experience and manage your account
         </p>
       </div>
-      <SettingsContent user={user} />
+      <SettingsContent />
     </div>
   )
 }
