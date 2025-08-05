@@ -162,7 +162,7 @@ function WeekSelector() {
         iconOnly={<ChevronLeft />}
         disabled={!hasPrevWeek}
         size="icon-sm"
-        variant="secondary"
+        variant="tertiary"
         onClick={() => handleWeekChange('prev')}
       />
       <Select
@@ -172,7 +172,7 @@ function WeekSelector() {
       >
         <SelectTrigger
           size="sm"
-          variant="ghost"
+          variant="tertiary"
           className="[&_svg]:data-[icon=mark]:size-3.5"
         >
           <SelectValue
@@ -202,7 +202,7 @@ function WeekSelector() {
       <Button
         iconOnly={<ChevronRight />}
         size="icon-sm"
-        variant="secondary"
+        variant="tertiary"
         onClick={() => handleWeekChange('next')}
         disabled={!hasNextWeek}
       />

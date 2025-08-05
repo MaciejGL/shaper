@@ -1,8 +1,9 @@
-import { forwardRef } from 'react'
+import { forwardRef, useEffect, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
+import { formatDecimalInput, formatNumberSmart } from '@/lib/format-tempo'
 
 interface WeightInputProps {
   id?: string
@@ -34,24 +35,55 @@ export const WeightInput = forwardRef<HTMLInputElement, WeightInputProps>(
     const { toDisplayWeight, toStorageWeight, getWeightLabel, weightUnit } =
       useWeightConversion()
 
-    const displayWeight = toDisplayWeight(weightInKg)
-    const inputValue = displayWeight?.toFixed(decimals) || ''
+    // Local state to preserve user's typing experience
+    const [inputValue, setInputValue] = useState('')
+    const [isFocused, setIsFocused] = useState(false)
+
+    // Update local input value when weightInKg prop changes (but only when not focused)
+    useEffect(() => {
+      if (!isFocused) {
+        const displayWeight = toDisplayWeight(weightInKg)
+        const formattedValue =
+          displayWeight !== null
+            ? formatNumberSmart(displayWeight, decimals)
+            : ''
+        setInputValue(formattedValue)
+      }
+    }, [weightInKg, toDisplayWeight, decimals, isFocused])
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
+      // Use formatDecimalInput to allow decimal points but clean other characters
+      const formattedValue = formatDecimalInput(e)
+      setInputValue(formattedValue)
 
-      if (value === '' || value === null) {
+      if (formattedValue === '' || formattedValue === null) {
         onWeightChange?.(null)
         return
       }
 
-      const numericValue = parseFloat(value)
+      const numericValue = parseFloat(formattedValue)
       if (isNaN(numericValue)) {
-        return // Invalid input, don't update
+        return // Invalid input, don't update parent
       }
 
       const weightInKg = toStorageWeight(numericValue)
       onWeightChange?.(weightInKg)
+    }
+
+    const handleFocus = () => {
+      setIsFocused(true)
+    }
+
+    const handleBlur = () => {
+      setIsFocused(false)
+      // Format the value when focus is lost
+      const numericValue = parseFloat(inputValue)
+      if (!isNaN(numericValue)) {
+        const displayWeight = toDisplayWeight(toStorageWeight(numericValue))
+        if (displayWeight !== null) {
+          setInputValue(formatNumberSmart(displayWeight, decimals))
+        }
+      }
     }
 
     const finalLabel = label || getWeightLabel()
@@ -71,6 +103,8 @@ export const WeightInput = forwardRef<HTMLInputElement, WeightInputProps>(
             id={inputId}
             value={inputValue}
             onChange={handleInputChange}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             disabled={disabled}
             className={className}
             placeholder={placeholder}

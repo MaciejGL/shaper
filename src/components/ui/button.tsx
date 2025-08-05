@@ -7,38 +7,58 @@ import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
   cn(
-    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none  [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 [&_svg]:size-4 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive relative flex cursor-pointer',
+    'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200 disabled:pointer-events-none [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 [&_svg]:size-4 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive relative flex cursor-pointer',
+    // Improved loading state with text dimming instead of transparency
+    'data-[loading=true]:pointer-events-none data-[loading=true]:opacity-80',
   ),
   {
     variants: {
       variant: {
         default: cn(
           'bg-primary text-primary-foreground hover:bg-primary/90',
-          'data-[loading=true]:bg-primary/80 data-[loading=true]:text-primary/70 disabled:bg-primary/50 data-[loading=true]:dark:bg-primary/80 data-[loading=true]:dark:text-primary-foreground/70 disabled:dark:bg-primary/50',
+          // Loading state with dimmed text and maintained background
+          'data-[loading=true]:bg-primary/90 data-[loading=true]:text-primary-foreground/30 disabled:bg-primary/50 disabled:text-primary-foreground/50',
         ),
         destructive: cn(
           'hover:bg-accent text-destructive/75 hover:text-destructive bg-destructive/10',
-          'data-[loading=true]:bg-destructive/80 disabled:bg-destructive/50',
+          // Loading state for destructive variant
+          'data-[loading=true]:bg-destructive/15 data-[loading=true]:text-destructive/30 disabled:bg-destructive/5 disabled:text-destructive/30',
         ),
         outline: cn(
           'border bg-background hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
-          'data-[loading=true]:bg-input/30 data-[loading=true]:text-input/70 disabled:bg-input/50 data-[loading=true]:dark:bg-input/30 data-[loading=true]:dark:text-input/70 disabled:dark:bg-input/50',
+          // Loading state for outline variant
+          'data-[loading=true]:bg-accent/30 data-[loading=true]:text-accent-foreground/30 disabled:bg-input/20 disabled:text-foreground/30',
         ),
         secondary: cn(
           'bg-secondary hover:bg-secondary/80 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80',
-          'data-[loading=true]:bg-secondary/80 data-[loading=true]:text-secondary-foreground/50 disabled:bg-secondary/50 data-[loading=true]:dark:bg-secondary/80 data-[loading=true]:dark:text-secondary-foreground/50 disabled:dark:bg-secondary/50',
+          // Loading state for secondary variant
+          'data-[loading=true]:bg-secondary/90 data-[loading=true]:text-secondary-foreground/30 disabled:bg-secondary/50 disabled:text-secondary-foreground/40',
+        ),
+        tertiary: cn(
+          'bg-primary/7 hover:bg-primary/15 dark:bg-secondary dark:text-secondary-foreground dark:hover:bg-secondary/80',
+          // Loading state for tertiary variant
+          'data-[loading=true]:bg-primary/12 data-[loading=true]:text-foreground/10 disabled:bg-primary/5 disabled:text-foreground/30',
         ),
         gradient: cn(
           'bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0',
-          'data-[loading=true]:bg-gradient-to-r data-[loading=true]:from-amber-500 data-[loading=true]:to-orange-500 data-[loading=true]:hover:from-amber-600 data-[loading=true]:hover:to-orange-600 data-[loading=true]:text-white data-[loading=true]:border-0',
+          // Loading state for gradient variant
+          'data-[loading=true]:from-amber-500/90 data-[loading=true]:to-orange-500/90 data-[loading=true]:text-white/40 disabled:from-amber-500/50 disabled:to-orange-500/50 disabled:text-white/40',
         ),
         ghost: cn(
-          'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 data-[loading=true]:bg-accent/50 disabled:bg-accent/50',
-          'data-[loading=true]:bg-accent/50 data-[loading=true]:text-accent/70 disabled:bg-accent/50 data-[loading=true]:dark:bg-accent/50 data-[loading=true]:dark:text-accent/70 disabled:dark:bg-accent/50',
+          'hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50',
+          // Loading state for ghost variant
+          'data-[loading=true]:bg-accent/30 data-[loading=true]:text-accent-foreground/30 disabled:bg-accent/20 disabled:text-accent-foreground/30',
         ),
-        link: 'text-primary underline-offset-4 hover:underline disabled:text-primary/50',
-        variantless:
-          'bg-transparent text-primary hover:bg-transparent shadow-none disabled:text-primary/50',
+        link: cn(
+          'text-primary underline-offset-4 hover:underline',
+          // Loading state for link variant
+          'data-[loading=true]:text-primary/30 disabled:text-primary/40',
+        ),
+        variantless: cn(
+          'bg-transparent text-primary hover:bg-transparent shadow-none',
+          // Loading state for variantless
+          'data-[loading=true]:text-primary/30 disabled:text-primary/40',
+        ),
       },
       size: {
         variantless: 'h-auto p-0',
@@ -84,6 +104,28 @@ function Button({
   const Comp = asChild ? Slot : 'button'
   const defaultSize = iconOnly ? size || 'icon-md' : size || 'md'
 
+  // Function to get loader color based on variant
+  const getLoaderColorClass = () => {
+    switch (variant) {
+      case 'default':
+      case 'gradient':
+        return 'text-primary-foreground'
+      case 'destructive':
+        return 'text-destructive'
+      case 'outline':
+      case 'ghost':
+      case 'tertiary':
+        return 'text-accent-foreground dark:text-secondary-foreground'
+      case 'secondary':
+        return 'text-secondary-foreground'
+      case 'link':
+      case 'variantless':
+        return 'text-primary'
+      default:
+        return 'text-primary-foreground'
+    }
+  }
+
   return (
     <Comp
       data-slot="button"
@@ -106,9 +148,8 @@ function Button({
         <Loader2Icon
           data-loading={loading}
           className={cn(
-            'size-[70%] animate-spin absolute z-10 inset-1/2 -translate-x-1/2 -translate-y-1/2',
-            variant === 'default' &&
-              'data-[loading=true]:text-white dark:data-[loading=true]:text-primary',
+            'size-[70%] animate-spin absolute z-10 inset-1/2 -translate-x-1/2 -translate-y-1/2 transition-all duration-200',
+            getLoaderColorClass(),
           )}
         />
       )}

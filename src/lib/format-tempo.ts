@@ -50,6 +50,40 @@ export const formatNumberInput = (
 }
 
 /**
+ * Format number input allowing decimal points
+ * Useful for weight, measurements, etc.
+ */
+export const formatDecimalInput = (
+  e: React.ChangeEvent<HTMLInputElement>,
+): string => {
+  const rawValue = e.target.value
+  // Allow digits and one decimal point
+  return rawValue.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1')
+}
+
+/**
+ * Smart number formatting that only shows decimals when needed
+ * @param value - The number to format
+ * @param maxDecimals - Maximum decimal places to show
+ * @returns Formatted number string without unnecessary decimals
+ */
+export const formatNumberSmart = (
+  value: number,
+  maxDecimals: number = 1,
+): string => {
+  // Round to the specified decimal places
+  const rounded = Number(value.toFixed(maxDecimals))
+
+  // If the rounded number is the same as the integer version, don't show decimals
+  if (rounded === Math.floor(rounded)) {
+    return rounded.toString()
+  }
+
+  // Otherwise, show the number with decimals, removing trailing zeros
+  return rounded.toString()
+}
+
+/**
  * Handles keydown event to prevent non-numeric input
  * @param e - React keyboard event for input element
  * @param maxLength - Optional maximum length of the input

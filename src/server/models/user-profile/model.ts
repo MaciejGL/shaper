@@ -158,7 +158,14 @@ export default class UserProfile implements GQLUserProfile {
   }
 
   get timeFormat(): GQLTimeFormat {
-    return (this.data.timeFormat as GQLTimeFormat) || GQLTimeFormat.H24
+    switch (this.data.timeFormat) {
+      case GQLTimeFormat.H24:
+        return GQLTimeFormat.H24
+      case GQLTimeFormat.H12:
+        return GQLTimeFormat.H12
+      default:
+        return GQLTimeFormat.H24
+    }
   }
 
   get trainingView() {

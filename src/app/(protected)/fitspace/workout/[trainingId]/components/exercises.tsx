@@ -14,7 +14,7 @@ import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 import { Exercise } from './exercise'
 import { ExercisesPagination } from './exercises-pagaination'
 import { RestDay } from './rest-day'
-import { SimpleExerciseList } from './simple-exercise-list'
+import { SimpleExerciseList } from './simple-exercise-list/simple-exercise-list'
 import { Summary } from './summary'
 
 export function Exercises() {
@@ -98,11 +98,12 @@ export function Exercises() {
   return (
     <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
       {!activeDay.isRestDay && (
-        <div className="flex flex-col py-2 space-y-2 w-full">
+        <div className="flex flex-col py-4 space-y-2 w-full">
           <div className="flex justify-between items-end gap-2">
             <p className="text-md">
               {formatWorkoutType(activeDay.workoutType)}
             </p>
+
             <ExercisesCompleted
               completedExercises={completedExercises}
               totalExercises={exercises.length}
@@ -129,9 +130,7 @@ export function Exercises() {
           continueButtonText={isSimpleView ? 'Back to Workout' : 'Back'}
         />
       ) : isSimpleView ? (
-        <SimpleExerciseList
-          onShowSummary={() => setActiveExerciseId('summary')}
-        />
+        <SimpleExerciseList />
       ) : selectedExercise ? (
         <div className="relative">
           <SwipeableWrapper
@@ -179,7 +178,7 @@ function ExercisesCompleted({
   totalExercises: number
 }) {
   return (
-    <Badge variant="outline" size="sm" className="self-end">
+    <Badge variant="secondary" size="sm" className="self-end">
       {completedExercises}/{totalExercises} completed{' '}
       {completedExercises === totalExercises ? (
         <BadgeCheckIcon className="text-green-500" />

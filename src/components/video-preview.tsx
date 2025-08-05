@@ -8,14 +8,16 @@ import { Dialog, DialogContent, DialogTrigger } from './ui/dialog'
 export function VideoPreview({
   url,
   variant = 'ghost',
+  size = 'icon-md',
 }: {
   url: string
   variant?: ButtonProps['variant']
+  size?: ButtonProps['size']
 }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant={variant} size="icon-md" iconOnly={<VideoIcon />} />
+        <Button variant={variant} size={size} iconOnly={<VideoIcon />} />
       </DialogTrigger>
       <DialogContent
         dialogTitle="Video Preview"

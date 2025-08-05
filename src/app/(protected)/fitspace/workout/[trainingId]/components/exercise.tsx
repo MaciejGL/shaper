@@ -1,4 +1,3 @@
-import { DropdownMenuPortal } from '@radix-ui/react-dropdown-menu'
 import { useQueryClient } from '@tanstack/react-query'
 import { debounce } from 'lodash'
 import {
@@ -6,6 +5,7 @@ import {
   ArrowRight,
   BadgeCheckIcon,
   Check,
+  CheckIcon,
   ChevronDown,
   FlameIcon,
   GaugeIcon,
@@ -13,27 +13,20 @@ import {
   ListChecksIcon,
   MoreHorizontalIcon,
   NotebookPenIcon,
-  NotebookTextIcon,
   PlusIcon,
   Replace,
-  TimerIcon,
   TrashIcon,
+  XIcon,
 } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { toast } from 'sonner'
 
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
+import { Card } from '@/components/ui/card'
+import { CountdownTimer } from '@/components/ui/countdown-timer'
 import {
   Drawer,
   DrawerTrigger,
@@ -47,8 +40,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
   Tooltip,
   TooltipContent,
@@ -62,18 +53,18 @@ import {
   useFitspaceAddSetMutation,
   useFitspaceGetWorkoutQuery,
   useFitspaceMarkExerciseAsCompletedMutation,
+  useFitspaceMarkSetAsCompletedMutation,
   useFitspaceRemoveExerciseFromWorkoutMutation,
   useFitspaceRemoveSetMutation,
-  useFitspaceSwapExerciseMutation,
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
-import { convertSecondsToTimeString } from '@/lib/convert-seconds-time-to-string'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
 
 import { ExerciseNotes, useExerciseNotesCount } from './exercise-notes'
 import { ExerciseWeightInput } from './exercise-weight-input'
+import { createOptimisticSetUpdate } from './simple-exercise-list/optimistic-updates'
 import { WorkoutExercise } from './workout-page.client'
 
 interface ExerciseProps {
@@ -154,17 +145,23 @@ export function Exercise({
       <ExerciseHeader
         exercise={exercise}
         exercises={exercises}
-        isCompleted={isExerciseCompleted}
-        handleMarkAsCompleted={handleMarkAsCompleted}
         onPaginationClick={onPaginationClick}
-        handleRemoveExercise={handleRemoveExercise}
-        isRemoving={isRemoving}
       />
-      <ExerciseSets
-        exercise={exercise}
-        previousLogs={previousLogs}
-        isExerciseCompleted={isExerciseCompleted}
-      />
+
+      <Card className="px-2 mt-4">
+        <ExerciseMetadata
+          exercise={exercise}
+          handleMarkAsCompleted={handleMarkAsCompleted}
+          isCompleted={isExerciseCompleted}
+          handleRemoveExercise={handleRemoveExercise}
+          isRemoving={isRemoving}
+        />
+        <ExerciseSets
+          exercise={exercise}
+          previousLogs={previousLogs}
+          isExerciseCompleted={isExerciseCompleted}
+        />
+      </Card>
     </div>
   )
 }
@@ -172,58 +169,17 @@ export function Exercise({
 function ExerciseHeader({
   exercise,
   exercises,
-  isCompleted,
-  handleMarkAsCompleted,
   onPaginationClick,
-  handleRemoveExercise,
-  isRemoving,
 }: {
   exercise: WorkoutExercise
   exercises: WorkoutExercise[]
-  isCompleted: boolean
-  handleMarkAsCompleted: (checked: boolean) => void
   onPaginationClick: (exerciseId: string, type: 'prev' | 'next') => void
-  handleRemoveExercise: () => void
-  isRemoving: boolean
 }) {
-  const invalidateQuery = useInvalidateQuery()
-  const { trainingId } = useParams<{ trainingId: string }>()
-  const { mutateAsync: swapExercise, isPending: isSwapping } =
-    useFitspaceSwapExerciseMutation({
-      onSuccess: () => {
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
-        })
-        toast.success('Exercise swapped')
-      },
-    })
-
-  const [isSwapExerciseOpen, setIsSwapExerciseOpen] = useState(false)
-  const [selectedSubstituteId, setSelectedSubstituteId] = useState<
-    string | null
-  >(null)
   const [activeExerciseId, setActiveExerciseId] = useQueryState('exercise')
-  const [isInstructionsOpen, setIsInstructionsOpen] = useState(false)
-
-  const restDuration = exercise.restSeconds
-    ? convertSecondsToTimeString(exercise.restSeconds)
-    : null
 
   const isSuperset =
     exercise.type === GQLExerciseType.Superset_1A ||
     exercise.type === GQLExerciseType.Superset_1B
-
-  const handleSwapExercise = async () => {
-    if (!selectedSubstituteId) {
-      return
-    }
-    await swapExercise({
-      exerciseId: exercise.id,
-      substituteId: selectedSubstituteId,
-    })
-    setIsSwapExerciseOpen(false)
-    setSelectedSubstituteId(null)
-  }
 
   return (
     <div>
@@ -233,42 +189,6 @@ function ExerciseHeader({
           activeExerciseId={activeExerciseId}
           setActiveExerciseId={setActiveExerciseId}
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="secondary" iconOnly={<MoreHorizontalIcon />} />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem
-              onClick={() => handleMarkAsCompleted(!isCompleted)}
-            >
-              <Check
-                className={cn(
-                  'transition-all duration-200',
-                  isCompleted ? 'text-green-500' : 'text-muted-foreground',
-                )}
-              />
-              {isCompleted ? 'Mark as incomplete' : 'Mark as completed'}
-            </DropdownMenuItem>
-            {exercise.instructions && (
-              <DropdownMenuItem onClick={() => setIsInstructionsOpen(true)}>
-                <NotebookTextIcon /> Instructions
-              </DropdownMenuItem>
-            )}
-            {exercise.substitutes.length > 0 && (
-              <DropdownMenuItem onClick={() => setIsSwapExerciseOpen(true)}>
-                <Replace /> Swap exercise
-              </DropdownMenuItem>
-            )}
-            {exercise.isExtra && (
-              <DropdownMenuItem
-                onClick={handleRemoveExercise}
-                loading={isRemoving}
-              >
-                <TrashIcon /> Remove exercise
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
       {isSuperset && (
         <div className="mt-2">
@@ -277,141 +197,6 @@ function ExerciseHeader({
             exercises={exercises}
             onPaginationClick={onPaginationClick}
           />
-        </div>
-      )}
-      <div className="flex items-start justify-between gap-4 mt-4">
-        <div className="flex flex-wrap gap-2">
-          {isSuperset && (
-            <Badge variant="secondary" size="md">
-              <ArrowLeftRight />
-              Superset A/B
-            </Badge>
-          )}
-          {exercise.warmupSets && (
-            <Badge variant="secondary" size="md">
-              <FlameIcon />
-              {exercise.warmupSets} warmup{exercise.warmupSets > 1 ? 's' : ''}
-            </Badge>
-          )}
-          {exercise.restSeconds && (
-            <Badge variant="secondary" size="md">
-              <TimerIcon />
-              {restDuration} rest
-            </Badge>
-          )}
-          {exercise.tempo && (
-            <Badge variant="secondary" size="md">
-              <GaugeIcon />
-              {exercise.tempo}
-            </Badge>
-          )}
-        </div>
-        <div className="flex gap-2">
-          <ExerciseNotebook exercise={exercise} />
-          {(exercise.substitutedBy?.videoUrl || exercise.videoUrl) && (
-            <VideoPreview
-              variant="secondary"
-              url={exercise.substitutedBy?.videoUrl || exercise.videoUrl || ''}
-            />
-          )}
-          <Button
-            variant="secondary"
-            onClick={() => handleMarkAsCompleted(!isCompleted)}
-            iconOnly={
-              <Check
-                className={cn(
-                  'transition-all duration-200',
-                  isCompleted ? 'text-green-500' : 'text-muted-foreground',
-                )}
-              />
-            }
-          />
-
-          <Dialog
-            open={isInstructionsOpen}
-            onOpenChange={setIsInstructionsOpen}
-          >
-            <DialogContent dialogTitle={exercise.name}>
-              <DialogHeader>
-                <DialogTitle>{exercise.name}</DialogTitle>
-              </DialogHeader>
-              <DialogDescription className="whitespace-pre-wrap">
-                {exercise.instructions}
-              </DialogDescription>
-            </DialogContent>
-          </Dialog>
-          {isSwapExerciseOpen && (
-            <Drawer
-              open={isSwapExerciseOpen}
-              onOpenChange={setIsSwapExerciseOpen}
-            >
-              <SimpleDrawerContent
-                title="Swap exercise"
-                footer={
-                  <Button
-                    variant="secondary"
-                    disabled={!selectedSubstituteId}
-                    loading={isSwapping}
-                    onClick={() => handleSwapExercise()}
-                  >
-                    Swap
-                  </Button>
-                }
-              >
-                <div className="flex flex-col gap-2">
-                  <RadioGroup
-                    value={selectedSubstituteId}
-                    onValueChange={(value) => {
-                      setSelectedSubstituteId(value)
-                    }}
-                  >
-                    <Label
-                      key={exercise.id}
-                      htmlFor={exercise.id}
-                      className={cn(
-                        'flex items-center gap-2 p-4 rounded-md bg-card-on-card',
-                        !exercise.substitutedBy && 'opacity-50 cursor-default',
-                      )}
-                    >
-                      <RadioGroupItem
-                        value={exercise.id}
-                        id={exercise.id}
-                        disabled={!exercise.substitutedBy}
-                      />
-                      {exercise.name} (original)
-                    </Label>
-                    {exercise.substitutes.map((substitute) => (
-                      <Label
-                        key={substitute.substitute.id}
-                        htmlFor={substitute.substitute.id}
-                        className={cn(
-                          'flex items-center gap-2 p-4 rounded-md bg-card-on-card',
-                          substitute.substitute.id ===
-                            exercise.substitutedBy?.baseId &&
-                            'opacity-50 cursor-default',
-                        )}
-                      >
-                        <RadioGroupItem
-                          value={substitute.substitute.id}
-                          id={substitute.substitute.id}
-                          disabled={
-                            substitute.substitute.id ===
-                            exercise.substitutedBy?.baseId
-                          }
-                        />
-                        {substitute.substitute.name}
-                      </Label>
-                    ))}
-                  </RadioGroup>
-                </div>
-              </SimpleDrawerContent>
-            </Drawer>
-          )}
-        </div>
-      </div>
-      {exercise.additionalInstructions && (
-        <div className="text-sm text-muted-foreground mt-2">
-          {exercise.additionalInstructions}
         </div>
       )}
     </div>
@@ -507,7 +292,7 @@ export function ExerciseSelector({
 }
 
 const sharedLayoutStyles = cn(
-  'w-full py-1 px-2.5 grid grid-cols-[auto_1fr_1fr_1fr] gap-3 items-center',
+  'w-full py-1 px-2.5 grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-3 items-center',
 )
 
 function ExerciseSets({
@@ -595,12 +380,85 @@ function ExerciseSets({
     })
   }
 
+  const { mutateAsync: removeSet } = useFitspaceRemoveSetMutation({
+    onMutate: async (variables) => {
+      // Cancel outgoing queries to prevent race conditions
+      const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
+      await queryClient.cancelQueries({ queryKey })
+
+      // Get current data for rollback
+      const previousData =
+        queryClient.getQueryData<GQLFitspaceGetWorkoutQuery>(queryKey)
+
+      // Optimistically update cache to remove the set
+      queryClient.setQueryData(queryKey, (old: GQLFitspaceGetWorkoutQuery) => {
+        if (!old?.getWorkout?.plan) return old
+
+        const newWorkout = JSON.parse(
+          JSON.stringify(old),
+        ) as NonNullable<GQLFitspaceGetWorkoutQuery>
+        if (!newWorkout.getWorkout?.plan) return newWorkout
+
+        // Find and remove the set from the workout data
+        newWorkout.getWorkout.plan.weeks.forEach((week) => {
+          week.days.forEach((day) => {
+            day.exercises.forEach((exercise) => {
+              const setsToUpdate = exercise.substitutedBy?.sets || exercise.sets
+              const setIndex = setsToUpdate.findIndex(
+                (s) => s.id === variables.setId,
+              )
+              if (setIndex !== -1) {
+                setsToUpdate.splice(setIndex, 1)
+                // Reorder remaining sets
+                setsToUpdate.forEach((remainingSet, index) => {
+                  remainingSet.order = index + 1
+                })
+              }
+            })
+          })
+        })
+
+        return newWorkout
+      })
+
+      return { previousData }
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousData) {
+        const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
+        queryClient.setQueryData(queryKey, context.previousData)
+      }
+    },
+    onSuccess: () => {
+      invalidateQuery({
+        queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+      })
+    },
+  })
+
+  const removeExtraSet = async () => {
+    const exerciseSets = exercise.substitutedBy?.sets || exercise.sets
+    // Find the last extra set (highest order among extra sets)
+    const extraSets = exerciseSets.filter((set) => set.isExtra)
+    const lastExtraSet = extraSets.reduce(
+      (latest, current) => (current.order > latest.order ? current : latest),
+      extraSets[0],
+    )
+
+    if (lastExtraSet) {
+      await removeSet({
+        setId: lastExtraSet.id,
+      })
+    }
+  }
+
   const hasExtraSets = (exercise.substitutedBy?.sets || exercise.sets).some(
     (set) => set.isExtra,
   )
 
   return (
-    <div className="flex flex-col mt-4 py-4">
+    <div className="flex flex-col">
       <div className="flex items-center gap-1">
         <div
           className={cn(sharedLayoutStyles, 'text-xs text-muted-foreground')}
@@ -629,6 +487,7 @@ function ExerciseSets({
               </TooltipContent>
             </Tooltip>
           </div>
+          <div className="text-center min-w-[40px]"></div>
         </div>
 
         {hasExtraSets && <div className="w-8 shrink-0" />}
@@ -641,20 +500,38 @@ function ExerciseSets({
               set={set}
               previousLogs={previousLogs}
               isExerciseCompleted={isExerciseCompleted}
-              hasExtraSets={hasExtraSets}
             />
           )
         })}
-        <Button
-          variant="secondary"
-          size="sm"
-          className="w-max"
-          iconStart={<PlusIcon />}
-          loading={isAddingSet}
-          onClick={handleAddSet}
+
+        <div
+          className={cn(
+            'grid grid-cols-1 items-center gap-2',
+            hasExtraSets && 'grid-cols-2',
+          )}
         >
-          Add set
-        </Button>
+          {hasExtraSets && (
+            <Button
+              variant="secondary"
+              size="sm"
+              className="w-full"
+              iconStart={<XIcon />}
+              onClick={removeExtraSet}
+            >
+              Remove last set
+            </Button>
+          )}
+          <Button
+            variant="secondary"
+            size="sm"
+            className={cn('w-max', hasExtraSets && 'w-full')}
+            iconStart={<PlusIcon />}
+            loading={isAddingSet}
+            onClick={handleAddSet}
+          >
+            Add set
+          </Button>
+        </div>
       </div>
     </div>
   )
@@ -663,7 +540,6 @@ function ExerciseSets({
 function ExerciseSet({
   set,
   previousLogs,
-  hasExtraSets,
 }: {
   set: WorkoutExercise['sets'][number]
   previousLogs: (WorkoutExercise & {
@@ -671,11 +547,11 @@ function ExerciseSet({
     performedOnDayNumber: number
   })[]
   isExerciseCompleted: boolean
-  hasExtraSets: boolean
 }) {
   const { trainingId } = useParams<{ trainingId: string }>()
   const [reps, setReps] = useState('')
   const [weight, setWeight] = useState('')
+  const [isCompletingSet, setIsCompletingSet] = useState(false)
   const hasUserEdited = useRef(false)
   const { toDisplayWeight } = useWeightConversion()
   const invalidateQuery = useInvalidateQuery()
@@ -740,55 +616,52 @@ function ExerciseSet({
     },
   })
 
-  const { mutateAsync: removeSet, isPending: isRemovingSet } =
-    useFitspaceRemoveSetMutation({
-      onMutate: (variables) => {
-        // Update cache after successful removal
+  const { mutateAsync: markSetAsCompleted } =
+    useFitspaceMarkSetAsCompletedMutation({
+      onMutate: async ({ setId, completed }) => {
+        // Cancel outgoing queries to prevent race conditions
+        const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
+        await queryClient.cancelQueries({ queryKey })
+
+        // Get current data for rollback
+        const previousData =
+          queryClient.getQueryData<GQLFitspaceGetWorkoutQuery>(queryKey)
+
+        // Optimistically update the cache
         queryClient.setQueryData(
-          useFitspaceGetWorkoutQuery.getKey({ trainingId }),
-          (old: GQLFitspaceGetWorkoutQuery) => {
-            if (!old?.getWorkout?.plan) return old
-
-            const newWorkout = JSON.parse(
-              JSON.stringify(old),
-            ) as NonNullable<GQLFitspaceGetWorkoutQuery>
-            if (!newWorkout.getWorkout?.plan) return newWorkout
-
-            // Find and remove the set from the workout data
-            newWorkout.getWorkout.plan.weeks.forEach((week) => {
-              week.days.forEach((day) => {
-                day.exercises.forEach((exercise) => {
-                  const setsToUpdate =
-                    exercise.substitutedBy?.sets || exercise.sets
-                  const setIndex = setsToUpdate.findIndex(
-                    (s) => s.id === variables.setId,
-                  )
-                  if (setIndex !== -1) {
-                    setsToUpdate.splice(setIndex, 1)
-                    // Reorder remaining sets
-                    setsToUpdate.forEach((remainingSet, index) => {
-                      remainingSet.order = index + 1
-                    })
-                  }
-                })
-              })
-            })
-
-            return newWorkout
-          },
+          queryKey,
+          createOptimisticSetUpdate(setId, completed),
         )
+
+        return { previousData }
       },
-      onSettled: () => {
+      onError: (err, variables, context) => {
+        // Rollback on error
+        if (context?.previousData) {
+          const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
+          queryClient.setQueryData(queryKey, context.previousData)
+        }
+        setIsCompletingSet(false)
+      },
+      onSuccess: () => {
         invalidateQuery({
           queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
         })
+        setIsCompletingSet(false)
       },
     })
 
-  const handleRemoveSet = async () => {
-    await removeSet({
-      setId: set.id,
-    })
+  const handleToggleSetCompletion = async () => {
+    setIsCompletingSet(true)
+    try {
+      await markSetAsCompleted({
+        setId: set.id,
+        completed: !set.completedAt,
+      })
+    } catch (error) {
+      console.error('Failed to toggle set completion:', error)
+      setIsCompletingSet(false)
+    }
   }
 
   useEffect(() => {
@@ -842,7 +715,8 @@ function ExerciseSet({
   }
 
   const showLabel =
-    set.reps || set.minReps || set.maxReps || set.weight || set.rpe
+    !set.isExtra &&
+    (set.reps || set.minReps || set.maxReps || set.weight || set.rpe)
 
   const lastLog = previousLogs[previousLogs.length - 1]
   const thisSet = lastLog?.sets[set.order - 1]
@@ -864,8 +738,8 @@ function ExerciseSet({
               {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : ''}
             </div>
             <div className="" />
+            <div className="min-w-[40px]" />
           </div>
-          {hasExtraSets && <div className="w-8 shrink-0" />}
         </div>
       )}
 
@@ -874,7 +748,7 @@ function ExerciseSet({
           <div
             className={cn(
               sharedLayoutStyles,
-              'rounded-md bg-card  dark:bg-secondary text-primary border-l border-r border-b border-border dark:border-none',
+              'rounded-md bg-card dark:bg-secondary text-primary relative',
             )}
           >
             <div className="min-w-2.5">{set.order}.</div>
@@ -904,32 +778,27 @@ function ExerciseSet({
             <div className="text-sm text-muted-foreground text-center">
               {set.rpe}
             </div>
+            <div className="flex justify-center">
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                iconOnly={
+                  <CheckIcon
+                    className={cn(
+                      'size-4 transition-colors',
+                      set.completedAt
+                        ? 'text-green-500'
+                        : 'text-muted-foreground/40',
+                    )}
+                  />
+                }
+                loading={isCompletingSet}
+                onClick={handleToggleSetCompletion}
+                className="self-center"
+              />
+            </div>
           </div>
         </div>
-        {hasExtraSets && (
-          <div className="w-8 shrink-0 flex justify-center">
-            {set.isExtra && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon-sm"
-                    iconOnly={<MoreHorizontalIcon />}
-                    loading={isRemovingSet}
-                    className="self-center"
-                  />
-                </DropdownMenuTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={handleRemoveSet}>
-                      <TrashIcon /> Remove set
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenuPortal>
-              </DropdownMenu>
-            )}
-          </div>
-        )}
       </div>
     </AnimateChangeInHeight>
   )
@@ -1043,5 +912,139 @@ function ExerciseNotebook({ exercise }: { exercise: WorkoutExercise }) {
         </div>
       </SimpleDrawerContent>
     </Drawer>
+  )
+}
+
+function ExerciseMetadata({
+  exercise,
+  handleMarkAsCompleted,
+  isCompleted,
+  handleRemoveExercise,
+  isRemoving,
+}: {
+  exercise: WorkoutExercise
+  handleMarkAsCompleted: (checked: boolean) => void
+  isCompleted: boolean
+  handleRemoveExercise: () => void
+  isRemoving: boolean
+}) {
+  const { trainingId } = useParams<{ trainingId: string }>()
+  const invalidateQuery = useInvalidateQuery()
+
+  const { mutateAsync: markSetAsCompleted } =
+    useFitspaceMarkSetAsCompletedMutation({
+      onSuccess: () => {
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+        })
+      },
+    })
+
+  const handleToggleSet = async (setId: string, completed: boolean) => {
+    try {
+      await markSetAsCompleted({
+        setId,
+        completed,
+      })
+    } catch (error) {
+      console.error('Failed to toggle set:', error)
+    }
+  }
+
+  const isSuperset =
+    exercise.type === GQLExerciseType.Superset_1A ||
+    exercise.type === GQLExerciseType.Superset_1B
+
+  return (
+    <div>
+      <div className="flex flex-col gap-4">
+        <div className="flex gap-2">
+          {exercise.restSeconds && (
+            <CountdownTimer
+              variant="secondary"
+              restDuration={2}
+              onComplete={() => {
+                // Find the first uncompleted set and mark it as done
+                const firstUncompletedSet = (
+                  exercise.substitutedBy?.sets || exercise.sets
+                ).find((set) => !set.completedAt)
+                if (firstUncompletedSet) {
+                  handleToggleSet(firstUncompletedSet.id, true)
+                }
+              }}
+            />
+          )}
+          <div className="flex gap-2 ml-auto">
+            <ExerciseNotebook exercise={exercise} />
+            {(exercise.substitutedBy?.videoUrl || exercise.videoUrl) && (
+              <VideoPreview
+                variant="secondary"
+                url={
+                  exercise.substitutedBy?.videoUrl || exercise.videoUrl || ''
+                }
+              />
+            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" iconOnly={<MoreHorizontalIcon />} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={() => handleMarkAsCompleted(!isCompleted)}
+                >
+                  <Check
+                    className={cn(
+                      'transition-all duration-200',
+                      isCompleted ? 'text-green-500' : 'text-muted-foreground',
+                    )}
+                  />
+                  {isCompleted ? 'Mark as incomplete' : 'Mark as completed'}
+                </DropdownMenuItem>
+                {exercise.substitutes.length > 0 && (
+                  <DropdownMenuItem>
+                    <Replace /> Swap exercise
+                  </DropdownMenuItem>
+                )}
+                {exercise.isExtra && (
+                  <DropdownMenuItem
+                    onClick={handleRemoveExercise}
+                    loading={isRemoving}
+                  >
+                    <TrashIcon /> Remove exercise
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+      {exercise.additionalInstructions && (
+        <div className="text-sm text-muted-foreground mt-2">
+          {exercise.additionalInstructions}
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2 mt-4">
+        {isSuperset && (
+          <Badge variant="secondary" size="md">
+            <ArrowLeftRight />
+            Superset A/B
+          </Badge>
+        )}
+        {exercise.warmupSets && (
+          <Badge variant="secondary" size="md">
+            <FlameIcon />
+            {exercise.warmupSets} warmup{exercise.warmupSets > 1 ? 's' : ''}
+          </Badge>
+        )}
+
+        {exercise.tempo && (
+          <Badge variant="secondary" size="md">
+            <GaugeIcon />
+            {exercise.tempo}
+          </Badge>
+        )}
+      </div>
+    </div>
   )
 }

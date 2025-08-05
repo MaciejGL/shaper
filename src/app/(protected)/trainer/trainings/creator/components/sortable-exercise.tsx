@@ -679,6 +679,7 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               min="0"
               step="15"
               disabled={disabled}
+              value={exercise?.restSeconds ?? ''}
               onChange={(e) => {
                 const restSeconds =
                   e.target.value === '' ? undefined : Number(e.target.value)
