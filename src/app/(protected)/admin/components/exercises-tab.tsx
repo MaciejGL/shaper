@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import { ExerciseEditor } from '@/components/exercises/exercise-editor'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -23,8 +24,6 @@ import {
 } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
-
-import { ExerciseEditor } from './exercise-editor'
 
 interface ExerciseStats {
   totalExercises: number
@@ -413,7 +412,12 @@ export function ExercisesTab() {
       <Separator className="my-8" />
 
       {/* Exercise Editor */}
-      <ExerciseEditor onStatsUpdate={fetchStats} />
+      <ExerciseEditor
+        apiEndpoint="/api/admin/exercises/list"
+        updateEndpoint="/api/admin/exercises/update"
+        deleteEndpoint="/api/admin/exercises/update"
+        onStatsUpdate={fetchStats}
+      />
 
       {/* Difficulty & Equipment Breakdown */}
       {stats && (

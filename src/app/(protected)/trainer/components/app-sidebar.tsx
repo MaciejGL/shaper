@@ -17,7 +17,7 @@ import {
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { Divider } from '@/components/divider'
 import { Button } from '@/components/ui/button'
@@ -107,6 +107,26 @@ export function AppSidebar() {
   const { data: session } = useSession()
   const queryClient = useQueryClient()
   const router = useRouter()
+  const [isModerator, setIsModerator] = useState(false)
+
+  // Check if user is a moderator
+  useEffect(() => {
+    const checkModeratorStatus = async () => {
+      try {
+        const response = await fetch(
+          '/api/moderator/exercises/list?page=1&limit=1',
+        )
+        setIsModerator(response.ok)
+      } catch {
+        setIsModerator(false)
+      }
+    }
+
+    if (session?.user) {
+      checkModeratorStatus()
+    }
+  }, [session])
+
   const { data: clients, isPlaceholderData: isPlaceholderClients } =
     useGetClientsQuery(undefined, {
       placeholderData: placeholderClients,
@@ -246,6 +266,7 @@ export function AppSidebar() {
         icon: DumbbellIcon,
         disabled: TRAINER_LINKS.exercises.disabled,
       },
+
       // Collaboration item
       {
         title: TRAINER_LINKS.collaboration.label,
@@ -275,6 +296,17 @@ export function AppSidebar() {
       icon: UserRoundCogIcon,
       disabled: TRAINER_LINKS.profile.disabled,
     },
+    // Exercise Management item (for moderators only)
+    ...(isModerator
+      ? [
+          {
+            title: TRAINER_LINKS.exerciseManagement.label,
+            url: TRAINER_LINKS.exerciseManagement.href,
+            icon: DumbbellIcon,
+            disabled: TRAINER_LINKS.exerciseManagement.disabled,
+          },
+        ]
+      : []),
     isAdmin && {
       title: 'Admin',
       url: '/admin',
@@ -354,40 +386,42 @@ function SidebarItem({
           </Button>
         )}
       </SidebarMenuButton>
-      <SidebarMenuSub>
-        {item.subItems?.map((subItem, index) => (
-          <SidebarMenuSubItem key={subItem.title + index}>
-            <SidebarMenuSubButton asChild size="md">
-              {subItem.url ? (
-                <Link
-                  href={subItem.url}
-                  className={cn(
-                    'w-full',
-                    isLoading && 'masked-placeholder-text',
-                  )}
-                >
-                  <subItem.icon />
-                  <span className="truncate">{subItem.title}</span>
-                  {subItem.url === pathname && (
-                    <ChevronRight className="ml-auto h-4 w-4 opacity-60" />
-                  )}
-                </Link>
-              ) : (
-                <Button
-                  onClick={subItem.onClick}
-                  variant="variantless"
-                  className="inline-flex w-full text-left justify-start [&_svg]:size-4 pl-2"
-                  disabled={subItem.disabled}
-                  loading={subItem.loading}
-                  iconStart={<subItem.icon />}
-                >
-                  <span>{subItem.title}</span>
-                </Button>
-              )}
-            </SidebarMenuSubButton>
-          </SidebarMenuSubItem>
-        ))}
-      </SidebarMenuSub>
+      {item.subItems && item.subItems.length > 0 && (
+        <SidebarMenuSub>
+          {item.subItems.map((subItem, index) => (
+            <SidebarMenuSubItem key={subItem.title + index}>
+              <SidebarMenuSubButton asChild size="md">
+                {subItem.url ? (
+                  <Link
+                    href={subItem.url}
+                    className={cn(
+                      'w-full',
+                      isLoading && 'masked-placeholder-text',
+                    )}
+                  >
+                    <subItem.icon />
+                    <span className="truncate">{subItem.title}</span>
+                    {subItem.url === pathname && (
+                      <ChevronRight className="ml-auto h-4 w-4 opacity-60" />
+                    )}
+                  </Link>
+                ) : (
+                  <Button
+                    onClick={subItem.onClick}
+                    variant="variantless"
+                    className="inline-flex w-full text-left justify-start [&_svg]:size-4 pl-2"
+                    disabled={subItem.disabled}
+                    loading={subItem.loading}
+                    iconStart={<subItem.icon />}
+                  >
+                    <span>{subItem.title}</span>
+                  </Button>
+                )}
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
+          ))}
+        </SidebarMenuSub>
+      )}
     </SidebarMenuItem>
   )
 }

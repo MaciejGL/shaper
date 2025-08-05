@@ -1,15 +1,18 @@
 import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 
-import { isAdminUser } from '@/lib/admin-auth'
+import {
+  isModeratorUser,
+  moderatorAccessDeniedResponse,
+} from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
-    // Check admin access
-    const hasAdminAccess = await isAdminUser()
-    if (!hasAdminAccess) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Check moderator access
+    const hasModeratorAccess = await isModeratorUser()
+    if (!hasModeratorAccess) {
+      return moderatorAccessDeniedResponse()
     }
 
     const { searchParams } = request.nextUrl
@@ -113,23 +116,18 @@ export async function GET(request: NextRequest) {
     const totalPages = Math.ceil(totalItems / limit)
     const skip = (page - 1) * limit
 
-    // Fetch exercises
+    // Fetch exercises with selected fields only (moderator access)
     const exercises = await prisma.baseExercise.findMany({
       where,
       select: {
         id: true,
         name: true,
         description: true,
-        difficulty: true,
         equipment: true,
-        videoUrl: true,
         isPublic: true,
         isPremium: true,
         version: true,
-        dataSource: true,
-        additionalInstructions: true,
-        instructions: true,
-        tips: true,
+        videoUrl: true,
         images: {
           select: {
             id: true,
@@ -150,11 +148,7 @@ export async function GET(request: NextRequest) {
         createdAt: true,
         updatedAt: true,
       },
-      orderBy: [
-        { isPremium: 'desc' }, // Premium first
-        { version: 'desc' }, // V2 before V1
-        { name: 'asc' },
-      ],
+      orderBy: [{ isPremium: 'asc' }, { name: 'asc' }],
       skip,
       take: limit,
     })
@@ -165,12 +159,13 @@ export async function GET(request: NextRequest) {
         currentPage: page,
         totalPages,
         totalItems,
+        limit,
         hasNext: page < totalPages,
         hasPrev: page > 1,
       },
     })
   } catch (error) {
-    console.error('Failed to fetch exercises:', error)
+    console.error('Error fetching exercises for moderator:', error)
     return NextResponse.json(
       { error: 'Failed to fetch exercises' },
       { status: 500 },
