@@ -148,7 +148,7 @@ export function Exercise({
         onPaginationClick={onPaginationClick}
       />
 
-      <Card className="px-2 mt-4">
+      <Card className="px-2 mt-4 gap-4">
         <ExerciseMetadata
           exercise={exercise}
           handleMarkAsCompleted={handleMarkAsCompleted}
@@ -512,7 +512,7 @@ function ExerciseSets({
         >
           {hasExtraSets && (
             <Button
-              variant="secondary"
+              variant="tertiary"
               size="sm"
               className="w-full"
               iconStart={<XIcon />}
@@ -522,7 +522,7 @@ function ExerciseSets({
             </Button>
           )}
           <Button
-            variant="secondary"
+            variant="tertiary"
             size="sm"
             className={cn('w-max', hasExtraSets && 'w-full')}
             iconStart={<PlusIcon />}
@@ -727,7 +727,7 @@ function ExerciseSet({
           <div
             className={cn(
               sharedLayoutStyles,
-              'rounded-t-md bg-secondary/50 dark:bg-card/50 pb-2 -mb-2 border-t border-l border-r border-border dark:border-none',
+              'bg-secondary/50 dark:bg-card/50 pb-2 -mb-2 dark:border-none',
             )}
           >
             <div className="min-w-2.5"></div>
@@ -748,10 +748,12 @@ function ExerciseSet({
           <div
             className={cn(
               sharedLayoutStyles,
-              'rounded-md bg-card dark:bg-secondary text-primary relative',
+              'rounded-md bg-muted/50 dark:bg-secondary text-primary relative',
             )}
           >
-            <div className="min-w-2.5">{set.order}.</div>
+            <div className="min-w-2.5 text-sm text-muted-foreground">
+              {set.order}.
+            </div>
             <Input
               id={`set-${set.id}-reps`}
               value={reps}
@@ -759,7 +761,7 @@ function ExerciseSet({
               inputMode="decimal"
               variant={'secondary'}
               placeholder={thisSet?.log?.reps?.toString() || ''}
-              className="min-w-[96px] text-center"
+              className="min-w-[96px] text-center bg-white"
             />
             <ExerciseWeightInput
               setId={set.id}
@@ -775,12 +777,10 @@ function ExerciseSet({
               }
               disabled={false}
             />
-            <div className="text-sm text-muted-foreground text-center">
-              {set.rpe}
-            </div>
+            <div className="text-sm text-center">{set.rpe}</div>
             <div className="flex justify-center">
               <Button
-                variant="ghost"
+                variant="tertiary"
                 size="icon-sm"
                 iconOnly={
                   <CheckIcon
@@ -894,7 +894,7 @@ function ExerciseNotebook({ exercise }: { exercise: WorkoutExercise }) {
     <Drawer>
       <DrawerTrigger asChild>
         <div className="flex items-center gap-1 relative">
-          <Button variant="secondary" iconOnly={<NotebookPenIcon />} />
+          <Button variant="tertiary" iconOnly={<NotebookPenIcon />} />
           {notesCount > 0 && (
             <div className="text-xs absolute -top-1 -right-1 bg-amber-500/60 rounded-full size-4 shrink-0 flex items-center justify-center">
               {notesCount}
@@ -957,90 +957,88 @@ function ExerciseMetadata({
 
   return (
     <div>
-      <div className="flex flex-col gap-4">
-        <div className="flex gap-2">
-          {exercise.restSeconds && (
-            <CountdownTimer
-              variant="secondary"
-              restDuration={2}
-              onComplete={() => {
-                // Find the first uncompleted set and mark it as done
-                const firstUncompletedSet = (
-                  exercise.substitutedBy?.sets || exercise.sets
-                ).find((set) => !set.completedAt)
-                if (firstUncompletedSet) {
-                  handleToggleSet(firstUncompletedSet.id, true)
-                }
-              }}
+      <div className="flex gap-2 mb-12">
+        {exercise.restSeconds && (
+          <CountdownTimer
+            variant="tertiary"
+            restDuration={2}
+            onComplete={() => {
+              // Find the first uncompleted set and mark it as done
+              const firstUncompletedSet = (
+                exercise.substitutedBy?.sets || exercise.sets
+              ).find((set) => !set.completedAt)
+              if (firstUncompletedSet) {
+                handleToggleSet(firstUncompletedSet.id, true)
+              }
+            }}
+          />
+        )}
+        <div className="flex gap-2 ml-auto">
+          <ExerciseNotebook exercise={exercise} />
+          {(exercise.substitutedBy?.videoUrl || exercise.videoUrl) && (
+            <VideoPreview
+              variant="tertiary"
+              url={exercise.substitutedBy?.videoUrl || exercise.videoUrl || ''}
             />
           )}
-          <div className="flex gap-2 ml-auto">
-            <ExerciseNotebook exercise={exercise} />
-            {(exercise.substitutedBy?.videoUrl || exercise.videoUrl) && (
-              <VideoPreview
-                variant="secondary"
-                url={
-                  exercise.substitutedBy?.videoUrl || exercise.videoUrl || ''
-                }
-              />
-            )}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="secondary" iconOnly={<MoreHorizontalIcon />} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem
-                  onClick={() => handleMarkAsCompleted(!isCompleted)}
-                >
-                  <Check
-                    className={cn(
-                      'transition-all duration-200',
-                      isCompleted ? 'text-green-500' : 'text-muted-foreground',
-                    )}
-                  />
-                  {isCompleted ? 'Mark as incomplete' : 'Mark as completed'}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="tertiary" iconOnly={<MoreHorizontalIcon />} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem
+                onClick={() => handleMarkAsCompleted(!isCompleted)}
+              >
+                <Check
+                  className={cn(
+                    'transition-all duration-200',
+                    isCompleted ? 'text-green-500' : 'text-muted-foreground',
+                  )}
+                />
+                {isCompleted ? 'Mark as incomplete' : 'Mark as completed'}
+              </DropdownMenuItem>
+              {exercise.substitutes.length > 0 && (
+                <DropdownMenuItem>
+                  <Replace /> Swap exercise
                 </DropdownMenuItem>
-                {exercise.substitutes.length > 0 && (
-                  <DropdownMenuItem>
-                    <Replace /> Swap exercise
-                  </DropdownMenuItem>
-                )}
-                {exercise.isExtra && (
-                  <DropdownMenuItem
-                    onClick={handleRemoveExercise}
-                    loading={isRemoving}
-                  >
-                    <TrashIcon /> Remove exercise
-                  </DropdownMenuItem>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+              )}
+              {exercise.isExtra && (
+                <DropdownMenuItem
+                  onClick={handleRemoveExercise}
+                  loading={isRemoving}
+                >
+                  <TrashIcon /> Remove exercise
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       {exercise.additionalInstructions && (
-        <div className="text-sm text-muted-foreground mt-2">
-          {exercise.additionalInstructions}
+        <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded mb-2">
+          <p className="whitespace-pre-wrap">
+            {exercise.additionalInstructions}
+          </p>
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2 mt-4">
+      <div className={cn('flex flex-wrap gap-2')}>
         {isSuperset && (
           <Badge variant="secondary" size="md">
-            <ArrowLeftRight />
+            <ArrowLeftRight className="text-red-500" />
             Superset A/B
           </Badge>
         )}
         {exercise.warmupSets && (
           <Badge variant="secondary" size="md">
-            <FlameIcon />
+            <FlameIcon className="text-amber-500" />
             {exercise.warmupSets} warmup{exercise.warmupSets > 1 ? 's' : ''}
           </Badge>
         )}
 
         {exercise.tempo && (
           <Badge variant="secondary" size="md">
-            <GaugeIcon />
+            <GaugeIcon className="text-green-500" />
             {exercise.tempo}
           </Badge>
         )}

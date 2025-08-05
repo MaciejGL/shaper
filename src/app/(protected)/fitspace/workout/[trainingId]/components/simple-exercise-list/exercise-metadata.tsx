@@ -1,7 +1,8 @@
-import { FlameIcon, GaugeIcon } from 'lucide-react'
+import { ArrowLeftRight, FlameIcon, GaugeIcon } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import type { WorkoutContextPlan } from '@/context/workout-context/workout-context'
+import { GQLExerciseType } from '@/generated/graphql-client'
 
 interface ExerciseMetadataProps {
   exercise: WorkoutContextPlan['weeks'][number]['days'][number]['exercises'][number]
@@ -12,8 +13,18 @@ export function ExerciseMetadata({ exercise }: ExerciseMetadataProps) {
 
   if (!hasMetadata) return null
 
+  const isSuperset =
+    exercise.type === GQLExerciseType.Superset_1A ||
+    exercise.type === GQLExerciseType.Superset_1B
+
   return (
     <div className="flex flex-wrap gap-1.5 mt-2">
+      {isSuperset && (
+        <Badge variant="secondary" size="md">
+          <ArrowLeftRight className="text-red-500" />
+          Superset A/B
+        </Badge>
+      )}
       {exercise.warmupSets && (
         <Badge variant="secondary" className="text-xs">
           <FlameIcon className="w-3 h-3 mr-1 text-amber-500" />

@@ -103,7 +103,9 @@ export function SimpleExercise({
         <CardContent className="space-y-3">
           {exercise.additionalInstructions && (
             <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-              <p className="line-clamp-2">{exercise.additionalInstructions}</p>
+              <p className="whitespace-pre-wrap">
+                {exercise.additionalInstructions}
+              </p>
             </div>
           )}
 
