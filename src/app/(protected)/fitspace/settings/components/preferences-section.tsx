@@ -28,34 +28,6 @@ export function PreferencesSection() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {/* Training View */}
-      <div className="space-y-3">
-        <div className="flex items-center space-x-2">
-          <DumbbellIcon className="size-4 text-purple-500" />
-          <Label htmlFor="training-view" className="text-sm font-medium">
-            Training View
-          </Label>
-        </div>
-        <RadioButtons
-          value={preferences.trainingView}
-          onValueChange={setTrainingView}
-          options={[
-            {
-              value: GQLTrainingView.Simple,
-              label: 'Simple',
-              description: 'Quick completion',
-            },
-            {
-              value: GQLTrainingView.Advanced,
-              label: 'Advanced',
-              description: 'Detailed logging',
-            },
-          ]}
-          description={`Simple: Mark exercises as complete without detailed logging.
-
-          Advanced: Full workout tracking with sets, reps, and weights.`}
-        />
-      </div>
       {/* Weight Unit */}
       <div className="space-y-3">
         <div className="flex items-center space-x-2">
@@ -128,10 +100,39 @@ export function PreferencesSection() {
           value={preferences.timeFormat}
           onValueChange={setTimeFormat}
           options={[
-            { value: '12h', label: '12 Hour' },
             { value: '24h', label: '24 Hour' },
+            { value: '12h', label: '12 Hour' },
           ]}
           description="Choose your preferred time format for displaying times"
+        />
+      </div>
+
+      {/* Training View */}
+      <div className="space-y-3">
+        <div className="flex items-center space-x-2">
+          <DumbbellIcon className="size-4 text-purple-500" />
+          <Label htmlFor="training-view" className="text-sm font-medium">
+            Training View
+          </Label>
+        </div>
+        <RadioButtons
+          value={preferences.trainingView}
+          onValueChange={setTrainingView}
+          options={[
+            {
+              value: GQLTrainingView.Simple,
+              label: 'Simple',
+              description: 'Quick completion',
+            },
+            {
+              value: GQLTrainingView.Advanced,
+              label: 'Advanced',
+              description: 'Detailed logging',
+            },
+          ]}
+          description={`Simple: Mark exercises as complete without detailed logging.
+
+          Advanced: Full workout tracking with sets, reps, and weights.`}
         />
       </div>
 

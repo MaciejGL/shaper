@@ -115,7 +115,8 @@ export function Exercises() {
 
       {activeDay.isRestDay ? (
         <RestDay />
-      ) : activeExerciseId === 'summary' || !selectedExercise ? (
+      ) : activeExerciseId === 'summary' ||
+        (!selectedExercise && !activeDay.isRestDay) ? (
         <Summary
           open={true}
           onContinue={() => {

@@ -43,7 +43,7 @@ import {
 import { SidebarTrigger } from '../ui/sidebar'
 import { UserAvatar } from '../user-avatar'
 
-import { NavLink } from './nav-link'
+import { DropdownProvider, NavLink } from './nav-link'
 import { NotificationBell } from './notification-bell'
 import { SwapAccountButton } from './swap-account'
 
@@ -221,79 +221,78 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
         />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <div className="flex items-center gap-2 p-4">
-          <UserAvatar
-            className="size-12"
-            imageUrl={user?.user.profile?.avatarUrl}
-            firstName={user?.user.profile?.firstName ?? ''}
-            lastName={user?.user.profile?.lastName ?? ''}
-            sex={user?.user.profile?.sex}
-          />
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium">
-              {user?.user.profile?.firstName} {user?.user.profile?.lastName}
-            </p>
-            <p className="text-sm text-muted-foreground">{user?.user.email}</p>
+        <DropdownProvider value={{ closeDropdown: () => setIsOpen(false) }}>
+          <div className="flex items-center gap-2 p-4">
+            <UserAvatar
+              className="size-12"
+              imageUrl={user?.user.profile?.avatarUrl}
+              firstName={user?.user.profile?.firstName ?? ''}
+              lastName={user?.user.profile?.lastName ?? ''}
+              sex={user?.user.profile?.sex}
+            />
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium">
+                {user?.user.profile?.firstName} {user?.user.profile?.lastName}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {user?.user.email}
+              </p>
+            </div>
           </div>
-        </div>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <NavLink
-            href={CLIENT_LINKS.dashboard.href}
-            icon={<LayoutDashboardIcon className="size-4" />}
-            label={CLIENT_LINKS.dashboard.label}
-            onClick={() => setIsOpen(false)}
-          />
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <NavLink
-            href={CLIENT_LINKS.myPlans.href}
-            icon={<LayoutListIcon className="size-4" />}
-            label={CLIENT_LINKS.myPlans.label}
-            onClick={() => setIsOpen(false)}
-          />
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <NavLink
-            href={CLIENT_LINKS.workout.href}
-            icon={<NotebookTextIcon className="size-4" />}
-            label={CLIENT_LINKS.workout.label}
-            onClick={() => setIsOpen(false)}
-          />
-        </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <NavLink
+              href={CLIENT_LINKS.dashboard.href}
+              icon={<LayoutDashboardIcon className="size-4" />}
+              label={CLIENT_LINKS.dashboard.label}
+            />
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <NavLink
+              href={CLIENT_LINKS.myPlans.href}
+              icon={<LayoutListIcon className="size-4" />}
+              label={CLIENT_LINKS.myPlans.label}
+            />
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <NavLink
+              href={CLIENT_LINKS.workout.href}
+              icon={<NotebookTextIcon className="size-4" />}
+              label={CLIENT_LINKS.workout.label}
+            />
+          </DropdownMenuItem>
 
-        <DropdownMenuItem asChild>
-          <NavLink
-            href={CLIENT_LINKS.profile.href}
-            icon={<UserRoundCogIcon className="size-4" />}
-            label={CLIENT_LINKS.profile.label}
-            onClick={() => setIsOpen(false)}
-          />
-        </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <NavLink
+              href={CLIENT_LINKS.profile.href}
+              icon={<UserRoundCogIcon className="size-4" />}
+              label={CLIENT_LINKS.profile.label}
+            />
+          </DropdownMenuItem>
 
-        <DropdownMenuItem asChild>
-          <NavLink
-            href={CLIENT_LINKS.settings.href}
-            icon={<Settings className="size-4" />}
-            label={CLIENT_LINKS.settings.label}
-            onClick={() => setIsOpen(false)}
-          />
-        </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <NavLink
+              href={CLIENT_LINKS.settings.href}
+              icon={<Settings className="size-4" />}
+              label={CLIENT_LINKS.settings.label}
+            />
+          </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
+          <DropdownMenuSeparator />
 
-        <DropdownMenuItem asChild>
-          <NavLink
-            href="#"
-            onClick={() => signOut({ callbackUrl: '/login', redirect: true })}
-            icon={<LogOutIcon className="size-4" />}
-            label="Logout"
-          />
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <div className="flex flex-col gap-2 px-4 py-4">
-          <SwapAccountButton />
-        </div>
+          <DropdownMenuItem asChild>
+            <NavLink
+              href="#"
+              onClick={() => signOut({ callbackUrl: '/login', redirect: true })}
+              icon={<LogOutIcon className="size-4" />}
+              label="Logout"
+            />
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <div className="flex flex-col gap-2 px-4 py-4">
+            <SwapAccountButton />
+          </div>
+        </DropdownProvider>
       </DropdownMenuContent>
     </DropdownMenu>
   )

@@ -2,10 +2,17 @@ import { cva } from 'class-variance-authority'
 import { ChevronRight } from 'lucide-react'
 import NextLink from 'next/link'
 import { usePathname } from 'next/navigation'
+import { createContext, useContext } from 'react'
 
 import { cn } from '@/lib/utils'
 
 import { Button } from '../ui/button'
+
+// Context for dropdown close functionality
+const DropdownContext = createContext<{ closeDropdown?: () => void }>({})
+
+export const DropdownProvider = DropdownContext.Provider
+export const useDropdownContext = () => useContext(DropdownContext)
 
 interface NavItemProps {
   href: string
@@ -47,6 +54,14 @@ export function NavLink({
 }: NavItemProps) {
   const pathname = usePathname()
   const isActive = href === pathname
+  const { closeDropdown } = useDropdownContext()
+
+  const handleClick = () => {
+    // Call the original onClick if provided
+    onClick?.()
+    // Close dropdown if we're inside one
+    closeDropdown?.()
+  }
 
   return (
     <NextLink href={href} className="w-full">
@@ -55,7 +70,7 @@ export function NavLink({
         disabled={disabled}
         className={cn(navLinkVariants({ isActive }), className)}
         iconStart={icon}
-        onClick={onClick}
+        onClick={handleClick}
       >
         <span className={cn('font-medium', className)}>{label}</span>
         {isActive && <ChevronRight className="ml-auto h-4 w-4 opacity-60" />}

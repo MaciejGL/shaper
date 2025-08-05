@@ -167,7 +167,7 @@ export function SimpleExerciseList() {
         ))}
       </div>
 
-      <Summary open={allCompleted} />
+      {!activeDay.isRestDay && <Summary open={allCompleted} />}
     </div>
   )
 }
