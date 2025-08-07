@@ -17,22 +17,22 @@ export const UserAvatar = ({
   withFallbackAvatar?: boolean
   className?: string
 }) => {
+  // Determine the gender-based fallback image
   let fallbackImage = null
   if (sex?.toLowerCase() === 'female') {
     fallbackImage = '/avatar-female.png'
-  }
-  if (sex?.toLowerCase() === 'male') {
+  } else if (sex?.toLowerCase() === 'male') {
     fallbackImage = '/avatar-male.png'
   }
 
   const fallbackInitials = firstName.charAt(0) + lastName.charAt(0)
+
+  // Determine which image to display (custom image has priority over gender-based avatar)
+  const displayImage = imageUrl || (withFallbackAvatar ? fallbackImage : null)
+
   return (
     <Avatar className={cn('size-20 aspect-square', className)}>
-      {imageUrl ? (
-        <AvatarImage src={imageUrl ?? fallbackImage} />
-      ) : withFallbackAvatar && fallbackImage ? (
-        <AvatarImage src={fallbackImage} />
-      ) : null}
+      {displayImage && <AvatarImage src={displayImage} />}
       <AvatarFallback>{fallbackInitials}</AvatarFallback>
     </Avatar>
   )

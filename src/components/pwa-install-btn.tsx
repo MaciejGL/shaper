@@ -131,12 +131,14 @@ export function PWAInstallButton({
           onClick={() => setShowIOSInstructions(false)}
         >
           <div
-            className="bg-card rounded-lg p-6 max-w-sm w-full shadow-neuro-light dark:shadow-neuro-dark"
+            className="dark bg-card rounded-lg p-6 max-w-sm w-full shadow-neuro-light dark:shadow-neuro-dark"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="font-semibold text-lg mb-4">Install Fitspace</h3>
+            <h3 className="font-semibold text-lg mb-4 text-white">
+              Install Fitspace
+            </h3>
             <div className="space-y-3 text-sm text-muted-foreground">
-              <div className="flex items-start gap-3">
+              <div className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold flex-shrink-0 mt-0.5">
                   1
                 </div>
@@ -144,7 +146,7 @@ export function PWAInstallButton({
                   Tap the <strong>Share button</strong> at the bottom of Safari
                 </p>
               </div>
-              <div className="flex items-start gap-3">
+              <div className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold flex-shrink-0 mt-0.5">
                   2
                 </div>
@@ -152,7 +154,7 @@ export function PWAInstallButton({
                   Scroll down and tap <strong>"Add to Home Screen"</strong>
                 </p>
               </div>
-              <div className="flex items-start gap-3">
+              <div className="flex items-center gap-3">
                 <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold flex-shrink-0 mt-0.5">
                   3
                 </div>
