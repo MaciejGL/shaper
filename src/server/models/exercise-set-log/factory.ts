@@ -7,6 +7,11 @@ import {
   GQLMutationUpdateSetLogArgs,
   GQLWorkoutSessionEvent,
 } from '@/generated/graphql-server'
+import {
+  notifyPlanCompleted,
+  notifyTrainerWorkoutCompleted,
+  notifyWorkoutCompleted,
+} from '@/lib/notifications/push-notification-service'
 
 import ExerciseSetLog from './model'
 
@@ -344,12 +349,76 @@ export const markWorkoutAsCompleted = async (
 
   const now = new Date()
 
+  // Get user and trainer info for push notifications
+  const dayWithInfo = await prisma.trainingDay.findUnique({
+    where: { id: dayId },
+    select: {
+      id: true,
+      weekId: true,
+      workoutType: true,
+      week: {
+        select: {
+          id: true,
+          planId: true,
+          plan: {
+            select: {
+              id: true,
+              title: true,
+              assignedTo: {
+                select: {
+                  id: true,
+                  name: true,
+                  profile: {
+                    select: {
+                      firstName: true,
+                      lastName: true,
+                    },
+                  },
+                },
+              },
+              createdBy: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
   await prisma.trainingDay.update({
     where: { id: dayId },
     data: { completedAt: now },
   })
 
   await updateWorkoutSessionEvent(dayId, GQLWorkoutSessionEvent.Complete)
+
+  // Send workout completion notifications
+  if (dayWithInfo?.week?.plan?.assignedTo) {
+    const client = dayWithInfo.week.plan.assignedTo
+    const clientName =
+      client.profile?.firstName && client.profile?.lastName
+        ? `${client.profile.firstName} ${client.profile.lastName}`
+        : client.name || 'Client'
+
+    // Notify client of their achievement
+    await notifyWorkoutCompleted(
+      client.id,
+      dayWithInfo.workoutType || undefined,
+    )
+
+    // If there's a trainer, notify them
+    if (dayWithInfo.week.plan.createdBy.id !== client.id) {
+      await notifyTrainerWorkoutCompleted(
+        dayWithInfo.week.plan.createdBy.id,
+        clientName,
+        dayWithInfo.workoutType || undefined,
+      )
+    }
+  }
 
   // ✅ Cascade completion checks remain sequential
 
@@ -383,7 +452,16 @@ export const markWorkoutAsCompleted = async (
 
   const plan = await prisma.trainingPlan.findUnique({
     where: { id: week.planId },
-    select: { id: true, weeks: { select: { completedAt: true } } },
+    select: {
+      id: true,
+      title: true,
+      assignedTo: {
+        select: {
+          id: true,
+        },
+      },
+      weeks: { select: { completedAt: true } },
+    },
   })
 
   if (!plan) return true
@@ -394,6 +472,11 @@ export const markWorkoutAsCompleted = async (
       where: { id: plan.id },
       data: { completedAt: now },
     })
+
+    // Send plan completion notification
+    if (plan.assignedTo) {
+      await notifyPlanCompleted(plan.assignedTo.id, plan.title)
+    }
   }
 
   return true

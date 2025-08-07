@@ -76,8 +76,13 @@ export const metadata: Metadata = {
   appleWebApp: {
     title: 'Fitspace',
     statusBarStyle: 'black-translucent',
+    capable: true,
   },
   manifest: '/manifest.json',
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+  },
 }
 
 export default function RootLayout({

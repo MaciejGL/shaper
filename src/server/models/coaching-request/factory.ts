@@ -6,6 +6,11 @@ import {
   GQLUserRole,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import {
+  notifyCoachingRequest,
+  notifyCoachingRequestAccepted,
+  notifyCoachingRequestRejected,
+} from '@/lib/notifications/push-notification-service'
 import { UserWithSession } from '@/types/UserWithSession'
 import { GQLContext } from '@/types/gql-context'
 
@@ -170,6 +175,10 @@ export async function upsertCoachingRequest({
         },
         context,
       )
+
+      // Send push notification
+      await notifyCoachingRequest(recipient.id, senderName || 'Someone')
+
       return new CoachingRequest(coachingRequest, context)
     } catch (error) {
       console.error(
@@ -261,6 +270,12 @@ export async function acceptCoachingRequest({
       context,
     )
 
+    // Send push notification
+    await notifyCoachingRequestAccepted(
+      coachingRequest.senderId,
+      coachingRequest.sender?.name || 'Someone',
+    )
+
     return coachingRequest
       ? new CoachingRequest(coachingRequest, context)
       : null
@@ -333,6 +348,12 @@ export async function rejectCoachingRequest({
         relatedItemId: coachingRequest.id,
       },
       context,
+    )
+
+    // Send push notification
+    await notifyCoachingRequestRejected(
+      coachingRequest.senderId,
+      coachingRequest.sender?.name || 'Someone',
     )
 
     return coachingRequest

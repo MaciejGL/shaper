@@ -34,7 +34,7 @@ export const MUSCLES_V2: Muscle[] = [
   {
     id: 'cmb6zr9v70004uhmhhanl6im1',
     name: 'Pectoralis Minor',
-    alias: 'Inner Chest',
+    alias: 'Pec Minor',
     group: 'Chest',
     groupSlug: 'chest',
     description: 'Deep chest muscle for scapular protraction',

@@ -24,6 +24,7 @@ import {
   GQLQueryGetMealPlanTemplatesArgs,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { notifyMealPlanAssigned } from '@/lib/notifications/push-notification-service'
 import {
   CollaborationAction,
   checkMealPlanPermission,
@@ -554,6 +555,13 @@ export async function assignMealPlanToClient(
         type: GQLNotificationType.NewMealPlanAssigned,
       },
       context,
+    )
+
+    // Send push notification
+    await notifyMealPlanAssigned(
+      clientId,
+      templatePlan.title,
+      senderName || undefined,
     )
 
     return true

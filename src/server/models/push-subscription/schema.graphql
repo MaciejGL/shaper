@@ -1,0 +1,30 @@
+type PushSubscription {
+  id: ID!
+  endpoint: String!
+  userAgent: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreatePushSubscriptionInput {
+  endpoint: String!
+  p256dh: String!
+  auth: String!
+  userAgent: String
+}
+
+input UpdatePushSubscriptionInput {
+  id: ID!
+  userAgent: String
+}
+
+type Mutation {
+  createPushSubscription(input: CreatePushSubscriptionInput!): PushSubscription!
+  deletePushSubscription(endpoint: String!): Boolean!
+  updatePushSubscription(input: UpdatePushSubscriptionInput!): PushSubscription!
+}
+
+type Query {
+  pushSubscriptions: [PushSubscription!]!
+  pushSubscription(endpoint: String!): PushSubscription
+}

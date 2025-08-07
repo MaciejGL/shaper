@@ -357,7 +357,7 @@ export type GQLCreateExerciseInput = {
   imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
-  secondaryMuscleGroups: Array<Scalars['ID']['input']>;
+  secondaryMuscleGroups?: InputMaybe<Array<Scalars['ID']['input']>>;
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
@@ -473,6 +473,13 @@ export type GQLCreateNotificationInput = {
   relatedItemId?: InputMaybe<Scalars['String']['input']>;
   type: GQLNotificationType;
   userId: Scalars['ID']['input'];
+};
+
+export type GQLCreatePushSubscriptionInput = {
+  auth: Scalars['String']['input'];
+  endpoint: Scalars['String']['input'];
+  p256dh: Scalars['String']['input'];
+  userAgent?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GQLCreateQuickWorkoutInput = {
@@ -953,6 +960,7 @@ export type GQLMutation = {
   createNote: GQLNote;
   createNoteReply: GQLNote;
   createNotification: GQLNotification;
+  createPushSubscription: GQLPushSubscription;
   createQuickWorkout: GQLTrainingPlan;
   createReview: Scalars['Boolean']['output'];
   createTrainingPlan: GQLCreateTrainingPlanPayload;
@@ -963,6 +971,7 @@ export type GQLMutation = {
   deleteNote: Scalars['Boolean']['output'];
   deleteNotification: Scalars['Boolean']['output'];
   deletePlan: Scalars['Boolean']['output'];
+  deletePushSubscription: Scalars['Boolean']['output'];
   deleteReview: Scalars['Boolean']['output'];
   deleteTrainingPlan: Scalars['Boolean']['output'];
   deleteUserAccount: Scalars['Boolean']['output'];
@@ -1017,6 +1026,7 @@ export type GQLMutation = {
   updateNote: GQLNote;
   updateNotification: GQLNotification;
   updateProfile?: Maybe<GQLUserProfile>;
+  updatePushSubscription: GQLPushSubscription;
   updateReview: Scalars['Boolean']['output'];
   updateSetLog?: Maybe<GQLExerciseSetLog>;
   updateSubstituteExercise: Scalars['Boolean']['output'];
@@ -1203,6 +1213,11 @@ export type GQLMutationCreateNotificationArgs = {
 };
 
 
+export type GQLMutationCreatePushSubscriptionArgs = {
+  input: GQLCreatePushSubscriptionInput;
+};
+
+
 export type GQLMutationCreateQuickWorkoutArgs = {
   input: GQLCreateQuickWorkoutInput;
 };
@@ -1250,6 +1265,11 @@ export type GQLMutationDeleteNotificationArgs = {
 
 export type GQLMutationDeletePlanArgs = {
   planId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDeletePushSubscriptionArgs = {
+  endpoint: Scalars['String']['input'];
 };
 
 
@@ -1523,6 +1543,11 @@ export type GQLMutationUpdateProfileArgs = {
 };
 
 
+export type GQLMutationUpdatePushSubscriptionArgs = {
+  input: GQLUpdatePushSubscriptionInput;
+};
+
+
 export type GQLMutationUpdateReviewArgs = {
   input: GQLUpdateReviewInput;
 };
@@ -1640,15 +1665,20 @@ export enum GQLNotificationType {
   CoachingRequestRejected = 'COACHING_REQUEST_REJECTED',
   CollaborationInvitation = 'COLLABORATION_INVITATION',
   CollaborationResponse = 'COLLABORATION_RESPONSE',
+  ExerciseNoteAdded = 'EXERCISE_NOTE_ADDED',
+  ExerciseNoteReply = 'EXERCISE_NOTE_REPLY',
   MealPlanCollaboration = 'MEAL_PLAN_COLLABORATION',
   MealPlanCollaborationRemoved = 'MEAL_PLAN_COLLABORATION_REMOVED',
   Message = 'MESSAGE',
   NewMealPlanAssigned = 'NEW_MEAL_PLAN_ASSIGNED',
   NewTrainingPlanAssigned = 'NEW_TRAINING_PLAN_ASSIGNED',
+  PlanCompleted = 'PLAN_COMPLETED',
   Reminder = 'REMINDER',
   System = 'SYSTEM',
+  TrainerWorkoutCompleted = 'TRAINER_WORKOUT_COMPLETED',
   TrainingPlanCollaboration = 'TRAINING_PLAN_COLLABORATION',
-  TrainingPlanCollaborationRemoved = 'TRAINING_PLAN_COLLABORATION_REMOVED'
+  TrainingPlanCollaborationRemoved = 'TRAINING_PLAN_COLLABORATION_REMOVED',
+  WorkoutCompleted = 'WORKOUT_COMPLETED'
 }
 
 export type GQLOneRmEntry = {
@@ -1695,6 +1725,15 @@ export type GQLPlanWithPermissions = {
   isTemplate: Scalars['Boolean']['output'];
   planType: Scalars['String']['output'];
   title: Scalars['String']['output'];
+};
+
+export type GQLPushSubscription = {
+  __typename?: 'PushSubscription';
+  createdAt: Scalars['String']['output'];
+  endpoint: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  updatedAt: Scalars['String']['output'];
+  userAgent?: Maybe<Scalars['String']['output']>;
 };
 
 export type GQLQuery = {
@@ -1753,6 +1792,8 @@ export type GQLQuery = {
   notifications: Array<GQLNotification>;
   profile?: Maybe<GQLUserProfile>;
   publicExercises: Array<GQLBaseExercise>;
+  pushSubscription?: Maybe<GQLPushSubscription>;
+  pushSubscriptions: Array<GQLPushSubscription>;
   sentCollaborationInvitations: Array<GQLCollaborationInvitation>;
   trainingPlanCollaborators: Array<GQLTrainingPlanCollaborator>;
   user?: Maybe<GQLUser>;
@@ -1934,6 +1975,11 @@ export type GQLQueryNotificationsArgs = {
 
 export type GQLQueryPublicExercisesArgs = {
   where?: InputMaybe<GQLExerciseWhereInput>;
+};
+
+
+export type GQLQueryPushSubscriptionArgs = {
+  endpoint: Scalars['String']['input'];
 };
 
 
@@ -2229,7 +2275,7 @@ export type GQLUpdateExerciseInput = {
   imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
-  secondaryMuscleGroups: Array<Scalars['ID']['input']>;
+  secondaryMuscleGroups?: InputMaybe<Array<Scalars['ID']['input']>>;
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
@@ -2333,6 +2379,11 @@ export type GQLUpdateProfileInput = {
   weekStartsOn?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
   weightUnit?: InputMaybe<GQLWeightUnit>;
+};
+
+export type GQLUpdatePushSubscriptionInput = {
+  id: Scalars['ID']['input'];
+  userAgent?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GQLUpdateReviewInput = {
