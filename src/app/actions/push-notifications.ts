@@ -9,7 +9,7 @@ webpush.setVapidDetails(
   process.env.VAPID_PRIVATE_KEY!,
 )
 
-// In production, store subscriptions in your database
+// TODO: Replace in-memory subscriptions with persistent database storage before production launch
 // For demo purposes, we'll store in memory (this will reset on server restart)
 let subscriptions: {
   endpoint: string
@@ -92,6 +92,17 @@ export async function sendTestNotification(message: string) {
     const failed = results.filter(
       (result) => result.status === 'rejected',
     ).length
+
+    // Log detailed error information for failed notifications
+    const failedResults = results.filter(
+      (result) => result.status === 'rejected',
+    ) as PromiseRejectedResult[]
+
+    if (failedResults.length > 0) {
+      failedResults.forEach((result, index) => {
+        console.error(`Notification ${index + 1} failed:`, result.reason)
+      })
+    }
 
     console.info(
       `📧 Sent notification to ${successful} users, ${failed} failed`,

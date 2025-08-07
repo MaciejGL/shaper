@@ -36,7 +36,10 @@ self.addEventListener('push', function (event) {
 })
 
 self.addEventListener('notificationclick', function (event) {
-  console.log('Notification click received.')
+  // Only log in development mode
+  if (self.location.hostname === 'localhost') {
+    console.log('Notification click received.')
+  }
   event.notification.close()
   const url = event.notification.data?.url || '/'
   event.waitUntil(clients.openWindow(url))
