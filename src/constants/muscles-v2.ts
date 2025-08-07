@@ -398,4 +398,3 @@ export const MUSCLE_ID_MAPPING: Record<string, string> = {
   // Add your current database muscle IDs mapping to new static IDs
   // e.g., 'db-uuid-123': 'pectoralis-major'
   // You can populate this during migration
-}
