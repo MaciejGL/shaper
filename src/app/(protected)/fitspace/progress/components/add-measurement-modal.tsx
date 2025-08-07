@@ -120,7 +120,7 @@ export function AddMeasurementModal({
         <div>
           <p>Please enter valid measurements.</p>
           <p className="whitespace-pre-wrap">
-            {Object.values(isValid.error.formErrors.fieldErrors).join('\n')}
+            {Object.values(isValid.error.message).join('\n')}
           </p>
         </div>,
       )

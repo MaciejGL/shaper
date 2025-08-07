@@ -33,7 +33,7 @@ const itemVariants = {
       ease: 'easeIn',
     },
   },
-}
+} as const
 
 const containerVariants = {
   initial: {},

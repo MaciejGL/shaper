@@ -87,7 +87,7 @@ export function HomepageClient() {
         damping: 12,
       },
     },
-  }
+  } as const
 
   // Simplified hover animations for mockups
   const mockupHoverVariants = {
@@ -99,7 +99,7 @@ export function HomepageClient() {
         damping: 25,
       },
     },
-  }
+  } as const
 
   // Feature card animations
   const featureVariants = {
@@ -123,7 +123,7 @@ export function HomepageClient() {
         damping: 25,
       },
     },
-  }
+  } as const
 
   // More subtle text animation variants with persistence
   const subtleTextVariants = {
@@ -138,7 +138,7 @@ export function HomepageClient() {
         duration: 0.6,
       },
     },
-  }
+  } as const
 
   return (
     <div

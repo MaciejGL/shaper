@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { motion, Variants } from 'framer-motion'
 
 import { cn } from '@/lib/utils'
 
@@ -14,7 +14,7 @@ export function AnimatedLogo({
   forceColor?: string
 }) {
   // Animation variants for the container
-  const containerVariants = {
+  const containerVariants: Variants = {
     initial: {},
     animate: {
       transition: {
@@ -25,7 +25,7 @@ export function AnimatedLogo({
   }
 
   // Animation variants for the circle (center element)
-  const circleVariants = {
+  const circleVariants: Variants = {
     initial: {
       scale: 0,
       opacity: 0,
@@ -39,10 +39,10 @@ export function AnimatedLogo({
         ease: 'easeOut',
       },
     },
-  }
+  } 
 
   // Animation variants for the paths with smooth stroke drawing effect
-  const pathVariants = {
+  const pathVariants: Variants = {
     initial: {
       strokeDasharray: '100 100', // Set up dash pattern
       strokeDashoffset: 100, // Start with path hidden
@@ -68,7 +68,7 @@ export function AnimatedLogo({
         },
       },
     }),
-  }
+  } 
 
   return (
     <div className="flex flex-col items-center justify-center gap-6">

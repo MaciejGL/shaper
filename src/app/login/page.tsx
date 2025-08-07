@@ -4,9 +4,7 @@ import { redirect } from 'next/navigation'
 import React from 'react'
 
 import { AnimatedLogo, AnimatedLogoText } from '@/components/animated-logo'
-import { GQLUserRole } from '@/generated/graphql-server'
 import { authOptions } from '@/lib/auth'
-import { getCurrentUser } from '@/lib/getUser'
 
 import { LoginCard } from './components/login-card'
 
@@ -14,7 +12,6 @@ export default async function RequestOtpPage() {
   let user
   try {
     user = await getServerSession(authOptions)
-    console.log(user)
   } catch (error) {
     console.warn(error)
   }

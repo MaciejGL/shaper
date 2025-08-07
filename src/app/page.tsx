@@ -8,7 +8,6 @@ export default async function Home() {
   let user
   try {
     user = await getServerSession(authOptions)
-    console.log(user)
   } catch (error) {
     console.warn(error)
   }
