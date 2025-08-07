@@ -100,7 +100,7 @@ input CreateExerciseInput {
   videoUrl: String
   equipment: Equipment
   muscleGroups: [ID!]!
-  secondaryMuscleGroups: [ID!]!
+  secondaryMuscleGroups: [ID!]
   substituteIds: [ID!]
   imageUrls: [String!]
 }
@@ -111,7 +111,7 @@ input UpdateExerciseInput {
   videoUrl: String
   equipment: Equipment
   muscleGroups: [ID!]!
-  secondaryMuscleGroups: [ID!]!
+  secondaryMuscleGroups: [ID!]
   substituteIds: [ID!]
   imageUrls: [String!]
 }
