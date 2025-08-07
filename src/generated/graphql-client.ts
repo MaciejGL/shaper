@@ -253,6 +253,7 @@ export type GQLBaseExercise = {
   muscleGroupCategories: Array<GQLMuscleGroupCategory>;
   muscleGroups: Array<GQLMuscleGroup>;
   name: Scalars['String']['output'];
+  secondaryMuscleGroups: Array<GQLMuscleGroup>;
   sourceId?: Maybe<Scalars['String']['output']>;
   substitutes: Array<GQLBaseExerciseSubstitute>;
   tips?: Maybe<Scalars['String']['output']>;
@@ -356,6 +357,7 @@ export type GQLCreateExerciseInput = {
   imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
+  secondaryMuscleGroups: Array<Scalars['ID']['input']>;
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
@@ -2227,6 +2229,7 @@ export type GQLUpdateExerciseInput = {
   imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  secondaryMuscleGroups: Array<Scalars['ID']['input']>;
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
@@ -2863,7 +2866,7 @@ export type GQLFitspaceGetWorkoutQuery = { __typename?: 'Query', getWorkout?: { 
 export type GQLFitspaceGetExercisesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLFitspaceGetExercisesQuery = { __typename?: 'Query', getExercises: { __typename?: 'GetExercisesResponse', publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }>, trainerExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }> }, muscleGroupCategories: Array<{ __typename?: 'MuscleGroupCategory', id: string, name: string, slug: string, muscles: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }> };
+export type GQLFitspaceGetExercisesQuery = { __typename?: 'Query', getExercises: { __typename?: 'GetExercisesResponse', publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }>, trainerExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }> }, muscleGroupCategories: Array<{ __typename?: 'MuscleGroupCategory', id: string, name: string, slug: string, muscles: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }> };
 
 export type GQLFitspaceGetWorkoutInfoQueryVariables = Exact<{
   dayId: Scalars['ID']['input'];
@@ -2877,7 +2880,7 @@ export type GQLFitspaceGetAiExerciseSuggestionsMutationVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceGetAiExerciseSuggestionsMutation = { __typename?: 'Mutation', getAiExerciseSuggestions: Array<{ __typename?: 'AiExerciseSuggestion', exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null>, aiMeta: { __typename?: 'AiMeta', explanation: string } }> };
+export type GQLFitspaceGetAiExerciseSuggestionsMutation = { __typename?: 'Mutation', getAiExerciseSuggestions: Array<{ __typename?: 'AiExerciseSuggestion', exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null>, aiMeta: { __typename?: 'AiMeta', explanation: string } }> };
 
 export type GQLFitspaceAddAiExerciseToWorkoutMutationVariables = Exact<{
   input: GQLAddAiExerciseToWorkoutInput;
@@ -2970,7 +2973,7 @@ export type GQLQuickWorkoutExercisesQueryVariables = Exact<{
 }>;
 
 
-export type GQLQuickWorkoutExercisesQuery = { __typename?: 'Query', publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, type?: GQLExerciseType | undefined | null, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }> }> };
+export type GQLQuickWorkoutExercisesQuery = { __typename?: 'Query', publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, type?: GQLExerciseType | undefined | null, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }> }> };
 
 export type GQLFitspaceGetUserQuickWorkoutPlanQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -3192,14 +3195,14 @@ export type GQLTrainerExercisesQueryVariables = Exact<{
 }>;
 
 
-export type GQLTrainerExercisesQuery = { __typename?: 'Query', userExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }> }>, publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }> }> };
+export type GQLTrainerExercisesQuery = { __typename?: 'Query', userExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }> }>, publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }> }> };
 
 export type GQLPublicExercisesQueryVariables = Exact<{
   where?: InputMaybe<GQLExerciseWhereInput>;
 }>;
 
 
-export type GQLPublicExercisesQuery = { __typename?: 'Query', publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }> }> };
+export type GQLPublicExercisesQuery = { __typename?: 'Query', publicExercises: Array<{ __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, isPublic: boolean, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }>, secondaryMuscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }> }> };
 
 export type GQLExerciseQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6291,6 +6294,11 @@ export const FitspaceGetExercisesDocument = `
         alias
         groupSlug
       }
+      secondaryMuscleGroups {
+        id
+        alias
+        groupSlug
+      }
     }
     trainerExercises {
       id
@@ -6305,6 +6313,11 @@ export const FitspaceGetExercisesDocument = `
         order
       }
       muscleGroups {
+        id
+        alias
+        groupSlug
+      }
+      secondaryMuscleGroups {
         id
         alias
         groupSlug
@@ -6428,6 +6441,11 @@ export const FitspaceGetAiExerciseSuggestionsDocument = `
       equipment
       isPublic
       muscleGroups {
+        id
+        alias
+        groupSlug
+      }
+      secondaryMuscleGroups {
         id
         alias
         groupSlug
@@ -6784,6 +6802,12 @@ export const QuickWorkoutExercisesDocument = `
       alias
       groupSlug
     }
+    secondaryMuscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
   }
   publicExercises(where: $where) {
     id
@@ -6799,6 +6823,12 @@ export const QuickWorkoutExercisesDocument = `
       order
     }
     muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+    secondaryMuscleGroups {
       id
       name
       alias
@@ -8726,6 +8756,12 @@ export const TrainerExercisesDocument = `
       alias
       groupSlug
     }
+    secondaryMuscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
   }
   publicExercises(where: $where) {
     id
@@ -8740,6 +8776,12 @@ export const TrainerExercisesDocument = `
       order
     }
     muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+    secondaryMuscleGroups {
       id
       name
       alias
@@ -8801,6 +8843,12 @@ export const PublicExercisesDocument = `
     equipment
     isPublic
     muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+    secondaryMuscleGroups {
       id
       name
       alias

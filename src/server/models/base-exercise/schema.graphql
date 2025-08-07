@@ -7,6 +7,7 @@ type BaseExercise {
   videoUrl: String
   equipment: Equipment
   muscleGroups: [MuscleGroup!]!
+  secondaryMuscleGroups: [MuscleGroup!]!
   muscleGroupCategories: [MuscleGroupCategory!]!
   isPublic: Boolean!
   createdBy: UserPublic
@@ -99,6 +100,7 @@ input CreateExerciseInput {
   videoUrl: String
   equipment: Equipment
   muscleGroups: [ID!]!
+  secondaryMuscleGroups: [ID!]
   substituteIds: [ID!]
   imageUrls: [String!]
 }
@@ -109,6 +111,7 @@ input UpdateExerciseInput {
   videoUrl: String
   equipment: Equipment
   muscleGroups: [ID!]!
+  secondaryMuscleGroups: [ID!]
   substituteIds: [ID!]
   imageUrls: [String!]
 }

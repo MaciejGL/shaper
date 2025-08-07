@@ -45,6 +45,12 @@ query TrainerExercises($where: ExerciseWhereInput) {
       alias
       groupSlug
     }
+    secondaryMuscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
   }
 
   publicExercises(where: $where) {
@@ -65,6 +71,12 @@ query TrainerExercises($where: ExerciseWhereInput) {
       alias
       groupSlug
     }
+    secondaryMuscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
   }
 }
 
@@ -77,6 +89,12 @@ query PublicExercises($where: ExerciseWhereInput) {
     equipment
     isPublic
     muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+    secondaryMuscleGroups {
       id
       name
       alias

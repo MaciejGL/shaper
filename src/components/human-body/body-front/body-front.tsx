@@ -122,14 +122,14 @@ export function FrontBodyView({
       aliases: ['inner thigh'],
       side: 'right',
     },
-    Shins: {
-      muscleX: 127,
-      muscleY: 310,
-      labelX: RIGHT_LABEL_OFFSET || 195,
-      labelY: 320 + Y_OFFSET,
-      aliases: ['shin'],
-      side: 'right',
-    },
+    // Shins: {
+    //   muscleX: 127,
+    //   muscleY: 310,
+    //   labelX: RIGHT_LABEL_OFFSET || 195,
+    //   labelY: 320 + Y_OFFSET,
+    //   aliases: ['shin'],
+    //   side: 'right',
+    // },
   }
   return (
     <div className="relative">

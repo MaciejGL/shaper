@@ -32,7 +32,7 @@ export function MuscleLabel({
       ref={ref}
       key={label}
       size="xs"
-      variant={isRegionSelected(value.aliases) ? 'default' : 'outline'}
+      variant={isRegionSelected(value.aliases) ? 'default' : 'tertiary'}
       style={{
         top: `${value.labelY}px`,
         left:

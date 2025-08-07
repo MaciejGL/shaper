@@ -43,7 +43,7 @@ export default function MyPlansPage() {
 
       {/* Plans Tabs */}
       <Tabs
-        value={tab ?? (activePlan ? PlanTab.Plans : PlanTab.QuickWorkout)}
+        value={tab ?? PlanTab.QuickWorkout}
         onValueChange={(value) => setTab(value as PlanTab)}
         className="w-full"
       >

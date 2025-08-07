@@ -56,6 +56,7 @@ export type CreateExerciseFormData = {
   equipment?: GQLEquipment
   videoUrl?: string | null
   muscleGroups: { id: string }[]
+  secondaryMuscleGroups: { id: string }[]
   substituteIds: string[]
   imageUrls: string[]
 }
@@ -75,6 +76,8 @@ export function CreateExerciseDialog({
     equipment: exercise?.equipment ?? undefined,
     videoUrl: exercise?.videoUrl ?? '',
     muscleGroups: exercise?.muscleGroups.map((mg) => ({ id: mg.id })) ?? [],
+    secondaryMuscleGroups:
+      exercise?.secondaryMuscleGroups?.map((mg) => ({ id: mg.id })) ?? [],
     substituteIds: [],
     imageUrls: [],
   })
@@ -170,6 +173,9 @@ export function CreateExerciseDialog({
           input: {
             ...formData,
             muscleGroups: formData.muscleGroups.map((mg) => mg.id),
+            secondaryMuscleGroups: formData.secondaryMuscleGroups.map(
+              (mg) => mg.id,
+            ),
             substituteIds: formData.substituteIds,
             imageUrls: formData.imageUrls,
           },
@@ -179,6 +185,9 @@ export function CreateExerciseDialog({
           input: {
             ...formData,
             muscleGroups: formData.muscleGroups.map((mg) => mg.id),
+            secondaryMuscleGroups: formData.secondaryMuscleGroups.map(
+              (mg) => mg.id,
+            ),
             substituteIds: formData.substituteIds,
             imageUrls: formData.imageUrls,
           },
@@ -191,6 +200,7 @@ export function CreateExerciseDialog({
         equipment: undefined,
         videoUrl: '',
         muscleGroups: [],
+        secondaryMuscleGroups: [],
         substituteIds: [],
         imageUrls: [],
       })
@@ -200,8 +210,14 @@ export function CreateExerciseDialog({
     }
   }
 
-  const handleMuscleGroupsChange = (muscleGroups: { id: string }[]) => {
+  const handlePrimaryMuscleGroupsChange = (muscleGroups: { id: string }[]) => {
     setFormData((prev) => ({ ...prev, muscleGroups }))
+  }
+
+  const handleSecondaryMuscleGroupsChange = (
+    secondaryMuscleGroups: { id: string }[],
+  ) => {
+    setFormData((prev) => ({ ...prev, secondaryMuscleGroups }))
   }
 
   const title = exercise?.id ? 'Edit Exercise' : 'Create New Exercise'
@@ -246,14 +262,17 @@ export function CreateExerciseDialog({
       <DialogContent
         dialogTitle={title}
         fullScreen
-        className="sm:max-w-[600px]"
+        className="sm:max-w-[900px]"
       >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4 overflow-y-auto hide-scrollbar"
+        >
           <div className="space-y-2">
             <Label htmlFor="name">Exercise Name *</Label>
             <Input
@@ -338,8 +357,10 @@ export function CreateExerciseDialog({
           <div className="space-y-2">
             <MuscleGroupSelector
               categories={categories}
-              selectedMuscleGroups={formData.muscleGroups}
-              onMuscleGroupsChange={handleMuscleGroupsChange}
+              selectedPrimaryMuscleGroups={formData.muscleGroups}
+              selectedSecondaryMuscleGroups={formData.secondaryMuscleGroups}
+              onPrimaryMuscleGroupsChange={handlePrimaryMuscleGroupsChange}
+              onSecondaryMuscleGroupsChange={handleSecondaryMuscleGroupsChange}
             />
           </div>
 
