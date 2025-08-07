@@ -7,7 +7,6 @@ import { useRef } from 'react'
 
 import { AnimatedLogo, AnimatedLogoText } from '@/components/animated-logo'
 import { PWAInstallButton } from '@/components/pwa-install-btn'
-import { MockupGradient, OrbGradient } from '@/components/smooth-gradient'
 import { ButtonLink } from '@/components/ui/button-link'
 
 import { Card } from './ui/card'
@@ -152,14 +151,16 @@ export function HomepageClient() {
     >
       <main
         ref={containerRef}
-        className="min-h-screen w-full bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-800 overflow-x-hidden"
+        className="min-h-screen w-full bg-zinc-950 overflow-x-hidden"
       >
         {/* Hero Section */}
         <motion.section
+          key="hero-section-container"
           style={{ y: heroY }}
           className="min-h-screen flex flex-col items-center justify-center px-4 relative z-20"
         >
           <motion.div
+            key="hero-section-content"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -167,6 +168,7 @@ export function HomepageClient() {
           >
             {/* App Logo and Branding */}
             <motion.div
+              key="hero-section-content-logo"
               variants={itemVariants}
               className="flex flex-col items-center gap-6"
             >
@@ -174,6 +176,7 @@ export function HomepageClient() {
               <div className="space-y-4">
                 <AnimatedLogoText className="text-4xl text-white" />
                 <motion.p
+                  key="hero-section-content-description"
                   variants={itemVariants}
                   className="text-lg md:text-xl text-zinc-300 max-w-2xl leading-relaxed"
                 >
@@ -186,6 +189,7 @@ export function HomepageClient() {
 
             {/* Action Buttons */}
             <motion.div
+              key="hero-section-content-buttons"
               variants={itemVariants}
               className="flex flex-col gap-4 w-full max-w-sm"
             >
@@ -200,66 +204,28 @@ export function HomepageClient() {
               </ButtonLink>
             </motion.div>
           </motion.div>
-
-          {/* Floating gradient orbs for background decoration - Using new component */}
-          <motion.div
-            animate={{
-              scale: [1, 1.4, 1],
-              rotate: [0, 180, 360],
-            }}
-            transition={{
-              duration: 20,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: 'linear',
-            }}
-            className="absolute top-1/4 right-1/4"
-          >
-            <OrbGradient
-              size="large"
-              colors={{
-                primary: 'rgba(59, 131, 246, 0.421)',
-                secondary: 'rgba(132, 90, 232, 0.307)',
-                accent: 'rgba(59, 131, 246, 0.209)',
-              }}
-            />
-          </motion.div>
-          <motion.div
-            animate={{
-              scale: [1.4, 1, 1.4],
-              rotate: [360, 180, 0],
-            }}
-            transition={{
-              duration: 15,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: 'linear',
-            }}
-            className="absolute bottom-1/4 left-1/4"
-          >
-            <OrbGradient
-              size="medium"
-              colors={{
-                primary: 'rgba(138, 92, 246, 0.629)',
-                secondary: 'rgba(59, 131, 246, 0.337)',
-                accent: 'rgba(139, 92, 246, 0.25)',
-              }}
-            />
-          </motion.div>
         </motion.section>
 
         {/* Mockup Showcase Section */}
         <motion.section
+          key="mockup-section"
           ref={mockupSectionRef}
           style={{ y: mockupsY }}
           className="pb-24 pt-0 px-4 relative z-10"
         >
           <motion.div
+            key="mockup-section-content"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.1 }}
             className="max-w-7xl mx-auto"
           >
-            <motion.div variants={itemVariants} className="text-center mb-16">
-              <h2 className="text-3xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent">
+            <motion.div
+              key="mockup-section-content-title"
+              variants={itemVariants}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">
                 Experience Fitspace
               </h2>
               <p className="text-lg text-zinc-300 max-w-2xl mx-auto">
@@ -276,19 +242,12 @@ export function HomepageClient() {
                 className="relative group cursor-pointer"
               >
                 <motion.div
-                  key="front"
+                  key="front-mockup"
                   style={{ scale: frontMockupScale }}
                   whileHover="hover"
                   variants={mockupHoverVariants}
                   className="transform-gpu"
                 >
-                  <MockupGradient
-                    index={0}
-                    colors={{
-                      primary: 'rgba(59, 131, 246, 0.007)',
-                      secondary: 'rgba(45, 48, 207, 0.628)',
-                    }}
-                  />
                   <Image
                     src="/mockup-front.png"
                     alt="Fitspace Mobile App Front View"
@@ -301,6 +260,7 @@ export function HomepageClient() {
                   />
                 </motion.div>
                 <motion.div
+                  key="front-mockup-description"
                   variants={subtleTextVariants}
                   initial="hidden"
                   whileInView="visible"
@@ -322,19 +282,12 @@ export function HomepageClient() {
                 className="relative group cursor-pointer"
               >
                 <motion.div
-                  key="angle"
+                  key="angle-mockup"
                   style={{ scale: angleMockupScale }}
                   whileHover="hover"
                   variants={mockupHoverVariants}
                   className="transform-gpu"
                 >
-                  <MockupGradient
-                    index={1}
-                    colors={{
-                      primary: 'rgba(138, 92, 246, 0.223)',
-                      secondary: 'rgba(168, 85, 247, 0.15)',
-                    }}
-                  />
                   <Image
                     src="/mockup-angle.png"
                     alt="Fitspace Mobile App Angle View"
@@ -347,6 +300,7 @@ export function HomepageClient() {
                   />
                 </motion.div>
                 <motion.div
+                  key="angle-mockup-description"
                   variants={subtleTextVariants}
                   initial="hidden"
                   whileInView="visible"
@@ -368,18 +322,12 @@ export function HomepageClient() {
                 className="relative group cursor-pointer"
               >
                 <motion.div
+                  key="side-mockup"
                   style={{ scale: sideMockupScale }}
                   whileHover="hover"
                   variants={mockupHoverVariants}
                   className="transform-gpu"
                 >
-                  <MockupGradient
-                    index={2}
-                    colors={{
-                      primary: 'rgba(4, 88, 222, 0.357)',
-                      secondary: 'rgba(138, 92, 246, 0.328)',
-                    }}
-                  />
                   <Image
                     src="/mockup-side.png"
                     alt="Fitspace Mobile App Side View"
@@ -392,6 +340,7 @@ export function HomepageClient() {
                   />
                 </motion.div>
                 <motion.div
+                  key="side-mockup-description"
                   variants={subtleTextVariants}
                   initial="hidden"
                   whileInView="visible"
@@ -412,16 +361,19 @@ export function HomepageClient() {
 
         {/* Feature Highlights */}
         <motion.section
+          key="feature-section"
           style={{ y: featuresY }}
-          className="py-24 px-4 bg-gradient-to-r from-zinc-950 to-zinc-900 relative z-5"
+          className="py-24 px-4 bg-zinc-900 relative z-5"
         >
           <motion.div
+            key="feature-section-content"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
             className="max-w-4xl mx-auto"
           >
             <motion.div
+              key="feature-section-content-title"
               variants={subtleTextVariants}
               className="text-center mb-12"
             >
@@ -455,7 +407,7 @@ export function HomepageClient() {
                 },
               ].map((feature, index) => (
                 <motion.div
-                  key={feature.title}
+                  key={`feature-${index}`}
                   variants={featureVariants}
                   whileHover="hover"
                   custom={index}
@@ -464,11 +416,11 @@ export function HomepageClient() {
                   viewport={{ once: true, amount: 0.1 }}
                 >
                   <Card
-                    variant="gradient"
-                    className="border border-zinc-700 shadow-neuro-dark 
+                    className="border border-zinc-700 shadow-neuro-dark bg-zinc-800
                     group text-center p-8"
                   >
                     <motion.div
+                      key={`feature-${index}-icon`}
                       className="w-16 h-16 mx-auto mb-4 bg-primary/10 rounded-2xl flex items-center justify-center"
                       whileHover={{ rotate: 360 }}
                       transition={{ duration: 0.3 }}
@@ -489,8 +441,9 @@ export function HomepageClient() {
         </motion.section>
 
         {/* Call to Action */}
-        <motion.section className="py-24 px-4 relative z-5">
+        <motion.section key="cta-section" className="py-24 px-4 relative z-5">
           <motion.div
+            key="cta-section-content"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.3 }}
@@ -498,19 +451,24 @@ export function HomepageClient() {
             className="text-center max-w-2xl mx-auto"
           >
             <motion.h2
+              key="cta-section-content-title"
               variants={subtleTextVariants}
-              className="text-3xl md:text-4xl font-bold mb-6 bg-gradient-to-r from-zinc-100 to-zinc-400 bg-clip-text text-transparent"
+              className="text-3xl md:text-4xl font-bold mb-6 text-white"
             >
               Ready to Transform Your Fitness?
             </motion.h2>
             <motion.p
+              key="cta-section-content-description"
               variants={subtleTextVariants}
               className="text-lg text-zinc-300 mb-8"
             >
               Join thousands of users who have already started their fitness
               journey with Fitspace
             </motion.p>
-            <motion.div variants={subtleTextVariants}>
+            <motion.div
+              key="cta-section-content-button"
+              variants={subtleTextVariants}
+            >
               <ButtonLink
                 href="/login"
                 size="lg"
