@@ -78,10 +78,6 @@ export const metadata: Metadata = {
     startupImage: ['/favicons/apple-touch-icon.png'],
   },
   manifest: '/manifest.json',
-  other: {
-    'mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-capable': 'yes',
-  },
 }
 
 export default function RootLayout({
