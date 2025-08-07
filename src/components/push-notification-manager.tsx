@@ -23,6 +23,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { useUserPreferences } from '@/context/user-preferences-context'
 
 // Utility function to convert VAPID public key
 function urlBase64ToUint8Array(base64String: string) {
@@ -65,6 +66,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 export function PushNotificationManager() {
+  const { preferences, updatePreferences } = useUserPreferences()
   const [isSupported, setIsSupported] = useState(false)
   const [subscription, setSubscription] = useState<PushSubscription | null>(
     null,
@@ -72,6 +74,9 @@ export function PushNotificationManager() {
   const [isLoading, setIsLoading] = useState(false)
   const [customMessage, setCustomMessage] = useState('')
   const [subscriptionCount, setSubscriptionCount] = useState(0)
+
+  const pushNotificationsEnabled =
+    preferences.notifications?.pushNotifications ?? false
 
   useEffect(() => {
     // Check if push notifications are supported
@@ -130,6 +135,14 @@ export function PushNotificationManager() {
 
       const result = await subscribeUser(convertPushSubscription(sub))
       if (result.success) {
+        // Enable push notifications in user preferences
+        await updatePreferences({
+          notifications: {
+            ...preferences.notifications,
+            pushNotifications: true,
+          },
+        })
+
         toast.success('✅ Successfully subscribed to push notifications!')
         // Update subscription count
         const { count } = await getSubscriptionCount()
@@ -153,6 +166,14 @@ export function PushNotificationManager() {
 
       const result = await unsubscribeUser()
       if (result.success) {
+        // Disable push notifications in user preferences
+        await updatePreferences({
+          notifications: {
+            ...preferences.notifications,
+            pushNotifications: false,
+          },
+        })
+
         toast.success('✅ Successfully unsubscribed from push notifications')
         // Update subscription count
         const { count } = await getSubscriptionCount()
@@ -253,7 +274,8 @@ export function PushNotificationManager() {
         </CardTitle>
         <CardDescription>
           Test push notifications for your Shaper app. These will work even when
-          the app is closed!
+          the app is closed! Your preference:{' '}
+          {pushNotificationsEnabled ? '✅ Enabled' : '❌ Disabled'}
         </CardDescription>
         {subscriptionCount > 0 && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -269,7 +291,11 @@ export function PushNotificationManager() {
           <div>
             <p className="font-medium">Notification Status</p>
             <p className="text-sm text-muted-foreground">
-              {subscription ? '✅ Subscribed' : '❌ Not subscribed'}
+              {subscription && pushNotificationsEnabled
+                ? '✅ Subscribed & Enabled'
+                : subscription
+                  ? '🔕 Subscribed but Disabled in Preferences'
+                  : '❌ Not subscribed'}
             </p>
           </div>
 
