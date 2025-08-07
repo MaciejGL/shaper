@@ -2,12 +2,13 @@
 
 import webpush from 'web-push'
 
-import { auth } from '@/lib/auth'
+import { getCurrentUser } from '@/lib/getUser'
 import { getAllPushSubscriptionsForNotification } from '@/server/models/push-subscription/factory'
 import {
   createPushSubscription,
   deletePushSubscriptionsForUser,
 } from '@/server/models/push-subscription/factory'
+import { GQLContext } from '@/types/gql-context'
 
 // Configure VAPID details
 webpush.setVapidDetails(
@@ -24,8 +25,8 @@ export async function subscribeUser(sub: {
   }
 }) {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
+    const userSession = await getCurrentUser()
+    if (!userSession?.user?.id) {
       return { success: false, error: 'Authentication required' }
     }
 
@@ -37,8 +38,11 @@ export async function subscribeUser(sub: {
         auth: sub.keys.auth,
         userAgent: undefined, // Could be passed from client if needed
       },
-      session.user.id,
-      { user: session.user },
+      userSession.user.id,
+      {
+        user: userSession,
+        loaders: {} as unknown as GQLContext['loaders'], // Context not used in PushSubscription model
+      },
     )
 
     console.info('✅ User subscribed to push notifications:', sub.endpoint)
@@ -51,13 +55,13 @@ export async function subscribeUser(sub: {
 
 export async function unsubscribeUser() {
   try {
-    const session = await auth()
-    if (!session?.user?.id) {
+    const userSession = await getCurrentUser()
+    if (!userSession?.user?.id) {
       return { success: false, error: 'Authentication required' }
     }
 
     // Remove all subscriptions for this user from database
-    await deletePushSubscriptionsForUser(session.user.id)
+    await deletePushSubscriptionsForUser(userSession.user.id)
 
     console.info('✅ User unsubscribed from push notifications')
     return { success: true }
@@ -131,22 +135,7 @@ export async function sendTestNotification(message: string) {
   }
 }
 
-// Helper functions for different notification types
-export async function sendWorkoutReminder(workoutName: string) {
-  return await sendTestNotification(`Time for your ${workoutName} workout! 💪`)
-}
-
-export async function sendMealReminder(mealName: string) {
-  return await sendTestNotification(`Don't forget to log your ${mealName}! 🍽️`)
-}
-
-export async function sendCoachingNotification(message: string) {
-  return await sendTestNotification(`📝 Coach update: ${message}`)
-}
-
-export async function sendAchievementNotification(achievement: string) {
-  return await sendTestNotification(`🎉 Achievement unlocked: ${achievement}`)
-}
+// Legacy helper functions - deprecated, use centralized push-notification-service instead
 
 // Function to get subscription count (for testing/admin purposes)
 export async function getSubscriptionCount() {

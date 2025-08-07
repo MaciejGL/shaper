@@ -4,156 +4,135 @@
  * This file helps integrate push notifications with your existing GraphQL notification system.
  * When you create notifications through your existing system, you can also trigger push notifications.
  */
-import { sendPushNotificationToUsers } from '@/app/actions/push-notifications'
 import { GQLNotificationType } from '@/generated/graphql-server'
 
-// Map notification types to push notification content
+import {
+  notifyCoachingRequest,
+  notifyCoachingRequestAccepted,
+  notifyCoachingRequestRejected,
+  notifyCollaborationInvitation,
+  notifyCollaborationResponse,
+  notifyMealPlanAssigned,
+  notifySystemAnnouncement,
+  notifyTrainingPlanAssigned,
+} from './push-notification-service'
+// Legacy helper functions - use centralized service instead
+import {
+  notifyMealReminder,
+  notifyWorkoutReminder,
+  sendBatchNotifications,
+} from './push-notification-service'
+
+// Map notification types to specific push notification functions
 export async function sendPushForNotification(
   userId: string,
   type: GQLNotificationType,
   message: string,
   link?: string,
+  additionalData?: { senderName?: string; planTitle?: string },
 ) {
-  const notificationMap: Record<
-    GQLNotificationType,
-    { title: string; icon?: string }
-  > = {
-    [GQLNotificationType.CoachingRequest]: {
-      title: '👨‍💼 New Coaching Request',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.CoachingRequestAccepted]: {
-      title: '✅ Coaching Request Accepted',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.CoachingRequestRejected]: {
-      title: '❌ Coaching Request Declined',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.NewTrainingPlanAssigned]: {
-      title: '🏋️ New Training Plan',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.NewMealPlanAssigned]: {
-      title: '🍽️ New Meal Plan',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.CollaborationInvitation]: {
-      title: '🤝 Collaboration Invitation',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.CollaborationResponse]: {
-      title: '📝 Collaboration Response',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.TrainingPlanCollaboration]: {
-      title: '🏋️ Training Plan Update',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.TrainingPlanCollaborationRemoved]: {
-      title: '🏋️ Training Plan Access Removed',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.MealPlanCollaboration]: {
-      title: '🍽️ Meal Plan Update',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.MealPlanCollaborationRemoved]: {
-      title: '🍽️ Meal Plan Access Removed',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.Reminder]: {
-      title: '⏰ Reminder',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.System]: {
-      title: '🔔 System Notification',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-    [GQLNotificationType.Message]: {
-      title: '💬 New Message',
-      icon: '/favicons/android-chrome-192x192.png',
-    },
-  }
+  try {
+    switch (type) {
+      case GQLNotificationType.CoachingRequest:
+        return await notifyCoachingRequest(
+          userId,
+          additionalData?.senderName || 'Someone',
+        )
 
-  const config = notificationMap[type]
-  if (!config) {
-    console.warn(`No push notification config for type: ${type}`)
-    return
-  }
+      case GQLNotificationType.CoachingRequestAccepted:
+        return await notifyCoachingRequestAccepted(
+          userId,
+          additionalData?.senderName || 'Someone',
+        )
 
-  return await sendPushNotificationToUsers(
-    [userId],
-    config.title,
-    message,
-    link,
-    config.icon,
-  )
+      case GQLNotificationType.CoachingRequestRejected:
+        return await notifyCoachingRequestRejected(
+          userId,
+          additionalData?.senderName || 'Someone',
+        )
+
+      case GQLNotificationType.NewTrainingPlanAssigned:
+        return await notifyTrainingPlanAssigned(
+          userId,
+          additionalData?.planTitle || 'Training Plan',
+          additionalData?.senderName,
+        )
+
+      case GQLNotificationType.NewMealPlanAssigned:
+        return await notifyMealPlanAssigned(
+          userId,
+          additionalData?.planTitle || 'Meal Plan',
+          additionalData?.senderName,
+        )
+
+      case GQLNotificationType.CollaborationInvitation:
+        return await notifyCollaborationInvitation(
+          userId,
+          additionalData?.senderName || 'Someone',
+          additionalData?.planTitle || 'a plan',
+        )
+
+      case GQLNotificationType.CollaborationResponse:
+        // Note: This would need additional logic to determine if accepted/rejected
+        return await notifyCollaborationResponse(
+          userId,
+          additionalData?.senderName || 'Someone',
+          true, // Would need to pass this from context
+          additionalData?.planTitle || 'a plan',
+        )
+
+      case GQLNotificationType.System:
+      case GQLNotificationType.Reminder:
+      case GQLNotificationType.Message:
+        return await notifySystemAnnouncement([userId], 'Notification', message)
+
+      default:
+        console.warn(`No push notification handler for type: ${type}`)
+        return await notifySystemAnnouncement([userId], 'Notification', message)
+    }
+  } catch (error) {
+    console.error('Error sending push notification:', error)
+    return { success: false, error: 'Failed to send push notification' }
+  }
 }
 
-// Bulk push notifications for multiple users
+/**
+ * @deprecated Use sendBatchNotifications from push-notification-service instead
+ */
 export async function sendBulkPushNotifications(
   userIds: string[],
   title: string,
   message: string,
   link?: string,
 ) {
-  return await sendPushNotificationToUsers(userIds, title, message, link)
+  return await sendBatchNotifications([
+    {
+      userIds,
+      title,
+      message,
+      url: link,
+    },
+  ])
 }
 
-// Helper to extend your existing createNotification function
-export async function createNotificationWithPush(notification: {
-  userId: string
-  type: GQLNotificationType
-  message: string
-  link?: string
-  createdBy?: string
-  relatedItemId?: string
-}) {
-  // First create the regular notification using your existing system
-  // You would call your existing createNotification function here
-
-  // Then send push notification
-  await sendPushForNotification(
-    notification.userId,
-    notification.type,
-    notification.message,
-    notification.link,
-  )
-}
-
-// Workout reminder helper
+/**
+ * @deprecated Use specific notification functions from push-notification-service instead
+ */
 export async function sendWorkoutReminderPush(
   userId: string,
   workoutName: string,
   scheduledTime?: string,
 ) {
-  const message = scheduledTime
-    ? `Your ${workoutName} workout is scheduled for ${scheduledTime}. Ready to get stronger? 💪`
-    : `Time for your ${workoutName} workout! Ready to get stronger? 💪`
-
-  return await sendPushNotificationToUsers(
-    [userId],
-    '🏋️ Workout Reminder',
-    message,
-    '/fitspace/workouts',
-  )
+  return await notifyWorkoutReminder(userId, workoutName, scheduledTime)
 }
 
-// Meal reminder helper
+/**
+ * @deprecated Use specific notification functions from push-notification-service instead
+ */
 export async function sendMealReminderPush(
   userId: string,
   mealName: string,
   scheduledTime?: string,
 ) {
-  const message = scheduledTime
-    ? `Time to log your ${mealName}! Scheduled for ${scheduledTime}. 🍽️`
-    : `Don't forget to log your ${mealName}! 🍽️`
-
-  return await sendPushNotificationToUsers(
-    [userId],
-    '🍽️ Meal Reminder',
-    message,
-    '/fitspace/nutrition',
-  )
+  return await notifyMealReminder(userId, mealName, scheduledTime)
 }
