@@ -1,17 +1,47 @@
 // Basic service worker for PWA
-const CACHE_NAME = 'fitspace-v1'
-const urlsToCache = ['/', '/login']
+const CACHE_NAME = 'fitspace-v2' // Increment version
+const urlsToCache = [
+  '/login', // Remove '/' from cache to prevent stale CSS
+  '/manifest.json',
+  '/favicons/android-chrome-192x192.png',
+]
 
 self.addEventListener('install', (event) => {
+  // Force skip waiting for immediate activation
+  self.skipWaiting()
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache)),
   )
 })
 
+self.addEventListener('activate', (event) => {
+  // Clear old caches
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName)
+          }
+        }),
+      )
+    }),
+  )
+})
+
 self.addEventListener('fetch', (event) => {
+  // Don't cache the homepage or CSS files - let them load fresh
+  if (
+    event.request.url.includes('/_next/') ||
+    event.request.url.endsWith('/') ||
+    event.request.url.includes('.css')
+  ) {
+    event.respondWith(fetch(event.request))
+    return
+  }
+
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // Return cached version or fetch from network
       return response || fetch(event.request)
     }),
   )
