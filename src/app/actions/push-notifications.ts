@@ -75,7 +75,8 @@ export async function sendTestNotification(message: string) {
     const payload = JSON.stringify({
       title: '🏋️ Shaper Notification',
       body: message,
-      icon: '/icon-192x192.png',
+      icon: '/favicons/android-chrome-192x192.png',
+      badge: '/favicons/android-chrome-192x192.png',
       url: '/fitspace',
     })
 
