@@ -1665,15 +1665,20 @@ export enum GQLNotificationType {
   CoachingRequestRejected = 'COACHING_REQUEST_REJECTED',
   CollaborationInvitation = 'COLLABORATION_INVITATION',
   CollaborationResponse = 'COLLABORATION_RESPONSE',
+  ExerciseNoteAdded = 'EXERCISE_NOTE_ADDED',
+  ExerciseNoteReply = 'EXERCISE_NOTE_REPLY',
   MealPlanCollaboration = 'MEAL_PLAN_COLLABORATION',
   MealPlanCollaborationRemoved = 'MEAL_PLAN_COLLABORATION_REMOVED',
   Message = 'MESSAGE',
   NewMealPlanAssigned = 'NEW_MEAL_PLAN_ASSIGNED',
   NewTrainingPlanAssigned = 'NEW_TRAINING_PLAN_ASSIGNED',
+  PlanCompleted = 'PLAN_COMPLETED',
   Reminder = 'REMINDER',
   System = 'SYSTEM',
+  TrainerWorkoutCompleted = 'TRAINER_WORKOUT_COMPLETED',
   TrainingPlanCollaboration = 'TRAINING_PLAN_COLLABORATION',
-  TrainingPlanCollaborationRemoved = 'TRAINING_PLAN_COLLABORATION_REMOVED'
+  TrainingPlanCollaborationRemoved = 'TRAINING_PLAN_COLLABORATION_REMOVED',
+  WorkoutCompleted = 'WORKOUT_COMPLETED'
 }
 
 export type GQLOneRmEntry = {

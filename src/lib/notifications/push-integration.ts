@@ -12,9 +12,14 @@ import {
   notifyCoachingRequestRejected,
   notifyCollaborationInvitation,
   notifyCollaborationResponse,
+  notifyExerciseCommentReply,
   notifyMealPlanAssigned,
+  notifyPlanCompleted,
   notifySystemAnnouncement,
+  notifyTrainerExerciseNote,
+  notifyTrainerWorkoutCompleted,
   notifyTrainingPlanAssigned,
+  notifyWorkoutCompleted,
 } from './push-notification-service'
 // Legacy helper functions - use centralized service instead
 import {
@@ -29,7 +34,14 @@ export async function sendPushForNotification(
   type: GQLNotificationType,
   message: string,
   link?: string,
-  additionalData?: { senderName?: string; planTitle?: string },
+  additionalData?: {
+    senderName?: string
+    planTitle?: string
+    workoutType?: string
+    noteText?: string
+    clientName?: string
+    trainerName?: string
+  },
 ) {
   try {
     switch (type) {
@@ -79,6 +91,37 @@ export async function sendPushForNotification(
           additionalData?.senderName || 'Someone',
           true, // Would need to pass this from context
           additionalData?.planTitle || 'a plan',
+        )
+
+      // New coaching-related notifications
+      case GQLNotificationType.WorkoutCompleted:
+        return await notifyWorkoutCompleted(userId, additionalData?.workoutType)
+
+      case GQLNotificationType.PlanCompleted:
+        return await notifyPlanCompleted(
+          userId,
+          additionalData?.planTitle || 'Training Plan',
+        )
+
+      case GQLNotificationType.ExerciseNoteAdded:
+        return await notifyTrainerExerciseNote(
+          userId,
+          additionalData?.clientName || 'Client',
+          additionalData?.noteText || 'Added a note to their exercise',
+        )
+
+      case GQLNotificationType.ExerciseNoteReply:
+        return await notifyExerciseCommentReply(
+          userId,
+          additionalData?.senderName || 'Someone',
+          additionalData?.noteText || 'Replied to your exercise note',
+        )
+
+      case GQLNotificationType.TrainerWorkoutCompleted:
+        return await notifyTrainerWorkoutCompleted(
+          userId,
+          additionalData?.clientName || 'Client',
+          additionalData?.workoutType,
         )
 
       case GQLNotificationType.System:

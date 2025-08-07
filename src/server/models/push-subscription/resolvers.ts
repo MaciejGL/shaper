@@ -17,7 +17,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     if (!context.user) {
       throw new Error('Authentication required')
     }
-    return getPushSubscriptions(context.user.id, context)
+    return getPushSubscriptions(context.user.user.id, context)
   },
   pushSubscription: (_, { endpoint }, context) =>
     getPushSubscriptionByEndpoint(endpoint, context),
@@ -28,7 +28,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     if (!context.user) {
       throw new Error('Authentication required')
     }
-    return createPushSubscription(input, context.user.id, context)
+    return createPushSubscription(input, context.user.user.id, context)
   },
   updatePushSubscription: (_, { input }, context) =>
     updatePushSubscription(input, context),

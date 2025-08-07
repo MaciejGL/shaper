@@ -29,6 +29,7 @@ import {
   calculateTrainingDayScheduledDate,
   translateDayOfWeekForUser,
 } from '@/lib/date-utils'
+import { notifyTrainingPlanAssigned } from '@/lib/notifications/push-notification-service'
 import {
   CollaborationAction,
   checkTrainingPlanPermission,
@@ -1199,6 +1200,17 @@ export async function assignTrainingPlanToClient(
     },
     context,
   )
+
+  // Send push notification
+  try {
+    await notifyTrainingPlanAssigned(
+      clientId,
+      plan.title,
+      senderName || undefined,
+    )
+  } catch (error) {
+    console.error('Error sending push notification:', error)
+  }
 
   return true
 }

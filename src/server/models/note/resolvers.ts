@@ -5,6 +5,10 @@ import {
   GQLMutationResolvers,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
+import {
+  notifyExerciseCommentReply,
+  notifyTrainerExerciseNote,
+} from '@/lib/notifications/push-notification-service'
 import { GQLContext } from '@/types/gql-context'
 
 import Note from './model'
@@ -227,7 +231,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     const { exerciseId, note, shareWithTrainer } = input
 
-    // Verify the exercise belongs to the user's training plans
+    // Verify the exercise belongs to the user's training plans and get trainer info
     const exercise = await prisma.trainingExercise.findFirst({
       where: {
         id: exerciseId,
@@ -238,6 +242,26 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
                 { createdById: user.user.id },
                 { assignedToId: user.user.id },
               ],
+            },
+          },
+        },
+      },
+      include: {
+        day: {
+          include: {
+            week: {
+              include: {
+                plan: {
+                  include: {
+                    createdBy: true,
+                    assignedTo: {
+                      include: {
+                        profile: true,
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },
@@ -265,6 +289,21 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         },
       },
     })
+
+    // Send push notification to trainer if note is shared and user is a client
+    if (shareWithTrainer && exercise.day.week.plan) {
+      const plan = exercise.day.week.plan
+      const isClientNote = plan.assignedToId === user.user.id
+
+      if (isClientNote && plan.createdBy) {
+        const clientName =
+          user.user.profile?.firstName && user.user.profile?.lastName
+            ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
+            : user.user.name || 'Client'
+
+        await notifyTrainerExerciseNote(plan.createdBy.id, clientName, note)
+      }
+    }
 
     return new Note(newNote, context)
   },
@@ -329,6 +368,16 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         },
       },
     })
+
+    // Send push notification to the original note creator (if it's not the same person)
+    if (parentNote.createdById !== user.user.id) {
+      const senderName =
+        user.user.profile?.firstName && user.user.profile?.lastName
+          ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
+          : user.user.name || 'Someone'
+
+      await notifyExerciseCommentReply(parentNote.createdById, senderName, text)
+    }
 
     return new Note(reply, context)
   },

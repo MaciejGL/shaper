@@ -80,7 +80,7 @@ export function MobilePushSettings() {
         const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
 
         if (!vapidKey) {
-          toast.error('VAPID key not configured')
+          console.error('VAPID key not configured')
           return
         }
 
@@ -96,7 +96,7 @@ export function MobilePushSettings() {
         if (result.success) {
           setIsSubscribed(true)
           setNotifications({ pushNotifications: true })
-          toast.success('✅ Push notifications enabled!')
+          toast.success('Push notifications enabled!')
         } else {
           toast.error('Failed to enable push notifications: ' + result.error)
         }
@@ -110,7 +110,7 @@ export function MobilePushSettings() {
         if (result.success) {
           setIsSubscribed(false)
           setNotifications({ pushNotifications: false })
-          toast.success('✅ Push notifications disabled')
+          toast.success('Push notifications disabled')
         } else {
           toast.error('Failed to disable push notifications: ' + result.error)
         }
