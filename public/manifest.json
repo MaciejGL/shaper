@@ -1,6 +1,6 @@
 {
-  "name": "Shaper - Fitness & Nutrition Tracker",
-  "short_name": "Shaper",
+  "name": "Fitspace - Fitness & Nutrition Tracker",
+  "short_name": "Fitspace",
   "description": "Your personal fitness and nutrition tracking app",
   "id": "/",
   "start_url": "/fitspace",

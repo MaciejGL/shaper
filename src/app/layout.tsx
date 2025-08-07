@@ -73,7 +73,7 @@ export const metadata: Metadata = {
   applicationName: 'Fitspace',
   appleWebApp: {
     title: 'Fitspace',
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     capable: true,
     startupImage: ['/favicons/apple-touch-icon.png'],
   },
