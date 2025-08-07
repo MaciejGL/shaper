@@ -1,8 +1,8 @@
 // Basic service worker for PWA
-const CACHE_NAME = 'fitspace-v2' // Increment version
+const CACHE_NAME = 'fitspace-v6' // Increment version
 const urlsToCache = [
   '/',
-  '/manifest.json',
+  '/manifest.webmanifest',
   '/favicons/android-chrome-192x192.png',
 ]
 
