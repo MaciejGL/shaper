@@ -22,7 +22,7 @@ export function EmailForm({
       <Input
         id="email"
         value={email}
-        variant="ghost"
+        variant="secondary"
         onChange={onEmailChange}
         autoFocus
         placeholder="name@example.com"

@@ -34,7 +34,7 @@ export const LoginCard = () => {
   } = useLoginForm()
 
   return (
-    <Card className="flex flex-col gap-8 w-full max-w-md shadow-neuro-light dark:shadow-neuro-dark bg-white dark:bg-zinc-800">
+    <Card className="dark flex flex-col gap-8 w-full max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle>Login</CardTitle>
         <CardDescription>

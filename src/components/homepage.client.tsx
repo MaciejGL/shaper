@@ -71,14 +71,11 @@ export function HomepageClient() {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.1,
-      },
+      transition: {},
     },
   }
 
-  // Individual item animations
+  // Individual item animations with proper exit handling
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -107,7 +104,7 @@ export function HomepageClient() {
   // Feature card animations
   const featureVariants = {
     hidden: { opacity: 0, y: 20, scale: 0.95 },
-    visible: (i: number) => ({
+    visible: {
       opacity: 1,
       y: 0,
       scale: 1,
@@ -115,9 +112,8 @@ export function HomepageClient() {
         type: 'spring',
         stiffness: 150,
         damping: 20,
-        delay: 0.8 + i * 0.1,
       },
-    }),
+    },
     hover: {
       scale: 1.02,
       y: -2,
@@ -129,7 +125,7 @@ export function HomepageClient() {
     },
   }
 
-  // More subtle text animation variants
+  // More subtle text animation variants with persistence
   const subtleTextVariants = {
     hidden: { opacity: 0, y: 10 },
     visible: {
@@ -155,12 +151,10 @@ export function HomepageClient() {
       >
         {/* Hero Section */}
         <motion.section
-          key="hero-section-container"
           style={{ y: heroY }}
           className="min-h-screen flex flex-col items-center justify-center px-4 relative z-20"
         >
           <motion.div
-            key="hero-section-content"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -168,7 +162,6 @@ export function HomepageClient() {
           >
             {/* App Logo and Branding */}
             <motion.div
-              key="hero-section-content-logo"
               variants={itemVariants}
               className="flex flex-col items-center gap-6"
             >
@@ -176,7 +169,6 @@ export function HomepageClient() {
               <div className="space-y-4">
                 <AnimatedLogoText className="text-4xl text-white" />
                 <motion.p
-                  key="hero-section-content-description"
                   variants={itemVariants}
                   className="text-lg md:text-xl text-zinc-300 max-w-2xl leading-relaxed"
                 >
@@ -189,7 +181,6 @@ export function HomepageClient() {
 
             {/* Action Buttons */}
             <motion.div
-              key="hero-section-content-buttons"
               variants={itemVariants}
               className="flex flex-col gap-4 w-full max-w-sm"
             >
@@ -208,23 +199,18 @@ export function HomepageClient() {
 
         {/* Mockup Showcase Section */}
         <motion.section
-          key="mockup-section"
           ref={mockupSectionRef}
           style={{ y: mockupsY }}
           className="pb-24 pt-0 px-4 relative z-10"
         >
           <motion.div
-            key="mockup-section-content"
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, amount: 0.1 }}
+            variants={containerVariants}
             className="max-w-7xl mx-auto"
           >
-            <motion.div
-              key="mockup-section-content-title"
-              variants={itemVariants}
-              className="text-center mb-16"
-            >
+            <motion.div variants={itemVariants} className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">
                 Experience Fitspace
               </h2>
@@ -410,7 +396,6 @@ export function HomepageClient() {
                   key={`feature-${index}`}
                   variants={featureVariants}
                   whileHover="hover"
-                  custom={index}
                   initial="hidden"
                   whileInView="visible"
                   viewport={{ once: true, amount: 0.1 }}
