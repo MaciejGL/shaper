@@ -136,6 +136,11 @@ query FitspaceGetExercises {
         alias
         groupSlug
       }
+      secondaryMuscleGroups {
+        id
+        alias
+        groupSlug
+      }
     }
     trainerExercises {
       id
@@ -150,6 +155,11 @@ query FitspaceGetExercises {
         order
       }
       muscleGroups {
+        id
+        alias
+        groupSlug
+      }
+      secondaryMuscleGroups {
         id
         alias
         groupSlug
@@ -185,6 +195,11 @@ mutation FitspaceGetAiExerciseSuggestions($dayId: ID!) {
       equipment
       isPublic
       muscleGroups {
+        id
+        alias
+        groupSlug
+      }
+      secondaryMuscleGroups {
         id
         alias
         groupSlug

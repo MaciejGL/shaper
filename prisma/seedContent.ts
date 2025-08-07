@@ -1,5 +1,6 @@
 import { BaseExercise as BaseExerciseType } from '@prisma/client'
 
+import { MUSCLES_V2 } from '../src/constants/muscles-v2'
 import { prisma } from '../src/lib/db'
 
 type BaseExercise = Pick<
@@ -7,98 +8,30 @@ type BaseExercise = Pick<
   'name' | 'description' | 'equipment'
 > & { muscleGroupIds: string[] }
 
-export async function seedMuscleGroups() {
-  const muscleCategoriesAndGroups = [
-    {
-      name: 'Chest',
-      slug: 'chest',
-      muscles: [
-        { name: 'Pectoralis Major', alias: 'Chest', groupSlug: 'chest' },
-        { name: 'Pectoralis Minor', alias: 'Inner Chest', groupSlug: 'chest' },
-        { name: 'Serratus Anterior', alias: 'Serratus', groupSlug: 'chest' }, // Added for V2 exercises
-      ],
-    },
-    {
-      name: 'Back',
-      slug: 'back',
-      muscles: [
-        { name: 'Latissimus Dorsi', alias: 'Lats', groupSlug: 'back' },
-        { name: 'Trapezius', alias: 'Traps', groupSlug: 'back' },
-        { name: 'Rhomboids', alias: 'Rhomboids', groupSlug: 'back' },
-        { name: 'Erector Spinae', alias: 'Lower Back', groupSlug: 'back' },
-      ],
-    },
-    {
-      name: 'Arms',
-      slug: 'arms',
-      muscles: [
-        { name: 'Biceps Brachii', alias: 'Biceps', groupSlug: 'arms' },
-        { name: 'Triceps Brachii', alias: 'Triceps', groupSlug: 'arms' },
-        { name: 'Brachialis', alias: 'Brachialis', groupSlug: 'arms' },
-        { name: 'Forearms', alias: 'Forearms', groupSlug: 'arms' },
-      ],
-    },
-    {
-      name: 'Legs',
-      slug: 'legs',
-      muscles: [
-        { name: 'Quadriceps', alias: 'Quads', groupSlug: 'legs' },
-        { name: 'Hamstrings', alias: 'Hams', groupSlug: 'legs' },
-        { name: 'Gluteus Maximus', alias: 'Glutes', groupSlug: 'legs' },
-        { name: 'Adductors', alias: 'Inner Thigh', groupSlug: 'legs' },
-        { name: 'Abductors', alias: 'Hip Abductors', groupSlug: 'legs' }, // Added for V2 exercises
-        { name: 'Calves', alias: 'Calves', groupSlug: 'legs' },
-        { name: 'Shin', alias: 'Shin', groupSlug: 'legs' },
-      ],
-    },
-    {
-      name: 'Shoulders',
-      slug: 'shoulders',
-      muscles: [
-        {
-          name: 'Deltoid Anterior',
-          alias: 'Front Delts',
-          groupSlug: 'shoulders',
-        },
-        {
-          name: 'Deltoid Lateral',
-          alias: 'Side Delts',
-          groupSlug: 'shoulders',
-        },
-        {
-          name: 'Deltoid Posterior',
-          alias: 'Rear Delts',
-          groupSlug: 'shoulders',
-        },
-      ],
-    },
-    {
-      name: 'Core',
-      slug: 'core',
-      muscles: [
-        { name: 'Rectus Abdominis', alias: 'Abs', groupSlug: 'core' },
-        { name: 'Obliques', alias: 'Obliques', groupSlug: 'core' },
-        { name: 'Transverse Abdominis', alias: 'Deep Core', groupSlug: 'core' },
-      ],
-    },
-    {
-      name: 'Neck',
-      slug: 'neck',
-      muscles: [
-        {
-          name: 'Anterior',
-          alias: 'Anterior',
-          groupSlug: 'neck',
-        },
-        {
-          name: 'Posterior',
-          alias: 'Posterior',
-          groupSlug: 'neck',
-        },
-      ],
-    },
+export async function seedMuscleGroupsV2() {
+  // Create categories based on muscles-v2.ts structure
+  const muscleCategoriesV2 = [
+    { name: 'Chest', slug: 'chest' },
+    { name: 'Upper Back', slug: 'upper-back' },
+    { name: 'Lower Back', slug: 'lower-back' },
+    { name: 'Shoulders', slug: 'shoulders' },
+    { name: 'Biceps', slug: 'biceps' },
+    { name: 'Triceps', slug: 'triceps' },
+    { name: 'Forearms', slug: 'forearms' },
+    { name: 'Quads', slug: 'quads' },
+    { name: 'Hamstrings', slug: 'hamstrings' },
+    { name: 'Glutes', slug: 'glutes' },
+    { name: 'Calves', slug: 'calves' },
+    { name: 'Core', slug: 'core' },
+    { name: 'Hip Adductors', slug: 'hip-adductors' },
+    { name: 'Hip Abductors', slug: 'hip-abductors' },
+    { name: 'Neck', slug: 'neck' },
+    { name: 'Stabilizers', slug: 'stabilizers' },
   ]
-  for (const cat of muscleCategoriesAndGroups) {
+
+  // Create muscle group categories
+  const categoryMap: Record<string, string> = {}
+  for (const cat of muscleCategoriesV2) {
     const category = await prisma.muscleGroupCategory.upsert({
       where: { slug: cat.slug },
       update: {
@@ -110,28 +43,36 @@ export async function seedMuscleGroups() {
         slug: cat.slug,
       },
     })
-
-    for (const muscle of cat.muscles) {
-      await prisma.muscleGroup.upsert({
-        where: { name: muscle.name },
-        update: {
-          name: muscle.name,
-          alias: muscle.alias,
-          groupSlug: muscle.groupSlug,
-          categoryId: category.id,
-        },
-        create: {
-          name: muscle.name,
-          alias: muscle.alias,
-          groupSlug: muscle.groupSlug,
-          categoryId: category.id,
-        },
-      })
-      console.info(`Added/Updated MuscleGroup: ${muscle.name}`)
-    }
-
+    categoryMap[cat.name] = category.id
     console.info(`Added/Updated MuscleGroupCategory: ${cat.name}`)
   }
+
+  // Create muscle groups using data from muscles-v2.ts
+  for (const muscle of MUSCLES_V2) {
+    await prisma.muscleGroup.upsert({
+      where: { id: muscle.id },
+      update: {
+        name: muscle.name,
+        alias: muscle.alias,
+        groupSlug: muscle.groupSlug,
+        categoryId: categoryMap[muscle.group],
+        isPrimary: muscle.isPrimary !== false, // Default to true if not specified
+      },
+      create: {
+        id: muscle.id, // Use specific ID from muscles-v2.ts
+        name: muscle.name,
+        alias: muscle.alias,
+        groupSlug: muscle.groupSlug,
+        categoryId: categoryMap[muscle.group],
+        isPrimary: muscle.isPrimary !== false, // Default to true if not specified
+      },
+    })
+    console.info(`Added/Updated MuscleGroup: ${muscle.name} (${muscle.alias})`)
+  }
+
+  console.info(
+    `Seeded ${MUSCLES_V2.length} muscle groups across ${muscleCategoriesV2.length} categories`,
+  )
 }
 
 export async function seedBaseExercisesChest() {

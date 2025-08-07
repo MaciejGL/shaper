@@ -126,7 +126,7 @@ export function ExerciseCard({
             <div className="flex flex-wrap gap-1">
               {exercise.equipment && (
                 <Badge
-                  variant="outline"
+                  variant="equipment"
                   className="capitalize"
                   isLoading={isLoading}
                 >
@@ -148,17 +148,16 @@ export function ExerciseCard({
             </div>
             <div className="flex flex-wrap gap-1">
               {exercise.muscleGroups.slice(0, 3).map((muscle) => (
-                <Badge
-                  key={muscle.id}
-                  variant="secondary"
-                  isLoading={isLoading}
-                >
+                <Badge key={muscle.id} variant="muscle" isLoading={isLoading}>
                   {muscle.alias ?? muscle.name}
                 </Badge>
               ))}
-              {exercise.muscleGroups.length > 3 && (
+              {[...exercise.muscleGroups, ...exercise.secondaryMuscleGroups]
+                .length > 3 && (
                 <Badge variant="outline" isLoading={isLoading}>
-                  +{exercise.muscleGroups.length - 3}
+                  +
+                  {[...exercise.muscleGroups, ...exercise.secondaryMuscleGroups]
+                    .length - 3}
                 </Badge>
               )}
             </div>

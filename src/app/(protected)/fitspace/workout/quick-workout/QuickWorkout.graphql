@@ -19,6 +19,12 @@ query QuickWorkoutExercises($where: ExerciseWhereInput) {
       alias
       groupSlug
     }
+    secondaryMuscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
   }
 
   publicExercises(where: $where) {
@@ -35,6 +41,12 @@ query QuickWorkoutExercises($where: ExerciseWhereInput) {
       order
     }
     muscleGroups {
+      id
+      name
+      alias
+      groupSlug
+    }
+    secondaryMuscleGroups {
       id
       name
       alias

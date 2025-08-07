@@ -159,7 +159,7 @@ function PrimaryTabList<T extends string>({
         <Button
           key={option.value}
           data-value={option.value}
-          variant="link"
+          variant="variantless"
           size="lg"
           onClick={() => onClick(option.value)}
           className={cn(

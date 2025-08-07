@@ -143,6 +143,7 @@ function NavbarUser({ user }: { user?: UserWithSession | null }) {
 }
 
 function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
+  const isProduction = process.env.NODE_ENV === 'production'
   return (
     <Drawer direction="right">
       <DrawerTrigger asChild>
@@ -193,9 +194,11 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
             label="Logout"
           />
         </div>
-        <DrawerFooter>
-          <SwapAccountButton />
-        </DrawerFooter>
+        {!isProduction && (
+          <DrawerFooter>
+            <SwapAccountButton />
+          </DrawerFooter>
+        )}
       </DrawerContent>
     </Drawer>
   )
@@ -203,6 +206,7 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
 
 function ClientNavbar({ user }: { user?: UserWithSession | null }) {
   const [isOpen, setIsOpen] = useState(false)
+  const isProduction = process.env.NODE_ENV === 'production'
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -288,10 +292,14 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
               label="Logout"
             />
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <div className="flex flex-col gap-2 px-4 py-4">
-            <SwapAccountButton />
-          </div>
+          {!isProduction && (
+            <>
+              <DropdownMenuSeparator />
+              <div className="flex flex-col gap-2 px-4 py-4">
+                <SwapAccountButton />
+              </div>
+            </>
+          )}
         </DropdownProvider>
       </DropdownMenuContent>
     </DropdownMenu>

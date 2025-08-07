@@ -56,40 +56,40 @@ model UserSession {
 }
 
 model UserProfile {
-  id            String            @id @default(uuid())
-  userId        String            @unique
-  firstName     String?
-  lastName      String?
-  phone         String?
-  birthday      DateTime?
-  sex           String?
-  avatarUrl     String?
-  activityLevel String?
-  bio           String?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  allergies     String?
-  fitnessLevel  String?
-  height        Float?
-  weight        Float?
-  goals         String[]
+  id                         String            @id @default(uuid())
+  userId                     String            @unique
+  firstName                  String?
+  lastName                   String?
+  phone                      String?
+  birthday                   DateTime?
+  sex                        String?
+  avatarUrl                  String?
+  activityLevel              String?
+  bio                        String?
+  createdAt                  DateTime          @default(now())
+  updatedAt                  DateTime          @updatedAt
+  allergies                  String?
+  fitnessLevel               String?
+  height                     Float?
+  weight                     Float?
+  goals                      String[]
   // User Preferences
-  weekStartsOn  Int?              @default(1) // 0 = Sunday, 1 = Monday
-  weightUnit    String?           @default("kg") // "kg" | "lbs"
-  heightUnit    String?           @default("cm") // "cm" | "ft"
-  theme         String?           @default("system") // "light" | "dark" | "system"
-  timeFormat    String?           @default("24h") // "12h" | "24h"
-  trainingView  String?           @default("advanced") // "simple" | "advanced"
+  weekStartsOn               Int?              @default(1) // 0 = Sunday, 1 = Monday
+  weightUnit                 String?           @default("kg") // "kg" | "lbs"
+  heightUnit                 String?           @default("cm") // "cm" | "ft"
+  theme                      String?           @default("system") // "light" | "dark" | "system"
+  timeFormat                 String?           @default("24h") // "12h" | "24h"
+  trainingView               String?           @default("advanced") // "simple" | "advanced"
   // Notification Preferences
-  workoutReminders              Boolean? @default(true)
-  mealReminders                 Boolean? @default(true)
-  progressUpdates               Boolean? @default(true)
-  collaborationNotifications    Boolean? @default(true)
-  systemNotifications           Boolean? @default(true)
-  emailNotifications            Boolean? @default(true)
-  pushNotifications             Boolean? @default(false) // Disabled for now as requested
-  bodyMeasures  UserBodyMeasure[]
-  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workoutReminders           Boolean?          @default(true)
+  mealReminders              Boolean?          @default(true)
+  progressUpdates            Boolean?          @default(true)
+  collaborationNotifications Boolean?          @default(true)
+  systemNotifications        Boolean?          @default(true)
+  emailNotifications         Boolean?          @default(true)
+  pushNotifications          Boolean?          @default(false) // Disabled for now as requested
+  bodyMeasures               UserBodyMeasure[]
+  user                       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model UserBodyMeasure {
@@ -295,37 +295,38 @@ model ExerciseSetLog {
 }
 
 model BaseExercise {
-  id                     String                   @id @default(uuid())
+  id                     String   @id @default(uuid())
   name                   String
   description            String?
   videoUrl               String?
   equipment              String?
   createdById            String?
-  isPublic               Boolean                  @default(false)
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
+  isPublic               Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
   additionalInstructions String?
   type                   String?
 
   // V2 Exercise Integration Fields
-  version                Int                      @default(1) // 1 = manual, 2 = imported
-  dataSource             String?                              // "exercemus", "manual", etc.
-  sourceId               String?                              // Original ID from source
-  importedAt             DateTime?                            // When imported
-  difficulty             String?                              // "beginner", "intermediate", "advanced"
-  instructions           String?                              // JSON array of step-by-step instructions
-  tips                   String?                              // JSON array of exercise tips
-  
-  // Premium Feature for Subscriptions
-  isPremium              Boolean                  @default(false) // Premium exercises for paid plans
+  version      Int       @default(1) // 1 = manual, 2 = imported
+  dataSource   String? // "exercemus", "manual", etc.
+  sourceId     String? // Original ID from source
+  importedAt   DateTime? // When imported
+  difficulty   String? // "beginner", "intermediate", "advanced"
+  instructions String? // JSON array of step-by-step instructions
+  tips         String? // JSON array of exercise tips
 
-  createdBy              User?                    @relation(fields: [createdById], references: [id])
-  substitutes            BaseExerciseSubstitute[] @relation("OriginalExercise")
-  substitutedBy          BaseExerciseSubstitute[] @relation("SubstituteExercise")
-  trainingExercises      TrainingExercise[]
+  // Premium Feature for Subscriptions
+  isPremium Boolean @default(false) // Premium exercises for paid plans
+
+  createdBy                 User?                      @relation(fields: [createdById], references: [id])
+  substitutes               BaseExerciseSubstitute[]   @relation("OriginalExercise")
+  substitutedBy             BaseExerciseSubstitute[]   @relation("SubstituteExercise")
+  trainingExercises         TrainingExercise[]
   favouriteWorkoutExercises FavouriteWorkoutExercise[]
-  muscleGroups           MuscleGroup[]            @relation("ExerciseMuscleGroups")
-  images                 Image[]                  @relation("ExerciseImages")
+  muscleGroups              MuscleGroup[]              @relation("ExerciseMuscleGroups")
+  secondaryMuscleGroups     MuscleGroup[]              @relation("ExerciseSecondaryMuscleGroups")
+  images                    Image[]                    @relation("ExerciseImages")
 
   @@index([version])
   @@index([dataSource])
@@ -351,15 +352,16 @@ model Image {
 }
 
 model MuscleGroup {
-  id         String              @id @default(uuid())
-  name       String              @unique
-  alias      String?
-  groupSlug  String
-  isPrimary  Boolean             @default(true)
-  createdAt  DateTime            @default(now())
-  categoryId String
-  category   MuscleGroupCategory @relation(fields: [categoryId], references: [id])
-  exercises  BaseExercise[]      @relation("ExerciseMuscleGroups")
+  id                 String              @id @default(uuid())
+  name               String              @unique
+  alias              String?
+  groupSlug          String
+  isPrimary          Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  categoryId         String
+  category           MuscleGroupCategory @relation(fields: [categoryId], references: [id])
+  exercises          BaseExercise[]      @relation("ExerciseMuscleGroups")
+  secondaryExercises BaseExercise[]      @relation("ExerciseSecondaryMuscleGroups")
 }
 
 model MuscleGroupCategory {
@@ -743,41 +745,41 @@ model FavouriteWorkout {
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
-  createdBy   User     @relation("CreatedFavouriteWorkouts", fields: [createdById], references: [id])
-  exercises   FavouriteWorkoutExercise[]
-  
+
+  createdBy User                       @relation("CreatedFavouriteWorkouts", fields: [createdById], references: [id])
+  exercises FavouriteWorkoutExercise[]
+
   @@index([createdById])
 }
 
 model FavouriteWorkoutExercise {
-  id                     String            @id @default(uuid())
-  name                   String
-  order                  Int
-  baseId                 String?
-  favouriteWorkoutId     String
-  restSeconds            Int?
-  instructions           String?
-  
-  base                   BaseExercise?     @relation(fields: [baseId], references: [id])
-  favouriteWorkout       FavouriteWorkout  @relation(fields: [favouriteWorkoutId], references: [id], onDelete: Cascade)
-  sets                   FavouriteWorkoutSet[]
-  
+  id                 String  @id @default(uuid())
+  name               String
+  order              Int
+  baseId             String?
+  favouriteWorkoutId String
+  restSeconds        Int?
+  instructions       String?
+
+  base             BaseExercise?         @relation(fields: [baseId], references: [id])
+  favouriteWorkout FavouriteWorkout      @relation(fields: [favouriteWorkoutId], references: [id], onDelete: Cascade)
+  sets             FavouriteWorkoutSet[]
+
   @@index([favouriteWorkoutId])
   @@index([baseId])
 }
 
 model FavouriteWorkoutSet {
-  id          String   @id @default(uuid())
-  order       Int
-  reps        Int?
-  minReps     Int?
-  maxReps     Int?
-  weight      Float?
-  rpe         Int?
-  exerciseId  String
-  
-  exercise    FavouriteWorkoutExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-  
+  id         String @id @default(uuid())
+  order      Int
+  reps       Int?
+  minReps    Int?
+  maxReps    Int?
+  weight     Float?
+  rpe        Int?
+  exerciseId String
+
+  exercise FavouriteWorkoutExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
   @@index([exerciseId])
 }

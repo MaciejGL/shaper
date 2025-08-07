@@ -51,6 +51,11 @@ export const Query: GQLQueryResolvers<GQLContext> = {
             category: true,
           },
         },
+        secondaryMuscleGroups: {
+          include: {
+            category: true,
+          },
+        },
       },
     })
 
@@ -91,6 +96,11 @@ export const Query: GQLQueryResolvers<GQLContext> = {
             category: true,
           },
         },
+        secondaryMuscleGroups: {
+          include: {
+            category: true,
+          },
+        },
       },
     })
 
@@ -115,6 +125,11 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         include: {
           images: true,
           muscleGroups: {
+            include: {
+              category: true,
+            },
+          },
+          secondaryMuscleGroups: {
             include: {
               category: true,
             },
@@ -157,6 +172,11 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       include: {
         images: true,
         muscleGroups: {
+          include: {
+            category: true,
+          },
+        },
+        secondaryMuscleGroups: {
           include: {
             category: true,
           },
@@ -323,6 +343,19 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       },
     })
 
+    // Get secondary muscle groups if provided
+    let secondaryMuscleGroups: { id: string }[] = []
+    if (input.secondaryMuscleGroups?.length) {
+      const secondaryMuscleGroupsData = await prisma.muscleGroup.findMany({
+        where: {
+          id: { in: input.secondaryMuscleGroups },
+        },
+      })
+      secondaryMuscleGroups = secondaryMuscleGroupsData.map((mg) => ({
+        id: mg.id,
+      }))
+    }
+
     // Create the exercise first
     const exercise = await prisma.baseExercise.create({
       data: {
@@ -332,6 +365,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         equipment: input.equipment,
         muscleGroups: {
           connect: muscleGroups.map((mg) => ({ id: mg.id })),
+        },
+        secondaryMuscleGroups: {
+          connect: secondaryMuscleGroups,
         },
         createdBy: {
           connect: {
@@ -409,6 +445,21 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       },
     })
 
+    // Get secondary muscle groups if provided
+    let secondaryMuscleGroups: { id: string }[] = []
+    if (input.secondaryMuscleGroups !== undefined) {
+      if (input.secondaryMuscleGroups?.length) {
+        const secondaryMuscleGroupsData = await prisma.muscleGroup.findMany({
+          where: {
+            id: { in: input.secondaryMuscleGroups },
+          },
+        })
+        secondaryMuscleGroups = secondaryMuscleGroupsData.map((mg) => ({
+          id: mg.id,
+        }))
+      }
+    }
+
     // Update the exercise
     await prisma.baseExercise.update({
       where: { id },
@@ -420,6 +471,11 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         muscleGroups: {
           set: muscleGroups.map((mg) => ({ id: mg.id })),
         },
+        ...(input.secondaryMuscleGroups !== undefined && {
+          secondaryMuscleGroups: {
+            set: secondaryMuscleGroups,
+          },
+        }),
       },
     })
 

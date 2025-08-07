@@ -1,13 +1,14 @@
 import { PrismaClient } from '@prisma/client'
 
 import {
-  seedBaseExercisesArms,
-  seedBaseExercisesBack,
-  seedBaseExercisesChest,
-  seedBaseExercisesCore,
-  seedBaseExercisesLegs,
-  seedBaseExercisesShoulders,
-  seedMuscleGroups,
+  // seedBaseExercisesArms,
+  // seedBaseExercisesBack,
+  // seedBaseExercisesChest,
+  // seedBaseExercisesCore,
+  // seedBaseExercisesLegs,
+  // seedBaseExercisesShoulders,
+  // seedMuscleGroups,
+  seedMuscleGroupsV2,
 } from './seedContent'
 
 const prisma = new PrismaClient()
@@ -53,20 +54,20 @@ async function main() {
   console.info('Updating training exercises...')
   // await updateTrainingExercises()
 
-  console.info('Seeding muscle groups...')
-  await seedMuscleGroups()
-  console.info('Seeding chest exercises...')
-  await seedBaseExercisesChest()
-  console.info('Seeding back exercises...')
-  await seedBaseExercisesBack()
-  console.info('Seeding arms exercises...')
-  await seedBaseExercisesArms()
-  console.info('Seeding legs exercises...')
-  await seedBaseExercisesLegs()
-  console.info('Seeding shoulders exercises...')
-  await seedBaseExercisesShoulders()
-  console.info('Seeding core exercises...')
-  await seedBaseExercisesCore()
+  console.info('Seeding muscle groups V2...')
+  await seedMuscleGroupsV2()
+  // console.info('Seeding chest exercises...')
+  // await seedBaseExercisesChest()
+  // console.info('Seeding back exercises...')
+  // await seedBaseExercisesBack()
+  // console.info('Seeding arms exercises...')
+  // await seedBaseExercisesArms()
+  // console.info('Seeding legs exercises...')
+  // await seedBaseExercisesLegs()
+  // console.info('Seeding shoulders exercises...')
+  // await seedBaseExercisesShoulders()
+  // console.info('Seeding core exercises...')
+  // await seedBaseExercisesCore()
 
   console.info('Seeding complete')
 }

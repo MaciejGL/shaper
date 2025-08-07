@@ -255,6 +255,7 @@ export type GQLBaseExercise = {
   muscleGroupCategories: EntireFieldWrapper<Array<GQLMuscleGroupCategory>>;
   muscleGroups: EntireFieldWrapper<Array<GQLMuscleGroup>>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
+  secondaryMuscleGroups: EntireFieldWrapper<Array<GQLMuscleGroup>>;
   sourceId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   substitutes: EntireFieldWrapper<Array<GQLBaseExerciseSubstitute>>;
   tips?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -358,6 +359,7 @@ export type GQLCreateExerciseInput = {
   imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
+  secondaryMuscleGroups?: InputMaybe<Array<Scalars['ID']['input']>>;
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
@@ -2229,6 +2231,7 @@ export type GQLUpdateExerciseInput = {
   imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+  secondaryMuscleGroups?: InputMaybe<Array<Scalars['ID']['input']>>;
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
@@ -3052,6 +3055,7 @@ export type GQLBaseExerciseResolvers<ContextType = GQLContext, ParentType extend
   muscleGroupCategories?: Resolver<Array<GQLResolversTypes['MuscleGroupCategory']>, ParentType, ContextType>;
   muscleGroups?: Resolver<Array<GQLResolversTypes['MuscleGroup']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  secondaryMuscleGroups?: Resolver<Array<GQLResolversTypes['MuscleGroup']>, ParentType, ContextType>;
   sourceId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   substitutes?: Resolver<Array<GQLResolversTypes['BaseExerciseSubstitute']>, ParentType, ContextType>;
   tips?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;

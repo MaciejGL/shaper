@@ -210,7 +210,16 @@ const placeholderExercises = [
         groupSlug: 'quads',
       },
     ],
+    secondaryMuscleGroups: [
+      {
+        id: '3',
+        name: 'Hamstrings',
+        alias: 'Hamstrings',
+        groupSlug: 'hamstrings',
+      },
+    ],
   },
+
   {
     id: '2',
     name: 'Deadlift',
@@ -226,6 +235,14 @@ const placeholderExercises = [
         name: 'Quadriceps',
         alias: 'Quads',
         groupSlug: 'quads',
+      },
+    ],
+    secondaryMuscleGroups: [
+      {
+        id: '3',
+        name: 'Hamstrings',
+        alias: 'Hamstrings',
+        groupSlug: 'hamstrings',
       },
     ],
   },
@@ -244,6 +261,14 @@ const placeholderExercises = [
         name: 'Quadriceps',
         alias: 'Quads',
         groupSlug: 'quads',
+      },
+    ],
+    secondaryMuscleGroups: [
+      {
+        id: '3',
+        name: 'Hamstrings',
+        alias: 'Hamstrings',
+        groupSlug: 'hamstrings',
       },
     ],
   },
