@@ -23,10 +23,8 @@ export const viewport: Viewport = {
   themeColor: '#000000',
   width: 'device-width',
   initialScale: 1,
-  // Allow zoom for better camera functionality (important for camera focus)
   maximumScale: 5,
   userScalable: true,
-  // Change from 'cover' to 'contain' to respect safe areas
   viewportFit: 'contain',
 }
 
@@ -75,9 +73,9 @@ export const metadata: Metadata = {
   applicationName: 'Fitspace',
   appleWebApp: {
     title: 'Fitspace',
-    // Change from 'black-translucent' to 'default'
     statusBarStyle: 'default',
     capable: true,
+    startupImage: ['/favicons/apple-touch-icon.png'],
   },
   manifest: '/manifest.json',
   other: {
