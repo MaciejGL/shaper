@@ -1,6 +1,10 @@
 // Basic service worker for PWA
 const CACHE_NAME = 'fitspace-v2' // Increment version
-const urlsToCache = ['/manifest.json', '/favicons/android-chrome-192x192.png']
+const urlsToCache = [
+  '/',
+  '/manifest.json',
+  '/favicons/android-chrome-192x192.png',
+]
 
 self.addEventListener('install', (event) => {
   // Force skip waiting for immediate activation
@@ -21,24 +25,6 @@ self.addEventListener('activate', (event) => {
           }
         }),
       )
-    }),
-  )
-})
-
-self.addEventListener('fetch', (event) => {
-  // Don't cache the homepage or CSS files - let them load fresh
-  if (
-    event.request.url.includes('/_next/') ||
-    event.request.url.endsWith('/') ||
-    event.request.url.includes('.css')
-  ) {
-    event.respondWith(fetch(event.request))
-    return
-  }
-
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request)
     }),
   )
 })
