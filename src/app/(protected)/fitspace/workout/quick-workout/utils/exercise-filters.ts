@@ -12,6 +12,7 @@ import { Exercise } from '../components/exercise-card'
  */
 type GraphQLExercise = Pick<GQLBaseExercise, 'id' | 'name' | 'equipment'> & {
   muscleGroups: Pick<GQLMuscleGroup, 'id' | 'alias' | 'groupSlug'>[]
+  secondaryMuscleGroups?: Pick<GQLMuscleGroup, 'id' | 'alias' | 'groupSlug'>[]
   images: Pick<GQLImage, 'id' | 'url' | 'order'>[]
 }
 
@@ -37,11 +38,17 @@ export function filterExercises({
         ex.muscleGroups.some((group) =>
           group.alias?.toLowerCase().includes(searchTermLower),
         ) ||
+        ex.secondaryMuscleGroups?.some((group) =>
+          group.alias?.toLowerCase().includes(searchTermLower),
+        ) ||
         ex.equipment?.toLowerCase().includes(searchTermLower)
 
       const matchesMuscleGroup =
         selectedMuscleGroups.length === 0 ||
         ex.muscleGroups.some(
+          (group) => group.alias && selectedMuscleGroups.includes(group.alias),
+        ) ||
+        ex.secondaryMuscleGroups?.some(
           (group) => group.alias && selectedMuscleGroups.includes(group.alias),
         )
 
@@ -57,6 +64,11 @@ export function filterExercises({
       equipment: ex.equipment,
       images: ex.images,
       muscleGroups: ex.muscleGroups.map((mg) => ({
+        id: mg.id,
+        alias: mg.alias,
+        groupSlug: mg.groupSlug,
+      })),
+      secondaryMuscleGroups: ex.secondaryMuscleGroups?.map((mg) => ({
         id: mg.id,
         alias: mg.alias,
         groupSlug: mg.groupSlug,

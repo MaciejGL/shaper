@@ -34,14 +34,14 @@ export default function TrainerExercisesPage() {
   const categories = muscleGroupCategories?.muscleGroupCategories
 
   return (
-    <div className="container @container/section">
+    <div className="container @container/section mx-auto">
       <Header setIsCreateDialogOpen={setIsCreateDialogOpen} />
 
       <div className="space-y-6">
         <ExerciseSearch />
 
         <Tabs defaultValue="all">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 max-w-full overflow-x-auto hide-scrollbar">
             <TabsList>
               <TabsTrigger value="all">All</TabsTrigger>
               {categories?.map((category) => (

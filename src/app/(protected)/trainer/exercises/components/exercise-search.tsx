@@ -64,7 +64,7 @@ export function ExerciseSearch() {
         />
       </div>
       <Select value={selectedEquipment} onValueChange={setSelectedEquipment}>
-        <SelectTrigger className="min-w-48">
+        <SelectTrigger className="min-w-48" variant="ghost">
           <SelectValue placeholder="Equipment" />
         </SelectTrigger>
         <SelectContent>

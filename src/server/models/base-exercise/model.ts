@@ -89,6 +89,9 @@ export default class BaseExercise implements GQLBaseExercise {
       muscleGroups: (PrismaMuscleGroup & {
         category: PrismaMuscleGroupCategory
       })[]
+      secondaryMuscleGroups?: (PrismaMuscleGroup & {
+        category: PrismaMuscleGroupCategory
+      })[]
       images?: PrismaImage[]
       substitutes?: (PrismaBaseExerciseSubstitute & {
         substitute: PrismaBaseExercise & {
@@ -195,6 +198,15 @@ export default class BaseExercise implements GQLBaseExercise {
       )
       throw new GraphQLError('No muscle groups found for exercise')
     }
+  }
+
+  async secondaryMuscleGroups() {
+    if (this.data.secondaryMuscleGroups?.length) {
+      return this.data.secondaryMuscleGroups.map((muscleGroup) => {
+        return new MuscleGroup(muscleGroup, this.context)
+      })
+    }
+    return []
   }
 
   async muscleGroupCategories() {

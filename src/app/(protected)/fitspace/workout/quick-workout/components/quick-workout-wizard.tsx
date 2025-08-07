@@ -250,7 +250,7 @@ export function QuickWorkoutWizard({
           <div className="py-2 max-w-screen-sm mx-auto">
             <div className="flex justify-between gap-4">
               <Button
-                variant="secondary"
+                variant="tertiary"
                 onClick={prevStep}
                 disabled={
                   isOnLanding ||
@@ -259,7 +259,7 @@ export function QuickWorkoutWizard({
                     (!workoutFlow || !onFlowChange))
                 }
                 className={cn(
-                  'flex-1 bg-transparent transition-opacity',
+                  'flex-1 transition-opacity',
                   (isOnLanding ||
                     (currentStep === 0 &&
                       !hasExistingWorkout &&
@@ -280,7 +280,7 @@ export function QuickWorkoutWizard({
                   variant={
                     currentSteps[currentStep].id === 'ai-parameters'
                       ? 'gradient'
-                      : 'secondary'
+                      : 'default'
                   }
                   disabled={!canProceedFromStep(currentStep)}
                   className="flex-1"

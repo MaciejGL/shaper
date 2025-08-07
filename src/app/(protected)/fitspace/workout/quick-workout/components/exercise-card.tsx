@@ -13,6 +13,7 @@ import { translateEquipment } from '@/utils/translate-equipment'
 
 export type Exercise = Pick<GQLBaseExercise, 'id' | 'name' | 'equipment'> & {
   muscleGroups: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
+  secondaryMuscleGroups?: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
   completedAt?: string | null
   images: Pick<GQLImage, 'id' | 'url' | 'order'>[]
 }
@@ -98,8 +99,21 @@ export function ExerciseCard({
             </Badge>
           )}
 
+          {/* Primary muscle groups */}
           {exercise.muscleGroups.map((group) => (
             <Badge key={group.id} variant="muscle" size="xs">
+              {group.alias}
+            </Badge>
+          ))}
+
+          {/* Secondary muscle groups with different styling */}
+          {exercise.secondaryMuscleGroups?.map((group) => (
+            <Badge
+              key={group.id}
+              variant="outline"
+              size="xs"
+              className="border-orange-200 text-orange-600 bg-orange-50"
+            >
               {group.alias}
             </Badge>
           ))}
