@@ -26,8 +26,8 @@ export const viewport: Viewport = {
   // Allow zoom for better camera functionality (important for camera focus)
   maximumScale: 5,
   userScalable: true,
-  // Improve camera rendering on mobile
-  viewportFit: 'cover',
+  // Change from 'cover' to 'contain' to respect safe areas
+  viewportFit: 'contain',
 }
 
 export const metadata: Metadata = {
@@ -75,7 +75,8 @@ export const metadata: Metadata = {
   applicationName: 'Fitspace',
   appleWebApp: {
     title: 'Fitspace',
-    statusBarStyle: 'black-translucent',
+    // Change from 'black-translucent' to 'default'
+    statusBarStyle: 'default',
     capable: true,
   },
   manifest: '/manifest.json',
