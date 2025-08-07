@@ -1,8 +1,8 @@
 // Basic service worker for PWA
-const CACHE_NAME = 'fitspace-v6' // Increment version
+const CACHE_NAME = 'fitspace-v7' // Increment version to force cache refresh
 const urlsToCache = [
   '/',
-  '/manifest.webmanifest',
+  '/manifest.json',
   '/favicons/android-chrome-192x192.png',
 ]
 
@@ -10,7 +10,17 @@ self.addEventListener('install', (event) => {
   // Force skip waiting for immediate activation
   self.skipWaiting()
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache)),
+    caches.open(CACHE_NAME).then((cache) => {
+      // Add URLs individually to handle failures gracefully
+      return Promise.allSettled(
+        urlsToCache.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn(`Failed to cache ${url}:`, err)
+            return null
+          }),
+        ),
+      )
+    }),
   )
 })
 

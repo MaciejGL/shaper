@@ -1,7 +1,7 @@
-import type { MetadataRoute } from 'next'
+import { NextResponse } from 'next/server'
 
-export default function manifest(): MetadataRoute.Manifest {
-  return {
+export async function GET() {
+  const manifest = {
     name: 'Fitspace - Fitness & Nutrition Tracker',
     short_name: 'Fitspace',
     description: 'Your personal fitness and nutrition tracking app',
@@ -43,20 +43,6 @@ export default function manifest(): MetadataRoute.Manifest {
         purpose: 'maskable',
       },
     ],
-    screenshots: [
-      {
-        src: '/screenshot-desktop.png',
-        sizes: '1280x720',
-        type: 'image/png',
-        form_factor: 'wide',
-      },
-      {
-        src: '/screenshot-mobile.png',
-        sizes: '375x667',
-        type: 'image/png',
-        form_factor: 'narrow',
-      },
-    ],
     shortcuts: [
       {
         name: 'Log Workout',
@@ -71,19 +57,13 @@ export default function manifest(): MetadataRoute.Manifest {
           },
         ],
       },
-      {
-        name: 'Track Nutrition',
-        short_name: 'Nutrition',
-        description: 'Quick access to track your meals',
-        url: '/fitspace/nutrition',
-        icons: [
-          {
-            src: '/favicons/android-chrome-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-        ],
-      },
     ],
   }
+
+  return NextResponse.json(manifest, {
+    headers: {
+      'Content-Type': 'application/manifest+json',
+      'Cache-Control': 'public, max-age=3600, immutable',
+    },
+  })
 }

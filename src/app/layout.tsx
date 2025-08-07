@@ -77,7 +77,7 @@ export const metadata: Metadata = {
     capable: true,
     startupImage: ['/favicons/apple-touch-icon.png'],
   },
-  manifest: '/manifest.webmanifest',
+  manifest: '/manifest.json',
 }
 
 export default function RootLayout({
@@ -87,6 +87,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Explicit manifest link for better PWA support */}
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+      </head>
       <body
         className={`${inter.variable} ${interTight.variable} antialiased min-h-svh`}
       >
@@ -96,12 +107,26 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                    })
-                    .catch((registrationError) => {
-                      console.log('SW registration failed: ', registrationError);
+                  const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
+                  
+                  if (isLocalhost) {
+                    // Clear old caches in development to avoid manifest caching issues
+                    navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
+                    if (window.caches) {
+                      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+                    }
+                    
+                    // Register SW after clearing
+                    setTimeout(() => {
+                      navigator.serviceWorker.register('/sw.js').catch((err) => {
+                        console.log('SW registration failed: ', err);
+                      });
+                    }, 100);
+                  } else {
+                    navigator.serviceWorker.register('/sw.js').catch((err) => {
+                      console.log('SW registration failed: ', err);
                     });
+                  }
                 });
               }
             `,
