@@ -147,17 +147,36 @@ export function ExerciseCard({
               )}
             </div>
             <div className="flex flex-wrap gap-1">
-              {exercise.muscleGroups.slice(0, 3).map((muscle) => (
-                <Badge key={muscle.id} variant="muscle" isLoading={isLoading}>
-                  {muscle.alias ?? muscle.name}
-                </Badge>
-              ))}
-              {[...exercise.muscleGroups, ...exercise.secondaryMuscleGroups]
-                .length > 3 && (
+              {/* Show first 3 muscle groups (primary + secondary) */}
+              {[
+                ...exercise.muscleGroups,
+                ...(exercise.secondaryMuscleGroups ?? []),
+              ]
+                .slice(0, 3)
+                .map((muscle, index) => (
+                  <Badge
+                    key={muscle.id}
+                    variant={
+                      index < exercise.muscleGroups.length
+                        ? 'muscle'
+                        : 'secondary'
+                    }
+                    isLoading={isLoading}
+                  >
+                    {muscle.alias ?? muscle.name}
+                  </Badge>
+                ))}
+              {/* Show "+X more" badge if there are more than 3 total muscle groups */}
+              {[
+                ...exercise.muscleGroups,
+                ...(exercise.secondaryMuscleGroups ?? []),
+              ].length > 3 && (
                 <Badge variant="outline" isLoading={isLoading}>
                   +
-                  {[...exercise.muscleGroups, ...exercise.secondaryMuscleGroups]
-                    .length - 3}
+                  {[
+                    ...exercise.muscleGroups,
+                    ...(exercise.secondaryMuscleGroups ?? []),
+                  ].length - 3}
                 </Badge>
               )}
             </div>

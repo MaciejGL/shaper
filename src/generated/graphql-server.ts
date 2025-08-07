@@ -359,7 +359,7 @@ export type GQLCreateExerciseInput = {
   imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name: Scalars['String']['input'];
-  secondaryMuscleGroups?: InputMaybe<Array<Scalars['ID']['input']>>;
+  secondaryMuscleGroups: Array<Scalars['ID']['input']>;
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };
@@ -2231,7 +2231,7 @@ export type GQLUpdateExerciseInput = {
   imageUrls?: InputMaybe<Array<Scalars['String']['input']>>;
   muscleGroups: Array<Scalars['ID']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
-  secondaryMuscleGroups?: InputMaybe<Array<Scalars['ID']['input']>>;
+  secondaryMuscleGroups: Array<Scalars['ID']['input']>;
   substituteIds?: InputMaybe<Array<Scalars['ID']['input']>>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
 };

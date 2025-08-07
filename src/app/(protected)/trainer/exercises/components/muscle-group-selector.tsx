@@ -121,7 +121,7 @@ export function MuscleGroupSelector({
   )
 
   return (
-    <div className="space-y-6 flex gap-4 w-full">
+    <div className="flex gap-4 w-full">
       {renderMuscleSection(
         'Primary Muscle Groups',
         'Main muscles targeted by this exercise',
