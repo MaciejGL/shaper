@@ -25,7 +25,10 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Access-Control-Allow-Origin',
-            value: 'https://fit-space.app',
+            value:
+              process.env.NODE_ENV === 'development'
+                ? '*'
+                : 'https://hypertro.app',
           },
           {
             key: 'Access-Control-Allow-Methods',

@@ -85,6 +85,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const isDevelopment = process.env.NODE_ENV === 'development'
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -101,6 +103,9 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${interTight.variable} antialiased min-h-svh`}
       >
+        {isDevelopment && (
+          <div className="fixed top-0 left-0 size-2 rounded-full bg-red-500 z-50"></div>
+        )}
         <Providers>{children}</Providers>
         <script
           dangerouslySetInnerHTML={{
