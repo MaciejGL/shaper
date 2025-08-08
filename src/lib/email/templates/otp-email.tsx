@@ -15,14 +15,14 @@ interface OtpEmailProps {
 }
 
 export const OtpEmail = ({ code, userName }: OtpEmailProps) => (
-  <EmailWrapper previewText={`Your Fitspace login code: ${code}`}>
-    <EmailHeader brandName="Fitspace" />
+  <EmailWrapper previewText={`Your Hypertro login code: ${code}`}>
+    <EmailHeader brandName="Hypertro" />
     <EmailContent>
       <EmailHeading size={2}>
         {userName ? `Hello ${userName}! 👋` : 'Hello! 👋'}
       </EmailHeading>
 
-      <EmailText center>Your Fitspace login code</EmailText>
+      <EmailText center>Your Hypertro login code</EmailText>
 
       <EmailHeading size={1} center>
         {code}
@@ -40,9 +40,9 @@ export const OtpEmail = ({ code, userName }: OtpEmailProps) => (
       <EmailText size={5}>
         Stay fit! 💪
         <br />
-        <strong>The Fitspace Team</strong>
+        <strong>The Hypertro Team</strong>
       </EmailText>
     </EmailContent>
-    <EmailFooter companyName="Fitspace" />
+    <EmailFooter companyName="Hypertro" />
   </EmailWrapper>
 )
