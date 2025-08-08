@@ -4,8 +4,8 @@ import { render } from '@react-email/render'
 import { resend } from './resend'
 import { OtpEmail } from './templates/otp-email'
 
-const NO_REPLY_EMAIL = 'noreply@fit-space.app'
-const NO_REPLY_NAME = 'Fitspace'
+const NO_REPLY_EMAIL = 'noreply@hypertro.app'
+const NO_REPLY_NAME = 'Hypertro'
 
 const FROM_EMAIL = `${NO_REPLY_NAME} <${NO_REPLY_EMAIL}>`
 
@@ -19,7 +19,7 @@ export const sendEmail = {
     await resend.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: 'Your Fitspace Login Code',
+      subject: 'Your Hypertro Login Code',
       html,
     })
   },
