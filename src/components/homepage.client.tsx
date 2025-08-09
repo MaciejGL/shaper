@@ -212,10 +212,10 @@ export function HomepageClient() {
           >
             <motion.div variants={itemVariants} className="text-center mb-16">
               <h2 className="text-3xl md:text-5xl font-bold mb-4 text-white">
-                Experience Fitspace
+                Experience Hypertro
               </h2>
               <p className="text-lg text-zinc-300 max-w-2xl mx-auto">
-                See how Fitspace transforms your fitness journey with powerful
+                See how Hypertro transforms your fitness journey with powerful
                 features
               </p>
             </motion.div>
@@ -236,7 +236,7 @@ export function HomepageClient() {
                 >
                   <Image
                     src="/mockup-front.png"
-                    alt="Fitspace Mobile App Front View"
+                    alt="Hypertro Mobile App Front View"
                     width={400}
                     height={800}
                     quality={95}
@@ -276,7 +276,7 @@ export function HomepageClient() {
                 >
                   <Image
                     src="/mockup-angle.png"
-                    alt="Fitspace Mobile App Angle View"
+                    alt="Hypertro Mobile App Angle View"
                     width={450}
                     height={900}
                     quality={95}
@@ -316,7 +316,7 @@ export function HomepageClient() {
                 >
                   <Image
                     src="/mockup-side.png"
-                    alt="Fitspace Mobile App Side View"
+                    alt="Hypertro Mobile App Side View"
                     width={400}
                     height={800}
                     quality={95}
@@ -364,7 +364,7 @@ export function HomepageClient() {
               className="text-center mb-12"
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">
-                Why Choose Fitspace?
+                Why Choose Hypertro?
               </h2>
               <p className="text-zinc-300">
                 Everything you need to transform your fitness journey
@@ -448,7 +448,7 @@ export function HomepageClient() {
               className="text-lg text-zinc-300 mb-8"
             >
               Join thousands of users who have already started their fitness
-              journey with Fitspace
+              journey with Hypertro
             </motion.p>
             <motion.div
               key="cta-section-content-button"

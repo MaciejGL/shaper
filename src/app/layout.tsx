@@ -29,7 +29,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Fitspace',
+  title: 'Hypertro',
   description: 'The best way to get fit and find new friends.',
   icons: {
     icon: [
@@ -57,22 +57,22 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Fitspace',
+    title: 'Hypertro',
     description: 'Your personal fitness coach',
     images: ['/favicons/android-chrome-192x192.png'],
   },
   openGraph: {
-    title: 'Fitspace',
+    title: 'Hypertro',
     description: 'Your personal fitness coach',
     images: ['/favicons/android-chrome-192x192.png'],
   },
   alternates: {
-    canonical: 'https://fit-space.app',
+    canonical: 'https://hypertro.app',
   },
-  metadataBase: new URL('https://fit-space.app'),
-  applicationName: 'Fitspace',
+  metadataBase: new URL('https://hypertro.app'),
+  applicationName: 'Hypertro',
   appleWebApp: {
-    title: 'Fitspace',
+    title: 'Hypertro',
     statusBarStyle: 'black-translucent',
     capable: true,
     startupImage: ['/favicons/apple-touch-icon.png'],

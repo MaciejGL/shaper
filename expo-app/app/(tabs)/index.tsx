@@ -8,7 +8,7 @@ export default function HypertroWebView() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
       <WebView
-        source={{ uri: 'https://fit-space.app' }}
+        source={{ uri: 'https://hypertro.app' }}
         style={styles.webview}
         javaScriptEnabled={true}
         domStorageEnabled={true}

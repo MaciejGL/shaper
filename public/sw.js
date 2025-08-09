@@ -1,5 +1,5 @@
 // Basic service worker for PWA
-const CACHE_NAME = 'fitspace-v7' // Increment version to force cache refresh
+const CACHE_NAME = 'hypertro-v7' // Increment version to force cache refresh
 const urlsToCache = [
   '/',
   '/manifest.json',

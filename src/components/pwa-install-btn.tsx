@@ -135,7 +135,7 @@ export function PWAInstallButton({
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="font-semibold text-lg mb-4 text-white">
-              Install Fitspace
+              Install Hypertro
             </h3>
             <div className="space-y-3 text-sm text-muted-foreground">
               <div className="flex items-center gap-3">
@@ -159,7 +159,7 @@ export function PWAInstallButton({
                   3
                 </div>
                 <p>
-                  Tap <strong>"Add"</strong> to install Fitspace
+                  Tap <strong>"Add"</strong> to install Hypertro
                 </p>
               </div>
             </div>

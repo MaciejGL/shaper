@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, Variants } from 'framer-motion'
+import { Variants, motion } from 'framer-motion'
 
 import { cn } from '@/lib/utils'
 
@@ -39,7 +39,7 @@ export function AnimatedLogo({
         ease: 'easeOut',
       },
     },
-  } 
+  }
 
   // Animation variants for the paths with smooth stroke drawing effect
   const pathVariants: Variants = {
@@ -68,7 +68,7 @@ export function AnimatedLogo({
         },
       },
     }),
-  } 
+  }
 
   return (
     <div className="flex flex-col items-center justify-center gap-6">
@@ -156,7 +156,7 @@ export function AnimatedLogoText({ className }: { className?: string }) {
       }}
       className={cn('text-md font-medium', className)}
     >
-      {'Fitspace'.split('').map((letter, index) => (
+      {'Hypertro'.split('').map((letter, index) => (
         <motion.span
           key={index}
           variants={{
