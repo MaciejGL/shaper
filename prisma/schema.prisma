@@ -43,6 +43,7 @@ model User {
   profile                          UserProfile?
   sessions                         UserSession[]
   pushSubscriptions                PushSubscription[]
+  mobilePushTokens                 MobilePushToken[]
 }
 
 model UserSession {
@@ -164,6 +165,23 @@ model PushSubscription {
 
   @@index([userId])
   @@index([endpoint])
+}
+
+model MobilePushToken {
+  id                      String   @id @default(uuid())
+  userId                  String?  // Nullable for anonymous tokens
+  expoPushToken           String   @unique
+  platform                String   // "ios" or "android"
+  deviceInfo              String?  // JSON string with device details
+  pushNotificationsEnabled Boolean @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  lastActiveAt            DateTime @default(now())
+  user                    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expoPushToken])
+  @@index([pushNotificationsEnabled])
 }
 
 model TrainingPlan {

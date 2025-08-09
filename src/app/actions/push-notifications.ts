@@ -3,6 +3,7 @@
 import webpush from 'web-push'
 
 import { getCurrentUser } from '@/lib/getUser'
+import { sendMobilePushNotifications } from '@/lib/notifications/mobile-push-service'
 import { getAllPushSubscriptionsForNotification } from '@/server/models/push-subscription/factory'
 import {
   createPushSubscription,
@@ -155,6 +156,63 @@ export async function sendPushNotificationToUsers(
   icon?: string,
 ) {
   try {
+    // Send to both web and mobile platforms in parallel
+    const [webResults, mobileResults] = await Promise.allSettled([
+      // Web push notifications (existing system)
+      sendWebPushNotifications(userIds, title, body, url, icon),
+      // Mobile push notifications (new system)
+      sendMobilePushNotifications({
+        userIds,
+        title,
+        body,
+        data: { url: url || '/fitspace' },
+      }),
+    ])
+
+    // Aggregate results
+    const webStats =
+      webResults.status === 'fulfilled'
+        ? webResults.value
+        : { sent: 0, failed: 0, total: 0 }
+    const mobileStats =
+      mobileResults.status === 'fulfilled'
+        ? mobileResults.value
+        : { sent: 0, failed: 0, total: 0 }
+
+    const totalSent = webStats.sent + mobileStats.sent
+    const totalFailed = webStats.failed + mobileStats.failed
+    const totalAttempted = webStats.total + (mobileStats.total ?? 0)
+
+    console.info(
+      `📧 Push notifications sent: ${totalSent}/${totalAttempted} total (Web: ${webStats.sent}/${webStats.total}, Mobile: ${mobileStats.sent}/${mobileStats.total})`,
+    )
+
+    return {
+      success: true,
+      sent: totalSent,
+      failed: totalFailed,
+      total: totalAttempted,
+      breakdown: {
+        web: webStats,
+        mobile: mobileStats,
+      },
+      message: `Sent to ${totalSent} devices${totalFailed > 0 ? `, ${totalFailed} failed` : ''}`,
+    }
+  } catch (error) {
+    console.error('❌ Error sending push notifications:', error)
+    return { success: false, error: 'Failed to send push notifications' }
+  }
+}
+
+// Separate web push function (extracted from original)
+async function sendWebPushNotifications(
+  userIds: string[],
+  title: string,
+  body: string,
+  url?: string,
+  icon?: string,
+) {
+  try {
     // Get push subscriptions for specific users
     const subscriptions = await getAllPushSubscriptionsForNotification(userIds)
 
@@ -164,8 +222,8 @@ export async function sendPushNotificationToUsers(
     )
 
     if (enabledSubscriptions.length === 0) {
-      console.info('No users with push notifications enabled')
-      return { success: true, sent: 0, message: 'No enabled subscriptions' }
+      console.info('No web users with push notifications enabled')
+      return { success: true, sent: 0, failed: 0, total: 0 }
     }
 
     const payload = JSON.stringify({
@@ -197,23 +255,21 @@ export async function sendPushNotificationToUsers(
 
     if (failedResults.length > 0) {
       failedResults.forEach((result, index) => {
-        console.error(`Push notification ${index + 1} failed:`, result.reason)
+        console.error(
+          `Web push notification ${index + 1} failed:`,
+          result.reason,
+        )
       })
     }
-
-    console.info(
-      `📧 Sent push notifications to ${successful}/${enabledSubscriptions.length} users`,
-    )
 
     return {
       success: true,
       sent: successful,
       failed,
       total: enabledSubscriptions.length,
-      message: `Sent to ${successful} users${failed > 0 ? `, ${failed} failed` : ''}`,
     }
   } catch (error) {
-    console.error('❌ Error sending push notifications:', error)
-    return { success: false, error: 'Failed to send push notifications' }
+    console.error('❌ Error sending web push notifications:', error)
+    return { success: false, sent: 0, failed: 0, total: 0 }
   }
 }

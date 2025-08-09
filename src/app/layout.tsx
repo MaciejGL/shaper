@@ -106,6 +106,7 @@ export default function RootLayout({
         {isDevelopment && (
           <div className="fixed top-0 left-0 size-2 rounded-full bg-red-500 z-50"></div>
         )}
+
         <Providers>{children}</Providers>
         <script
           dangerouslySetInnerHTML={{

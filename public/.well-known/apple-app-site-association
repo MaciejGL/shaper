@@ -1,0 +1,22 @@
+{
+  "applinks": {
+    "details": [
+      {
+        "appIDs": [
+          "TEAMID.app.hypertro.mobile"
+        ],
+        "components": [
+          {
+            "/": "*",
+            "comment": "Matches all paths - universal links for entire app"
+          }
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "TEAMID.app.hypertro.mobile"
+    ]
+  }
+}
