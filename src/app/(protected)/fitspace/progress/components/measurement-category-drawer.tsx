@@ -6,6 +6,7 @@ import {
   SimpleDrawerContent,
 } from '@/components/ui/drawer'
 import { GQLBodyMeasuresQuery } from '@/generated/graphql-client'
+import { useDynamicUnitResolver } from '@/hooks/use-dynamic-unit-resolver'
 import { cn } from '@/lib/utils'
 
 import { MeasurementChart } from './measurement-chart'
@@ -40,6 +41,7 @@ export function MeasurementCategoryDrawer({
 
   const { getLatestMeasurement, getTrend } =
     useBodyMeasurements(filteredMeasurements)
+  const { resolveUnit } = useDynamicUnitResolver()
 
   // If focusField is provided, show only that specific field, otherwise show all category fields
   const fieldsToShow = focusField
@@ -68,12 +70,13 @@ export function MeasurementCategoryDrawer({
             )}
           >
             {fieldsToShow.map((field) => {
+              const resolvedUnit = resolveUnit(field.key, field.unit)
               return (
                 <StatCard
                   key={field.key}
                   label={field.label}
                   value={getLatestMeasurement(field.key)}
-                  unit={field.unit}
+                  unit={resolvedUnit}
                   trend={getTrend(field.key)}
                   size={focusField ? 'default' : 'sm'}
                   isOnCard
@@ -84,17 +87,20 @@ export function MeasurementCategoryDrawer({
 
           {/* Charts for fields with enough data */}
           {hasData &&
-            fieldsToShow.map((field) => (
-              <div key={field.key}>
-                <h3 className="font-semibold mb-3">{field.label} Progress</h3>
-                <MeasurementChart
-                  measurements={filteredMeasurements}
-                  field={field.key}
-                  label={field.label}
-                  unit={field.unit}
-                />
-              </div>
-            ))}
+            fieldsToShow.map((field) => {
+              const resolvedUnit = resolveUnit(field.key, field.unit)
+              return (
+                <div key={field.key}>
+                  <h3 className="font-semibold mb-3">{field.label} Progress</h3>
+                  <MeasurementChart
+                    measurements={filteredMeasurements}
+                    field={field.key}
+                    label={field.label}
+                    unit={resolvedUnit}
+                  />
+                </div>
+              )
+            })}
 
           {/* Recent History */}
           <div>

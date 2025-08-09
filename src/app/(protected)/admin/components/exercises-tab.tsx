@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
+import { safeDownload } from '@/lib/download-utils'
 
 interface ExerciseStats {
   totalExercises: number
@@ -59,6 +60,7 @@ interface ImportProgress {
 export function ExercisesTab() {
   const [stats, setStats] = useState<ExerciseStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isDownloading, setIsDownloading] = useState(false)
   const [importProgress, setImportProgress] = useState<ImportProgress>({
     isRunning: false,
     type: null,
@@ -91,26 +93,24 @@ export function ExercisesTab() {
   }
 
   const downloadExercemusData = async () => {
+    if (isDownloading) return // Prevent multiple downloads
+
     try {
+      setIsDownloading(true)
       setError(null)
       const response = await fetch('/api/admin/exercises/download-exercemus')
       if (!response.ok) {
         throw new Error('Failed to download exercemus data')
       }
       const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'exercemus-exercises.json'
-      document.body.appendChild(a)
-      a.click()
-      window.URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      safeDownload(blob, 'exercemus-exercises.json')
 
       // Refresh stats after download
       fetchStats()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Download failed')
+    } finally {
+      setIsDownloading(false)
     }
   }
 
@@ -345,10 +345,11 @@ export function ExercisesTab() {
               <Button
                 onClick={downloadExercemusData}
                 variant="outline"
-                disabled={importProgress.isRunning}
+                disabled={importProgress.isRunning || isDownloading}
+                loading={isDownloading}
               >
                 <Download className="h-4 w-4 mr-2" />
-                Download JSON
+                {isDownloading ? 'Downloading...' : 'Download JSON'}
               </Button>
             </div>
 

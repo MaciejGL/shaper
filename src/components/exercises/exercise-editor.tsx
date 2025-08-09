@@ -49,6 +49,7 @@ import {
 } from '@/components/ui/table'
 import { Textarea } from '@/components/ui/textarea'
 import { GQLEquipment } from '@/generated/graphql-client'
+import { downloadJsonFile } from '@/lib/download-utils'
 import { translateEquipment } from '@/utils/translate-equipment'
 
 interface Exercise {
@@ -210,7 +211,7 @@ export function ExerciseEditor({
     exercise: null,
     isDeleting: false,
   })
-
+  const [isExporting, setIsExporting] = useState(false)
   const fetchExercises = useCallback(async () => {
     try {
       setLoading(true)
@@ -376,28 +377,24 @@ export function ExerciseEditor({
   }
 
   const exportExercises = async () => {
+    if (isExporting) return // Prevent multiple exports
+
     try {
+      setIsExporting(true)
       const response = await fetch(`${apiEndpoint}?page=1&limit=10000`)
       if (!response.ok) {
         throw new Error('Failed to fetch exercises for export')
       }
 
       const data = await response.json()
-      const blob = new Blob([JSON.stringify(data.exercises, null, 2)], {
-        type: 'application/json',
-      })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `exercises-export-${new Date().toISOString().split('T')[0]}.json`
-      document.body.appendChild(a)
-      a.click()
-      URL.revokeObjectURL(url)
-      document.body.removeChild(a)
+      const filename = `exercises-export-${new Date().toISOString().split('T')[0]}.json`
+      downloadJsonFile(data.exercises, filename)
     } catch (err) {
       setError(
         err instanceof Error ? err.message : 'Failed to export exercises',
       )
+    } finally {
+      setIsExporting(false)
     }
   }
 
@@ -435,9 +432,15 @@ export function ExerciseEditor({
           <p className="text-muted-foreground">Total: {totalItems} exercises</p>
         </div>
         <div className="flex items-center space-x-2">
-          <Button onClick={exportExercises} variant="outline" size="sm">
+          <Button
+            onClick={exportExercises}
+            variant="outline"
+            size="sm"
+            disabled={isExporting}
+            loading={isExporting}
+          >
             <Download className="h-4 w-4 mr-2" />
-            Export
+            {isExporting ? 'Exporting...' : 'Export'}
           </Button>
           {hasChanges && (
             <>

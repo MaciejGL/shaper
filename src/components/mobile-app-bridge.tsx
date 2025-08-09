@@ -27,7 +27,7 @@
  * }
  * ```
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 interface NativeAppAPI {
   onNavigate: (path: string) => void
@@ -53,8 +53,13 @@ export function useMobileApp() {
   const [platform, setPlatform] = useState<
     'ios' | 'android' | 'expo' | 'web' | undefined
   >()
+  const initRef = useRef(false)
 
   useEffect(() => {
+    // Prevent double initialization in React Strict Mode
+    if (initRef.current) return
+    initRef.current = true
+
     // Check if running in native app
     const isNative = window.isNativeApp === true
     const currentPlatform = window.mobilePlatform
@@ -67,6 +72,11 @@ export function useMobileApp() {
         platform: currentPlatform,
         environment: window.appEnvironment,
       })
+    }
+
+    // Cleanup function
+    return () => {
+      initRef.current = false
     }
   }, [])
 

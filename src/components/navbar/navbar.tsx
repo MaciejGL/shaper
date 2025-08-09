@@ -157,6 +157,7 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
               firstName={user?.user.profile?.firstName ?? ''}
               lastName={user?.user.profile?.lastName ?? ''}
               sex={user?.user.profile?.sex}
+              withFallbackAvatar
             />
             <div>{user?.user.email}</div>
           </div>
@@ -216,7 +217,8 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
           iconOnly={
             <UserAvatar
               className="size-8"
-              imageUrl={user?.user.profile?.avatarUrl}
+              withFallbackAvatar
+              // imageUrl={user?.user.profile?.avatarUrl}
               firstName={user?.user.profile?.firstName ?? ''}
               lastName={user?.user.profile?.lastName ?? ''}
               sex={user?.user.profile?.sex}

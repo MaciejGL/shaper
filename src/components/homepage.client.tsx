@@ -6,7 +6,6 @@ import Image from 'next/image'
 import { useRef } from 'react'
 
 import { AnimatedLogo, AnimatedLogoText } from '@/components/animated-logo'
-import { PWAInstallButton } from '@/components/pwa-install-btn'
 import { ButtonLink } from '@/components/ui/button-link'
 
 import { Card } from './ui/card'
@@ -184,12 +183,6 @@ export function HomepageClient() {
               variants={itemVariants}
               className="flex flex-col gap-4 w-full max-w-sm"
             >
-              <PWAInstallButton
-                variant="secondary"
-                size="lg"
-                className="w-full"
-                showOnMobile={true}
-              />
               <ButtonLink href="/login" className="w-full" size="lg">
                 Get Started
               </ButtonLink>
