@@ -1,6 +1,8 @@
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 
+import { MobileAppAuthSync } from '@/components/mobile-app-auth-sync'
+import { MobileAppThemeSync } from '@/components/mobile-app-theme-sync'
 import { ThemeProvider } from '@/components/theme-provider'
 import { UserProvider } from '@/context/user-context'
 import { UserPreferencesProvider } from '@/context/user-preferences-context'
@@ -28,6 +30,8 @@ export default async function ProtectedLayout({
           enableSystem
           disableTransitionOnChange={false}
         >
+          <MobileAppAuthSync />
+          <MobileAppThemeSync />
           {children}
         </ThemeProvider>
       </UserPreferencesProvider>

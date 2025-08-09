@@ -2,22 +2,10 @@
  * Theme Manager Hook
  * Manages status bar and navigation bar styling based on web app theme
  */
+// Import expo-navigation-bar for Android navigation bar theming
+import * as NavigationBar from 'expo-navigation-bar'
 import { useCallback, useState } from 'react'
 import { Platform, StatusBar } from 'react-native'
-
-// Optional: expo-navigation-bar for Android navigation bar theming
-// Install with: npm install expo-navigation-bar
-let NavigationBar: {
-  setBackgroundColorAsync: (color: string) => Promise<void>
-  setButtonStyleAsync: (style: string) => Promise<void>
-} | null = null
-try {
-  NavigationBar = require('expo-navigation-bar')
-} catch (error) {
-  console.warn(
-    '📱 expo-navigation-bar not installed. Android navigation bar theming will be skipped.',
-  )
-}
 
 export type AppTheme = 'light' | 'dark'
 
@@ -60,8 +48,8 @@ export function useThemeManager() {
         StatusBar.setBackgroundColor(colors.statusBarBackground, true)
       }
 
-      // Update Android navigation bar (if expo-navigation-bar is installed)
-      if (Platform.OS === 'android' && NavigationBar) {
+      // Update Android navigation bar
+      if (Platform.OS === 'android') {
         try {
           await NavigationBar.setBackgroundColorAsync(
             colors.navigationBarBackground,

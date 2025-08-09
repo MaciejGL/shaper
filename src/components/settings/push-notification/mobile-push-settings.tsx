@@ -1,13 +1,10 @@
 'use client'
 
-import { Bell, X } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Bell, BellOff, Download, Settings, Smartphone } from 'lucide-react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 
-import {
-  subscribeUser,
-  unsubscribeUser,
-} from '@/app/actions/push-notifications'
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -16,115 +13,135 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Switch } from '@/components/ui/switch'
 import { useUserPreferences } from '@/context/user-preferences-context'
-import {
-  convertPushSubscription,
-  registerServiceWorker,
-  urlBase64ToUint8Array,
-} from '@/lib/push-notifications/utils'
 
 import { NotificationPreferences } from './notification-preferences'
 
 /**
- * Mobile-specific push notification settings
- * Includes subscription toggle and full notification management
+ * Native Mobile App Push Notification Settings
+ * Only works in the native mobile app - prompts web users to download app
  */
 export function MobilePushSettings() {
   const { preferences, setNotifications } = useUserPreferences()
-  const [isSubscribed, setIsSubscribed] = useState(false)
+  const {
+    isNativeApp,
+    requestPushPermissions,
+    checkPushPermissions,
+    disablePushPermissions,
+    capabilities,
+  } = useMobileApp()
   const [isLoading, setIsLoading] = useState(false)
-  const [permissionState, setPermissionState] =
-    useState<NotificationPermission>('default')
 
   const pushEnabled = preferences.notifications?.pushNotifications ?? false
 
-  useEffect(() => {
-    checkPermission()
-    checkSubscription()
-  }, [])
-
-  async function checkPermission() {
-    if ('Notification' in window) {
-      setPermissionState(Notification.permission)
+  const handleEnablePushNotifications = async () => {
+    if (!isNativeApp) {
+      toast.error('Push notifications are only available in the mobile app')
+      return
     }
-  }
 
-  async function checkSubscription() {
-    try {
-      const registration = await navigator.serviceWorker.ready
-      const subscription = await registration.pushManager.getSubscription()
-      setIsSubscribed(!!subscription)
-    } catch (error) {
-      console.error('Error checking subscription:', error)
-    }
-  }
-
-  async function handlePushToggle(enabled: boolean) {
     setIsLoading(true)
-
     try {
-      if (enabled) {
-        // Request permission and subscribe
-        const permission = await Notification.requestPermission()
-        setPermissionState(permission)
-
-        if (permission !== 'granted') {
-          toast.error('Push notification permission denied')
-          return
-        }
-
-        // Ensure service worker is registered
-        await registerServiceWorker()
-        const registration = await navigator.serviceWorker.ready
-        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
-
-        if (!vapidKey) {
-          console.error('VAPID key not configured')
-          return
-        }
-
-        const subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(vapidKey),
-        })
-
-        const result = await subscribeUser(
-          convertPushSubscription(subscription),
-        )
-
-        if (result.success) {
-          setIsSubscribed(true)
-          setNotifications({ pushNotifications: true })
-          toast.success('Push notifications enabled!')
-        } else {
-          toast.error('Failed to enable push notifications: ' + result.error)
-        }
-      } else {
-        // Unsubscribe
-        const registration = await navigator.serviceWorker.ready
-        const subscription = await registration.pushManager.getSubscription()
-        await subscription?.unsubscribe()
-
-        const result = await unsubscribeUser()
-        if (result.success) {
-          setIsSubscribed(false)
-          setNotifications({ pushNotifications: false })
-          toast.success('Push notifications disabled')
-        } else {
-          toast.error('Failed to disable push notifications: ' + result.error)
-        }
-      }
+      await requestPushPermissions()
+      setNotifications({ pushNotifications: true })
+      // The mobile app will handle the success/error messaging
     } catch (error) {
-      console.error('Error toggling push notifications:', error)
-      toast.error(
-        `Failed to update push notifications: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      )
+      console.error('Error enabling push notifications:', error)
+      toast.error('Failed to enable push notifications')
     } finally {
       setIsLoading(false)
     }
   }
 
+  const handleCheckPermissions = async () => {
+    if (!isNativeApp) {
+      toast.error('Permission check is only available in the mobile app')
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      await checkPushPermissions()
+      toast.success('Checking permissions status...')
+    } catch (error) {
+      console.error('Error checking permissions:', error)
+      toast.error('Failed to check permissions')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDisablePushNotifications = async () => {
+    if (!isNativeApp) {
+      toast.error(
+        'Push notification control is only available in the mobile app',
+      )
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      // Disable in mobile app (which updates backend)
+      disablePushPermissions()
+
+      // Update local preferences
+      setNotifications({ pushNotifications: false })
+
+      toast.success('Push notifications disabled successfully')
+    } catch (error) {
+      console.error('Error disabling push notifications:', error)
+      toast.error('Failed to disable push notifications')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+  // TODO: APP DOWNLOAD LINK TO APP STORE AND GOOGLE PLAY
+  // If not in native app, show download prompt
+  if (!isNativeApp) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-6">
+              <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                <Smartphone className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="font-medium text-lg mb-2 text-blue-900">
+                Download the Hypertro Mobile App
+              </h3>
+              <p className="text-blue-700 text-sm max-w-sm mx-auto mb-4">
+                Push notifications are only available in our native mobile app.
+                Download the app to receive workout reminders, progress updates,
+                and coaching messages.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button
+                  variant="default"
+                  className="gap-2 bg-blue-600 hover:bg-blue-700"
+                  onClick={() => window.open('/download', '_blank')}
+                >
+                  <Download className="w-4 h-4" />
+                  Download Mobile App
+                </Button>
+                <Button
+                  variant="outline"
+                  className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
+                  onClick={() =>
+                    navigator.clipboard.writeText(window.location.origin)
+                  }
+                >
+                  <Settings className="w-4 h-4" />
+                  Copy Link
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Native app interface
   return (
     <div className="space-y-6">
       {/* Push Notification Status */}
@@ -134,45 +151,99 @@ export function MobilePushSettings() {
             <div className="flex items-center gap-3">
               <div className="flex flex-col gap-2">
                 <CardTitle className="flex items-center gap-2">
+                  <Bell className="w-5 h-5" />
                   Push Notifications
                 </CardTitle>
                 <CardDescription>
-                  {isSubscribed && pushEnabled
+                  {pushEnabled
                     ? 'Receive notifications even when the app is closed'
                     : 'Enable push notifications to stay updated'}
                 </CardDescription>
               </div>
             </div>
-            <Switch
-              checked={pushEnabled && isSubscribed}
-              onCheckedChange={handlePushToggle}
-              disabled={isLoading}
-            />
           </div>
         </CardHeader>
 
-        {permissionState === 'denied' && (
-          <CardContent className="pt-0">
-            <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg">
+        <CardContent className="space-y-4">
+          {pushEnabled ? (
+            // Push notifications enabled
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
               <div className="flex items-start gap-3">
-                <X className="w-5 h-5 text-destructive mt-0.5 flex-shrink-0" />
+                <Bell className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                 <div className="flex flex-col gap-2">
-                  <p className="font-medium text-destructive">
-                    Permission Denied
+                  <p className="font-medium text-green-900">
+                    Push Notifications Enabled
                   </p>
-                  <p className="text-sm text-destructive/80">
-                    You've blocked notifications for this site. To enable them,
-                    check your browser's notification settings for this site.
+                  <p className="text-sm text-green-700">
+                    You'll receive notifications for workouts, meals, and
+                    updates from your trainer.
                   </p>
                 </div>
               </div>
             </div>
-          </CardContent>
-        )}
+          ) : (
+            // Push notifications disabled
+            <div className="p-4 bg-orange-50 border border-orange-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <BellOff className="w-5 h-5 text-orange-600 mt-0.5 flex-shrink-0" />
+                <div className="flex flex-col gap-2">
+                  <p className="font-medium text-orange-900">
+                    Push Notifications Disabled
+                  </p>
+                  <p className="text-sm text-orange-700">
+                    Enable push notifications to receive workout reminders and
+                    coaching updates.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            {!pushEnabled ? (
+              <Button
+                onClick={handleEnablePushNotifications}
+                disabled={isLoading || !capabilities.canRequestPushPermissions}
+                className="gap-2"
+              >
+                <Bell className="w-4 h-4" />
+                {isLoading ? 'Enabling...' : 'Enable Push Notifications'}
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={handleDisablePushNotifications}
+                disabled={isLoading || !capabilities.canDisablePushPermissions}
+                className="gap-2"
+              >
+                <BellOff className="w-4 h-4" />
+                {isLoading ? 'Disabling...' : 'Disable Notifications'}
+              </Button>
+            )}
+
+            <Button
+              variant="outline"
+              onClick={handleCheckPermissions}
+              disabled={isLoading || !capabilities.canCheckPushPermissions}
+              className="gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              {isLoading ? 'Checking...' : 'Check Status'}
+            </Button>
+          </div>
+
+          <div className="text-xs text-muted-foreground">
+            <p>
+              <strong>Tip:</strong> If you previously denied notifications, you
+              may need to enable them in your device settings. Use "Check
+              Status" to detect when you've enabled them externally.
+            </p>
+          </div>
+        </CardContent>
       </Card>
 
       {/* Notification Types */}
-      {pushEnabled && isSubscribed && (
+      {pushEnabled && (
         <Card>
           <CardHeader>
             <CardTitle>Notification Types</CardTitle>
@@ -182,35 +253,6 @@ export function MobilePushSettings() {
           </CardHeader>
           <CardContent>
             <NotificationPreferences idPrefix="mobile" />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Enable Push Notifications CTA */}
-      {!pushEnabled && (
-        <Card className="border-dashed">
-          <CardContent className="pt-6">
-            <div className="text-center py-6">
-              <div className="w-16 h-16 mx-auto bg-muted rounded-full flex items-center justify-center mb-4">
-                <Bell className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <h3 className="font-medium text-lg mb-2">
-                Enable Push Notifications
-              </h3>
-              <p className="text-muted-foreground text-sm max-w-sm mx-auto mb-4">
-                Stay connected with your fitness journey. Get workout reminders,
-                progress updates, and coaching messages even when the app is
-                closed.
-              </p>
-              <Button
-                onClick={() => handlePushToggle(true)}
-                disabled={isLoading}
-                className="gap-2"
-              >
-                <Bell className="w-4 h-4" />
-                {isLoading ? 'Enabling...' : 'Enable Push Notifications'}
-              </Button>
-            </div>
           </CardContent>
         </Card>
       )}

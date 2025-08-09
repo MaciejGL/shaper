@@ -1,10 +1,12 @@
 // Simple, reliable configuration for Hypertro mobile app
 export const APP_CONFIG = {
-  // Web app URLs - use production for testing, update IP for local dev
-  WEB_URL: __DEV__ ? 'https://hypertro.app' : 'https://hypertro.app',
+  // Web app URLs - use local dev server when in development
+  WEB_URL: __DEV__ ? 'http://192.168.0.25:4000' : 'https://hypertro.app',
 
   // API URLs (if needed for direct API calls)
-  API_URL: __DEV__ ? 'https://hypertro.app/api' : 'https://hypertro.app/api',
+  API_URL: __DEV__
+    ? 'http://192.168.0.25:4000/api'
+    : 'https://hypertro.app/api',
 
   // Environment info
   ENVIRONMENT: __DEV__ ? 'development' : 'production',

@@ -9,6 +9,9 @@ import { Platform } from 'react-native'
 
 import { APP_CONFIG } from '../config/app-config'
 
+// Store current push token in memory
+let currentPushToken: string | null = null
+
 // Configure notification handling behavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -65,6 +68,8 @@ export async function registerForPushNotifications(): Promise<string | null> {
     })
   }
 
+  // Store token for later use
+  currentPushToken = token
   return token
 }
 
@@ -96,13 +101,24 @@ export async function syncPushTokenWithBackend(
     })
 
     if (response.ok) {
+      console.info('✅ Push token synced successfully with backend')
       return true
     } else {
-      console.error('❌ Failed to sync push token:', response.status)
+      console.error(`❌ Failed to sync push token: HTTP ${response.status}`)
       return false
     }
   } catch (error) {
-    console.error('❌ Error syncing push token:', error)
+    if (
+      error instanceof TypeError &&
+      error.message.includes('Network request failed')
+    ) {
+      console.error(
+        '❌ Error syncing push token: [TypeError: Network request failed]',
+      )
+      console.warn('⚠️ Could not sync push token with backend')
+    } else {
+      console.error('❌ Error syncing push token:', error)
+    }
     return false
   }
 }
@@ -151,9 +167,18 @@ export async function setBadgeCount(count: number) {
 
 /**
  * Initialize push notifications system
+ * Only call this when user is authenticated
  */
 export async function initializePushNotifications(authToken?: string) {
   try {
+    // Ensure we have an authenticated user
+    if (!authToken) {
+      console.warn(
+        '⚠️ Cannot initialize push notifications without authentication',
+      )
+      return null
+    }
+
     // Register for push notifications
     const token = await registerForPushNotifications()
 
@@ -167,6 +192,7 @@ export async function initializePushNotifications(authToken?: string) {
 
     if (!synced) {
       console.warn('⚠️ Could not sync push token with backend')
+      // Still return success as the token is valid, sync can be retried later
     }
 
     // Setup notification handlers
@@ -179,6 +205,120 @@ export async function initializePushNotifications(authToken?: string) {
   } catch (error) {
     console.error('❌ Failed to initialize push notifications:', error)
     return null
+  }
+}
+
+/**
+ * Check current push notification permission status
+ */
+export async function getPushNotificationStatus() {
+  try {
+    const { status } = await Notifications.getPermissionsAsync()
+    return {
+      status,
+      isGranted: status === 'granted',
+      canAskAgain: status === 'undetermined',
+      isDenied: status === 'denied',
+    }
+  } catch (error) {
+    console.error('❌ Error checking push notification status:', error)
+    return {
+      status: 'unknown',
+      isGranted: false,
+      canAskAgain: false,
+      isDenied: false,
+    }
+  }
+}
+
+/**
+ * Get the current push token
+ */
+export function getCurrentPushToken(): string | null {
+  return currentPushToken
+}
+
+/**
+ * Update push notification preferences in the backend
+ */
+export async function updatePushNotificationPreferences(
+  enabled: boolean,
+  authToken?: string,
+): Promise<boolean> {
+  try {
+    if (!currentPushToken) {
+      console.warn('⚠️ No push token available to update preferences')
+      return false
+    }
+
+    if (!authToken) {
+      console.warn('⚠️ Cannot update push preferences without authentication')
+      return false
+    }
+
+    const response = await fetch(`${APP_CONFIG.API_URL}/mobile/push-token`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': APP_CONFIG.USER_AGENT,
+        ...(authToken && { Authorization: `Bearer ${authToken}` }),
+      },
+      body: JSON.stringify({
+        expoPushToken: currentPushToken,
+        pushNotificationsEnabled: enabled,
+      }),
+    })
+
+    if (response.ok) {
+      console.info(
+        `✅ Push notification preferences updated: ${enabled ? 'enabled' : 'disabled'}`,
+      )
+      return true
+    } else {
+      console.error(
+        `❌ Failed to update push preferences: HTTP ${response.status}`,
+      )
+      return false
+    }
+  } catch (error) {
+    if (
+      error instanceof TypeError &&
+      error.message.includes('Network request failed')
+    ) {
+      console.error(
+        '❌ Error updating push preferences: [TypeError: Network request failed]',
+      )
+      console.warn('⚠️ Could not update push preferences with backend')
+    } else {
+      console.error('❌ Error updating push preferences:', error)
+    }
+    return false
+  }
+}
+
+/**
+ * Disable push notifications (both locally and in backend)
+ */
+export async function disablePushNotifications(
+  authToken?: string,
+): Promise<boolean> {
+  try {
+    // Update backend first
+    const backendUpdated = await updatePushNotificationPreferences(
+      false,
+      authToken,
+    )
+
+    if (!backendUpdated) {
+      console.warn('⚠️ Failed to disable push notifications in backend')
+      return false
+    }
+
+    console.info('✅ Push notifications disabled successfully')
+    return true
+  } catch (error) {
+    console.error('❌ Failed to disable push notifications:', error)
+    return false
   }
 }
 

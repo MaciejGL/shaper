@@ -31,7 +31,7 @@ function setupNativeAppGlobals(): string {
   return `
     // Make app aware it's running in native container
     window.isNativeApp = true;
-    window.platform = 'expo';
+    window.mobilePlatform = 'expo';
     window.appEnvironment = '${APP_CONFIG.ENVIRONMENT}';
   `
 }
@@ -66,11 +66,33 @@ function setupNativeAppAPI(): string {
         }));
       },
       
+      // Check and sync permissions (for when user enables in settings)
+      checkNotificationPermissions: function() {
+        window.ReactNativeWebView?.postMessage(JSON.stringify({
+          type: 'check_push_permissions'
+        }));
+      },
+      
+      // Disable push notifications (updates backend)
+      disableNotificationPermissions: function() {
+        window.ReactNativeWebView?.postMessage(JSON.stringify({
+          type: 'disable_push_permissions'
+        }));
+      },
+      
       // Theme synchronization
       updateTheme: function(theme) {
         window.ReactNativeWebView?.postMessage(JSON.stringify({
           type: 'theme_changed',
           theme: theme
+        }));
+      },
+      
+      // Authentication bridge
+      setAuthToken: function(token) {
+        window.ReactNativeWebView?.postMessage(JSON.stringify({
+          type: 'auth_token',
+          token: token
         }));
       }
     };
@@ -194,18 +216,35 @@ interface EnhancedWebViewProps {
   onNavigationStateChange?: (navState: object) => void
   onLoad?: () => void
   onThemeChange?: (theme: 'light' | 'dark') => void
+  onAuthToken?: (token: string) => void
+  onRequestPushPermission?: () => void
+  onCheckPushPermissions?: () => void
+  onDisablePushPermissions?: () => void
 }
 
 export const EnhancedWebView = forwardRef<
   EnhancedWebViewRef,
   EnhancedWebViewProps
->(({ initialUrl, onNavigationStateChange, onLoad, onThemeChange }, ref) => {
-  const webViewRef = useRef<WebView>(null)
+>(
+  (
+    {
+      initialUrl,
+      onNavigationStateChange,
+      onLoad,
+      onThemeChange,
+      onAuthToken,
+      onRequestPushPermission,
+      onCheckPushPermissions,
+      onDisablePushPermissions,
+    },
+    ref,
+  ) => {
+    const webViewRef = useRef<WebView>(null)
 
-  // Expose methods to parent components
-  useImperativeHandle(ref, () => ({
-    navigateToPath: (path: string) => {
-      webViewRef.current?.injectJavaScript(`
+    // Expose methods to parent components
+    useImperativeHandle(ref, () => ({
+      navigateToPath: (path: string) => {
+        webViewRef.current?.injectJavaScript(`
           // Use HTML5 History API for smooth navigation
           if (window.history && window.history.pushState) {
             window.history.pushState(null, '', '${path}');
@@ -220,82 +259,132 @@ export const EnhancedWebView = forwardRef<
           }
           true; // Required return statement
         `)
-    },
+      },
 
-    reload: () => {
-      webViewRef.current?.reload()
-    },
+      reload: () => {
+        webViewRef.current?.reload()
+      },
 
-    goBack: () => {
-      webViewRef.current?.goBack()
-    },
+      goBack: () => {
+        webViewRef.current?.goBack()
+      },
 
-    goForward: () => {
-      webViewRef.current?.goForward()
-    },
-  }))
+      goForward: () => {
+        webViewRef.current?.goForward()
+      },
+    }))
 
-  // Generate the injected JavaScript in a clean, readable way
-  const injectedJavaScript = createWebViewScript()
+    // Generate the injected JavaScript in a clean, readable way
+    const injectedJavaScript = createWebViewScript()
 
-  const handleMessage = (event: { nativeEvent: { data: string } }) => {
-    try {
-      const message = JSON.parse(event.nativeEvent.data)
+    const handleMessage = (event: { nativeEvent: { data: string } }) => {
+      try {
+        const message = JSON.parse(event.nativeEvent.data)
 
-      switch (message.type) {
-        case 'navigation':
-          onNavigationStateChange?.(message)
-          break
+        switch (message.type) {
+          case 'navigation':
+            onNavigationStateChange?.(message)
+            break
 
-        case 'notification_click':
-          // Handle notification clicks from web app
-          break
+          case 'notification_click':
+            // Handle notification clicks from web app
+            break
 
-        case 'request_push_permission':
-          // Handle push permission requests from web app
-          break
+          case 'request_push_permission':
+            onRequestPushPermission?.()
+            break
 
-        case 'theme_changed':
-          onThemeChange?.(message.theme)
-          break
+          case 'check_push_permissions':
+            onCheckPushPermissions?.()
+            break
 
-        default:
-          // Unknown message from web app
-          break
+          case 'disable_push_permissions':
+            onDisablePushPermissions?.()
+            break
+
+          case 'theme_changed':
+            onThemeChange?.(message.theme)
+            break
+
+          case 'auth_token':
+            onAuthToken?.(message.token)
+            break
+
+          default:
+            // Unknown message from web app
+            break
+        }
+      } catch (error) {
+        console.error('❌ Error parsing message from web app:', error)
       }
-    } catch (error) {
-      console.error('❌ Error parsing message from web app:', error)
     }
-  }
 
-  return (
-    <WebView
-      ref={webViewRef}
-      source={{ uri: initialUrl || APP_CONFIG.WEB_URL }}
-      style={styles.webview}
-      javaScriptEnabled={true}
-      domStorageEnabled={true}
-      startInLoadingState={true}
-      userAgent={APP_CONFIG.USER_AGENT}
-      injectedJavaScript={injectedJavaScript}
-      onMessage={handleMessage}
-      onNavigationStateChange={onNavigationStateChange}
-      onLoad={onLoad}
-      // Security settings
-      allowsBackForwardNavigationGestures={true}
-      decelerationRate="normal"
-      // Enable features needed for your web app
-      allowsInlineMediaPlayback={true}
-      mediaPlaybackRequiresUserAction={false}
-      // Cache and storage
-      cacheEnabled={true}
-      thirdPartyCookiesEnabled={true}
-      sharedCookiesEnabled={true}
-      // Performance
-      androidLayerType="hardware"
-    />
-  )
-})
+    return (
+      <WebView
+        ref={webViewRef}
+        source={{ uri: initialUrl || APP_CONFIG.WEB_URL }}
+        style={styles.webview}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        startInLoadingState={true}
+        userAgent={APP_CONFIG.USER_AGENT}
+        injectedJavaScript={injectedJavaScript}
+        onMessage={handleMessage}
+        onNavigationStateChange={onNavigationStateChange}
+        onLoad={onLoad}
+        onError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent
+          console.error('❌ WebView error:', nativeEvent)
+
+          // Handle specific connection errors
+          if (
+            nativeEvent.description?.includes(
+              'Kunne ikke koble til tjeneren',
+            ) ||
+            nativeEvent.description?.includes('Could not connect to the server')
+          ) {
+            console.warn(
+              '⚠️ WebView connection failed - development server may be down',
+            )
+          }
+        }}
+        onHttpError={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent
+          console.error(
+            '❌ WebView HTTP error:',
+            nativeEvent.statusCode,
+            nativeEvent.description,
+          )
+        }}
+        onLoadEnd={(syntheticEvent) => {
+          const { nativeEvent } = syntheticEvent
+          if (
+            !nativeEvent.loading &&
+            nativeEvent.canGoBack === false &&
+            nativeEvent.canGoForward === false &&
+            nativeEvent.title === ''
+          ) {
+            console.warn(
+              '⚠️ WebView loaded but appears to have connection issues',
+            )
+          }
+        }}
+        // Security settings
+        allowsBackForwardNavigationGestures={true}
+        decelerationRate={0.998}
+        // Enable features needed for your web app
+        allowsInlineMediaPlayback={true}
+        mediaPlaybackRequiresUserAction={false}
+        // Cache and storage
+        cacheEnabled={true}
+        thirdPartyCookiesEnabled={true}
+        sharedCookiesEnabled={true}
+        // Performance
+        androidLayerType="hardware"
+      />
+    )
+  },
+)
 
 const styles = StyleSheet.create({
   webview: {

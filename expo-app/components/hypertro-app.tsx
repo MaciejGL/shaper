@@ -4,13 +4,16 @@
  */
 import Constants from 'expo-constants'
 import { StatusBar } from 'expo-status-bar'
-import React from 'react'
-import { SafeAreaView, StyleSheet } from 'react-native'
+import React, { useEffect } from 'react'
+import { AppState, SafeAreaView, StyleSheet } from 'react-native'
 
 import { useThemeManager } from '../hooks/use-theme-manager'
 
 import { EnhancedWebView } from './enhanced-webview'
-import { PushNotificationManager } from './push-notification-manager'
+import {
+  PushNotificationManager,
+  useRequestPushPermissions,
+} from './push-notification-manager'
 import {
   WebViewNavigationProvider,
   useWebViewNavigation,
@@ -24,9 +27,48 @@ interface HypertroAppProps {
 function HypertroAppContent({ authToken }: HypertroAppProps) {
   const { webViewRef } = useWebViewNavigation()
   const { handleWebThemeChange, colors } = useThemeManager()
+  const [currentAuthToken, setCurrentAuthToken] = React.useState(authToken)
+  const { requestPermissions, checkAndSyncPermissions, disableNotifications } =
+    useRequestPushPermissions(currentAuthToken)
+
+  const handleAuthToken = (token: string) => {
+    console.info(
+      '📱 Received auth token from web app:',
+      token.slice(0, 10) + '...',
+    )
+    setCurrentAuthToken(token)
+  }
+
+  // Monitor app state changes to detect when user enables permissions externally
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'active' && currentAuthToken) {
+        // App became active, check if permissions were enabled
+        checkAndSyncPermissions()
+      }
+    }
+
+    const subscription = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    )
+    return () => subscription?.remove()
+  }, [currentAuthToken, checkAndSyncPermissions])
+
+  const handleRequestPushPermission = () => {
+    requestPermissions()
+  }
+
+  const handleCheckPushPermissions = () => {
+    checkAndSyncPermissions()
+  }
+
+  const handleDisablePushNotifications = () => {
+    disableNotifications()
+  }
 
   return (
-    <PushNotificationManager authToken={authToken}>
+    <PushNotificationManager authToken={currentAuthToken}>
       <SafeAreaView
         style={[styles.container, { backgroundColor: colors.appBackground }]}
       >
@@ -37,6 +79,10 @@ function HypertroAppContent({ authToken }: HypertroAppProps) {
         <EnhancedWebView
           ref={webViewRef}
           onThemeChange={handleWebThemeChange}
+          onAuthToken={handleAuthToken}
+          onRequestPushPermission={handleRequestPushPermission}
+          onCheckPushPermissions={handleCheckPushPermissions}
+          onDisablePushPermissions={handleDisablePushNotifications}
         />
       </SafeAreaView>
     </PushNotificationManager>

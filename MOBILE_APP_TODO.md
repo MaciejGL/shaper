@@ -197,7 +197,7 @@ shaper/ (existing repo)
       <SafeAreaView style={{ flex: 1, paddingTop: Constants.statusBarHeight }}>
         <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
         <WebView
-          source={{ uri: 'https://fit-space.app' }}
+          source={{ uri: 'https://hypertro.app' }}
           style={{ flex: 1 }}
           javaScriptEnabled={true}
           domStorageEnabled={true}
@@ -667,7 +667,7 @@ shaper/ (existing repo)
 
         <WebView
           ref={webViewRef}
-          source={{ uri: 'https://fit-space.app' }}
+          source={{ uri: 'https://hypertro.app' }}
           style={{ flex: 1 }}
           onMessage={handleWebViewMessage}
           javaScriptEnabled={true}

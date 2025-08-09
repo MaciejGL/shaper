@@ -7,7 +7,11 @@ import * as Notifications from 'expo-notifications'
 import React, { useCallback, useEffect, useRef } from 'react'
 import { Alert, Platform } from 'react-native'
 
-import { initializePushNotifications } from '../services/push-notifications'
+import {
+  disablePushNotifications,
+  getCurrentPushToken,
+  initializePushNotifications,
+} from '../services/push-notifications'
 
 import { useWebViewNavigation } from './webview-navigation-manager'
 
@@ -77,7 +81,15 @@ export function PushNotificationManager({
   )
 
   useEffect(() => {
-    // Initialize push notifications
+    // Only initialize push notifications when user is authenticated
+    if (!authToken) {
+      console.info(
+        '📱 Waiting for user authentication before requesting push permissions',
+      )
+      return
+    }
+
+    // Initialize push notifications for authenticated user
     initializePushNotifications(authToken).then((result) => {
       if (result) {
         console.info('✅ Push notifications initialized successfully')
@@ -189,19 +201,19 @@ export function PushNotificationManager({
     return webPath
   }
 
-  // Request permissions on first render for iOS
+  // Check permissions status for iOS only when authenticated
   useEffect(() => {
-    if (Platform.OS === 'ios') {
-      // Request permissions for iOS
+    if (Platform.OS === 'ios' && authToken) {
+      // Check permissions for authenticated iOS users
       Notifications.getPermissionsAsync().then((status) => {
         if (status.status !== 'granted') {
-          // Don't request immediately - let the user experience the app first
-          // You can add a prompt later asking if they want notifications
-          console.info('📱 iOS push permissions not granted yet')
+          console.info(
+            '📱 iOS push permissions not granted yet - will request when user enables notifications',
+          )
         }
       })
     }
-  }, [])
+  }, [authToken])
 
   return <>{children}</>
 }
@@ -210,14 +222,21 @@ export function PushNotificationManager({
  * Hook to manually request push notification permissions
  * Use this when you want to ask for permissions at a specific time
  */
-export function useRequestPushPermissions() {
+export function useRequestPushPermissions(authToken?: string) {
   const requestPermissions = async () => {
     try {
+      if (!authToken) {
+        console.warn(
+          '⚠️ Cannot request push permissions without authentication',
+        )
+        return false
+      }
+
       const { status } = await Notifications.requestPermissionsAsync()
 
       if (status === 'granted') {
         // Re-initialize push notifications with new permissions
-        const result = await initializePushNotifications()
+        const result = await initializePushNotifications(authToken)
         if (result) {
           Alert.alert(
             'Notifications Enabled',
@@ -243,5 +262,71 @@ export function useRequestPushPermissions() {
     }
   }
 
-  return { requestPermissions }
+  const checkAndSyncPermissions = async () => {
+    try {
+      if (!authToken) return false
+
+      const { status } = await Notifications.getPermissionsAsync()
+
+      if (status === 'granted') {
+        // Permissions are now granted, try to sync
+        const result = await initializePushNotifications(authToken)
+        if (result) {
+          console.info('✅ Push notifications re-enabled and synced')
+          return true
+        }
+      }
+      return false
+    } catch (error) {
+      console.error('❌ Error checking permissions:', error)
+      return false
+    }
+  }
+
+  const disableNotifications = async () => {
+    try {
+      if (!authToken) {
+        console.warn(
+          '⚠️ Cannot disable push notifications without authentication',
+        )
+        return false
+      }
+
+      const result = await disablePushNotifications(authToken)
+      if (result) {
+        Alert.alert(
+          'Notifications Disabled',
+          'Push notifications have been disabled. You can re-enable them anytime in settings.',
+          [{ text: 'OK', style: 'default' }],
+        )
+        return true
+      } else {
+        Alert.alert(
+          'Error',
+          'Failed to disable push notifications. Please try again.',
+          [{ text: 'OK', style: 'default' }],
+        )
+        return false
+      }
+    } catch (error) {
+      console.error('❌ Error disabling push notifications:', error)
+      Alert.alert(
+        'Error',
+        'Failed to disable push notifications. Please try again.',
+        [{ text: 'OK', style: 'default' }],
+      )
+      return false
+    }
+  }
+
+  const getCurrentToken = () => {
+    return getCurrentPushToken()
+  }
+
+  return {
+    requestPermissions,
+    checkAndSyncPermissions,
+    disableNotifications,
+    getCurrentToken,
+  }
 }
