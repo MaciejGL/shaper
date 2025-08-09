@@ -7,6 +7,7 @@ import * as Notifications from 'expo-notifications'
 import React, { useCallback, useEffect, useRef } from 'react'
 import { Alert, Platform } from 'react-native'
 
+import { APP_CONFIG } from '../config/app-config'
 import {
   disablePushNotifications,
   getCurrentPushToken,
@@ -25,7 +26,6 @@ export function PushNotificationManager({
   children,
   authToken,
 }: PushNotificationManagerProps) {
-  const notificationListener = useRef<Notifications.Subscription | null>(null)
   const responseListener = useRef<Notifications.Subscription | null>(null)
   const linkingListener = useRef<(() => void) | null>(null)
   const { navigateToPath, isReady } = useWebViewNavigation()
@@ -83,29 +83,25 @@ export function PushNotificationManager({
   useEffect(() => {
     // Only initialize push notifications when user is authenticated
     if (!authToken) {
-      console.info(
-        '📱 Waiting for user authentication before requesting push permissions',
-      )
+      if (APP_CONFIG.IS_DEV) {
+        console.info(
+          '📱 Waiting for user authentication before requesting push permissions',
+        )
+      }
       return
     }
 
-    // Initialize push notifications for authenticated user
+    // Initialize push notifications for authenticated user (prevents duplicates internally)
     initializePushNotifications(authToken).then((result) => {
-      if (result) {
-        console.info('✅ Push notifications initialized successfully')
-      } else {
+      if (result && APP_CONFIG.IS_DEV) {
+        console.info('✅ Push notifications ready')
+      } else if (!result) {
         console.warn('⚠️ Failed to initialize push notifications')
       }
     })
 
-    // Set up notification listeners
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        console.info('📱 Notification received:', notification)
-
-        // You can show custom UI here if needed
-        // For now, we'll let the system handle it
-      })
+    // Note: Notification handling is now done in push-notifications service
+    // to prevent duplicate handlers and excessive logging
 
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
@@ -147,9 +143,6 @@ export function PushNotificationManager({
 
     // Cleanup listeners on unmount
     return () => {
-      if (notificationListener.current) {
-        notificationListener.current.remove()
-      }
       if (responseListener.current) {
         responseListener.current.remove()
       }
@@ -270,11 +263,11 @@ export function useRequestPushPermissions(authToken?: string) {
 
       if (status === 'granted') {
         // Permissions are now granted, try to sync
-        const result = await initializePushNotifications(authToken)
-        if (result) {
-          console.info('✅ Push notifications re-enabled and synced')
-          return true
+        const result = await initializePushNotifications(authToken, true) // Force re-sync
+        if (result && APP_CONFIG.IS_DEV) {
+          console.info('✅ Push notifications re-synced')
         }
+        return !!result
       }
       return false
     } catch (error) {

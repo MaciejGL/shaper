@@ -17,7 +17,7 @@ function Drawer({
   const isMobile = useIsMobile()
   const historyPushedRef = React.useRef(false)
   const isClosingFromPopstateRef = React.useRef(false)
-  const closeTimeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const closeTimeoutRef = React.useRef<NodeJS.Timeout | number | null>(null)
 
   // Create a unified close handler that works with both onOpenChange and onClose patterns
   const handleDrawerClose = React.useCallback(() => {

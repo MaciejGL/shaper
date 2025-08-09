@@ -18,7 +18,7 @@ export function useConfirmationModal() {
   const [isLoading, setIsLoading] = useState(false)
   const [modalProps, setModalProps] =
     useState<UseConfirmationModalProps | null>(null)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | number | null>(null)
 
   const openModal = useCallback((props: UseConfirmationModalProps) => {
     // Clear any existing timeout

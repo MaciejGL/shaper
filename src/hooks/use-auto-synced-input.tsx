@@ -13,7 +13,7 @@ export function useAutoSyncedInput<T>(
 ) {
   const [localValue, setLocalValue] = useState<T>(externalValue)
   const [isFocused, setIsFocused] = useState(false)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const timeoutRef = useRef<NodeJS.Timeout | number | null>(null)
   const lastExternalValue = useRef<T>(externalValue)
 
   // Update local value when external value changes, but only when not focused

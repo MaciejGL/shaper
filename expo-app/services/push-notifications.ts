@@ -11,14 +11,14 @@ import { APP_CONFIG } from '../config/app-config'
 
 // Store current push token in memory
 let currentPushToken: string | null = null
+let isInitialized = false
 
 // Configure notification handling behavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
+    shouldShowBanner: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
-    shouldShowBanner: true,
     shouldShowList: true,
   }),
 })
@@ -101,7 +101,10 @@ export async function syncPushTokenWithBackend(
     })
 
     if (response.ok) {
-      console.info('✅ Push token synced successfully with backend')
+      // Only log on first sync or errors - reduce spam
+      if (APP_CONFIG.IS_DEV) {
+        console.info('✅ Push token synced with backend')
+      }
       return true
     } else {
       console.error(`❌ Failed to sync push token: HTTP ${response.status}`)
@@ -123,24 +126,34 @@ export async function syncPushTokenWithBackend(
   }
 }
 
+// Track if handlers are already set up to prevent duplicates
+let handlersSetup = false
+
 /**
  * Handle incoming push notifications
  * NOTE: Notification taps are handled by PushNotificationManager
  */
 export function setupNotificationHandlers() {
+  if (handlersSetup) {
+    console.info('📱 Notification handlers already set up')
+    return () => {} // Return empty cleanup function
+  }
+
   // Handle notifications that are received while the app is foregrounded
   const notificationListener = Notifications.addNotificationReceivedListener(
     (notification) => {
-      console.info(
-        '📱 Notification received:',
-        notification.request.content.title,
-      )
+      if (APP_CONFIG.IS_DEV) {
+        console.info('📱 Notification:', notification.request.content.title)
+      }
       // Custom UI handling can be added here if needed
     },
   )
 
+  handlersSetup = true
+
   return () => {
     notificationListener.remove()
+    handlersSetup = false
   }
 }
 
@@ -169,14 +182,30 @@ export async function setBadgeCount(count: number) {
  * Initialize push notifications system
  * Only call this when user is authenticated
  */
-export async function initializePushNotifications(authToken?: string) {
+export async function initializePushNotifications(
+  authToken?: string,
+  force: boolean = false,
+) {
   try {
     // Ensure we have an authenticated user
     if (!authToken) {
-      console.warn(
-        '⚠️ Cannot initialize push notifications without authentication',
-      )
+      if (APP_CONFIG.IS_DEV) {
+        console.warn(
+          '⚠️ Cannot initialize push notifications without authentication',
+        )
+      }
       return null
+    }
+
+    // Check if already initialized (unless forced)
+    if (isInitialized && !force && currentPushToken) {
+      if (APP_CONFIG.IS_DEV) {
+        console.info('📱 Push notifications already initialized')
+      }
+      return {
+        token: currentPushToken,
+        cleanup: () => {},
+      }
     }
 
     // Register for push notifications
@@ -187,16 +216,20 @@ export async function initializePushNotifications(authToken?: string) {
       return null
     }
 
-    // Sync with backend
-    const synced = await syncPushTokenWithBackend(token, authToken)
+    // Only sync if token changed or forced
+    if (token !== currentPushToken || force) {
+      const synced = await syncPushTokenWithBackend(token, authToken)
 
-    if (!synced) {
-      console.warn('⚠️ Could not sync push token with backend')
-      // Still return success as the token is valid, sync can be retried later
+      if (!synced) {
+        console.warn('⚠️ Could not sync push token with backend')
+        // Still return success as the token is valid, sync can be retried later
+      }
     }
 
-    // Setup notification handlers
+    // Setup notification handlers (prevents duplicates internally)
     const cleanup = setupNotificationHandlers()
+
+    isInitialized = true
 
     return {
       token,
@@ -236,6 +269,15 @@ export async function getPushNotificationStatus() {
  */
 export function getCurrentPushToken(): string | null {
   return currentPushToken
+}
+
+/**
+ * Reset initialization state (for testing or when disabling notifications)
+ */
+export function resetPushNotificationState() {
+  isInitialized = false
+  handlersSetup = false
+  currentPushToken = null
 }
 
 /**
@@ -314,7 +356,12 @@ export async function disablePushNotifications(
       return false
     }
 
-    console.info('✅ Push notifications disabled successfully')
+    // Reset state so they can be re-enabled properly later
+    resetPushNotificationState()
+
+    if (APP_CONFIG.IS_DEV) {
+      console.info('✅ Push notifications disabled successfully')
+    }
     return true
   } catch (error) {
     console.error('❌ Failed to disable push notifications:', error)

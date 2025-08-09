@@ -10,7 +10,7 @@ export function useTrackWorkoutSession(
   isActive?: boolean,
   isCompleted?: boolean,
 ) {
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const intervalRef = useRef<NodeJS.Timeout | number | null>(null)
 
   const { mutateAsync: logWorkoutProgress } =
     useFitspaceLogWorkoutProgressMutation()

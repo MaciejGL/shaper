@@ -78,7 +78,7 @@ export function PushNotificationsTab() {
       setIsRefreshing(false)
     }
   }
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sendTestNotification = async (type: string, extraData?: any) => {
     setIsLoading(true)
     setTestResult(null)

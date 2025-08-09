@@ -41,10 +41,16 @@ function HypertroAppContent({ authToken }: HypertroAppProps) {
 
   // Monitor app state changes to detect when user enables permissions externally
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout | number | null = null
+
     const handleAppStateChange = (nextAppState: string) => {
       if (nextAppState === 'active' && currentAuthToken) {
-        // App became active, check if permissions were enabled
-        checkAndSyncPermissions()
+        // Debounce app state changes to prevent excessive calls
+        if (timeoutId) clearTimeout(timeoutId)
+
+        timeoutId = setTimeout(() => {
+          checkAndSyncPermissions()
+        }, 2000) // Wait 2 seconds after app becomes active
       }
     }
 
@@ -52,7 +58,11 @@ function HypertroAppContent({ authToken }: HypertroAppProps) {
       'change',
       handleAppStateChange,
     )
-    return () => subscription?.remove()
+
+    return () => {
+      subscription?.remove()
+      if (timeoutId) clearTimeout(timeoutId)
+    }
   }, [currentAuthToken, checkAndSyncPermissions])
 
   const handleRequestPushPermission = () => {

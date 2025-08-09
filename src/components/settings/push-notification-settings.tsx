@@ -1,7 +1,6 @@
 'use client'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
-import { useIsMobile } from '@/hooks/use-is-mobile'
 
 import { DesktopPushSettings } from './push-notification/desktop-push-settings'
 import { MobilePushSettings } from './push-notification/mobile-push-settings'
@@ -11,11 +10,10 @@ import { MobilePushSettings } from './push-notification/mobile-push-settings'
  * Shows native mobile app push settings or desktop preferences
  */
 export function PushNotificationSettings() {
-  const isMobile = useIsMobile()
   const { isNativeApp } = useMobileApp()
 
   // Desktop users - show preferences only (no push notifications)
-  if (!isMobile) {
+  if (!isNativeApp) {
     return <DesktopPushSettings hasSubscriptions={false} />
   }
 
