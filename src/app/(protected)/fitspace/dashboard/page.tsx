@@ -6,8 +6,12 @@ import { useFitspaceDashboardGetCurrentWeekQuery } from '@/generated/graphql-cli
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
+import { BodyProgressSnapshot } from './components/body-progress-snapshot'
 import { DashboardStats } from './components/dashbaord-stats'
 import { DashboardStatsSkeleton } from './components/dashboard-stats-skeleton'
+import { ProfileCompletionBanner } from './components/profile-completion-banner'
+import { QuickNutritionOverview } from './components/quick-nutrition-overview'
+import { RecentPRsSection } from './components/recent-prs-section'
 import {
   TodaysSession,
   TodaysSessionSkeleton,
@@ -16,25 +20,33 @@ import {
 export default function DashboardPage() {
   const { data, isLoading } = useFitspaceDashboardGetCurrentWeekQuery()
 
-  // TO ADD:
-  // - Profile completion - with survey
-
-  // - Last PRs from this and last week
-  // - emtpy state on my stats(add weight progress)
-  // - My favourite exercises progress(?)
-
   if (isLoading) {
     return <DashboardSkeleton />
   }
 
   return (
-    <div className="container-hypertro mx-auto mb-24">
+    <div className="container-hypertro mx-auto mb-24 max-w-md">
       <DashboardHeader title="Dashboard" icon={<LayoutDashboard />} />
 
-      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
+      {/* Single Column Mobile-First Layout */}
+      <div className="space-y-6">
+        {/* Profile Completion Banner - Only shows if profile incomplete */}
+        <ProfileCompletionBanner />
+
+        {/* Today's Session */}
         <TodaysSession plan={data?.getCurrentWorkoutWeek?.plan ?? undefined} />
 
+        {/* Quick Nutrition Overview */}
+        <QuickNutritionOverview isLoading={isLoading} />
+
+        {/* Recent Activity & Stats (Enhanced existing component) */}
         <DashboardStats plan={data?.getCurrentWorkoutWeek?.plan ?? undefined} />
+
+        {/* Recent PRs */}
+        <RecentPRsSection isLoading={isLoading} />
+
+        {/* Body Progress Snapshot */}
+        <BodyProgressSnapshot isLoading={isLoading} />
       </div>
     </div>
   )
@@ -42,12 +54,14 @@ export default function DashboardPage() {
 
 function DashboardSkeleton() {
   return (
-    <div className="container-hypertro mx-auto mb-24">
+    <div className="container-hypertro mx-auto mb-24 max-w-md">
       <DashboardHeader title="Dashboard" icon={<LayoutDashboard />} />
-      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
+      <div className="space-y-6">
         <TodaysSessionSkeleton />
-
+        <QuickNutritionOverview isLoading={true} />
         <DashboardStatsSkeleton />
+        <RecentPRsSection isLoading={true} />
+        <BodyProgressSnapshot isLoading={true} />
       </div>
     </div>
   )

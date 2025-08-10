@@ -15,6 +15,7 @@ import { useRef } from 'react'
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { StatsItem } from '@/components/stats-item'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SectionIcon } from '@/components/ui/section-icon'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLFitspaceDashboardGetWorkoutQuery } from '@/generated/graphql-client'
 import { useScrollToItem } from '@/hooks/use-scroll-to-item'
@@ -85,7 +86,7 @@ export function DashboardStats({ plan }: DashboardStatsProps) {
       <Card className="py-4">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Activity className="h-5 w-5" />
+            <SectionIcon icon={Activity} variant="blue" />
             Recent Activity
           </CardTitle>
         </CardHeader>
