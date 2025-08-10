@@ -37,7 +37,7 @@ export default function DashboardPage() {
         <TodaysSession plan={data?.getCurrentWorkoutWeek?.plan ?? undefined} />
 
         {/* Quick Nutrition Overview */}
-        <QuickNutritionOverview isLoading={isLoading} />
+        <QuickNutritionOverview />
 
         {/* Recent Activity & Stats (Enhanced existing component) */}
         <DashboardStats plan={data?.getCurrentWorkoutWeek?.plan ?? undefined} />
@@ -46,7 +46,7 @@ export default function DashboardPage() {
         <RecentPRsSection isLoading={isLoading} />
 
         {/* Body Progress Snapshot */}
-        <BodyProgressSnapshot isLoading={isLoading} />
+        <BodyProgressSnapshot />
       </div>
     </div>
   )
@@ -58,10 +58,10 @@ function DashboardSkeleton() {
       <DashboardHeader title="Dashboard" icon={<LayoutDashboard />} />
       <div className="space-y-6">
         <TodaysSessionSkeleton />
-        <QuickNutritionOverview isLoading={true} />
+        <QuickNutritionOverview />
         <DashboardStatsSkeleton />
         <RecentPRsSection isLoading={true} />
-        <BodyProgressSnapshot isLoading={true} />
+        <BodyProgressSnapshot />
       </div>
     </div>
   )

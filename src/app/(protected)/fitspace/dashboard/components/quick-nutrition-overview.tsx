@@ -1,11 +1,22 @@
 'use client'
 
 import { ChevronRight, FlameIcon, Plus, Utensils } from 'lucide-react'
+import { useMemo } from 'react'
 
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CircularProgress } from '@/components/ui/circular-progress'
 import { Progress } from '@/components/ui/progress'
 import { SectionIcon } from '@/components/ui/section-icon'
+import { useUserPreferences } from '@/context/user-preferences-context'
+import {
+  type GQLGetActiveMealPlanQuery,
+  type GQLGetDefaultMealPlanQuery,
+  useGetActiveMealPlanQuery,
+  useGetDefaultMealPlanQuery,
+} from '@/generated/graphql-client'
+import { isMealPlanDayMatch } from '@/lib/date-utils'
+import { getStartOfWeekUTC, toISOString } from '@/lib/utc-date-utils'
 import { cn } from '@/lib/utils'
 
 interface NutritionData {
@@ -27,62 +38,144 @@ interface QuickNutritionData {
 }
 
 interface QuickNutritionOverviewProps {
-  nutritionData?: QuickNutritionData
   isLoading?: boolean
 }
 
-// Mock data - replace with real meal plan data
-const mockNutritionData: QuickNutritionData = {
-  calories: {
-    current: 1847,
-    target: 2200,
-    unit: 'kcal',
-    percentage: 84,
-  },
-  protein: {
-    current: 120,
-    target: 150,
-    unit: 'g',
-    percentage: 80,
-  },
-  carbs: {
-    current: 180,
-    target: 275,
-    unit: 'g',
-    percentage: 65,
-  },
-  fat: {
-    current: 65,
-    target: 85,
-    unit: 'g',
-    percentage: 76,
-  },
-  lastLoggedMeal: {
-    name: 'Lunch - Chicken Bowl',
-    time: '2 hours ago',
-  },
+// Type for meals from either plan
+type MealPlan =
+  | NonNullable<GQLGetActiveMealPlanQuery['getActiveMealPlan']>
+  | NonNullable<GQLGetDefaultMealPlanQuery['getDefaultMealPlan']>
+type Meal = MealPlan['weeks'][0]['days'][0]['meals'][0]
+
+// Helper function to calculate nutrition from combined meal plan data
+function calculateNutritionFromMealPlans(
+  activePlan: NonNullable<
+    GQLGetActiveMealPlanQuery['getActiveMealPlan']
+  > | null,
+  defaultPlan: NonNullable<
+    GQLGetDefaultMealPlanQuery['getDefaultMealPlan']
+  > | null,
+): QuickNutritionData | null {
+  // Get today's date string for matching
+  const today = new Date()
+  const todayString = today.toISOString().split('T')[0] // YYYY-MM-DD format
+
+  let combinedMeals: Meal[] = []
+
+  // Add meals from active plan if available
+  if (activePlan?.weeks?.length) {
+    const activePlanDay = activePlan.weeks.at(0)?.days.find((planDay) => {
+      return isMealPlanDayMatch(todayString, planDay.dayOfWeek)
+    })
+    if (activePlanDay?.meals) {
+      combinedMeals = [...combinedMeals, ...activePlanDay.meals]
+    }
+  }
+
+  // Add meals from default plan if available
+  if (defaultPlan?.weeks?.length) {
+    const defaultPlanDay = defaultPlan.weeks.at(0)?.days.find((planDay) => {
+      return isMealPlanDayMatch(todayString, planDay.dayOfWeek)
+    })
+    if (defaultPlanDay?.meals) {
+      combinedMeals = [...combinedMeals, ...defaultPlanDay.meals]
+    }
+  }
+
+  if (!combinedMeals.length) return null
+
+  // Calculate totals from logged foods across all combined meals
+  let totalCalories = 0
+  let totalProtein = 0
+  let totalCarbs = 0
+  let totalFat = 0
+  let lastLoggedMeal: { name: string; time: string } | undefined
+
+  for (const meal of combinedMeals) {
+    if (meal.foods) {
+      for (const food of meal.foods) {
+        if (food.log) {
+          // Use logged quantities
+          totalCalories += food.log.calories || 0
+          totalProtein += food.log.protein || 0
+          totalCarbs += food.log.carbs || 0
+          totalFat += food.log.fat || 0
+
+          // Track most recent logged meal
+          if (
+            !lastLoggedMeal ||
+            new Date(food.log.loggedAt) > new Date(lastLoggedMeal.time)
+          ) {
+            lastLoggedMeal = {
+              name: `${meal.name} - ${food.name}`,
+              time: new Date(food.log.loggedAt).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              }),
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Get targets from plans (prefer active plan targets, fallback to default plan, then defaults)
+  const targetCalories =
+    activePlan?.dailyCalories || defaultPlan?.dailyCalories || 2200
+  const targetProtein =
+    activePlan?.dailyProtein || defaultPlan?.dailyProtein || 150
+  const targetCarbs = activePlan?.dailyCarbs || defaultPlan?.dailyCarbs || 275
+  const targetFat = activePlan?.dailyFat || defaultPlan?.dailyFat || 85
+
+  return {
+    calories: {
+      current: Math.round(totalCalories),
+      target: targetCalories,
+      unit: 'kcal',
+      percentage: Math.round((totalCalories / targetCalories) * 100),
+    },
+    protein: {
+      current: Math.round(totalProtein),
+      target: targetProtein,
+      unit: 'g',
+      percentage: Math.round((totalProtein / targetProtein) * 100),
+    },
+    carbs: {
+      current: Math.round(totalCarbs),
+      target: targetCarbs,
+      unit: 'g',
+      percentage: Math.round((totalCarbs / targetCarbs) * 100),
+    },
+    fat: {
+      current: Math.round(totalFat),
+      target: targetFat,
+      unit: 'g',
+      percentage: Math.round((totalFat / targetFat) * 100),
+    },
+    lastLoggedMeal,
+  }
 }
 
-function MacroBar({
+function MacroCircle({
   label,
   data,
-  colorClass,
+  variant,
 }: {
   label: string
   data: NutritionData
-  colorClass: string
+  variant: 'protein' | 'carbs' | 'fat'
 }) {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between text-sm">
-        <span className="flex items-center gap-1 font-medium">{label}</span>
-        <span className="text-muted-foreground">
-          {data.current}
-          {data.unit} / {data.target}
-          {data.unit}
-        </span>
-      </div>
-      <Progress value={data.percentage} className={cn('h-2', colorClass)} />
+    <div className="flex flex-col items-center space-y-2">
+      <CircularProgress
+        value={data.percentage}
+        variant={variant}
+        size="lg"
+        strokeWidth={4}
+        label={`${data.current}${data.unit}`}
+        sublabel={`${data.target}${data.unit}`}
+      />
+      <span className="text-xs font-medium text-center">{label}</span>
     </div>
   )
 }
@@ -130,16 +223,66 @@ function NutritionSkeleton() {
 }
 
 export function QuickNutritionOverview({
-  nutritionData = mockNutritionData,
   isLoading,
 }: QuickNutritionOverviewProps) {
-  if (isLoading) {
+  const { preferences } = useUserPreferences()
+
+  // Calculate date parameter for the query
+  const dateParam = useMemo(() => {
+    const today = new Date()
+    return toISOString(getStartOfWeekUTC(today, preferences.weekStartsOn))
+  }, [preferences.weekStartsOn])
+
+  // Fetch both active and default meal plans (like the main meal plan page)
+  const {
+    data: activePlanData,
+    isLoading: isLoadingActive,
+    error: activePlanError,
+  } = useGetActiveMealPlanQuery(
+    {
+      date: dateParam,
+    },
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  )
+
+  const {
+    data: defaultPlanData,
+    isLoading: isLoadingDefault,
+    error: defaultPlanError,
+  } = useGetDefaultMealPlanQuery(
+    {
+      date: dateParam,
+    },
+    {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+    },
+  )
+
+  // Extract the plans
+  const activePlan = activePlanData?.getActiveMealPlan
+  const defaultPlan = defaultPlanData?.getDefaultMealPlan
+
+  // Calculate nutrition data from both plans combined
+  const nutritionData = useMemo(() => {
+    return calculateNutritionFromMealPlans(
+      activePlan ?? null,
+      defaultPlan ?? null,
+    )
+  }, [activePlan, defaultPlan])
+
+  const combinedLoading = isLoading || isLoadingActive || isLoadingDefault
+  const hasError = activePlanError || defaultPlanError
+  if (combinedLoading) {
     return (
       <Card variant="secondary">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <SectionIcon icon={Utensils} variant="amber" />
-            Today's Nutrition
+            Nutrition
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -149,8 +292,8 @@ export function QuickNutritionOverview({
     )
   }
 
-  // Show empty state if no nutrition data
-  if (!nutritionData.calories.current) {
+  // Show empty state if no nutrition data or error
+  if (hasError || !nutritionData || !nutritionData.calories.current) {
     return (
       <Card variant="secondary">
         <CardHeader className="pb-3">
@@ -199,34 +342,20 @@ export function QuickNutritionOverview({
           <Progress value={nutritionData.calories.percentage} className="h-3" />
         </div>
 
-        {/* Macros */}
-        <div className="space-y-3">
-          <MacroBar
+        {/* Macros - Circular Progress */}
+        <div className="grid grid-cols-3 gap-4 py-2">
+          <MacroCircle
             label="Protein"
             data={nutritionData.protein}
-            colorClass="text-blue-600"
+            variant="protein"
           />
-          <MacroBar
+          <MacroCircle
             label="Carbs"
             data={nutritionData.carbs}
-            colorClass="text-orange-600"
+            variant="carbs"
           />
-          <MacroBar
-            label="Fat"
-            data={nutritionData.fat}
-            colorClass="text-green-600"
-          />
+          <MacroCircle label="Fat" data={nutritionData.fat} variant="fat" />
         </div>
-
-        {/* Last meal logged */}
-        {nutritionData.lastLoggedMeal && (
-          <div className="pt-2 border-t border-border/50">
-            <p className="text-xs text-muted-foreground">
-              Last logged: {nutritionData.lastLoggedMeal.name} •{' '}
-              {nutritionData.lastLoggedMeal.time}
-            </p>
-          </div>
-        )}
 
         {/* Action buttons */}
         <div className="flex gap-2 pt-2">
