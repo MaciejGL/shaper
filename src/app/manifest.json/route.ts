@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   const manifest = {
-    name: 'Fitspace - Fitness & Nutrition Tracker',
-    short_name: 'Fitspace',
+    name: 'Hypertro - Fitness & Nutrition Tracker',
+    short_name: 'Hypertro',
     description: 'Your personal fitness and nutrition tracking app',
     start_url: '/fitspace',
     id: '/',

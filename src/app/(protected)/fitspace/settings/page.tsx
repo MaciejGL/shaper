@@ -12,7 +12,7 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="container-fitspace mx-auto py-8 max-w-5xl">
+    <div className="container-hypertro mx-auto py-8 max-w-5xl">
       <div className="mb-10 text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl mb-4">
           <Settings className="w-8 h-8 text-white" />

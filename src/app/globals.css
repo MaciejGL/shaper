@@ -202,7 +202,7 @@
   max-width: 80rem;
 }
 
-@utility container-fitspace {
+@utility container-hypertro {
   width: 100%;
   max-width: 60rem;
 }

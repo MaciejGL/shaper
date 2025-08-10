@@ -22,7 +22,7 @@ const yoga = createYoga<{
   logging: 'info',
   graphqlEndpoint: '/api/graphql',
   cors: {
-    origin: ['https://fit-space.app', 'https://www.fit-space.app'],
+    origin: ['https://hypertro.app', 'https://www.hypertro.app'],
     credentials: true,
   },
   context: async () => createContext(),

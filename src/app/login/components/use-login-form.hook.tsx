@@ -21,11 +21,15 @@ export const useLoginForm = () => {
 
   // Timer for resend OTP
   useEffect(() => {
-    let interval: NodeJS.Timeout
+    let interval: NodeJS.Timeout | number | null
     if (leftTime > 0) {
       interval = setTimeout(() => setLeftTime(leftTime - 1), 1000)
     }
-    return () => clearInterval(interval)
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+    }
   }, [leftTime])
 
   const handleSendOtp = async () => {

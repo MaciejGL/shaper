@@ -29,7 +29,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Fitspace',
+  title: 'Hypertro',
   description: 'The best way to get fit and find new friends.',
   icons: {
     icon: [
@@ -57,22 +57,22 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Fitspace',
+    title: 'Hypertro',
     description: 'Your personal fitness coach',
     images: ['/favicons/android-chrome-192x192.png'],
   },
   openGraph: {
-    title: 'Fitspace',
+    title: 'Hypertro',
     description: 'Your personal fitness coach',
     images: ['/favicons/android-chrome-192x192.png'],
   },
   alternates: {
-    canonical: 'https://fit-space.app',
+    canonical: 'https://hypertro.app',
   },
-  metadataBase: new URL('https://fit-space.app'),
-  applicationName: 'Fitspace',
+  metadataBase: new URL('https://hypertro.app'),
+  applicationName: 'Hypertro',
   appleWebApp: {
-    title: 'Fitspace',
+    title: 'Hypertro',
     statusBarStyle: 'black-translucent',
     capable: true,
     startupImage: ['/favicons/apple-touch-icon.png'],
@@ -85,6 +85,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const isDevelopment = process.env.NODE_ENV === 'development'
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -101,6 +103,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${interTight.variable} antialiased min-h-svh`}
       >
+        {isDevelopment && (
+          <div className="fixed top-0 left-0 size-2 rounded-full bg-red-500 z-50"></div>
+        )}
+
         <Providers>{children}</Providers>
         <script
           dangerouslySetInnerHTML={{

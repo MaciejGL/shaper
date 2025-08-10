@@ -28,7 +28,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container-fitspace mx-auto mb-24">
+    <div className="container-hypertro mx-auto mb-24">
       <DashboardHeader title="Dashboard" icon={<LayoutDashboard />} />
 
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
 function DashboardSkeleton() {
   return (
-    <div className="container-fitspace mx-auto mb-24">
+    <div className="container-hypertro mx-auto mb-24">
       <DashboardHeader title="Dashboard" icon={<LayoutDashboard />} />
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2">
         <TodaysSessionSkeleton />

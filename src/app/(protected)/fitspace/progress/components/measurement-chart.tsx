@@ -1,4 +1,5 @@
 import { format } from 'date-fns'
+import { useMemo } from 'react'
 import { CartesianGrid, Legend, Line, LineChart, XAxis, YAxis } from 'recharts'
 
 import {
@@ -69,16 +70,20 @@ export function MeasurementChart({
   const yAxisMin = Math.max(0, minValue - padding) // Don't go below 0 for measurements
   const yAxisMax = maxValue + padding
 
-  const chartConfig = {
-    [field]: {
-      label: `${label} (${unit})`,
-      color: 'var(--chart-1)',
-    },
-    [`${field}Average`]: {
-      label: `Weekly Average (${unit})`,
-      color: 'var(--chart-2)',
-    },
-  } satisfies ChartConfig
+  const chartConfig = useMemo(
+    () =>
+      ({
+        [field]: {
+          label: `${label} (${unit})`,
+          color: 'var(--chart-1)',
+        },
+        [`${field}Average`]: {
+          label: `Weekly Average (${unit})`,
+          color: 'var(--chart-2)',
+        },
+      }) satisfies ChartConfig,
+    [field, label, unit],
+  )
 
   // Custom legend formatter to use chartConfig labels
   const legendFormatter = (value: string) => {

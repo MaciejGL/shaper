@@ -95,7 +95,7 @@ export const EmailHeader = ({
           }}
         >
           <img
-            src={'https://fit-space.app/favicons/android-chrome-192x192.png'}
+            src={'https://hypertro.app/favicons/android-chrome-192x192.png'}
             alt={logoAlt}
             style={{
               height: '40px',

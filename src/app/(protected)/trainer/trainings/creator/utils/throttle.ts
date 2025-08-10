@@ -4,7 +4,7 @@ export function throttle<T extends (...args: any[]) => any>(
   func: T,
   delay: number,
 ): T & { cancel: () => void } {
-  let timeoutId: NodeJS.Timeout | null = null
+  let timeoutId: NodeJS.Timeout | number | null = null
   let lastExecTime = 0
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

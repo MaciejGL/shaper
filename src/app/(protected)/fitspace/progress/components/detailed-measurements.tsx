@@ -1,4 +1,5 @@
 import { useCircumferenceConversion } from '@/hooks/use-circumference-conversion'
+import { useDynamicUnitResolver } from '@/hooks/use-dynamic-unit-resolver'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
 import { useBodyMeasurementsContext } from './body-measurements-context'
@@ -12,6 +13,7 @@ export function DetailedMeasurements() {
   const { toDisplayWeight, weightUnit } = useWeightConversion()
   const { toDisplayCircumference, circumferenceUnit } =
     useCircumferenceConversion()
+  const { resolveUnit } = useDynamicUnitResolver()
 
   // List of circumference measurement fields
   const circumferenceFields = [
@@ -93,7 +95,7 @@ export function DetailedMeasurements() {
                   key={field.key}
                   label={field.label}
                   value={getLatestMeasurement(field.key)}
-                  unit={field.unit}
+                  unit={resolveUnit(field.key, field.unit)}
                   trend={getTrend(field.key)}
                 />
               )

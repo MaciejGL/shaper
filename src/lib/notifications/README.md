@@ -1,24 +1,24 @@
-# Push Notifications Integration Guide
+# Push Notifications - Mobile Only
 
 ## Overview
 
-Push notifications are now fully integrated with your Shaper app's user preferences and database system. Users can control their push notification preferences through the existing settings, and notifications respect these preferences.
+Push notifications are now **mobile-only** using native Expo push notifications. The PWA/web push system has been removed in favor of a simpler, more reliable mobile app experience.
 
-## Database Schema
+## Architecture
 
-### PushSubscription Model
+### Mobile Push Tokens
 
 ```prisma
-model PushSubscription {
-  id        String   @id @default(uuid())
-  userId    String
-  endpoint  String   @unique
-  p256dh    String
-  auth      String
-  userAgent String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model MobilePushToken {
+  id                      String   @id @default(uuid())
+  expoPushToken           String   @unique
+  userId                  String
+  platform                String   // 'ios' | 'android'
+  deviceInfo              String?  // JSON string with device details
+  pushNotificationsEnabled Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  lastActiveAt            DateTime @default(now())
+  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 ```
 
@@ -30,38 +30,34 @@ Push notifications are controlled via the existing `UserProfile.pushNotification
 pushNotifications Boolean? @default(false)
 ```
 
-## Integration Points
+## How It Works
 
-### 1. User Preferences Context
+### 1. Mobile App Registration
 
-- ✅ Push notifications integrate with `useUserPreferences()` hook
-- ✅ Subscription status automatically updates user preferences
-- ✅ Preferences control whether notifications are sent
+- User logs into mobile app
+- App requests push permissions
+- Expo push token is generated and sent to backend
+- Token is stored in `MobilePushToken` table with user association
 
-### 2. Existing Notification System
+### 2. Push Notification Flow
 
-Use the integration helper to send push notifications alongside your existing notifications:
-
-```typescript
-import { sendPushForNotification } from '@/lib/notifications/push-integration'
-
-// Send push notification for existing notification types
-await sendPushForNotification(
-  userId,
-  GQLNotificationType.NewTrainingPlanAssigned,
-  'Your new training plan is ready!',
-  '/fitspace/my-plans',
-)
+```
+Backend → Expo Push Service → iOS/Android → Mobile App
 ```
 
-### 3. Direct Push Notifications
+### 3. User Control
 
-Send push notifications directly to specific users:
+- Users can enable/disable in mobile app settings
+- Settings sync with backend via mobile app bridge
+- Disabled tokens are not sent notifications
+
+## Usage Examples
+
+### Send to Specific Users
 
 ```typescript
 import { sendPushNotificationToUsers } from '@/app/actions/push-notifications'
 
-// Send to specific users
 await sendPushNotificationToUsers(
   [userId1, userId2],
   '🏋️ Workout Reminder',
@@ -70,110 +66,85 @@ await sendPushNotificationToUsers(
 )
 ```
 
-### 4. Specialized Helpers
+### Send via Mobile Service
 
 ```typescript
-import {
-  sendMealReminderPush,
-  sendWorkoutReminderPush,
-} from '@/lib/notifications/push-integration'
+import { sendMobilePushNotifications } from '@/lib/notifications/mobile-push-service'
 
-// Workout reminders
-await sendWorkoutReminderPush(userId, 'Upper Body Strength', '3:00 PM')
-
-// Meal reminders
-await sendMealReminderPush(userId, 'lunch', '12:30 PM')
+await sendMobilePushNotifications({
+  userIds: [userId],
+  title: 'New Plan Assigned',
+  body: 'Your trainer assigned you a new workout plan',
+  data: { url: '/fitspace/my-plans' },
+})
 ```
 
-## Usage Examples
-
-### Extending Existing Notification Creation
+### Integration with Existing Notifications
 
 ```typescript
-// In your existing notification resolvers/services
-import { createNotificationWithPush } from '@/lib/notifications/push-integration'
+import { sendPushForNotification } from '@/lib/notifications/push-integration'
 
-export async function createTrainingPlanNotification(
-  userId: string,
-  planName: string,
-) {
-  // This will create both in-app and push notifications
-  await createNotificationWithPush({
-    userId,
-    type: GQLNotificationType.NewTrainingPlanAssigned,
-    message: `Your new training plan "${planName}" is ready!`,
-    link: '/fitspace/my-plans',
-  })
-}
+// Automatically sends push alongside in-app notifications
+await sendPushForNotification(
+  userId,
+  GQLNotificationType.NewTrainingPlanAssigned,
+  'Your new training plan is ready!',
+  '/fitspace/my-plans',
+)
 ```
 
-### Scheduled Notifications
+## API Endpoints
+
+### Mobile App Registration
+
+- `POST /api/mobile/push-token` - Register/update push token
+- `PATCH /api/mobile/push-token` - Update notification preferences
+
+### Admin/Testing
+
+- `POST /api/admin/test-push` - Send test notifications
+- `GET /api/admin/test-push` - Get push statistics
+
+## Key Features
+
+### ✅ What Works
+
+- Native iOS/Android push notifications
+- Deep linking support
+- User preference synchronization
+- Automatic permission detection
+- Background notification handling
+- Badge count management
+
+### ❌ What's Removed
+
+- PWA/web push notifications
+- Service worker registration
+- VAPID key configuration
+- Browser notification APIs
+
+## Migration Notes
+
+If upgrading from the old PWA system:
+
+1. **Database**: Old `PushSubscription` records are not automatically migrated
+2. **Environment**: VAPID keys are no longer needed
+3. **Frontend**: Remove any service worker registration code
+4. **Settings**: Update notification settings to mobile-only UI
+
+## Development
+
+### Testing
 
 ```typescript
-// For cron jobs or scheduled tasks
-import { sendWorkoutReminderPush } from '@/lib/notifications/push-integration'
+import { sendTestNotification } from '@/app/actions/push-notifications'
 
-// Send workout reminders 30 minutes before scheduled time
-await sendWorkoutReminderPush(userId, 'Morning Strength Training', '7:00 AM')
+await sendTestNotification('Test message')
 ```
 
-## User Experience
+### Debugging
 
-### Subscription Flow
-
-1. User visits `/fitspace/push-test` or uses the component
-2. Clicks "Subscribe" → Browser requests permission
-3. If granted → Subscription stored in database + preferences updated to `pushNotifications: true`
-4. User can disable in preferences without unsubscribing (notifications won't be sent)
-5. User can unsubscribe completely → removes from database + updates preferences
-
-### Preference Integration
-
-- **Subscribed + Enabled**: ✅ Receives notifications
-- **Subscribed + Disabled**: 🔕 No notifications sent (respects preferences)
-- **Not Subscribed**: ❌ No notifications possible
-
-## Files Created/Modified
-
-### New Files
-
-- `src/server/models/push-subscription/` - Complete GraphQL model
-- `src/lib/notifications/push-integration.ts` - Integration helpers
-- `src/lib/notifications/README.md` - This documentation
-
-### Modified Files
-
-- `prisma/schema.prisma` - Added PushSubscription model
-- `src/app/actions/push-notifications.ts` - Database integration
-- `src/components/push-notification-manager.tsx` - User preferences integration
-
-## Next Steps
-
-### Run Migration
-
-```bash
-npx prisma migrate dev --name add_push_subscriptions
-```
-
-### Add to GraphQL Schema
-
-Add the push subscription schema to your main GraphQL schema if using schema stitching.
-
-### Test Integration
-
-1. Add VAPID keys to `.env`
-2. Visit `/fitspace/push-test`
-3. Subscribe to notifications
-4. Check preferences are updated
-5. Test notification sending
-
-## Production Considerations
-
-- ✅ User preferences respected
-- ✅ Database persistence
-- ✅ Error handling and logging
-- ✅ Authentication required
-- ✅ Cross-platform support
-- ✅ Integration with existing notification system
-
-The system is now production-ready and fully integrated with your existing Shaper app architecture! 🚀
+- Check Expo push token format: `ExponentPushToken[...]`
+- Verify permissions in mobile app settings
+- Check device platform compatibility
+- Monitor push token sync in app logs
