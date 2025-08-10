@@ -150,6 +150,11 @@ export default class UserProfile implements GQLUserProfile {
   }
 
   get trainerSince() {
+    if (!this.data.trainerSince) return null
+    if (typeof this.data.trainerSince === 'string') {
+      return this.data.trainerSince
+    }
+
     return this.data.trainerSince?.toISOString() ?? null
   }
 

@@ -1761,6 +1761,7 @@ export type GQLPublicTrainer = {
   __typename?: 'PublicTrainer';
   clientCount: EntireFieldWrapper<Scalars['Int']['output']>;
   credentials: EntireFieldWrapper<Array<Scalars['String']['output']>>;
+  email: EntireFieldWrapper<Scalars['String']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   name?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
@@ -2460,6 +2461,7 @@ export type GQLUpdateProfileInput = {
   successStories?: InputMaybe<Array<Scalars['String']['input']>>;
   theme?: InputMaybe<GQLTheme>;
   timeFormat?: InputMaybe<GQLTimeFormat>;
+  trainerSince?: InputMaybe<Scalars['String']['input']>;
   trainingView?: InputMaybe<GQLTrainingView>;
   weekStartsOn?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
@@ -3757,6 +3759,7 @@ export type GQLPlanWithPermissionsResolvers<ContextType = GQLContext, ParentType
 export type GQLPublicTrainerResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PublicTrainer'] = GQLResolversParentTypes['PublicTrainer']> = {
   clientCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   credentials?: Resolver<Array<GQLResolversTypes['String']>, ParentType, ContextType>;
+  email?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   profile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType>;

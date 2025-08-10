@@ -32,12 +32,12 @@ query GetFeaturedTrainers($limit: Int) {
     name
     role
     clientCount
+    email
     profile {
       firstName
       lastName
       bio
       avatarUrl
-      email
       specialization
       credentials
       successStories

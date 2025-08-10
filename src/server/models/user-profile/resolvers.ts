@@ -82,6 +82,10 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       updateData.credentials = rest.credentials || []
     if (rest.successStories !== undefined)
       updateData.successStories = rest.successStories || []
+    if (rest.trainerSince !== undefined)
+      updateData.trainerSince = rest.trainerSince
+        ? new Date(rest.trainerSince)
+        : null
 
     // Preference fields
     if (rest.weekStartsOn !== undefined)

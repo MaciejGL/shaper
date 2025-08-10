@@ -22,6 +22,12 @@ const cardVariants = cva(
   },
 )
 
+export type CardProps = React.ComponentProps<'div'> & {
+  variant?: 'gradient' | 'elevated' | 'secondary'
+  borderless?: boolean
+  hoverable?: boolean
+}
+
 function Card({
   className,
   children,
@@ -29,11 +35,7 @@ function Card({
   borderless = false,
   hoverable = false,
   ...props
-}: React.ComponentProps<'div'> & {
-  variant?: 'gradient' | 'elevated' | 'secondary'
-  borderless?: boolean
-  hoverable?: boolean
-}) {
+}: CardProps) {
   return (
     <div
       data-slot="card"

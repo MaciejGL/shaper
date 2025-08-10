@@ -158,6 +158,7 @@ input UpdateProfileInput {
   specialization: [String!]
   credentials: [String!]
   successStories: [String!]
+  trainerSince: String
   weekStartsOn: Int
   weightUnit: WeightUnit
   heightUnit: HeightUnit

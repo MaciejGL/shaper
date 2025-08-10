@@ -13,6 +13,11 @@ fragment ProfileFragment on UserProfile {
   activityLevel
   goals
   bio
+  # Trainer-specific fields
+  specialization
+  credentials
+  successStories
+  trainerSince
   createdAt
   updatedAt
   email

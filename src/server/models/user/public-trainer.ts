@@ -40,6 +40,10 @@ export default class PublicTrainer implements GQLPublicTrainer {
     return this.data.profile ? new UserProfile(this.data.profile) : null
   }
 
+  get email() {
+    return this.data.email ?? null
+  }
+
   get clientCount() {
     return this.data._count?.clients ?? 0
   }
@@ -61,6 +65,11 @@ export default class PublicTrainer implements GQLPublicTrainer {
   }
 
   get trainerSince() {
+    if (!this.data.profile?.trainerSince) return null
+    if (typeof this.data.profile?.trainerSince === 'string') {
+      return this.data.profile?.trainerSince
+    }
+
     return this.data.profile?.trainerSince?.toISOString() ?? null
   }
 

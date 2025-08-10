@@ -10,6 +10,7 @@ import {
   LayoutDashboardIcon,
   PlusCircleIcon,
   ShieldIcon,
+  UserIcon,
   UserRoundCogIcon,
   Users2Icon,
   UtensilsIcon,
@@ -295,6 +296,12 @@ export function AppSidebar() {
       url: TRAINER_LINKS.profile.href,
       icon: UserRoundCogIcon,
       disabled: TRAINER_LINKS.profile.disabled,
+    },
+    {
+      title: TRAINER_LINKS.publicProfile.label,
+      url: TRAINER_LINKS.publicProfile.href,
+      icon: UserIcon,
+      disabled: TRAINER_LINKS.publicProfile.disabled,
     },
     // Exercise Management item (for moderators only)
     ...(isModerator

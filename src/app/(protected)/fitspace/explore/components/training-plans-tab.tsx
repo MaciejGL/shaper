@@ -1,46 +1,22 @@
 'use client'
 
-import { Clock, Crown, Dumbbell, Filter, Lock, Star } from 'lucide-react'
+import { Clock, Crown, Dumbbell, Lock, Star } from 'lucide-react'
 import { useState } from 'react'
 
+import {
+  FilterType,
+  TrainingPlanFilters,
+} from '@/components/training-plan/training-plan-filters'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Separator } from '@/components/ui/separator'
 import {
   GQLFocusTag,
   GQLGetPublicTrainingPlansQuery,
   useGetPublicTrainingPlansQuery,
 } from '@/generated/graphql-client'
-
-type FilterType = 'all' | 'free' | 'premium'
-type FocusTag = GQLFocusTag
-
-// Helper function to convert enum values to display labels
-const focusTagLabels: Record<GQLFocusTag, string> = {
-  [GQLFocusTag.Strength]: 'Strength',
-  [GQLFocusTag.Cardio]: 'Cardio',
-  [GQLFocusTag.Hypertrophy]: 'Hypertrophy',
-  [GQLFocusTag.AthleticPerformance]: 'Athletic Performance',
-  [GQLFocusTag.BeginnerFriendly]: 'Beginner Friendly',
-  [GQLFocusTag.BodyRecomposition]: 'Body Recomposition',
-  [GQLFocusTag.Powerlifting]: 'Powerlifting',
-  [GQLFocusTag.WeightLoss]: 'Weight Loss',
-  [GQLFocusTag.Endurance]: 'Endurance',
-  [GQLFocusTag.Flexibility]: 'Flexibility',
-  [GQLFocusTag.FunctionalFitness]: 'Functional Fitness',
-  [GQLFocusTag.Bodyweight]: 'Bodyweight',
-  [GQLFocusTag.MuscleBuilding]: 'Muscle Building',
-  [GQLFocusTag.FatLoss]: 'Fat Loss',
-  [GQLFocusTag.Conditioning]: 'Conditioning',
-}
 
 export function TrainingPlansTab() {
   const [selectedPlan, setSelectedPlan] = useState<
@@ -62,7 +38,7 @@ export function TrainingPlansTab() {
     setIsPreviewOpen(true)
   }
 
-  const toggleFocusTag = (tag: FocusTag) => {
+  const toggleFocusTag = (tag: GQLFocusTag) => {
     setSelectedFocusTags((prev) =>
       prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     )
@@ -119,105 +95,16 @@ export function TrainingPlansTab() {
     return true
   })
 
-  const focusTagOptions: GQLFocusTag[] = [
-    GQLFocusTag.Strength,
-    GQLFocusTag.Hypertrophy,
-    GQLFocusTag.Cardio,
-    GQLFocusTag.AthleticPerformance,
-    GQLFocusTag.BeginnerFriendly,
-    GQLFocusTag.BodyRecomposition,
-    GQLFocusTag.Powerlifting,
-    GQLFocusTag.WeightLoss,
-    GQLFocusTag.Endurance,
-    GQLFocusTag.Flexibility,
-    GQLFocusTag.FunctionalFitness,
-    GQLFocusTag.Bodyweight,
-  ]
-
   return (
     <div className="space-y-6">
       {/* Filter Section */}
-      <div className="space-y-4">
-        {/* Main Filter Buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            variant={activeFilter === 'all' ? 'default' : 'tertiary'}
-            size="sm"
-            onClick={() => setActiveFilter('all')}
-          >
-            All Plans
-          </Button>
-          <Button
-            variant={activeFilter === 'free' ? 'default' : 'tertiary'}
-            size="sm"
-            onClick={() => setActiveFilter('free')}
-          >
-            Free
-          </Button>
-          <Button
-            variant={activeFilter === 'premium' ? 'default' : 'tertiary'}
-            size="sm"
-            onClick={() => setActiveFilter('premium')}
-            className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0"
-            iconStart={<Crown />}
-          >
-            Premium
-          </Button>
-
-          {/* Advanced Filters Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="tertiary"
-                size="sm"
-                iconOnly={<Filter />}
-                className="ml-auto"
-              >
-                More Filters
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48">
-              {focusTagOptions.map((tag) => (
-                <DropdownMenuItem
-                  key={tag}
-                  onClick={() => toggleFocusTag(tag)}
-                  className="flex items-center justify-between"
-                >
-                  <span>{focusTagLabels[tag]}</span>
-                  {selectedFocusTags.includes(tag) && (
-                    <div className="w-2 h-2 bg-primary rounded-full" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-              {selectedFocusTags.length > 0 && (
-                <>
-                  <div className="h-px bg-border my-1" />
-                  <DropdownMenuItem onClick={clearAllFilters}>
-                    Clear All Filters
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        {/* Active Focus Tags */}
-        {selectedFocusTags.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-sm text-muted-foreground">Focus:</span>
-            {selectedFocusTags.map((tag) => (
-              <Badge
-                key={tag}
-                variant="secondary"
-                className="cursor-pointer hover:bg-destructive hover:text-destructive-foreground"
-                onClick={() => toggleFocusTag(tag)}
-              >
-                {focusTagLabels[tag]} ×
-              </Badge>
-            ))}
-          </div>
-        )}
-      </div>
+      <TrainingPlanFilters
+        activeFilter={activeFilter}
+        selectedFocusTags={selectedFocusTags}
+        onFilterChange={setActiveFilter}
+        onToggleFocusTag={toggleFocusTag}
+        onClearAllFilters={clearAllFilters}
+      />
 
       {/* Results */}
       <div className="space-y-3">

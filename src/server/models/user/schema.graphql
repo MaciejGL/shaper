@@ -86,6 +86,7 @@ type PublicTrainer {
   name: String
   role: UserRole!
   profile: UserProfile
+  email: String!
   specialization: [String!]!
   credentials: [String!]!
   successStories: [String!]!

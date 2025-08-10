@@ -23,6 +23,11 @@ export const TRAINER_LINKS = {
     disabled: false,
   },
   profile: { href: '/trainer/profile', label: 'Profile', disabled: false },
+  publicProfile: {
+    href: '/trainer/public-profile',
+    label: 'Public Profile',
+    disabled: false,
+  },
 }
 
 export const CLIENT_LINKS = {
