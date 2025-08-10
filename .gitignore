@@ -49,3 +49,5 @@ next-env.d.ts
 # Firebase configuration files (contain sensitive API keys)
 **/GoogleService-Info.plist
 **/google-services.json
+
+expo-app/node_modules
