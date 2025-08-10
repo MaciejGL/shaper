@@ -40,13 +40,11 @@
       "package": "app.hypertro.mobile",
       "googleServicesFile": "./google-services.json",
       "permissions": [
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
         "INTERNET",
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "POST_NOTIFICATIONS"
       ],
-      "usesCleartextTraffic": true,
+      "usesCleartextTraffic": false,
       "intentFilters": [
         {
           "action": "VIEW",

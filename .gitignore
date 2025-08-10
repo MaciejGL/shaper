@@ -46,8 +46,4 @@ next-env.d.ts
 **/downloads/
 *.zip
 
-# Firebase configuration files (contain sensitive API keys)
-**/GoogleService-Info.plist
-**/google-services.json
-
 expo-app/node_modules
