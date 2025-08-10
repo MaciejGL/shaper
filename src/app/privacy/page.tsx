@@ -28,7 +28,7 @@ export default async function PrivacyPolicyPage() {
   const backUrl = getBackUrl()
   const backText = userSession ? 'Back to Settings' : 'Back to Home'
   return (
-    <div className="mx-auto bg-background h-screen overflow-y-auto">
+    <div className="mx-auto bg-background h-screen overflow-y-auto hide-scrollbar">
       {/* Navigation Header */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-5xl">
@@ -103,98 +103,168 @@ export default async function PrivacyPolicyPage() {
                 <div className="space-y-6">
                   <div className="bg-muted/30 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-3 text-foreground">
-                      Information You Provide
+                      Account & Profile Information
                     </h3>
                     <ul className="space-y-2 text-muted-foreground">
                       <li>
                         <strong className="text-foreground">
-                          Account Information:
+                          Basic Account:
                         </strong>{' '}
-                        Name, email address, password, profile picture
+                        Email address, name, user role (client or trainer),
+                        profile picture
                       </li>
                       <li>
                         <strong className="text-foreground">
-                          Profile Data:
+                          Personal Details:
                         </strong>{' '}
-                        Age, gender, height, weight, fitness goals, experience
-                        level
+                        First name, last name, phone number, date of birth,
+                        biological sex
                       </li>
                       <li>
                         <strong className="text-foreground">
-                          Fitness Data:
+                          Fitness Profile:
                         </strong>{' '}
-                        Workout logs, exercise history, progress measurements,
-                        photos
+                        Height, weight, fitness level, activity level, goals,
+                        bio, allergies
+                      </li>
+                      <li>
+                        <strong className="text-foreground">
+                          Body Measurements:
+                        </strong>{' '}
+                        Circumference measurements (chest, waist, hips, neck,
+                        biceps, calves, thighs), body fat percentage, tracking
+                        timestamps
+                      </li>
+                      <li>
+                        <strong className="text-foreground">Images:</strong>{' '}
+                        Avatar photos (public), progress photos (private),
+                        exercise demonstration images
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-muted/30 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-3 text-foreground">
+                      Fitness & Nutrition Data
+                    </h3>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li>
+                        <strong className="text-foreground">
+                          Training Data:
+                        </strong>{' '}
+                        Workout plans, exercises performed, sets, reps, weights,
+                        RPE scores, rest periods, completion timestamps
+                      </li>
+                      <li>
+                        <strong className="text-foreground">
+                          Exercise Logs:
+                        </strong>{' '}
+                        Detailed workout history, performance tracking, notes
+                        and observations
                       </li>
                       <li>
                         <strong className="text-foreground">
                           Nutrition Data:
                         </strong>{' '}
-                        Meal logs, dietary preferences, nutritional information
+                        Meal plans, food logs, nutritional targets, dietary
+                        preferences
                       </li>
                       <li>
                         <strong className="text-foreground">
-                          Communication Data:
+                          Reviews & Ratings:
                         </strong>{' '}
-                        Messages with trainers, support requests, feedback
+                        Training plan ratings, comments, and feedback
                       </li>
                     </ul>
                   </div>
 
                   <div className="bg-muted/30 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-3 text-foreground">
-                      Information Automatically Collected
+                      Communication & Collaboration
                     </h3>
                     <ul className="space-y-2 text-muted-foreground">
                       <li>
-                        <strong className="text-foreground">Usage Data:</strong>{' '}
-                        App interactions, feature usage, session duration
+                        <strong className="text-foreground">
+                          Trainer-Client Communications:
+                        </strong>{' '}
+                        Notes, coaching requests, collaboration invitations
+                      </li>
+                      <li>
+                        <strong className="text-foreground">
+                          Notifications:
+                        </strong>{' '}
+                        In-app notification preferences and delivery status
+                      </li>
+                      <li>
+                        <strong className="text-foreground">
+                          Support Communications:
+                        </strong>{' '}
+                        Help requests, bug reports, feedback submissions
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-muted/30 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-3 text-foreground">
+                      Technical & Usage Data
+                    </h3>
+                    <ul className="space-y-2 text-muted-foreground">
+                      <li>
+                        <strong className="text-foreground">
+                          Analytics Data:
+                        </strong>{' '}
+                        App usage patterns, feature interactions, session
+                        duration (via PostHog)
                       </li>
                       <li>
                         <strong className="text-foreground">
                           Device Information:
                         </strong>{' '}
-                        Device type, operating system, app version, device
-                        identifiers
+                        Device type, operating system, app version, platform
+                        (iOS/Android/Web)
                       </li>
                       <li>
                         <strong className="text-foreground">
-                          Location Data:
+                          Authentication Data:
                         </strong>{' '}
-                        General location (city/region) for trainer matching
-                        (with permission)
+                        Session tokens, one-time passwords (OTP) for login
+                        verification
                       </li>
                       <li>
                         <strong className="text-foreground">
-                          Performance Data:
+                          Push Notification Data:
                         </strong>{' '}
-                        App crashes, errors, performance metrics
+                        Mobile push tokens (Expo), notification preferences,
+                        delivery status
                       </li>
                     </ul>
                   </div>
 
                   <div className="bg-muted/30 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-3 text-foreground">
-                      Information from Third Parties
+                      Third-Party Data Sources
                     </h3>
                     <ul className="space-y-2 text-muted-foreground">
                       <li>
                         <strong className="text-foreground">
-                          Social Media:
+                          Food Databases:
                         </strong>{' '}
-                        Profile information if you connect social media accounts
+                        Nutritional information from OpenFoodFacts and USDA Food
+                        Data Central
                       </li>
                       <li>
                         <strong className="text-foreground">
-                          Payment Processors:
+                          Email Services:
                         </strong>{' '}
-                        Transaction information for premium features
+                        Delivery status and engagement metrics from our email
+                        provider (Resend)
                       </li>
                       <li>
                         <strong className="text-foreground">
                           Analytics Services:
                         </strong>{' '}
-                        Aggregated usage statistics and performance data
+                        Aggregated usage statistics and user behavior insights
+                        (PostHog)
                       </li>
                     </ul>
                   </div>
@@ -275,20 +345,32 @@ export default async function PrivacyPolicyPage() {
                     </h3>
                     <ul className="space-y-2 text-amber-800 dark:text-amber-200 text-sm">
                       <li>
-                        <strong>Trainers:</strong> Your profile and fitness data
-                        with trainers you choose to work with
+                        <strong>Trainers:</strong> When you work with a trainer,
+                        we share your profile, fitness data, progress
+                        measurements, and training history
                       </li>
                       <li>
-                        <strong>Service Providers:</strong> Third-party services
-                        that help us operate the app
+                        <strong>AWS S3:</strong> Secure cloud storage for your
+                        images (avatar photos are publicly accessible, progress
+                        photos are private)
                       </li>
                       <li>
-                        <strong>Analytics Partners:</strong> Aggregated,
-                        non-identifying data for app improvement
+                        <strong>PostHog:</strong> Analytics service receives
+                        anonymized usage data and session recordings (with
+                        password masking)
+                      </li>
+                      <li>
+                        <strong>Expo Push Service:</strong> Mobile notification
+                        delivery service receives push tokens and notification
+                        content
+                      </li>
+                      <li>
+                        <strong>Resend Email Service:</strong> Receives your
+                        email address and OTP codes for authentication emails
                       </li>
                       <li>
                         <strong>Legal Requirements:</strong> When required by
-                        law or to protect our rights
+                        law, court order, or to protect our rights and safety
                       </li>
                     </ul>
                   </div>
@@ -299,11 +381,17 @@ export default async function PrivacyPolicyPage() {
                     </h3>
                     <ul className="space-y-2 text-red-800 dark:text-red-200 text-sm">
                       <li>Sell your personal information to third parties</li>
+                      <li>Share your data with social media platforms</li>
+                      <li>Provide identifying information to advertisers</li>
                       <li>
-                        Share identifying information without your consent
+                        Use your fitness data for marketing to third parties
                       </li>
-                      <li>Use your data for unrelated commercial purposes</li>
-                      <li>Retain data longer than necessary</li>
+                      <li>Share progress photos without explicit consent</li>
+                      <li>Retain authentication data longer than necessary</li>
+                      <li>
+                        Store traditional passwords (we use OTP-only
+                        authentication)
+                      </li>
                     </ul>
                   </div>
                 </div>
@@ -315,16 +403,19 @@ export default async function PrivacyPolicyPage() {
                   Data Security
                 </h2>
                 <p className="text-muted-foreground mb-4">
-                  We implement industry-standard security measures to protect
-                  your information:
+                  We implement multiple layers of security to protect your
+                  personal information and fitness data:
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                     <span className="text-sm">
-                      <strong className="text-foreground">Encryption:</strong>{' '}
+                      <strong className="text-foreground">
+                        OTP Authentication:
+                      </strong>{' '}
                       <span className="text-muted-foreground">
-                        Data encrypted in transit and at rest
+                        No password storage - secure one-time password login
+                        only
                       </span>
                     </span>
                   </div>
@@ -332,10 +423,10 @@ export default async function PrivacyPolicyPage() {
                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                     <span className="text-sm">
                       <strong className="text-foreground">
-                        Access Controls:
+                        HTTPS Encryption:
                       </strong>{' '}
                       <span className="text-muted-foreground">
-                        Limited access to authorized personnel only
+                        All data transmitted using TLS encryption
                       </span>
                     </span>
                   </div>
@@ -343,10 +434,10 @@ export default async function PrivacyPolicyPage() {
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                     <span className="text-sm">
                       <strong className="text-foreground">
-                        Regular Audits:
+                        Private Image Storage:
                       </strong>{' '}
                       <span className="text-muted-foreground">
-                        Security assessments and vulnerability testing
+                        Progress photos stored in private AWS S3 buckets
                       </span>
                     </span>
                   </div>
@@ -354,13 +445,75 @@ export default async function PrivacyPolicyPage() {
                     <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                     <span className="text-sm">
                       <strong className="text-foreground">
-                        Secure Infrastructure:
+                        PostgreSQL Database:
                       </strong>{' '}
                       <span className="text-muted-foreground">
-                        SOC 2 compliant hosting and data centers
+                        Industry-standard database with role-based access
+                        controls
                       </span>
                     </span>
                   </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
+                    <span className="text-sm">
+                      <strong className="text-foreground">
+                        Session Management:
+                      </strong>{' '}
+                      <span className="text-muted-foreground">
+                        JWT tokens with automatic expiration and cleanup
+                      </span>
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
+                    <span className="text-sm">
+                      <strong className="text-foreground">
+                        Data Minimization:
+                      </strong>{' '}
+                      <span className="text-muted-foreground">
+                        We collect only data necessary for app functionality
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mobile App Specific Information */}
+              <div className="bg-blue-50 dark:bg-blue-950/30 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h2 className="text-2xl font-semibold mb-4 text-blue-900 dark:text-blue-100">
+                  📱 Mobile App Information
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-200">
+                      Push Notifications
+                    </h3>
+                    <ul className="space-y-2 text-blue-700 dark:text-blue-300 text-sm">
+                      <li>• Mobile-only push notifications via Expo</li>
+                      <li>• Push tokens stored securely with your account</li>
+                      <li>• You can disable notifications in app settings</li>
+                      <li>• No web browser push notifications</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-200">
+                      Camera & Photos
+                    </h3>
+                    <ul className="space-y-2 text-blue-700 dark:text-blue-300 text-sm">
+                      <li>• Camera access for progress photos only</li>
+                      <li>• Photos compressed before upload</li>
+                      <li>• Progress photos are private to your account</li>
+                      <li>• Avatar photos are publicly visible</li>
+                    </ul>
+                  </div>
+                </div>
+                <div className="mt-4 p-4 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
+                  <p className="text-blue-800 dark:text-blue-200 text-sm">
+                    <strong>Note:</strong> Our mobile app uses a WebView to
+                    display the web application with native integrations for
+                    camera and push notifications. Your data is synced across
+                    all platforms.
+                  </p>
                 </div>
               </div>
 
@@ -386,7 +539,8 @@ export default async function PrivacyPolicyPage() {
                             Access
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            View and download your personal data
+                            View and download your personal data from Settings →
+                            Data & Privacy
                           </div>
                         </div>
                       </div>
@@ -401,7 +555,7 @@ export default async function PrivacyPolicyPage() {
                             Correction
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            Update inaccurate or incomplete information
+                            Update your profile information directly in the app
                           </div>
                         </div>
                       </div>
@@ -416,7 +570,8 @@ export default async function PrivacyPolicyPage() {
                             Deletion
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            Request removal of your account and data
+                            Delete your account via Settings → Account or
+                            contact support
                           </div>
                         </div>
                       </div>
@@ -431,11 +586,31 @@ export default async function PrivacyPolicyPage() {
                             Portability
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            Export your data in a standard format
+                            Export your fitness data in JSON format from
+                            Settings
                           </div>
                         </div>
                       </div>
                     </div>
+                  </div>
+                  <div className="bg-muted/30 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-3 text-foreground">
+                      Notification Controls
+                    </h3>
+                    <ul className="space-y-2 text-muted-foreground text-sm">
+                      <li>
+                        • Manage push notification preferences in mobile app
+                        settings
+                      </li>
+                      <li>
+                        • Control email notifications from your profile settings
+                      </li>
+                      <li>
+                        • Disable specific notification types (workouts, meals,
+                        collaboration)
+                      </li>
+                      <li>• Opt out of all non-essential communications</li>
+                    </ul>
                   </div>
                 </div>
               </div>

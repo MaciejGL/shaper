@@ -99,24 +99,40 @@ export default async function TermsOfServicePage() {
                   2. Description of Service
                 </h2>
                 <p className="text-base leading-relaxed text-muted-foreground mb-4">
-                  Hypertro is a personal fitness training platform that
-                  provides:
+                  Hypertro is a comprehensive fitness platform available as both
+                  a web application and mobile apps that provides:
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                      Core Features
+                    </h4>
                     <ul className="space-y-2 text-blue-800 dark:text-blue-200 text-sm">
-                      <li>• Workout planning and tracking tools</li>
-                      <li>• Personal trainer connection services</li>
-                      <li>• Progress monitoring and analytics</li>
+                      <li>• Customizable workout plan creation and tracking</li>
+                      <li>• Exercise database with detailed instructions</li>
+                      <li>• Body measurement and progress photo tracking</li>
+                      <li>• Real-time workout session recording</li>
                     </ul>
                   </div>
                   <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg border border-green-200 dark:border-green-800">
+                    <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2">
+                      Advanced Features
+                    </h4>
                     <ul className="space-y-2 text-green-800 dark:text-green-200 text-sm">
-                      <li>• Nutrition tracking capabilities</li>
-                      <li>• Fitness-related content and guidance</li>
-                      <li>• Community features and support</li>
+                      <li>• Meal planning and nutrition tracking</li>
+                      <li>• Trainer-client collaboration tools</li>
+                      <li>• Mobile app with native push notifications</li>
+                      <li>• Data export and privacy controls</li>
                     </ul>
                   </div>
+                </div>
+                <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
+                  <p className="text-amber-800 dark:text-amber-200 text-sm">
+                    <strong>Current Status:</strong> Hypertro is currently free
+                    to use. Premium features may be introduced in the future,
+                    but core functionality will always remain available at no
+                    cost.
+                  </p>
                 </div>
               </div>
 
@@ -134,23 +150,29 @@ export default async function TermsOfServicePage() {
                       <li>
                         • You must be at least 13 years old to create an account
                       </li>
+                      <li>• You must provide a valid email address</li>
                       <li>
-                        • You must provide accurate and complete information
+                        • Account information must be accurate and complete
                       </li>
                       <li>
-                        • You are responsible for maintaining account security
+                        • You may not share your account access with others
                       </li>
-                      <li>• You may not share your account credentials</li>
                     </ul>
                   </div>
 
                   <div className="bg-muted/30 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-3 text-foreground">
-                      Account Responsibilities
+                      Authentication & Security
                     </h3>
                     <ul className="space-y-2 text-muted-foreground text-sm">
-                      <li>• Keep your password secure and confidential</li>
-                      <li>• Notify us immediately of any unauthorized use</li>
+                      <li>
+                        • Hypertro uses one-time password (OTP) authentication
+                      </li>
+                      <li>• No traditional passwords are stored or required</li>
+                      <li>
+                        • Notify us immediately of any unauthorized account
+                        access
+                      </li>
                       <li>
                         • You are responsible for all activities under your
                         account
@@ -308,6 +330,48 @@ export default async function TermsOfServicePage() {
                 </div>
               </div>
 
+              {/* Mobile App Terms */}
+              <div className="bg-blue-50 dark:bg-blue-950/30 p-6 rounded-lg border border-blue-200 dark:border-blue-800">
+                <h2 className="text-2xl font-semibold mb-4 text-blue-900 dark:text-blue-100">
+                  📱 Mobile Application Terms
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-200">
+                      App Store Compliance
+                    </h3>
+                    <ul className="space-y-2 text-blue-700 dark:text-blue-300 text-sm">
+                      <li>
+                        • Available on iOS App Store and Google Play Store
+                      </li>
+                      <li>
+                        • Subject to respective platform terms and policies
+                      </li>
+                      <li>
+                        • Over-the-air updates may be automatically applied
+                      </li>
+                      <li>
+                        • App permissions are clearly disclosed during
+                        installation
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-200">
+                      Mobile-Specific Features
+                    </h3>
+                    <ul className="space-y-2 text-blue-700 dark:text-blue-300 text-sm">
+                      <li>
+                        • Camera access for progress photos only when granted
+                      </li>
+                      <li>• Push notifications require user permission</li>
+                      <li>• Data syncs across web and mobile platforms</li>
+                      <li>• Native integrations with device capabilities</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
               {/* Legal Disclaimers */}
               <div>
                 <h2 className="text-2xl font-semibold mb-4 text-foreground">
@@ -329,6 +393,7 @@ export default async function TermsOfServicePage() {
                       <li>• ACCURACY OR COMPLETENESS OF CONTENT</li>
                       <li>• UNINTERRUPTED OR ERROR-FREE OPERATION</li>
                       <li>• SECURITY OR ABSENCE OF VIRUSES</li>
+                      <li>• FITNESS ADVICE OR NUTRITIONAL RECOMMENDATIONS</li>
                     </ul>
                   </div>
 
@@ -341,10 +406,14 @@ export default async function TermsOfServicePage() {
                     </p>
                     <ul className="space-y-1 text-muted-foreground text-sm">
                       <li>• WE SHALL NOT BE LIABLE FOR INDIRECT DAMAGES</li>
-                      <li>
-                        • OUR TOTAL LIABILITY SHALL NOT EXCEED AMOUNT PAID
-                      </li>
                       <li>• WE ARE NOT LIABLE FOR EXERCISE-RELATED INJURIES</li>
+                      <li>
+                        • WE ARE NOT LIABLE FOR TRAINER-CLIENT RELATIONSHIPS
+                      </li>
+                      <li>
+                        • WE ARE NOT LIABLE FOR DATA LOSS OR DEVICE ISSUES
+                      </li>
+                      <li>• LIABILITY LIMITED TO THE FULLEST EXTENT OF LAW</li>
                     </ul>
                   </div>
                 </div>

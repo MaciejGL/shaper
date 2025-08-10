@@ -147,15 +147,19 @@ export default async function SupportPage() {
                     {[
                       {
                         q: 'How do I create an account?',
-                        a: 'Simply download the Hypertro app from the App Store or Google Play and follow the sign-up process. You can register with your email address.',
+                        a: "Visit hypertro.app in your web browser or download our mobile app. Enter your email address and we'll send you a one-time password (OTP) to log in. No traditional password needed!",
                       },
                       {
                         q: 'Is Hypertro free to use?',
-                        a: 'Yes! Hypertro offers comprehensive fitness tracking features for free. We may introduce premium features in the future, but our core functionality will always remain free.',
+                        a: 'Yes! Hypertro is completely free with all core features included: workout tracking, meal planning, progress photos, trainer collaboration, and more. Premium features may be added in the future.',
                       },
                       {
-                        q: 'How do I connect with a personal trainer?',
-                        a: 'Visit the "Trainers" section in the app to browse available personal trainers in your area. You can view their profiles, credentials, and specialties before connecting.',
+                        q: 'How does the trainer-client system work?',
+                        a: "If you're a client, you can send coaching requests to trainers. Once connected, trainers can create custom workout and meal plans for you, track your progress, and leave notes.",
+                      },
+                      {
+                        q: 'Can I use Hypertro without a trainer?',
+                        a: 'Absolutely! You can create your own workout plans, track exercises, log meals, take progress photos, and monitor your fitness journey independently.',
                       },
                       {
                         q: 'Is Hypertro still in development?',
@@ -209,11 +213,19 @@ export default async function SupportPage() {
                     {[
                       {
                         q: 'How do I sync my data across devices?',
-                        a: "Your data automatically syncs when you're logged into the same account on multiple devices with an internet connection. Make sure you're using the same email address on all devices.",
+                        a: "Your data automatically syncs when you're logged into the same account on multiple devices with an internet connection. Works seamlessly between web browser and mobile app.",
                       },
                       {
-                        q: "Push notifications aren't working",
-                        a: 'Check your device settings to ensure notifications are enabled for Hypertro. You can also manage notification preferences within the app settings.',
+                        q: "Push notifications aren't working on mobile",
+                        a: 'First, ensure notifications are enabled in your device settings for Hypertro. Then check the notification preferences in the mobile app settings. Note: Push notifications only work on mobile apps, not in web browsers.',
+                      },
+                      {
+                        q: 'Can I export my workout data?',
+                        a: 'Yes! Go to Settings → Data & Privacy → Export Data to download your workout history, progress measurements, and other fitness data in JSON format.',
+                      },
+                      {
+                        q: 'How does OTP login work?',
+                        a: 'Instead of passwords, Hypertro uses one-time passwords (OTP). Enter your email, check your inbox for a 6-digit code, and enter it to log in. Codes expire after a few minutes for security.',
                       },
                       {
                         q: 'I found a bug or want to suggest a feature',
@@ -246,16 +258,20 @@ export default async function SupportPage() {
                   <div className="space-y-4">
                     {[
                       {
-                        q: 'How do I export my data?',
-                        a: 'You can export your workout history and progress data from the Settings menu. Go to Settings → Data & Privacy → Export Data.',
+                        q: 'What data can I export?',
+                        a: 'You can export your complete fitness data including workout plans, exercise logs, body measurements, meal plans, and progress tracking data in JSON format from Settings → Data & Privacy.',
                       },
                       {
                         q: 'How do I delete my account?',
-                        a: 'To delete your account, go to Settings → Account → Delete Account. Please note that this action is permanent and cannot be undone.',
+                        a: 'To delete your account, go to Settings → Account → Delete Account or email support@hypertro.app. This will permanently remove all your data including progress photos and workout history.',
+                      },
+                      {
+                        q: 'Where are my progress photos stored?',
+                        a: 'Progress photos are securely stored in private AWS S3 buckets and are only accessible to you and any trainers you collaborate with. Avatar photos are publicly visible to other users.',
                       },
                       {
                         q: 'Is my data secure?',
-                        a: 'Yes! We use industry-standard encryption to protect your data. Learn more about our security practices in our Privacy Policy.',
+                        a: 'Yes! We use OTP authentication (no password storage), HTTPS encryption, and secure cloud storage. Learn more in our Privacy Policy.',
                       },
                     ].map((faq, index) => (
                       <div
@@ -283,6 +299,48 @@ export default async function SupportPage() {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+
+              {/* Mobile App Specific */}
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold mb-4 text-foreground flex items-center">
+                  <span className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3 text-white text-sm font-bold">
+                    📱
+                  </span>
+                  Mobile App
+                </h3>
+                <div className="space-y-4">
+                  {[
+                    {
+                      q: 'Where can I download the mobile app?',
+                      a: 'The Hypertro mobile app is available on the iOS App Store and Google Play Store. Search for "Hypertro" or visit the download links on our website.',
+                    },
+                    {
+                      q: 'Why do I need camera permissions?',
+                      a: 'Camera access is only used for taking progress photos and exercise demonstration images. You can grant or deny this permission in your device settings.',
+                    },
+                    {
+                      q: 'How do mobile push notifications work?',
+                      a: 'Our mobile app uses native push notifications to remind you about workouts, meals, and collaboration updates. You can customize notification types in the app settings.',
+                    },
+                    {
+                      q: 'Is the mobile app the same as the website?',
+                      a: 'The mobile app provides the same features as the web version with additional native integrations like push notifications and camera access. Your data syncs across all platforms.',
+                    },
+                  ].map((faq, index) => (
+                    <div
+                      key={index}
+                      className="bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-500 pl-6 py-4 rounded-r-lg"
+                    >
+                      <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2">
+                        {faq.q}
+                      </h4>
+                      <p className="text-blue-800 dark:text-blue-200 text-sm leading-relaxed">
+                        {faq.a}
+                      </p>
+                    </div>
+                  ))}
                 </div>
               </div>
 
