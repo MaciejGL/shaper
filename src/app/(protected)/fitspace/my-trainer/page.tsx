@@ -1,33 +1,23 @@
 'use client'
 
-import {
-  Calendar,
-  Clock,
-  Mail,
-  MessageSquare,
-  TrendingUp,
-  UserCheck,
-  Users,
-} from 'lucide-react'
-import { useState } from 'react'
+import { Clock, MessageSquare, UserCheck, Users } from 'lucide-react'
 
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { TrainerCard } from '@/components/trainer/trainer-card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
+  GQLMyCoachingRequestsQuery,
   useMyCoachingRequestsQuery,
-  useUserBasicQuery,
 } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
+type CoachingRequest = GQLMyCoachingRequestsQuery['coachingRequests'][0]
+
 export default function MyTrainerPage() {
-  const { data: userData } = useUserBasicQuery()
   const { data: requestsData } = useMyCoachingRequestsQuery()
 
-  const user = userData?.userBasic
   const coachingRequests = requestsData?.coachingRequests || []
 
   // Filter for accepted requests (this means we have a trainer relationship)
@@ -43,7 +33,7 @@ export default function MyTrainerPage() {
       <DashboardHeader title="My Trainer" icon={UserCheck} />
 
       {hasTrainer ? (
-        <TrainerRelationshipView requests={acceptedRequests} />
+        <TrainerView trainer={acceptedRequests[0].recipient} />
       ) : (
         <NoTrainerView requests={coachingRequests} />
       )}
@@ -51,245 +41,49 @@ export default function MyTrainerPage() {
   )
 }
 
-interface TrainerRelationshipViewProps {
-  requests: any[]
+interface TrainerViewProps {
+  trainer: CoachingRequest['recipient']
 }
 
-function TrainerRelationshipView({ requests }: TrainerRelationshipViewProps) {
-  const [activeTab, setActiveTab] = useState('overview')
-
-  // Use request data for trainer info
-  const trainerInfo = requests[0]?.recipient
-
+function TrainerView({ trainer }: TrainerViewProps) {
   return (
-    <div className="space-y-6">
-      {/* Trainer Info Card */}
+    <div className="space-y-4">
+      {/* Connected Status */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-              <UserCheck className="h-8 w-8 text-primary" />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
+              <UserCheck className="h-5 w-5 text-primary" />
             </div>
-
             <div className="flex-1">
-              <h2 className="font-semibold">
-                {trainerInfo?.name || 'Your Trainer'}
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {trainerInfo?.email}
-              </p>
-              <Badge className="mt-2" variant="secondary">
+              <p className="text-sm font-medium">Connected to trainer</p>
+              <Badge variant="secondary" className="mt-1">
                 <Users className="h-3 w-3 mr-1" />
-                Connected
+                Active relationship
               </Badge>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Navigation Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="communication">Messages</TabsTrigger>
-          <TabsTrigger value="progress">Progress</TabsTrigger>
-        </TabsList>
+      {/* Trainer Card */}
+      <TrainerCard
+        trainer={trainer}
+        showExperience={false}
+        variant="secondary"
+      />
 
-        <TabsContent value="overview" className="mt-6">
-          <OverviewTab trainer={trainerInfo} />
-        </TabsContent>
-
-        <TabsContent value="communication" className="mt-6">
-          <CommunicationTab trainer={trainerInfo} />
-        </TabsContent>
-
-        <TabsContent value="progress" className="mt-6">
-          <ProgressTab trainer={trainerInfo} />
-        </TabsContent>
-      </Tabs>
-    </div>
-  )
-}
-
-function OverviewTab({ trainer }: { trainer: any }) {
-  return (
-    <div className="space-y-4">
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 pt-0">
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" size="sm" className="h-auto p-3">
-              <div className="flex flex-col items-center gap-1">
-                <MessageSquare className="h-4 w-4" />
-                <span className="text-xs">Send Message</span>
-              </div>
-            </Button>
-
-            <Button variant="outline" size="sm" className="h-auto p-3">
-              <div className="flex flex-col items-center gap-1">
-                <Calendar className="h-4 w-4" />
-                <span className="text-xs">Schedule Session</span>
-              </div>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Trainer Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Trainer Information</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 pt-0 space-y-3">
-          <div className="flex items-center gap-2 text-sm">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-            <span>{trainer?.email || 'Not available'}</span>
-          </div>
-
-          <div className="flex items-center gap-2 text-sm">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span>Response time: Usually within 24 hours</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Current Plan */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Current Training Plan</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 pt-0">
-          <p className="text-sm text-muted-foreground">
-            No training plan assigned yet. Your trainer will create a
-            personalized plan for you soon.
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function CommunicationTab({ trainer }: { trainer: any }) {
-  return (
-    <div className="space-y-4">
-      {/* Communication Placeholder */}
-      <Alert>
-        <MessageSquare className="h-4 w-4" />
-        <AlertDescription>
-          In-app messaging system is coming soon! For now, you can reach your
-          trainer at {trainer?.email}
-        </AlertDescription>
-      </Alert>
-
-      {/* Message History Placeholder */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Message History</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 pt-0">
-          <div className="text-center py-8">
-            <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">No messages yet</p>
-            <p className="text-xs text-muted-foreground">
-              Your conversation history will appear here
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Quick Message Templates */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Quick Messages</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 pt-0 space-y-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start"
-            disabled
-          >
-            "I completed today's workout"
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start"
-            disabled
-          >
-            "I have a question about my program"
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full justify-start"
-            disabled
-          >
-            "Can we reschedule our session?"
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-
-function ProgressTab({ trainer }: { trainer: any }) {
-  return (
-    <div className="space-y-4">
-      {/* Progress Overview */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Progress Overview</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 pt-0">
-          <div className="text-center py-8">
-            <TrendingUp className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-sm text-muted-foreground">
-              No progress data yet
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Your progress tracking will appear here
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Shared Progress */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Shared with Trainer</CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 pt-0">
-          <p className="text-sm text-muted-foreground">
-            Your trainer can view your workout logs, body measurements, and
-            progress photos when you share them.
-          </p>
-
-          <div className="mt-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Workout Logs</span>
-              <Badge variant="outline">Auto-shared</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Body Measurements</span>
-              <Badge variant="secondary">Private</Badge>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm">Progress Photos</span>
-              <Badge variant="secondary">Private</Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Message Button */}
+      <Button className="w-full" size="lg" disabled>
+        <MessageSquare className="h-4 w-4 mr-2" />
+        Send Message (Coming Soon)
+      </Button>
     </div>
   )
 }
 
 interface NoTrainerViewProps {
-  requests: any[]
+  requests: CoachingRequest[]
 }
 
 function NoTrainerView({ requests }: NoTrainerViewProps) {
