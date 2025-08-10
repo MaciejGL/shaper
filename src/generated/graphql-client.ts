@@ -1770,6 +1770,7 @@ export type GQLQuery = {
   getMyPlansOverviewFull: GQLMyPlansPayload;
   getMyPlansOverviewLite: GQLMyPlansPayload;
   getQuickWorkoutPlan: GQLTrainingPlan;
+  getRecentCompletedWorkouts: Array<GQLTrainingDay>;
   getTemplates: Array<GQLTrainingPlan>;
   getTrainingExercise?: Maybe<GQLTrainingExercise>;
   getTrainingPlanById: GQLTrainingPlan;
@@ -2625,6 +2626,11 @@ export type GQLFitspaceDashboardGetCurrentWeekQueryVariables = Exact<{ [key: str
 
 
 export type GQLFitspaceDashboardGetCurrentWeekQuery = { __typename?: 'Query', getCurrentWorkoutWeek?: { __typename?: 'CurrentWorkoutWeekPayload', currentWeekIndex: number, totalWeeks: number, plan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, duration?: number | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, sets: Array<{ __typename?: 'ExerciseSet', id: string }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }> }> }> }> } | undefined | null } | undefined | null };
+
+export type GQLFitspaceDashboardGetRecentProgressQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLFitspaceDashboardGetRecentProgressQuery = { __typename?: 'Query', getRecentCompletedWorkouts: Array<{ __typename?: 'TrainingDay', id: string, completedAt?: string | undefined | null, dayOfWeek: number, duration?: number | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, completedAt?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, weight?: number | undefined | null, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, reps?: number | undefined | null, rpe?: number | undefined | null, createdAt: string } | undefined | null }> }> }> };
 
 export type GQLGetActiveMealPlanQueryVariables = Exact<{
   date?: InputMaybe<Scalars['String']['input']>;
@@ -4095,6 +4101,79 @@ useInfiniteFitspaceDashboardGetCurrentWeekQuery.getKey = (variables?: GQLFitspac
 
 
 useFitspaceDashboardGetCurrentWeekQuery.fetcher = (variables?: GQLFitspaceDashboardGetCurrentWeekQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceDashboardGetCurrentWeekQuery, GQLFitspaceDashboardGetCurrentWeekQueryVariables>(FitspaceDashboardGetCurrentWeekDocument, variables, options);
+
+export const FitspaceDashboardGetRecentProgressDocument = `
+    query FitspaceDashboardGetRecentProgress {
+  getRecentCompletedWorkouts {
+    id
+    completedAt
+    dayOfWeek
+    duration
+    exercises {
+      id
+      name
+      baseId
+      completedAt
+      sets {
+        id
+        order
+        reps
+        weight
+        completedAt
+        log {
+          id
+          weight
+          reps
+          rpe
+          createdAt
+        }
+      }
+    }
+  }
+}
+    `;
+
+export const useFitspaceDashboardGetRecentProgressQuery = <
+      TData = GQLFitspaceDashboardGetRecentProgressQuery,
+      TError = unknown
+    >(
+      variables?: GQLFitspaceDashboardGetRecentProgressQueryVariables,
+      options?: Omit<UseQueryOptions<GQLFitspaceDashboardGetRecentProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitspaceDashboardGetRecentProgressQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLFitspaceDashboardGetRecentProgressQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['FitspaceDashboardGetRecentProgress'] : ['FitspaceDashboardGetRecentProgress', variables],
+    queryFn: fetchData<GQLFitspaceDashboardGetRecentProgressQuery, GQLFitspaceDashboardGetRecentProgressQueryVariables>(FitspaceDashboardGetRecentProgressDocument, variables),
+    ...options
+  }
+    )};
+
+useFitspaceDashboardGetRecentProgressQuery.getKey = (variables?: GQLFitspaceDashboardGetRecentProgressQueryVariables) => variables === undefined ? ['FitspaceDashboardGetRecentProgress'] : ['FitspaceDashboardGetRecentProgress', variables];
+
+export const useInfiniteFitspaceDashboardGetRecentProgressQuery = <
+      TData = InfiniteData<GQLFitspaceDashboardGetRecentProgressQuery>,
+      TError = unknown
+    >(
+      variables: GQLFitspaceDashboardGetRecentProgressQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLFitspaceDashboardGetRecentProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitspaceDashboardGetRecentProgressQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLFitspaceDashboardGetRecentProgressQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['FitspaceDashboardGetRecentProgress.infinite'] : ['FitspaceDashboardGetRecentProgress.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLFitspaceDashboardGetRecentProgressQuery, GQLFitspaceDashboardGetRecentProgressQueryVariables>(FitspaceDashboardGetRecentProgressDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteFitspaceDashboardGetRecentProgressQuery.getKey = (variables?: GQLFitspaceDashboardGetRecentProgressQueryVariables) => variables === undefined ? ['FitspaceDashboardGetRecentProgress.infinite'] : ['FitspaceDashboardGetRecentProgress.infinite', variables];
+
+
+useFitspaceDashboardGetRecentProgressQuery.fetcher = (variables?: GQLFitspaceDashboardGetRecentProgressQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceDashboardGetRecentProgressQuery, GQLFitspaceDashboardGetRecentProgressQueryVariables>(FitspaceDashboardGetRecentProgressDocument, variables, options);
 
 export const GetActiveMealPlanDocument = `
     query GetActiveMealPlan($date: String) {

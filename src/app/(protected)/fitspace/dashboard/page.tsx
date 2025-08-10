@@ -11,7 +11,7 @@ import { DashboardStats } from './components/dashbaord-stats'
 import { DashboardStatsSkeleton } from './components/dashboard-stats-skeleton'
 import { ProfileCompletionBanner } from './components/profile-completion-banner'
 import { QuickNutritionOverview } from './components/quick-nutrition-overview'
-import { RecentPRsSection } from './components/recent-prs-section'
+import { RecentProgressSection } from './components/recent-prs-section'
 import {
   TodaysSession,
   TodaysSessionSkeleton,
@@ -42,8 +42,8 @@ export default function DashboardPage() {
         {/* Recent Activity & Stats (Enhanced existing component) */}
         <DashboardStats plan={data?.getCurrentWorkoutWeek?.plan ?? undefined} />
 
-        {/* Recent PRs */}
-        <RecentPRsSection isLoading={isLoading} />
+        {/* Recent Progress */}
+        <RecentProgressSection />
 
         {/* Body Progress Snapshot */}
         <BodyProgressSnapshot />
@@ -60,7 +60,7 @@ function DashboardSkeleton() {
         <TodaysSessionSkeleton />
         <QuickNutritionOverview />
         <DashboardStatsSkeleton />
-        <RecentPRsSection isLoading={true} />
+        <RecentProgressSection />
         <BodyProgressSnapshot />
       </div>
     </div>

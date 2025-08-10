@@ -1772,6 +1772,7 @@ export type GQLQuery = {
   getMyPlansOverviewFull: EntireFieldWrapper<GQLMyPlansPayload>;
   getMyPlansOverviewLite: EntireFieldWrapper<GQLMyPlansPayload>;
   getQuickWorkoutPlan: EntireFieldWrapper<GQLTrainingPlan>;
+  getRecentCompletedWorkouts: EntireFieldWrapper<Array<GQLTrainingDay>>;
   getTemplates: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getTrainingExercise?: EntireFieldWrapper<Maybe<GQLTrainingExercise>>;
   getTrainingPlanById: EntireFieldWrapper<GQLTrainingPlan>;
@@ -3690,6 +3691,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getMyPlansOverviewFull?: Resolver<GQLResolversTypes['MyPlansPayload'], ParentType, ContextType>;
   getMyPlansOverviewLite?: Resolver<GQLResolversTypes['MyPlansPayload'], ParentType, ContextType>;
   getQuickWorkoutPlan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
+  getRecentCompletedWorkouts?: Resolver<Array<GQLResolversTypes['TrainingDay']>, ParentType, ContextType>;
   getTemplates?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetTemplatesArgs>>;
   getTrainingExercise?: Resolver<Maybe<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainingExerciseArgs, 'id'>>;
   getTrainingPlanById?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLQueryGetTrainingPlanByIdArgs, 'id'>>;

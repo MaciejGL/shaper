@@ -54,6 +54,7 @@ enum WorkoutSessionEvent {
 
 type Query {
   getWorkoutInfo(dayId: ID!): TrainingDay!
+  getRecentCompletedWorkouts: [TrainingDay!]!
 }
 
 input UpdateTrainingDayDataInput {

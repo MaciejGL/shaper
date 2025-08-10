@@ -91,3 +91,32 @@ query FitspaceDashboardGetCurrentWeek {
     totalWeeks
   }
 }
+
+query FitspaceDashboardGetRecentProgress {
+  getRecentCompletedWorkouts {
+    id
+    completedAt
+    dayOfWeek
+    duration
+    exercises {
+      id
+      name
+      baseId
+      completedAt
+      sets {
+        id
+        order
+        reps
+        weight
+        completedAt
+        log {
+          id
+          weight
+          reps
+          rpe
+          createdAt
+        }
+      }
+    }
+  }
+}
