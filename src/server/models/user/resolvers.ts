@@ -1,4 +1,9 @@
-import { Prisma } from '@prisma/client'
+import {
+  Prisma,
+  User as PrismaUser,
+  UserProfile as PrismaUserProfile,
+  UserSession as PrismaUserSession,
+} from '@prisma/client'
 
 import {
   GQLMutationResolvers,
@@ -6,12 +11,24 @@ import {
 } from '@/generated/graphql-server'
 import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
+import { getFromCache, setInCache } from '@/lib/redis'
 import { GQLContext } from '@/types/gql-context'
 
 import UserPublic from '../user-public/model'
 
 import AdminUserListItem from './admin-user-list-item'
 import User from './model'
+import PublicTrainer from './public-trainer'
+
+// Type for cached trainer data
+type UserWithIncludes = PrismaUser & {
+  profile?: PrismaUserProfile | null
+  sessions?: PrismaUserSession[]
+  _count?: {
+    sessions: number
+    clients: number
+  }
+}
 
 export const Query: GQLQueryResolvers<GQLContext> = {
   user: async (_, __, context) => {
@@ -139,9 +156,66 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     return clients.map((client) => new UserPublic(client, context))
   },
 
+  // Public queries
+  getFeaturedTrainers: async (_, { limit = 10 }, context) => {
+    const cacheKey = `featured-trainers:${limit}`
+    const ttlSeconds = 5 * 60 // 5 minutes
+
+    const cachedTrainers = await getFromCache<UserWithIncludes[]>(cacheKey)
+    if (cachedTrainers) {
+      return cachedTrainers.map(
+        (trainer) => new PublicTrainer(trainer, context),
+      )
+    }
+
+    const featuredTrainers = await prisma.user.findMany({
+      where: {
+        role: 'TRAINER',
+        featured: true,
+      },
+      include: {
+        profile: true,
+        sessions: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+        _count: {
+          select: {
+            sessions: true,
+            clients: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit ?? 20,
+    })
+
+    await setInCache(cacheKey, featuredTrainers, ttlSeconds)
+    return featuredTrainers.map(
+      (trainer) => new PublicTrainer(trainer, context),
+    )
+  },
+
   // Admin-only queries
   adminUserStats: async () => {
     await requireAdminUser()
+
+    const cacheKey = 'admin-user-stats'
+    const ttlSeconds = 5 * 60 // 5 minutes
+
+    const cachedStats = await getFromCache<{
+      totalUsers: number
+      totalClients: number
+      totalTrainers: number
+      totalAdmins: number
+      activeUsers: number
+      inactiveUsers: number
+      usersWithoutProfiles: number
+      recentSignups: number
+    }>(cacheKey)
+    if (cachedStats) {
+      return cachedStats
+    }
 
     const [
       totalUsers,
@@ -187,7 +261,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       },
     })
 
-    return {
+    const stats = {
       totalUsers,
       totalClients,
       totalTrainers,
@@ -197,10 +271,34 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       usersWithoutProfiles,
       recentSignups,
     }
+
+    await setInCache(cacheKey, stats, ttlSeconds)
+    return stats
   },
 
   adminUserList: async (_, { filters, limit = 50, offset = 0 }, context) => {
     await requireAdminUser()
+
+    // Create cache key based on filters
+    const cacheKey = `admin-user-list:${JSON.stringify({ filters, limit, offset })}`
+    const ttlSeconds = 2 * 60 // 2 minutes (shorter TTL due to frequent updates)
+
+    const cachedResult = await getFromCache<{
+      users: UserWithIncludes[]
+      total: number
+      hasMore: boolean
+    }>(cacheKey)
+    if (cachedResult) {
+      // Convert cached data back to AdminUserListItem instances
+      const userListItems = cachedResult.users.map(
+        (userData) => new AdminUserListItem(userData, context),
+      )
+      return {
+        users: userListItems,
+        total: cachedResult.total,
+        hasMore: cachedResult.hasMore,
+      }
+    }
 
     const whereClause: Prisma.UserWhereInput = {}
 
@@ -267,11 +365,21 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       (user) => new AdminUserListItem(user, context),
     )
 
-    return {
+    const result = {
       users: userListItems,
       total,
       hasMore: (offset ?? 0) + (limit ?? 50) < total,
     }
+
+    // Cache the raw user data (not the AdminUserListItem instances)
+    const cacheData = {
+      users: users, // Store raw Prisma data
+      total,
+      hasMore: (offset ?? 0) + (limit ?? 50) < total,
+    }
+    await setInCache(cacheKey, cacheData, ttlSeconds)
+
+    return result
   },
 
   adminUserById: async (_, { id }, context) => {
@@ -305,7 +413,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   },
 }
 
-export const Mutation: GQLMutationResolvers = {
+export const Mutation: GQLMutationResolvers<GQLContext> = {
   updateUserRole: async (_, { input }, context) => {
     const adminUser = await requireAdminUser()
 
@@ -333,6 +441,51 @@ export const Mutation: GQLMutationResolvers = {
         },
       },
     })
+
+    return new AdminUserListItem(user, context)
+  },
+
+  updateUserFeatured: async (_, { input }, context) => {
+    await requireAdminUser()
+
+    const user = await prisma.user.update({
+      where: { id: input.userId },
+      data: { featured: input.featured },
+      include: {
+        profile: true,
+        trainer: {
+          include: { profile: true },
+        },
+        sessions: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+        _count: {
+          select: {
+            sessions: true,
+            clients: true,
+          },
+        },
+      },
+    })
+
+    // Invalidate relevant caches by setting them to expire immediately
+    try {
+      // Clear stats cache since featured count changed
+      await setInCache('admin-user-stats', null, 0)
+
+      // Clear featured trainers cache since featured status changed
+      await setInCache('featured-trainers:10', null, 0) // Default limit
+      await setInCache('featured-trainers:5', null, 0) // Common limits
+      await setInCache('featured-trainers:20', null, 0)
+
+      // Note: In a production environment, you might want to implement
+      // pattern-based cache invalidation for admin-user-list:* keys
+      // For now, the 2-minute TTL will ensure relatively fresh data
+    } catch (error) {
+      console.error('Cache invalidation error:', error)
+      // Don't fail the mutation if cache invalidation fails
+    }
 
     return new AdminUserListItem(user, context)
   },

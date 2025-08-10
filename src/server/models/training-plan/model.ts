@@ -12,7 +12,12 @@ import {
 } from '@prisma/client'
 import { differenceInCalendarDays } from 'date-fns'
 
-import { GQLDifficulty, GQLTrainingPlan } from '@/generated/graphql-server'
+import {
+  GQLDifficulty,
+  GQLFocusTag,
+  GQLTargetGoal,
+  GQLTrainingPlan,
+} from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
 
 import Review from '../review/model'
@@ -74,6 +79,26 @@ export default class TrainingPlan implements GQLTrainingPlan {
 
   get active() {
     return this.data.active
+  }
+
+  get premium() {
+    return this.data.premium
+  }
+
+  get focusTags() {
+    return (
+      this.data.focusTags.map(
+        (tag) => GQLFocusTag[tag as keyof typeof GQLFocusTag],
+      ) || []
+    )
+  }
+
+  get targetGoals() {
+    return (
+      this.data.targetGoals.map(
+        (goal) => GQLTargetGoal[goal as keyof typeof GQLTargetGoal],
+      ) || []
+    )
   }
 
   get startDate() {
@@ -143,6 +168,21 @@ export default class TrainingPlan implements GQLTrainingPlan {
     }
 
     const count = await this.context.loaders.plan.assignedCountByPlanId.load(id)
+
+    return count
+  }
+
+  async assignmentCount() {
+    // Only count for templates (public plans)
+    if (!this.data.isTemplate) {
+      return 0
+    }
+
+    // Count how many duplicates (assigned plans) were created from this template
+    const count =
+      await this.context.loaders.plan.assignmentCountByTemplateId.load(
+        this.data.id,
+      )
 
     return count
   }
@@ -301,11 +341,15 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   get createdAt() {
-    return this.data.createdAt.toISOString()
+    return typeof this.data.createdAt === 'string'
+      ? this.data.createdAt
+      : this.data.createdAt.toISOString()
   }
 
   get updatedAt() {
-    return this.data.updatedAt.toISOString()
+    return typeof this.data.updatedAt === 'string'
+      ? this.data.updatedAt
+      : this.data.updatedAt.toISOString()
   }
 
   async weeks() {
@@ -334,5 +378,80 @@ export default class TrainingPlan implements GQLTrainingPlan {
     }
 
     return Math.round((completedDays / totalDays) * 100)
+  }
+
+  get sessionsPerWeek() {
+    // Calculate sessions per week based on the plan structure
+    if (!this.data.weeks || this.data.weeks.length === 0) return null
+
+    const totalSessions = this.data.weeks.reduce((total, week) => {
+      return total + (week.days?.length || 0)
+    }, 0)
+
+    return Math.round(totalSessions / this.data.weeks.length)
+  }
+
+  get avgSessionTime() {
+    // Calculate based on: Exercises 45s, rest time, and warmups each 45s + 60s times number of exercises. Calculate for each day in a week 1 and take average
+    if (!this.data.weeks || this.data.weeks.length === 0) return null
+
+    const firstWeek = this.data.weeks[0]
+    if (!firstWeek?.days || firstWeek.days.length === 0) return null
+
+    const dayTimes: number[] = []
+
+    firstWeek.days.forEach((day) => {
+      if (day.isRestDay || !day.exercises || day.exercises.length === 0) {
+        return // Skip rest days
+      }
+
+      let totalTimeSeconds = 0
+      const exerciseCount = day.exercises.length
+
+      day.exercises.forEach((exercise) => {
+        // Exercise execution time: 45 seconds per set
+        const setCount = exercise.sets?.length || 1
+        const exerciseTime = setCount * 45
+
+        // Rest time between sets (from exercise.restSeconds)
+        const restTime = exercise.restSeconds || 60 // Default 60s rest
+        const totalRestTime = (setCount - 1) * restTime // Rest between sets only
+
+        // Warmup time: 45 seconds (assuming one warmup per exercise)
+        const warmupTime = (exercise.warmupSets ?? 0) > 0 ? 45 : 0
+
+        totalTimeSeconds += exerciseTime + totalRestTime + warmupTime
+      })
+
+      // Add base time: 60s times number of exercises
+      totalTimeSeconds += exerciseCount * 60
+
+      // Convert to minutes and add to day times
+      dayTimes.push(Math.round(totalTimeSeconds / 60))
+    })
+
+    // Return average time across training days in week 1
+    if (dayTimes.length === 0) return null
+    return Math.round(
+      dayTimes.reduce((sum, time) => sum + time, 0) / dayTimes.length,
+    )
+  }
+
+  get equipment() {
+    if (!this.data.weeks) return []
+
+    const equipmentSet = new Set<string>()
+
+    this.data.weeks.forEach((week) => {
+      week.days?.forEach((day) => {
+        day.exercises?.forEach((exercise) => {
+          if (exercise.base?.equipment) {
+            equipmentSet.add(exercise.base.equipment)
+          }
+        })
+      })
+    })
+
+    return Array.from(equipmentSet)
   }
 }

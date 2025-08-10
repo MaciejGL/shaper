@@ -76,6 +76,12 @@ type UserProfile {
   goals: [Goal!]!
   bio: String
 
+  # Trainer-specific fields
+  specialization: [String!]!
+  credentials: [String!]!
+  successStories: [String!]!
+  trainerSince: String
+
   # User Preferences
   weekStartsOn: Int
   weightUnit: WeightUnit!
@@ -148,6 +154,10 @@ input UpdateProfileInput {
   activityLevel: ActivityLevel
   goals: [Goal!]
   bio: String
+  # Trainer-specific fields
+  specialization: [String!]
+  credentials: [String!]
+  successStories: [String!]
   weekStartsOn: Int
   weightUnit: WeightUnit
   heightUnit: HeightUnit

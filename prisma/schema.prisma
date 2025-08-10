@@ -16,6 +16,7 @@ model User {
   image                            String?
   name                             String?
   role                             String                     @default("CLIENT")
+  featured                         Boolean                    @default(false)
   trainerId                        String?
   BaseExercise                     BaseExercise[]
   receivedRequests                 CoachingRequest[]          @relation("ReceivedRequests")
@@ -75,6 +76,11 @@ model UserProfile {
   height                     Float?
   weight                     Float?
   goals                      String[]
+  // Trainer-specific fields
+  specialization             String[]          @default([])
+  credentials                String[]          @default([])
+  successStories             String[]          @default([])
+  trainerSince               DateTime?
   // User Preferences
   weekStartsOn               Int?              @default(1) // 0 = Sunday, 1 = Monday
   weightUnit                 String?           @default("kg") // "kg" | "lbs"
@@ -190,6 +196,7 @@ model TrainingPlan {
   description   String?
   createdById   String
   isPublic      Boolean                    @default(false)
+  premium       Boolean                    @default(false)
   isTemplate    Boolean                    @default(false)
   templateId    String?
   completedAt   DateTime?
@@ -201,6 +208,8 @@ model TrainingPlan {
   endDate       DateTime?
   startDate     DateTime?
   difficulty    String?
+  focusTags     String[]
+  targetGoals   String[]
   reviews       Review[]
   assignedTo    User?                      @relation("AssignedPlans", fields: [assignedToId], references: [id])
   createdBy     User                       @relation("CreatedPlans", fields: [createdById], references: [id])

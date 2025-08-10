@@ -8,11 +8,15 @@ type TrainingPlan {
   isTemplate: Boolean!
   isDraft: Boolean!
   active: Boolean!
+  premium: Boolean!
   startDate: String
   endDate: String
   progress: Float
   nextSession: String
   isDemo: Boolean!
+  isPremium: Boolean
+  focusTags: [FocusTag!]!
+  targetGoals: [TargetGoal!]!
 
   rating: Float
   reviews: [Review!]!
@@ -26,6 +30,7 @@ type TrainingPlan {
 
   weekCount: Int!
   assignedCount: Int!
+  assignmentCount: Int!
   collaboratorCount: Int!
   collaborators: [TrainingPlanCollaborator!]!
   currentWeekNumber: Int
@@ -33,6 +38,11 @@ type TrainingPlan {
   adherence: Float!
   totalWorkouts: Int!
   difficulty: Difficulty
+
+  # Additional training plan details
+  sessionsPerWeek: Int
+  avgSessionTime: Int
+  equipment: [String!]!
 
   createdAt: String!
   updatedAt: String!
@@ -42,6 +52,42 @@ enum Difficulty {
   INTERMEDIATE
   ADVANCED
   EXPERT
+}
+
+enum FocusTag {
+  STRENGTH
+  CARDIO
+  HYPERTROPHY
+  ATHLETIC_PERFORMANCE
+  BEGINNER_FRIENDLY
+  BODY_RECOMPOSITION
+  POWERLIFTING
+  WEIGHT_LOSS
+  ENDURANCE
+  FLEXIBILITY
+  FUNCTIONAL_FITNESS
+  BODYWEIGHT
+  MUSCLE_BUILDING
+  FAT_LOSS
+  CONDITIONING
+}
+
+enum TargetGoal {
+  LOSE_WEIGHT
+  GAIN_MUSCLE
+  IMPROVE_STRENGTH
+  INCREASE_ENDURANCE
+  IMPROVE_FLEXIBILITY
+  BODY_RECOMPOSITION
+  ATHLETIC_PERFORMANCE
+  GENERAL_FITNESS
+  POWERLIFTING_COMPETITION
+  MARATHON_TRAINING
+  FUNCTIONAL_MOVEMENT
+  INJURY_RECOVERY
+  IMPROVE_POSTURE
+  STRESS_RELIEF
+  IMPROVE_SLEEP
 }
 
 type MyPlansPayload {
@@ -60,6 +106,7 @@ type CurrentWorkoutWeekPayload {
 type Query {
   getTemplates(draft: Boolean, limit: Int): [TrainingPlan!]!
   getCollaborationTemplates(draft: Boolean): [TrainingPlan!]!
+  getPublicTrainingPlans(limit: Int): [TrainingPlan!]!
   getTrainingPlanById(id: ID!): TrainingPlan!
   getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!
   getClientActivePlan(clientId: ID!): TrainingPlan
@@ -160,7 +207,10 @@ input CreateTrainingPlanInput {
   description: String
   isPublic: Boolean
   isDraft: Boolean
+  premium: Boolean
   difficulty: Difficulty
+  focusTags: [FocusTag!]
+  targetGoals: [TargetGoal!]
   weeks: [CreateTrainingWeekInput!]
 }
 
@@ -170,7 +220,10 @@ input UpdateTrainingPlanInput {
   description: String
   isPublic: Boolean
   isDraft: Boolean
+  premium: Boolean
   difficulty: Difficulty
+  focusTags: [FocusTag!]
+  targetGoals: [TargetGoal!]
   weeks: [UpdateTrainingWeekInput!]
 }
 
@@ -222,7 +275,10 @@ input UpdateTrainingPlanDetailsInput {
   description: String
   isPublic: Boolean
   isDraft: Boolean
+  premium: Boolean
   difficulty: Difficulty
+  focusTags: [FocusTag!]
+  targetGoals: [TargetGoal!]
 }
 
 input UpdateTrainingWeekDetailsInput {

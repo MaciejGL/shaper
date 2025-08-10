@@ -11,7 +11,7 @@ export default async function Page() {
       <DashboardHeader
         title="Clients"
         description="Manage your clients, track their progress, and schedule sessions."
-        icon={<Users2Icon />}
+        icon={Users2Icon}
       />
       <div className="space-y-6">
         <ClientsFilter />

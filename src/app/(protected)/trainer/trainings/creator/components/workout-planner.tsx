@@ -11,6 +11,7 @@ import {
   useSensor,
   useSensors,
 } from '@dnd-kit/core'
+import { DumbbellIcon } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import React, { useState } from 'react'
 
@@ -216,6 +217,7 @@ export default function WorkoutPlanner() {
         <div className="flex justify-between items-baseline">
           <DashboardHeader
             title="Workout Editor"
+            icon={DumbbellIcon}
             prevSegment={{
               label: 'Training Plans',
               href: '/trainer/trainings',
@@ -243,6 +245,7 @@ export default function WorkoutPlanner() {
           <div className="flex items-center gap-3">
             <DashboardHeader
               title={`Workout Editor ${formData.details.title ? `- ${formData.details.title}` : ''}`}
+              icon={DumbbellIcon}
               prevSegment={{
                 label: 'Training Plans',
                 href: '/trainer/trainings',

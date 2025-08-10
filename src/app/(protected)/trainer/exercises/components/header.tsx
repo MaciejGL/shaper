@@ -14,7 +14,7 @@ export function Header({
       <DashboardHeader
         title="Exercise Library"
         description="Manage and create exercises for your training plans"
-        icon={<DumbbellIcon />}
+        icon={DumbbellIcon}
       />
       <Button
         onClick={() => setIsCreateDialogOpen(true)}

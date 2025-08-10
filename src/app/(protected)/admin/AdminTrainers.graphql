@@ -1,0 +1,41 @@
+query GetAdminUserStats {
+  adminUserStats {
+    totalUsers
+    totalTrainers
+    activeUsers
+    inactiveUsers
+  }
+}
+
+query GetTrainersList($filters: AdminUserFilters, $limit: Int, $offset: Int) {
+  adminUserList(filters: $filters, limit: $limit, offset: $offset) {
+    users {
+      id
+      email
+      name
+      role
+      createdAt
+      updatedAt
+      lastLoginAt
+      sessionCount
+      clientCount
+      isActive
+      featured
+      profile {
+        firstName
+        lastName
+        bio
+        avatarUrl
+      }
+    }
+    total
+    hasMore
+  }
+}
+
+mutation UpdateUserFeatured($input: UpdateUserFeaturedInput!) {
+  updateUserFeatured(input: $input) {
+    id
+    featured
+  }
+}

@@ -258,7 +258,7 @@ export function CreateFavouriteModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent fullScreen dialogTitle="Create Favourite Workout">
-        <div className="h-full relative mx-auto">
+        <div className="h-full relative mx-auto w-full">
           <QuickWorkoutWizard
             workoutFlow={workoutFlow}
             onFlowChange={handleFlowChange}

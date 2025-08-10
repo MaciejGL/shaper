@@ -1,6 +1,7 @@
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, LucideIcon } from 'lucide-react'
 
 import { ButtonLink } from '@/components/ui/button-link'
+import { SectionIcon } from '@/components/ui/section-icon'
 import { cn } from '@/lib/utils'
 
 export function DashboardHeader({
@@ -12,7 +13,7 @@ export function DashboardHeader({
 }: {
   title: string
   description?: string
-  icon?: React.ReactNode
+  icon?: LucideIcon
   className?: string
   prevSegment?: {
     label: string
@@ -33,7 +34,7 @@ export function DashboardHeader({
           </ButtonLink>
         )}
         <div className="flex items-center gap-2 text-3xl">
-          {icon && <span className="text-primary">{icon}</span>}
+          {icon && <SectionIcon icon={icon} />}
           <h1 className="font-medium tracking-tight">{title}</h1>
         </div>
       </div>

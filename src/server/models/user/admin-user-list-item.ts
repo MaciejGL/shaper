@@ -80,4 +80,8 @@ export default class AdminUserListItem implements GQLAdminUserListItem {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     return lastSession.createdAt > thirtyDaysAgo
   }
+
+  get featured() {
+    return this.data.featured || false
+  }
 }

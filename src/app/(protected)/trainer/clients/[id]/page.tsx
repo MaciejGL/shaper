@@ -1,5 +1,6 @@
 'use client'
 
+import { User } from 'lucide-react'
 import { use } from 'react'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
@@ -38,6 +39,7 @@ export default function ClientDetailPage({
     <div className="container @container/client-detail-page mx-auto">
       <DashboardHeader
         title="Client Profile"
+        icon={User}
         prevSegment={{ label: 'Clients', href: '/trainer/clients' }}
       />
       <Tabs defaultValue="info">

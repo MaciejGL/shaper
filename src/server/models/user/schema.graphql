@@ -53,6 +53,7 @@ type AdminUserListItem {
   trainer: UserPublic
   clientCount: Int!
   isActive: Boolean!
+  featured: Boolean!
 }
 
 type AdminUserListResponse {
@@ -75,11 +76,31 @@ input UpdateUserRoleInput {
   newRole: UserRole!
 }
 
+input UpdateUserFeaturedInput {
+  userId: ID!
+  featured: Boolean!
+}
+
+type PublicTrainer {
+  id: ID!
+  name: String
+  role: UserRole!
+  profile: UserProfile
+  specialization: [String!]!
+  credentials: [String!]!
+  successStories: [String!]!
+  trainerSince: String
+  clientCount: Int!
+}
+
 type Query {
   user: User
   userWithAllData: User
   userBasic: User
   myClients: [UserPublic!]!
+
+  # Public queries
+  getFeaturedTrainers(limit: Int): [PublicTrainer!]!
 
   # Admin-only queries
   adminUserStats: AdminUserStats!
@@ -94,6 +115,7 @@ type Query {
 type Mutation {
   # Admin-only mutations
   updateUserRole(input: UpdateUserRoleInput!): AdminUserListItem!
+  updateUserFeatured(input: UpdateUserFeaturedInput!): AdminUserListItem!
   deactivateUser(userId: ID!): Boolean!
   activateUser(userId: ID!): Boolean!
   clearUserSessions(userId: ID!): Boolean!

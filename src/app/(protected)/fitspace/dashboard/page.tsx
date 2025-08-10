@@ -26,7 +26,7 @@ export default function DashboardPage() {
 
   return (
     <div className="container-hypertro mx-auto mb-24 max-w-md">
-      <DashboardHeader title="Dashboard" icon={<LayoutDashboard />} />
+      <DashboardHeader title="Dashboard" icon={LayoutDashboard} />
 
       {/* Single Column Mobile-First Layout */}
       <div className="space-y-6">
@@ -55,7 +55,7 @@ export default function DashboardPage() {
 function DashboardSkeleton() {
   return (
     <div className="container-hypertro mx-auto mb-24 max-w-md">
-      <DashboardHeader title="Dashboard" icon={<LayoutDashboard />} />
+      <DashboardHeader title="Dashboard" icon={LayoutDashboard} />
       <div className="space-y-6">
         <TodaysSessionSkeleton />
         <QuickNutritionOverview />

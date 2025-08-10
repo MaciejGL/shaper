@@ -44,6 +44,8 @@ const badgeVariants = cva(
           'bg-blue-500/70 text-black [a&]:hover:bg-blue-500/90 focus-visible:ring-blue-500/20 dark:focus-visible:ring-blue-500/40 dark:bg-blue-500/60 border-none text-white',
         gradient:
           'bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-700 dark:to-amber-500 border-none text-white',
+        premium:
+          'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0',
       },
       size: {
         xs: cn('text-xs px-[4px] py-[1px] rounded-sm'),

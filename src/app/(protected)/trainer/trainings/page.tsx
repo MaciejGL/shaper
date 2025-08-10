@@ -30,7 +30,7 @@ export default async function Page() {
         <DashboardHeader
           title="Training Plans"
           description="Manage your training plans"
-          icon={<FilesIcon />}
+          icon={FilesIcon}
         />
         <ButtonLink
           href="/trainer/trainings/creator/new"

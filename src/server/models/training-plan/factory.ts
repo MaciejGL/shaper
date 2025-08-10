@@ -34,6 +34,7 @@ import {
   CollaborationAction,
   checkTrainingPlanPermission,
 } from '@/lib/permissions/collaboration-permissions'
+import { getFromCache, setInCache } from '@/lib/redis'
 import { parseUTCDate } from '@/lib/server-date-utils'
 import { getWeekStartUTC } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
@@ -167,6 +168,89 @@ export async function getTemplates(
     take: args.limit ?? undefined,
   })
   return templates.map((template) => new TrainingPlan(template, context))
+}
+
+export async function getPublicTrainingPlans(
+  args: { limit?: number | null },
+  context: GQLContext,
+) {
+  const cacheKey = `public-training-plans:${args.limit || 'all'}`
+  const ttlSeconds = 5 * 60 // 5 minutes as requested
+
+  // Try to get from cache first
+  const cachedPlans = await getFromCache<
+    Prisma.TrainingPlanGetPayload<{
+      include: {
+        createdBy: { include: { profile: true } }
+        reviews: { include: { createdBy: { include: { profile: true } } } }
+        weeks: {
+          include: {
+            days: {
+              include: {
+                exercises: {
+                  include: {
+                    base: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }>[]
+  >(cacheKey)
+  if (cachedPlans) {
+    return cachedPlans.map((plan) => new TrainingPlan(plan, context))
+  }
+
+  // If not in cache, fetch from database
+  const where: Prisma.TrainingPlanWhereInput = {
+    isPublic: true,
+    isTemplate: true,
+    isDraft: false, // Only show published plans
+  }
+
+  const publicPlans = await prisma.trainingPlan.findMany({
+    where,
+    orderBy: {
+      createdAt: 'desc', // Order by creation date for now
+    },
+    take: args.limit ?? undefined,
+    include: {
+      createdBy: {
+        include: {
+          profile: true,
+        },
+      },
+      reviews: {
+        include: {
+          createdBy: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+      },
+      weeks: {
+        include: {
+          days: {
+            include: {
+              exercises: {
+                include: {
+                  base: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  // Cache the raw database results for 5 minutes
+  await setInCache(cacheKey, publicPlans, ttlSeconds)
+
+  return publicPlans.map((plan) => new TrainingPlan(plan, context))
 }
 
 export async function getCollaborationTemplates(

@@ -93,6 +93,28 @@ export const createPlanLoaders = (context: GQLContext) => ({
     return planIds.map((id) => map.get(id) ?? 0)
   }),
 
+  assignmentCountByTemplateId: new DataLoader(
+    async (templateIds: readonly string[]) => {
+      const counts = await prisma.trainingPlan.groupBy({
+        by: ['templateId'],
+        where: {
+          templateId: { in: templateIds as string[] },
+          isTemplate: false, // Only count assigned plans (duplicates)
+          assignedToId: { not: null }, // Only count plans that are actually assigned to users
+        },
+        _count: {
+          templateId: true,
+        },
+      })
+
+      const map = new Map(
+        counts.map((item) => [item.templateId, item._count.templateId]),
+      )
+
+      return templateIds.map((id) => map.get(id) ?? 0)
+    },
+  ),
+
   collaboratorCountByTrainingPlanId: new DataLoader(
     async (planIds: readonly string[]) => {
       const counts = await prisma.trainingPlanCollaborator.groupBy({

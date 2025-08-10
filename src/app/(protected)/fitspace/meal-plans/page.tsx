@@ -56,7 +56,7 @@ export default function MealPlansOverviewPage() {
 
   return (
     <div className="container-hypertro mx-auto mb-24">
-      <DashboardHeader title="Meal Plans" icon={<ChefHat />} />
+      <DashboardHeader title="Meal Plans" icon={ChefHat} />
 
       {/* Meal Plans Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

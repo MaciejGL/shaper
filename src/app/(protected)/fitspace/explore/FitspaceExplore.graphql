@@ -1,0 +1,47 @@
+query GetPublicTrainingPlans($limit: Int) {
+  getPublicTrainingPlans(limit: $limit) {
+    id
+    title
+    description
+    isPublic
+    isPremium
+    difficulty
+    focusTags
+    targetGoals
+    weekCount
+    assignmentCount
+    sessionsPerWeek
+    avgSessionTime
+    equipment
+    rating
+    totalReviews
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+query GetFeaturedTrainers($limit: Int) {
+  getFeaturedTrainers(limit: $limit) {
+    id
+    name
+    role
+    clientCount
+    profile {
+      firstName
+      lastName
+      bio
+      avatarUrl
+      email
+      specialization
+      credentials
+      successStories
+      trainerSince
+    }
+  }
+}

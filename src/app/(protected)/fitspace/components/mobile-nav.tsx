@@ -3,12 +3,14 @@
 import {
   Calendar,
   ChefHatIcon,
+  Compass,
   Dumbbell,
   LayoutDashboardIcon,
   MoreHorizontalIcon,
   PersonStanding,
   SaladIcon,
   TrendingUp,
+  UserCheck,
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -145,6 +147,30 @@ function QuickActionDrawer({
         <div className="p-4 space-y-4">
           <div>
             <div className="flex flex-wrap gap-4">
+              <ButtonLink
+                onClick={() => onOpenChange(false)}
+                href="/fitspace/explore"
+                variant="secondary"
+                className="size-20"
+              >
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <Compass className="size-6" />
+                  <p className="text-xs font-medium">Explore</p>
+                </div>
+              </ButtonLink>
+
+              <ButtonLink
+                onClick={() => onOpenChange(false)}
+                href="/fitspace/my-trainer"
+                variant="secondary"
+                className="size-20"
+              >
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <UserCheck className="size-6" />
+                  <p className="text-xs font-medium">My Trainer</p>
+                </div>
+              </ButtonLink>
+
               <ButtonLink
                 onClick={() => onOpenChange(false)}
                 href="/fitspace/meal-plans"

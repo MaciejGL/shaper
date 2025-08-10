@@ -157,6 +157,7 @@ export type GQLAdminUserListItem = {
   clientCount: Scalars['Int']['output'];
   createdAt: Scalars['String']['output'];
   email: Scalars['String']['output'];
+  featured: Scalars['Boolean']['output'];
   id: Scalars['ID']['output'];
   isActive: Scalars['Boolean']['output'];
   lastLoginAt?: Maybe<Scalars['String']['output']>;
@@ -517,8 +518,11 @@ export type GQLCreateTrainingExerciseInput = {
 export type GQLCreateTrainingPlanInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   difficulty?: InputMaybe<GQLDifficulty>;
+  focusTags?: InputMaybe<Array<GQLFocusTag>>;
   isDraft?: InputMaybe<Scalars['Boolean']['input']>;
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  premium?: InputMaybe<Scalars['Boolean']['input']>;
+  targetGoals?: InputMaybe<Array<GQLTargetGoal>>;
   title: Scalars['String']['input'];
   weeks?: InputMaybe<Array<GQLCreateTrainingWeekInput>>;
 };
@@ -679,6 +683,24 @@ export enum GQLFitnessLevel {
   Beginner = 'BEGINNER',
   Expert = 'EXPERT',
   Intermediate = 'INTERMEDIATE'
+}
+
+export enum GQLFocusTag {
+  AthleticPerformance = 'ATHLETIC_PERFORMANCE',
+  BeginnerFriendly = 'BEGINNER_FRIENDLY',
+  Bodyweight = 'BODYWEIGHT',
+  BodyRecomposition = 'BODY_RECOMPOSITION',
+  Cardio = 'CARDIO',
+  Conditioning = 'CONDITIONING',
+  Endurance = 'ENDURANCE',
+  FatLoss = 'FAT_LOSS',
+  Flexibility = 'FLEXIBILITY',
+  FunctionalFitness = 'FUNCTIONAL_FITNESS',
+  Hypertrophy = 'HYPERTROPHY',
+  MuscleBuilding = 'MUSCLE_BUILDING',
+  Powerlifting = 'POWERLIFTING',
+  Strength = 'STRENGTH',
+  WeightLoss = 'WEIGHT_LOSS'
 }
 
 export type GQLGenerateAiWorkoutInput = {
@@ -1036,6 +1058,7 @@ export type GQLMutation = {
   updateTrainingPlanCollaboratorPermission: GQLTrainingPlanCollaborator;
   updateTrainingPlanDetails: Scalars['Boolean']['output'];
   updateTrainingWeekDetails: Scalars['Boolean']['output'];
+  updateUserFeatured: GQLAdminUserListItem;
   updateUserRole: GQLAdminUserListItem;
 };
 
@@ -1593,6 +1616,11 @@ export type GQLMutationUpdateTrainingWeekDetailsArgs = {
 };
 
 
+export type GQLMutationUpdateUserFeaturedArgs = {
+  input: GQLUpdateUserFeaturedInput;
+};
+
+
 export type GQLMutationUpdateUserRoleArgs = {
   input: GQLUpdateUserRoleInput;
 };
@@ -1727,6 +1755,19 @@ export type GQLPlanWithPermissions = {
   title: Scalars['String']['output'];
 };
 
+export type GQLPublicTrainer = {
+  __typename?: 'PublicTrainer';
+  clientCount: Scalars['Int']['output'];
+  credentials: Array<Scalars['String']['output']>;
+  id: Scalars['ID']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  profile?: Maybe<GQLUserProfile>;
+  role: GQLUserRole;
+  specialization: Array<Scalars['String']['output']>;
+  successStories: Array<Scalars['String']['output']>;
+  trainerSince?: Maybe<Scalars['String']['output']>;
+};
+
 export type GQLPushSubscription = {
   __typename?: 'PushSubscription';
   createdAt: Scalars['String']['output'];
@@ -1763,12 +1804,14 @@ export type GQLQuery = {
   getExercises: GQLGetExercisesResponse;
   getFavouriteWorkout?: Maybe<GQLFavouriteWorkout>;
   getFavouriteWorkouts: Array<GQLFavouriteWorkout>;
+  getFeaturedTrainers: Array<GQLPublicTrainer>;
   getMealPlanById: GQLMealPlan;
   getMealPlanTemplates: Array<GQLMealPlan>;
   getMyMealPlansOverview: GQLMyMealPlansPayload;
   getMyPlansOverview: GQLMyPlansPayload;
   getMyPlansOverviewFull: GQLMyPlansPayload;
   getMyPlansOverviewLite: GQLMyPlansPayload;
+  getPublicTrainingPlans: Array<GQLTrainingPlan>;
   getQuickWorkoutPlan: GQLTrainingPlan;
   getRecentCompletedWorkouts: Array<GQLTrainingDay>;
   getTemplates: Array<GQLTrainingPlan>;
@@ -1897,6 +1940,11 @@ export type GQLQueryGetFavouriteWorkoutArgs = {
 };
 
 
+export type GQLQueryGetFeaturedTrainersArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type GQLQueryGetMealPlanByIdArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1904,6 +1952,11 @@ export type GQLQueryGetMealPlanByIdArgs = {
 
 export type GQLQueryGetMealPlanTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQueryGetPublicTrainingPlansArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
 };
 
@@ -2108,6 +2161,24 @@ export type GQLSuggestedSetsInput = {
   rpe?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export enum GQLTargetGoal {
+  AthleticPerformance = 'ATHLETIC_PERFORMANCE',
+  BodyRecomposition = 'BODY_RECOMPOSITION',
+  FunctionalMovement = 'FUNCTIONAL_MOVEMENT',
+  GainMuscle = 'GAIN_MUSCLE',
+  GeneralFitness = 'GENERAL_FITNESS',
+  ImproveFlexibility = 'IMPROVE_FLEXIBILITY',
+  ImprovePosture = 'IMPROVE_POSTURE',
+  ImproveSleep = 'IMPROVE_SLEEP',
+  ImproveStrength = 'IMPROVE_STRENGTH',
+  IncreaseEndurance = 'INCREASE_ENDURANCE',
+  InjuryRecovery = 'INJURY_RECOVERY',
+  LoseWeight = 'LOSE_WEIGHT',
+  MarathonTraining = 'MARATHON_TRAINING',
+  PowerliftingCompetition = 'POWERLIFTING_COMPETITION',
+  StressRelief = 'STRESS_RELIEF'
+}
+
 export type GQLTeamMember = {
   __typename?: 'TeamMember';
   addedBy: GQLUserPublic;
@@ -2179,6 +2250,8 @@ export type GQLTrainingPlan = {
   adherence: Scalars['Float']['output'];
   assignedCount: Scalars['Int']['output'];
   assignedTo?: Maybe<GQLUserPublic>;
+  assignmentCount: Scalars['Int']['output'];
+  avgSessionTime?: Maybe<Scalars['Int']['output']>;
   collaboratorCount: Scalars['Int']['output'];
   collaborators: Array<GQLTrainingPlanCollaborator>;
   completedAt?: Maybe<Scalars['String']['output']>;
@@ -2189,17 +2262,23 @@ export type GQLTrainingPlan = {
   description?: Maybe<Scalars['String']['output']>;
   difficulty?: Maybe<GQLDifficulty>;
   endDate?: Maybe<Scalars['String']['output']>;
+  equipment: Array<Scalars['String']['output']>;
+  focusTags: Array<GQLFocusTag>;
   id: Scalars['ID']['output'];
   isDemo: Scalars['Boolean']['output'];
   isDraft: Scalars['Boolean']['output'];
+  isPremium?: Maybe<Scalars['Boolean']['output']>;
   isPublic: Scalars['Boolean']['output'];
   isTemplate: Scalars['Boolean']['output'];
   lastSessionActivity?: Maybe<Scalars['String']['output']>;
   nextSession?: Maybe<Scalars['String']['output']>;
+  premium: Scalars['Boolean']['output'];
   progress?: Maybe<Scalars['Float']['output']>;
   rating?: Maybe<Scalars['Float']['output']>;
   reviews: Array<GQLReview>;
+  sessionsPerWeek?: Maybe<Scalars['Int']['output']>;
   startDate?: Maybe<Scalars['String']['output']>;
+  targetGoals: Array<GQLTargetGoal>;
   title: Scalars['String']['output'];
   totalReviews: Scalars['Int']['output'];
   totalWorkouts: Scalars['Int']['output'];
@@ -2364,6 +2443,7 @@ export type GQLUpdateProfileInput = {
   avatarUrl?: InputMaybe<Scalars['String']['input']>;
   bio?: InputMaybe<Scalars['String']['input']>;
   birthday?: InputMaybe<Scalars['String']['input']>;
+  credentials?: InputMaybe<Array<Scalars['String']['input']>>;
   email?: InputMaybe<Scalars['String']['input']>;
   firstName?: InputMaybe<Scalars['String']['input']>;
   fitnessLevel?: InputMaybe<GQLFitnessLevel>;
@@ -2374,6 +2454,8 @@ export type GQLUpdateProfileInput = {
   notificationPreferences?: InputMaybe<GQLNotificationPreferencesInput>;
   phone?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Scalars['String']['input']>;
+  specialization?: InputMaybe<Array<Scalars['String']['input']>>;
+  successStories?: InputMaybe<Array<Scalars['String']['input']>>;
   theme?: InputMaybe<GQLTheme>;
   timeFormat?: InputMaybe<GQLTimeFormat>;
   trainingView?: InputMaybe<GQLTrainingView>;
@@ -2436,18 +2518,24 @@ export type GQLUpdateTrainingPlanCollaboratorPermissionInput = {
 export type GQLUpdateTrainingPlanDetailsInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   difficulty?: InputMaybe<GQLDifficulty>;
+  focusTags?: InputMaybe<Array<GQLFocusTag>>;
   id: Scalars['ID']['input'];
   isDraft?: InputMaybe<Scalars['Boolean']['input']>;
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  premium?: InputMaybe<Scalars['Boolean']['input']>;
+  targetGoals?: InputMaybe<Array<GQLTargetGoal>>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GQLUpdateTrainingPlanInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   difficulty?: InputMaybe<GQLDifficulty>;
+  focusTags?: InputMaybe<Array<GQLFocusTag>>;
   id: Scalars['ID']['input'];
   isDraft?: InputMaybe<Scalars['Boolean']['input']>;
   isPublic?: InputMaybe<Scalars['Boolean']['input']>;
+  premium?: InputMaybe<Scalars['Boolean']['input']>;
+  targetGoals?: InputMaybe<Array<GQLTargetGoal>>;
   title?: InputMaybe<Scalars['String']['input']>;
   weeks?: InputMaybe<Array<GQLUpdateTrainingWeekInput>>;
 };
@@ -2465,6 +2553,11 @@ export type GQLUpdateTrainingWeekInput = {
   id: Scalars['ID']['input'];
   name?: InputMaybe<Scalars['String']['input']>;
   weekNumber: Scalars['Int']['input'];
+};
+
+export type GQLUpdateUserFeaturedInput = {
+  featured: Scalars['Boolean']['input'];
+  userId: Scalars['ID']['input'];
 };
 
 export type GQLUpdateUserRoleInput = {
@@ -2517,6 +2610,7 @@ export type GQLUserProfile = {
   birthday?: Maybe<Scalars['String']['output']>;
   bodyMeasures: Array<GQLUserBodyMeasure>;
   createdAt: Scalars['String']['output'];
+  credentials: Array<Scalars['String']['output']>;
   email?: Maybe<Scalars['String']['output']>;
   firstName?: Maybe<Scalars['String']['output']>;
   fitnessLevel?: Maybe<GQLFitnessLevel>;
@@ -2528,8 +2622,11 @@ export type GQLUserProfile = {
   notificationPreferences: GQLNotificationPreferences;
   phone?: Maybe<Scalars['String']['output']>;
   sex?: Maybe<Scalars['String']['output']>;
+  specialization: Array<Scalars['String']['output']>;
+  successStories: Array<Scalars['String']['output']>;
   theme: GQLTheme;
   timeFormat: GQLTimeFormat;
+  trainerSince?: Maybe<Scalars['String']['output']>;
   trainingView: GQLTrainingView;
   updatedAt: Scalars['String']['output'];
   weekStartsOn?: Maybe<Scalars['Int']['output']>;
@@ -2617,6 +2714,27 @@ export enum GQLWorkoutType {
   UpperBody = 'UpperBody'
 }
 
+export type GQLGetAdminUserStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetAdminUserStatsQuery = { __typename?: 'Query', adminUserStats: { __typename?: 'AdminUserStats', totalUsers: number, totalTrainers: number, activeUsers: number, inactiveUsers: number } };
+
+export type GQLGetTrainersListQueryVariables = Exact<{
+  filters?: InputMaybe<GQLAdminUserFilters>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLGetTrainersListQuery = { __typename?: 'Query', adminUserList: { __typename?: 'AdminUserListResponse', total: number, hasMore: boolean, users: Array<{ __typename?: 'AdminUserListItem', id: string, email: string, name?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, lastLoginAt?: string | undefined | null, sessionCount: number, clientCount: number, isActive: boolean, featured: boolean, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null, bio?: string | undefined | null, avatarUrl?: string | undefined | null } | undefined | null }> } };
+
+export type GQLUpdateUserFeaturedMutationVariables = Exact<{
+  input: GQLUpdateUserFeaturedInput;
+}>;
+
+
+export type GQLUpdateUserFeaturedMutation = { __typename?: 'Mutation', updateUserFeatured: { __typename?: 'AdminUserListItem', id: string, featured: boolean } };
+
 export type GQLFitspaceDashboardGetWorkoutQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -2631,6 +2749,20 @@ export type GQLFitspaceDashboardGetRecentProgressQueryVariables = Exact<{ [key: 
 
 
 export type GQLFitspaceDashboardGetRecentProgressQuery = { __typename?: 'Query', getRecentCompletedWorkouts: Array<{ __typename?: 'TrainingDay', id: string, completedAt?: string | undefined | null, dayOfWeek: number, duration?: number | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, completedAt?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, weight?: number | undefined | null, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, reps?: number | undefined | null, rpe?: number | undefined | null, createdAt: string } | undefined | null }> }> }> };
+
+export type GQLGetPublicTrainingPlansQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLGetPublicTrainingPlansQuery = { __typename?: 'Query', getPublicTrainingPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isPremium?: boolean | undefined | null, difficulty?: GQLDifficulty | undefined | null, focusTags: Array<GQLFocusTag>, targetGoals: Array<GQLTargetGoal>, weekCount: number, assignmentCount: number, sessionsPerWeek?: number | undefined | null, avgSessionTime?: number | undefined | null, equipment: Array<string>, rating?: number | undefined | null, totalReviews: number, createdAt: string, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } | undefined | null }> };
+
+export type GQLGetFeaturedTrainersQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLGetFeaturedTrainersQuery = { __typename?: 'Query', getFeaturedTrainers: Array<{ __typename?: 'PublicTrainer', id: string, name?: string | undefined | null, role: GQLUserRole, clientCount: number, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null, bio?: string | undefined | null, avatarUrl?: string | undefined | null, email?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null } | undefined | null }> };
 
 export type GQLGetActiveMealPlanQueryVariables = Exact<{
   date?: InputMaybe<Scalars['String']['input']>;
@@ -3926,6 +4058,156 @@ export const TrainingTemplateFragmentDoc = `
   }
 }
     `;
+export const GetAdminUserStatsDocument = `
+    query GetAdminUserStats {
+  adminUserStats {
+    totalUsers
+    totalTrainers
+    activeUsers
+    inactiveUsers
+  }
+}
+    `;
+
+export const useGetAdminUserStatsQuery = <
+      TData = GQLGetAdminUserStatsQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetAdminUserStatsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetAdminUserStatsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetAdminUserStatsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetAdminUserStatsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetAdminUserStats'] : ['GetAdminUserStats', variables],
+    queryFn: fetchData<GQLGetAdminUserStatsQuery, GQLGetAdminUserStatsQueryVariables>(GetAdminUserStatsDocument, variables),
+    ...options
+  }
+    )};
+
+useGetAdminUserStatsQuery.getKey = (variables?: GQLGetAdminUserStatsQueryVariables) => variables === undefined ? ['GetAdminUserStats'] : ['GetAdminUserStats', variables];
+
+export const useInfiniteGetAdminUserStatsQuery = <
+      TData = InfiniteData<GQLGetAdminUserStatsQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetAdminUserStatsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetAdminUserStatsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetAdminUserStatsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetAdminUserStatsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetAdminUserStats.infinite'] : ['GetAdminUserStats.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetAdminUserStatsQuery, GQLGetAdminUserStatsQueryVariables>(GetAdminUserStatsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetAdminUserStatsQuery.getKey = (variables?: GQLGetAdminUserStatsQueryVariables) => variables === undefined ? ['GetAdminUserStats.infinite'] : ['GetAdminUserStats.infinite', variables];
+
+
+useGetAdminUserStatsQuery.fetcher = (variables?: GQLGetAdminUserStatsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetAdminUserStatsQuery, GQLGetAdminUserStatsQueryVariables>(GetAdminUserStatsDocument, variables, options);
+
+export const GetTrainersListDocument = `
+    query GetTrainersList($filters: AdminUserFilters, $limit: Int, $offset: Int) {
+  adminUserList(filters: $filters, limit: $limit, offset: $offset) {
+    users {
+      id
+      email
+      name
+      role
+      createdAt
+      updatedAt
+      lastLoginAt
+      sessionCount
+      clientCount
+      isActive
+      featured
+      profile {
+        firstName
+        lastName
+        bio
+        avatarUrl
+      }
+    }
+    total
+    hasMore
+  }
+}
+    `;
+
+export const useGetTrainersListQuery = <
+      TData = GQLGetTrainersListQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetTrainersListQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetTrainersListQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetTrainersListQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetTrainersListQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetTrainersList'] : ['GetTrainersList', variables],
+    queryFn: fetchData<GQLGetTrainersListQuery, GQLGetTrainersListQueryVariables>(GetTrainersListDocument, variables),
+    ...options
+  }
+    )};
+
+useGetTrainersListQuery.getKey = (variables?: GQLGetTrainersListQueryVariables) => variables === undefined ? ['GetTrainersList'] : ['GetTrainersList', variables];
+
+export const useInfiniteGetTrainersListQuery = <
+      TData = InfiniteData<GQLGetTrainersListQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetTrainersListQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetTrainersListQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetTrainersListQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetTrainersListQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetTrainersList.infinite'] : ['GetTrainersList.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetTrainersListQuery, GQLGetTrainersListQueryVariables>(GetTrainersListDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetTrainersListQuery.getKey = (variables?: GQLGetTrainersListQueryVariables) => variables === undefined ? ['GetTrainersList.infinite'] : ['GetTrainersList.infinite', variables];
+
+
+useGetTrainersListQuery.fetcher = (variables?: GQLGetTrainersListQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetTrainersListQuery, GQLGetTrainersListQueryVariables>(GetTrainersListDocument, variables, options);
+
+export const UpdateUserFeaturedDocument = `
+    mutation UpdateUserFeatured($input: UpdateUserFeaturedInput!) {
+  updateUserFeatured(input: $input) {
+    id
+    featured
+  }
+}
+    `;
+
+export const useUpdateUserFeaturedMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateUserFeaturedMutation, TError, GQLUpdateUserFeaturedMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateUserFeaturedMutation, TError, GQLUpdateUserFeaturedMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateUserFeatured'],
+    mutationFn: (variables?: GQLUpdateUserFeaturedMutationVariables) => fetchData<GQLUpdateUserFeaturedMutation, GQLUpdateUserFeaturedMutationVariables>(UpdateUserFeaturedDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateUserFeaturedMutation.getKey = () => ['UpdateUserFeatured'];
+
+
+useUpdateUserFeaturedMutation.fetcher = (variables: GQLUpdateUserFeaturedMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateUserFeaturedMutation, GQLUpdateUserFeaturedMutationVariables>(UpdateUserFeaturedDocument, variables, options);
+
 export const FitspaceDashboardGetWorkoutDocument = `
     query FitspaceDashboardGetWorkout {
   getWorkout {
@@ -4174,6 +4456,142 @@ useInfiniteFitspaceDashboardGetRecentProgressQuery.getKey = (variables?: GQLFits
 
 
 useFitspaceDashboardGetRecentProgressQuery.fetcher = (variables?: GQLFitspaceDashboardGetRecentProgressQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceDashboardGetRecentProgressQuery, GQLFitspaceDashboardGetRecentProgressQueryVariables>(FitspaceDashboardGetRecentProgressDocument, variables, options);
+
+export const GetPublicTrainingPlansDocument = `
+    query GetPublicTrainingPlans($limit: Int) {
+  getPublicTrainingPlans(limit: $limit) {
+    id
+    title
+    description
+    isPublic
+    isPremium
+    difficulty
+    focusTags
+    targetGoals
+    weekCount
+    assignmentCount
+    sessionsPerWeek
+    avgSessionTime
+    equipment
+    rating
+    totalReviews
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useGetPublicTrainingPlansQuery = <
+      TData = GQLGetPublicTrainingPlansQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetPublicTrainingPlansQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetPublicTrainingPlansQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetPublicTrainingPlansQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetPublicTrainingPlansQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetPublicTrainingPlans'] : ['GetPublicTrainingPlans', variables],
+    queryFn: fetchData<GQLGetPublicTrainingPlansQuery, GQLGetPublicTrainingPlansQueryVariables>(GetPublicTrainingPlansDocument, variables),
+    ...options
+  }
+    )};
+
+useGetPublicTrainingPlansQuery.getKey = (variables?: GQLGetPublicTrainingPlansQueryVariables) => variables === undefined ? ['GetPublicTrainingPlans'] : ['GetPublicTrainingPlans', variables];
+
+export const useInfiniteGetPublicTrainingPlansQuery = <
+      TData = InfiniteData<GQLGetPublicTrainingPlansQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetPublicTrainingPlansQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetPublicTrainingPlansQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetPublicTrainingPlansQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetPublicTrainingPlansQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetPublicTrainingPlans.infinite'] : ['GetPublicTrainingPlans.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetPublicTrainingPlansQuery, GQLGetPublicTrainingPlansQueryVariables>(GetPublicTrainingPlansDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetPublicTrainingPlansQuery.getKey = (variables?: GQLGetPublicTrainingPlansQueryVariables) => variables === undefined ? ['GetPublicTrainingPlans.infinite'] : ['GetPublicTrainingPlans.infinite', variables];
+
+
+useGetPublicTrainingPlansQuery.fetcher = (variables?: GQLGetPublicTrainingPlansQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetPublicTrainingPlansQuery, GQLGetPublicTrainingPlansQueryVariables>(GetPublicTrainingPlansDocument, variables, options);
+
+export const GetFeaturedTrainersDocument = `
+    query GetFeaturedTrainers($limit: Int) {
+  getFeaturedTrainers(limit: $limit) {
+    id
+    name
+    role
+    clientCount
+    profile {
+      firstName
+      lastName
+      bio
+      avatarUrl
+      email
+      specialization
+      credentials
+      successStories
+      trainerSince
+    }
+  }
+}
+    `;
+
+export const useGetFeaturedTrainersQuery = <
+      TData = GQLGetFeaturedTrainersQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetFeaturedTrainersQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetFeaturedTrainersQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetFeaturedTrainersQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetFeaturedTrainersQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetFeaturedTrainers'] : ['GetFeaturedTrainers', variables],
+    queryFn: fetchData<GQLGetFeaturedTrainersQuery, GQLGetFeaturedTrainersQueryVariables>(GetFeaturedTrainersDocument, variables),
+    ...options
+  }
+    )};
+
+useGetFeaturedTrainersQuery.getKey = (variables?: GQLGetFeaturedTrainersQueryVariables) => variables === undefined ? ['GetFeaturedTrainers'] : ['GetFeaturedTrainers', variables];
+
+export const useInfiniteGetFeaturedTrainersQuery = <
+      TData = InfiniteData<GQLGetFeaturedTrainersQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetFeaturedTrainersQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetFeaturedTrainersQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetFeaturedTrainersQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetFeaturedTrainersQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetFeaturedTrainers.infinite'] : ['GetFeaturedTrainers.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetFeaturedTrainersQuery, GQLGetFeaturedTrainersQueryVariables>(GetFeaturedTrainersDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetFeaturedTrainersQuery.getKey = (variables?: GQLGetFeaturedTrainersQueryVariables) => variables === undefined ? ['GetFeaturedTrainers.infinite'] : ['GetFeaturedTrainers.infinite', variables];
+
+
+useGetFeaturedTrainersQuery.fetcher = (variables?: GQLGetFeaturedTrainersQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetFeaturedTrainersQuery, GQLGetFeaturedTrainersQueryVariables>(GetFeaturedTrainersDocument, variables, options);
 
 export const GetActiveMealPlanDocument = `
     query GetActiveMealPlan($date: String) {

@@ -39,7 +39,7 @@ export default function MyPlansPage() {
 
   return (
     <div className="container-hypertro mx-auto mb-24">
-      <DashboardHeader title="Training Plans" icon={<LayoutList />} />
+      <DashboardHeader title="Training Plans" icon={LayoutList} />
 
       {/* Plans Tabs */}
       <Tabs

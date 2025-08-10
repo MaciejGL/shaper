@@ -41,7 +41,7 @@ export default function CollaborationPage() {
         <DashboardHeader
           title="Collaboration"
           description="Manage collaboration invitations and shared plans"
-          icon={<Users2Icon />}
+          icon={Users2Icon}
         />
         <SendInvitationDialog
           onSuccess={() => {

@@ -46,7 +46,7 @@ export default function MealPlansPage() {
         <DashboardHeader
           title="Meal Plans"
           description="Manage your meal plans and nutrition templates"
-          icon={<UtensilsIcon />}
+          icon={UtensilsIcon}
         />
         <Button
           onClick={() => createDraftMealTemplate({})}

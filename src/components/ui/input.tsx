@@ -64,7 +64,7 @@ export function Input({
 
       <div className="relative group [&_svg]:transition-colors">
         {iconStart && (
-          <div className="[&>svg]:size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-muted group-hover:text-muted">
+          <div className="[&>svg]:size-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-muted group-hover:text-muted dark:text-muted-foreground">
             {iconStart}
           </div>
         )}

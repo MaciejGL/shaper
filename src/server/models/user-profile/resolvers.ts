@@ -75,6 +75,14 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       updateData.allergies = rest.allergies || null
     if (rest.bio !== undefined) updateData.bio = rest.bio || null
 
+    // Trainer-specific fields
+    if (rest.specialization !== undefined)
+      updateData.specialization = rest.specialization || []
+    if (rest.credentials !== undefined)
+      updateData.credentials = rest.credentials || []
+    if (rest.successStories !== undefined)
+      updateData.successStories = rest.successStories || []
+
     // Preference fields
     if (rest.weekStartsOn !== undefined)
       updateData.weekStartsOn = rest.weekStartsOn

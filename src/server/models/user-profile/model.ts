@@ -137,6 +137,22 @@ export default class UserProfile implements GQLUserProfile {
     return this.data.bio
   }
 
+  get specialization() {
+    return this.data.specialization || []
+  }
+
+  get credentials() {
+    return this.data.credentials || []
+  }
+
+  get successStories() {
+    return this.data.successStories || []
+  }
+
+  get trainerSince() {
+    return this.data.trainerSince?.toISOString() ?? null
+  }
+
   get createdAt() {
     return this.data.createdAt.toISOString()
   }

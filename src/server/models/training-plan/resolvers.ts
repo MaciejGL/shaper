@@ -36,6 +36,7 @@ import {
   getMyPlansOverview,
   getMyPlansOverviewFull,
   getMyPlansOverviewLite,
+  getPublicTrainingPlans,
   getTemplates,
   getTrainingPlanById,
   getWorkout,
@@ -68,6 +69,9 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   },
   getTemplates: async (_, args, context) => {
     return getTemplates(args, context)
+  },
+  getPublicTrainingPlans: async (_, args, context) => {
+    return getPublicTrainingPlans(args, context)
   },
   getClientTrainingPlans: async (_, args, context) => {
     return getClientTrainingPlans(args, context)
