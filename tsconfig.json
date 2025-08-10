@@ -36,5 +36,5 @@
     "prisma/seed.ts",
     "scripts/update-exercises.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "expo-app"]
 }
