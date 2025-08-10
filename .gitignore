@@ -45,3 +45,7 @@ next-env.d.ts
 **/data/usda/
 **/downloads/
 *.zip
+
+# Firebase configuration files (contain sensitive API keys)
+**/GoogleService-Info.plist
+**/google-services.json
