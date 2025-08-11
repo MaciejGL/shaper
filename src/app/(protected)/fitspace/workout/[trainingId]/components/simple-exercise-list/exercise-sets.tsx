@@ -27,9 +27,9 @@ export function ExerciseSets({
         <div
           key={set.id}
           className={cn(
-            'flex items-center justify-between px-2 py-2 rounded text-sm',
+            'flex items-center justify-between px-2 py-2 rounded text-sm bg-muted/50 relative',
             set.completedAt
-              ? 'bg-green-50 dark:bg-green-950/20'
+              ? 'after:content-[""] after:absolute after:left-0 after:top-0 after:bottom-0 after:rounded-l-lg after:w-1 after:bg-green-500'
               : 'bg-muted/50',
           )}
         >
@@ -46,7 +46,7 @@ export function ExerciseSets({
                 <span>{set.reps}</span>
               ) : null}
 
-              {set.weight && (
+              {typeof set.weight === 'number' && (
                 <div className="flex items-center gap-3">
                   <span className="text-muted-foreground">x</span>
                   <span>

@@ -54,7 +54,7 @@ export function FoodSearchResults({
           <div className="space-y-2 bg-card-on-card p-2 rounded-lg -mx-2 px-2">
             {commonFoods.map((food, index) => (
               <FoodCard
-                key={food.name}
+                key={food.name + index}
                 food={food}
                 index={index}
                 selectedMeal={selectedMeal}
@@ -72,7 +72,7 @@ export function FoodSearchResults({
           <div className="space-y-2 bg-card-on-card p-2 rounded-lg -mx-2 px-2">
             {productFoods.map((food, index) => (
               <FoodCard
-                key={food.name}
+                key={food.name + index}
                 food={food}
                 index={index}
                 selectedMeal={selectedMeal}

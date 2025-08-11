@@ -113,6 +113,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       where: { id: userSession.user.id },
       include: {
         profile: true, // Include full profile (bodyMeasures will be lazy-loaded if needed)
+        trainer: true,
         // Exclude trainer, clients, sessions, notifications, and other heavy data
       },
     })

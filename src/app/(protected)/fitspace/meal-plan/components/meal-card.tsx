@@ -210,7 +210,7 @@ export function MealCard({
   return (
     <div className="grid grid-cols-[1fr_minmax(min-content,max-content)] gap-3">
       <div className="min-w-0">
-        <div className="flex items-center gap-2 justify-between mb-1">
+        <div className="flex items-center gap-2 justify-between bg-secondary rounded-lg px-2 py-1 mb-2 shadow-xs">
           <MealTotals
             plannedTotals={{
               calories: meal.plannedCalories,
@@ -280,7 +280,10 @@ export function MealCard({
         </div>
       </div>
       <div className="flex flex-col items-end">
-        <Badge variant="outline" className="rounded-full font-mono mb-2">
+        <Badge
+          variant="secondary"
+          className="rounded-full font-mono mb-2 shadow-xs !bg-secondary"
+        >
           {formatTime(new Date(meal.dateTime))}
         </Badge>
         <AnimatePresence>
@@ -350,16 +353,19 @@ export function MealTotals({
     <div className="flex gap-2">
       <p className="text-sm font-medium flex items-center text-primary">
         {formatNumber(Math.round(totalsToShow?.calories ?? 0))}
-        <FlameIcon className="size-3 text-orange-500" />
+        <FlameIcon className="size-[13px] text-orange-500" />
       </p>
       <p className="text-sm font-medium text-green-600">
-        {formatNumber(Math.round(totalsToShow?.protein ?? 0))}P
+        {formatNumber(Math.round(totalsToShow?.protein ?? 0))}
+        <span className="text-sm">P</span>
       </p>
       <p className="text-sm font-medium text-blue-600">
-        {formatNumber(Math.round(totalsToShow?.carbs ?? 0))}C
+        {formatNumber(Math.round(totalsToShow?.carbs ?? 0))}
+        <span className="text-sm text-blue-600">C</span>
       </p>
-      <p className="text-sm font-medium text-yellow-600">
-        {formatNumber(Math.round(totalsToShow?.fat ?? 0))}F
+      <p className="text-sm font-medium text-yellow-500">
+        {formatNumber(Math.round(totalsToShow?.fat ?? 0))}
+        <span className="text-sm text-yellow-500">F</span>
       </p>
     </div>
   )

@@ -159,7 +159,7 @@ export function CreateFavouriteModal({
     }
 
     try {
-      const workoutTitle = title.trim() || 'AI Workout'
+      const workoutTitle = title.trim() || 'Untitled Workout'
 
       await createFromAI({ title: workoutTitle }, aiWorkoutResult)
 

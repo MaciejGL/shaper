@@ -16,7 +16,7 @@ export function MealHeaderInfo({
   return (
     <div className="flex items-center justify-between">
       <div className="text-right text-sm">
-        <p className="font-medium">{Math.round(totalCalories)} cal</p>
+        <p className="font-medium">{Math.round(totalCalories)} kcal</p>
         <NutritionSummary
           protein={totalProtein}
           carbs={totalCarbs}

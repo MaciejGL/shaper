@@ -353,10 +353,10 @@ export function CustomFoodSearchDrawer({
           </div>
 
           <div className="p-4 border-t flex justify-end gap-2">
-            <Button variant="secondary" onClick={onShowMeal}>
+            <Button variant="tertiary" onClick={onShowMeal}>
               View Meal
             </Button>
-            <Button variant="secondary" onClick={handleClose} className="">
+            <Button variant="tertiary" onClick={handleClose} className="">
               Done
             </Button>
           </div>

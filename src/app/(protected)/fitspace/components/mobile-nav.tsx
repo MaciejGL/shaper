@@ -22,6 +22,7 @@ import { Icon } from '@/components/icons'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
+import { useUser } from '@/context/user-context'
 import { useFitspaceGetActivePlanIdQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
@@ -136,6 +137,9 @@ function QuickActionDrawer({
   isOpen: boolean
   onOpenChange: (open: boolean) => void
 }) {
+  const { user } = useUser()
+  const hasTrainer = Boolean(user?.trainer?.id)
+
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
       <DrawerContent dialogTitle="Quick Actions">
@@ -148,47 +152,33 @@ function QuickActionDrawer({
               />
 
               <div className="space-y-2">
-                <h3 className="text-md font-medium">My Assets</h3>
-                <div className="grid grid-cols-4 gap-2">
-                  <ButtonLink
+                <h3 className="text-md font-medium">Coach & Plans</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <QuickActionTile
+                    href={
+                      hasTrainer ? '/fitspace/my-trainer' : '/fitspace/explore'
+                    }
+                    label={hasTrainer ? 'My Trainer' : 'Find a Trainer'}
+                    icon={UserCheck}
                     onClick={() => onOpenChange(false)}
-                    href="/fitspace/my-trainer"
-                    variant="secondary"
-                    className="size-20 rounded-xl"
-                  >
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <UserCheck className="size-6" />
-                      <p className="text-xs font-medium">My Trainer</p>
-                    </div>
-                  </ButtonLink>
-
-                  <ButtonLink
-                    onClick={() => onOpenChange(false)}
+                  />
+                  <QuickActionTile
                     href="/fitspace/my-plans"
-                    variant="secondary"
-                    className="size-20 rounded-xl"
-                  >
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <Notebook className="size-6" />
-                      <p className="text-xs font-medium">My Plans</p>
-                    </div>
-                  </ButtonLink>
-                  <ButtonLink
+                    label="Training Plans"
+                    icon={Notebook}
                     onClick={() => onOpenChange(false)}
+                  />
+                  <QuickActionTile
                     href="/fitspace/meal-plans"
-                    variant="secondary"
-                    className="size-20 rounded-xl"
-                  >
-                    <div className="flex flex-col items-center justify-center gap-2">
-                      <ChefHatIcon className="size-6" />
-                      <p className="text-xs font-medium">Meal Plans</p>
-                    </div>
-                  </ButtonLink>
+                    label="Meal Plans"
+                    icon={ChefHatIcon}
+                    onClick={() => onOpenChange(false)}
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <h3 className="text-md font-medium">Progress</h3>
-                <DrawerMeasurement />
+                <DrawerMeasurement onOpenChange={() => onOpenChange(false)} />
               </div>
             </div>
           </div>
@@ -198,7 +188,7 @@ function QuickActionDrawer({
   )
 }
 
-function DrawerMeasurement() {
+function DrawerMeasurement({ onOpenChange }: { onOpenChange: () => void }) {
   const weightFields: MeasurementFieldEnum[] = [
     MeasurementFieldEnum.Weight,
     MeasurementFieldEnum.BodyFat,
@@ -227,33 +217,36 @@ function DrawerMeasurement() {
     ...armsLegsFields,
   ]
   return (
-    <div className="grid grid-cols-4 gap-2">
-      <ButtonLink
+    <div className="grid grid-cols-3 gap-2">
+      <QuickActionTile
         href="/fitspace/progress"
-        variant="secondary"
-        className="size-20 rounded-xl"
-      >
-        <div className="flex flex-col items-center justify-center gap-2">
-          <TrendingUp className="size-6" />
-          <p className="text-xs font-medium">Progress</p>
-        </div>
-      </ButtonLink>
+        label="Progress"
+        icon={TrendingUp}
+        onClick={onOpenChange}
+      />
+
       <AddMeasurementModal showFields={weightFields} title="Add Weight">
-        <Button variant="secondary" className="size-20 rounded-xl">
-          <div className="flex flex-col items-center justify-center gap-2 text-xs">
-            <Icon name="scale" />
-            <span className="text-xs whitespace-pre-wrap">Log Weight</span>
-          </div>
-        </Button>
+        <div>
+          <QuickActionTile
+            href="#"
+            label="Log Weight"
+            icon={() => <Icon name="scale" />}
+            onClick={() => {}}
+            ariaLabel="Log Weight"
+          />
+        </div>
       </AddMeasurementModal>
 
       <AddMeasurementModal showFields={allFields} title="Add All">
-        <Button variant="secondary" className="size-20 rounded-xl">
-          <div className="flex flex-col items-center justify-center gap-2 text-xs">
-            <PersonStanding />
-            <span className="text-xs whitespace-pre-wrap">Log Measures</span>
-          </div>
-        </Button>
+        <div>
+          <QuickActionTile
+            href="#"
+            label="Log Measures"
+            icon={PersonStanding}
+            onClick={() => {}}
+            ariaLabel="Log Measures"
+          />
+        </div>
       </AddMeasurementModal>
     </div>
   )
@@ -294,6 +287,44 @@ export function ExploreCtaButton({
         </div>
       </div>
       <ChevronRight className="size-5 opacity-90" />
+    </ButtonLink>
+  )
+}
+
+type QuickActionTileProps = {
+  href: string
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  onClick?: () => void
+  ariaLabel?: string
+  disabled?: boolean
+  className?: string
+}
+
+export function QuickActionTile({
+  href,
+  label,
+  icon: Icon,
+  onClick,
+  ariaLabel,
+  disabled,
+  className,
+}: QuickActionTileProps) {
+  return (
+    <ButtonLink
+      href={href}
+      onClick={onClick}
+      variant="secondary"
+      aria-label={ariaLabel || label}
+      disabled={disabled}
+      className={`h-24 rounded-xl ${className || ''}`}
+    >
+      <div className="flex flex-col items-center justify-center gap-2">
+        <Icon className="size-6" />
+        <p className="text-xs font-medium text-center whitespace-pre-wrap">
+          {label}
+        </p>
+      </div>
     </ButtonLink>
   )
 }

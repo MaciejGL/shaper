@@ -206,7 +206,7 @@ export function MealLoggingDrawer({
           <div className="flex items-center justify-end w-full">
             <div className="flex items-center gap-2">
               <Button
-                variant="secondary"
+                variant="tertiary"
                 onClick={onClose}
                 disabled={isLoading || removingItemIds.length > 0}
               >
@@ -227,10 +227,11 @@ export function MealLoggingDrawer({
           {/* Meal Info */}
 
           {meal.instructions && (
-            <div className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                <strong>Instructions:</strong> {meal.instructions}
+            <div className="px-3">
+              <p className="text-sm">
+                <strong>Instructions:</strong>
               </p>
+              <p className="text-sm whitespace-pre-wrap">{meal.instructions}</p>
             </div>
           )}
 
@@ -253,7 +254,9 @@ export function MealLoggingDrawer({
               return (
                 <div
                   key={food.id}
-                  className={cn('p-3 rounded-lg bg-card-on-card')}
+                  className={cn(
+                    'p-3 rounded-lg bg-card dark:bg-card-on-card shadow-sm',
+                  )}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex-1">

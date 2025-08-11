@@ -118,10 +118,6 @@ export function FavouriteWorkoutCard({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </CardHeader>
-
-      <CardContent className="pt-0 space-y-4">
-        {/* Workout Stats */}
         <div className="flex gap-2 flex-wrap">
           <Badge variant="secondary">
             <Dumbbell className="w-3 h-3 mr-1" />
@@ -137,10 +133,15 @@ export function FavouriteWorkoutCard({
             </Badge>
           )}
         </div>
+      </CardHeader>
+
+      <CardContent className="pt-0 space-y-4">
+        {/* Workout Stats */}
 
         {/* Exercise Preview */}
         {totalExercises > 0 && (
           <div className="space-y-1">
+            <h4 className="text-sm font-medium">Exercises</h4>
             <div className="text-sm space-y-1">
               {favourite.exercises.map((exercise, index) => (
                 <Badge key={exercise.id} variant="secondary" size="lg">
@@ -157,15 +158,17 @@ export function FavouriteWorkoutCard({
         <span className="text-xs text-muted-foreground">
           Created {createdAgo}
         </span>
-        <Button
-          onClick={onStart}
-          size="sm"
-          variant={buttonProps.variant}
-          disabled={buttonProps.disabled}
-          iconEnd={<ChevronRight />}
-        >
-          {buttonProps.text}
-        </Button>
+        {!buttonProps.disabled ? (
+          <Button
+            onClick={onStart}
+            size="sm"
+            variant={buttonProps.variant}
+            disabled={buttonProps.disabled}
+            iconEnd={<ChevronRight />}
+          >
+            {buttonProps.text}
+          </Button>
+        ) : null}
       </CardFooter>
     </Card>
   )

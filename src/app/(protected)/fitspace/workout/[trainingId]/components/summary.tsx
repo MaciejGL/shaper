@@ -181,7 +181,7 @@ export function Summary({
                 icon={<DumbbellIcon className="h-4 w-4 text-green-600" />}
               />
               <StatsItem
-                value={toDisplayWeight(displayedWeight)?.toFixed(1) || 0}
+                value={toDisplayWeight(displayedWeight)?.toFixed() || 0}
                 label={`Total volume (${weightUnit})`}
                 icon={<WeightIcon className="h-4 w-4 text-blue-600" />}
               />

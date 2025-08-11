@@ -10,7 +10,7 @@ export function FoodSearchLoading() {
         <p>Searching for foods...</p>
       </div>
       {[...Array(3)].map((_, i) => (
-        <Card key={i} className="p-4">
+        <Card key={i} className="p-4 shadow-xs">
           <div className="flex items-center space-x-3">
             <Skeleton className="h-12 w-12 rounded" />
             <div className="space-y-2 flex-1">

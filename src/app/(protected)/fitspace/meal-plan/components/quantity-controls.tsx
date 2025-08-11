@@ -38,7 +38,7 @@ export function QuantityControls({
   return (
     <div className="flex items-center gap-1">
       <Button
-        variant="outline"
+        variant="tertiary"
         size="sm"
         onClick={handleDecrement}
         disabled={disabled || value <= min}
@@ -48,7 +48,7 @@ export function QuantityControls({
       </Button>
       <Input
         id={id}
-        variant="outline"
+        variant="secondary"
         value={value}
         onChange={(e) => {
           const newValue = formatNumberInput(e)
@@ -63,7 +63,7 @@ export function QuantityControls({
         iconEnd={<span className="text-sm">{unit}</span>}
       />
       <Button
-        variant="outline"
+        variant="tertiary"
         size="sm"
         onClick={handleIncrement}
         disabled={disabled || (max !== undefined && value >= max)}

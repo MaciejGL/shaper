@@ -14,5 +14,8 @@ query UserBasic {
       birthday
       sex
     }
+    trainer {
+      id
+    }
   }
 }

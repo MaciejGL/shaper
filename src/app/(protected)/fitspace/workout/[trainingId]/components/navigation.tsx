@@ -173,11 +173,12 @@ function WeekSelector() {
         <SelectTrigger
           size="sm"
           variant="tertiary"
-          className="[&_svg]:data-[icon=mark]:size-3.5"
+          className="[&_svg]:data-[icon=mark]:size-3.5 truncate"
         >
           <SelectValue
             defaultValue={activeWeek?.id}
             placeholder="Select a workout"
+            className=""
           />
         </SelectTrigger>
         <SelectContent>
