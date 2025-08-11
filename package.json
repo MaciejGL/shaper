@@ -18,7 +18,9 @@
     "generate": "prisma generate",
     "migrate": "prisma migrate dev --create-only",
     "codegen": "graphql-codegen --config codegen.ts --watch",
-    "seed": "npx prisma db seed"
+    "seed": "npx prisma db seed",
+    "analyze": "ANALYZE=true npm run build",
+    "analyze:dev": "ANALYZE=true npm run dev"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
@@ -107,6 +109,7 @@
     "@graphql-codegen/typescript-operations": "4.6.0",
     "@graphql-codegen/typescript-react-query": "6.1.0",
     "@graphql-codegen/typescript-resolvers": "4.5.0",
+    "@next/bundle-analyzer": "^15.4.6",
     "@parcel/watcher": "2.5.1",
     "@tailwindcss/postcss": "4.1.11",
     "@tanstack/react-query-devtools": "5.75.1",

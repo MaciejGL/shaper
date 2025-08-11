@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion'
 
-import { EnhancedBodyView } from '@/components/human-body/enhanced-body-view'
+import { LazyEnhancedBodyView as EnhancedBodyView } from '@/components/human-body/lazy-enhanced-body-view'
 import { GQLMuscleGroup } from '@/generated/graphql-client'
 
 import type { AiWorkoutInputData } from '../hooks/use-ai-workout-generation'

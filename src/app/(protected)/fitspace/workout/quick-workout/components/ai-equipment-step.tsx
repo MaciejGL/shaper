@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
 import { GQLEquipment } from '@/generated/graphql-client'
 
-import { EquipmentFilters } from '../../[trainingId]/components/equipment-filters'
+import LazyEquipmentFilters from '../../[trainingId]/components/lazy-equipment-filters'
 import type { AiWorkoutInputData } from '../hooks/use-ai-workout-generation'
 
 interface AiEquipmentStepProps {
@@ -32,7 +32,7 @@ export function AiEquipmentStep({ data, onDataChange }: AiEquipmentStepProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.1 }}
       >
-        <EquipmentFilters
+        <LazyEquipmentFilters
           selectedEquipment={data.selectedEquipment}
           onEquipmentToggle={handleEquipmentToggle}
           equipment={allEquipment}

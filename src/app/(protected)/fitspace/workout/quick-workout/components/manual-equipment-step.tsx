@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
 import { GQLEquipment } from '@/generated/graphql-client'
 
-import { EquipmentFilters } from '../../[trainingId]/components/equipment-filters'
+import LazyEquipmentFilters from '../../[trainingId]/components/lazy-equipment-filters'
 
 interface ManualEquipmentStepProps {
   selectedEquipment: GQLEquipment[]
@@ -26,7 +26,7 @@ export function ManualEquipmentStep({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <EquipmentFilters
+        <LazyEquipmentFilters
           selectedEquipment={selectedEquipment}
           onEquipmentToggle={onEquipmentToggle}
           equipment={allEquipment}

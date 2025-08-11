@@ -1,6 +1,6 @@
 'use client'
 
-import { equipmentIcons } from '@/components/equipment-icons'
+import { LazyEquipmentIcon } from '@/components/equipment-icons/lazy-equipment-icon'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { GQLEquipment } from '@/generated/graphql-client'
@@ -12,65 +12,6 @@ type EquipmentFiltersProps = {
   onEquipmentToggle: (equipment: GQLEquipment) => void
   equipment: GQLEquipment[]
   variant?: 'compact' | 'cards' | 'grid'
-}
-
-const getEquipmentIcon = (equipment: GQLEquipment) => {
-  switch (equipment) {
-    case GQLEquipment.Band:
-      return (
-        <div className="size-full [&_svg]:size-full">{equipmentIcons.band}</div>
-      )
-    case GQLEquipment.Barbell:
-      return (
-        <div className="size-full [&_svg]:size-full">
-          {equipmentIcons.barbell}
-        </div>
-      )
-    case GQLEquipment.Bodyweight:
-      return (
-        <div className="size-full [&_svg]:size-full">
-          {equipmentIcons.bodyweight}
-        </div>
-      )
-    case GQLEquipment.Cable:
-      return (
-        <div className="size-full [&_svg]:size-full">
-          {equipmentIcons.cable}
-        </div>
-      )
-    case GQLEquipment.Dumbbell:
-      return (
-        <div className="size-full [&_svg]:size-full">
-          {equipmentIcons.dumbbell}
-        </div>
-      )
-    case GQLEquipment.Kettlebell:
-      return (
-        <div className="size-full [&_svg]:size-full">
-          {equipmentIcons.kettlebell}
-        </div>
-      )
-    case GQLEquipment.Machine:
-      return (
-        <div className="size-full [&_svg]:size-full">
-          {equipmentIcons.machine}
-        </div>
-      )
-    case GQLEquipment.SmithMachine:
-      return (
-        <div className="size-full [&_svg]:size-full">
-          {equipmentIcons.smithmachine}
-        </div>
-      )
-    case GQLEquipment.Other:
-      return (
-        <div className="size-full [&_svg]:size-full">
-          {equipmentIcons.other}
-        </div>
-      )
-    default:
-      return null
-  }
 }
 
 export function EquipmentFilters({
@@ -94,13 +35,11 @@ export function EquipmentFilters({
             onClick={() => onEquipmentToggle(equipmentItem)}
           >
             <CardContent className="px-2 text-center space-y-2">
-              <div
-                className={cn(
-                  'mx-auto text-black',
-                  'size-full max-w-24 max-h-24',
-                )}
-              >
-                {getEquipmentIcon(equipmentItem)}
+              <div className="mx-auto size-full max-w-24 max-h-24">
+                <LazyEquipmentIcon
+                  equipment={equipmentItem}
+                  className="w-full h-full text-black"
+                />
               </div>
               <div className="text-sm font-medium">
                 {translateEquipment(equipmentItem)}
@@ -124,14 +63,16 @@ export function EquipmentFilters({
             }
             className="h-16 flex flex-col gap-1 p-2"
           >
-            <div
-              className={cn(
-                selectedEquipment.includes(equipmentItem)
-                  ? 'text-primary-foreground'
-                  : 'text-foreground',
-              )}
-            >
-              {getEquipmentIcon(equipmentItem)}
+            <div>
+              <LazyEquipmentIcon
+                equipment={equipmentItem}
+                className={cn(
+                  'w-8 h-8',
+                  selectedEquipment.includes(equipmentItem)
+                    ? 'text-primary-foreground'
+                    : 'text-foreground',
+                )}
+              />
             </div>
             <span className="text-xs leading-tight">
               {translateEquipment(equipmentItem)?.split(' ')[0]}
@@ -155,15 +96,15 @@ export function EquipmentFilters({
           size="sm"
           className="gap-2"
         >
-          <div
-            className={
+          <LazyEquipmentIcon
+            equipment={equipmentItem}
+            className={cn(
+              'w-4 h-4',
               selectedEquipment.includes(equipmentItem)
                 ? 'text-primary-foreground'
-                : 'text-foreground'
-            }
-          >
-            {getEquipmentIcon(equipmentItem)}
-          </div>
+                : 'text-foreground',
+            )}
+          />
           {translateEquipment(equipmentItem)}
         </Button>
       ))}

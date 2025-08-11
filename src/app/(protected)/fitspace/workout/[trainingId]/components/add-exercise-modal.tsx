@@ -4,7 +4,7 @@ import { PlusIcon, Search } from 'lucide-react'
 import React, { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
-import { EnhancedBodyView } from '@/components/human-body/enhanced-body-view'
+import { LazyEnhancedBodyView as EnhancedBodyView } from '@/components/human-body/lazy-enhanced-body-view'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
@@ -21,8 +21,8 @@ import {
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 
-import { EquipmentFilters } from './equipment-filters'
 import { ExercisesList } from './exercises-list'
+import LazyEquipmentFilters from './lazy-equipment-filters'
 import { SelectedFilters } from './selected-filters'
 
 type AddExerciseModalProps = {
@@ -226,7 +226,7 @@ export function AddExerciseModal({
             </div>
             <div className="px-4">
               <p className="text-md font-medium  mb-2">2. Select equipment</p>
-              <EquipmentFilters
+              <LazyEquipmentFilters
                 selectedEquipment={selectedEquipment}
                 onEquipmentToggle={handleEquipmentToggle}
                 equipment={allEquipment}

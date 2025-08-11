@@ -2,12 +2,14 @@ import { Bell, Cloud, Dumbbell, UserCheck, Users, Utensils } from 'lucide-react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { AwsTab } from './components/aws-tab'
-import { ExercisesTab } from './components/exercises-tab'
-import { FoodsTab } from './components/foods-tab'
-import { PushNotificationsTab } from './components/push-notifications-tab'
-import { TrainersTab } from './components/trainers-tab'
-import { UsersTab } from './components/users-tab'
+import {
+  LazyAwsTab as AwsTab,
+  LazyExercisesTab as ExercisesTab,
+  LazyFoodsTab as FoodsTab,
+  LazyPushNotificationsTab as PushNotificationsTab,
+  LazyTrainersTab as TrainersTab,
+  LazyUsersTab as UsersTab,
+} from './components/lazy-admin-tabs'
 
 export default function AdminPage() {
   return (
