@@ -19,7 +19,6 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Icon } from '@/components/icons'
-import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { useUser } from '@/context/user-context'
