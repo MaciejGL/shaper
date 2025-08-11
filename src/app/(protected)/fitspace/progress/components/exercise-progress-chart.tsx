@@ -42,7 +42,6 @@ import {
   TimePeriod,
   formatTooltipValue,
   formatYAxisTick,
-  getChartLabel,
 } from './exercise-progress-constants'
 import { ExerciseProgressStats } from './exercise-progress-stats'
 import { useChartData, useExerciseImprovement } from './use-exercise-progress'
@@ -289,7 +288,6 @@ export function ExerciseProgressChart({
                   content={<ChartTooltipContent />}
                   formatter={(value) => [
                     formatTooltipValue(value as number, activeChart),
-                    getChartLabel(activeChart),
                   ]}
                 />
                 <Line
@@ -337,7 +335,6 @@ export function ExerciseProgressChart({
                   content={<ChartTooltipContent />}
                   formatter={(value) => [
                     formatTooltipValue(value as number, activeChart),
-                    getChartLabel(activeChart),
                   ]}
                 />
                 <Bar

@@ -27,25 +27,12 @@ export function formatTooltipValue(
 ): string {
   switch (chartType) {
     case 'oneRM':
-      return formatWeight(value, 1)
+      return `${formatWeight(value, 1)} 1RM`
     case 'sets':
-      return `${formatSets(value)} sets`
+      return `${formatSets(value)} set${value > 1 ? 's' : ''}`
     case 'volume':
-      return formatWeight(value, 0)
+      return `${formatWeight(value, 0)} volume`
     default:
       return value.toString()
-  }
-}
-
-export function getChartLabel(chartType: ChartType): string {
-  switch (chartType) {
-    case 'oneRM':
-      return '1RM'
-    case 'sets':
-      return 'Sets'
-    case 'volume':
-      return 'Volume'
-    default:
-      return ''
   }
 }

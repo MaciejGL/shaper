@@ -10,7 +10,7 @@ export function CompletionStats({
   totalWorkouts: number
 }) {
   return (
-    <div className="mt-8">
+    <div>
       <div className="flex justify-between items-center text-sm text-muted-foreground">
         <div className="flex items-center gap-1">
           <span>

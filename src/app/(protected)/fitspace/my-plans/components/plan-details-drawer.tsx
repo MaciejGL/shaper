@@ -92,17 +92,17 @@ export function PlanDetailsDrawer({
           </div>
 
           {/* Rating and Reviews */}
-          {plan.rating && plan.totalReviews > 0 && (
+          {plan.rating && plan.totalReviews > 0 ? (
             <div className="flex items-center gap-2">
               <RatingStars rating={plan.rating} size="sm" />
               <span className="text-sm text-muted-foreground">
                 {plan.rating.toFixed(1)} ({plan.totalReviews} reviews)
               </span>
             </div>
-          )}
+          ) : null}
 
           {/* Progress Overview */}
-          {(plan.completedWorkoutsDays > 0 || plan.adherence) && (
+          {plan.completedWorkoutsDays > 0 || plan.adherence ? (
             <div className="space-y-2">
               <h3 className="font-medium">Progress</h3>
               <CompletionStats
@@ -111,7 +111,7 @@ export function PlanDetailsDrawer({
                 totalWorkouts={plan.totalWorkouts}
               />
             </div>
-          )}
+          ) : null}
 
           {/* Plan Description */}
           {plan.description && (

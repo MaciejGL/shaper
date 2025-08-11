@@ -3,10 +3,12 @@
 import {
   Calendar,
   ChefHatIcon,
+  ChevronRight,
   Compass,
   Dumbbell,
   LayoutDashboardIcon,
   MoreHorizontalIcon,
+  Notebook,
   PersonStanding,
   SaladIcon,
   TrendingUp,
@@ -65,13 +67,6 @@ export function MobileNav() {
         prefetch: true,
       },
       {
-        href: '/fitspace/progress',
-        icon: TrendingUp,
-        label: 'Progress',
-        disabled: true,
-        prefetch: true,
-      },
-      {
         icon: MoreHorizontalIcon,
         label: 'More',
         prefetch: true,
@@ -86,7 +81,7 @@ export function MobileNav() {
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar rounded-t-lg">
-        <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto gap-1">
+        <div className="grid grid-cols-5 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
@@ -146,44 +141,55 @@ function QuickActionDrawer({
       <DrawerContent dialogTitle="Quick Actions">
         <div className="p-4 space-y-4">
           <div>
-            <div className="flex flex-wrap gap-4">
-              <ButtonLink
-                onClick={() => onOpenChange(false)}
+            <div className="flex flex-col gap-4">
+              <ExploreCtaButton
                 href="/fitspace/explore"
-                variant="secondary"
-                className="size-20"
-              >
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <Compass className="size-6" />
-                  <p className="text-xs font-medium">Explore</p>
-                </div>
-              </ButtonLink>
-
-              <ButtonLink
                 onClick={() => onOpenChange(false)}
-                href="/fitspace/my-trainer"
-                variant="secondary"
-                className="size-20"
-              >
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <UserCheck className="size-6" />
-                  <p className="text-xs font-medium">My Trainer</p>
-                </div>
-              </ButtonLink>
+              />
 
-              <ButtonLink
-                onClick={() => onOpenChange(false)}
-                href="/fitspace/meal-plans"
-                variant="secondary"
-                className="size-20"
-              >
-                <div className="flex flex-col items-center justify-center gap-2">
-                  <ChefHatIcon className="size-6" />
-                  <p className="text-xs font-medium">Meal Plans</p>
-                </div>
-              </ButtonLink>
+              <div className="space-y-2">
+                <h3 className="text-md font-medium">My Assets</h3>
+                <div className="grid grid-cols-4 gap-2">
+                  <ButtonLink
+                    onClick={() => onOpenChange(false)}
+                    href="/fitspace/my-trainer"
+                    variant="secondary"
+                    className="size-20 rounded-xl"
+                  >
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <UserCheck className="size-6" />
+                      <p className="text-xs font-medium">My Trainer</p>
+                    </div>
+                  </ButtonLink>
 
-              <DrawerMeasurement />
+                  <ButtonLink
+                    onClick={() => onOpenChange(false)}
+                    href="/fitspace/my-plans"
+                    variant="secondary"
+                    className="size-20 rounded-xl"
+                  >
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <Notebook className="size-6" />
+                      <p className="text-xs font-medium">My Plans</p>
+                    </div>
+                  </ButtonLink>
+                  <ButtonLink
+                    onClick={() => onOpenChange(false)}
+                    href="/fitspace/meal-plans"
+                    variant="secondary"
+                    className="size-20 rounded-xl"
+                  >
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <ChefHatIcon className="size-6" />
+                      <p className="text-xs font-medium">Meal Plans</p>
+                    </div>
+                  </ButtonLink>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-md font-medium">Progress</h3>
+                <DrawerMeasurement />
+              </div>
             </div>
           </div>
         </div>
@@ -221,9 +227,19 @@ function DrawerMeasurement() {
     ...armsLegsFields,
   ]
   return (
-    <>
+    <div className="grid grid-cols-4 gap-2">
+      <ButtonLink
+        href="/fitspace/progress"
+        variant="secondary"
+        className="size-20 rounded-xl"
+      >
+        <div className="flex flex-col items-center justify-center gap-2">
+          <TrendingUp className="size-6" />
+          <p className="text-xs font-medium">Progress</p>
+        </div>
+      </ButtonLink>
       <AddMeasurementModal showFields={weightFields} title="Add Weight">
-        <Button variant="secondary" className="size-20">
+        <Button variant="secondary" className="size-20 rounded-xl">
           <div className="flex flex-col items-center justify-center gap-2 text-xs">
             <Icon name="scale" />
             <span className="text-xs whitespace-pre-wrap">Log Weight</span>
@@ -232,13 +248,52 @@ function DrawerMeasurement() {
       </AddMeasurementModal>
 
       <AddMeasurementModal showFields={allFields} title="Add All">
-        <Button variant="secondary" className="size-20">
+        <Button variant="secondary" className="size-20 rounded-xl">
           <div className="flex flex-col items-center justify-center gap-2 text-xs">
             <PersonStanding />
             <span className="text-xs whitespace-pre-wrap">Log Measures</span>
           </div>
         </Button>
       </AddMeasurementModal>
-    </>
+    </div>
+  )
+}
+
+type ExploreCtaButtonProps = {
+  href: string
+  onClick?: () => void
+  title?: string
+  subtitle?: string
+  icon?: React.ComponentType<{ className?: string }>
+  className?: string
+}
+
+export function ExploreCtaButton({
+  href,
+  onClick,
+  title = 'Explore Coaches & Plans',
+  subtitle = 'Get matched to a coach or start a plan',
+  icon: Icon = Compass,
+  className,
+}: ExploreCtaButtonProps) {
+  return (
+    <ButtonLink
+      href={href}
+      onClick={onClick}
+      variant="secondary"
+      aria-label={title}
+      className={`w-full h-20 rounded-xl px-4 flex items-center justify-between ${className || ''}`}
+    >
+      <div className="flex items-center gap-3">
+        <div className="size-9 rounded-lg bg-white/10 flex items-center justify-center">
+          <Icon className="size-5" />
+        </div>
+        <div className="text-left">
+          <div className="text-base font-semibold leading-tight">{title}</div>
+          <div className="text-xs text-white/80 leading-tight">{subtitle}</div>
+        </div>
+      </div>
+      <ChevronRight className="size-5 opacity-90" />
+    </ButtonLink>
   )
 }
