@@ -1,7 +1,6 @@
 import { forwardRef, useEffect, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { formatDecimalInput, formatNumberSmart } from '@/lib/format-tempo'
 
@@ -91,30 +90,25 @@ export const WeightInput = forwardRef<HTMLInputElement, WeightInputProps>(
       id || `weight-input-${Math.random().toString(36).substr(2, 9)}`
 
     return (
-      <div className="space-y-2">
-        {showLabel && (
-          <Label htmlFor={inputId} className="text-sm">
-            {finalLabel}
-          </Label>
-        )}
-        <div className="relative">
-          <Input
-            ref={ref}
-            id={inputId}
-            value={inputValue}
-            onChange={handleInputChange}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            disabled={disabled}
-            className={className}
-            placeholder={placeholder}
-            iconEnd={
-              <div className="text-sm text-muted-foreground pointer-events-none">
-                {weightUnit}
-              </div>
-            }
-          />
-        </div>
+      <div className="relative">
+        <Input
+          ref={ref}
+          id={inputId}
+          value={inputValue}
+          label={showLabel ? finalLabel : undefined}
+          onChange={handleInputChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          disabled={disabled}
+          className={className}
+          placeholder={placeholder}
+          variant="secondary"
+          iconEnd={
+            <div className="text-sm text-muted-foreground pointer-events-none">
+              {weightUnit}
+            </div>
+          }
+        />
       </div>
     )
   },

@@ -43,8 +43,8 @@ export function DailyProgressCard({
       <div className="text-xs text-muted-foreground mt-1.5">
         <div className="grid grid-cols-4 gap-4">
           <div className="space-y-1">
-            <div className="flex justify-end">
-              <FlameIcon className="size-3" />
+            <div className="flex justify-end items-center">
+              <FlameIcon className="size-3 shrink-0" />
               <span>
                 {Math.round(dailyActual.calories)}/
                 {Math.round(dailyTargets.calories)}

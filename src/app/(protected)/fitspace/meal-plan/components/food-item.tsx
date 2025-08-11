@@ -1,5 +1,6 @@
 import { FlameIcon } from 'lucide-react'
 
+import { useDisplayUnits } from '@/hooks/use-display-units'
 import { formatNumber } from '@/lib/utils'
 
 import { MealCardProps } from './meal-card'
@@ -11,6 +12,8 @@ export function FoodItem({
   food: MealCardProps['meal']['foods'][0]
   onClick: () => void
 }) {
+  const { convertToDisplayUnit } = useDisplayUnits()
+
   return (
     <button
       key={food.id}
@@ -24,7 +27,11 @@ export function FoodItem({
           {food.name}
         </p>
         <p className="text-xs shrink-0 whitespace-nowrap">
-          {food.log?.loggedQuantity || food.quantity} {food.unit}
+          {(() => {
+            const quantity = food.log?.loggedQuantity || food.quantity
+            const displayUnit = convertToDisplayUnit(quantity, food.unit)
+            return `${displayUnit.quantity} ${displayUnit.unit}`
+          })()}
         </p>
       </div>
       <div className="flex gap-1">

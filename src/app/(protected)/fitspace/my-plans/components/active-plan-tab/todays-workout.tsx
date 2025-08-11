@@ -4,7 +4,6 @@ import { format } from 'date-fns'
 import { motion } from 'framer-motion'
 import {
   ArrowRight,
-  BadgeCheck,
   CheckIcon,
   ChevronsDownIcon,
   ClockIcon,
@@ -16,6 +15,7 @@ import { Fragment, useState } from 'react'
 import { BiggyIcon } from '@/components/biggy-icon'
 import { Badge } from '@/components/ui/badge'
 import { ButtonLink } from '@/components/ui/button-link'
+import { SectionIcon } from '@/components/ui/section-icon'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
@@ -57,7 +57,11 @@ export function TodaysWorkout({
   return (
     <div>
       <div className="flex items-baseline justify-between mb-4">
-        <div>
+        <div className="flex items-center gap-2">
+          <SectionIcon
+            icon={DumbbellIcon}
+            variant={todaysWorkout.completedAt ? 'green' : 'indigo'}
+          />
           <p className="text-lg font-semibold">{getTitle()}</p>
           {isNextWorkout && todaysWorkout.scheduledAt && (
             <p className="text-sm text-muted-foreground">
@@ -141,12 +145,13 @@ function WorkoutDayHeader({
 
   return (
     <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-2">
-        {day.completedAt && <BadgeCheck className="size-5 text-green-500" />}
-        <h2 className="text-2xl font-semibold text-foreground">
-          {formatWorkoutType(day.workoutType)}
-        </h2>
-      </div>
+      {day.workoutType && (
+        <div className="flex items-center gap-2">
+          <h2 className="text-2xl font-semibold text-foreground">
+            {formatWorkoutType(day.workoutType)}
+          </h2>
+        </div>
+      )}
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Badge variant="secondary" className="flex items-center gap-1">
           <DumbbellIcon />

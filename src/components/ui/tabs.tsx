@@ -124,10 +124,12 @@ function PrimaryTabList<T extends string>({
   options,
   onClick,
   active,
+  className,
 }: {
   options: { label: string; value: T; icon?: React.ReactNode }[]
   onClick: (value: T) => void
   active: T
+  className?: string
 }) {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const [underlineStyle, setUnderlineStyle] = React.useState({
@@ -154,7 +156,13 @@ function PrimaryTabList<T extends string>({
   }, [active])
 
   return (
-    <div ref={containerRef} className="relative flex gap-2 mb-2 border-b">
+    <div
+      ref={containerRef}
+      className={cn(
+        'relative flex gap-2 mb-2 border-b-2 border-primary/10 dark:border-border',
+        className,
+      )}
+    >
       {options.map((option) => (
         <Button
           key={option.value}
@@ -164,9 +172,7 @@ function PrimaryTabList<T extends string>({
           onClick={() => onClick(option.value)}
           className={cn(
             'relative rounded-none transition-colors duration-200',
-            active === option.value
-              ? 'text-foreground'
-              : 'text-muted-foreground',
+            active === option.value ? 'text-foreground' : 'text-foreground/80',
           )}
           iconStart={option.icon}
         >
@@ -176,7 +182,7 @@ function PrimaryTabList<T extends string>({
 
       {/* Animated underline */}
       <div
-        className="absolute bottom-0 h-0.5 bg-primary transition-all duration-300 ease-out"
+        className="absolute bottom-[-2px] h-0.5 bg-primary transition-all duration-300 ease-out rounded-full"
         style={{
           width: underlineStyle.width,
           transform: `translateX(${underlineStyle.left}px)`,

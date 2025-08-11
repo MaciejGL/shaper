@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import { useMemo } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
@@ -19,6 +20,9 @@ import {
 } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { cn } from '@/lib/utils'
+
+import { AddMeasurementModal } from '../../progress/components/add-measurement-modal'
+import { MeasurementFieldEnum } from '../../progress/components/measurement-constants'
 
 interface BodyMeasurement {
   id: string
@@ -173,10 +177,29 @@ function EmptyMeasurements() {
       <p className="text-xs text-muted-foreground/70 mb-4">
         Track your body measurements to see progress
       </p>
-      <ButtonLink href="/fitspace/progress" size="sm" variant="outline">
-        <Plus className="h-4 w-4 mr-1" />
-        Add Measurements
-      </ButtonLink>
+      <AddMeasurementModal
+        showFields={[
+          MeasurementFieldEnum.Weight,
+          MeasurementFieldEnum.BodyFat,
+          MeasurementFieldEnum.Chest,
+          MeasurementFieldEnum.Neck,
+          MeasurementFieldEnum.Waist,
+          MeasurementFieldEnum.Hips,
+          MeasurementFieldEnum.BicepsLeft,
+          MeasurementFieldEnum.BicepsRight,
+          MeasurementFieldEnum.ThighLeft,
+          MeasurementFieldEnum.ThighRight,
+          MeasurementFieldEnum.CalfLeft,
+          MeasurementFieldEnum.CalfRight,
+          MeasurementFieldEnum.Notes,
+        ]}
+        title="Add Measurements"
+      >
+        <Button size="sm" variant="outline">
+          <Plus className="h-4 w-4 mr-1" />
+          Add Measurements
+        </Button>
+      </AddMeasurementModal>
     </div>
   )
 }
@@ -381,14 +404,28 @@ export function BodyProgressSnapshot({ isLoading }: BodyProgressSnapshotProps) {
 
             {/* Action buttons */}
             <div className="flex gap-2 pt-2 border-t border-border/50">
-              <ButtonLink
-                href="/fitspace/progress"
-                variant="tertiary"
-                size="sm"
-                iconStart={<Plus />}
+              <AddMeasurementModal
+                showFields={[
+                  MeasurementFieldEnum.Weight,
+                  MeasurementFieldEnum.BodyFat,
+                  MeasurementFieldEnum.Chest,
+                  MeasurementFieldEnum.Neck,
+                  MeasurementFieldEnum.Waist,
+                  MeasurementFieldEnum.Hips,
+                  MeasurementFieldEnum.BicepsLeft,
+                  MeasurementFieldEnum.BicepsRight,
+                  MeasurementFieldEnum.ThighLeft,
+                  MeasurementFieldEnum.ThighRight,
+                  MeasurementFieldEnum.CalfLeft,
+                  MeasurementFieldEnum.CalfRight,
+                  MeasurementFieldEnum.Notes,
+                ]}
+                title="Add Measurement"
               >
-                Add Measurement
-              </ButtonLink>
+                <Button variant="tertiary" size="sm" iconStart={<Plus />}>
+                  Add Measurement
+                </Button>
+              </AddMeasurementModal>
               <ButtonLink
                 href="/fitspace/progress"
                 variant="tertiary"

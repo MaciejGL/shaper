@@ -18,7 +18,7 @@ const textareaVariants = cva(
     variants: {
       variant: {
         default: '',
-        ghost: 'border-none bg-secondary shadow-none',
+        ghost: 'border-none bg-primary/5  dark:bg-secondary shadow-none',
       },
     },
   },

@@ -2,6 +2,7 @@ import { Calendar, DumbbellIcon } from 'lucide-react'
 
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SectionIcon } from '@/components/ui/section-icon'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLFitspaceDashboardGetWorkoutQuery } from '@/generated/graphql-client'
@@ -26,7 +27,7 @@ export function TodaysSession({ plan }: TodaysSessionProps) {
       <Card className="@container/todays-session" variant="secondary">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+            <SectionIcon icon={Calendar} />
             What are you up to today?
           </CardTitle>
         </CardHeader>

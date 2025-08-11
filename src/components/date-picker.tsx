@@ -47,7 +47,7 @@ export function DatePicker({
       <Popover open={open} onOpenChange={setOpen} modal>
         <PopoverTrigger asChild>
           <Button
-            variant="secondary"
+            variant="tertiary"
             id="date"
             className={cn(
               'w-full justify-between font-normal',

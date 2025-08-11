@@ -1,7 +1,7 @@
 'use client'
 
 import { formatDistanceToNow } from 'date-fns'
-import { ChevronRight, Plus, TrendingUp } from 'lucide-react'
+import { ChevronRight, TrendingUp } from 'lucide-react'
 import { useMemo } from 'react'
 
 import { ButtonLink } from '@/components/ui/button-link'
@@ -291,25 +291,24 @@ function ProgressItem({ progress }: { progress: ExerciseProgress }) {
           {progress.exerciseName}
         </div>
         <div className="text-xs text-muted-foreground">
-          {progress.currentSession.bestSet.weight}kg ×{' '}
-          {progress.currentSession.bestSet.reps}
-          <span className={cn('ml-1 font-medium', getProgressColor())}>
+          <p>
+            {progress.currentSession.bestSet.weight}kg ×{' '}
+            {progress.currentSession.bestSet.reps}
+          </p>
+          <p className={cn('ml-1 font-medium', getProgressColor())}>
             {getProgressText()}
-          </span>
-          <span className="ml-2">
-            • {progress.progress.timeGap}
+          </p>
+          <p>
+            {progress.progress.timeGap}
+
             {progress.progress.isOldComparison && (
               <span className="text-amber-600 dark:text-amber-400">
                 {' '}
                 (older data)
               </span>
             )}
-          </span>
+          </p>
         </div>
-      </div>
-
-      <div className="text-right text-xs text-muted-foreground">
-        {progress.progress.isOldComparison ? 'vs previous' : 'vs last time'}
       </div>
     </div>
   )
@@ -410,14 +409,6 @@ export function RecentProgressSection() {
 
             {/* Action buttons */}
             <div className="flex gap-2 pt-2 border-t border-border/50">
-              <ButtonLink
-                href="/fitspace/workout"
-                variant="tertiary"
-                size="sm"
-                iconStart={<Plus />}
-              >
-                Start Workout
-              </ButtonLink>
               <ButtonLink
                 href="/fitspace/progress"
                 variant="tertiary"

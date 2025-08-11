@@ -277,7 +277,7 @@ export function AddMeasurementModal({
             )}
             <Button
               type="button"
-              variant="secondary"
+              variant="tertiary"
               onClick={() => setOpen(false)}
               className="flex-1"
             >

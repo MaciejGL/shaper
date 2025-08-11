@@ -160,7 +160,7 @@ export function Summary({
           <div className="flex flex-col gap-4">
             <h2 className="text-lg font-semibold">Stats</h2>
 
-            <div className="grid grid-cols-2 gap-4 bg-secondary rounded-lg p-4">
+            <div className="grid grid-cols-2 gap-4 bg-card rounded-lg p-4 shadow-xs">
               <StatsItem
                 value={displayedDuration}
                 label="Duration (min)"
@@ -192,7 +192,7 @@ export function Summary({
           {completedExercises && completedExercises.length > 0 && (
             <div className="flex flex-col gap-4">
               <h2 className="text-lg font-semibold">Exercises Completed</h2>
-              <div className="space-y-2 bg-muted rounded-lg p-4">
+              <div className="space-y-2 bg-card rounded-lg p-4 shadow-xs">
                 <div className="space-y-1">
                   {completedExercises.map((exercise, index) => (
                     <Fragment key={index}>

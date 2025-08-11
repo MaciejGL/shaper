@@ -27,11 +27,9 @@ function Progress({
         data-slot="progress-indicator"
         className={cn('bg-primary h-full w-full flex-1 transition-all', {
           'bg-transparent': fallbackValue === 0,
-          'bg-amber-50': fallbackValue >= 10,
-          'bg-amber-100': fallbackValue >= 20,
-          'bg-amber-200': fallbackValue >= 30,
-          'bg-amber-300': fallbackValue >= 40,
-          'bg-amber-400': fallbackValue >= 50,
+          'bg-amber-300': fallbackValue >= 10,
+          'bg-amber-400': fallbackValue >= 40,
+          'bg-amber-500': fallbackValue >= 50,
           'bg-green-400': fallbackValue >= 60,
           'bg-green-500': fallbackValue >= 70,
           'bg-green-600': fallbackValue >= 80,

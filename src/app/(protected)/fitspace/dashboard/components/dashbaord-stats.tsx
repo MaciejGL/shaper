@@ -121,7 +121,7 @@ export function DashboardStats({ plan }: DashboardStatsProps) {
                           !day.isRestDay && 'bg-primary/6',
                           day.isRestDay && 'bg-muted/20 text-muted-foreground',
                           day.dayOfWeek === currentDay?.dayOfWeek &&
-                            'ring-2 ring-primary/20',
+                            'ring-1 ring-primary/20',
                         )}
                       >
                         <div className="flex-center flex-col gap-1 text-xs md:text-md text-center">
