@@ -44,6 +44,7 @@ export default function MyPlansPage() {
       {/* Plans Tabs */}
       <Tabs
         value={tab ?? PlanTab.QuickWorkout}
+        defaultValue={PlanTab.QuickWorkout}
         onValueChange={(value) => setTab(value as PlanTab)}
         className="w-full"
       >
@@ -53,7 +54,7 @@ export default function MyPlansPage() {
             { label: 'Plans', value: PlanTab.Plans },
           ]}
           onClick={setTab}
-          active={tab ?? (activePlan ? PlanTab.Plans : PlanTab.QuickWorkout)}
+          active={tab ?? PlanTab.QuickWorkout}
         />
 
         {/* Enhanced Quick Workout Plan with Favourites */}

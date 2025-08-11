@@ -28,7 +28,9 @@ export const Main = async ({
         className,
       )}
     >
-      {user && <Navbar user={user} withSidebar={withSidebar} />}
+      <div className="relative">
+        {user && <Navbar user={user} withSidebar={withSidebar} />}
+      </div>
       <div
         className={cn('w-full h-[calc(100%+0.5rem)] overflow-hidden', {
           'md:p-2 -mt-2': isTrainer,

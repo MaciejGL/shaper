@@ -73,9 +73,12 @@ export function useScrollVisibility(options: UseScrollVisibilityOptions = {}) {
 
       // Force visibility when near the top of the page
       if (currentScrollY <= topProximityThreshold) {
-        if (!isVisible) {
-          setIsVisible(true)
-        }
+        setIsVisible((prev) => {
+          if (!prev) {
+            return true
+          }
+          return prev
+        })
         lastScrollY.current = currentScrollY
         return
       }
@@ -95,11 +98,14 @@ export function useScrollVisibility(options: UseScrollVisibilityOptions = {}) {
 
       // Check if threshold is reached
       if (scrollAccumulator.current >= threshold) {
-        if (direction === 'down' && isVisible) {
-          setIsVisible(false)
-        } else if (direction === 'up' && !isVisible) {
-          setIsVisible(true)
-        }
+        setIsVisible((prev) => {
+          if (direction === 'down' && prev) {
+            return false
+          } else if (direction === 'up' && !prev) {
+            return true
+          }
+          return prev
+        })
         scrollAccumulator.current = 0 // Reset after triggering
       }
 
@@ -113,7 +119,7 @@ export function useScrollVisibility(options: UseScrollVisibilityOptions = {}) {
     return () => {
       targetElement.removeEventListener('scroll', handleScroll)
     }
-  }, [threshold, isVisible, scrollContainer, topProximityThreshold])
+  }, [threshold, scrollContainer, topProximityThreshold])
 
   return {
     isVisible,

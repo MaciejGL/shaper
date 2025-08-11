@@ -75,6 +75,7 @@ export const Navbar = ({
 
   return (
     <motion.div
+      key={isFitspace ? 'fitspace' : 'default'}
       initial={
         isFitspace ? { opacity: 0, y: 0, height: 60, padding: '12px 16px' } : {}
       }
@@ -218,7 +219,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
             <UserAvatar
               className="size-8"
               withFallbackAvatar
-              // imageUrl={user?.user.profile?.avatarUrl}
+              imageUrl={user?.user.profile?.avatarUrl}
               firstName={user?.user.profile?.firstName ?? ''}
               lastName={user?.user.profile?.lastName ?? ''}
               sex={user?.user.profile?.sex}

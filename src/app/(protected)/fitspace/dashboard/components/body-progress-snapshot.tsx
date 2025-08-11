@@ -195,8 +195,7 @@ function EmptyMeasurements() {
         ]}
         title="Add Measurements"
       >
-        <Button size="sm" variant="outline">
-          <Plus className="h-4 w-4 mr-1" />
+        <Button size="sm" variant="tertiary" iconStart={<Plus />}>
           Add Measurements
         </Button>
       </AddMeasurementModal>
