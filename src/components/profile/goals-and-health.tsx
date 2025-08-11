@@ -16,7 +16,10 @@ type GoalsAndHealthProps = {
   isEditing: boolean
   profile: Pick<Profile, 'goals' | 'allergies'>
 
-  handleChange: (field: keyof Profile, value: string | string[]) => void
+  handleChange: (
+    field: keyof Profile,
+    value: string | string[] | number | null,
+  ) => void
 }
 
 export function GoalsAndHealth({
@@ -61,7 +64,10 @@ function GoalsField({
   disabled,
 }: {
   profile: Profile
-  handleChange: (field: keyof Profile, value: string | string[]) => void
+  handleChange: (
+    field: keyof Profile,
+    value: string | string[] | number | null,
+  ) => void
   disabled: boolean
 }) {
   const handleGoalClick = (goal: GQLGoal) => {
@@ -93,7 +99,10 @@ function AllergiesField({
   disabled,
 }: {
   allergies: string
-  handleChange: (field: keyof Profile, value: string | string[]) => void
+  handleChange: (
+    field: keyof Profile,
+    value: string | string[] | number | null,
+  ) => void
   disabled: boolean
 }) {
   return (

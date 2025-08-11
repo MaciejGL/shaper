@@ -68,9 +68,14 @@ export const formatDecimalInput = (
  * @returns Formatted number string without unnecessary decimals
  */
 export const formatNumberSmart = (
-  value: number,
+  value: number | null | undefined,
   maxDecimals: number = 1,
 ): string => {
+  // Handle null, undefined, or non-number values
+  if (value == null || typeof value !== 'number' || isNaN(value)) {
+    return ''
+  }
+
   // Round to the specified decimal places
   const rounded = Number(value.toFixed(maxDecimals))
 

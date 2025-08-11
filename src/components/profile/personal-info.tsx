@@ -19,7 +19,7 @@ type PersonalInfoProps = {
     Profile,
     'firstName' | 'lastName' | 'phone' | 'birthday' | 'sex' | 'email'
   >
-  handleChange: (field: keyof Profile, value: string) => void
+  handleChange: (field: keyof Profile, value: string | number | null) => void
 }
 export function PersonalInfo({
   isEditing,

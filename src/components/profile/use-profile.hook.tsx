@@ -77,7 +77,7 @@ export function useProfile() {
   const handleChange = useCallback(
     (
       field: keyof NonNullable<GQLProfileQuery['profile']>,
-      value: string | string[],
+      value: string | string[] | number | null,
     ) => {
       setProfile((prev) => ({
         ...prev,
@@ -94,8 +94,8 @@ export function useProfile() {
   const handleSave = useCallback(async () => {
     const input = {
       ...profile,
-      height: profile.height ? parseFloat(profile.height.toString()) : null,
-      weight: profile.weight ? parseFloat(profile.weight.toString()) : null,
+      height: profile.height,
+      weight: profile.weight,
       birthday: profile.birthday
         ? new Date(profile.birthday).toISOString()
         : null,

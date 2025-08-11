@@ -7,7 +7,7 @@ import { Profile } from './types'
 type BioProps = {
   isEditing: boolean
   profile: Pick<Profile, 'bio'>
-  handleChange: (field: keyof Profile, value: string) => void
+  handleChange: (field: keyof Profile, value: string | number | null) => void
 }
 
 export function Bio({ isEditing, profile, handleChange }: BioProps) {

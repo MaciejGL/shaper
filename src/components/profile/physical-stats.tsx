@@ -16,7 +16,7 @@ import { Profile } from './types'
 type PhysicalStatsProps = {
   isEditing: boolean
   profile: Pick<Profile, 'height' | 'weight' | 'fitnessLevel' | 'activityLevel'>
-  handleChange: (field: keyof Profile, value: string) => void
+  handleChange: (field: keyof Profile, value: string | number | null) => void
 }
 export function PhysicalStats({
   isEditing,
@@ -35,7 +35,7 @@ export function PhysicalStats({
               id="height"
               heightInCm={profile?.height ?? null}
               onHeightChange={(heightInCm: number | null) =>
-                handleChange('height', heightInCm?.toString() ?? '')
+                handleChange('height', heightInCm)
               }
               disabled={!isEditing}
               showLabel={true}
@@ -47,7 +47,7 @@ export function PhysicalStats({
               id="weight"
               weightInKg={profile?.weight ?? null}
               onWeightChange={(weightInKg: number | null) =>
-                handleChange('weight', weightInKg?.toString() ?? '')
+                handleChange('weight', weightInKg)
               }
               disabled={!isEditing}
               showLabel={true}
