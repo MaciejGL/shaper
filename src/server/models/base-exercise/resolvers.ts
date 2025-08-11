@@ -9,6 +9,10 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { deleteImages } from '@/lib/aws/s3'
+import {
+  getPublicExerciseById,
+  getPublicExercises,
+} from '@/lib/cache/base-exercise-cache'
 import { getExerciseVersionWhereClause } from '@/lib/exercise-version-filter'
 import { GQLContext } from '@/types/gql-context'
 
@@ -66,43 +70,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     return exercises.map((exercise) => new BaseExercise(exercise, context))
   },
   publicExercises: async (_, { where }, context) => {
-    const whereClause: Prisma.BaseExerciseWhereInput = {
-      createdBy: null,
-      isPublic: true,
-      ...getExerciseVersionWhereClause(), // Apply environment version filter
-    }
-
-    if (where?.equipment) {
-      whereClause.equipment = where.equipment
-    }
-
-    if (where?.muscleGroups) {
-      whereClause.muscleGroups = {
-        some: {
-          id: { in: where.muscleGroups },
-        },
-      }
-    }
-
-    const exercises = await prisma.baseExercise.findMany({
-      where: whereClause,
-      orderBy: {
-        name: 'asc',
-      },
-      include: {
-        images: true,
-        muscleGroups: {
-          include: {
-            category: true,
-          },
-        },
-        secondaryMuscleGroups: {
-          include: {
-            category: true,
-          },
-        },
-      },
-    })
+    // Use cached public exercises - cache service handles filtering and environment version filter
+    const exercises = await getPublicExercises(where)
 
     return exercises.map((exercise) => new BaseExercise(exercise, context))
   },
@@ -113,30 +82,11 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    const versionFilter = getExerciseVersionWhereClause()
-
     const [publicExercises, trainerExercises] = await Promise.all([
-      prisma.baseExercise.findMany({
-        where: {
-          createdBy: null,
-          isPublic: true,
-          ...versionFilter, // Apply environment version filter
-        },
-        include: {
-          images: true,
-          muscleGroups: {
-            include: {
-              category: true,
-            },
-          },
-          secondaryMuscleGroups: {
-            include: {
-              category: true,
-            },
-          },
-        },
-      }),
+      // Use cached public exercises (no filtering needed here)
+      getPublicExercises(),
 
+      // Keep trainer exercises as direct DB query (not cached)
       trainerId &&
         prisma.baseExercise.findMany({
           where: {
@@ -147,6 +97,11 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           include: {
             images: true,
             muscleGroups: {
+              include: {
+                category: true,
+              },
+            },
+            secondaryMuscleGroups: {
               include: {
                 category: true,
               },
@@ -167,22 +122,28 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     }
   },
   exercise: async (_, { id }, context) => {
-    const exercise = await prisma.baseExercise.findUnique({
-      where: { id },
-      include: {
-        images: true,
-        muscleGroups: {
-          include: {
-            category: true,
+    // Try to get from public exercise cache first
+    let exercise = await getPublicExerciseById(id)
+
+    // If not found in cache (not a public exercise), query database directly
+    if (!exercise) {
+      exercise = await prisma.baseExercise.findUnique({
+        where: { id },
+        include: {
+          images: true,
+          muscleGroups: {
+            include: {
+              category: true,
+            },
+          },
+          secondaryMuscleGroups: {
+            include: {
+              category: true,
+            },
           },
         },
-        secondaryMuscleGroups: {
-          include: {
-            category: true,
-          },
-        },
-      },
-    })
+      })
+    }
 
     return exercise ? new BaseExercise(exercise, context) : null
   },
