@@ -7,6 +7,15 @@ const withBundleAnalyzerExt = withBundleAnalyzer({
 })
 
 const nextConfig: NextConfig = {
+  redirects: async () => {
+    return [
+      {
+        source: '/fitspace',
+        destination: '/fitspace/dashboard',
+        permanent: true,
+      },
+    ]
+  },
   images: {
     remotePatterns: [
       {
