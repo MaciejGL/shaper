@@ -5,7 +5,7 @@ export async function GET() {
     name: 'Hypertro - Fitness & Nutrition Tracker',
     short_name: 'Hypertro',
     description: 'Your personal fitness and nutrition tracking app',
-    start_url: '/fitspace',
+    start_url: '/fitspace/dashboard',
     id: '/',
     display: 'standalone',
     background_color: '#ffffff',
