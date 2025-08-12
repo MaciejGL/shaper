@@ -331,6 +331,38 @@ function EmptyProgress() {
   )
 }
 
+export function RecentProgressSkeleton() {
+  return (
+    <Card variant="secondary">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center gap-2">
+          <SectionIcon icon={TrendingUp} variant="green" />
+          Recent Progress
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50"
+            >
+              <div className="w-8 h-8 rounded-full bg-muted animate-pulse shrink-0" />
+              <div className="flex-1 space-y-1">
+                <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
+                <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+              </div>
+              <div className="text-right">
+                <div className="h-3 bg-muted rounded animate-pulse w-16" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 function ProgressSkeleton() {
   return (
     <div className="space-y-3">

@@ -137,21 +137,24 @@ export function FavouriteWorkoutCard({
 
       <CardContent className="pt-0 space-y-4">
         {/* Workout Stats */}
-
         {/* Exercise Preview */}
         {totalExercises > 0 && (
           <div className="space-y-1">
             <h4 className="text-sm font-medium">Exercises</h4>
-            <div className="text-sm space-y-1">
+            <div className="text-sm flex flex-col gap-1">
               {favourite.exercises.map((exercise, index) => (
-                <Badge key={exercise.id} variant="secondary" size="lg">
+                <Badge
+                  key={exercise.id}
+                  variant="secondary"
+                  size="lg"
+                  className="w-full justify-start"
+                >
                   {index + 1}. {exercise.name}
                 </Badge>
               ))}
             </div>
           </div>
         )}
-
         {/* Footer */}
       </CardContent>
       <CardFooter className="flex items-center justify-between">

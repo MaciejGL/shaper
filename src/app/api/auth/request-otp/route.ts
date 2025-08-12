@@ -25,8 +25,8 @@ export async function POST(req: Request) {
         email,
         profile: {
           create: {
-            firstName: isDemoAccount ? 'Google Play' : '',
-            lastName: isDemoAccount ? 'Demo User' : '',
+            firstName: isDemoAccount ? 'Demo' : '',
+            lastName: isDemoAccount ? 'User' : '',
           },
         },
       },

@@ -11,7 +11,10 @@ import { DashboardStats } from './components/dashbaord-stats'
 import { DashboardStatsSkeleton } from './components/dashboard-stats-skeleton'
 import { ProfileCompletionBanner } from './components/profile-completion-banner'
 import { QuickNutritionOverview } from './components/quick-nutrition-overview'
-import { RecentProgressSection } from './components/recent-prs-section'
+import {
+  RecentProgressSection,
+  RecentProgressSkeleton,
+} from './components/recent-prs-section'
 import {
   TodaysSession,
   TodaysSessionSkeleton,
@@ -58,10 +61,10 @@ function DashboardSkeleton() {
       <DashboardHeader title="Dashboard" icon={LayoutDashboard} />
       <div className="space-y-6">
         <TodaysSessionSkeleton />
-        <QuickNutritionOverview />
+        <QuickNutritionOverview isLoading={true} />
         <DashboardStatsSkeleton />
-        <RecentProgressSection />
-        <BodyProgressSnapshot />
+        <RecentProgressSkeleton />
+        <BodyProgressSnapshot isLoading={true} />
       </div>
     </div>
   )

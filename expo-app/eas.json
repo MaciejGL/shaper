@@ -28,11 +28,13 @@
     },
     "production": {
       "ios": {
-        "resourceClass": "default"
+        "resourceClass": "default",
+        "autoIncrement": true
       },
       "android": {
         "resourceClass": "default",
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "autoIncrement": true
       }
     }
   },

@@ -232,17 +232,17 @@ export function useCreateFavouriteFromManual() {
 
   const createFromManual = async (
     workoutData: Pick<FavouriteWorkoutWizardData, 'title' | 'description'>,
-    selectedExercises: string[],
+    selectedExerciseObjects: { id: string; name: string }[],
   ): Promise<string> => {
-    if (selectedExercises.length === 0) {
+    if (selectedExerciseObjects.length === 0) {
       throw new Error('No exercises selected')
     }
 
     // Transform manual selection to favourite workout format
-    const exercises = selectedExercises.map((exerciseId, index) => ({
-      name: `Exercise ${index + 1}`, // Will be resolved by baseId on server
+    const exercises = selectedExerciseObjects.map((exercise, index) => ({
+      name: exercise.name, // Use actual exercise name
       order: index + 1,
-      baseId: exerciseId,
+      baseId: exercise.id,
       restSeconds: null,
       instructions: null,
       sets: [

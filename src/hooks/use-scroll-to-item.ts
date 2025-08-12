@@ -67,12 +67,23 @@ export function useScrollToItem({
       const items = container.querySelectorAll(itemSelector)
       const currentItem = items[currentIndex] as HTMLElement
 
-      if (currentItem) {
-        currentItem.scrollIntoView({
-          behavior: 'smooth',
-          block: 'nearest',
-          inline: 'center',
-        })
+      if (currentItem && container.contains(currentItem)) {
+        // Use more conservative scroll that won't affect page scroll
+        const itemRect = currentItem.getBoundingClientRect()
+        const containerRect = container.getBoundingClientRect()
+
+        // Only scroll if item is outside the visible area of its container
+        const isItemVisible =
+          itemRect.left >= containerRect.left &&
+          itemRect.right <= containerRect.right
+
+        if (!isItemVisible) {
+          currentItem.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center',
+          })
+        }
       } else {
         // Fallback to manual calculation
         const containerWidth = container.clientWidth

@@ -135,7 +135,7 @@ export function CreateFavouriteModal({
 
   // Handle creating favourite from manual data
   const handleFinishManual = async () => {
-    if (selectedExercises.length === 0) {
+    if (selectedExerciseObjects.length === 0) {
       console.error('Missing exercises')
       return
     }
@@ -143,7 +143,7 @@ export function CreateFavouriteModal({
     try {
       const workoutTitle = title.trim() || 'My Workout'
 
-      await createFromManual({ title: workoutTitle }, selectedExercises)
+      await createFromManual({ title: workoutTitle }, selectedExerciseObjects)
 
       handleSuccess()
     } catch (error) {
