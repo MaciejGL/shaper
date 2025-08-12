@@ -1,10 +1,6 @@
 // Basic service worker for PWA
 const CACHE_NAME = 'hypertro-v7' // Increment version to force cache refresh
-const urlsToCache = [
-  '/',
-  '/manifest.json',
-  '/favicons/android-chrome-192x192.png',
-]
+const urlsToCache = ['/', '/favicons/android-chrome-192x192.png']
 
 self.addEventListener('install', (event) => {
   // Force skip waiting for immediate activation

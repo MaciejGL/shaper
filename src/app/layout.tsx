@@ -30,7 +30,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: 'Hypertro',
-  description: 'The best way to get fit and find new friends.',
+  description: 'Your personal fitness coach.',
   icons: {
     icon: [
       {

@@ -28,7 +28,11 @@ export const Main = async ({
         className,
       )}
     >
-      <div className="relative">
+      <div
+        className={
+          !isTrainer ? 'z-10 bg-sidebar fixed top-0 left-0 right-0' : 'relative'
+        }
+      >
         {user && <Navbar user={user} withSidebar={withSidebar} />}
       </div>
       <div
@@ -39,9 +43,10 @@ export const Main = async ({
         <div
           id="main-content"
           className={cn(
-            'w-full h-full p-2 md:p-4 lg:p-8 bg-background overflow-y-auto safe-area-y',
+            'w-full h-full p-2 md:p-4 lg:p-8 bg-background overflow-y-auto safe-area-bottom',
             {
               'md:rounded-md': isTrainer,
+              'pt-[calc(var(--safe-area-inset-top)+60px)]': !isTrainer,
             },
           )}
         >

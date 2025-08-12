@@ -48,7 +48,7 @@ export async function GET() {
         name: 'Log Workout',
         short_name: 'Workout',
         description: 'Quick access to log your workout',
-        url: '/fitspace/workouts',
+        url: '/fitspace/workout',
         icons: [
           {
             src: '/favicons/android-chrome-192x192.png',
