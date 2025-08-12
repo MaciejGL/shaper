@@ -2,6 +2,7 @@ import { GQLEquipment } from '@/generated/graphql-client'
 
 export const EQUIPMENT_OPTIONS: { value: GQLEquipment; label: string }[] = [
   { value: GQLEquipment.Barbell, label: 'Barbell' },
+  { value: GQLEquipment.EzBar, label: 'EZ Bar' },
   { value: GQLEquipment.Dumbbell, label: 'Dumbbell' },
   { value: GQLEquipment.Machine, label: 'Machine' },
   { value: GQLEquipment.Cable, label: 'Cable' },

@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
     // Check if exercise with same name already exists
     const existingExercise = await prisma.baseExercise.findFirst({
       where: {
+        isPublic: true,
         name: {
           equals: input.name.trim(),
           mode: 'insensitive',
