@@ -80,7 +80,7 @@ export function MobileNav() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar rounded-t-lg">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar rounded-t-lg safe-area-bottom safe-area-x">
         <div className="grid grid-cols-5 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon

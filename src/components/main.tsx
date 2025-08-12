@@ -39,7 +39,7 @@ export const Main = async ({
         <div
           id="main-content"
           className={cn(
-            'w-full h-full p-2 md:p-4 lg:p-8 bg-background overflow-y-auto',
+            'w-full h-full p-2 md:p-4 lg:p-8 bg-background overflow-y-auto safe-area-y',
             {
               'md:rounded-md': isTrainer,
             },
