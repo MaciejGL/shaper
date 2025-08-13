@@ -107,10 +107,10 @@ export function Navigation() {
   return (
     <div
       className={cn(
-        'bg-sidebar rounded-b-xl sticky -top-[120px] z-[5]',
+        'bg-sidebar rounded-b-xl mt-[-60px]',
         // Counter Main padding
-        '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
-        'p-2 md:p-4 lg:p-8',
+        '-mx-2 md:-mx-4 lg:-mx-8 md:mt-[calc(-4px-60px)] lg:mt-[calc(-20px-60px)]',
+        'px-2 py-4 md:px-4 lg:p-8',
       )}
     >
       <div className="mx-auto max-w-sm">

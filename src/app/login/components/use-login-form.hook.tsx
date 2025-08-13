@@ -7,6 +7,7 @@ export const useLoginForm = () => {
   const [email, setEmail] = useState('')
   const [otp, setOtp] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isResending, setIsResending] = useState(false)
   const [showOtp, setShowOtp] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [leftTime, setLeftTime] = useState(30)
@@ -35,7 +36,7 @@ export const useLoginForm = () => {
   const handleSendOtp = async () => {
     if (!emailValidation(email)) return
 
-    setIsLoading(true)
+    setIsResending(true)
     setOtp('')
     try {
       await fetch('/api/auth/request-otp', {
@@ -49,7 +50,7 @@ export const useLoginForm = () => {
       setErrorMessage('Failed to send OTP')
       console.error(error)
     } finally {
-      setIsLoading(false)
+      setIsResending(false)
     }
   }
 
@@ -91,6 +92,7 @@ export const useLoginForm = () => {
     email,
     otp,
     isLoading,
+    isResending,
     showOtp,
     errorMessage,
     leftTime,

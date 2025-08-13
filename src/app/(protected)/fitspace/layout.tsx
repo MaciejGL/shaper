@@ -17,6 +17,7 @@ export default async function ProtectedLayout({
 
   return (
     <Main user={user}>
+      <div className="h-12 max-md:hidden" />
       {children}
       <MobileNav />
       {/* <PrefetchFitspacePages /> */}

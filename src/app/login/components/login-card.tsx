@@ -22,6 +22,7 @@ export const LoginCard = () => {
     email,
     otp,
     isLoading,
+    isResending,
     showOtp,
     errorMessage,
     leftTime,
@@ -87,7 +88,7 @@ export const LoginCard = () => {
             {!leftTime ? (
               <Button
                 variant="link"
-                loading={isLoading}
+                loading={isResending}
                 onClick={handleResendOtp}
               >
                 Resend code to your email

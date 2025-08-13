@@ -70,8 +70,15 @@ export const Navbar = ({
     user?.user?.role === 'TRAINER'
       ? TRAINER_LINKS.dashboard.href
       : CLIENT_LINKS.dashboard.href
+  const pathname = usePathname()
+  const isFitspace = pathname.startsWith('/fitspace')
 
-  const isFitspace = usePathname().startsWith('/fitspace')
+  if (
+    pathname === '/fitspace/meal-plan' ||
+    pathname.startsWith('/fitspace/workout')
+  ) {
+    return null
+  }
 
   return (
     <motion.div

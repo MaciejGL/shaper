@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils'
 import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
-import { ActivePlan } from '../../types'
+import { ActivePlan } from '../../my-plans/types'
 
 export function TodaysWorkout({
   todaysWorkout,

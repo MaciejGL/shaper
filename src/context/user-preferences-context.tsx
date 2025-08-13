@@ -82,7 +82,7 @@ const DEFAULT_PREFERENCES: UserPreferences = {
   heightUnit: 'cm',
   theme: 'system',
   timeFormat: '24h',
-  trainingView: GQLTrainingView.Simple,
+  trainingView: GQLTrainingView.Advanced,
   notifications: DEFAULT_NOTIFICATIONS,
 }
 

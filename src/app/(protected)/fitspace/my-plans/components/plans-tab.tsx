@@ -1,6 +1,9 @@
+import { ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 
 import { CardSkeleton } from '@/components/card-skeleton'
+import { ButtonLink } from '@/components/ui/button-link'
+import { Card, CardContent } from '@/components/ui/card'
 import { GQLTrainingPlan } from '@/generated/graphql-client'
 
 import {
@@ -108,27 +111,36 @@ export function PlansTab({
 
 function EmptyPlansState() {
   return (
-    <div className="col-span-2 text-center py-12">
-      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-        <svg
-          className="h-8 w-8 text-muted-foreground"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+    <Card>
+      <CardContent className="flex-center flex-col gap-4 py-12">
+        <div className="size-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+          <svg
+            className="size-8 text-muted-foreground"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+            />
+          </svg>
+        </div>
+        <h3 className="font-semibold">No Training Plans</h3>
+        <p className="text-muted-foreground text-center max-w-md">
+          You don't have any training plans yet. Create your first plan or check
+          our ready plans!
+        </p>
+
+        <ButtonLink
+          href="/fitspace/explore?tab=plans"
+          iconEnd={<ChevronRight />}
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-          />
-        </svg>
-      </div>
-      <h3 className="font-semibold mb-2">No Training Plans</h3>
-      <p className="text-muted-foreground">
-        You don't have any training plans yet. Create your first plan to get
-        started!
-      </p>
-    </div>
+          Explore Plans
+        </ButtonLink>
+      </CardContent>
+    </Card>
   )
 }

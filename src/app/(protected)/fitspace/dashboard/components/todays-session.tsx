@@ -8,7 +8,7 @@ import { useUserPreferences } from '@/context/user-preferences-context'
 import { GQLFitspaceDashboardGetWorkoutQuery } from '@/generated/graphql-client'
 import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
 
-import { TodaysWorkout } from '../../my-plans/components/active-plan-tab/todays-workout'
+import { TodaysWorkout } from './todays-workout'
 
 export type TodaysSessionProps = {
   plan?: NonNullable<
