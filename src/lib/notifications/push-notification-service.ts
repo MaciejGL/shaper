@@ -21,7 +21,7 @@ export async function notifyCoachingRequest(
     [recipientId],
     'New Coaching Request',
     `You have a new coaching request${senderName ? ` from ${senderName}` : ''}.`,
-    '/fitspace/dashboard',
+    '/fitspace/my-trainer',
   )
 }
 

@@ -1,9 +1,10 @@
 'use client'
 
-import { Bell, BellOff, Download, Settings, Smartphone } from 'lucide-react'
+import { Bell, BellOff, Settings } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { MobileAppBanner } from '@/components/mobile-app-banner'
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
 import {
@@ -95,50 +96,9 @@ export function MobilePushSettings() {
       setIsLoading(false)
     }
   }
-  // TODO: APP DOWNLOAD LINK TO APP STORE AND GOOGLE PLAY
-  // If not in native app, show download prompt
+
   if (!isNativeApp) {
-    return (
-      <div className="space-y-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-6">
-              <div className="w-16 h-16 mx-auto bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <Smartphone className="w-8 h-8 text-blue-600" />
-              </div>
-              <h3 className="font-medium text-lg mb-2 text-blue-900">
-                Download the Hypertro Mobile App
-              </h3>
-              <p className="text-blue-700 text-sm max-w-sm mx-auto mb-4">
-                Push notifications are only available in our native mobile app.
-                Download the app to receive workout reminders, progress updates,
-                and coaching messages.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button
-                  variant="default"
-                  className="gap-2 bg-blue-600 hover:bg-blue-700"
-                  onClick={() => window.open('/download', '_blank')}
-                >
-                  <Download className="w-4 h-4" />
-                  Download Mobile App
-                </Button>
-                <Button
-                  variant="outline"
-                  className="gap-2 border-blue-200 text-blue-700 hover:bg-blue-50"
-                  onClick={() =>
-                    navigator.clipboard.writeText(window.location.origin)
-                  }
-                >
-                  <Settings className="w-4 h-4" />
-                  Copy Link
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <MobileAppBanner />
   }
 
   // Native app interface
@@ -167,14 +127,12 @@ export function MobilePushSettings() {
         <CardContent className="space-y-4">
           {pushEnabled ? (
             // Push notifications enabled
-            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="p-4 border rounded-lg">
               <div className="flex items-start gap-3">
-                <Bell className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <Bell className="w-5 h-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                 <div className="flex flex-col gap-2">
-                  <p className="font-medium text-green-900">
-                    Push Notifications Enabled
-                  </p>
-                  <p className="text-sm text-green-700">
+                  <p className="font-medium">Push Notifications Enabled</p>
+                  <p className="text-sm text-muted-foreground">
                     You'll receive notifications for workouts, meals, and
                     updates from your trainer.
                   </p>

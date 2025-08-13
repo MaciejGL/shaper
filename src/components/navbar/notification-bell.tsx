@@ -141,7 +141,7 @@ export function NotificationBell({
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   exit={{ scale: 0 }}
-                  className="absolute -top-1 -right-1 flex items-center justify-center"
+                  className="absolute top-0 right-0 flex items-center justify-center"
                 >
                   <span className="relative flex size-[14px]">
                     <span className="absolute inline-flex h-full w-full rounded-full bg-blue-600 opacity-75 animate-ping [animation-iteration-count:5]"></span>
