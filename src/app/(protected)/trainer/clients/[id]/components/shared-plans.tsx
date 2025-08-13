@@ -93,7 +93,7 @@ export function SharedPlansWithClient({
       <CardContent className="p-0">
         {plans.length > 0 ? (
           <div className="grid gap-6 @3xl/shared-plans:grid-cols-2">
-            {plans.slice(0, 3).map((plan) => (
+            {plans.map((plan) => (
               <TrainingCard key={plan.id} plan={plan} clientName={clientName} />
             ))}
           </div>
