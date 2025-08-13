@@ -8,6 +8,7 @@ import { useRef } from 'react'
 import { AnimatedLogo, AnimatedLogoText } from '@/components/animated-logo'
 import { ButtonLink } from '@/components/ui/button-link'
 
+import { MobileAppBanner } from './mobile-app-banner'
 import { Card } from './ui/card'
 
 export function HomepageClient() {
@@ -187,6 +188,7 @@ export function HomepageClient() {
                 Get Started
               </ButtonLink>
             </motion.div>
+            <MobileAppBanner />
           </motion.div>
         </motion.section>
 
