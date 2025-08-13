@@ -352,9 +352,6 @@ model BaseExercise {
 
   // V2 Exercise Integration Fields
   version      Int       @default(1) // 1 = manual, 2 = imported
-  dataSource   String? // "exercemus", "manual", etc.
-  sourceId     String? // Original ID from source
-  importedAt   DateTime? // When imported
   difficulty   String? // "beginner", "intermediate", "advanced"
   instructions String? // JSON array of step-by-step instructions
   tips         String? // JSON array of exercise tips
@@ -372,9 +369,7 @@ model BaseExercise {
   images                    Image[]                    @relation("ExerciseImages")
 
   @@index([version])
-  @@index([dataSource])
   @@index([difficulty])
-  @@index([importedAt])
   @@index([isPremium])
 }
 
