@@ -123,6 +123,8 @@ export async function GET(request: NextRequest) {
         id: true,
         name: true,
         description: true,
+        instructions: true,
+        tips: true,
         equipment: true,
         isPublic: true,
         isPremium: true,
@@ -145,16 +147,44 @@ export async function GET(request: NextRequest) {
           },
           orderBy: { name: 'asc' },
         },
+        secondaryMuscleGroups: {
+          select: {
+            id: true,
+            name: true,
+            alias: true,
+            groupSlug: true,
+          },
+          orderBy: { name: 'asc' },
+        },
+        substitutes: {
+          select: {
+            substitute: {
+              select: {
+                id: true,
+                name: true,
+                equipment: true,
+              },
+            },
+          },
+        },
         createdAt: true,
         updatedAt: true,
       },
-      orderBy: [{ isPremium: 'asc' }, { name: 'asc' }],
+      orderBy: [
+        { name: 'asc' }, // Alphabetical
+      ],
       skip,
       take: limit,
     })
 
+    // Transform the response to flatten substitute structure
+    const transformedExercises = exercises.map((exercise) => ({
+      ...exercise,
+      substitutes: exercise.substitutes?.map((sub) => sub.substitute) || [],
+    }))
+
     return NextResponse.json({
-      exercises,
+      exercises: transformedExercises,
       pagination: {
         currentPage: page,
         totalPages,

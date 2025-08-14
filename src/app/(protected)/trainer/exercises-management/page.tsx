@@ -14,7 +14,7 @@ export default async function ExerciseManagementPage() {
   }
 
   return (
-    <div className="container @container/section">
+    <div className="@container/section">
       <ExerciseManagementContent />
     </div>
   )

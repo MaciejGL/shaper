@@ -19,12 +19,9 @@ type BaseExercise {
 
   # V2 Exercise Integration Fields
   version: Int!
-  dataSource: String
-  sourceId: String
-  importedAt: String
   difficulty: String
-  instructions: String
-  tips: String
+  instructions: [String!]!
+  tips: [String!]!
 
   # Premium Feature
   isPremium: Boolean!

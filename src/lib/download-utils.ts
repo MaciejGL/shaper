@@ -42,13 +42,3 @@ export function safeDownloadFromUrl(url: string, filename: string): void {
     }
   }
 }
-
-/**
- * Create download from JSON data
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function downloadJsonFile(data: any, filename: string): void {
-  const jsonString = JSON.stringify(data, null, 2)
-  const blob = new Blob([jsonString], { type: 'application/json' })
-  safeDownload(blob, filename)
-}

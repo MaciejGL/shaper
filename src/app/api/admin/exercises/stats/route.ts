@@ -20,8 +20,6 @@ export async function GET() {
       privateExercises,
       difficultyStats,
       equipmentStats,
-      dataSourceStats,
-      lastImport,
     ] = await Promise.all([
       // Total exercises
       prisma.baseExercise.count(),
@@ -61,22 +59,6 @@ export async function GET() {
         by: ['equipment'],
         _count: { equipment: true },
       }),
-
-      // Data source breakdown
-      prisma.baseExercise.groupBy({
-        by: ['dataSource'],
-        _count: { dataSource: true },
-      }),
-
-      // Last import date
-      prisma.baseExercise.findFirst({
-        where: {
-          version: 2,
-          importedAt: { not: null },
-        },
-        orderBy: { importedAt: 'desc' },
-        select: { importedAt: true },
-      }),
     ])
 
     // Process difficulty stats
@@ -107,13 +89,6 @@ export async function GET() {
       exercisesByEquipment[equipment] = item._count.equipment
     })
 
-    // Process data source stats
-    const exercisesByDataSource: Record<string, number> = {}
-    dataSourceStats.forEach((item) => {
-      const source = item.dataSource || 'manual'
-      exercisesByDataSource[source] = item._count.dataSource
-    })
-
     return NextResponse.json({
       totalExercises,
       v1Exercises,
@@ -122,9 +97,6 @@ export async function GET() {
       privateExercises,
       exercisesByDifficulty,
       exercisesByEquipment,
-      exercisesByDataSource,
-      lastImportDate: lastImport?.importedAt?.toISOString() || null,
-      hasExercemusData: v2Exercises > 0,
     })
   } catch (error) {
     console.error('Failed to fetch exercise stats:', error)

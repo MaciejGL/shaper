@@ -10,10 +10,16 @@ interface ExerciseUpdate {
   id: string
   name?: string
   description?: string | null
+  instructions?: string[]
+  tips?: string[]
   equipment?: string
   isPublic?: boolean
   isPremium?: boolean
   version?: number
+  videoUrl?: string | null
+  muscleGroupIds?: string[]
+  secondaryMuscleGroupIds?: string[]
+  substituteIds?: string[]
 }
 
 export async function PATCH(request: NextRequest) {
@@ -32,28 +38,90 @@ export async function PATCH(request: NextRequest) {
 
     // Process updates in parallel
     const updatePromises = updates.map(async (update) => {
-      const { id, ...updateData } = update
+      const {
+        id,
+        muscleGroupIds,
+        secondaryMuscleGroupIds,
+        substituteIds,
+        ...updateData
+      } = update
 
-      // Remove undefined values
+      // Remove undefined values from basic update data
       const cleanedData = Object.fromEntries(
         Object.entries(updateData).filter(([, value]) => value !== undefined),
       )
 
-      if (Object.keys(cleanedData).length === 0) {
+      // Prepare muscle group and substitute updates
+      const relationUpdates: any = {}
+
+      if (muscleGroupIds !== undefined) {
+        relationUpdates.muscleGroups = {
+          set: muscleGroupIds.map((id) => ({ id })),
+        }
+      }
+
+      if (secondaryMuscleGroupIds !== undefined) {
+        relationUpdates.secondaryMuscleGroups = {
+          set: secondaryMuscleGroupIds.map((id) => ({ id })),
+        }
+      }
+
+      // Handle substitute exercises
+      if (substituteIds !== undefined) {
+        // First, remove existing substitutes for this exercise
+        await prisma.baseExerciseSubstitute.deleteMany({
+          where: { originalId: id },
+        })
+
+        // Then add new substitutes
+        if (substituteIds.length > 0) {
+          await prisma.baseExerciseSubstitute.createMany({
+            data: substituteIds.map((substituteId) => ({
+              originalId: id,
+              substituteId,
+              reason: null,
+            })),
+          })
+        }
+      }
+
+      // Combine all updates
+      const allUpdates = { ...cleanedData, ...relationUpdates }
+
+      if (Object.keys(allUpdates).length === 0) {
         return null // Skip empty updates
       }
 
       return prisma.baseExercise.update({
         where: { id },
-        data: cleanedData,
+        data: allUpdates,
         select: {
           id: true,
           name: true,
           description: true,
+          instructions: true,
+          tips: true,
           equipment: true,
           isPublic: true,
           isPremium: true,
           version: true,
+          videoUrl: true,
+          muscleGroups: {
+            select: {
+              id: true,
+              name: true,
+              alias: true,
+              groupSlug: true,
+            },
+          },
+          secondaryMuscleGroups: {
+            select: {
+              id: true,
+              name: true,
+              alias: true,
+              groupSlug: true,
+            },
+          },
           updatedAt: true,
         },
       })

@@ -10,5 +10,9 @@ export const EQUIPMENT_OPTIONS: { value: GQLEquipment; label: string }[] = [
   { value: GQLEquipment.Bodyweight, label: 'Bodyweight' },
   { value: GQLEquipment.Kettlebell, label: 'Kettlebell' },
   { value: GQLEquipment.Band, label: 'Band' },
+  { value: GQLEquipment.MedicineBall, label: 'Medicine Ball' },
+  { value: GQLEquipment.ExerciseBall, label: 'Exercise Ball' },
+  { value: GQLEquipment.PullUpBar, label: 'Pull Up Bar' },
+  { value: GQLEquipment.Bench, label: 'Bench' },
   { value: GQLEquipment.Other, label: 'Other' },
 ]

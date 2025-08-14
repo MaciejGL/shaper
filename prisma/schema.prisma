@@ -353,8 +353,8 @@ model BaseExercise {
   // V2 Exercise Integration Fields
   version      Int       @default(1) // 1 = manual, 2 = imported
   difficulty   String? // "beginner", "intermediate", "advanced"
-  instructions String? // JSON array of step-by-step instructions
-  tips         String? // JSON array of exercise tips
+  instructions String[]
+  tips         String[]
 
   // Premium Feature for Subscriptions
   isPremium Boolean @default(false) // Premium exercises for paid plans

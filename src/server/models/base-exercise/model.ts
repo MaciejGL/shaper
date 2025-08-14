@@ -325,18 +325,6 @@ export default class BaseExercise implements GQLBaseExercise {
     return this.data.version
   }
 
-  get dataSource() {
-    return this.data.dataSource
-  }
-
-  get sourceId() {
-    return this.data.sourceId
-  }
-
-  get importedAt() {
-    return this.data.importedAt?.toISOString() || null
-  }
-
   get difficulty() {
     return this.data.difficulty
   }
