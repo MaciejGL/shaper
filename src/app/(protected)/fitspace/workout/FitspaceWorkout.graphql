@@ -126,6 +126,9 @@ query FitspaceGetExercises {
       videoUrl
       equipment
       isPublic
+      instructions
+      tips
+      difficulty
       images {
         id
         url
@@ -149,6 +152,9 @@ query FitspaceGetExercises {
       videoUrl
       equipment
       isPublic
+      instructions
+      tips
+      difficulty
       images {
         id
         url

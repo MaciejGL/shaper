@@ -201,7 +201,7 @@ export function QuickWorkoutWizard({
     <div className="bg-background pb-[80px]">
       {/* Header with Progress */}
       {!isOnLanding && (
-        <div className="container py-4 space-y-4">
+        <div className="container py-4 space-y-4 mx-auto">
           <div className="text-center mx-auto">
             <p className="text-sm text-muted-foreground">
               Step {currentStep + 1} of {currentSteps.length}
@@ -213,7 +213,7 @@ export function QuickWorkoutWizard({
       )}
 
       {/* Step Content */}
-      <div className={cn('container pt-6', isOnLanding && 'pt-12')}>
+      <div className={cn('container pt-6 mx-auto', isOnLanding && 'pt-12')}>
         <AnimatePresence mode="wait">
           <motion.div
             key={`${workoutFlow}-${currentStep}`}

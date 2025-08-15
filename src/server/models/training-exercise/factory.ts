@@ -145,7 +145,7 @@ export const updateExerciseForm = async (
   // Prepare data for Prisma update (filter out null values)
   const updateData: Partial<TrainingExerciseType> = {
     name: exerciseUpdates.name ?? undefined,
-    instructions: exerciseUpdates.instructions ?? null,
+    description: exerciseUpdates.description ?? null,
     additionalInstructions: exerciseUpdates.additionalInstructions ?? null,
     type: exerciseUpdates.type ?? null,
     restSeconds: exerciseUpdates.restSeconds ?? null,
@@ -243,6 +243,16 @@ export const addExercisesToWorkout = async (
     where: {
       id: { in: exerciseIds },
     },
+    select: {
+      id: true,
+      name: true,
+      description: true, // V1 description
+      additionalInstructions: true, // V1 additional instructions
+      instructions: true, // V2 instructions array
+      tips: true, // V2 tips array
+      type: true,
+      difficulty: true,
+    },
   })
 
   const trainingDay = await prisma.trainingDay.findUnique({
@@ -280,7 +290,10 @@ export const addExercisesToWorkout = async (
           dayId: trainingDay.id,
           name: ex.name,
           order: trainingDay.exercises.length + index + 1, // Fix order calculation
-          instructions: ex.description,
+          description: ex.description,
+          instructions: ex.instructions,
+          tips: ex.tips,
+          difficulty: ex.difficulty,
           additionalInstructions: ex.additionalInstructions,
           isExtra: true,
           sets: {
@@ -313,6 +326,16 @@ export const addAiExerciseToWorkout = async (
   const baseExericse = await prisma.baseExercise.findUnique({
     where: {
       id: exerciseId,
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true, // V1 description
+      additionalInstructions: true, // V1 additional instructions
+      instructions: true, // V2 instructions array
+      tips: true, // V2 tips array
+      type: true,
+      difficulty: true,
     },
   })
 
@@ -353,7 +376,10 @@ export const addAiExerciseToWorkout = async (
       dayId: trainingDay.id,
       name: baseExericse.name,
       order: trainingDay.exercises.length + 1,
-      instructions: baseExericse.description,
+      description: baseExericse.description,
+      instructions: baseExericse.instructions,
+      tips: baseExericse.tips,
+      difficulty: baseExericse.difficulty,
       additionalInstructions: baseExericse.additionalInstructions,
       isExtra: true,
       sets: {
@@ -1376,7 +1402,10 @@ export const swapExercise = async (
       name: substitute.substitute.name,
       order: exercise.order,
       restSeconds: exercise.restSeconds,
-      instructions: substitute.substitute.description,
+      description: substitute.substitute.description,
+      instructions: substitute.substitute.instructions,
+      tips: substitute.substitute.tips,
+      difficulty: substitute.substitute.difficulty,
       additionalInstructions: substitute.substitute.additionalInstructions,
       type: substitute.substitute.type,
       sets: {
@@ -1511,6 +1540,16 @@ export const addExercisesToQuickWorkout = async (
     where: {
       id: { in: exerciseIds },
     },
+    select: {
+      id: true,
+      name: true,
+      description: true, // V1 description
+      additionalInstructions: true, // V1 additional instructions
+      instructions: true, // V2 instructions array
+      tips: true, // V2 tips array
+      type: true,
+      difficulty: true,
+    },
   })
 
   // Create a map for quick lookup
@@ -1535,7 +1574,10 @@ export const addExercisesToQuickWorkout = async (
         baseId: baseExercise.id,
         name: baseExercise.name,
         order: safeOrder, // Use safe order to prevent conflicts
-        instructions: baseExercise.description,
+        description: baseExercise.description,
+        instructions: baseExercise.instructions,
+        tips: baseExercise.tips,
+        difficulty: baseExercise.difficulty,
         additionalInstructions: baseExercise.additionalInstructions,
         type: baseExercise.type,
         isExtra: true,
@@ -1684,6 +1726,16 @@ export const createQuickWorkout = async (
     where: {
       id: { in: exerciseIds },
     },
+    select: {
+      id: true,
+      name: true,
+      description: true, // V1 description
+      additionalInstructions: true, // V1 additional instructions
+      instructions: true, // V2 instructions array
+      tips: true, // V2 tips array
+      type: true,
+      difficulty: true,
+    },
   })
 
   // Create a map for quick lookup
@@ -1710,7 +1762,10 @@ export const createQuickWorkout = async (
           baseId: baseExercise.id,
           name: baseExercise.name,
           order: safeOrder,
-          instructions: baseExercise.description,
+          description: baseExercise.description,
+          instructions: baseExercise.instructions,
+          tips: baseExercise.tips,
+          difficulty: baseExercise.difficulty,
           additionalInstructions: baseExercise.additionalInstructions,
           type: baseExercise.type,
           isExtra: true,

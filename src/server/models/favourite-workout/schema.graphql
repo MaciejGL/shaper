@@ -15,7 +15,11 @@ type FavouriteWorkoutExercise {
   baseId: ID
   favouriteWorkoutId: ID!
   restSeconds: Int
-  instructions: String
+  description: String
+  additionalInstructions: String
+  instructions: [String!]
+  tips: [String!]
+  difficulty: String
   base: BaseExercise
   sets: [FavouriteWorkoutSet!]!
 }
@@ -43,7 +47,11 @@ input CreateFavouriteWorkoutExerciseInput {
   order: Int!
   baseId: ID
   restSeconds: Int
-  instructions: String
+  description: String
+  additionalInstructions: String
+  instructions: [String!]
+  tips: [String!]
+  difficulty: String
   sets: [CreateFavouriteWorkoutSetInput!]!
 }
 
@@ -61,6 +69,10 @@ input UpdateFavouriteWorkoutInput {
   id: ID!
   title: String
   description: String
+  additionalInstructions: String
+  instructions: [String!]
+  tips: [String!]
+  difficulty: String
   exercises: [UpdateFavouriteWorkoutExerciseInput!]
 }
 
@@ -70,7 +82,11 @@ input UpdateFavouriteWorkoutExerciseInput {
   order: Int!
   baseId: ID
   restSeconds: Int
-  instructions: String
+  description: String
+  tips: [String!]
+  difficulty: String
+  additionalInstructions: String
+  instructions: [String!]
   sets: [UpdateFavouriteWorkoutSetInput!]!
 }
 

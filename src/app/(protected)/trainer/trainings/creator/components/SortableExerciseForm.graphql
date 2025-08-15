@@ -3,7 +3,10 @@ query GetExerciseFormData($exerciseId: ID!) {
   exercise: getTrainingExercise(id: $exerciseId) {
     id
     name
+    description
     instructions
+    tips
+    difficulty
     additionalInstructions
     type
     restSeconds
@@ -34,7 +37,10 @@ mutation UpdateExerciseForm($input: UpdateExerciseFormInput!) {
   updateExerciseForm(input: $input) {
     id
     name
+    description
     instructions
+    tips
+    difficulty
     additionalInstructions
     type
     restSeconds

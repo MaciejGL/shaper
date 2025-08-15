@@ -197,7 +197,10 @@ export function useTrainingPlanMutations(trainingId?: string) {
       const newExercise = {
         id: tempId || generateTempId('exercise'),
         name: variables.input.name || '',
-        instructions: variables.input.instructions || '',
+        description: variables.input.description || '',
+        instructions: variables.input.instructions || [],
+        tips: variables.input.tips || [],
+        difficulty: variables.input.difficulty || null,
         baseId: variables.input.baseId,
         additionalInstructions: variables.input.additionalInstructions || '',
         restSeconds: variables.input.restSeconds,

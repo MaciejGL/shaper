@@ -69,11 +69,14 @@ export type GQLAddExerciseToDayInput = {
   additionalInstructions?: InputMaybe<Scalars['String']['input']>;
   baseId?: InputMaybe<Scalars['ID']['input']>;
   dayId: Scalars['ID']['input'];
-  instructions?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  difficulty?: InputMaybe<Scalars['String']['input']>;
+  instructions?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   order: Scalars['Int']['input'];
   restSeconds?: InputMaybe<Scalars['Int']['input']>;
   tempo?: InputMaybe<Scalars['String']['input']>;
+  tips?: InputMaybe<Array<Scalars['String']['input']>>;
   type?: InputMaybe<GQLExerciseType>;
   warmupSets?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -378,12 +381,16 @@ export type GQLCreateExerciseSetInput = {
 };
 
 export type GQLCreateFavouriteWorkoutExerciseInput = {
+  additionalInstructions?: InputMaybe<Scalars['String']['input']>;
   baseId?: InputMaybe<Scalars['ID']['input']>;
-  instructions?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  difficulty?: InputMaybe<Scalars['String']['input']>;
+  instructions?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   order: Scalars['Int']['input'];
   restSeconds?: InputMaybe<Scalars['Int']['input']>;
   sets: Array<GQLCreateFavouriteWorkoutSetInput>;
+  tips?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type GQLCreateFavouriteWorkoutInput = {
@@ -503,12 +510,15 @@ export type GQLCreateTrainingDayInput = {
 export type GQLCreateTrainingExerciseInput = {
   additionalInstructions?: InputMaybe<Scalars['String']['input']>;
   baseId?: InputMaybe<Scalars['ID']['input']>;
-  instructions?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  difficulty?: InputMaybe<Scalars['String']['input']>;
+  instructions?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   order: Scalars['Int']['input'];
   restSeconds?: InputMaybe<Scalars['Int']['input']>;
   sets?: InputMaybe<Array<GQLCreateExerciseSetInput>>;
   tempo?: InputMaybe<Scalars['String']['input']>;
+  tips?: InputMaybe<Array<Scalars['String']['input']>>;
   type?: InputMaybe<GQLExerciseType>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
   warmupSets?: InputMaybe<Scalars['Int']['input']>;
@@ -654,15 +664,19 @@ export type GQLFavouriteWorkout = {
 
 export type GQLFavouriteWorkoutExercise = {
   __typename?: 'FavouriteWorkoutExercise';
+  additionalInstructions?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   base?: EntireFieldWrapper<Maybe<GQLBaseExercise>>;
   baseId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
+  description?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  difficulty?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   favouriteWorkoutId: EntireFieldWrapper<Scalars['ID']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
-  instructions?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  instructions?: EntireFieldWrapper<Maybe<Array<Scalars['String']['output']>>>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
   order: EntireFieldWrapper<Scalars['Int']['output']>;
   restSeconds?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   sets: EntireFieldWrapper<Array<GQLFavouriteWorkoutSet>>;
+  tips?: EntireFieldWrapper<Maybe<Array<Scalars['String']['output']>>>;
 };
 
 export type GQLFavouriteWorkoutSet = {
@@ -2139,12 +2153,15 @@ export type GQLSubstitute = {
   completedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   dayId: EntireFieldWrapper<Scalars['ID']['output']>;
+  description?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  difficulty?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
-  instructions?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  instructions?: EntireFieldWrapper<Maybe<Array<Scalars['String']['output']>>>;
   isPublic: EntireFieldWrapper<Scalars['Boolean']['output']>;
   muscleGroups: EntireFieldWrapper<Array<GQLMuscleGroup>>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
   sets: EntireFieldWrapper<Array<GQLExerciseSet>>;
+  tips?: EntireFieldWrapper<Maybe<Array<Scalars['String']['output']>>>;
   type?: EntireFieldWrapper<Maybe<GQLExerciseType>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
   videoUrl?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -2223,10 +2240,12 @@ export type GQLTrainingExercise = {
   completedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   dayId: EntireFieldWrapper<Scalars['ID']['output']>;
+  description?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  difficulty?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   equipment?: EntireFieldWrapper<Maybe<GQLEquipment>>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   images: EntireFieldWrapper<Array<GQLImage>>;
-  instructions?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  instructions?: EntireFieldWrapper<Maybe<Array<Scalars['String']['output']>>>;
   isExtra: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isPublic: EntireFieldWrapper<Scalars['Boolean']['output']>;
   logs: EntireFieldWrapper<Array<GQLExerciseLog>>;
@@ -2238,6 +2257,7 @@ export type GQLTrainingExercise = {
   substitutedBy?: EntireFieldWrapper<Maybe<GQLSubstitute>>;
   substitutes: EntireFieldWrapper<Array<GQLBaseExerciseSubstitute>>;
   tempo?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  tips?: EntireFieldWrapper<Maybe<Array<Scalars['String']['output']>>>;
   type?: EntireFieldWrapper<Maybe<GQLExerciseType>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
   videoUrl?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -2339,12 +2359,15 @@ export type GQLUpdateBodyMeasurementInput = {
 
 export type GQLUpdateExerciseFormInput = {
   additionalInstructions?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  difficulty?: InputMaybe<Scalars['String']['input']>;
   exerciseId: Scalars['ID']['input'];
-  instructions?: InputMaybe<Scalars['String']['input']>;
+  instructions?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   restSeconds?: InputMaybe<Scalars['Int']['input']>;
   sets?: InputMaybe<Array<GQLUpdateExerciseSetFormInput>>;
   tempo?: InputMaybe<Scalars['String']['input']>;
+  tips?: InputMaybe<Array<Scalars['String']['input']>>;
   type?: InputMaybe<GQLExerciseType>;
   warmupSets?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -2380,19 +2403,27 @@ export type GQLUpdateExerciseSetInput = {
 };
 
 export type GQLUpdateFavouriteWorkoutExerciseInput = {
+  additionalInstructions?: InputMaybe<Scalars['String']['input']>;
   baseId?: InputMaybe<Scalars['ID']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  difficulty?: InputMaybe<Scalars['String']['input']>;
   id?: InputMaybe<Scalars['ID']['input']>;
-  instructions?: InputMaybe<Scalars['String']['input']>;
+  instructions?: InputMaybe<Array<Scalars['String']['input']>>;
   name: Scalars['String']['input'];
   order: Scalars['Int']['input'];
   restSeconds?: InputMaybe<Scalars['Int']['input']>;
   sets: Array<GQLUpdateFavouriteWorkoutSetInput>;
+  tips?: InputMaybe<Array<Scalars['String']['input']>>;
 };
 
 export type GQLUpdateFavouriteWorkoutInput = {
+  additionalInstructions?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
+  difficulty?: InputMaybe<Scalars['String']['input']>;
   exercises?: InputMaybe<Array<GQLUpdateFavouriteWorkoutExerciseInput>>;
   id: Scalars['ID']['input'];
+  instructions?: InputMaybe<Array<Scalars['String']['input']>>;
+  tips?: InputMaybe<Array<Scalars['String']['input']>>;
   title?: InputMaybe<Scalars['String']['input']>;
 };
 
@@ -2499,13 +2530,16 @@ export type GQLUpdateTrainingDayInput = {
 export type GQLUpdateTrainingExerciseInput = {
   additionalInstructions?: InputMaybe<Scalars['String']['input']>;
   baseId?: InputMaybe<Scalars['ID']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  difficulty?: InputMaybe<Scalars['String']['input']>;
   id: Scalars['ID']['input'];
-  instructions?: InputMaybe<Scalars['String']['input']>;
+  instructions?: InputMaybe<Array<Scalars['String']['input']>>;
   name?: InputMaybe<Scalars['String']['input']>;
   order: Scalars['Int']['input'];
   restSeconds?: InputMaybe<Scalars['Int']['input']>;
   sets?: InputMaybe<Array<GQLUpdateExerciseSetInput>>;
   tempo?: InputMaybe<Scalars['String']['input']>;
+  tips?: InputMaybe<Array<Scalars['String']['input']>>;
   type?: InputMaybe<GQLExerciseType>;
   videoUrl?: InputMaybe<Scalars['String']['input']>;
   warmupSets?: InputMaybe<Scalars['Int']['input']>;
@@ -3335,15 +3369,19 @@ export type GQLFavouriteWorkoutResolvers<ContextType = GQLContext, ParentType ex
 };
 
 export type GQLFavouriteWorkoutExerciseResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['FavouriteWorkoutExercise'] = GQLResolversParentTypes['FavouriteWorkoutExercise']> = {
+  additionalInstructions?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   base?: Resolver<Maybe<GQLResolversTypes['BaseExercise']>, ParentType, ContextType>;
   baseId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
+  description?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  difficulty?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   favouriteWorkoutId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
-  instructions?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  instructions?: Resolver<Maybe<Array<GQLResolversTypes['String']>>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   order?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   restSeconds?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   sets?: Resolver<Array<GQLResolversTypes['FavouriteWorkoutSet']>, ParentType, ContextType>;
+  tips?: Resolver<Maybe<Array<GQLResolversTypes['String']>>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -3862,12 +3900,15 @@ export type GQLSubstituteResolvers<ContextType = GQLContext, ParentType extends 
   completedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   dayId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  description?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  difficulty?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
-  instructions?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  instructions?: Resolver<Maybe<Array<GQLResolversTypes['String']>>, ParentType, ContextType>;
   isPublic?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   muscleGroups?: Resolver<Array<GQLResolversTypes['MuscleGroup']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   sets?: Resolver<Array<GQLResolversTypes['ExerciseSet']>, ParentType, ContextType>;
+  tips?: Resolver<Maybe<Array<GQLResolversTypes['String']>>, ParentType, ContextType>;
   type?: Resolver<Maybe<GQLResolversTypes['ExerciseType']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   videoUrl?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
@@ -3912,10 +3953,12 @@ export type GQLTrainingExerciseResolvers<ContextType = GQLContext, ParentType ex
   completedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   dayId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  description?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  difficulty?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   equipment?: Resolver<Maybe<GQLResolversTypes['Equipment']>, ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   images?: Resolver<Array<GQLResolversTypes['Image']>, ParentType, ContextType>;
-  instructions?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  instructions?: Resolver<Maybe<Array<GQLResolversTypes['String']>>, ParentType, ContextType>;
   isExtra?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isPublic?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   logs?: Resolver<Array<GQLResolversTypes['ExerciseLog']>, ParentType, ContextType>;
@@ -3927,6 +3970,7 @@ export type GQLTrainingExerciseResolvers<ContextType = GQLContext, ParentType ex
   substitutedBy?: Resolver<Maybe<GQLResolversTypes['Substitute']>, ParentType, ContextType>;
   substitutes?: Resolver<Array<GQLResolversTypes['BaseExerciseSubstitute']>, ParentType, ContextType>;
   tempo?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  tips?: Resolver<Maybe<Array<GQLResolversTypes['String']>>, ParentType, ContextType>;
   type?: Resolver<Maybe<GQLResolversTypes['ExerciseType']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   videoUrl?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;

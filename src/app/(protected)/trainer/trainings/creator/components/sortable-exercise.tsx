@@ -610,6 +610,9 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
               updateExercise({
                 name: e.target.value,
                 type: exercise?.type,
+                description: exercise?.description,
+                tips: exercise?.tips,
+                difficulty: exercise?.difficulty,
                 instructions: exercise?.instructions,
                 additionalInstructions: exercise?.additionalInstructions,
                 restSeconds: exercise?.restSeconds,
@@ -639,6 +642,9 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 updateExercise({
                   name: exercise?.name,
                   type: value === 'none' ? null : (value as GQLExerciseType),
+                  description: exercise?.description,
+                  tips: exercise?.tips,
+                  difficulty: exercise?.difficulty,
                   instructions: exercise?.instructions,
                   additionalInstructions: exercise?.additionalInstructions,
                   restSeconds: exercise?.restSeconds,
@@ -686,6 +692,9 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 updateExercise({
                   name: exercise?.name,
                   type: exercise?.type,
+                  description: exercise?.description,
+                  tips: exercise?.tips,
+                  difficulty: exercise?.difficulty,
                   instructions: exercise?.instructions,
                   additionalInstructions: exercise?.additionalInstructions,
                   restSeconds,
@@ -723,7 +732,10 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 updateExercise({
                   name: exercise?.name,
                   type: exercise?.type,
+                  description: exercise?.description,
                   instructions: exercise?.instructions,
+                  tips: exercise?.tips,
+                  difficulty: exercise?.difficulty,
                   additionalInstructions: exercise?.additionalInstructions,
                   restSeconds: exercise?.restSeconds,
                   warmupSets,
@@ -758,7 +770,10 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 updateExercise({
                   name: exercise?.name,
                   type: exercise?.type,
+                  description: exercise?.description,
                   instructions: exercise?.instructions,
+                  tips: exercise?.tips,
+                  difficulty: exercise?.difficulty,
                   additionalInstructions: exercise?.additionalInstructions,
                   restSeconds: exercise?.restSeconds,
                   warmupSets: exercise?.warmupSets,
@@ -840,12 +855,15 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                 className="min-h-24"
                 variant="ghost"
                 disabled={disabled}
-                value={exercise?.instructions ?? ''}
+                value={exercise?.description ?? ''}
                 onChange={(e) =>
                   updateExercise({
                     name: exercise?.name,
                     type: exercise?.type,
-                    instructions: e.target.value,
+                    description: e.target.value,
+                    instructions: exercise?.instructions,
+                    tips: exercise?.tips,
+                    difficulty: exercise?.difficulty,
                     additionalInstructions: exercise?.additionalInstructions,
                     restSeconds: exercise?.restSeconds,
                     warmupSets: exercise?.warmupSets,
@@ -884,6 +902,8 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
                     name: exercise?.name,
                     type: exercise?.type,
                     instructions: exercise?.instructions,
+                    tips: exercise?.tips,
+                    difficulty: exercise?.difficulty,
                     additionalInstructions: e.target.value,
                     restSeconds: exercise?.restSeconds,
                     warmupSets: exercise?.warmupSets,

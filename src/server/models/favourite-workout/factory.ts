@@ -98,7 +98,10 @@ export async function createFavouriteWorkout(
           order: exercise.order,
           baseId: exercise.baseId,
           restSeconds: exercise.restSeconds,
-          instructions: exercise.instructions,
+          description: exercise.description,
+          instructions: exercise.instructions ?? [],
+          tips: exercise.tips ?? [],
+          difficulty: exercise.difficulty,
           sets: {
             create: exercise.sets.map((set) => ({
               order: set.order,
@@ -178,7 +181,10 @@ export async function updateFavouriteWorkout(
             order: exercise.order,
             baseId: exercise.baseId,
             restSeconds: exercise.restSeconds,
-            instructions: exercise.instructions,
+            description: exercise.description,
+            instructions: exercise.instructions ?? [],
+            tips: exercise.tips ?? [],
+            difficulty: exercise.difficulty,
             sets: {
               create: exercise.sets.map((set) => ({
                 order: set.order,
@@ -448,7 +454,10 @@ export async function startWorkoutFromFavourite(
           order: favExercise.order,
           baseId: favExercise.baseId,
           restSeconds: favExercise.restSeconds,
+          description: favExercise.description,
           instructions: favExercise.instructions,
+          tips: favExercise.tips,
+          difficulty: favExercise.difficulty,
           dayId: todaysWorkout.id,
           sets: {
             create: favExercise.sets.map((set) => ({

@@ -178,8 +178,11 @@ input CreateTrainingExerciseInput {
   name: String!
   restSeconds: Int
   tempo: String
-  instructions: String
+  description: String
   additionalInstructions: String
+  instructions: [String!]
+  tips: [String!]
+  difficulty: String
   type: ExerciseType
   order: Int!
   warmupSets: Int
@@ -249,8 +252,11 @@ input UpdateTrainingExerciseInput {
   order: Int!
   restSeconds: Int
   tempo: String
-  instructions: String
+  description: String
   additionalInstructions: String
+  instructions: [String!]
+  tips: [String!]
+  difficulty: String
   type: ExerciseType
   warmupSets: Int
   baseId: ID
@@ -301,8 +307,11 @@ input AddExerciseToDayInput {
   order: Int!
   restSeconds: Int
   tempo: String
-  instructions: String
+  description: String
   additionalInstructions: String
+  instructions: [String!]
+  tips: [String!]
+  difficulty: String
   type: ExerciseType
   warmupSets: Int
   baseId: ID

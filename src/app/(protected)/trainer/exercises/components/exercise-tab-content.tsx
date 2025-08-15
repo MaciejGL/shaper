@@ -198,6 +198,10 @@ const placeholderExercises = [
     name: 'Deadlift',
     description:
       'One to rule them all, One to find them, One to bring them all and in the darkness bind them',
+    instructions: [],
+    tips: [],
+    difficulty: null,
+    additionalInstructions: null,
     videoUrl: '',
     equipment: GQLEquipment.Barbell,
     isPublic: false,
@@ -225,6 +229,10 @@ const placeholderExercises = [
     name: 'Deadlift',
     description:
       'One to rule them all, One to find them, One to bring them all and in the darkness bind them',
+    instructions: [],
+    tips: [],
+    difficulty: null,
+    additionalInstructions: null,
     videoUrl: '',
     equipment: GQLEquipment.Barbell,
     isPublic: false,
@@ -251,6 +259,10 @@ const placeholderExercises = [
     name: 'Deadlift',
     description:
       'One to rule them all, One to find them, One to bring them all and in the darkness bind them',
+    instructions: [],
+    tips: [],
+    difficulty: null,
+    additionalInstructions: null,
     videoUrl: '',
     equipment: GQLEquipment.Barbell,
     isPublic: false,

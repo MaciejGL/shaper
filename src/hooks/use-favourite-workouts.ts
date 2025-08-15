@@ -208,7 +208,11 @@ export interface FavouriteWorkoutExerciseData {
   name?: string
   baseId?: string
   restSeconds?: number
-  instructions?: string
+  description?: string
+  instructions?: string[]
+  tips?: string[]
+  difficulty?: string
+  additionalInstructions?: string
   sets: {
     order: number
     reps?: number
@@ -359,7 +363,11 @@ export function useUpdateFavouriteFromWizard() {
         order: exercise.order,
         baseId: exercise.baseId || null,
         restSeconds: exercise.restSeconds || null,
-        instructions: exercise.instructions || null,
+        description: exercise.description || null,
+        instructions: exercise.instructions || [],
+        tips: exercise.tips || [],
+        difficulty: exercise.difficulty || null,
+        additionalInstructions: undefined,
         sets: exercise.sets.map((set) => ({
           order: set.order,
           reps: set.reps || null,

@@ -198,7 +198,10 @@ export default function WorkoutPlanner() {
     const exerciseToAdd: Omit<GQLAddExerciseToDayInput, 'dayId'> = {
       baseId: newExercise.id,
       name: newExercise.name,
-      instructions: newExercise.description || '',
+      description: newExercise.description || '',
+      instructions: newExercise.instructions || [],
+      tips: newExercise.tips || [],
+      difficulty: newExercise.difficulty || null,
       additionalInstructions: undefined,
       restSeconds: undefined,
       tempo: undefined,

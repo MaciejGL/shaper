@@ -112,6 +112,14 @@ export class FavouriteWorkoutExercise implements GQLFavouriteWorkoutExercise {
     return this.data.restSeconds
   }
 
+  get description() {
+    return this.data.description
+  }
+
+  get additionalInstructions() {
+    return this.data.additionalInstructions
+  }
+
   get instructions() {
     return this.data.instructions
   }

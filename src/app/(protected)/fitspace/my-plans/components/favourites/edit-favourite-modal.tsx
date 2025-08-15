@@ -348,22 +348,21 @@ export function EditFavouriteModal({
             {/* Current exercises preview */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Current Exercises</label>
-              <div className="bg-muted rounded-md p-3 max-h-32 overflow-y-auto">
-                {favourite.exercises.length > 0 ? (
-                  <div className="space-y-1">
-                    {favourite.exercises.map((exercise, index) => (
-                      <div
-                        key={exercise.id}
-                        className="text-sm text-muted-foreground"
-                      >
-                        {index + 1}. {exercise.name}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">No exercises</p>
-                )}
-              </div>
+
+              {favourite.exercises.length > 0 ? (
+                <div className="space-y-1">
+                  {favourite.exercises.map((exercise, index) => (
+                    <div
+                      key={exercise.id}
+                      className="text-sm text-muted-foreground bg-muted rounded-md p-3"
+                    >
+                      {index + 1}. {exercise.name}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">No exercises</p>
+              )}
             </div>
 
             {/* Workout Creation Options */}

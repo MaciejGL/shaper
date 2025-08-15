@@ -74,7 +74,10 @@ export function OptimizedExerciseForm({
   // ## Local State
   const [localData, setLocalData] = useState({
     name: '',
-    instructions: '',
+    description: '',
+    instructions: [] as string[],
+    tips: [] as string[],
+    difficulty: '',
     additionalInstructions: '',
     restSeconds: '',
     warmupSets: '',
@@ -98,7 +101,10 @@ export function OptimizedExerciseForm({
 
       setLocalData({
         name: data.exercise.name || '',
-        instructions: data.exercise.instructions || '',
+        description: data.exercise.description || '',
+        instructions: data.exercise.instructions || [],
+        tips: data.exercise.tips || [],
+        difficulty: data.exercise.difficulty || '',
         additionalInstructions: data.exercise.additionalInstructions || '',
         restSeconds: data.exercise.restSeconds?.toString() || '',
         warmupSets: data.exercise.warmupSets?.toString() || '',
@@ -110,7 +116,7 @@ export function OptimizedExerciseForm({
   const debouncedUpdate = useMemo(
     () =>
       debounce(
-        async (updates: Record<string, string | number | null>) => {
+        async (updates: Record<string, string | number | string[] | null>) => {
           if (!exerciseId) return
 
           try {
@@ -126,7 +132,10 @@ export function OptimizedExerciseForm({
             if (data?.exercise) {
               setLocalData({
                 name: data.exercise.name || '',
-                instructions: data.exercise.instructions || '',
+                description: data.exercise.description || '',
+                instructions: data.exercise.instructions || [],
+                tips: data.exercise.tips || [],
+                difficulty: data.exercise.difficulty || '',
                 additionalInstructions:
                   data.exercise.additionalInstructions || '',
                 restSeconds: data.exercise.restSeconds?.toString() || '',
@@ -423,18 +432,18 @@ export function OptimizedExerciseForm({
               </div>
             </div>
 
-            {/* Instructions */}
+            {/* Description */}
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="instructions">Instructions</Label>
+                <Label htmlFor="description">Description</Label>
                 <Textarea
-                  id="instructions"
+                  id="description"
                   variant="ghost"
-                  value={localData.instructions}
+                  value={localData.description}
                   onChange={(e) =>
-                    handleInputChange('instructions', e.target.value)
+                    handleInputChange('description', e.target.value)
                   }
-                  placeholder="Exercise instructions..."
+                  placeholder="Exercise description..."
                   rows={4}
                   className="resize-none min-h-20"
                 />
@@ -455,6 +464,125 @@ export function OptimizedExerciseForm({
                   rows={4}
                   className="resize-none min-h-20"
                 />
+              </div>
+
+              {/* Difficulty */}
+              <div className="space-y-2">
+                <Label htmlFor="difficulty">Difficulty</Label>
+                <select
+                  id="difficulty"
+                  value={localData.difficulty}
+                  onChange={(e) =>
+                    handleInputChange('difficulty', e.target.value)
+                  }
+                  className="w-full p-2 border border-gray-300 rounded-md bg-white"
+                >
+                  <option value="">Select difficulty</option>
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+              </div>
+
+              {/* Instructions (V2 Array) */}
+              <div className="space-y-2">
+                <Label>Instructions</Label>
+                <div className="space-y-2">
+                  {localData.instructions.map((instruction, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={instruction}
+                        onChange={(e) => {
+                          const newInstructions = [...localData.instructions]
+                          newInstructions[index] = e.target.value
+                          setLocalData((prev) => ({
+                            ...prev,
+                            instructions: newInstructions,
+                          }))
+                          debouncedUpdate({ instructions: newInstructions })
+                        }}
+                        placeholder={`Instruction ${index + 1}`}
+                        className="flex-1 p-2 border border-gray-300 rounded-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newInstructions = localData.instructions.filter(
+                            (_, i) => i !== index,
+                          )
+                          setLocalData((prev) => ({
+                            ...prev,
+                            instructions: newInstructions,
+                          }))
+                          debouncedUpdate({ instructions: newInstructions })
+                        }}
+                        className="px-3 py-2 text-red-600 border border-red-300 rounded-md hover:bg-red-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newInstructions = [...localData.instructions, '']
+                      setLocalData((prev) => ({
+                        ...prev,
+                        instructions: newInstructions,
+                      }))
+                    }}
+                    className="px-3 py-2 text-blue-600 border border-blue-300 rounded-md hover:bg-blue-50"
+                  >
+                    Add Instruction
+                  </button>
+                </div>
+              </div>
+
+              {/* Tips (V2 Array) */}
+              <div className="space-y-2">
+                <Label>Tips</Label>
+                <div className="space-y-2">
+                  {localData.tips.map((tip, index) => (
+                    <div key={index} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={tip}
+                        onChange={(e) => {
+                          const newTips = [...localData.tips]
+                          newTips[index] = e.target.value
+                          setLocalData((prev) => ({ ...prev, tips: newTips }))
+                          debouncedUpdate({ tips: newTips })
+                        }}
+                        placeholder={`Tip ${index + 1}`}
+                        className="flex-1 p-2 border border-gray-300 rounded-md"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newTips = localData.tips.filter(
+                            (_, i) => i !== index,
+                          )
+                          setLocalData((prev) => ({ ...prev, tips: newTips }))
+                          debouncedUpdate({ tips: newTips })
+                        }}
+                        className="px-3 py-2 text-red-600 border border-red-300 rounded-md hover:bg-red-50"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newTips = [...localData.tips, '']
+                      setLocalData((prev) => ({ ...prev, tips: newTips }))
+                    }}
+                    className="px-3 py-2 text-blue-600 border border-blue-300 rounded-md hover:bg-blue-50"
+                  >
+                    Add Tip
+                  </button>
+                </div>
               </div>
             </div>
 

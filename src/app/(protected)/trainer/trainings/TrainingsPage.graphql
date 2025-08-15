@@ -58,7 +58,10 @@ fragment TrainingTemplate on TrainingPlan {
         restSeconds
         tempo
         warmupSets
+        description
         instructions
+        tips
+        difficulty
         additionalInstructions
         type
         order

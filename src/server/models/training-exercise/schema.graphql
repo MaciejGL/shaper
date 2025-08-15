@@ -1,7 +1,10 @@
 type Substitute {
   id: ID!
   name: String!
-  instructions: String
+  description: String
+  instructions: [String!]
+  tips: [String!]
+  difficulty: String
   additionalInstructions: String
   type: ExerciseType
   completedAt: String
@@ -23,7 +26,10 @@ type TrainingExercise {
   restSeconds: Int
   tempo: String
   warmupSets: Int
-  instructions: String
+  description: String
+  instructions: [String!]
+  tips: [String!]
+  difficulty: String
   additionalInstructions: String
   type: ExerciseType
   order: Int!
@@ -140,8 +146,11 @@ input AddAiExerciseToWorkoutInput {
 input UpdateExerciseFormInput {
   exerciseId: ID!
   name: String
-  instructions: String
+  description: String
   additionalInstructions: String
+  instructions: [String!]
+  tips: [String!]
+  difficulty: String
   type: ExerciseType
   restSeconds: Int
   warmupSets: Int

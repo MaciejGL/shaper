@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 
 import {
@@ -52,7 +53,7 @@ export async function PATCH(request: NextRequest) {
       )
 
       // Prepare muscle group and substitute updates
-      const relationUpdates: any = {}
+      const relationUpdates: Prisma.BaseExerciseUpdateInput = {}
 
       if (muscleGroupIds !== undefined) {
         relationUpdates.muscleGroups = {

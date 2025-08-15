@@ -14,7 +14,11 @@ query GetFavouriteWorkouts {
       baseId
       favouriteWorkoutId
       restSeconds
+      description
+      additionalInstructions
       instructions
+      tips
+      difficulty
       base {
         id
         name
@@ -22,6 +26,9 @@ query GetFavouriteWorkouts {
         videoUrl
         equipment
         isPublic
+        difficulty
+        tips
+        instructions
         additionalInstructions
         type
         muscleGroups {

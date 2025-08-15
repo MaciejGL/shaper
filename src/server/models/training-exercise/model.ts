@@ -68,8 +68,20 @@ export default class TrainingExercise implements GQLTrainingExercise {
     return this.data.warmupSets
   }
 
+  get description() {
+    return this.data.description
+  }
+
   get instructions() {
     return this.data.instructions
+  }
+
+  get tips() {
+    return this.data.tips
+  }
+
+  get difficulty() {
+    return this.data.difficulty
   }
 
   get additionalInstructions() {
@@ -258,8 +270,20 @@ export class ExerciseSubstitute implements GQLSubstitute {
     return this.data.name
   }
 
+  get description() {
+    return this.data.description
+  }
+
   get instructions() {
     return this.data.instructions
+  }
+
+  get tips() {
+    return this.data.tips
+  }
+
+  get difficulty() {
+    return this.data.difficulty
   }
 
   get additionalInstructions() {

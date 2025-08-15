@@ -188,7 +188,7 @@ export function ExerciseSets({
           <div className="min-w-2.5"></div>
           <div className="text-center min-w-[96px]">Reps</div>
           <div className="text-center min-w-[96px]">Weight</div>
-          <div className={cn('text-center', !hasRpe && 'opacity-0')}>
+          <div className={cn('text-center', !hasRpe && 'hidden')}>
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex justify-center gap-1">
@@ -215,7 +215,7 @@ export function ExerciseSets({
         {hasExtraSets && <div className="w-8 shrink-0" />}
       </div>
 
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-2">
         {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
           return (
             <ExerciseSet
