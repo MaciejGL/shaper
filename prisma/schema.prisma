@@ -45,6 +45,8 @@ model User {
   clients                          User[]                     @relation("TrainerClients")
   profile                          UserProfile?
   sessions                         UserSession[]
+
+  @@index([trainerId])
 }
 
 model UserSession {
@@ -221,6 +223,7 @@ model TrainingPlan {
   @@index([assignedToId, createdById])
   @@index([createdById])
   @@index([active])
+  @@index([templateId])
 }
 
 model TrainingWeek {
@@ -325,6 +328,9 @@ model ExerciseLog {
   exerciseId  String
   exercise    TrainingExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   user        User             @relation(fields: [userId], references: [id])
+
+  @@index([exerciseId])
+  @@index([userId])
 }
 
 model ExerciseSetLog {
@@ -366,6 +372,7 @@ model BaseExercise {
   @@index([version])
   @@index([difficulty])
   @@index([isPremium])
+  @@index([createdById])
 }
 
 model Image {
@@ -380,6 +387,7 @@ model Image {
 
   @@index([entityType, entityId])
   @@index([order])
+  @@index([entityId])
 }
 
 model MuscleGroup {
@@ -393,6 +401,8 @@ model MuscleGroup {
   category           MuscleGroupCategory @relation(fields: [categoryId], references: [id])
   exercises          BaseExercise[]      @relation("ExerciseMuscleGroups")
   secondaryExercises BaseExercise[]      @relation("ExerciseSecondaryMuscleGroups")
+
+  @@index([categoryId])
 }
 
 model MuscleGroupCategory {
@@ -495,6 +505,7 @@ model TrainingPlanCollaborator {
   @@unique([trainingPlanId, collaboratorId])
   @@index([trainingPlanId])
   @@index([collaboratorId])
+  @@index([addedById])
 }
 
 model MealPlanCollaborator {
@@ -512,6 +523,7 @@ model MealPlanCollaborator {
   @@unique([mealPlanId, collaboratorId])
   @@index([mealPlanId])
   @@index([collaboratorId])
+  @@index([addedById])
 }
 
 model MealPlan {
@@ -542,6 +554,9 @@ model MealPlan {
   weeks         MealWeek[]
 
   @@index([completedAt])
+  @@index([assignedToId])
+  @@index([createdById])
+  @@index([templateId])
 }
 
 model MealWeek {
@@ -558,6 +573,7 @@ model MealWeek {
   plan        MealPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
 
   @@index([completedAt])
+  @@index([planId])
 }
 
 model MealDay {
@@ -576,6 +592,7 @@ model MealDay {
   week           MealWeek  @relation(fields: [weekId], references: [id], onDelete: Cascade)
 
   @@index([completedAt])
+  @@index([weekId])
 }
 
 model Meal {
@@ -591,6 +608,7 @@ model Meal {
   foods        MealFood[]
 
   @@index([dateTime])
+  @@index([dayId])
 }
 
 model MealFood {
@@ -616,6 +634,7 @@ model MealFood {
 
   @@index([mealId])
   @@index([addedAt])
+  @@index([addedById])
 }
 
 model MealFoodLog {
@@ -743,6 +762,10 @@ model OpenFoodFactsProduct {
   @@index([countries, productName], map: "off_country_search_idx")
   @@index([productName, energyKcal100g], map: "off_fast_search_idx")
   @@index([productName, proteins100g], map: "off_protein_search_idx")
+  @@index([countries, energyKcal100g, proteins100g], map: "off_country_nutrition_idx")
+  @@index([completeness(sort: Desc), scansN(sort: Desc)], map: "off_quality_sort_idx")  
+  @@index([importedAt(sort: Desc)], map: "off_imported_desc_idx")
+  @@index([imageUrl], map: "off_images_idx")
 }
 
 model FavouriteWorkout {
