@@ -29,7 +29,6 @@ export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
       </DrawerTrigger>
       <SimpleDrawerContent
         title="Exercise Notes"
-        headerIcon={<NotebookPenIcon />}
         className="max-h-[80vh] flex flex-col"
       >
         <div className="flex-1 overflow-y-auto">

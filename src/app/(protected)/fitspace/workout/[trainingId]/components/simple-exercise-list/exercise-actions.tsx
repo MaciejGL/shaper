@@ -5,7 +5,7 @@ import { CountdownTimer } from '@/components/ui/countdown-timer'
 import { VideoPreview } from '@/components/video-preview'
 import type { WorkoutContextPlan } from '@/context/workout-context/workout-context'
 
-import { ExerciseNotebook } from './exercise-notebook'
+import { ExerciseNotebook } from '../exercise/exercise-notebook'
 
 interface ExerciseActionsProps {
   exercise: WorkoutContextPlan['weeks'][number]['days'][number]['exercises'][number]
@@ -47,7 +47,7 @@ export function ExerciseActions({
           />
         )}
 
-        <ExerciseNotebook exercise={exercise} variant="tertiary" />
+        <ExerciseNotebook exercise={exercise} />
 
         {exercise.substitutes.length > 0 && (
           <Button

@@ -147,7 +147,7 @@ export function FavouriteWorkoutCard({
                   key={exercise.id}
                   variant="secondary"
                   size="lg"
-                  className="w-full justify-start"
+                  className="w-full justify-start py-3"
                 >
                   {index + 1}. {exercise.name}
                 </Badge>

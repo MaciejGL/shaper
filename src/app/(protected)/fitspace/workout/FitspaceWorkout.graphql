@@ -45,11 +45,19 @@ query FitspaceGetWorkout($trainingId: ID!) {
             restSeconds
             tempo
             warmupSets
+            description
+            tips
+            difficulty
             instructions
             additionalInstructions
             type
             order
             videoUrl
+            images {
+              id
+              url
+              order
+            }
             completedAt
             isExtra
             substitutedBy {

@@ -160,12 +160,9 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
   return (
     <div className="space-y-6">
       {/* Header with Add Button */}
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold text-foreground">
-          Exercise Notes
-        </h3>
+      <div className="flex justify-end items-center">
         <Button
-          variant="outline"
+          variant="tertiary"
           size="sm"
           onClick={handleOpenCreateNote}
           className="h-8 px-3 text-sm"

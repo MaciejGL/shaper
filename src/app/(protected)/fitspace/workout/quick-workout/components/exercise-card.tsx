@@ -35,7 +35,7 @@ export function ExerciseCard({
   isDraggable,
   loading,
 }: ExerciseCardProps) {
-  const firstImage = exercise.images.find((image) => image.order === 0)
+  const firstImage = exercise.images.at(0)
 
   return (
     <div
@@ -65,15 +65,16 @@ export function ExerciseCard({
         <Image
           src={firstImage.url}
           alt={exercise.name}
-          width={60}
-          height={60}
+          width={100}
+          height={100}
           className="rounded-lg"
         />
       )}
-      <div className="flex-1">
+
+      <div className="flex-1 self-start">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <div className="font-medium text-sm mb-3">{exercise.name}</div>
-          <div className="flex items-center gap-2">
+          <div className="font-medium text-md mb-3">{exercise.name}</div>
+          <div className="flex items-center gap-1">
             {selectedExercises?.includes(exercise.id) && (
               <div className="flex items-center">
                 <CheckIcon className="h-4 w-4 text-green-600" />
@@ -82,6 +83,7 @@ export function ExerciseCard({
             {onExerciseRemove && (
               <Button
                 variant="ghost"
+                size="icon-xs"
                 onClick={() => onExerciseRemove(exercise.id)}
                 iconOnly={<XIcon />}
                 className="opacity-70 group-hover/exercise-card:opacity-100 transition-opacity"
@@ -110,9 +112,9 @@ export function ExerciseCard({
           {exercise.secondaryMuscleGroups?.map((group) => (
             <Badge
               key={group.id}
-              variant="outline"
+              variant="muscle"
               size="xs"
-              className="border-orange-200 text-orange-600 bg-orange-50"
+              className="opacity-60"
             >
               {group.alias}
             </Badge>
