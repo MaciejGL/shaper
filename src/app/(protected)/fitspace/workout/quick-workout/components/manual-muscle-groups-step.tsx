@@ -36,7 +36,7 @@ export function ManualMuscleGroupsStep({
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: 0.1 }}
-        className="text-center text-sm text-muted-foreground bg-card p-4 rounded-lg"
+        className="text-center text-sm text-muted-foreground bg-card p-4 rounded-lg mb-4"
       >
         {selectedMuscleGroups.length === 0 ? (
           <>

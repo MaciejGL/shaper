@@ -41,7 +41,7 @@ export function ExerciseCard({
     <div
       className={cn(
         'group/exercise-card p-3 flex items-center gap-3 rounded-lg transition-colors border border-transparent',
-        selectedExercises?.includes(exercise.id) ? 'bg-primary/5' : ' bg-card ',
+        selectedExercises?.includes(exercise.id) ? 'bg-primary/5' : ' bg-card',
         !onExerciseRemove && 'cursor-pointer hover:border-primary/20',
       )}
       onClick={

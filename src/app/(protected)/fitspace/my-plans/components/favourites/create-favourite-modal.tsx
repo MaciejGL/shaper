@@ -240,6 +240,7 @@ export function CreateFavouriteModal({
                 placeholder="e.g., Morning Push Routine"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                autoFocus={false}
               />
             </div>
 
@@ -258,94 +259,89 @@ export function CreateFavouriteModal({
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent fullScreen dialogTitle="Create Favourite Workout">
-        <div className="h-full relative mx-auto w-full">
-          <QuickWorkoutWizard
-            workoutFlow={workoutFlow}
-            onFlowChange={handleFlowChange}
-            canProceedFromStep={canProceedFromStep}
-            isAdding={isCreating}
-            onFinish={handleFinish}
-            onStepChange={handleStepChange}
-            footerClassName={cn('sticky bottom-[-24px]')}
-            finishButtonText="Add to Favourites"
-            // Manual flow components (reuse existing)
-            muscleGroupsComponent={
-              <ManualMuscleGroupsStep
-                muscleGroups={allMuscleGroups}
-                selectedMuscleGroups={selectedMuscleGroups}
-                onMuscleGroupToggle={(alias: string) => {
-                  const newSelection = selectedMuscleGroups.includes(alias)
-                    ? selectedMuscleGroups.filter((g) => g !== alias)
-                    : [...selectedMuscleGroups, alias]
-                  setSelectedMuscleGroups(newSelection)
-                }}
-              />
-            }
-            equipmentComponent={
-              <ManualEquipmentStep
-                selectedEquipment={selectedEquipment}
-                onEquipmentToggle={(equipment) => {
-                  const newSelection = selectedEquipment.includes(equipment)
-                    ? selectedEquipment.filter((e) => e !== equipment)
-                    : [...selectedEquipment, equipment]
-                  setSelectedEquipment(newSelection)
-                }}
-              />
-            }
-            exercisesComponent={
-              <ManualExercisesStep
-                filteredExercises={filteredExercises}
-                selectedExercises={selectedExercises}
-                onExerciseSelect={handleExerciseSelect}
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
-                existingExercises={[]} // No existing exercises for favourites
-                selectedMuscleGroups={selectedMuscleGroups}
-                onMuscleGroupChange={setSelectedMuscleGroups}
-                selectedEquipment={selectedEquipment}
-                onEquipmentChange={setSelectedEquipment}
-              />
-            }
-            reviewComponent={
-              <ManualReviewStep
-                existingExercises={[]} // No existing exercises for favourites
-                selectedExercises={selectedExerciseObjects}
-                onReorderExercises={handleReorderExercises}
-                onRemoveExercise={handleRemoveExercise}
-              />
-            }
-            // AI flow components (reuse existing)
-            aiMuscleGroupsComponent={
-              <AiMuscleGroupsStep
-                data={aiInputData}
-                onDataChange={setAiInputData}
-                muscleGroups={allMuscleGroups}
-              />
-            }
-            aiEquipmentComponent={
-              <AiEquipmentStep
-                data={aiInputData}
-                onDataChange={setAiInputData}
-              />
-            }
-            aiParametersComponent={
-              <AiParametersStep
-                data={aiInputData}
-                onDataChange={setAiInputData}
-              />
-            }
-            aiResultsComponent={
-              <AiResultsStep
-                data={aiWorkoutResult}
-                inputData={aiInputData}
-                isLoading={isGeneratingAiWorkout}
-                error={aiGenerationError}
-                onRetry={handleRetryAiGeneration}
-                onExercisesReorder={handleExercisesReorder}
-              />
-            }
-          />
-        </div>
+        <QuickWorkoutWizard
+          workoutFlow={workoutFlow}
+          onFlowChange={handleFlowChange}
+          canProceedFromStep={canProceedFromStep}
+          isAdding={isCreating}
+          onFinish={handleFinish}
+          onStepChange={handleStepChange}
+          footerClassName={cn('sticky bottom-[-24px]')}
+          finishButtonText="Add to Favourites"
+          // Manual flow components (reuse existing)
+          muscleGroupsComponent={
+            <ManualMuscleGroupsStep
+              muscleGroups={allMuscleGroups}
+              selectedMuscleGroups={selectedMuscleGroups}
+              onMuscleGroupToggle={(alias: string) => {
+                const newSelection = selectedMuscleGroups.includes(alias)
+                  ? selectedMuscleGroups.filter((g) => g !== alias)
+                  : [...selectedMuscleGroups, alias]
+                setSelectedMuscleGroups(newSelection)
+              }}
+            />
+          }
+          equipmentComponent={
+            <ManualEquipmentStep
+              selectedEquipment={selectedEquipment}
+              onEquipmentToggle={(equipment) => {
+                const newSelection = selectedEquipment.includes(equipment)
+                  ? selectedEquipment.filter((e) => e !== equipment)
+                  : [...selectedEquipment, equipment]
+                setSelectedEquipment(newSelection)
+              }}
+            />
+          }
+          exercisesComponent={
+            <ManualExercisesStep
+              filteredExercises={filteredExercises}
+              selectedExercises={selectedExercises}
+              onExerciseSelect={handleExerciseSelect}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+              existingExercises={[]} // No existing exercises for favourites
+              selectedMuscleGroups={selectedMuscleGroups}
+              onMuscleGroupChange={setSelectedMuscleGroups}
+              selectedEquipment={selectedEquipment}
+              onEquipmentChange={setSelectedEquipment}
+            />
+          }
+          reviewComponent={
+            <ManualReviewStep
+              existingExercises={[]} // No existing exercises for favourites
+              selectedExercises={selectedExerciseObjects}
+              onReorderExercises={handleReorderExercises}
+              onRemoveExercise={handleRemoveExercise}
+            />
+          }
+          // AI flow components (reuse existing)
+          aiMuscleGroupsComponent={
+            <AiMuscleGroupsStep
+              data={aiInputData}
+              onDataChange={setAiInputData}
+              muscleGroups={allMuscleGroups}
+            />
+          }
+          aiEquipmentComponent={
+            <AiEquipmentStep data={aiInputData} onDataChange={setAiInputData} />
+          }
+          aiParametersComponent={
+            <AiParametersStep
+              data={aiInputData}
+              onDataChange={setAiInputData}
+            />
+          }
+          aiResultsComponent={
+            <AiResultsStep
+              data={aiWorkoutResult}
+              inputData={aiInputData}
+              isLoading={isGeneratingAiWorkout}
+              error={aiGenerationError}
+              onRetry={handleRetryAiGeneration}
+              onExercisesReorder={handleExercisesReorder}
+            />
+          }
+        />
       </DialogContent>
     </Dialog>
   )

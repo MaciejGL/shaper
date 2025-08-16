@@ -21,8 +21,8 @@ import {
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 
+import { EquipmentFilters } from './equipment-filters'
 import { ExercisesList } from './exercises-list'
-import LazyEquipmentFilters from './lazy-equipment-filters'
 import { SelectedFilters } from './selected-filters'
 
 type AddExerciseModalProps = {
@@ -226,10 +226,11 @@ export function AddExerciseModal({
             </div>
             <div className="px-4">
               <p className="text-md font-medium  mb-2">2. Select equipment</p>
-              <LazyEquipmentFilters
+              <EquipmentFilters
                 selectedEquipment={selectedEquipment}
                 onEquipmentToggle={handleEquipmentToggle}
                 equipment={allEquipment}
+                variant="cards"
               />
             </div>
 

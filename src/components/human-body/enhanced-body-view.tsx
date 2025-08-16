@@ -70,14 +70,20 @@ export function EnhancedBodyView({
         <TabsTrigger value="back">Back</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="front" className="flex flex-col items-center">
+      <TabsContent
+        value="front"
+        className="flex flex-col items-center bg-secondary -mx-2 px-2 rounded-lg shadow-xs"
+      >
         <FrontBodyView
           getPathProps={getPathProps}
           isRegionSelected={isRegionSelected}
           handleRegionClick={handleRegionClick}
         />
       </TabsContent>
-      <TabsContent value="back" className="flex flex-col items-center">
+      <TabsContent
+        value="back"
+        className="flex flex-col items-center bg-secondary -mx-2 px-2 rounded-lg shadow-xs"
+      >
         <BackBodyView
           getPathProps={getPathProps}
           isRegionSelected={isRegionSelected}

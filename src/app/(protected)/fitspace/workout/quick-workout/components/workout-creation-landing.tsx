@@ -28,7 +28,7 @@ export function WorkoutCreationLanding({
   onSelectFavourites,
 }: WorkoutCreationLandingProps) {
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6">
       {/* Option Cards */}
       <div className="grid gap-4">
         {/* AI Generation Option */}
@@ -39,7 +39,7 @@ export function WorkoutCreationLanding({
         >
           <Card
             className="cursor-pointer transition-all"
-            variant="gradient"
+            variant="secondary"
             onClick={onSelectAI}
           >
             <CardContent>
@@ -52,7 +52,7 @@ export function WorkoutCreationLanding({
                     Quick Workout
                   </CardTitle>
                   <CardDescription>
-                    Let us find the exercises for you
+                    Automatically suggest exercises for you
                   </CardDescription>
                 </div>
                 <Button

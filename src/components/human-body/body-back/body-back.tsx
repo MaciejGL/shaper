@@ -23,8 +23,8 @@ export function BackBodyView({
   handleRegionClick,
 }: BodyViewProps) {
   const Y_OFFSET = 20
-  const LEFT_LABEL_OFFSET = 1
-  const RIGHT_LABEL_OFFSET = 195
+  const LEFT_LABEL_OFFSET = 13
+  const RIGHT_LABEL_OFFSET = 188
   const config: Record<
     string,
     {

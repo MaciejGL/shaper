@@ -441,7 +441,7 @@ export default function QuickWorkoutPage() {
   )
 
   return (
-    <div className="min-h-screen pb-[80px] max-w-screen-sm mx-auto">
+    <div className="min-h-screen pb-[80px] max-w-screen-sm mx-auto px-2">
       {shouldShowWizard ? (
         <QuickWorkoutWizard
           showLanding={workoutFlow === null}
@@ -472,6 +472,7 @@ export default function QuickWorkoutPage() {
           aiResultsComponent={aiResultsComponent}
           // Favourites flow components
           favouritesComponent={favouritesComponent}
+          footerClassName="mx-0"
         />
       ) : (
         <ExistingWorkoutView

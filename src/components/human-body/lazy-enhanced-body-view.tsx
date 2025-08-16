@@ -1,9 +1,10 @@
 'use client'
 
+import { Loader2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { ComponentType } from 'react'
 
-import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 
 interface EnhancedBodyViewProps {
   selectedMuscleGroups: string[]
@@ -13,27 +14,23 @@ interface EnhancedBodyViewProps {
 }
 
 // Loading skeleton that matches the actual component layout
-function BodyViewSkeleton() {
+export function BodyViewSkeleton() {
   return (
     <div className="w-full max-w-md mx-auto space-y-4">
       {/* Tabs skeleton */}
-      <div className="flex space-x-1 bg-muted p-1 rounded-md">
-        <Skeleton className="h-9 flex-1" />
-        <Skeleton className="h-9 flex-1" />
+      <div className="flex justify-center">
+        <Tabs className="flex space-x-1">
+          <TabsList>
+            <TabsTrigger value="front">Front</TabsTrigger>
+            <TabsTrigger value="back">Back</TabsTrigger>
+          </TabsList>
+        </Tabs>
       </div>
 
       {/* Body diagram skeleton */}
       <div className="flex justify-center">
-        <Skeleton className="h-96 w-64 rounded-lg" />
-      </div>
-
-      {/* Optional muscle labels skeleton */}
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-32 mx-auto" />
-        <div className="flex justify-center space-x-2">
-          <Skeleton className="h-6 w-16" />
-          <Skeleton className="h-6 w-20" />
-          <Skeleton className="h-6 w-18" />
+        <div className="h-96 w-64 rounded-lg flex-center">
+          <Loader2 className="animate-spin" />
         </div>
       </div>
     </div>

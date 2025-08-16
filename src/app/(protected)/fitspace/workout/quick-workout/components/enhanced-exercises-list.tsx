@@ -48,7 +48,7 @@ export function EnhancedExercisesList({
   }, [filteredExercises, selectedExercises])
 
   return (
-    <div className="pb-10 space-y-4">
+    <div className="space-y-4">
       {/* Search Input */}
       <Input
         id="search-exercises"

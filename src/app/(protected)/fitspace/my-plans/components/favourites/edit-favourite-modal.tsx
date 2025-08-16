@@ -325,7 +325,7 @@ export function EditFavouriteModal({
     return (
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent fullScreen dialogTitle="Edit Favourite Workout">
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="text-center space-y-2 mt-4">
               <h2 className="text-2xl font-bold">Edit Favourite Workout</h2>
               <p className="text-muted-foreground">
@@ -337,11 +337,11 @@ export function EditFavouriteModal({
               <Input
                 label="Workout Name *"
                 id="edit-title"
-                className="w-full px-3 py-2 border border-border rounded-md bg-background"
+                className="w-full"
                 placeholder="e.g., Morning Push Routine"
                 value={title}
+                variant="secondary"
                 onChange={(e) => setTitle(e.target.value)}
-                autoFocus
               />
             </div>
 
@@ -354,7 +354,7 @@ export function EditFavouriteModal({
                   {favourite.exercises.map((exercise, index) => (
                     <div
                       key={exercise.id}
-                      className="text-sm text-muted-foreground bg-muted rounded-md p-3"
+                      className="text-sm font-medium bg-card rounded-md p-3"
                     >
                       {index + 1}. {exercise.name}
                     </div>
@@ -374,16 +374,6 @@ export function EditFavouriteModal({
                 onSelectManual={handleSelectManual}
                 onSelectAI={handleSelectAI}
               />
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={handleClose}
-                className="px-4 py-2 border border-border rounded-md hover:bg-muted"
-              >
-                Cancel
-              </button>
             </div>
           </div>
         </DialogContent>

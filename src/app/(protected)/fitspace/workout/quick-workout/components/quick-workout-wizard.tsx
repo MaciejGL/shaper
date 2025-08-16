@@ -243,11 +243,11 @@ export function QuickWorkoutWizard({
       {!isOnLanding && (
         <div
           className={cn(
-            'bg-background fixed bottom-[72px] left-0 right-0 px-2 z-50',
+            'bg-background fixed bottom-[72px] left-0 right-0 z-50 px-2 -mx-4',
             footerClassName,
           )}
         >
-          <div className="py-2 max-w-screen-sm mx-auto">
+          <div className="py-2 mx-auto">
             <div className="flex justify-between gap-4">
               <Button
                 variant="tertiary"

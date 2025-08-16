@@ -579,15 +579,13 @@ export enum GQLEquipment {
   Dumbbell = 'DUMBBELL',
   ExerciseBall = 'EXERCISE_BALL',
   EzBar = 'EZ_BAR',
-  FoamRoller = 'FOAM_ROLLER',
-  InclineBench = 'INCLINE_BENCH',
   Kettlebell = 'KETTLEBELL',
   Machine = 'MACHINE',
   Mat = 'MAT',
   MedicineBall = 'MEDICINE_BALL',
   Other = 'OTHER',
-  PullUpBar = 'PULL_UP_BAR',
-  SmithMachine = 'SMITH_MACHINE'
+  SmithMachine = 'SMITH_MACHINE',
+  TrapBar = 'TRAP_BAR'
 }
 
 export type GQLExerciseLog = {
