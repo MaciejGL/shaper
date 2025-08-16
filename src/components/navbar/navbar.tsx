@@ -235,7 +235,10 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
           }
         />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent
+        align="end"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
         <DropdownProvider value={{ closeDropdown: () => setIsOpen(false) }}>
           <div className="flex items-center gap-2 p-4">
             <UserAvatar
