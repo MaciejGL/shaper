@@ -20,20 +20,10 @@ export function translateEquipment(equipment: GQLEquipment) {
       return 'Kettlebell'
     case GQLEquipment.SmithMachine:
       return 'Smith Machine'
-    case GQLEquipment.MedicineBall:
-      return 'Medicine Ball'
-    case GQLEquipment.ExerciseBall:
-      return 'Exercise Ball'
-    case GQLEquipment.PullUpBar:
-      return 'Pull-up Bar'
+    case GQLEquipment.TrapBar:
+      return 'Trap Bar'
     case GQLEquipment.Bench:
       return 'Bench'
-    case GQLEquipment.InclineBench:
-      return 'Incline Bench'
-    case GQLEquipment.Mat:
-      return 'Mat'
-    case GQLEquipment.FoamRoller:
-      return 'Foam Roller'
     case GQLEquipment.Other:
       return 'Other'
     default:

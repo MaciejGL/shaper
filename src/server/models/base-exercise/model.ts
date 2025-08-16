@@ -151,20 +151,10 @@ export default class BaseExercise implements GQLBaseExercise {
         return GQLEquipment.Machine
       case 'SMITH_MACHINE':
         return GQLEquipment.SmithMachine
-      case 'MEDICINE_BALL':
-        return GQLEquipment.MedicineBall
-      case 'EXERCISE_BALL':
-        return GQLEquipment.ExerciseBall
-      case 'PULL_UP_BAR':
-        return GQLEquipment.PullUpBar
       case 'BENCH':
         return GQLEquipment.Bench
-      case 'INCLINE_BENCH':
-        return GQLEquipment.InclineBench
-      case 'MAT':
-        return GQLEquipment.Mat
-      case 'FOAM_ROLLER':
-        return GQLEquipment.FoamRoller
+      case 'TRAP_BAR':
+        return GQLEquipment.TrapBar
       case 'OTHER':
         return GQLEquipment.Other
       default:

@@ -577,12 +577,9 @@ export enum GQLEquipment {
   Bodyweight = 'BODYWEIGHT',
   Cable = 'CABLE',
   Dumbbell = 'DUMBBELL',
-  ExerciseBall = 'EXERCISE_BALL',
   EzBar = 'EZ_BAR',
   Kettlebell = 'KETTLEBELL',
   Machine = 'MACHINE',
-  Mat = 'MAT',
-  MedicineBall = 'MEDICINE_BALL',
   Other = 'OTHER',
   SmithMachine = 'SMITH_MACHINE',
   TrapBar = 'TRAP_BAR'

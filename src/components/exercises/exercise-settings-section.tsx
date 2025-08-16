@@ -15,11 +15,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import {
-  GQLEquipment,
-  useMuscleGroupCategoriesQuery,
-} from '@/generated/graphql-client'
-import { translateEquipment } from '@/utils/translate-equipment'
+import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
+import { useMuscleGroupCategoriesQuery } from '@/generated/graphql-client'
 
 import {
   Drawer,
@@ -151,26 +148,6 @@ interface ExerciseSettingsSectionProps {
   ) => void
 }
 
-const EQUIPMENT_OPTIONS: GQLEquipment[] = [
-  GQLEquipment.Barbell,
-  GQLEquipment.EzBar,
-  GQLEquipment.Dumbbell,
-  GQLEquipment.Machine,
-  GQLEquipment.Cable,
-  GQLEquipment.Bodyweight,
-  GQLEquipment.Band,
-  GQLEquipment.Kettlebell,
-  GQLEquipment.SmithMachine,
-  GQLEquipment.MedicineBall,
-  GQLEquipment.ExerciseBall,
-  GQLEquipment.PullUpBar,
-  GQLEquipment.Bench,
-  GQLEquipment.InclineBench,
-  GQLEquipment.Mat,
-  GQLEquipment.FoamRoller,
-  GQLEquipment.Other,
-]
-
 export function ExerciseSettingsSection({
   exercise,
   currentExercise,
@@ -267,8 +244,8 @@ export function ExerciseSettingsSection({
             </SelectTrigger>
             <SelectContent>
               {EQUIPMENT_OPTIONS.map((equipment) => (
-                <SelectItem key={equipment} value={equipment}>
-                  {translateEquipment(equipment)}
+                <SelectItem key={equipment.value} value={equipment.value}>
+                  {equipment.label}
                 </SelectItem>
               ))}
             </SelectContent>

@@ -11,6 +11,7 @@ export const EQUIPMENT_OPTIONS: { value: GQLEquipment; label: string }[] = [
   { value: GQLEquipment.Bodyweight, label: 'Bodyweight' },
   { value: GQLEquipment.Kettlebell, label: 'Kettlebell' },
   { value: GQLEquipment.Band, label: 'Band' },
+  { value: GQLEquipment.TrapBar, label: 'Trap Bar' },
   { value: GQLEquipment.Other, label: 'Other' },
 ]
 
@@ -36,12 +37,6 @@ export const equipmentImages: Record<GQLEquipment, string> = {
   [GQLEquipment.Barbell]:
     'https://res.cloudinary.com/drfdhibmu/image/upload/v1755348298/ChatGPT_Image_Aug_16_2025_02_44_43_PM_j0otnt.png',
   [GQLEquipment.Other]:
-    'https://res.cloudinary.com/drfdhibmu/image/upload/v1755347493/ChatGPT_Image_Aug_16_2025_02_31_16_PM_p3zdue.png',
-  [GQLEquipment.Mat]:
-    'https://res.cloudinary.com/drfdhibmu/image/upload/v1755347493/ChatGPT_Image_Aug_16_2025_02_31_16_PM_p3zdue.png',
-  [GQLEquipment.MedicineBall]:
-    'https://res.cloudinary.com/drfdhibmu/image/upload/v1755347493/ChatGPT_Image_Aug_16_2025_02_31_16_PM_p3zdue.png',
-  [GQLEquipment.ExerciseBall]:
     'https://res.cloudinary.com/drfdhibmu/image/upload/v1755347493/ChatGPT_Image_Aug_16_2025_02_31_16_PM_p3zdue.png',
   [GQLEquipment.TrapBar]:
     'https://res.cloudinary.com/drfdhibmu/image/upload/v1755347826/ChatGPT_Image_Aug_16_2025_02_36_51_PM_p5dmxh.png',
