@@ -16,7 +16,7 @@ import {
   usePausePlanMutation,
 } from '@/generated/graphql-client'
 
-import { PlanAction } from '../../types'
+import { PlanAction, PlanTab } from '../../types'
 
 export function usePlanAction() {
   const [dialogState, setDialogState] = useState<{
@@ -59,7 +59,7 @@ export function usePlanAction() {
         invalidateQueries()
         toast.success('Plan activated')
         router.refresh()
-        router.push('/fitspace/my-plans?tab=active')
+        router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
     })
   const { mutateAsync: pausePlan, isPending: isPausingPlan } =
@@ -67,7 +67,7 @@ export function usePlanAction() {
       onSuccess: () => {
         invalidateQueries()
         toast.success('Plan paused')
-        router.push('/fitspace/my-plans?tab=available')
+        router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
     })
   const { mutateAsync: closePlan, isPending: isClosingPlan } =
@@ -75,7 +75,7 @@ export function usePlanAction() {
       onSuccess: () => {
         invalidateQueries()
         toast.success('Plan closed')
-        router.push('/fitspace/my-plans?tab=available')
+        router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
     })
   const { mutateAsync: deletePlan, isPending: isDeletingPlan } =

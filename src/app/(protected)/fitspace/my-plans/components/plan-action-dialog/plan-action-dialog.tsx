@@ -148,8 +148,8 @@ export function PlanActionDialog({
             </div>
           </div>
         )}
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose} disabled={isLoading}>
+        <DialogFooter className="grid grid-cols-[auto_1fr] gap-2">
+          <Button variant="secondary" onClick={onClose} disabled={isLoading}>
             Cancel
           </Button>
           <Button
