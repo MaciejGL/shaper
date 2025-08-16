@@ -33,8 +33,8 @@ export function DashboardStatsSkeleton() {
                 {/* Generate 7 skeleton day cards */}
                 {Array.from({ length: 7 }).map((_, index) => (
                   <div key={index} className="shrink-0 last:pr-4">
-                    <div className="day-card rounded-md shrink-0 p-3 min-w-[5rem] bg-primary/6">
-                      <div className="flex-center flex-col gap-1 text-xs md:text-md text-center masked-placeholder-text">
+                    <div className="day-card rounded-md shrink-0 p-3 min-w-[5rem] masked-placeholder-text">
+                      <div className="flex-center flex-col gap-1 text-xs md:text-md text-center opacity-0">
                         <DumbbellIcon className="size-4 text-amber-600" />
                         <span className="masked-placeholder-text">Mon</span>
                         <span className="font-medium truncate ">Upper</span>

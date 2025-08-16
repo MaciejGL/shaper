@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CircularProgress } from '@/components/ui/circular-progress'
 import { Progress } from '@/components/ui/progress'
 import { SectionIcon } from '@/components/ui/section-icon'
+import { Skeleton } from '@/components/ui/skeleton'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   type GQLGetActiveMealPlanQuery,
@@ -208,18 +209,18 @@ function NutritionSkeleton() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="h-4 bg-muted rounded animate-pulse w-24" />
-        <div className="h-4 bg-muted rounded animate-pulse w-20" />
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-4 w-20" />
       </div>
-      <div className="h-2 bg-muted rounded animate-pulse" />
+      <Skeleton className="h-2 w-full" />
 
       {[1, 2, 3].map((i) => (
         <div key={i} className="space-y-2">
           <div className="flex items-center justify-between">
-            <div className="h-4 bg-muted rounded animate-pulse w-16" />
-            <div className="h-4 bg-muted rounded animate-pulse w-20" />
+            <Skeleton className="h-4 w-16" />
+            <Skeleton className="h-4 w-20" />
           </div>
-          <div className="h-2 bg-muted rounded animate-pulse" />
+          <Skeleton className="h-2 w-full" />
         </div>
       ))}
     </div>

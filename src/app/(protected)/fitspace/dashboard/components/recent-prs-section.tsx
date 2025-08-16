@@ -7,6 +7,7 @@ import { useMemo } from 'react'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   type GQLFitspaceDashboardGetRecentProgressQuery,
   useFitspaceDashboardGetRecentProgressQuery,
@@ -344,13 +345,13 @@ export function RecentProgressSkeleton() {
               key={i}
               className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50"
             >
-              <div className="w-8 h-8 rounded-full bg-muted animate-pulse shrink-0" />
+              <Skeleton className="w-8 h-8 rounded-full shrink-0" />
               <div className="flex-1 space-y-1">
-                <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
-                <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-3 w-1/2" />
               </div>
               <div className="text-right">
-                <div className="h-3 bg-muted rounded animate-pulse w-16" />
+                <Skeleton className="h-3 w-16" />
               </div>
             </div>
           ))}
@@ -368,13 +369,13 @@ function ProgressSkeleton() {
           key={i}
           className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50"
         >
-          <div className="w-8 h-8 rounded-full bg-muted animate-pulse shrink-0" />
+          <Skeleton className="w-8 h-8 rounded-full shrink-0" />
           <div className="flex-1 space-y-1">
-            <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
-            <div className="h-3 bg-muted rounded animate-pulse w-1/2" />
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-3 w-1/2" />
           </div>
           <div className="text-right">
-            <div className="h-3 bg-muted rounded animate-pulse w-16" />
+            <Skeleton className="h-3 w-16" />
           </div>
         </div>
       ))}

@@ -57,10 +57,7 @@ export function PlanCard({
 
   return (
     <Card
-      className={cn(
-        'cursor-pointer hover:shadow-md transition-shadow',
-        loading && 'opacity-50',
-      )}
+      className={cn('cursor-pointer', loading && 'opacity-50')}
       onClick={() => onClick(plan)}
     >
       <CardHeader className="pb-3">

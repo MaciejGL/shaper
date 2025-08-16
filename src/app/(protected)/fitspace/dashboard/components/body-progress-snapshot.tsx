@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
   type GQLBodyMeasuresQuery,
   useBodyMeasuresQuery,
@@ -212,15 +213,15 @@ function MeasurementsSkeleton() {
           className="flex items-center justify-between p-3 rounded-lg bg-background/50 border border-border/50"
         >
           <div className="flex items-center gap-3">
-            <div className="w-5 h-5 bg-muted rounded animate-pulse" />
+            <Skeleton className="w-5 h-5 rounded-full" />
             <div className="space-y-1">
-              <div className="h-4 bg-muted rounded animate-pulse w-16" />
-              <div className="h-3 bg-muted rounded animate-pulse w-12" />
+              <Skeleton className="h-4 w-16" />
+              <Skeleton className="h-3 w-12" />
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <div className="h-3 w-3 bg-muted rounded animate-pulse" />
-            <div className="h-3 w-8 bg-muted rounded animate-pulse" />
+            <Skeleton className="h-3 w-3 rounded-full" />
+            <Skeleton className="h-3 w-8" />
           </div>
         </div>
       ))}
