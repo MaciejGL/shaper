@@ -63,29 +63,43 @@ export function useScrollToItem({
       const container = containerRef.current
       if (!container) return
 
-      // Try scrollIntoView first (more reliable)
+      // Always use manual calculation to avoid page scroll
       const items = container.querySelectorAll(itemSelector)
       const currentItem = items[currentIndex] as HTMLElement
 
       if (currentItem && container.contains(currentItem)) {
-        // Use more conservative scroll that won't affect page scroll
-        const itemRect = currentItem.getBoundingClientRect()
-        const containerRect = container.getBoundingClientRect()
+        // Get actual item position relative to container
+        const containerScrollLeft = container.scrollLeft
+        // const containerClientLeft = container.clientLeft
+        const itemOffsetLeft = currentItem.offsetLeft
+        const itemWidth = currentItem.offsetWidth
+        const containerWidth = container.clientWidth
 
-        // Only scroll if item is outside the visible area of its container
-        const isItemVisible =
-          itemRect.left >= containerRect.left &&
-          itemRect.right <= containerRect.right
+        // Calculate if item is visible
+        const itemStart = itemOffsetLeft - containerScrollLeft
+        const itemEnd = itemStart + itemWidth
+        const isItemVisible = itemStart >= 0 && itemEnd <= containerWidth
 
         if (!isItemVisible) {
-          currentItem.scrollIntoView({
+          // Calculate scroll position to center the item
+          const scrollPosition =
+            itemOffsetLeft - containerWidth / 2 + itemWidth / 2
+
+          // Ensure scroll position is within bounds
+          const maxScroll = Math.max(0, container.scrollWidth - containerWidth)
+          const finalScrollPosition = Math.max(
+            0,
+            Math.min(scrollPosition, maxScroll),
+          )
+
+          // Only scroll the container, never the page
+          container.scrollTo({
+            left: finalScrollPosition,
             behavior: 'smooth',
-            block: 'nearest',
-            inline: 'center',
           })
         }
       } else {
-        // Fallback to manual calculation
+        // Fallback to calculation-based approach
         const containerWidth = container.clientWidth
         const totalWidth = itemCount * itemWidth
 

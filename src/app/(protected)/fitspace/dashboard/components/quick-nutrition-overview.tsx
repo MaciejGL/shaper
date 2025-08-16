@@ -192,8 +192,12 @@ function EmptyNutrition() {
       <p className="text-xs text-muted-foreground/70 mb-4">
         Start tracking your nutrition to see your progress
       </p>
-      <ButtonLink href="/fitspace/meal-plan" size="sm" variant="outline">
-        <Plus className="h-4 w-4 mr-1" />
+      <ButtonLink
+        href="/fitspace/meal-plan"
+        size="sm"
+        variant="tertiary"
+        iconStart={<Plus />}
+      >
         Log First Meal
       </ButtonLink>
     </div>

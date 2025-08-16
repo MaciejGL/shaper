@@ -324,9 +324,6 @@ function EmptyProgress() {
       <p className="text-xs text-muted-foreground/70 mb-4">
         Complete workouts with logged weights and reps to see progress
       </p>
-      <ButtonLink href="/fitspace/workout" size="sm" variant="outline">
-        Start Workout
-      </ButtonLink>
     </div>
   )
 }
