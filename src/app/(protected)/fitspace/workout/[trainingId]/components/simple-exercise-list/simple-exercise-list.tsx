@@ -155,6 +155,11 @@ export function SimpleExerciseList() {
   return (
     <div className="space-y-4 pb-24">
       <div className="space-y-6">
+        {activeDay.exercises.length === 0 && (
+          <div className="text-center text-muted-foreground p-4 rounded-lg bg-muted/50">
+            You don't have any exercises for this day.
+          </div>
+        )}
         {activeDay.exercises.map((exercise) => (
           <SimpleExercise
             key={exercise.id}
@@ -167,7 +172,9 @@ export function SimpleExerciseList() {
         ))}
       </div>
 
-      {!activeDay.isRestDay && <Summary open={allCompleted} />}
+      {!activeDay.isRestDay && activeDay.exercises.length > 0 && (
+        <Summary open={allCompleted} />
+      )}
     </div>
   )
 }

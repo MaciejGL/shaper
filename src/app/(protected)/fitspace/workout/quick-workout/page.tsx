@@ -1,8 +1,9 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
+import { Loader } from '@/components/loader'
 import {
   GQLEquipment,
   GQLTrainingPlan,
@@ -66,13 +67,26 @@ export default function QuickWorkoutPage() {
 
   // Data fetching
   const { data: exercisesData } = useFitspaceGetExercisesQuery()
-  const { data: quickWorkoutPlanData } =
+  const { data: quickWorkoutPlanData, isLoading: isLoadingQuickWorkoutPlan } =
     useFitspaceGetUserQuickWorkoutPlanQuery(
       {},
       {
         refetchOnMount: true,
       },
     )
+
+  useEffect(() => {
+    const mainContent = document.getElementById('main-content')
+    if (mainContent) {
+      mainContent.classList.add('bg-secondary', 'dark:bg-background')
+    }
+
+    return () => {
+      if (mainContent) {
+        mainContent.classList.remove('bg-secondary', 'dark:bg-background')
+      }
+    }
+  }, [])
 
   // Process data
   const quickWorkoutPlan = useMemo(() => {
@@ -442,7 +456,12 @@ export default function QuickWorkoutPage() {
 
   return (
     <div className="min-h-screen pb-[80px] max-w-screen-sm mx-auto px-2">
-      {shouldShowWizard ? (
+      {isLoadingQuickWorkoutPlan && (
+        <div className="flex justify-center items-center min-h-[400px]">
+          <Loader />
+        </div>
+      )}
+      {shouldShowWizard && !isLoadingQuickWorkoutPlan ? (
         <QuickWorkoutWizard
           showLanding={workoutFlow === null}
           workoutFlow={workoutFlow}
@@ -474,13 +493,13 @@ export default function QuickWorkoutPage() {
           favouritesComponent={favouritesComponent}
           footerClassName="mx-0"
         />
-      ) : (
+      ) : !isLoadingQuickWorkoutPlan ? (
         <ExistingWorkoutView
           quickWorkoutPlan={quickWorkoutPlan}
           onCreateNewWorkout={handleCreateNewWorkout}
           onAddMoreExercises={handleAddMoreExercises}
         />
-      )}
+      ) : null}
     </div>
   )
 }

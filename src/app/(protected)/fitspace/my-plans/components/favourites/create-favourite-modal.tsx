@@ -237,6 +237,7 @@ export function CreateFavouriteModal({
               <Input
                 label="Workout Name"
                 id="title"
+                variant="secondary"
                 placeholder="e.g., Morning Push Routine"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}

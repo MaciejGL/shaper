@@ -23,6 +23,7 @@ export function ExerciseSets({
 
   return (
     <div className="grid gap-1.5">
+      <h3 className="text-sm font-medium text-muted-foreground">Sets</h3>
       {exercise.sets.map((set, index) => (
         <div
           key={set.id}
@@ -40,20 +41,22 @@ export function ExerciseSets({
             <div className="flex gap-3">
               {set.minReps && set.maxReps ? (
                 <span>
-                  {set.minReps}-{set.maxReps}
+                  {set.minReps}-{set.maxReps} reps
                 </span>
-              ) : set.reps ? (
-                <span>{set.reps}</span>
+              ) : set.reps || set.minReps ? (
+                <span>{set.reps || set.minReps} reps</span>
               ) : null}
 
-              {typeof set.weight === 'number' && (
+              {typeof set.weight === 'number' ? (
                 <div className="flex items-center gap-3">
-                  <span className="text-muted-foreground">x</span>
+                  {set.reps || set.minReps ? (
+                    <span className="text-muted-foreground">x</span>
+                  ) : null}
                   <span>
                     {set.weight} {preferences.weightUnit}
                   </span>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
 

@@ -26,6 +26,7 @@ interface FavouriteWorkoutsListProps {
   onDeleteWorkout: (favouriteId: string) => void
   onRefetch: () => void
   workoutStatus: WorkoutStatusAnalysis
+  isStarting: boolean
 }
 
 export function FavouriteWorkoutsList({
@@ -36,6 +37,7 @@ export function FavouriteWorkoutsList({
   onDeleteWorkout,
   onRefetch,
   workoutStatus,
+  isStarting,
 }: FavouriteWorkoutsListProps) {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
@@ -82,6 +84,7 @@ export function FavouriteWorkoutsList({
               onEdit={() => onEditWorkout(favourite)}
               onDelete={() => onDeleteWorkout(favourite.id)}
               workoutStatus={workoutStatus}
+              isLoading={isStarting}
             />
           ))}
         </div>

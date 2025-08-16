@@ -11,7 +11,8 @@ const cardVariants = cva(
     variants: {
       variant: {
         elevated: 'shadow-neuro-light dark:shadow-neuro-dark',
-        secondary: 'bg-card border-0 shadow-none',
+        secondary:
+          'bg-card border-0 dark:shadow-none shadow-xs border-border dark:border-border/50 border',
         gradient:
           'border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-white via-white to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800 border-0',
       },

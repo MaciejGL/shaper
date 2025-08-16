@@ -1,12 +1,11 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { ListPlusIcon, PlusIcon } from 'lucide-react'
+import { ChevronRight, ListPlusIcon, PlusIcon } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
-import { Separator } from '@/components/ui/separator'
 import { GQLFitspaceGetUserQuickWorkoutPlanQuery } from '@/generated/graphql-client'
 
 import { getTodaysWorkoutExercises } from '../utils/workout-utils'
@@ -118,8 +117,6 @@ export function ExistingWorkoutView({
               </div>
             </div>
 
-            <Separator />
-
             {/* Action Buttons */}
             <div className="space-y-4">
               <div className="flex flex-col gap-3">
@@ -127,6 +124,7 @@ export function ExistingWorkoutView({
                   href={`/fitspace/workout/${quickWorkoutPlan.id}`}
                   size="lg"
                   className="w-full"
+                  iconEnd={<ChevronRight />}
                 >
                   {isWorkoutCompleted
                     ? 'View Completed Workout'
@@ -135,7 +133,7 @@ export function ExistingWorkoutView({
 
                 <div className="flex gap-3">
                   <Button
-                    variant="secondary"
+                    variant="tertiary"
                     onClick={onCreateNewWorkout}
                     className="flex-1"
                     iconStart={<PlusIcon />}
@@ -144,7 +142,7 @@ export function ExistingWorkoutView({
                   </Button>
 
                   <Button
-                    variant="secondary"
+                    variant="tertiary"
                     onClick={onAddMoreExercises}
                     className="flex-1"
                     iconStart={<ListPlusIcon />}

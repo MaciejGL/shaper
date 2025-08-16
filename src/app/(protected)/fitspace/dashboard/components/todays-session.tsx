@@ -41,7 +41,7 @@ export function TodaysSession({ plan }: TodaysSessionProps) {
 
           <div>
             <div className="flex gap-2">
-              <ButtonLink href="/fitspace/my-plans" variant="outline">
+              <ButtonLink href="/fitspace/my-plans" variant="tertiary">
                 Activate plan
               </ButtonLink>
               <ButtonLink

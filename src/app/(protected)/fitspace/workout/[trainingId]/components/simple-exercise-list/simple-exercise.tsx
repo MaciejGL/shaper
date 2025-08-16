@@ -7,13 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import type { WorkoutContextPlan } from '@/context/workout-context/workout-context'
 import {
   useFitspaceGetWorkoutQuery,
+  useFitspaceRemoveExerciseFromWorkoutMutation,
   useFitspaceSwapExerciseMutation,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
 
-import { ExerciseActions } from './exercise-actions'
-import { ExerciseMetadata } from './exercise-metadata'
+import { ExerciseMetadata } from '../exercise/exercise-metadata'
+
 import { ExerciseSets } from './exercise-sets'
 import { InstructionsDrawer } from './instructions-drawer'
 import { SwapExerciseDrawer } from './swap-exercise-drawer'
@@ -47,6 +48,15 @@ export function SimpleExercise({
 
   const { mutateAsync: swapExercise, isPending: isSwapping } =
     useFitspaceSwapExerciseMutation({
+      onSuccess: () => {
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+        })
+      },
+    })
+
+  const { mutateAsync: removeExercise, isPending: isRemoving } =
+    useFitspaceRemoveExerciseFromWorkoutMutation({
       onSuccess: () => {
         invalidateQuery({
           queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
@@ -89,13 +99,6 @@ export function SimpleExercise({
                   className="self-start"
                 />
               </div>
-
-              <ExerciseActions
-                exercise={exercise}
-                handleToggleSet={handleToggleSet}
-                onShowInstructions={() => setIsInstructionsOpen(true)}
-                onShowSwapExercise={() => setIsSwapExerciseOpen(true)}
-              />
             </div>
           </div>
         </CardHeader>
@@ -109,7 +112,17 @@ export function SimpleExercise({
             </div>
           )}
 
-          <ExerciseMetadata exercise={exercise} />
+          <ExerciseMetadata
+            exercise={exercise}
+            handleMarkAsCompleted={() =>
+              handleToggleExercise(exercise.id, !isCompleted)
+            }
+            isCompleted={isCompleted}
+            handleRemoveExercise={() =>
+              removeExercise({ exerciseId: exercise.id })
+            }
+            isRemoving={isRemoving}
+          />
 
           <ExerciseSets
             exercise={exercise}

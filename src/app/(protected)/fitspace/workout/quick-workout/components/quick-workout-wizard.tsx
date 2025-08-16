@@ -198,7 +198,7 @@ export function QuickWorkoutWizard({
     : ((currentStep + 1) / currentSteps.length) * 100
 
   return (
-    <div className="bg-background pb-[80px]">
+    <div className="dark:bg-background pb-[80px]">
       {/* Header with Progress */}
       {!isOnLanding && (
         <div className="container py-4 space-y-4 mx-auto">
@@ -243,7 +243,7 @@ export function QuickWorkoutWizard({
       {!isOnLanding && (
         <div
           className={cn(
-            'bg-background fixed bottom-[72px] left-0 right-0 z-50 px-2 -mx-4',
+            'bg-secondary dark:bg-background fixed bottom-[72px] left-0 right-0 z-50 px-2 -mx-4',
             footerClassName,
           )}
         >

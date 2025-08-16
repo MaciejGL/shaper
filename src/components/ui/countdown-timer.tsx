@@ -75,6 +75,7 @@ export function CountdownTimer({
           setState('completed')
           onComplete?.()
           // Auto-reset to idle after 3 seconds
+
           setTimeout(() => {
             setState('idle')
             setTimeRemaining(restDuration)

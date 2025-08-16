@@ -104,10 +104,12 @@ export function Exercises() {
               {formatWorkoutType(activeDay.workoutType)}
             </p>
 
-            <ExercisesCompleted
-              completedExercises={completedExercises}
-              totalExercises={exercises.length}
-            />
+            {exercises.length > 0 && (
+              <ExercisesCompleted
+                completedExercises={completedExercises}
+                totalExercises={exercises.length}
+              />
+            )}
           </div>
           {exercises.length > 0 && <Progress value={progressPercentage} />}
         </div>
@@ -116,7 +118,7 @@ export function Exercises() {
       {activeDay.isRestDay ? (
         <RestDay />
       ) : activeExerciseId === 'summary' ||
-        (!selectedExercise && !activeDay.isRestDay) ? (
+        (!selectedExercise && !activeDay.isRestDay && !isSimpleView) ? (
         <Summary
           open={true}
           onContinue={() => {

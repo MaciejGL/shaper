@@ -31,6 +31,7 @@ interface FavouriteWorkoutCardProps {
   onEdit: () => void
   onDelete: () => void
   workoutStatus: WorkoutStatusAnalysis
+  isLoading: boolean
 }
 
 export function FavouriteWorkoutCard({
@@ -39,6 +40,7 @@ export function FavouriteWorkoutCard({
   onEdit,
   onDelete,
   workoutStatus,
+  isLoading,
 }: FavouriteWorkoutCardProps) {
   const totalExercises = favourite.exercises.length
   const totalSets = favourite.exercises.reduce(
@@ -74,6 +76,7 @@ export function FavouriteWorkoutCard({
         disabled: false,
         variant: 'secondary' as const,
         text: 'Replace & Start',
+        loading: isLoading,
       }
     }
 
@@ -81,6 +84,7 @@ export function FavouriteWorkoutCard({
       disabled: false,
       variant: 'default' as const,
       text: 'Start Workout',
+      loading: isLoading,
     }
   }
 
@@ -147,7 +151,7 @@ export function FavouriteWorkoutCard({
                   key={exercise.id}
                   variant="secondary"
                   size="lg"
-                  className="w-full justify-start py-3"
+                  className="w-full justify-start py-3 whitespace-pre-wrap"
                 >
                   {index + 1}. {exercise.name}
                 </Badge>
@@ -157,7 +161,7 @@ export function FavouriteWorkoutCard({
         )}
         {/* Footer */}
       </CardContent>
-      <CardFooter className="flex items-center justify-between">
+      <CardFooter className="flex items-center justify-between gap-2">
         <span className="text-xs text-muted-foreground">
           Created {createdAgo}
         </span>

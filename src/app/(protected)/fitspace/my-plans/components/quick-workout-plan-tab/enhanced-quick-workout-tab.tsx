@@ -49,6 +49,7 @@ export function EnhancedQuickWorkoutTab({
   const [pendingFavouriteId, setPendingFavouriteId] = useState<string | null>(
     null,
   )
+  const [isStarting, setIsStarting] = useState(false)
 
   // Favourite workouts hooks
   const {
@@ -60,6 +61,23 @@ export function EnhancedQuickWorkoutTab({
 
   // Workout status analysis
   const workoutStatus = useFavouriteWorkoutStatus()
+
+  const startWorkout = async (favouriteId: string) => {
+    try {
+      setIsStarting(true)
+      await favouriteOperations.startFromFavourite({
+        favouriteWorkoutId: favouriteId,
+        replaceExisting: true,
+      })
+
+      // Show success message (could be a toast notification)
+    } catch (error) {
+      console.error('Failed to start workout from favourite:', error)
+      // Handle error (could show error toast)
+    } finally {
+      setIsStarting(false)
+    }
+  }
 
   const handleStartFromFavourite = async (favouriteId: string) => {
     // Check workout status before proceeding
@@ -77,20 +95,6 @@ export function EnhancedQuickWorkoutTab({
 
     // Direct start if no confirmation needed
     await startWorkout(favouriteId)
-  }
-
-  const startWorkout = async (favouriteId: string) => {
-    try {
-      await favouriteOperations.startFromFavourite({
-        favouriteWorkoutId: favouriteId,
-        replaceExisting: true,
-      })
-
-      // Show success message (could be a toast notification)
-    } catch (error) {
-      console.error('Failed to start workout from favourite:', error)
-      // Handle error (could show error toast)
-    }
   }
 
   const handleConfirmReplacement = async () => {
@@ -174,6 +178,7 @@ export function EnhancedQuickWorkoutTab({
             onDeleteWorkout={handleDeleteFavourite}
             onRefetch={refetch}
             workoutStatus={workoutStatus}
+            isStarting={isStarting}
           />
         </TabsContent>
 
