@@ -14,6 +14,7 @@ import {
   GQLExerciseType,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
+import { isProd } from '@/lib/get-base-url'
 import { GQLContext } from '@/types/gql-context'
 
 import Image from '../image/model'
@@ -303,9 +304,11 @@ export default class BaseExercise implements GQLBaseExercise {
     if (this.data.images) {
       return this.data.images.map((image) => new Image(image, this.context))
     } else {
-      console.error(
-        `[BaseExercise] No images found for exercise ${this.id}. Skipping.`,
-      )
+      if (!isProd) {
+        console.error(
+          `[BaseExercise] No images found for exercise ${this.id}. Skipping.`,
+        )
+      }
       return []
     }
   }

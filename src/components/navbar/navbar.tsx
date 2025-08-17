@@ -99,7 +99,8 @@ export const Navbar = ({
       transition={{ duration: 0.3 }}
       className={cn(
         'py-3 px-4 flex justify-between items-center bg-transparent',
-        'mt-[var(--safe-area-inset-top)] safe-area-x', // Add safe area padding for iOS PWA
+        'mt-[var(--safe-area-inset-top)]', // Add safe area padding for iOS PWA
+        withSidebar && 'mb-2',
       )}
     >
       <div className="flex items-center gap-2">
