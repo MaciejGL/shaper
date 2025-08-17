@@ -1,6 +1,6 @@
 'use client'
 
-import { Smartphone } from 'lucide-react'
+import Image from 'next/image'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -12,7 +12,6 @@ interface MobileAppBannerProps {
 }
 
 export function MobileAppBanner({
-  appName = 'Hypertro',
   appStoreUrl = 'https://apps.apple.com/app/hypertro',
   playStoreUrl = 'https://play.google.com/store/apps/details?id=com.hypertro',
 }: MobileAppBannerProps) {
@@ -61,39 +60,26 @@ export function MobileAppBanner({
   return (
     <div>
       <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
-          <Smartphone className="w-6 h-6 text-muted-foreground" />
-        </div>
-
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-sm mb-1 text-center ">
-            Get the {appName} App
-          </h3>
-          <p className="text-xs text-muted-foreground text-center">
-            Download our mobile app for the best experience
-          </p>
-        </div>
-
         {deviceType === 'ios' && (
-          <Button
-            onClick={handleDownload}
-            size="sm"
-            className="flex items-center gap-2 flex-shrink-0"
-            iconStart={<AppleIcon />}
-          >
-            App Store
-          </Button>
+          <button onClick={handleDownload}>
+            <Image
+              src="/app-store.svg"
+              alt="App Store"
+              width={240}
+              height={80}
+            />
+          </button>
         )}
 
         {deviceType === 'android' && (
-          <Button
-            onClick={handleDownload}
-            size="sm"
-            className="flex items-center gap-2 flex-shrink-0"
-            iconStart={<GooglePlayIcon />}
-          >
-            Google Play
-          </Button>
+          <button onClick={handleDownload}>
+            <Image
+              src="/google-play.svg"
+              alt="Google Play"
+              width={240}
+              height={80}
+            />
+          </button>
         )}
 
         {deviceType === 'other' && (

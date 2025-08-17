@@ -3,8 +3,15 @@ import { NextResponse } from 'next/server'
 import { tmpdir } from 'os'
 import path from 'path'
 
+import { isAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { openai } from '@/lib/open-ai/open-ai'
+
+// Add File polyfill for OpenAI SDK compatibility
+if (typeof globalThis.File === 'undefined') {
+  const { File } = await import('node:buffer')
+  globalThis.File = File as typeof globalThis.File
+}
 
 const ASSISTANT_ID = process.env.OPENAI_ASSISTANT_ID!
 const QUICK_WORKOUT_ASSISTANT_ID = process.env.OPENAI_ASSISTANT_QUICKWORKOUT_ID!
@@ -50,6 +57,7 @@ async function createVectorStoreForAssistant(
 }
 
 export async function POST() {
+  await isAdminUser()
   try {
     /* ------------------------------------------------------------------ */
     /* 1. Pull public exercises from DB                                   */

@@ -151,6 +151,16 @@ export function ExercisesTab() {
     }
   }
 
+  const uploadExercisesToAI = async () => {
+    const response = await fetch('/api/ai/upload-exercises', {
+      method: 'POST',
+    })
+    if (!response.ok) {
+      throw new Error('Failed to upload exercises')
+    }
+    await fetchStats()
+  }
+
   useEffect(() => {
     fetchStats()
   }, [])
@@ -234,6 +244,16 @@ export function ExercisesTab() {
               Refresh
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Upload Exercises</CardTitle>
+          <CardDescription>Upload exercises to AI assistants</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button onClick={uploadExercisesToAI}>Upload Exercises to AI</Button>
         </CardContent>
       </Card>
 

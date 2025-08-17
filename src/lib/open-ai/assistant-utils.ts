@@ -38,7 +38,7 @@ export async function getLastAssistantMessage(threadId: string) {
 }
 
 /**
- * Parses JSON from assistant response, handling cases where it's wrapped in backticks
+ * Parses JSON from assistant response, handling cases where it's wrapped in backticks or markdown code blocks
  */
 export function parseAssistantJsonResponse(response: string) {
   try {
@@ -47,17 +47,30 @@ export function parseAssistantJsonResponse(response: string) {
   } catch (err) {
     console.error(err)
   }
-  // In case the Assistant wrapped the JSON in back-ticks, strip them:
-  const jsonStart = response.indexOf('[')
-  const jsonEnd = response.lastIndexOf(']')
-  const rawJson =
-    jsonStart !== -1 && jsonEnd !== -1
-      ? response.slice(jsonStart, jsonEnd + 1)
-      : response
+
+  // Clean the response by removing markdown code blocks and extra whitespace
+  let cleanedResponse = response.trim()
+
+  // Remove markdown code block markers (```json ... ``` or ``` ... ```)
+  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/
+  const codeBlockMatch = cleanedResponse.match(codeBlockRegex)
+  if (codeBlockMatch) {
+    cleanedResponse = codeBlockMatch[1].trim()
+  }
+
+  // If markdown removal didn't work, try the legacy approach for arrays
+  if (!codeBlockMatch) {
+    const jsonStart = response.indexOf('[')
+    const jsonEnd = response.lastIndexOf(']')
+    if (jsonStart !== -1 && jsonEnd !== -1) {
+      cleanedResponse = response.slice(jsonStart, jsonEnd + 1)
+    }
+  }
 
   try {
-    return JSON.parse(rawJson)
+    return JSON.parse(cleanedResponse)
   } catch (err) {
+    console.error('Failed to parse cleaned response:', cleanedResponse)
     throw new Error('Assistant response was not valid JSON')
   }
 }

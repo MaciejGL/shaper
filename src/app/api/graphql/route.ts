@@ -53,21 +53,41 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
+  let operationName = 'Unknown'
 
   try {
+    // Extract operation name for better tracking
+    const body = await request.clone().text()
+    try {
+      const parsed = JSON.parse(body)
+      operationName =
+        parsed.operationName ||
+        parsed.query?.match(/(?:query|mutation)\s+(\w+)/)?.[1] ||
+        'Unknown'
+    } catch {
+      // If we can't parse, continue with 'Unknown'
+    }
+
     const response = await yoga.handleRequest(request, {
       req: request,
     })
 
-    // Track successful query
+    // Track successful query with operation name
     const executionTime = Date.now() - startTime
-    dbMonitor.trackQuery(executionTime, 'GraphQL-POST')
+    dbMonitor.trackQuery(executionTime, `GraphQL-POST-${operationName}`)
+
+    // Log slow GraphQL operations specifically
+    if (executionTime > 1000) {
+      console.warn(`[SLOW-GRAPHQL] ${operationName}: ${executionTime}ms`)
+    }
 
     return response
   } catch (error) {
     // Track failed query
     const executionTime = Date.now() - startTime
-    dbMonitor.trackQuery(executionTime, 'GraphQL-POST-ERROR')
+    dbMonitor.trackQuery(executionTime, `GraphQL-POST-ERROR-${operationName}`)
+
+    console.error(`[GRAPHQL-ERROR] ${operationName}: ${executionTime}ms`, error)
     throw error
   }
 }
