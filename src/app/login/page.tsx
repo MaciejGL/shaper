@@ -8,6 +8,8 @@ import { authOptions } from '@/lib/auth'
 
 import { LoginCard } from './components/login-card'
 
+export const dynamic = 'force-dynamic'
+
 export default async function RequestOtpPage() {
   let user
   try {

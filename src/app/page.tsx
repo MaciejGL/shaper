@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation'
 import { HomepageClient } from '@/components/homepage.client'
 import { authOptions } from '@/lib/auth'
 
+export const dynamic = 'force-dynamic'
+
 export default async function Home() {
   let user
   try {
