@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { useQueryState } from 'nuqs'
 import { useEffect, useMemo } from 'react'
 
+import { PremiumGate } from '@/components/premium-gate'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   useGetActiveMealPlanQuery,
@@ -43,7 +44,7 @@ export default function MealPlanPage() {
   const activePlan = activePlanData?.getActiveMealPlan
   const defaultPlan = defaultPlanData?.getDefaultMealPlan
 
-  return (
+  const mealPlanContent = (
     <MealPlanProvider
       activePlan={activePlan}
       defaultPlan={defaultPlan}
@@ -58,5 +59,15 @@ export default function MealPlanPage() {
         </div>
       </div>
     </MealPlanProvider>
+  )
+
+  return (
+    <PremiumGate
+      feature="Meal Plans"
+      description="Track your nutrition and follow structured meal plans with premium access."
+      showPartialContent={false}
+    >
+      {mealPlanContent}
+    </PremiumGate>
   )
 }

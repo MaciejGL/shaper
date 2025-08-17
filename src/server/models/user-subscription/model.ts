@@ -22,10 +22,8 @@ export type UserSubscriptionWithIncludes = PrismaUserSubscription & {
   package?:
     | (PrismaPackageTemplate & {
         services: PrismaPackageService[]
-        trainer?: PrismaUser | null
       })
     | null
-  trainer?: PrismaUser | null
   usedServices?: PrismaServiceUsage[]
 }
 

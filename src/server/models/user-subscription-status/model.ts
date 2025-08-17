@@ -11,7 +11,9 @@ import type {
   UserSubscriptionWithDetails,
 } from '@/types/subscription'
 
-import UserSubscription from '../user-subscription/model'
+import UserSubscription, {
+  UserSubscriptionWithIncludes,
+} from '../user-subscription/model'
 
 export interface UserSubscriptionStatusData {
   hasPremium: boolean
@@ -53,8 +55,8 @@ export default class UserSubscriptionStatus
 
   get activeSubscriptions(): GQLUserSubscription[] {
     return this.data.activeSubscriptions.map((sub) => {
-      // Just provide the core subscription data - let GraphQL field resolvers handle related entities
-      const subscriptionData = {
+      // Include all subscription data including package relationship
+      const subscriptionData: UserSubscriptionWithIncludes = {
         id: sub.id,
         userId: sub.userId,
         packageId: sub.packageId,
@@ -73,6 +75,15 @@ export default class UserSubscriptionStatus
           subscriptionId: sub.id,
           metadata: (service.metadata as JsonValue) || null,
         })),
+        package: {
+          ...sub.package,
+          trainerId: sub.trainerId || null,
+          description: sub.package.description || null,
+          services: sub.package.services.map((service) => ({
+            ...service,
+            packageId: sub.packageId,
+          })),
+        },
       }
 
       return new UserSubscription(subscriptionData, this.context)

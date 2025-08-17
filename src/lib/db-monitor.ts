@@ -249,7 +249,7 @@ class DatabaseMonitor {
         if (conn.duration_minutes > 5) {
           longRunning++
           console.warn(
-            `[DB-INVESTIGATE] Long-running: PID ${conn.pid} (${conn.duration_minutes}m) - ${conn.state} - ${conn.query.substring(0, 50)}...`,
+            `[DB-INVESTIGATE] Long-running: PID ${conn.pid} (${conn.duration_minutes}m) - ${conn.state} - ${conn.query}...`,
           )
         }
       }

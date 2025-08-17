@@ -157,6 +157,16 @@ export type GQLAddTrainingWeekInput = {
   weekNumber: Scalars['Int']['input'];
 };
 
+export type GQLAdminExtendSubscriptionInput = {
+  additionalMonths: Scalars['Int']['input'];
+  subscriptionId: Scalars['ID']['input'];
+};
+
+export type GQLAdminUpdateSubscriptionStatusInput = {
+  status: GQLSubscriptionStatus;
+  subscriptionId: Scalars['ID']['input'];
+};
+
 export type GQLAdminUserFilters = {
   dateFrom?: InputMaybe<Scalars['String']['input']>;
   dateTo?: InputMaybe<Scalars['String']['input']>;
@@ -310,6 +320,11 @@ export type GQLBatchLogMealFoodItemInput = {
 export type GQLBulkUpdatePlanPermissionsInput = {
   planUpdates: Array<GQLPlanPermissionUpdateInput>;
   userId: Scalars['ID']['input'];
+};
+
+export type GQLCheckServiceAccessInput = {
+  serviceType: GQLServiceType;
+  trainerId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 export type GQLCoachingRequest = {
@@ -764,6 +779,11 @@ export type GQLGetMealPlanPayload = {
   plan: EntireFieldWrapper<GQLMealPlan>;
 };
 
+export type GQLGetServiceUsageTrackerInput = {
+  serviceType: GQLServiceType;
+  subscriptionId: Scalars['ID']['input'];
+};
+
 export type GQLGetWorkoutPayload = {
   __typename?: 'GetWorkoutPayload';
   plan: EntireFieldWrapper<GQLTrainingPlan>;
@@ -1006,6 +1026,7 @@ export type GQLMutation = {
   adminExtendSubscription: EntireFieldWrapper<GQLUserSubscription>;
   adminUpdateSubscriptionStatus: EntireFieldWrapper<GQLUserSubscription>;
   assignMealPlanToClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  assignTemplateToSelf: EntireFieldWrapper<Scalars['Boolean']['output']>;
   assignTrainingPlanToClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   batchLogMealFood: EntireFieldWrapper<Scalars['Boolean']['output']>;
   bulkUpdatePlanPermissions: EntireFieldWrapper<Array<GQLPlanCollaboratorSummary>>;
@@ -1202,19 +1223,22 @@ export type GQLMutationAddTrainingWeekArgs = {
 
 
 export type GQLMutationAdminExtendSubscriptionArgs = {
-  additionalMonths: Scalars['Int']['input'];
-  subscriptionId: Scalars['ID']['input'];
+  input: GQLAdminExtendSubscriptionInput;
 };
 
 
 export type GQLMutationAdminUpdateSubscriptionStatusArgs = {
-  status: GQLSubscriptionStatus;
-  subscriptionId: Scalars['ID']['input'];
+  input: GQLAdminUpdateSubscriptionStatusInput;
 };
 
 
 export type GQLMutationAssignMealPlanToClientArgs = {
   input: GQLAssignMealPlanToClientInput;
+};
+
+
+export type GQLMutationAssignTemplateToSelfArgs = {
+  planId: Scalars['ID']['input'];
 };
 
 
@@ -1599,9 +1623,7 @@ export type GQLMutationSwapExerciseArgs = {
 
 
 export type GQLMutationTrackServiceUsageArgs = {
-  metadata?: InputMaybe<Scalars['String']['input']>;
-  serviceType: GQLServiceType;
-  trainerId?: InputMaybe<Scalars['ID']['input']>;
+  input: GQLTrackServiceUsageInput;
 };
 
 
@@ -1657,7 +1679,6 @@ export type GQLMutationUpdateNotificationArgs = {
 
 
 export type GQLMutationUpdatePackageTemplateArgs = {
-  id: Scalars['ID']['input'];
   input: GQLUpdatePackageTemplateInput;
 };
 
@@ -1865,7 +1886,6 @@ export type GQLPackageTemplate = {
   services: EntireFieldWrapper<Array<GQLPackageService>>;
   totalRevenue: EntireFieldWrapper<Scalars['Int']['output']>;
   totalSubscriptionCount: EntireFieldWrapper<Scalars['Int']['output']>;
-  trainer?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
   trainerId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
@@ -2034,8 +2054,7 @@ export type GQLQueryAvailablePlansForTeamMemberArgs = {
 
 
 export type GQLQueryCheckServiceAccessArgs = {
-  serviceType: GQLServiceType;
-  trainerId?: InputMaybe<Scalars['ID']['input']>;
+  input: GQLCheckServiceAccessInput;
 };
 
 
@@ -2151,8 +2170,7 @@ export type GQLQueryGetPublicTrainingPlansArgs = {
 
 
 export type GQLQueryGetServiceUsageTrackerArgs = {
-  serviceType: GQLServiceType;
-  subscriptionId: Scalars['ID']['input'];
+  input: GQLGetServiceUsageTrackerInput;
 };
 
 
@@ -2475,6 +2493,12 @@ export enum GQLTimeFormat {
   H24 = 'h24'
 }
 
+export type GQLTrackServiceUsageInput = {
+  metadata?: InputMaybe<Scalars['String']['input']>;
+  serviceType: GQLServiceType;
+  trainerId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type GQLTrackServiceUsageResponse = {
   __typename?: 'TrackServiceUsageResponse';
   error?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -2745,6 +2769,7 @@ export type GQLUpdateNotificationInput = {
 export type GQLUpdatePackageTemplateInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   duration?: InputMaybe<GQLSubscriptionDuration>;
+  id: Scalars['ID']['input'];
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
   priceNOK?: InputMaybe<Scalars['Int']['input']>;
@@ -3156,6 +3181,8 @@ export type GQLResolversTypes = {
   AddSubstituteExerciseInput: GQLAddSubstituteExerciseInput;
   AddTrainingPlanCollaboratorInput: GQLAddTrainingPlanCollaboratorInput;
   AddTrainingWeekInput: GQLAddTrainingWeekInput;
+  AdminExtendSubscriptionInput: GQLAdminExtendSubscriptionInput;
+  AdminUpdateSubscriptionStatusInput: GQLAdminUpdateSubscriptionStatusInput;
   AdminUserFilters: GQLAdminUserFilters;
   AdminUserListItem: ResolverTypeWrapper<GQLAdminUserListItem>;
   AdminUserListResponse: ResolverTypeWrapper<GQLAdminUserListResponse>;
@@ -3173,6 +3200,7 @@ export type GQLResolversTypes = {
   BatchLogMealFoodItemInput: GQLBatchLogMealFoodItemInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   BulkUpdatePlanPermissionsInput: GQLBulkUpdatePlanPermissionsInput;
+  CheckServiceAccessInput: GQLCheckServiceAccessInput;
   CoachingRequest: ResolverTypeWrapper<GQLCoachingRequest>;
   CoachingRequestStatus: GQLCoachingRequestStatus;
   CollaborationInvitation: ResolverTypeWrapper<GQLCollaborationInvitation>;
@@ -3226,6 +3254,7 @@ export type GQLResolversTypes = {
   GenerateAiWorkoutInput: GQLGenerateAiWorkoutInput;
   GetExercisesResponse: ResolverTypeWrapper<GQLGetExercisesResponse>;
   GetMealPlanPayload: ResolverTypeWrapper<GQLGetMealPlanPayload>;
+  GetServiceUsageTrackerInput: GQLGetServiceUsageTrackerInput;
   GetWorkoutPayload: ResolverTypeWrapper<GQLGetWorkoutPayload>;
   Goal: GQLGoal;
   HeightUnit: GQLHeightUnit;
@@ -3294,6 +3323,7 @@ export type GQLResolversTypes = {
   TeamMember: ResolverTypeWrapper<GQLTeamMember>;
   Theme: GQLTheme;
   TimeFormat: GQLTimeFormat;
+  TrackServiceUsageInput: GQLTrackServiceUsageInput;
   TrackServiceUsageResponse: ResolverTypeWrapper<GQLTrackServiceUsageResponse>;
   TrainerRevenueStats: ResolverTypeWrapper<GQLTrainerRevenueStats>;
   TrainingDay: ResolverTypeWrapper<GQLTrainingDay>;
@@ -3360,6 +3390,8 @@ export type GQLResolversParentTypes = {
   AddSubstituteExerciseInput: GQLAddSubstituteExerciseInput;
   AddTrainingPlanCollaboratorInput: GQLAddTrainingPlanCollaboratorInput;
   AddTrainingWeekInput: GQLAddTrainingWeekInput;
+  AdminExtendSubscriptionInput: GQLAdminExtendSubscriptionInput;
+  AdminUpdateSubscriptionStatusInput: GQLAdminUpdateSubscriptionStatusInput;
   AdminUserFilters: GQLAdminUserFilters;
   AdminUserListItem: GQLAdminUserListItem;
   AdminUserListResponse: GQLAdminUserListResponse;
@@ -3377,6 +3409,7 @@ export type GQLResolversParentTypes = {
   BatchLogMealFoodItemInput: GQLBatchLogMealFoodItemInput;
   Boolean: Scalars['Boolean']['output'];
   BulkUpdatePlanPermissionsInput: GQLBulkUpdatePlanPermissionsInput;
+  CheckServiceAccessInput: GQLCheckServiceAccessInput;
   CoachingRequest: GQLCoachingRequest;
   CollaborationInvitation: GQLCollaborationInvitation;
   CopyExercisesFromDayInput: GQLCopyExercisesFromDayInput;
@@ -3421,6 +3454,7 @@ export type GQLResolversParentTypes = {
   GenerateAiWorkoutInput: GQLGenerateAiWorkoutInput;
   GetExercisesResponse: GQLGetExercisesResponse;
   GetMealPlanPayload: GQLGetMealPlanPayload;
+  GetServiceUsageTrackerInput: GQLGetServiceUsageTrackerInput;
   GetWorkoutPayload: GQLGetWorkoutPayload;
   ID: Scalars['ID']['output'];
   Image: GQLImage;
@@ -3478,6 +3512,7 @@ export type GQLResolversParentTypes = {
   SuggestedSets: GQLSuggestedSets;
   SuggestedSetsInput: GQLSuggestedSetsInput;
   TeamMember: GQLTeamMember;
+  TrackServiceUsageInput: GQLTrackServiceUsageInput;
   TrackServiceUsageResponse: GQLTrackServiceUsageResponse;
   TrainerRevenueStats: GQLTrainerRevenueStats;
   TrainingDay: GQLTrainingDay;
@@ -3975,9 +4010,10 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   addSubstituteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAddSubstituteExerciseArgs, 'input'>>;
   addTrainingPlanCollaborator?: Resolver<GQLResolversTypes['TrainingPlanCollaborator'], ParentType, ContextType, RequireFields<GQLMutationAddTrainingPlanCollaboratorArgs, 'input'>>;
   addTrainingWeek?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAddTrainingWeekArgs, 'input'>>;
-  adminExtendSubscription?: Resolver<GQLResolversTypes['UserSubscription'], ParentType, ContextType, RequireFields<GQLMutationAdminExtendSubscriptionArgs, 'additionalMonths' | 'subscriptionId'>>;
-  adminUpdateSubscriptionStatus?: Resolver<GQLResolversTypes['UserSubscription'], ParentType, ContextType, RequireFields<GQLMutationAdminUpdateSubscriptionStatusArgs, 'status' | 'subscriptionId'>>;
+  adminExtendSubscription?: Resolver<GQLResolversTypes['UserSubscription'], ParentType, ContextType, RequireFields<GQLMutationAdminExtendSubscriptionArgs, 'input'>>;
+  adminUpdateSubscriptionStatus?: Resolver<GQLResolversTypes['UserSubscription'], ParentType, ContextType, RequireFields<GQLMutationAdminUpdateSubscriptionStatusArgs, 'input'>>;
   assignMealPlanToClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignMealPlanToClientArgs, 'input'>>;
+  assignTemplateToSelf?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignTemplateToSelfArgs, 'planId'>>;
   assignTrainingPlanToClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignTrainingPlanToClientArgs, 'input'>>;
   batchLogMealFood?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationBatchLogMealFoodArgs, 'input'>>;
   bulkUpdatePlanPermissions?: Resolver<Array<GQLResolversTypes['PlanCollaboratorSummary']>, ParentType, ContextType, RequireFields<GQLMutationBulkUpdatePlanPermissionsArgs, 'input'>>;
@@ -4058,7 +4094,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   sendCollaborationInvitation?: Resolver<GQLResolversTypes['CollaborationInvitation'], ParentType, ContextType, RequireFields<GQLMutationSendCollaborationInvitationArgs, 'input'>>;
   startWorkoutFromFavourite?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationStartWorkoutFromFavouriteArgs, 'input'>>;
   swapExercise?: Resolver<GQLResolversTypes['Substitute'], ParentType, ContextType, RequireFields<GQLMutationSwapExerciseArgs, 'exerciseId' | 'substituteId'>>;
-  trackServiceUsage?: Resolver<GQLResolversTypes['TrackServiceUsageResponse'], ParentType, ContextType, RequireFields<GQLMutationTrackServiceUsageArgs, 'serviceType'>>;
+  trackServiceUsage?: Resolver<GQLResolversTypes['TrackServiceUsageResponse'], ParentType, ContextType, RequireFields<GQLMutationTrackServiceUsageArgs, 'input'>>;
   uncompleteMeal?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUncompleteMealArgs, 'mealId'>>;
   updateBodyMeasurement?: Resolver<GQLResolversTypes['UserBodyMeasure'], ParentType, ContextType, RequireFields<GQLMutationUpdateBodyMeasurementArgs, 'input'>>;
   updateExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseArgs, 'id' | 'input'>>;
@@ -4069,7 +4105,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateMealPlanDetails?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateMealPlanDetailsArgs, 'input'>>;
   updateNote?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationUpdateNoteArgs, 'input'>>;
   updateNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationUpdateNotificationArgs, 'input'>>;
-  updatePackageTemplate?: Resolver<GQLResolversTypes['PackageTemplate'], ParentType, ContextType, RequireFields<GQLMutationUpdatePackageTemplateArgs, 'id' | 'input'>>;
+  updatePackageTemplate?: Resolver<GQLResolversTypes['PackageTemplate'], ParentType, ContextType, RequireFields<GQLMutationUpdatePackageTemplateArgs, 'input'>>;
   updateProfile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType, RequireFields<GQLMutationUpdateProfileArgs, 'input'>>;
   updatePushSubscription?: Resolver<GQLResolversTypes['PushSubscription'], ParentType, ContextType, RequireFields<GQLMutationUpdatePushSubscriptionArgs, 'input'>>;
   updateReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateReviewArgs, 'input'>>;
@@ -4185,7 +4221,6 @@ export type GQLPackageTemplateResolvers<ContextType = GQLContext, ParentType ext
   services?: Resolver<Array<GQLResolversTypes['PackageService']>, ParentType, ContextType>;
   totalRevenue?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   totalSubscriptionCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  trainer?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
   trainerId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -4247,7 +4282,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   availablePlansForTeamMember?: Resolver<Array<GQLResolversTypes['AvailablePlan']>, ParentType, ContextType, RequireFields<GQLQueryAvailablePlansForTeamMemberArgs, 'userId'>>;
   bodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
   checkPremiumAccess?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  checkServiceAccess?: Resolver<GQLResolversTypes['AccessValidationResult'], ParentType, ContextType, RequireFields<GQLQueryCheckServiceAccessArgs, 'serviceType'>>;
+  checkServiceAccess?: Resolver<GQLResolversTypes['AccessValidationResult'], ParentType, ContextType, RequireFields<GQLQueryCheckServiceAccessArgs, 'input'>>;
   clientBodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType, RequireFields<GQLQueryClientBodyMeasuresArgs, 'clientId'>>;
   clientSharedNotes?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType, RequireFields<GQLQueryClientSharedNotesArgs, 'clientId'>>;
   coachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLQueryCoachingRequestArgs, 'id'>>;
@@ -4284,7 +4319,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getPublicTrainingPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetPublicTrainingPlansArgs>>;
   getQuickWorkoutPlan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
   getRecentCompletedWorkouts?: Resolver<Array<GQLResolversTypes['TrainingDay']>, ParentType, ContextType>;
-  getServiceUsageTracker?: Resolver<Maybe<GQLResolversTypes['ServiceUsageTracker']>, ParentType, ContextType, RequireFields<GQLQueryGetServiceUsageTrackerArgs, 'serviceType' | 'subscriptionId'>>;
+  getServiceUsageTracker?: Resolver<Maybe<GQLResolversTypes['ServiceUsageTracker']>, ParentType, ContextType, RequireFields<GQLQueryGetServiceUsageTrackerArgs, 'input'>>;
   getSubscriptionStats?: Resolver<GQLResolversTypes['SubscriptionStats'], ParentType, ContextType>;
   getTemplates?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetTemplatesArgs>>;
   getTrainerRevenue?: Resolver<GQLResolversTypes['TrainerRevenueStats'], ParentType, ContextType, RequireFields<GQLQueryGetTrainerRevenueArgs, 'trainerId'>>;

@@ -10,7 +10,6 @@ type PackageTemplate {
 
   # Who can offer this package (null = general premium)
   trainerId: ID
-  trainer: UserPublic
 
   # What services are included
   services: [PackageService!]!

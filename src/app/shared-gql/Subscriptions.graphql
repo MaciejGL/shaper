@@ -1,0 +1,191 @@
+# Get current user's subscription status and limits
+query GetMySubscriptionStatus {
+  getMySubscriptionStatus {
+    hasPremium
+    trainingPlanLimit
+    canAccessPremiumTrainingPlans
+    canAccessPremiumExercises
+    canAccessMealPlans
+    activeSubscriptions {
+      id
+      status
+      startDate
+      endDate
+      isActive
+      daysUntilExpiry
+      package {
+        id
+        name
+        priceNOK
+        duration
+      }
+    }
+    usageTrackers {
+      serviceType
+      usedThisMonth
+      allowedPerMonth
+      remainingUsage
+      nextResetDate
+    }
+  }
+}
+
+# Get available package templates for subscription
+query GetActivePackageTemplates($trainerId: ID) {
+  getActivePackageTemplates(trainerId: $trainerId) {
+    id
+    name
+    description
+    priceNOK
+    duration
+    isActive
+    trainerId
+    services {
+      id
+      serviceType
+      quantity
+    }
+
+    activeSubscriptionCount
+    totalRevenue
+    createdAt
+    updatedAt
+  }
+}
+
+# Get all package templates (including inactive ones for admin)
+query GetPackageTemplates($trainerId: ID) {
+  getPackageTemplates(trainerId: $trainerId) {
+    id
+    name
+    description
+    priceNOK
+    duration
+    isActive
+    trainerId
+    services {
+      id
+      serviceType
+      quantity
+    }
+    activeSubscriptionCount
+    totalRevenue
+    createdAt
+    updatedAt
+  }
+}
+
+# Get user's subscriptions
+query GetMySubscriptions {
+  getMySubscriptions {
+    id
+    userId
+    packageId
+    trainerId
+    status
+    startDate
+    endDate
+    stripeSubscriptionId
+    stripePriceId
+    mockPaymentStatus
+    mockTransactionId
+    isActive
+    daysUntilExpiry
+    package {
+      id
+      name
+      description
+      priceNOK
+      duration
+    }
+    usedServices {
+      id
+      serviceType
+      usedAt
+      quantity
+      metadata
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+# Check premium access (quick check)
+query CheckPremiumAccess {
+  checkPremiumAccess
+}
+
+# Create subscription (works for both mock and real payments)
+mutation CreateSubscription($input: CreateSubscriptionInput!) {
+  createMockSubscription(input: $input) {
+    success
+    subscriptionId
+    error
+  }
+}
+
+# Cancel subscription
+mutation CancelSubscription($id: ID!) {
+  cancelSubscription(id: $id)
+}
+
+# Reactivate subscription
+mutation ReactivateSubscription($id: ID!) {
+  reactivateSubscription(id: $id)
+}
+
+# Track service usage
+mutation TrackServiceUsage($input: TrackServiceUsageInput!) {
+  trackServiceUsage(input: $input) {
+    success
+    error
+    remainingUsage
+  }
+}
+
+# Admin mutations (for package template management)
+mutation CreatePackageTemplate($input: CreatePackageTemplateInput!) {
+  createPackageTemplate(input: $input) {
+    id
+    name
+    description
+    priceNOK
+    duration
+    isActive
+    trainerId
+    services {
+      id
+      serviceType
+      quantity
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpdatePackageTemplate($input: UpdatePackageTemplateInput!) {
+  updatePackageTemplate(input: $input) {
+    id
+    name
+    description
+    priceNOK
+    duration
+    isActive
+    trainerId
+    services {
+      id
+      serviceType
+      quantity
+    }
+    updatedAt
+  }
+}
+
+mutation DeletePackageTemplate($id: ID!) {
+  deletePackageTemplate(id: $id)
+}
+
+# Assign training plan template to current user
+mutation AssignTemplateToSelf($planId: ID!) {
+  assignTemplateToSelf(planId: $planId)
+}

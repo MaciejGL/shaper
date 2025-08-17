@@ -4,6 +4,7 @@ import { ChefHat } from 'lucide-react'
 import { useState } from 'react'
 
 import { EmptyStateCard } from '@/components/empty-state-card'
+import { PremiumGate } from '@/components/premium-gate'
 import { useFitspaceMealPlansOverviewQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
@@ -55,7 +56,7 @@ export default function MealPlansOverviewPage() {
     ? allPlans.find((plan) => plan.id === selectedPlan.id)
     : null
 
-  return (
+  const mealPlansContent = (
     <div className="container-hypertro mx-auto">
       <DashboardHeader title="Meal Plans" icon={ChefHat} />
 
@@ -101,5 +102,15 @@ export default function MealPlansOverviewPage() {
         isLoading={isActivating || isDeactivating || isDeleting}
       />
     </div>
+  )
+
+  return (
+    <PremiumGate
+      feature="Meal Plans Overview"
+      description="Browse and manage your assigned meal plans with premium access."
+      showPartialContent={false}
+    >
+      {mealPlansContent}
+    </PremiumGate>
   )
 }

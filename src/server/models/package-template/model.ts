@@ -13,8 +13,6 @@ import {
 import { GQLContext } from '@/types/gql-context'
 import { SubscriptionDuration } from '@/types/subscription'
 
-import UserPublic from '../user-public/model'
-
 export type PackageTemplateWithIncludes = PrismaPackageTemplate & {
   services: PrismaPackageService[]
   trainer?: PrismaUser | null
@@ -63,16 +61,10 @@ export default class PackageTemplate implements GQLPackageTemplate {
     return this.data.trainerId
   }
 
-  get trainer() {
-    return this.data.trainer
-      ? new UserPublic(this.data.trainer, this.context)
-      : null
-  }
-
   get services(): GQLPackageService[] {
     return this.data.services.map((service) => ({
       id: service.id,
-      serviceType: service.serviceType as any, // Cast to GraphQL enum
+      serviceType: service.serviceType as unknown as GQLServiceType, // Cast to GraphQL enum
       quantity: service.quantity,
     }))
   }

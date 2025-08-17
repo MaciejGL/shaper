@@ -62,6 +62,7 @@ input PackageServiceInput {
 }
 
 input UpdatePackageTemplateInput {
+  id: ID!
   name: String
   description: String
   priceNOK: Int
@@ -84,6 +85,32 @@ input SubscriptionFilters {
   serviceType: ServiceType
   dateFrom: String
   dateTo: String
+}
+
+input TrackServiceUsageInput {
+  serviceType: ServiceType!
+  trainerId: ID
+  metadata: String
+}
+
+input AdminUpdateSubscriptionStatusInput {
+  subscriptionId: ID!
+  status: SubscriptionStatus!
+}
+
+input AdminExtendSubscriptionInput {
+  subscriptionId: ID!
+  additionalMonths: Int!
+}
+
+input CheckServiceAccessInput {
+  serviceType: ServiceType!
+  trainerId: ID
+}
+
+input GetServiceUsageTrackerInput {
+  subscriptionId: ID!
+  serviceType: ServiceType!
 }
 
 # Response types
@@ -112,13 +139,9 @@ type Query {
 
   # Access Validation
   checkPremiumAccess: Boolean!
-  checkServiceAccess(
-    serviceType: ServiceType!
-    trainerId: ID
-  ): AccessValidationResult!
+  checkServiceAccess(input: CheckServiceAccessInput!): AccessValidationResult!
   getServiceUsageTracker(
-    subscriptionId: ID!
-    serviceType: ServiceType!
+    input: GetServiceUsageTrackerInput!
   ): ServiceUsageTracker
 
   # Trainer Queries
@@ -133,10 +156,7 @@ type Query {
 type Mutation {
   # Package Template Management
   createPackageTemplate(input: CreatePackageTemplateInput!): PackageTemplate!
-  updatePackageTemplate(
-    id: ID!
-    input: UpdatePackageTemplateInput!
-  ): PackageTemplate!
+  updatePackageTemplate(input: UpdatePackageTemplateInput!): PackageTemplate!
   deletePackageTemplate(id: ID!): Boolean!
 
   # Subscription Management
@@ -147,20 +167,14 @@ type Mutation {
   reactivateSubscription(id: ID!): Boolean!
 
   # Service Usage
-  trackServiceUsage(
-    serviceType: ServiceType!
-    trainerId: ID
-    metadata: String
-  ): TrackServiceUsageResponse!
+  trackServiceUsage(input: TrackServiceUsageInput!): TrackServiceUsageResponse!
 
   # Admin Mutations
   adminUpdateSubscriptionStatus(
-    subscriptionId: ID!
-    status: SubscriptionStatus!
+    input: AdminUpdateSubscriptionStatusInput!
   ): UserSubscription!
   adminExtendSubscription(
-    subscriptionId: ID!
-    additionalMonths: Int!
+    input: AdminExtendSubscriptionInput!
   ): UserSubscription!
 }
 

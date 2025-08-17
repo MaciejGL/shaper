@@ -14,6 +14,7 @@ import {
   GQLQueryGetWorkoutArgs,
 } from '@/generated/graphql-client'
 import {
+  GQLMutationAssignTemplateToSelfArgs,
   GQLMutationAssignTrainingPlanToClientArgs,
   GQLMutationCreateTrainingPlanArgs,
   GQLMutationDeleteTrainingPlanArgs,
@@ -37,6 +38,7 @@ import {
 import { getFromCache, setInCache } from '@/lib/redis'
 import { parseUTCDate } from '@/lib/server-date-utils'
 import { getWeekStartUTC } from '@/lib/server-date-utils'
+import { subscriptionValidator } from '@/lib/subscription'
 import { GQLContext } from '@/types/gql-context'
 
 import { createNotification } from '../notification/factory'
@@ -1334,6 +1336,104 @@ export async function removeTrainingPlanFromClient(
     where: {
       id: planId,
       assignedToId: clientId,
+      isTemplate: false,
+    },
+  })
+
+  return true
+}
+
+export async function assignTemplateToSelf(
+  args: GQLMutationAssignTemplateToSelfArgs,
+  context: GQLContext,
+) {
+  const { planId } = args
+  const user = context.user
+
+  if (!user) {
+    throw new Error('User not authenticated')
+  }
+
+  const userId = user.user.id
+
+  // Get the template plan to check if it's premium
+  const template = await prisma.trainingPlan.findUnique({
+    where: { id: planId },
+    select: {
+      id: true,
+      title: true,
+      premium: true,
+      isTemplate: true,
+      isPublic: true,
+    },
+  })
+
+  if (!template) {
+    throw new Error('Training plan template not found')
+  }
+
+  if (!template.isTemplate) {
+    throw new Error('Plan is not a template')
+  }
+
+  // Check if template is premium and user has access
+  if (template.premium) {
+    const subscriptionStatus =
+      await subscriptionValidator.getUserSubscriptionStatus(userId)
+
+    if (
+      !subscriptionStatus.hasPremium &&
+      !subscriptionStatus.canAccessPremiumTrainingPlans
+    ) {
+      throw new Error(
+        'Premium subscription required to access this training plan template',
+      )
+    }
+  }
+
+  // Check training plan limits
+  const subscriptionStatus =
+    await subscriptionValidator.getUserSubscriptionStatus(userId)
+
+  if (!subscriptionStatus.hasPremium) {
+    // Count current assigned training plans (non-completed)
+    const currentPlansCount = await prisma.trainingPlan.count({
+      where: {
+        assignedToId: userId,
+        active: false,
+      },
+    })
+
+    if (currentPlansCount >= subscriptionStatus.trainingPlanLimit) {
+      throw new GraphQLError(
+        `Training plan limit reached. Upgrade to Premium for unlimited plans.`,
+      )
+    }
+  }
+
+  // Get the full plan for duplication
+  const fullPlan = await getFullPlanById(planId)
+
+  if (!fullPlan) {
+    throw new Error('Training plan template not found')
+  }
+
+  // Duplicate the plan
+  const duplicated = await duplicatePlan({
+    plan: fullPlan,
+    asTemplate: false,
+    createdById: fullPlan.createdById,
+  })
+
+  if (!duplicated) {
+    throw new Error('Failed to assign template')
+  }
+
+  // Assign to self
+  await prisma.trainingPlan.update({
+    where: { id: duplicated.id },
+    data: {
+      assignedToId: userId,
       isTemplate: false,
     },
   })

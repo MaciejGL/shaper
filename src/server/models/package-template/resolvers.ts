@@ -30,8 +30,8 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   createPackageTemplate: async (_, { input }, context) => {
     return createPackageTemplate(input, context)
   },
-  updatePackageTemplate: async (_, { id, input }, context) => {
-    return updatePackageTemplate(id, input, context)
+  updatePackageTemplate: async (_, { input }, context) => {
+    return updatePackageTemplate(input.id, input, context)
   },
   deletePackageTemplate: async (_, { id }) => {
     return deletePackageTemplate(id)

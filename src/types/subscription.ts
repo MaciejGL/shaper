@@ -152,7 +152,7 @@ export interface CreatePackageTemplateInput {
 export const PREDEFINED_PACKAGES = {
   // General Premium Subscription
   PREMIUM: {
-    name: 'FitSpace Premium',
+    name: 'Hypertro Premium',
     description: 'Access to premium features and content',
     priceNOK: 15900, // 159 NOK monthly
     duration: SubscriptionDuration.MONTHLY,

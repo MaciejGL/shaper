@@ -20,6 +20,7 @@ import { GQLContext } from '@/types/gql-context'
 
 import {
   activatePlan,
+  assignTemplateToSelf,
   assignTrainingPlanToClient,
   closePlan,
   createDraftTemplate,
@@ -123,6 +124,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   },
   assignTrainingPlanToClient: async (_, args, context) => {
     return assignTrainingPlanToClient(args, context)
+  },
+  assignTemplateToSelf: async (_, args, context) => {
+    return assignTemplateToSelf(args, context)
   },
   removeTrainingPlanFromClient: async (_, args, context) => {
     return removeTrainingPlanFromClient(args, context)

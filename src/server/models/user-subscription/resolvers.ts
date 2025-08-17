@@ -1,9 +1,5 @@
 import {
-  GQLMutationAdminExtendSubscriptionArgs,
-  GQLMutationAdminUpdateSubscriptionStatusArgs,
   GQLMutationResolvers,
-  GQLQueryGetAllSubscriptionsArgs,
-  GQLQueryGetUserSubscriptionsArgs,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
@@ -11,6 +7,7 @@ import { GQLContext } from '@/types/gql-context'
 import {
   adminExtendSubscription,
   adminUpdateSubscriptionStatus,
+  createMockSubscription,
   getAllSubscriptions,
   getMySubscriptionStatus,
   getMySubscriptions,
@@ -18,11 +15,8 @@ import {
 } from './factory'
 
 export const Query: GQLQueryResolvers = {
-  getUserSubscriptions: async (
-    _,
-    args: GQLQueryGetUserSubscriptionsArgs,
-    context: GQLContext,
-  ) => getUserSubscriptions(args, context),
+  getUserSubscriptions: async (_, args, context: GQLContext) =>
+    getUserSubscriptions(args, context),
 
   getMySubscriptions: async (_, __, context: GQLContext) =>
     getMySubscriptions(context),
@@ -30,28 +24,34 @@ export const Query: GQLQueryResolvers = {
   getMySubscriptionStatus: async (_, __, context: GQLContext) =>
     getMySubscriptionStatus(context),
 
-  getAllSubscriptions: async (
-    _,
-    args: GQLQueryGetAllSubscriptionsArgs,
-    context: GQLContext,
-  ) => getAllSubscriptions(args, context),
+  getAllSubscriptions: async (_, args, context: GQLContext) =>
+    getAllSubscriptions(args, context),
 }
 
 export const Mutation: GQLMutationResolvers = {
-  adminUpdateSubscriptionStatus: async (
-    _,
-    args: GQLMutationAdminUpdateSubscriptionStatusArgs,
-    context: GQLContext,
-  ) => adminUpdateSubscriptionStatus(args.subscriptionId, args.status, context),
+  createMockSubscription: async (_, args, context: GQLContext) => {
+    if (!context.user?.user.id) {
+      throw new Error('User not authenticated')
+    }
 
-  adminExtendSubscription: async (
-    _,
-    args: GQLMutationAdminExtendSubscriptionArgs,
-    context: GQLContext,
-  ) =>
+    // Override userId from context instead of input
+    return createMockSubscription({
+      ...args.input,
+      userId: context.user.user.id,
+    })
+  },
+
+  adminUpdateSubscriptionStatus: async (_, args, context: GQLContext) =>
+    adminUpdateSubscriptionStatus(
+      args.input.subscriptionId,
+      args.input.status,
+      context,
+    ),
+
+  adminExtendSubscription: async (_, args, context: GQLContext) =>
     adminExtendSubscription(
-      args.subscriptionId,
-      args.additionalMonths || 0,
+      args.input.subscriptionId,
+      args.input.additionalMonths || 0,
       context,
     ),
 }
