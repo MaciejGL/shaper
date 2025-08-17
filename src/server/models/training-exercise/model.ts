@@ -15,7 +15,6 @@ import {
   GQLTrainingExercise,
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
-import { isProd } from '@/lib/get-base-url'
 import { GQLContext } from '@/types/gql-context'
 
 import { BaseExerciseSubstitute } from '../base-exercise/model'
@@ -126,11 +125,11 @@ export default class TrainingExercise implements GQLTrainingExercise {
         (image) => new Image(image, this.context),
       )
     } else {
-      if (!isProd) {
-        console.error(
-          `[TrainingExercise] No images found for exercise ${this.id}. Skipping.`,
-        )
-      }
+      // if (!isProd) {
+      //   console.error(
+      //     `[TrainingExercise] No images found for exercise ${this.id}. Skipping.`,
+      //   )
+      // }
       return []
     }
   }

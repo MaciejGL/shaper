@@ -11,10 +11,9 @@ import { BarcodeScanner } from '@/components/barcode-scanner'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
-  DrawerContent,
   DrawerDescription,
-  DrawerHeader,
   DrawerTitle,
+  SimpleDrawerContent,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
 import { useDebounce } from '@/hooks/use-debounce'
@@ -56,6 +55,8 @@ export function CustomFoodSearchDrawer({
 
   // Ref to track current search request so we can abort it if user types again
   const currentSearchController = useRef<AbortController | null>(null)
+  // Ref to the search input to control focus
+  const searchInputRef = useRef<HTMLInputElement>(null)
   // Search foods using the API route (server-side) with abort signal support
   // API now returns SearchResult[] directly - no conversion needed!
   const searchFoodsAPI = async (
@@ -100,6 +101,10 @@ export function CustomFoodSearchDrawer({
       // Only update results if this request wasn't aborted
       if (!controller.signal.aborted) {
         setSearchResults(results || [])
+        // Remove focus from input when results are fetched to dismiss keyboard
+        if (searchInputRef.current && (results || []).length > 0) {
+          searchInputRef.current.blur()
+        }
       }
     } catch (error) {
       // Don't show error if request was just aborted (user typed again)
@@ -260,19 +265,76 @@ export function CustomFoodSearchDrawer({
   return (
     <>
       <Drawer open={isOpen} onClose={handleClose}>
-        <DrawerContent
-          className="flex flex-col"
-          dialogTitle="Search for products"
-        >
-          <DrawerHeader>
-            <DrawerTitle>Search for products</DrawerTitle>
-            <DrawerDescription>
-              Search for products to add to this meal.
-            </DrawerDescription>
-          </DrawerHeader>
+        <SimpleDrawerContent
+          className="flex flex-col h-[100dvh]"
+          title="Search for products"
+          header={
+            <div className="shrink-0">
+              <DrawerTitle>Search for products</DrawerTitle>
+              <DrawerDescription>
+                Search for products to add to this meal.
+              </DrawerDescription>
 
-          <div className="flex-1 min-h-0 overflow-y-auto p-4">
-            <div className="space-y-4">
+              {/* Move search input to header for better mobile experience */}
+              <div
+                className={cn(
+                  'grid gap-2 pt-2',
+                  barcodeEnabled && 'grid-cols-[1fr_auto]',
+                  !barcodeEnabled && 'grid-cols-[1fr]',
+                )}
+              >
+                <Input
+                  ref={searchInputRef}
+                  id="food-search"
+                  placeholder="Search for foods..."
+                  variant="secondary"
+                  iconStart={<SearchIcon />}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full grow"
+                  onFocusCapture={() => {
+                    setSearchTerm('')
+                    // Cancel any ongoing search when input is cleared
+                    if (currentSearchController.current) {
+                      currentSearchController.current.abort()
+                      currentSearchController.current = null
+                    }
+                  }}
+                />
+
+                {barcodeEnabled && (
+                  <Button
+                    variant="default"
+                    iconStart={<ScanBarcodeIcon />}
+                    onClick={() => setIsScannerOpen(true)}
+                    loading={isLookingUpBarcode}
+                    disabled={isLookingUpBarcode}
+                  >
+                    {isLookingUpBarcode ? 'Looking up...' : 'Scan'}
+                  </Button>
+                )}
+              </div>
+            </div>
+          }
+          footer={
+            <div className="flex justify-end gap-2">
+              <Button variant="tertiary" onClick={onShowMeal}>
+                View Meal
+              </Button>
+              <Button variant="tertiary" onClick={handleClose}>
+                Done
+              </Button>
+            </div>
+          }
+        >
+          {/* Scrollable content area with better mobile viewport handling and iOS keyboard support */}
+          <div
+            className={cn(
+              'flex-1 min-h-0',
+              // Add iOS-specific padding when keyboard is open for better spacing
+            )}
+          >
+            <div className="space-y-4 py-4">
               {/* Show no product found message only when barcode lookup has failed */}
               {barcode && !isLookingUpBarcode && !scannedFood && (
                 <div className="text-center text-muted-foreground py-4">
@@ -290,16 +352,18 @@ export function CustomFoodSearchDrawer({
                 />
               )}
 
-              {/* Show search results only if no scanned food */}
+              {/* Show search results only if no scanned food - Allow them to expand fully */}
               {!scannedFood &&
                 searchResults.length > 0 &&
                 !isLookingUpBarcode && (
-                  <FoodSearchResults
-                    searchResults={searchResults}
-                    addFood={addFood}
-                    removeFood={handleRemoveLogItem}
-                    selectedMeal={selectedMeal}
-                  />
+                  <div className="flex-1">
+                    <FoodSearchResults
+                      searchResults={searchResults}
+                      addFood={addFood}
+                      removeFood={handleRemoveLogItem}
+                      selectedMeal={selectedMeal}
+                    />
+                  </div>
                 )}
 
               {/* Show no results message */}
@@ -312,55 +376,12 @@ export function CustomFoodSearchDrawer({
                     No foods found. Try a different search term.
                   </div>
                 )}
+
+              {/* Add some padding at the bottom to ensure last items are visible */}
+              <div className="h-16"></div>
             </div>
           </div>
-          <div
-            className={cn(
-              'grid gap-2 p-4',
-              barcodeEnabled && 'grid-cols-[1fr_auto]',
-              !barcodeEnabled && 'grid-cols-[1fr]',
-            )}
-          >
-            <Input
-              id="food-search"
-              placeholder="Search for foods..."
-              variant="secondary"
-              iconStart={<SearchIcon />}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full grow"
-              onFocusCapture={() => {
-                setSearchTerm('')
-                // Cancel any ongoing search when input is cleared
-                if (currentSearchController.current) {
-                  currentSearchController.current.abort()
-                  currentSearchController.current = null
-                }
-              }}
-            />
-
-            {barcodeEnabled && (
-              <Button
-                variant="default"
-                iconStart={<ScanBarcodeIcon />}
-                onClick={() => setIsScannerOpen(true)}
-                loading={isLookingUpBarcode}
-                disabled={isLookingUpBarcode}
-              >
-                {isLookingUpBarcode ? 'Looking up...' : 'Scan'}
-              </Button>
-            )}
-          </div>
-
-          <div className="p-4 border-t flex justify-end gap-2">
-            <Button variant="tertiary" onClick={onShowMeal}>
-              View Meal
-            </Button>
-            <Button variant="tertiary" onClick={handleClose} className="">
-              Done
-            </Button>
-          </div>
-        </DrawerContent>
+        </SimpleDrawerContent>
       </Drawer>
 
       {/* Barcode Scanner Drawer */}

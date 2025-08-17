@@ -111,6 +111,95 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     return filteredNotes.map((note) => new Note(note, context))
   },
 
+  // NEW: Optimized batch query for workout notes - replaces 9 individual calls with 1
+  workoutExerciseNotes: async (_, { exerciseNames }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    console.info(
+      `[NOTES-BATCH] Loading notes for ${exerciseNames.length} exercises: ${exerciseNames.join(', ')}`,
+    )
+    const startTime = Date.now()
+
+    // OPTIMIZED: Single query to find all exercises by names
+    const exercises = await prisma.trainingExercise.findMany({
+      where: {
+        name: { in: exerciseNames },
+        day: {
+          week: {
+            plan: {
+              OR: [
+                { createdById: user.user.id },
+                { assignedToId: user.user.id },
+              ],
+            },
+          },
+        },
+      },
+      select: { id: true, name: true },
+    })
+
+    const exerciseIds = exercises.map((ex) => ex.id)
+
+    if (exerciseIds.length === 0) {
+      // Return empty results for all requested exercise names
+      return exerciseNames.map((name) => ({
+        exerciseName: name,
+        notes: [],
+      }))
+    }
+
+    // OPTIMIZED: Single query to get ALL notes for ALL exercises
+    const notes = await prisma.note.findMany({
+      where: {
+        relatedToId: { in: exerciseIds },
+        createdById: user.user.id,
+      },
+      include: {
+        createdBy: {
+          include: { profile: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    // Filter out replies and group by exercise
+    const filteredNotes = notes.filter((note) => {
+      if (!note.metadata || typeof note.metadata !== 'object') return true
+      const metadata = note.metadata as { parentNoteId?: string }
+      return !metadata.parentNoteId
+    })
+
+    // Group notes by exercise name
+    const notesByExercise = new Map<string, typeof filteredNotes>()
+
+    for (const note of filteredNotes) {
+      // Find the exercise name for this note
+      const exercise = exercises.find((ex) => ex.id === note.relatedToId)
+      if (exercise) {
+        if (!notesByExercise.has(exercise.name)) {
+          notesByExercise.set(exercise.name, [])
+        }
+        notesByExercise.get(exercise.name)!.push(note)
+      }
+    }
+
+    const duration = Date.now() - startTime
+    console.info(
+      `[NOTES-BATCH] Completed in ${duration}ms, found ${filteredNotes.length} notes total`,
+    )
+
+    // Return results for all requested exercise names (empty array if no notes)
+    return exerciseNames.map((exerciseName) => ({
+      exerciseName,
+      notes: (notesByExercise.get(exerciseName) || []).map(
+        (note) => new Note(note, context),
+      ),
+    }))
+  },
+
   clientSharedNotes: async (_, { clientId }, context) => {
     const user = context.user
     if (!user) {

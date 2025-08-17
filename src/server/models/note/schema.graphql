@@ -10,10 +10,16 @@ type Note {
   createdBy: UserPublic!
 }
 
+type WorkoutExerciseNotes {
+  exerciseName: String!
+  notes: [Note!]!
+}
+
 type Query {
   notes(relatedTo: ID): [Note!]!
   note(id: ID!, relatedTo: ID): Note
   exerciseNotes(exerciseName: String!): [Note!]!
+  workoutExerciseNotes(exerciseNames: [String!]!): [WorkoutExerciseNotes!]!
   clientSharedNotes(clientId: String!): [Note!]!
   noteReplies(noteId: String!): [Note!]!
 }

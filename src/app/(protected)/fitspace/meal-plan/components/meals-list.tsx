@@ -53,7 +53,11 @@ export function MealsList({
 
   const handleCloseDrawer = () => {
     setDrawerOpen(false)
-    setSelectedMealId(null)
+    // Only reset selectedMealId if custom food drawer is not open
+    // This prevents closing both drawers when meal drawer closes while custom food drawer is open
+    if (!customFoodDrawerOpen) {
+      setSelectedMealId(null)
+    }
   }
 
   const handleSaveMealLog = async (
@@ -101,7 +105,13 @@ export function MealsList({
       {selectedMealId && allowCustomFood && customFoodDrawerOpen && (
         <CustomFoodSearchDrawer
           isOpen={customFoodDrawerOpen}
-          onClose={() => setCustomFoodDrawerOpen(false)}
+          onClose={() => {
+            setCustomFoodDrawerOpen(false)
+            // Reset selectedMealId when custom food drawer closes (if meal drawer is not open)
+            if (!drawerOpen) {
+              setSelectedMealId(null)
+            }
+          }}
           mealId={selectedMealId}
           onShowMeal={() =>
             handleMealClick(

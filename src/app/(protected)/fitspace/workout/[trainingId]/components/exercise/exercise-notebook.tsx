@@ -2,11 +2,7 @@ import { NotebookPenIcon } from 'lucide-react'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
-import {
-  Drawer,
-  DrawerTrigger,
-  SimpleDrawerContent,
-} from '@/components/ui/drawer'
+import { Drawer, DrawerTrigger } from '@/components/ui/drawer'
 
 import { ExerciseNotes, useExerciseNotesCount } from '../exercise-notes'
 
@@ -27,14 +23,8 @@ export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
           )}
         </div>
       </DrawerTrigger>
-      <SimpleDrawerContent
-        title="Exercise Notes"
-        className="max-h-[80vh] flex flex-col"
-      >
-        <div className="flex-1 overflow-y-auto">
-          <ExerciseNotes exercise={exercise} />
-        </div>
-      </SimpleDrawerContent>
+
+      <ExerciseNotes exercise={exercise} />
     </Drawer>
   )
 }

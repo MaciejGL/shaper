@@ -1852,6 +1852,7 @@ export type GQLQuery = {
   userExercises: Array<GQLBaseExercise>;
   userPublic?: Maybe<GQLUserPublic>;
   userWithAllData?: Maybe<GQLUser>;
+  workoutExerciseNotes: Array<GQLWorkoutExerciseNotes>;
 };
 
 
@@ -2056,6 +2057,11 @@ export type GQLQueryUserExercisesArgs = {
 
 export type GQLQueryUserPublicArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryWorkoutExerciseNotesArgs = {
+  exerciseNames: Array<Scalars['String']['input']>;
 };
 
 export type GQLQuickWorkoutExerciseInput = {
@@ -2710,6 +2716,12 @@ export enum GQLWeightUnit {
   Kg = 'kg',
   Lbs = 'lbs'
 }
+
+export type GQLWorkoutExerciseNotes = {
+  __typename?: 'WorkoutExerciseNotes';
+  exerciseName: Scalars['String']['output'];
+  notes: Array<GQLNote>;
+};
 
 export enum GQLWorkoutSessionEvent {
   Complete = 'COMPLETE',
@@ -3809,6 +3821,13 @@ export type GQLGetExerciseNotesQueryVariables = Exact<{
 
 
 export type GQLGetExerciseNotesQuery = { __typename?: 'Query', exerciseNotes: Array<{ __typename?: 'Note', id: string, text: string, createdAt: string, updatedAt: string, shareWithTrainer?: boolean | undefined | null, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } }> };
+
+export type GQLGetWorkoutExerciseNotesQueryVariables = Exact<{
+  exerciseNames: Array<Scalars['String']['input']> | Scalars['String']['input'];
+}>;
+
+
+export type GQLGetWorkoutExerciseNotesQuery = { __typename?: 'Query', workoutExerciseNotes: Array<{ __typename?: 'WorkoutExerciseNotes', exerciseName: string, notes: Array<{ __typename?: 'Note', id: string, text: string, createdAt: string, updatedAt: string, shareWithTrainer?: boolean | undefined | null, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } }> }> };
 
 export type GQLGetClientSharedNotesQueryVariables = Exact<{
   clientId: Scalars['String']['input'];
@@ -11485,6 +11504,70 @@ useInfiniteGetExerciseNotesQuery.getKey = (variables: GQLGetExerciseNotesQueryVa
 
 
 useGetExerciseNotesQuery.fetcher = (variables: GQLGetExerciseNotesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetExerciseNotesQuery, GQLGetExerciseNotesQueryVariables>(GetExerciseNotesDocument, variables, options);
+
+export const GetWorkoutExerciseNotesDocument = `
+    query GetWorkoutExerciseNotes($exerciseNames: [String!]!) {
+  workoutExerciseNotes(exerciseNames: $exerciseNames) {
+    exerciseName
+    notes {
+      id
+      text
+      createdAt
+      updatedAt
+      shareWithTrainer
+      createdBy {
+        id
+        firstName
+        lastName
+        image
+        role
+      }
+    }
+  }
+}
+    `;
+
+export const useGetWorkoutExerciseNotesQuery = <
+      TData = GQLGetWorkoutExerciseNotesQuery,
+      TError = unknown
+    >(
+      variables: GQLGetWorkoutExerciseNotesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetWorkoutExerciseNotesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetWorkoutExerciseNotesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetWorkoutExerciseNotesQuery, TError, TData>(
+      {
+    queryKey: ['GetWorkoutExerciseNotes', variables],
+    queryFn: fetchData<GQLGetWorkoutExerciseNotesQuery, GQLGetWorkoutExerciseNotesQueryVariables>(GetWorkoutExerciseNotesDocument, variables),
+    ...options
+  }
+    )};
+
+useGetWorkoutExerciseNotesQuery.getKey = (variables: GQLGetWorkoutExerciseNotesQueryVariables) => ['GetWorkoutExerciseNotes', variables];
+
+export const useInfiniteGetWorkoutExerciseNotesQuery = <
+      TData = InfiniteData<GQLGetWorkoutExerciseNotesQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetWorkoutExerciseNotesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetWorkoutExerciseNotesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetWorkoutExerciseNotesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetWorkoutExerciseNotesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetWorkoutExerciseNotes.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetWorkoutExerciseNotesQuery, GQLGetWorkoutExerciseNotesQueryVariables>(GetWorkoutExerciseNotesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetWorkoutExerciseNotesQuery.getKey = (variables: GQLGetWorkoutExerciseNotesQueryVariables) => ['GetWorkoutExerciseNotes.infinite', variables];
+
+
+useGetWorkoutExerciseNotesQuery.fetcher = (variables: GQLGetWorkoutExerciseNotesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetWorkoutExerciseNotesQuery, GQLGetWorkoutExerciseNotesQueryVariables>(GetWorkoutExerciseNotesDocument, variables, options);
 
 export const GetClientSharedNotesDocument = `
     query GetClientSharedNotes($clientId: String!) {

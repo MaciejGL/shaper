@@ -49,6 +49,27 @@ query GetExerciseNotes($exerciseName: String!) {
   }
 }
 
+# NEW: Batch query for all exercises in a workout
+query GetWorkoutExerciseNotes($exerciseNames: [String!]!) {
+  workoutExerciseNotes(exerciseNames: $exerciseNames) {
+    exerciseName
+    notes {
+      id
+      text
+      createdAt
+      updatedAt
+      shareWithTrainer
+      createdBy {
+        id
+        firstName
+        lastName
+        image
+        role
+      }
+    }
+  }
+}
+
 query GetClientSharedNotes($clientId: String!) {
   clientSharedNotes(clientId: $clientId) {
     id

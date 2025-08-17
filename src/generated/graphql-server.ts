@@ -1854,6 +1854,7 @@ export type GQLQuery = {
   userExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
   userPublic?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
   userWithAllData?: EntireFieldWrapper<Maybe<GQLUser>>;
+  workoutExerciseNotes: EntireFieldWrapper<Array<GQLWorkoutExerciseNotes>>;
 };
 
 
@@ -2058,6 +2059,11 @@ export type GQLQueryUserExercisesArgs = {
 
 export type GQLQueryUserPublicArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryWorkoutExerciseNotesArgs = {
+  exerciseNames: Array<Scalars['String']['input']>;
 };
 
 export type GQLQuickWorkoutExerciseInput = {
@@ -2713,6 +2719,12 @@ export enum GQLWeightUnit {
   Lbs = 'lbs'
 }
 
+export type GQLWorkoutExerciseNotes = {
+  __typename?: 'WorkoutExerciseNotes';
+  exerciseName: EntireFieldWrapper<Scalars['String']['output']>;
+  notes: EntireFieldWrapper<Array<GQLNote>>;
+};
+
 export enum GQLWorkoutSessionEvent {
   Complete = 'COMPLETE',
   Progress = 'PROGRESS'
@@ -2992,6 +3004,7 @@ export type GQLResolversTypes = {
   UserSession: ResolverTypeWrapper<GQLUserSession>;
   VolumeEntry: ResolverTypeWrapper<GQLVolumeEntry>;
   WeightUnit: GQLWeightUnit;
+  WorkoutExerciseNotes: ResolverTypeWrapper<GQLWorkoutExerciseNotes>;
   WorkoutSessionEvent: GQLWorkoutSessionEvent;
   WorkoutType: GQLWorkoutType;
 };
@@ -3154,6 +3167,7 @@ export type GQLResolversParentTypes = {
   UserPublic: GQLUserPublic;
   UserSession: GQLUserSession;
   VolumeEntry: GQLVolumeEntry;
+  WorkoutExerciseNotes: GQLWorkoutExerciseNotes;
 };
 
 export type GQLAdminUserListItemResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AdminUserListItem'] = GQLResolversParentTypes['AdminUserListItem']> = {
@@ -3873,6 +3887,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   userExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType, Partial<GQLQueryUserExercisesArgs>>;
   userPublic?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType, RequireFields<GQLQueryUserPublicArgs, 'id'>>;
   userWithAllData?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
+  workoutExerciseNotes?: Resolver<Array<GQLResolversTypes['WorkoutExerciseNotes']>, ParentType, ContextType, RequireFields<GQLQueryWorkoutExerciseNotesArgs, 'exerciseNames'>>;
 };
 
 export type GQLReviewResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Review'] = GQLResolversParentTypes['Review']> = {
@@ -4150,6 +4165,12 @@ export type GQLVolumeEntryResolvers<ContextType = GQLContext, ParentType extends
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLWorkoutExerciseNotesResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['WorkoutExerciseNotes'] = GQLResolversParentTypes['WorkoutExerciseNotes']> = {
+  exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  notes?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLResolvers<ContextType = GQLContext> = {
   AdminUserListItem?: GQLAdminUserListItemResolvers<ContextType>;
   AdminUserListResponse?: GQLAdminUserListResponseResolvers<ContextType>;
@@ -4214,5 +4235,6 @@ export type GQLResolvers<ContextType = GQLContext> = {
   UserPublic?: GQLUserPublicResolvers<ContextType>;
   UserSession?: GQLUserSessionResolvers<ContextType>;
   VolumeEntry?: GQLVolumeEntryResolvers<ContextType>;
+  WorkoutExerciseNotes?: GQLWorkoutExerciseNotesResolvers<ContextType>;
 };
 

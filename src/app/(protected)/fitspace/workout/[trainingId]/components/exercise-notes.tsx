@@ -1,10 +1,12 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { Edit3, Plus, Reply, Send, Share, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 import { AnimatedContainer } from '@/components/animations/animated-container'
 import { Button } from '@/components/ui/button'
+import { DrawerTitle, SimpleDrawerContent } from '@/components/ui/drawer'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
@@ -13,10 +15,10 @@ import {
   useCreateExerciseNoteMutation,
   useCreateNoteReplyMutation,
   useDeleteNoteMutation,
-  useGetExerciseNotesQuery,
   useGetNoteRepliesQuery,
   useUpdateNoteMutation,
 } from '@/generated/graphql-client'
+import { useExerciseNotes } from '@/hooks/use-workout-notes-batch'
 import { cn } from '@/lib/utils'
 
 import { WorkoutExercise } from './workout-page.client'
@@ -36,22 +38,18 @@ interface Note {
   shareWithTrainer?: boolean | null
   createdBy?: {
     id: string
-    firstName: string | null
-    lastName: string | null
-    image: string | null
+    firstName?: string | null | undefined
+    lastName?: string | null | undefined
+    image?: string | null | undefined
     role: string
   }
 }
 
-// Hook to get notes count for the indicator
+// Hook to get notes count for the indicator - now uses optimized batch query
 export function useExerciseNotesCount(exercise: WorkoutExercise) {
   const exerciseName = exercise.substitutedBy?.name || exercise.name
-
-  const { data: notesData } = useGetExerciseNotesQuery({
-    exerciseName,
-  })
-
-  return (notesData?.exerciseNotes || []).length
+  const { notesCount } = useExerciseNotes(exerciseName)
+  return notesCount
 }
 
 export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
@@ -67,23 +65,48 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
   const exerciseName = exercise.substitutedBy?.name || exercise.name
   const exerciseId = exercise.substitutedBy?.id || exercise.id
 
-  // GQL
-  const {
-    data: notesData,
-    refetch,
-    isLoading,
-  } = useGetExerciseNotesQuery({
-    exerciseName,
-  })
+  // Use optimized batch query instead of individual query
+  const { notes, isLoading } = useExerciseNotes(exerciseName)
+
+  // Query client for cache invalidation
+  const queryClient = useQueryClient()
 
   const { mutateAsync: updateNote, isPending: isUpdatingNote } =
-    useUpdateNoteMutation()
+    useUpdateNoteMutation({
+      onSuccess: () => {
+        // Invalidate queries after successful update
+        refetch()
+      },
+    })
   const { mutateAsync: deleteNote, isPending: isDeletingNote } =
-    useDeleteNoteMutation()
+    useDeleteNoteMutation({
+      onSuccess: () => {
+        // Invalidate queries after successful delete
+        refetch()
+      },
+    })
   const { mutateAsync: createExerciseNote, isPending: isCreatingNote } =
-    useCreateExerciseNoteMutation()
+    useCreateExerciseNoteMutation({
+      onSuccess: () => {
+        // Invalidate queries after successful create
+        refetch()
+      },
+    })
 
-  const notes = (notesData?.exerciseNotes || []) as Note[]
+  // Proper refetch function that invalidates relevant queries
+  const refetch = async () => {
+    // Invalidate both batch and individual exercise note queries
+    await Promise.all([
+      // Invalidate the batch workout exercise notes query (used by useWorkoutNotesBatch)
+      queryClient.invalidateQueries({
+        queryKey: ['GetWorkoutExerciseNotes'],
+      }),
+      // Invalidate individual exercise notes query (fallback)
+      queryClient.invalidateQueries({
+        queryKey: ['GetExerciseNotes', { exerciseName }],
+      }),
+    ])
+  }
 
   // Handlers
   const handleStartEdit = (note: Note) => {
@@ -102,7 +125,7 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
             shareWithTrainer: editingShareWithTrainer,
           },
         })
-        await refetch()
+        // Cache invalidation is handled automatically via onSuccess callback
         setEditingNoteId(null)
         setEditingText('')
         setEditingShareWithTrainer(false)
@@ -121,7 +144,7 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
   const handleDeleteNote = async (noteId: string) => {
     try {
       await deleteNote({ id: noteId })
-      await refetch()
+      // Cache invalidation is handled automatically via onSuccess callback
     } catch (error) {
       console.error('Failed to delete note:', error)
     }
@@ -137,7 +160,7 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
             shareWithTrainer: newNoteShareWithTrainer,
           },
         })
-        await refetch()
+        // Cache invalidation is handled automatically via onSuccess callback
         setNewNoteText('')
         setNewNoteShareWithTrainer(false)
         setIsCreating(false)
@@ -158,71 +181,82 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header with Add Button */}
-      <div className="flex justify-end items-center">
-        <Button
-          variant="tertiary"
-          size="sm"
-          onClick={handleOpenCreateNote}
-          className="h-8 px-3 text-sm"
-          iconStart={
-            <Plus
-              className={cn(
-                'h-4 w-4 transition-transform duration-200',
-                isCreating && 'rotate-45',
-              )}
-            />
-          }
-        >
-          Add Note
-        </Button>
+    <SimpleDrawerContent
+      title="Exercise Notes"
+      className="max-h-[80vh] flex flex-col"
+      header={
+        <div className="flex justify-between gap-2 items-center">
+          <DrawerTitle>Exercise Notes</DrawerTitle>
+          <Button
+            variant="tertiary"
+            size="sm"
+            onClick={handleOpenCreateNote}
+            className="h-8 px-3 text-sm"
+            iconStart={
+              <Plus
+                className={cn(
+                  'h-4 w-4 transition-transform duration-200',
+                  isCreating && 'rotate-45',
+                )}
+              />
+            }
+          >
+            Add Note
+          </Button>
+        </div>
+      }
+    >
+      <div className="flex-1">
+        <div className="space-y-6">
+          {/* Header with Add Button */}
+
+          {/* Create Note Form */}
+          <CreateNoteForm
+            isCreating={isCreating}
+            newNoteText={newNoteText}
+            newNoteShareWithTrainer={newNoteShareWithTrainer}
+            isCreatingNote={isCreatingNote}
+            onNewNoteTextChange={setNewNoteText}
+            onNewNoteShareWithTrainerChange={setNewNoteShareWithTrainer}
+            onCreateNote={handleCreateNote}
+            onCancelCreate={handleCancelCreate}
+          />
+          {notes.length === 0 && !isCreating ? (
+            <div className="text-center py-12">
+              <p className="text-sm text-muted-foreground">
+                {isCreating
+                  ? 'Add your first note above'
+                  : 'No notes yet. Click "Add Note" to start.'}
+              </p>
+            </div>
+          ) : null}
+
+          {/* Notes List */}
+          {notes.length > 0 && (
+            <div className="space-y-4">
+              {notes.map((note) => (
+                <ExerciseNote
+                  key={note.id}
+                  note={note}
+                  isEditing={editingNoteId === note.id}
+                  editingText={editingText}
+                  editingShareWithTrainer={editingShareWithTrainer}
+                  isUpdatingNote={isUpdatingNote}
+                  isDeletingNote={isDeletingNote}
+                  loading={isLoading}
+                  onStartEdit={handleStartEdit}
+                  onSaveEdit={handleSaveEdit}
+                  onCancelEdit={handleCancelEdit}
+                  onDeleteNote={handleDeleteNote}
+                  onEditingTextChange={setEditingText}
+                  onEditingShareWithTrainerChange={setEditingShareWithTrainer}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-
-      {/* Create Note Form */}
-      <CreateNoteForm
-        isCreating={isCreating}
-        newNoteText={newNoteText}
-        newNoteShareWithTrainer={newNoteShareWithTrainer}
-        isCreatingNote={isCreatingNote}
-        onNewNoteTextChange={setNewNoteText}
-        onNewNoteShareWithTrainerChange={setNewNoteShareWithTrainer}
-        onCreateNote={handleCreateNote}
-        onCancelCreate={handleCancelCreate}
-      />
-
-      {/* Notes List */}
-      {notes.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-sm text-muted-foreground">
-            {isCreating
-              ? 'Add your first note above'
-              : 'No notes yet. Click "Add Note" to start.'}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {notes.map((note) => (
-            <ExerciseNote
-              key={note.id}
-              note={note}
-              isEditing={editingNoteId === note.id}
-              editingText={editingText}
-              editingShareWithTrainer={editingShareWithTrainer}
-              isUpdatingNote={isUpdatingNote}
-              isDeletingNote={isDeletingNote}
-              loading={isLoading}
-              onStartEdit={handleStartEdit}
-              onSaveEdit={handleSaveEdit}
-              onCancelEdit={handleCancelEdit}
-              onDeleteNote={handleDeleteNote}
-              onEditingTextChange={setEditingText}
-              onEditingShareWithTrainerChange={setEditingShareWithTrainer}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    </SimpleDrawerContent>
   )
 }
 
@@ -252,13 +286,14 @@ function CreateNoteForm({
       className="overflow-hidden"
       id="create-note-form"
     >
-      <div className="space-y-4 border border-border rounded-lg p-4">
+      <div className="space-y-4">
         <Textarea
           id="new-note"
           placeholder="Write your exercise note here..."
           value={newNoteText}
+          variant="ghost"
           onChange={(e) => onNewNoteTextChange(e.target.value)}
-          className="min-h-[100px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-sm"
+          className="min-h-[100px] resize-none"
           autoFocus
         />
 
@@ -344,7 +379,12 @@ function ExerciseNote({
   )
 
   const { mutateAsync: createReply, isPending: isCreatingReply } =
-    useCreateNoteReplyMutation()
+    useCreateNoteReplyMutation({
+      onSuccess: () => {
+        // Invalidate replies query after successful reply creation
+        refetchReplies()
+      },
+    })
 
   const replies = repliesData?.noteReplies || []
 
@@ -360,7 +400,7 @@ function ExerciseNote({
       })
       setReplyText('')
       setIsReplying(false)
-      await refetchReplies()
+      // Cache invalidation is handled automatically via onSuccess callback
     } catch (error) {
       console.error('Failed to create reply:', error)
     }
@@ -379,9 +419,10 @@ function ExerciseNote({
             <div className="space-y-4">
               <Textarea
                 id="edit-note"
+                variant="ghost"
                 value={editingText}
                 onChange={(e) => onEditingTextChange(e.target.value)}
-                className="min-h-[100px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-sm"
+                className="min-h-[100px] resize-none"
                 autoFocus
               />
 
