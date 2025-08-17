@@ -45,6 +45,11 @@ model User {
   clients                          User[]                     @relation("TrainerClients")
   profile                          UserProfile?
   sessions                         UserSession[]
+  
+  // Subscription relations
+  subscriptions                    UserSubscription[]         @relation("UserSubscriptions")
+  trainerPackages                  PackageTemplate[]          @relation("TrainerPackages")
+  clientSubscriptions              UserSubscription[]         @relation("TrainerSubscriptions")
 
   @@index([trainerId])
 }
@@ -817,4 +822,118 @@ model FavouriteWorkoutSet {
   exercise   FavouriteWorkoutExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@index([exerciseId])
+}
+
+// Subscription System Models
+
+model PackageTemplate {
+  id            String                @id @default(uuid())
+  name          String                // "Training + Coaching", "Full Combo", etc.
+  description   String?
+  priceNOK      Int                   // Price in Norwegian Kroner (øre)
+  duration      SubscriptionDuration
+  isActive      Boolean               @default(true)
+  
+  // Who can offer this package (null = general premium, specific = trainer package)
+  trainerId     String?
+  trainer       User?                 @relation("TrainerPackages", fields: [trainerId], references: [id])
+  
+  // What services are included
+  services      PackageService[]
+  
+  // Purchased subscriptions
+  subscriptions UserSubscription[]
+  
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  
+  @@index([trainerId])
+  @@index([isActive])
+  @@index([duration])
+}
+
+model PackageService {
+  id          String          @id @default(uuid())
+  packageId   String
+  serviceType ServiceType
+  quantity    Int             @default(1) // e.g., 1 meeting per month
+  package     PackageTemplate @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  
+  @@unique([packageId, serviceType])
+  @@index([packageId])
+  @@index([serviceType])
+}
+
+model UserSubscription {
+  id               String              @id @default(uuid())
+  userId           String
+  packageId        String
+  trainerId        String?             // null for premium, specific for trainer packages
+  
+  status           SubscriptionStatus  @default(ACTIVE)
+  startDate        DateTime
+  endDate          DateTime
+  
+  // Payment tracking (for future Stripe integration)
+  stripeSubscriptionId String?
+  stripePriceId        String?
+  
+  // Mock payment tracking (until Stripe integration)
+  mockPaymentStatus    String?         @default("COMPLETED") // PENDING, COMPLETED, FAILED
+  mockTransactionId    String?         // Internal transaction ID
+  
+  // Service usage tracking
+  usedServices     ServiceUsage[]
+  
+  user             User               @relation("UserSubscriptions", fields: [userId], references: [id])
+  package          PackageTemplate    @relation(fields: [packageId], references: [id])
+  trainer          User?              @relation("TrainerSubscriptions", fields: [trainerId], references: [id])
+  
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  
+  @@index([userId])
+  @@index([trainerId])
+  @@index([status])
+  @@index([endDate])
+  @@index([startDate])
+}
+
+model ServiceUsage {
+  id             String           @id @default(uuid())
+  subscriptionId String
+  serviceType    ServiceType
+  usedAt         DateTime         @default(now())
+  quantity       Int              @default(1)
+  
+  // Optional metadata for specific usage
+  metadata       Json?            // Can store meeting details, plan IDs, etc.
+  
+  subscription   UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  @@index([subscriptionId])
+  @@index([serviceType])
+  @@index([usedAt])
+}
+
+// Enums for Subscription System
+
+enum ServiceType {
+  TRAINING_PLAN
+  MEAL_PLAN
+  COACHING
+  IN_PERSON_MEETING
+  PREMIUM_ACCESS
+}
+
+enum SubscriptionDuration {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
 }

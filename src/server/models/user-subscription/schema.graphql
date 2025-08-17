@@ -1,0 +1,38 @@
+# User Subscription specific schema
+
+type UserSubscription {
+  id: ID!
+  userId: ID!
+  packageId: ID!
+  trainerId: ID
+
+  status: SubscriptionStatus!
+  startDate: String!
+  endDate: String!
+
+  # Payment tracking
+  stripeSubscriptionId: String
+  stripePriceId: String
+  mockPaymentStatus: String
+  mockTransactionId: String
+
+  # Related data
+  package: PackageTemplate!
+  usedServices: [ServiceUsage!]!
+
+  # Computed fields
+  isActive: Boolean!
+  daysUntilExpiry: Int!
+
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ServiceUsage {
+  id: ID!
+  subscriptionId: ID!
+  serviceType: ServiceType!
+  usedAt: String!
+  quantity: Int!
+  metadata: String
+}

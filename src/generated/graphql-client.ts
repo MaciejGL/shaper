@@ -16,6 +16,15 @@ export type Scalars = {
   Float: { input: number; output: number; }
 };
 
+export type GQLAccessValidationResult = {
+  __typename?: 'AccessValidationResult';
+  hasAccess: Scalars['Boolean']['output'];
+  reason?: Maybe<Scalars['String']['output']>;
+  remainingUsage?: Maybe<Scalars['Int']['output']>;
+  subscription?: Maybe<GQLUserSubscription>;
+  totalAllowed?: Maybe<Scalars['Int']['output']>;
+};
+
 export enum GQLActivityLevel {
   Active = 'ACTIVE',
   Athlete = 'ATHLETE',
@@ -480,6 +489,15 @@ export type GQLCreateNotificationInput = {
   userId: Scalars['ID']['input'];
 };
 
+export type GQLCreatePackageTemplateInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  duration: GQLSubscriptionDuration;
+  name: Scalars['String']['input'];
+  priceNOK: Scalars['Int']['input'];
+  services: Array<GQLPackageServiceInput>;
+  trainerId?: InputMaybe<Scalars['ID']['input']>;
+};
+
 export type GQLCreatePushSubscriptionInput = {
   auth: Scalars['String']['input'];
   endpoint: Scalars['String']['input'];
@@ -496,6 +514,21 @@ export type GQLCreateReviewInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   rating: Scalars['Int']['input'];
   trainingPlanId: Scalars['ID']['input'];
+};
+
+export type GQLCreateSubscriptionInput = {
+  durationMonths?: InputMaybe<Scalars['Int']['input']>;
+  packageId: Scalars['ID']['input'];
+  startDate?: InputMaybe<Scalars['String']['input']>;
+  trainerId?: InputMaybe<Scalars['ID']['input']>;
+  userId: Scalars['ID']['input'];
+};
+
+export type GQLCreateSubscriptionResponse = {
+  __typename?: 'CreateSubscriptionResponse';
+  error?: Maybe<Scalars['String']['output']>;
+  subscriptionId?: Maybe<Scalars['ID']['output']>;
+  success: Scalars['Boolean']['output'];
 };
 
 export type GQLCreateTrainingDayInput = {
@@ -968,12 +1001,15 @@ export type GQLMutation = {
   addSubstituteExercise: Scalars['Boolean']['output'];
   addTrainingPlanCollaborator: GQLTrainingPlanCollaborator;
   addTrainingWeek: Scalars['ID']['output'];
+  adminExtendSubscription: GQLUserSubscription;
+  adminUpdateSubscriptionStatus: GQLUserSubscription;
   assignMealPlanToClient: Scalars['Boolean']['output'];
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
   batchLogMealFood: Scalars['Boolean']['output'];
   bulkUpdatePlanPermissions: Array<GQLPlanCollaboratorSummary>;
   cancelCoaching: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
+  cancelSubscription: Scalars['Boolean']['output'];
   clearTodaysWorkout: Scalars['Boolean']['output'];
   clearUserSessions: Scalars['Boolean']['output'];
   closePlan: Scalars['Boolean']['output'];
@@ -986,9 +1022,11 @@ export type GQLMutation = {
   createExerciseNote: GQLNote;
   createFavouriteWorkout: GQLFavouriteWorkout;
   createMealPlan: GQLCreateMealPlanPayload;
+  createMockSubscription: GQLCreateSubscriptionResponse;
   createNote: GQLNote;
   createNoteReply: GQLNote;
   createNotification: GQLNotification;
+  createPackageTemplate: GQLPackageTemplate;
   createPushSubscription: GQLPushSubscription;
   createQuickWorkout: GQLTrainingPlan;
   createReview: Scalars['Boolean']['output'];
@@ -999,6 +1037,7 @@ export type GQLMutation = {
   deleteFavouriteWorkout: Scalars['Boolean']['output'];
   deleteNote: Scalars['Boolean']['output'];
   deleteNotification: Scalars['Boolean']['output'];
+  deletePackageTemplate: Scalars['Boolean']['output'];
   deletePlan: Scalars['Boolean']['output'];
   deletePushSubscription: Scalars['Boolean']['output'];
   deleteReview: Scalars['Boolean']['output'];
@@ -1023,6 +1062,7 @@ export type GQLMutation = {
   moderateReview: Scalars['Boolean']['output'];
   moveExercise: Scalars['Boolean']['output'];
   pausePlan: Scalars['Boolean']['output'];
+  reactivateSubscription: Scalars['Boolean']['output'];
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
   removeAllExercisesFromDay: Scalars['Boolean']['output'];
   removeExerciseFromDay: Scalars['Boolean']['output'];
@@ -1044,6 +1084,7 @@ export type GQLMutation = {
   sendCollaborationInvitation: GQLCollaborationInvitation;
   startWorkoutFromFavourite: Scalars['ID']['output'];
   swapExercise: GQLSubstitute;
+  trackServiceUsage: GQLTrackServiceUsageResponse;
   uncompleteMeal: Scalars['Boolean']['output'];
   updateBodyMeasurement: GQLUserBodyMeasure;
   updateExercise: Scalars['Boolean']['output'];
@@ -1054,6 +1095,7 @@ export type GQLMutation = {
   updateMealPlanDetails: Scalars['Boolean']['output'];
   updateNote: GQLNote;
   updateNotification: GQLNotification;
+  updatePackageTemplate: GQLPackageTemplate;
   updateProfile?: Maybe<GQLUserProfile>;
   updatePushSubscription: GQLPushSubscription;
   updateReview: Scalars['Boolean']['output'];
@@ -1157,6 +1199,18 @@ export type GQLMutationAddTrainingWeekArgs = {
 };
 
 
+export type GQLMutationAdminExtendSubscriptionArgs = {
+  additionalMonths: Scalars['Int']['input'];
+  subscriptionId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationAdminUpdateSubscriptionStatusArgs = {
+  status: GQLSubscriptionStatus;
+  subscriptionId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationAssignMealPlanToClientArgs = {
   input: GQLAssignMealPlanToClientInput;
 };
@@ -1178,6 +1232,11 @@ export type GQLMutationBulkUpdatePlanPermissionsArgs = {
 
 
 export type GQLMutationCancelCoachingRequestArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationCancelSubscriptionArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1228,6 +1287,11 @@ export type GQLMutationCreateMealPlanArgs = {
 };
 
 
+export type GQLMutationCreateMockSubscriptionArgs = {
+  input: GQLCreateSubscriptionInput;
+};
+
+
 export type GQLMutationCreateNoteArgs = {
   input: GQLCreateNoteInput;
 };
@@ -1240,6 +1304,11 @@ export type GQLMutationCreateNoteReplyArgs = {
 
 export type GQLMutationCreateNotificationArgs = {
   input: GQLCreateNotificationInput;
+};
+
+
+export type GQLMutationCreatePackageTemplateArgs = {
+  input: GQLCreatePackageTemplateInput;
 };
 
 
@@ -1289,6 +1358,11 @@ export type GQLMutationDeleteNoteArgs = {
 
 
 export type GQLMutationDeleteNotificationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDeletePackageTemplateArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1413,6 +1487,11 @@ export type GQLMutationPausePlanArgs = {
 };
 
 
+export type GQLMutationReactivateSubscriptionArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationRejectCoachingRequestArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1517,6 +1596,13 @@ export type GQLMutationSwapExerciseArgs = {
 };
 
 
+export type GQLMutationTrackServiceUsageArgs = {
+  metadata?: InputMaybe<Scalars['String']['input']>;
+  serviceType: GQLServiceType;
+  trainerId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type GQLMutationUncompleteMealArgs = {
   mealId: Scalars['ID']['input'];
 };
@@ -1565,6 +1651,12 @@ export type GQLMutationUpdateNoteArgs = {
 
 export type GQLMutationUpdateNotificationArgs = {
   input: GQLUpdateNotificationInput;
+};
+
+
+export type GQLMutationUpdatePackageTemplateArgs = {
+  id: Scalars['ID']['input'];
+  input: GQLUpdatePackageTemplateInput;
 };
 
 
@@ -1731,6 +1823,51 @@ export type GQLOneRmLog = {
   weight?: Maybe<Scalars['Float']['output']>;
 };
 
+export type GQLPackagePopularityStats = {
+  __typename?: 'PackagePopularityStats';
+  package: GQLPackageTemplate;
+  revenue: Scalars['Int']['output'];
+  subscriptionCount: Scalars['Int']['output'];
+};
+
+export type GQLPackageService = {
+  __typename?: 'PackageService';
+  id: Scalars['ID']['output'];
+  quantity: Scalars['Int']['output'];
+  serviceType: GQLServiceType;
+};
+
+export type GQLPackageServiceInput = {
+  quantity: Scalars['Int']['input'];
+  serviceType: GQLServiceType;
+};
+
+export type GQLPackageStats = {
+  __typename?: 'PackageStats';
+  activeSubscriptions: Scalars['Int']['output'];
+  conversionRate: Scalars['Float']['output'];
+  package: GQLPackageTemplate;
+  totalRevenue: Scalars['Int']['output'];
+};
+
+export type GQLPackageTemplate = {
+  __typename?: 'PackageTemplate';
+  activeSubscriptionCount: Scalars['Int']['output'];
+  createdAt: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  duration: GQLSubscriptionDuration;
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  name: Scalars['String']['output'];
+  priceNOK: Scalars['Int']['output'];
+  services: Array<GQLPackageService>;
+  totalRevenue: Scalars['Int']['output'];
+  totalSubscriptionCount: Scalars['Int']['output'];
+  trainer?: Maybe<GQLUserPublic>;
+  trainerId?: Maybe<Scalars['ID']['output']>;
+  updatedAt: Scalars['String']['output'];
+};
+
 export type GQLPlanCollaboratorSummary = {
   __typename?: 'PlanCollaboratorSummary';
   addedBy: GQLUserPublic;
@@ -1794,6 +1931,8 @@ export type GQLQuery = {
   allPlansWithPermissions: Array<GQLPlanWithPermissions>;
   availablePlansForTeamMember: Array<GQLAvailablePlan>;
   bodyMeasures: Array<GQLUserBodyMeasure>;
+  checkPremiumAccess: Scalars['Boolean']['output'];
+  checkServiceAccess: GQLAccessValidationResult;
   clientBodyMeasures: Array<GQLUserBodyMeasure>;
   clientSharedNotes: Array<GQLNote>;
   coachingRequest?: Maybe<GQLCoachingRequest>;
@@ -1802,7 +1941,9 @@ export type GQLQuery = {
   exerciseNotes: Array<GQLNote>;
   exercisesProgressByUser: Array<GQLExerciseProgress>;
   getActiveMealPlan?: Maybe<GQLMealPlan>;
+  getActivePackageTemplates: Array<GQLPackageTemplate>;
   getActivePlanId?: Maybe<Scalars['ID']['output']>;
+  getAllSubscriptions: Array<GQLUserSubscription>;
   getClientActivePlan?: Maybe<GQLTrainingPlan>;
   getClientMealPlans: Array<GQLMealPlan>;
   getClientTrainingPlans: Array<GQLTrainingPlan>;
@@ -1820,13 +1961,22 @@ export type GQLQuery = {
   getMyPlansOverview: GQLMyPlansPayload;
   getMyPlansOverviewFull: GQLMyPlansPayload;
   getMyPlansOverviewLite: GQLMyPlansPayload;
+  getMySubscriptionStatus: GQLUserSubscriptionStatus;
+  getMySubscriptions: Array<GQLUserSubscription>;
   getMyTrainer?: Maybe<GQLPublicTrainer>;
+  getPackageTemplate?: Maybe<GQLPackageTemplate>;
+  getPackageTemplates: Array<GQLPackageTemplate>;
   getPublicTrainingPlans: Array<GQLTrainingPlan>;
   getQuickWorkoutPlan: GQLTrainingPlan;
   getRecentCompletedWorkouts: Array<GQLTrainingDay>;
+  getServiceUsageTracker?: Maybe<GQLServiceUsageTracker>;
+  getSubscriptionStats: GQLSubscriptionStats;
   getTemplates: Array<GQLTrainingPlan>;
+  getTrainerRevenue: GQLTrainerRevenueStats;
+  getTrainerSubscriptions: Array<GQLUserSubscription>;
   getTrainingExercise?: Maybe<GQLTrainingExercise>;
   getTrainingPlanById: GQLTrainingPlan;
+  getUserSubscriptions: Array<GQLUserSubscription>;
   getWorkout?: Maybe<GQLGetWorkoutPayload>;
   getWorkoutInfo: GQLTrainingDay;
   mealPlanCollaborators: Array<GQLMealPlanCollaborator>;
@@ -1881,6 +2031,12 @@ export type GQLQueryAvailablePlansForTeamMemberArgs = {
 };
 
 
+export type GQLQueryCheckServiceAccessArgs = {
+  serviceType: GQLServiceType;
+  trainerId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type GQLQueryClientBodyMeasuresArgs = {
   clientId: Scalars['ID']['input'];
 };
@@ -1913,6 +2069,16 @@ export type GQLQueryExercisesProgressByUserArgs = {
 
 export type GQLQueryGetActiveMealPlanArgs = {
   date?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type GQLQueryGetActivePackageTemplatesArgs = {
+  trainerId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type GQLQueryGetAllSubscriptionsArgs = {
+  filters?: InputMaybe<GQLSubscriptionFilters>;
 };
 
 
@@ -1967,14 +2133,40 @@ export type GQLQueryGetMealPlanTemplatesArgs = {
 };
 
 
+export type GQLQueryGetPackageTemplateArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetPackageTemplatesArgs = {
+  trainerId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
 export type GQLQueryGetPublicTrainingPlansArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQueryGetServiceUsageTrackerArgs = {
+  serviceType: GQLServiceType;
+  subscriptionId: Scalars['ID']['input'];
 };
 
 
 export type GQLQueryGetTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQueryGetTrainerRevenueArgs = {
+  trainerId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetTrainerSubscriptionsArgs = {
+  filters?: InputMaybe<GQLSubscriptionFilters>;
 };
 
 
@@ -1985,6 +2177,11 @@ export type GQLQueryGetTrainingExerciseArgs = {
 
 export type GQLQueryGetTrainingPlanByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetUserSubscriptionsArgs = {
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -2143,10 +2340,67 @@ export type GQLSendCollaborationInvitationInput = {
   recipientEmail: Scalars['String']['input'];
 };
 
+export enum GQLServiceType {
+  Coaching = 'COACHING',
+  InPersonMeeting = 'IN_PERSON_MEETING',
+  MealPlan = 'MEAL_PLAN',
+  PremiumAccess = 'PREMIUM_ACCESS',
+  TrainingPlan = 'TRAINING_PLAN'
+}
+
+export type GQLServiceUsage = {
+  __typename?: 'ServiceUsage';
+  id: Scalars['ID']['output'];
+  metadata?: Maybe<Scalars['String']['output']>;
+  quantity: Scalars['Int']['output'];
+  serviceType: GQLServiceType;
+  subscriptionId: Scalars['ID']['output'];
+  usedAt: Scalars['String']['output'];
+};
+
+export type GQLServiceUsageTracker = {
+  __typename?: 'ServiceUsageTracker';
+  allowedPerMonth: Scalars['Int']['output'];
+  nextResetDate: Scalars['String']['output'];
+  remainingUsage: Scalars['Int']['output'];
+  serviceType: GQLServiceType;
+  usedThisMonth: Scalars['Int']['output'];
+};
+
 export type GQLStartWorkoutFromFavouriteInput = {
   favouriteWorkoutId: Scalars['ID']['input'];
   replaceExisting?: InputMaybe<Scalars['Boolean']['input']>;
 };
+
+export enum GQLSubscriptionDuration {
+  Monthly = 'MONTHLY',
+  Yearly = 'YEARLY'
+}
+
+export type GQLSubscriptionFilters = {
+  dateFrom?: InputMaybe<Scalars['String']['input']>;
+  dateTo?: InputMaybe<Scalars['String']['input']>;
+  serviceType?: InputMaybe<GQLServiceType>;
+  status?: InputMaybe<GQLSubscriptionStatus>;
+  trainerId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+export type GQLSubscriptionStats = {
+  __typename?: 'SubscriptionStats';
+  monthlyRevenue: Scalars['Int']['output'];
+  packageStats: Array<GQLPackageStats>;
+  premiumUsers: Scalars['Int']['output'];
+  totalActiveSubscriptions: Scalars['Int']['output'];
+  totalRevenue: Scalars['Int']['output'];
+  trainerSubscriptions: Scalars['Int']['output'];
+};
+
+export enum GQLSubscriptionStatus {
+  Active = 'ACTIVE',
+  Cancelled = 'CANCELLED',
+  Expired = 'EXPIRED',
+  Pending = 'PENDING'
+}
 
 export type GQLSubstitute = {
   __typename?: 'Substitute';
@@ -2218,6 +2472,22 @@ export enum GQLTimeFormat {
   H12 = 'h12',
   H24 = 'h24'
 }
+
+export type GQLTrackServiceUsageResponse = {
+  __typename?: 'TrackServiceUsageResponse';
+  error?: Maybe<Scalars['String']['output']>;
+  remainingUsage?: Maybe<Scalars['Int']['output']>;
+  success: Scalars['Boolean']['output'];
+};
+
+export type GQLTrainerRevenueStats = {
+  __typename?: 'TrainerRevenueStats';
+  activeSubscriptions: Scalars['Int']['output'];
+  monthlyRevenue: Scalars['Int']['output'];
+  popularPackages: Array<GQLPackagePopularityStats>;
+  totalRevenue: Scalars['Int']['output'];
+  totalSubscriptions: Scalars['Int']['output'];
+};
 
 export type GQLTrainingDay = {
   __typename?: 'TrainingDay';
@@ -2470,6 +2740,15 @@ export type GQLUpdateNotificationInput = {
   type?: InputMaybe<GQLNotificationType>;
 };
 
+export type GQLUpdatePackageTemplateInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  duration?: InputMaybe<GQLSubscriptionDuration>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  priceNOK?: InputMaybe<Scalars['Int']['input']>;
+  services?: InputMaybe<Array<GQLPackageServiceInput>>;
+};
+
 export type GQLUpdateProfileInput = {
   activityLevel?: InputMaybe<GQLActivityLevel>;
   allergies?: InputMaybe<Scalars['String']['input']>;
@@ -2706,6 +2985,38 @@ export type GQLUserSession = {
   id: Scalars['ID']['output'];
   otp: Scalars['String']['output'];
   user: GQLUser;
+};
+
+export type GQLUserSubscription = {
+  __typename?: 'UserSubscription';
+  createdAt: Scalars['String']['output'];
+  daysUntilExpiry: Scalars['Int']['output'];
+  endDate: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  mockPaymentStatus?: Maybe<Scalars['String']['output']>;
+  mockTransactionId?: Maybe<Scalars['String']['output']>;
+  package: GQLPackageTemplate;
+  packageId: Scalars['ID']['output'];
+  startDate: Scalars['String']['output'];
+  status: GQLSubscriptionStatus;
+  stripePriceId?: Maybe<Scalars['String']['output']>;
+  stripeSubscriptionId?: Maybe<Scalars['String']['output']>;
+  trainerId?: Maybe<Scalars['ID']['output']>;
+  updatedAt: Scalars['String']['output'];
+  usedServices: Array<GQLServiceUsage>;
+  userId: Scalars['ID']['output'];
+};
+
+export type GQLUserSubscriptionStatus = {
+  __typename?: 'UserSubscriptionStatus';
+  activeSubscriptions: Array<GQLUserSubscription>;
+  canAccessMealPlans: Scalars['Boolean']['output'];
+  canAccessPremiumExercises: Scalars['Boolean']['output'];
+  canAccessPremiumTrainingPlans: Scalars['Boolean']['output'];
+  hasPremium: Scalars['Boolean']['output'];
+  trainingPlanLimit: Scalars['Int']['output'];
+  usageTrackers: Array<GQLServiceUsageTracker>;
 };
 
 export type GQLVolumeEntry = {
