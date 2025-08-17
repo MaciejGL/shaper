@@ -3,7 +3,24 @@ import DataLoader from 'dataloader'
 import { prisma } from '@/lib/db'
 
 export const createUserLoaders = () => ({
+  // LIGHTWEIGHT: Basic user data only (for navigation and auth)
   getCurrentUser: new DataLoader(async (emails: readonly string[]) => {
+    const users = await prisma.user.findMany({
+      where: { email: { in: emails as string[] } },
+      include: {
+        profile: true,
+      },
+    })
+
+    const map = new Map(users.map((u) => [u.email, u]))
+    return emails.map((email) => map.get(email) ?? null)
+  }),
+
+  // HEAVY: Full user data (only use when specifically needed)
+  getCurrentUserFull: new DataLoader(async (emails: readonly string[]) => {
+    console.warn(
+      '[USER-LOADER] Using heavy getCurrentUserFull - ensure this is necessary',
+    )
     const users = await prisma.user.findMany({
       where: { email: { in: emails as string[] } },
       include: {

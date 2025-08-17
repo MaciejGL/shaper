@@ -7,7 +7,41 @@ import TrainingPlanCollaborator from '@/server/models/training-plan-collaborator
 import { GQLContext } from '@/types/gql-context'
 
 export const createPlanLoaders = (context: GQLContext) => ({
+  // LIGHTWEIGHT: Basic plan info for listings and navigation
+  trainingPlanBasic: new DataLoader(async (planIds: readonly string[]) => {
+    const plans = await prisma.trainingPlan.findMany({
+      where: { id: { in: planIds as string[] } },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            profile: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+        _count: {
+          select: {
+            weeks: true,
+          },
+        },
+      },
+    })
+
+    const map = new Map(plans.map((plan) => [plan.id, plan]))
+    return planIds.map((id) => map.get(id) ?? null)
+  }),
+
+  // HEAVY: Full plan data (only use when specifically needed)
   trainingPlanById: new DataLoader(async (planIds: readonly string[]) => {
+    console.warn(
+      '[PLAN-LOADER] Using heavy trainingPlanById - ensure this is necessary for plan:',
+      planIds[0],
+    )
     const plans = await prisma.trainingPlan.findMany({
       where: { id: { in: planIds as string[] } },
       include: {

@@ -25,7 +25,7 @@ import {
 import { getUTCWeekStart } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
-import { getFullPlanById } from '../training-utils.server'
+import { getLightPlanById } from '../training-utils.server'
 
 import TrainingPlan from './model'
 
@@ -1339,15 +1339,16 @@ export async function getQuickWorkoutPlan(context: GQLContext) {
     throw new GraphQLError('Quick workout plan not found')
   }
 
-  const fullPlan = await getFullPlanById(quickWorkoutPlan.id)
+  // Use lightweight version instead of heavy getFullPlanById to prevent connection exhaustion
+  const lightPlan = await getLightPlanById(quickWorkoutPlan.id)
 
-  if (!fullPlan) {
+  if (!lightPlan) {
     console.error(
-      '[getFullPlanById] Quick workout plan not found',
+      '[getLightPlanById] Quick workout plan not found',
       quickWorkoutPlan.id,
     )
     throw new GraphQLError('Quick workout plan not found')
   }
 
-  return new TrainingPlan(fullPlan, context)
+  return new TrainingPlan(lightPlan, context)
 }

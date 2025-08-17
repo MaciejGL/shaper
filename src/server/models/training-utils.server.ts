@@ -19,7 +19,71 @@ type FullTrainingPlan = PrismaTrainingPlan & {
   })[]
 }
 
+// LIGHTWEIGHT VERSION - Use this for quick workout plans and similar operations
+export async function getLightPlanById(id: string) {
+  return prisma.trainingPlan.findUnique({
+    where: { id },
+    include: {
+      weeks: {
+        orderBy: {
+          weekNumber: 'asc',
+        },
+        include: {
+          days: {
+            orderBy: {
+              dayOfWeek: 'asc',
+            },
+            include: {
+              exercises: {
+                orderBy: {
+                  order: 'asc',
+                },
+                include: {
+                  base: {
+                    select: {
+                      id: true,
+                      name: true,
+                      muscleGroups: {
+                        select: {
+                          id: true,
+                          name: true,
+                          alias: true,
+                          groupSlug: true,
+                        },
+                      },
+                    },
+                  },
+                  sets: {
+                    orderBy: {
+                      order: 'asc',
+                    },
+                    select: {
+                      id: true,
+                      order: true,
+                      reps: true,
+                      minReps: true,
+                      maxReps: true,
+                      weight: true,
+                      rpe: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+// FULL VERSION - Only use when you actually need all the nested data (logs, substitutions, etc.)
+// WARNING: This query can consume 8-12 database connections - use sparingly!
 export async function getFullPlanById(id: string) {
+  console.warn(
+    `[DB-WARNING] Using heavy getFullPlanById query for plan ${id} - consider using getLightPlanById instead`,
+  )
+
   return prisma.trainingPlan.findUnique({
     where: { id },
     include: {

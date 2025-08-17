@@ -55,7 +55,7 @@ class DatabaseMonitor {
   private readonly SLOW_QUERY_THRESHOLD = 2000 // 2 seconds
   private readonly MAX_QUERY_TIMES = 100 // Keep last 100 query times for average
 
-  // Track query execution
+  // Track query execution with connection monitoring
   trackQuery(executionTime: number, queryType?: string) {
     this.stats.totalQueries++
     this.queryTimes.push(executionTime)
@@ -77,6 +77,16 @@ class DatabaseMonitor {
         `[DB-MONITOR] Slow query detected: ${executionTime}ms${queryType ? ` (${queryType})` : ''}`,
       )
     }
+
+    // Track potentially problematic queries that might be causing connection issues
+    if (
+      executionTime > 1000 ||
+      (queryType && queryType.includes('FitspaceGetUserQuickWorkoutPlan'))
+    ) {
+      console.error(
+        `[DB-MONITOR] HIGH-RISK QUERY: ${executionTime}ms - ${queryType || 'Unknown'} - This may be causing connection exhaustion!`,
+      )
+    }
   }
 
   // Get current connection count (original method)
@@ -94,11 +104,233 @@ class DatabaseMonitor {
         console.warn(`[DB-MONITOR] High connection count: ${count}`)
       }
 
+      // CRITICAL: Log high connection count and investigate sources
+      if (count > 40) {
+        console.error(
+          `[DB-MONITOR] CRITICAL: ${count} connections detected - investigating sources...`,
+        )
+        await this.investigateHighConnections()
+      } else if (count > 20) {
+        console.warn(
+          `[DB-MONITOR] WARNING: ${count} connections detected - monitoring closely`,
+        )
+      }
+
       return count
     } catch (error) {
       console.error('[DB-MONITOR] Failed to check connections:', error)
       this.stats.consecutiveFailures++
       return -1
+    }
+  }
+
+  // Emergency function to terminate idle connections
+  async terminateIdleConnections(): Promise<void> {
+    try {
+      const result = await prisma.$queryRaw<[{ terminated: number }]>`
+        SELECT COUNT(*) as terminated FROM (
+          SELECT pg_terminate_backend(pid) 
+          FROM pg_stat_activity 
+          WHERE datname = current_database()
+            AND state = 'idle'
+            AND query_start < NOW() - INTERVAL '5 minutes'
+            AND pid <> pg_backend_pid()
+        ) as terminated_connections
+      `
+
+      const terminated = Number(result[0].terminated)
+      console.warn(
+        `[DB-MONITOR] Emergency: Terminated ${terminated} idle connections`,
+      )
+
+      return
+    } catch (error) {
+      console.error('[DB-MONITOR] Failed to terminate idle connections:', error)
+    }
+  }
+
+  // NEW: Check for deadlocks specifically
+  async checkDeadlocks(): Promise<void> {
+    try {
+      const deadlocks = await prisma.$queryRaw<
+        {
+          blocked_pid: number
+          blocking_pid: number
+          blocked_query: string
+          blocking_query: string
+        }[]
+      >`
+        SELECT 
+          w.pid as blocked_pid,
+          l.pid as blocking_pid,
+          w.query as blocked_query,
+          l.query as blocking_query
+        FROM pg_stat_activity w
+        JOIN pg_locks wl ON w.pid = wl.pid
+        JOIN pg_locks ll ON wl.locktype = ll.locktype 
+          AND wl.database = ll.database 
+          AND wl.relation = ll.relation
+        JOIN pg_stat_activity l ON ll.pid = l.pid
+        WHERE w.datname = current_database()
+          AND l.datname = current_database()
+          AND wl.granted = false
+          AND ll.granted = true
+          AND w.pid != l.pid
+      `
+
+      if (deadlocks.length > 0) {
+        console.error(
+          `[DEADLOCK-DETECTED] ${deadlocks.length} potential deadlocks found!`,
+        )
+
+        for (const deadlock of deadlocks) {
+          console.error(
+            `[DEADLOCK] PID ${deadlock.blocked_pid} blocked by PID ${deadlock.blocking_pid}`,
+          )
+          console.error(
+            `  Blocked query: ${deadlock.blocked_query.substring(0, 100)}...`,
+          )
+          console.error(
+            `  Blocking query: ${deadlock.blocking_query.substring(0, 100)}...`,
+          )
+        }
+      }
+    } catch (error) {
+      console.error('[DB-MONITOR] Failed to check deadlocks:', error)
+    }
+  }
+
+  // NEW: Detect and handle stuck transactions
+  async checkStuckTransactions(): Promise<void> {
+    try {
+      // Check for deadlocks first
+      await this.checkDeadlocks()
+
+      const stuckTransactions = await prisma.$queryRaw<
+        {
+          pid: number
+          query: string
+          state: string
+          duration_seconds: number
+          application_name: string
+        }[]
+      >`
+        SELECT 
+          pid,
+          query,
+          state,
+          EXTRACT(EPOCH FROM (NOW() - query_start)) as duration_seconds,
+          application_name
+        FROM pg_stat_activity 
+        WHERE datname = current_database()
+          AND state IN ('idle in transaction', 'active')
+          AND query_start < NOW() - INTERVAL '30 seconds'
+          AND pid <> pg_backend_pid()
+        ORDER BY query_start ASC
+      `
+
+      for (const tx of stuckTransactions) {
+        const minutes = Math.round(tx.duration_seconds / 60)
+
+        if (tx.duration_seconds > 120) {
+          // 2+ minutes
+          console.error(
+            `[STUCK-TRANSACTION] PID ${tx.pid}: ${tx.state} - ${minutes}m - Query: ${tx.query.substring(0, 50)}...`,
+          )
+
+          // Auto-kill transactions stuck for 5+ minutes
+          if (tx.duration_seconds > 300) {
+            console.error(
+              `[EMERGENCY] Terminating stuck transaction PID ${tx.pid} after ${minutes} minutes`,
+            )
+            await prisma.$queryRaw`SELECT pg_terminate_backend(${tx.pid})`
+          }
+        }
+      }
+
+      // Log summary if we have stuck transactions
+      if (stuckTransactions.length > 0) {
+        console.warn(
+          `[TRANSACTION-HEALTH] ${stuckTransactions.length} stuck transactions detected`,
+        )
+      }
+    } catch (error) {
+      console.error('[DB-MONITOR] Failed to check stuck transactions:', error)
+    }
+  }
+
+  // Enhanced connection investigation for debugging high connection counts
+  async investigateHighConnections(): Promise<void> {
+    try {
+      console.info('[DB-INVESTIGATE] Analyzing connection sources...')
+
+      const connections = await prisma.$queryRaw<
+        {
+          pid: number
+          application_name: string
+          client_addr: string
+          state: string
+          query: string
+          query_start: Date
+          state_change: Date
+          duration_minutes: number
+        }[]
+      >`
+        SELECT 
+          pid,
+          application_name,
+          client_addr,
+          state,
+          SUBSTRING(query, 1, 100) as query,
+          query_start,
+          state_change,
+          ROUND(EXTRACT(EPOCH FROM (NOW() - query_start))/60, 2) as duration_minutes
+        FROM pg_stat_activity 
+        WHERE datname = current_database()
+          AND pid <> pg_backend_pid()
+        ORDER BY query_start ASC
+      `
+
+      console.info(`[DB-INVESTIGATE] Found ${connections.length} connections:`)
+
+      // Group by application
+      const byApp = new Map<string, number>()
+      const byState = new Map<string, number>()
+      let longRunning = 0
+
+      for (const conn of connections) {
+        byApp.set(
+          conn.application_name,
+          (byApp.get(conn.application_name) || 0) + 1,
+        )
+        byState.set(conn.state, (byState.get(conn.state) || 0) + 1)
+
+        if (conn.duration_minutes > 5) {
+          longRunning++
+          console.warn(
+            `[DB-INVESTIGATE] Long-running: PID ${conn.pid} (${conn.duration_minutes}m) - ${conn.state} - ${conn.query.substring(0, 50)}...`,
+          )
+        }
+      }
+
+      console.info('[DB-INVESTIGATE] By Application:')
+      for (const [app, count] of byApp) {
+        console.info(`  ${app || 'unknown'}: ${count}`)
+      }
+
+      console.info('[DB-INVESTIGATE] By State:')
+      for (const [state, count] of byState) {
+        console.info(`  ${state}: ${count}`)
+      }
+
+      console.info(`[DB-INVESTIGATE] Long-running (>5min): ${longRunning}`)
+
+      return
+    } catch (error) {
+      console.error(
+        '[DB-INVESTIGATE] Failed to investigate connections:',
+        error,
+      )
     }
   }
 
@@ -326,7 +558,8 @@ export const dbMonitor = new DatabaseMonitor()
 setInterval(async () => {
   await dbMonitor.checkConnections()
   await dbMonitor.healthCheck()
-}, 60000) // Every minute
+  await dbMonitor.checkStuckTransactions() // Check for stuck transactions
+}, 60000) // Every 60 seconds (further reduced to save connections)
 
 // Detailed connection logging every 5 minutes
 setInterval(
