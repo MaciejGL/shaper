@@ -46,7 +46,7 @@ function TabsList({
   className,
   variant = 'default',
   size = 'default',
-  rounded = 'full',
+  rounded = 'lg',
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> & {
   variant?: 'default' | 'secondary'
@@ -87,7 +87,7 @@ function TabsTrigger({
   className,
   variant = 'default',
   size = 'default',
-  rounded = 'full',
+  rounded = 'lg',
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Trigger> & {
   variant?: 'default'

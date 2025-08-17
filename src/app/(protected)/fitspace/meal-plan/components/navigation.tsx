@@ -5,6 +5,7 @@ import { useQueryState } from 'nuqs'
 import { useMemo } from 'react'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
+import { AnimateHeightItem } from '@/components/animations/animated-container'
 import { MealDayPickerDrawer } from '@/components/meal-day-picker-drawer'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
@@ -18,7 +19,10 @@ import {
 } from '@/lib/utc-date-utils'
 import { cn } from '@/lib/utils'
 
-import { DailyProgressCard } from './daily-progress-card'
+import {
+  DailyProgressCard,
+  DailyProgressCardSkeleton,
+} from './daily-progress-card'
 import { Meal, MealPlan, useMealPlan } from './meal-plan-context'
 
 function calculateLoggedTotals(meals: Meal[]) {
@@ -88,7 +92,7 @@ function getCombinedDailyTotals(
   return calculateLoggedTotals(combinedMeals)
 }
 
-export function Navigation() {
+export function Navigation({ isLoading }: { isLoading: boolean }) {
   const { activeDay, currentPlan, activePlan, defaultPlan } = useMealPlan()
   const [date] = useQueryState('date')
 
@@ -116,10 +120,22 @@ export function Navigation() {
       <div className="mx-auto max-w-sm">
         <WeekSelector />
         <DaySelector />
-        <DailyProgressCard
-          dailyTargets={dailyTargets}
-          dailyActual={dailyActual}
-        />
+
+        <AnimatePresence>
+          {isLoading ? (
+            <DailyProgressCardSkeleton />
+          ) : (
+            <AnimateHeightItem
+              id="daily-progress-card"
+              isFirstRender={isLoading}
+            >
+              <DailyProgressCard
+                dailyTargets={dailyTargets}
+                dailyActual={dailyActual}
+              />
+            </AnimateHeightItem>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

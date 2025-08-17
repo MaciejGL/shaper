@@ -51,7 +51,7 @@ export default function MealPlanPage() {
       isLoadingDefault={isLoadingDefault}
     >
       <div className="flex flex-col h-full w-full pb-32">
-        <Navigation />
+        <Navigation isLoading={isLoadingActive || isLoadingDefault} />
 
         <div className="pt-4 w-full max-w-sm mx-auto grow h-full">
           <MealView />

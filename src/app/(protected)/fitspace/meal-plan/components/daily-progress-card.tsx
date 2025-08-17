@@ -1,3 +1,4 @@
+import { isNil } from 'lodash'
 import { FlameIcon } from 'lucide-react'
 
 import { Progress } from '@/components/ui/progress'
@@ -27,14 +28,10 @@ export function DailyProgressCard({
   }
 
   if (
-    !dailyActual?.calories ||
-    !dailyTargets.calories ||
-    !dailyActual.protein ||
-    !dailyTargets.protein ||
-    !dailyActual.carbs ||
-    !dailyTargets.carbs ||
-    !dailyActual.fat ||
-    !dailyTargets.fat
+    isNil(dailyActual?.calories) ||
+    isNil(dailyActual?.protein) ||
+    isNil(dailyActual?.carbs) ||
+    isNil(dailyActual?.fat)
   )
     return null
 
@@ -44,11 +41,13 @@ export function DailyProgressCard({
         <div className="grid grid-cols-4 gap-4">
           <div className="space-y-1">
             <div className="flex justify-end items-center">
-              <FlameIcon className="size-3 shrink-0" />
               <span>
-                {Math.round(dailyActual.calories)}/
-                {Math.round(dailyTargets.calories)}
+                {Math.round(dailyActual.calories)}
+                {dailyTargets.calories
+                  ? `/${Math.round(dailyTargets.calories)}`
+                  : ''}
               </span>
+              <FlameIcon className="size-2.5 shrink-0" />
             </div>
             <Progress
               value={getProgressValue(
@@ -60,8 +59,11 @@ export function DailyProgressCard({
           <div className="space-y-1">
             <div className="flex justify-end">
               <span>
-                {Math.round(dailyActual.protein)}/
-                {Math.round(dailyTargets.protein)}P
+                {Math.round(dailyActual.protein)}
+                {dailyTargets.protein
+                  ? `/${Math.round(dailyTargets.protein)}P`
+                  : ''}
+                P
               </span>
             </div>
             <Progress
@@ -74,7 +76,8 @@ export function DailyProgressCard({
           <div className="space-y-1">
             <div className="flex justify-end">
               <span>
-                {Math.round(dailyActual.carbs)}/{Math.round(dailyTargets.carbs)}
+                {Math.round(dailyActual.carbs)}
+                {dailyTargets.carbs ? `/${Math.round(dailyTargets.carbs)}` : ''}
                 C
               </span>
             </div>
@@ -85,12 +88,57 @@ export function DailyProgressCard({
           <div className="space-y-1">
             <div className="flex justify-end">
               <span>
-                {Math.round(dailyActual.fat)}/{Math.round(dailyTargets.fat)}F
+                {Math.round(dailyActual.fat)}
+                {dailyTargets.fat ? `/${Math.round(dailyTargets.fat)}` : ''}F
               </span>
             </div>
             <Progress
               value={getProgressValue(dailyActual.fat, dailyTargets.fat)}
             />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export function DailyProgressCardSkeleton() {
+  return (
+    <div>
+      <div className="text-xs text-muted-foreground mt-1.5">
+        <div className="grid grid-cols-4 gap-4">
+          <div className="space-y-1">
+            <div className="flex justify-end items-center">
+              <FlameIcon className="size-3 shrink-0" />
+              <span className="masked-placeholder-text rounded-md">
+                1300/1300
+              </span>
+            </div>
+            <Progress value={0} />
+          </div>
+          <div className="space-y-1">
+            <div className="flex justify-end">
+              <span className="masked-placeholder-text rounded-md">
+                180/180 P
+              </span>
+            </div>
+            <Progress value={0} />
+          </div>
+          <div className="space-y-1">
+            <div className="flex justify-end">
+              <span className="masked-placeholder-text rounded-md">
+                180/180 C
+              </span>
+            </div>
+            <Progress value={0} />
+          </div>
+          <div className="space-y-1">
+            <div className="flex justify-end">
+              <span className="masked-placeholder-text rounded-md">
+                60/60 F
+              </span>
+            </div>
+            <Progress value={0} />
           </div>
         </div>
       </div>
