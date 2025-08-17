@@ -679,6 +679,7 @@ model USDAFood {
   id               String    @id @default(uuid())
   fdcId            Int       @unique
   description      String
+  displayName      String?
   dataType         String
   foodCategory     String?
   brandOwner       String?
@@ -707,6 +708,9 @@ model USDAFood {
   @@index([fdcId], map: "usda_food_fdc_id_idx")
   @@index([dataType, description], map: "usda_food_search_quality_idx")
   @@index([caloriesPer100g, proteinPer100g, carbsPer100g, fatPer100g], map: "usda_nutrition_filter_idx")
+  @@index([displayName], map: "usda_food_display_name_idx")
+  @@index([displayName, dataType], map: "usda_food_display_search_idx")
+  @@index([dataType, displayName, description], map: "usda_food_hybrid_search_idx")
 }
 
 model OpenFoodFactsProduct {

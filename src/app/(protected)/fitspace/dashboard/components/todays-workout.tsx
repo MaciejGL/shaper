@@ -4,6 +4,7 @@ import { format } from 'date-fns'
 import { motion } from 'framer-motion'
 import {
   ArrowRight,
+  CalendarIcon,
   CheckIcon,
   ChevronsDownIcon,
   ClockIcon,
@@ -26,12 +27,12 @@ import { ActivePlan } from '../../my-plans/types'
 export function TodaysWorkout({
   todaysWorkout,
   planId,
-  isNextWorkout,
   forceExpanded,
+  isNextWorkout,
 }: {
   todaysWorkout?: NonNullable<ActivePlan>['weeks'][number]['days'][number]
   planId: string
-  isNextWorkout?: boolean
+  isNextWorkout: boolean
   forceExpanded?: boolean
 }) {
   if (!todaysWorkout || !planId) {
@@ -40,7 +41,7 @@ export function TodaysWorkout({
 
   const getTitle = () => {
     if (isNextWorkout) {
-      return "Next's workout"
+      return 'Get ready!'
     }
 
     if (todaysWorkout.completedAt) {
@@ -54,21 +55,26 @@ export function TodaysWorkout({
     return "Today's workout"
   }
 
+  const getSubtitle = () => {
+    if (isNextWorkout && todaysWorkout.scheduledAt) {
+      return `Your workout begins on ${format(todaysWorkout.scheduledAt, 'EEEE, d. MMMM')}`
+    }
+    return null
+  }
+
   return (
     <div>
       <div className="flex items-baseline justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <SectionIcon
-            icon={DumbbellIcon}
-            variant={todaysWorkout.completedAt ? 'green' : 'indigo'}
-          />
-          <p className="text-lg font-semibold">{getTitle()}</p>
-          {isNextWorkout && todaysWorkout.scheduledAt && (
-            <p className="text-sm text-muted-foreground">
-              {format(todaysWorkout.scheduledAt, 'EEEE, d. MMMM')}
-            </p>
-          )}
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <SectionIcon
+              icon={DumbbellIcon}
+              variant={todaysWorkout.completedAt ? 'green' : 'indigo'}
+            />
+            <p className="text-lg font-semibold">{getTitle()}</p>
+          </div>
         </div>
+
         {!todaysWorkout.isRestDay && (
           <ButtonLink
             href={`/fitspace/workout/${planId}`}
@@ -78,6 +84,12 @@ export function TodaysWorkout({
           </ButtonLink>
         )}
       </div>
+      {getSubtitle() && (
+        <div className="flex items-center gap-2 text-sm text-muted-foreground bg-card-on-card rounded-lg p-2 my-4">
+          <CalendarIcon className="size-4 text-blue-500" />
+          {getSubtitle()}
+        </div>
+      )}
       {todaysWorkout.isRestDay ? (
         <RestDay />
       ) : (

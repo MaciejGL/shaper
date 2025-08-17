@@ -96,76 +96,183 @@ function transformOpenFoodFactsProductToResult(
 }
 
 // ============================================================================
+// SEARCH CONFIGURATION
+// ============================================================================
+
+/**
+ * Configuration for OpenFoodFacts search quality and deduplication
+ *
+ * 🎛️ TWEAKING GUIDE:
+ *
+ * FOR SPEED (prioritize fast response):
+ * - Set quality.enableQualityFilter = false (disables quality filters)
+ * - Reduce fetch.multiplier to 1.2 (fetch fewer items)
+ * - Set deduplication.enableDeduplication = false (skip deduplication)
+ * - Increase deduplication.maxGroupsToProcess limit
+ *
+ * FOR QUALITY (prioritize better results):
+ * - Increase quality.minCompleteness (0.15 → 0.3)
+ * - Increase fetch.multiplier (1.5 → 2.5) for better deduplication
+ * - Decrease deduplication.completenessThreshold (0.15 → 0.05) for stricter matching
+ *
+ * FOR DEBUGGING:
+ * - Set logging.enableSearchLogs = true to see performance metrics
+ */
+const SEARCH_CONFIG = {
+  // Quality thresholds for filtering products
+  quality: {
+    minCompleteness: 0.15, // Minimum data completeness (lowered for speed)
+    minScans: 1, // Minimum number of scans (lowered for speed)
+    minUniqueScans: 1, // Minimum unique user scans
+    enableQualityFilter: true, // Toggle quality filtering entirely
+  },
+
+  // Search fetch strategy
+  fetch: {
+    multiplier: 1.5, // Fetch this many times the requested limit for better filtering (optimized for speed)
+    minFetch: 15, // Minimum number of products to fetch (optimized for speed)
+    maxFetch: 50, // Maximum products to fetch to prevent slow queries
+  },
+
+  // Deduplication quality comparison thresholds
+  deduplication: {
+    completenessThreshold: 0.15, // Products within this completeness range are considered equal
+    scansThreshold: 10, // Products within this scan count range are considered equal
+    enableDeduplication: true, // Toggle deduplication on/off
+    maxGroupsToProcess: 20, // Limit deduplication processing for speed
+  },
+
+  // Product name normalization rules
+  normalization: {
+    // Terms to remove from product names for similarity grouping
+    percentageTerms: /\b\d+%\s*/g,
+    marketingTerms: /\b(organic|natural|pure|premium|select|choice)\b/g,
+    completenessTerms: /\b(100%|whole|complete|full)\b/g,
+    preparationTerms:
+      /\b(quick|instant|old\s+fashioned|traditional|steel\s+cut)\b/g,
+    originTerms: /\b(australian\s+grown|imported|local|farm|grown)\b/g,
+    redundantTerms: /\b(grain|cereal)\b/g,
+    sizeTerms: /\b(large|small|medium|family\s+size)\b/g,
+
+    // Fallback strategy when normalized name becomes too short
+    fallbackWordCount: 2, // Use first N words from original name
+  },
+
+  // Logging preferences
+  logging: {
+    enableSearchLogs: true,
+    enableDeduplicationLogs: true,
+  },
+} as const
+
+// Export config for external tweaking if needed
+export { SEARCH_CONFIG }
+
+// ============================================================================
 // SEARCH SERVICE CLASS
 // ============================================================================
 
 export class OpenFoodFactsSearchService {
   /**
-   * Search OpenFoodFacts products in local database with strict country filtering
+   * Enhanced search with quality-based ranking and smart deduplication
    *
-   * FILTERING STRATEGY:
-   * 1. Database-level country filtering for precise results
-   * 2. Only returns products from the specified country
-   * 3. Fallback search without nutrition filter if no results found
+   * QUALITY & DEDUPLICATION STRATEGY:
+   * 1. Quality-based ranking: completeness > popularity (scans) > uniqueness
+   * 2. Smart deduplication: groups similar products, picks best from each group
+   * 3. Minimum quality thresholds to filter out poor data
+   * 4. Fallback search with relaxed filters if needed
+   * 5. Uses optimized database indexes for performance
+   *
+   * DEDUPLICATION EXAMPLES:
+   * - "100% whole grain Australian grown oats"
+   * - "100% whole grain cereal quick oats"
+   * - "100% whole grain oats"
+   * → Returns only the highest quality "oats" product
    *
    * @param query - Search term (minimum 2 characters)
    * @param limit - Maximum number of results (default: 10)
    * @param country - Country to limit results to (default: 'Norway')
-   * @returns Promise<OpenFoodFactsSearchResult[]> - Array of matching products from specified country only
+   * @returns Promise<OpenFoodFactsSearchResult[]> - Array of high-quality, unique products
    *
    * @example
-   * // Default Norway search - only Norwegian products
-   * await searchProducts('porridge')
+   * // Returns top quality, deduplicated oats products
+   * await searchProducts('oats', 10)
    *
-   * // Search for specific country - only Swedish products
-   * await searchProducts('porridge', 10, 'Sweden')
+   * // Returns best quality yogurt products without duplicates
+   * await searchProducts('yogurt', 5, 'Norway')
    */
   async searchProducts(
     query: string,
     limit = 10,
     country = 'Norway',
   ): Promise<OpenFoodFactsSearchResult[]> {
+    // Note: country parameter available for future country filtering implementation
+    console.info(`🔍 Searching OpenFoodFacts for "${query}" in ${country}`)
     if (query.length < 2) return []
 
     try {
-      let products = await prisma.openFoodFactsProduct.findMany({
-        where: {
-          AND: [
-            {
-              productName: {
-                contains: query,
-                mode: 'insensitive' as const,
-              },
-            },
-            // STRICT COUNTRY FILTER: Only Norwegian products
-            // {
-            //   countries: {
-            //     contains: country,
-            //     mode: 'insensitive',
-            //   },
-            // },
-            // Simple nutrition filter - at least calories OR protein
-            {
-              OR: [
-                { energyKcal100g: { not: null } },
-                { proteins100g: { not: null } },
-              ],
-            },
+      // Fetch more results initially to allow for deduplication and quality filtering
+      const fetchLimit = Math.min(
+        Math.max(
+          limit * SEARCH_CONFIG.fetch.multiplier,
+          SEARCH_CONFIG.fetch.minFetch,
+        ),
+        SEARCH_CONFIG.fetch.maxFetch,
+      )
+
+      // PERFORMANCE OPTIMIZATION: Use the fastest possible query
+
+      const whereConditions: Prisma.OpenFoodFactsProductWhereInput[] = [
+        {
+          productName: {
+            contains: query,
+            mode: 'insensitive' as const,
+          },
+        },
+        // Always require nutrition data for relevance
+        {
+          OR: [
+            { energyKcal100g: { not: null } },
+            { proteins100g: { not: null } },
           ],
         },
-        take: limit,
-        // Simple ordering for speed
-        orderBy: {
-          productName: 'asc',
+      ]
+
+      // Only add quality filters if enabled (they can slow down queries significantly)
+      if (SEARCH_CONFIG.quality.enableQualityFilter) {
+        whereConditions.push({
+          OR: [
+            { completeness: { gte: SEARCH_CONFIG.quality.minCompleteness } },
+            { scansN: { gte: SEARCH_CONFIG.quality.minScans } },
+            { uniqueScansN: { gte: SEARCH_CONFIG.quality.minUniqueScans } },
+          ],
+        })
+      }
+
+      let products = await prisma.openFoodFactsProduct.findMany({
+        where: {
+          AND: whereConditions,
         },
+        take: fetchLimit,
+        // Use the fastest index: off_fast_search_idx (productName, energyKcal100g)
+        orderBy: [
+          { productName: 'asc' }, // Use indexed field first for speed
+          { scansN: 'desc' }, // Then popularity
+          { completeness: 'desc' }, // Then quality
+        ],
       })
 
-      // If no results with nutrition filter, try without nutrition filter but keep country filter
-      if (products.length === 0) {
+      // PERFORMANCE: Skip expensive fallback query if we have reasonable results
+      // Only do fallback if we have very few results AND quality filters are enabled
+      if (
+        products.length < Math.ceil(limit / 2) &&
+        SEARCH_CONFIG.quality.enableQualityFilter
+      ) {
         console.info(
-          `🔄 No results with nutrition filter, trying broader search for ${country}...`,
+          `🔄 Only found ${products.length} results, trying quick fallback...`,
         )
-        products = await prisma.openFoodFactsProduct.findMany({
+
+        const additionalProducts = await prisma.openFoodFactsProduct.findMany({
           where: {
             AND: [
               {
@@ -174,32 +281,191 @@ export class OpenFoodFactsSearchService {
                   mode: 'insensitive' as const,
                 },
               },
-              // STRICT COUNTRY FILTER: Still only Norwegian products
-              // {
-              //   countries: {
-              //     contains: country,
-              //     mode: 'insensitive',
-              //   },
-              // },
+              // Exclude products we already found
+              {
+                NOT: {
+                  id: {
+                    in: products.map((p) => p.id),
+                  },
+                },
+              },
+              // Keep nutrition requirement for relevance
+              {
+                OR: [
+                  { energyKcal100g: { not: null } },
+                  { proteins100g: { not: null } },
+                ],
+              },
             ],
           },
-          take: limit,
-          orderBy: {
-            productName: 'asc',
-          },
+          take: limit, // Only fetch what we need
+          orderBy: { productName: 'asc' }, // Simple fast ordering
         })
+
+        products = [...products, ...additionalProducts]
       }
 
-      console.info(
-        `🇳🇴 Country-filtered search for "${country}": ${products.length} results`,
-      )
+      if (SEARCH_CONFIG.logging.enableSearchLogs) {
+        console.info(
+          `🔍 Found ${products.length} products before deduplication`,
+        )
+      }
 
-      // No post-processing needed since we filter at database level
-      return products.map(transformOpenFoodFactsProductToResult)
+      // Apply smart deduplication to remove similar items
+      const deduplicatedProducts = SEARCH_CONFIG.deduplication
+        .enableDeduplication
+        ? this.deduplicateSimilarProducts(products, limit)
+        : products.slice(0, limit)
+
+      if (SEARCH_CONFIG.logging.enableDeduplicationLogs) {
+        console.info(
+          `✨ Deduplicated to ${deduplicatedProducts.length} unique products`,
+        )
+      }
+
+      return deduplicatedProducts.map(transformOpenFoodFactsProductToResult)
     } catch (error) {
       console.error('OpenFoodFacts search error:', error)
       return []
     }
+  }
+
+  /**
+   * Smart deduplication to remove similar product names while keeping the highest quality items
+   *
+   * STRATEGY:
+   * 1. Normalize product names to group similar items
+   * 2. Within each group, pick the product with best quality metrics
+   * 3. Prioritize: completeness > popularity (scans) > shorter names
+   *
+   * @param products - Array of products to deduplicate
+   * @param limit - Maximum number of results to return
+   * @returns Deduplicated array of best quality products
+   */
+  private deduplicateSimilarProducts(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    products: any[],
+    limit: number,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): any[] {
+    const productGroups = new Map<string, typeof products>()
+
+    // Group products by normalized name
+    for (const product of products) {
+      const normalizedName = this.normalizeProductName(product.productName)
+
+      if (!productGroups.has(normalizedName)) {
+        productGroups.set(normalizedName, [])
+      }
+      productGroups.get(normalizedName)!.push(product)
+    }
+
+    const deduplicatedProducts: typeof products = []
+    let groupsProcessed = 0
+
+    // Pick the best product from each group (with processing limit for speed)
+    for (const groupProducts of productGroups.values()) {
+      if (deduplicatedProducts.length >= limit) break
+      if (groupsProcessed >= SEARCH_CONFIG.deduplication.maxGroupsToProcess)
+        break
+
+      groupsProcessed++
+
+      // Sort products within group by quality metrics
+      const bestProduct = groupProducts.sort((a, b) => {
+        // Primary: Data completeness (higher is better)
+        const completenessA = a.completeness || 0
+        const completenessB = b.completeness || 0
+        if (
+          Math.abs(completenessA - completenessB) >
+          SEARCH_CONFIG.deduplication.completenessThreshold
+        ) {
+          return completenessB - completenessA
+        }
+
+        // Secondary: Popularity (scan count - higher is better)
+        const scansA = a.scansN || 0
+        const scansB = b.scansN || 0
+        if (
+          Math.abs(scansA - scansB) > SEARCH_CONFIG.deduplication.scansThreshold
+        ) {
+          return scansB - scansA
+        }
+
+        // Tertiary: Unique users (higher is better)
+        const uniqueScansA = a.uniqueScansN || 0
+        const uniqueScansB = b.uniqueScansN || 0
+        if (uniqueScansA !== uniqueScansB) {
+          return uniqueScansB - uniqueScansA
+        }
+
+        // Final: Shorter, simpler names are often better (less brand-specific)
+        return a.productName.length - b.productName.length
+      })[0] // Take the best product from this group
+
+      deduplicatedProducts.push(bestProduct)
+    }
+
+    // Sort final results by overall quality for consistent ordering
+    return deduplicatedProducts
+      .sort((a, b) => {
+        const completenessA = a.completeness || 0
+        const completenessB = b.completeness || 0
+        if (
+          Math.abs(completenessA - completenessB) >
+          SEARCH_CONFIG.deduplication.completenessThreshold / 2
+        ) {
+          return completenessB - completenessA
+        }
+
+        const scansA = a.scansN || 0
+        const scansB = b.scansN || 0
+        return scansB - scansA
+      })
+      .slice(0, limit)
+  }
+
+  /**
+   * Normalize product name for similarity grouping
+   *
+   * NORMALIZATION RULES:
+   * 1. Convert to lowercase
+   * 2. Remove brand/marketing terms (organic, 100%, etc.)
+   * 3. Remove preparation methods (quick, old fashioned, etc.)
+   * 4. Remove origin descriptors (Australian grown, etc.)
+   * 5. Standardize whitespace
+   *
+   * Example: "100% Whole Grain Australian Grown Oats" → "grain oats"
+   */
+  private normalizeProductName(name: string): string {
+    return (
+      name
+        .toLowerCase()
+        .trim()
+        // Remove percentage indicators
+        .replace(SEARCH_CONFIG.normalization.percentageTerms, '')
+        // Remove common marketing/quality terms
+        .replace(SEARCH_CONFIG.normalization.marketingTerms, '')
+        // Remove completeness indicators
+        .replace(SEARCH_CONFIG.normalization.completenessTerms, '')
+        // Remove preparation/processing terms
+        .replace(SEARCH_CONFIG.normalization.preparationTerms, '')
+        // Remove origin/source terms
+        .replace(SEARCH_CONFIG.normalization.originTerms, '')
+        // Remove grain/cereal descriptors that are often redundant
+        .replace(SEARCH_CONFIG.normalization.redundantTerms, '')
+        // Remove size/packaging terms
+        .replace(SEARCH_CONFIG.normalization.sizeTerms, '')
+        // Remove extra whitespace and normalize
+        .replace(/\s+/g, ' ')
+        .trim() ||
+      // If result is too short, use first N significant words from original
+      name
+        .toLowerCase()
+        .split(' ')
+        .slice(0, SEARCH_CONFIG.normalization.fallbackWordCount)
+        .join(' ')
+    )
   }
 
   /**

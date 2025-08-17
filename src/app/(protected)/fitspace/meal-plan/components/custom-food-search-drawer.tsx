@@ -224,7 +224,6 @@ export function CustomFoodSearchDrawer({
       handleSearch(debouncedQuery.trim())
     } else {
       // Clear results and cancel any ongoing search when query is too short
-      setSearchResults([])
       setIsSearching(false)
       if (currentSearchController.current) {
         currentSearchController.current.abort()
@@ -329,8 +328,6 @@ export function CustomFoodSearchDrawer({
               className="w-full grow"
               onFocusCapture={() => {
                 setSearchTerm('')
-                setSearchResults([])
-                setIsSearching(false)
                 // Cancel any ongoing search when input is cleared
                 if (currentSearchController.current) {
                   currentSearchController.current.abort()

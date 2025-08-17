@@ -1884,10 +1884,14 @@ export async function getCurrentWorkoutWeek(context: GQLContext) {
   const currentWeekIndex = Math.floor(daysSinceStart / 7)
 
   // Instead of manipulating the structure, just return the plan with limited weeks
-  const limitedWeeks = plan.weeks.slice(
+  let limitedWeeks = plan.weeks.slice(
     Math.max(0, currentWeekIndex - 4),
     currentWeekIndex + 1,
   )
+
+  if (limitedWeeks.length === 0) {
+    limitedWeeks = plan.weeks.slice(0, 1)
+  }
 
   const limitedPlan = {
     ...plan,

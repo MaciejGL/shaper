@@ -40,5 +40,31 @@ export const getCurrentWeekAndDay = <T extends GetCurrentWeekAndDay>(
       )
     })
 
-  return { currentWeek, currentDay, nextWorkout }
+  // Fallback logic: if no current week/day is found, use the first available workout day
+  let fallbackWeek = currentWeek
+  let fallbackDay = currentDay
+
+  if (!currentWeek || !currentDay) {
+    // Find the first week that has any scheduled workout days
+    const firstAvailableWeek = weeks.find((week) =>
+      week.days.some((day) => day.scheduledAt && !day.isRestDay),
+    )
+
+    if (firstAvailableWeek && !currentWeek) {
+      fallbackWeek = firstAvailableWeek
+    }
+
+    // Find the first non-rest day in the selected week
+    if (fallbackWeek && !currentDay) {
+      fallbackDay = fallbackWeek.days.find(
+        (day) => day.scheduledAt && !day.isRestDay,
+      )
+    }
+  }
+
+  return {
+    currentWeek: fallbackWeek,
+    currentDay: fallbackDay,
+    nextWorkout,
+  }
 }

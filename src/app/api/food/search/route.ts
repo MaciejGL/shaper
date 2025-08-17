@@ -134,9 +134,9 @@ export async function GET(request: Request) {
       // Run both searches in parallel for maximum performance
       const [usdaResult, offResult] = await Promise.allSettled([
         // USDA search (most reliable nutrition data)
-        usdaSearchService.searchFoods(query, 80),
+        usdaSearchService.searchFoods(query, 12),
         // OpenFoodFacts search (broader product variety)
-        openFoodFactsSearchService.searchProducts(query, 20, country),
+        openFoodFactsSearchService.searchProducts(query, 8, country),
       ])
 
       const searchTime = Date.now() - searchStart

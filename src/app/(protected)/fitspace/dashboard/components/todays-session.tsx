@@ -18,7 +18,7 @@ export type TodaysSessionProps = {
 
 export function TodaysSession({ plan }: TodaysSessionProps) {
   const { preferences } = useUserPreferences()
-  const { currentDay } = getCurrentWeekAndDay(
+  const { currentDay, nextWorkout } = getCurrentWeekAndDay(
     plan?.weeks,
     preferences.weekStartsOn,
   )
@@ -57,10 +57,16 @@ export function TodaysSession({ plan }: TodaysSessionProps) {
     )
   }
 
+  const workoutToShow = currentDay || nextWorkout
+
   return (
     <Card variant="secondary">
       <CardContent>
-        <TodaysWorkout planId={plan.id} todaysWorkout={currentDay} />
+        <TodaysWorkout
+          planId={plan.id}
+          todaysWorkout={workoutToShow}
+          isNextWorkout={!!nextWorkout}
+        />
       </CardContent>
     </Card>
   )
