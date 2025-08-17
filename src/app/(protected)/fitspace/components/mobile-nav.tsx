@@ -4,7 +4,6 @@ import {
   Calendar,
   ChefHatIcon,
   ChevronRight,
-  Compass,
   Dumbbell,
   LayoutDashboardIcon,
   MoreHorizontalIcon,
@@ -20,6 +19,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { Icon } from '@/components/icons'
 import { ButtonLink } from '@/components/ui/button-link'
+import { Card } from '@/components/ui/card'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { useUser } from '@/context/user-context'
 import { useFitspaceGetActivePlanIdQuery } from '@/generated/graphql-client'
@@ -256,7 +256,6 @@ type ExploreCtaButtonProps = {
   onClick?: () => void
   title?: string
   subtitle?: string
-  icon?: React.ComponentType<{ className?: string }>
   className?: string
 }
 
@@ -265,28 +264,26 @@ export function ExploreCtaButton({
   onClick,
   title = 'Explore Coaches & Plans',
   subtitle = 'Get matched to a coach or start a plan',
-  icon: Icon = Compass,
   className,
 }: ExploreCtaButtonProps) {
   return (
-    <ButtonLink
-      href={href}
-      onClick={onClick}
-      variant="secondary"
-      aria-label={title}
-      className={`w-full h-20 rounded-xl px-4 flex items-center justify-between ${className || ''}`}
-    >
-      <div className="flex items-center gap-3">
-        <div className="size-9 rounded-lg bg-white/10 flex items-center justify-center">
-          <Icon className="size-5" />
+    <Link href={href} onClick={onClick} aria-label={title}>
+      <Card
+        variant="premium"
+        className={cn(
+          'w-full flex flex-row items-center justify-between p-4',
+          className,
+        )}
+      >
+        <div className="flex items-center gap-3">
+          <div className="text-left">
+            <div className="text-base font-semibold leading-tight">{title}</div>
+            <div className="text-xs leading-tight">{subtitle}</div>
+          </div>
         </div>
-        <div className="text-left">
-          <div className="text-base font-semibold leading-tight">{title}</div>
-          <div className="text-xs text-white/80 leading-tight">{subtitle}</div>
-        </div>
-      </div>
-      <ChevronRight className="size-5 opacity-90" />
-    </ButtonLink>
+        <ChevronRight className="size-5 text-primary opacity-90" />
+      </Card>
+    </Link>
   )
 }
 
@@ -316,10 +313,10 @@ export function QuickActionTile({
       variant="secondary"
       aria-label={ariaLabel || label}
       disabled={disabled}
-      className={`h-24 rounded-xl ${className || ''}`}
+      className={cn('h-24 rounded-xl border', className)}
     >
       <div className="flex flex-col items-center justify-center gap-2">
-        <Icon className="size-6" />
+        <Icon />
         <p className="text-xs font-medium text-center whitespace-pre-wrap">
           {label}
         </p>

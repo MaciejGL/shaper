@@ -1,13 +1,18 @@
 'use client'
 
-import { Clock, MessageSquare, UserCheck, Users } from 'lucide-react'
+import { Clock, Loader2, MessageSquare, UserCheck, Users } from 'lucide-react'
+import { useState } from 'react'
 
+import { Loader } from '@/components/loader'
 import { TrainerCard } from '@/components/trainer/trainer-card'
+import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
+  GQLGetMyTrainerQuery,
   GQLMyCoachingRequestsQuery,
+  useGetMyTrainerQuery,
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
 
@@ -20,21 +25,22 @@ export default function MyTrainerPage() {
 
   const coachingRequests = requestsData?.coachingRequests || []
 
-  // Filter for accepted requests (this means we have a trainer relationship)
-  const acceptedRequests = coachingRequests.filter(
-    (request) => request.status === 'ACCEPTED',
-  )
+  const { data: trainerData, isLoading: isLoadingTrainer } =
+    useGetMyTrainerQuery()
 
-  // Check if user has a trainer relationship
-  const hasTrainer = acceptedRequests.length > 0
+  const trainer = trainerData?.getMyTrainer
 
   return (
     <div className="container-hypertro mx-auto mb-24 max-w-md">
       <DashboardHeader title="My Trainer" icon={UserCheck} />
+      {isLoadingTrainer && (
+        <div className="min-h-[300px] flex-center">
+          <Loader />
+        </div>
+      )}
+      {!isLoadingTrainer && trainer && <TrainerView trainer={trainer} />}
 
-      {hasTrainer ? (
-        <TrainerView trainer={acceptedRequests[0].recipient} />
-      ) : (
+      {!isLoadingTrainer && !trainer && (
         <NoTrainerView requests={coachingRequests} />
       )}
     </div>
@@ -42,42 +48,59 @@ export default function MyTrainerPage() {
 }
 
 interface TrainerViewProps {
-  trainer: CoachingRequest['recipient']
+  trainer: NonNullable<GQLGetMyTrainerQuery['getMyTrainer']>
 }
 
 function TrainerView({ trainer }: TrainerViewProps) {
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+
+  const handleCancelCoaching = () => {
+    console.log('Cancel Coaching')
+  }
+
+  const handleSendMessage = () => {
+    console.log('Send Message')
+  }
+
   return (
     <div className="space-y-4">
-      {/* Connected Status */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center">
-              <UserCheck className="h-5 w-5 text-primary" />
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-medium">Connected to trainer</p>
-              <Badge variant="secondary" className="mt-1">
-                <Users className="h-3 w-3 mr-1" />
-                Active relationship
-              </Badge>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Trainer Card */}
       <TrainerCard
         trainer={trainer}
-        showExperience={false}
+        showExperience={true}
+        showClientCount={false}
         variant="secondary"
+        onClick={() => setIsDrawerOpen(true)}
+      />
+
+      <TrainerDetailsDrawer
+        trainer={trainer}
+        isOpen={isDrawerOpen}
+        onClose={() => setIsDrawerOpen(false)}
+        showRequestCoaching={false}
       />
 
       {/* Message Button */}
-      <Button className="w-full" size="lg" disabled>
-        <MessageSquare className="h-4 w-4 mr-2" />
-        Send Message (Coming Soon)
-      </Button>
+
+      <div className="grid grid-cols-2 gap-2">
+        <Button
+          className="w-full"
+          size="lg"
+          disabled
+          onClick={handleCancelCoaching}
+        >
+          Cancel Coaching
+        </Button>
+
+        <Button
+          className="w-full"
+          size="lg"
+          disabled
+          iconStart={<MessageSquare />}
+          onClick={handleSendMessage}
+        >
+          Send Message
+        </Button>
+      </div>
     </div>
   )
 }

@@ -1818,6 +1818,7 @@ export type GQLQuery = {
   getMyPlansOverview: GQLMyPlansPayload;
   getMyPlansOverviewFull: GQLMyPlansPayload;
   getMyPlansOverviewLite: GQLMyPlansPayload;
+  getMyTrainer?: Maybe<GQLPublicTrainer>;
   getPublicTrainingPlans: Array<GQLTrainingPlan>;
   getQuickWorkoutPlan: GQLTrainingPlan;
   getRecentCompletedWorkouts: Array<GQLTrainingDay>;
@@ -2997,6 +2998,11 @@ export type GQLRemoveWeekMutationVariables = Exact<{
 
 
 export type GQLRemoveWeekMutation = { __typename?: 'Mutation', removeWeek: boolean };
+
+export type GQLGetMyTrainerQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetMyTrainerQuery = { __typename?: 'Query', getMyTrainer?: { __typename?: 'PublicTrainer', id: string, name?: string | undefined | null, role: GQLUserRole, clientCount: number, email: string, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null, bio?: string | undefined | null, avatarUrl?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null } | undefined | null } | undefined | null };
 
 export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, mealReminders: boolean, progressUpdates: boolean, collaborationNotifications: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } };
 
@@ -6053,6 +6059,70 @@ useRemoveWeekMutation.getKey = () => ['RemoveWeek'];
 
 
 useRemoveWeekMutation.fetcher = (variables: GQLRemoveWeekMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveWeekMutation, GQLRemoveWeekMutationVariables>(RemoveWeekDocument, variables, options);
+
+export const GetMyTrainerDocument = `
+    query GetMyTrainer {
+  getMyTrainer {
+    id
+    name
+    role
+    clientCount
+    email
+    profile {
+      firstName
+      lastName
+      bio
+      avatarUrl
+      specialization
+      credentials
+      successStories
+      trainerSince
+    }
+  }
+}
+    `;
+
+export const useGetMyTrainerQuery = <
+      TData = GQLGetMyTrainerQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetMyTrainerQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetMyTrainerQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetMyTrainerQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetMyTrainerQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetMyTrainer'] : ['GetMyTrainer', variables],
+    queryFn: fetchData<GQLGetMyTrainerQuery, GQLGetMyTrainerQueryVariables>(GetMyTrainerDocument, variables),
+    ...options
+  }
+    )};
+
+useGetMyTrainerQuery.getKey = (variables?: GQLGetMyTrainerQueryVariables) => variables === undefined ? ['GetMyTrainer'] : ['GetMyTrainer', variables];
+
+export const useInfiniteGetMyTrainerQuery = <
+      TData = InfiniteData<GQLGetMyTrainerQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetMyTrainerQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetMyTrainerQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetMyTrainerQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetMyTrainerQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetMyTrainer.infinite'] : ['GetMyTrainer.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetMyTrainerQuery, GQLGetMyTrainerQueryVariables>(GetMyTrainerDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetMyTrainerQuery.getKey = (variables?: GQLGetMyTrainerQueryVariables) => variables === undefined ? ['GetMyTrainer.infinite'] : ['GetMyTrainer.infinite', variables];
+
+
+useGetMyTrainerQuery.fetcher = (variables?: GQLGetMyTrainerQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMyTrainerQuery, GQLGetMyTrainerQueryVariables>(GetMyTrainerDocument, variables, options);
 
 export const ProfileDocument = `
     query Profile {

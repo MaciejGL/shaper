@@ -197,6 +197,35 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     )
   },
 
+  getMyTrainer: async (_, __, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    if (!user.user.trainerId) {
+      return null
+    }
+
+    const trainer = await prisma.user.findUnique({
+      where: { id: user.user.trainerId },
+      include: {
+        profile: true,
+        _count: {
+          select: {
+            clients: true,
+          },
+        },
+      },
+    })
+
+    if (!trainer) {
+      return null
+    }
+
+    return new PublicTrainer(trainer, context)
+  },
+
   // Admin-only queries
   adminUserStats: async () => {
     await requireAdminUser()

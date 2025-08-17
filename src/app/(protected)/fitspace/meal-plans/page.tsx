@@ -3,6 +3,7 @@
 import { ChefHat } from 'lucide-react'
 import { useState } from 'react'
 
+import { EmptyStateCard } from '@/components/empty-state-card'
 import { useFitspaceMealPlansOverviewQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
@@ -74,14 +75,11 @@ export default function MealPlansOverviewPage() {
 
       {/* Empty State */}
       {!isLoading && allPlans.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12">
-          <ChefHat className="size-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">No Meal Plans</h3>
-          <p className="text-muted-foreground">
-            You don't have any meal plans yet. Contact your trainer to get
-            started.
-          </p>
-        </div>
+        <EmptyStateCard
+          title="No Meal Plans"
+          description="You don't have any meal plans yet. Contact your trainer to get started."
+          icon={ChefHat}
+        />
       )}
 
       {/* Meal Plan Details Drawer */}

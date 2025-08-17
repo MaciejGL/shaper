@@ -28,6 +28,7 @@ interface TrainerCardProps {
   onClick?: () => void
   variant?: CardProps['variant']
   showExperience?: boolean
+  showClientCount?: boolean
   className?: string
 }
 
@@ -36,6 +37,7 @@ export function TrainerCard({
   onClick,
   variant = 'secondary',
   showExperience = true,
+  showClientCount = true,
   className = '',
 }: TrainerCardProps) {
   const trainerName =
@@ -87,7 +89,8 @@ export function TrainerCard({
                       {getExperienceText()} of experience
                     </Badge>
                   )}
-                  {trainer.clientCount !== null &&
+                  {showClientCount &&
+                    trainer.clientCount !== null &&
                     trainer.clientCount !== undefined && (
                       <Badge variant="equipment" size="sm">
                         {trainer.clientCount} clients

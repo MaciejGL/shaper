@@ -1,4 +1,4 @@
-import { cva } from 'class-variance-authority'
+import { VariantProps, cva } from 'class-variance-authority'
 import * as React from 'react'
 
 import { cn } from '@/lib/utils'
@@ -10,11 +10,12 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        elevated: 'shadow-neuro-light dark:shadow-neuro-dark',
         secondary:
           'bg-card border-0 dark:shadow-none shadow-xs border-border dark:border-border/50 border',
         gradient:
           'border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-white via-white to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800 border-0',
+        premium:
+          'bg-gradient-to-br from-amber-400 via-amber-400 to-amber-600 border-0 shadow-sm dark:from-amber-500 dark:via-amber-500 dark:to-amber-600 text-primary-foreground [&_svg]:text-primary-foreground',
       },
     },
     defaultVariants: {
@@ -24,7 +25,7 @@ const cardVariants = cva(
 )
 
 export type CardProps = React.ComponentProps<'div'> & {
-  variant?: 'gradient' | 'elevated' | 'secondary'
+  variant?: VariantProps<typeof cardVariants>['variant']
   borderless?: boolean
   hoverable?: boolean
 }

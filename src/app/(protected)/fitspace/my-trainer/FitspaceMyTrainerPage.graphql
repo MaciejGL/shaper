@@ -1,0 +1,19 @@
+query GetMyTrainer {
+  getMyTrainer {
+    id
+    name
+    role
+    clientCount
+    email
+    profile {
+      firstName
+      lastName
+      bio
+      avatarUrl
+      specialization
+      credentials
+      successStories
+      trainerSince
+    }
+  }
+}

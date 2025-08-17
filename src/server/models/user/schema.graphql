@@ -102,6 +102,7 @@ type Query {
 
   # Public queries
   getFeaturedTrainers(limit: Int): [PublicTrainer!]!
+  getMyTrainer: PublicTrainer
 
   # Admin-only queries
   adminUserStats: AdminUserStats!
