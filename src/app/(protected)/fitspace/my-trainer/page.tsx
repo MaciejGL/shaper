@@ -1,17 +1,28 @@
 'use client'
 
-import { Clock, Loader2, MessageSquare, UserCheck, Users } from 'lucide-react'
+import { formatDate } from 'date-fns'
+import { Calendar, Clock, MessageSquare, UserCheck, Users } from 'lucide-react'
 import { useState } from 'react'
 
+import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Loader } from '@/components/loader'
+import { RadioButtons } from '@/components/radio-buttons'
 import { TrainerCard } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  GQLCoachingRequestStatus,
   GQLGetMyTrainerQuery,
   GQLMyCoachingRequestsQuery,
+  useCancelCoachingMutation,
   useGetMyTrainerQuery,
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
@@ -31,7 +42,7 @@ export default function MyTrainerPage() {
   const trainer = trainerData?.getMyTrainer
 
   return (
-    <div className="container-hypertro mx-auto mb-24 max-w-md">
+    <div className="container-hypertro mx-auto max-w-md">
       <DashboardHeader title="My Trainer" icon={UserCheck} />
       {isLoadingTrainer && (
         <div className="min-h-[300px] flex-center">
@@ -53,14 +64,46 @@ interface TrainerViewProps {
 
 function TrainerView({ trainer }: TrainerViewProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const { openModal } = useConfirmationModalContext()
+  const { data: coachingRequests } = useMyCoachingRequestsQuery()
+  const { refetch: refetchTrainer } = useGetMyTrainerQuery()
+  const { mutateAsync: cancelCoaching } = useCancelCoachingMutation()
 
   const handleCancelCoaching = () => {
-    console.log('Cancel Coaching')
+    const trainerName =
+      trainer.profile?.firstName && trainer.profile?.lastName
+        ? `${trainer.profile.firstName} ${trainer.profile.lastName}`
+        : trainer.name || 'your trainer'
+
+    openModal({
+      title: 'Cancel Coaching',
+      description: `Are you sure you want to cancel your coaching relationship with ${trainerName}? This action cannot be undone.`,
+      confirmText: 'Cancel Coaching',
+      cancelText: 'Keep Coaching',
+      variant: 'destructive',
+      onConfirm: async () => {
+        try {
+          await cancelCoaching({})
+          // Refetch data to update the UI
+          await refetchTrainer()
+        } catch (error) {
+          console.error('Failed to cancel coaching:', error)
+          throw error // Re-throw to prevent modal from closing
+        }
+      },
+    })
   }
 
   const handleSendMessage = () => {
-    console.log('Send Message')
+    // TODO: Implement send message functionality
   }
+
+  const trainerCoachingRequest = coachingRequests?.coachingRequests.find(
+    (request) =>
+      (request.recipient?.id === trainer.id ||
+        request.sender?.id === trainer.id) &&
+      request.status === GQLCoachingRequestStatus.Accepted,
+  )
 
   return (
     <div className="space-y-4">
@@ -79,13 +122,81 @@ function TrainerView({ trainer }: TrainerViewProps) {
         showRequestCoaching={false}
       />
 
-      {/* Message Button */}
+      <Card>
+        <CardContent>
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-semibold">Coaching Informations</h3>
+            {trainerCoachingRequest?.id && (
+              <div className="flex items-center gap-2">
+                <p className="text-md">Connected since </p>
+                <Badge variant="secondary">
+                  {formatDate(trainerCoachingRequest.createdAt, 'd. MMM yyyy')}
+                </Badge>
+              </div>
+            )}
+            {/* Update plan type */}
+            <div className="flex flex-col gap-2 opacity-50">
+              <p className="text-md font-medium">Plan type - coming soon</p>
+              <RadioButtons
+                options={[
+                  {
+                    label: 'Training plan',
+                    value: 'training-plan',
+                    description: 'Training plan only',
+                  },
+                  {
+                    label: 'Meal plan',
+                    value: 'meal-plan',
+                    description: 'Meal plan only',
+                  },
+                  {
+                    label: 'Training & Meal plan',
+                    value: 'training-meal-plan',
+                    description: 'Training plan & Meal plan',
+                  },
+                  {
+                    label: 'Full Package',
+                    value: 'full-coaching',
+                    description:
+                      'Training plan & Meal plan and 1 session per month',
+                  },
+                ]}
+                description="Select the type of coaching plan you want to update"
+                value="training-plan"
+                onValueChange={(value) => console.info(value)}
+                columns={1}
+                className="w-full"
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent>
+          {/* Scheduled Sessions */}
+          <div className="flex flex-col gap-2 opacity-50">
+            <h3 className="text-lg font-semibold">
+              Scheduled Sessions - coming soon
+            </h3>
+            <p>Available sessions this month: 0</p>
+            <p className="text-sm text-muted-foreground">
+              You have no scheduled sessions with {trainer.name}.
+            </p>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-end">
+          <Button iconStart={<Calendar />} disabled>
+            Schedule Session
+          </Button>
+        </CardFooter>
+      </Card>
 
       <div className="grid grid-cols-2 gap-2">
         <Button
           className="w-full"
           size="lg"
-          disabled
+          variant="destructive"
           onClick={handleCancelCoaching}
         >
           Cancel Coaching

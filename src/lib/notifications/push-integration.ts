@@ -7,6 +7,7 @@
 import { GQLNotificationType } from '@/generated/graphql-server'
 
 import {
+  notifyCoachingCancelled,
   notifyCoachingRequest,
   notifyCoachingRequestAccepted,
   notifyCoachingRequestRejected,
@@ -61,6 +62,12 @@ export async function sendPushForNotification(
         return await notifyCoachingRequestRejected(
           userId,
           additionalData?.senderName || 'Someone',
+        )
+
+      case GQLNotificationType.CoachingCancelled:
+        return await notifyCoachingCancelled(
+          userId,
+          additionalData?.clientName || 'Someone',
         )
 
       case GQLNotificationType.NewTrainingPlanAssigned:

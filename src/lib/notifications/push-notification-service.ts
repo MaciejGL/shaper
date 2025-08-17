@@ -55,6 +55,21 @@ export async function notifyCoachingRequestRejected(
   )
 }
 
+/**
+ * Send push notification when client cancels coaching relationship
+ */
+export async function notifyCoachingCancelled(
+  trainerId: string,
+  clientName: string,
+) {
+  return await sendPushNotificationToUsers(
+    [trainerId],
+    'Coaching Cancelled',
+    `${clientName} has cancelled their coaching relationship with you.`,
+    '/fitspace/clients',
+  )
+}
+
 // ================================
 // PLAN ASSIGNMENTS
 // ================================

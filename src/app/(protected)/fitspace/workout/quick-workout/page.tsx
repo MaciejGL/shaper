@@ -455,7 +455,7 @@ export default function QuickWorkoutPage() {
   )
 
   return (
-    <div className="min-h-screen pb-[80px] max-w-screen-sm mx-auto px-2">
+    <div className="min-h-screen max-w-screen-sm mx-auto px-2">
       {isLoadingQuickWorkoutPlan && (
         <div className="flex justify-center items-center min-h-[400px]">
           <Loader />

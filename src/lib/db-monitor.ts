@@ -200,65 +200,6 @@ class DatabaseMonitor {
     }
   }
 
-  // NEW: Detect and handle stuck transactions
-  async checkStuckTransactions(): Promise<void> {
-    try {
-      // Check for deadlocks first
-      await this.checkDeadlocks()
-
-      const stuckTransactions = await prisma.$queryRaw<
-        {
-          pid: number
-          query: string
-          state: string
-          duration_seconds: number
-          application_name: string
-        }[]
-      >`
-        SELECT 
-          pid,
-          query,
-          state,
-          EXTRACT(EPOCH FROM (NOW() - query_start)) as duration_seconds,
-          application_name
-        FROM pg_stat_activity 
-        WHERE datname = current_database()
-          AND state IN ('idle in transaction', 'active')
-          AND query_start < NOW() - INTERVAL '30 seconds'
-          AND pid <> pg_backend_pid()
-        ORDER BY query_start ASC
-      `
-
-      for (const tx of stuckTransactions) {
-        const minutes = Math.round(tx.duration_seconds / 60)
-
-        if (tx.duration_seconds > 120) {
-          // 2+ minutes
-          console.error(
-            `[STUCK-TRANSACTION] PID ${tx.pid}: ${tx.state} - ${minutes}m - Query: ${tx.query.substring(0, 50)}...`,
-          )
-
-          // Auto-kill transactions stuck for 5+ minutes
-          if (tx.duration_seconds > 300) {
-            console.error(
-              `[EMERGENCY] Terminating stuck transaction PID ${tx.pid} after ${minutes} minutes`,
-            )
-            await prisma.$queryRaw`SELECT pg_terminate_backend(${tx.pid})`
-          }
-        }
-      }
-
-      // Log summary if we have stuck transactions
-      if (stuckTransactions.length > 0) {
-        console.warn(
-          `[TRANSACTION-HEALTH] ${stuckTransactions.length} stuck transactions detected`,
-        )
-      }
-    } catch (error) {
-      console.error('[DB-MONITOR] Failed to check stuck transactions:', error)
-    }
-  }
-
   // Enhanced connection investigation for debugging high connection counts
   async investigateHighConnections(): Promise<void> {
     try {
@@ -558,7 +499,6 @@ export const dbMonitor = new DatabaseMonitor()
 setInterval(async () => {
   await dbMonitor.checkConnections()
   await dbMonitor.healthCheck()
-  await dbMonitor.checkStuckTransactions() // Check for stuck transactions
 }, 60000) // Every 60 seconds (further reduced to save connections)
 
 // Detailed connection logging every 5 minutes

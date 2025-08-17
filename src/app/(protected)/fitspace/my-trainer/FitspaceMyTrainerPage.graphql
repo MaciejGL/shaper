@@ -17,3 +17,7 @@ query GetMyTrainer {
     }
   }
 }
+
+mutation CancelCoaching {
+  cancelCoaching
+}

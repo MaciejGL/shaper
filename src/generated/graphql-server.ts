@@ -974,6 +974,7 @@ export type GQLMutation = {
   assignTrainingPlanToClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   batchLogMealFood: EntireFieldWrapper<Scalars['Boolean']['output']>;
   bulkUpdatePlanPermissions: EntireFieldWrapper<Array<GQLPlanCollaboratorSummary>>;
+  cancelCoaching: EntireFieldWrapper<Scalars['Boolean']['output']>;
   cancelCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   clearTodaysWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
   clearUserSessions: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1696,6 +1697,7 @@ export type GQLNotificationPreferencesInput = {
 };
 
 export enum GQLNotificationType {
+  CoachingCancelled = 'COACHING_CANCELLED',
   CoachingRequest = 'COACHING_REQUEST',
   CoachingRequestAccepted = 'COACHING_REQUEST_ACCEPTED',
   CoachingRequestRejected = 'COACHING_REQUEST_REJECTED',
@@ -3611,6 +3613,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   assignTrainingPlanToClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignTrainingPlanToClientArgs, 'input'>>;
   batchLogMealFood?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationBatchLogMealFoodArgs, 'input'>>;
   bulkUpdatePlanPermissions?: Resolver<Array<GQLResolversTypes['PlanCollaboratorSummary']>, ParentType, ContextType, RequireFields<GQLMutationBulkUpdatePlanPermissionsArgs, 'input'>>;
+  cancelCoaching?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   cancelCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationCancelCoachingRequestArgs, 'id'>>;
   clearTodaysWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   clearUserSessions?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationClearUserSessionsArgs, 'userId'>>;

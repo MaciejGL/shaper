@@ -11,7 +11,7 @@ import { TrainingPlansTab } from './components/training-plans-tab'
 
 export default function ExplorePage() {
   return (
-    <div className="container-hypertro mx-auto mb-24 max-w-md">
+    <div className="container-hypertro mx-auto max-w-md">
       <DashboardHeader title="Explore" icon={Compass} />
 
       <Tabs defaultValue="plans" className="w-full">

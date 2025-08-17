@@ -33,7 +33,7 @@ export default function ProgressPage() {
   )
 
   return (
-    <div className="container-hypertro mx-auto mb-24">
+    <div className="container-hypertro mx-auto">
       <DashboardHeader title="Progress" icon={TrendingUp} className="mb-6" />
 
       <Tabs defaultValue="body-measures" className="space-y-6">

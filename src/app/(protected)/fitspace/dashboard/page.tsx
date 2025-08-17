@@ -28,7 +28,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container-hypertro mx-auto mb-24 max-w-md">
+    <div className="container-hypertro mx-auto max-w-md">
       <DashboardHeader title="Dashboard" icon={LayoutDashboard} />
 
       {/* Single Column Mobile-First Layout */}
@@ -57,7 +57,7 @@ export default function DashboardPage() {
 
 function DashboardSkeleton() {
   return (
-    <div className="container-hypertro mx-auto mb-24 max-w-md">
+    <div className="container-hypertro mx-auto max-w-md">
       <DashboardHeader title="Dashboard" icon={LayoutDashboard} />
       <div className="space-y-6">
         <TodaysSessionSkeleton />

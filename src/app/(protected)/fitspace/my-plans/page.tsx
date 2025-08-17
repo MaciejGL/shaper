@@ -38,7 +38,7 @@ export default function MyPlansPage() {
   const quickWorkoutPlan = data?.getMyPlansOverviewFull?.quickWorkoutPlan
 
   return (
-    <div className="container-hypertro mx-auto mb-24">
+    <div className="container-hypertro mx-auto">
       <DashboardHeader title="Training Plans" icon={LayoutList} />
 
       {/* Plans Tabs */}

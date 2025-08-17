@@ -7,13 +7,16 @@ import {
 
 import {
   GQLMutationResolvers,
+  GQLNotificationType,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
+import { notifyCoachingCancelled } from '@/lib/notifications/push-notification-service'
 import { getFromCache, setInCache } from '@/lib/redis'
 import { GQLContext } from '@/types/gql-context'
 
+import { createNotification } from '../notification/factory'
 import UserPublic from '../user-public/model'
 
 import AdminUserListItem from './admin-user-list-item'
@@ -784,6 +787,79 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     } catch (error) {
       console.error('Failed to delete user account:', error)
       throw new Error('Failed to delete user account')
+    }
+  },
+
+  cancelCoaching: async (_, __, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not authenticated')
+    }
+
+    const userId = user.user.id
+
+    try {
+      // Get current user with trainer and profile info
+      const currentUser = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          trainer: {
+            include: {
+              profile: true,
+            },
+          },
+          profile: true,
+        },
+      })
+
+      if (!currentUser?.trainerId) {
+        throw new Error('No active coaching relationship to cancel')
+      }
+
+      const trainerId = currentUser.trainerId
+      const clientName =
+        currentUser.profile?.firstName && currentUser.profile?.lastName
+          ? `${currentUser.profile.firstName} ${currentUser.profile.lastName}`
+          : currentUser.name || 'Client'
+
+      // Use transaction to ensure all operations succeed or fail together
+      await prisma.$transaction(async (tx) => {
+        // Disconnect trainer from client
+        await tx.user.update({
+          where: { id: userId },
+          data: { trainerId: null },
+        })
+
+        // Remove client from trainer's clients list (if needed by the relation setup)
+        await tx.user.update({
+          where: { id: trainerId },
+          data: {
+            clients: {
+              disconnect: { id: userId },
+            },
+          },
+        })
+      })
+
+      // Create notification for the trainer
+
+      await createNotification(
+        {
+          userId: trainerId,
+          message: `${clientName} has cancelled their coaching relationship with you.`,
+          type: GQLNotificationType.CoachingCancelled,
+          createdBy: userId,
+          link: '/fitspace/clients',
+        },
+        context,
+      )
+
+      await notifyCoachingCancelled(trainerId, clientName)
+
+      return true
+    } catch (error) {
+      console.error('Failed to cancel coaching:', error)
+      throw new Error('Failed to cancel coaching relationship')
     }
   },
 }

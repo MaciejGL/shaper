@@ -1,5 +1,7 @@
 'use client'
 
+import { ChevronRight } from 'lucide-react'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardProps } from '@/components/ui/card'
 
@@ -120,6 +122,7 @@ export function TrainerCard({
               </p>
             )}
           </div>
+          <ChevronRight className="self-center" />
         </div>
       </CardContent>
     </Card>

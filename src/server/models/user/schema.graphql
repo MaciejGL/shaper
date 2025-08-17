@@ -125,4 +125,7 @@ type Mutation {
   # User account management
   resetUserLogs: Boolean!
   deleteUserAccount: Boolean!
+
+  # Coaching management
+  cancelCoaching: Boolean!
 }

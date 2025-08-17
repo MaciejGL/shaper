@@ -972,6 +972,7 @@ export type GQLMutation = {
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
   batchLogMealFood: Scalars['Boolean']['output'];
   bulkUpdatePlanPermissions: Array<GQLPlanCollaboratorSummary>;
+  cancelCoaching: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   clearTodaysWorkout: Scalars['Boolean']['output'];
   clearUserSessions: Scalars['Boolean']['output'];
@@ -1694,6 +1695,7 @@ export type GQLNotificationPreferencesInput = {
 };
 
 export enum GQLNotificationType {
+  CoachingCancelled = 'COACHING_CANCELLED',
   CoachingRequest = 'COACHING_REQUEST',
   CoachingRequestAccepted = 'COACHING_REQUEST_ACCEPTED',
   CoachingRequestRejected = 'COACHING_REQUEST_REJECTED',
@@ -3003,6 +3005,11 @@ export type GQLGetMyTrainerQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GQLGetMyTrainerQuery = { __typename?: 'Query', getMyTrainer?: { __typename?: 'PublicTrainer', id: string, name?: string | undefined | null, role: GQLUserRole, clientCount: number, email: string, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null, bio?: string | undefined | null, avatarUrl?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null } | undefined | null } | undefined | null };
+
+export type GQLCancelCoachingMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLCancelCoachingMutation = { __typename?: 'Mutation', cancelCoaching: boolean };
 
 export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, mealReminders: boolean, progressUpdates: boolean, collaborationNotifications: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } };
 
@@ -6123,6 +6130,30 @@ useInfiniteGetMyTrainerQuery.getKey = (variables?: GQLGetMyTrainerQueryVariables
 
 
 useGetMyTrainerQuery.fetcher = (variables?: GQLGetMyTrainerQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMyTrainerQuery, GQLGetMyTrainerQueryVariables>(GetMyTrainerDocument, variables, options);
+
+export const CancelCoachingDocument = `
+    mutation CancelCoaching {
+  cancelCoaching
+}
+    `;
+
+export const useCancelCoachingMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCancelCoachingMutation, TError, GQLCancelCoachingMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCancelCoachingMutation, TError, GQLCancelCoachingMutationVariables, TContext>(
+      {
+    mutationKey: ['CancelCoaching'],
+    mutationFn: (variables?: GQLCancelCoachingMutationVariables) => fetchData<GQLCancelCoachingMutation, GQLCancelCoachingMutationVariables>(CancelCoachingDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCancelCoachingMutation.getKey = () => ['CancelCoaching'];
+
+
+useCancelCoachingMutation.fetcher = (variables?: GQLCancelCoachingMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCancelCoachingMutation, GQLCancelCoachingMutationVariables>(CancelCoachingDocument, variables, options);
 
 export const ProfileDocument = `
     query Profile {
