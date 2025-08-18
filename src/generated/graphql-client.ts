@@ -1030,7 +1030,7 @@ export type GQLMutation = {
   bulkUpdatePlanPermissions: Array<GQLPlanCollaboratorSummary>;
   cancelCoaching: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
-  cancelSubscription: Scalars['Boolean']['output'];
+  cancelSubscription: GQLUserSubscription;
   clearTodaysWorkout: Scalars['Boolean']['output'];
   clearUserSessions: Scalars['Boolean']['output'];
   closePlan: Scalars['Boolean']['output'];
@@ -1083,7 +1083,7 @@ export type GQLMutation = {
   moderateReview: Scalars['Boolean']['output'];
   moveExercise: Scalars['Boolean']['output'];
   pausePlan: Scalars['Boolean']['output'];
-  reactivateSubscription: Scalars['Boolean']['output'];
+  reactivateSubscription: GQLUserSubscription;
   rejectCoachingRequest?: Maybe<GQLCoachingRequest>;
   removeAllExercisesFromDay: Scalars['Boolean']['output'];
   removeExerciseFromDay: Scalars['Boolean']['output'];
@@ -1261,7 +1261,7 @@ export type GQLMutationCancelCoachingRequestArgs = {
 
 
 export type GQLMutationCancelSubscriptionArgs = {
-  id: Scalars['ID']['input'];
+  subscriptionId: Scalars['ID']['input'];
 };
 
 
@@ -1512,7 +1512,7 @@ export type GQLMutationPausePlanArgs = {
 
 
 export type GQLMutationReactivateSubscriptionArgs = {
-  id: Scalars['ID']['input'];
+  subscriptionId: Scalars['ID']['input'];
 };
 
 
@@ -3039,6 +3039,7 @@ export type GQLUserSubscriptionStatus = {
   canAccessMealPlans: Scalars['Boolean']['output'];
   canAccessPremiumExercises: Scalars['Boolean']['output'];
   canAccessPremiumTrainingPlans: Scalars['Boolean']['output'];
+  cancelledSubscriptions: Array<GQLUserSubscription>;
   hasPremium: Scalars['Boolean']['output'];
   trainingPlanLimit: Scalars['Int']['output'];
   usageTrackers: Array<GQLServiceUsageTracker>;
@@ -4230,7 +4231,7 @@ export type GQLDeleteNoteMutation = { __typename?: 'Mutation', deleteNote: boole
 export type GQLGetMySubscriptionStatusQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetMySubscriptionStatusQuery = { __typename?: 'Query', getMySubscriptionStatus: { __typename?: 'UserSubscriptionStatus', hasPremium: boolean, trainingPlanLimit: number, canAccessPremiumTrainingPlans: boolean, canAccessPremiumExercises: boolean, canAccessMealPlans: boolean, activeSubscriptions: Array<{ __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string, isActive: boolean, daysUntilExpiry: number, package: { __typename?: 'PackageTemplate', id: string, name: string, priceNOK: number, duration: GQLSubscriptionDuration } }>, usageTrackers: Array<{ __typename?: 'ServiceUsageTracker', serviceType: GQLServiceType, usedThisMonth: number, allowedPerMonth: number, remainingUsage: number, nextResetDate: string }> } };
+export type GQLGetMySubscriptionStatusQuery = { __typename?: 'Query', getMySubscriptionStatus: { __typename?: 'UserSubscriptionStatus', hasPremium: boolean, trainingPlanLimit: number, canAccessPremiumTrainingPlans: boolean, canAccessPremiumExercises: boolean, canAccessMealPlans: boolean, activeSubscriptions: Array<{ __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string, isActive: boolean, daysUntilExpiry: number, package: { __typename?: 'PackageTemplate', id: string, name: string, priceNOK: number, duration: GQLSubscriptionDuration } }>, cancelledSubscriptions: Array<{ __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string, isActive: boolean, daysUntilExpiry: number, package: { __typename?: 'PackageTemplate', id: string, name: string, priceNOK: number, duration: GQLSubscriptionDuration } }>, usageTrackers: Array<{ __typename?: 'ServiceUsageTracker', serviceType: GQLServiceType, usedThisMonth: number, allowedPerMonth: number, remainingUsage: number, nextResetDate: string }> } };
 
 export type GQLGetActivePackageTemplatesQueryVariables = Exact<{
   trainerId?: InputMaybe<Scalars['ID']['input']>;
@@ -4263,19 +4264,12 @@ export type GQLCreateSubscriptionMutationVariables = Exact<{
 
 export type GQLCreateSubscriptionMutation = { __typename?: 'Mutation', createMockSubscription: { __typename?: 'CreateSubscriptionResponse', success: boolean, subscriptionId?: string | undefined | null, error?: string | undefined | null } };
 
-export type GQLCancelSubscriptionMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type GQLCancelSubscriptionMutation = { __typename?: 'Mutation', cancelSubscription: boolean };
-
 export type GQLReactivateSubscriptionMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
+  subscriptionId: Scalars['ID']['input'];
 }>;
 
 
-export type GQLReactivateSubscriptionMutation = { __typename?: 'Mutation', reactivateSubscription: boolean };
+export type GQLReactivateSubscriptionMutation = { __typename?: 'Mutation', reactivateSubscription: { __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string, isActive: boolean } };
 
 export type GQLTrackServiceUsageMutationVariables = Exact<{
   input: GQLTrackServiceUsageInput;
@@ -4311,6 +4305,13 @@ export type GQLAssignTemplateToSelfMutationVariables = Exact<{
 
 
 export type GQLAssignTemplateToSelfMutation = { __typename?: 'Mutation', assignTemplateToSelf: boolean };
+
+export type GQLCancelSubscriptionMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLCancelSubscriptionMutation = { __typename?: 'Mutation', cancelSubscription: { __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, endDate: string } };
 
 export type GQLUserWithAllDataQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -12399,6 +12400,20 @@ export const GetMySubscriptionStatusDocument = `
         duration
       }
     }
+    cancelledSubscriptions {
+      id
+      status
+      startDate
+      endDate
+      isActive
+      daysUntilExpiry
+      package {
+        id
+        name
+        priceNOK
+        duration
+      }
+    }
     usageTrackers {
       serviceType
       usedThisMonth
@@ -12736,33 +12751,15 @@ useCreateSubscriptionMutation.getKey = () => ['CreateSubscription'];
 
 useCreateSubscriptionMutation.fetcher = (variables: GQLCreateSubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateSubscriptionMutation, GQLCreateSubscriptionMutationVariables>(CreateSubscriptionDocument, variables, options);
 
-export const CancelSubscriptionDocument = `
-    mutation CancelSubscription($id: ID!) {
-  cancelSubscription(id: $id)
-}
-    `;
-
-export const useCancelSubscriptionMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLCancelSubscriptionMutation, TError, GQLCancelSubscriptionMutationVariables, TContext>) => {
-    
-    return useMutation<GQLCancelSubscriptionMutation, TError, GQLCancelSubscriptionMutationVariables, TContext>(
-      {
-    mutationKey: ['CancelSubscription'],
-    mutationFn: (variables?: GQLCancelSubscriptionMutationVariables) => fetchData<GQLCancelSubscriptionMutation, GQLCancelSubscriptionMutationVariables>(CancelSubscriptionDocument, variables)(),
-    ...options
-  }
-    )};
-
-useCancelSubscriptionMutation.getKey = () => ['CancelSubscription'];
-
-
-useCancelSubscriptionMutation.fetcher = (variables: GQLCancelSubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCancelSubscriptionMutation, GQLCancelSubscriptionMutationVariables>(CancelSubscriptionDocument, variables, options);
-
 export const ReactivateSubscriptionDocument = `
-    mutation ReactivateSubscription($id: ID!) {
-  reactivateSubscription(id: $id)
+    mutation ReactivateSubscription($subscriptionId: ID!) {
+  reactivateSubscription(subscriptionId: $subscriptionId) {
+    id
+    status
+    startDate
+    endDate
+    isActive
+  }
 }
     `;
 
@@ -12936,6 +12933,34 @@ useAssignTemplateToSelfMutation.getKey = () => ['AssignTemplateToSelf'];
 
 
 useAssignTemplateToSelfMutation.fetcher = (variables: GQLAssignTemplateToSelfMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAssignTemplateToSelfMutation, GQLAssignTemplateToSelfMutationVariables>(AssignTemplateToSelfDocument, variables, options);
+
+export const CancelSubscriptionDocument = `
+    mutation CancelSubscription($id: ID!) {
+  cancelSubscription(subscriptionId: $id) {
+    id
+    status
+    endDate
+  }
+}
+    `;
+
+export const useCancelSubscriptionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCancelSubscriptionMutation, TError, GQLCancelSubscriptionMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCancelSubscriptionMutation, TError, GQLCancelSubscriptionMutationVariables, TContext>(
+      {
+    mutationKey: ['CancelSubscription'],
+    mutationFn: (variables?: GQLCancelSubscriptionMutationVariables) => fetchData<GQLCancelSubscriptionMutation, GQLCancelSubscriptionMutationVariables>(CancelSubscriptionDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCancelSubscriptionMutation.getKey = () => ['CancelSubscription'];
+
+
+useCancelSubscriptionMutation.fetcher = (variables: GQLCancelSubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCancelSubscriptionMutation, GQLCancelSubscriptionMutationVariables>(CancelSubscriptionDocument, variables, options);
 
 export const UserWithAllDataDocument = `
     query UserWithAllData {

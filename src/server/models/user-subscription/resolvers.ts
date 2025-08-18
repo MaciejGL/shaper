@@ -7,12 +7,15 @@ import { GQLContext } from '@/types/gql-context'
 import {
   adminExtendSubscription,
   adminUpdateSubscriptionStatus,
+  cancelSubscription,
   createMockSubscription,
   getAllSubscriptions,
   getMySubscriptionStatus,
   getMySubscriptions,
   getUserSubscriptions,
+  reactivateSubscription,
 } from './factory'
+import UserSubscription from './model'
 
 export const Query: GQLQueryResolvers = {
   getUserSubscriptions: async (_, args, context: GQLContext) =>
@@ -39,6 +42,32 @@ export const Mutation: GQLMutationResolvers = {
       ...args.input,
       userId: context.user.user.id,
     })
+  },
+
+  cancelSubscription: async (_, args, context: GQLContext) => {
+    if (!context.user?.user.id) {
+      throw new Error('User not authenticated')
+    }
+
+    const cancelledSubscription = await cancelSubscription(
+      args.subscriptionId,
+      context.user.user.id,
+    )
+
+    return new UserSubscription(cancelledSubscription, context)
+  },
+
+  reactivateSubscription: async (_, args, context: GQLContext) => {
+    if (!context.user?.user.id) {
+      throw new Error('User not authenticated')
+    }
+
+    const reactivatedSubscription = await reactivateSubscription(
+      args.subscriptionId,
+      context.user.user.id,
+    )
+
+    return new UserSubscription(reactivatedSubscription, context)
   },
 
   adminUpdateSubscriptionStatus: async (_, args, context: GQLContext) =>

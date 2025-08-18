@@ -75,6 +75,9 @@ export function SettingsContent({}: SettingsContentProps) {
         </CardContent>
       </Card>
 
+      {/* Account Management */}
+      <AccountSection />
+
       {/* Legal & Privacy Section */}
       <Card className="border-0 shadow-xl">
         <CardHeader className="pb-6">
@@ -149,9 +152,6 @@ export function SettingsContent({}: SettingsContentProps) {
           </div>
         </CardContent>
       </Card>
-
-      {/* Account Management */}
-      <AccountSection />
     </div>
   )
 }

@@ -31,6 +31,7 @@ type ServiceUsageTracker {
 type UserSubscriptionStatus {
   hasPremium: Boolean!
   activeSubscriptions: [UserSubscription!]!
+  cancelledSubscriptions: [UserSubscription!]!
   trainingPlanLimit: Int! # -1 for unlimited
   usageTrackers: [ServiceUsageTracker!]!
   canAccessPremiumTrainingPlans: Boolean!
@@ -163,8 +164,6 @@ type Mutation {
   createMockSubscription(
     input: CreateSubscriptionInput!
   ): CreateSubscriptionResponse!
-  cancelSubscription(id: ID!): Boolean!
-  reactivateSubscription(id: ID!): Boolean!
 
   # Service Usage
   trackServiceUsage(input: TrackServiceUsageInput!): TrackServiceUsageResponse!

@@ -20,6 +20,20 @@ query GetMySubscriptionStatus {
         duration
       }
     }
+    cancelledSubscriptions {
+      id
+      status
+      startDate
+      endDate
+      isActive
+      daysUntilExpiry
+      package {
+        id
+        name
+        priceNOK
+        duration
+      }
+    }
     usageTrackers {
       serviceType
       usedThisMonth
@@ -124,14 +138,15 @@ mutation CreateSubscription($input: CreateSubscriptionInput!) {
   }
 }
 
-# Cancel subscription
-mutation CancelSubscription($id: ID!) {
-  cancelSubscription(id: $id)
-}
-
 # Reactivate subscription
-mutation ReactivateSubscription($id: ID!) {
-  reactivateSubscription(id: $id)
+mutation ReactivateSubscription($subscriptionId: ID!) {
+  reactivateSubscription(subscriptionId: $subscriptionId) {
+    id
+    status
+    startDate
+    endDate
+    isActive
+  }
 }
 
 # Track service usage
@@ -188,4 +203,13 @@ mutation DeletePackageTemplate($id: ID!) {
 # Assign training plan template to current user
 mutation AssignTemplateToSelf($planId: ID!) {
   assignTemplateToSelf(planId: $planId)
+}
+
+# Cancel an existing subscription
+mutation CancelSubscription($id: ID!) {
+  cancelSubscription(subscriptionId: $id) {
+    id
+    status
+    endDate
+  }
 }

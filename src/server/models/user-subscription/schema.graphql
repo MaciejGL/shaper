@@ -36,3 +36,11 @@ type ServiceUsage {
   quantity: Int!
   metadata: String
 }
+
+type Mutation {
+  createMockSubscription(
+    input: CreateSubscriptionInput!
+  ): CreateSubscriptionResponse!
+  cancelSubscription(subscriptionId: ID!): UserSubscription!
+  reactivateSubscription(subscriptionId: ID!): UserSubscription!
+}

@@ -16,7 +16,7 @@ import { SubscriptionStatus } from '@/types/subscription'
 
 import UserSubscriptionStatus from '../user-subscription-status/model'
 
-import UserSubscription from './model'
+import UserSubscription, { UserSubscriptionWithIncludes } from './model'
 
 /**
  * Get user's own subscriptions
@@ -280,68 +280,93 @@ export async function createMockSubscription(
  * Cancel a subscription
  */
 export async function cancelSubscription(
-  id: string,
-  context: GQLContext,
-): Promise<boolean> {
-  try {
-    const subscription = await prisma.userSubscription.findUnique({
-      where: { id },
-    })
+  subscriptionId: string,
+  userId: string,
+): Promise<UserSubscriptionWithIncludes> {
+  // Verify the subscription belongs to the user
+  const subscription = await prisma.userSubscription.findFirst({
+    where: {
+      id: subscriptionId,
+      userId,
+      status: SubscriptionStatus.ACTIVE,
+    },
+  })
 
-    if (!subscription) {
-      throw new Error('Subscription not found')
-    }
-
-    // TODO: Add permission check - user can only cancel their own subscription
-    if (subscription.userId !== context.user?.user.id) {
-      throw new Error('Unauthorized')
-    }
-
-    await prisma.userSubscription.update({
-      where: { id },
-      data: {
-        status: SubscriptionStatus.CANCELLED,
-      },
-    })
-
-    return true
-  } catch (error) {
-    console.error('Error cancelling subscription:', error)
-    return false
+  if (!subscription) {
+    throw new Error('Active subscription not found')
   }
+
+  // Update subscription status to cancelled
+  const cancelledSubscription = await prisma.userSubscription.update({
+    where: { id: subscriptionId },
+    data: { status: SubscriptionStatus.CANCELLED },
+    include: {
+      package: {
+        include: {
+          services: true,
+          trainer: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      },
+      trainer: {
+        select: { id: true, name: true, email: true },
+      },
+      usedServices: {
+        orderBy: { usedAt: 'desc' },
+        take: 10,
+      },
+    },
+  })
+
+  return cancelledSubscription as UserSubscriptionWithIncludes
 }
 
 /**
  * Reactivate a cancelled subscription
  */
-export async function reactivateSubscription(id: string): Promise<boolean> {
-  try {
-    const subscription = await prisma.userSubscription.findUnique({
-      where: { id },
-    })
+export async function reactivateSubscription(
+  subscriptionId: string,
+  userId: string,
+): Promise<UserSubscriptionWithIncludes> {
+  // Verify the subscription belongs to the user and is cancelled
+  const subscription = await prisma.userSubscription.findFirst({
+    where: {
+      id: subscriptionId,
+      userId,
+      status: SubscriptionStatus.CANCELLED,
+    },
+  })
 
-    if (!subscription) {
-      throw new Error('Subscription not found')
-    }
-
-    // TODO: Add permission check
-
-    // Only reactivate if not expired
-    if (subscription.endDate > new Date()) {
-      await prisma.userSubscription.update({
-        where: { id },
-        data: {
-          status: SubscriptionStatus.ACTIVE,
-        },
-      })
-      return true
-    }
-
-    return false
-  } catch (error) {
-    console.error('Error reactivating subscription:', error)
-    return false
+  if (!subscription) {
+    throw new Error('Cancelled subscription not found')
   }
+
+  // Simply reactivate by changing status back to ACTIVE
+  // Don't extend dates - let normal billing cycle handle renewal
+  const reactivatedSubscription = await prisma.userSubscription.update({
+    where: { id: subscriptionId },
+    data: { status: SubscriptionStatus.ACTIVE },
+    include: {
+      package: {
+        include: {
+          services: true,
+          trainer: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+      },
+      trainer: {
+        select: { id: true, name: true, email: true },
+      },
+      usedServices: {
+        orderBy: { usedAt: 'desc' },
+        take: 10,
+      },
+    },
+  })
+
+  return reactivatedSubscription as UserSubscriptionWithIncludes
 }
 
 /**

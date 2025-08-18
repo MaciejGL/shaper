@@ -17,12 +17,12 @@ import {
 
 export class SubscriptionValidator {
   /**
-   * Check if user has general premium access
+   * Check if user has general premium access (including cancelled but valid subscriptions)
    */
   async hasPremiumAccess(userId: string): Promise<boolean> {
-    const activeSubscriptions = await this.getActiveSubscriptions(userId)
+    const validSubscriptions = await this.getValidSubscriptions(userId)
 
-    return activeSubscriptions.some((sub) =>
+    return validSubscriptions.some((sub) =>
       sub.package.services.some(
         (service) => service.serviceType === ServiceType.PREMIUM_ACCESS,
       ),
@@ -250,6 +250,42 @@ export class SubscriptionValidator {
   }
 
   /**
+   * Get all valid subscriptions (active + cancelled but not expired)
+   */
+  async getValidSubscriptions(
+    userId: string,
+  ): Promise<UserSubscriptionWithDetails[]> {
+    const subscriptions = await prisma.userSubscription.findMany({
+      where: {
+        userId,
+        status: {
+          in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.CANCELLED],
+        },
+        endDate: { gte: new Date() },
+      },
+      include: {
+        package: {
+          include: {
+            services: true,
+            trainer: {
+              select: { id: true, name: true, email: true },
+            },
+          },
+        },
+        trainer: {
+          select: { id: true, name: true, email: true },
+        },
+        usedServices: {
+          orderBy: { usedAt: 'desc' },
+          take: 10,
+        },
+      },
+    })
+
+    return subscriptions as UserSubscriptionWithDetails[]
+  }
+
+  /**
    * Check if user can access premium training plans
    */
   async canAccessPremiumTrainingPlans(userId: string): Promise<boolean> {
@@ -316,10 +352,16 @@ export class SubscriptionValidator {
    */
   async getUserSubscriptionStatus(userId: string) {
     const activeSubscriptions = await this.getActiveSubscriptions(userId)
+    const validSubscriptions = await this.getValidSubscriptions(userId)
     const hasPremium = await this.hasPremiumAccess(userId)
     const trainingPlanLimit = await this.getTrainingPlanLimit(userId)
 
-    // Get usage trackers for all services
+    // Check for cancelled but still valid subscriptions
+    const cancelledSubscriptions = validSubscriptions.filter(
+      (sub) => sub.status === SubscriptionStatus.CANCELLED,
+    )
+
+    // Get usage trackers for all services from active subscriptions
     const usageTrackers: ServiceUsageTracker[] = []
 
     for (const subscription of activeSubscriptions) {
@@ -336,14 +378,15 @@ export class SubscriptionValidator {
 
     return {
       hasPremium,
-      activeSubscriptions,
+      activeSubscriptions: validSubscriptions, // Include all valid subscriptions
+      cancelledSubscriptions, // Separate cancelled subscriptions
       trainingPlanLimit,
       usageTrackers,
       canAccessPremiumTrainingPlans: hasPremium,
       canAccessPremiumExercises: hasPremium,
       canAccessMealPlans:
         hasPremium ||
-        activeSubscriptions.some((sub) =>
+        validSubscriptions.some((sub) =>
           sub.package.services.some(
             (service) => service.serviceType === ServiceType.MEAL_PLAN,
           ),

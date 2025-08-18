@@ -18,6 +18,7 @@ import UserSubscription, {
 export interface UserSubscriptionStatusData {
   hasPremium: boolean
   activeSubscriptions: UserSubscriptionWithDetails[]
+  cancelledSubscriptions: UserSubscriptionWithDetails[]
   trainingPlanLimit: number
   usageTrackers: ServiceUsageTracker[]
   canAccessPremiumTrainingPlans: boolean
@@ -98,5 +99,42 @@ export default class UserSubscriptionStatus
       remainingUsage: tracker.remainingUsage,
       nextResetDate: tracker.nextResetDate.toISOString(),
     }))
+  }
+
+  get cancelledSubscriptions(): GQLUserSubscription[] {
+    return this.data.cancelledSubscriptions.map((sub) => {
+      // Include all subscription data including package relationship
+      const subscriptionData: UserSubscriptionWithIncludes = {
+        id: sub.id,
+        userId: sub.userId,
+        packageId: sub.packageId,
+        status: sub.status,
+        startDate: sub.startDate,
+        endDate: sub.endDate,
+        createdAt: sub.createdAt,
+        updatedAt: sub.updatedAt,
+        trainerId: sub.trainerId || null,
+        stripeSubscriptionId: sub.stripeSubscriptionId || null,
+        stripePriceId: sub.stripePriceId || null,
+        mockPaymentStatus: sub.mockPaymentStatus || null,
+        mockTransactionId: sub.mockTransactionId || null,
+        usedServices: (sub.usedServices || []).map((service) => ({
+          ...service,
+          subscriptionId: sub.id,
+          metadata: (service.metadata as JsonValue) || null,
+        })),
+        package: {
+          ...sub.package,
+          trainerId: sub.trainerId || null,
+          description: sub.package.description || null,
+          services: sub.package.services.map((service) => ({
+            ...service,
+            packageId: sub.packageId,
+          })),
+        },
+      }
+
+      return new UserSubscription(subscriptionData, this.context)
+    })
   }
 }
