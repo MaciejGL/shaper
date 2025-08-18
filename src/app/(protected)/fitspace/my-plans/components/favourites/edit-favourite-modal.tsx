@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { useUser } from '@/context/user-context'
 import {
   GQLFavouriteWorkout,
   useFitspaceGetExercisesQuery,
@@ -52,6 +53,9 @@ export function EditFavouriteModal({
 
   // Data fetching
   const { data: exercisesData } = useFitspaceGetExercisesQuery()
+
+  // Check premium access for AI features
+  const { hasPremium: hasPremiumAccess } = useUser()
 
   // Muscle groups data
   const allMuscleGroups = useMemo(() => {
@@ -141,6 +145,13 @@ export function EditFavouriteModal({
   }
 
   const handleSelectAI = () => {
+    // Block AI flow for non-premium users
+    if (!hasPremiumAccess) {
+      console.warn(
+        'AI flow blocked in edit favorite: Premium subscription required',
+      )
+      return
+    }
     setWorkoutFlow('ai')
     setShowTitleStep(false)
   }

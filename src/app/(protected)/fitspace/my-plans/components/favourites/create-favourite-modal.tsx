@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { useUser } from '@/context/user-context'
 import { useFitspaceGetExercisesQuery } from '@/generated/graphql-client'
 import {
   useCreateFavouriteFromAI,
@@ -48,6 +49,9 @@ export function CreateFavouriteModal({
 
   // Data fetching
   const { data: exercisesData } = useFitspaceGetExercisesQuery()
+
+  // Check premium access for AI features
+  const { hasPremium: hasPremiumAccess } = useUser()
 
   // Muscle groups data
   const allMuscleGroups = useMemo(() => {
@@ -108,6 +112,13 @@ export function CreateFavouriteModal({
   }
 
   const handleSelectAI = () => {
+    // Block AI flow for non-premium users
+    if (!hasPremiumAccess) {
+      console.warn(
+        'AI flow blocked in favorite creation: Premium subscription required',
+      )
+      return
+    }
     setWorkoutFlow('ai')
     setShowTitleStep(false)
   }

@@ -56,7 +56,10 @@ export function SettingsContent({}: SettingsContentProps) {
       </Card>
 
       {/* Subscription Section */}
-      <Card className="border-0 shadow-xl bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 backdrop-blur-sm">
+      <Card
+        id="subscription-section"
+        className="border-0 shadow-xl bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 backdrop-blur-sm"
+      >
         <CardHeader className="pb-6">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">

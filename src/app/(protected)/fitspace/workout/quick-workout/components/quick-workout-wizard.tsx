@@ -5,6 +5,7 @@ import React, { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useUser } from '@/context/user-context'
 import { cn } from '@/lib/utils'
 
 import { scrollToTop } from '../utils/scroll-utils'
@@ -126,6 +127,9 @@ export function QuickWorkoutWizard({
   footerClassName,
   finishButtonText = 'Start Workout',
 }: QuickWorkoutWizardProps) {
+  // Check premium access for AI flow
+  const { hasPremium: hasPremiumAccess } = useUser()
+
   // Determine the current step sequence based on flow
   const getSteps = () => {
     if (showLanding && workoutFlow === null) {
@@ -136,6 +140,11 @@ export function QuickWorkoutWizard({
       case 'manual':
         return MANUAL_STEPS
       case 'ai':
+        // Block AI flow for non-premium users
+        if (!hasPremiumAccess) {
+          console.warn('AI workflow blocked: Premium subscription required')
+          return MANUAL_STEPS // fallback to manual
+        }
         return AI_STEPS
       case 'favourites':
         return FAVOURITES_STEPS
@@ -182,6 +191,12 @@ export function QuickWorkoutWizard({
   }
 
   const handleFlowSelection = (flow: WorkoutFlow) => {
+    // Block AI flow selection for non-premium users
+    if (flow === 'ai' && !hasPremiumAccess) {
+      console.warn('AI flow selection blocked: Premium subscription required')
+      return // Don't change flow
+    }
+
     onFlowChange?.(flow)
     setCurrentStep(0) // Reset to first step of the new flow
     scrollToTop()
