@@ -92,7 +92,7 @@ export function useSubscriptionActions({
 
     setIsUpgrading(true)
     try {
-      const result = await reactivateSubscription.mutateAsync({
+      await reactivateSubscription.mutateAsync({
         subscriptionId: cancelledSubscription.id,
       })
 
