@@ -79,4 +79,73 @@ export const createUserLoaders = () => ({
     const map = new Map(users.map((u) => [u.id, u]))
     return ids.map((id) => map.get(id) ?? null)
   }),
+
+  // LIGHTWEIGHT: Basic user data by ID (profile + trainer only)
+  userBasic: new DataLoader(async (ids: readonly string[]) => {
+    const users = await prisma.user.findMany({
+      where: { id: { in: ids as string[] } },
+      include: {
+        profile: true, // Include full profile (bodyMeasures will be lazy-loaded if needed)
+        trainer: true,
+        // Exclude trainer relations, clients, sessions, notifications, and other heavy data
+      },
+    })
+    const map = new Map(users.map((u) => [u.id, u]))
+    return ids.map((id) => map.get(id) ?? null)
+  }),
+
+  // HEAVY: Full user data by ID (only use when specifically needed)
+  userWithAllData: new DataLoader(async (ids: readonly string[]) => {
+    console.warn(
+      '[USER-LOADER] Using heavy userWithAllData - ensure this is necessary for user:',
+      ids[0],
+    )
+    const users = await prisma.user.findMany({
+      where: { id: { in: ids as string[] } },
+      include: {
+        profile: {
+          include: {
+            bodyMeasures: true,
+          },
+        },
+        trainer: {
+          include: {
+            profile: true,
+          },
+        },
+        clients: {
+          include: {
+            profile: true,
+          },
+        },
+        sessions: true,
+        notifications: {
+          include: {
+            creator: {
+              include: {
+                profile: true,
+              },
+            },
+          },
+        },
+      },
+    })
+    const map = new Map(users.map((u) => [u.id, u]))
+    return ids.map((id) => map.get(id) ?? null)
+  }),
+
+  // UserProfile DataLoader by userId to eliminate UserProfile N+1 queries
+  userProfileByUserId: new DataLoader(async (userIds: readonly string[]) => {
+    const userProfiles = await prisma.userProfile.findMany({
+      where: { userId: { in: userIds as string[] } },
+      include: {
+        user: true,
+        bodyMeasures: true,
+      },
+    })
+    const map = new Map(
+      userProfiles.map((profile) => [profile.userId, profile]),
+    )
+    return userIds.map((userId) => map.get(userId) ?? null)
+  }),
 })

@@ -16,13 +16,10 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    const userProfile = await prisma.userProfile.findUnique({
-      where: { userId: userSession?.user?.id },
-      include: {
-        user: true,
-        bodyMeasures: true,
-      },
-    })
+    // Use DataLoader to batch UserProfile queries and prevent N+1 queries
+    const userProfile = await context.loaders.user.userProfileByUserId.load(
+      userSession.user.id,
+    )
 
     if (!userProfile) {
       throw new Error('User profile not found')
