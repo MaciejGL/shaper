@@ -4,9 +4,7 @@ import { motion } from 'framer-motion'
 import {
   BookmarkIcon,
   ChevronRight,
-  Crown,
   ListTodoIcon,
-  Lock,
   SparklesIcon,
 } from 'lucide-react'
 

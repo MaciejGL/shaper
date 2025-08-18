@@ -86,27 +86,20 @@ export function useSubscriptionActions({
   }
 
   const handleReactivate = async () => {
-    console.log('🔄 handleReactivate called', { cancelledSubscription })
     if (!cancelledSubscription) {
-      console.log('❌ No cancelled subscription found')
       return
     }
 
     setIsUpgrading(true)
     try {
-      console.log('🚀 Calling reactivateSubscription mutation with:', {
-        subscriptionId: cancelledSubscription.id,
-      })
       const result = await reactivateSubscription.mutateAsync({
         subscriptionId: cancelledSubscription.id,
       })
-      console.log('✅ Reactivation successful:', result)
 
       // Refresh subscription status
       await queryClient.invalidateQueries({
         queryKey: ['GetMySubscriptionStatus'],
       })
-      console.log('🔄 Queries invalidated')
     } catch (error) {
       console.error('❌ Failed to reactivate subscription:', error)
     } finally {

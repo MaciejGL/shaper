@@ -36,6 +36,15 @@ export function PremiumBenefitsCard({
   onCancel,
   premiumPackage,
 }: PremiumBenefitsCardProps) {
+  // Extract subscription end date logic for clarity
+  const endDate = hasCancelledSubscription
+    ? cancelledSubscription?.endDate
+    : activeSubscription?.endDate
+
+  const formattedEndDate = endDate
+    ? formatDate(endDate, 'd. MMMM yyyy')
+    : 'Unknown'
+
   return (
     <div className="space-y-6">
       <h4 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
@@ -108,18 +117,7 @@ export function PremiumBenefitsCard({
                 }`}
               >
                 {hasCancelledSubscription ? 'Premium expires' : 'Active until'}:{' '}
-                {((hasCancelledSubscription
-                  ? cancelledSubscription
-                  : activeSubscription
-                )?.endDate &&
-                  formatDate(
-                    (hasCancelledSubscription
-                      ? cancelledSubscription
-                      : activeSubscription
-                    )?.endDate!,
-                    'd. MMMM yyyy',
-                  )) ||
-                  'Unknown'}
+                {formattedEndDate}
               </p>
             </div>
           )}
