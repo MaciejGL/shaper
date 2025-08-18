@@ -30,6 +30,7 @@ import {
   checkTrainingPlanPermission,
 } from '@/lib/permissions/collaboration-permissions'
 import { getUTCWeekStart } from '@/lib/server-date-utils'
+import { checkPremiumAccess } from '@/lib/subscription'
 import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from '../base-exercise/model'
@@ -321,6 +322,14 @@ export const addAiExerciseToWorkout = async (
   const user = context.user
   if (!user) {
     throw new GraphQLError('User not found')
+  }
+
+  // Check if user has premium access for AI features
+  const hasPremium = await checkPremiumAccess(user.user.id)
+  if (!hasPremium) {
+    throw new GraphQLError(
+      'Premium subscription required for AI exercise features',
+    )
   }
 
   const baseExericse = await prisma.baseExercise.findUnique({
@@ -717,6 +726,19 @@ export const getAiExerciseSuggestions = async (
   dayId: string,
   context: GQLContext,
 ) => {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  // Check if user has premium access for AI features
+  const hasPremium = await checkPremiumAccess(user.user.id)
+  if (!hasPremium) {
+    throw new GraphQLError(
+      'Premium subscription required for AI exercise suggestions',
+    )
+  }
+
   /* 1.  Fetch workout day + logs */
   const day = await prisma.trainingDay.findUnique({
     where: { id: dayId },
@@ -786,6 +808,14 @@ export const generateAiWorkout = async (
   const user = context.user
   if (!user) {
     throw new GraphQLError('User not found')
+  }
+
+  // Check if user has premium access for AI features
+  const hasPremium = await checkPremiumAccess(user.user.id)
+  if (!hasPremium) {
+    throw new GraphQLError(
+      'Premium subscription required for AI workout generation',
+    )
   }
 
   const {

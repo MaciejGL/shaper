@@ -9,6 +9,7 @@ import {
   GQLSubscriptionStatus,
 } from '@/generated/graphql-server'
 import { isAdminUser } from '@/lib/admin-auth'
+import { cache } from '@/lib/cache'
 import { prisma } from '@/lib/db'
 import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
@@ -201,7 +202,6 @@ export async function getAllSubscriptions(
   args: GQLQueryGetAllSubscriptionsArgs,
   context: GQLContext,
 ): Promise<UserSubscription[]> {
-  // TODO: Add admin permission check
   if (!(await isAdminUser())) {
     throw new Error('Unauthorized')
   }
@@ -319,6 +319,9 @@ export async function cancelSubscription(
     },
   })
 
+  // Invalidate user subscription caches
+  await cache.removePattern(cache.keys.patterns.userSubscriptions(userId))
+
   return cancelledSubscription as UserSubscriptionWithIncludes
 }
 
@@ -366,6 +369,9 @@ export async function reactivateSubscription(
     },
   })
 
+  // Invalidate user subscription caches
+  await cache.removePattern(cache.keys.patterns.userSubscriptions(userId))
+
   return reactivatedSubscription as UserSubscriptionWithIncludes
 }
 
@@ -377,7 +383,9 @@ export async function adminUpdateSubscriptionStatus(
   status: GQLSubscriptionStatus,
   context: GQLContext,
 ): Promise<UserSubscription> {
-  // TODO: Add admin permission check
+  if (!(await isAdminUser())) {
+    throw new Error('Unauthorized')
+  }
 
   const subscription = await prisma.userSubscription.update({
     where: { id: subscriptionId },
@@ -406,7 +414,9 @@ export async function adminExtendSubscription(
   additionalMonths: number,
   context: GQLContext,
 ): Promise<UserSubscription> {
-  // TODO: Add admin permission check
+  if (!(await isAdminUser())) {
+    throw new Error('Unauthorized')
+  }
 
   const subscription = await prisma.userSubscription.findUnique({
     where: { id: subscriptionId },

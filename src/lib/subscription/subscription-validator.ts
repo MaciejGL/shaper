@@ -6,6 +6,7 @@
  */
 import { addMonths, endOfMonth, startOfMonth } from 'date-fns'
 
+import { cache } from '@/lib/cache'
 import { prisma } from '@/lib/db'
 import {
   AccessValidationResult,
@@ -20,12 +21,18 @@ export class SubscriptionValidator {
    * Check if user has general premium access (including cancelled but valid subscriptions)
    */
   async hasPremiumAccess(userId: string): Promise<boolean> {
-    const validSubscriptions = await this.getValidSubscriptions(userId)
+    return cache.getOrSet(
+      cache.keys.user.premiumAccess(userId),
+      async () => {
+        const validSubscriptions = await this.getValidSubscriptions(userId)
 
-    return validSubscriptions.some((sub) =>
-      sub.package.services.some(
-        (service) => service.serviceType === ServiceType.PREMIUM_ACCESS,
-      ),
+        return validSubscriptions.some((sub) =>
+          sub.package.services.some(
+            (service) => service.serviceType === ServiceType.PREMIUM_ACCESS,
+          ),
+        )
+      },
+      cache.TTL.SHORT,
     )
   }
 
@@ -255,34 +262,40 @@ export class SubscriptionValidator {
   async getValidSubscriptions(
     userId: string,
   ): Promise<UserSubscriptionWithDetails[]> {
-    const subscriptions = await prisma.userSubscription.findMany({
-      where: {
-        userId,
-        status: {
-          in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.CANCELLED],
-        },
-        endDate: { gte: new Date() },
-      },
-      include: {
-        package: {
+    return cache.getOrSet(
+      cache.keys.user.subscription(userId),
+      async () => {
+        const subscriptions = await prisma.userSubscription.findMany({
+          where: {
+            userId,
+            status: {
+              in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.CANCELLED],
+            },
+            endDate: { gte: new Date() },
+          },
           include: {
-            services: true,
+            package: {
+              include: {
+                services: true,
+                trainer: {
+                  select: { id: true, name: true, email: true },
+                },
+              },
+            },
             trainer: {
               select: { id: true, name: true, email: true },
             },
+            usedServices: {
+              orderBy: { usedAt: 'desc' },
+              take: 10,
+            },
           },
-        },
-        trainer: {
-          select: { id: true, name: true, email: true },
-        },
-        usedServices: {
-          orderBy: { usedAt: 'desc' },
-          take: 10,
-        },
-      },
-    })
+        })
 
-    return subscriptions as UserSubscriptionWithDetails[]
+        return subscriptions as UserSubscriptionWithDetails[]
+      },
+      cache.TTL.SHORT,
+    )
   }
 
   /**
@@ -351,47 +364,53 @@ export class SubscriptionValidator {
    * Get comprehensive user subscription status
    */
   async getUserSubscriptionStatus(userId: string) {
-    const activeSubscriptions = await this.getActiveSubscriptions(userId)
-    const validSubscriptions = await this.getValidSubscriptions(userId)
-    const hasPremium = await this.hasPremiumAccess(userId)
-    const trainingPlanLimit = await this.getTrainingPlanLimit(userId)
+    return cache.getOrSet(
+      cache.keys.user.subscriptionStatus(userId),
+      async () => {
+        const activeSubscriptions = await this.getActiveSubscriptions(userId)
+        const validSubscriptions = await this.getValidSubscriptions(userId)
+        const hasPremium = await this.hasPremiumAccess(userId)
+        const trainingPlanLimit = await this.getTrainingPlanLimit(userId)
 
-    // Check for cancelled but still valid subscriptions
-    const cancelledSubscriptions = validSubscriptions.filter(
-      (sub) => sub.status === SubscriptionStatus.CANCELLED,
-    )
+        // Check for cancelled but still valid subscriptions
+        const cancelledSubscriptions = validSubscriptions.filter(
+          (sub) => sub.status === SubscriptionStatus.CANCELLED,
+        )
 
-    // Get usage trackers for all services from active subscriptions
-    const usageTrackers: ServiceUsageTracker[] = []
+        // Get usage trackers for all services from active subscriptions
+        const usageTrackers: ServiceUsageTracker[] = []
 
-    for (const subscription of activeSubscriptions) {
-      for (const service of subscription.package.services) {
-        if (service.serviceType !== ServiceType.PREMIUM_ACCESS) {
-          const tracker = await this.getServiceUsageTracker(
-            subscription.id,
-            service.serviceType,
-          )
-          usageTrackers.push(tracker)
+        for (const subscription of activeSubscriptions) {
+          for (const service of subscription.package.services) {
+            if (service.serviceType !== ServiceType.PREMIUM_ACCESS) {
+              const tracker = await this.getServiceUsageTracker(
+                subscription.id,
+                service.serviceType,
+              )
+              usageTrackers.push(tracker)
+            }
+          }
         }
-      }
-    }
 
-    return {
-      hasPremium,
-      activeSubscriptions: validSubscriptions, // Include all valid subscriptions
-      cancelledSubscriptions, // Separate cancelled subscriptions
-      trainingPlanLimit,
-      usageTrackers,
-      canAccessPremiumTrainingPlans: hasPremium,
-      canAccessPremiumExercises: hasPremium,
-      canAccessMealPlans:
-        hasPremium ||
-        validSubscriptions.some((sub) =>
-          sub.package.services.some(
-            (service) => service.serviceType === ServiceType.MEAL_PLAN,
-          ),
-        ),
-    }
+        return {
+          hasPremium,
+          activeSubscriptions: validSubscriptions, // Include all valid subscriptions
+          cancelledSubscriptions, // Separate cancelled subscriptions
+          trainingPlanLimit,
+          usageTrackers,
+          canAccessPremiumTrainingPlans: hasPremium,
+          canAccessPremiumExercises: hasPremium,
+          canAccessMealPlans:
+            hasPremium ||
+            validSubscriptions.some((sub) =>
+              sub.package.services.some(
+                (service) => service.serviceType === ServiceType.MEAL_PLAN,
+              ),
+            ),
+        }
+      },
+      cache.TTL.SHORT,
+    )
   }
 
   /**
