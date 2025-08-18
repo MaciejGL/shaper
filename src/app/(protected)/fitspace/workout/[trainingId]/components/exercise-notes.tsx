@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Edit3, Plus, Reply, Send, Share, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
-import { AnimatedContainer } from '@/components/animations/animated-container'
+// import { AnimatedContainer } from '@/components/animations/animated-container'
 import { Button } from '@/components/ui/button'
 import { DrawerTitle, SimpleDrawerContent } from '@/components/ui/drawer'
 import { Label } from '@/components/ui/label'
@@ -183,7 +183,7 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
   return (
     <SimpleDrawerContent
       title="Exercise Notes"
-      className="max-h-[80vh] flex flex-col"
+      className="flex flex-col"
       header={
         <div className="flex justify-between gap-2 items-center">
           <DrawerTitle>Exercise Notes</DrawerTitle>
@@ -280,61 +280,62 @@ function CreateNoteForm({
   onCreateNote: () => void
   onCancelCreate: () => void
 }) {
+  if (!isCreating) return null
   return (
-    <AnimatedContainer
-      isVisible={isCreating}
-      className="overflow-hidden"
-      id="create-note-form"
-    >
-      <div className="space-y-4">
-        <Textarea
-          id="new-note"
-          placeholder="Write your exercise note here..."
-          value={newNoteText}
-          variant="ghost"
-          onChange={(e) => onNewNoteTextChange(e.target.value)}
-          className="min-h-[100px] resize-none"
-          autoFocus
-        />
+    // <AnimatedContainer
+    //   isVisible={isCreating}
+    //   className="overflow-hidden"
+    //   id="create-note-form"
+    // >
+    <div className="space-y-4">
+      <Textarea
+        id="new-note"
+        placeholder="Write your exercise note here..."
+        value={newNoteText}
+        variant="ghost"
+        onChange={(e) => onNewNoteTextChange(e.target.value)}
+        className="min-h-[100px] resize-none"
+        autoFocus
+      />
 
-        <div className="flex items-center justify-between pt-2 border-t border-border">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="share-new-note"
-              checked={newNoteShareWithTrainer}
-              onCheckedChange={onNewNoteShareWithTrainerChange}
-            />
-            <Label
-              htmlFor="share-new-note"
-              className="text-sm text-muted-foreground"
-            >
-              Share with my trainer
-            </Label>
-          </div>
+      <div className="flex items-center justify-between pt-2 border-t border-border">
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="share-new-note"
+            checked={newNoteShareWithTrainer}
+            onCheckedChange={onNewNoteShareWithTrainerChange}
+          />
+          <Label
+            htmlFor="share-new-note"
+            className="text-sm text-muted-foreground"
+          >
+            Share with my trainer
+          </Label>
+        </div>
 
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onCancelCreate}
-              disabled={isCreatingNote}
-              className="h-8 px-3"
-            >
-              Cancel
-            </Button>
-            <Button
-              size="sm"
-              onClick={onCreateNote}
-              disabled={!newNoteText.trim() || isCreatingNote}
-              loading={isCreatingNote}
-              className="h-8 px-3"
-            >
-              Save Note
-            </Button>
-          </div>
+        <div className="flex gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancelCreate}
+            disabled={isCreatingNote}
+            className="h-8 px-3"
+          >
+            Cancel
+          </Button>
+          <Button
+            size="sm"
+            onClick={onCreateNote}
+            disabled={!newNoteText.trim() || isCreatingNote}
+            loading={isCreatingNote}
+            className="h-8 px-3"
+          >
+            Save Note
+          </Button>
         </div>
       </div>
-    </AnimatedContainer>
+    </div>
+    // </AnimatedContainer>
   )
 }
 
