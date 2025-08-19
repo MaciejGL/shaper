@@ -2,13 +2,27 @@ import DataLoader from 'dataloader'
 
 import { prisma } from '@/lib/db'
 
+/**
+ * User DataLoaders - PERFORMANCE OPTIMIZATION GUIDE:
+ *
+ * 🟢 PREFERRED: Use userBasic for most cases (profile + trainer)
+ * 🟢 PREFERRED: Use getCurrentUser for email lookups (profile + trainer)
+ * 🟡 CAUTION: userById includes bodyMeasures (won't batch with others)
+ * 🔴 AVOID: getCurrentUserFull, userWithAllData (very heavy)
+ *
+ * To maximize batching, use consistent include patterns!
+ */
 export const createUserLoaders = () => ({
-  // LIGHTWEIGHT: Basic user data only (for navigation and auth)
+  // STANDARDIZED: Use same include pattern as userBasic for batching
   getCurrentUser: new DataLoader(async (emails: readonly string[]) => {
+    console.info(
+      `🔍 [USER-LOADER] getCurrentUser loading ${emails.length} users by email`,
+    )
     const users = await prisma.user.findMany({
       where: { email: { in: emails as string[] } },
       include: {
         profile: true,
+        trainer: true, // Added for consistency with userBasic
       },
     })
 
@@ -49,6 +63,9 @@ export const createUserLoaders = () => ({
   }),
 
   authSession: new DataLoader(async (emails: readonly string[]) => {
+    console.info(
+      `🔍 [USER-LOADER] authSession loading ${emails.length} users by email`,
+    )
     const user = await prisma.user.findMany({
       where: { email: { in: emails as string[] } },
       include: {
@@ -65,7 +82,11 @@ export const createUserLoaders = () => ({
     return emails.map((email) => map.get(email) ?? null)
   }),
 
+  // HEAVY: User with bodyMeasures - use userBasic instead unless bodyMeasures specifically needed
   userById: new DataLoader(async (ids: readonly string[]) => {
+    console.warn(
+      `⚠️ [USER-LOADER] userById (with bodyMeasures) loading ${ids.length} users - consider using userBasic instead`,
+    )
     const users = await prisma.user.findMany({
       where: { id: { in: ids as string[] } },
       include: {
@@ -80,8 +101,9 @@ export const createUserLoaders = () => ({
     return ids.map((id) => map.get(id) ?? null)
   }),
 
-  // LIGHTWEIGHT: Basic user data by ID (profile + trainer only)
+  // STANDARDIZED: Standard user data by ID (profile + trainer) - PREFERRED for most use cases
   userBasic: new DataLoader(async (ids: readonly string[]) => {
+    console.info(`🔍 [USER-LOADER] userBasic loading ${ids.length} users by ID`)
     const users = await prisma.user.findMany({
       where: { id: { in: ids as string[] } },
       include: {
