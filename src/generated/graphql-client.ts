@@ -3840,7 +3840,7 @@ export type GQLGetWorkoutExerciseNotesQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetWorkoutExerciseNotesQuery = { __typename?: 'Query', workoutExerciseNotes: Array<{ __typename?: 'WorkoutExerciseNotes', exerciseName: string, notes: Array<{ __typename?: 'Note', id: string, text: string, createdAt: string, updatedAt: string, shareWithTrainer?: boolean | undefined | null, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } }> }> };
+export type GQLGetWorkoutExerciseNotesQuery = { __typename?: 'Query', workoutExerciseNotes: Array<{ __typename?: 'WorkoutExerciseNotes', exerciseName: string, notes: Array<{ __typename?: 'Note', id: string, text: string, createdAt: string, updatedAt: string, shareWithTrainer?: boolean | undefined | null, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole }, replies: Array<{ __typename?: 'Note', id: string, text: string, createdAt: string, updatedAt: string, createdBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole } }> }> }> };
 
 export type GQLGetClientSharedNotesQueryVariables = Exact<{
   clientId: Scalars['String']['input'];
@@ -11622,6 +11622,19 @@ export const GetWorkoutExerciseNotesDocument = `
         lastName
         image
         role
+      }
+      replies {
+        id
+        text
+        createdAt
+        updatedAt
+        createdBy {
+          id
+          firstName
+          lastName
+          image
+          role
+        }
       }
     }
   }

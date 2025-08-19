@@ -104,14 +104,6 @@ export function SimpleExercise({
         </CardHeader>
 
         <CardContent className="space-y-3">
-          {exercise.additionalInstructions && (
-            <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded">
-              <p className="whitespace-pre-wrap">
-                {exercise.additionalInstructions}
-              </p>
-            </div>
-          )}
-
           <ExerciseMetadata
             exercise={exercise}
             handleMarkAsCompleted={() =>

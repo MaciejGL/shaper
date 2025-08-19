@@ -1,30 +1,37 @@
 'use client'
 
-import { useQueryClient } from '@tanstack/react-query'
 import { Edit3, Plus, Reply, Send, Share, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
-// import { AnimatedContainer } from '@/components/animations/animated-container'
+import { AnimateHeightItem } from '@/components/animations/animated-container'
 import { Button } from '@/components/ui/button'
 import { DrawerTitle, SimpleDrawerContent } from '@/components/ui/drawer'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
+import { useWorkout } from '@/context/workout-context/workout-context'
 import {
-  type GQLGetNoteRepliesQuery,
+  type GQLGetWorkoutExerciseNotesQuery,
   useCreateExerciseNoteMutation,
   useCreateNoteReplyMutation,
   useDeleteNoteMutation,
-  useGetNoteRepliesQuery,
   useUpdateNoteMutation,
 } from '@/generated/graphql-client'
-import { useExerciseNotes } from '@/hooks/use-workout-notes-batch'
+import {
+  type OptimisticNote,
+  createOptimisticNote,
+  createOptimisticReply,
+  useOptimisticNotes,
+  useOptimisticReplies,
+} from '@/hooks/use-optimistic-notes'
 import { cn } from '@/lib/utils'
 
 import { WorkoutExercise } from './workout-page.client'
 
-// Type definitions for replies
-type NoteReply = NonNullable<GQLGetNoteRepliesQuery['noteReplies']>[number]
+// Type definitions
+type NoteReply = NonNullable<
+  GQLGetWorkoutExerciseNotesQuery['workoutExerciseNotes'][number]['notes'][number]['replies']
+>[number]
 
 interface ExerciseNotesProps {
   exercise: WorkoutExercise
@@ -45,11 +52,11 @@ interface Note {
   }
 }
 
-// Hook to get notes count for the indicator - now uses optimized batch query
+// Hook to get notes count for the indicator
 export function useExerciseNotesCount(exercise: WorkoutExercise) {
   const exerciseName = exercise.substitutedBy?.name || exercise.name
-  const { notesCount } = useExerciseNotes(exerciseName)
-  return notesCount
+  const { notesCountForExercise } = useWorkout()
+  return notesCountForExercise(exerciseName)
 }
 
 export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
@@ -61,52 +68,30 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
   const [newNoteText, setNewNoteText] = useState('')
   const [newNoteShareWithTrainer, setNewNoteShareWithTrainer] = useState(false)
 
-  // Use the exercise name for querying but exercise ID for creating
+  // Exercise data
   const exerciseName = exercise.substitutedBy?.name || exercise.name
   const exerciseId = exercise.substitutedBy?.id || exercise.id
 
-  // Use optimized batch query instead of individual query
-  const { notes, isLoading } = useExerciseNotes(exerciseName)
+  // Get notes from workout context (batched for all exercises)
+  const { notesForExercise, isNotesLoading } = useWorkout()
+  const notes = notesForExercise(exerciseName)
+  const isLoading = isNotesLoading
 
-  // Query client for cache invalidation
-  const queryClient = useQueryClient()
+  // Optimistic mutations hook
+  const {
+    addNoteOptimistically,
+    updateNoteOptimistically,
+    deleteNoteOptimistically,
+    invalidateQueries,
+  } = useOptimisticNotes(exerciseName)
 
+  // Mutations
   const { mutateAsync: updateNote, isPending: isUpdatingNote } =
-    useUpdateNoteMutation({
-      onSuccess: () => {
-        // Invalidate queries after successful update
-        refetch()
-      },
-    })
+    useUpdateNoteMutation()
   const { mutateAsync: deleteNote, isPending: isDeletingNote } =
-    useDeleteNoteMutation({
-      onSuccess: () => {
-        // Invalidate queries after successful delete
-        refetch()
-      },
-    })
+    useDeleteNoteMutation()
   const { mutateAsync: createExerciseNote, isPending: isCreatingNote } =
-    useCreateExerciseNoteMutation({
-      onSuccess: () => {
-        // Invalidate queries after successful create
-        refetch()
-      },
-    })
-
-  // Proper refetch function that invalidates relevant queries
-  const refetch = async () => {
-    // Invalidate both batch and individual exercise note queries
-    await Promise.all([
-      // Invalidate the batch workout exercise notes query (used by useWorkoutNotesBatch)
-      queryClient.invalidateQueries({
-        queryKey: ['GetWorkoutExerciseNotes'],
-      }),
-      // Invalidate individual exercise notes query (fallback)
-      queryClient.invalidateQueries({
-        queryKey: ['GetExerciseNotes', { exerciseName }],
-      }),
-    ])
-  }
+    useCreateExerciseNoteMutation()
 
   // Handlers
   const handleStartEdit = (note: Note) => {
@@ -116,23 +101,35 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
   }
 
   const handleSaveEdit = async () => {
-    if (editingNoteId && editingText.trim()) {
-      try {
-        await updateNote({
-          input: {
-            id: editingNoteId,
-            note: editingText.trim(),
-            shareWithTrainer: editingShareWithTrainer,
-          },
-        })
-        // Cache invalidation is handled automatically via onSuccess callback
-        setEditingNoteId(null)
-        setEditingText('')
-        setEditingShareWithTrainer(false)
-      } catch (error) {
-        console.error('Failed to update note:', error)
-      }
+    if (!editingNoteId || !editingText.trim()) return
+
+    const noteId = editingNoteId
+    const noteText = editingText.trim()
+    const shareWithTrainer = editingShareWithTrainer
+
+    // Clear editing state immediately
+    setEditingNoteId(null)
+    setEditingText('')
+    setEditingShareWithTrainer(false)
+
+    // Update note in cache immediately - user sees changes right away
+    updateNoteOptimistically(noteId, { text: noteText, shareWithTrainer })
+
+    try {
+      // Run mutation in background
+      await updateNote({
+        input: { id: noteId, note: noteText, shareWithTrainer },
+      })
+    } catch (error) {
+      console.error('Failed to update note:', error)
+      // On error, restore form state
+      setEditingNoteId(noteId)
+      setEditingText(noteText)
+      setEditingShareWithTrainer(shareWithTrainer)
     }
+
+    // Always refetch to sync with server
+    invalidateQueries()
   }
 
   const handleCancelEdit = () => {
@@ -142,32 +139,57 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
   }
 
   const handleDeleteNote = async (noteId: string) => {
+    // Store the note for potential rollback
+    const noteToDelete = notes.find((note) => note.id === noteId)
+
+    // Remove note from cache immediately - user sees it disappear right away
+    deleteNoteOptimistically(noteId)
+
     try {
+      // Run mutation in background
       await deleteNote({ id: noteId })
-      // Cache invalidation is handled automatically via onSuccess callback
+      // Success - refresh cache to sync with server
+      await invalidateQueries()
     } catch (error) {
       console.error('Failed to delete note:', error)
+      // Rollback: add the note back if deletion failed
+      if (noteToDelete) {
+        addNoteOptimistically(noteToDelete as OptimisticNote)
+      }
     }
   }
 
   const handleCreateNote = async () => {
-    if (newNoteText.trim()) {
-      try {
-        await createExerciseNote({
-          input: {
-            exerciseId,
-            note: newNoteText.trim(),
-            shareWithTrainer: newNoteShareWithTrainer,
-          },
-        })
-        // Cache invalidation is handled automatically via onSuccess callback
-        setNewNoteText('')
-        setNewNoteShareWithTrainer(false)
-        setIsCreating(false)
-      } catch (error) {
-        console.error('Failed to create note:', error)
-      }
+    if (!newNoteText.trim()) return
+
+    const noteText = newNoteText.trim()
+    const shareWithTrainer = newNoteShareWithTrainer
+
+    // Clear form immediately
+    setNewNoteText('')
+    setNewNoteShareWithTrainer(false)
+    setIsCreating(false)
+
+    // Add note to cache immediately - user sees it right away
+    const optimisticNote = createOptimisticNote(noteText, shareWithTrainer)
+    addNoteOptimistically(optimisticNote)
+
+    try {
+      // Run mutation in background
+      await createExerciseNote({
+        input: { exerciseId, note: noteText, shareWithTrainer },
+      })
+    } catch (error) {
+      console.error('Failed to create note:', error)
+      // On error, restore form state but keep optimistic note visible
+      // Server sync will happen via refetch
+      setNewNoteText(noteText)
+      setNewNoteShareWithTrainer(shareWithTrainer)
+      setIsCreating(true)
     }
+
+    // Always refetch to sync with server
+    invalidateQueries()
   }
 
   const handleCancelCreate = () => {
@@ -208,8 +230,6 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
     >
       <div className="flex-1">
         <div className="space-y-6">
-          {/* Header with Add Button */}
-
           {/* Create Note Form */}
           <CreateNoteForm
             isCreating={isCreating}
@@ -221,6 +241,7 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
             onCreateNote={handleCreateNote}
             onCancelCreate={handleCancelCreate}
           />
+
           {notes.length === 0 && !isCreating ? (
             <div className="text-center py-12">
               <p className="text-sm text-muted-foreground">
@@ -281,12 +302,8 @@ function CreateNoteForm({
   onCancelCreate: () => void
 }) {
   if (!isCreating) return null
+
   return (
-    // <AnimatedContainer
-    //   isVisible={isCreating}
-    //   className="overflow-hidden"
-    //   id="create-note-form"
-    // >
     <div className="space-y-4">
       <Textarea
         id="new-note"
@@ -335,7 +352,6 @@ function CreateNoteForm({
         </div>
       </div>
     </div>
-    // </AnimatedContainer>
   )
 }
 
@@ -372,39 +388,42 @@ function ExerciseNote({
   const [isReplying, setIsReplying] = useState(false)
   const [replyText, setReplyText] = useState('')
 
-  // Fetch replies for this note
-  const { data: repliesData, refetch: refetchReplies } = useGetNoteRepliesQuery(
-    {
-      noteId: note.id,
-    },
-  )
+  // Get replies from batched workout context
+  const { repliesForNote } = useWorkout()
+  const replies = repliesForNote(note.id)
 
   const { mutateAsync: createReply, isPending: isCreatingReply } =
-    useCreateNoteReplyMutation({
-      onSuccess: () => {
-        // Invalidate replies query after successful reply creation
-        refetchReplies()
-      },
-    })
+    useCreateNoteReplyMutation()
 
-  const replies = repliesData?.noteReplies || []
+  const { performOptimisticReplyMutation, invalidateRepliesQuery } =
+    useOptimisticReplies(note.id)
 
   const handleCreateReply = async () => {
     if (!replyText.trim()) return
 
-    try {
-      await createReply({
-        input: {
-          parentNoteId: note.id,
-          text: replyText.trim(),
-        },
-      })
-      setReplyText('')
-      setIsReplying(false)
-      // Cache invalidation is handled automatically via onSuccess callback
-    } catch (error) {
-      console.error('Failed to create reply:', error)
-    }
+    const replyTextValue = replyText.trim()
+    const optimisticReply = createOptimisticReply(replyTextValue)
+
+    // Clear form immediately
+    setReplyText('')
+    setIsReplying(false)
+
+    // Add reply to cache immediately - user sees it right away
+    await performOptimisticReplyMutation(
+      optimisticReply,
+      () =>
+        createReply({
+          input: { parentNoteId: note.id, text: replyTextValue },
+        }),
+      () => {
+        // On error, restore form state
+        setReplyText(replyTextValue)
+        setIsReplying(true)
+      },
+    )
+
+    // Always refetch replies to sync with server
+    invalidateRepliesQuery()
   }
 
   return (
@@ -414,185 +433,199 @@ function ExerciseNote({
         loading && 'opacity-50',
       )}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          {isEditing ? (
-            <div className="space-y-4">
-              <Textarea
-                id="edit-note"
-                variant="ghost"
-                value={editingText}
-                onChange={(e) => onEditingTextChange(e.target.value)}
-                className="min-h-[100px] resize-none"
-                autoFocus
-              />
-
-              <div className="flex items-center space-x-2">
-                <Switch
-                  id="share-edit-note"
-                  checked={editingShareWithTrainer}
-                  onCheckedChange={onEditingShareWithTrainerChange}
-                />
-                <Label
-                  htmlFor="share-edit-note"
-                  className="text-sm text-muted-foreground"
-                >
-                  Share with my trainer
-                </Label>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-border">
-                <Button
+      <AnimateHeightItem
+        id={note.text}
+        isFirstRender={false}
+        className="w-full"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            {isEditing ? (
+              <div className="space-y-4">
+                <Textarea
+                  id="edit-note"
                   variant="ghost"
-                  size="sm"
-                  onClick={() => onDeleteNote(note.id)}
-                  loading={isDeletingNote}
-                  className="h-8 px-3 text-destructive hover:text-destructive"
-                  iconStart={<Trash2 className="h-4 w-4" />}
-                >
-                  Delete
-                </Button>
-                <div className="flex gap-2">
+                  value={editingText}
+                  onChange={(e) => onEditingTextChange(e.target.value)}
+                  className="min-h-[100px] resize-none"
+                  autoFocus
+                />
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="share-edit-note"
+                    checked={editingShareWithTrainer}
+                    onCheckedChange={onEditingShareWithTrainerChange}
+                  />
+                  <Label
+                    htmlFor="share-edit-note"
+                    className="text-sm text-muted-foreground"
+                  >
+                    Share with my trainer
+                  </Label>
+                </div>
+
+                <div className="flex items-center justify-between pt-3 border-t border-border">
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={onCancelEdit}
-                    disabled={isUpdatingNote}
-                    className="h-8 px-3"
+                    onClick={() => onDeleteNote(note.id)}
+                    loading={isDeletingNote}
+                    className="h-8 px-3 text-destructive hover:text-destructive"
+                    iconStart={<Trash2 className="h-4 w-4" />}
                   >
-                    Cancel
+                    Delete
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={onSaveEdit}
-                    disabled={!editingText.trim() || isUpdatingNote}
-                    loading={isUpdatingNote}
-                    className="h-8 px-3"
-                  >
-                    Save
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap bg-muted rounded-md p-2">
-                    {note.text}
-                  </p>
-                  {!isEditing && (
+                  <div className="flex gap-2">
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => onStartEdit(note)}
-                      iconOnly={<Edit3 />}
-                    />
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    {note.shareWithTrainer && (
-                      <div className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400">
-                        <Share className="h-3 w-3" />
-                        <span>Shared with trainer</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <time className="text-xs text-muted-foreground">
-                    {new Date(note.createdAt).toLocaleDateString('en-GB', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </time>
-                </div>
-              </div>
-
-              {/* Trainer Replies */}
-              {replies.length > 0 && (
-                <div className="ml-4 space-y-3 border-l-2 border-muted pl-4 bg-muted rounded-md p-2">
-                  {replies.map((reply: NoteReply) => (
-                    <div key={reply.id} className="space-y-2">
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                        {reply.text}
-                      </p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-medium text-muted-foreground">
-                          {reply.createdBy.firstName} {reply.createdBy.lastName}
-                        </span>
-                        <time className="text-xs text-muted-foreground">
-                          {new Date(reply.createdAt).toLocaleDateString(
-                            'en-GB',
-                            {
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            },
-                          )}
-                        </time>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {note.shareWithTrainer && !isReplying && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsReplying(!isReplying)}
-                  iconStart={<Reply />}
-                  className="ml-auto"
-                >
-                  Reply
-                </Button>
-              )}
-
-              {isReplying && (
-                <div className="ml-4 space-y-3 border-l-2 border-muted pl-4">
-                  <Textarea
-                    id={`reply-${note.id}`}
-                    placeholder="Write your reply..."
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    className="min-h-[80px] text-sm border-border"
-                  />
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setIsReplying(false)
-                        setReplyText('')
-                      }}
-                      disabled={isCreatingReply}
+                      onClick={onCancelEdit}
+                      disabled={isUpdatingNote}
                       className="h-8 px-3"
                     >
                       Cancel
                     </Button>
                     <Button
                       size="sm"
-                      onClick={handleCreateReply}
-                      disabled={!replyText.trim() || isCreatingReply}
-                      loading={isCreatingReply}
+                      onClick={onSaveEdit}
+                      disabled={!editingText.trim() || isUpdatingNote}
+                      loading={isUpdatingNote}
                       className="h-8 px-3"
-                      iconStart={<Send className="h-3 w-3" />}
                     >
-                      Send Reply
+                      Save
                     </Button>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <p className="text-sm leading-relaxed text-foreground whitespace-pre-wrap bg-muted rounded-md p-2">
+                      {note.text}
+                    </p>
+                    {!isEditing && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onStartEdit(note)}
+                        iconOnly={<Edit3 />}
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      {note.shareWithTrainer && (
+                        <div className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400">
+                          <Share className="h-3 w-3" />
+                          <span>Shared with trainer</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <time className="text-xs text-muted-foreground">
+                      {new Date(note.createdAt).toLocaleDateString('en-GB', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </time>
+                  </div>
+                </div>
+
+                {/* Trainer Replies */}
+                {replies.length > 0 && (
+                  <div className="ml-4 space-y-3 border-l-2 border-muted pl-4 bg-muted rounded-md p-2">
+                    {replies.map((reply: NoteReply, index: number) => (
+                      <AnimateHeightItem
+                        key={`reply-${index}`}
+                        id={reply.text}
+                        isFirstRender={false}
+                        className="w-full"
+                      >
+                        <div key={reply.id} className="space-y-2">
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                            {reply.text}
+                          </p>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-medium text-muted-foreground">
+                              {reply.createdBy.firstName}{' '}
+                              {reply.createdBy.lastName}
+                            </span>
+                            <time className="text-xs text-muted-foreground">
+                              {new Date(reply.createdAt).toLocaleDateString(
+                                'en-GB',
+                                {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                },
+                              )}
+                            </time>
+                          </div>
+                        </div>
+                      </AnimateHeightItem>
+                    ))}
+                  </div>
+                )}
+
+                {note.shareWithTrainer && !isReplying && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsReplying(!isReplying)}
+                    iconStart={<Reply />}
+                    className="ml-auto"
+                  >
+                    Reply
+                  </Button>
+                )}
+
+                {isReplying && (
+                  <div className="ml-4 space-y-3 border-l-2 border-muted pl-4">
+                    <Textarea
+                      id={`reply-${note.id}`}
+                      placeholder="Write your reply..."
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      className="min-h-[80px] text-sm border-border"
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setIsReplying(false)
+                          setReplyText('')
+                        }}
+                        disabled={isCreatingReply}
+                        className="h-8 px-3"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleCreateReply}
+                        disabled={!replyText.trim() || isCreatingReply}
+                        loading={isCreatingReply}
+                        className="h-8 px-3"
+                        iconStart={<Send className="h-3 w-3" />}
+                      >
+                        Send Reply
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </AnimateHeightItem>
     </div>
   )
 }
