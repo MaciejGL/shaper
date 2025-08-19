@@ -62,6 +62,25 @@ export function useWorkoutNotesBatch(
     return getNotesForExercise(exerciseName).length
   }
 
+  // Helper function to get replies for a specific note
+  const getRepliesForNote = (noteId: string) => {
+    // Search through all exercises and notes to find the note with this ID
+    if (data?.workoutExerciseNotes) {
+      for (const exerciseData of data.workoutExerciseNotes) {
+        const note = exerciseData.notes?.find((note) => note.id === noteId)
+        if (note) {
+          return note.replies || []
+        }
+      }
+    }
+    return []
+  }
+
+  // Helper function to get replies count for a specific note
+  const getRepliesCountForNote = (noteId: string) => {
+    return getRepliesForNote(noteId).length
+  }
+
   return {
     // Status
     isLoading,
@@ -71,6 +90,10 @@ export function useWorkoutNotesBatch(
     notesByExercise,
     getNotesForExercise,
     getNotesCountForExercise,
+
+    // Reply helpers
+    getRepliesForNote,
+    getRepliesCountForNote,
 
     // Stats
     totalExercises: exerciseNames.length,

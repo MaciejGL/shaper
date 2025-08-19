@@ -118,11 +118,6 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    console.info(
-      `[NOTES-BATCH] Loading notes for ${exerciseNames.length} exercises: ${exerciseNames.join(', ')}`,
-    )
-    const startTime = Date.now()
-
     // OPTIMIZED: Single query to find all exercises by names
     const exercises = await prisma.trainingExercise.findMany({
       where: {
@@ -165,17 +160,42 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       orderBy: { createdAt: 'desc' },
     })
 
-    // Filter out replies and group by exercise
-    const filteredNotes = notes.filter((note) => {
+    // Separate parent notes from replies
+    const parentNotes = notes.filter((note) => {
       if (!note.metadata || typeof note.metadata !== 'object') return true
       const metadata = note.metadata as { parentNoteId?: string }
       return !metadata.parentNoteId
     })
 
-    // Group notes by exercise name
-    const notesByExercise = new Map<string, typeof filteredNotes>()
+    const replies = notes
+      .filter((note) => {
+        if (!note.metadata || typeof note.metadata !== 'object') return false
+        const metadata = note.metadata as { parentNoteId?: string }
+        return !!metadata.parentNoteId
+      })
+      .sort((a, b) => {
+        const aDate = a.createdAt
+        const bDate = b.createdAt
+        return aDate.getTime() - bDate.getTime()
+      })
 
-    for (const note of filteredNotes) {
+    // Group replies by parent note ID
+    const repliesByParentNoteId = new Map<string, typeof replies>()
+    for (const reply of replies) {
+      const metadata = reply.metadata as { parentNoteId?: string }
+      const parentNoteId = metadata.parentNoteId
+      if (parentNoteId) {
+        if (!repliesByParentNoteId.has(parentNoteId)) {
+          repliesByParentNoteId.set(parentNoteId, [])
+        }
+        repliesByParentNoteId.get(parentNoteId)!.push(reply)
+      }
+    }
+
+    // Group parent notes by exercise name
+    const notesByExercise = new Map<string, typeof parentNotes>()
+
+    for (const note of parentNotes) {
       // Find the exercise name for this note
       const exercise = exercises.find((ex) => ex.id === note.relatedToId)
       if (exercise) {
@@ -186,17 +206,14 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       }
     }
 
-    const duration = Date.now() - startTime
-    console.info(
-      `[NOTES-BATCH] Completed in ${duration}ms, found ${filteredNotes.length} notes total`,
-    )
-
     // Return results for all requested exercise names (empty array if no notes)
     return exerciseNames.map((exerciseName) => ({
       exerciseName,
-      notes: (notesByExercise.get(exerciseName) || []).map(
-        (note) => new Note(note, context),
-      ),
+      notes: (notesByExercise.get(exerciseName) || []).map((note) => {
+        // Include replies for each parent note
+        const noteReplies = repliesByParentNoteId.get(note.id) || []
+        return new Note({ ...note, replies: noteReplies }, context)
+      }),
     }))
   },
 
@@ -514,6 +531,40 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
+    // First, verify the note exists and belongs to the user
+    const noteToDelete = await prisma.note.findFirst({
+      where: { id, createdById: user.user.id },
+    })
+
+    if (!noteToDelete) {
+      throw new Error(
+        'Note not found or you do not have permission to delete it',
+      )
+    }
+
+    // Find and delete all replies to this note (cascading delete)
+    const replies = await prisma.note.findMany({
+      where: {
+        createdById: user.user.id,
+        // Find notes where metadata contains parentNoteId matching our note ID
+        metadata: {
+          path: ['parentNoteId'],
+          equals: id,
+        },
+      },
+    })
+
+    // Delete all replies first
+    if (replies.length > 0) {
+      await prisma.note.deleteMany({
+        where: {
+          id: { in: replies.map((reply) => reply.id) },
+          createdById: user.user.id,
+        },
+      })
+    }
+
+    // Then delete the parent note
     await prisma.note.delete({
       where: { id, createdById: user.user.id },
     })

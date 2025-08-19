@@ -12,7 +12,11 @@ import {
 
 import { WorkoutExercise } from '@/app/(protected)/fitspace/workout/[trainingId]/components/workout-page.client'
 import { useUserPreferences } from '@/context/user-preferences-context'
-import { GQLFitspaceGetWorkoutQuery } from '@/generated/graphql-client'
+import {
+  GQLFitspaceGetWorkoutQuery,
+  GQLGetWorkoutExerciseNotesQuery,
+} from '@/generated/graphql-client'
+import { useWorkoutNotesBatch } from '@/hooks/use-workout-notes-batch'
 import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
 
 import { getPreviousLogsByExercise } from './utils'
@@ -33,6 +37,20 @@ type WorkoutContextType = {
   getPastLogs: (
     exercise: WorkoutExercise,
   ) => ReturnType<typeof getPreviousLogsByExercise>
+
+  // Notes functionality - batched for all exercises in active day
+  notesForExercise: (
+    exerciseName: string,
+  ) => GQLGetWorkoutExerciseNotesQuery['workoutExerciseNotes'][number]['notes']
+  notesCountForExercise: (exerciseName: string) => number
+  isNotesLoading: boolean
+  notesError: unknown
+
+  // Replies functionality - batched for all notes
+  repliesForNote: (
+    noteId: string,
+  ) => GQLGetWorkoutExerciseNotesQuery['workoutExerciseNotes'][number]['notes'][number]['replies']
+  repliesCountForNote: (noteId: string) => number
 }
 
 export function WorkoutProvider({
@@ -92,25 +110,52 @@ export function WorkoutProvider({
     [plan, activeWeekId],
   )
 
+  // Get active day for notes batching
+  const activeDay = plan?.weeks
+    .find((week) => week.id === activeWeekId)
+    ?.days.find((day) => day.id === activeDayId)
+
+  // Batch fetch notes for all exercises in the active day
+  const notesBatch = useWorkoutNotesBatch(
+    activeDay?.exercises.map((ex) => ({
+      name: ex.substitutedBy?.name || ex.name,
+      id: ex.substitutedBy?.id || ex.id,
+    })) || [],
+  )
+
   const value = useMemo(
     () => ({
       plan,
 
       activeWeek: plan?.weeks.find((week) => week.id === activeWeekId),
-      activeDay: plan?.weeks
-        .find((week) => week.id === activeWeekId)
-        ?.days.find((day) => day.id === activeDayId),
+      activeDay,
       setActiveWeekId: handleSetActiveWeek,
       setActiveDayId,
       getPastLogs,
+
+      // Notes functionality - batched for all exercises
+      notesForExercise: notesBatch.getNotesForExercise,
+      notesCountForExercise: notesBatch.getNotesCountForExercise,
+      isNotesLoading: notesBatch.isLoading,
+      notesError: notesBatch.error,
+
+      // Replies functionality - batched for all notes
+      repliesForNote: notesBatch.getRepliesForNote,
+      repliesCountForNote: notesBatch.getRepliesCountForNote,
     }),
     [
       plan,
       activeWeekId,
-      activeDayId,
+      activeDay,
       handleSetActiveWeek,
       setActiveDayId,
       getPastLogs,
+      notesBatch.getNotesForExercise,
+      notesBatch.getNotesCountForExercise,
+      notesBatch.isLoading,
+      notesBatch.error,
+      notesBatch.getRepliesForNote,
+      notesBatch.getRepliesCountForNote,
     ],
   )
 
