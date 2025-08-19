@@ -46,12 +46,16 @@ model User {
   profile                          UserProfile?
   sessions                         UserSession[]
   
+  // Stripe integration
+  stripeCustomerId                 String?                    @unique
+  
   // Subscription relations
   subscriptions                    UserSubscription[]         @relation("UserSubscriptions")
   trainerPackages                  PackageTemplate[]          @relation("TrainerPackages")
   clientSubscriptions              UserSubscription[]         @relation("TrainerSubscriptions")
 
   @@index([trainerId])
+  @@index([stripeCustomerId])
 }
 
 model UserSession {
@@ -834,6 +838,12 @@ model PackageTemplate {
   duration      SubscriptionDuration
   isActive      Boolean               @default(true)
   
+  // Stripe integration
+  stripeProductId    String?          // Maps to Stripe product
+  stripePriceIdNOK   String?          // Norwegian Kroner price ID
+  stripePriceIdEUR   String?          // Euro price ID
+  stripePriceIdUSD   String?          // USD price ID
+  
   // Who can offer this package (null = general premium, specific = trainer package)
   trainerId     String?
   trainer       User?                 @relation("TrainerPackages", fields: [trainerId], references: [id])
@@ -850,6 +860,7 @@ model PackageTemplate {
   @@index([trainerId])
   @@index([isActive])
   @@index([duration])
+  @@index([stripeProductId])
 }
 
 model PackageService {
