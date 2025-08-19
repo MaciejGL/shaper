@@ -159,8 +159,7 @@ function DrawerContent({
       <DrawerPrimitive.Content
         data-slot="drawer-content"
         className={cn(
-          'group/drawer-content bg-sidebar fixed z-50 flex h-auto flex-col',
-          // Replace dvh with vh for stable viewport behavior
+          'group/drawer-content bg-sidebar fixed z-50 flex flex-col h-auto',
           'data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-lg data-[vaul-drawer-direction=top]:border-b',
           'data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[calc(95vh-var(--safe-area-inset-bottom,0px))] data-[vaul-drawer-direction=bottom]:rounded-t-2xl',
           'data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=right]:sm:max-w-sm',
@@ -260,7 +259,7 @@ export function SimpleDrawerContent({
   const Icon = headerIcon
   return (
     <DrawerContent dialogTitle={title}>
-      <DrawerHeader className="border-b">
+      <DrawerHeader className="border-b flex-none">
         {header ? (
           header
         ) : (
@@ -271,18 +270,12 @@ export function SimpleDrawerContent({
         )}
       </DrawerHeader>
 
-      <div
-        className={cn(
-          // Replace dvh with vh for consistent behavior
-          'p-4 overflow-y-auto max-h-[calc(95vh-8rem)]',
-          className,
-        )}
-      >
-        {/* Content */}
+      <div className={cn('flex-1 min-h-0 p-4 overflow-y-auto', className)}>
         {children}
       </div>
+
       {footer && (
-        <DrawerFooter className="sticky bottom-0 border-t p-4">
+        <DrawerFooter className="sticky bottom-0 border-t p-4 flex-none">
           {footer}
         </DrawerFooter>
       )}
