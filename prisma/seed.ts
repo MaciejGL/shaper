@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import { prisma } from '../src/lib/db'
 
 import {
   // seedBaseExercisesArms,
@@ -10,8 +10,6 @@ import {
   // seedMuscleGroups,
   seedMuscleGroupsV2,
 } from './seedContent'
-
-const prisma = new PrismaClient()
 
 // async function updateTrainingExercises() {
 //   // 1. Find all non-public BaseExercises

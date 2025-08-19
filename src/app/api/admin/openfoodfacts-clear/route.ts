@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client'
 import { NextResponse } from 'next/server'
 
 import { requireAdminUser } from '@/lib/admin-auth'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/db'
 
 export async function POST() {
   try {
@@ -27,7 +25,5 @@ export async function POST() {
       { error: 'Failed to clear OpenFoodFacts data' },
       { status: 500 },
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }

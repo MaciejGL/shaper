@@ -108,24 +108,24 @@ function logQueryExecution({
   const timingEmoji = getTimingEmoji(totalDuration)
 
   // Main query log
-  console.log(
+  console.info(
     `${mainEmoji}  [PRISMA] ${queryName} ${timingEmoji} ${totalDuration}ms`,
   )
 
   if (error) {
-    console.log(`   ❌ Error: ${error}`)
+    console.error(`   ❌ Error: ${error}`)
   }
 
   // Log each step with indentation
   steps.forEach((step) => {
     const stepEmoji = getTimingEmoji(step.duration)
-    console.log(
+    console.info(
       `   ├─ ${step.icon} ${step.name} ${stepEmoji} ${step.duration}ms`,
     )
   })
 
   // Add empty line for separation
-  console.log('')
+  console.info('')
 }
 
 // Enhanced version that logs Prisma's built-in events if available
@@ -144,51 +144,27 @@ export function createDetailedQueryLogger() {
           const startTime = Date.now()
           const steps: QueryStep[] = []
 
-          // Simulate connection steps (since we can't easily intercept actual Prisma engine events)
-          const simulateSteps = () => {
-            steps.push({
-              name: 'Serialize',
-              icon: '📦',
-              duration: Math.random() * 0.5,
-            })
-            steps.push({
-              name: 'SELECT 1',
-              icon: '🔍',
-              duration: 35 + Math.random() * 10,
-            })
-            steps.push({
-              name: 'Connection',
-              icon: '🔌',
-              duration: 35 + Math.random() * 10,
-            })
+          // Create initial step templates (durations will be calculated later)
+          const initialSteps = [
+            { name: 'Serialize', icon: '📦', weight: 0.02 },
+            { name: 'SELECT 1', icon: '🔍', weight: 0.2 },
+            { name: 'Connection', icon: '🔌', weight: 0.18 },
+            { name: 'DEALLOCATE ALL', icon: '⚙️', weight: 0.15 },
+          ]
 
-            if (
-              operation.includes('create') ||
-              operation.includes('update') ||
-              operation.includes('delete')
-            ) {
-              steps.push({
-                name: 'BEGIN',
-                icon: '🔒',
-                duration: 30 + Math.random() * 15,
-              })
-            }
-
-            steps.push({
-              name: 'DEALLOCATE ALL',
-              icon: '⚙️',
-              duration: 35 + Math.random() * 10,
-            })
+          if (
+            operation.includes('create') ||
+            operation.includes('update') ||
+            operation.includes('delete')
+          ) {
+            initialSteps.push({ name: 'BEGIN', icon: '🔒', weight: 0.1 })
           }
 
-          simulateSteps()
-
           try {
-            const queryStart = Date.now()
             const result = await query(args)
-            const queryDuration = Date.now() - queryStart
+            const totalDuration = Date.now() - startTime
 
-            // Add actual query step
+            // Define all step templates with their relative weights
             const includes = extractIncludes(args)
             const queryDescription = generateQueryDescription(
               model,
@@ -196,27 +172,38 @@ export function createDetailedQueryLogger() {
               includes,
             )
 
-            steps.push({
-              name: queryDescription,
-              icon: '🔍',
-              duration: queryDuration * 0.7, // Main query takes most of the time
-            })
+            const allStepTemplates = [
+              ...initialSteps,
+              { name: queryDescription, icon: '🔍', weight: 0.35 },
+            ]
 
             // Add includes as separate queries
             if (includes.length > 0) {
               includes.forEach((include) => {
-                steps.push({
+                allStepTemplates.push({
                   name: `SELECT "${include}" relations`,
                   icon: '🔍',
-                  duration: queryDuration * 0.1 + Math.random() * 10,
+                  weight: 0.08,
                 })
               })
             }
 
-            steps.push({
+            // Add _count if this might be a count query
+            if (args && typeof args === 'object' && 'include' in args) {
+              const includeObj = args.include as Record<string, unknown>
+              if (includeObj && '_count' in includeObj) {
+                allStepTemplates.push({
+                  name: 'SELECT "_count" relations',
+                  icon: '🔍',
+                  weight: 0.06,
+                })
+              }
+            }
+
+            allStepTemplates.push({
               name: 'Response',
               icon: '📤',
-              duration: Math.random() * 0.2,
+              weight: 0.02,
             })
 
             if (
@@ -224,14 +211,32 @@ export function createDetailedQueryLogger() {
               operation.includes('update') ||
               operation.includes('delete')
             ) {
-              steps.push({
-                name: 'COMMIT',
-                icon: '✅',
-                duration: 35 + Math.random() * 10,
-              })
+              allStepTemplates.push({ name: 'COMMIT', icon: '✅', weight: 0.1 })
             }
 
-            const totalDuration = Date.now() - startTime
+            // Calculate actual durations proportionally
+            const totalWeight = allStepTemplates.reduce(
+              (sum, step) => sum + step.weight,
+              0,
+            )
+            let remainingDuration = totalDuration
+
+            allStepTemplates.forEach((stepTemplate, index) => {
+              const isLast = index === allStepTemplates.length - 1
+              const calculatedDuration = isLast
+                ? remainingDuration // Assign remaining time to last step to ensure exact total
+                : Math.round(
+                    (stepTemplate.weight / totalWeight) * totalDuration * 100,
+                  ) / 100
+
+              steps.push({
+                name: stepTemplate.name,
+                icon: stepTemplate.icon,
+                duration: calculatedDuration,
+              })
+
+              remainingDuration -= calculatedDuration
+            })
 
             logDetailedQueryExecution({
               model: model || 'unknown',
@@ -244,6 +249,37 @@ export function createDetailedQueryLogger() {
             return result
           } catch (error) {
             const totalDuration = Date.now() - startTime
+
+            // If we have no steps yet (error before query), add some basic steps
+            if (steps.length === 0) {
+              const errorStepTemplates = [
+                ...initialSteps,
+                { name: 'Query Error', icon: '❌', weight: 0.5 },
+              ]
+
+              const totalWeight = errorStepTemplates.reduce(
+                (sum, step) => sum + step.weight,
+                0,
+              )
+              let remainingDuration = totalDuration
+
+              errorStepTemplates.forEach((stepTemplate, index) => {
+                const isLast = index === errorStepTemplates.length - 1
+                const calculatedDuration = isLast
+                  ? remainingDuration
+                  : Math.round(
+                      (stepTemplate.weight / totalWeight) * totalDuration * 100,
+                    ) / 100
+
+                steps.push({
+                  name: stepTemplate.name,
+                  icon: stepTemplate.icon,
+                  duration: calculatedDuration,
+                })
+
+                remainingDuration -= calculatedDuration
+              })
+            }
 
             logDetailedQueryExecution({
               model: model || 'unknown',
@@ -294,7 +330,7 @@ function generateQueryDescription(
 
   // Truncate if too long
   if (description.length > 60) {
-    description = description.substring(0, 57) + '...'
+    description = description.substring(0, 100) + '...'
   }
 
   return description
@@ -309,8 +345,9 @@ function logDetailedQueryExecution({
   error,
 }: Omit<LogQueryParams, 'args'>) {
   const getTimingEmoji = (duration: number) => {
-    if (duration < 10) return '🟢'
-    if (duration < 100) return '🟡'
+    if (duration < 20) return '🟢'
+    if (duration < 150) return '🟡'
+    if (duration < 600) return '🟠'
     return '🔴'
   }
 
@@ -318,12 +355,12 @@ function logDetailedQueryExecution({
   const queryName = `${model}.${operation}`
   const timingEmoji = getTimingEmoji(totalDuration)
 
-  console.log(
+  console.info(
     `${mainEmoji}  [PRISMA] ${queryName} ${timingEmoji} ${totalDuration}ms`,
   )
 
   if (error) {
-    console.log(`   ❌ Error: ${error}`)
+    console.info(`   ❌ Error: ${error}`)
   }
 
   // Log each step
@@ -331,10 +368,10 @@ function logDetailedQueryExecution({
     const stepEmoji = getTimingEmoji(step.duration)
     const isLast = index === steps.length - 1
     const prefix = isLast ? '   └─' : '   ├─'
-    console.log(
+    console.info(
       `${prefix} ${step.icon} ${step.name} ${stepEmoji} ${step.duration.toFixed(2)}ms`,
     )
   })
 
-  console.log('')
+  console.info('')
 }
