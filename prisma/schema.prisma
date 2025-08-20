@@ -885,7 +885,20 @@ model UserSubscription {
   startDate        DateTime
   endDate          DateTime
   
-  // Payment tracking (for future Stripe integration)
+  // Trial management (14 days)
+  trialStart       DateTime?
+  trialEnd         DateTime?
+  isTrialActive    Boolean             @default(false)
+  
+  // Grace period management (3 days after failed payment)
+  gracePeriodEnd   DateTime?
+  isInGracePeriod  Boolean             @default(false)
+  
+  // Payment retry tracking
+  failedPaymentRetries Int             @default(0)
+  lastPaymentAttempt   DateTime?
+  
+  // Stripe integration
   stripeSubscriptionId String?
   stripePriceId        String?
   
@@ -895,6 +908,7 @@ model UserSubscription {
   
   // Service usage tracking
   usedServices     ServiceUsage[]
+  billingRecords   BillingRecord[]
   
   user             User               @relation("UserSubscriptions", fields: [userId], references: [id])
   package          PackageTemplate    @relation(fields: [packageId], references: [id])
@@ -908,6 +922,44 @@ model UserSubscription {
   @@index([status])
   @@index([endDate])
   @@index([startDate])
+  @@index([trialEnd])
+  @@index([gracePeriodEnd])
+  @@index([isTrialActive])
+  @@index([isInGracePeriod])
+}
+
+model BillingRecord {
+  id               String           @id @default(uuid())
+  subscriptionId   String
+  
+  // Payment details
+  amount           Int              // Amount in cents
+  currency         Currency
+  status           BillingStatus
+  
+  // Stripe references
+  stripeInvoiceId  String?
+  stripePaymentId  String?
+  
+  // Billing period
+  periodStart      DateTime
+  periodEnd        DateTime
+  
+  // Metadata
+  description      String?
+  failureReason    String?
+  refundReason     String?
+  refundAmount     Int?             // Refund amount in cents
+  
+  subscription     UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([periodStart])
+  @@index([stripeInvoiceId])
 }
 
 model ServiceUsage {
@@ -947,4 +999,17 @@ enum SubscriptionStatus {
   EXPIRED
   CANCELLED
   PENDING
+}
+
+enum BillingStatus {
+  SUCCEEDED
+  FAILED
+  PENDING
+  REFUNDED
+}
+
+enum Currency {
+  NOK
+  EUR
+  USD
 }
