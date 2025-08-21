@@ -21,6 +21,7 @@ export const SwapAccountButton = () => {
   // Define the email or logic for the other account type
   const clientEmail = process.env.NEXT_PUBLIC_TEST_CLIENT_EMAIL
   const client2Email = process.env.NEXT_PUBLIC_TEST_CLIENT2_EMAIL
+  const client3Email = process.env.NEXT_PUBLIC_TEST_CLIENT3_EMAIL
   const trainerEmail = process.env.NEXT_PUBLIC_TEST_TRAINER_EMAIL
   const trainer2Email = process.env.NEXT_PUBLIC_TEST_TRAINER2_EMAIL
   const trainer3Email = process.env.NEXT_PUBLIC_TEST_TRAINER3_EMAIL
@@ -55,6 +56,10 @@ export const SwapAccountButton = () => {
     {
       email: client2Email,
       label: 'Dawid Client',
+    },
+    {
+      email: client3Email,
+      label: 'Irka Client',
     },
   ]
 

@@ -66,6 +66,7 @@ export function TodaysSession({ plan }: TodaysSessionProps) {
           planId={plan.id}
           todaysWorkout={workoutToShow}
           isNextWorkout={!!nextWorkout}
+          startDate={plan.startDate}
         />
       </CardContent>
     </Card>

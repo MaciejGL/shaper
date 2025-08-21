@@ -51,7 +51,7 @@ export function FoodSearchResults({
       {commonFoods.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-sm font-medium">Common</h2>
-          <div className="space-y-2 bg-card-on-card p-2 rounded-lg -mx-2 px-2">
+          <div className="space-y-2 bg-card-on-card p-2 rounded-lg">
             {commonFoods.map((food, index) => (
               <FoodCard
                 key={food.name + index}
@@ -69,7 +69,7 @@ export function FoodSearchResults({
       {productFoods.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-sm font-medium">Products</h2>
-          <div className="space-y-2 bg-card-on-card p-2 rounded-lg -mx-2 px-2">
+          <div className="space-y-2 bg-card-on-card p-2 rounded-lg">
             {productFoods.map((food, index) => (
               <FoodCard
                 key={food.name + index}

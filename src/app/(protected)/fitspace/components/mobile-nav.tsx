@@ -226,27 +226,21 @@ function DrawerMeasurement({ onOpenChange }: { onOpenChange: () => void }) {
       />
 
       <AddMeasurementModal showFields={weightFields} title="Add Weight">
-        <div>
-          <QuickActionTile
-            href="#"
-            label="Log Weight"
-            icon={() => <Icon name="scale" />}
-            onClick={() => {}}
-            ariaLabel="Log Weight"
-          />
-        </div>
+        <QuickActionTile
+          href="#"
+          label="Log Weight"
+          icon={() => <Icon name="scale" />}
+          ariaLabel="Log Weight"
+        />
       </AddMeasurementModal>
 
       <AddMeasurementModal showFields={allFields} title="Add All">
-        <div>
-          <QuickActionTile
-            href="#"
-            label="Log Measures"
-            icon={PersonStanding}
-            onClick={() => {}}
-            ariaLabel="Log Measures"
-          />
-        </div>
+        <QuickActionTile
+          href="#"
+          label="Log Measures"
+          icon={PersonStanding}
+          ariaLabel="Log Measures"
+        />
       </AddMeasurementModal>
     </div>
   )

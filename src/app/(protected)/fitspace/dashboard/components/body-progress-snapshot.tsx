@@ -196,7 +196,12 @@ function EmptyMeasurements() {
         ]}
         title="Add Measurements"
       >
-        <Button size="sm" variant="tertiary" iconStart={<Plus />}>
+        <Button
+          size="sm"
+          variant="tertiary"
+          className="mx-auto w-full"
+          iconStart={<Plus />}
+        >
           Add Measurements
         </Button>
       </AddMeasurementModal>

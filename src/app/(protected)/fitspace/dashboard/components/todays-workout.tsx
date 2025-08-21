@@ -1,6 +1,6 @@
 'use client'
 
-import { format } from 'date-fns'
+import { format, isBefore } from 'date-fns'
 import { motion } from 'framer-motion'
 import {
   ArrowRight,
@@ -29,11 +29,13 @@ export function TodaysWorkout({
   planId,
   forceExpanded,
   isNextWorkout,
+  startDate,
 }: {
   todaysWorkout?: NonNullable<ActivePlan>['weeks'][number]['days'][number]
   planId: string
   isNextWorkout: boolean
   forceExpanded?: boolean
+  startDate?: string | null
 }) {
   if (!todaysWorkout || !planId) {
     return null
@@ -56,6 +58,10 @@ export function TodaysWorkout({
   }
 
   const getSubtitle = () => {
+    const isPast = startDate ? isBefore(new Date(startDate), new Date()) : false
+    if (isPast) {
+      return null
+    }
     if (isNextWorkout && todaysWorkout.scheduledAt) {
       return `Your workout begins on ${format(todaysWorkout.scheduledAt, 'EEEE, d. MMMM')}`
     }
