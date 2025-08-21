@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "installCommand": "pnpm install --network-timeout 300000 --fetch-retries 5 --fetch-retry-mintimeout 20000 --fetch-retry-maxtimeout 120000",
+  "installCommand": "pnpm install --fetch-timeout 300000 --fetch-retries 5 --fetch-retry-mintimeout 20000 --fetch-retry-maxtimeout 120000 --registry https://registry.npmjs.org/",
   "functions": {
     "src/app/api/**/*.ts": {
       "memory": 1024,
@@ -10,7 +10,9 @@
   "build": {
     "env": {
       "GENERATE_SOURCEMAP": "false",
-      "NODE_OPTIONS": "--max-old-space-size=4096"
+      "NODE_OPTIONS": "--max-old-space-size=4096",
+      "NPM_CONFIG_FETCH_TIMEOUT": "300000",
+      "NPM_CONFIG_FETCH_RETRIES": "5"
     }
   },
   "github": {
