@@ -1,5 +1,4 @@
 import { prisma } from '@lib/db'
-import { Prisma } from '@prisma/client'
 import { formatISO, startOfDay, startOfISOWeek } from 'date-fns'
 import { GraphQLError } from 'graphql'
 import { groupBy } from 'lodash'
@@ -8,6 +7,7 @@ import {
   GQLMutationResolvers,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
+import { Prisma } from '@/generated/prisma/client'
 import { deleteImages } from '@/lib/aws/s3'
 import {
   getPublicExerciseById,

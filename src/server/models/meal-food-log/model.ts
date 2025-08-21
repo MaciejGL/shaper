@@ -1,10 +1,9 @@
+import { GQLMealFoodLog } from '@/generated/graphql-server'
 import {
   MealFood as PrismaMealFood,
   MealFoodLog as PrismaMealFoodLog,
   User as PrismaUser,
-} from '@prisma/client'
-
-import { GQLMealFoodLog } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import MealFood from '../meal-food/model'

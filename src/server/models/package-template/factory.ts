@@ -1,5 +1,3 @@
-import { ServiceType, SubscriptionDuration } from '@prisma/client'
-
 import {
   GQLCreatePackageTemplateInput,
   GQLQueryGetActivePackageTemplatesArgs,
@@ -7,6 +5,7 @@ import {
   GQLQueryGetPackageTemplatesArgs,
   GQLUpdatePackageTemplateInput,
 } from '@/generated/graphql-server'
+import { ServiceType, SubscriptionDuration } from '@/generated/prisma/client'
 import { isAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'

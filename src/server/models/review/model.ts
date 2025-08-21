@@ -1,10 +1,9 @@
+import { GQLReview } from '@/generated/graphql-server'
 import {
   UserProfile as PrismaProfile,
   Review as PrismaReview,
   User as PrismaUser,
-} from '@prisma/client'
-
-import { GQLReview } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 export default class Review implements GQLReview {

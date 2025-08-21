@@ -1,9 +1,8 @@
+import { GQLPublicTrainer, GQLUserRole } from '@/generated/graphql-server'
 import {
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
-} from '@prisma/client'
-
-import { GQLPublicTrainer, GQLUserRole } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import UserProfile from '../user-profile/model'

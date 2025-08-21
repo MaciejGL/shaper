@@ -1,17 +1,16 @@
 import {
+  GQLFavouriteWorkout,
+  GQLFavouriteWorkoutExercise,
+  GQLFavouriteWorkoutSet,
+} from '@/generated/graphql-server'
+import {
   BaseExercise as PrismaBaseExercise,
   FavouriteWorkout as PrismaFavouriteWorkout,
   FavouriteWorkoutExercise as PrismaFavouriteWorkoutExercise,
   FavouriteWorkoutSet as PrismaFavouriteWorkoutSet,
   Image as PrismaImage,
   MuscleGroup as PrismaMuscleGroup,
-} from '@prisma/client'
-
-import {
-  GQLFavouriteWorkout,
-  GQLFavouriteWorkoutExercise,
-  GQLFavouriteWorkoutSet,
-} from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from '../base-exercise/model'

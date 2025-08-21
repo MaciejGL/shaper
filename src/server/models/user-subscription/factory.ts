@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client'
 import { addMonths } from 'date-fns'
 
 import {
@@ -6,6 +5,7 @@ import {
   GQLQueryGetUserSubscriptionsArgs,
   GQLSubscriptionStatus,
 } from '@/generated/graphql-server'
+import { Prisma } from '@/generated/prisma/client'
 import { isAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { subscriptionValidator } from '@/lib/subscription/subscription-validator'

@@ -1,9 +1,8 @@
-import { Prisma } from '@prisma/client'
-
 import {
   GQLMutationResolvers,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
+import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 

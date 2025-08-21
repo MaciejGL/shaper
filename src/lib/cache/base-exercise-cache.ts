@@ -20,10 +20,10 @@
  *
  * CACHE TTL: 24 hours (public exercises are very static)
  */
-import { Prisma } from '@prisma/client'
 import crypto from 'crypto'
 
 import { GQLExerciseWhereInput } from '@/generated/graphql-server'
+import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { getExerciseVersionWhereClause } from '@/lib/exercise-version-filter'
 import { getFromCache, setInCache } from '@/lib/redis'

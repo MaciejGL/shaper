@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client'
 import { endOfWeek, startOfWeek } from 'date-fns'
 import { GraphQLError } from 'graphql'
 
@@ -23,6 +22,7 @@ import {
   GQLQueryGetMealPlanByIdArgs,
   GQLQueryGetMealPlanTemplatesArgs,
 } from '@/generated/graphql-server'
+import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { notifyMealPlanAssigned } from '@/lib/notifications/push-notification-service'
 import {

@@ -1,3 +1,4 @@
+import { GQLMealWeek } from '@/generated/graphql-server'
 import {
   Meal as PrismaMeal,
   MealDay as PrismaMealDay,
@@ -5,9 +6,7 @@ import {
   MealFoodLog as PrismaMealFoodLog,
   MealPlan as PrismaMealPlan,
   MealWeek as PrismaMealWeek,
-} from '@prisma/client'
-
-import { GQLMealWeek } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { openFoodFactsClient } from '@/lib/open-food-facts/client'
 import { GQLContext } from '@/types/gql-context'
 

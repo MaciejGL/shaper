@@ -1,10 +1,3 @@
-import {
-  BaseExercise as PrismaBaseExercise,
-  BaseExerciseSubstitute as PrismaBaseExerciseSubstitute,
-  Image as PrismaImage,
-  MuscleGroup as PrismaMuscleGroup,
-  MuscleGroupCategory as PrismaMuscleGroupCategory,
-} from '@prisma/client'
 import { GraphQLError } from 'graphql'
 
 import {
@@ -13,6 +6,13 @@ import {
   GQLEquipment,
   GQLExerciseType,
 } from '@/generated/graphql-server'
+import {
+  BaseExercise as PrismaBaseExercise,
+  BaseExerciseSubstitute as PrismaBaseExerciseSubstitute,
+  Image as PrismaImage,
+  MuscleGroup as PrismaMuscleGroup,
+  MuscleGroupCategory as PrismaMuscleGroupCategory,
+} from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 

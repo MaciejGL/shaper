@@ -1,3 +1,4 @@
+import { GQLTrainingWeek } from '@/generated/graphql-server'
 import {
   BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
@@ -6,9 +7,7 @@ import {
   TrainingDay as PrismaTrainingDay,
   TrainingExercise as PrismaTrainingExercise,
   TrainingWeek as PrismaTrainingWeek,
-} from '@prisma/client'
-
-import { GQLTrainingWeek } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import TrainingDay from '../training-day/model'

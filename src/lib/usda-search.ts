@@ -1,5 +1,4 @@
-import type { USDAFood } from '@prisma/client'
-
+import type { USDAFood } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 
 // ============================================================================

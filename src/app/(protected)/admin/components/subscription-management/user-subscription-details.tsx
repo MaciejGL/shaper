@@ -1,6 +1,5 @@
 'use client'
 
-import { BillingStatus } from '@prisma/client'
 import {
   AlertTriangle,
   CheckCircle,
@@ -12,6 +11,7 @@ import {
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { BillingStatus } from '@/generated/prisma/client'
 import {
   useBillingHistory,
   useSubscriptionStatus,

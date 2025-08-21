@@ -1,6 +1,6 @@
-import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 
+import { Prisma } from '@/generated/prisma/client'
 import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 

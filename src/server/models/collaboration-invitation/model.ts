@@ -1,9 +1,4 @@
 import {
-  CollaborationInvitation as PrismaCollaborationInvitation,
-  User as PrismaUser,
-} from '@prisma/client'
-
-import {
   GQLAvailablePlan,
   GQLCollaborationInvitation,
   GQLCollaborationInvitationStatus,
@@ -11,6 +6,10 @@ import {
   GQLPlanCollaboratorSummary,
   GQLTeamMember,
 } from '@/generated/graphql-server'
+import {
+  CollaborationInvitation as PrismaCollaborationInvitation,
+  User as PrismaUser,
+} from '@/generated/prisma/client'
 import UserPublic from '@/server/models/user-public/model'
 import { GQLContext } from '@/types/gql-context'
 

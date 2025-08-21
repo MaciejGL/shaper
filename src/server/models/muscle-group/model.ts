@@ -1,9 +1,8 @@
+import { GQLMuscleGroup } from '@/generated/graphql-server'
 import {
   MuscleGroup as PrismaMuscleGroup,
   MuscleGroupCategory as PrismaMuscleGroupCategory,
-} from '@prisma/client'
-
-import { GQLMuscleGroup } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 

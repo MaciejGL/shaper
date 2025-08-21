@@ -3,12 +3,12 @@
 // Reads from existing CSV and does upserts with single database connection
 // OPTIMIZED FOR MEMORY EFFICIENCY - Uses streaming processing
 import { PrismaPg } from '@prisma/adapter-pg'
-import { Prisma, PrismaClient } from '@prisma/client'
 import { parse } from 'csv-parse'
 import { createReadStream } from 'fs'
 import path from 'path'
 import { Pool } from 'pg'
 
+import { Prisma, PrismaClient } from '@/generated/prisma/client'
 import { formatNumber } from '@/lib/utils'
 
 import fs from 'fs/promises'

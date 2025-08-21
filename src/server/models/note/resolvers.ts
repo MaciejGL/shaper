@@ -1,10 +1,10 @@
 import { prisma } from '@lib/db'
-import { Prisma } from '@prisma/client'
 
 import {
   GQLMutationResolvers,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
+import { Prisma } from '@/generated/prisma/client'
 import {
   notifyExerciseCommentReply,
   notifyTrainerExerciseNote,

@@ -1,6 +1,5 @@
-import { UserBodyMeasure as PrismaUserBodyMeasure } from '@prisma/client'
-
 import { GQLUserBodyMeasure } from '@/generated/graphql-server'
+import { UserBodyMeasure as PrismaUserBodyMeasure } from '@/generated/prisma/client'
 
 export default class UserBodyMeasure implements GQLUserBodyMeasure {
   constructor(protected data: PrismaUserBodyMeasure) {}

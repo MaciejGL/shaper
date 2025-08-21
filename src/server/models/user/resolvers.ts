@@ -1,15 +1,14 @@
 import {
-  Prisma,
-  User as PrismaUser,
-  UserProfile as PrismaUserProfile,
-  UserSession as PrismaUserSession,
-} from '@prisma/client'
-
-import {
   GQLMutationResolvers,
   GQLNotificationType,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
+import {
+  Prisma,
+  User as PrismaUser,
+  UserProfile as PrismaUserProfile,
+  UserSession as PrismaUserSession,
+} from '@/generated/prisma/client'
 import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { notifyCoachingCancelled } from '@/lib/notifications/push-notification-service'

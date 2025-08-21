@@ -1,5 +1,3 @@
-import { TrainingDay } from '@prisma/client'
-import { TrainingExercise as TrainingExerciseType } from '@prisma/client'
 import {
   addDays,
   getISOWeek,
@@ -17,6 +15,8 @@ import {
   GQLUpdateExerciseFormInput,
   GQLWorkoutSessionEvent,
 } from '@/generated/graphql-server'
+import { TrainingDay } from '@/generated/prisma/client'
+import { TrainingExercise as TrainingExerciseType } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { getExerciseVersionWhereClause } from '@/lib/exercise-version-filter'
 import {

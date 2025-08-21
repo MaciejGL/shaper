@@ -1,17 +1,16 @@
-import type {
-  PackageService as PrismaPackageService,
-  PackageTemplate as PrismaPackageTemplate,
-  ServiceUsage as PrismaServiceUsage,
-  User as PrismaUser,
-  UserSubscription as PrismaUserSubscription,
-} from '@prisma/client'
-
 import {
   GQLServiceType,
   GQLServiceUsage,
   GQLSubscriptionStatus,
   GQLUserSubscription,
 } from '@/generated/graphql-server'
+import type {
+  PackageService as PrismaPackageService,
+  PackageTemplate as PrismaPackageTemplate,
+  ServiceUsage as PrismaServiceUsage,
+  User as PrismaUser,
+  UserSubscription as PrismaUserSubscription,
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 import { SubscriptionStatus } from '@/types/subscription'
 

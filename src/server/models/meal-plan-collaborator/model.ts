@@ -1,13 +1,12 @@
 import {
-  MealPlan as PrismaMealPlan,
-  MealPlanCollaborator as PrismaMealPlanCollaborator,
-  User as PrismaUser,
-} from '@prisma/client'
-
-import {
   GQLCollaborationPermission,
   GQLMealPlanCollaborator,
 } from '@/generated/graphql-server'
+import {
+  MealPlan as PrismaMealPlan,
+  MealPlanCollaborator as PrismaMealPlanCollaborator,
+  User as PrismaUser,
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import MealPlan from '../meal-plan/model'

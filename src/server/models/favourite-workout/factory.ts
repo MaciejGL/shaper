@@ -1,4 +1,3 @@
-import { Prisma } from '@prisma/client'
 import { addDays, getISOWeek, isSameWeek } from 'date-fns'
 
 import {
@@ -6,6 +5,7 @@ import {
   GQLMutationStartWorkoutFromFavouriteArgs,
   GQLUpdateFavouriteWorkoutInput,
 } from '@/generated/graphql-server'
+import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { getUTCWeekStart } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'

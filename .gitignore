@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# generated prisma client
+/src/generated/prisma
+
 # data directories (USDA datasets, etc.)
 /data
 **/data/usda/

@@ -1,10 +1,9 @@
+import { GQLNote } from '@/generated/graphql-server'
 import {
   Note as PrismaNote,
   User as PrismaUser,
   UserProfile,
-} from '@prisma/client'
-
-import { GQLNote } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import UserPublic from '../user-public/model'

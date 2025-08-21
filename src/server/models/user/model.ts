@@ -1,11 +1,10 @@
+import { GQLUser, GQLUserRole } from '@/generated/graphql-server'
 import {
   Notification as PrismaNotification,
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
   UserSession as PrismaUserSession,
-} from '@prisma/client'
-
-import { GQLUser, GQLUserRole } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import Notification from '../notification/model'

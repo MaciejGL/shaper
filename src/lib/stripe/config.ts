@@ -1,4 +1,8 @@
-import { BillingStatus, Currency, SubscriptionStatus } from '@prisma/client'
+import {
+  BillingStatus,
+  Currency,
+  SubscriptionStatus,
+} from '@/generated/prisma/client'
 
 // Subscription Configuration
 export const SUBSCRIPTION_CONFIG = {

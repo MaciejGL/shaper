@@ -1,13 +1,12 @@
+import { dayNames } from '@/app/(protected)/trainer/trainings/creator/utils'
+import { GQLMealDay } from '@/generated/graphql-server'
 import {
   Meal as PrismaMeal,
   MealDay as PrismaMealDay,
   MealFood as PrismaMealFood,
   MealFoodLog as PrismaMealFoodLog,
   MealWeek as PrismaMealWeek,
-} from '@prisma/client'
-
-import { dayNames } from '@/app/(protected)/trainer/trainings/creator/utils'
-import { GQLMealDay } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { openFoodFactsClient } from '@/lib/open-food-facts/client'
 import { GQLContext } from '@/types/gql-context'
 

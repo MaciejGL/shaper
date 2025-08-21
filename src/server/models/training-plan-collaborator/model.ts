@@ -1,13 +1,12 @@
 import {
-  TrainingPlan as PrismaTrainingPlan,
-  TrainingPlanCollaborator as PrismaTrainingPlanCollaborator,
-  User as PrismaUser,
-} from '@prisma/client'
-
-import {
   GQLCollaborationPermission,
   GQLTrainingPlanCollaborator,
 } from '@/generated/graphql-server'
+import {
+  TrainingPlan as PrismaTrainingPlan,
+  TrainingPlanCollaborator as PrismaTrainingPlanCollaborator,
+  User as PrismaUser,
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import TrainingPlan from '../training-plan/model'

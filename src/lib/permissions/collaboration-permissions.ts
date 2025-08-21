@@ -1,7 +1,7 @@
-import { MealPlan, TrainingPlan } from '@prisma/client'
 import { GraphQLError } from 'graphql'
 
 import { GQLCollaborationPermission } from '@/generated/graphql-server'
+import { MealPlan, TrainingPlan } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 

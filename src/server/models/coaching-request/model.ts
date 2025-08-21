@@ -1,9 +1,8 @@
-import { CoachingRequest as PrismaCoachingRequest } from '@prisma/client'
-
 import {
   GQLCoachingRequest,
   GQLCoachingRequestStatus,
 } from '@/generated/graphql-server'
+import { CoachingRequest as PrismaCoachingRequest } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 

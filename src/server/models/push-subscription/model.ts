@@ -1,6 +1,5 @@
-import { PushSubscription as PrismaPushSubscription } from '@prisma/client'
-
 import { GQLPushSubscription } from '@/generated/graphql-server'
+import { PushSubscription as PrismaPushSubscription } from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 export default class PushSubscription implements GQLPushSubscription {

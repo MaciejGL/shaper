@@ -1,7 +1,11 @@
-import { BillingStatus, Currency, SubscriptionStatus } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
+import {
+  BillingStatus,
+  Currency,
+  SubscriptionStatus,
+} from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { STRIPE_WEBHOOK_EVENTS, SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'

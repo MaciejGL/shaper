@@ -1,6 +1,5 @@
-import { ExerciseSetLog as PrismaExerciseSetLog } from '@prisma/client'
-
 import { GQLExerciseSetLog } from '@/generated/graphql-server'
+import { ExerciseSetLog as PrismaExerciseSetLog } from '@/generated/prisma/client'
 
 export default class ExerciseSetLog implements GQLExerciseSetLog {
   constructor(protected data: PrismaExerciseSetLog) {}

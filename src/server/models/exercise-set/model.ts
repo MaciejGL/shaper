@@ -1,9 +1,8 @@
+import { GQLExerciseSet } from '@/generated/graphql-server'
 import {
   ExerciseSet as PrismaExerciseSet,
   ExerciseSetLog as PrismaExerciseSetLog,
-} from '@prisma/client'
-
-import { GQLExerciseSet } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 
 import ExerciseSetLog from '../exercise-set-log/model'
 

@@ -1,7 +1,7 @@
-import { SubscriptionStatus } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
+import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'
 

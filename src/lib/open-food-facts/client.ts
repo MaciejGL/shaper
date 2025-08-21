@@ -1,5 +1,4 @@
-import type { FoodProduct } from '@prisma/client'
-
+import type { FoodProduct } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 
 interface OpenFoodFactsSearchResponse {

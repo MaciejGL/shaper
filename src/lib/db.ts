@@ -1,6 +1,7 @@
 // lib/prisma.ts
 import { PrismaPg } from '@prisma/adapter-pg'
-import { PrismaClient } from '@prisma/client'
+
+import { PrismaClient } from '@/generated/prisma/client'
 
 import { createDetailedQueryLogger } from './prisma-query-logger'
 

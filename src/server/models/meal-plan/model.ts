@@ -1,3 +1,4 @@
+import { GQLMealPlan } from '@/generated/graphql-server'
 import {
   Meal as PrismaMeal,
   MealDay as PrismaMealDay,
@@ -6,9 +7,7 @@ import {
   MealPlan as PrismaMealPlan,
   MealWeek as PrismaMealWeek,
   User as PrismaUser,
-} from '@prisma/client'
-
-import { GQLMealPlan } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import MealWeek from '../meal-week/model'

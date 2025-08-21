@@ -1,6 +1,5 @@
 'use client'
 
-import { BillingStatus } from '@prisma/client'
 import { CreditCard, RefreshCw } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
@@ -19,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { BillingStatus } from '@/generated/prisma/client'
 
 interface BillingRecord {
   id: string

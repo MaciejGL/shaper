@@ -1,10 +1,4 @@
 import {
-  User as PrismaUser,
-  UserBodyMeasure as PrismaUserBodyMeasure,
-  UserProfile as PrismaUserProfile,
-} from '@prisma/client'
-
-import {
   GQLActivityLevel,
   GQLFitnessLevel,
   GQLGoal,
@@ -16,6 +10,11 @@ import {
   GQLUserProfile,
   GQLWeightUnit,
 } from '@/generated/graphql-server'
+import {
+  User as PrismaUser,
+  UserBodyMeasure as PrismaUserBodyMeasure,
+  UserProfile as PrismaUserProfile,
+} from '@/generated/prisma/client'
 
 import UserBodyMeasure from '../user-body-measure/model'
 

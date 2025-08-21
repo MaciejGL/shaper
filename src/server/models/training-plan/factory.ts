@@ -1,5 +1,4 @@
 import { prisma } from '@lib/db'
-import { Prisma } from '@prisma/client'
 import * as crypto from 'crypto'
 import { addDays, addWeeks, differenceInCalendarDays } from 'date-fns'
 import { GraphQLError } from 'graphql'
@@ -26,6 +25,7 @@ import {
   GQLQueryGetTemplatesArgs,
   GQLQueryGetTrainingPlanByIdArgs,
 } from '@/generated/graphql-server'
+import { Prisma } from '@/generated/prisma/client'
 import {
   calculateTrainingDayScheduledDate,
   translateDayOfWeekForUser,

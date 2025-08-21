@@ -1,6 +1,5 @@
-import { Image as PrismaImage } from '@prisma/client'
-
 import { GQLImage } from '@/generated/graphql-server'
+import { Image as PrismaImage } from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 export default class Image implements GQLImage {

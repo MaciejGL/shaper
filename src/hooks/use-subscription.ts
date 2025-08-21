@@ -1,5 +1,6 @@
-import { BillingStatus } from '@prisma/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+
+import { BillingStatus } from '@/generated/prisma/client'
 
 export interface SubscriptionStatus {
   hasPremiumAccess: boolean

@@ -1,4 +1,4 @@
-import { BaseExercise as BaseExerciseType } from '@prisma/client'
+import { BaseExercise as BaseExerciseType } from '@/generated/prisma/client'
 
 import { MUSCLES_V2 } from '../src/constants/muscles-v2'
 import { prisma } from '../src/lib/db'

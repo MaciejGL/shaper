@@ -1,3 +1,4 @@
+import { GQLGoal, GQLUserPublic, GQLUserRole } from '@/generated/graphql-server'
 import {
   ExerciseSet as PrismaExerciseSet,
   ExerciseSetLog as PrismaExerciseSetLog,
@@ -8,9 +9,7 @@ import {
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
   WorkoutSessionEvent as PrismaWorkoutSessionEvent,
-} from '@prisma/client'
-
-import { GQLGoal, GQLUserPublic, GQLUserRole } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import TrainingPlan from '../training-plan/model'

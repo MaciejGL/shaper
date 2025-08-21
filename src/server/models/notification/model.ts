@@ -1,13 +1,13 @@
-import {
-  Notification as PrismaNotification,
-  User as PrismaUser,
-} from '@prisma/client'
 import { GraphQLError } from 'graphql'
 
 import {
   GQLNotification,
   GQLNotificationType,
 } from '@/generated/graphql-server'
+import {
+  Notification as PrismaNotification,
+  User as PrismaUser,
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import User from '../user/model'

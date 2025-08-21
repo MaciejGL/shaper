@@ -1,10 +1,9 @@
+import { GQLAdminUserListItem, GQLUserRole } from '@/generated/graphql-server'
 import {
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
   UserSession as PrismaUserSession,
-} from '@prisma/client'
-
-import { GQLAdminUserListItem, GQLUserRole } from '@/generated/graphql-server'
+} from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import UserProfile from '../user-profile/model'
