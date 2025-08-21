@@ -15,7 +15,10 @@ const globalForPrisma = globalThis as unknown as {
 // Create adapter for the new Rust-free architecture
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
-  ssl: false, // Disable SSL for adapter - let DATABASE_URL handle it
+  ssl:
+    process.env.NODE_ENV === 'production'
+      ? { rejectUnauthorized: false }
+      : false,
 })
 
 const basePrisma = new PrismaClient({
