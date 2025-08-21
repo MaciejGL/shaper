@@ -88,9 +88,24 @@ export type ButtonProps = React.ComponentProps<'button'> &
     iconOnly?: React.ReactNode
   }
 
+/**
+ * Use exapmle:
+ *
+ * <Button variant="secondary" size="md"  onClick={() => refetch()} iconStart={<RefreshCw />} loading={isLoading} disabled={isLoading}  iconEnd={<RefreshCw />}>
+ *   Refresh
+ * </Button>
+ *
+ * iconButton: just a button with an icon
+ * <Button variant="icon-md" iconOnly={<RefreshCw />} loading={isLoading} disabled={isLoading} />
+ *
+ *
+ * @param param0
+ * @returns
+ */
+
 function Button({
   className,
-  variant,
+  variant = 'default',
   size,
   asChild = false,
   loading,

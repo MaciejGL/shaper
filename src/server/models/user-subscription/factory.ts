@@ -2,14 +2,11 @@ import { Prisma } from '@prisma/client'
 import { addMonths } from 'date-fns'
 
 import {
-  GQLCreateSubscriptionInput,
   GQLQueryGetAllSubscriptionsArgs,
-  GQLQueryGetTrainerSubscriptionsArgs,
   GQLQueryGetUserSubscriptionsArgs,
   GQLSubscriptionStatus,
 } from '@/generated/graphql-server'
 import { isAdminUser } from '@/lib/admin-auth'
-import { cache } from '@/lib/cache'
 import { prisma } from '@/lib/db'
 import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
@@ -61,6 +58,7 @@ export async function getMySubscriptionStatus(context: GQLContext) {
 
   const status = await subscriptionValidator.getUserSubscriptionStatus(
     context.user.user.id,
+    context,
   )
 
   // Use the UserSubscriptionStatus model
@@ -90,103 +88,6 @@ export async function getUserSubscriptions(
       usedServices: {
         orderBy: { usedAt: 'desc' },
         take: 10,
-      },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
-
-  return subscriptions.map((sub) => new UserSubscription(sub, context))
-}
-
-/**
- * Get a specific subscription by ID
- */
-export async function getSubscription(
-  args: { id: string },
-  context: GQLContext,
-): Promise<UserSubscription | null> {
-  const subscription = await prisma.userSubscription.findUnique({
-    where: { id: args.id },
-    include: {
-      user: true,
-      package: {
-        include: {
-          services: true,
-          trainer: true,
-        },
-      },
-      trainer: true,
-      usedServices: {
-        orderBy: { usedAt: 'desc' },
-        take: 10,
-      },
-    },
-  })
-
-  if (!subscription) return null
-
-  // TODO: Add permission check - user can only view their own subscriptions
-  // unless they're admin or the trainer
-
-  return new UserSubscription(subscription, context)
-}
-
-/**
- * Get subscriptions for a trainer's clients
- */
-export async function getTrainerSubscriptions(
-  args: GQLQueryGetTrainerSubscriptionsArgs,
-  context: GQLContext,
-): Promise<UserSubscription[]> {
-  if (!context.user) {
-    throw new Error('Authentication required')
-  }
-
-  const { filters } = args
-  const trainerId = context.user?.user.id // Trainer viewing their client subscriptions
-
-  const where: Prisma.UserSubscriptionWhereInput = {
-    trainerId,
-  }
-
-  if (filters?.status) {
-    where.status = filters.status
-  }
-
-  if (filters?.dateFrom || filters?.dateTo) {
-    where.createdAt = {}
-    if (filters.dateFrom) {
-      where.createdAt.gte = new Date(filters.dateFrom)
-    }
-    if (filters.dateTo) {
-      where.createdAt.lte = new Date(filters.dateTo)
-    }
-  }
-
-  if (filters?.serviceType) {
-    where.package = {
-      services: {
-        some: {
-          serviceType: filters.serviceType,
-        },
-      },
-    }
-  }
-
-  const subscriptions = await prisma.userSubscription.findMany({
-    where,
-    include: {
-      user: true,
-      package: {
-        include: {
-          services: true,
-          trainer: true,
-        },
-      },
-      trainer: true,
-      usedServices: {
-        orderBy: { usedAt: 'desc' },
-        take: 5,
       },
     },
     orderBy: { createdAt: 'desc' },
@@ -261,22 +162,6 @@ export async function getAllSubscriptions(
 }
 
 /**
- * Create a mock subscription (for testing without payment)
- */
-export async function createMockSubscription(
-  input: GQLCreateSubscriptionInput,
-) {
-  const durationMonths = input.durationMonths || 1
-
-  return subscriptionValidator.createMockSubscription(
-    input.userId,
-    input.packageId,
-    input.trainerId || undefined,
-    durationMonths,
-  )
-}
-
-/**
  * Cancel a subscription
  */
 export async function cancelSubscription(
@@ -318,9 +203,6 @@ export async function cancelSubscription(
       },
     },
   })
-
-  // Invalidate user subscription caches
-  await cache.removePattern(cache.keys.patterns.userSubscriptions(userId))
 
   return cancelledSubscription as UserSubscriptionWithIncludes
 }
@@ -368,9 +250,6 @@ export async function reactivateSubscription(
       },
     },
   })
-
-  // Invalidate user subscription caches
-  await cache.removePattern(cache.keys.patterns.userSubscriptions(userId))
 
   return reactivatedSubscription as UserSubscriptionWithIncludes
 }

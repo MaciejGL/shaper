@@ -85,6 +85,17 @@ const LazyAwsTab = dynamic(
   },
 )
 
+const LazySubscriptionsTab = dynamic(
+  () =>
+    import('./subscriptions-tab').then((mod) => ({
+      default: mod.SubscriptionsTab,
+    })),
+  {
+    loading: () => <AdminTabSkeleton />,
+    ssr: false,
+  },
+)
+
 export {
   LazyUsersTab,
   LazyTrainersTab,
@@ -92,4 +103,5 @@ export {
   LazyFoodsTab,
   LazyPushNotificationsTab,
   LazyAwsTab,
+  LazySubscriptionsTab,
 }

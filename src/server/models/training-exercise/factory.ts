@@ -30,7 +30,7 @@ import {
   checkTrainingPlanPermission,
 } from '@/lib/permissions/collaboration-permissions'
 import { getUTCWeekStart } from '@/lib/server-date-utils'
-import { checkPremiumAccess } from '@/lib/subscription'
+import { checkPremiumAccess } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from '../base-exercise/model'

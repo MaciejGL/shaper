@@ -26,10 +26,6 @@ const TTL = {
 // Cache key generators
 const keys = {
   user: {
-    subscription: (userId: string) => `user:${userId}:subscription`,
-    subscriptionStatus: (userId: string) =>
-      `user:${userId}:subscription:status`,
-    premiumAccess: (userId: string) => `user:${userId}:premium`,
     trainingPlans: (userId: string) => `user:${userId}:training-plans`,
     mealPlans: (userId: string) => `user:${userId}:meal-plans`,
   },

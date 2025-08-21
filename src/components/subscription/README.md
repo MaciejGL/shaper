@@ -106,7 +106,7 @@ Components use shadcn/ui components and Tailwind CSS. Required UI components:
 ### **Basic Subscription Page**
 
 ```tsx
-// app/settings/subscription/page.tsx
+// app/(protected)/fitspace/settings/page.tsx
 import { SubscriptionDashboard } from '@/components/subscription'
 
 export default function SubscriptionPage() {

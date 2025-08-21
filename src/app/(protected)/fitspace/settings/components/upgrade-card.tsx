@@ -3,70 +3,120 @@
 import { Sparkles } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { formatPrice } from '@/types/subscription'
 
 import { PremiumBenefitsList, UPGRADE_BENEFITS } from './premium-benefits-list'
 
+interface Package {
+  id: string
+  name: string
+  priceNOK: number
+  duration: string
+  description?: string
+}
+
 interface UpgradeCardProps {
-  premiumPackage?: {
-    priceNOK: number
-  }
+  monthlyPackage?: Package
+  yearlyPackage?: Package
   isUpgrading: boolean
-  onUpgrade: () => void
+  onUpgrade: (packageId?: string) => void
 }
 
 export function UpgradeCard({
-  premiumPackage,
+  monthlyPackage,
+  yearlyPackage,
   isUpgrading,
   onUpgrade,
 }: UpgradeCardProps) {
   return (
     <div className="space-y-6">
-      <h4 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-        Upgrade to Premium
-      </h4>
-
-      <div className="relative overflow-hidden bg-gradient-to-br from-purple-500 to-blue-600 p-8 rounded-lg text-white">
-        <div className="relative z-10">
-          {/* Header */}
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div>
-              <h5 className="text-2xl font-bold">Premium Features</h5>
-              {premiumPackage && (
-                <p className="text-white/80 text-sm">
-                  {formatPrice(premiumPackage.priceNOK)}/month
-                </p>
-              )}
-            </div>
+      {/* Benefits Overview */}
+      <div className="bg-card-on-card p-6 rounded-lg text-white mb-6">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-white" />
           </div>
-
-          {/* Benefits List */}
-          <div className="mb-8">
-            <PremiumBenefitsList benefits={UPGRADE_BENEFITS} variant="white" />
-          </div>
-
-          {/* Upgrade Button */}
-          <Button
-            onClick={onUpgrade}
-            disabled={isUpgrading || !premiumPackage}
-            variant="outline"
-            className="w-full h-12 text-white border-white/30 hover:bg-white/10 disabled:opacity-50"
-          >
-            {isUpgrading
-              ? 'Upgrading...'
-              : premiumPackage
-                ? `Upgrade to Premium - ${formatPrice(premiumPackage.priceNOK)}/month`
-                : 'Loading...'}
-          </Button>
+          <h5 className="text-lg font-bold">Premium Features</h5>
         </div>
-
-        {/* Background Decorations */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
+        <PremiumBenefitsList benefits={UPGRADE_BENEFITS} variant="secondary" />
       </div>
+
+      {/* Pricing Options */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Monthly Plan */}
+        {monthlyPackage && (
+          <Card className="h-full bg-card-on-card rounded-lg text-white mb-6 flex flex-col">
+            <CardContent className="text-center grow flex-center flex-col">
+              <h6 className="text-lg font-medium text-center">Monthly</h6>
+              <div className="text-3xl font-semibold">
+                {formatPrice(monthlyPackage.priceNOK)}
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button
+                onClick={() => onUpgrade(monthlyPackage.id)}
+                disabled={isUpgrading}
+                className="w-full"
+                loading={isUpgrading}
+                variant="default"
+              >
+                Subscribe Monthly
+              </Button>
+            </CardFooter>
+          </Card>
+        )}
+
+        {/* Yearly Plan */}
+        {yearlyPackage && (
+          <Card className="h-full bg-card-on-card rounded-lg text-white mb-6 flex flex-col mt-2 outline-1 outline-amber-500 bg-gradient-to-br from-amber-500/2 to-amber-600/7">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+              <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                Best Value
+              </div>
+            </div>
+            <CardContent className="text-center grow flex-center flex-col">
+              <h6 className="text-lg font-medium">Yearly</h6>
+              <div className="text-3xl font-semibold">
+                {formatPrice(yearlyPackage.priceNOK)}
+              </div>
+              {monthlyPackage && (
+                <div className="text-xs text-green-600 font-medium mt-1">
+                  Save{' '}
+                  {Math.round(
+                    ((monthlyPackage.priceNOK * 12 - yearlyPackage.priceNOK) /
+                      (monthlyPackage.priceNOK * 12)) *
+                      100,
+                  )}
+                  %
+                </div>
+              )}
+            </CardContent>
+            <CardFooter>
+              <Button
+                onClick={() => onUpgrade(yearlyPackage.id)}
+                disabled={isUpgrading}
+                className="w-full"
+                loading={isUpgrading}
+                variant="gradient"
+              >
+                Subscribe Yearly
+              </Button>
+            </CardFooter>
+          </Card>
+        )}
+      </div>
+
+      {/* No packages available */}
+      {!monthlyPackage && !yearlyPackage && (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <p className="text-gray-500">
+              No subscription packages are currently available.
+            </p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

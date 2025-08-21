@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
+import { sendEmail } from '@/lib/email/send-mail'
 import { STRIPE_WEBHOOK_EVENTS, SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'
 
 // Extended interfaces for Stripe webhook events
@@ -116,6 +117,10 @@ export async function POST(request: NextRequest) {
         await handleTrialWillEnd(event.data.object as Stripe.Subscription)
         break
 
+      case STRIPE_WEBHOOK_EVENTS.CUSTOMER_DELETED:
+        await handleCustomerDeleted(event.data.object as Stripe.Customer)
+        break
+
       default:
         console.info(`Unhandled event type: ${event.type}`)
     }
@@ -134,6 +139,7 @@ export async function POST(request: NextRequest) {
 async function findUserByStripeCustomerId(customerId: string) {
   return await prisma.user.findUnique({
     where: { stripeCustomerId: customerId },
+    include: { profile: true },
   })
 }
 
@@ -236,6 +242,21 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     console.info(
       `✅ ${isReactivation ? 'Reactivated' : 'New'} subscription record created for user ${user.id}`,
     )
+
+    // Send welcome email
+    if (user.email) {
+      try {
+        await sendEmail.subscriptionWelcome(user.email, {
+          userName: user.profile?.firstName,
+          packageName: packageTemplate.name,
+          isReactivation,
+          dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard`,
+        })
+        console.info(`📧 Welcome email sent to ${user.email}`)
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError)
+      }
+    }
   } catch (error) {
     console.error('Error handling subscription created:', error)
   }
@@ -274,6 +295,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   console.info('❌ Subscription deleted:', subscription.id)
 
   try {
+    // Get subscription details before updating
+    const userSubscription = await prisma.userSubscription.findFirst({
+      where: { stripeSubscriptionId: subscription.id },
+      include: {
+        user: { include: { profile: true } },
+        package: true,
+      },
+    })
+
     await prisma.userSubscription.updateMany({
       where: { stripeSubscriptionId: subscription.id },
       data: {
@@ -283,6 +313,27 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     })
 
     console.info(`✅ Subscription ${subscription.id} marked as CANCELLED`)
+
+    // Send cancellation email
+    if (userSubscription?.user.email && userSubscription.package) {
+      try {
+        await sendEmail.subscriptionCancelled(userSubscription.user.email, {
+          userName: userSubscription.user.profile?.firstName,
+          packageName: userSubscription.package.name,
+          endDate: userSubscription.endDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          reactivateUrl: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
+        })
+        console.info(
+          `📧 Cancellation email sent to ${userSubscription.user.email}`,
+        )
+      } catch (emailError) {
+        console.error('Failed to send cancellation email:', emailError)
+      }
+    }
   } catch (error) {
     console.error('Error handling subscription deleted:', error)
   }
@@ -417,15 +468,67 @@ async function handlePaymentFailed(invoice: ExpandedInvoice) {
           console.warn(
             `❌ Subscription ${subscriptionId} exceeded max retries (${newRetryCount}), will be cancelled after grace period`,
           )
+        }
 
-          // TODO: Schedule subscription cancellation after grace period
-          // TODO: Send final warning email
+        // Send payment failed email
+        const user = await prisma.user.findUnique({
+          where: { id: subscription.userId },
+          include: { profile: true },
+        })
+
+        const packageTemplate = await prisma.packageTemplate.findUnique({
+          where: { id: subscription.packageId },
+        })
+
+        if (user?.email && packageTemplate) {
+          try {
+            await sendEmail.paymentFailed(user.email, {
+              userName: user.profile?.firstName,
+              gracePeriodDays: SUBSCRIPTION_CONFIG.GRACE_PERIOD_DAYS,
+              packageName: packageTemplate.name,
+              updatePaymentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
+            })
+            console.info(`📧 Payment failed email sent to ${user.email}`)
+          } catch (emailError) {
+            console.error('Failed to send payment failed email:', emailError)
+          }
+
+          // Send grace period ending warning if close to end and max retries reached
+          if (newRetryCount >= SUBSCRIPTION_CONFIG.MAX_PAYMENT_RETRIES) {
+            const gracePeriodEnd = subscription.gracePeriodEnd
+            if (gracePeriodEnd) {
+              const daysUntilCancellation = Math.max(
+                0,
+                Math.ceil(
+                  (gracePeriodEnd.getTime() - Date.now()) /
+                    (1000 * 60 * 60 * 24),
+                ),
+              )
+
+              // Send final warning email 1 day before cancellation
+              if (daysUntilCancellation <= 1) {
+                try {
+                  await sendEmail.gracePeriodEnding(user.email, {
+                    userName: user.profile?.firstName,
+                    packageName: packageTemplate.name,
+                    daysRemaining: daysUntilCancellation,
+                    updatePaymentUrl: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
+                  })
+                  console.info(
+                    `📧 Grace period ending email sent to ${user.email}`,
+                  )
+                } catch (emailError) {
+                  console.error(
+                    'Failed to send grace period ending email:',
+                    emailError,
+                  )
+                }
+              }
+            }
+          }
         }
       }
     }
-
-    // TODO: Send payment failure notification
-    // TODO: Implement retry logic and grace period
   } catch (error) {
     console.error('Error handling payment failed:', error)
   }
@@ -494,7 +597,7 @@ async function handleTrialWillEnd(subscription: Stripe.Subscription) {
     // Find the subscription in our database
     const userSubscription = await prisma.userSubscription.findFirst({
       where: { stripeSubscriptionId: subscription.id },
-      include: { user: true },
+      include: { user: { include: { profile: true } } },
     })
 
     if (!userSubscription) {
@@ -512,9 +615,155 @@ async function handleTrialWillEnd(subscription: Stripe.Subscription) {
 
     console.info(`⏰ Trial ending soon for user ${userSubscription.user.email}`)
 
-    // TODO: Send trial expiration notification email
-    // TODO: Prepare for conversion to paid subscription
+    // Get package information for email
+    const packageTemplate = await prisma.packageTemplate.findUnique({
+      where: { id: userSubscription.packageId },
+    })
+
+    if (packageTemplate && userSubscription.user.email) {
+      // Calculate days remaining in trial
+      const trialEnd = userSubscription.trialEnd
+      const daysRemaining = trialEnd
+        ? Math.max(
+            0,
+            Math.ceil(
+              (trialEnd.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+            ),
+          )
+        : 3
+
+      try {
+        await sendEmail.trialEnding(userSubscription.user.email, {
+          userName: userSubscription.user.profile?.firstName,
+          daysRemaining,
+          packageName: packageTemplate.name,
+          upgradeUrl: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
+        })
+        console.info(
+          `📧 Trial ending email sent to ${userSubscription.user.email}`,
+        )
+      } catch (emailError) {
+        console.error('Failed to send trial ending email:', emailError)
+      }
+    }
   } catch (error) {
     console.error('Error handling trial will end:', error)
+  }
+}
+
+// Customer Events
+async function handleCustomerDeleted(customer: Stripe.Customer) {
+  console.info('🗑️ Customer deleted:', customer.id)
+
+  try {
+    // Find the user associated with this Stripe customer
+    const user = await prisma.user.findUnique({
+      where: { stripeCustomerId: customer.id },
+      include: {
+        profile: true,
+        subscriptions: {
+          include: {
+            package: true,
+          },
+        },
+      },
+    })
+
+    if (!user) {
+      console.warn(`No user found for deleted Stripe customer: ${customer.id}`)
+      return
+    }
+
+    console.info(`Found user ${user.id} for deleted customer ${customer.id}`)
+
+    // Cancel all active subscriptions for this user
+    const activeSubscriptions = user.subscriptions.filter(
+      (sub) =>
+        sub.status === SubscriptionStatus.ACTIVE ||
+        sub.status === SubscriptionStatus.PENDING,
+    )
+
+    if (activeSubscriptions.length > 0) {
+      await prisma.userSubscription.updateMany({
+        where: {
+          userId: user.id,
+          status: {
+            in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.PENDING],
+          },
+        },
+        data: {
+          status: SubscriptionStatus.CANCELLED,
+          // Clear Stripe-related fields since customer no longer exists
+          isInGracePeriod: false,
+          gracePeriodEnd: null,
+        },
+      })
+
+      console.info(
+        `✅ Cancelled ${activeSubscriptions.length} active subscriptions for user ${user.id}`,
+      )
+    }
+
+    // Clear the Stripe customer ID from the user record
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        stripeCustomerId: null,
+      },
+    })
+
+    console.info(`✅ Cleared Stripe customer ID for user ${user.id}`)
+
+    // Create billing records for the cancellation events
+    for (const subscription of activeSubscriptions) {
+      await prisma.billingRecord.create({
+        data: {
+          subscriptionId: subscription.id,
+          amount: 0, // No charge for cancellation
+          currency: Currency.USD, // Default currency for cancellation record
+          status: BillingStatus.SUCCEEDED,
+          periodStart: subscription.startDate,
+          periodEnd: subscription.endDate,
+          description: `Subscription cancelled due to customer deletion - ${subscription.package.name}`,
+          failureReason: 'Customer deleted in Stripe',
+        },
+      })
+    }
+
+    // Send notification email to user about account changes
+    if (user.email && activeSubscriptions.length > 0) {
+      try {
+        const latestEndDate = new Date(
+          Math.max(...activeSubscriptions.map((sub) => sub.endDate.getTime())),
+        )
+
+        await sendEmail.subscriptionCancelled(user.email, {
+          userName: user.profile?.firstName,
+          packageName: activeSubscriptions
+            .map((sub) => sub.package.name)
+            .join(', '),
+          endDate: latestEndDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
+          reactivateUrl: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
+        })
+        console.info(
+          `📧 Customer deletion notification email sent to ${user.email}`,
+        )
+      } catch (emailError) {
+        console.error(
+          'Failed to send customer deletion notification email:',
+          emailError,
+        )
+      }
+    }
+
+    console.info(
+      `🗑️ Successfully processed customer deletion for user ${user.id} (${user.email})`,
+    )
+  } catch (error) {
+    console.error('Error handling customer deleted:', error)
   }
 }

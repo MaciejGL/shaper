@@ -28,29 +28,6 @@ export enum SubscriptionStatus {
   PENDING = 'PENDING',
 }
 
-// Service type display labels
-export const SERVICE_TYPE_LABELS: Record<ServiceType, string> = {
-  [ServiceType.TRAINING_PLAN]: 'Training Plan',
-  [ServiceType.MEAL_PLAN]: 'Meal Plan',
-  [ServiceType.COACHING]: 'Coaching Support',
-  [ServiceType.IN_PERSON_MEETING]: 'In-Person Meeting',
-  [ServiceType.PREMIUM_ACCESS]: 'Premium Access',
-}
-
-// Duration display labels
-export const DURATION_LABELS: Record<SubscriptionDuration, string> = {
-  [SubscriptionDuration.MONTHLY]: 'Monthly',
-  [SubscriptionDuration.YEARLY]: 'Yearly',
-}
-
-// Status display labels
-export const STATUS_LABELS: Record<SubscriptionStatus, string> = {
-  [SubscriptionStatus.ACTIVE]: 'Active',
-  [SubscriptionStatus.EXPIRED]: 'Expired',
-  [SubscriptionStatus.CANCELLED]: 'Cancelled',
-  [SubscriptionStatus.PENDING]: 'Pending',
-}
-
 // Package template interface for UI/API
 export interface PackageTemplateWithServices {
   id: string
@@ -105,15 +82,6 @@ export interface UserSubscriptionWithDetails {
   updatedAt: Date
 }
 
-// Access validation result
-export interface AccessValidationResult {
-  hasAccess: boolean
-  reason?: string
-  subscription?: UserSubscriptionWithDetails
-  remainingUsage?: number
-  totalAllowed?: number
-}
-
 // Service usage tracking
 export interface ServiceUsageTracker {
   serviceType: ServiceType
@@ -123,104 +91,6 @@ export interface ServiceUsageTracker {
   nextResetDate: Date
 }
 
-// Subscription creation input
-export interface CreateSubscriptionInput {
-  userId: string
-  packageId: string
-  trainerId?: string
-  startDate?: Date
-  duration?: number // Custom duration in days, overrides package duration
-}
-
-// Package service creation input
-export interface PackageServiceInput {
-  serviceType: ServiceType
-  quantity: number
-}
-
-// Package template creation input
-export interface CreatePackageTemplateInput {
-  name: string
-  description?: string
-  priceNOK: number
-  duration: SubscriptionDuration
-  trainerId?: string
-  services: PackageServiceInput[]
-}
-
-// Predefined package templates (for seeding)
-export const PREDEFINED_PACKAGES = {
-  // General Premium Subscription
-  PREMIUM: {
-    name: 'Hypertro Premium',
-    description: 'Access to premium features and content',
-    priceNOK: 15900, // 159 NOK monthly
-    duration: SubscriptionDuration.MONTHLY,
-    trainerId: null,
-    services: [{ serviceType: ServiceType.PREMIUM_ACCESS, quantity: 1 }],
-  },
-
-  // Trainer Packages
-  TRAINING_COACHING: {
-    name: 'Training Plan + Coaching',
-    description: 'Personalized training plan with coaching support',
-    priceNOK: 80000, // 800 NOK
-    duration: SubscriptionDuration.MONTHLY,
-    services: [
-      { serviceType: ServiceType.TRAINING_PLAN, quantity: 1 },
-      { serviceType: ServiceType.COACHING, quantity: 1 },
-      { serviceType: ServiceType.PREMIUM_ACCESS, quantity: 1 },
-    ],
-  },
-
-  MEAL_COACHING: {
-    name: 'Meal Plan + Coaching',
-    description: 'Custom meal plan with nutritional coaching',
-    priceNOK: 60000, // 600 NOK
-    duration: SubscriptionDuration.MONTHLY,
-    services: [
-      { serviceType: ServiceType.MEAL_PLAN, quantity: 1 },
-      { serviceType: ServiceType.COACHING, quantity: 1 },
-      { serviceType: ServiceType.PREMIUM_ACCESS, quantity: 1 },
-    ],
-  },
-
-  TRAINING_MEAL_COACHING: {
-    name: 'Training + Meal + Coaching',
-    description: 'Complete fitness package with training and meal plans',
-    priceNOK: 130000, // 1300 NOK
-    duration: SubscriptionDuration.MONTHLY,
-    services: [
-      { serviceType: ServiceType.TRAINING_PLAN, quantity: 1 },
-      { serviceType: ServiceType.MEAL_PLAN, quantity: 1 },
-      { serviceType: ServiceType.COACHING, quantity: 1 },
-      { serviceType: ServiceType.PREMIUM_ACCESS, quantity: 1 },
-    ],
-  },
-
-  EXTRA_MEETING: {
-    name: 'Extra Gym Meeting',
-    description: 'Additional in-person training session',
-    priceNOK: 90000, // 900 NOK
-    duration: SubscriptionDuration.MONTHLY,
-    services: [{ serviceType: ServiceType.IN_PERSON_MEETING, quantity: 1 }],
-  },
-
-  FULL_COMBO: {
-    name: 'Full Combo + Meeting',
-    description: 'Complete package with everything included',
-    priceNOK: 210000, // 2100 NOK
-    duration: SubscriptionDuration.MONTHLY,
-    services: [
-      { serviceType: ServiceType.TRAINING_PLAN, quantity: 1 },
-      { serviceType: ServiceType.MEAL_PLAN, quantity: 1 },
-      { serviceType: ServiceType.COACHING, quantity: 1 },
-      { serviceType: ServiceType.IN_PERSON_MEETING, quantity: 1 },
-      { serviceType: ServiceType.PREMIUM_ACCESS, quantity: 1 },
-    ],
-  },
-} as const
-
 // Helper functions for formatting
 export const formatPrice = (priceNOK: number): string => {
   return `${(priceNOK / 100).toFixed(0)} NOK`
@@ -228,40 +98,4 @@ export const formatPrice = (priceNOK: number): string => {
 
 export const formatPriceDetailed = (priceNOK: number): string => {
   return `${(priceNOK / 100).toFixed(2)} NOK`
-}
-
-export const isSubscriptionActive = (
-  subscription: UserSubscriptionWithDetails,
-): boolean => {
-  return (
-    subscription.status === SubscriptionStatus.ACTIVE &&
-    subscription.endDate > new Date()
-  )
-}
-
-export const getDaysUntilExpiry = (
-  subscription: UserSubscriptionWithDetails,
-): number => {
-  const now = new Date()
-  const expiry = new Date(subscription.endDate)
-  const diffTime = expiry.getTime() - now.getTime()
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-  return Math.max(0, diffDays)
-}
-
-export const getServiceIcon = (serviceType: ServiceType): string => {
-  switch (serviceType) {
-    case ServiceType.TRAINING_PLAN:
-      return '💪'
-    case ServiceType.MEAL_PLAN:
-      return '🥗'
-    case ServiceType.COACHING:
-      return '👨‍🏫'
-    case ServiceType.IN_PERSON_MEETING:
-      return '🤝'
-    case ServiceType.PREMIUM_ACCESS:
-      return '⭐'
-    default:
-      return '📦'
-  }
 }

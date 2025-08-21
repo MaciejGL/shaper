@@ -1,3 +1,4 @@
+import { BillingStatus } from '@prisma/client'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 export interface SubscriptionStatus {
@@ -13,6 +14,7 @@ export interface SubscriptionStatus {
     package: {
       name: string
       duration: string
+      priceNOK: number
     }
     stripeSubscriptionId?: string
   }
@@ -34,7 +36,7 @@ export interface BillingRecord {
   id: string
   amount: number
   currency: string
-  status: string
+  status: BillingStatus
   description: string
   periodStart: string
   periodEnd: string

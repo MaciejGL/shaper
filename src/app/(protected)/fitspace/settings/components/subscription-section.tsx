@@ -1,5 +1,6 @@
 'use client'
 
+import { useUser } from '@/context/user-context'
 import {
   useGetActivePackageTemplatesQuery,
   useGetMySubscriptionStatusQuery,
@@ -10,36 +11,104 @@ import { useSubscriptionActions } from '../hooks/use-subscription-actions'
 import { CurrentPlanCard } from './current-plan-card'
 import { PremiumBenefitsCard } from './premium-benefits-card'
 import { UpgradeCard } from './upgrade-card'
-import { UsageLimitsCard } from './usage-limits-card'
+
+// Types for better subscription state management
+interface SubscriptionState {
+  type: 'none' | 'trial' | 'active' | 'grace_period' | 'cancelled' | 'expired'
+  subscription?: {
+    id: string
+    status: string
+    isActive: boolean
+    daysUntilExpiry: number
+    endDate?: string
+    package?: {
+      id: string
+      name: string
+      priceNOK: number
+      duration: string
+    }
+  }
+  daysRemaining?: number
+  isReactivationEligible?: boolean
+}
 
 export function SubscriptionSection() {
-  // Fetch user's subscription status
+  const { user } = useUser()
   const { data: subscriptionData, isLoading } =
     useGetMySubscriptionStatusQuery()
-
-  // Fetch premium package template
   const { data: packagesData } = useGetActivePackageTemplatesQuery({})
-
   const subscriptionStatus = subscriptionData?.getMySubscriptionStatus
-  const premiumPackage = packagesData?.getActivePackageTemplates?.find(
-    (pkg) => pkg.name === 'Hypertro Premium',
+  const availablePackages = packagesData?.getActivePackageTemplates || []
+
+  // Simple package selection - just get monthly and yearly options
+  const monthlyPackage = availablePackages.find(
+    (pkg) => pkg.duration === 'MONTHLY' && pkg.isActive,
+  )
+  const yearlyPackage = availablePackages.find(
+    (pkg) => pkg.duration === 'YEARLY' && pkg.isActive,
   )
 
-  // Check subscription states
-  const hasCancelledSubscription =
-    (subscriptionStatus?.cancelledSubscriptions?.length ?? 0) > 0
-  const cancelledSubscription = subscriptionStatus?.cancelledSubscriptions?.[0]
-  const activeSubscription = subscriptionStatus?.activeSubscriptions?.find(
-    (sub) => sub.status === 'ACTIVE',
-  )
+  // Analyze subscription state with comprehensive logic
+  const subscriptionState: SubscriptionState = (() => {
+    // No premium access at all
+    if (!subscriptionStatus?.hasPremium) {
+      return { type: 'none' }
+    }
 
-  // Subscription actions hook
-  const { isUpgrading, handleUpgrade, handleReactivate, handleCancel } =
-    useSubscriptionActions({
-      premiumPackage,
-      activeSubscription,
-      cancelledSubscription,
-    })
+    // Check for active subscription
+    const activeSubscription = subscriptionStatus.activeSubscriptions?.find(
+      (sub) => sub.status === 'ACTIVE' && sub.isActive,
+    )
+
+    if (activeSubscription) {
+      // Check if it's a trial
+      const isTrialActive =
+        activeSubscription.daysUntilExpiry > 0 &&
+        activeSubscription.daysUntilExpiry <= 14 // Assuming 14-day trial
+
+      return {
+        type: isTrialActive ? 'trial' : 'active',
+        subscription: activeSubscription,
+        daysRemaining: activeSubscription.daysUntilExpiry,
+      }
+    }
+
+    // Check for cancelled but still active subscription
+    const cancelledSubscription = subscriptionStatus.cancelledSubscriptions?.[0]
+    if (cancelledSubscription && cancelledSubscription.isActive) {
+      return {
+        type: 'grace_period',
+        subscription: cancelledSubscription,
+        daysRemaining: cancelledSubscription.daysUntilExpiry,
+        isReactivationEligible: true,
+      }
+    }
+
+    // Expired subscription
+    if (cancelledSubscription) {
+      return {
+        type: 'cancelled',
+        subscription: cancelledSubscription,
+        isReactivationEligible: true,
+      }
+    }
+
+    return { type: 'expired' }
+  })()
+
+  // Note: activeSubscription and cancelledSubscription are no longer needed
+  // since we handle everything through the Stripe customer portal
+
+  // For upgrade functionality, we still need the hook for the UpgradeCard
+  const { isUpgrading, handleUpgrade } = useSubscriptionActions({
+    userId: user?.id || '',
+    premiumPackage: monthlyPackage
+      ? {
+          id: monthlyPackage.id,
+          priceNOK: monthlyPackage.priceNOK,
+        }
+      : undefined,
+  })
 
   if (isLoading) {
     return (
@@ -50,38 +119,48 @@ export function SubscriptionSection() {
     )
   }
 
+  if (!user?.id || user.email !== 'm.glowacki01@gmail.com') {
+    return null
+  }
+
   return (
     <div className="space-y-8">
-      {/* Current Plan Status */}
-      <CurrentPlanCard hasPremium={subscriptionStatus?.hasPremium ?? false} />
+      {/* Current Plan Status - Enhanced with subscription state */}
+      <CurrentPlanCard
+        hasPremium={subscriptionState.type !== 'none'}
+        subscriptionState={subscriptionState}
+      />
 
-      {/* Premium Status or Upgrade Options */}
-      {subscriptionStatus?.hasPremium ? (
-        <PremiumBenefitsCard
-          hasCancelledSubscription={hasCancelledSubscription}
-          cancelledSubscription={cancelledSubscription}
-          activeSubscription={activeSubscription}
-          isUpgrading={isUpgrading}
-          onReactivate={handleReactivate}
-          onCancel={handleCancel}
-          premiumPackage={premiumPackage}
-        />
-      ) : (
+      {/* Render different components based on subscription state */}
+      {subscriptionState.type === 'none' ? (
+        /* No subscription - show upgrade options */
         <UpgradeCard
-          premiumPackage={premiumPackage}
+          monthlyPackage={
+            monthlyPackage
+              ? {
+                  ...monthlyPackage,
+                  description: monthlyPackage.description || undefined,
+                }
+              : undefined
+          }
+          yearlyPackage={
+            yearlyPackage
+              ? {
+                  ...yearlyPackage,
+                  description: yearlyPackage.description || undefined,
+                }
+              : undefined
+          }
           isUpgrading={isUpgrading}
           onUpgrade={handleUpgrade}
         />
+      ) : (
+        /* Has some form of subscription - show management */
+        <PremiumBenefitsCard
+          subscriptionState={subscriptionState}
+          userId={user?.id || ''}
+        />
       )}
-
-      {/* Usage Information */}
-      <UsageLimitsCard
-        trainingPlanLimit={subscriptionStatus?.trainingPlanLimit ?? 1}
-        canAccessMealPlans={subscriptionStatus?.canAccessMealPlans ?? false}
-        canAccessPremiumExercises={
-          subscriptionStatus?.canAccessPremiumExercises ?? false
-        }
-      />
     </div>
   )
 }

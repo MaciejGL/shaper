@@ -38,7 +38,7 @@ import {
 import { getFromCache, setInCache } from '@/lib/redis'
 import { parseUTCDate } from '@/lib/server-date-utils'
 import { getWeekStartUTC } from '@/lib/server-date-utils'
-import { subscriptionValidator } from '@/lib/subscription'
+import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
 
 import { createNotification } from '../notification/factory'
@@ -1379,7 +1379,7 @@ export async function assignTemplateToSelf(
   // Check if template is premium and user has access
   if (template.premium) {
     const subscriptionStatus =
-      await subscriptionValidator.getUserSubscriptionStatus(userId)
+      await subscriptionValidator.getUserSubscriptionStatus(userId, context)
 
     if (
       !subscriptionStatus.hasPremium &&
@@ -1393,7 +1393,7 @@ export async function assignTemplateToSelf(
 
   // Check training plan limits
   const subscriptionStatus =
-    await subscriptionValidator.getUserSubscriptionStatus(userId)
+    await subscriptionValidator.getUserSubscriptionStatus(userId, context)
 
   if (!subscriptionStatus.hasPremium) {
     // Count current assigned training plans (non-completed)

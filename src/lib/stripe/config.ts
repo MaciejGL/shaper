@@ -53,6 +53,9 @@ export const STRIPE_WEBHOOK_EVENTS = {
   // Trial events
   TRIAL_WILL_END: 'customer.subscription.trial_will_end',
 
+  // Customer events
+  CUSTOMER_DELETED: 'customer.deleted',
+
   // Dispute events
   DISPUTE_CREATED: 'charge.dispute.created',
   PAYMENT_ACTION_REQUIRED: 'invoice.payment_action_required',
@@ -84,9 +87,9 @@ export const API_CONFIG = {
 
   // Return URLs for customer portal
   PORTAL_RETURN_URLS: {
-    DEFAULT: `${process.env.NEXT_PUBLIC_APP_URL}/settings/subscription`,
-    SUCCESS: `${process.env.NEXT_PUBLIC_APP_URL}/settings/subscription?success=true`,
-    CANCELLED: `${process.env.NEXT_PUBLIC_APP_URL}/settings/subscription?cancelled=true`,
+    DEFAULT: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
+    SUCCESS: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings?success=true`,
+    CANCELLED: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings?cancelled=true`,
   },
 } as const
 

@@ -1,9 +1,9 @@
+'use client'
+
 import {
   AlertTriangle,
   ArrowRight,
-  Calendar,
   CheckCircle,
-  Clock,
   Gift,
   RefreshCw,
   Shield,
@@ -154,10 +154,7 @@ export function PlanManagement({ userId }: PlanManagementProps) {
                   {status.gracePeriod?.isActive && ' • Grace Period'}
                 </div>
               </div>
-              <Badge
-                variant="default"
-                className="bg-green-100 text-green-800 border-green-200"
-              >
+              <Badge className="bg-green-100 text-green-800 border-green-200">
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Active
               </Badge>
@@ -297,7 +294,10 @@ export function PlanManagement({ userId }: PlanManagementProps) {
 
       {/* Cancellation Dialog */}
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent
+          dialogTitle="Cancel Subscription"
+          className="sm:max-w-[425px]"
+        >
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <XCircle className="h-5 w-5 text-red-500" />

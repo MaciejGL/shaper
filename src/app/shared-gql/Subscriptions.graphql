@@ -67,28 +67,6 @@ query GetActivePackageTemplates($trainerId: ID) {
   }
 }
 
-# Get all package templates (including inactive ones for admin)
-query GetPackageTemplates($trainerId: ID) {
-  getPackageTemplates(trainerId: $trainerId) {
-    id
-    name
-    description
-    priceNOK
-    duration
-    isActive
-    trainerId
-    services {
-      id
-      serviceType
-      quantity
-    }
-    activeSubscriptionCount
-    totalRevenue
-    createdAt
-    updatedAt
-  }
-}
-
 # Get user's subscriptions
 query GetMySubscriptions {
   getMySubscriptions {
@@ -129,26 +107,6 @@ query CheckPremiumAccess {
   checkPremiumAccess
 }
 
-# Create subscription (works for both mock and real payments)
-mutation CreateSubscription($input: CreateSubscriptionInput!) {
-  createMockSubscription(input: $input) {
-    success
-    subscriptionId
-    error
-  }
-}
-
-# Reactivate subscription
-mutation ReactivateSubscription($subscriptionId: ID!) {
-  reactivateSubscription(subscriptionId: $subscriptionId) {
-    id
-    status
-    startDate
-    endDate
-    isActive
-  }
-}
-
 # Track service usage
 mutation TrackServiceUsage($input: TrackServiceUsageInput!) {
   trackServiceUsage(input: $input) {
@@ -158,58 +116,108 @@ mutation TrackServiceUsage($input: TrackServiceUsageInput!) {
   }
 }
 
-# Admin mutations (for package template management)
-mutation CreatePackageTemplate($input: CreatePackageTemplateInput!) {
-  createPackageTemplate(input: $input) {
+# Assign training plan template to current user
+mutation AssignTemplateToSelf($planId: ID!) {
+  assignTemplateToSelf(planId: $planId)
+}
+
+# Admin Queries - Get all subscriptions with filters
+query GetAllSubscriptions($filters: SubscriptionFilters) {
+  getAllSubscriptions(filters: $filters) {
     id
-    name
-    description
-    priceNOK
-    duration
-    isActive
+    userId
+    packageId
     trainerId
-    services {
+    status
+    startDate
+    endDate
+    stripeSubscriptionId
+    stripePriceId
+    mockPaymentStatus
+    mockTransactionId
+    isActive
+    daysUntilExpiry
+    package {
+      id
+      name
+      description
+      priceNOK
+      duration
+    }
+    usedServices {
       id
       serviceType
+      usedAt
       quantity
+      metadata
     }
     createdAt
     updatedAt
   }
 }
 
-mutation UpdatePackageTemplate($input: UpdatePackageTemplateInput!) {
-  updatePackageTemplate(input: $input) {
-    id
-    name
-    description
-    priceNOK
-    duration
-    isActive
-    trainerId
-    services {
-      id
-      serviceType
-      quantity
+# Admin Query - Get subscription statistics
+query GetSubscriptionStats {
+  getSubscriptionStats {
+    totalActiveSubscriptions
+    totalRevenue
+    monthlyRevenue
+    premiumUsers
+    trainerSubscriptions
+    packageStats {
+      package {
+        id
+        name
+        priceNOK
+        duration
+      }
+      activeSubscriptions
+      totalRevenue
+      conversionRate
     }
+  }
+}
+
+# Admin Query - Get trainer revenue stats
+query GetTrainerRevenue($trainerId: ID!) {
+  getTrainerRevenue(trainerId: $trainerId) {
+    totalRevenue
+    monthlyRevenue
+    totalSubscriptions
+    activeSubscriptions
+    popularPackages {
+      package {
+        id
+        name
+        priceNOK
+        duration
+      }
+      subscriptionCount
+      revenue
+    }
+  }
+}
+
+# Admin Mutations - Update subscription status
+mutation AdminUpdateSubscriptionStatus(
+  $input: AdminUpdateSubscriptionStatusInput!
+) {
+  adminUpdateSubscriptionStatus(input: $input) {
+    id
+    status
+    startDate
+    endDate
     updatedAt
   }
 }
 
-mutation DeletePackageTemplate($id: ID!) {
-  deletePackageTemplate(id: $id)
-}
-
-# Assign training plan template to current user
-mutation AssignTemplateToSelf($planId: ID!) {
-  assignTemplateToSelf(planId: $planId)
-}
-
-# Cancel an existing subscription
-mutation CancelSubscription($id: ID!) {
-  cancelSubscription(subscriptionId: $id) {
+# Admin Mutations - Extend subscription
+mutation AdminExtendSubscription($input: AdminExtendSubscriptionInput!) {
+  adminExtendSubscription(input: $input) {
     id
     status
+    startDate
     endDate
+    updatedAt
   }
 }
