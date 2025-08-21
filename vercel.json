@@ -1,0 +1,19 @@
+{
+  "buildCommand": "npm run build",
+  "installCommand": "pnpm install --network-timeout 300000 --fetch-retries 5 --fetch-retry-mintimeout 20000 --fetch-retry-maxtimeout 120000",
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "build": {
+    "env": {
+      "GENERATE_SOURCEMAP": "false",
+      "NODE_OPTIONS": "--max-old-space-size=4096"
+    }
+  },
+  "github": {
+    "autoJobCancelation": false
+  }
+}

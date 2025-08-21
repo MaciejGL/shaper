@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  '@aws-crypto/sha1-browser': 5.2.0
+  '@aws-crypto/sha256-browser': 5.2.0
+  '@aws-crypto/crc32': 5.2.0
+
 importers:
 
   .:

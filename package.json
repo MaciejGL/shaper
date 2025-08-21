@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "PORT=${PORT:=4000} concurrently \"next dev --turbopack\" \"npm run codegen\"",
-    "build": "prisma generate && next build",
+    "build": "NODE_OPTIONS='--max-old-space-size=4096' prisma generate && next build",
     "start": "next start",
     "lint": "concurrently \"next lint\" \"tsc --noEmit\" --kill-others-on-fail --success first",
     "mobile:dev": "cd expo-app && npx expo start",
@@ -109,6 +109,17 @@
     "unzipper": "0.12.3",
     "vaul": "1.1.2",
     "zod": "4.0.15"
+  },
+  "engines": {
+    "node": ">=18.17.0",
+    "pnpm": ">=8.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "@aws-crypto/sha1-browser": "5.2.0",
+      "@aws-crypto/sha256-browser": "5.2.0",
+      "@aws-crypto/crc32": "5.2.0"
+    }
   },
   "devDependencies": {
     "@eslint/eslintrc": "3.3.1",
