@@ -198,7 +198,7 @@ importers:
         specifier: 5.12.1
         version: 5.12.1(ws@8.18.3)(zod@4.0.15)
       pg:
-        specifier: ^8.16.3
+        specifier: 8.16.3
         version: 8.16.3
       posthog-js:
         specifier: 1.258.6
