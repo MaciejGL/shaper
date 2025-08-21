@@ -97,7 +97,11 @@ export function ConfirmationModal({
           {children && <div className="mt-4">{children}</div>}
         </DialogHeader>
         <DialogFooter>
-          <Button onClick={handleCancel} disabled={isLoading} variant="outline">
+          <Button
+            onClick={handleCancel}
+            disabled={isLoading}
+            variant="secondary"
+          >
             {cancelText}
           </Button>
           <Button

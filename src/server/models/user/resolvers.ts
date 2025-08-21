@@ -40,18 +40,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    // Preload commonly requested data to prevent N+1 queries
-    // Other relations (trainer, clients, sessions) are lazy-loaded as needed
-    const user = await prisma.user.findUnique({
-      where: { id: userSession.user.id },
-      include: {
-        profile: {
-          include: {
-            bodyMeasures: true,
-          },
-        },
-      },
-    })
+    // Use DataLoader to batch user queries and prevent N+1 queries
+    const user = await context.loaders.user.userById.load(userSession.user.id)
 
     if (!user) {
       throw new Error('User not found')
@@ -66,37 +56,10 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    // Preload ALL related data to prevent N+1 queries
-    const user = await prisma.user.findUnique({
-      where: { id: userSession.user.id },
-      include: {
-        profile: {
-          include: {
-            bodyMeasures: true,
-          },
-        },
-        trainer: {
-          include: {
-            profile: true,
-          },
-        },
-        clients: {
-          include: {
-            profile: true,
-          },
-        },
-        sessions: true,
-        notifications: {
-          include: {
-            creator: {
-              include: {
-                profile: true,
-              },
-            },
-          },
-        },
-      },
-    })
+    // Use DataLoader to batch heavy user queries and prevent N+1 queries
+    const user = await context.loaders.user.userWithAllData.load(
+      userSession.user.id,
+    )
 
     if (!user) {
       throw new Error('User not found')
@@ -111,15 +74,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    // Only fetch essential data for global context
-    const user = await prisma.user.findUnique({
-      where: { id: userSession.user.id },
-      include: {
-        profile: true, // Include full profile (bodyMeasures will be lazy-loaded if needed)
-        trainer: true,
-        // Exclude trainer, clients, sessions, notifications, and other heavy data
-      },
-    })
+    // Use DataLoader to batch basic user queries and prevent N+1 queries
+    const user = await context.loaders.user.userBasic.load(userSession.user.id)
 
     if (!user) {
       throw new Error('User not found')

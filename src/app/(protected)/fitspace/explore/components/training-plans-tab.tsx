@@ -1,7 +1,9 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { Clock, Crown, Dumbbell, Lock, Star } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 import {
   FilterType,
@@ -14,7 +16,10 @@ import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { Separator } from '@/components/ui/separator'
 import {
   GQLFocusTag,
+  GQLGetMySubscriptionStatusQuery,
   GQLGetPublicTrainingPlansQuery,
+  useAssignTemplateToSelfMutation,
+  useGetMySubscriptionStatusQuery,
   useGetPublicTrainingPlansQuery,
 } from '@/generated/graphql-client'
 
@@ -25,17 +30,38 @@ export function TrainingPlansTab() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
   const [selectedFocusTags, setSelectedFocusTags] = useState<GQLFocusTag[]>([])
-
+  const queryClient = useQueryClient()
   // Fetch public training plans
   const { data, isLoading } = useGetPublicTrainingPlansQuery({
     limit: 30,
   })
+
+  // Fetch subscription status and assignment mutation
+  const { data: subscriptionData } = useGetMySubscriptionStatusQuery()
+  const { mutateAsync: assignTemplate, isPending: isAssigning } =
+    useAssignTemplateToSelfMutation({})
 
   const handlePlanClick = (
     plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number],
   ) => {
     setSelectedPlan(plan)
     setIsPreviewOpen(true)
+  }
+
+  const handleAssignTemplate = async (planId: string) => {
+    try {
+      await assignTemplate({
+        planId,
+      })
+      setIsPreviewOpen(false)
+      setSelectedPlan(null)
+      queryClient.invalidateQueries({
+        queryKey: ['FitspaceMyPlans'],
+      })
+      toast.success('Training plan added to your plans')
+    } catch (error) {
+      console.error('Failed to add training plan to your plans:', error)
+    }
   }
 
   const toggleFocusTag = (tag: GQLFocusTag) => {
@@ -161,6 +187,9 @@ export function TrainingPlansTab() {
         plan={selectedPlan}
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
+        subscriptionData={subscriptionData}
+        handleAssignTemplate={handleAssignTemplate}
+        isAssigning={isAssigning}
       />
     </div>
   )
@@ -275,12 +304,18 @@ interface TrainingPlanPreviewProps {
   plan: GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number] | null
   isOpen: boolean
   onClose: () => void
+  subscriptionData?: GQLGetMySubscriptionStatusQuery
+  handleAssignTemplate: (planId: string) => void
+  isAssigning: boolean
 }
 
 function TrainingPlanPreview({
   plan,
   isOpen,
   onClose,
+  subscriptionData,
+  handleAssignTemplate,
+  isAssigning,
 }: TrainingPlanPreviewProps) {
   if (!plan) return null
 
@@ -435,19 +470,44 @@ function TrainingPlanPreview({
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            <Button className="w-full" size="lg" disabled={!!plan.isPremium}>
-              {plan.isPremium ? (
-                <>
-                  <Lock className="h-4 w-4 mr-2" />
-                  Premium Required
-                </>
+            {plan.isPremium ? (
+              // Premium plan - check if user has access
+              subscriptionData?.getMySubscriptionStatus?.hasPremium ||
+              subscriptionData?.getMySubscriptionStatus
+                ?.canAccessPremiumTrainingPlans ? (
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => handleAssignTemplate(plan.id)}
+                  loading={isAssigning}
+                  disabled={isAssigning}
+                  iconStart={<Crown />}
+                >
+                  Add to My Plans
+                </Button>
               ) : (
-                <>
-                  <Dumbbell className="h-4 w-4 mr-2" />
-                  Start This Plan
-                </>
-              )}
-            </Button>
+                <Button
+                  className="w-full"
+                  size="lg"
+                  disabled
+                  iconStart={<Lock />}
+                >
+                  Premium Required
+                </Button>
+              )
+            ) : (
+              // Free plan
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={() => handleAssignTemplate(plan.id)}
+                disabled={isAssigning}
+                loading={isAssigning}
+                iconStart={<Dumbbell />}
+              >
+                Add to My Plans
+              </Button>
+            )}
 
             {plan.isPremium && (
               <p className="text-xs text-center text-muted-foreground">

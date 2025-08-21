@@ -9,12 +9,14 @@ import {
 } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import {
   Card,
   CardContent,
   CardDescription,
   CardTitle,
 } from '@/components/ui/card'
+import { useUser } from '@/context/user-context'
 
 export interface WorkoutCreationLandingProps {
   onSelectManual: () => void
@@ -27,6 +29,7 @@ export function WorkoutCreationLanding({
   onSelectAI,
   onSelectFavourites,
 }: WorkoutCreationLandingProps) {
+  const { hasPremium: hasPremiumAccess } = useUser()
   return (
     <div className="space-y-6">
       {/* Option Cards */}
@@ -55,13 +58,23 @@ export function WorkoutCreationLanding({
                     Automatically suggest exercises for you
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={onSelectAI}
-                  variant="link"
-                  iconOnly={<ChevronRight />}
-                >
-                  Start Quick Workout
-                </Button>
+                {hasPremiumAccess ? (
+                  <Button
+                    onClick={onSelectAI}
+                    variant="link"
+                    iconOnly={<ChevronRight />}
+                  >
+                    Start Quick Workout
+                  </Button>
+                ) : (
+                  <ButtonLink
+                    href="/fitspace/settings#subscription-section"
+                    variant="outline"
+                    size="sm"
+                  >
+                    Upgrade
+                  </ButtonLink>
+                )}
               </div>
             </CardContent>
           </Card>

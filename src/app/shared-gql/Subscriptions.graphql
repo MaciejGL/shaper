@@ -1,0 +1,223 @@
+# Get current user's subscription status and limits
+query GetMySubscriptionStatus {
+  getMySubscriptionStatus {
+    hasPremium
+    trainingPlanLimit
+    canAccessPremiumTrainingPlans
+    canAccessPremiumExercises
+    canAccessMealPlans
+    activeSubscriptions {
+      id
+      status
+      startDate
+      endDate
+      isActive
+      daysUntilExpiry
+      package {
+        id
+        name
+        priceNOK
+        duration
+      }
+    }
+    cancelledSubscriptions {
+      id
+      status
+      startDate
+      endDate
+      isActive
+      daysUntilExpiry
+      package {
+        id
+        name
+        priceNOK
+        duration
+      }
+    }
+    usageTrackers {
+      serviceType
+      usedThisMonth
+      allowedPerMonth
+      remainingUsage
+      nextResetDate
+    }
+  }
+}
+
+# Get available package templates for subscription
+query GetActivePackageTemplates($trainerId: ID) {
+  getActivePackageTemplates(trainerId: $trainerId) {
+    id
+    name
+    description
+    priceNOK
+    duration
+    isActive
+    trainerId
+    services {
+      id
+      serviceType
+      quantity
+    }
+
+    activeSubscriptionCount
+    totalRevenue
+    createdAt
+    updatedAt
+  }
+}
+
+# Get user's subscriptions
+query GetMySubscriptions {
+  getMySubscriptions {
+    id
+    userId
+    packageId
+    trainerId
+    status
+    startDate
+    endDate
+    stripeSubscriptionId
+    stripePriceId
+    mockPaymentStatus
+    mockTransactionId
+    isActive
+    daysUntilExpiry
+    package {
+      id
+      name
+      description
+      priceNOK
+      duration
+    }
+    usedServices {
+      id
+      serviceType
+      usedAt
+      quantity
+      metadata
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+# Check premium access (quick check)
+query CheckPremiumAccess {
+  checkPremiumAccess
+}
+
+# Track service usage
+mutation TrackServiceUsage($input: TrackServiceUsageInput!) {
+  trackServiceUsage(input: $input) {
+    success
+    error
+    remainingUsage
+  }
+}
+
+# Assign training plan template to current user
+mutation AssignTemplateToSelf($planId: ID!) {
+  assignTemplateToSelf(planId: $planId)
+}
+
+# Admin Queries - Get all subscriptions with filters
+query GetAllSubscriptions($filters: SubscriptionFilters) {
+  getAllSubscriptions(filters: $filters) {
+    id
+    userId
+    packageId
+    trainerId
+    status
+    startDate
+    endDate
+    stripeSubscriptionId
+    stripePriceId
+    mockPaymentStatus
+    mockTransactionId
+    isActive
+    daysUntilExpiry
+    package {
+      id
+      name
+      description
+      priceNOK
+      duration
+    }
+    usedServices {
+      id
+      serviceType
+      usedAt
+      quantity
+      metadata
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+# Admin Query - Get subscription statistics
+query GetSubscriptionStats {
+  getSubscriptionStats {
+    totalActiveSubscriptions
+    totalRevenue
+    monthlyRevenue
+    premiumUsers
+    trainerSubscriptions
+    packageStats {
+      package {
+        id
+        name
+        priceNOK
+        duration
+      }
+      activeSubscriptions
+      totalRevenue
+      conversionRate
+    }
+  }
+}
+
+# Admin Query - Get trainer revenue stats
+query GetTrainerRevenue($trainerId: ID!) {
+  getTrainerRevenue(trainerId: $trainerId) {
+    totalRevenue
+    monthlyRevenue
+    totalSubscriptions
+    activeSubscriptions
+    popularPackages {
+      package {
+        id
+        name
+        priceNOK
+        duration
+      }
+      subscriptionCount
+      revenue
+    }
+  }
+}
+
+# Admin Mutations - Update subscription status
+mutation AdminUpdateSubscriptionStatus(
+  $input: AdminUpdateSubscriptionStatusInput!
+) {
+  adminUpdateSubscriptionStatus(input: $input) {
+    id
+    status
+    startDate
+    endDate
+    updatedAt
+  }
+}
+
+# Admin Mutations - Extend subscription
+mutation AdminExtendSubscription($input: AdminExtendSubscriptionInput!) {
+  adminExtendSubscription(input: $input) {
+    id
+    status
+    startDate
+    endDate
+    updatedAt
+  }
+}

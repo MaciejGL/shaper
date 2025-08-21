@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Loader } from '@/components/loader'
+import { useUser } from '@/context/user-context'
 import {
   GQLEquipment,
   GQLTrainingPlan,
@@ -74,6 +75,9 @@ export default function QuickWorkoutPage() {
         refetchOnMount: true,
       },
     )
+
+  // Check premium access for AI features
+  const { hasPremium: hasPremiumAccess } = useUser()
 
   useEffect(() => {
     const mainContent = document.getElementById('main-content')
@@ -322,6 +326,11 @@ export default function QuickWorkoutPage() {
   }
 
   const handleSelectAI = () => {
+    // Only allow AI selection if user has premium
+    if (!hasPremiumAccess) {
+      console.warn('AI flow blocked: Premium subscription required')
+      return
+    }
     setWorkoutFlow('ai')
   }
 

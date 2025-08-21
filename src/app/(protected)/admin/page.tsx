@@ -1,4 +1,17 @@
-import { Bell, Cloud, Dumbbell, UserCheck, Users, Utensils } from 'lucide-react'
+'use client'
+
+import {
+  Bell,
+  Cloud,
+  CreditCard,
+  Dumbbell,
+  Package,
+  UserCheck,
+  Users,
+  Utensils,
+} from 'lucide-react'
+import { parseAsStringEnum } from 'nuqs'
+import { useQueryState } from 'nuqs'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -7,15 +20,58 @@ import {
   LazyExercisesTab as ExercisesTab,
   LazyFoodsTab as FoodsTab,
   LazyPushNotificationsTab as PushNotificationsTab,
+  LazySubscriptionsTab as SubscriptionsTab,
   LazyTrainersTab as TrainersTab,
   LazyUsersTab as UsersTab,
 } from './components/lazy-admin-tabs'
+import { ProductManagementTab } from './components/product-management-tab'
 
 export default function AdminPage() {
+  // Use nuqs for tab persistence
+  const [activeTab, setActiveTab] = useQueryState(
+    'tab',
+    parseAsStringEnum<
+      | 'users'
+      | 'trainers'
+      | 'exercises'
+      | 'foods'
+      | 'push'
+      | 'subscriptions'
+      | 'products'
+      | 'aws'
+    >([
+      'users',
+      'trainers',
+      'exercises',
+      'foods',
+      'push',
+      'subscriptions',
+      'products',
+      'aws',
+    ])
+      .withDefault('users')
+      .withOptions({ clearOnDefault: true }),
+  )
+
   return (
     <div className="space-y-6">
       {/* Admin Tabs */}
-      <Tabs defaultValue="users">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) =>
+          setActiveTab(
+            value as
+              | 'users'
+              | 'trainers'
+              | 'exercises'
+              | 'foods'
+              | 'push'
+              | 'subscriptions'
+              | 'products'
+              | 'aws',
+          )
+        }
+      >
         <TabsList>
           <TabsTrigger value="users">
             <Users className="h-4 w-4" />
@@ -36,6 +92,14 @@ export default function AdminPage() {
           <TabsTrigger value="push">
             <Bell className="h-4 w-4" />
             Push Notifications
+          </TabsTrigger>
+          <TabsTrigger value="subscriptions">
+            <CreditCard className="h-4 w-4" />
+            Subscriptions
+          </TabsTrigger>
+          <TabsTrigger value="products">
+            <Package className="h-4 w-4" />
+            Products
           </TabsTrigger>
           <TabsTrigger value="aws">
             <Cloud className="h-4 w-4" />
@@ -63,6 +127,14 @@ export default function AdminPage() {
 
         <TabsContent value="push" className="mt-6">
           <PushNotificationsTab />
+        </TabsContent>
+
+        <TabsContent value="subscriptions" className="mt-6">
+          <SubscriptionsTab />
+        </TabsContent>
+
+        <TabsContent value="products" className="mt-6">
+          <ProductManagementTab />
         </TabsContent>
 
         <TabsContent value="aws" className="mt-6">

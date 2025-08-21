@@ -196,7 +196,7 @@ export function AccountSection({}: AccountSectionProps) {
         {/* Reset Account Data */}
         <CardHeader>
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
               <RotateCcw className="size-5 text-white" />
             </div>
             <div>
@@ -210,7 +210,7 @@ export function AccountSection({}: AccountSectionProps) {
         <CardContent>
           <div className="flex items-start space-x-4">
             <div className="flex-1">
-              <ul className="list-disc list-inside mb-4 text-sm text-gray-600 dark:text-gray-400">
+              <ul className="list-disc list-inside mb-4 space-y-1 text-sm text-gray-600 dark:text-gray-400">
                 <li className="font-medium">Workout logs</li>
                 <li className="font-medium">Exercise data</li>
                 <li className="font-medium">Progress tracking</li>

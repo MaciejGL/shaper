@@ -2,10 +2,12 @@
 // Direct CSV to Database sync for OpenFoodFacts data
 // Reads from existing CSV and does upserts with single database connection
 // OPTIMIZED FOR MEMORY EFFICIENCY - Uses streaming processing
+import { PrismaPg } from '@prisma/adapter-pg'
 import { Prisma, PrismaClient } from '@prisma/client'
 import { parse } from 'csv-parse'
 import { createReadStream } from 'fs'
 import path from 'path'
+import { Pool } from 'pg'
 
 import { formatNumber } from '@/lib/utils'
 
@@ -19,8 +21,13 @@ const PAUSE_BETWEEN_BATCHES = 200 // Increased pause to reduce database load
 const START_FROM_RECORD = parseInt(process.env.START_FROM_RECORD || '0')
 
 // Single Prisma instance with sync-optimized connection settings
+const connectionString =
+  process.env.SYNC_DATABASE_URL || process.env.DATABASE_URL
+const pool = new Pool({ connectionString })
+const adapter = new PrismaPg(pool)
+
 const prisma = new PrismaClient({
-  datasourceUrl: process.env.SYNC_DATABASE_URL || process.env.DATABASE_URL,
+  adapter,
 })
 
 interface CSVProduct {

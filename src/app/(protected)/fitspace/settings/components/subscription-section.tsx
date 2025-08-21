@@ -1,102 +1,166 @@
 'use client'
 
-import { Sparkles } from 'lucide-react'
+import { useUser } from '@/context/user-context'
+import {
+  useGetActivePackageTemplatesQuery,
+  useGetMySubscriptionStatusQuery,
+} from '@/generated/graphql-client'
 
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { useSubscriptionActions } from '../hooks/use-subscription-actions'
+
+import { CurrentPlanCard } from './current-plan-card'
+import { PremiumBenefitsCard } from './premium-benefits-card'
+import { UpgradeCard } from './upgrade-card'
+
+// Types for better subscription state management
+interface SubscriptionState {
+  type: 'none' | 'trial' | 'active' | 'grace_period' | 'cancelled' | 'expired'
+  subscription?: {
+    id: string
+    status: string
+    isActive: boolean
+    daysUntilExpiry: number
+    endDate?: string
+    package?: {
+      id: string
+      name: string
+      priceNOK: number
+      duration: string
+    }
+  }
+  daysRemaining?: number
+  isReactivationEligible?: boolean
+}
 
 export function SubscriptionSection() {
+  const { user } = useUser()
+  const { data: subscriptionData, isLoading } =
+    useGetMySubscriptionStatusQuery()
+  const { data: packagesData } = useGetActivePackageTemplatesQuery({})
+  const subscriptionStatus = subscriptionData?.getMySubscriptionStatus
+  const availablePackages = packagesData?.getActivePackageTemplates || []
+
+  // Simple package selection - just get monthly and yearly options
+  const monthlyPackage = availablePackages.find(
+    (pkg) => pkg.duration === 'MONTHLY' && pkg.isActive,
+  )
+  const yearlyPackage = availablePackages.find(
+    (pkg) => pkg.duration === 'YEARLY' && pkg.isActive,
+  )
+
+  // Analyze subscription state with comprehensive logic
+  const subscriptionState: SubscriptionState = (() => {
+    // No premium access at all
+    if (!subscriptionStatus?.hasPremium) {
+      return { type: 'none' }
+    }
+
+    // Check for active subscription
+    const activeSubscription = subscriptionStatus.activeSubscriptions?.find(
+      (sub) => sub.status === 'ACTIVE' && sub.isActive,
+    )
+
+    if (activeSubscription) {
+      // Check if it's a trial
+      const isTrialActive =
+        activeSubscription.daysUntilExpiry > 0 &&
+        activeSubscription.daysUntilExpiry <= 14 // Assuming 14-day trial
+
+      return {
+        type: isTrialActive ? 'trial' : 'active',
+        subscription: activeSubscription,
+        daysRemaining: activeSubscription.daysUntilExpiry,
+      }
+    }
+
+    // Check for cancelled but still active subscription
+    const cancelledSubscription = subscriptionStatus.cancelledSubscriptions?.[0]
+    if (cancelledSubscription && cancelledSubscription.isActive) {
+      return {
+        type: 'grace_period',
+        subscription: cancelledSubscription,
+        daysRemaining: cancelledSubscription.daysUntilExpiry,
+        isReactivationEligible: true,
+      }
+    }
+
+    // Expired subscription
+    if (cancelledSubscription) {
+      return {
+        type: 'cancelled',
+        subscription: cancelledSubscription,
+        isReactivationEligible: true,
+      }
+    }
+
+    return { type: 'expired' }
+  })()
+
+  // Note: activeSubscription and cancelledSubscription are no longer needed
+  // since we handle everything through the Stripe customer portal
+
+  // For upgrade functionality, we still need the hook for the UpgradeCard
+  const { isUpgrading, handleUpgrade } = useSubscriptionActions({
+    userId: user?.id || '',
+    premiumPackage: monthlyPackage
+      ? {
+          id: monthlyPackage.id,
+          priceNOK: monthlyPackage.priceNOK,
+        }
+      : undefined,
+  })
+
+  if (isLoading) {
+    return (
+      <div className="space-y-8 animate-pulse">
+        <div className="h-20 bg-muted rounded-lg"></div>
+        <div className="h-64 bg-muted rounded-lg"></div>
+      </div>
+    )
+  }
+
+  if (!user?.id || user.email !== 'm.glowacki01@gmail.com') {
+    return null
+  }
+
   return (
     <div className="space-y-8">
-      {/* Current Plan */}
-      <div className="flex items-center justify-between shadow-xs p-6 bg-zinc-300 dark:bg-gray-600/50 rounded-lg">
-        <div className="space-y-1">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Current Plan
-          </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            Free Plan - Basic features included
-          </p>
-        </div>
-        <Badge variant="secondary" className="px-4 py-2 text-sm font-medium">
-          Free
-        </Badge>
-      </div>
+      {/* Current Plan Status - Enhanced with subscription state */}
+      <CurrentPlanCard
+        hasPremium={subscriptionState.type !== 'none'}
+        subscriptionState={subscriptionState}
+      />
 
-      {/* Upgrade Options */}
-      <div className="space-y-6">
-        <h4 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-          Upgrade to Premium
-        </h4>
-        <div className="relative overflow-hidden bg-gradient-to-br from-purple-500 to-blue-600 p-8 rounded-lg text-white">
-          <div className="relative z-10">
-            <div className="flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-                <Sparkles className="w-6 h-6" />
-              </div>
-              <h5 className="text-2xl font-bold">Premium Features</h5>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-white rounded-full flex-shrink-0"></div>
-                <span className="text-sm">
-                  Advanced training plans with detailed progression
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-white rounded-full flex-shrink-0"></div>
-                <span className="text-sm">
-                  Access to additional 400+ exercises library
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-white rounded-full flex-shrink-0"></div>
-                <span className="text-sm">
-                  Meal plan logging system with nutrition tracking
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-white rounded-full flex-shrink-0"></div>
-                <span className="text-sm">
-                  Unlimited plans assigned to your account
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-white rounded-full flex-shrink-0"></div>
-                <span className="text-sm">
-                  Advanced analytics on exercise progress
-                </span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <div className="w-2 h-2 bg-white rounded-full flex-shrink-0"></div>
-                <span className="text-sm">
-                  More detailed body measurements and tracking
-                </span>
-              </div>
-            </div>
-            <Button
-              disabled
-              variant="outline"
-              className="w-full h-12 text-white border-white/30 hover:bg-white/10"
-            >
-              Premium Coming Soon
-            </Button>
-          </div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 -translate-x-24"></div>
-        </div>
-      </div>
-
-      {/* Billing Information */}
-      <div className="p-6 bg-zinc-300 dark:bg-gray-800/50 rounded-lg">
-        <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-          Billing Information
-        </h4>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          No billing information on file. You're currently using the free tier
-          with all basic features included.
-        </p>
-      </div>
+      {/* Render different components based on subscription state */}
+      {subscriptionState.type === 'none' ? (
+        /* No subscription - show upgrade options */
+        <UpgradeCard
+          monthlyPackage={
+            monthlyPackage
+              ? {
+                  ...monthlyPackage,
+                  description: monthlyPackage.description || undefined,
+                }
+              : undefined
+          }
+          yearlyPackage={
+            yearlyPackage
+              ? {
+                  ...yearlyPackage,
+                  description: yearlyPackage.description || undefined,
+                }
+              : undefined
+          }
+          isUpgrading={isUpgrading}
+          onUpgrade={handleUpgrade}
+        />
+      ) : (
+        /* Has some form of subscription - show management */
+        <PremiumBenefitsCard
+          subscriptionState={subscriptionState}
+          userId={user?.id || ''}
+        />
+      )}
     </div>
   )
 }

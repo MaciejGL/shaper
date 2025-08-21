@@ -14,7 +14,7 @@ interface SettingsContentProps {}
 
 export function SettingsContent({}: SettingsContentProps) {
   return (
-    <div className="space-y-8 pb-24">
+    <div className="space-y-8">
       {/* Preferences Section */}
       <Card className="border-0 shadow-xl">
         <CardHeader className="pb-6">
@@ -39,7 +39,7 @@ export function SettingsContent({}: SettingsContentProps) {
       <Card className="border-0 shadow-xl">
         <CardHeader className="pb-6">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl flex items-center justify-center">
               <Bell className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -56,10 +56,10 @@ export function SettingsContent({}: SettingsContentProps) {
       </Card>
 
       {/* Subscription Section */}
-      <Card className="border-0 shadow-xl bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 backdrop-blur-sm">
+      <Card id="subscription-section" className="border-0 shadow-xl">
         <CardHeader className="pb-6">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
               <CreditCard className="w-5 h-5 text-white" />
             </div>
             <div>
@@ -74,6 +74,9 @@ export function SettingsContent({}: SettingsContentProps) {
           <SubscriptionSection />
         </CardContent>
       </Card>
+
+      {/* Account Management */}
+      <AccountSection />
 
       {/* Legal & Privacy Section */}
       <Card className="border-0 shadow-xl">
@@ -149,9 +152,6 @@ export function SettingsContent({}: SettingsContentProps) {
           </div>
         </CardContent>
       </Card>
-
-      {/* Account Management */}
-      <AccountSection />
     </div>
   )
 }

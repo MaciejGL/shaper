@@ -1,0 +1,30 @@
+# Package Template specific schema (imported by main subscription schema)
+
+type PackageTemplate {
+  id: ID!
+  name: String!
+  description: String
+  priceNOK: Int!
+  duration: SubscriptionDuration!
+  isActive: Boolean!
+
+  # Who can offer this package (null = general premium)
+  trainerId: ID
+
+  # What services are included
+  services: [PackageService!]!
+
+  # Statistics
+  activeSubscriptionCount: Int!
+  totalSubscriptionCount: Int!
+  totalRevenue: Int!
+
+  createdAt: String!
+  updatedAt: String!
+}
+
+type PackageService {
+  id: ID!
+  serviceType: ServiceType!
+  quantity: Int!
+}

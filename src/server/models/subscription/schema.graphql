@@ -1,0 +1,209 @@
+# Subscription System GraphQL Schema
+
+enum ServiceType {
+  TRAINING_PLAN
+  MEAL_PLAN
+  COACHING
+  IN_PERSON_MEETING
+  PREMIUM_ACCESS
+}
+
+enum SubscriptionDuration {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
+}
+
+type ServiceUsageTracker {
+  serviceType: ServiceType!
+  usedThisMonth: Int!
+  allowedPerMonth: Int!
+  remainingUsage: Int!
+  nextResetDate: String!
+}
+
+type UserSubscriptionStatus {
+  hasPremium: Boolean!
+  activeSubscriptions: [UserSubscription!]!
+  cancelledSubscriptions: [UserSubscription!]!
+  trainingPlanLimit: Int! # -1 for unlimited
+  usageTrackers: [ServiceUsageTracker!]!
+  canAccessPremiumTrainingPlans: Boolean!
+  canAccessPremiumExercises: Boolean!
+  canAccessMealPlans: Boolean!
+}
+
+type AccessValidationResult {
+  hasAccess: Boolean!
+  reason: String
+  subscription: UserSubscription
+  remainingUsage: Int
+  totalAllowed: Int
+}
+
+# Input types
+input CreatePackageTemplateInput {
+  name: String!
+  description: String
+  priceNOK: Int!
+  duration: SubscriptionDuration!
+  trainerId: ID
+  services: [PackageServiceInput!]!
+}
+
+input PackageServiceInput {
+  serviceType: ServiceType!
+  quantity: Int!
+}
+
+input UpdatePackageTemplateInput {
+  id: ID!
+  name: String
+  description: String
+  priceNOK: Int
+  duration: SubscriptionDuration
+  isActive: Boolean
+  services: [PackageServiceInput!]
+}
+
+input CreateSubscriptionInput {
+  userId: ID!
+  packageId: ID!
+  trainerId: ID
+  startDate: String
+  durationMonths: Int
+}
+
+input SubscriptionFilters {
+  status: SubscriptionStatus
+  trainerId: ID
+  serviceType: ServiceType
+  dateFrom: String
+  dateTo: String
+}
+
+input TrackServiceUsageInput {
+  serviceType: ServiceType!
+  trainerId: ID
+  metadata: String
+}
+
+input AdminUpdateSubscriptionStatusInput {
+  subscriptionId: ID!
+  status: SubscriptionStatus!
+}
+
+input AdminExtendSubscriptionInput {
+  subscriptionId: ID!
+  additionalMonths: Int!
+}
+
+input CheckServiceAccessInput {
+  serviceType: ServiceType!
+  trainerId: ID
+}
+
+input GetServiceUsageTrackerInput {
+  subscriptionId: ID!
+  serviceType: ServiceType!
+}
+
+# Response types
+type CreateSubscriptionResponse {
+  success: Boolean!
+  subscriptionId: ID
+  error: String
+}
+
+type TrackServiceUsageResponse {
+  success: Boolean!
+  error: String
+  remainingUsage: Int
+}
+
+type Query {
+  # Package Templates
+  getPackageTemplates(trainerId: ID): [PackageTemplate!]!
+  getActivePackageTemplates(trainerId: ID): [PackageTemplate!]!
+  getPackageTemplate(id: ID!): PackageTemplate
+
+  # User Subscriptions
+  getMySubscriptions: [UserSubscription!]!
+  getMySubscriptionStatus: UserSubscriptionStatus!
+  getUserSubscriptions(userId: ID!): [UserSubscription!]!
+
+  # Access Validation
+  checkPremiumAccess: Boolean!
+  checkServiceAccess(input: CheckServiceAccessInput!): AccessValidationResult!
+  getServiceUsageTracker(
+    input: GetServiceUsageTrackerInput!
+  ): ServiceUsageTracker
+
+  # Trainer Queries
+  getTrainerSubscriptions(filters: SubscriptionFilters): [UserSubscription!]!
+  getTrainerRevenue(trainerId: ID!): TrainerRevenueStats!
+
+  # Admin Queries
+  getAllSubscriptions(filters: SubscriptionFilters): [UserSubscription!]!
+  getSubscriptionStats: SubscriptionStats!
+}
+
+type Mutation {
+  # Package Template Management
+  createPackageTemplate(input: CreatePackageTemplateInput!): PackageTemplate!
+  updatePackageTemplate(input: UpdatePackageTemplateInput!): PackageTemplate!
+  deletePackageTemplate(id: ID!): Boolean!
+
+  # Subscription Management
+  createMockSubscription(
+    input: CreateSubscriptionInput!
+  ): CreateSubscriptionResponse!
+
+  # Service Usage
+  trackServiceUsage(input: TrackServiceUsageInput!): TrackServiceUsageResponse!
+
+  # Admin Mutations
+  adminUpdateSubscriptionStatus(
+    input: AdminUpdateSubscriptionStatusInput!
+  ): UserSubscription!
+  adminExtendSubscription(
+    input: AdminExtendSubscriptionInput!
+  ): UserSubscription!
+}
+
+# Additional types for dashboard/statistics
+type TrainerRevenueStats {
+  totalRevenue: Int!
+  monthlyRevenue: Int!
+  activeSubscriptions: Int!
+  totalSubscriptions: Int!
+  popularPackages: [PackagePopularityStats!]!
+}
+
+type PackagePopularityStats {
+  package: PackageTemplate!
+  subscriptionCount: Int!
+  revenue: Int!
+}
+
+type SubscriptionStats {
+  totalActiveSubscriptions: Int!
+  totalRevenue: Int!
+  monthlyRevenue: Int!
+  premiumUsers: Int!
+  trainerSubscriptions: Int!
+  packageStats: [PackageStats!]!
+}
+
+type PackageStats {
+  package: PackageTemplate!
+  activeSubscriptions: Int!
+  totalRevenue: Int!
+  conversionRate: Float!
+}

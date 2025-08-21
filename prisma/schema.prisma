@@ -1,6 +1,6 @@
 generator client {
   provider   = "prisma-client-js"
-  engineType = "binary"
+  previewFeatures = ["queryCompiler", "driverAdapters"]
 }
 
 datasource db {
@@ -45,8 +45,17 @@ model User {
   clients                          User[]                     @relation("TrainerClients")
   profile                          UserProfile?
   sessions                         UserSession[]
+  
+  // Stripe integration
+  stripeCustomerId                 String?                    @unique
+  
+  // Subscription relations
+  subscriptions                    UserSubscription[]         @relation("UserSubscriptions")
+  trainerPackages                  PackageTemplate[]          @relation("TrainerPackages")
+  clientSubscriptions              UserSubscription[]         @relation("TrainerSubscriptions")
 
   @@index([trainerId])
+  @@index([stripeCustomerId])
 }
 
 model UserSession {
@@ -817,4 +826,190 @@ model FavouriteWorkoutSet {
   exercise   FavouriteWorkoutExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@index([exerciseId])
+}
+
+// Subscription System Models
+
+model PackageTemplate {
+  id            String                @id @default(uuid())
+  name          String                // "Training + Coaching", "Full Combo", etc.
+  description   String?
+  priceNOK      Int                   // Price in Norwegian Kroner (øre)
+  duration      SubscriptionDuration
+  isActive      Boolean               @default(true)
+  
+  // Stripe integration
+  stripeProductId    String?          // Maps to Stripe product
+  stripePriceIdNOK   String?          // Norwegian Kroner price ID
+  stripePriceIdEUR   String?          // Euro price ID
+  stripePriceIdUSD   String?          // USD price ID
+  
+  // Who can offer this package (null = general premium, specific = trainer package)
+  trainerId     String?
+  trainer       User?                 @relation("TrainerPackages", fields: [trainerId], references: [id])
+  
+  // What services are included
+  services      PackageService[]
+  
+  // Purchased subscriptions
+  subscriptions UserSubscription[]
+  
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+  
+  @@index([trainerId])
+  @@index([isActive])
+  @@index([duration])
+  @@index([stripeProductId])
+}
+
+model PackageService {
+  id          String          @id @default(uuid())
+  packageId   String
+  serviceType ServiceType
+  quantity    Int             @default(1) // e.g., 1 meeting per month
+  package     PackageTemplate @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  
+  @@unique([packageId, serviceType])
+  @@index([packageId])
+  @@index([serviceType])
+}
+
+model UserSubscription {
+  id               String              @id @default(uuid())
+  userId           String
+  packageId        String
+  trainerId        String?             // null for premium, specific for trainer packages
+  
+  status           SubscriptionStatus  @default(ACTIVE)
+  startDate        DateTime
+  endDate          DateTime
+  
+  // Trial management (14 days)
+  trialStart       DateTime?
+  trialEnd         DateTime?
+  isTrialActive    Boolean             @default(false)
+  
+  // Grace period management (3 days after failed payment)
+  gracePeriodEnd   DateTime?
+  isInGracePeriod  Boolean             @default(false)
+  
+  // Payment retry tracking
+  failedPaymentRetries Int             @default(0)
+  lastPaymentAttempt   DateTime?
+  
+  // Stripe integration
+  stripeSubscriptionId String?
+  stripePriceId        String?
+  
+  // Mock payment tracking (until Stripe integration)
+  mockPaymentStatus    String?         @default("COMPLETED") // PENDING, COMPLETED, FAILED
+  mockTransactionId    String?         // Internal transaction ID
+  
+  // Service usage tracking
+  usedServices     ServiceUsage[]
+  billingRecords   BillingRecord[]
+  
+  user             User               @relation("UserSubscriptions", fields: [userId], references: [id])
+  package          PackageTemplate    @relation(fields: [packageId], references: [id])
+  trainer          User?              @relation("TrainerSubscriptions", fields: [trainerId], references: [id])
+  
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  
+  @@index([userId])
+  @@index([trainerId])
+  @@index([status])
+  @@index([endDate])
+  @@index([startDate])
+  @@index([trialEnd])
+  @@index([gracePeriodEnd])
+  @@index([isTrialActive])
+  @@index([isInGracePeriod])
+}
+
+model BillingRecord {
+  id               String           @id @default(uuid())
+  subscriptionId   String
+  
+  // Payment details
+  amount           Int              // Amount in cents
+  currency         Currency
+  status           BillingStatus
+  
+  // Stripe references
+  stripeInvoiceId  String?
+  stripePaymentId  String?
+  
+  // Billing period
+  periodStart      DateTime
+  periodEnd        DateTime
+  
+  // Metadata
+  description      String?
+  failureReason    String?
+  refundReason     String?
+  refundAmount     Int?             // Refund amount in cents
+  
+  subscription     UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([periodStart])
+  @@index([stripeInvoiceId])
+}
+
+model ServiceUsage {
+  id             String           @id @default(uuid())
+  subscriptionId String
+  serviceType    ServiceType
+  usedAt         DateTime         @default(now())
+  quantity       Int              @default(1)
+  
+  // Optional metadata for specific usage
+  metadata       Json?            // Can store meeting details, plan IDs, etc.
+  
+  subscription   UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  
+  @@index([subscriptionId])
+  @@index([serviceType])
+  @@index([usedAt])
+}
+
+// Enums for Subscription System
+
+enum ServiceType {
+  TRAINING_PLAN
+  MEAL_PLAN
+  COACHING
+  IN_PERSON_MEETING
+  PREMIUM_ACCESS
+}
+
+enum SubscriptionDuration {
+  MONTHLY
+  YEARLY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  PENDING
+}
+
+enum BillingStatus {
+  SUCCEEDED
+  FAILED
+  PENDING
+  REFUNDED
+}
+
+enum Currency {
+  NOK
+  EUR
+  USD
 }
