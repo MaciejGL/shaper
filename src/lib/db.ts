@@ -95,7 +95,7 @@ if (process.env.NODE_ENV === 'development') {
     // if (stats.total > 0) {
     console.info('[DB-POOL]', stats)
     // }
-  }, 5000)
+  }, 10000)
 }
 
 // In your db.ts (production only)

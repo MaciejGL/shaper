@@ -16,7 +16,6 @@ interface SubscriptionState {
     package?: {
       id: string
       name: string
-      priceNOK: number
       duration: string
     }
   }

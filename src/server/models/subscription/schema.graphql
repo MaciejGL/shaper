@@ -51,7 +51,6 @@ type AccessValidationResult {
 input CreatePackageTemplateInput {
   name: String!
   description: String
-  priceNOK: Int!
   duration: SubscriptionDuration!
   trainerId: ID
   services: [PackageServiceInput!]!
@@ -66,7 +65,6 @@ input UpdatePackageTemplateInput {
   id: ID!
   name: String
   description: String
-  priceNOK: Int
   duration: SubscriptionDuration
   isActive: Boolean
   services: [PackageServiceInput!]

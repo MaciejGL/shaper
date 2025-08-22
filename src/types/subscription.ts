@@ -92,10 +92,23 @@ export interface ServiceUsageTracker {
 }
 
 // Helper functions for formatting
-export const formatPrice = (priceNOK: number): string => {
-  return `${(priceNOK / 100).toFixed(0)} NOK`
+export const formatPrice = (
+  amount: number,
+  currency: string = 'USD',
+): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+  }).format(amount / 100) // Convert from cents
 }
 
-export const formatPriceDetailed = (priceNOK: number): string => {
-  return `${(priceNOK / 100).toFixed(2)} NOK`
+export const formatPriceDetailed = (
+  amount: number,
+  currency: string = 'USD',
+): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    minimumFractionDigits: 2,
+  }).format(amount / 100) // Convert from cents
 }

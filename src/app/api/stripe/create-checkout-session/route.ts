@@ -46,9 +46,7 @@ export async function POST(request: NextRequest) {
         name: true,
         description: true,
         duration: true,
-        stripePriceIdNOK: true,
-        stripePriceIdEUR: true,
-        stripePriceIdUSD: true,
+        stripePriceId: true,
         trainerId: true,
       },
     })
@@ -58,11 +56,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if package has Stripe configuration
-    if (
-      !packageTemplate.stripePriceIdUSD &&
-      !packageTemplate.stripePriceIdEUR &&
-      !packageTemplate.stripePriceIdNOK
-    ) {
+    if (!packageTemplate.stripePriceId) {
       return NextResponse.json(
         { error: 'Package is not configured for Stripe payments' },
         { status: 400 },
@@ -121,12 +115,8 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Determine currency and price ID (default to USD for now)
-    // TODO: Add currency detection based on user location
-    const priceId =
-      packageTemplate.stripePriceIdUSD ||
-      packageTemplate.stripePriceIdEUR ||
-      packageTemplate.stripePriceIdNOK
+    // Use the single price ID (Stripe handles multi-currency automatically)
+    const priceId = packageTemplate.stripePriceId
 
     if (!priceId) {
       return NextResponse.json(

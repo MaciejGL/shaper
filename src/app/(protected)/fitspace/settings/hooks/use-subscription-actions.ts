@@ -8,7 +8,6 @@ interface UseSubscriptionActionsProps {
   userId: string
   premiumPackage?: {
     id: string
-    priceNOK: number
   }
 }
 

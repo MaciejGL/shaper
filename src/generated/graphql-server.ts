@@ -510,7 +510,6 @@ export type GQLCreatePackageTemplateInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   duration: GQLSubscriptionDuration;
   name: Scalars['String']['input'];
-  priceNOK: Scalars['Int']['input'];
   services: Array<GQLPackageServiceInput>;
   trainerId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -1870,8 +1869,8 @@ export type GQLPackageTemplate = {
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   isActive: EntireFieldWrapper<Scalars['Boolean']['output']>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
-  priceNOK: EntireFieldWrapper<Scalars['Int']['output']>;
   services: EntireFieldWrapper<Array<GQLPackageService>>;
+  stripePriceId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   totalRevenue: EntireFieldWrapper<Scalars['Int']['output']>;
   totalSubscriptionCount: EntireFieldWrapper<Scalars['Int']['output']>;
   trainerId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
@@ -2760,7 +2759,6 @@ export type GQLUpdatePackageTemplateInput = {
   id: Scalars['ID']['input'];
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
-  priceNOK?: InputMaybe<Scalars['Int']['input']>;
   services?: InputMaybe<Array<GQLPackageServiceInput>>;
 };
 
@@ -4204,8 +4202,8 @@ export type GQLPackageTemplateResolvers<ContextType = GQLContext, ParentType ext
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   isActive?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  priceNOK?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   services?: Resolver<Array<GQLResolversTypes['PackageService']>, ParentType, ContextType>;
+  stripePriceId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   totalRevenue?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   totalSubscriptionCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   trainerId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;

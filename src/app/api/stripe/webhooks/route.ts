@@ -150,11 +150,7 @@ async function findUserByStripeCustomerId(customerId: string) {
 async function findPackageByStripePriceId(priceId: string) {
   return await prisma.packageTemplate.findFirst({
     where: {
-      OR: [
-        { stripePriceIdNOK: priceId },
-        { stripePriceIdEUR: priceId },
-        { stripePriceIdUSD: priceId },
-      ],
+      stripePriceId: priceId,
     },
   })
 }

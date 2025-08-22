@@ -508,7 +508,6 @@ export type GQLCreatePackageTemplateInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   duration: GQLSubscriptionDuration;
   name: Scalars['String']['input'];
-  priceNOK: Scalars['Int']['input'];
   services: Array<GQLPackageServiceInput>;
   trainerId?: InputMaybe<Scalars['ID']['input']>;
 };
@@ -1868,8 +1867,8 @@ export type GQLPackageTemplate = {
   id: Scalars['ID']['output'];
   isActive: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
-  priceNOK: Scalars['Int']['output'];
   services: Array<GQLPackageService>;
+  stripePriceId?: Maybe<Scalars['String']['output']>;
   totalRevenue: Scalars['Int']['output'];
   totalSubscriptionCount: Scalars['Int']['output'];
   trainerId?: Maybe<Scalars['ID']['output']>;
@@ -2758,7 +2757,6 @@ export type GQLUpdatePackageTemplateInput = {
   id: Scalars['ID']['input'];
   isActive?: InputMaybe<Scalars['Boolean']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
-  priceNOK?: InputMaybe<Scalars['Int']['input']>;
   services?: InputMaybe<Array<GQLPackageServiceInput>>;
 };
 
@@ -4219,19 +4217,19 @@ export type GQLDeleteNoteMutation = { __typename?: 'Mutation', deleteNote: boole
 export type GQLGetMySubscriptionStatusQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetMySubscriptionStatusQuery = { __typename?: 'Query', getMySubscriptionStatus: { __typename?: 'UserSubscriptionStatus', hasPremium: boolean, trainingPlanLimit: number, canAccessPremiumTrainingPlans: boolean, canAccessPremiumExercises: boolean, canAccessMealPlans: boolean, activeSubscriptions: Array<{ __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string, isActive: boolean, daysUntilExpiry: number, package: { __typename?: 'PackageTemplate', id: string, name: string, priceNOK: number, duration: GQLSubscriptionDuration } }>, cancelledSubscriptions: Array<{ __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string, isActive: boolean, daysUntilExpiry: number, package: { __typename?: 'PackageTemplate', id: string, name: string, priceNOK: number, duration: GQLSubscriptionDuration } }>, usageTrackers: Array<{ __typename?: 'ServiceUsageTracker', serviceType: GQLServiceType, usedThisMonth: number, allowedPerMonth: number, remainingUsage: number, nextResetDate: string }> } };
+export type GQLGetMySubscriptionStatusQuery = { __typename?: 'Query', getMySubscriptionStatus: { __typename?: 'UserSubscriptionStatus', hasPremium: boolean, trainingPlanLimit: number, canAccessPremiumTrainingPlans: boolean, canAccessPremiumExercises: boolean, canAccessMealPlans: boolean, activeSubscriptions: Array<{ __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string, isActive: boolean, daysUntilExpiry: number, package: { __typename?: 'PackageTemplate', id: string, name: string, duration: GQLSubscriptionDuration } }>, cancelledSubscriptions: Array<{ __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string, isActive: boolean, daysUntilExpiry: number, package: { __typename?: 'PackageTemplate', id: string, name: string, duration: GQLSubscriptionDuration } }>, usageTrackers: Array<{ __typename?: 'ServiceUsageTracker', serviceType: GQLServiceType, usedThisMonth: number, allowedPerMonth: number, remainingUsage: number, nextResetDate: string }> } };
 
 export type GQLGetActivePackageTemplatesQueryVariables = Exact<{
   trainerId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
-export type GQLGetActivePackageTemplatesQuery = { __typename?: 'Query', getActivePackageTemplates: Array<{ __typename?: 'PackageTemplate', id: string, name: string, description?: string | undefined | null, priceNOK: number, duration: GQLSubscriptionDuration, isActive: boolean, trainerId?: string | undefined | null, activeSubscriptionCount: number, totalRevenue: number, createdAt: string, updatedAt: string, services: Array<{ __typename?: 'PackageService', id: string, serviceType: GQLServiceType, quantity: number }> }> };
+export type GQLGetActivePackageTemplatesQuery = { __typename?: 'Query', getActivePackageTemplates: Array<{ __typename?: 'PackageTemplate', id: string, name: string, description?: string | undefined | null, duration: GQLSubscriptionDuration, isActive: boolean, stripePriceId?: string | undefined | null, trainerId?: string | undefined | null, activeSubscriptionCount: number, totalRevenue: number, createdAt: string, updatedAt: string, services: Array<{ __typename?: 'PackageService', id: string, serviceType: GQLServiceType, quantity: number }> }> };
 
 export type GQLGetMySubscriptionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetMySubscriptionsQuery = { __typename?: 'Query', getMySubscriptions: Array<{ __typename?: 'UserSubscription', id: string, userId: string, packageId: string, trainerId?: string | undefined | null, status: GQLSubscriptionStatus, startDate: string, endDate: string, stripeSubscriptionId?: string | undefined | null, stripePriceId?: string | undefined | null, mockPaymentStatus?: string | undefined | null, mockTransactionId?: string | undefined | null, isActive: boolean, daysUntilExpiry: number, createdAt: string, updatedAt: string, package: { __typename?: 'PackageTemplate', id: string, name: string, description?: string | undefined | null, priceNOK: number, duration: GQLSubscriptionDuration }, usedServices: Array<{ __typename?: 'ServiceUsage', id: string, serviceType: GQLServiceType, usedAt: string, quantity: number, metadata?: string | undefined | null }> }> };
+export type GQLGetMySubscriptionsQuery = { __typename?: 'Query', getMySubscriptions: Array<{ __typename?: 'UserSubscription', id: string, userId: string, packageId: string, trainerId?: string | undefined | null, status: GQLSubscriptionStatus, startDate: string, endDate: string, stripeSubscriptionId?: string | undefined | null, stripePriceId?: string | undefined | null, mockPaymentStatus?: string | undefined | null, mockTransactionId?: string | undefined | null, isActive: boolean, daysUntilExpiry: number, createdAt: string, updatedAt: string, package: { __typename?: 'PackageTemplate', id: string, name: string, description?: string | undefined | null, duration: GQLSubscriptionDuration }, usedServices: Array<{ __typename?: 'ServiceUsage', id: string, serviceType: GQLServiceType, usedAt: string, quantity: number, metadata?: string | undefined | null }> }> };
 
 export type GQLCheckPremiumAccessQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -4257,19 +4255,19 @@ export type GQLGetAllSubscriptionsQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetAllSubscriptionsQuery = { __typename?: 'Query', getAllSubscriptions: Array<{ __typename?: 'UserSubscription', id: string, userId: string, packageId: string, trainerId?: string | undefined | null, status: GQLSubscriptionStatus, startDate: string, endDate: string, stripeSubscriptionId?: string | undefined | null, stripePriceId?: string | undefined | null, mockPaymentStatus?: string | undefined | null, mockTransactionId?: string | undefined | null, isActive: boolean, daysUntilExpiry: number, createdAt: string, updatedAt: string, package: { __typename?: 'PackageTemplate', id: string, name: string, description?: string | undefined | null, priceNOK: number, duration: GQLSubscriptionDuration }, usedServices: Array<{ __typename?: 'ServiceUsage', id: string, serviceType: GQLServiceType, usedAt: string, quantity: number, metadata?: string | undefined | null }> }> };
+export type GQLGetAllSubscriptionsQuery = { __typename?: 'Query', getAllSubscriptions: Array<{ __typename?: 'UserSubscription', id: string, userId: string, packageId: string, trainerId?: string | undefined | null, status: GQLSubscriptionStatus, startDate: string, endDate: string, stripeSubscriptionId?: string | undefined | null, stripePriceId?: string | undefined | null, mockPaymentStatus?: string | undefined | null, mockTransactionId?: string | undefined | null, isActive: boolean, daysUntilExpiry: number, createdAt: string, updatedAt: string, package: { __typename?: 'PackageTemplate', id: string, name: string, description?: string | undefined | null, duration: GQLSubscriptionDuration }, usedServices: Array<{ __typename?: 'ServiceUsage', id: string, serviceType: GQLServiceType, usedAt: string, quantity: number, metadata?: string | undefined | null }> }> };
 
 export type GQLGetSubscriptionStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetSubscriptionStatsQuery = { __typename?: 'Query', getSubscriptionStats: { __typename?: 'SubscriptionStats', totalActiveSubscriptions: number, totalRevenue: number, monthlyRevenue: number, premiumUsers: number, trainerSubscriptions: number, packageStats: Array<{ __typename?: 'PackageStats', activeSubscriptions: number, totalRevenue: number, conversionRate: number, package: { __typename?: 'PackageTemplate', id: string, name: string, priceNOK: number, duration: GQLSubscriptionDuration } }> } };
+export type GQLGetSubscriptionStatsQuery = { __typename?: 'Query', getSubscriptionStats: { __typename?: 'SubscriptionStats', totalActiveSubscriptions: number, totalRevenue: number, monthlyRevenue: number, premiumUsers: number, trainerSubscriptions: number, packageStats: Array<{ __typename?: 'PackageStats', activeSubscriptions: number, totalRevenue: number, conversionRate: number, package: { __typename?: 'PackageTemplate', id: string, name: string, duration: GQLSubscriptionDuration } }> } };
 
 export type GQLGetTrainerRevenueQueryVariables = Exact<{
   trainerId: Scalars['ID']['input'];
 }>;
 
 
-export type GQLGetTrainerRevenueQuery = { __typename?: 'Query', getTrainerRevenue: { __typename?: 'TrainerRevenueStats', totalRevenue: number, monthlyRevenue: number, totalSubscriptions: number, activeSubscriptions: number, popularPackages: Array<{ __typename?: 'PackagePopularityStats', subscriptionCount: number, revenue: number, package: { __typename?: 'PackageTemplate', id: string, name: string, priceNOK: number, duration: GQLSubscriptionDuration } }> } };
+export type GQLGetTrainerRevenueQuery = { __typename?: 'Query', getTrainerRevenue: { __typename?: 'TrainerRevenueStats', totalRevenue: number, monthlyRevenue: number, totalSubscriptions: number, activeSubscriptions: number, popularPackages: Array<{ __typename?: 'PackagePopularityStats', subscriptionCount: number, revenue: number, package: { __typename?: 'PackageTemplate', id: string, name: string, duration: GQLSubscriptionDuration } }> } };
 
 export type GQLAdminUpdateSubscriptionStatusMutationVariables = Exact<{
   input: GQLAdminUpdateSubscriptionStatusInput;
@@ -12381,7 +12379,6 @@ export const GetMySubscriptionStatusDocument = `
       package {
         id
         name
-        priceNOK
         duration
       }
     }
@@ -12395,7 +12392,6 @@ export const GetMySubscriptionStatusDocument = `
       package {
         id
         name
-        priceNOK
         duration
       }
     }
@@ -12458,9 +12454,9 @@ export const GetActivePackageTemplatesDocument = `
     id
     name
     description
-    priceNOK
     duration
     isActive
+    stripePriceId
     trainerId
     services {
       id
@@ -12537,7 +12533,6 @@ export const GetMySubscriptionsDocument = `
       id
       name
       description
-      priceNOK
       duration
     }
     usedServices {
@@ -12715,7 +12710,6 @@ export const GetAllSubscriptionsDocument = `
       id
       name
       description
-      priceNOK
       duration
     }
     usedServices {
@@ -12785,7 +12779,6 @@ export const GetSubscriptionStatsDocument = `
       package {
         id
         name
-        priceNOK
         duration
       }
       activeSubscriptions
@@ -12849,7 +12842,6 @@ export const GetTrainerRevenueDocument = `
       package {
         id
         name
-        priceNOK
         duration
       }
       subscriptionCount

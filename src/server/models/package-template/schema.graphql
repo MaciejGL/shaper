@@ -4,9 +4,11 @@ type PackageTemplate {
   id: ID!
   name: String!
   description: String
-  priceNOK: Int!
   duration: SubscriptionDuration!
   isActive: Boolean!
+
+  # Stripe integration
+  stripePriceId: String
 
   # Who can offer this package (null = general premium)
   trainerId: ID

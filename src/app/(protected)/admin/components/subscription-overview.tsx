@@ -68,13 +68,6 @@ export function SubscriptionOverview() {
     filters: filters,
   })
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('no-NO', {
-      style: 'currency',
-      currency: 'NOK',
-    }).format(amount / 100)
-  }
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('no-NO', {
       year: 'numeric',
@@ -285,8 +278,7 @@ export function SubscriptionOverview() {
                             {subscription.package.name}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {subscription.package.duration} •{' '}
-                            {formatCurrency(subscription.package.priceNOK)}
+                            {subscription.package.duration} • From Stripe
                           </div>
                         </div>
                       </TableCell>
@@ -313,9 +305,7 @@ export function SubscriptionOverview() {
                         )}
                       </TableCell>
 
-                      <TableCell className="font-medium">
-                        {formatCurrency(subscription.package.priceNOK)}
-                      </TableCell>
+                      <TableCell className="font-medium">From Stripe</TableCell>
 
                       <TableCell className="text-right">
                         <DropdownMenu>

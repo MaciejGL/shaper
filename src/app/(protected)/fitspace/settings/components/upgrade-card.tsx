@@ -4,16 +4,16 @@ import { Sparkles } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
-import { formatPrice } from '@/types/subscription'
+import { useStripePrice } from '@/hooks/use-stripe-price'
 
 import { PremiumBenefitsList, UPGRADE_BENEFITS } from './premium-benefits-list'
 
 interface Package {
   id: string
   name: string
-  priceNOK: number
   duration: string
   description?: string
+  stripePriceId?: string | null
 }
 
 interface UpgradeCardProps {
@@ -21,6 +21,30 @@ interface UpgradeCardProps {
   yearlyPackage?: Package
   isUpgrading: boolean
   onUpgrade: (packageId?: string) => void
+}
+
+function PackagePriceDisplay({
+  stripePriceId,
+}: {
+  stripePriceId?: string | null
+}) {
+  const { usdPrice, isLoading, error } = useStripePrice(stripePriceId || null)
+
+  if (isLoading) {
+    return (
+      <div className="text-3xl font-semibold text-gray-400">Loading...</div>
+    )
+  }
+
+  if (error || !usdPrice) {
+    return (
+      <div className="text-3xl font-semibold text-gray-400">
+        Price unavailable
+      </div>
+    )
+  }
+
+  return <div className="text-3xl font-semibold">{usdPrice}</div>
 }
 
 export function UpgradeCard({
@@ -49,9 +73,9 @@ export function UpgradeCard({
           <Card className="h-full bg-card-on-card rounded-lg text-white mb-6 flex flex-col">
             <CardContent className="text-center grow flex-center flex-col">
               <h6 className="text-lg font-medium text-center">Monthly</h6>
-              <div className="text-3xl font-semibold">
-                {formatPrice(monthlyPackage.priceNOK)}
-              </div>
+              <PackagePriceDisplay
+                stripePriceId={monthlyPackage.stripePriceId}
+              />
             </CardContent>
             <CardFooter>
               <Button
@@ -77,18 +101,12 @@ export function UpgradeCard({
             </div>
             <CardContent className="text-center grow flex-center flex-col">
               <h6 className="text-lg font-medium">Yearly</h6>
-              <div className="text-3xl font-semibold">
-                {formatPrice(yearlyPackage.priceNOK)}
-              </div>
+              <PackagePriceDisplay
+                stripePriceId={yearlyPackage.stripePriceId}
+              />
               {monthlyPackage && (
                 <div className="text-xs text-green-600 font-medium mt-1">
-                  Save{' '}
-                  {Math.round(
-                    ((monthlyPackage.priceNOK * 12 - yearlyPackage.priceNOK) /
-                      (monthlyPackage.priceNOK * 12)) *
-                      100,
-                  )}
-                  %
+                  Save with annual billing
                 </div>
               )}
             </CardContent>
@@ -100,7 +118,7 @@ export function UpgradeCard({
                 loading={isUpgrading}
                 variant="gradient"
               >
-                Subscribe Yearly
+                Subscribe Annually
               </Button>
             </CardFooter>
           </Card>

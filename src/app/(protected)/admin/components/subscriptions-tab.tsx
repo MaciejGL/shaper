@@ -190,8 +190,7 @@ export function SubscriptionsTab() {
                       {packageStat.package.name}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {packageStat.package.duration} •{' '}
-                      {formatCurrency(packageStat.package.priceNOK)}
+                      {packageStat.package.duration} • Revenue from Stripe
                     </div>
                   </div>
                   <div className="text-right space-y-1">

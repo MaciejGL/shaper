@@ -16,7 +16,6 @@ query GetMySubscriptionStatus {
       package {
         id
         name
-        priceNOK
         duration
       }
     }
@@ -30,7 +29,6 @@ query GetMySubscriptionStatus {
       package {
         id
         name
-        priceNOK
         duration
       }
     }
@@ -50,9 +48,9 @@ query GetActivePackageTemplates($trainerId: ID) {
     id
     name
     description
-    priceNOK
     duration
     isActive
+    stripePriceId
     trainerId
     services {
       id
@@ -87,7 +85,6 @@ query GetMySubscriptions {
       id
       name
       description
-      priceNOK
       duration
     }
     usedServices {
@@ -141,7 +138,6 @@ query GetAllSubscriptions($filters: SubscriptionFilters) {
       id
       name
       description
-      priceNOK
       duration
     }
     usedServices {
@@ -168,7 +164,6 @@ query GetSubscriptionStats {
       package {
         id
         name
-        priceNOK
         duration
       }
       activeSubscriptions
@@ -189,7 +184,6 @@ query GetTrainerRevenue($trainerId: ID!) {
       package {
         id
         name
-        priceNOK
         duration
       }
       subscriptionCount

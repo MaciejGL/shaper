@@ -37,41 +37,22 @@ export async function getSubscriptionStats(
     },
   })
 
-  // Get all active subscriptions with packages for revenue calculation
-  const activeSubscriptions = await prisma.userSubscription.findMany({
+  // Calculate total revenue from successful billing records
+  const billingRevenue = await prisma.billingRecord.aggregate({
+    _sum: { amount: true },
+    where: { status: 'SUCCEEDED' },
+  })
+  const totalRevenue = billingRevenue._sum.amount || 0
+
+  // Calculate monthly revenue from successful billing records
+  const monthlyBillingRevenue = await prisma.billingRecord.aggregate({
+    _sum: { amount: true },
     where: {
-      status: SubscriptionStatus.ACTIVE,
-      endDate: {
-        gte: now,
-      },
-    },
-    include: {
-      package: true,
+      status: 'SUCCEEDED',
+      createdAt: { gte: startOfMonth, lte: endOfMonth },
     },
   })
-
-  // Calculate total revenue from active subscriptions
-  const totalRevenue = activeSubscriptions.reduce((sum, sub) => {
-    return sum + (sub.package.priceNOK || 0)
-  }, 0)
-
-  // Get monthly revenue (subscriptions created this month)
-  const monthlySubscriptions = await prisma.userSubscription.findMany({
-    where: {
-      status: SubscriptionStatus.ACTIVE,
-      createdAt: {
-        gte: startOfMonth,
-        lte: endOfMonth,
-      },
-    },
-    include: {
-      package: true,
-    },
-  })
-
-  const monthlyRevenue = monthlySubscriptions.reduce((sum, sub) => {
-    return sum + (sub.package.priceNOK || 0)
-  }, 0)
+  const monthlyRevenue = monthlyBillingRevenue._sum.amount || 0
 
   // Get unique premium users (users with active subscriptions)
   const premiumUsers = await prisma.userSubscription.groupBy({
@@ -145,23 +126,33 @@ export async function getPackageStats(
     },
   })
 
-  return packages.map((pkg) => {
-    const activeSubscriptions = pkg.subscriptions.length
-    const totalRevenue = activeSubscriptions * (pkg.priceNOK || 0)
+  return await Promise.all(
+    packages.map(async (pkg) => {
+      const activeSubscriptions = pkg.subscriptions.length
+      // Calculate revenue from billing records for this package
+      const packageBillingRevenue = await prisma.billingRecord.aggregate({
+        _sum: { amount: true },
+        where: {
+          status: 'SUCCEEDED',
+          subscription: { packageId: pkg.id },
+        },
+      })
+      const totalRevenue = packageBillingRevenue._sum.amount || 0
 
-    // Calculate conversion rate (simplified)
-    // This could be enhanced with more sophisticated tracking
-    const totalTrials = pkg._count.subscriptions
-    const conversionRate =
-      totalTrials > 0 ? (activeSubscriptions / totalTrials) * 100 : 0
+      // Calculate conversion rate (simplified)
+      // This could be enhanced with more sophisticated tracking
+      const totalTrials = pkg._count.subscriptions
+      const conversionRate =
+        totalTrials > 0 ? (activeSubscriptions / totalTrials) * 100 : 0
 
-    return {
-      package: new PackageTemplate(pkg, context),
-      activeSubscriptions,
-      totalRevenue,
-      conversionRate,
-    }
-  })
+      return {
+        package: new PackageTemplate(pkg, context),
+        activeSubscriptions,
+        totalRevenue,
+        conversionRate,
+      }
+    }),
+  )
 }
 
 /**
@@ -200,40 +191,52 @@ export async function getTrainerRevenue(
     (sub) => sub.status === SubscriptionStatus.ACTIVE && sub.endDate >= now,
   )
 
-  // Get monthly subscriptions
-  const monthlySubscriptions = allSubscriptions.filter(
-    (sub) => sub.createdAt >= startOfMonth,
-  )
-
-  // Calculate revenues
-  const totalRevenue = allSubscriptions.reduce((sum, sub) => {
-    return sum + (sub.package.priceNOK || 0)
-  }, 0)
-
-  const monthlyRevenue = monthlySubscriptions.reduce((sum, sub) => {
-    return sum + (sub.package.priceNOK || 0)
-  }, 0)
-
-  // Get package popularity stats
-  const packageCounts = allSubscriptions.reduce(
-    (acc, sub) => {
-      const packageId = sub.packageId
-      if (!acc[packageId]) {
-        acc[packageId] = {
-          package: sub.package,
-          count: 0,
-          revenue: 0,
-        }
-      }
-      acc[packageId].count++
-      acc[packageId].revenue += sub.package.priceNOK || 0
-      return acc
+  // Calculate revenues from billing records for this trainer
+  const trainerBillingRevenue = await prisma.billingRecord.aggregate({
+    _sum: { amount: true },
+    where: {
+      status: 'SUCCEEDED',
+      subscription: { trainerId },
     },
-    {} as Record<
-      string,
-      { package: PackageTemplateWithIncludes; count: number; revenue: number }
-    >,
-  )
+  })
+  const totalRevenue = trainerBillingRevenue._sum.amount || 0
+
+  const trainerMonthlyBillingRevenue = await prisma.billingRecord.aggregate({
+    _sum: { amount: true },
+    where: {
+      status: 'SUCCEEDED',
+      subscription: { trainerId },
+      createdAt: { gte: startOfMonth },
+    },
+  })
+  const monthlyRevenue = trainerMonthlyBillingRevenue._sum.amount || 0
+
+  // Get package popularity stats with revenue from billing records
+  const packageCounts: Record<
+    string,
+    { package: PackageTemplateWithIncludes; count: number; revenue: number }
+  > = {}
+
+  for (const sub of allSubscriptions) {
+    const packageId = sub.packageId
+    if (!packageCounts[packageId]) {
+      packageCounts[packageId] = {
+        package: sub.package,
+        count: 0,
+        revenue: 0,
+      }
+    }
+    packageCounts[packageId].count++
+    // Calculate revenue from billing records for this subscription
+    const subBillingRevenue = await prisma.billingRecord.aggregate({
+      _sum: { amount: true },
+      where: {
+        status: 'SUCCEEDED',
+        subscriptionId: sub.id,
+      },
+    })
+    packageCounts[packageId].revenue += subBillingRevenue._sum.amount || 0
+  }
 
   const popularPackages = Object.values(packageCounts)
     .map((stats) => ({

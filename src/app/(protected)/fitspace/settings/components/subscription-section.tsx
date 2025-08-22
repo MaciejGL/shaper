@@ -24,7 +24,6 @@ interface SubscriptionState {
     package?: {
       id: string
       name: string
-      priceNOK: number
       duration: string
     }
   }
@@ -105,7 +104,6 @@ export function SubscriptionSection() {
     premiumPackage: monthlyPackage
       ? {
           id: monthlyPackage.id,
-          priceNOK: monthlyPackage.priceNOK,
         }
       : undefined,
   })

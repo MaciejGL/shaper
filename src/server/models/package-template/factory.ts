@@ -55,7 +55,7 @@ export async function getActivePackageTemplates(
         select: { subscriptions: true },
       },
     },
-    orderBy: { priceNOK: 'asc' },
+    orderBy: { createdAt: 'desc' },
   })
 
   return templates.map((template) => new PackageTemplate(template, context))
@@ -143,7 +143,7 @@ export async function updatePackageTemplate(
       data: {
         name: templateData.name || undefined,
         description: templateData.description || undefined,
-        priceNOK: templateData.priceNOK || undefined,
+        // priceNOK removed - using Stripe pricing instead
         duration: (templateData.duration as SubscriptionDuration) || undefined,
         isActive: templateData.isActive || undefined,
       },

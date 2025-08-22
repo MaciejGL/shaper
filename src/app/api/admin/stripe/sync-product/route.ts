@@ -62,37 +62,14 @@ export async function POST(request: NextRequest) {
       where: { stripeProductId: product.id },
     })
 
-    // Handle multi-currency pricing (single price ID with multiple currencies)
-    const priceMapping: {
-      stripePriceIdNOK?: string
-      stripePriceIdEUR?: string
-      stripePriceIdUSD?: string
-      priceNOK?: number
-    } = {}
+    // Use the first active price (single price ID approach)
+    const stripePriceId = prices.data.length > 0 ? prices.data[0].id : null
 
-    if (prices.data.length === 1) {
-      // Multi-currency price (one price ID for all currencies) ✅ YOUR SETUP
-      const price = prices.data[0]
-      priceMapping.stripePriceIdNOK = price.id
-      priceMapping.stripePriceIdEUR = price.id
-      priceMapping.stripePriceIdUSD = price.id
-      priceMapping.priceNOK = price.unit_amount || 0
-    } else {
-      // Legacy approach (separate price IDs for each currency)
-      prices.data.forEach((price) => {
-        switch (price.currency.toUpperCase()) {
-          case 'NOK':
-            priceMapping.stripePriceIdNOK = price.id
-            priceMapping.priceNOK = price.unit_amount || 0
-            break
-          case 'EUR':
-            priceMapping.stripePriceIdEUR = price.id
-            break
-          case 'USD':
-            priceMapping.stripePriceIdUSD = price.id
-            break
-        }
-      })
+    if (!stripePriceId) {
+      return NextResponse.json(
+        { error: 'No active prices found for this product' },
+        { status: 400 },
+      )
     }
 
     let packageTemplate
@@ -110,7 +87,7 @@ export async function POST(request: NextRequest) {
           name: `${productNamePrefix}${product.name}`,
           description,
           isActive: product.active,
-          ...priceMapping,
+          stripePriceId,
         },
       })
     } else {
@@ -119,12 +96,10 @@ export async function POST(request: NextRequest) {
         data: {
           name: `${productNamePrefix}${product.name}`,
           description,
-          priceNOK:
-            priceMapping.priceNOK || (duration === 'MONTHLY' ? 14900 : 149000),
           duration,
           stripeProductId: product.id,
           isActive: product.active,
-          ...priceMapping,
+          stripePriceId,
         },
       })
     }
@@ -138,9 +113,9 @@ export async function POST(request: NextRequest) {
         name: packageTemplate.name,
         duration: packageTemplate.duration,
         stripeProductId: packageTemplate.stripeProductId,
+        stripePriceId: packageTemplate.stripePriceId,
       },
       prices: prices.data.length,
-      priceMapping,
       metadata: {
         packageType: product.metadata.packageType,
         duration: product.metadata.duration,

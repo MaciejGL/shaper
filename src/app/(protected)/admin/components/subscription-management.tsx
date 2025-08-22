@@ -50,10 +50,7 @@ import {
   useAdminExtendSubscriptionMutation,
   useAdminUpdateSubscriptionStatusMutation,
 } from '@/generated/graphql-client'
-import {
-  useBillingHistory,
-  useSubscriptionStatus,
-} from '@/hooks/use-subscription'
+import { useSubscriptionStatus } from '@/hooks/use-subscription'
 
 interface AdminAction {
   type: 'extend' | 'cancel' | 'activate' | 'update_status'
@@ -82,9 +79,6 @@ export function SubscriptionManagement() {
   // Use our existing hooks for user data
   const { data: userSubscriptionStatus, isLoading: loadingUserStatus } =
     useSubscriptionStatus(selectedUserId || undefined)
-  const { data: billingHistory, isLoading: loadingBilling } = useBillingHistory(
-    selectedUserId || undefined,
-  )
 
   const searchUser = () => {
     if (selectedUserId.trim()) {
@@ -203,13 +197,6 @@ export function SubscriptionManagement() {
     } catch (err) {
       console.error('Error opening Stripe portal:', err)
     }
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('no-NO', {
-      style: 'currency',
-      currency: 'NOK',
-    }).format(amount / 100)
   }
 
   const formatDate = (dateString: string) => {
@@ -363,11 +350,7 @@ export function SubscriptionManagement() {
                                 userSubscriptionStatus.subscription.package
                                   .duration
                               }{' '}
-                              •{' '}
-                              {formatCurrency(
-                                userSubscriptionStatus.subscription.package
-                                  .priceNOK,
-                              )}
+                              • From Stripe
                             </div>
                             <div className="text-sm text-muted-foreground mt-1">
                               {formatDate(
@@ -623,47 +606,9 @@ export function SubscriptionManagement() {
               <CardTitle>Billing History</CardTitle>
             </CardHeader>
             <CardContent>
-              {loadingBilling ? (
-                <div className="flex items-center justify-center py-8">
-                  <RefreshCw className="h-6 w-6 animate-spin mr-2" />
-                  Loading billing history...
-                </div>
-              ) : billingHistory?.records &&
-                billingHistory.records.length > 0 ? (
-                <div className="space-y-3">
-                  {billingHistory.records.slice(0, 5).map((record) => (
-                    <div
-                      key={record.id}
-                      className="flex items-center justify-between p-3 border rounded-lg"
-                    >
-                      <div>
-                        <div className="font-medium">{record.description}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {formatDate(record.createdAt)}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium">
-                          {formatCurrency(record.amount)}
-                        </div>
-                        {getStatusBadge(record.status)}
-                      </div>
-                    </div>
-                  ))}
-
-                  {billingHistory.records.length > 5 && (
-                    <div className="text-center py-2">
-                      <Button variant="outline" size="sm">
-                        View All ({billingHistory.records.length} records)
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  No billing history found for this user
-                </div>
-              )}
+              <p className="text-muted-foreground">
+                Billing history is now managed through Stripe Customer Portal.
+              </p>
             </CardContent>
           </Card>
         </div>

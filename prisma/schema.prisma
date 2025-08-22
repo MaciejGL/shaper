@@ -835,15 +835,12 @@ model PackageTemplate {
   id            String                @id @default(uuid())
   name          String                // "Training + Coaching", "Full Combo", etc.
   description   String?
-  priceNOK      Int                   // Price in Norwegian Kroner (øre)
   duration      SubscriptionDuration
   isActive      Boolean               @default(true)
   
   // Stripe integration
   stripeProductId    String?          // Maps to Stripe product
-  stripePriceIdNOK   String?          // Norwegian Kroner price ID
-  stripePriceIdEUR   String?          // Euro price ID
-  stripePriceIdUSD   String?          // USD price ID
+  stripePriceId      String?          // Single price ID (Stripe handles multi-currency)
   
   // Who can offer this package (null = general premium, specific = trainer package)
   trainerId     String?
@@ -862,6 +859,7 @@ model PackageTemplate {
   @@index([isActive])
   @@index([duration])
   @@index([stripeProductId])
+  @@index([stripePriceId])
 }
 
 model PackageService {

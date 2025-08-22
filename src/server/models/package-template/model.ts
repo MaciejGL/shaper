@@ -38,8 +38,8 @@ export default class PackageTemplate implements GQLPackageTemplate {
     return this.data.description
   }
 
-  get priceNOK() {
-    return this.data.priceNOK
+  get stripePriceId() {
+    return this.data.stripePriceId
   }
 
   get duration() {

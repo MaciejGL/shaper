@@ -11,14 +11,9 @@ import {
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { BillingStatus } from '@/generated/prisma/client'
-import {
-  useBillingHistory,
-  useSubscriptionStatus,
-} from '@/hooks/use-subscription'
+import { useSubscriptionStatus } from '@/hooks/use-subscription'
 
 import { AdminActions } from './admin-actions'
-import { BillingHistoryPreview } from './billing-history-preview'
 
 interface UserSubscriptionDetailsProps {
   userId: string
@@ -33,28 +28,6 @@ export function UserSubscriptionDetails({
 }: UserSubscriptionDetailsProps) {
   const { data: userSubscriptionStatus, isLoading: loadingUserStatus } =
     useSubscriptionStatus(userId)
-  const { data: billingHistory, isLoading: loadingBilling } =
-    useBillingHistory(userId)
-
-  // Transform billing history to match component expectations
-  const transformedBillingHistory = billingHistory
-    ? {
-        records: billingHistory.records.map((record) => ({
-          ...record,
-          type: 'SUBSCRIPTION' as const,
-          createdAt: record.paidAt || record.periodStart,
-        })),
-        summary: {
-          totalSpent: billingHistory.summary.totalPaid,
-          successfulPayments: billingHistory.records.filter(
-            (r) => r.status === BillingStatus.SUCCEEDED,
-          ).length,
-          failedPayments: billingHistory.records.filter(
-            (r) => r.status === BillingStatus.FAILED,
-          ).length,
-        },
-      }
-    : undefined
 
   const openStripeCustomerPortal = async () => {
     try {
@@ -76,13 +49,6 @@ export function UserSubscriptionDetails({
     } catch (err) {
       console.error('Error opening Stripe portal:', err)
     }
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('no-NO', {
-      style: 'currency',
-      currency: 'NOK',
-    }).format(amount / 100)
   }
 
   const formatDate = (dateString: string) => {
@@ -155,11 +121,7 @@ export function UserSubscriptionDetails({
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {userSubscriptionStatus.subscription.package.duration}{' '}
-                          •{' '}
-                          {formatCurrency(
-                            userSubscriptionStatus.subscription.package
-                              .priceNOK,
-                          )}
+                          • From Stripe
                         </div>
                         <div className="text-sm text-muted-foreground mt-1">
                           {formatDate(
@@ -222,14 +184,6 @@ export function UserSubscriptionDetails({
           )}
         </CardContent>
       </Card>
-
-      {/* Billing History */}
-      <BillingHistoryPreview
-        billingHistory={transformedBillingHistory}
-        isLoading={loadingBilling}
-        formatCurrency={formatCurrency}
-        formatDate={formatDate}
-      />
     </div>
   )
 }
