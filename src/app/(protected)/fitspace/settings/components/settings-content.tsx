@@ -1,18 +1,15 @@
 'use client'
 
-import { Bell, CreditCard, Shield, Sliders } from 'lucide-react'
+import { Bell, Shield, Sliders } from 'lucide-react'
 import Link from 'next/link'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-import { AccountSection } from './account-section'
+import { ExternalAccountManagement } from './external-account-management'
 import { NotificationSection } from './notification-section'
 import { PreferencesSection } from './preferences-section'
-import { SubscriptionSection } from './subscription-section'
 
-interface SettingsContentProps {}
-
-export function SettingsContent({}: SettingsContentProps) {
+export function SettingsContent() {
   return (
     <div className="space-y-8">
       {/* Preferences Section */}
@@ -55,28 +52,8 @@ export function SettingsContent({}: SettingsContentProps) {
         </CardContent>
       </Card>
 
-      {/* Subscription Section */}
-      <Card id="subscription-section" className="border-0 shadow-xl">
-        <CardHeader className="pb-6">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
-              <CreditCard className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <CardTitle className="text-xl">Subscription & Premium</CardTitle>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Upgrade to unlock advanced features
-              </p>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <SubscriptionSection />
-        </CardContent>
-      </Card>
-
-      {/* Account Management */}
-      <AccountSection />
+      {/* External Account Management */}
+      <ExternalAccountManagement />
 
       {/* Legal & Privacy Section */}
       <Card className="border-0 shadow-xl">
