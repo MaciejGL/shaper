@@ -34,7 +34,6 @@ export function SubscriptionActionButtons({
 }: SubscriptionActionButtonsProps) {
   const { type } = subscriptionState
 
-  // Use the customer portal hook
   const customerPortal = useCustomerPortal()
 
   const handleOpenCustomerPortal = async () => {
@@ -55,18 +54,12 @@ export function SubscriptionActionButtons({
 
   return (
     <div className="mt-4 pt-4">
-      {(type === 'active' ||
-        type === 'grace_period' ||
-        type === 'cancelled') && (
+      {type !== 'none' && (
         <div className="flex flex-col gap-3">
           <Button
             onClick={handleOpenCustomerPortal}
             variant={type === 'grace_period' ? 'default' : 'secondary'}
-            className={
-              type === 'grace_period'
-                ? 'w-full bg-orange-600 hover:bg-orange-700 text-white'
-                : 'w-full'
-            }
+            className={'w-full'}
             disabled={customerPortal.isPending}
             loading={customerPortal.isPending}
           >

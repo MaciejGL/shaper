@@ -4,34 +4,12 @@ import Stripe from 'stripe'
 import {
   BillingStatus,
   Currency,
+  Prisma,
   SubscriptionStatus,
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { STRIPE_WEBHOOK_EVENTS, SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'
-
-// Extended interfaces for Stripe webhook events
-interface ExpandedSubscription
-  extends Omit<Stripe.Subscription, 'current_period_end' | 'trial_end'> {
-  current_period_end: number
-  trial_end?: number | null
-}
-
-interface ExpandedInvoice
-  extends Omit<
-    Stripe.Invoice,
-    | 'subscription'
-    | 'period_start'
-    | 'period_end'
-    | 'amount_paid'
-    | 'amount_due'
-  > {
-  subscription?: string | Stripe.Subscription
-  period_start?: number
-  period_end?: number
-  amount_paid?: number
-  amount_due?: number
-}
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-07-30.basil',
@@ -43,9 +21,6 @@ export async function POST(request: NextRequest) {
   try {
     const signature = request.headers.get('stripe-signature')
     const body = await request.text()
-
-    // Basic webhook info
-    console.info(`🔗 Webhook received: ${body.length} bytes`)
 
     if (!signature) {
       console.error('Missing stripe-signature header')
@@ -69,60 +44,50 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid signature' }, { status: 400 })
     }
 
-    console.info(`✅ Received webhook event: ${event.type}`)
+    if (process.env.NODE_ENV === 'development') {
+      console.info(`✅ Received webhook event: ${event.type}`)
+    }
 
     // Handle the event
     switch (event.type) {
       case STRIPE_WEBHOOK_EVENTS.SUBSCRIPTION_CREATED:
-        await handleSubscriptionCreated(
-          event.data.object as Stripe.Subscription,
-        )
+        await handleSubscriptionCreated(event.data.object)
         break
 
       case STRIPE_WEBHOOK_EVENTS.SUBSCRIPTION_UPDATED:
-        await handleSubscriptionUpdated(
-          event.data.object as Stripe.Subscription,
-        )
+        await handleSubscriptionUpdated(event.data.object)
         break
 
       case STRIPE_WEBHOOK_EVENTS.SUBSCRIPTION_DELETED:
-        await handleSubscriptionDeleted(
-          event.data.object as Stripe.Subscription,
-        )
+        await handleSubscriptionDeleted(event.data.object)
         break
 
       case STRIPE_WEBHOOK_EVENTS.PAYMENT_SUCCEEDED:
-        await handlePaymentSucceeded(event.data.object as Stripe.Invoice)
+        await handlePaymentSucceeded(event.data.object)
         break
 
       case STRIPE_WEBHOOK_EVENTS.PAYMENT_FAILED:
-        await handlePaymentFailed(event.data.object as Stripe.Invoice)
+        await handlePaymentFailed(event.data.object)
         break
 
       case STRIPE_WEBHOOK_EVENTS.CHECKOUT_COMPLETED:
-        await handleCheckoutCompleted(
-          event.data.object as Stripe.Checkout.Session,
-        )
+        await handleCheckoutCompleted(event.data.object)
         break
 
       case STRIPE_WEBHOOK_EVENTS.PAYMENT_INTENT_SUCCEEDED:
-        await handlePaymentIntentSucceeded(
-          event.data.object as Stripe.PaymentIntent,
-        )
+        await handlePaymentIntentSucceeded(event.data.object)
         break
 
       case STRIPE_WEBHOOK_EVENTS.PAYMENT_INTENT_FAILED:
-        await handlePaymentIntentFailed(
-          event.data.object as Stripe.PaymentIntent,
-        )
+        await handlePaymentIntentFailed(event.data.object)
         break
 
       case STRIPE_WEBHOOK_EVENTS.TRIAL_WILL_END:
-        await handleTrialWillEnd(event.data.object as Stripe.Subscription)
+        await handleTrialWillEnd(event.data.object)
         break
 
       case STRIPE_WEBHOOK_EVENTS.CUSTOMER_DELETED:
-        await handleCustomerDeleted(event.data.object as Stripe.Customer)
+        await handleCustomerDeleted(event.data.object)
         break
 
       default:
@@ -157,11 +122,26 @@ async function findPackageByStripePriceId(priceId: string) {
 
 // Subscription Events
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
-  console.info('🎉 Subscription created:', subscription.id)
-
   try {
     const customerId = subscription.customer as string
     const priceId = subscription.items.data[0]?.price.id
+    const startDate = new Date(
+      subscription.items.data[0].current_period_start * 1000,
+    )
+    const endDate = new Date(
+      subscription.items.data[0].current_period_end * 1000,
+    )
+
+    const isTrial =
+      subscription.trial_end !== null && subscription.trial_end !== undefined
+    const trialStart =
+      isTrial && subscription.trial_start
+        ? new Date(subscription.trial_start * 1000)
+        : null
+    const trialEnd =
+      isTrial && subscription.trial_end
+        ? new Date(subscription.trial_end * 1000)
+        : null
 
     if (!priceId) {
       console.error('No price ID found in subscription')
@@ -184,18 +164,6 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       return
     }
 
-    // Check if subscription has a trial
-    const hasTrialPeriod =
-      subscription.trial_end != null &&
-      subscription.trial_end > subscription.created
-    const trialStart = hasTrialPeriod
-      ? new Date(subscription.created * 1000)
-      : null
-    const trialEnd =
-      hasTrialPeriod && subscription.trial_end
-        ? new Date(subscription.trial_end * 1000)
-        : null
-
     // Check if this is a reactivation
     const isReactivation = subscription.metadata?.isReactivation === 'true'
     const previousSubscriptionId = subscription.metadata?.previousSubscriptionId
@@ -209,13 +177,8 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
         },
         data: {
           status: SubscriptionStatus.CANCELLED,
-          // Add a note that this was superseded by reactivation
         },
       })
-
-      console.info(
-        `🔄 Marked previous subscription ${previousSubscriptionId} as superseded by reactivation`,
-      )
     }
 
     // Create new subscription record
@@ -225,23 +188,17 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
         packageId: packageTemplate.id,
         trainerId: packageTemplate.trainerId,
         status: SubscriptionStatus.ACTIVE,
-        startDate: new Date(subscription.created * 1000),
-        endDate: new Date(
-          (subscription as ExpandedSubscription).current_period_end * 1000,
-        ),
+        startDate,
+        endDate,
         stripeSubscriptionId: subscription.id,
         stripePriceId: priceId,
 
-        // Trial period setup (14 days)
+        // Trial period setup
         trialStart,
         trialEnd,
-        isTrialActive: hasTrialPeriod || false,
+        isTrialActive: isTrial || false,
       },
     })
-
-    console.info(
-      `✅ ${isReactivation ? 'Reactivated' : 'New'} subscription record created for user ${user.id}`,
-    )
 
     // Send welcome email
     if (user.email) {
@@ -263,8 +220,6 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  console.info('📝 Subscription updated:', subscription.id)
-
   try {
     const status =
       subscription.status === 'active'
@@ -279,9 +234,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       where: { stripeSubscriptionId: subscription.id },
       data: {
         status,
-        endDate: new Date(
-          (subscription as ExpandedSubscription).current_period_end * 1000,
-        ),
+        endDate: new Date(subscription.items.data[0].current_period_end * 1000),
       },
     })
 
@@ -292,8 +245,6 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  console.info('❌ Subscription deleted:', subscription.id)
-
   try {
     // Get subscription details before updating
     const userSubscription = await prisma.userSubscription.findFirst({
@@ -312,24 +263,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       },
     })
 
-    console.info(`✅ Subscription ${subscription.id} marked as CANCELLED`)
-
     // Send cancellation email
     if (userSubscription?.user.email && userSubscription.package) {
       try {
         await sendEmail.subscriptionCancelled(userSubscription.user.email, {
           userName: userSubscription.user.profile?.firstName,
           packageName: userSubscription.package.name,
-          endDate: userSubscription.endDate.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          }),
+          endDate: userSubscription.endDate.toISOString(),
           reactivateUrl: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
         })
-        console.info(
-          `📧 Cancellation email sent to ${userSubscription.user.email}`,
-        )
       } catch (emailError) {
         console.error('Failed to send cancellation email:', emailError)
       }
@@ -340,35 +282,40 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 // Payment Events
-async function handlePaymentSucceeded(invoice: ExpandedInvoice) {
-  console.info('💰 Payment succeeded:', invoice.id)
-
+async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   try {
-    // Handle both expanded and non-expanded subscription references
-    const subscriptionId =
-      typeof invoice.subscription === 'string'
-        ? invoice.subscription
-        : invoice.subscription?.id
+    // Handle subscription reference from invoice using proper Stripe types
+    const subscriptionId = invoice.id
 
     if (subscriptionId) {
-      // Update subscription status, extend period, and clear grace period
+      // Update subscription status and clear grace period
       const subscription = await prisma.userSubscription.findFirst({
         where: { stripeSubscriptionId: subscriptionId },
       })
 
       if (subscription) {
+        // Prepare update data
+        const updateData: Prisma.UserSubscriptionUpdateInput = {
+          status: SubscriptionStatus.ACTIVE,
+
+          // Clear grace period and reset retry count
+          isInGracePeriod: false,
+          gracePeriodEnd: null,
+          failedPaymentRetries: 0,
+          lastPaymentAttempt: new Date(),
+        }
+
+        // DON'T update endDate for trial subscriptions
+        // Trial invoice period_end is the same as period_start (setup date)
+        // The subscription.created webhook already set the correct trial endDate
+        const invoicePeriodEnd = invoice.period_end
+        if (!subscription.isTrialActive && invoicePeriodEnd) {
+          updateData.endDate = new Date(invoicePeriodEnd * 1000)
+        }
+
         await prisma.userSubscription.update({
           where: { id: subscription.id },
-          data: {
-            status: SubscriptionStatus.ACTIVE,
-            endDate: new Date((invoice.period_end ?? Date.now() / 1000) * 1000),
-
-            // Clear grace period and reset retry count
-            isInGracePeriod: false,
-            gracePeriodEnd: null,
-            failedPaymentRetries: 0,
-            lastPaymentAttempt: new Date(),
-          },
+          data: updateData,
         })
 
         // Create billing record
@@ -380,12 +327,8 @@ async function handlePaymentSucceeded(invoice: ExpandedInvoice) {
               (invoice.currency?.toUpperCase() as Currency) ?? Currency.USD,
             status: BillingStatus.SUCCEEDED,
             stripeInvoiceId: invoice.id,
-            periodStart: new Date(
-              (invoice.period_start ?? Date.now() / 1000) * 1000,
-            ),
-            periodEnd: new Date(
-              (invoice.period_end ?? Date.now() / 1000) * 1000,
-            ),
+            periodStart: new Date(invoice.period_start * 1000),
+            periodEnd: new Date(invoice.period_end * 1000),
             description: `Payment for ${invoice.description || 'subscription'}`,
           },
         })
@@ -401,15 +344,10 @@ async function handlePaymentSucceeded(invoice: ExpandedInvoice) {
   }
 }
 
-async function handlePaymentFailed(invoice: ExpandedInvoice) {
-  console.info('💸 Payment failed:', invoice.id)
-
+async function handlePaymentFailed(invoice: Stripe.Invoice) {
   try {
-    // Handle both expanded and non-expanded subscription references
-    const subscriptionId =
-      typeof invoice.subscription === 'string'
-        ? invoice.subscription
-        : invoice.subscription?.id
+    // Handle subscription reference from invoice using proper Stripe types
+    const subscriptionId = invoice.id
 
     if (subscriptionId) {
       // Find the subscription and implement grace period + dunning logic
@@ -448,20 +386,12 @@ async function handlePaymentFailed(invoice: ExpandedInvoice) {
               (invoice.currency?.toUpperCase() as Currency) ?? Currency.USD,
             status: BillingStatus.FAILED,
             stripeInvoiceId: invoice.id,
-            periodStart: new Date(
-              (invoice.period_start ?? Date.now() / 1000) * 1000,
-            ),
-            periodEnd: new Date(
-              (invoice.period_end ?? Date.now() / 1000) * 1000,
-            ),
+            periodStart: new Date(invoice.period_start * 1000),
+            periodEnd: new Date(invoice.period_end * 1000),
             description: `Failed payment for ${invoice.description || 'subscription'}`,
             failureReason: `Payment attempt ${newRetryCount} failed`,
           },
         })
-
-        console.info(
-          `⚠️ Subscription ${subscriptionId} set to PENDING with 3-day grace period (attempt ${newRetryCount})`,
-        )
 
         // Dunning management: Cancel subscription after too many failures
         if (newRetryCount >= SUBSCRIPTION_CONFIG.MAX_PAYMENT_RETRIES) {
@@ -536,8 +466,6 @@ async function handlePaymentFailed(invoice: ExpandedInvoice) {
 
 // One-time Purchase Events
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  console.info('🛒 Checkout completed:', session.id)
-
   try {
     // Handle one-time package purchases (for trainer services)
     if (session.mode === 'payment' && session.customer) {
@@ -561,8 +489,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 async function handlePaymentIntentSucceeded(
   paymentIntent: Stripe.PaymentIntent,
 ) {
-  console.info('✅ Payment intent succeeded:', paymentIntent.id)
-
   try {
     // Handle successful one-time payments
     // This complements checkout.session.completed for payment intent flows
@@ -576,8 +502,6 @@ async function handlePaymentIntentSucceeded(
 }
 
 async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
-  console.info('❌ Payment intent failed:', paymentIntent.id)
-
   try {
     // Handle failed one-time payments
     console.info(`❌ Payment intent ${paymentIntent.id} failed`)
@@ -591,7 +515,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 
 // Trial Events
 async function handleTrialWillEnd(subscription: Stripe.Subscription) {
-  console.info('⏰ Trial will end:', subscription.id)
+  console.info('\n\n⏰ Trial will end:\n\n', subscription)
 
   try {
     // Find the subscription in our database

@@ -44,11 +44,7 @@ export function PremiumBenefitsCard({
 
   return (
     <div className="space-y-6">
-      <h4 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-        {displayInfo.title}
-      </h4>
-
-      <Card variant="tertiary">
+      <Card variant="secondary">
         <CardContent>
           {/* Header */}
           <div className="flex items-center space-x-3 mb-4">
@@ -114,7 +110,7 @@ const getDisplayInfo = (
   switch (subscriptionState.type) {
     case 'trial':
       return {
-        title: 'Premium Trial Active',
+        title: 'Premium Trial - Active',
         icon: Clock,
         iconColor: cn('bg-blue-500'),
         textColor: cn('text-blue-900 dark:text-blue-100'),
@@ -126,7 +122,7 @@ const getDisplayInfo = (
       }
     case 'active':
       return {
-        title: 'Premium Benefits Active',
+        title: 'Premium Benefits - Active',
         icon: Crown,
         iconColor: cn('bg-green-500'),
         textColor: cn('text-green-900 dark:text-green-100'),
