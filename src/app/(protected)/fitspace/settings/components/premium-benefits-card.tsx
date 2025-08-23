@@ -4,7 +4,6 @@ import { formatDate } from 'date-fns'
 import { AlertTriangle, Clock, Crown } from 'lucide-react'
 
 import { BadgeProps } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 import { PREMIUM_BENEFITS, PremiumBenefitsList } from './premium-benefits-list'
@@ -44,52 +43,50 @@ export function PremiumBenefitsCard({
 
   return (
     <div className="space-y-6">
-      <Card variant="secondary">
-        <CardContent>
-          {/* Header */}
-          <div className="flex items-center space-x-3 mb-4">
-            <div
-              className={cn(
-                'w-10 h-10 rounded-xl flex items-center justify-center',
-                displayInfo.iconColor,
-              )}
-            >
-              <StatusIcon className="w-5 h-5 text-white" />
-            </div>
-            <h5 className={cn('text-lg font-semibold', displayInfo.textColor)}>
-              {displayInfo.title}
-            </h5>
+      <div>
+        {/* Header */}
+        <div className="flex items-center space-x-3 mb-4">
+          <div
+            className={cn(
+              'size-10 rounded-xl flex items-center justify-center shrink-0 self-start',
+              displayInfo.iconColor,
+            )}
+          >
+            <StatusIcon className="w-5 h-5 text-white" />
           </div>
+          <h5 className={cn('text-lg font-semibold', displayInfo.textColor)}>
+            {displayInfo.title}
+          </h5>
+        </div>
 
-          {/* Notice */}
-          {displayInfo.notice && (
-            <div className={cn('mb-4 p-3 rounded-lg', displayInfo.bgColor)}>
-              <p className={cn('text-sm font-medium', displayInfo.textColor)}>
-                {displayInfo.notice}
-              </p>
-            </div>
-          )}
-
-          {/* Benefits List */}
-          <PremiumBenefitsList
-            benefits={PREMIUM_BENEFITS}
-            variant={displayInfo.benefitsVariant}
-          />
-
-          {/* Status Information */}
-          <div className={cn('mt-4 pt-4 border-t', displayInfo.borderColor)}>
-            <p className={cn('text-sm', displayInfo.textColor)}>
-              {displayInfo.statusText}
+        {/* Notice */}
+        {displayInfo.notice && (
+          <div className={cn('mb-4 p-3 rounded-lg', displayInfo.bgColor)}>
+            <p className={cn('text-sm font-medium', displayInfo.textColor)}>
+              {displayInfo.notice}
             </p>
           </div>
+        )}
 
-          {/* Action Buttons */}
-          <SubscriptionActionButtons
-            subscriptionState={subscriptionState}
-            userId={userId}
-          />
-        </CardContent>
-      </Card>
+        {/* Benefits List */}
+        <PremiumBenefitsList
+          benefits={PREMIUM_BENEFITS}
+          variant={displayInfo.benefitsVariant}
+        />
+
+        {/* Status Information */}
+        <div className={cn('mt-4 pt-4', displayInfo.borderColor)}>
+          <p className={cn('text-sm', displayInfo.textColor)}>
+            {displayInfo.statusText}
+          </p>
+        </div>
+
+        {/* Action Buttons */}
+        <SubscriptionActionButtons
+          subscriptionState={subscriptionState}
+          userId={userId}
+        />
+      </div>
     </div>
   )
 }

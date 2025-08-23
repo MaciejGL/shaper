@@ -196,7 +196,7 @@ export function AccountSection({}: AccountSectionProps) {
         {/* Reset Account Data */}
         <CardHeader>
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center">
+            <div className="size-10 bg-gradient-to-br from-sky-500 to-sky-600 rounded-xl flex items-center justify-center shrink-0 self-start">
               <RotateCcw className="size-5 text-white" />
             </div>
             <div>
@@ -236,7 +236,7 @@ export function AccountSection({}: AccountSectionProps) {
       <Card className="border-0 shadow-xl bg-card">
         <CardHeader>
           <div className="flex items-center space-x-3">
-            <div className="size-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center flex-shrink-0">
+            <div className="size-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shrink-0 self-start">
               <Trash2 className="size-5 text-white" />
             </div>
             <div>

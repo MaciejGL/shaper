@@ -1,0 +1,27 @@
+---
+description: Project-wide conventions for Hypertro/Shaper. Keep code lean, typed, and consistent.
+globs:
+  - src/**
+  - prisma/**/*
+  - expo-app/**
+alwaysApply: true
+---
+
+- Use existing patterns and utilities before writing new code.
+- Keep edits scoped; do not change unrelated UI or behavior.
+- Split large components into smaller ones; keep files focused. Prefer multiple files over one big file.
+- Avoid `any`. Use existing types (e.g., from `src/generated`, local types) and prefer enums for reusable discriminants.
+- If logic repeats across files, extract a util in a dedicated file rather than duplicating.
+- Avoid index re-exports for components. Import from the specific file path.
+- Respect existing tailwind and global theme tokens. Prefer Tailwind classes over inline styles. Consult `@src/app/globals.css`.
+- For Next.js app dir:
+  - Server Components by default; only add `use client` when truly needed.
+  - Use route-level `layout.tsx` for shared UI/shell; do not re-define fonts/metadata per page.
+- Error handling:
+  - Reuse existing patterns; client mutations should surface errors through standard toasts/snackbar when relevant.
+- Security and auth:
+  - Use existing auth/util helpers in `src/lib` and contexts rather than rolling new logic.
+- Never run schema migration commands via the agent. Leave DB migrations to dedicated workflows.
+
+@src/app/layout.tsx
+@src/app/globals.css

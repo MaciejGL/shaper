@@ -1,0 +1,74 @@
+---
+description: Data access patterns with GraphQL and React Query.
+globs:
+  - src/lib/**/*.ts
+  - src/generated/**/*.ts
+  - src/app/**/*
+  - src/hooks/**/*.ts
+alwaysApply: false
+---
+
+## GraphQL Codegen Patterns
+
+- **Generated hooks**: Use generated React Query hooks from `src/generated/graphql-client.ts`:
+  - Queries: `useGetExampleQuery(variables, options)`
+  - Mutations: `useCreateExampleMutation()`
+  - Infinite queries: `useGetExampleInfiniteQuery()` (when configured)
+- **Generated types**: All types prefixed with `GQL` (e.g., `GQLUser`, `GQLCreateUserInput`)
+- **Query keys**: Use exposed `.getKey()` method: `useGetExampleQuery.getKey({ id })`
+- **Fetcher functions**: Use exposed fetcher for manual calls: `useGetExampleQuery.fetcher()`
+
+## Server vs Client Data Fetching
+
+### Server Components (SSR/SSG)
+
+- Use `gqlServerFetch<TData, TVariables>(query, variables, options)`
+- Handles cookies and internal API routing automatically
+- Returns `{ data, error }` structure for error handling
+
+### Client Components
+
+- **Prefer generated hooks**: `useGetExampleQuery()` over manual `gqlFetch`
+- **Query options**: Configure `staleTime`, `enabled`, `refetchOnWindowFocus` as needed
+- **Optimistic updates**: Use `useOptimisticMutation` from `@/lib/optimistic-mutations`
+- **Debounced mutations**: Use `useDebouncedMutation` for rapid user input (forms, typing)
+
+## Advanced Patterns
+
+### Batch Queries
+
+- Prefer batch queries over multiple individual calls (see `useWorkoutNotesBatch`)
+- Use `useMemo` to transform batch results into easy-to-use maps
+
+### Query Invalidation
+
+- Use `useDebouncedInvalidation` to prevent excessive refetches
+- Target specific query keys, avoid broad invalidations
+- Use `.getKey()` method for precise invalidation: `queryClient.invalidateQueries({ queryKey })`
+
+### Error Handling
+
+- Let shared query client handle global mutation errors (toasts)
+- Handle specific errors in components when needed
+- Use `onError` callbacks for cleanup or specific error states
+
+### Performance
+
+- Use `staleTime` for caching (e.g., `5 * 60 * 1000` for 5 minutes)
+- Implement optimistic updates for better UX
+- Debounce rapid mutations (form inputs, auto-save)
+
+## Do Not
+
+- Fetch GraphQL endpoint directly with `fetch`
+- Use `any` types; leverage generated `GQL*` types
+- Create manual query keys; use `.getKey()` methods
+- Duplicate global error handling
+
+@src/lib/graphql.ts
+@src/lib/gqlServerFetch.ts
+@src/lib/get-query-client.ts
+@src/generated/graphql-client.ts
+@src/generated/graphql-server.ts
+@src/app/shared-gql
+@codegen.ts

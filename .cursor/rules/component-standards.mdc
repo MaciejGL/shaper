@@ -1,0 +1,27 @@
+---
+description: Component standards and structure for React components and Next.js routes.
+globs:
+  - src/components/**/*.tsx
+  - src/app/**/*.tsx
+alwaysApply: false
+---
+
+- Component structure:
+  - Define `Props` interface at the top, prefer `type`/`interface` with exact fields; no `any`.
+  - Use named exports; avoid default exports.
+  - Keep components small; extract subcomponents into separate files under the same folder.
+  - Co-locate component-specific helpers next to the component (not in global utils) unless reused elsewhere.
+- Styling:
+  - Use Tailwind classes; prefer tokens from `globals.css` theme. Don't introduce ad-hoc CSS unless necessary.
+- UI building blocks:
+  - Prefer existing primitives from `src/components/ui/*` (e.g., `button`, `input`, `dialog`, `tabs`, `dropdown-menu`, `sheet`, `select`, `calendar`, etc.).
+  - Do not add a new primitive if a similar one exists; compose existing primitives.
+- Client vs server:
+  - Route components are Server Components by default. Add `use client` only for interactivity.
+- Accessibility:
+  - Use accessible Radix-based primitives (dialogs, popovers, menus). Ensure labels and aria-\* when needed.
+
+Examples (structure):
+
+- Props first, named export, small and focused
+- Use `@/components/ui/button` over custom buttons

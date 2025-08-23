@@ -58,7 +58,7 @@ export function UpgradeCard({
       {/* Benefits Overview */}
       <div className="bg-card-on-card p-6 rounded-lg text-white mb-6">
         <div className="flex items-center space-x-3 mb-4">
-          <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center">
+          <div className="size-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shrink-0 self-start">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <h5 className="text-lg font-bold">Premium Features</h5>
