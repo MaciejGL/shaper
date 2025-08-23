@@ -19,7 +19,7 @@ export function ReturnToApp({ variant = 'complete' }: ReturnToAppProps) {
     } else {
       // Try deeplink first, fallback to web
       try {
-        window.location.href = 'hypertro://settings'
+        window.location.href = 'hypertro://fitspace/settings'
         // Fallback to web app after short delay
         setTimeout(() => {
           window.location.href = `${window.location.origin}/fitspace/settings`
