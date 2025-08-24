@@ -24,6 +24,7 @@ import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
 import { AnimatedLogo, AnimatedLogoText } from '../animated-logo'
+import { useMobileApp } from '../mobile-app-bridge'
 import { Button } from '../ui/button'
 import { ButtonLink } from '../ui/button-link'
 import {
@@ -216,8 +217,36 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
 }
 
 function ClientNavbar({ user }: { user?: UserWithSession | null }) {
+  const { isNativeApp } = useMobileApp()
   const [isOpen, setIsOpen] = useState(false)
   const isProduction = process.env.NODE_ENV === 'production'
+
+  const handleOpenAccountManagement = () => {
+    const accountManagementUrl = `${window.location.origin}/account-management`
+
+    if (isNativeApp) {
+      // Force external browser opening for native app
+      const opened = window.open(
+        accountManagementUrl,
+        '_blank',
+        'noopener,noreferrer,external=true',
+      )
+
+      if (!opened) {
+        // Fallback: create link element
+        const link = document.createElement('a')
+        link.href = accountManagementUrl
+        link.target = '_blank'
+        link.rel = 'noopener noreferrer external'
+        link.style.display = 'none'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+    } else {
+      window.open(accountManagementUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -294,6 +323,14 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
               href={CLIENT_LINKS.settings.href}
               icon={<Settings className="size-4" />}
               label={CLIENT_LINKS.settings.label}
+            />
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <NavLink
+              href="#"
+              icon={<Settings className="size-4" />}
+              label={CLIENT_LINKS.accountManagement.label}
+              onClick={handleOpenAccountManagement}
             />
           </DropdownMenuItem>
 

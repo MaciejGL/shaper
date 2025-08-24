@@ -1,71 +1,22 @@
-# Get current user's subscription status and limits
+# Quick subscription status check - most important query
 query GetMySubscriptionStatus {
   getMySubscriptionStatus {
     hasPremium
-    trainingPlanLimit
+    trainerId
     canAccessPremiumTrainingPlans
     canAccessPremiumExercises
     canAccessMealPlans
-    activeSubscriptions {
-      id
-      status
-      startDate
-      endDate
-      isActive
-      daysUntilExpiry
-      package {
-        id
-        name
-        duration
-      }
-    }
-    cancelledSubscriptions {
-      id
-      status
-      startDate
-      endDate
-      isActive
-      daysUntilExpiry
-      package {
-        id
-        name
-        duration
-      }
-    }
-    usageTrackers {
-      serviceType
-      usedThisMonth
-      allowedPerMonth
-      remainingUsage
-      nextResetDate
-    }
+    subscriptionEndDate
+    isInGracePeriod
   }
 }
 
-# Get available package templates for subscription
-query GetActivePackageTemplates($trainerId: ID) {
-  getActivePackageTemplates(trainerId: $trainerId) {
-    id
-    name
-    description
-    duration
-    isActive
-    stripePriceId
-    trainerId
-    services {
-      id
-      serviceType
-      quantity
-    }
-
-    activeSubscriptionCount
-    totalRevenue
-    createdAt
-    updatedAt
-  }
+# Simple premium access check (boolean only)
+query CheckPremiumAccess {
+  checkPremiumAccess
 }
 
-# Get user's subscriptions
+# Basic subscription info (no complex usage tracking)
 query GetMySubscriptions {
   getMySubscriptions {
     id
@@ -77,141 +28,96 @@ query GetMySubscriptions {
     endDate
     stripeSubscriptionId
     stripePriceId
-    mockPaymentStatus
-    mockTransactionId
     isActive
     daysUntilExpiry
-    package {
+    packageId
+    trainer {
       id
       name
-      description
-      duration
-    }
-    usedServices {
-      id
-      serviceType
-      usedAt
-      quantity
-      metadata
+      email
     }
     createdAt
     updatedAt
   }
 }
 
-# Check premium access (quick check)
-query CheckPremiumAccess {
-  checkPremiumAccess
+# Service delivery tracking (replaces complex usage tracking)
+query GetMyServiceDeliveries($status: DeliveryStatus) {
+  getMyServiceDeliveries(status: $status) {
+    id
+    serviceType
+    packageName
+    quantity
+    status
+    deliveredAt
+    deliveryNotes
+    trainer {
+      id
+      name
+      email
+    }
+    createdAt
+    updatedAt
+  }
 }
 
-# Track service usage
-mutation TrackServiceUsage($input: TrackServiceUsageInput!) {
-  trackServiceUsage(input: $input) {
-    success
-    error
-    remainingUsage
+# Trainer: Get deliveries to manage
+query GetTrainerDeliveries($trainerId: ID!, $status: DeliveryStatus) {
+  getTrainerDeliveries(trainerId: $trainerId, status: $status) {
+    id
+    serviceType
+    packageName
+    quantity
+    status
+    deliveredAt
+    deliveryNotes
+    client {
+      id
+      name
+      email
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+# Update service delivery status
+mutation UpdateServiceDelivery(
+  $deliveryId: ID!
+  $status: DeliveryStatus!
+  $notes: String
+) {
+  updateServiceDelivery(
+    deliveryId: $deliveryId
+    status: $status
+    notes: $notes
+  ) {
+    id
+    status
+    deliveredAt
+    deliveryNotes
+    updatedAt
+  }
+}
+
+# Get active package templates for subscription upgrade
+query GetActivePackageTemplates($trainerId: ID) {
+  getActivePackageTemplates(trainerId: $trainerId) {
+    id
+    name
+    description
+    duration
+    isActive
+    stripeProductId
+    stripePriceId
+    trainerId
+    serviceType
+    createdAt
+    updatedAt
   }
 }
 
 # Assign training plan template to current user
 mutation AssignTemplateToSelf($planId: ID!) {
   assignTemplateToSelf(planId: $planId)
-}
-
-# Admin Queries - Get all subscriptions with filters
-query GetAllSubscriptions($filters: SubscriptionFilters) {
-  getAllSubscriptions(filters: $filters) {
-    id
-    userId
-    packageId
-    trainerId
-    status
-    startDate
-    endDate
-    stripeSubscriptionId
-    stripePriceId
-    mockPaymentStatus
-    mockTransactionId
-    isActive
-    daysUntilExpiry
-    package {
-      id
-      name
-      description
-      duration
-    }
-    usedServices {
-      id
-      serviceType
-      usedAt
-      quantity
-      metadata
-    }
-    createdAt
-    updatedAt
-  }
-}
-
-# Admin Query - Get subscription statistics
-query GetSubscriptionStats {
-  getSubscriptionStats {
-    totalActiveSubscriptions
-    totalRevenue
-    monthlyRevenue
-    premiumUsers
-    trainerSubscriptions
-    packageStats {
-      package {
-        id
-        name
-        duration
-      }
-      activeSubscriptions
-      totalRevenue
-      conversionRate
-    }
-  }
-}
-
-# Admin Query - Get trainer revenue stats
-query GetTrainerRevenue($trainerId: ID!) {
-  getTrainerRevenue(trainerId: $trainerId) {
-    totalRevenue
-    monthlyRevenue
-    totalSubscriptions
-    activeSubscriptions
-    popularPackages {
-      package {
-        id
-        name
-        duration
-      }
-      subscriptionCount
-      revenue
-    }
-  }
-}
-
-# Admin Mutations - Update subscription status
-mutation AdminUpdateSubscriptionStatus(
-  $input: AdminUpdateSubscriptionStatusInput!
-) {
-  adminUpdateSubscriptionStatus(input: $input) {
-    id
-    status
-    startDate
-    endDate
-    updatedAt
-  }
-}
-
-# Admin Mutations - Extend subscription
-mutation AdminExtendSubscription($input: AdminExtendSubscriptionInput!) {
-  adminExtendSubscription(input: $input) {
-    id
-    status
-    startDate
-    endDate
-    updatedAt
-  }
 }

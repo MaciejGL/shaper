@@ -106,14 +106,21 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Determine trial eligibility
-    const hasUsedTrial = await prisma.userSubscription.findFirst({
-      where: {
-        userId,
-        packageId,
-        OR: [{ isTrialActive: true }, { trialStart: { not: null } }],
-      },
-    })
+    // Determine trial eligibility - check if user has EVER used a trial (global check)
+    const [hasUsedTrialInDB, stripeCustomer] = await Promise.all([
+      prisma.userSubscription.findFirst({
+        where: {
+          userId,
+          OR: [{ isTrialActive: true }, { trialStart: { not: null } }],
+        },
+      }),
+      stripe.customers.retrieve(customerId),
+    ])
+
+    // Check both local DB and Stripe metadata for trial usage
+    const hasUsedTrial =
+      hasUsedTrialInDB ||
+      (stripeCustomer as Stripe.Customer).metadata?.hasUsedTrial === 'true'
 
     // Use the single price ID (Stripe handles multi-currency automatically)
     const priceId = packageTemplate.stripePriceId

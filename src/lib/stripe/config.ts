@@ -1,8 +1,4 @@
-import {
-  BillingStatus,
-  Currency,
-  SubscriptionStatus,
-} from '@/generated/prisma/client'
+import { Currency, SubscriptionStatus } from '@/generated/prisma/client'
 
 // Subscription Configuration
 export const SUBSCRIPTION_CONFIG = {
@@ -28,14 +24,6 @@ export const BILLING_CONFIG = {
   // Supported currencies
   SUPPORTED_CURRENCIES: [Currency.NOK, Currency.EUR, Currency.USD] as const,
   DEFAULT_CURRENCY: Currency.USD,
-
-  // Billing statuses
-  STATUS: {
-    SUCCEEDED: BillingStatus.SUCCEEDED,
-    FAILED: BillingStatus.FAILED,
-    PENDING: BillingStatus.PENDING,
-    REFUNDED: BillingStatus.REFUNDED,
-  } as const,
 } as const
 
 // Stripe Webhook Events
@@ -51,6 +39,7 @@ export const STRIPE_WEBHOOK_EVENTS = {
 
   // One-time purchase events
   CHECKOUT_COMPLETED: 'checkout.session.completed',
+  CHECKOUT_EXPIRED: 'checkout.session.expired',
   PAYMENT_INTENT_SUCCEEDED: 'payment_intent.succeeded',
   PAYMENT_INTENT_FAILED: 'payment_intent.payment_failed',
 
@@ -65,18 +54,33 @@ export const STRIPE_WEBHOOK_EVENTS = {
   PAYMENT_ACTION_REQUIRED: 'invoice.payment_action_required',
 } as const
 
-// Stripe Product Configuration
+// Stripe Product Configuration (Method 2 - Single Price per Product)
 export const STRIPE_PRODUCTS = {
-  // Price ID mappings (these would be set from environment or database)
-  PREMIUM_MONTHLY: {
-    NOK: process.env.STRIPE_PRICE_PREMIUM_MONTHLY_NOK,
-    EUR: process.env.STRIPE_PRICE_PREMIUM_MONTHLY_EUR,
-    USD: process.env.STRIPE_PRICE_PREMIUM_MONTHLY_USD,
-  },
-  PREMIUM_YEARLY: {
-    NOK: process.env.STRIPE_PRICE_PREMIUM_YEARLY_NOK,
-    EUR: process.env.STRIPE_PRICE_PREMIUM_YEARLY_EUR,
-    USD: process.env.STRIPE_PRICE_PREMIUM_YEARLY_USD,
+  // Platform subscriptions
+  PREMIUM_MONTHLY: process.env.STRIPE_PRICE_PREMIUM_MONTHLY,
+  PREMIUM_YEARLY: process.env.STRIPE_PRICE_PREMIUM_YEARLY,
+
+  // Trainer one-time services
+  MEAL_PLAN: process.env.STRIPE_PRICE_MEAL_PLAN,
+  WORKOUT_PLAN: process.env.STRIPE_PRICE_WORKOUT_PLAN,
+
+  // Trainer recurring services
+  COACHING_COMBO: process.env.STRIPE_PRICE_COACHING_COMBO,
+
+  // Add-on services
+  IN_PERSON_SESSION: process.env.STRIPE_PRICE_IN_PERSON_SESSION,
+} as const
+
+// Commission Configuration: Trainers get 90%, Platform takes 10%
+export const COMMISSION_CONFIG = {
+  PLATFORM_PERCENTAGE: 10, // Platform commission percentage
+  TRAINER_PERCENTAGE: 90, // Trainer payout percentage
+
+  // Product-specific commission settings (if needed for different rates)
+  PRODUCT_COMMISSION: {
+    TRAINER_SERVICES: 10, // 10% platform commission for all trainer services
+    COACHING_PACKAGES: 10, // 10% platform commission for coaching
+    PLATFORM_PREMIUM: 0, // No commission on platform subscriptions
   },
 } as const
 
@@ -115,13 +119,6 @@ export const SUBSCRIPTION_HELPERS = {
   ) => {
     return status === SubscriptionStatus.ACTIVE || isInTrial || isInGracePeriod
   },
-} as const
-
-export const BILLING_HELPERS = {
-  isSuccessful: (status: BillingStatus) => status === BillingStatus.SUCCEEDED,
-  isFailed: (status: BillingStatus) => status === BillingStatus.FAILED,
-  isPending: (status: BillingStatus) => status === BillingStatus.PENDING,
-  isRefunded: (status: BillingStatus) => status === BillingStatus.REFUNDED,
 } as const
 
 export const REACTIVATION_HELPERS = {

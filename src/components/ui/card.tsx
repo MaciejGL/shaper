@@ -14,7 +14,7 @@ const cardVariants = cva(
           'bg-card border-0 dark:shadow-none shadow-xs border-border dark:border-border/50 border',
         tertiary: 'border-0 shadow-xs bg-zinc-300 dark:bg-gray-600/50',
         gradient:
-          'border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-white via-white to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800 border-0',
+          'border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-white via-white to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800',
         premium:
           'bg-gradient-to-br from-amber-400 via-amber-400 to-amber-600 border-0 shadow-sm dark:from-amber-500 dark:via-amber-500 dark:to-amber-600 text-primary-foreground [&_svg]:text-primary-foreground',
       },
@@ -72,7 +72,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card-title"
-      className={cn('leading-none font-semibold', className)}
+      className={cn('leading-tight font-semibold', className)}
       {...props}
     />
   )

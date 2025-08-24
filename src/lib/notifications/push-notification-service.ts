@@ -374,6 +374,23 @@ export async function notifyCollaborationResponse(
   )
 }
 
+/**
+ * Send push notification for trainer package offers
+ */
+export async function notifyTrainerOfferReceived(
+  clientUserId: string,
+  trainerName: string,
+  packageDescription: string,
+  offerToken: string,
+) {
+  return await sendPushNotificationToUsers(
+    [clientUserId],
+    `Training Offer from ${trainerName}`,
+    `You have a new training offer from ${trainerName}`,
+    `/offer/${offerToken}`,
+  )
+}
+
 // ================================
 // SYSTEM NOTIFICATIONS
 // ================================

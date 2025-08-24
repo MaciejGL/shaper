@@ -1,11 +1,12 @@
-# Subscription System GraphQL Schema
+# SIMPLIFIED Subscription System GraphQL Schema
+# This replaces the complex schema with Stripe-as-source-of-truth approach
 
 enum ServiceType {
-  TRAINING_PLAN
-  MEAL_PLAN
-  COACHING
-  IN_PERSON_MEETING
-  PREMIUM_ACCESS
+  workout_plan
+  meal_plan
+  coaching_complete
+  in_person_meeting
+  premium_access
 }
 
 enum SubscriptionDuration {
@@ -20,188 +21,95 @@ enum SubscriptionStatus {
   PENDING
 }
 
-type ServiceUsageTracker {
-  serviceType: ServiceType!
-  usedThisMonth: Int!
-  allowedPerMonth: Int!
-  remainingUsage: Int!
-  nextResetDate: String!
+enum DeliveryStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
 
+# Simplified user subscription status - focuses on what user can access
 type UserSubscriptionStatus {
   hasPremium: Boolean!
-  activeSubscriptions: [UserSubscription!]!
-  cancelledSubscriptions: [UserSubscription!]!
-  trainingPlanLimit: Int! # -1 for unlimited
-  usageTrackers: [ServiceUsageTracker!]!
+  trainerId: ID
   canAccessPremiumTrainingPlans: Boolean!
   canAccessPremiumExercises: Boolean!
   canAccessMealPlans: Boolean!
+  subscriptionEndDate: String # When current subscription ends
+  isInGracePeriod: Boolean! # Stripe handles grace periods
 }
 
-type AccessValidationResult {
-  hasAccess: Boolean!
-  reason: String
-  subscription: UserSubscription
-  remainingUsage: Int
-  totalAllowed: Int
-}
+# UserSubscription type is defined in user-subscription/schema.graphql
 
-# Input types
-input CreatePackageTemplateInput {
+# Package templates - simplified without services relation
+type PackageTemplate {
+  id: ID!
   name: String!
   description: String
   duration: SubscriptionDuration!
+  isActive: Boolean!
+
+  # Stripe integration
+  stripeProductId: String
+  stripePriceId: String
+
+  # Trainer assignment
   trainerId: ID
-  services: [PackageServiceInput!]!
+  trainer: User
+
+  # Service info stored in metadata instead of separate table
+  serviceType: ServiceType # Computed from metadata
+  createdAt: String!
+  updatedAt: String!
 }
 
-input PackageServiceInput {
-  serviceType: ServiceType!
-  quantity: Int!
-}
-
-input UpdatePackageTemplateInput {
+# Service delivery tracking (replaces complex usage tracking)
+type ServiceDelivery {
   id: ID!
-  name: String
-  description: String
-  duration: SubscriptionDuration
-  isActive: Boolean
-  services: [PackageServiceInput!]
-}
-
-input CreateSubscriptionInput {
-  userId: ID!
-  packageId: ID!
-  trainerId: ID
-  startDate: String
-  durationMonths: Int
-}
-
-input SubscriptionFilters {
-  status: SubscriptionStatus
-  trainerId: ID
+  trainerId: ID!
+  clientId: ID!
   serviceType: ServiceType
-  dateFrom: String
-  dateTo: String
+  packageName: String!
+  quantity: Int!
+  status: DeliveryStatus!
+
+  deliveredAt: String
+  deliveryNotes: String
+
+  # Relations
+  trainer: User!
+  client: User!
+
+  createdAt: String!
+  updatedAt: String!
 }
 
-input TrackServiceUsageInput {
-  serviceType: ServiceType!
-  trainerId: ID
-  metadata: String
-}
-
-input AdminUpdateSubscriptionStatusInput {
-  subscriptionId: ID!
-  status: SubscriptionStatus!
-}
-
-input AdminExtendSubscriptionInput {
-  subscriptionId: ID!
-  additionalMonths: Int!
-}
-
-input CheckServiceAccessInput {
-  serviceType: ServiceType!
-  trainerId: ID
-}
-
-input GetServiceUsageTrackerInput {
-  subscriptionId: ID!
-  serviceType: ServiceType!
-}
-
-# Response types
-type CreateSubscriptionResponse {
-  success: Boolean!
-  subscriptionId: ID
-  error: String
-}
-
-type TrackServiceUsageResponse {
-  success: Boolean!
-  error: String
-  remainingUsage: Int
-}
-
+# SIMPLIFIED QUERIES - Focus on essentials only
 type Query {
-  # Package Templates
-  getPackageTemplates(trainerId: ID): [PackageTemplate!]!
+  # Essential subscription checks
+  getMySubscriptionStatus: UserSubscriptionStatus!
+  checkPremiumAccess: Boolean!
+
+  # Package management
   getActivePackageTemplates(trainerId: ID): [PackageTemplate!]!
   getPackageTemplate(id: ID!): PackageTemplate
 
-  # User Subscriptions
+  # Service delivery (replaces complex usage tracking)
+  getMyServiceDeliveries(status: DeliveryStatus): [ServiceDelivery!]!
+  getTrainerDeliveries(
+    trainerId: ID!
+    status: DeliveryStatus
+  ): [ServiceDelivery!]!
+
+  # Basic subscription info (simplified)
   getMySubscriptions: [UserSubscription!]!
-  getMySubscriptionStatus: UserSubscriptionStatus!
-  getUserSubscriptions(userId: ID!): [UserSubscription!]!
-
-  # Access Validation
-  checkPremiumAccess: Boolean!
-  checkServiceAccess(input: CheckServiceAccessInput!): AccessValidationResult!
-  getServiceUsageTracker(
-    input: GetServiceUsageTrackerInput!
-  ): ServiceUsageTracker
-
-  # Trainer Queries
-  getTrainerSubscriptions(filters: SubscriptionFilters): [UserSubscription!]!
-  getTrainerRevenue(trainerId: ID!): TrainerRevenueStats!
-
-  # Admin Queries
-  getAllSubscriptions(filters: SubscriptionFilters): [UserSubscription!]!
-  getSubscriptionStats: SubscriptionStats!
 }
 
 type Mutation {
-  # Package Template Management
-  createPackageTemplate(input: CreatePackageTemplateInput!): PackageTemplate!
-  updatePackageTemplate(input: UpdatePackageTemplateInput!): PackageTemplate!
-  deletePackageTemplate(id: ID!): Boolean!
-
-  # Subscription Management
-  createMockSubscription(
-    input: CreateSubscriptionInput!
-  ): CreateSubscriptionResponse!
-
-  # Service Usage
-  trackServiceUsage(input: TrackServiceUsageInput!): TrackServiceUsageResponse!
-
-  # Admin Mutations
-  adminUpdateSubscriptionStatus(
-    input: AdminUpdateSubscriptionStatusInput!
-  ): UserSubscription!
-  adminExtendSubscription(
-    input: AdminExtendSubscriptionInput!
-  ): UserSubscription!
-}
-
-# Additional types for dashboard/statistics
-type TrainerRevenueStats {
-  totalRevenue: Int!
-  monthlyRevenue: Int!
-  activeSubscriptions: Int!
-  totalSubscriptions: Int!
-  popularPackages: [PackagePopularityStats!]!
-}
-
-type PackagePopularityStats {
-  package: PackageTemplate!
-  subscriptionCount: Int!
-  revenue: Int!
-}
-
-type SubscriptionStats {
-  totalActiveSubscriptions: Int!
-  totalRevenue: Int!
-  monthlyRevenue: Int!
-  premiumUsers: Int!
-  trainerSubscriptions: Int!
-  packageStats: [PackageStats!]!
-}
-
-type PackageStats {
-  package: PackageTemplate!
-  activeSubscriptions: Int!
-  totalRevenue: Int!
-  conversionRate: Float!
+  # Service delivery management (replaces usage tracking)
+  updateServiceDelivery(
+    deliveryId: ID!
+    status: DeliveryStatus!
+    notes: String
+  ): ServiceDelivery!
 }

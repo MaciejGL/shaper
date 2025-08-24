@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 
 import { isAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
+import { PackageSummary } from '@/types/trainer-offer'
 
 // GET /api/admin/package-templates - Fetch all package templates from database
 export async function GET() {
@@ -14,7 +15,6 @@ export async function GET() {
     // Fetch all package templates with subscription counts
     const packageTemplates = await prisma.packageTemplate.findMany({
       include: {
-        services: true,
         trainer: {
           select: {
             id: true,
@@ -39,13 +39,13 @@ export async function GET() {
       id: template.id,
       name: template.name,
       description: template.description,
+      packageSummary: template.metadata as unknown as PackageSummary,
       duration: template.duration,
       isActive: template.isActive,
       stripeProductId: template.stripeProductId,
       stripePriceId: template.stripePriceId,
       trainerId: template.trainerId,
       trainer: template.trainer,
-      services: template.services,
       activeSubscriptions: template._count.subscriptions,
       createdAt: template.createdAt,
       updatedAt: template.updatedAt,

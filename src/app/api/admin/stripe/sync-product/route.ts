@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
+import { ServiceType } from '@/generated/prisma/client'
 import { isAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 
@@ -28,27 +29,89 @@ export async function POST(request: NextRequest) {
     // Fetch product from Stripe
     const product = await stripe.products.retrieve(productId)
 
+    // Check if product is archived
+    if (!product.active) {
+      return NextResponse.json(
+        {
+          error:
+            'Cannot sync archived products. Please restore the product in Stripe first.',
+        },
+        { status: 400 },
+      )
+    }
+
     // Fetch prices for the product
     const prices = await stripe.prices.list({
       product: productId,
       active: true,
     })
 
-    // Validate metadata
-    if (!product.metadata?.packageType || !product.metadata?.duration) {
+    // Determine product type and validate metadata
+    const isTrainerService =
+      product.metadata?.category === 'trainer_service' ||
+      product.metadata?.category === 'trainer_coaching'
+    const isPremiumProduct = product.metadata?.category === 'platform_premium'
+
+    let duration: 'MONTHLY' | 'YEARLY' = 'MONTHLY' // Default duration
+    let productCategory = 'general'
+
+    if (isTrainerService) {
+      // Trainer service products - validate service metadata
+      if (!product.metadata?.service_type) {
+        return NextResponse.json(
+          {
+            error:
+              'Trainer service product missing required metadata: service_type',
+            metadata: product.metadata,
+          },
+          { status: 400 },
+        )
+      }
+
+      productCategory = product.metadata.category || 'trainer_service'
+
+      // Set duration based on service type and price type
+      const price = prices.data[0]
+      if (price?.type === 'recurring') {
+        duration = price.recurring?.interval === 'year' ? 'YEARLY' : 'MONTHLY'
+      } else {
+        duration = 'MONTHLY' // One-time products default to monthly for database compatibility
+      }
+    } else if (isPremiumProduct) {
+      // Premium products - support both old and new metadata structures
+      const isNewPremiumStructure =
+        product.metadata?.category === 'platform_premium'
+
+      if (isNewPremiumStructure) {
+        // New structure: category = platform_premium + duration
+        if (!product.metadata?.duration) {
+          return NextResponse.json(
+            {
+              error:
+                'Platform premium product missing required metadata: duration',
+              metadata: product.metadata,
+            },
+            { status: 400 },
+          )
+        }
+        productCategory = 'platform_premium'
+      }
+
+      duration = product.metadata.duration as 'MONTHLY' | 'YEARLY'
+      if (!['MONTHLY', 'YEARLY'].includes(duration)) {
+        return NextResponse.json(
+          { error: 'Invalid duration in metadata. Must be MONTHLY or YEARLY' },
+          { status: 400 },
+        )
+      }
+    } else {
+      // Unknown product type
       return NextResponse.json(
         {
-          error: 'Product missing required metadata: packageType and duration',
+          error:
+            'Product must have either trainer service metadata (category + service_type) or premium metadata (packageType + duration OR category=platform_premium + duration)',
           metadata: product.metadata,
         },
-        { status: 400 },
-      )
-    }
-
-    const duration = product.metadata.duration as 'MONTHLY' | 'YEARLY'
-    if (!['MONTHLY', 'YEARLY'].includes(duration)) {
-      return NextResponse.json(
-        { error: 'Invalid duration in metadata. Must be MONTHLY or YEARLY' },
         { status: 400 },
       )
     }
@@ -79,48 +142,64 @@ export async function POST(request: NextRequest) {
       ? `[TEST ENVIRONMENT] ${product.description || 'Test product for development'}`
       : product.description || null
 
+    // Prepare package data
+    const packageData = {
+      name: `${productNamePrefix}${product.name}`,
+      description,
+      isActive: product.active,
+      stripePriceId,
+      metadata: product.metadata, // Store all Stripe metadata
+    }
+
     if (existingPackage) {
       // Update existing package
       packageTemplate = await prisma.packageTemplate.update({
         where: { id: existingPackage.id },
-        data: {
-          name: `${productNamePrefix}${product.name}`,
-          description,
-          isActive: product.active,
-          stripePriceId,
-        },
+        data: packageData,
       })
     } else {
       // Create new package
       packageTemplate = await prisma.packageTemplate.create({
         data: {
-          name: `${productNamePrefix}${product.name}`,
-          description,
+          ...packageData,
           duration,
           stripeProductId: product.id,
-          isActive: product.active,
-          stripePriceId,
         },
       })
+
+      // Create associated services for trainer products
+      if (isTrainerService && product.metadata?.service_type) {
+        const serviceType = mapServiceTypeFromMetadata(
+          product.metadata.service_type as string,
+        )
+        if (serviceType) {
+          await prisma.packageService.create({
+            data: {
+              packageId: packageTemplate.id,
+              serviceType,
+              quantity: 1,
+            },
+          })
+        }
+      }
     }
 
     return NextResponse.json({
       success: true,
       action: existingPackage ? 'updated' : 'created',
       isTestProduct,
+      productType: isTrainerService ? 'trainer_service' : 'premium',
+      productCategory,
       packageTemplate: {
         id: packageTemplate.id,
         name: packageTemplate.name,
         duration: packageTemplate.duration,
         stripeProductId: packageTemplate.stripeProductId,
         stripePriceId: packageTemplate.stripePriceId,
+        metadata: packageTemplate.metadata,
       },
       prices: prices.data.length,
-      metadata: {
-        packageType: product.metadata.packageType,
-        duration: product.metadata.duration,
-        env: product.metadata.env || 'production',
-      },
+      metadata: product.metadata,
     })
   } catch (error) {
     console.error('Error syncing product:', error)
@@ -137,4 +216,21 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     )
   }
+}
+
+// Helper function to map Stripe metadata service types to Prisma ServiceType enum
+function mapServiceTypeFromMetadata(serviceType: string): ServiceType | null {
+  const mapping: Record<string, ServiceType> = {
+    meal_plan: ServiceType.MEAL_PLAN,
+    workout_plan: ServiceType.TRAINING_PLAN,
+    training_plan: ServiceType.TRAINING_PLAN,
+    coaching_complete: ServiceType.COACHING,
+    coaching_full: ServiceType.COACHING,
+    coaching: ServiceType.COACHING,
+    in_person_coaching: ServiceType.IN_PERSON_MEETING,
+    in_person_session: ServiceType.IN_PERSON_MEETING,
+    premium_access: ServiceType.PREMIUM_ACCESS,
+  }
+
+  return mapping[serviceType] || null
 }

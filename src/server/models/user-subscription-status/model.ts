@@ -17,6 +17,10 @@ export interface UserSubscriptionStatusData {
   canAccessPremiumTrainingPlans: boolean
   canAccessPremiumExercises: boolean
   canAccessMealPlans: boolean
+  isInGracePeriod: boolean
+  hasTrainerSubscription: boolean
+  trainerId?: string | null
+  subscriptionEndDate?: string | null
 }
 
 export default class UserSubscriptionStatus
@@ -59,6 +63,14 @@ export default class UserSubscriptionStatus
       remainingUsage: tracker.remainingUsage,
       nextResetDate: tracker.nextResetDate.toISOString(),
     }))
+  }
+
+  get isInGracePeriod() {
+    return this.data.isInGracePeriod
+  }
+
+  get hasTrainerSubscription() {
+    return this.data.hasTrainerSubscription
   }
 
   get cancelledSubscriptions(): GQLUserSubscription[] {

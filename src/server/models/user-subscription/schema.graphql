@@ -1,5 +1,3 @@
-# User Subscription specific schema
-
 type UserSubscription {
   id: ID!
   userId: ID!
@@ -10,29 +8,17 @@ type UserSubscription {
   startDate: String!
   endDate: String!
 
-  # Payment tracking
+  # Stripe integration (source of truth for payment)
   stripeSubscriptionId: String
   stripePriceId: String
-  mockPaymentStatus: String
-  mockTransactionId: String
-
-  # Related data
-  package: PackageTemplate!
-  usedServices: [ServiceUsage!]!
 
   # Computed fields
   isActive: Boolean!
   daysUntilExpiry: Int!
 
+  # Relations
+  trainer: User
+
   createdAt: String!
   updatedAt: String!
-}
-
-type ServiceUsage {
-  id: ID!
-  subscriptionId: ID!
-  serviceType: ServiceType!
-  usedAt: String!
-  quantity: Int!
-  metadata: String
 }

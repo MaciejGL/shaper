@@ -59,8 +59,9 @@ const basePrisma = new PrismaClient({
   },
 })
 
-export const prisma =
-  globalForPrisma.prisma ?? basePrisma.$extends(createDetailedQueryLogger())
+// export const prisma =
+// globalForPrisma.prisma ?? basePrisma.$extends(createDetailedQueryLogger())
+export const prisma = globalForPrisma.prisma ?? basePrisma
 
 export { pool }
 
@@ -89,14 +90,14 @@ export const getPoolStats = () => ({
   min: pool.options.min,
 })
 
-if (process.env.NODE_ENV === 'development') {
-  setInterval(() => {
-    const stats = getPoolStats()
-    // if (stats.total > 0) {
-    console.info('[DB-POOL]', stats)
-    // }
-  }, 10000)
-}
+// if (process.env.NODE_ENV === 'development') {
+//   setInterval(() => {
+//     const stats = getPoolStats()
+//     // if (stats.total > 0) {
+//     console.info('[DB-POOL]', stats)
+//     // }
+//   }, 60000)
+// }
 
 // In your db.ts (production only)
 if (process.env.NODE_ENV === 'production' && typeof window === 'undefined') {

@@ -7,6 +7,7 @@ globs:
 alwaysApply: true
 ---
 
+- Syling and theme MUST match existing patterns, AVOID using custom colors.
 - Use existing patterns and utilities before writing new code.
 - Keep edits scoped; do not change unrelated UI or behavior.
 - Split large components into smaller ones; keep files focused. Prefer multiple files over one big file.

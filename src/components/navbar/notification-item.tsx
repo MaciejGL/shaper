@@ -104,6 +104,8 @@ function getNotificationTitle(
       return 'Training Plan Access Granted'
     case GQLNotificationType.TrainingPlanCollaborationRemoved:
       return 'Training Plan Access Removed'
+    case GQLNotificationType.TrainerOfferReceived:
+      return 'New Training Offer'
 
     default:
       return null

@@ -150,7 +150,6 @@
   }
   body {
     @apply bg-background text-foreground;
-    overflow-y: hidden;
   }
 
   /* PWA Safe Area Support for iOS */

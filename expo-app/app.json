@@ -29,7 +29,13 @@
             }
           }
         },
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLName": "hypertro",
+            "CFBundleURLSchemes": ["hypertro"]
+          }
+        ]
       }
     },
     "android": {
@@ -52,7 +58,22 @@
           "data": [
             {
               "scheme": "https",
-              "host": "hypertro.app"
+              "host": "hypertro.app",
+              "pathPrefix": "/fitspace"
+            },
+            {
+              "scheme": "https",
+              "host": "hypertro.app",
+              "pathPrefix": "/trainer"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        },
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "hypertro"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]

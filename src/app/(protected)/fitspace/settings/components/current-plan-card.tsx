@@ -55,9 +55,9 @@ export function CurrentPlanCard({
     switch (subscriptionState.type) {
       case 'trial':
         return {
-          title: 'Premium Trial',
+          title: 'Premium',
           description: `Trial active - ${subscriptionState.daysRemaining} days remaining`,
-          badge: 'Trial',
+          badge: 'Premium',
           variant: 'premium',
           icon: Clock,
         }

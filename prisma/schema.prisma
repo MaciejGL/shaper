@@ -1,6 +1,6 @@
 generator client {
-  provider   = "prisma-client"
-  output     = "../src/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
   previewFeatures = ["queryCompiler", "driverAdapters"]
 }
 
@@ -46,14 +46,21 @@ model User {
   clients                          User[]                     @relation("TrainerClients")
   profile                          UserProfile?
   sessions                         UserSession[]
-  
+
   // Stripe integration
-  stripeCustomerId                 String?                    @unique
-  
+  stripeCustomerId String? @unique
+
   // Subscription relations
-  subscriptions                    UserSubscription[]         @relation("UserSubscriptions")
-  trainerPackages                  PackageTemplate[]          @relation("TrainerPackages")
-  clientSubscriptions              UserSubscription[]         @relation("TrainerSubscriptions")
+  subscriptions       UserSubscription[] @relation("UserSubscriptions")
+  trainerPackages     PackageTemplate[]  @relation("TrainerPackages")
+  clientSubscriptions UserSubscription[] @relation("TrainerSubscriptions")
+
+  // Trainer offer relations
+  sentOffers TrainerOffer[] @relation("TrainerOffers")
+
+  // Service delivery relations
+  trainerDeliveries ServiceDelivery[] @relation("TrainerDeliveries")
+  clientDeliveries  ServiceDelivery[] @relation("ClientDeliveries")
 
   @@index([trainerId])
   @@index([stripeCustomerId])
@@ -777,7 +784,7 @@ model OpenFoodFactsProduct {
   @@index([productName, energyKcal100g], map: "off_fast_search_idx")
   @@index([productName, proteins100g], map: "off_protein_search_idx")
   @@index([countries, energyKcal100g, proteins100g], map: "off_country_nutrition_idx")
-  @@index([completeness(sort: Desc), scansN(sort: Desc)], map: "off_quality_sort_idx")  
+  @@index([completeness(sort: Desc), scansN(sort: Desc)], map: "off_quality_sort_idx")
   @@index([importedAt(sort: Desc)], map: "off_imported_desc_idx")
   @@index([imageUrl], map: "off_images_idx")
 }
@@ -832,90 +839,75 @@ model FavouriteWorkoutSet {
 // Subscription System Models
 
 model PackageTemplate {
-  id            String                @id @default(uuid())
-  name          String                // "Training + Coaching", "Full Combo", etc.
-  description   String?
-  duration      SubscriptionDuration
-  isActive      Boolean               @default(true)
-  
+  id          String               @id @default(uuid())
+  name        String // "Training + Coaching", "Full Combo", etc.
+  description String?
+  duration    SubscriptionDuration
+  isActive    Boolean              @default(true)
+
   // Stripe integration
-  stripeProductId    String?          // Maps to Stripe product
-  stripePriceId      String?          // Single price ID (Stripe handles multi-currency)
-  
+  stripeProductId String? // Maps to Stripe product
+  stripePriceId   String? // Single price ID (Stripe handles multi-currency)
+
   // Who can offer this package (null = general premium, specific = trainer package)
-  trainerId     String?
-  trainer       User?                 @relation("TrainerPackages", fields: [trainerId], references: [id])
-  
-  // What services are included
-  services      PackageService[]
-  
+  trainerId String?
+  trainer   User?   @relation("TrainerPackages", fields: [trainerId], references: [id])
+
+  // Stripe metadata for business logic (commission rates, service types, etc.)
+  metadata Json?
+
   // Purchased subscriptions
   subscriptions UserSubscription[]
-  
-  createdAt     DateTime              @default(now())
-  updatedAt     DateTime              @updatedAt
-  
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([trainerId])
   @@index([isActive])
   @@index([duration])
   @@index([stripeProductId])
   @@index([stripePriceId])
-}
-
-model PackageService {
-  id          String          @id @default(uuid())
-  packageId   String
-  serviceType ServiceType
-  quantity    Int             @default(1) // e.g., 1 meeting per month
-  package     PackageTemplate @relation(fields: [packageId], references: [id], onDelete: Cascade)
-  
-  @@unique([packageId, serviceType])
-  @@index([packageId])
-  @@index([serviceType])
+  @@index([metadata], type: Gin)
 }
 
 model UserSubscription {
-  id               String              @id @default(uuid())
-  userId           String
-  packageId        String
-  trainerId        String?             // null for premium, specific for trainer packages
-  
-  status           SubscriptionStatus  @default(ACTIVE)
-  startDate        DateTime
-  endDate          DateTime
-  
+  id        String  @id @default(uuid())
+  userId    String
+  packageId String
+  trainerId String? // null for premium, specific for trainer packages
+
+  status    SubscriptionStatus @default(ACTIVE)
+  startDate DateTime
+  endDate   DateTime
+
   // Trial management (14 days)
-  trialStart       DateTime?
-  trialEnd         DateTime?
-  isTrialActive    Boolean             @default(false)
-  
+  trialStart    DateTime?
+  trialEnd      DateTime?
+  isTrialActive Boolean   @default(false)
+
   // Grace period management (3 days after failed payment)
-  gracePeriodEnd   DateTime?
-  isInGracePeriod  Boolean             @default(false)
-  
+  gracePeriodEnd  DateTime?
+  isInGracePeriod Boolean   @default(false)
+
   // Payment retry tracking
-  failedPaymentRetries Int             @default(0)
+  failedPaymentRetries Int       @default(0)
   lastPaymentAttempt   DateTime?
-  
+
   // Stripe integration
   stripeSubscriptionId String?
   stripePriceId        String?
-  
+
   // Mock payment tracking (until Stripe integration)
-  mockPaymentStatus    String?         @default("COMPLETED") // PENDING, COMPLETED, FAILED
-  mockTransactionId    String?         // Internal transaction ID
-  
-  // Service usage tracking
-  usedServices     ServiceUsage[]
-  billingRecords   BillingRecord[]
-  
-  user             User               @relation("UserSubscriptions", fields: [userId], references: [id])
-  package          PackageTemplate    @relation(fields: [packageId], references: [id])
-  trainer          User?              @relation("TrainerSubscriptions", fields: [trainerId], references: [id])
-  
-  createdAt        DateTime           @default(now())
-  updatedAt        DateTime           @updatedAt
-  
+  mockPaymentStatus String? @default("COMPLETED") // PENDING, COMPLETED, FAILED
+  mockTransactionId String? // Internal transaction ID
+
+  user    User            @relation("UserSubscriptions", fields: [userId], references: [id])
+  package PackageTemplate @relation(fields: [packageId], references: [id])
+  trainer User?           @relation("TrainerSubscriptions", fields: [trainerId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([trainerId])
   @@index([status])
@@ -927,63 +919,12 @@ model UserSubscription {
   @@index([isInGracePeriod])
 }
 
-model BillingRecord {
-  id               String           @id @default(uuid())
-  subscriptionId   String
-  
-  // Payment details
-  amount           Int              // Amount in cents
-  currency         Currency
-  status           BillingStatus
-  
-  // Stripe references
-  stripeInvoiceId  String?
-  stripePaymentId  String?
-  
-  // Billing period
-  periodStart      DateTime
-  periodEnd        DateTime
-  
-  // Metadata
-  description      String?
-  failureReason    String?
-  refundReason     String?
-  refundAmount     Int?             // Refund amount in cents
-  
-  subscription     UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
-  
-  @@index([subscriptionId])
-  @@index([status])
-  @@index([periodStart])
-  @@index([stripeInvoiceId])
-}
-
-model ServiceUsage {
-  id             String           @id @default(uuid())
-  subscriptionId String
-  serviceType    ServiceType
-  usedAt         DateTime         @default(now())
-  quantity       Int              @default(1)
-  
-  // Optional metadata for specific usage
-  metadata       Json?            // Can store meeting details, plan IDs, etc.
-  
-  subscription   UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
-  
-  @@index([subscriptionId])
-  @@index([serviceType])
-  @@index([usedAt])
-}
-
 // Enums for Subscription System
 
 enum ServiceType {
-  TRAINING_PLAN
+  WORKOUT_PLAN
   MEAL_PLAN
-  COACHING
+  COACHING_COMPLETE
   IN_PERSON_MEETING
   PREMIUM_ACCESS
 }
@@ -1000,15 +941,83 @@ enum SubscriptionStatus {
   PENDING
 }
 
-enum BillingStatus {
-  SUCCEEDED
-  FAILED
-  PENDING
-  REFUNDED
-}
-
 enum Currency {
   NOK
   EUR
   USD
+}
+
+model TrainerOffer {
+  id              String  @id @default(uuid())
+  token           String  @unique // Unique token for secure offer links
+  trainerId       String
+  clientEmail     String
+  personalMessage String?
+  status          String  @default("PENDING") // PENDING, PAID, EXPIRED, CANCELLED
+
+  // Stripe integration - links to checkout session when paid
+  stripeCheckoutSessionId String? @unique
+  stripePaymentIntentId   String? @unique
+
+  // Package summary for display (JSON array of {packageId, quantity, name})
+  packageSummary Json? // Lightweight summary for UI, full data in Stripe
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  expiresAt   DateTime // Offers expire after 24 hours
+  completedAt DateTime?
+
+  // Relations
+  trainer User @relation("TrainerOffers", fields: [trainerId], references: [id])
+
+  @@index([token])
+  @@index([trainerId])
+  @@index([clientEmail])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([createdAt])
+  @@index([stripeCheckoutSessionId])
+  @@index([stripePaymentIntentId])
+}
+
+// Service delivery tracking - what trainers need to deliver to clients
+model ServiceDelivery {
+  id                    String      @id @default(uuid())
+  stripePaymentIntentId String // Links to Stripe payment for payment verification
+  trainerId             String
+  clientId              String
+  serviceType           ServiceType
+  packageName           String
+  quantity              Int         @default(1)
+
+  // Delivery status and progress
+  status        DeliveryStatus @default(PENDING)
+  deliveredAt   DateTime?
+  deliveryNotes String?
+
+  // Optional metadata for specific delivery details
+  metadata Json? // Can store meeting details, plan IDs, etc.
+
+  // Relations
+  trainer User @relation("TrainerDeliveries", fields: [trainerId], references: [id])
+  client  User @relation("ClientDeliveries", fields: [clientId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([trainerId])
+  @@index([clientId])
+  @@index([stripePaymentIntentId])
+  @@index([status])
+  @@index([serviceType])
+  @@index([createdAt])
+}
+
+// Delivery status enum
+enum DeliveryStatus {
+  PENDING // Service purchased but not yet delivered
+  IN_PROGRESS // Trainer has started working on delivery
+  COMPLETED // Service fully delivered to client
+  CANCELLED // Service delivery cancelled/refunded
 }

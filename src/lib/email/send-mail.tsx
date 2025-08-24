@@ -7,9 +7,11 @@ import {
   GracePeriodEndingEmail,
   PaymentFailedEmail,
   SubscriptionCancelledEmail,
+  SubscriptionDeletedEmail,
   TrialEndingEmail,
   WelcomeEmail,
 } from './templates/subscription-emails'
+import { TrainerOfferEmail } from './templates/trainer-offer-email'
 
 const NO_REPLY_EMAIL = 'noreply@hypertro.app'
 const NO_REPLY_NAME = 'Hypertro'
@@ -125,6 +127,28 @@ export const sendEmail = {
     })
   },
 
+  subscriptionDeleted: async (
+    to: string,
+    {
+      userName,
+      packageName,
+    }: { userName?: string | null; packageName: string },
+  ) => {
+    const html = await render(
+      <SubscriptionDeletedEmail
+        userName={userName}
+        packageName={packageName}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: 'Subscription has been removed',
+      html,
+    })
+  },
+
   subscriptionWelcome: async (
     to: string,
     {
@@ -185,6 +209,52 @@ export const sendEmail = {
       from: FROM_EMAIL,
       to,
       subject: `Final Notice: ${packageName} subscription ending in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`,
+      html,
+    })
+  },
+
+  // Training offer email
+  trainerOffer: async (
+    to: string,
+    {
+      clientName,
+      trainerName,
+      bundleItems,
+      personalMessage,
+      offerUrl,
+      expiresAt,
+    }: {
+      clientName?: string | null
+      trainerName: string
+      bundleItems: {
+        quantity: number
+        packageName: string
+        services: string[]
+      }[]
+      personalMessage?: string | null
+      offerUrl: string
+      expiresAt: string
+    },
+  ) => {
+    const bundleDescription = bundleItems
+      .map((item) => `${item.quantity}x ${item.packageName}`)
+      .join(', ')
+
+    const html = await render(
+      <TrainerOfferEmail
+        clientName={clientName}
+        trainerName={trainerName}
+        bundleItems={bundleItems}
+        personalMessage={personalMessage}
+        offerUrl={offerUrl}
+        expiresAt={expiresAt}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `${trainerName} sent you a training package: ${bundleDescription}`,
       html,
     })
   },

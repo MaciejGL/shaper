@@ -29,8 +29,8 @@ export function useSubscriptionActions({
       const result = await createCheckoutSession.mutateAsync({
         userId,
         packageId: targetPackageId,
-        returnUrl: `${window.location.origin}/fitspace/settings?success=true`,
-        cancelUrl: `${window.location.origin}/fitspace/settings?cancelled=true`,
+        returnUrl: `${window.location.origin}/account-management?success=true`,
+        cancelUrl: `${window.location.origin}/account-management?cancelled=true`,
       })
 
       // Redirect to Stripe checkout

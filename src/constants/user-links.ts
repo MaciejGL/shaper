@@ -53,4 +53,9 @@ export const CLIENT_LINKS = {
   },
   profile: { href: '/fitspace/profile', label: 'Profile', disabled: false },
   settings: { href: '/fitspace/settings', label: 'Settings', disabled: false },
+  accountManagement: {
+    href: '/account-management',
+    label: 'Manage Account & Subscriptions',
+    disabled: false,
+  },
 }

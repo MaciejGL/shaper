@@ -15,6 +15,7 @@ import { ClientInfo } from './components/client-info/client-info'
 import { ClientMealPlans } from './components/client-meal-plans/client-meal-plans'
 import { ClientMeasurements } from './components/client-measurements'
 import { ClientNotes } from './components/client-notes/client-notes'
+import { ClientServices } from './components/client-services/client-services'
 import { SharedPlansWithClient } from './components/shared-plans'
 
 export default function ClientDetailPage({
@@ -63,6 +64,9 @@ export default function ClientDetailPage({
           <TabsTrigger size="lg" value="meal-plans">
             Meal Plans
           </TabsTrigger>
+          <TabsTrigger size="lg" value="services">
+            Services & Offers
+          </TabsTrigger>
         </TabsList>
         <AnimatedPageTransition id="info">
           <TabsContent value="info">
@@ -104,6 +108,15 @@ export default function ClientDetailPage({
         <AnimatedPageTransition id="meal-plans">
           <TabsContent value="meal-plans">
             <ClientMealPlans client={client} clientName={clientName} />
+          </TabsContent>
+        </AnimatedPageTransition>
+        <AnimatedPageTransition id="services">
+          <TabsContent value="services">
+            <ClientServices
+              clientId={client.id}
+              clientName={clientName}
+              clientEmail={client.email}
+            />
           </TabsContent>
         </AnimatedPageTransition>
       </Tabs>

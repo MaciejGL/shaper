@@ -15,9 +15,10 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // Fetch all products from Stripe
+    // Fetch all active products from Stripe (exclude archived ones)
     const products = await stripe.products.list({
       limit: 100,
+      active: true,
       expand: ['data.default_price'],
     })
 

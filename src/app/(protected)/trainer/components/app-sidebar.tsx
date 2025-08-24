@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/sidebar'
 import { TRAINER_LINKS } from '@/constants/user-links'
 import {
+  GQLUserRole,
   useCreateDraftMealTemplateMutation,
   useCreateDraftTemplateMutation,
   useGetClientsQuery,
@@ -65,43 +66,53 @@ type SidebarSubItem = {
 
 // Define placeholder data types
 const placeholderClients = {
-  myClients: Array(2).fill({
-    id: 'placeholder' + Math.random(),
-    firstName: 'Loading...',
-    lastName: 'Loading...',
-    email: 'Loading...',
-    image: null,
-    role: 'CLIENT',
-    updatedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-  }),
+  myClients: Array(2)
+    .fill(null)
+    .map((_, index) => ({
+      id: `client-placeholder-${index}`,
+      firstName: 'Loading...',
+      lastName: 'Loading...',
+      email: 'Loading...',
+      image: null,
+      role: GQLUserRole.Client,
+      updatedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    })),
 }
 
 const placeholderTemplates = {
-  getTemplates: Array(2).fill({
-    id: 'placeholder' + Math.random(),
-    title: 'Loading...',
-    description: null,
-    isPublic: false,
-    isDraft: false,
-    weekCount: 0,
-    assignedCount: 0,
-  }),
+  getTemplates: Array(2)
+    .fill(null)
+    .map((_, index) => ({
+      id: `template-placeholder-${index}`,
+      title: 'Loading...',
+      description: null,
+      isPublic: false,
+      isDraft: false,
+      weekCount: 0,
+      assignedCount: 0,
+      collaboratorCount: 0,
+    })),
 }
 
 const placeholderMealPlans = {
-  getMealPlanTemplates: Array(2).fill({
-    id: 'placeholder' + Math.random(),
-    title: 'Loading...',
-    description: null,
-    isDraft: false,
-    dailyCalories: 0,
-    dailyProtein: 0,
-    dailyCarbs: 0,
-    dailyFat: 0,
-    weekCount: 0,
-    assignedCount: 0,
-  }),
+  getMealPlanTemplates: Array(2)
+    .fill(null)
+    .map((_, index) => ({
+      id: `meal-plan-placeholder-${index}`,
+      title: 'Loading...',
+      description: null,
+      isDraft: false,
+      dailyCalories: 0,
+      dailyProtein: 0,
+      dailyCarbs: 0,
+      dailyFat: 0,
+      weekCount: 0,
+      assignedCount: 0,
+      collaboratorCount: 0,
+      createdAt: new Date('2025-01-01').toISOString(),
+      updatedAt: new Date('2025-01-01').toISOString(),
+    })),
 }
 
 export function AppSidebar() {

@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 import {
-  BillingStatus,
-  Currency,
   Prisma,
+  ServiceType,
   SubscriptionStatus,
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
@@ -72,6 +71,10 @@ export async function POST(request: NextRequest) {
 
       case STRIPE_WEBHOOK_EVENTS.CHECKOUT_COMPLETED:
         await handleCheckoutCompleted(event.data.object)
+        break
+
+      case STRIPE_WEBHOOK_EVENTS.CHECKOUT_EXPIRED:
+        await handleCheckoutExpired(event.data.object)
         break
 
       case STRIPE_WEBHOOK_EVENTS.PAYMENT_INTENT_SUCCEEDED:
@@ -181,12 +184,36 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
       })
     }
 
+    // Handle trainer assignment from offers
+    const offerToken = subscription.metadata?.offerToken
+    const trainerIdFromOffer = subscription.metadata?.trainerId
+    let assignedTrainerId = packageTemplate.trainerId
+
+    // If this is from a trainer offer, mark offer as completed and assign trainer
+    if (offerToken) {
+      await prisma.trainerOffer.update({
+        where: { token: offerToken },
+        data: {
+          status: 'COMPLETED',
+          completedAt: new Date(),
+        },
+      })
+
+      // Use trainer from offer if package doesn't have one assigned
+      if (!assignedTrainerId && trainerIdFromOffer) {
+        assignedTrainerId = trainerIdFromOffer
+        console.info(
+          `🎯 Assigning trainer ${trainerIdFromOffer} from offer ${offerToken}`,
+        )
+      }
+    }
+
     // Create new subscription record
     await prisma.userSubscription.create({
       data: {
         userId: user.id,
         packageId: packageTemplate.id,
-        trainerId: packageTemplate.trainerId,
+        trainerId: assignedTrainerId, // Use assigned trainer (from package or offer)
         status: SubscriptionStatus.ACTIVE,
         startDate,
         endDate,
@@ -199,6 +226,13 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
         isTrialActive: isTrial || false,
       },
     })
+
+    // Mark customer as having used a trial in Stripe (prevents future trial abuse)
+    if (isTrial) {
+      await stripe.customers.update(customerId, {
+        metadata: { hasUsedTrial: 'true' },
+      })
+    }
 
     // Send welcome email
     if (user.email) {
@@ -255,23 +289,44 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
       },
     })
 
+    if (!userSubscription) {
+      console.error(`Subscription not found for Stripe ID: ${subscription.id}`)
+      return
+    }
+
+    // Immediately disable access by setting endDate to now and clearing all access periods
+    const now = new Date()
+
     await prisma.userSubscription.updateMany({
       where: { stripeSubscriptionId: subscription.id },
       data: {
         status: SubscriptionStatus.CANCELLED,
-        // Keep endDate as is - user retains access until period end
+        endDate: now, // Immediately expire subscription to disable access
+
+        // Clear grace period settings to prevent continued access
+        isInGracePeriod: false,
+        gracePeriodEnd: null,
+        failedPaymentRetries: 0,
+
+        // Clear trial settings to prevent continued access
+        isTrialActive: false,
       },
     })
 
+    console.info(
+      `✅ Subscription ${subscription.id} deleted - immediate access revoked for user ${userSubscription.user.email}`,
+    )
+
     // Send cancellation email
-    if (userSubscription?.user.email && userSubscription.package) {
+    if (userSubscription.user.email && userSubscription.package) {
       try {
-        await sendEmail.subscriptionCancelled(userSubscription.user.email, {
+        await sendEmail.subscriptionDeleted(userSubscription.user.email, {
           userName: userSubscription.user.profile?.firstName,
           packageName: userSubscription.package.name,
-          endDate: userSubscription.endDate.toISOString(),
-          reactivateUrl: `${process.env.NEXT_PUBLIC_APP_URL}/fitspace/settings`,
         })
+        console.info(
+          `📧 Subscription deletion email sent to ${userSubscription.user.email}`,
+        )
       } catch (emailError) {
         console.error('Failed to send cancellation email:', emailError)
       }
@@ -318,21 +373,6 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
           data: updateData,
         })
 
-        // Create billing record
-        await prisma.billingRecord.create({
-          data: {
-            subscriptionId: subscription.id,
-            amount: invoice.amount_paid ?? 0,
-            currency:
-              (invoice.currency?.toUpperCase() as Currency) ?? Currency.USD,
-            status: BillingStatus.SUCCEEDED,
-            stripeInvoiceId: invoice.id,
-            periodStart: new Date(invoice.period_start * 1000),
-            periodEnd: new Date(invoice.period_end * 1000),
-            description: `Payment for ${invoice.description || 'subscription'}`,
-          },
-        })
-
         console.info(`✅ Payment processed for subscription ${subscriptionId}`)
       }
     }
@@ -353,6 +393,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
       // Find the subscription and implement grace period + dunning logic
       const subscription = await prisma.userSubscription.findFirst({
         where: { stripeSubscriptionId: subscriptionId },
+        include: { package: true },
       })
 
       if (subscription) {
@@ -377,21 +418,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
           },
         })
 
-        // Create billing record for failed payment
-        await prisma.billingRecord.create({
-          data: {
-            subscriptionId: subscription.id,
-            amount: invoice.amount_due ?? 0,
-            currency:
-              (invoice.currency?.toUpperCase() as Currency) ?? Currency.USD,
-            status: BillingStatus.FAILED,
-            stripeInvoiceId: invoice.id,
-            periodStart: new Date(invoice.period_start * 1000),
-            periodEnd: new Date(invoice.period_end * 1000),
-            description: `Failed payment for ${invoice.description || 'subscription'}`,
-            failureReason: `Payment attempt ${newRetryCount} failed`,
-          },
-        })
+        // Failed payment records now tracked in Stripe directly
 
         // Dunning management: Cancel subscription after too many failures
         if (newRetryCount >= SUBSCRIPTION_CONFIG.MAX_PAYMENT_RETRIES) {
@@ -464,10 +491,10 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   }
 }
 
-// One-time Purchase Events
+// Simplified payment processing - uses Stripe as source of truth
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   try {
-    // Handle one-time package purchases (for trainer services)
+    // Handle one-time package purchases (supports bundles)
     if (session.mode === 'payment' && session.customer) {
       const customerId = session.customer as string
       const user = await findUserByStripeCustomerId(customerId)
@@ -477,12 +504,157 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         return
       }
 
-      // TODO: Implement one-time package purchase logic
-      // This will handle trainer package purchases with commission splits
-      console.info(`✅ One-time purchase completed for user ${user.id}`)
+      // Get payment intent for reference
+      const paymentIntent = await stripe.paymentIntents.retrieve(
+        session.payment_intent as string,
+      )
+
+      const offerToken = session.metadata?.offerToken
+      const trainerId = session.metadata?.trainerId
+
+      // Get all line items for service delivery creation
+      const lineItems = session.line_items?.data || []
+
+      if (lineItems.length === 0) {
+        console.error('No line items found in checkout session')
+        return
+      }
+
+      console.info(
+        `📦 Processing ${lineItems.length} items in checkout session ${session.id}`,
+      )
+
+      // Create service delivery tasks for each line item
+      const deliveryTasks = []
+
+      for (const lineItem of lineItems) {
+        const priceId = lineItem.price?.id
+        const quantity = lineItem.quantity || 1
+
+        if (!priceId) {
+          console.error(`No price ID found for line item`)
+          continue
+        }
+
+        const packageTemplate = await findPackageByStripePriceId(priceId)
+
+        if (!packageTemplate) {
+          console.error(`Package not found for price: ${priceId}`)
+          continue
+        }
+
+        // Determine trainer ID (from offer or package)
+        const finalTrainerId = trainerId || packageTemplate.trainerId
+        console.log(
+          'finalTrainerId',
+          trainerId,
+          packageTemplate.trainerId,
+          packageTemplate,
+        )
+
+        if (finalTrainerId) {
+          // Get service types from package metadata (simplified approach)
+          const metadata = packageTemplate.metadata as Record<string, unknown>
+          const serviceType =
+            (metadata?.service_type as ServiceType) ||
+            ServiceType.COACHING_COMPLETE // Default service type
+
+          // Create a single delivery task for the package
+          const deliveryTask = await prisma.serviceDelivery.create({
+            data: {
+              stripePaymentIntentId: paymentIntent.id,
+              trainerId: finalTrainerId,
+              clientId: user.id,
+              serviceType: serviceType,
+              packageName: packageTemplate.name,
+              quantity: quantity, // Line item quantity
+              status: 'PENDING',
+              metadata: {
+                checkoutSessionId: session.id,
+                offerToken: offerToken || null,
+                stripePriceId: priceId,
+                lineItemIndex: lineItems.indexOf(lineItem),
+              },
+            },
+          })
+
+          deliveryTasks.push(deliveryTask)
+
+          console.info(
+            `📋 Created delivery task: ${quantity}x ${serviceType} for ${packageTemplate.name} (Trainer: ${finalTrainerId})`,
+          )
+        }
+      }
+
+      // If this is from a trainer offer, mark offer as completed and link to Stripe
+      if (offerToken) {
+        await prisma.trainerOffer.update({
+          where: { token: offerToken },
+          data: {
+            status: 'PAID',
+            completedAt: new Date(),
+            stripeCheckoutSessionId: session.id,
+            stripePaymentIntentId: paymentIntent.id,
+          },
+        })
+
+        console.info(
+          `🎯 Marked trainer offer ${offerToken} as PAID and linked to Stripe`,
+        )
+      }
+
+      console.info(
+        `✅ Payment processed: ${user.email} → ${deliveryTasks.length} delivery tasks created (${paymentIntent.amount / 100} ${paymentIntent.currency.toUpperCase()})`,
+      )
     }
   } catch (error) {
     console.error('Error handling checkout completed:', error)
+  }
+}
+
+// Handle checkout session expired - reset offer status to allow retry
+async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
+  try {
+    const offerToken = session.metadata?.offerToken
+
+    if (!offerToken) {
+      console.info('No offer token found in expired checkout session metadata')
+      return
+    }
+
+    // Find the offer that was being processed
+    const offer = await prisma.trainerOffer.findUnique({
+      where: { token: offerToken },
+    })
+
+    if (!offer) {
+      console.warn(`Offer not found for token: ${offerToken}`)
+      return
+    }
+
+    // Only reset if the offer is currently in processing status
+    if (offer.status === 'PROCESSING') {
+      console.info(
+        `🔄 Resetting offer ${offerToken} back to PENDING after checkout session expired`,
+      )
+      await prisma.trainerOffer.update({
+        where: { id: offer.id },
+        data: {
+          status: 'PENDING',
+          updatedAt: new Date(),
+        },
+      })
+
+      console.info(
+        `🔄 Reset offer ${offerToken} back to PENDING after checkout session expired`,
+      )
+    } else {
+      console.info(
+        `Offer ${offerToken} status is ${offer.status}, no reset needed`,
+      )
+    }
+  } catch (error) {
+    console.error('Error handling checkout expired:', error)
   }
 }
 
@@ -638,21 +810,7 @@ async function handleCustomerDeleted(customer: Stripe.Customer) {
 
     console.info(`✅ Cleared Stripe customer ID for user ${user.id}`)
 
-    // Create billing records for the cancellation events
-    for (const subscription of activeSubscriptions) {
-      await prisma.billingRecord.create({
-        data: {
-          subscriptionId: subscription.id,
-          amount: 0, // No charge for cancellation
-          currency: Currency.USD, // Default currency for cancellation record
-          status: BillingStatus.SUCCEEDED,
-          periodStart: subscription.startDate,
-          periodEnd: subscription.endDate,
-          description: `Subscription cancelled due to customer deletion - ${subscription.package.name}`,
-          failureReason: 'Customer deleted in Stripe',
-        },
-      })
-    }
+    // Billing records for cancellations now tracked in Stripe directly
 
     // Send notification email to user about account changes
     if (user.email && activeSubscriptions.length > 0) {
@@ -691,3 +849,5 @@ async function handleCustomerDeleted(customer: Stripe.Customer) {
     console.error('Error handling customer deleted:', error)
   }
 }
+
+// Helper functions removed - service types now come directly from PackageService relations

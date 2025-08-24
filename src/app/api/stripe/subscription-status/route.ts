@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Get user's current subscription status
-    const subscription = await prisma.userSubscription.findFirst({
+    // Get ALL user subscriptions to check for premium access
+    const subscriptions = await prisma.userSubscription.findMany({
       where: {
         userId,
         OR: [
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     const now = new Date()
 
-    if (!subscription) {
+    if (subscriptions.length === 0) {
       return NextResponse.json({
         hasPremiumAccess: false,
         status: 'NO_SUBSCRIPTION',
@@ -43,6 +43,37 @@ export async function GET(request: NextRequest) {
         gracePeriod: null,
       })
     }
+
+    // Find the most recent active/pending subscription for display
+    const primarySubscription = subscriptions[0]
+
+    // Check if user has premium access from ANY subscription
+    const hasPremiumAccess = subscriptions.some((sub) => {
+      const packageName = sub.package.name.toLowerCase()
+      const isNotExpired = now <= sub.endDate
+
+      // Premium access granted by:
+      // 1. Traditional premium subscription
+      const hasPremiumSubscription =
+        packageName.includes('premium') && isNotExpired
+
+      // 2. Complete Coaching Combo (includes premium access)
+      const hasCoachingCombo =
+        packageName.includes('coaching') &&
+        packageName.includes('combo') &&
+        isNotExpired
+
+      return (
+        (hasPremiumSubscription || hasCoachingCombo) &&
+        SUBSCRIPTION_HELPERS.canAccess(
+          sub.status,
+          sub.isTrialActive || false,
+          sub.isInGracePeriod || false,
+        )
+      )
+    })
+
+    const subscription = primarySubscription
 
     // Check trial status (14 days)
     const isInTrial =
@@ -61,12 +92,7 @@ export async function GET(request: NextRequest) {
       subscription.status === SubscriptionStatus.ACTIVE &&
       now <= subscription.endDate
 
-    // Determine premium access using helper
-    const hasPremiumAccess = SUBSCRIPTION_HELPERS.canAccess(
-      subscription.status,
-      isInTrial || false,
-      isInGracePeriod || false,
-    )
+    // Premium access already calculated above based on subscription types
 
     // Calculate days remaining
     let daysRemaining = 0

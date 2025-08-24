@@ -164,6 +164,35 @@ export function SubscriptionCancelledEmail({
   )
 }
 
+// Subscription Deleted Email
+interface SubscriptionDeletedEmailProps {
+  userName?: string | null
+  packageName: string
+}
+
+export function SubscriptionDeletedEmail({
+  userName,
+  packageName,
+}: SubscriptionDeletedEmailProps) {
+  return (
+    <EmailWrapper>
+      <EmailHeader brandName="Hypertro" />
+      <EmailContent>
+        <EmailHeading size={2}>Subscription has been removed</EmailHeading>
+
+        <p>Hi{userName ? ` ${userName}` : ''},</p>
+
+        <p>Your {packageName} subscription has been removed.</p>
+
+        <p style={{ fontSize: '14px', color: '#666', marginTop: '24px' }}>
+          We're sorry to see you go. If you have feedback about your experience,
+          we'd love to hear from you - just reply to this email.
+        </p>
+      </EmailContent>
+    </EmailWrapper>
+  )
+}
+
 // Welcome/Reactivation Email
 interface WelcomeEmailProps {
   userName?: string | null

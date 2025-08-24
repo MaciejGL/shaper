@@ -126,7 +126,7 @@ const getDisplayInfo = (
         benefitsVariant: 'premium',
         borderColor: cn('border-green-200 dark:border-green-800'),
         bgColor: cn('bg-green-100 dark:bg-green-900/30'),
-        statusText: `Active until ${subscriptionState.subscription?.endDate ? formatDate(subscriptionState.subscription.endDate, 'd. MMMM yyyy') : 'Unknown'}`,
+        statusText: `Next billing date: ${subscriptionState.subscription?.endDate ? formatDate(subscriptionState.subscription.endDate, 'd. MMMM yyyy') : 'Unknown'}`,
         notice: null,
       }
     case 'grace_period':

@@ -4,6 +4,7 @@ import { useUser } from '@/context/user-context'
 import {
   useGetActivePackageTemplatesQuery,
   useGetMySubscriptionStatusQuery,
+  useGetMySubscriptionsQuery,
 } from '@/generated/graphql-client'
 
 import { useSubscriptionActions } from '../hooks/use-subscription-actions'
@@ -36,8 +37,10 @@ export function SubscriptionSection() {
   const { data: subscriptionData, isLoading } =
     useGetMySubscriptionStatusQuery()
   const { data: packagesData } = useGetActivePackageTemplatesQuery({})
+  const { data: mySubscriptionsData } = useGetMySubscriptionsQuery()
   const subscriptionStatus = subscriptionData?.getMySubscriptionStatus
   const availablePackages = packagesData?.getActivePackageTemplates || []
+  const mySubscriptions = mySubscriptionsData?.getMySubscriptions || []
 
   // Simple package selection - just get monthly and yearly options
   const monthlyPackage = availablePackages.find(
@@ -54,13 +57,13 @@ export function SubscriptionSection() {
       return { type: 'none' }
     }
 
-    // Check for active subscription
-    const activeSubscription = subscriptionStatus.activeSubscriptions?.find(
+    // Check for active subscription from mySubscriptions
+    const activeSubscription = mySubscriptions.find(
       (sub) => sub.status === 'ACTIVE' && sub.isActive,
     )
 
     if (activeSubscription) {
-      // Check if it's a trial
+      // Check if it's a trial based on subscription duration
       const isTrialActive =
         activeSubscription.daysUntilExpiry > 0 &&
         activeSubscription.daysUntilExpiry <= 14 // Assuming 14-day trial
@@ -73,8 +76,10 @@ export function SubscriptionSection() {
     }
 
     // Check for cancelled but still active subscription
-    const cancelledSubscription = subscriptionStatus.cancelledSubscriptions?.[0]
-    if (cancelledSubscription && cancelledSubscription.isActive) {
+    const cancelledSubscription = mySubscriptions.find(
+      (sub) => sub.status === 'CANCELLED' && sub.isActive,
+    )
+    if (cancelledSubscription) {
       return {
         type: 'grace_period',
         subscription: cancelledSubscription,
@@ -83,20 +88,21 @@ export function SubscriptionSection() {
       }
     }
 
-    // Expired subscription
-    if (cancelledSubscription) {
+    // Check for expired subscription
+    const expiredSubscription = mySubscriptions.find(
+      (sub) => sub.status === 'EXPIRED',
+    )
+    if (expiredSubscription) {
       return {
         type: 'cancelled',
-        subscription: cancelledSubscription,
+        subscription: expiredSubscription,
         isReactivationEligible: true,
       }
     }
 
+    // Has premium but no subscriptions (edge case)
     return { type: 'expired' }
   })()
-
-  // Note: activeSubscription and cancelledSubscription are no longer needed
-  // since we handle everything through the Stripe customer portal
 
   // For upgrade functionality, we still need the hook for the UpgradeCard
   const { isUpgrading, handleUpgrade } = useSubscriptionActions({

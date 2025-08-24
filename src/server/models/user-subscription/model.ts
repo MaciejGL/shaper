@@ -1,29 +1,18 @@
 import {
-  GQLServiceType,
-  GQLServiceUsage,
   GQLSubscriptionStatus,
   GQLUserSubscription,
 } from '@/generated/graphql-server'
 import type {
-  PackageService as PrismaPackageService,
   PackageTemplate as PrismaPackageTemplate,
-  ServiceUsage as PrismaServiceUsage,
   User as PrismaUser,
   UserSubscription as PrismaUserSubscription,
 } from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 import { SubscriptionStatus } from '@/types/subscription'
 
-import PackageTemplate from '../package-template/model'
-
 export type UserSubscriptionWithIncludes = PrismaUserSubscription & {
   user?: PrismaUser | null
-  package?:
-    | (PrismaPackageTemplate & {
-        services: PrismaPackageService[]
-      })
-    | null
-  usedServices?: PrismaServiceUsage[]
+  package?: PrismaPackageTemplate | null
 }
 
 export default class UserSubscription implements GQLUserSubscription {
@@ -84,25 +73,6 @@ export default class UserSubscription implements GQLUserSubscription {
 
   get mockTransactionId() {
     return this.data.mockTransactionId
-  }
-
-  get package() {
-    if (!this.data.package) {
-      throw new Error('Package data not included in subscription')
-    }
-
-    return new PackageTemplate(this.data.package, this.context)
-  }
-
-  get usedServices(): GQLServiceUsage[] {
-    return (this.data.usedServices || []).map((usage) => ({
-      id: usage.id,
-      subscriptionId: usage.subscriptionId,
-      serviceType: usage.serviceType as GQLServiceType,
-      usedAt: usage.usedAt.toISOString(),
-      quantity: usage.quantity,
-      metadata: usage.metadata ? JSON.stringify(usage.metadata) : null,
-    }))
   }
 
   get isActive() {

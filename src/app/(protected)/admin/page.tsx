@@ -20,11 +20,10 @@ import {
   LazyExercisesTab as ExercisesTab,
   LazyFoodsTab as FoodsTab,
   LazyPushNotificationsTab as PushNotificationsTab,
-  LazySubscriptionsTab as SubscriptionsTab,
   LazyTrainersTab as TrainersTab,
   LazyUsersTab as UsersTab,
 } from './components/lazy-admin-tabs'
-import { ProductManagementTab } from './components/product-management-tab'
+import { UnifiedProductManagement } from './components/unified-product-management'
 
 export default function AdminPage() {
   // Use nuqs for tab persistence
@@ -129,12 +128,12 @@ export default function AdminPage() {
           <PushNotificationsTab />
         </TabsContent>
 
-        <TabsContent value="subscriptions" className="mt-6">
+        {/* <TabsContent value="subscriptions" className="mt-6">
           <SubscriptionsTab />
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="products" className="mt-6">
-          <ProductManagementTab />
+          <UnifiedProductManagement />
         </TabsContent>
 
         <TabsContent value="aws" className="mt-6">

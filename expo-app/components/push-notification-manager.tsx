@@ -50,13 +50,27 @@ export function PushNotificationManager({
             targetPath = targetPath.substring(1)
           }
 
+          // Check if this is a path we should handle (fitspace/ or trainer/ or custom scheme)
+          const shouldHandle =
+            url.startsWith('hypertro://') ||
+            targetPath.startsWith('fitspace/') ||
+            targetPath.startsWith('trainer/')
+
+          if (!shouldHandle) {
+            console.info(
+              '❌ Deep link ignored (not fitspace/trainer path):',
+              url,
+            )
+            return
+          }
+
           // Map deep link paths to web app routes
           const webPath = mapDeepLinkToWebPath(
             targetPath,
             parsed.queryParams as Record<string, string> | undefined,
           )
 
-          console.info('🔗 Navigating to web path:', webPath)
+          console.info('✅ Navigating to web path:', webPath)
 
           // Actually navigate the WebView to the target path
           if (isReady()) {
@@ -72,6 +86,8 @@ export function PushNotificationManager({
               }
             }, 1000)
           }
+        } else {
+          console.info('❌ Deep link ignored (not Hypertro URL):', url)
         }
       } catch (error) {
         console.error('❌ Error handling deep link:', error)

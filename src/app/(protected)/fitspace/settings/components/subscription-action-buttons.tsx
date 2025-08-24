@@ -40,7 +40,7 @@ export function SubscriptionActionButtons({
     try {
       const result = await customerPortal.mutateAsync({
         userId,
-        returnUrl: `${window.location.origin}/fitspace/settings`,
+        returnUrl: `${window.location.origin}/account-management`,
       })
 
       if (result.url) {

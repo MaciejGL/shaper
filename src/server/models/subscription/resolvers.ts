@@ -1,12 +1,30 @@
-import { GQLQueryResolvers } from '@/generated/graphql-server'
-import { GQLContext } from '@/types/gql-context'
+import {
+  GQLMutationResolvers,
+  GQLQueryResolvers,
+} from '@/generated/graphql-server'
 
-import { getSubscriptionStats, getTrainerRevenue } from './factory'
+import {
+  checkPremiumAccess,
+  getActivePackageTemplates,
+  getMyServiceDeliveries,
+  getTrainerDeliveries,
+  updateServiceDelivery,
+} from './factory'
 
 export const Query: GQLQueryResolvers = {
-  getSubscriptionStats: async (_, __, context: GQLContext) =>
-    getSubscriptionStats(context),
+  checkPremiumAccess: async (_, __, context) => checkPremiumAccess(context),
 
-  getTrainerRevenue: async (_, args, context: GQLContext) =>
-    getTrainerRevenue(args, context),
+  getActivePackageTemplates: async (_, args, context) =>
+    getActivePackageTemplates(args, context),
+
+  getMyServiceDeliveries: async (_, args, context) =>
+    getMyServiceDeliveries(args, context),
+
+  getTrainerDeliveries: async (_, args, context) =>
+    getTrainerDeliveries(args, context),
+}
+
+export const Mutation: GQLMutationResolvers = {
+  updateServiceDelivery: async (_, args, context) =>
+    updateServiceDelivery(args.deliveryId, args.status, args.notes, context),
 }

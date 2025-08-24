@@ -1,257 +1,218 @@
 import {
-  GQLPackageStats,
-  GQLQueryGetTrainerRevenueArgs,
-  GQLSubscriptionStats,
+  GQLDeliveryStatus,
+  GQLQueryGetActivePackageTemplatesArgs,
+  GQLQueryGetMyServiceDeliveriesArgs,
+  GQLQueryGetTrainerDeliveriesArgs,
 } from '@/generated/graphql-server'
-import { isAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
+import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
-import { SubscriptionStatus } from '@/types/subscription'
 
-import PackageTemplate, {
-  PackageTemplateWithIncludes,
-} from '../package-template/model'
+import { PackageTemplate, ServiceDelivery } from './model'
 
 /**
- * Get comprehensive subscription statistics (admin only)
+ * Fast premium access check - uses local cache
+ * Use this for UI/content access checks
  */
-export async function getSubscriptionStats(
+export async function checkPremiumAccess(
   context: GQLContext,
-): Promise<GQLSubscriptionStats> {
-  if (!(await isAdminUser())) {
-    throw new Error('Unauthorized')
+): Promise<boolean> {
+  if (!context.user?.user) {
+    return false
   }
 
-  // Get current date for monthly calculations
-  const now = new Date()
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0)
-
-  // Get total active subscriptions
-  const totalActiveSubscriptions = await prisma.userSubscription.count({
-    where: {
-      status: SubscriptionStatus.ACTIVE,
-      endDate: {
-        gte: now,
-      },
-    },
-  })
-
-  // Calculate total revenue from successful billing records
-  const billingRevenue = await prisma.billingRecord.aggregate({
-    _sum: { amount: true },
-    where: { status: 'SUCCEEDED' },
-  })
-  const totalRevenue = billingRevenue._sum.amount || 0
-
-  // Calculate monthly revenue from successful billing records
-  const monthlyBillingRevenue = await prisma.billingRecord.aggregate({
-    _sum: { amount: true },
-    where: {
-      status: 'SUCCEEDED',
-      createdAt: { gte: startOfMonth, lte: endOfMonth },
-    },
-  })
-  const monthlyRevenue = monthlyBillingRevenue._sum.amount || 0
-
-  // Get unique premium users (users with active subscriptions)
-  const premiumUsers = await prisma.userSubscription.groupBy({
-    by: ['userId'],
-    where: {
-      status: SubscriptionStatus.ACTIVE,
-      endDate: {
-        gte: now,
-      },
-    },
-  })
-
-  // Get trainer-specific subscriptions
-  const trainerSubscriptions = await prisma.userSubscription.count({
-    where: {
-      status: SubscriptionStatus.ACTIVE,
-      trainerId: {
-        not: null,
-      },
-      endDate: {
-        gte: now,
-      },
-    },
-  })
-
-  // Get package statistics
-  const packageStats = await getPackageStats(context)
-
-  return {
-    totalActiveSubscriptions,
-    totalRevenue,
-    monthlyRevenue,
-    premiumUsers: premiumUsers.length,
-    trainerSubscriptions,
-    packageStats,
+  try {
+    return await subscriptionValidator.hasPremiumAccess(
+      context.user.user.id,
+      context,
+    )
+  } catch (error) {
+    console.error('Error checking premium access:', error)
+    return false
   }
 }
 
 /**
- * Get statistics for each package template
+ * Critical premium access check - validates with Stripe
+ * Use this for purchases, admin actions, etc.
  */
-export async function getPackageStats(
+export async function checkCriticalPremiumAccess(
   context: GQLContext,
-): Promise<GQLPackageStats[]> {
-  const now = new Date()
+): Promise<boolean> {
+  if (!context.user?.user) {
+    return false
+  }
 
-  // Get all package templates with their subscription counts
-  const packages = await prisma.packageTemplate.findMany({
-    include: {
-      services: true,
-      trainer: true,
-      subscriptions: {
-        where: {
-          status: SubscriptionStatus.ACTIVE,
-          endDate: {
-            gte: now,
-          },
-        },
-      },
-      _count: {
-        select: {
-          subscriptions: {
-            where: {
-              createdAt: {
-                gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // Last 30 days
-              },
-            },
-          },
-        },
-      },
-    },
-  })
-
-  return await Promise.all(
-    packages.map(async (pkg) => {
-      const activeSubscriptions = pkg.subscriptions.length
-      // Calculate revenue from billing records for this package
-      const packageBillingRevenue = await prisma.billingRecord.aggregate({
-        _sum: { amount: true },
-        where: {
-          status: 'SUCCEEDED',
-          subscription: { packageId: pkg.id },
-        },
-      })
-      const totalRevenue = packageBillingRevenue._sum.amount || 0
-
-      // Calculate conversion rate (simplified)
-      // This could be enhanced with more sophisticated tracking
-      const totalTrials = pkg._count.subscriptions
-      const conversionRate =
-        totalTrials > 0 ? (activeSubscriptions / totalTrials) * 100 : 0
-
-      return {
-        package: new PackageTemplate(pkg, context),
-        activeSubscriptions,
-        totalRevenue,
-        conversionRate,
-      }
-    }),
-  )
+  try {
+    return await subscriptionValidator.validateCriticalAccess(
+      context.user.user.id,
+    )
+  } catch (error) {
+    console.error('Error checking critical premium access:', error)
+    // Fallback to regular check if Stripe validation fails
+    return checkPremiumAccess(context)
+  }
 }
 
 /**
- * Get trainer revenue statistics
+ * Get user's service deliveries (what trainers need to deliver to them)
  */
-export async function getTrainerRevenue(
-  args: GQLQueryGetTrainerRevenueArgs,
+export async function getMyServiceDeliveries(
+  args: GQLQueryGetMyServiceDeliveriesArgs,
   context: GQLContext,
 ) {
-  const trainerId = args.trainerId
-
-  // Verify access - user can only view their own stats unless admin
-  if (context.user?.user.id !== trainerId && !(await isAdminUser())) {
-    throw new Error('Unauthorized')
+  if (!context.user?.user) {
+    throw new Error('Authentication required')
   }
 
-  const now = new Date()
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const where = {
+    clientId: context.user.user.id,
+    ...(args.status && { status: args.status }),
+  }
 
-  // Get all trainer subscriptions
-  const allSubscriptions = await prisma.userSubscription.findMany({
-    where: {
-      trainerId,
-    },
+  const deliveries = await prisma.serviceDelivery.findMany({
+    where,
     include: {
-      package: {
+      trainer: {
         include: {
-          services: true,
+          profile: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return deliveries.map((delivery) => new ServiceDelivery(delivery, context))
+}
+
+/**
+ * Get trainer's deliveries to manage
+ */
+export async function getTrainerDeliveries(
+  args: GQLQueryGetTrainerDeliveriesArgs,
+  context: GQLContext,
+) {
+  // Verify trainer access
+  const requestingUserId = context.user?.user.id
+  if (!requestingUserId) {
+    throw new Error('Authentication required')
+  }
+
+  // Only allow trainers to view their own deliveries (or admin)
+  if (requestingUserId !== args.trainerId) {
+    // TODO: Add admin check here if needed
+    throw new Error('Unauthorized: Can only view your own deliveries')
+  }
+
+  const where = {
+    trainerId: args.trainerId,
+    ...(args.status && { status: args.status }),
+  }
+
+  const deliveries = await prisma.serviceDelivery.findMany({
+    where,
+    include: {
+      client: {
+        include: {
+          profile: true,
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  return deliveries.map((delivery) => new ServiceDelivery(delivery, context))
+}
+
+/**
+ * Update service delivery status
+ */
+export async function updateServiceDelivery(
+  deliveryId: string,
+  status: GQLDeliveryStatus,
+  notes: string | undefined | null,
+  context: GQLContext,
+) {
+  if (!context.user?.user) {
+    throw new Error('Authentication required')
+  }
+
+  // Find the delivery and verify trainer ownership
+  const delivery = await prisma.serviceDelivery.findUnique({
+    where: { id: deliveryId },
+  })
+
+  if (!delivery) {
+    throw new Error('Service delivery not found')
+  }
+
+  // Only the assigned trainer can update the delivery
+  if (delivery.trainerId !== context.user.user.id) {
+    throw new Error(
+      'Unauthorized: Only the assigned trainer can update this delivery',
+    )
+  }
+
+  const updateData: {
+    status: GQLDeliveryStatus
+    updatedAt: Date
+    deliveredAt?: Date
+    deliveryNotes?: string | null
+  } = {
+    status,
+    updatedAt: new Date(),
+  }
+
+  // Set deliveredAt when marking as completed
+  if (status === 'COMPLETED') {
+    updateData.deliveredAt = new Date()
+  }
+
+  // Update notes if provided
+  if (notes !== undefined) {
+    updateData.deliveryNotes = notes
+  }
+
+  const updatedDelivery = await prisma.serviceDelivery.update({
+    where: { id: deliveryId },
+    data: updateData,
+    include: {
+      trainer: {
+        include: {
+          profile: true,
+        },
+      },
+      client: {
+        include: {
+          profile: true,
         },
       },
     },
   })
 
-  // Get active subscriptions
-  const activeSubscriptions = allSubscriptions.filter(
-    (sub) => sub.status === SubscriptionStatus.ACTIVE && sub.endDate >= now,
-  )
+  return new ServiceDelivery(updatedDelivery, context)
+}
 
-  // Calculate revenues from billing records for this trainer
-  const trainerBillingRevenue = await prisma.billingRecord.aggregate({
-    _sum: { amount: true },
-    where: {
-      status: 'SUCCEEDED',
-      subscription: { trainerId },
-    },
-  })
-  const totalRevenue = trainerBillingRevenue._sum.amount || 0
-
-  const trainerMonthlyBillingRevenue = await prisma.billingRecord.aggregate({
-    _sum: { amount: true },
-    where: {
-      status: 'SUCCEEDED',
-      subscription: { trainerId },
-      createdAt: { gte: startOfMonth },
-    },
-  })
-  const monthlyRevenue = trainerMonthlyBillingRevenue._sum.amount || 0
-
-  // Get package popularity stats with revenue from billing records
-  const packageCounts: Record<
-    string,
-    { package: PackageTemplateWithIncludes; count: number; revenue: number }
-  > = {}
-
-  for (const sub of allSubscriptions) {
-    const packageId = sub.packageId
-    if (!packageCounts[packageId]) {
-      packageCounts[packageId] = {
-        package: sub.package,
-        count: 0,
-        revenue: 0,
-      }
-    }
-    packageCounts[packageId].count++
-    // Calculate revenue from billing records for this subscription
-    const subBillingRevenue = await prisma.billingRecord.aggregate({
-      _sum: { amount: true },
-      where: {
-        status: 'SUCCEEDED',
-        subscriptionId: sub.id,
-      },
-    })
-    packageCounts[packageId].revenue += subBillingRevenue._sum.amount || 0
+/**
+ * Get active package templates for subscription options
+ */
+export async function getActivePackageTemplates(
+  args: GQLQueryGetActivePackageTemplatesArgs,
+  context: GQLContext,
+) {
+  const where = {
+    isActive: true,
+    ...(args.trainerId && { trainerId: args.trainerId }),
   }
 
-  const popularPackages = Object.values(packageCounts)
-    .map((stats) => ({
-      package: new PackageTemplate(stats.package, context),
-      subscriptionCount: stats.count,
-      revenue: stats.revenue,
-    }))
-    .sort((a, b) => b.subscriptionCount - a.subscriptionCount)
-    .slice(0, 5) // Top 5 packages
+  const packages = await prisma.packageTemplate.findMany({
+    where,
+    orderBy: [
+      { duration: 'asc' }, // Monthly first, then yearly
+      { createdAt: 'desc' },
+    ],
+  })
 
-  return {
-    totalRevenue,
-    monthlyRevenue,
-    activeSubscriptions: activeSubscriptions.length,
-    totalSubscriptions: allSubscriptions.length,
-    popularPackages,
-  }
+  // Map packages to include computed serviceType from metadata
+  return packages.map((pkg) => new PackageTemplate(pkg, context))
 }

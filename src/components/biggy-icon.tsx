@@ -8,6 +8,7 @@ const byggyIconVariants = cva(
     variants: {
       variant: {
         default: 'bg-muted-foreground/10 [&>svg]:text-muted-foreground',
+        success: 'bg-green-500/10 [&>svg]:text-green-500',
       },
       size: {
         xs: 'size-8 [&>svg]:size-4',

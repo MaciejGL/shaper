@@ -76,6 +76,9 @@ export function UpgradeCard({
               <PackagePriceDisplay
                 stripePriceId={monthlyPackage.stripePriceId}
               />
+              <p className="text-sm text-muted-foreground">
+                14 days free trial
+              </p>
             </CardContent>
             <CardFooter>
               <Button
@@ -96,7 +99,7 @@ export function UpgradeCard({
           <Card className="h-full bg-card-on-card rounded-lg text-white mb-6 flex flex-col mt-2 outline-1 outline-amber-500 bg-gradient-to-br from-amber-500/2 to-amber-600/7">
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
               <div className="bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-medium">
-                Best Value
+                Popular
               </div>
             </div>
             <CardContent className="text-center grow flex-center flex-col">
@@ -105,10 +108,13 @@ export function UpgradeCard({
                 stripePriceId={yearlyPackage.stripePriceId}
               />
               {monthlyPackage && (
-                <div className="text-xs text-green-600 font-medium mt-1">
-                  Save with annual billing
+                <div className="text-md text-green-600 font-medium mt-1">
+                  4 months free
                 </div>
               )}
+              <p className="text-sm text-muted-foreground">
+                14 days free trial
+              </p>
             </CardContent>
             <CardFooter>
               <Button
