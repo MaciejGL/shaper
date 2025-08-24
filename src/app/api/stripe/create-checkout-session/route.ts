@@ -4,10 +4,7 @@ import Stripe from 'stripe'
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-})
+import { stripe } from '@/lib/stripe/stripe'
 
 export async function POST(request: NextRequest) {
   try {

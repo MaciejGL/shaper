@@ -9,7 +9,7 @@ import { OfferPage } from './offer-page'
 
 interface OfferPageProps {
   params: Promise<{ token: string }>
-  searchParams: { client?: string }
+  searchParams: Promise<{ client?: string }>
 }
 
 export default async function TrainerOfferPage({
@@ -17,8 +17,7 @@ export default async function TrainerOfferPage({
   searchParams,
 }: OfferPageProps) {
   const { token } = await params
-  console.log('token', token)
-  console.log('searchParams', searchParams)
+  const awaitedSearchParams = await searchParams
 
   // Find the offer by token
   const offer = await prisma.trainerOffer.findUnique({
@@ -106,7 +105,7 @@ export default async function TrainerOfferPage({
   return (
     <OfferPage
       offer={offer}
-      clientEmail={searchParams.client || offer.clientEmail}
+      clientEmail={awaitedSearchParams.client || offer.clientEmail}
     />
   )
 }

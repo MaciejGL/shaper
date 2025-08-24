@@ -5,8 +5,8 @@ import { prisma } from '@/lib/db'
 import { SuccessPage } from './success-page'
 
 interface SuccessPageProps {
-  params: { token: string }
-  searchParams: { session_id?: string }
+  params: Promise<{ token: string }>
+  searchParams: Promise<{ session_id?: string }>
 }
 
 export default async function OfferSuccessPage({

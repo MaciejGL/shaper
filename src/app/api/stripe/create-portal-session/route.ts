@@ -2,10 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-})
+import { stripe } from '@/lib/stripe/stripe'
 
 export async function POST(request: NextRequest) {
   try {

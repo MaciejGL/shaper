@@ -123,11 +123,11 @@ export function OfferPage({
   }
 
   const serviceLabels: Record<ServiceType, string> = {
-    MEAL_PLAN: '🍽️ Custom Meal Plan',
-    TRAINING_PLAN: '💪 Personalized Workout Plan',
-    COACHING: '🎯 Personal Coaching Sessions',
-    IN_PERSON_MEETING: '🤝 In-Person Training',
-    PREMIUM_ACCESS: '⭐ Premium Platform Access',
+    MEAL_PLAN: 'Custom Meal Plan',
+    WORKOUT_PLAN: 'Personalized Workout Plan',
+    COACHING_COMPLETE: 'Personal Coaching Sessions',
+    IN_PERSON_MEETING: 'In-Person Training',
+    PREMIUM_ACCESS: 'Premium Platform Access',
   }
 
   const formatPrice = (amount: number) => {

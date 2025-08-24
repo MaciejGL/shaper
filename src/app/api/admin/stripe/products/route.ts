@@ -2,10 +2,7 @@ import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 import { isAdminUser } from '@/lib/admin-auth'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-})
+import { stripe } from '@/lib/stripe/stripe'
 
 // GET /api/admin/stripe/products - Fetch all Stripe products with prices
 export async function GET() {

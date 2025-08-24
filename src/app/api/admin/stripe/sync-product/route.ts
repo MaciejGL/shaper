@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-import { ServiceType } from '@/generated/prisma/client'
 import { isAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-})
+import { stripe } from '@/lib/stripe/stripe'
 
 // POST /api/admin/stripe/sync-product - Manually sync a Stripe product to database
 export async function POST(request: NextRequest) {
@@ -168,20 +164,6 @@ export async function POST(request: NextRequest) {
       })
 
       // Create associated services for trainer products
-      if (isTrainerService && product.metadata?.service_type) {
-        const serviceType = mapServiceTypeFromMetadata(
-          product.metadata.service_type as string,
-        )
-        if (serviceType) {
-          await prisma.packageService.create({
-            data: {
-              packageId: packageTemplate.id,
-              serviceType,
-              quantity: 1,
-            },
-          })
-        }
-      }
     }
 
     return NextResponse.json({
@@ -216,21 +198,4 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     )
   }
-}
-
-// Helper function to map Stripe metadata service types to Prisma ServiceType enum
-function mapServiceTypeFromMetadata(serviceType: string): ServiceType | null {
-  const mapping: Record<string, ServiceType> = {
-    meal_plan: ServiceType.MEAL_PLAN,
-    workout_plan: ServiceType.TRAINING_PLAN,
-    training_plan: ServiceType.TRAINING_PLAN,
-    coaching_complete: ServiceType.COACHING,
-    coaching_full: ServiceType.COACHING,
-    coaching: ServiceType.COACHING,
-    in_person_coaching: ServiceType.IN_PERSON_MEETING,
-    in_person_session: ServiceType.IN_PERSON_MEETING,
-    premium_access: ServiceType.PREMIUM_ACCESS,
-  }
-
-  return mapping[serviceType] || null
 }

@@ -1,13 +1,9 @@
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
-import { ServiceType } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
+import { stripe } from '@/lib/stripe/stripe'
 import { PackageSummary } from '@/types/trainer-offer'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-})
 
 // GET /api/trainer-packages - Fetch trainer service packages for trainer offers
 // Only includes trainer_service and trainer_coaching packages
@@ -150,32 +146,4 @@ export async function GET() {
       { status: 500 },
     )
   }
-}
-
-// Helper function to format currency display
-export function formatPrice(amount: number, currency: string): string {
-  const symbols: Record<string, string> = {
-    USD: '$',
-    EUR: '€',
-    NOK: 'kr',
-    GBP: '£',
-  }
-
-  const symbol = symbols[currency] || currency
-  const value = (amount / 100).toFixed(2)
-
-  return currency === 'NOK' ? `${value} ${symbol}` : `${symbol}${value}`
-}
-
-// Helper function to get service type description
-export function getServiceDescription(serviceType: ServiceType): string {
-  const descriptions: Record<ServiceType, string> = {
-    MEAL_PLAN: 'Custom Meal Plan',
-    WORKOUT_PLAN: 'Personalized Workout Plan',
-    COACHING_COMPLETE: 'Personal Coaching Sessions',
-    IN_PERSON_MEETING: 'In-Person Training',
-    PREMIUM_ACCESS: 'Premium Platform Access',
-  }
-
-  return descriptions[serviceType] || serviceType
 }

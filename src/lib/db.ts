@@ -59,9 +59,8 @@ const basePrisma = new PrismaClient({
   },
 })
 
-// export const prisma =
-// globalForPrisma.prisma ?? basePrisma.$extends(createDetailedQueryLogger())
-export const prisma = globalForPrisma.prisma ?? basePrisma
+export const prisma =
+  globalForPrisma.prisma ?? basePrisma.$extends(createDetailedQueryLogger())
 
 export { pool }
 

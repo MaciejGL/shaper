@@ -3,7 +3,6 @@
 import {
   Bell,
   Cloud,
-  CreditCard,
   Dumbbell,
   Package,
   UserCheck,
@@ -30,24 +29,8 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useQueryState(
     'tab',
     parseAsStringEnum<
-      | 'users'
-      | 'trainers'
-      | 'exercises'
-      | 'foods'
-      | 'push'
-      | 'subscriptions'
-      | 'products'
-      | 'aws'
-    >([
-      'users',
-      'trainers',
-      'exercises',
-      'foods',
-      'push',
-      'subscriptions',
-      'products',
-      'aws',
-    ])
+      'users' | 'trainers' | 'exercises' | 'foods' | 'push' | 'products' | 'aws'
+    >(['users', 'trainers', 'exercises', 'foods', 'push', 'products', 'aws'])
       .withDefault('users')
       .withOptions({ clearOnDefault: true }),
   )
@@ -65,7 +48,6 @@ export default function AdminPage() {
               | 'exercises'
               | 'foods'
               | 'push'
-              | 'subscriptions'
               | 'products'
               | 'aws',
           )
@@ -91,10 +73,6 @@ export default function AdminPage() {
           <TabsTrigger value="push">
             <Bell className="h-4 w-4" />
             Push Notifications
-          </TabsTrigger>
-          <TabsTrigger value="subscriptions">
-            <CreditCard className="h-4 w-4" />
-            Subscriptions
           </TabsTrigger>
           <TabsTrigger value="products">
             <Package className="h-4 w-4" />
@@ -128,10 +106,6 @@ export default function AdminPage() {
           <PushNotificationsTab />
         </TabsContent>
 
-        {/* <TabsContent value="subscriptions" className="mt-6">
-          <SubscriptionsTab />
-        </TabsContent> */}
-
         <TabsContent value="products" className="mt-6">
           <UnifiedProductManagement />
         </TabsContent>
@@ -139,11 +113,6 @@ export default function AdminPage() {
         <TabsContent value="aws" className="mt-6">
           <AwsTab />
         </TabsContent>
-
-        {/* Future tab contents can be added here */}
-        {/* <TabsContent value="database">
-          <DatabaseTab />
-        </TabsContent> */}
       </Tabs>
     </div>
   )

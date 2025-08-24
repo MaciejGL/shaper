@@ -30,7 +30,6 @@ export function BundleSummary({
     selectedPackages.map((item) => item.package),
   )
   const discountAmount = calculateDiscountAmount(selectedPackages)
-  console.log({ selectedPackages, bundleDiscount, discountAmount })
   return (
     <Card>
       <CardHeader className="flex items-center justify-between">

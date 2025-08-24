@@ -9,10 +9,7 @@ import {
   hasInPersonDiscount,
 } from '@/lib/stripe/discount-utils'
 import { getStripePricingInfo } from '@/lib/stripe/pricing-utils'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil',
-})
+import { stripe } from '@/lib/stripe/stripe'
 
 export async function POST(request: NextRequest) {
   try {
