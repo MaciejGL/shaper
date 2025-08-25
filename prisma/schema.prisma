@@ -1000,8 +1000,9 @@ model ServiceDelivery {
   metadata Json? // Can store meeting details, plan IDs, etc.
 
   // Relations
-  trainer User @relation("TrainerDeliveries", fields: [trainerId], references: [id])
-  client  User @relation("ClientDeliveries", fields: [clientId], references: [id])
+  trainer User          @relation("TrainerDeliveries", fields: [trainerId], references: [id])
+  client  User          @relation("ClientDeliveries", fields: [clientId], references: [id])
+  tasks   ServiceTask[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1012,6 +1013,37 @@ model ServiceDelivery {
   @@index([status])
   @@index([serviceType])
   @@index([createdAt])
+}
+
+// Service task for individual deliverables within a service delivery
+model ServiceTask {
+  id                 String    @id @default(uuid())
+  serviceDeliveryId  String
+  templateId         String
+  title              String
+  taskType           String
+  status             String    @default("PENDING")
+  order              Int       @default(0)
+  isRequired         Boolean   @default(true)
+  completedAt        DateTime?
+  notes              String?
+  requiresScheduling Boolean   @default(false)
+  scheduledAt        DateTime?
+  estimatedDuration  Int?
+  isRecurring        Boolean   @default(false)
+  intervalDays       Int?
+  recurrenceCount    Int?
+  metadata           Json?
+
+  serviceDelivery ServiceDelivery @relation(fields: [serviceDeliveryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([serviceDeliveryId])
+  @@index([status])
+  @@index([templateId])
+  @@index([scheduledAt])
 }
 
 // Delivery status enum

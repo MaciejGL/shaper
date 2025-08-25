@@ -1,5 +1,6 @@
 import Stripe from 'stripe'
 
+import { generateTasks } from '@/constants/task-templates'
 import { PackageTemplate, Prisma, ServiceType } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { User } from '@/lib/getUser'
@@ -352,17 +353,30 @@ async function createServiceDelivery({
       return null
     }
 
-    return await prisma.serviceDelivery.create({
-      data: {
-        stripePaymentIntentId,
-        trainerId,
-        clientId,
-        serviceType,
-        packageName: packageTemplate.name,
-        quantity,
-        status: 'PENDING',
-        metadata: metadata as Prisma.InputJsonValue,
-      },
+    // Create delivery and tasks in transaction
+    return await prisma.$transaction(async (tx) => {
+      // Create service delivery
+      const delivery = await tx.serviceDelivery.create({
+        data: {
+          stripePaymentIntentId,
+          trainerId,
+          clientId,
+          serviceType,
+          packageName: packageTemplate.name,
+          quantity,
+          status: 'PENDING',
+          metadata: metadata as Prisma.InputJsonValue,
+        },
+      })
+
+      // Generate and create tasks
+      const taskData = generateTasks(delivery.id, serviceType, quantity)
+      if (taskData.length > 0) {
+        await tx.serviceTask.createMany({ data: taskData })
+        console.info(`📋 Generated ${taskData.length} tasks for ${serviceType}`)
+      }
+
+      return delivery
     })
   } catch (error) {
     console.error('Failed to create service delivery:', error)

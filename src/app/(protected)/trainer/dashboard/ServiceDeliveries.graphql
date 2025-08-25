@@ -1,0 +1,39 @@
+query GetTrainerServiceDeliveries($trainerId: ID!) {
+  getTrainerDeliveries(trainerId: $trainerId) {
+    id
+    serviceType
+    packageName
+    quantity
+    status
+    deliveredAt
+    deliveryNotes
+    createdAt
+    client {
+      id
+      name
+      email
+    }
+  }
+}
+
+query GetTrainerTasks($trainerId: ID!, $status: TaskStatus) {
+  getTrainerTasks(trainerId: $trainerId, status: $status) {
+    id
+    serviceDeliveryId
+    templateId
+    title
+    taskType
+    status
+    order
+    isRequired
+    completedAt
+    notes
+    requiresScheduling
+    scheduledAt
+    estimatedDuration
+    location
+    isRecurring
+    createdAt
+    updatedAt
+  }
+}

@@ -1068,6 +1068,7 @@ export type GQLMutation = {
   updatePushSubscription: EntireFieldWrapper<GQLPushSubscription>;
   updateReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateServiceDelivery: EntireFieldWrapper<GQLServiceDelivery>;
+  updateServiceTask: EntireFieldWrapper<GQLServiceTask>;
   updateSetLog?: EntireFieldWrapper<Maybe<GQLExerciseSetLog>>;
   updateSubstituteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateTrainingDayData: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1606,6 +1607,12 @@ export type GQLMutationUpdateServiceDeliveryArgs = {
 };
 
 
+export type GQLMutationUpdateServiceTaskArgs = {
+  input: GQLUpdateServiceTaskInput;
+  taskId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationUpdateSetLogArgs = {
   input: GQLLogSetInput;
 };
@@ -1870,8 +1877,10 @@ export type GQLQuery = {
   getPublicTrainingPlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getQuickWorkoutPlan: EntireFieldWrapper<GQLTrainingPlan>;
   getRecentCompletedWorkouts: EntireFieldWrapper<Array<GQLTrainingDay>>;
+  getServiceDeliveryTasks: EntireFieldWrapper<Array<GQLServiceTask>>;
   getTemplates: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getTrainerDeliveries: EntireFieldWrapper<Array<GQLServiceDelivery>>;
+  getTrainerTasks: EntireFieldWrapper<Array<GQLServiceTask>>;
   getTrainingExercise?: EntireFieldWrapper<Maybe<GQLTrainingExercise>>;
   getTrainingPlanById: EntireFieldWrapper<GQLTrainingPlan>;
   getWorkout?: EntireFieldWrapper<Maybe<GQLGetWorkoutPayload>>;
@@ -2034,6 +2043,11 @@ export type GQLQueryGetPublicTrainingPlansArgs = {
 };
 
 
+export type GQLQueryGetServiceDeliveryTasksArgs = {
+  serviceDeliveryId: Scalars['ID']['input'];
+};
+
+
 export type GQLQueryGetTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -2042,6 +2056,13 @@ export type GQLQueryGetTemplatesArgs = {
 
 export type GQLQueryGetTrainerDeliveriesArgs = {
   status?: InputMaybe<GQLDeliveryStatus>;
+  trainerId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetTrainerTasksArgs = {
+  serviceDeliveryId?: InputMaybe<Scalars['ID']['input']>;
+  status?: InputMaybe<GQLTaskStatus>;
   trainerId: Scalars['ID']['input'];
 };
 
@@ -2228,6 +2249,30 @@ export type GQLServiceDelivery = {
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
+export type GQLServiceTask = {
+  __typename?: 'ServiceTask';
+  completedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  estimatedDuration?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  intervalDays?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  isRecurring: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  isRequired: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  location?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  notes?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  order: EntireFieldWrapper<Scalars['Int']['output']>;
+  recurrenceCount?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  requiresScheduling: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  scheduledAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  serviceDelivery: EntireFieldWrapper<GQLServiceDelivery>;
+  serviceDeliveryId: EntireFieldWrapper<Scalars['ID']['output']>;
+  status: EntireFieldWrapper<GQLTaskStatus>;
+  taskType: EntireFieldWrapper<GQLTaskType>;
+  templateId: EntireFieldWrapper<Scalars['String']['output']>;
+  title: EntireFieldWrapper<Scalars['String']['output']>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
 export enum GQLServiceType {
   CoachingComplete = 'coaching_complete',
   InPersonMeeting = 'in_person_meeting',
@@ -2301,6 +2346,23 @@ export enum GQLTargetGoal {
   MarathonTraining = 'MARATHON_TRAINING',
   PowerliftingCompetition = 'POWERLIFTING_COMPETITION',
   StressRelief = 'STRESS_RELIEF'
+}
+
+export enum GQLTaskStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  InProgress = 'IN_PROGRESS',
+  Pending = 'PENDING'
+}
+
+export enum GQLTaskType {
+  Assessment = 'ASSESSMENT',
+  CheckIn = 'CHECK_IN',
+  Consultation = 'CONSULTATION',
+  FollowUp = 'FOLLOW_UP',
+  Meeting = 'MEETING',
+  PlanCreation = 'PLAN_CREATION',
+  PlanDelivery = 'PLAN_DELIVERY'
 }
 
 export type GQLTeamMember = {
@@ -2612,6 +2674,13 @@ export type GQLUpdateReviewInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   rating?: InputMaybe<Scalars['Int']['input']>;
   reviewId: Scalars['ID']['input'];
+};
+
+export type GQLUpdateServiceTaskInput = {
+  location?: InputMaybe<Scalars['String']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  scheduledAt?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<GQLTaskStatus>;
 };
 
 export type GQLUpdateSubstituteExerciseInput = {
@@ -3093,6 +3162,7 @@ export type GQLResolversTypes = {
   SaveMealInput: GQLSaveMealInput;
   SendCollaborationInvitationInput: GQLSendCollaborationInvitationInput;
   ServiceDelivery: ResolverTypeWrapper<GQLServiceDelivery>;
+  ServiceTask: ResolverTypeWrapper<GQLServiceTask>;
   ServiceType: GQLServiceType;
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
@@ -3102,6 +3172,8 @@ export type GQLResolversTypes = {
   SuggestedSets: ResolverTypeWrapper<GQLSuggestedSets>;
   SuggestedSetsInput: GQLSuggestedSetsInput;
   TargetGoal: GQLTargetGoal;
+  TaskStatus: GQLTaskStatus;
+  TaskType: GQLTaskType;
   TeamMember: ResolverTypeWrapper<GQLTeamMember>;
   Theme: GQLTheme;
   TimeFormat: GQLTimeFormat;
@@ -3126,6 +3198,7 @@ export type GQLResolversTypes = {
   UpdateProfileInput: GQLUpdateProfileInput;
   UpdatePushSubscriptionInput: GQLUpdatePushSubscriptionInput;
   UpdateReviewInput: GQLUpdateReviewInput;
+  UpdateServiceTaskInput: GQLUpdateServiceTaskInput;
   UpdateSubstituteExerciseInput: GQLUpdateSubstituteExerciseInput;
   UpdateTrainingDayDataInput: GQLUpdateTrainingDayDataInput;
   UpdateTrainingDayInput: GQLUpdateTrainingDayInput;
@@ -3269,6 +3342,7 @@ export type GQLResolversParentTypes = {
   SaveMealInput: GQLSaveMealInput;
   SendCollaborationInvitationInput: GQLSendCollaborationInvitationInput;
   ServiceDelivery: GQLServiceDelivery;
+  ServiceTask: GQLServiceTask;
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
   String: Scalars['String']['output'];
   Substitute: GQLSubstitute;
@@ -3295,6 +3369,7 @@ export type GQLResolversParentTypes = {
   UpdateProfileInput: GQLUpdateProfileInput;
   UpdatePushSubscriptionInput: GQLUpdatePushSubscriptionInput;
   UpdateReviewInput: GQLUpdateReviewInput;
+  UpdateServiceTaskInput: GQLUpdateServiceTaskInput;
   UpdateSubstituteExerciseInput: GQLUpdateSubstituteExerciseInput;
   UpdateTrainingDayDataInput: GQLUpdateTrainingDayDataInput;
   UpdateTrainingDayInput: GQLUpdateTrainingDayInput;
@@ -3844,6 +3919,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updatePushSubscription?: Resolver<GQLResolversTypes['PushSubscription'], ParentType, ContextType, RequireFields<GQLMutationUpdatePushSubscriptionArgs, 'input'>>;
   updateReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateReviewArgs, 'input'>>;
   updateServiceDelivery?: Resolver<GQLResolversTypes['ServiceDelivery'], ParentType, ContextType, RequireFields<GQLMutationUpdateServiceDeliveryArgs, 'deliveryId' | 'status'>>;
+  updateServiceTask?: Resolver<GQLResolversTypes['ServiceTask'], ParentType, ContextType, RequireFields<GQLMutationUpdateServiceTaskArgs, 'input' | 'taskId'>>;
   updateSetLog?: Resolver<Maybe<GQLResolversTypes['ExerciseSetLog']>, ParentType, ContextType, RequireFields<GQLMutationUpdateSetLogArgs, 'input'>>;
   updateSubstituteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateSubstituteExerciseArgs, 'input'>>;
   updateTrainingDayData?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingDayDataArgs, 'input'>>;
@@ -4029,8 +4105,10 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getPublicTrainingPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetPublicTrainingPlansArgs>>;
   getQuickWorkoutPlan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
   getRecentCompletedWorkouts?: Resolver<Array<GQLResolversTypes['TrainingDay']>, ParentType, ContextType>;
+  getServiceDeliveryTasks?: Resolver<Array<GQLResolversTypes['ServiceTask']>, ParentType, ContextType, RequireFields<GQLQueryGetServiceDeliveryTasksArgs, 'serviceDeliveryId'>>;
   getTemplates?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetTemplatesArgs>>;
   getTrainerDeliveries?: Resolver<Array<GQLResolversTypes['ServiceDelivery']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainerDeliveriesArgs, 'trainerId'>>;
+  getTrainerTasks?: Resolver<Array<GQLResolversTypes['ServiceTask']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainerTasksArgs, 'trainerId'>>;
   getTrainingExercise?: Resolver<Maybe<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainingExerciseArgs, 'id'>>;
   getTrainingPlanById?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLQueryGetTrainingPlanByIdArgs, 'id'>>;
   getWorkout?: Resolver<Maybe<GQLResolversTypes['GetWorkoutPayload']>, ParentType, ContextType, Partial<GQLQueryGetWorkoutArgs>>;
@@ -4091,6 +4169,30 @@ export type GQLServiceDeliveryResolvers<ContextType = GQLContext, ParentType ext
   status?: Resolver<GQLResolversTypes['DeliveryStatus'], ParentType, ContextType>;
   trainer?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
   trainerId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLServiceTaskResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ServiceTask'] = GQLResolversParentTypes['ServiceTask']> = {
+  completedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  estimatedDuration?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  intervalDays?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  isRecurring?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  isRequired?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  location?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  notes?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  order?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  recurrenceCount?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  requiresScheduling?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  scheduledAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  serviceDelivery?: Resolver<GQLResolversTypes['ServiceDelivery'], ParentType, ContextType>;
+  serviceDeliveryId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  status?: Resolver<GQLResolversTypes['TaskStatus'], ParentType, ContextType>;
+  taskType?: Resolver<GQLResolversTypes['TaskType'], ParentType, ContextType>;
+  templateId?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  title?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -4443,6 +4545,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   Query?: GQLQueryResolvers<ContextType>;
   Review?: GQLReviewResolvers<ContextType>;
   ServiceDelivery?: GQLServiceDeliveryResolvers<ContextType>;
+  ServiceTask?: GQLServiceTaskResolvers<ContextType>;
   Substitute?: GQLSubstituteResolvers<ContextType>;
   SuggestedSets?: GQLSuggestedSetsResolvers<ContextType>;
   TeamMember?: GQLTeamMemberResolvers<ContextType>;

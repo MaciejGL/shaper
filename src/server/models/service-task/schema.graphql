@@ -1,0 +1,72 @@
+enum TaskType {
+  CONSULTATION
+  ASSESSMENT
+  PLAN_CREATION
+  PLAN_DELIVERY
+  CHECK_IN
+  MEETING
+  FOLLOW_UP
+}
+
+enum TaskStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+type ServiceTask {
+  id: ID!
+  serviceDeliveryId: ID!
+  templateId: String!
+  title: String!
+  taskType: TaskType!
+  status: TaskStatus!
+  order: Int!
+  isRequired: Boolean!
+
+  # Completion tracking
+  completedAt: String
+  notes: String
+
+  # Scheduling
+  requiresScheduling: Boolean!
+  scheduledAt: String
+  estimatedDuration: Int
+  location: String
+
+  # Recurrence
+  isRecurring: Boolean!
+  intervalDays: Int
+  recurrenceCount: Int
+
+  # Relations
+  serviceDelivery: ServiceDelivery!
+
+  createdAt: String!
+  updatedAt: String!
+}
+
+input UpdateServiceTaskInput {
+  status: TaskStatus
+  notes: String
+  scheduledAt: String
+  location: String
+}
+
+type Query {
+  # Get tasks for a specific service delivery
+  getServiceDeliveryTasks(serviceDeliveryId: ID!): [ServiceTask!]!
+
+  # Get all tasks for trainer's service deliveries
+  getTrainerTasks(
+    trainerId: ID!
+    status: TaskStatus
+    serviceDeliveryId: ID
+  ): [ServiceTask!]!
+}
+
+type Mutation {
+  # Update task status, scheduling, etc.
+  updateServiceTask(taskId: ID!, input: UpdateServiceTaskInput!): ServiceTask!
+}

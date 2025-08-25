@@ -1066,6 +1066,7 @@ export type GQLMutation = {
   updatePushSubscription: GQLPushSubscription;
   updateReview: Scalars['Boolean']['output'];
   updateServiceDelivery: GQLServiceDelivery;
+  updateServiceTask: GQLServiceTask;
   updateSetLog?: Maybe<GQLExerciseSetLog>;
   updateSubstituteExercise: Scalars['Boolean']['output'];
   updateTrainingDayData: Scalars['Boolean']['output'];
@@ -1604,6 +1605,12 @@ export type GQLMutationUpdateServiceDeliveryArgs = {
 };
 
 
+export type GQLMutationUpdateServiceTaskArgs = {
+  input: GQLUpdateServiceTaskInput;
+  taskId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationUpdateSetLogArgs = {
   input: GQLLogSetInput;
 };
@@ -1868,8 +1875,10 @@ export type GQLQuery = {
   getPublicTrainingPlans: Array<GQLTrainingPlan>;
   getQuickWorkoutPlan: GQLTrainingPlan;
   getRecentCompletedWorkouts: Array<GQLTrainingDay>;
+  getServiceDeliveryTasks: Array<GQLServiceTask>;
   getTemplates: Array<GQLTrainingPlan>;
   getTrainerDeliveries: Array<GQLServiceDelivery>;
+  getTrainerTasks: Array<GQLServiceTask>;
   getTrainingExercise?: Maybe<GQLTrainingExercise>;
   getTrainingPlanById: GQLTrainingPlan;
   getWorkout?: Maybe<GQLGetWorkoutPayload>;
@@ -2032,6 +2041,11 @@ export type GQLQueryGetPublicTrainingPlansArgs = {
 };
 
 
+export type GQLQueryGetServiceDeliveryTasksArgs = {
+  serviceDeliveryId: Scalars['ID']['input'];
+};
+
+
 export type GQLQueryGetTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -2040,6 +2054,13 @@ export type GQLQueryGetTemplatesArgs = {
 
 export type GQLQueryGetTrainerDeliveriesArgs = {
   status?: InputMaybe<GQLDeliveryStatus>;
+  trainerId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetTrainerTasksArgs = {
+  serviceDeliveryId?: InputMaybe<Scalars['ID']['input']>;
+  status?: InputMaybe<GQLTaskStatus>;
   trainerId: Scalars['ID']['input'];
 };
 
@@ -2226,6 +2247,30 @@ export type GQLServiceDelivery = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type GQLServiceTask = {
+  __typename?: 'ServiceTask';
+  completedAt?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  estimatedDuration?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['ID']['output'];
+  intervalDays?: Maybe<Scalars['Int']['output']>;
+  isRecurring: Scalars['Boolean']['output'];
+  isRequired: Scalars['Boolean']['output'];
+  location?: Maybe<Scalars['String']['output']>;
+  notes?: Maybe<Scalars['String']['output']>;
+  order: Scalars['Int']['output'];
+  recurrenceCount?: Maybe<Scalars['Int']['output']>;
+  requiresScheduling: Scalars['Boolean']['output'];
+  scheduledAt?: Maybe<Scalars['String']['output']>;
+  serviceDelivery: GQLServiceDelivery;
+  serviceDeliveryId: Scalars['ID']['output'];
+  status: GQLTaskStatus;
+  taskType: GQLTaskType;
+  templateId: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export enum GQLServiceType {
   CoachingComplete = 'coaching_complete',
   InPersonMeeting = 'in_person_meeting',
@@ -2299,6 +2344,23 @@ export enum GQLTargetGoal {
   MarathonTraining = 'MARATHON_TRAINING',
   PowerliftingCompetition = 'POWERLIFTING_COMPETITION',
   StressRelief = 'STRESS_RELIEF'
+}
+
+export enum GQLTaskStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  InProgress = 'IN_PROGRESS',
+  Pending = 'PENDING'
+}
+
+export enum GQLTaskType {
+  Assessment = 'ASSESSMENT',
+  CheckIn = 'CHECK_IN',
+  Consultation = 'CONSULTATION',
+  FollowUp = 'FOLLOW_UP',
+  Meeting = 'MEETING',
+  PlanCreation = 'PLAN_CREATION',
+  PlanDelivery = 'PLAN_DELIVERY'
 }
 
 export type GQLTeamMember = {
@@ -2610,6 +2672,13 @@ export type GQLUpdateReviewInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   rating?: InputMaybe<Scalars['Int']['input']>;
   reviewId: Scalars['ID']['input'];
+};
+
+export type GQLUpdateServiceTaskInput = {
+  location?: InputMaybe<Scalars['String']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  scheduledAt?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<GQLTaskStatus>;
 };
 
 export type GQLUpdateSubstituteExerciseInput = {
@@ -3553,6 +3622,21 @@ export type GQLBasicUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
 export type GQLBasicUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string } | undefined | null };
+
+export type GQLGetTrainerServiceDeliveriesQueryVariables = Exact<{
+  trainerId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetTrainerServiceDeliveriesQuery = { __typename?: 'Query', getTrainerDeliveries: Array<{ __typename?: 'ServiceDelivery', id: string, serviceType?: GQLServiceType | undefined | null, packageName: string, quantity: number, status: GQLDeliveryStatus, deliveredAt?: string | undefined | null, deliveryNotes?: string | undefined | null, createdAt: string, client: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } }> };
+
+export type GQLGetTrainerTasksQueryVariables = Exact<{
+  trainerId: Scalars['ID']['input'];
+  status?: InputMaybe<GQLTaskStatus>;
+}>;
+
+
+export type GQLGetTrainerTasksQuery = { __typename?: 'Query', getTrainerTasks: Array<{ __typename?: 'ServiceTask', id: string, serviceDeliveryId: string, templateId: string, title: string, taskType: GQLTaskType, status: GQLTaskStatus, order: number, isRequired: boolean, completedAt?: string | undefined | null, notes?: string | undefined | null, requiresScheduling: boolean, scheduledAt?: string | undefined | null, estimatedDuration?: number | undefined | null, location?: string | undefined | null, isRecurring: boolean, createdAt: string, updatedAt: string }> };
 
 export type GQLMuscleGroupCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -9529,6 +9613,134 @@ useInfiniteBasicUserQuery.getKey = (variables?: GQLBasicUserQueryVariables) => v
 
 
 useBasicUserQuery.fetcher = (variables?: GQLBasicUserQueryVariables, options?: RequestInit['headers']) => fetchData<GQLBasicUserQuery, GQLBasicUserQueryVariables>(BasicUserDocument, variables, options);
+
+export const GetTrainerServiceDeliveriesDocument = `
+    query GetTrainerServiceDeliveries($trainerId: ID!) {
+  getTrainerDeliveries(trainerId: $trainerId) {
+    id
+    serviceType
+    packageName
+    quantity
+    status
+    deliveredAt
+    deliveryNotes
+    createdAt
+    client {
+      id
+      name
+      email
+    }
+  }
+}
+    `;
+
+export const useGetTrainerServiceDeliveriesQuery = <
+      TData = GQLGetTrainerServiceDeliveriesQuery,
+      TError = unknown
+    >(
+      variables: GQLGetTrainerServiceDeliveriesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetTrainerServiceDeliveriesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetTrainerServiceDeliveriesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetTrainerServiceDeliveriesQuery, TError, TData>(
+      {
+    queryKey: ['GetTrainerServiceDeliveries', variables],
+    queryFn: fetchData<GQLGetTrainerServiceDeliveriesQuery, GQLGetTrainerServiceDeliveriesQueryVariables>(GetTrainerServiceDeliveriesDocument, variables),
+    ...options
+  }
+    )};
+
+useGetTrainerServiceDeliveriesQuery.getKey = (variables: GQLGetTrainerServiceDeliveriesQueryVariables) => ['GetTrainerServiceDeliveries', variables];
+
+export const useInfiniteGetTrainerServiceDeliveriesQuery = <
+      TData = InfiniteData<GQLGetTrainerServiceDeliveriesQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetTrainerServiceDeliveriesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetTrainerServiceDeliveriesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetTrainerServiceDeliveriesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetTrainerServiceDeliveriesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetTrainerServiceDeliveries.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetTrainerServiceDeliveriesQuery, GQLGetTrainerServiceDeliveriesQueryVariables>(GetTrainerServiceDeliveriesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetTrainerServiceDeliveriesQuery.getKey = (variables: GQLGetTrainerServiceDeliveriesQueryVariables) => ['GetTrainerServiceDeliveries.infinite', variables];
+
+
+useGetTrainerServiceDeliveriesQuery.fetcher = (variables: GQLGetTrainerServiceDeliveriesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetTrainerServiceDeliveriesQuery, GQLGetTrainerServiceDeliveriesQueryVariables>(GetTrainerServiceDeliveriesDocument, variables, options);
+
+export const GetTrainerTasksDocument = `
+    query GetTrainerTasks($trainerId: ID!, $status: TaskStatus) {
+  getTrainerTasks(trainerId: $trainerId, status: $status) {
+    id
+    serviceDeliveryId
+    templateId
+    title
+    taskType
+    status
+    order
+    isRequired
+    completedAt
+    notes
+    requiresScheduling
+    scheduledAt
+    estimatedDuration
+    location
+    isRecurring
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useGetTrainerTasksQuery = <
+      TData = GQLGetTrainerTasksQuery,
+      TError = unknown
+    >(
+      variables: GQLGetTrainerTasksQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetTrainerTasksQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetTrainerTasksQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetTrainerTasksQuery, TError, TData>(
+      {
+    queryKey: ['GetTrainerTasks', variables],
+    queryFn: fetchData<GQLGetTrainerTasksQuery, GQLGetTrainerTasksQueryVariables>(GetTrainerTasksDocument, variables),
+    ...options
+  }
+    )};
+
+useGetTrainerTasksQuery.getKey = (variables: GQLGetTrainerTasksQueryVariables) => ['GetTrainerTasks', variables];
+
+export const useInfiniteGetTrainerTasksQuery = <
+      TData = InfiniteData<GQLGetTrainerTasksQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetTrainerTasksQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetTrainerTasksQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetTrainerTasksQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetTrainerTasksQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetTrainerTasks.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetTrainerTasksQuery, GQLGetTrainerTasksQueryVariables>(GetTrainerTasksDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetTrainerTasksQuery.getKey = (variables: GQLGetTrainerTasksQueryVariables) => ['GetTrainerTasks.infinite', variables];
+
+
+useGetTrainerTasksQuery.fetcher = (variables: GQLGetTrainerTasksQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetTrainerTasksQuery, GQLGetTrainerTasksQueryVariables>(GetTrainerTasksDocument, variables, options);
 
 export const MuscleGroupCategoriesDocument = `
     query MuscleGroupCategories {

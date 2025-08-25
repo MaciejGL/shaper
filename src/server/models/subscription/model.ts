@@ -127,7 +127,20 @@ export class ServiceDelivery implements GQLServiceDelivery {
   }
 
   get serviceType(): GQLServiceType {
-    return this.data.serviceType as GQLServiceType
+    switch (this.data.serviceType) {
+      case 'WORKOUT_PLAN':
+        return GQLServiceType.WorkoutPlan
+      case 'MEAL_PLAN':
+        return GQLServiceType.MealPlan
+      case 'COACHING_COMPLETE':
+        return GQLServiceType.CoachingComplete
+      case 'IN_PERSON_MEETING':
+        return GQLServiceType.InPersonMeeting
+      case 'PREMIUM_ACCESS':
+        return GQLServiceType.PremiumAccess
+      default:
+        return GQLServiceType.WorkoutPlan // Default fallback
+    }
   }
 
   get status(): GQLDeliveryStatus {
