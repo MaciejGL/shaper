@@ -1,0 +1,59 @@
+# Admin subscription management queries
+
+# Get all users with their subscription status
+query GetAllUsersWithSubscriptions(
+  $limit: Int
+  $offset: Int
+  $searchQuery: String
+) {
+  getAllUsersWithSubscriptions(
+    limit: $limit
+    offset: $offset
+    searchQuery: $searchQuery
+  ) {
+    users {
+      id
+      email
+      name
+      role
+      hasActiveSubscription
+      subscription {
+        id
+        status
+        startDate
+        endDate
+        isActive
+        stripeSubscriptionId
+      }
+      createdAt
+    }
+    totalCount
+  }
+}
+
+# Give lifetime premium subscription to a user
+mutation GiveLifetimePremium($userId: ID!) {
+  giveLifetimePremium(userId: $userId) {
+    id
+    status
+    startDate
+    endDate
+    isActive
+  }
+}
+
+# Remove subscription from a user
+mutation RemoveUserSubscription($userId: ID!) {
+  removeUserSubscription(userId: $userId)
+}
+
+# Get subscription statistics
+query GetSubscriptionStats {
+  getSubscriptionStats {
+    totalUsers
+    usersWithActiveSubscriptions
+    usersWithExpiredSubscriptions
+    usersWithoutSubscriptions
+    totalLifetimeSubscriptions
+  }
+}

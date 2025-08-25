@@ -3,6 +3,7 @@
 import {
   Bell,
   Cloud,
+  CreditCard,
   Dumbbell,
   Package,
   UserCheck,
@@ -19,6 +20,7 @@ import {
   LazyExercisesTab as ExercisesTab,
   LazyFoodsTab as FoodsTab,
   LazyPushNotificationsTab as PushNotificationsTab,
+  LazySubscriptionsTab as SubscriptionsTab,
   LazyTrainersTab as TrainersTab,
   LazyUsersTab as UsersTab,
 } from './components/lazy-admin-tabs'
@@ -29,8 +31,24 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useQueryState(
     'tab',
     parseAsStringEnum<
-      'users' | 'trainers' | 'exercises' | 'foods' | 'push' | 'products' | 'aws'
-    >(['users', 'trainers', 'exercises', 'foods', 'push', 'products', 'aws'])
+      | 'users'
+      | 'trainers'
+      | 'exercises'
+      | 'foods'
+      | 'push'
+      | 'products'
+      | 'aws'
+      | 'subscriptions'
+    >([
+      'users',
+      'trainers',
+      'exercises',
+      'foods',
+      'push',
+      'products',
+      'aws',
+      'subscriptions',
+    ])
       .withDefault('users')
       .withOptions({ clearOnDefault: true }),
   )
@@ -49,7 +67,8 @@ export default function AdminPage() {
               | 'foods'
               | 'push'
               | 'products'
-              | 'aws',
+              | 'aws'
+              | 'subscriptions',
           )
         }
       >
@@ -61,6 +80,10 @@ export default function AdminPage() {
           <TabsTrigger value="trainers">
             <UserCheck className="h-4 w-4" />
             Trainers
+          </TabsTrigger>
+          <TabsTrigger value="subscriptions">
+            <CreditCard className="h-4 w-4" />
+            Subscriptions
           </TabsTrigger>
           <TabsTrigger value="exercises">
             <Dumbbell className="h-4 w-4" />
@@ -92,6 +115,10 @@ export default function AdminPage() {
 
         <TabsContent value="trainers" className="mt-6">
           <TrainersTab />
+        </TabsContent>
+
+        <TabsContent value="subscriptions" className="mt-6">
+          <SubscriptionsTab />
         </TabsContent>
 
         <TabsContent value="exercises" className="mt-6">

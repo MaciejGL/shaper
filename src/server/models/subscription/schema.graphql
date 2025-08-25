@@ -84,9 +84,41 @@ type ServiceDelivery {
   updatedAt: String!
 }
 
+# Admin types for subscription management
+type UserWithSubscription {
+  id: ID!
+  email: String!
+  name: String
+  role: String!
+  hasActiveSubscription: Boolean!
+  subscription: UserSubscription
+  createdAt: String!
+}
+
+type UsersWithSubscriptionsResult {
+  users: [UserWithSubscription!]!
+  totalCount: Int!
+}
+
+type SubscriptionStats {
+  totalUsers: Int!
+  usersWithActiveSubscriptions: Int!
+  usersWithExpiredSubscriptions: Int!
+  usersWithoutSubscriptions: Int!
+  totalLifetimeSubscriptions: Int!
+}
+
 # SIMPLIFIED QUERIES - Focus on essentials only
 type Query {
   # Essential subscription checks
+
+  # Admin subscription management
+  getAllUsersWithSubscriptions(
+    limit: Int
+    offset: Int
+    searchQuery: String
+  ): UsersWithSubscriptionsResult!
+  getSubscriptionStats: SubscriptionStats!
   getMySubscriptionStatus: UserSubscriptionStatus!
   checkPremiumAccess: Boolean!
 
@@ -112,4 +144,8 @@ type Mutation {
     status: DeliveryStatus!
     notes: String
   ): ServiceDelivery!
+
+  # Admin subscription management
+  giveLifetimePremium(userId: ID!): UserSubscription!
+  removeUserSubscription(userId: ID!): Boolean!
 }

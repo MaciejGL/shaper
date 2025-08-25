@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { GQLTaskStatus } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
 interface TaskItemProps {

@@ -6,7 +6,6 @@ import { useState } from 'react'
 
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Loader } from '@/components/loader'
-import { RadioButtons } from '@/components/radio-buttons'
 import { TrainerCard } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Badge } from '@/components/ui/badge'
@@ -28,6 +27,8 @@ import {
 } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
+
+import { ClientServiceDeliveriesSection } from './components/client-service-deliveries-section'
 
 type CoachingRequest = GQLMyCoachingRequestsQuery['coachingRequests'][0]
 
@@ -134,43 +135,12 @@ function TrainerView({ trainer }: TrainerViewProps) {
                 </Badge>
               </div>
             )}
-            {/* Update plan type */}
-            <div className="flex flex-col gap-2 opacity-50">
-              <p className="text-md font-medium">Plan type - coming soon</p>
-              <RadioButtons
-                options={[
-                  {
-                    label: 'Training plan',
-                    value: 'training-plan',
-                    description: 'Training plan only',
-                  },
-                  {
-                    label: 'Meal plan',
-                    value: 'meal-plan',
-                    description: 'Meal plan only',
-                  },
-                  {
-                    label: 'Training & Meal plan',
-                    value: 'training-meal-plan',
-                    description: 'Training plan & Meal plan',
-                  },
-                  {
-                    label: 'Full Package',
-                    value: 'full-coaching',
-                    description:
-                      'Training plan & Meal plan and 1 session per month',
-                  },
-                ]}
-                description="Select the type of coaching plan you want to update"
-                value="training-plan"
-                onValueChange={(value) => console.info(value)}
-                columns={1}
-                className="w-full"
-              />
-            </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Service Deliveries Section */}
+      <ClientServiceDeliveriesSection trainerId={trainer.id} />
 
       <Card>
         <CardContent>

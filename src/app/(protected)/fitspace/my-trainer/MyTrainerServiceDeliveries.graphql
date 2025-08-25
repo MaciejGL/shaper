@@ -1,0 +1,18 @@
+query FitGetMyServiceDeliveries($status: DeliveryStatus) {
+  getMyServiceDeliveries(status: $status) {
+    id
+    serviceType
+    packageName
+    quantity
+    status
+    deliveredAt
+    deliveryNotes
+    trainer {
+      id
+      name
+      email
+    }
+    createdAt
+    updatedAt
+  }
+}

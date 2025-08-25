@@ -1023,6 +1023,7 @@ export type GQLMutation = {
   fitspaceDeleteMealPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   generateAiWorkout: EntireFieldWrapper<GQLAiWorkoutResult>;
   getAiExerciseSuggestions: EntireFieldWrapper<Array<GQLAiExerciseSuggestion>>;
+  giveLifetimePremium: EntireFieldWrapper<GQLUserSubscription>;
   logWorkoutProgress: EntireFieldWrapper<Scalars['ID']['output']>;
   logWorkoutSessionEvent: EntireFieldWrapper<Scalars['ID']['output']>;
   markAllNotificationsRead: EntireFieldWrapper<Array<GQLNotification>>;
@@ -1047,6 +1048,7 @@ export type GQLMutation = {
   removeTrainingPlanCollaborator: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeTrainingPlanFromClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeTrainingWeek: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  removeUserSubscription: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeWeek: EntireFieldWrapper<Scalars['Boolean']['output']>;
   resetUserLogs: EntireFieldWrapper<Scalars['Boolean']['output']>;
   respondToCollaborationInvitation: EntireFieldWrapper<GQLCollaborationInvitation>;
@@ -1376,6 +1378,11 @@ export type GQLMutationGetAiExerciseSuggestionsArgs = {
 };
 
 
+export type GQLMutationGiveLifetimePremiumArgs = {
+  userId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationLogWorkoutProgressArgs = {
   dayId: Scalars['ID']['input'];
   tick: Scalars['Int']['input'];
@@ -1499,6 +1506,11 @@ export type GQLMutationRemoveTrainingPlanFromClientArgs = {
 
 export type GQLMutationRemoveTrainingWeekArgs = {
   weekId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveUserSubscriptionArgs = {
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -1852,6 +1864,7 @@ export type GQLQuery = {
   getActiveMealPlan?: EntireFieldWrapper<Maybe<GQLMealPlan>>;
   getActivePackageTemplates: EntireFieldWrapper<Array<GQLPackageTemplate>>;
   getActivePlanId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
+  getAllUsersWithSubscriptions: EntireFieldWrapper<GQLUsersWithSubscriptionsResult>;
   getClientActivePlan?: EntireFieldWrapper<Maybe<GQLTrainingPlan>>;
   getClientMealPlans: EntireFieldWrapper<Array<GQLMealPlan>>;
   getClientTrainingPlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
@@ -1878,6 +1891,7 @@ export type GQLQuery = {
   getQuickWorkoutPlan: EntireFieldWrapper<GQLTrainingPlan>;
   getRecentCompletedWorkouts: EntireFieldWrapper<Array<GQLTrainingDay>>;
   getServiceDeliveryTasks: EntireFieldWrapper<Array<GQLServiceTask>>;
+  getSubscriptionStats: EntireFieldWrapper<GQLSubscriptionStats>;
   getTemplates: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getTrainerDeliveries: EntireFieldWrapper<Array<GQLServiceDelivery>>;
   getTrainerTasks: EntireFieldWrapper<Array<GQLServiceTask>>;
@@ -1974,6 +1988,13 @@ export type GQLQueryGetActiveMealPlanArgs = {
 
 export type GQLQueryGetActivePackageTemplatesArgs = {
   trainerId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type GQLQueryGetAllUsersWithSubscriptionsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -2296,6 +2317,15 @@ export enum GQLSubscriptionDuration {
   Monthly = 'MONTHLY',
   Yearly = 'YEARLY'
 }
+
+export type GQLSubscriptionStats = {
+  __typename?: 'SubscriptionStats';
+  totalLifetimeSubscriptions: EntireFieldWrapper<Scalars['Int']['output']>;
+  totalUsers: EntireFieldWrapper<Scalars['Int']['output']>;
+  usersWithActiveSubscriptions: EntireFieldWrapper<Scalars['Int']['output']>;
+  usersWithExpiredSubscriptions: EntireFieldWrapper<Scalars['Int']['output']>;
+  usersWithoutSubscriptions: EntireFieldWrapper<Scalars['Int']['output']>;
+};
 
 export enum GQLSubscriptionStatus {
   Active = 'ACTIVE',
@@ -2917,6 +2947,23 @@ export type GQLUserSubscriptionStatus = {
   trainerId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
 };
 
+export type GQLUserWithSubscription = {
+  __typename?: 'UserWithSubscription';
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  email: EntireFieldWrapper<Scalars['String']['output']>;
+  hasActiveSubscription: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  name?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  role: EntireFieldWrapper<Scalars['String']['output']>;
+  subscription?: EntireFieldWrapper<Maybe<GQLUserSubscription>>;
+};
+
+export type GQLUsersWithSubscriptionsResult = {
+  __typename?: 'UsersWithSubscriptionsResult';
+  totalCount: EntireFieldWrapper<Scalars['Int']['output']>;
+  users: EntireFieldWrapper<Array<GQLUserWithSubscription>>;
+};
+
 export type GQLVolumeEntry = {
   __typename?: 'VolumeEntry';
   totalSets: EntireFieldWrapper<Scalars['Int']['output']>;
@@ -3173,6 +3220,7 @@ export type GQLResolversTypes = {
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   SubscriptionDuration: GQLSubscriptionDuration;
+  SubscriptionStats: ResolverTypeWrapper<GQLSubscriptionStats>;
   SubscriptionStatus: GQLSubscriptionStatus;
   Substitute: ResolverTypeWrapper<GQLSubstitute>;
   SuggestedSets: ResolverTypeWrapper<GQLSuggestedSets>;
@@ -3224,6 +3272,8 @@ export type GQLResolversTypes = {
   UserSession: ResolverTypeWrapper<GQLUserSession>;
   UserSubscription: ResolverTypeWrapper<GQLUserSubscription>;
   UserSubscriptionStatus: ResolverTypeWrapper<GQLUserSubscriptionStatus>;
+  UserWithSubscription: ResolverTypeWrapper<GQLUserWithSubscription>;
+  UsersWithSubscriptionsResult: ResolverTypeWrapper<GQLUsersWithSubscriptionsResult>;
   VolumeEntry: ResolverTypeWrapper<GQLVolumeEntry>;
   WeightUnit: GQLWeightUnit;
   WorkoutExerciseNotes: ResolverTypeWrapper<GQLWorkoutExerciseNotes>;
@@ -3351,6 +3401,7 @@ export type GQLResolversParentTypes = {
   ServiceTask: GQLServiceTask;
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
   String: Scalars['String']['output'];
+  SubscriptionStats: GQLSubscriptionStats;
   Substitute: GQLSubstitute;
   SuggestedSets: GQLSuggestedSets;
   SuggestedSetsInput: GQLSuggestedSetsInput;
@@ -3394,6 +3445,8 @@ export type GQLResolversParentTypes = {
   UserSession: GQLUserSession;
   UserSubscription: GQLUserSubscription;
   UserSubscriptionStatus: GQLUserSubscriptionStatus;
+  UserWithSubscription: GQLUserWithSubscription;
+  UsersWithSubscriptionsResult: GQLUsersWithSubscriptionsResult;
   VolumeEntry: GQLVolumeEntry;
   WorkoutExerciseNotes: GQLWorkoutExerciseNotes;
 };
@@ -3880,6 +3933,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   fitspaceDeleteMealPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationFitspaceDeleteMealPlanArgs, 'planId'>>;
   generateAiWorkout?: Resolver<GQLResolversTypes['AiWorkoutResult'], ParentType, ContextType, RequireFields<GQLMutationGenerateAiWorkoutArgs, 'input'>>;
   getAiExerciseSuggestions?: Resolver<Array<GQLResolversTypes['AiExerciseSuggestion']>, ParentType, ContextType, RequireFields<GQLMutationGetAiExerciseSuggestionsArgs, 'dayId'>>;
+  giveLifetimePremium?: Resolver<GQLResolversTypes['UserSubscription'], ParentType, ContextType, RequireFields<GQLMutationGiveLifetimePremiumArgs, 'userId'>>;
   logWorkoutProgress?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutProgressArgs, 'dayId' | 'tick'>>;
   logWorkoutSessionEvent?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutSessionEventArgs, 'dayId' | 'event'>>;
   markAllNotificationsRead?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLMutationMarkAllNotificationsReadArgs, 'userId'>>;
@@ -3904,6 +3958,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   removeTrainingPlanCollaborator?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingPlanCollaboratorArgs, 'input'>>;
   removeTrainingPlanFromClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingPlanFromClientArgs, 'clientId' | 'planId'>>;
   removeTrainingWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingWeekArgs, 'weekId'>>;
+  removeUserSubscription?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveUserSubscriptionArgs, 'userId'>>;
   removeWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveWeekArgs, 'planId' | 'weekId'>>;
   resetUserLogs?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   respondToCollaborationInvitation?: Resolver<GQLResolversTypes['CollaborationInvitation'], ParentType, ContextType, RequireFields<GQLMutationRespondToCollaborationInvitationArgs, 'input'>>;
@@ -4086,6 +4141,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getActiveMealPlan?: Resolver<Maybe<GQLResolversTypes['MealPlan']>, ParentType, ContextType, Partial<GQLQueryGetActiveMealPlanArgs>>;
   getActivePackageTemplates?: Resolver<Array<GQLResolversTypes['PackageTemplate']>, ParentType, ContextType, Partial<GQLQueryGetActivePackageTemplatesArgs>>;
   getActivePlanId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
+  getAllUsersWithSubscriptions?: Resolver<GQLResolversTypes['UsersWithSubscriptionsResult'], ParentType, ContextType, Partial<GQLQueryGetAllUsersWithSubscriptionsArgs>>;
   getClientActivePlan?: Resolver<Maybe<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientActivePlanArgs, 'clientId'>>;
   getClientMealPlans?: Resolver<Array<GQLResolversTypes['MealPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientMealPlansArgs, 'clientId'>>;
   getClientTrainingPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientTrainingPlansArgs, 'clientId'>>;
@@ -4112,6 +4168,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getQuickWorkoutPlan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
   getRecentCompletedWorkouts?: Resolver<Array<GQLResolversTypes['TrainingDay']>, ParentType, ContextType>;
   getServiceDeliveryTasks?: Resolver<Array<GQLResolversTypes['ServiceTask']>, ParentType, ContextType, RequireFields<GQLQueryGetServiceDeliveryTasksArgs, 'serviceDeliveryId'>>;
+  getSubscriptionStats?: Resolver<GQLResolversTypes['SubscriptionStats'], ParentType, ContextType>;
   getTemplates?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetTemplatesArgs>>;
   getTrainerDeliveries?: Resolver<Array<GQLResolversTypes['ServiceDelivery']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainerDeliveriesArgs, 'trainerId'>>;
   getTrainerTasks?: Resolver<Array<GQLResolversTypes['ServiceTask']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainerTasksArgs, 'trainerId'>>;
@@ -4200,6 +4257,15 @@ export type GQLServiceTaskResolvers<ContextType = GQLContext, ParentType extends
   templateId?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   title?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLSubscriptionStatsResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SubscriptionStats'] = GQLResolversParentTypes['SubscriptionStats']> = {
+  totalLifetimeSubscriptions?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  totalUsers?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  usersWithActiveSubscriptions?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  usersWithExpiredSubscriptions?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  usersWithoutSubscriptions?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -4486,6 +4552,23 @@ export type GQLUserSubscriptionStatusResolvers<ContextType = GQLContext, ParentT
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLUserWithSubscriptionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UserWithSubscription'] = GQLResolversParentTypes['UserWithSubscription']> = {
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  email?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  hasActiveSubscription?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  role?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  subscription?: Resolver<Maybe<GQLResolversTypes['UserSubscription']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLUsersWithSubscriptionsResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['UsersWithSubscriptionsResult'] = GQLResolversParentTypes['UsersWithSubscriptionsResult']> = {
+  totalCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  users?: Resolver<Array<GQLResolversTypes['UserWithSubscription']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLVolumeEntryResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['VolumeEntry'] = GQLResolversParentTypes['VolumeEntry']> = {
   totalSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   totalVolume?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
@@ -4552,6 +4635,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   Review?: GQLReviewResolvers<ContextType>;
   ServiceDelivery?: GQLServiceDeliveryResolvers<ContextType>;
   ServiceTask?: GQLServiceTaskResolvers<ContextType>;
+  SubscriptionStats?: GQLSubscriptionStatsResolvers<ContextType>;
   Substitute?: GQLSubstituteResolvers<ContextType>;
   SuggestedSets?: GQLSuggestedSetsResolvers<ContextType>;
   TeamMember?: GQLTeamMemberResolvers<ContextType>;
@@ -4567,6 +4651,8 @@ export type GQLResolvers<ContextType = GQLContext> = {
   UserSession?: GQLUserSessionResolvers<ContextType>;
   UserSubscription?: GQLUserSubscriptionResolvers<ContextType>;
   UserSubscriptionStatus?: GQLUserSubscriptionStatusResolvers<ContextType>;
+  UserWithSubscription?: GQLUserWithSubscriptionResolvers<ContextType>;
+  UsersWithSubscriptionsResult?: GQLUsersWithSubscriptionsResultResolvers<ContextType>;
   VolumeEntry?: GQLVolumeEntryResolvers<ContextType>;
   WorkoutExerciseNotes?: GQLWorkoutExerciseNotesResolvers<ContextType>;
 };

@@ -1021,6 +1021,7 @@ export type GQLMutation = {
   fitspaceDeleteMealPlan: Scalars['Boolean']['output'];
   generateAiWorkout: GQLAiWorkoutResult;
   getAiExerciseSuggestions: Array<GQLAiExerciseSuggestion>;
+  giveLifetimePremium: GQLUserSubscription;
   logWorkoutProgress: Scalars['ID']['output'];
   logWorkoutSessionEvent: Scalars['ID']['output'];
   markAllNotificationsRead: Array<GQLNotification>;
@@ -1045,6 +1046,7 @@ export type GQLMutation = {
   removeTrainingPlanCollaborator: Scalars['Boolean']['output'];
   removeTrainingPlanFromClient: Scalars['Boolean']['output'];
   removeTrainingWeek: Scalars['Boolean']['output'];
+  removeUserSubscription: Scalars['Boolean']['output'];
   removeWeek: Scalars['Boolean']['output'];
   resetUserLogs: Scalars['Boolean']['output'];
   respondToCollaborationInvitation: GQLCollaborationInvitation;
@@ -1374,6 +1376,11 @@ export type GQLMutationGetAiExerciseSuggestionsArgs = {
 };
 
 
+export type GQLMutationGiveLifetimePremiumArgs = {
+  userId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationLogWorkoutProgressArgs = {
   dayId: Scalars['ID']['input'];
   tick: Scalars['Int']['input'];
@@ -1497,6 +1504,11 @@ export type GQLMutationRemoveTrainingPlanFromClientArgs = {
 
 export type GQLMutationRemoveTrainingWeekArgs = {
   weekId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveUserSubscriptionArgs = {
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -1850,6 +1862,7 @@ export type GQLQuery = {
   getActiveMealPlan?: Maybe<GQLMealPlan>;
   getActivePackageTemplates: Array<GQLPackageTemplate>;
   getActivePlanId?: Maybe<Scalars['ID']['output']>;
+  getAllUsersWithSubscriptions: GQLUsersWithSubscriptionsResult;
   getClientActivePlan?: Maybe<GQLTrainingPlan>;
   getClientMealPlans: Array<GQLMealPlan>;
   getClientTrainingPlans: Array<GQLTrainingPlan>;
@@ -1876,6 +1889,7 @@ export type GQLQuery = {
   getQuickWorkoutPlan: GQLTrainingPlan;
   getRecentCompletedWorkouts: Array<GQLTrainingDay>;
   getServiceDeliveryTasks: Array<GQLServiceTask>;
+  getSubscriptionStats: GQLSubscriptionStats;
   getTemplates: Array<GQLTrainingPlan>;
   getTrainerDeliveries: Array<GQLServiceDelivery>;
   getTrainerTasks: Array<GQLServiceTask>;
@@ -1972,6 +1986,13 @@ export type GQLQueryGetActiveMealPlanArgs = {
 
 export type GQLQueryGetActivePackageTemplatesArgs = {
   trainerId?: InputMaybe<Scalars['ID']['input']>;
+};
+
+
+export type GQLQueryGetAllUsersWithSubscriptionsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -2294,6 +2315,15 @@ export enum GQLSubscriptionDuration {
   Monthly = 'MONTHLY',
   Yearly = 'YEARLY'
 }
+
+export type GQLSubscriptionStats = {
+  __typename?: 'SubscriptionStats';
+  totalLifetimeSubscriptions: Scalars['Int']['output'];
+  totalUsers: Scalars['Int']['output'];
+  usersWithActiveSubscriptions: Scalars['Int']['output'];
+  usersWithExpiredSubscriptions: Scalars['Int']['output'];
+  usersWithoutSubscriptions: Scalars['Int']['output'];
+};
 
 export enum GQLSubscriptionStatus {
   Active = 'ACTIVE',
@@ -2915,6 +2945,23 @@ export type GQLUserSubscriptionStatus = {
   trainerId?: Maybe<Scalars['ID']['output']>;
 };
 
+export type GQLUserWithSubscription = {
+  __typename?: 'UserWithSubscription';
+  createdAt: Scalars['String']['output'];
+  email: Scalars['String']['output'];
+  hasActiveSubscription: Scalars['Boolean']['output'];
+  id: Scalars['ID']['output'];
+  name?: Maybe<Scalars['String']['output']>;
+  role: Scalars['String']['output'];
+  subscription?: Maybe<GQLUserSubscription>;
+};
+
+export type GQLUsersWithSubscriptionsResult = {
+  __typename?: 'UsersWithSubscriptionsResult';
+  totalCount: Scalars['Int']['output'];
+  users: Array<GQLUserWithSubscription>;
+};
+
 export type GQLVolumeEntry = {
   __typename?: 'VolumeEntry';
   totalSets: Scalars['Int']['output'];
@@ -3217,6 +3264,13 @@ export type GQLCancelCoachingMutationVariables = Exact<{ [key: string]: never; }
 
 
 export type GQLCancelCoachingMutation = { __typename?: 'Mutation', cancelCoaching: boolean };
+
+export type GQLFitGetMyServiceDeliveriesQueryVariables = Exact<{
+  status?: InputMaybe<GQLDeliveryStatus>;
+}>;
+
+
+export type GQLFitGetMyServiceDeliveriesQuery = { __typename?: 'Query', getMyServiceDeliveries: Array<{ __typename?: 'ServiceDelivery', id: string, serviceType?: GQLServiceType | undefined | null, packageName: string, quantity: number, status: GQLDeliveryStatus, deliveredAt?: string | undefined | null, deliveryNotes?: string | undefined | null, createdAt: string, updatedAt: string, trainer: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } }> };
 
 export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, mealReminders: boolean, progressUpdates: boolean, collaborationNotifications: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } };
 
@@ -4012,6 +4066,34 @@ export type GQLRemoveSetExerciseFormMutationVariables = Exact<{
 
 
 export type GQLRemoveSetExerciseFormMutation = { __typename?: 'Mutation', removeSetExerciseForm: boolean };
+
+export type GQLGetAllUsersWithSubscriptionsQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GQLGetAllUsersWithSubscriptionsQuery = { __typename?: 'Query', getAllUsersWithSubscriptions: { __typename?: 'UsersWithSubscriptionsResult', totalCount: number, users: Array<{ __typename?: 'UserWithSubscription', id: string, email: string, name?: string | undefined | null, role: string, hasActiveSubscription: boolean, createdAt: string, subscription?: { __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string, isActive: boolean, stripeSubscriptionId?: string | undefined | null } | undefined | null }> } };
+
+export type GQLGiveLifetimePremiumMutationVariables = Exact<{
+  userId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGiveLifetimePremiumMutation = { __typename?: 'Mutation', giveLifetimePremium: { __typename?: 'UserSubscription', id: string, status: GQLSubscriptionStatus, startDate: string, endDate: string, isActive: boolean } };
+
+export type GQLRemoveUserSubscriptionMutationVariables = Exact<{
+  userId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveUserSubscriptionMutation = { __typename?: 'Mutation', removeUserSubscription: boolean };
+
+export type GQLGetSubscriptionStatsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetSubscriptionStatsQuery = { __typename?: 'Query', getSubscriptionStats: { __typename?: 'SubscriptionStats', totalUsers: number, usersWithActiveSubscriptions: number, usersWithExpiredSubscriptions: number, usersWithoutSubscriptions: number, totalLifetimeSubscriptions: number } };
 
 export type GQLMyCoachingRequestsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6440,6 +6522,69 @@ useCancelCoachingMutation.getKey = () => ['CancelCoaching'];
 
 
 useCancelCoachingMutation.fetcher = (variables?: GQLCancelCoachingMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCancelCoachingMutation, GQLCancelCoachingMutationVariables>(CancelCoachingDocument, variables, options);
+
+export const FitGetMyServiceDeliveriesDocument = `
+    query FitGetMyServiceDeliveries($status: DeliveryStatus) {
+  getMyServiceDeliveries(status: $status) {
+    id
+    serviceType
+    packageName
+    quantity
+    status
+    deliveredAt
+    deliveryNotes
+    trainer {
+      id
+      name
+      email
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useFitGetMyServiceDeliveriesQuery = <
+      TData = GQLFitGetMyServiceDeliveriesQuery,
+      TError = unknown
+    >(
+      variables?: GQLFitGetMyServiceDeliveriesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLFitGetMyServiceDeliveriesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitGetMyServiceDeliveriesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLFitGetMyServiceDeliveriesQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['FitGetMyServiceDeliveries'] : ['FitGetMyServiceDeliveries', variables],
+    queryFn: fetchData<GQLFitGetMyServiceDeliveriesQuery, GQLFitGetMyServiceDeliveriesQueryVariables>(FitGetMyServiceDeliveriesDocument, variables),
+    ...options
+  }
+    )};
+
+useFitGetMyServiceDeliveriesQuery.getKey = (variables?: GQLFitGetMyServiceDeliveriesQueryVariables) => variables === undefined ? ['FitGetMyServiceDeliveries'] : ['FitGetMyServiceDeliveries', variables];
+
+export const useInfiniteFitGetMyServiceDeliveriesQuery = <
+      TData = InfiniteData<GQLFitGetMyServiceDeliveriesQuery>,
+      TError = unknown
+    >(
+      variables: GQLFitGetMyServiceDeliveriesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLFitGetMyServiceDeliveriesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitGetMyServiceDeliveriesQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLFitGetMyServiceDeliveriesQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['FitGetMyServiceDeliveries.infinite'] : ['FitGetMyServiceDeliveries.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLFitGetMyServiceDeliveriesQuery, GQLFitGetMyServiceDeliveriesQueryVariables>(FitGetMyServiceDeliveriesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteFitGetMyServiceDeliveriesQuery.getKey = (variables?: GQLFitGetMyServiceDeliveriesQueryVariables) => variables === undefined ? ['FitGetMyServiceDeliveries.infinite'] : ['FitGetMyServiceDeliveries.infinite', variables];
+
+
+useFitGetMyServiceDeliveriesQuery.fetcher = (variables?: GQLFitGetMyServiceDeliveriesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitGetMyServiceDeliveriesQuery, GQLFitGetMyServiceDeliveriesQueryVariables>(FitGetMyServiceDeliveriesDocument, variables, options);
 
 export const ProfileDocument = `
     query Profile {
@@ -11672,6 +11817,184 @@ useRemoveSetExerciseFormMutation.getKey = () => ['RemoveSetExerciseForm'];
 
 
 useRemoveSetExerciseFormMutation.fetcher = (variables: GQLRemoveSetExerciseFormMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveSetExerciseFormMutation, GQLRemoveSetExerciseFormMutationVariables>(RemoveSetExerciseFormDocument, variables, options);
+
+export const GetAllUsersWithSubscriptionsDocument = `
+    query GetAllUsersWithSubscriptions($limit: Int, $offset: Int, $searchQuery: String) {
+  getAllUsersWithSubscriptions(
+    limit: $limit
+    offset: $offset
+    searchQuery: $searchQuery
+  ) {
+    users {
+      id
+      email
+      name
+      role
+      hasActiveSubscription
+      subscription {
+        id
+        status
+        startDate
+        endDate
+        isActive
+        stripeSubscriptionId
+      }
+      createdAt
+    }
+    totalCount
+  }
+}
+    `;
+
+export const useGetAllUsersWithSubscriptionsQuery = <
+      TData = GQLGetAllUsersWithSubscriptionsQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetAllUsersWithSubscriptionsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetAllUsersWithSubscriptionsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetAllUsersWithSubscriptionsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetAllUsersWithSubscriptionsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetAllUsersWithSubscriptions'] : ['GetAllUsersWithSubscriptions', variables],
+    queryFn: fetchData<GQLGetAllUsersWithSubscriptionsQuery, GQLGetAllUsersWithSubscriptionsQueryVariables>(GetAllUsersWithSubscriptionsDocument, variables),
+    ...options
+  }
+    )};
+
+useGetAllUsersWithSubscriptionsQuery.getKey = (variables?: GQLGetAllUsersWithSubscriptionsQueryVariables) => variables === undefined ? ['GetAllUsersWithSubscriptions'] : ['GetAllUsersWithSubscriptions', variables];
+
+export const useInfiniteGetAllUsersWithSubscriptionsQuery = <
+      TData = InfiniteData<GQLGetAllUsersWithSubscriptionsQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetAllUsersWithSubscriptionsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetAllUsersWithSubscriptionsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetAllUsersWithSubscriptionsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetAllUsersWithSubscriptionsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetAllUsersWithSubscriptions.infinite'] : ['GetAllUsersWithSubscriptions.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetAllUsersWithSubscriptionsQuery, GQLGetAllUsersWithSubscriptionsQueryVariables>(GetAllUsersWithSubscriptionsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetAllUsersWithSubscriptionsQuery.getKey = (variables?: GQLGetAllUsersWithSubscriptionsQueryVariables) => variables === undefined ? ['GetAllUsersWithSubscriptions.infinite'] : ['GetAllUsersWithSubscriptions.infinite', variables];
+
+
+useGetAllUsersWithSubscriptionsQuery.fetcher = (variables?: GQLGetAllUsersWithSubscriptionsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetAllUsersWithSubscriptionsQuery, GQLGetAllUsersWithSubscriptionsQueryVariables>(GetAllUsersWithSubscriptionsDocument, variables, options);
+
+export const GiveLifetimePremiumDocument = `
+    mutation GiveLifetimePremium($userId: ID!) {
+  giveLifetimePremium(userId: $userId) {
+    id
+    status
+    startDate
+    endDate
+    isActive
+  }
+}
+    `;
+
+export const useGiveLifetimePremiumMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLGiveLifetimePremiumMutation, TError, GQLGiveLifetimePremiumMutationVariables, TContext>) => {
+    
+    return useMutation<GQLGiveLifetimePremiumMutation, TError, GQLGiveLifetimePremiumMutationVariables, TContext>(
+      {
+    mutationKey: ['GiveLifetimePremium'],
+    mutationFn: (variables?: GQLGiveLifetimePremiumMutationVariables) => fetchData<GQLGiveLifetimePremiumMutation, GQLGiveLifetimePremiumMutationVariables>(GiveLifetimePremiumDocument, variables)(),
+    ...options
+  }
+    )};
+
+useGiveLifetimePremiumMutation.getKey = () => ['GiveLifetimePremium'];
+
+
+useGiveLifetimePremiumMutation.fetcher = (variables: GQLGiveLifetimePremiumMutationVariables, options?: RequestInit['headers']) => fetchData<GQLGiveLifetimePremiumMutation, GQLGiveLifetimePremiumMutationVariables>(GiveLifetimePremiumDocument, variables, options);
+
+export const RemoveUserSubscriptionDocument = `
+    mutation RemoveUserSubscription($userId: ID!) {
+  removeUserSubscription(userId: $userId)
+}
+    `;
+
+export const useRemoveUserSubscriptionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveUserSubscriptionMutation, TError, GQLRemoveUserSubscriptionMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveUserSubscriptionMutation, TError, GQLRemoveUserSubscriptionMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveUserSubscription'],
+    mutationFn: (variables?: GQLRemoveUserSubscriptionMutationVariables) => fetchData<GQLRemoveUserSubscriptionMutation, GQLRemoveUserSubscriptionMutationVariables>(RemoveUserSubscriptionDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveUserSubscriptionMutation.getKey = () => ['RemoveUserSubscription'];
+
+
+useRemoveUserSubscriptionMutation.fetcher = (variables: GQLRemoveUserSubscriptionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveUserSubscriptionMutation, GQLRemoveUserSubscriptionMutationVariables>(RemoveUserSubscriptionDocument, variables, options);
+
+export const GetSubscriptionStatsDocument = `
+    query GetSubscriptionStats {
+  getSubscriptionStats {
+    totalUsers
+    usersWithActiveSubscriptions
+    usersWithExpiredSubscriptions
+    usersWithoutSubscriptions
+    totalLifetimeSubscriptions
+  }
+}
+    `;
+
+export const useGetSubscriptionStatsQuery = <
+      TData = GQLGetSubscriptionStatsQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetSubscriptionStatsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetSubscriptionStatsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetSubscriptionStatsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetSubscriptionStatsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetSubscriptionStats'] : ['GetSubscriptionStats', variables],
+    queryFn: fetchData<GQLGetSubscriptionStatsQuery, GQLGetSubscriptionStatsQueryVariables>(GetSubscriptionStatsDocument, variables),
+    ...options
+  }
+    )};
+
+useGetSubscriptionStatsQuery.getKey = (variables?: GQLGetSubscriptionStatsQueryVariables) => variables === undefined ? ['GetSubscriptionStats'] : ['GetSubscriptionStats', variables];
+
+export const useInfiniteGetSubscriptionStatsQuery = <
+      TData = InfiniteData<GQLGetSubscriptionStatsQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetSubscriptionStatsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetSubscriptionStatsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetSubscriptionStatsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetSubscriptionStatsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetSubscriptionStats.infinite'] : ['GetSubscriptionStats.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetSubscriptionStatsQuery, GQLGetSubscriptionStatsQueryVariables>(GetSubscriptionStatsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetSubscriptionStatsQuery.getKey = (variables?: GQLGetSubscriptionStatsQueryVariables) => variables === undefined ? ['GetSubscriptionStats.infinite'] : ['GetSubscriptionStats.infinite', variables];
+
+
+useGetSubscriptionStatsQuery.fetcher = (variables?: GQLGetSubscriptionStatsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetSubscriptionStatsQuery, GQLGetSubscriptionStatsQueryVariables>(GetSubscriptionStatsDocument, variables, options);
 
 export const MyCoachingRequestsDocument = `
     query MyCoachingRequests {
