@@ -11,7 +11,7 @@ type ClientMealPlansProps = {
 export function ClientMealPlans({ client, clientName }: ClientMealPlansProps) {
   return (
     <div className="@container/client-meal-plans">
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-semibold">Meal Plans</h2>
         <AssignMealPlanDialog clientName={clientName} clientId={client.id} />
       </div>

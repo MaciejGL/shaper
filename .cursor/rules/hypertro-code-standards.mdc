@@ -1,0 +1,72 @@
+---
+description: Code standards - TypeScript, components, hooks, and patterns for clean, readable code
+globs:
+  - src/**/*.{ts,tsx}
+  - expo-app/**/*.{ts,tsx}
+alwaysApply: true
+---
+
+# Code Standards
+
+## TypeScript - Strict & Clean
+
+- **NEVER**: `any`, `@ts-ignore`, type assertions without reason
+- **ALWAYS**: Use `GQL*` types from generated, precise interfaces, enums for reusable constants
+- **Prefer**: Union types (`'loading' | 'error'`), `Pick`/`Omit` composition
+
+## Components - Small & Focused
+
+```typescript
+// ✅ Structure: Props interface → named export → CVA variants
+interface ButtonProps extends React.ComponentProps<'button'> {
+  variant?: 'primary' | 'secondary'
+  loading?: boolean
+}
+
+export function Button({ variant = 'primary', ...props }: ButtonProps) {
+  return <button className={cn(buttonVariants({ variant }))} {...props} />
+}
+```
+
+**Rules**:
+
+- Keep components < 200 lines, split when needed
+- Props interface at top, named exports only
+- Server Components by default (`use client` only when needed)
+- Co-locate helpers, extract utils when reused
+
+## Hooks - Composition Over Configuration
+
+```typescript
+interface UseWorkoutReturn {
+  workout: GQLWorkout | null
+  isLoading: boolean
+  updateWorkout: (data: GQLUpdateWorkoutInput) => Promise<void>
+}
+
+export function useWorkout(id: string): UseWorkoutReturn {
+  // Focused, single responsibility
+}
+```
+
+**Rules**:
+
+- < 200 lines, split concerns
+- Export precise types
+- Options objects over positional params
+- Stable callbacks, memoized values
+
+## File Organization
+
+- **Small files**: One component/hook/util per file
+- **No index exports**: Import from specific file paths
+- **Focused folders**: Group by feature, not by type
+- **Extract logic**: If repeated, create util file
+
+## Error Patterns to Avoid
+
+- Modifying unrelated UI/behavior
+- Creating custom versions of existing UI primitives
+- Duplicating logic across files
+- Large monolithic components
+- Running migration commands

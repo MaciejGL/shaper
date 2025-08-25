@@ -1,5 +1,5 @@
-query GetClients {
-  myClients {
+query GetClients($limit: Int, $offset: Int) {
+  myClients(limit: $limit, offset: $offset) {
     id
     email
     firstName

@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         break
 
       case STRIPE_WEBHOOK_EVENTS.PAYMENT_SUCCEEDED:
-        await handlePaymentSucceeded(event.data.object)
+        await handlePaymentSucceeded(event.data.object as Stripe.Invoice)
         break
 
       case STRIPE_WEBHOOK_EVENTS.PAYMENT_FAILED:

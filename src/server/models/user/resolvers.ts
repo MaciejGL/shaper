@@ -82,7 +82,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     return new User(user, context)
   },
-  myClients: async (_, __, context) => {
+  myClients: async (_, { limit, offset }, context) => {
     const user = context.user
     if (!user) {
       throw new Error('User not found')
@@ -106,13 +106,25 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           },
         },
       },
+      take: limit || undefined,
+      skip: offset || undefined,
     })
 
     if (!clients) {
       throw new Error('User not found')
     }
 
-    return clients.map((client) => new UserPublic(client, context))
+    return clients
+      .map((client) => new UserPublic(client, context))
+      .sort(
+        (a, b) =>
+          (b.activePlan?.updatedAt
+            ? new Date(b.activePlan.updatedAt).getTime()
+            : 0) -
+          (a.activePlan?.updatedAt
+            ? new Date(a.activePlan.updatedAt).getTime()
+            : 0),
+      )
   },
 
   // Public queries

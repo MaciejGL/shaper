@@ -50,8 +50,8 @@ export function SharedPlansWithClient({
 }: SharedPlansWithClientProps) {
   return (
     <div className="@container/shared-plans">
-      <div className="flex justify-between items-center mb-4">
-        <CardTitle className="text-2xl font-semibold">Assigned Plans</CardTitle>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-semibold">Assigned Plans</h2>
         <div className="flex gap-2">
           <AssignPlanDialog
             clientName={clientName}

@@ -97,7 +97,9 @@ async function createDeliveriesFromTrainerOffer(
   offerToken?: string,
   trainerId?: string,
 ) {
-  const deliveryTasks: Awaited<ReturnType<typeof createServiceDelivery>>[] = []
+  const deliveryTasks: Awaited<
+    ReturnType<typeof createSingleServiceDelivery>
+  >[] = []
 
   if (!offerToken) {
     console.error('No offer token provided for trainer offer lookup')
@@ -149,27 +151,34 @@ async function createDeliveriesFromTrainerOffer(
       const finalTrainerId = trainerId || packageTemplate.trainerId || undefined
 
       if (finalTrainerId) {
-        const deliveryTask = await createServiceDelivery({
-          stripePaymentIntentId: paymentIntent.id,
-          trainerId: finalTrainerId,
-          clientId: user.id,
-          packageTemplate,
-          quantity: packageItem.quantity,
-          metadata: {
-            checkoutSessionId: session.id,
-            offerToken: offerToken,
-            packageId: packageItem.packageId,
-            originalStripePriceId: packageItem.stripePriceId,
-            mode: session.mode,
-            fromTrainerOffer: true,
-          },
-        })
+        // Create individual deliveries for each quantity
+        for (let i = 0; i < packageItem.quantity; i++) {
+          const deliveryNumber = packageItem.quantity > 1 ? i + 1 : undefined
 
-        if (deliveryTask) {
-          deliveryTasks.push(deliveryTask)
-          console.info(
-            `📋 Created delivery: ${packageItem.quantity}x ${deliveryTask.serviceType} for ${packageTemplate.name} (Trainer: ${finalTrainerId})`,
-          )
+          const deliveryTask = await createSingleServiceDelivery({
+            stripePaymentIntentId: paymentIntent.id,
+            trainerId: finalTrainerId,
+            clientId: user.id,
+            packageTemplate,
+            deliveryNumber,
+            metadata: {
+              checkoutSessionId: session.id,
+              offerToken: offerToken,
+              packageId: packageItem.packageId,
+              originalStripePriceId: packageItem.stripePriceId,
+              mode: session.mode,
+              fromTrainerOffer: true,
+              deliveryIndex: i + 1,
+              totalQuantity: packageItem.quantity,
+            },
+          })
+
+          if (deliveryTask) {
+            deliveryTasks.push(deliveryTask)
+            console.info(
+              `📋 Created delivery ${i + 1}/${packageItem.quantity}: ${deliveryTask.serviceType} for ${packageTemplate.name} (Trainer: ${finalTrainerId})`,
+            )
+          }
         }
       }
     }
@@ -248,7 +257,9 @@ async function createServiceDeliveriesForPayment(
   offerToken?: string,
   trainerId?: string,
 ) {
-  const deliveryTasks: Awaited<ReturnType<typeof createServiceDelivery>>[] = []
+  const deliveryTasks: Awaited<
+    ReturnType<typeof createSingleServiceDelivery>
+  >[] = []
 
   for (const lineItem of lineItems) {
     const priceId = lineItem.price?.id
@@ -270,26 +281,33 @@ async function createServiceDeliveriesForPayment(
     const finalTrainerId = trainerId || packageTemplate.trainerId || undefined
 
     if (finalTrainerId) {
-      const deliveryTask = await createServiceDelivery({
-        stripePaymentIntentId: paymentIntent.id,
-        trainerId: finalTrainerId,
-        clientId: user.id,
-        packageTemplate,
-        quantity,
-        metadata: {
-          checkoutSessionId: session.id,
-          offerToken: offerToken || null,
-          stripePriceId: priceId,
-          lineItemIndex: lineItems.indexOf(lineItem),
-          mode: 'payment',
-        },
-      })
+      // Create individual deliveries for each quantity
+      for (let i = 0; i < quantity; i++) {
+        const deliveryNumber = quantity > 1 ? i + 1 : undefined
 
-      if (deliveryTask) {
-        deliveryTasks.push(deliveryTask)
-        console.info(
-          `📋 Created payment delivery task: ${quantity}x ${deliveryTask.serviceType} for ${packageTemplate.name} (Trainer: ${finalTrainerId})`,
-        )
+        const deliveryTask = await createSingleServiceDelivery({
+          stripePaymentIntentId: paymentIntent.id,
+          trainerId: finalTrainerId,
+          clientId: user.id,
+          packageTemplate,
+          deliveryNumber,
+          metadata: {
+            checkoutSessionId: session.id,
+            offerToken: offerToken || null,
+            stripePriceId: priceId,
+            lineItemIndex: lineItems.indexOf(lineItem),
+            mode: 'payment',
+            deliveryIndex: i + 1,
+            totalQuantity: quantity,
+          },
+        })
+
+        if (deliveryTask) {
+          deliveryTasks.push(deliveryTask)
+          console.info(
+            `📋 Created payment delivery ${i + 1}/${quantity}: ${deliveryTask.serviceType} for ${packageTemplate.name} (Trainer: ${finalTrainerId})`,
+          )
+        }
       }
     }
   }
@@ -297,20 +315,20 @@ async function createServiceDeliveriesForPayment(
   return deliveryTasks
 }
 
-async function createServiceDelivery({
+async function createSingleServiceDelivery({
   stripePaymentIntentId,
   trainerId,
   clientId,
   packageTemplate,
-  quantity,
   metadata,
+  deliveryNumber,
 }: {
   stripePaymentIntentId: string
   trainerId: string
   clientId: string
   packageTemplate: PackageTemplate
-  quantity: number
   metadata: Record<string, unknown>
+  deliveryNumber?: number
 }) {
   try {
     // Get service types from package metadata
@@ -337,7 +355,7 @@ async function createServiceDelivery({
 
     if (!serviceType) {
       console.error(
-        `[createServiceDelivery] No service type found for package: ${packageTemplate.name} variables: 
+        `[createSingleServiceDelivery] No service type found for package: ${packageTemplate.name} variables: 
         {
         priceId: ${packageTemplate.stripePriceId}, 
         serviceTypeString: ${serviceTypeString}, 
@@ -346,7 +364,6 @@ async function createServiceDelivery({
         trainerId: ${trainerId},
         clientId: ${clientId},
         packageTemplate: ${JSON.stringify(packageTemplate)},
-        quantity: ${quantity},
         metadata: ${JSON.stringify(metadata)}
         }`,
       )
@@ -355,22 +372,26 @@ async function createServiceDelivery({
 
     // Create delivery and tasks in transaction
     return await prisma.$transaction(async (tx) => {
-      // Create service delivery
+      // Create service delivery (always quantity = 1)
+      const packageName = deliveryNumber
+        ? `${packageTemplate.name} #${deliveryNumber}`
+        : packageTemplate.name
+
       const delivery = await tx.serviceDelivery.create({
         data: {
           stripePaymentIntentId,
           trainerId,
           clientId,
           serviceType,
-          packageName: packageTemplate.name,
-          quantity,
+          packageName,
+          quantity: 1, // Always 1 for individual deliveries
           status: 'PENDING',
           metadata: metadata as Prisma.InputJsonValue,
         },
       })
 
-      // Generate and create tasks
-      const taskData = generateTasks(delivery.id, serviceType, quantity)
+      // Generate and create tasks (no quantity needed since it's always 1)
+      const taskData = generateTasks(delivery.id, serviceType)
       if (taskData.length > 0) {
         await tx.serviceTask.createMany({ data: taskData })
         console.info(`📋 Generated ${taskData.length} tasks for ${serviceType}`)

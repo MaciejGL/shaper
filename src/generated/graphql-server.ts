@@ -2097,6 +2097,12 @@ export type GQLQueryMuscleGroupCategoryArgs = {
 };
 
 
+export type GQLQueryMyClientsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type GQLQueryNoteArgs = {
   id: Scalars['ID']['input'];
   relatedTo?: InputMaybe<Scalars['ID']['input']>;
@@ -4116,7 +4122,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   mealPlanCollaborators?: Resolver<Array<GQLResolversTypes['MealPlanCollaborator']>, ParentType, ContextType, RequireFields<GQLQueryMealPlanCollaboratorsArgs, 'mealPlanId'>>;
   muscleGroupCategories?: Resolver<Array<GQLResolversTypes['MuscleGroupCategory']>, ParentType, ContextType>;
   muscleGroupCategory?: Resolver<GQLResolversTypes['MuscleGroupCategory'], ParentType, ContextType, RequireFields<GQLQueryMuscleGroupCategoryArgs, 'id'>>;
-  myClients?: Resolver<Array<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
+  myClients?: Resolver<Array<GQLResolversTypes['UserPublic']>, ParentType, ContextType, Partial<GQLQueryMyClientsArgs>>;
   myCollaborationInvitations?: Resolver<Array<GQLResolversTypes['CollaborationInvitation']>, ParentType, ContextType>;
   myMealPlanCollaborations?: Resolver<Array<GQLResolversTypes['MealPlanCollaborator']>, ParentType, ContextType>;
   myPlanCollaborators?: Resolver<Array<GQLResolversTypes['PlanCollaboratorSummary']>, ParentType, ContextType>;

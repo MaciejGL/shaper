@@ -2095,6 +2095,12 @@ export type GQLQueryMuscleGroupCategoryArgs = {
 };
 
 
+export type GQLQueryMyClientsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type GQLQueryNoteArgs = {
   id: Scalars['ID']['input'];
   relatedTo?: InputMaybe<Scalars['ID']['input']>;
@@ -3465,7 +3471,10 @@ export type GQLFitspaceAddExercisesToQuickWorkoutMutationVariables = Exact<{
 
 export type GQLFitspaceAddExercisesToQuickWorkoutMutation = { __typename?: 'Mutation', addExercisesToQuickWorkout: { __typename?: 'TrainingPlan', id: string, title: string, isDraft: boolean, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, order: number, isExtra: boolean, baseId?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, minReps?: number | undefined | null, maxReps?: number | undefined | null, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
 
-export type GQLGetClientsQueryVariables = Exact<{ [key: string]: never; }>;
+export type GQLGetClientsQueryVariables = Exact<{
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+}>;
 
 
 export type GQLGetClientsQuery = { __typename?: 'Query', myClients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, updatedAt: string, createdAt: string, activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, lastSessionActivity?: string | undefined | null, progress?: number | undefined | null } | undefined | null }> };
@@ -3637,6 +3646,14 @@ export type GQLGetTrainerTasksQueryVariables = Exact<{
 
 
 export type GQLGetTrainerTasksQuery = { __typename?: 'Query', getTrainerTasks: Array<{ __typename?: 'ServiceTask', id: string, serviceDeliveryId: string, templateId: string, title: string, taskType: GQLTaskType, status: GQLTaskStatus, order: number, isRequired: boolean, completedAt?: string | undefined | null, notes?: string | undefined | null, requiresScheduling: boolean, scheduledAt?: string | undefined | null, estimatedDuration?: number | undefined | null, location?: string | undefined | null, isRecurring: boolean, createdAt: string, updatedAt: string }> };
+
+export type GQLUpdateServiceTaskMutationVariables = Exact<{
+  taskId: Scalars['ID']['input'];
+  input: GQLUpdateServiceTaskInput;
+}>;
+
+
+export type GQLUpdateServiceTaskMutation = { __typename?: 'Mutation', updateServiceTask: { __typename?: 'ServiceTask', id: string, serviceDeliveryId: string, templateId: string, title: string, taskType: GQLTaskType, status: GQLTaskStatus, order: number, isRequired: boolean, completedAt?: string | undefined | null, notes?: string | undefined | null, requiresScheduling: boolean, scheduledAt?: string | undefined | null, estimatedDuration?: number | undefined | null, location?: string | undefined | null, isRecurring: boolean, createdAt: string, updatedAt: string } };
 
 export type GQLMuscleGroupCategoriesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -8208,8 +8225,8 @@ useFitspaceAddExercisesToQuickWorkoutMutation.getKey = () => ['FitspaceAddExerci
 useFitspaceAddExercisesToQuickWorkoutMutation.fetcher = (variables: GQLFitspaceAddExercisesToQuickWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceAddExercisesToQuickWorkoutMutation, GQLFitspaceAddExercisesToQuickWorkoutMutationVariables>(FitspaceAddExercisesToQuickWorkoutDocument, variables, options);
 
 export const GetClientsDocument = `
-    query GetClients {
-  myClients {
+    query GetClients($limit: Int, $offset: Int) {
+  myClients(limit: $limit, offset: $offset) {
     id
     email
     firstName
@@ -9741,6 +9758,48 @@ useInfiniteGetTrainerTasksQuery.getKey = (variables: GQLGetTrainerTasksQueryVari
 
 
 useGetTrainerTasksQuery.fetcher = (variables: GQLGetTrainerTasksQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetTrainerTasksQuery, GQLGetTrainerTasksQueryVariables>(GetTrainerTasksDocument, variables, options);
+
+export const UpdateServiceTaskDocument = `
+    mutation UpdateServiceTask($taskId: ID!, $input: UpdateServiceTaskInput!) {
+  updateServiceTask(taskId: $taskId, input: $input) {
+    id
+    serviceDeliveryId
+    templateId
+    title
+    taskType
+    status
+    order
+    isRequired
+    completedAt
+    notes
+    requiresScheduling
+    scheduledAt
+    estimatedDuration
+    location
+    isRecurring
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useUpdateServiceTaskMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateServiceTaskMutation, TError, GQLUpdateServiceTaskMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateServiceTaskMutation, TError, GQLUpdateServiceTaskMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateServiceTask'],
+    mutationFn: (variables?: GQLUpdateServiceTaskMutationVariables) => fetchData<GQLUpdateServiceTaskMutation, GQLUpdateServiceTaskMutationVariables>(UpdateServiceTaskDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateServiceTaskMutation.getKey = () => ['UpdateServiceTask'];
+
+
+useUpdateServiceTaskMutation.fetcher = (variables: GQLUpdateServiceTaskMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateServiceTaskMutation, GQLUpdateServiceTaskMutationVariables>(UpdateServiceTaskDocument, variables, options);
 
 export const MuscleGroupCategoriesDocument = `
     query MuscleGroupCategories {

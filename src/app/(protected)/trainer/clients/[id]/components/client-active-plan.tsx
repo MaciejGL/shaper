@@ -23,8 +23,8 @@ export function ClientActivePlan({
 }) {
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-2xl font-semibold">Active Plan</div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Active Plan</h2>
         {activePlan && (
           <ButtonLink
             href={`/trainer/trainings/creator/${activePlan.id}`}

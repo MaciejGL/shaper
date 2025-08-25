@@ -1,0 +1,45 @@
+---
+description: Hypertro fitness platform - product context, domain knowledge, and core business logic
+globs:
+  - src/**/*.{ts,tsx}
+  - expo-app/**/*.{ts,tsx}
+alwaysApply: true
+---
+
+# Hypertro Fitness Training Platform
+
+## Core Product
+
+**Web-first fitness app** with Expo native shell. Focus: personal trainers and their clients.
+
+## Key Entities & Domain
+
+- **Users**: Trainers (manage clients) + Trainees (personal workouts)
+- **Training**: Plans, sessions, exercises, sets, reps, weight, RPE
+- **Nutrition**: Meal plans, USDA food database, macro tracking
+- **Collaboration**: Trainer-client relationships, shared content
+- **Premium**: Stripe subscriptions, advanced features
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, React 19, TypeScript, Tailwind
+- **Backend**: GraphQL, Prisma, PostgreSQL
+- **State**: React Query for server state
+- **UI**: Radix primitives + custom design system
+- **Mobile**: Expo WebView bridge for native features
+
+## User Workflows
+
+- **Trainers**: Create plans → assign to clients → monitor progress
+- **Trainees**: Follow plans → log workouts → track progress
+- **Both**: Real-time workout logging with minimal friction
+
+## Key Patterns
+
+- **Mobile-first**: Design for phones during workouts
+- **Optimistic updates**: Immediate UI feedback
+- **Debounced mutations**: Prevent API spam
+- **Offline support**: Core tracking works offline
+- **Progressive enhancement**: Web core + native features
+
+Use proper fitness terminology: sets, reps, RPE, macros, progressive overload, etc.

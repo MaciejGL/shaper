@@ -47,16 +47,6 @@ export const TASK_TEMPLATES: Record<ServiceType, TaskTemplate[]> = {
       isRequired: true,
       requiresScheduling: false,
     },
-    {
-      id: 'checkin',
-      title: 'Bi-weekly Check-in',
-      taskType: TaskType.CHECK_IN,
-      order: 5,
-      isRequired: true,
-      isRecurring: true,
-      intervalDays: 14,
-      recurrenceCount: 2,
-    },
   ],
   [ServiceType.MEAL_PLAN]: [
     {
@@ -76,14 +66,6 @@ export const TASK_TEMPLATES: Record<ServiceType, TaskTemplate[]> = {
     },
   ],
   [ServiceType.IN_PERSON_MEETING]: [
-    {
-      id: 'consultation',
-      title: 'Consultation',
-      taskType: TaskType.CONSULTATION,
-      order: 1,
-      isRequired: false,
-      requiresScheduling: true,
-    },
     {
       id: 'schedule_meeting',
       title: 'Schedule Meeting',
@@ -141,30 +123,26 @@ export const TASK_TEMPLATES: Record<ServiceType, TaskTemplate[]> = {
 export function generateTasks(
   serviceDeliveryId: string,
   serviceType: ServiceType,
-  quantity: number = 1,
 ) {
   const templates = TASK_TEMPLATES[serviceType] || []
   const tasks = []
 
-  for (let i = 0; i < quantity; i++) {
-    const suffix = quantity > 1 ? ` #${i + 1}` : ''
-
-    for (const template of templates) {
-      tasks.push({
-        serviceDeliveryId,
-        templateId: template.id,
-        title: template.title + suffix,
-        taskType: template.taskType,
-        status: TaskStatus.PENDING,
-        order: template.order,
-        isRequired: template.isRequired,
-        requiresScheduling: template.requiresScheduling || false,
-        estimatedDuration: template.estimatedDuration,
-        isRecurring: template.isRecurring || false,
-        intervalDays: template.intervalDays,
-        recurrenceCount: template.recurrenceCount,
-      })
-    }
+  // Create tasks for a single service delivery (no quantity multiplier needed)
+  for (const template of templates) {
+    tasks.push({
+      serviceDeliveryId,
+      templateId: template.id,
+      title: template.title,
+      taskType: template.taskType,
+      status: TaskStatus.PENDING,
+      order: template.order,
+      isRequired: template.isRequired,
+      requiresScheduling: template.requiresScheduling || false,
+      estimatedDuration: template.estimatedDuration,
+      isRecurring: template.isRecurring || false,
+      intervalDays: template.intervalDays,
+      recurrenceCount: template.recurrenceCount,
+    })
   }
 
   return tasks

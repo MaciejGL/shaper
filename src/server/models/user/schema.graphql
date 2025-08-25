@@ -98,7 +98,7 @@ type Query {
   user: User
   userWithAllData: User
   userBasic: User
-  myClients: [UserPublic!]!
+  myClients(limit: Int, offset: Int): [UserPublic!]!
 
   # Public queries
   getFeaturedTrainers(limit: Int): [PublicTrainer!]!

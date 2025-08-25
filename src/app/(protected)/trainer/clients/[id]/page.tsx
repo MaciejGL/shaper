@@ -15,6 +15,7 @@ import { ClientInfo } from './components/client-info/client-info'
 import { ClientMealPlans } from './components/client-meal-plans/client-meal-plans'
 import { ClientMeasurements } from './components/client-measurements'
 import { ClientNotes } from './components/client-notes/client-notes'
+import { ClientServiceDeliveries } from './components/client-service-deliveries/client-service-deliveries'
 import { ClientServices } from './components/client-services/client-services'
 import { SharedPlansWithClient } from './components/shared-plans'
 
@@ -44,30 +45,35 @@ export default function ClientDetailPage({
         prevSegment={{ label: 'Clients', href: '/trainer/clients' }}
       />
       <Tabs defaultValue="info">
-        <TabsList size="lg">
-          <TabsTrigger size="lg" value="info">
-            Client Info
-          </TabsTrigger>
-          <TabsTrigger size="lg" value="plans">
-            Manage Plans
-          </TabsTrigger>
-          <TabsTrigger
-            size="lg"
-            value="active-plan"
-            disabled={!hasAssignedPlans}
-          >
-            Active Plan
-          </TabsTrigger>
-          <TabsTrigger size="lg" value="measurements">
-            Measurements Logs
-          </TabsTrigger>
-          <TabsTrigger size="lg" value="meal-plans">
-            Meal Plans
-          </TabsTrigger>
-          <TabsTrigger size="lg" value="services">
-            Services & Offers
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto hide-scrollbar -mx-2 px-2">
+          <TabsList size="lg" className="w-max min-w-full">
+            <TabsTrigger size="lg" value="info">
+              Client Info
+            </TabsTrigger>
+            <TabsTrigger size="lg" value="plans">
+              Manage Plans
+            </TabsTrigger>
+            <TabsTrigger
+              size="lg"
+              value="active-plan"
+              disabled={!hasAssignedPlans}
+            >
+              Active Plan
+            </TabsTrigger>
+            <TabsTrigger size="lg" value="measurements">
+              Measurements Logs
+            </TabsTrigger>
+            <TabsTrigger size="lg" value="meal-plans">
+              Meal Plans
+            </TabsTrigger>
+            <TabsTrigger size="lg" value="services">
+              Services & Offers
+            </TabsTrigger>
+            <TabsTrigger size="lg" value="tasks">
+              Task Management
+            </TabsTrigger>
+          </TabsList>
+        </div>
         <AnimatedPageTransition id="info">
           <TabsContent value="info">
             <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_4fr] gap-12">
@@ -116,6 +122,14 @@ export default function ClientDetailPage({
               clientId={client.id}
               clientName={clientName}
               clientEmail={client.email}
+            />
+          </TabsContent>
+        </AnimatedPageTransition>
+        <AnimatedPageTransition id="tasks">
+          <TabsContent value="tasks">
+            <ClientServiceDeliveries
+              clientId={client.id}
+              clientName={clientName}
             />
           </TabsContent>
         </AnimatedPageTransition>

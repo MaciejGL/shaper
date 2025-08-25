@@ -46,7 +46,12 @@ export function ClientServices({
 
   return (
     <div className="space-y-6">
-      {/* Header with Actions */}
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold">Services & Offers</h2>
+      </div>
+
+      {/* Navigation */}
       <div className="flex items-center">
         <div className="flex space-x-2">
           <Button

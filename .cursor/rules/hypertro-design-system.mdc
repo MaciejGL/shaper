@@ -1,0 +1,77 @@
+---
+description: Design system - colors, components, spacing, and UI patterns for consistent styling
+globs:
+  - src/**/*.{ts,tsx}
+alwaysApply: true
+---
+
+# Design System
+
+## Colors - Adaptive Tokens Only
+
+```typescript
+// ✅ ALWAYS - Auto light/dark
+'bg-background text-foreground'
+'bg-card text-card-foreground'
+'bg-primary text-primary-foreground'
+'border-border' 'ring-ring'
+
+// ❌ NEVER - Hardcoded colors
+'bg-white text-black' 'bg-gray-100' 'bg-[#fff]'
+```
+
+## Components - Use Existing Primitives
+
+```typescript
+// ✅ Extend existing UI components
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+
+// ✅ CVA for variants
+const variants = cva(cn('base-classes'), {
+  variants: { size: { sm: 'h-8', md: 'h-10' } },
+})
+```
+
+## Sizing & Spacing
+
+```typescript
+// ✅ Size - prefer size-* for equal dimensions
+'size-4' // Instead of 'w-4 h-4'
+'w-full h-4' // Only when different
+
+// ✅ Spacing - consistent scale
+'gap-2 gap-4 gap-6' 'p-2 p-4 p-6' 'py-4 px-3'
+
+// ❌ NEVER arbitrary
+'w-4 h-4' 'gap-[12px]' 'p-[18px]'
+```
+
+## Custom Utilities - Use When Available
+
+```typescript
+'flex-center' // Instead of 'flex items-center justify-center'
+'hide-scrollbar' 'container-hypertro' 'safe-area-*'
+'masked-placeholder-text' 'shadow-neuro-*'
+```
+
+## Loading States - Dedicated Components
+
+```typescript
+// ✅ Use existing
+import { Skeleton } from '@/components/ui/skeleton'
+<Skeleton className="h-4 w-full" />
+<Button loading={boolean} />
+
+// ❌ Never custom spinners
+<div className="animate-spin border-2" />
+```
+
+## Border Radius - Theme Tokens
+
+```typescript
+'rounded-sm' // calc(var(--radius) - 4px)
+'rounded-lg' // var(--radius) - DEFAULT
+```
+
+**Rules**: NEVER deviate from tokens. Check `src/components/ui/` first. All colors must work in light/dark modes automatically.

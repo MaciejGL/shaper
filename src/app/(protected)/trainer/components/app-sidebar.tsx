@@ -33,6 +33,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  useSidebar,
 } from '@/components/ui/sidebar'
 import { TRAINER_LINKS } from '@/constants/user-links'
 import {
@@ -140,10 +141,13 @@ export function AppSidebar() {
   }, [session])
 
   const { data: clients, isPlaceholderData: isPlaceholderClients } =
-    useGetClientsQuery(undefined, {
-      placeholderData: placeholderClients,
-      refetchOnWindowFocus: false,
-    })
+    useGetClientsQuery(
+      { limit: 4, offset: 0 },
+      {
+        placeholderData: placeholderClients,
+        refetchOnWindowFocus: false,
+      },
+    )
 
   const { data: templatesData, isPlaceholderData: isPlaceholderTemplates } =
     useGetTemplatesQuery(
@@ -379,12 +383,24 @@ function SidebarItem({
 }) {
   const pathname = usePathname()
   const isActive = item.url === pathname
+  const { setOpenMobile, isMobile } = useSidebar()
+
+  // Helper function to close mobile sidebar on navigation
+  const handleMobileNavigation = () => {
+    if (isMobile) {
+      setOpenMobile(false)
+    }
+  }
 
   return (
     <SidebarMenuItem key={item.title}>
       <SidebarMenuButton asChild disabled={item.disabled} size="md">
         {item.url ? (
-          <Link href={item.url} className="inline-flex py-4">
+          <Link
+            href={item.url}
+            className="inline-flex py-4"
+            onClick={handleMobileNavigation}
+          >
             <item.icon />
             <span>{item.title}</span>
             {isActive && <ChevronRight className="ml-auto size-4 opacity-60" />}
@@ -416,6 +432,7 @@ function SidebarItem({
                       'w-full',
                       isLoading && 'masked-placeholder-text',
                     )}
+                    onClick={handleMobileNavigation}
                   >
                     <subItem.icon />
                     <span className="truncate">{subItem.title}</span>

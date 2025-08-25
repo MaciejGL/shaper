@@ -96,7 +96,7 @@ export default class UserPublic implements GQLUserPublic {
   }
 
   get activePlan() {
-    const plan = this.data.assignedPlans?.at(0)
+    const plan = this.data.assignedPlans?.find((plan) => plan.active)
     if (!plan) return null
 
     return new TrainingPlan(plan, this.context)

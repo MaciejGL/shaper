@@ -1,0 +1,141 @@
+---
+description: Data layer - GraphQL, API patterns, React Query, and server/client data access
+globs:
+  - src/**/*.{ts,tsx}
+  - src/lib/**/*.ts
+  - src/generated/**/*.ts
+  - src/server/**/*.ts
+alwaysApply: true
+---
+
+# Data Layer
+
+## GraphQL - Generated Hooks First
+
+```typescript
+// ✅ Use generated hooks
+import {
+  useCreateWorkoutMutation,
+  useGetWorkoutQuery,
+} from '@/generated/graphql-client'
+
+// ✅ All types prefixed GQL
+function processWorkout(workout: GQLWorkout): ProcessedWorkout
+
+// ✅ Query keys from generated
+const queryKey = useGetWorkoutQuery.getKey({ id })
+```
+
+## Server vs Client Patterns
+
+### Server Components
+
+```typescript
+// ✅ Use gqlServerFetch
+const { data, error } = await gqlServerFetch(GetWorkoutDocument, { id })
+```
+
+### Client Components
+
+```typescript
+// ✅ Generated hooks with options
+const { data, isLoading } = useGetWorkoutQuery(
+  { id },
+  { staleTime: 5 * 60 * 1000, enabled: !!id },
+)
+
+// ✅ Optimistic updates for immediate UX
+const mutation = useCreateWorkoutMutation({
+  onMutate: async (variables) => {
+    // Cancel outgoing refetches
+    await queryClient.cancelQueries({ queryKey })
+
+    // Snapshot previous value
+    const previousData = queryClient.getQueryData(queryKey)
+
+    // Optimistically update UI immediately
+    queryClient.setQueryData(queryKey, (old) => ({
+      ...old,
+      workouts: [...old.workouts, { ...variables, id: 'temp-id' }],
+    }))
+
+    return { previousData }
+  },
+  onError: (err, variables, context) => {
+    // Rollback on error
+    if (context?.previousData) {
+      queryClient.setQueryData(queryKey, context.previousData)
+    }
+  },
+  onSettled: () => {
+    // Always refetch after mutation
+    queryClient.invalidateQueries({ queryKey })
+  },
+})
+```
+
+## Optimistic Updates - Immediate UX
+
+**ALWAYS use optimistic updates for mutations to show immediate feedback:**
+
+```typescript
+// ✅ Pattern for optimistic updates
+const mutation = useUpdateExerciseMutation({
+  onMutate: async (variables) => {
+    // 1. Cancel outgoing refetches
+    await queryClient.cancelQueries({ queryKey: exerciseQueryKey })
+
+    // 2. Snapshot current data
+    const previousData = queryClient.getQueryData(exerciseQueryKey)
+
+    // 3. Optimistically update UI immediately
+    queryClient.setQueryData(exerciseQueryKey, (old) => ({
+      ...old,
+      exercise: { ...old.exercise, ...variables },
+    }))
+
+    return { previousData }
+  },
+  onError: (err, variables, context) => {
+    // 4. Rollback optimistic update on error
+    if (context?.previousData) {
+      queryClient.setQueryData(exerciseQueryKey, context.previousData)
+    }
+  },
+  onSettled: () => {
+    // 5. Refetch to sync with server
+    queryClient.invalidateQueries({ queryKey: exerciseQueryKey })
+  },
+})
+
+// ✅ Use mutation with immediate UI feedback
+const handleSave = () => {
+  mutation.mutate(formData) // UI updates instantly
+}
+```
+
+## Performance Patterns
+
+- **Optimistic updates**: MANDATORY for all mutations affecting visible data
+- **Batch queries**: Prefer batch over multiple calls
+- **Debounce mutations**: Use `useDebouncedMutation` for rapid input
+- **Cache with staleTime**: `5 * 60 * 1000` for 5 minutes
+- **Precise invalidation**: Use `.getKey()` methods
+
+## Error Handling
+
+- **Global**: Let shared query client handle mutation errors (toasts)
+- **Specific**: Handle in components only when needed
+- **Cleanup**: Use `onError` for specific error states
+
+## What NOT to Do
+
+- Direct `fetch` to GraphQL endpoint
+- Manual query keys (use `.getKey()`)
+- `any` types (use `GQL*` types)
+- Duplicate global error handling
+- Broad query invalidations
+- **Mutations without optimistic updates** (causes laggy UX)
+- **Skipping rollback logic** (leaves UI in inconsistent state on errors)
+
+**Keep resolvers, models, and API layers simple and focused.**

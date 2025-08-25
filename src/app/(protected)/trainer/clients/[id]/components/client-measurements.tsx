@@ -28,7 +28,7 @@ export function ClientMeasurements({
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold">Body Measurements</h2>
+        <h2 className="text-2xl font-semibold">Body Measurements</h2>
         <div className="flex justify-center items-center py-8">
           <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
         </div>
@@ -39,7 +39,7 @@ export function ClientMeasurements({
   if (error) {
     return (
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold">Body Measurements</h2>
+        <h2 className="text-2xl font-semibold">Body Measurements</h2>
         <Card>
           <CardContent className="pt-6">
             <div className="text-center py-8">
@@ -56,8 +56,8 @@ export function ClientMeasurements({
   if (measurements.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Body Measurements</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold">Body Measurements</h2>
         </div>
         <ClientMeasurementsEmptyState clientName={clientName} />
       </div>
@@ -66,7 +66,7 @@ export function ClientMeasurements({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Body Measurements</h2>
+      <h2 className="text-2xl font-semibold">Body Measurements</h2>
 
       <ClientMeasurementsProvider measurements={measurements}>
         <ClientMeasurementsContent />
