@@ -19,7 +19,7 @@ export async function notifyCoachingRequest(
 ) {
   return await sendPushNotificationToUsers(
     [recipientId],
-    'New Coaching Request',
+    'New coaching request',
     `You have a new coaching request${senderName ? ` from ${senderName}` : ''}.`,
     '/fitspace/my-trainer',
   )
@@ -34,8 +34,8 @@ export async function notifyCoachingRequestAccepted(
 ) {
   return await sendPushNotificationToUsers(
     [senderId],
-    'Coaching Request Accepted',
-    `${acceptorName} has accepted your coaching request! Time to start your fitness journey together!`,
+    'Coaching request accepted',
+    `${acceptorName} has accepted your coaching request.`,
     '/fitspace/dashboard',
   )
 }
@@ -49,8 +49,8 @@ export async function notifyCoachingRequestRejected(
 ) {
   return await sendPushNotificationToUsers(
     [senderId],
-    'Coaching Request Declined',
-    `${rejectorName} has declined your coaching request. Don't give up - there are many great trainers out there!`,
+    'Coaching request declined',
+    `${rejectorName} has declined your coaching request.`,
     '/fitspace/dashboard',
   )
 }
@@ -64,8 +64,8 @@ export async function notifyCoachingCancelled(
 ) {
   return await sendPushNotificationToUsers(
     [trainerId],
-    'Coaching Cancelled',
-    `${clientName} has cancelled their coaching relationship with you.`,
+    'Coaching relationship ended',
+    `${clientName} has ended their coaching relationship with you.`,
     '/fitspace/clients',
   )
 }
@@ -84,8 +84,8 @@ export async function notifyTrainingPlanAssigned(
 ) {
   return await sendPushNotificationToUsers(
     [clientId],
-    'New Training Plan',
-    `New training plan "${planTitle}" has been assigned to you${trainerName ? ` by ${trainerName}` : ''}. Ready to get stronger?`,
+    'New training plan assigned',
+    `"${planTitle}" has been assigned to you${trainerName ? ` by ${trainerName}` : ''}.`,
     '/fitspace/my-plans',
   )
 }
@@ -100,8 +100,8 @@ export async function notifyMealPlanAssigned(
 ) {
   return await sendPushNotificationToUsers(
     [clientId],
-    'New Meal Plan',
-    `New meal plan "${planTitle}" has been assigned to you${trainerName ? ` by ${trainerName}` : ''}. Let's fuel your success!`,
+    'New meal plan assigned',
+    `"${planTitle}" has been assigned to you${trainerName ? ` by ${trainerName}` : ''}.`,
     '/fitspace/meal-plan',
   )
 }
@@ -121,8 +121,8 @@ export async function notifyTrainerWorkoutCompleted(
   const workoutDetail = workoutType ? ` (${workoutType})` : ''
   return await sendPushNotificationToUsers(
     [trainerId],
-    'Client Workout Complete!',
-    `${clientName} just finished their workout${workoutDetail}! Great coaching!`,
+    'Client workout completed',
+    `${clientName} has completed their workout${workoutDetail}.`,
     '/trainer/clients',
   )
 }
@@ -137,8 +137,8 @@ export async function notifyWorkoutCompleted(
   const workoutDetail = workoutType ? ` ${workoutType}` : ''
   return await sendPushNotificationToUsers(
     [userId],
-    'Workout Complete!',
-    `Amazing job! You crushed your${workoutDetail} workout. You're getting stronger every day!`,
+    'Workout completed',
+    `You have completed your${workoutDetail} workout.`,
     '/fitspace/progress',
   )
 }
@@ -149,8 +149,8 @@ export async function notifyWorkoutCompleted(
 export async function notifyWorkoutStreak(userId: string, streakDays: number) {
   return await sendPushNotificationToUsers(
     [userId],
-    `${streakDays} Day Streak!`,
-    `You're on fire! ${streakDays} days of consistent training. Keep the momentum going, champion!`,
+    `${streakDays}-day workout streak`,
+    `You have completed ${streakDays} consecutive days of training.`,
     '/fitspace/progress',
   )
 }
@@ -165,8 +165,8 @@ export async function notifyWeekCompleted(
 ) {
   return await sendPushNotificationToUsers(
     [userId],
-    'Week Complete!',
-    `Incredible! You've completed week ${weekNumber} of "${planTitle}". You're unstoppable!`,
+    'Week completed',
+    `You have completed week ${weekNumber} of "${planTitle}".`,
     '/fitspace/progress',
   )
 }
@@ -177,8 +177,8 @@ export async function notifyWeekCompleted(
 export async function notifyPlanCompleted(userId: string, planTitle: string) {
   return await sendPushNotificationToUsers(
     [userId],
-    'Training Plan Complete!',
-    `Congratulations! You've completed "${planTitle}". What an incredible achievement! Time to level up!`,
+    'Training plan completed',
+    `You have completed "${planTitle}".`,
     '/fitspace/progress',
   )
 }
@@ -199,7 +199,7 @@ export async function notifyExerciseCommentReply(
     replyText.length > 50 ? `${replyText.substring(0, 50)}...` : replyText
   return await sendPushNotificationToUsers(
     [recipientId],
-    'New Exercise Comment',
+    'Exercise comment reply',
     `${replierName} replied to your exercise note: "${truncatedText}"`,
     '/fitspace/workout',
   )
@@ -217,7 +217,7 @@ export async function notifyTrainerExerciseNote(
     noteText.length > 50 ? `${noteText.substring(0, 50)}...` : noteText
   return await sendPushNotificationToUsers(
     [trainerId],
-    'New Exercise Note',
+    'Exercise note added',
     `${clientName} added a note to their exercise: "${truncatedText}"`,
     '/trainer/clients',
   )
@@ -235,7 +235,7 @@ export async function notifyClientTrainerReply(
     replyText.length > 50 ? `${replyText.substring(0, 50)}...` : replyText
   return await sendPushNotificationToUsers(
     [clientId],
-    'Trainer Reply',
+    'Trainer reply',
     `${trainerName} responded to your exercise note: "${truncatedText}"`,
     '/fitspace/workout',
   )
@@ -251,8 +251,8 @@ export async function notifyClientTrainerReply(
 export async function notifyDailyNutritionCompleted(userId: string) {
   return await sendPushNotificationToUsers(
     [userId],
-    'Daily Nutrition Complete!',
-    "Fantastic! You've logged all your meals for today. Your nutrition game is on point!",
+    'Daily nutrition complete',
+    'You have logged all your meals for today.',
     '/fitspace/meal-plan',
   )
 }
@@ -268,8 +268,8 @@ export async function notifyMealReminder(
   const timeDetail = scheduledTime ? ` scheduled for ${scheduledTime}` : ''
   return await sendPushNotificationToUsers(
     [userId],
-    'Meal Reminder',
-    `Time to log your ${mealType}${timeDetail}! Proper nutrition fuels your success!`,
+    'Meal reminder',
+    `Time to log your ${mealType}${timeDetail}.`,
     '/fitspace/meal-plan',
   )
 }
@@ -289,8 +289,8 @@ export async function notifyWorkoutReminder(
   const timeDetail = scheduledTime ? ` scheduled for ${scheduledTime}` : ''
   return await sendPushNotificationToUsers(
     [userId],
-    'Workout Reminder',
-    `Time for your ${workoutName} workout${timeDetail}! Ready to get stronger?`,
+    'Workout reminder',
+    `Time for your ${workoutName} workout${timeDetail}.`,
     '/fitspace/workout',
   )
 }
@@ -301,8 +301,8 @@ export async function notifyWorkoutReminder(
 export async function notifyRestDay(userId: string) {
   return await sendPushNotificationToUsers(
     [userId],
-    'Rest Day Today',
-    'Today is your rest day! Take time to recover, stretch, or do some light activity. Your body will thank you!',
+    'Rest day',
+    'Today is your scheduled rest day. Consider light activity or stretching for recovery.',
     '/fitspace/progress',
   )
 }
@@ -313,8 +313,8 @@ export async function notifyRestDay(userId: string) {
 export async function notifyHydrationReminder(userId: string) {
   return await sendPushNotificationToUsers(
     [userId],
-    'Hydration Check',
-    'Time for a water break! Staying hydrated helps with performance and recovery.',
+    'Hydration reminder',
+    'Time for a water break. Staying hydrated supports performance and recovery.',
     '/fitspace/dashboard',
   )
 }
@@ -330,8 +330,8 @@ export async function notifyWeeklyProgress(
   const percentage = Math.round((workoutsCompleted / totalWorkouts) * 100)
   return await sendPushNotificationToUsers(
     [userId],
-    'Weekly Progress Report',
-    `This week: ${workoutsCompleted}/${totalWorkouts} workouts completed (${percentage}%)! ${percentage >= 80 ? 'Amazing consistency!' : 'Keep pushing forward!'}`,
+    'Weekly progress report',
+    `This week: ${workoutsCompleted}/${totalWorkouts} workouts completed (${percentage}%).`,
     '/fitspace/progress',
   )
 }
@@ -350,8 +350,8 @@ export async function notifyCollaborationInvitation(
 ) {
   return await sendPushNotificationToUsers(
     [recipientId],
-    'Collaboration Invitation',
-    `${inviterName} invited you to collaborate on "${planTitle}". Ready to work together?`,
+    'Collaboration invitation',
+    `${inviterName} invited you to collaborate on "${planTitle}".`,
     '/fitspace/my-plans',
   )
 }
@@ -368,7 +368,7 @@ export async function notifyCollaborationResponse(
   const status = accepted ? 'accepted' : 'declined'
   return await sendPushNotificationToUsers(
     [senderId],
-    `Collaboration ${accepted ? 'Accepted' : 'Declined'}`,
+    `Collaboration ${accepted ? 'accepted' : 'declined'}`,
     `${responderName} ${status} your collaboration invitation for "${planTitle}".`,
     '/fitspace/my-plans',
   )
@@ -385,8 +385,8 @@ export async function notifyTrainerOfferReceived(
 ) {
   return await sendPushNotificationToUsers(
     [clientUserId],
-    `Training Offer from ${trainerName}`,
-    `You have a new training offer from ${trainerName}`,
+    `Training offer from ${trainerName}`,
+    `You have a new training offer from ${trainerName}.`,
     `/offer/${offerToken}`,
   )
 }
@@ -405,7 +405,7 @@ export async function notifySystemAnnouncement(
 ) {
   return await sendPushNotificationToUsers(
     userIds,
-    `🔔 ${title}`,
+    title,
     message,
     '/fitspace/dashboard',
   )
@@ -417,8 +417,8 @@ export async function notifySystemAnnouncement(
 export async function notifyAppUpdate(userIds: string[]) {
   return await sendPushNotificationToUsers(
     userIds,
-    'App Update Available',
-    'A new version of Shaper is available with exciting features and improvements!',
+    'App update available',
+    'A new version of Hypertro is available with new features and improvements.',
     '/fitspace/dashboard',
   )
 }
