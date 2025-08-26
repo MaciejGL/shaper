@@ -41,15 +41,18 @@ const badgeVariants = cva(
         muscle:
           'bg-green-500/70 text-black [a&]:hover:bg-green-500/90 focus-visible:ring-green-500/20 dark:focus-visible:ring-green-500/40 dark:bg-green-500/60 border-none text-white',
 
-        equipment:
-          'bg-blue-500/70 text-black [a&]:hover:bg-blue-500/90 focus-visible:ring-blue-500/20 dark:focus-visible:ring-blue-500/40 dark:bg-blue-500/60 border-none text-white',
+        equipment: cn(
+          'bg-cyan-500/70 text-black [a&]:hover:bg-cyan-500/90 focus-visible:ring-cyan-500/20 dark:focus-visible:ring-cyan-500/40 dark:bg-cyan-500 border-none text-white',
+          'dark:bg-cyan-500/60',
+        ),
         gradient:
           'bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-700 dark:to-amber-500 border-none text-white',
         premium:
           'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0',
       },
       size: {
-        xs: cn('text-xs px-[4px] py-[1px] rounded-sm'),
+        '2xs': cn('text-[10px] px-[3px] py-[1px] rounded-[3px]'),
+        xs: cn(' text-xs px-[4px] py-[1px] rounded-sm'),
         sm: cn('text-xs px-1.5 py-0.5'),
         md: 'text-xs px-2 py-0.5',
         lg: 'text-sm px-3 py-1',

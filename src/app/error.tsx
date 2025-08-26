@@ -60,8 +60,8 @@ export default function Error({
             >
               Try Again
             </Button>
-            <ButtonLink href="/fitspace/dashboard" iconStart={<Home />}>
-              Go To Dashboard
+            <ButtonLink href="/fitspace/workout" iconStart={<Home />}>
+              Go To Workout
             </ButtonLink>
           </div>
 

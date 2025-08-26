@@ -21,8 +21,8 @@ export function GoBack() {
 
   const labelMap: { path: string; label: string }[] = [
     {
-      path: '/fitspace/dashboard',
-      label: 'Dashboard',
+      path: '/fitspace/workout',
+      label: 'Workout',
     },
     {
       path: '/fitspace/my-plans',
@@ -35,10 +35,6 @@ export function GoBack() {
     {
       path: '/fitspace/profile',
       label: 'Profile',
-    },
-    {
-      path: '/fitspace/training-preview',
-      label: 'Training Preview',
     },
   ]
 

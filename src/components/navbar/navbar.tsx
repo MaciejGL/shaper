@@ -70,7 +70,7 @@ export const Navbar = ({
   const linkToDashboard =
     user?.user?.role === 'TRAINER'
       ? TRAINER_LINKS.dashboard.href
-      : CLIENT_LINKS.dashboard.href
+      : CLIENT_LINKS.workout.href
   const pathname = usePathname()
   const isFitspace = pathname.startsWith('/fitspace')
 
@@ -288,13 +288,6 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
             </div>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <NavLink
-              href={CLIENT_LINKS.dashboard.href}
-              icon={<LayoutDashboardIcon className="size-4" />}
-              label={CLIENT_LINKS.dashboard.label}
-            />
-          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <NavLink
               href={CLIENT_LINKS.myPlans.href}

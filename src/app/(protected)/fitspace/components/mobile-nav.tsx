@@ -5,7 +5,6 @@ import {
   ChefHatIcon,
   ChevronRight,
   Dumbbell,
-  LayoutDashboardIcon,
   MoreHorizontalIcon,
   Notebook,
   PersonStanding,
@@ -22,7 +21,10 @@ import { ButtonLink } from '@/components/ui/button-link'
 import { Card } from '@/components/ui/card'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
 import { useUser } from '@/context/user-context'
-import { useFitspaceGetActivePlanIdQuery } from '@/generated/graphql-client'
+import {
+  useFitspaceGetActivePlanIdQuery,
+  useFitspaceGetUserQuickWorkoutPlanQuery,
+} from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
 import { AddMeasurementModal } from '../progress/components/add-measurement-modal'
@@ -33,8 +35,11 @@ export function MobileNav() {
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const [clickedItem, setClickedItem] = useState<string | null>(null)
   const { data, isLoading } = useFitspaceGetActivePlanIdQuery()
+  const { data: quickWorkoutPlanData, isLoading: isQuickWorkoutPlanLoading } =
+    useFitspaceGetUserQuickWorkoutPlanQuery({})
 
-  const currentWorkoutId = data?.getActivePlanId
+  const currentWorkoutId =
+    data?.getActivePlanId || quickWorkoutPlanData?.getQuickWorkoutPlan?.id
   useEffect(() => {
     setClickedItem(null)
   }, [pathname])
@@ -42,31 +47,38 @@ export function MobileNav() {
   const navItems = useMemo(
     () => [
       {
-        href: '/fitspace/dashboard',
-        icon: LayoutDashboardIcon,
-        label: 'Dash',
+        id: 'workout',
+        href: currentWorkoutId
+          ? `/fitspace/workout/${currentWorkoutId}`
+          : '/fitspace/my-plans',
+        icon: Dumbbell,
+        label: 'Workout',
+        prefetch: true,
+        disabled: isLoading || isQuickWorkoutPlanLoading,
+      },
+      {
+        id: 'meals',
+        href: '/fitspace/meal-plan',
+        icon: SaladIcon,
+        label: 'Meals',
         prefetch: true,
       },
       {
+        id: 'plans',
         href: '/fitspace/my-plans',
         icon: Calendar,
         label: 'Plans',
         prefetch: true,
       },
       {
-        href: `/fitspace/workout/${currentWorkoutId || 'quick-workout'}`,
-        icon: Dumbbell,
-        label: 'Workout',
-        prefetch: true,
-        disabled: isLoading,
-      },
-      {
-        href: '/fitspace/meal-plan',
-        icon: SaladIcon,
-        label: 'Food',
+        id: 'progress',
+        href: '/fitspace/progress',
+        icon: TrendingUp,
+        label: 'Progress',
         prefetch: true,
       },
       {
+        id: 'more',
         icon: MoreHorizontalIcon,
         label: 'More',
         prefetch: true,
@@ -75,13 +87,13 @@ export function MobileNav() {
         },
       },
     ],
-    [currentWorkoutId, isLoading],
+    [currentWorkoutId, isLoading, isQuickWorkoutPlanLoading],
   )
 
   return (
     <>
       <div className="h-40" />
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar rounded-t-lg safe-area-bottom safe-area-x">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar safe-area-bottom safe-area-x">
         <div className="grid grid-cols-5 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
@@ -92,7 +104,7 @@ export function MobileNav() {
             if (item.onClick) {
               return (
                 <button
-                  key={item.href || item.label}
+                  key={item.id}
                   onClick={item.onClick}
                   className={cn(
                     'flex flex-col text-muted-foreground hover:text-foreground items-center justify-center p-2 rounded-xl transition-colors min-w-[40px] cursor-pointer',
@@ -107,7 +119,7 @@ export function MobileNav() {
 
             return (
               <Link
-                key={item.href || item.label}
+                key={item.id}
                 href={item.href}
                 onClick={() => setClickedItem(item.label)}
                 className={cn(
@@ -303,16 +315,21 @@ export function QuickActionTile({
 }: QuickActionTileProps) {
   return (
     <ButtonLink
-      href={href}
-      onClick={onClick}
+      href={disabled ? '#' : href}
+      onClick={disabled ? undefined : onClick}
       variant="secondary"
       aria-label={ariaLabel || label}
       disabled={disabled}
       className={cn('h-24 rounded-xl border', className)}
     >
       <div className="flex flex-col items-center justify-center gap-2">
-        <Icon />
-        <p className="text-xs font-medium text-center whitespace-pre-wrap">
+        <Icon className={cn(disabled && 'opacity-50')} />
+        <p
+          className={cn(
+            'text-xs font-medium text-center whitespace-pre-wrap',
+            disabled && 'opacity-50',
+          )}
+        >
           {label}
         </p>
       </div>

@@ -32,9 +32,9 @@ export function Navigation() {
   return (
     <div
       className={cn(
-        'bg-sidebar rounded-b-xl mt-[-60px]',
+        'bg-sidebar rounded-b-xl',
         // Counter Main padding
-        '-mx-2 md:-mx-4 lg:-mx-8 md:mt-[calc(-4px-60px)] lg:mt-[calc(-20px-60px)]',
+        '-mx-2 md:-mx-4 lg:-mx-8',
         'px-2 py-4 md:px-4 lg:p-8',
       )}
     >

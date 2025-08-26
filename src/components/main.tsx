@@ -46,8 +46,7 @@ export const Main = async ({
             'w-full h-full p-2 md:p-4 lg:p-8 bg-background overflow-y-auto safe-area-bottom',
             {
               'md:rounded-md': isTrainer,
-              'pt-[calc(var(--safe-area-inset-top)+60px)] min-h-screen':
-                !isTrainer,
+              'pt-[calc(var(--safe-area-inset-top))] min-h-screen': !isTrainer,
             },
           )}
         >

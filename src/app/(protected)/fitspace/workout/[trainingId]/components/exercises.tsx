@@ -11,6 +11,8 @@ import { useWorkout } from '@/context/workout-context/workout-context'
 import { useTrainingView } from '@/hooks/use-training-view'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
+import { QuickWorkout } from '../../quick-workout/quick-workout'
+
 import { Exercise } from './exercise'
 import { ExercisesPagination } from './exercises-pagaination'
 import { RestDay } from './rest-day'
@@ -114,8 +116,12 @@ export function Exercises() {
           {exercises.length > 0 && <Progress value={progressPercentage} />}
         </div>
       )}
+      {activeDay.isRestDay ? <RestDay /> : null}
+      {activeDay.exercises.length === 0 ? (
+        <QuickWorkout hideProgress={true} />
+      ) : null}
 
-      {activeDay.isRestDay ? (
+      {/* {activeDay.isRestDay ? (
         <RestDay />
       ) : activeExerciseId === 'summary' ||
         (!selectedExercise && !activeDay.isRestDay && !isSimpleView) ? (
@@ -168,7 +174,7 @@ export function Exercises() {
             <ExercisesPagination onClick={handlePaginationClick} />
           )}
         </div>
-      ) : null}
+      ) : null} */}
     </AnimatedPageTransition>
   )
 }

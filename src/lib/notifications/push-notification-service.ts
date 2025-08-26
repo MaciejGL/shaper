@@ -36,7 +36,7 @@ export async function notifyCoachingRequestAccepted(
     [senderId],
     'Coaching request accepted',
     `${acceptorName} has accepted your coaching request.`,
-    '/fitspace/dashboard',
+    '/fitspace/my-trainer',
   )
 }
 
@@ -51,7 +51,6 @@ export async function notifyCoachingRequestRejected(
     [senderId],
     'Coaching request declined',
     `${rejectorName} has declined your coaching request.`,
-    '/fitspace/dashboard',
   )
 }
 
@@ -308,18 +307,6 @@ export async function notifyRestDay(userId: string) {
 }
 
 /**
- * Send push notification for hydration reminders
- */
-export async function notifyHydrationReminder(userId: string) {
-  return await sendPushNotificationToUsers(
-    [userId],
-    'Hydration reminder',
-    'Time for a water break. Staying hydrated supports performance and recovery.',
-    '/fitspace/dashboard',
-  )
-}
-
-/**
  * Send push notification for weekly progress summary
  */
 export async function notifyWeeklyProgress(
@@ -407,7 +394,7 @@ export async function notifySystemAnnouncement(
     userIds,
     title,
     message,
-    '/fitspace/dashboard',
+    '/fitspace/workout',
   )
 }
 
@@ -419,7 +406,7 @@ export async function notifyAppUpdate(userIds: string[]) {
     userIds,
     'App update available',
     'A new version of Hypertro is available with new features and improvements.',
-    '/fitspace/dashboard',
+    '/fitspace/workout',
   )
 }
 
@@ -444,7 +431,7 @@ export async function sendBatchNotifications(
         notification.userIds,
         notification.title,
         notification.message,
-        notification.url || '/fitspace/dashboard',
+        notification.url || '/fitspace/workout',
       ),
     ),
   )

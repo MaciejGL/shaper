@@ -36,16 +36,24 @@ export function EnhancedExercisesList({
   selectedEquipment,
   onEquipmentChange,
 }: EnhancedExercisesListProps) {
-  // Sort exercises: selected ones first, then unselected
-  const sortedExercises = useMemo(() => {
-    const selected = filteredExercises.filter((exercise) =>
-      selectedExercises.includes(exercise.id),
+  const groupedAlphabetically = useMemo(() => {
+    return filteredExercises.reduce(
+      (acc, exercise) => {
+        // Calculate the grouping key - use '#' for exercises starting with numbers
+        let firstLetter = exercise.name.charAt(0).toUpperCase()
+        if (exercise.name.trim().match(/^\d/)) {
+          firstLetter = '#'
+        }
+
+        if (!acc[firstLetter]) {
+          acc[firstLetter] = []
+        }
+        acc[firstLetter].push(exercise)
+        return acc
+      },
+      {} as Record<string, Exercise[]>,
     )
-    const unselected = filteredExercises.filter(
-      (exercise) => !selectedExercises.includes(exercise.id),
-    )
-    return [...selected, ...unselected]
-  }, [filteredExercises, selectedExercises])
+  }, [filteredExercises])
 
   return (
     <div className="space-y-4">
@@ -118,31 +126,39 @@ export function EnhancedExercisesList({
       )}
 
       {/* Exercises Grid */}
-      <motion.div
-        layout
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-      >
+      <motion.div layout className="space-y-4">
         <AnimatePresence mode="popLayout">
-          {sortedExercises.map((exercise) => (
-            <motion.div
-              key={exercise.id}
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{
-                type: 'spring',
-                stiffness: 350,
-                damping: 25,
-              }}
-            >
-              <ExerciseCard
-                exercise={exercise}
-                selectedExercises={selectedExercises}
-                onExerciseSelect={onExerciseSelect}
-              />
-            </motion.div>
-          ))}
+          {Object.entries(groupedAlphabetically)
+            .sort(([a], [b]) => {
+              // Put '#' (numbers) at the end
+              if (a === '#' && b !== '#') return 1
+              if (b === '#' && a !== '#') return -1
+              // Normal alphabetical sorting for everything else
+              return a.localeCompare(b)
+            })
+            .map(([letter, exercises]) => {
+              const isNumber = /^\d/.test(letter)
+              return (
+                <div key={letter}>
+                  {!isNumber && (
+                    <h3 className="text-2xl font-semibold bg-background/80 backdrop-blur-xs px-2 sticky top-0 z-10">
+                      {letter}
+                    </h3>
+                  )}
+                  <div className="h-2" />
+                  {exercises.map((exercise, index) => (
+                    <ExerciseCard
+                      key={exercise.id}
+                      exercise={exercise}
+                      selectedExercises={selectedExercises}
+                      onExerciseSelect={onExerciseSelect}
+                      isFirst={index === 0}
+                      isLast={index === exercises.length - 1}
+                    />
+                  ))}
+                </div>
+              )
+            })}
         </AnimatePresence>
       </motion.div>
 

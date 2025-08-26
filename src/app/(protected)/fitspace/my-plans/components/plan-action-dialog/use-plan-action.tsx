@@ -12,7 +12,6 @@ import {
   useFitspaceGetActivePlanIdQuery,
   useFitspaceGetCurrentWorkoutIdQuery,
   useFitspaceMyPlansQuery,
-  useGetTrainingPlanPreviewByIdQuery,
   usePausePlanMutation,
 } from '@/generated/graphql-client'
 
@@ -45,13 +44,13 @@ export function usePlanAction() {
     queryClient.invalidateQueries({
       queryKey: useFitspaceGetActivePlanIdQuery.getKey(),
     })
-    if (dialogState.plan?.id) {
-      queryClient.invalidateQueries({
-        queryKey: useGetTrainingPlanPreviewByIdQuery.getKey({
-          id: dialogState.plan.id,
-        }),
-      })
-    }
+    // if (dialogState.plan?.id) {
+    //   queryClient.invalidateQueries({
+    //     queryKey: useGetTrainingPlanPreviewByIdQuery.getKey({
+    //       id: dialogState.plan.id,
+    //     }),
+    //   })
+    // }
   }
   const { mutateAsync: activatePlan, isPending: isActivatingPlan } =
     useActivatePlanMutation({

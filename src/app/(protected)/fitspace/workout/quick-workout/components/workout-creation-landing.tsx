@@ -46,8 +46,8 @@ export function WorkoutCreationLanding({
             onClick={onSelectAI}
           >
             <CardContent>
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-700 dark:to-amber-500 rounded-lg">
+              <div className="flex items-center">
+                <div className="p-2 mr-3 bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-700 dark:to-amber-500 rounded-lg">
                   <SparklesIcon className="size-5 text-amber-600 dark:text-amber-200" />
                 </div>
                 <div className="flex-1">
@@ -55,7 +55,7 @@ export function WorkoutCreationLanding({
                     Quick Workout
                   </CardTitle>
                   <CardDescription>
-                    Automatically suggest exercises for you
+                    Generate based on your preferences
                   </CardDescription>
                 </div>
                 {hasPremiumAccess ? (
@@ -92,8 +92,8 @@ export function WorkoutCreationLanding({
               onClick={onSelectFavourites}
             >
               <CardContent>
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-card-on-card rounded-lg">
+                <div className="flex items-center">
+                  <div className="p-2 mr-3 bg-card-on-card rounded-lg">
                     <BookmarkIcon className="size-5" />
                   </div>
                   <div className="flex-1">
@@ -126,8 +126,8 @@ export function WorkoutCreationLanding({
             onClick={onSelectManual}
           >
             <CardContent>
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-card-on-card rounded-lg">
+              <div className="flex items-center">
+                <div className="p-2 mr-3 bg-card-on-card rounded-lg">
                   <ListTodoIcon className="size-5" />
                 </div>
                 <div className="flex-1">

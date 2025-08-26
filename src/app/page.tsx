@@ -16,7 +16,7 @@ export default async function Home() {
 
   // Move redirect outside of try-catch block
   if (user?.user?.email) {
-    return redirect('/fitspace/dashboard')
+    return redirect('/fitspace/workout')
   }
 
   return <HomepageClient />
