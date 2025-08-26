@@ -224,7 +224,7 @@ export async function sendOfferNotifications({
         data: {
           userId: client.id,
           createdBy: input.trainerId,
-          message: `${trainerName} sent you a custom training package: ${bundleDescription}`,
+          message: `${trainerName} created a custom training package for you: ${bundleDescription}`,
           type: 'TRAINER_OFFER_RECEIVED',
           link: `/offer/${offer.token}`,
           relatedItemId: offer.token,
@@ -235,7 +235,7 @@ export async function sendOfferNotifications({
       await sendPushForNotification(
         client.id,
         GQLNotificationType.TrainerOfferReceived,
-        `${trainerName} sent you a custom training package: ${bundleDescription}`,
+        `${trainerName} created a custom training package for you: ${bundleDescription}`,
         `/offer/${offer.token}`,
         {
           trainerName,

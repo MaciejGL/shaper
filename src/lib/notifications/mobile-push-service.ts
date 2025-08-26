@@ -198,8 +198,8 @@ export async function getMobilePushTokenStats() {
 export async function sendTestMobilePushNotification(userId: string) {
   return await sendMobilePushNotifications({
     userIds: [userId],
-    title: '🏋️ Hypertro Test',
-    body: 'This is a test notification from your Hypertro mobile app!',
+    title: 'Hypertro test notification',
+    body: 'This is a test notification from Hypertro.',
     data: {
       type: 'test',
       url: '/fitspace',
