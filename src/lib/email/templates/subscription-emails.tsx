@@ -1,8 +1,13 @@
 import {
+  EmailAlert,
   EmailButton,
+  EmailCard,
   EmailContent,
+  EmailDivider,
+  EmailFooter,
   EmailHeader,
   EmailHeading,
+  EmailText,
   EmailWrapper,
 } from './components'
 
@@ -20,42 +25,80 @@ export function TrialEndingEmail({
   packageName,
   upgradeUrl,
 }: TrialEndingEmailProps) {
+  const dayText = daysRemaining === 1 ? 'day' : 'days'
+
   return (
-    <EmailWrapper>
+    <EmailWrapper
+      previewText={`Your ${packageName} trial ends in ${daysRemaining} ${dayText}`}
+    >
       <EmailHeader brandName="Hypertro" />
       <EmailContent>
-        <EmailHeading size={2}>Your trial is ending soon</EmailHeading>
+        <EmailHeading size={2} marginBottom="12px">
+          Your trial is ending soon
+        </EmailHeading>
 
-        <p>Hi{userName ? ` ${userName}` : ''},</p>
+        <EmailText marginBottom="24px">
+          {userName ? `Hi ${userName},` : 'Hello,'}
+        </EmailText>
 
-        <p>
-          Your {packageName} trial will end in{' '}
+        <EmailAlert type="warning">
+          Your <strong>{packageName}</strong> trial will end in{' '}
           <strong>
-            {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}
+            {daysRemaining} {dayText}
           </strong>
-          .
-        </p>
+        </EmailAlert>
 
-        <p>
-          Don't lose access to your premium features! Upgrade now to continue
-          enjoying:
-        </p>
+        <EmailText marginBottom="24px">
+          Don't lose access to your premium features. Continue your fitness
+          journey with unlimited access to:
+        </EmailText>
 
-        <ul style={{ marginLeft: '20px', lineHeight: '1.6' }}>
-          <li>Unlimited workout plans</li>
-          <li>Advanced progress tracking</li>
-          <li>Premium exercise library</li>
-          <li>Meal planning tools</li>
-        </ul>
+        <EmailCard>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
+              <span>Unlimited workout plans and programs</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
+              <span>Advanced progress tracking and analytics</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
+              <span>Complete exercise library with instructions</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
+              <span>Personalized meal planning tools</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
+              <span>Priority customer support</span>
+            </div>
+          </div>
+        </EmailCard>
 
-        <div style={{ margin: '24px 0' }}>
-          <EmailButton href={upgradeUrl}>Upgrade Now</EmailButton>
+        <div style={{ textAlign: 'center', margin: '32px 0' }}>
+          <EmailButton href={upgradeUrl} size="lg">
+            Continue with {packageName}
+          </EmailButton>
         </div>
 
-        <p style={{ fontSize: '14px', color: '#666', marginTop: '24px' }}>
-          Questions? Reply to this email or contact our support team.
-        </p>
+        <EmailDivider />
+
+        <EmailText size={5} color="muted" marginBottom="0">
+          Questions about your subscription? Contact our team at{' '}
+          <a
+            href="mailto:support@hypertro.app"
+            style={{ color: '#0f172a', textDecoration: 'underline' }}
+          >
+            support@hypertro.app
+          </a>
+        </EmailText>
       </EmailContent>
+      <EmailFooter companyName="Hypertro" />
     </EmailWrapper>
   )
 }
@@ -75,42 +118,63 @@ export function PaymentFailedEmail({
   updatePaymentUrl,
 }: PaymentFailedEmailProps) {
   return (
-    <EmailWrapper>
+    <EmailWrapper
+      previewText={`Payment issue with your ${packageName} subscription`}
+    >
       <EmailHeader brandName="Hypertro" />
       <EmailContent>
-        <EmailHeading size={2}>Payment Failed - Action Required</EmailHeading>
+        <EmailHeading size={2} marginBottom="12px">
+          Payment unsuccessful
+        </EmailHeading>
 
-        <p>Hi{userName ? ` ${userName}` : ''},</p>
+        <EmailText marginBottom="24px">
+          {userName ? `Hi ${userName},` : 'Hello,'}
+        </EmailText>
 
-        <p>
-          We were unable to process the payment for your {packageName}{' '}
-          subscription.
-        </p>
+        <EmailText marginBottom="24px">
+          We encountered an issue processing the payment for your{' '}
+          <strong>{packageName}</strong> subscription.
+        </EmailText>
 
-        <p>
-          <strong>Don't worry!</strong> You have {gracePeriodDays} days to
-          update your payment method and keep your premium access active.
-        </p>
+        <EmailAlert type="info">
+          <strong>No worries!</strong> You have {gracePeriodDays} days to update
+          your payment method and maintain uninterrupted access to your premium
+          features.
+        </EmailAlert>
 
-        <p>Common reasons for payment failures:</p>
+        <EmailText marginBottom="16px">
+          Common reasons for payment issues:
+        </EmailText>
 
-        <ul style={{ marginLeft: '20px', lineHeight: '1.6' }}>
-          <li>Expired credit card</li>
-          <li>Insufficient funds</li>
-          <li>Card issuer declined the transaction</li>
-          <li>Billing address mismatch</li>
-        </ul>
+        <EmailCard>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div>• Expired credit or debit card</div>
+            <div>• Insufficient account balance</div>
+            <div>• Card issuer security restrictions</div>
+            <div>• Billing address verification mismatch</div>
+            <div>• Card network connectivity issues</div>
+          </div>
+        </EmailCard>
 
-        <div style={{ margin: '24px 0' }}>
-          <EmailButton href={updatePaymentUrl}>
+        <div style={{ textAlign: 'center', margin: '32px 0' }}>
+          <EmailButton href={updatePaymentUrl} size="lg">
             Update Payment Method
           </EmailButton>
         </div>
 
-        <p style={{ fontSize: '14px', color: '#666', marginTop: '24px' }}>
-          Need help? Contact us at support@hypertro.app
-        </p>
+        <EmailDivider />
+
+        <EmailText size={5} color="muted" marginBottom="0">
+          Need assistance? Our support team is ready to help at{' '}
+          <a
+            href="mailto:support@hypertro.app"
+            style={{ color: '#0f172a', textDecoration: 'underline' }}
+          >
+            support@hypertro.app
+          </a>
+        </EmailText>
       </EmailContent>
+      <EmailFooter companyName="Hypertro" />
     </EmailWrapper>
   )
 }
@@ -130,36 +194,58 @@ export function SubscriptionCancelledEmail({
   reactivateUrl,
 }: SubscriptionCancelledEmailProps) {
   return (
-    <EmailWrapper>
+    <EmailWrapper
+      previewText={`Your ${packageName} subscription has been cancelled`}
+    >
       <EmailHeader brandName="Hypertro" />
       <EmailContent>
-        <EmailHeading size={2}>Subscription Cancelled</EmailHeading>
+        <EmailHeading size={2} marginBottom="12px">
+          Subscription cancelled
+        </EmailHeading>
 
-        <p>Hi{userName ? ` ${userName}` : ''},</p>
+        <EmailText marginBottom="24px">
+          {userName ? `Hi ${userName},` : 'Hello,'}
+        </EmailText>
 
-        <p>Your {packageName} subscription has been cancelled as requested.</p>
+        <EmailText marginBottom="24px">
+          We've successfully cancelled your <strong>{packageName}</strong>{' '}
+          subscription as requested.
+        </EmailText>
 
-        <p>
-          You'll continue to have access to premium features until{' '}
-          <strong>{endDate}</strong>.
-        </p>
+        <EmailAlert type="info">
+          You'll continue to have full access to all premium features until{' '}
+          <strong>{endDate}</strong>
+        </EmailAlert>
 
-        <p>
-          Changed your mind? You can reactivate your subscription anytime before
-          it expires.
-        </p>
+        <EmailText marginBottom="24px">
+          Changed your mind? You can easily reactivate your subscription anytime
+          before it expires.
+        </EmailText>
 
-        <div style={{ margin: '24px 0' }}>
-          <EmailButton href={reactivateUrl}>
+        <div style={{ textAlign: 'center', margin: '32px 0' }}>
+          <EmailButton href={reactivateUrl} size="lg">
             Reactivate Subscription
           </EmailButton>
         </div>
 
-        <p style={{ fontSize: '14px', color: '#666', marginTop: '24px' }}>
-          We're sorry to see you go. If you have feedback about your experience,
-          we'd love to hear from you - just reply to this email.
-        </p>
+        <EmailDivider />
+
+        <EmailText size={5} color="muted" marginBottom="8px">
+          We're sorry to see you go. Your feedback helps us improve - we'd love
+          to hear about your experience.
+        </EmailText>
+
+        <EmailText size={5} color="muted" marginBottom="0">
+          Reply to this email or contact us at{' '}
+          <a
+            href="mailto:support@hypertro.app"
+            style={{ color: '#0f172a', textDecoration: 'underline' }}
+          >
+            support@hypertro.app
+          </a>
+        </EmailText>
       </EmailContent>
+      <EmailFooter companyName="Hypertro" />
     </EmailWrapper>
   )
 }
@@ -175,20 +261,45 @@ export function SubscriptionDeletedEmail({
   packageName,
 }: SubscriptionDeletedEmailProps) {
   return (
-    <EmailWrapper>
+    <EmailWrapper previewText={`Your ${packageName} subscription has ended`}>
       <EmailHeader brandName="Hypertro" />
       <EmailContent>
-        <EmailHeading size={2}>Subscription has been removed</EmailHeading>
+        <EmailHeading size={2} marginBottom="12px">
+          Subscription ended
+        </EmailHeading>
 
-        <p>Hi{userName ? ` ${userName}` : ''},</p>
+        <EmailText marginBottom="24px">
+          {userName ? `Hi ${userName},` : 'Hello,'}
+        </EmailText>
 
-        <p>Your {packageName} subscription has been removed.</p>
+        <EmailText marginBottom="24px">
+          Your <strong>{packageName}</strong> subscription has ended and has
+          been removed from your account.
+        </EmailText>
 
-        <p style={{ fontSize: '14px', color: '#666', marginTop: '24px' }}>
-          We're sorry to see you go. If you have feedback about your experience,
-          we'd love to hear from you - just reply to this email.
-        </p>
+        <EmailText marginBottom="24px">
+          You can still access your basic Hypertro account and create a new
+          subscription anytime to regain access to premium features.
+        </EmailText>
+
+        <EmailDivider />
+
+        <EmailText size={5} color="muted" marginBottom="8px">
+          We're sorry to see you go. Your feedback is valuable to us - we'd love
+          to hear about your experience.
+        </EmailText>
+
+        <EmailText size={5} color="muted" marginBottom="0">
+          Contact us anytime at{' '}
+          <a
+            href="mailto:support@hypertro.app"
+            style={{ color: '#0f172a', textDecoration: 'underline' }}
+          >
+            support@hypertro.app
+          </a>
+        </EmailText>
       </EmailContent>
+      <EmailFooter companyName="Hypertro" />
     </EmailWrapper>
   )
 }
@@ -207,40 +318,81 @@ export function WelcomeEmail({
   isReactivation = false,
   dashboardUrl,
 }: WelcomeEmailProps) {
+  const greeting = isReactivation ? 'Welcome back!' : 'Welcome to Premium!'
+  const message = isReactivation
+    ? `Welcome back! Your ${packageName} subscription has been reactivated and you now have full access to all premium features.`
+    : `Thank you for subscribing to ${packageName}! Your premium access is now active and ready to elevate your fitness journey.`
+
   return (
-    <EmailWrapper>
+    <EmailWrapper
+      previewText={
+        isReactivation
+          ? `Your ${packageName} subscription is reactivated`
+          : `Welcome to ${packageName}!`
+      }
+    >
       <EmailHeader brandName="Hypertro" />
       <EmailContent>
-        <EmailHeading size={2}>
-          {isReactivation ? 'Welcome back!' : 'Welcome to Premium!'}
+        <EmailHeading size={2} marginBottom="12px">
+          {greeting}
         </EmailHeading>
 
-        <p>Hi{userName ? ` ${userName}` : ''},</p>
+        <EmailText marginBottom="24px">
+          {userName ? `Hi ${userName},` : 'Hello,'}
+        </EmailText>
 
-        <p>
-          {isReactivation
-            ? `Welcome back! Your ${packageName} subscription has been reactivated.`
-            : `Thank you for subscribing to ${packageName}! Your premium access is now active.`}
-        </p>
+        <EmailText marginBottom="28px">{message}</EmailText>
 
-        <p>You now have access to:</p>
+        <EmailText marginBottom="16px">
+          Your premium membership includes:
+        </EmailText>
 
-        <ul style={{ marginLeft: '20px', lineHeight: '1.6' }}>
-          <li>Unlimited workout plans</li>
-          <li>Advanced progress tracking</li>
-          <li>Premium exercise library</li>
-          <li>Meal planning tools</li>
-          <li>Priority support</li>
-        </ul>
+        <EmailCard>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
+              <span>Unlimited workout plans and programs</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
+              <span>Advanced progress tracking and analytics</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
+              <span>Complete exercise library with video instructions</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
+              <span>Personalized meal planning and nutrition tools</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#16a34a', fontWeight: '600' }}>✓</span>
+              <span>Priority customer support and guidance</span>
+            </div>
+          </div>
+        </EmailCard>
 
-        <div style={{ margin: '24px 0' }}>
-          <EmailButton href={dashboardUrl}>Access Your Dashboard</EmailButton>
+        <div style={{ textAlign: 'center', margin: '32px 0' }}>
+          <EmailButton href={dashboardUrl} size="lg">
+            Access Your Dashboard
+          </EmailButton>
         </div>
 
-        <p style={{ fontSize: '14px', color: '#666', marginTop: '24px' }}>
-          Questions? We're here to help at support@hypertro.app
-        </p>
+        <EmailDivider />
+
+        <EmailText size={5} color="muted" marginBottom="0">
+          Need help getting started? Our support team is here for you at{' '}
+          <a
+            href="mailto:support@hypertro.app"
+            style={{ color: '#0f172a', textDecoration: 'underline' }}
+          >
+            support@hypertro.app
+          </a>
+        </EmailText>
       </EmailContent>
+      <EmailFooter companyName="Hypertro" />
     </EmailWrapper>
   )
 }
@@ -259,51 +411,80 @@ export function GracePeriodEndingEmail({
   daysRemaining,
   updatePaymentUrl,
 }: GracePeriodEndingEmailProps) {
+  const dayText = daysRemaining === 1 ? 'day' : 'days'
+
   return (
-    <EmailWrapper>
+    <EmailWrapper
+      previewText={`Final notice: ${packageName} subscription ending in ${daysRemaining} ${dayText}`}
+    >
       <EmailHeader brandName="Hypertro" />
       <EmailContent>
-        <EmailHeading size={2}>
-          Final Notice - Update Payment Method
+        <EmailHeading size={2} marginBottom="12px">
+          Final notice: Action required
         </EmailHeading>
 
-        <p>Hi{userName ? ` ${userName}` : ''},</p>
+        <EmailText marginBottom="24px">
+          {userName ? `Hi ${userName},` : 'Hello,'}
+        </EmailText>
 
-        <p>
+        <EmailAlert type="error">
           <strong>
             Your {packageName} subscription will be cancelled in {daysRemaining}{' '}
-            day{daysRemaining !== 1 ? 's' : ''}
-          </strong>
+            {dayText}
+          </strong>{' '}
           due to payment issues.
-        </p>
+        </EmailAlert>
 
-        <p>
-          This is your final reminder to update your payment method and keep
+        <EmailText marginBottom="24px">
+          This is your final reminder to update your payment method and maintain
           your premium access.
-        </p>
+        </EmailText>
 
-        <p
-          style={{
-            background: '#fff3cd',
-            padding: '12px',
-            borderRadius: '4px',
-            border: '1px solid #ffeaa7',
-          }}
-        >
-          ⚠️ After {daysRemaining} day{daysRemaining !== 1 ? 's' : ''}, you'll
-          lose access to all premium features.
-        </p>
+        <EmailAlert type="warning">
+          After {daysRemaining} {dayText}, you'll lose access to all premium
+          features including:
+          <div
+            style={{
+              marginTop: '12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px',
+            }}
+          >
+            <div>• Unlimited workout plans</div>
+            <div>• Progress tracking tools</div>
+            <div>• Premium exercise library</div>
+            <div>• Meal planning features</div>
+          </div>
+        </EmailAlert>
 
-        <div style={{ margin: '24px 0' }}>
-          <EmailButton href={updatePaymentUrl}>
+        <div style={{ textAlign: 'center', margin: '32px 0' }}>
+          <EmailButton
+            href={updatePaymentUrl}
+            size="lg"
+            backgroundColor="#dc2626"
+          >
             Update Payment Method Now
           </EmailButton>
         </div>
 
-        <p style={{ fontSize: '14px', color: '#666', marginTop: '24px' }}>
-          Need assistance? Contact us immediately at support@hypertro.app
-        </p>
+        <EmailDivider />
+
+        <EmailText size={5} color="muted" marginBottom="0">
+          Need immediate assistance? Contact our support team at{' '}
+          <a
+            href="mailto:support@hypertro.app"
+            style={{
+              color: '#dc2626',
+              textDecoration: 'underline',
+              fontWeight: '600',
+            }}
+          >
+            support@hypertro.app
+          </a>
+        </EmailText>
       </EmailContent>
+      <EmailFooter companyName="Hypertro" />
     </EmailWrapper>
   )
 }

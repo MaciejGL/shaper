@@ -1,7 +1,10 @@
 import * as React from 'react'
 
 import {
+  EmailAlert,
+  EmailCard,
   EmailContent,
+  EmailDivider,
   EmailFooter,
   EmailHeader,
   EmailHeading,
@@ -15,32 +18,57 @@ interface OtpEmailProps {
 }
 
 export const OtpEmail = ({ code, userName }: OtpEmailProps) => (
-  <EmailWrapper previewText={`Your Hypertro login code: ${code}`}>
+  <EmailWrapper previewText={`Your verification code: ${code}`}>
     <EmailHeader brandName="Hypertro" />
     <EmailContent>
-      <EmailHeading size={2}>
-        {userName ? `Hello ${userName}! 👋` : 'Hello! 👋'}
+      <EmailHeading size={2} marginBottom="12px">
+        {userName ? `Welcome back, ${userName}` : 'Verify your identity'}
       </EmailHeading>
 
-      <EmailText center>Your Hypertro login code</EmailText>
-
-      <EmailHeading size={1} center>
-        {code}
-      </EmailHeading>
-
-      <EmailText color="secondary" size={5}>
-        This code will expire in 10 minutes for your security.
+      <EmailText marginBottom="28px">
+        Use the verification code below to complete your sign-in to Hypertro.
       </EmailText>
 
-      <EmailText size={5}>
-        If you didn't request this code, you can safely ignore this email.
-        Someone else might have typed your email address by mistake.
+      <EmailCard backgroundColor="#f8fafc" borderColor="#e2e8f0" padding="32px">
+        <EmailText
+          size={5}
+          color="muted"
+          center
+          marginBottom="8px"
+          weight={500}
+        >
+          VERIFICATION CODE
+        </EmailText>
+        <EmailHeading
+          size={1}
+          center
+          weight={700}
+          marginBottom="0"
+          color="primary"
+        >
+          {code}
+        </EmailHeading>
+      </EmailCard>
+
+      <EmailAlert type="warning">
+        ⏰ This code expires in 10 minutes for your security
+      </EmailAlert>
+
+      <EmailDivider />
+
+      <EmailText size={5} color="muted" marginBottom="8px">
+        If you didn't request this code, please ignore this email. Your account
+        remains secure.
       </EmailText>
 
-      <EmailText size={5}>
-        Stay fit! 💪
-        <br />
-        <strong>The Hypertro Team</strong>
+      <EmailText size={5} color="muted" marginBottom="0">
+        Need help? Contact our support team at{' '}
+        <a
+          href="mailto:support@hypertro.app"
+          style={{ color: '#0f172a', textDecoration: 'underline' }}
+        >
+          support@hypertro.app
+        </a>
       </EmailText>
     </EmailContent>
     <EmailFooter companyName="Hypertro" />

@@ -11,15 +11,28 @@ export const EmailWrapper = ({ children, previewText }: EmailWrapperProps) => (
     <head>
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Email</title>
+      <title>Hypertro</title>
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        `}
+      </style>
     </head>
-    <body style={{ margin: '0', padding: '0', backgroundColor: '#f6f9fc' }}>
+    <body
+      style={{
+        margin: '0',
+        padding: '0',
+        backgroundColor: '#f8fafc',
+        fontFamily:
+          'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+      }}
+    >
       {previewText && (
         <div
           style={{
             display: 'none',
             fontSize: '1px',
-            color: '#f6f9fc',
+            color: '#f8fafc',
             lineHeight: '1px',
             maxHeight: '0px',
             maxWidth: '0px',
@@ -37,24 +50,24 @@ export const EmailWrapper = ({ children, previewText }: EmailWrapperProps) => (
         border={0}
         style={{
           width: '100%',
-          backgroundColor: '#f6f9fc',
+          backgroundColor: '#f8fafc',
           fontFamily:
-            '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, sans-serif',
+            'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
         }}
       >
         <tr>
-          <td align="center" style={{ padding: '40px 20px' }}>
+          <td align="center" style={{ padding: '48px 24px' }}>
             <table
               role="presentation"
               cellSpacing="0"
               cellPadding="0"
               border={0}
               style={{
-                maxWidth: '600px',
+                maxWidth: '580px',
                 width: '100%',
                 backgroundColor: '#ffffff',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                borderRadius: '12px',
+                border: '1px solid #e2e8f0',
                 overflow: 'hidden',
               }}
             >
@@ -68,67 +81,54 @@ export const EmailWrapper = ({ children, previewText }: EmailWrapperProps) => (
 )
 
 interface EmailHeaderProps {
-  logo?: string
   logoAlt?: string
   brandName?: string
   backgroundColor?: string
 }
 
 export const EmailHeader = ({
-  logo,
-  logoAlt = 'Logo',
-  brandName = 'Fitspace',
-  backgroundColor = '#1a1a1a',
+  logoAlt = 'Hypertro',
+  brandName = 'Hypertro',
+  backgroundColor = '#0f172a',
 }: EmailHeaderProps) => (
   <tr>
     <td
       style={{
         backgroundColor,
-        padding: '32px',
+        padding: '40px 48px',
         textAlign: 'center',
+        borderBottom: '1px solid #e2e8f0',
       }}
     >
-      {logo ? (
-        <div
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <img
+          src={'https://hypertro.app/favicons/android-chrome-192x192.png'}
+          alt={logoAlt}
           style={{
-            margin: '0 auto',
+            height: '32px',
+            width: '32px',
+            marginRight: '12px',
           }}
-        >
-          <img
-            src={'https://hypertro.app/favicons/android-chrome-192x192.png'}
-            alt={logoAlt}
-            style={{
-              height: '40px',
-              width: 'auto',
-              display: 'block',
-              margin: '0 16px 0 0',
-            }}
-          />
-          <h1
-            style={{
-              margin: '0',
-              fontSize: '24px',
-              fontWeight: '500',
-              color: '#ffffff',
-              letterSpacing: '-0.5px',
-            }}
-          >
-            {brandName}
-          </h1>
-        </div>
-      ) : (
+        />
         <h1
           style={{
             margin: '0',
-            fontSize: '24px',
-            fontWeight: '500',
+            fontSize: '20px',
+            fontWeight: '600',
             color: '#ffffff',
-            letterSpacing: '-0.5px',
+            letterSpacing: '-0.025em',
+            lineHeight: '1.2',
           }}
         >
           {brandName}
         </h1>
-      )}
+      </div>
     </td>
   </tr>
 )
@@ -140,17 +140,17 @@ interface EmailContentProps {
 
 export const EmailContent = ({
   children,
-  padding = '40px',
+  padding = '48px',
 }: EmailContentProps) => (
   <tr>
     <td style={{ padding }}>
       <div
         style={{
           fontSize: '16px',
-          lineHeight: '1.6',
-          color: '#374151',
+          lineHeight: '1.7',
+          color: '#334155',
           fontFamily:
-            '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, sans-serif',
+            'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
         }}
       >
         {children}
@@ -171,7 +171,7 @@ interface EmailFooterProps {
 }
 
 export const EmailFooter = ({
-  companyName = 'Fitspace',
+  companyName = 'Hypertro',
   address,
   unsubscribeUrl,
   socialLinks,
@@ -179,9 +179,9 @@ export const EmailFooter = ({
   <tr>
     <td
       style={{
-        backgroundColor: '#ffffff',
-        padding: '32px 40px',
-        borderTop: '1px solid #e5e7eb',
+        backgroundColor: '#f8fafc',
+        padding: '32px 48px',
+        borderTop: '1px solid #e2e8f0',
       }}
     >
       <table
@@ -193,14 +193,14 @@ export const EmailFooter = ({
       >
         {socialLinks && socialLinks.length > 0 && (
           <tr>
-            <td style={{ textAlign: 'center', paddingBottom: '20px' }}>
+            <td style={{ textAlign: 'center', paddingBottom: '24px' }}>
               {socialLinks.map((link, index) => (
                 <a
                   key={index}
                   href={link.url}
                   style={{
                     display: 'inline-block',
-                    margin: '0 8px',
+                    margin: '0 12px',
                     textDecoration: 'none',
                   }}
                 >
@@ -208,14 +208,15 @@ export const EmailFooter = ({
                     <img
                       src={link.icon || '/placeholder.svg'}
                       alt={link.name}
-                      style={{ width: '24px', height: '24px' }}
+                      style={{ width: '20px', height: '20px' }}
                     />
                   ) : (
                     <span
                       style={{
-                        fontSize: '14px',
-                        color: '#6b7280',
+                        fontSize: '13px',
+                        color: '#64748b',
                         textDecoration: 'underline',
+                        fontWeight: '500',
                       }}
                     >
                       {link.name}
@@ -230,10 +231,11 @@ export const EmailFooter = ({
           <td style={{ textAlign: 'center' }}>
             <p
               style={{
-                margin: '0 0 8px 0',
-                fontSize: '14px',
-                color: '#6b7280',
-                lineHeight: '1.4',
+                margin: '0 0 12px 0',
+                fontSize: '13px',
+                color: '#64748b',
+                lineHeight: '1.5',
+                fontWeight: '500',
               }}
             >
               © {new Date().getFullYear()} {companyName}. All rights reserved.
@@ -242,9 +244,9 @@ export const EmailFooter = ({
               <p
                 style={{
                   margin: '0 0 16px 0',
-                  fontSize: '14px',
-                  color: '#9ca3af',
-                  lineHeight: '1.4',
+                  fontSize: '13px',
+                  color: '#94a3b8',
+                  lineHeight: '1.5',
                 }}
               >
                 {address}
@@ -254,9 +256,10 @@ export const EmailFooter = ({
               <a
                 href={unsubscribeUrl}
                 style={{
-                  fontSize: '14px',
-                  color: '#6b7280',
+                  fontSize: '13px',
+                  color: '#64748b',
                   textDecoration: 'underline',
+                  fontWeight: '500',
                 }}
               >
                 Unsubscribe
@@ -276,45 +279,71 @@ interface EmailButtonProps {
   textColor?: string
   borderRadius?: string
   padding?: string
+  size?: 'sm' | 'md' | 'lg'
 }
 
 export const EmailButton = ({
   href,
   children,
-  backgroundColor = '#1f2937',
+  backgroundColor = '#0f172a',
   textColor = '#ffffff',
-  borderRadius = '6px',
-  padding = '12px 24px',
-}: EmailButtonProps) => (
-  <table role="presentation" cellSpacing="0" cellPadding="0" border={0}>
-    <tr>
-      <td
-        style={{
-          borderRadius,
-          backgroundColor,
-        }}
-      >
-        <a
-          href={href}
+  borderRadius = '8px',
+  padding,
+  size = 'md',
+}: EmailButtonProps) => {
+  const defaultPadding = {
+    sm: '10px 20px',
+    md: '14px 28px',
+    lg: '16px 32px',
+  }[size]
+
+  const fontSize = {
+    sm: '14px',
+    md: '16px',
+    lg: '16px',
+  }[size]
+
+  return (
+    <table
+      role="presentation"
+      cellSpacing="0"
+      cellPadding="0"
+      border={0}
+      style={{ margin: '0 auto' }}
+    >
+      <tr>
+        <td
           style={{
-            display: 'inline-block',
-            padding,
-            fontSize: '16px',
-            fontWeight: '600',
-            color: textColor,
-            textDecoration: 'none',
             borderRadius,
+            backgroundColor,
+            border: '1px solid transparent',
+            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
           }}
         >
-          {children}
-        </a>
-      </td>
-    </tr>
-  </table>
-)
+          <a
+            href={href}
+            style={{
+              display: 'inline-block',
+              padding: padding || defaultPadding,
+              fontSize,
+              fontWeight: '600',
+              color: textColor,
+              textDecoration: 'none',
+              borderRadius,
+              lineHeight: '1.4',
+              letterSpacing: '-0.025em',
+            }}
+          >
+            {children}
+          </a>
+        </td>
+      </tr>
+    </table>
+  )
+}
 
 const fontSize = {
-  1: '32px',
+  1: '28px',
   2: '24px',
   3: '20px',
   4: '16px',
@@ -323,36 +352,45 @@ const fontSize = {
 } as const
 
 const fontWeight = {
-  500: '500',
+  300: '300',
   400: '400',
+  500: '500',
+  600: '600',
+  700: '700',
 } as const
 
 const fontColor = {
-  primary: '#374151',
-  secondary: '#6b7280',
+  primary: '#0f172a',
+  secondary: '#475569',
+  muted: '#64748b',
+  subtle: '#94a3b8',
 } as const
 
 export const EmailHeading = ({
   children,
   size = 1,
-  weight = 500,
+  weight = 600,
   color = 'primary',
   center = false,
+  marginBottom = '24px',
 }: {
   children: React.ReactNode
   size?: keyof typeof fontSize
   weight?: keyof typeof fontWeight
   color?: keyof typeof fontColor
   center?: boolean
+  marginBottom?: string
 }) => {
   return (
     <h1
       style={{
-        margin: '0 0 24px 0',
+        margin: `0 0 ${marginBottom} 0`,
         fontSize: fontSize[size],
         fontWeight: fontWeight[weight],
         color: fontColor[color],
         textAlign: center ? 'center' : 'left',
+        lineHeight: '1.3',
+        letterSpacing: '-0.025em',
       }}
     >
       {children}
@@ -362,23 +400,102 @@ export const EmailHeading = ({
 
 export const EmailText = ({
   children,
-  color = 'primary',
+  color = 'secondary',
   size = 4,
+  weight = 400,
   center = false,
+  marginBottom = '20px',
 }: {
   children: React.ReactNode
   color?: keyof typeof fontColor
   size?: keyof typeof fontSize
+  weight?: keyof typeof fontWeight
   center?: boolean
+  marginBottom?: string
 }) => (
   <p
     style={{
-      margin: '0 0 16px 0',
+      margin: `0 0 ${marginBottom} 0`,
       fontSize: fontSize[size],
+      fontWeight: fontWeight[weight],
       color: fontColor[color],
       textAlign: center ? 'center' : 'left',
+      lineHeight: '1.6',
     }}
   >
     {children}
   </p>
 )
+
+// Additional utility components for modern email design
+export const EmailDivider = () => (
+  <div
+    style={{
+      height: '1px',
+      backgroundColor: '#e2e8f0',
+      margin: '32px 0',
+    }}
+  />
+)
+
+export const EmailCard = ({
+  children,
+  backgroundColor = '#f8fafc',
+  borderColor = '#e2e8f0',
+  padding = '24px',
+}: {
+  children: React.ReactNode
+  backgroundColor?: string
+  borderColor?: string
+  padding?: string
+}) => (
+  <div
+    style={{
+      backgroundColor,
+      border: `1px solid ${borderColor}`,
+      borderRadius: '8px',
+      padding,
+      margin: '24px 0',
+    }}
+  >
+    {children}
+  </div>
+)
+
+export const EmailAlert = ({
+  children,
+  type = 'info',
+}: {
+  children: React.ReactNode
+  type?: 'info' | 'warning' | 'error' | 'success'
+}) => {
+  const alertStyles = {
+    info: { bg: '#eff6ff', border: '#dbeafe', text: '#1e40af' },
+    warning: { bg: '#fefce8', border: '#fde047', text: '#a16207' },
+    error: { bg: '#fef2f2', border: '#fecaca', text: '#dc2626' },
+    success: { bg: '#f0fdf4', border: '#bbf7d0', text: '#16a34a' },
+  }[type]
+
+  return (
+    <div
+      style={{
+        backgroundColor: alertStyles.bg,
+        border: `1px solid ${alertStyles.border}`,
+        borderRadius: '8px',
+        padding: '16px',
+        margin: '24px 0',
+      }}
+    >
+      <div
+        style={{
+          fontSize: '14px',
+          fontWeight: '500',
+          color: alertStyles.text,
+          lineHeight: '1.5',
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  )
+}

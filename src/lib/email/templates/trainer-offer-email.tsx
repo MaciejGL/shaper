@@ -1,10 +1,14 @@
 import * as React from 'react'
 
 import {
+  EmailAlert,
   EmailButton,
+  EmailCard,
   EmailContent,
+  EmailDivider,
   EmailFooter,
   EmailHeader,
+  EmailHeading,
   EmailText,
   EmailWrapper,
 } from './components'
@@ -30,99 +34,133 @@ export const TrainerOfferEmail = ({
   offerUrl,
   expiresAt,
 }: TrainerOfferEmailProps) => {
-  const bundleDescription = bundleItems
-    .map((item) => `${item.quantity}x ${item.packageName}`)
-    .join(', ')
-
-  const allServices = bundleItems.flatMap((item) => item.services)
-  const uniqueServices = [...new Set(allServices)]
-
-  const expirationTime = new Date(expiresAt).toLocaleString('en-US', {
+  const expirationTime = new Date(expiresAt).toLocaleDateString('en-US', {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-    timeZoneName: 'short',
   })
+
+  const totalPackages = bundleItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0,
+  )
 
   return (
     <EmailWrapper
-      previewText={`${trainerName} has sent you a training package offer: ${bundleDescription}`}
+      previewText={`${trainerName} has created a custom training package for you`}
     >
-      <EmailHeader
-        brandName="Training Package Offer"
-        backgroundColor="#1e40af"
-      />
+      <EmailHeader brandName="Hypertro" />
 
       <EmailContent>
-        <EmailText>Hi {clientName || 'there'},</EmailText>
+        <EmailHeading size={2} marginBottom="12px">
+          Training package offer
+        </EmailHeading>
 
-        <EmailText>
-          Great news! <strong>{trainerName}</strong> has created a custom
-          training package just for you:
+        <EmailText marginBottom="24px">
+          {clientName ? `Hi ${clientName},` : 'Hello,'}
         </EmailText>
 
-        {/* Package Details Box */}
-        <div style={packageBox}>
-          <h3 style={packageTitle}>Your Training Bundle</h3>
+        <EmailText marginBottom="28px">
+          <strong>{trainerName}</strong> has created a personalized training
+          package designed specifically for your fitness goals.
+        </EmailText>
+
+        <EmailCard>
+          <EmailHeading size={3} marginBottom="16px" weight={600}>
+            Your Training Bundle
+          </EmailHeading>
+
           {bundleItems.map((item, index) => (
-            <div key={index} style={packageItem}>
-              <div style={packageItemText}>
-                <strong>
-                  {item.quantity}x {item.packageName}
-                </strong>
+            <div
+              key={index}
+              style={{
+                marginBottom: '16px',
+                paddingBottom: '16px',
+                borderBottom:
+                  index < bundleItems.length - 1 ? '1px solid #e2e8f0' : 'none',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#0f172a',
+                  marginBottom: '4px',
+                }}
+              >
+                {item.quantity}x {item.packageName}
               </div>
-              <div style={servicesList}>
+              <div style={{ fontSize: '14px', color: '#64748b' }}>
                 Includes: {item.services.join(', ')}
               </div>
             </div>
           ))}
-        </div>
 
-        {/* Personal Message */}
-        {personalMessage && (
-          <div style={messageBox}>
-            <div style={messageTitle}>Personal Message from {trainerName}:</div>
-            <div style={messageText}>"{personalMessage}"</div>
+          <div
+            style={{
+              marginTop: '20px',
+              padding: '16px',
+              backgroundColor: '#f8fafc',
+              borderRadius: '6px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '14px',
+                color: '#475569',
+                marginBottom: '4px',
+              }}
+            >
+              <strong>Total packages:</strong> {totalPackages}
+            </div>
+            <div style={{ fontSize: '14px', color: '#475569' }}>
+              <strong>Your trainer:</strong> {trainerName}
+            </div>
           </div>
+        </EmailCard>
+
+        {personalMessage && (
+          <EmailCard backgroundColor="#fefce8" borderColor="#fde047">
+            <EmailText size={5} weight={600} color="primary" marginBottom="8px">
+              Personal message from {trainerName}:
+            </EmailText>
+            <p
+              style={{
+                margin: '0',
+                fontSize: '16px',
+                fontStyle: 'italic',
+                color: '#a16207',
+                lineHeight: '1.6',
+              }}
+            >
+              "{personalMessage}"
+            </p>
+          </EmailCard>
         )}
 
-        {/* CTA Button */}
         <div style={{ textAlign: 'center', margin: '32px 0' }}>
-          <EmailButton
-            href={offerUrl}
-            backgroundColor="#1e40af"
-            padding="16px 32px"
-          >
-            View Your Training Package
+          <EmailButton href={offerUrl} size="lg">
+            View Training Package
           </EmailButton>
         </div>
 
-        {/* Package Details */}
-        <div style={detailsBox}>
-          <div style={detailsTitle}>Package Details</div>
-          <div style={detailsText}>• Total packages: {bundleItems.length}</div>
-          <div style={detailsText}>
-            • Services included: {uniqueServices.join(', ')}
-          </div>
-          <div style={detailsText}>• Trainer: {trainerName}</div>
-        </div>
+        <EmailAlert type="warning">
+          This offer expires on <strong>{expirationTime}</strong>. Training
+          packages are customized specifically for your goals and fitness level.
+        </EmailAlert>
 
-        {/* Urgency Box */}
-        <div style={urgencyBox}>
-          <div style={urgencyText}>
-            ⏰ This offer expires on {expirationTime}
-          </div>
-          <div style={urgencySubtext}>
-            Don't miss out! Training packages are customized specifically for
-            your goals.
-          </div>
-        </div>
+        <EmailDivider />
 
-        <EmailText center>
-          Questions? Reply to this email or contact your trainer directly.
+        <EmailText size={5} color="muted" marginBottom="0">
+          Questions about this offer? Contact {trainerName} directly or reach
+          out to our support team at{' '}
+          <a
+            href="mailto:support@hypertro.app"
+            style={{ color: '#0f172a', textDecoration: 'underline' }}
+          >
+            support@hypertro.app
+          </a>
         </EmailText>
       </EmailContent>
 
@@ -132,103 +170,6 @@ export const TrainerOfferEmail = ({
       />
     </EmailWrapper>
   )
-}
-
-// Styles for custom styled elements
-const packageBox = {
-  backgroundColor: '#f9fafb',
-  border: '1px solid #e5e7eb',
-  borderRadius: '8px',
-  padding: '20px',
-  margin: '24px 0',
-}
-
-const packageTitle = {
-  fontSize: '18px',
-  fontWeight: 'bold',
-  color: '#1f2937',
-  margin: '0 0 16px 0',
-}
-
-const packageItem = {
-  marginBottom: '12px',
-}
-
-const packageItemText = {
-  fontSize: '16px',
-  color: '#1f2937',
-  margin: '0 0 4px 0',
-}
-
-const servicesList = {
-  fontSize: '14px',
-  color: '#6b7280',
-  margin: '0 0 8px 0',
-}
-
-const messageBox = {
-  backgroundColor: '#fef3c7',
-  border: '1px solid #f59e0b',
-  borderRadius: '8px',
-  padding: '16px',
-  margin: '24px 0',
-}
-
-const messageTitle = {
-  fontSize: '16px',
-  fontWeight: 'bold',
-  color: '#92400e',
-  margin: '0 0 8px 0',
-}
-
-const messageText = {
-  fontSize: '16px',
-  color: '#92400e',
-  fontStyle: 'italic',
-  margin: '0',
-}
-
-const detailsBox = {
-  backgroundColor: '#f3f4f6',
-  border: '1px solid #d1d5db',
-  borderRadius: '8px',
-  padding: '16px',
-  margin: '24px 0',
-}
-
-const detailsTitle = {
-  fontSize: '16px',
-  fontWeight: 'bold',
-  color: '#1f2937',
-  margin: '0 0 12px 0',
-}
-
-const detailsText = {
-  fontSize: '14px',
-  color: '#4b5563',
-  margin: '0 0 4px 0',
-}
-
-const urgencyBox = {
-  backgroundColor: '#fee2e2',
-  border: '1px solid #fca5a5',
-  borderRadius: '8px',
-  padding: '16px',
-  margin: '24px 0',
-  textAlign: 'center' as const,
-}
-
-const urgencyText = {
-  fontSize: '16px',
-  fontWeight: 'bold',
-  color: '#dc2626',
-  margin: '0 0 8px 0',
-}
-
-const urgencySubtext = {
-  fontSize: '14px',
-  color: '#b91c1c',
-  margin: '0',
 }
 
 export default TrainerOfferEmail

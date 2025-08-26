@@ -28,7 +28,7 @@ export const sendEmail = {
     await resend.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: 'Your Hypertro Login Code',
+      subject: 'Your Hypertro verification code',
       html,
     })
   },
@@ -60,7 +60,7 @@ export const sendEmail = {
     await resend.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: `Your ${packageName} trial ends in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`,
+      subject: `${packageName} trial ending soon - ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} remaining`,
       html,
     })
   },
@@ -91,7 +91,7 @@ export const sendEmail = {
     await resend.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: 'Payment Failed - Action Required',
+      subject: `${packageName} payment issue - action needed`,
       html,
     })
   },
@@ -122,7 +122,7 @@ export const sendEmail = {
     await resend.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: 'Subscription Cancelled',
+      subject: `${packageName} subscription cancelled - access until ${endDate}`,
       html,
     })
   },
@@ -144,7 +144,7 @@ export const sendEmail = {
     await resend.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: 'Subscription has been removed',
+      subject: `${packageName} subscription ended`,
       html,
     })
   },
@@ -176,8 +176,8 @@ export const sendEmail = {
       from: FROM_EMAIL,
       to,
       subject: isReactivation
-        ? `Welcome back to ${packageName}!`
-        : `Welcome to ${packageName}!`,
+        ? `${packageName} reactivated - welcome back!`
+        : `${packageName} activated - welcome to premium!`,
       html,
     })
   },
@@ -208,7 +208,7 @@ export const sendEmail = {
     await resend.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: `Final Notice: ${packageName} subscription ending in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''}`,
+      subject: `Urgent: ${packageName} ending in ${daysRemaining} day${daysRemaining !== 1 ? 's' : ''} - update payment`,
       html,
     })
   },
@@ -236,10 +236,6 @@ export const sendEmail = {
       expiresAt: string
     },
   ) => {
-    const bundleDescription = bundleItems
-      .map((item) => `${item.quantity}x ${item.packageName}`)
-      .join(', ')
-
     const html = await render(
       <TrainerOfferEmail
         clientName={clientName}
@@ -254,7 +250,7 @@ export const sendEmail = {
     await resend.emails.send({
       from: FROM_EMAIL,
       to,
-      subject: `${trainerName} sent you a training package: ${bundleDescription}`,
+      subject: `${trainerName} created a custom training package for you`,
       html,
     })
   },
