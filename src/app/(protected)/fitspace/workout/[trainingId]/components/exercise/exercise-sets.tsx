@@ -1,14 +1,10 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { InfoIcon, PlusIcon, XIcon } from 'lucide-react'
+import { PlusIcon, XIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutQuery,
   useFitspaceAddSetMutation,
@@ -22,14 +18,67 @@ import { ExerciseSet } from './exercise-set'
 import { sharedLayoutStyles } from './shared-styles'
 import { ExerciseSetsProps } from './types'
 
-export function ExerciseSets({
-  exercise,
-  previousLogs,
-  isExerciseCompleted,
-}: ExerciseSetsProps) {
+export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
   const { trainingId } = useParams<{ trainingId: string }>()
   const invalidateQuery = useInvalidateQuery()
   const queryClient = useQueryClient()
+  const { preferences } = useUserPreferences()
+  // Initialize state with current log values for each set
+  const [setsLogs, setSetsLogs] = useState<
+    Record<string, { weight: string; reps: string }>
+  >(() => {
+    const initialState: Record<string, { weight: string; reps: string }> = {}
+    const exerciseSets = exercise.substitutedBy?.sets || exercise.sets
+    exerciseSets.forEach((set) => {
+      initialState[set.id] = {
+        weight: set.log?.weight?.toString() ?? '',
+        reps: set.log?.reps?.toString() ?? '',
+      }
+    })
+    return initialState
+  })
+
+  // Keep setsLogs in sync with exercise sets (for when new sets are added/removed/updated)
+  useEffect(() => {
+    const exerciseSets = exercise.substitutedBy?.sets || exercise.sets
+    setSetsLogs((prev) => {
+      const updated = { ...prev }
+
+      // Add new sets or update existing sets with new log values
+      exerciseSets.forEach((set) => {
+        const currentState = updated[set.id]
+        const newLogWeight = set.log?.weight?.toString() ?? ''
+        const newLogReps = set.log?.reps?.toString() ?? ''
+
+        if (!currentState) {
+          // New set - add it
+          updated[set.id] = {
+            weight: newLogWeight,
+            reps: newLogReps,
+          }
+        } else {
+          // Existing set - update only if the log values changed and user hasn't edited
+          // If current state is empty but we now have log values, update them
+          if (currentState.weight === '' && newLogWeight !== '') {
+            updated[set.id] = { ...currentState, weight: newLogWeight }
+          }
+          if (currentState.reps === '' && newLogReps !== '') {
+            updated[set.id] = { ...updated[set.id], reps: newLogReps }
+          }
+        }
+      })
+
+      // Remove any sets that no longer exist
+      const currentSetIds = new Set(exerciseSets.map((s) => s.id))
+      Object.keys(updated).forEach((setId) => {
+        if (!currentSetIds.has(setId)) {
+          delete updated[setId]
+        }
+      })
+
+      return updated
+    })
+  }, [exercise.substitutedBy?.sets, exercise.sets])
 
   const { mutateAsync: addSet, isPending: isAddingSet } =
     useFitspaceAddSetMutation({
@@ -151,8 +200,6 @@ export function ExerciseSets({
     },
   })
 
-  const hasRpe = exercise.sets.some((set) => set.rpe)
-
   const handleAddSet = async () => {
     await addSet({
       exerciseId: exercise.substitutedBy?.id || exercise.id,
@@ -179,65 +226,110 @@ export function ExerciseSets({
     (set) => set.isExtra,
   )
 
+  // Helper function to get previous set's logged value
+  const getPreviousSetValue = (
+    currentSetOrder: number,
+    valueType: 'weight' | 'reps',
+  ): number | null => {
+    const exerciseSets = exercise.substitutedBy?.sets || exercise.sets
+
+    // Sort sets by order and look through previous sets (order < currentSetOrder)
+    const previousSets = exerciseSets
+      .filter((set) => set.order < currentSetOrder)
+      .sort((a, b) => b.order - a.order) // Sort in descending order (most recent first)
+
+    for (const previousSet of previousSets) {
+      // First check if there's a logged value in current session
+      const currentSessionValue = setsLogs[previousSet.id]?.[valueType]
+      if (currentSessionValue && currentSessionValue !== '') {
+        return parseFloat(currentSessionValue)
+      }
+
+      // Then check if there's a logged value from previous workout
+      const loggedValue = previousSet.log?.[valueType]
+      if (loggedValue) {
+        return loggedValue
+      }
+    }
+
+    // If no previous set has a value, look at previous workout logs
+    if (previousLogs.length > 0) {
+      const lastWorkoutLog = previousLogs[previousLogs.length - 1]
+      const correspondingSet = lastWorkoutLog.sets.find(
+        (s) => s.order === currentSetOrder,
+      )
+      if (correspondingSet?.log?.[valueType]) {
+        return correspondingSet.log[valueType]
+      }
+    }
+
+    return null
+  }
+
+  const handleRepsChange = (reps: string, setId: string) => {
+    setSetsLogs((prev) => ({
+      ...prev,
+      [setId]: { ...prev[setId], reps },
+    }))
+  }
+
+  const handleWeightChange = (weight: string, setId: string) => {
+    setSetsLogs((prev) => ({
+      ...prev,
+      [setId]: { ...prev[setId], weight },
+    }))
+  }
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-background rounded-[0.45rem]">
       <div className="flex items-center gap-1">
         <div
-          className={cn(sharedLayoutStyles, 'text-xs text-muted-foreground')}
+          className={cn(
+            sharedLayoutStyles,
+            'text-[0.625rem] text-muted-foreground py-2',
+          )}
         >
-          <div className="min-w-2.5"></div>
-          <div className="text-center min-w-[96px]">Reps</div>
-          <div className="text-center min-w-[96px]">Weight</div>
-          <div className={cn('text-center', !hasRpe && 'hidden')}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex justify-center gap-1">
-                  RPE <InfoIcon className="size-2.5 text-muted-foreground" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                Suggested effort level for the set.
-                <br />
-                <br />
-                <strong>RPE (Rate of Perceived Exertion)</strong>: A subjective
-                measure of how hard an exercise feels, typically on a scale from
-                1 (very easy) to 10 (maximum effort).
-                <br />
-                <br />
-                For example, if you can do maximum 10 reps of a weight, your RPE
-                is 10.
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <div className="text-center min-w-[40px]"></div>
+          <div className="min-w-2.5">SET</div>
+          <div className="text-center">PREVIOUS</div>
+          <div className="text-center">REPS</div>
+          <div className="text-center uppercase">{preferences.weightUnit}</div>
+          <div className="text-center"></div>
         </div>
 
         {hasExtraSets && <div className="w-8 shrink-0" />}
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-0">
         {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
+          const previousWeightLog = getPreviousSetValue(set.order, 'weight')
+          const previousRepsLog = getPreviousSetValue(set.order, 'reps')
+
           return (
             <ExerciseSet
               key={set.id}
               set={set}
+              previousSetWeightLog={previousWeightLog}
+              previousSetRepsLog={previousRepsLog}
               previousLogs={previousLogs}
-              isExerciseCompleted={isExerciseCompleted}
+              reps={setsLogs[set.id]?.reps ?? ''}
+              weight={setsLogs[set.id]?.weight ?? ''}
+              onRepsChange={(reps) => handleRepsChange(reps, set.id)}
+              onWeightChange={(weight) => handleWeightChange(weight, set.id)}
             />
           )
         })}
 
         <div
           className={cn(
-            'grid grid-cols-1 items-center gap-2 mt-2',
+            'grid grid-cols-1 items-center justify-items-center gap-2 my-2',
             hasExtraSets && 'grid-cols-2',
           )}
         >
           {hasExtraSets && (
             <Button
-              variant="tertiary"
-              size="sm"
-              className="w-full"
+              variant="ghost"
+              size="xs"
+              className="w-max"
               iconStart={<XIcon />}
               onClick={removeExtraSet}
             >
@@ -245,10 +337,10 @@ export function ExerciseSets({
             </Button>
           )}
           <Button
-            variant="tertiary"
-            size="sm"
-            className={cn('w-full')}
+            variant="ghost"
+            size="xs"
             iconStart={<PlusIcon />}
+            className="w-max"
             loading={isAddingSet}
             onClick={handleAddSet}
           >

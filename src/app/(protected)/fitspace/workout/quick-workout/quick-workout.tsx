@@ -407,6 +407,7 @@ export function QuickWorkout({
         footerClassName="mx-0"
         hideProgress={hideProgress}
       />
+      <div className="h-[3.25rem]" />
     </div>
   )
 }

@@ -257,7 +257,7 @@ export function QuickWorkoutWizard({
             </div>
 
             {/* Step Content Container */}
-            <div className="min-h-[60vh]">{renderStepContent()}</div>
+            <div>{renderStepContent()}</div>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -437,7 +437,7 @@ export function QuickWorkoutWizardSkeleton() {
           </div>
 
           {/* Step Content Container */}
-          <div className="min-h-[60vh] space-y-6">
+          <div className="space-y-6">
             {/* Main content area skeleton */}
             <div className="space-y-4">
               {Array.from({ length: 4 }).map((_, i) => (

@@ -14,22 +14,14 @@ import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 import { QuickWorkout } from '../../quick-workout/quick-workout'
 
 import { Exercise } from './exercise'
-import { ExercisesPagination } from './exercises-pagaination'
 import { RestDay } from './rest-day'
-import { SimpleExerciseList } from './simple-exercise-list/simple-exercise-list'
-import { Summary } from './summary'
 
 export function Exercises() {
   const { activeDay } = useWorkout()
-  const { isSimpleView } = useTrainingView()
   const [activeExerciseId, setActiveExerciseId] = useQueryState('exercise')
   const [animationVariant, setAnimationVariant] = useState<
     'slideFromLeft' | 'slideFromRight'
   >('slideFromLeft')
-
-  const selectedExercise = activeDay?.exercises.find(
-    (exercise) => exercise.id === activeExerciseId,
-  )
 
   useEffect(() => {
     if (activeDay) {
@@ -117,9 +109,21 @@ export function Exercises() {
         </div>
       )}
       {activeDay.isRestDay ? <RestDay /> : null}
-      {activeDay.exercises.length === 0 ? (
+      {activeDay.exercises.length === 0 && !activeDay.isRestDay ? (
         <QuickWorkout hideProgress={true} />
       ) : null}
+      {activeDay.exercises.length > 0 && (
+        <div className="space-y-2">
+          {activeDay.exercises.map((exercise) => (
+            <Exercise
+              key={exercise.id}
+              exercise={exercise}
+              exercises={exercises}
+              onPaginationClick={handlePaginationClick}
+            />
+          ))}
+        </div>
+      )}
 
       {/* {activeDay.isRestDay ? (
         <RestDay />

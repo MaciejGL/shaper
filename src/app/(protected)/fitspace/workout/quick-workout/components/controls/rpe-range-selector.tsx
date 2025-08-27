@@ -46,7 +46,7 @@ export function RpeRangeSelector({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.25 }}
+      transition={{ duration: 0.07, delay: 0.03 }}
       className={className}
     >
       <Card>
@@ -60,7 +60,7 @@ export function RpeRangeSelector({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {RPE_OPTIONS.map((option) => (
               <RadioOption
                 key={option.value}
@@ -71,7 +71,8 @@ export function RpeRangeSelector({
                 description={option.description}
                 suffix={`(${option.value})`}
                 name="rpeRange"
-                variant="filled"
+                variant="default"
+                className="py-2"
               />
             ))}
           </div>

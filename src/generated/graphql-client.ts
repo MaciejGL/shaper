@@ -1411,7 +1411,9 @@ export type GQLMutationMarkNotificationReadArgs = {
 
 export type GQLMutationMarkSetAsCompletedArgs = {
   completed: Scalars['Boolean']['input'];
+  reps?: InputMaybe<Scalars['Int']['input']>;
   setId: Scalars['ID']['input'];
+  weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
 
@@ -3171,7 +3173,7 @@ export type GQLStartWorkoutFromFavouriteMutation = { __typename?: 'Mutation', st
 export type GQLFitspaceMyPlansQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLFitspaceMyPlansQuery = { __typename?: 'Query', getMyPlansOverviewFull: { __typename?: 'MyPlansPayload', activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, scheduledAt?: string | undefined | null, completedAt?: string | undefined | null, isExtra: boolean, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, restSeconds?: number | undefined | null, videoUrl?: string | undefined | null, instructions?: Array<string> | undefined | null, name: string, warmupSets?: number | undefined | null, completedAt?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }>, sets: Array<{ __typename?: 'ExerciseSet', id: string }> }> }> }> } | undefined | null, quickWorkoutPlan?: { __typename?: 'TrainingPlan', id: string, totalWorkouts: number, weekCount: number, completedWorkoutsDays: number, adherence: number, updatedAt: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, scheduledAt?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, videoUrl?: string | undefined | null, instructions?: Array<string> | undefined | null, name: string, completedAt?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }>, sets: Array<{ __typename?: 'ExerciseSet', id: string }> }> }> }> } | undefined | null, availablePlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }>, completedPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, completedAt?: string | undefined | null, updatedAt: string, userReview?: { __typename?: 'Review', id: string, rating: number, comment?: string | undefined | null, createdAt: string, updatedAt: string } | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }> } };
+export type GQLFitspaceMyPlansQuery = { __typename?: 'Query', getMyPlansOverviewFull: { __typename?: 'MyPlansPayload', activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, scheduledAt?: string | undefined | null, completedAt?: string | undefined | null, isExtra: boolean, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, restSeconds?: number | undefined | null, videoUrl?: string | undefined | null, instructions?: Array<string> | undefined | null, name: string, warmupSets?: number | undefined | null, completedAt?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number }> }> }> }> } | undefined | null, quickWorkoutPlan?: { __typename?: 'TrainingPlan', id: string, totalWorkouts: number, weekCount: number, completedWorkoutsDays: number, adherence: number, updatedAt: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, scheduledAt?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, videoUrl?: string | undefined | null, instructions?: Array<string> | undefined | null, name: string, completedAt?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }>, sets: Array<{ __typename?: 'ExerciseSet', id: string }> }> }> }> } | undefined | null, availablePlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, updatedAt: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, scheduledAt?: string | undefined | null, completedAt?: string | undefined | null, isExtra: boolean, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, restSeconds?: number | undefined | null, videoUrl?: string | undefined | null, instructions?: Array<string> | undefined | null, name: string, warmupSets?: number | undefined | null, completedAt?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number }> }> }> }>, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }>, completedPlans: Array<{ __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, difficulty?: GQLDifficulty | undefined | null, totalWorkouts: number, rating?: number | undefined | null, totalReviews: number, weekCount: number, currentWeekNumber?: number | undefined | null, completedWorkoutsDays: number, adherence: number, startDate?: string | undefined | null, endDate?: string | undefined | null, completedAt?: string | undefined | null, updatedAt: string, userReview?: { __typename?: 'Review', id: string, rating: number, comment?: string | undefined | null, createdAt: string, updatedAt: string } | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, sex?: string | undefined | null } | undefined | null }> } };
 
 export type GQLActivatePlanMutationVariables = Exact<{
   planId: Scalars['ID']['input'];
@@ -3373,6 +3375,8 @@ export type GQLFitspaceAddAiExerciseToWorkoutMutation = { __typename?: 'Mutation
 export type GQLFitspaceMarkSetAsCompletedMutationVariables = Exact<{
   setId: Scalars['ID']['input'];
   completed: Scalars['Boolean']['input'];
+  reps?: InputMaybe<Scalars['Int']['input']>;
+  weight?: InputMaybe<Scalars['Float']['input']>;
 }>;
 
 
@@ -3473,7 +3477,7 @@ export type GQLFitspaceGenerateAiWorkoutMutationVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceGenerateAiWorkoutMutation = { __typename?: 'Mutation', generateAiWorkout: { __typename?: 'AiWorkoutResult', totalDuration?: number | undefined | null, exercises: Array<{ __typename?: 'AiWorkoutExercise', order: number, exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null> }> } };
+export type GQLFitspaceGenerateAiWorkoutMutation = { __typename?: 'Mutation', generateAiWorkout: { __typename?: 'AiWorkoutResult', totalDuration?: number | undefined | null, exercises: Array<{ __typename?: 'AiWorkoutExercise', order: number, exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, images: Array<{ __typename?: 'Image', id: string, url: string, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null> }> } };
 
 export type GQLCreateQuickWorkoutPlanMutationVariables = Exact<{
   input: GQLCreateTrainingPlanInput;
@@ -5808,6 +5812,7 @@ export const FitspaceMyPlansDocument = `
             completedAt
             sets {
               id
+              order
             }
           }
         }
@@ -5863,6 +5868,39 @@ export const FitspaceMyPlansDocument = `
       startDate
       endDate
       updatedAt
+      weeks {
+        id
+        weekNumber
+        scheduledAt
+        completedAt
+        isExtra
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          workoutType
+          completedAt
+          scheduledAt
+          exercises {
+            id
+            restSeconds
+            videoUrl
+            instructions
+            name
+            warmupSets
+            muscleGroups {
+              id
+              name
+              alias
+            }
+            completedAt
+            sets {
+              id
+              order
+            }
+          }
+        }
+      }
       createdBy {
         id
         firstName
@@ -7291,8 +7329,13 @@ useFitspaceAddAiExerciseToWorkoutMutation.getKey = () => ['FitspaceAddAiExercise
 useFitspaceAddAiExerciseToWorkoutMutation.fetcher = (variables: GQLFitspaceAddAiExerciseToWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceAddAiExerciseToWorkoutMutation, GQLFitspaceAddAiExerciseToWorkoutMutationVariables>(FitspaceAddAiExerciseToWorkoutDocument, variables, options);
 
 export const FitspaceMarkSetAsCompletedDocument = `
-    mutation FitspaceMarkSetAsCompleted($setId: ID!, $completed: Boolean!) {
-  markSetAsCompleted(setId: $setId, completed: $completed)
+    mutation FitspaceMarkSetAsCompleted($setId: ID!, $completed: Boolean!, $reps: Int, $weight: Float) {
+  markSetAsCompleted(
+    setId: $setId
+    completed: $completed
+    reps: $reps
+    weight: $weight
+  )
 }
     `;
 
@@ -7827,6 +7870,11 @@ export const FitspaceGenerateAiWorkoutDocument = `
         description
         videoUrl
         equipment
+        images {
+          id
+          url
+          order
+        }
         muscleGroups {
           id
           alias

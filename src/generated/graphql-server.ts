@@ -1413,7 +1413,9 @@ export type GQLMutationMarkNotificationReadArgs = {
 
 export type GQLMutationMarkSetAsCompletedArgs = {
   completed: Scalars['Boolean']['input'];
+  reps?: InputMaybe<Scalars['Int']['input']>;
   setId: Scalars['ID']['input'];
+  weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
 

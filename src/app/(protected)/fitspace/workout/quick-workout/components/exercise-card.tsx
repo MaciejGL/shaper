@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { CheckIcon, Grip, GripVertical, XIcon } from 'lucide-react'
+import { CheckIcon, Grip, XIcon } from 'lucide-react'
 import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'

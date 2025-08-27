@@ -92,7 +92,7 @@ export function MobileNav() {
 
   return (
     <>
-      <div className="h-40" />
+      <div className="h-[4.5rem]" />
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar safe-area-bottom safe-area-x">
         <div className="grid grid-cols-5 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {

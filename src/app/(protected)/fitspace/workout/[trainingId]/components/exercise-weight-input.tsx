@@ -10,6 +10,7 @@ interface ExerciseWeightInputProps {
   onWeightChange: (weightInKg: number | null) => void
   placeholder?: string
   disabled?: boolean
+  showWeightUnit?: boolean
 }
 
 export function ExerciseWeightInput({
@@ -18,6 +19,7 @@ export function ExerciseWeightInput({
   onWeightChange,
   placeholder,
   disabled = false,
+  showWeightUnit = true,
 }: ExerciseWeightInputProps) {
   const { toDisplayWeight, toStorageWeight, weightUnit } = useWeightConversion()
 
@@ -71,11 +73,16 @@ export function ExerciseWeightInput({
         placeholder={placeholder}
         disabled={disabled}
         inputMode="decimal"
-        className="min-w-[96px] text-center pr-8"
+        className="min-w-[80px] text-center"
+        size="sm"
+        iconEnd={
+          showWeightUnit ? (
+            <div className="text-xs text-muted-foreground pointer-events-none">
+              {weightUnit}
+            </div>
+          ) : null
+        }
       />
-      <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-        {weightUnit}
-      </div>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckIcon, PlayIcon, TimerIcon } from 'lucide-react'
+import { CheckIcon, PauseIcon, PlayIcon, TimerIcon } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { cn } from '@/lib/utils'
@@ -18,6 +18,8 @@ interface CountdownTimerProps {
   className?: string
   /** Button variant */
   variant?: ButtonProps['variant']
+  /** Button size */
+  size?: ButtonProps['size']
 }
 
 /**
@@ -31,6 +33,7 @@ export function CountdownTimer({
   onComplete,
   className,
   variant,
+  size,
 }: CountdownTimerProps) {
   const [state, setState] = useState<CountdownState>('idle')
   const [timeRemaining, setTimeRemaining] = useState(restDuration)
@@ -109,6 +112,7 @@ export function CountdownTimer({
   return (
     <Button
       variant={state === 'completed' ? 'default' : variant || 'tertiary'}
+      size={size}
       onClick={handleClick}
       className={cn(
         'transition-all duration-250 tabular-nums gap-3',
@@ -119,18 +123,18 @@ export function CountdownTimer({
       )}
       iconStart={
         state === 'running' ? (
-          <TimerIcon className="text-blue-500 animate-pulse" />
+          <TimerIcon className="text-amber-500 animate-pulse" />
         ) : state === 'completed' ? (
           <CheckIcon />
         ) : (
-          <TimerIcon className="text-blue-500" />
+          <TimerIcon className="text-amber-500" />
         )
       }
       iconEnd={
         state === 'idle' ? (
-          <PlayIcon className="text-muted-foreground !size-4" />
+          <PlayIcon className="text-muted-foreground" />
         ) : (
-          <div className="bg-muted-foreground/50 !size-3.5 rounded-xs" />
+          <PauseIcon />
         )
       }
     >

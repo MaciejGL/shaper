@@ -37,7 +37,7 @@ export function AiParametersStep({
   }
 
   return (
-    <div className="space-y-6 ">
+    <div className="space-y-2">
       {/* Exercise Count and Max Sets in one card */}
       <ExerciseCountControl
         value={data.exerciseCount}

@@ -37,6 +37,8 @@ export default function MyPlansPage() {
   const completedPlans = data?.getMyPlansOverviewFull?.completedPlans
   const quickWorkoutPlan = data?.getMyPlansOverviewFull?.quickWorkoutPlan
 
+  console.log(activePlan, availablePlans)
+
   return (
     <div className="container-hypertro mx-auto">
       <DashboardHeader title="Training Plans" icon={LayoutList} />

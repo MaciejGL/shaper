@@ -158,6 +158,11 @@ mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
         description
         videoUrl
         equipment
+        images {
+          id
+          url
+          order
+        }
         muscleGroups {
           id
           alias

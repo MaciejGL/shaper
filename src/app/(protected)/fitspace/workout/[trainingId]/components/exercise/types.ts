@@ -25,16 +25,20 @@ export interface ExerciseSetsProps {
     performedOnWeekNumber: number
     performedOnDayNumber: number
   })[]
-  isExerciseCompleted: boolean
 }
 
 export interface ExerciseSetProps {
   set: WorkoutExercise['sets'][number]
+  previousSetWeightLog?: number | null
+  previousSetRepsLog?: number | null
   previousLogs: (WorkoutExercise & {
     performedOnWeekNumber: number
     performedOnDayNumber: number
   })[]
-  isExerciseCompleted: boolean
+  reps: string
+  weight: string
+  onRepsChange: (reps: string) => void
+  onWeightChange: (weight: string) => void
 }
 
 export interface ExerciseMetadataProps {

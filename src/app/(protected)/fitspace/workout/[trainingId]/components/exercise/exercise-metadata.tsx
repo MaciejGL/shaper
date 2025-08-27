@@ -6,11 +6,11 @@ import {
   GaugeIcon,
   InfoIcon,
   Lightbulb,
-  ListVideoIcon,
   MoreHorizontalIcon,
   Replace,
   Target,
   TrashIcon,
+  VideoIcon,
 } from 'lucide-react'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
@@ -80,26 +80,17 @@ export function ExerciseMetadata({
 
   return (
     <div>
-      <div className="flex gap-2 mb-6">
-        {exercise.restSeconds && (
-          <CountdownTimer
-            variant="tertiary"
-            restDuration={exercise.restSeconds}
-            onComplete={() => {
-              // Find the first uncompleted set and mark it as done
-              const firstUncompletedSet = (
-                exercise.substitutedBy?.sets || exercise.sets
-              ).find((set) => !set.completedAt)
-              if (firstUncompletedSet) {
-                handleToggleSet(firstUncompletedSet.id, true)
-              }
-            }}
-          />
-        )}
+      <div className="flex gap-2 items-start">
+        <p className="text-sm self-center line-clamp-2">{exercise.name}</p>
+
         <div className="flex gap-2 ml-auto">
           <Drawer>
             <DrawerTrigger asChild>
-              <Button variant="tertiary" iconOnly={<ListVideoIcon />} />
+              <Button
+                variant="tertiary"
+                size="icon-sm"
+                iconOnly={<VideoIcon />}
+              />
             </DrawerTrigger>
             <DrawerContent dialogTitle="Exercise Metadata">
               <DrawerHeader className="pb-4">
@@ -207,15 +198,13 @@ export function ExerciseMetadata({
             </DrawerContent>
           </Drawer>
           <ExerciseNotebook exercise={exercise} />
-          {(exercise.substitutedBy?.videoUrl || exercise.videoUrl) && (
-            <VideoPreview
-              variant="tertiary"
-              url={exercise.substitutedBy?.videoUrl || exercise.videoUrl || ''}
-            />
-          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="tertiary" iconOnly={<MoreHorizontalIcon />} />
+              <Button
+                variant="tertiary"
+                size="icon-sm"
+                iconOnly={<MoreHorizontalIcon />}
+              />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem
@@ -247,15 +236,7 @@ export function ExerciseMetadata({
         </div>
       </div>
 
-      {exercise.additionalInstructions && (
-        <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded mb-2">
-          <p className="whitespace-pre-wrap">
-            {exercise.additionalInstructions}
-          </p>
-        </div>
-      )}
-
-      <div className={cn('flex flex-wrap gap-2')}>
+      <div className={cn('flex flex-wrap gap-2 mt-2 empty:hidden')}>
         {isSuperset && (
           <Badge variant="secondary" size="md">
             <ArrowLeftRight className="text-red-500" />
@@ -275,7 +256,34 @@ export function ExerciseMetadata({
             {exercise.tempo}
           </Badge>
         )}
+        {exercise.restSeconds && (
+          <div className="ml-auto">
+            <CountdownTimer
+              size="xs"
+              variant="tertiary"
+              restDuration={exercise.restSeconds}
+              onComplete={() => {
+                // Find the first uncompleted set and mark it as done
+                const firstUncompletedSet = (
+                  exercise.substitutedBy?.sets || exercise.sets
+                ).find((set) => !set.completedAt)
+                if (firstUncompletedSet) {
+                  handleToggleSet(firstUncompletedSet.id, true)
+                }
+              }}
+            />
+          </div>
+        )}
       </div>
+
+      {exercise.additionalInstructions && (
+        <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded mt-2 flex items-center gap-2">
+          <InfoIcon className="size-3 text-blue-500 flex-shrink-0" />
+          <p className="whitespace-pre-wrap">
+            {exercise.additionalInstructions}
+          </p>
+        </div>
+      )}
     </div>
   )
 }

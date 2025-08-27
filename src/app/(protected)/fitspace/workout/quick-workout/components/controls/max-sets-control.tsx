@@ -26,14 +26,14 @@ export function MaxSetsControl({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.15 }}
+      transition={{ duration: 0.07, delay: 0.03 }}
       className={className}
     >
       <Card className={className}>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-2">
             <Label htmlFor="max-sets" className="text-sm font-medium">
               Maximum Sets per Exercise
             </Label>

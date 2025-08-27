@@ -30,7 +30,7 @@ export function RadioOption<T extends string>({
   return (
     <label
       className={cn(
-        'flex items-center p-4 rounded-lg border cursor-pointer transition-all hover:bg-muted/50',
+        'flex items-center p-4 rounded-lg border cursor-pointer transition-all duration-100 hover:bg-muted/50',
         isSelected
           ? 'border-primary bg-primary/5 ring-1 ring-primary/20'
           : 'border-border',

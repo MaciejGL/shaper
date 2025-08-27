@@ -26,14 +26,14 @@ export function ExerciseCountControl({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.1 }}
+      transition={{ duration: 0.07, delay: 0.03 }}
       className={className}
     >
       <Card>
-        <CardContent className="space-y-8">
-          <div className="space-y-4">
+        <CardContent>
+          <div className="space-y-2">
             <Label htmlFor="exercise-count" className="text-sm font-medium">
               Number of Exercises
             </Label>
