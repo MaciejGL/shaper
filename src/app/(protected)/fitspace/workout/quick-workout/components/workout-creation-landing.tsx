@@ -17,139 +17,139 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
+import { cn } from '@/lib/utils'
 
 export interface WorkoutCreationLandingProps {
   onSelectManual: () => void
   onSelectAI: () => void
   onSelectFavourites?: () => void
+  className?: string
 }
 
 export function WorkoutCreationLanding({
   onSelectManual,
   onSelectAI,
   onSelectFavourites,
+  className,
 }: WorkoutCreationLandingProps) {
   const { hasPremium: hasPremiumAccess } = useUser()
   return (
-    <div className="space-y-6">
-      {/* Option Cards */}
-      <div className="grid gap-4">
-        {/* AI Generation Option */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
+    <div className={cn('grid gap-4', className)}>
+      {/* AI Generation Option */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.2 }}
+      >
+        <Card
+          className="cursor-pointer transition-all"
+          variant="secondary"
+          onClick={onSelectAI}
         >
-          <Card
-            className="cursor-pointer transition-all"
-            variant="secondary"
-            onClick={onSelectAI}
-          >
-            <CardContent>
-              <div className="flex items-center">
-                <div className="p-2 mr-3 bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-700 dark:to-amber-500 rounded-lg">
-                  <SparklesIcon className="size-5 text-amber-600 dark:text-amber-200" />
-                </div>
-                <div className="flex-1">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    Quick Workout
-                  </CardTitle>
-                  <CardDescription>
-                    Generate based on your preferences
-                  </CardDescription>
-                </div>
-                {hasPremiumAccess ? (
-                  <Button
-                    onClick={onSelectAI}
-                    variant="link"
-                    iconOnly={<ChevronRight />}
-                  >
-                    Start Quick Workout
-                  </Button>
-                ) : (
-                  <ButtonLink
-                    href="/fitspace/settings#subscription-section"
-                    variant="outline"
-                    size="sm"
-                  >
-                    Upgrade
-                  </ButtonLink>
-                )}
+          <CardContent>
+            <div className="flex items-center">
+              <div className="p-2 mr-3 bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-700 dark:to-amber-500 rounded-lg">
+                <SparklesIcon className="size-5 text-amber-600 dark:text-amber-200" />
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              <div className="flex-1">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  Quick Workout
+                </CardTitle>
+                <CardDescription>
+                  Generate based on your preferences
+                </CardDescription>
+              </div>
+              {hasPremiumAccess ? (
+                <Button
+                  onClick={onSelectAI}
+                  variant="link"
+                  iconOnly={<ChevronRight />}
+                >
+                  Start Quick Workout
+                </Button>
+              ) : (
+                <ButtonLink
+                  href="/fitspace/settings#subscription-section"
+                  variant="outline"
+                  size="sm"
+                >
+                  Upgrade
+                </ButtonLink>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
 
-        {/* Favourites Option - Only show if onSelectFavourites is provided */}
-        {onSelectFavourites && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
-          >
-            <Card
-              className="cursor-pointer transition-all"
-              onClick={onSelectFavourites}
-            >
-              <CardContent>
-                <div className="flex items-center">
-                  <div className="p-2 mr-3 bg-card-on-card rounded-lg">
-                    <BookmarkIcon className="size-5" />
-                  </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-lg">From Favourites</CardTitle>
-                    <CardDescription>
-                      Select from your saved workouts
-                    </CardDescription>
-                  </div>
-                  <Button
-                    onClick={onSelectFavourites}
-                    variant="link"
-                    iconOnly={<ChevronRight />}
-                  >
-                    Select Favourite
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Manual Creation Option */}
+      {/* Favourites Option - Only show if onSelectFavourites is provided */}
+      {onSelectFavourites && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
         >
           <Card
             className="cursor-pointer transition-all"
-            onClick={onSelectManual}
+            onClick={onSelectFavourites}
           >
             <CardContent>
               <div className="flex items-center">
                 <div className="p-2 mr-3 bg-card-on-card rounded-lg">
-                  <ListTodoIcon className="size-5" />
+                  <BookmarkIcon className="size-5" />
                 </div>
                 <div className="flex-1">
-                  <CardTitle className="text-lg">
-                    Build your own workout
-                  </CardTitle>
+                  <CardTitle className="text-lg">From Favourites</CardTitle>
                   <CardDescription>
-                    Build your workout step by step
+                    Select from your saved workouts
                   </CardDescription>
                 </div>
                 <Button
-                  onClick={onSelectManual}
+                  onClick={onSelectFavourites}
                   variant="link"
                   iconOnly={<ChevronRight />}
                 >
-                  Start Manual Creation
+                  Select Favourite
                 </Button>
               </div>
             </CardContent>
           </Card>
         </motion.div>
-      </div>
+      )}
+
+      {/* Manual Creation Option */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
+        <Card
+          className="cursor-pointer transition-all"
+          onClick={onSelectManual}
+        >
+          <CardContent>
+            <div className="flex items-center">
+              <div className="p-2 mr-3 bg-card-on-card rounded-lg">
+                <ListTodoIcon className="size-5" />
+              </div>
+              <div className="flex-1">
+                <CardTitle className="text-lg">
+                  Build your own workout
+                </CardTitle>
+                <CardDescription>
+                  Build your workout step by step
+                </CardDescription>
+              </div>
+              <Button
+                onClick={onSelectManual}
+                variant="link"
+                iconOnly={<ChevronRight />}
+              >
+                Start Manual Creation
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   )
 }

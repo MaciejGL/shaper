@@ -1,9 +1,12 @@
 'use client'
 
+import { motion } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { useUser } from '@/context/user-context'
 import {
   GQLFavouriteWorkout,
@@ -11,6 +14,7 @@ import {
 } from '@/generated/graphql-client'
 import {
   FavouriteWorkoutWizardData,
+  useFavouriteWorkoutOperations,
   useUpdateFavouriteFromWizard,
 } from '@/hooks/use-favourite-workouts'
 import { cn } from '@/lib/utils'
@@ -99,7 +103,6 @@ export function EditFavouriteModal({
     filteredExercises,
   } = useManualWorkout({ allExercises, initialSelectedExercises })
 
-  // AI workflow hooks
   const {
     aiInputData,
     setAiInputData,
@@ -114,15 +117,18 @@ export function EditFavouriteModal({
   // Update hook
   const { updateFromWizard, isUpdating } = useUpdateFavouriteFromWizard()
 
+  // Separate hook for just updating title/description
+  const { updateFavourite, isUpdating: isUpdatingTitle } =
+    useFavouriteWorkoutOperations()
+
+  const [dirty, setDirty] = useState(false)
+
   // Populate form when favourite changes
   useEffect(() => {
     if (favourite && open) {
       setTitle(favourite.title)
       setDescription(favourite.description || '')
 
-      // Exercises are now pre-populated via initialSelectedExercises in useManualWorkout
-
-      // Reset other state
       setWorkoutFlow('manual')
       setShowTitleStep(true)
     }
@@ -179,20 +185,18 @@ export function EditFavouriteModal({
 
   // Handle updating favourite from manual data
   const handleFinishManual = async () => {
-    if (!title.trim() || !favourite || selectedExercises.length === 0) {
+    if (!title.trim() || !favourite || selectedExerciseObjects.length === 0) {
       console.error('Missing title, favourite, or exercises')
       return
     }
 
     try {
-      // Convert selected exercises to workout data format
-      const exercises = selectedExercises.map((exerciseId, index) => ({
-        exerciseId,
+      // Convert selected exercise objects to workout data format
+      const exercises = selectedExerciseObjects.map((exercise, index) => ({
+        exerciseId: exercise.id,
         order: index + 1,
-        name:
-          allExercises.find((ex) => ex.id === exerciseId)?.name ||
-          `Exercise ${index + 1}`,
-        baseId: exerciseId,
+        name: exercise.name, // Use the actual exercise name from the object
+        baseId: exercise.id,
         restSeconds: undefined,
         instructions: undefined,
         sets: [
@@ -245,10 +249,11 @@ export function EditFavouriteModal({
 
     try {
       // Convert AI result to workout data format
-      const exercises = aiWorkoutResult.exercises.map(
+      // Use the exercises from aiWorkoutResult which may have been reordered by the user
+      const aiExercises = aiWorkoutResult.exercises.map(
         (aiExercise, index: number) => ({
           exerciseId: aiExercise.exercise.id,
-          order: index + 1,
+          order: favourite?.exercises.length + index + 1, // Start after existing exercises
           name: aiExercise.exercise.name,
           baseId: aiExercise.exercise.id,
           restSeconds: undefined,
@@ -265,10 +270,33 @@ export function EditFavouriteModal({
         }),
       )
 
+      const mappedExercises = favourite?.exercises.map(
+        (exercise, index: number) => ({
+          exerciseId: exercise.baseId || '',
+          order: favourite?.exercises.length + index + 1, // Start after existing exercises
+          name: exercise.name,
+          baseId: exercise.baseId || '',
+          restSeconds: undefined,
+          instructions: undefined,
+          sets:
+            exercise.sets?.map((set, setIndex: number) => ({
+              order: setIndex + 1,
+              reps: set.reps || undefined,
+              minReps: undefined,
+              maxReps: undefined,
+              rpe: set.rpe || undefined,
+              weight: undefined,
+            })) || [],
+        }),
+      )
+
+      // Combine existing and new exercises
+      const allExercises = [...mappedExercises, ...aiExercises]
+
       const workoutData: FavouriteWorkoutWizardData = {
         title: title.trim(),
         description: description.trim() || undefined,
-        exercises,
+        exercises: allExercises,
       }
 
       await updateFromWizard(favourite.id, workoutData)
@@ -312,6 +340,25 @@ export function EditFavouriteModal({
     return true
   }
 
+  // Handle saving just title/description changes
+  const handleSaveTitleOnly = async () => {
+    if (!favourite || !title.trim()) {
+      return
+    }
+
+    try {
+      await updateFavourite({
+        id: favourite.id,
+        title: title.trim(),
+        description: description.trim() || null,
+        // Don't include exercises to avoid overwriting them
+      })
+      setDirty(false)
+    } catch (error) {
+      console.error('Failed to update favourite workout title:', error)
+    }
+  }
+
   const handleSuccess = () => {
     onSuccess()
     handleClose()
@@ -336,29 +383,85 @@ export function EditFavouriteModal({
     return (
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent fullScreen dialogTitle="Edit Favourite Workout">
-          <div className="space-y-4">
-            <div className="text-center space-y-2 mt-4">
+          <div>
+            <div className="text-center space-y-2 my-4">
               <h2 className="text-2xl font-bold">Edit Favourite Workout</h2>
               <p className="text-muted-foreground">
                 Update your workout details and exercises
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4 mb-4">
               <Input
-                label="Workout Name *"
+                label="Workout Name"
                 id="edit-title"
                 className="w-full"
                 placeholder="e.g., Morning Push Routine"
                 value={title}
                 variant="secondary"
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) => {
+                  setTitle(e.target.value)
+                  setDirty(true)
+                }}
+              />
+              <Textarea
+                label="Description"
+                id="edit-description"
+                className="w-full min-h-[60px]"
+                placeholder="Add a description for your workout..."
+                value={description}
+                variant="ghost"
+                onChange={(e) => {
+                  setDescription(e.target.value)
+                  setDirty(true)
+                }}
+              />
+            </div>
+
+            {/* Save title changes button */}
+
+            {dirty && (
+              <motion.div
+                initial={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                animate={{ opacity: 1, height: 'auto', overflow: 'visible' }}
+                exit={{ opacity: 0, height: 0, overflow: 'hidden' }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center justify-between bg-muted/50 rounded-lg p-4 space-y-3">
+                  <div>
+                    <p className="text-sm font-medium">Save changes</p>
+                    <p className="text-xs text-muted-foreground">
+                      Save title and description changes without modifying
+                      exercises
+                    </p>
+                  </div>
+                  <Button
+                    onClick={handleSaveTitleOnly}
+                    disabled={!title.trim() || isUpdatingTitle}
+                    loading={isUpdatingTitle}
+                    size="sm"
+                  >
+                    Save
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Workout Creation Options */}
+            <div className="space-y-3 my-4">
+              <p className="text-lg font-medium">
+                How would you like to update exercises?
+              </p>
+              <WorkoutCreationLanding
+                className="gap-2"
+                onSelectManual={handleSelectManual}
+                onSelectAI={handleSelectAI}
               />
             </div>
 
             {/* Current exercises preview */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Current Exercises</label>
+            <div className="space-y-3 my-4">
+              <p className="text-lg font-medium">Current Exercises</p>
 
               {favourite.exercises.length > 0 ? (
                 <div className="space-y-1">
@@ -375,24 +478,12 @@ export function EditFavouriteModal({
                 <p className="text-sm text-muted-foreground">No exercises</p>
               )}
             </div>
-
-            {/* Workout Creation Options */}
-            <div className="space-y-3">
-              <label className="text-sm font-medium">
-                How would you like to update exercises?
-              </label>
-              <WorkoutCreationLanding
-                onSelectManual={handleSelectManual}
-                onSelectAI={handleSelectAI}
-              />
-            </div>
           </div>
         </DialogContent>
       </Dialog>
     )
   }
 
-  // Workout update wizard
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent fullScreen dialogTitle="Edit Favourite Workout">
@@ -404,7 +495,9 @@ export function EditFavouriteModal({
             isAdding={isUpdating}
             onFinish={handleFinish}
             onStepChange={handleStepChange}
-            footerClassName={cn('sticky bottom-[-24px]')}
+            footerClassName={cn(
+              'sticky bottom-[-24px] left-0 right-0 mx-0 mt-8',
+            )}
             finishButtonText="Update Favourite"
             // Manual flow components (reuse existing)
             muscleGroupsComponent={

@@ -1,24 +1,17 @@
 'use client'
 
 import { formatDistanceToNow } from 'date-fns'
-import {
-  ChevronRight,
-  Clock,
-  Dumbbell,
-  Edit,
-  MoreVertical,
-  Trash2,
-} from 'lucide-react'
+import { ChevronRight, Clock, Dumbbell, Edit, Trash2 } from 'lucide-react'
 
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
+import { CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
 import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
@@ -90,93 +83,138 @@ export function FavouriteWorkoutCard({
 
   const buttonProps = getStartButtonProps()
 
+  // Get unique muscle groups by filtering duplicates based on ID
+  const uniqueMuscleGroups = favourite.exercises
+    .flatMap((exercise) => exercise.base?.muscleGroups ?? [])
+    .filter(
+      (muscleGroup, index, array) =>
+        array.findIndex((mg) => mg.groupSlug === muscleGroup.groupSlug) ===
+        index,
+    )
+
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
+    <Accordion type="single" collapsible>
+      <AccordionItem
+        value="body-fat-estimation-guide"
+        className="bg-card-on-card rounded-lg"
+      >
+        <AccordionTrigger className="flex items-center justify-between w-full p-4 text-left hover:bg-card-on-card/80 dark:hover:bg-card-on-card/80 transition-colors">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-2 mb-2">
               <h3 className="font-semibold truncate">{favourite.title}</h3>
             </div>
-            {favourite.description && (
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {favourite.description}
-              </p>
-            )}
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onEdit}>
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Workout
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onDelete} className="text-destructive">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Workout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <Badge variant="secondary">
-            <Dumbbell className="w-3 h-3 mr-1" />
-            {totalExercises} exercises
-          </Badge>
-          <Badge variant="secondary">
-            <Clock className="w-3 h-3 mr-1" />
-            {totalSets} sets
-          </Badge>
-          {estimatedTime > 0 && (
-            <Badge variant="secondary">
-              <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
-
-      <CardContent className="pt-0 space-y-4">
-        {/* Workout Stats */}
-        {/* Exercise Preview */}
-        {totalExercises > 0 && (
-          <div className="space-y-1">
-            <h4 className="text-sm font-medium">Exercises</h4>
-            <div className="text-sm flex flex-col gap-1">
-              {favourite.exercises.map((exercise, index) => (
-                <Badge
-                  key={exercise.id}
-                  variant="secondary"
-                  size="lg"
-                  className="w-full justify-start py-3 whitespace-pre-wrap"
-                >
-                  {index + 1}. {exercise.name}
+            <div className="flex items-center gap-1">
+              {favourite.exercises.length > 0 && (
+                <Badge variant="secondary" size="sm">
+                  {favourite.exercises.length} exercises
                 </Badge>
-              ))}
+              )}
+              {uniqueMuscleGroups.length > 0 &&
+                uniqueMuscleGroups.slice(0, 3).map((muscleGroup) => (
+                  <Badge
+                    key={muscleGroup?.id}
+                    variant="muscle"
+                    size="sm"
+                    className="capitalize"
+                  >
+                    {muscleGroup?.groupSlug}
+                  </Badge>
+                ))}
+              {uniqueMuscleGroups.length > 3 && (
+                <Badge variant="muscle" size="sm">
+                  +{uniqueMuscleGroups.length - 3}
+                </Badge>
+              )}
             </div>
           </div>
-        )}
-        {/* Footer */}
-      </CardContent>
-      <CardFooter className="flex items-center justify-between gap-2">
-        <span className="text-xs text-muted-foreground">
-          Created {createdAgo}
-        </span>
-        {!buttonProps.disabled ? (
-          <Button
-            onClick={onStart}
-            size="sm"
-            variant={buttonProps.variant}
-            disabled={buttonProps.disabled}
-            iconEnd={<ChevronRight />}
-          >
-            {buttonProps.text}
-          </Button>
-        ) : null}
-      </CardFooter>
-    </Card>
+        </AccordionTrigger>
+
+        <AccordionContent>
+          <div>
+            <CardHeader className="pb-3">
+              <div className="flex gap-2 flex-wrap">
+                <Badge variant="secondary">
+                  <Dumbbell className="w-3 h-3 mr-1" />
+                  {totalExercises} exercises
+                </Badge>
+                <Badge variant="secondary">
+                  <Clock className="w-3 h-3 mr-1" />
+                  {totalSets} sets
+                </Badge>
+                {estimatedTime > 0 && (
+                  <Badge variant="secondary">
+                    <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+
+            <CardContent className="pt-0 pb-4 space-y-4">
+              {/* Workout Stats */}
+              {/* Exercise Preview */}
+              {totalExercises > 0 && (
+                <div className="space-y-1">
+                  <h4 className="text-sm font-medium">Exercises</h4>
+
+                  {favourite.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {favourite.description}
+                    </p>
+                  )}
+                  <div className="text-sm flex flex-col gap-1">
+                    {favourite.exercises.map((exercise, index) => (
+                      <Badge
+                        key={exercise.id}
+                        variant="secondary"
+                        size="lg"
+                        className="w-full justify-start py-3 whitespace-pre-wrap"
+                      >
+                        {index + 1}. {exercise.name}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <span className="text-xs text-muted-foreground">
+                Created {createdAgo}
+              </span>
+            </CardContent>
+            <CardFooter className="flex flex-col gap-2 items-start border-t !pt-4">
+              <div>
+                <div className="flex items-start gap-2">
+                  <Button
+                    size="sm"
+                    onClick={onDelete}
+                    variant="ghost"
+                    iconStart={<Trash2 />}
+                  >
+                    Delete
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={onEdit}
+                    iconStart={<Edit />}
+                  >
+                    Edit
+                  </Button>
+                </div>
+                {!buttonProps.disabled ? (
+                  <Button
+                    onClick={onStart}
+                    size="sm"
+                    variant={buttonProps.variant}
+                    disabled={buttonProps.disabled}
+                    iconEnd={<ChevronRight />}
+                  >
+                    {buttonProps.text}
+                  </Button>
+                ) : null}
+              </div>
+            </CardFooter>
+          </div>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   )
 }
