@@ -111,9 +111,14 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
                     const lastSet = setsToUpdate[setsToUpdate.length - 1]
 
                     // Create a properly structured set with correct order and isExtra = true
+                    // Find the maximum existing order to ensure proper sequential ordering
+                    const maxOrder =
+                      setsToUpdate.length > 0
+                        ? Math.max(...setsToUpdate.map((set) => set.order))
+                        : 0
                     const newSet = {
                       ...data.addSet,
-                      order: setsToUpdate.length + 1,
+                      order: maxOrder + 1,
                       isExtra: true,
                       // Inherit target values from the last set
                       reps: lastSet?.reps || null,
@@ -281,13 +286,10 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
   }
 
   return (
-    <div className="flex flex-col bg-background rounded-[0.45rem]">
+    <div className="flex flex-col rounded-[0.45rem]">
       <div className="flex items-center gap-1">
         <div
-          className={cn(
-            sharedLayoutStyles,
-            'text-[0.625rem] text-muted-foreground py-2',
-          )}
+          className={cn(sharedLayoutStyles, 'text-[0.625rem] py-2 font-medium')}
         >
           <div className="min-w-2.5">SET</div>
           <div className="text-center">PREVIOUS</div>

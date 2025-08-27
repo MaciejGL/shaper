@@ -139,9 +139,14 @@ export function createExerciseFormOptimisticUpdate() {
       if (!oldData?.exercise) return oldData
 
       const lastSet = oldData.exercise.sets[oldData.exercise.sets.length - 1]
+      // Find the maximum existing order to ensure proper sequential ordering
+      const maxOrder =
+        oldData.exercise.sets.length > 0
+          ? Math.max(...oldData.exercise.sets.map((set) => set.order))
+          : 0
       const newSet = {
         id: tempId || generateTempId('set'),
-        order: oldData.exercise.sets.length + 1,
+        order: maxOrder + 1,
         minReps: variables.input.set.minReps || lastSet?.minReps || null,
         maxReps: variables.input.set.maxReps || lastSet?.maxReps || null,
         weight: variables.input.set.weight || lastSet?.weight || null,
@@ -163,13 +168,21 @@ export function createExerciseFormOptimisticUpdate() {
     ): GQLGetExerciseFormDataQuery => {
       if (!oldData?.exercise) return oldData
 
+      const filteredSets = oldData.exercise.sets.filter(
+        (set) => set.id !== variables.setId,
+      )
+
+      // Reorder remaining sets to maintain sequential ordering
+      const reorderedSets = filteredSets.map((set, index) => ({
+        ...set,
+        order: index + 1,
+      }))
+
       return {
         ...oldData,
         exercise: {
           ...oldData.exercise,
-          sets: oldData.exercise.sets.filter(
-            (set) => set.id !== variables.setId,
-          ),
+          sets: reorderedSets,
         },
       }
     },

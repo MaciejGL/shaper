@@ -612,6 +612,7 @@ export const addSet = async (exerciseId: string, context: GQLContext) => {
         select: {
           id: true,
           isExtra: true,
+          order: true,
         },
       },
       day: {
@@ -639,10 +640,16 @@ export const addSet = async (exerciseId: string, context: GQLContext) => {
     'add set to exercise',
   )
 
+  // Find the maximum existing order to ensure proper sequential ordering
+  const maxOrder =
+    trainingExercise.sets.length > 0
+      ? Math.max(...trainingExercise.sets.map((set) => set.order || 1))
+      : 0
+
   const set = await prisma.exerciseSet.create({
     data: {
       exerciseId: trainingExercise.id,
-      order: trainingExercise.sets.length + 1,
+      order: maxOrder + 1,
       isExtra: true,
     },
   })
@@ -1047,10 +1054,16 @@ export const addSetExerciseForm = async (
     throw new GraphQLError('Cannot add sets to completed exercise')
   }
 
+  // Find the maximum existing order to ensure proper sequential ordering
+  const maxOrder =
+    trainingExercise.sets.length > 0
+      ? Math.max(...trainingExercise.sets.map((set) => set.order || 1))
+      : 0
+
   const newSet = await prisma.exerciseSet.create({
     data: {
       exerciseId: trainingExercise.id,
-      order: trainingExercise.sets.length + 1,
+      order: maxOrder + 1,
       reps: set.minReps,
       minReps: set.minReps,
       maxReps: set.maxReps,

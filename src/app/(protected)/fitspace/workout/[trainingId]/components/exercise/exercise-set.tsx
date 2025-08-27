@@ -236,7 +236,12 @@ export function ExerciseSet({
         </div>
       )}
 
-      <div className={cn('flex items-start gap-1', set.isExtra && 'pt-4')}>
+      <div
+        className={cn(
+          'flex items-start gap-1 dark:bg-background py-1',
+          set.isExtra && 'pt-4',
+        )}
+      >
         <div>
           <div className={cn(sharedLayoutStyles, 'text-primary relative')}>
             <div className="text-sm text-muted-foreground">{set.order}</div>
@@ -267,7 +272,7 @@ export function ExerciseSet({
               inputMode="decimal"
               variant={'secondary'}
               placeholder={previousSetRepsLog?.toString() || ''}
-              className="text-center bg-white"
+              className="text-center"
               size="sm"
             />
             <ExerciseWeightInput

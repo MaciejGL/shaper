@@ -81,7 +81,9 @@ export function ExerciseMetadata({
   return (
     <div>
       <div className="flex gap-2 items-start">
-        <p className="text-sm self-center line-clamp-2">{exercise.name}</p>
+        <p className="text-md font-medium self-center line-clamp-2">
+          {exercise.name}
+        </p>
 
         <div className="flex gap-2 ml-auto">
           <Drawer>
@@ -236,7 +238,7 @@ export function ExerciseMetadata({
         </div>
       </div>
 
-      <div className={cn('flex flex-wrap gap-2 mt-2 empty:hidden')}>
+      <div className={cn('flex flex-wrap gap-2 mt-8 empty:hidden')}>
         {isSuperset && (
           <Badge variant="secondary" size="md">
             <ArrowLeftRight className="text-red-500" />

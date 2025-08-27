@@ -74,6 +74,7 @@ export function ExerciseWeightInput({
         disabled={disabled}
         inputMode="decimal"
         className="min-w-[80px] text-center"
+        variant="secondary"
         size="sm"
         iconEnd={
           showWeightUnit ? (

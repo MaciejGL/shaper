@@ -15,6 +15,7 @@ import { QuickWorkout } from '../../quick-workout/quick-workout'
 
 import { Exercise } from './exercise'
 import { RestDay } from './rest-day'
+import { Summary } from './summary'
 
 export function Exercises() {
   const { activeDay } = useWorkout()
@@ -122,63 +123,9 @@ export function Exercises() {
               onPaginationClick={handlePaginationClick}
             />
           ))}
+          <Summary open={true} />
         </div>
       )}
-
-      {/* {activeDay.isRestDay ? (
-        <RestDay />
-      ) : activeExerciseId === 'summary' ||
-        (!selectedExercise && !activeDay.isRestDay && !isSimpleView) ? (
-        <Summary
-          open={true}
-          onContinue={() => {
-            if (isSimpleView) {
-              // In simple view, go back to exercise list
-              setActiveExerciseId(null)
-            } else {
-              // In advanced view, go to last exercise
-              handlePaginationClick(exercises.at(-1)?.id ?? null, 'prev')
-            }
-          }}
-          continueButtonText={isSimpleView ? 'Back to Workout' : 'Back'}
-        />
-      ) : isSimpleView ? (
-        <SimpleExerciseList />
-      ) : selectedExercise ? (
-        <div className="relative">
-          <SwipeableWrapper
-            onSwipeLeft={handleSwipeLeft}
-            onSwipeRight={handleSwipeRight}
-            disabled={exercises.length <= 1} // Disable if only one exercise
-          >
-            <AnimateChangeInHeight
-              transition={{
-                type: 'tween',
-                stiffness: 80,
-                damping: 10,
-                mass: 0.5,
-                duration: 0.05,
-              }}
-            >
-              <AnimatedPageTransition
-                id={selectedExercise.id}
-                variant={animationVariant}
-                mode="wait"
-                className="w-full"
-              >
-                <Exercise
-                  exercise={selectedExercise}
-                  exercises={exercises}
-                  onPaginationClick={handlePaginationClick}
-                />
-              </AnimatedPageTransition>
-            </AnimateChangeInHeight>
-          </SwipeableWrapper>
-          {exercises.length > 1 && (
-            <ExercisesPagination onClick={handlePaginationClick} />
-          )}
-        </div>
-      ) : null} */}
     </AnimatedPageTransition>
   )
 }

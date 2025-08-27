@@ -322,7 +322,7 @@ function KanbanExerciseSets({
           isLoading && 'animate-pulse min-h-[76px]',
         )}
       >
-        {sets.map((set, index) => (
+        {sets.map((set, index, array) => (
           <div
             key={set.order + index}
             className={cn(
@@ -331,14 +331,22 @@ function KanbanExerciseSets({
             )}
           >
             <div
-              className={cn('font-medium w-8', set.order === 1 && 'mt-[20px]')}
+              className={cn(
+                'font-medium w-8',
+                set.order === 1 && 'mt-[20px]',
+                array.some((s) => s.order === set.order && s.id !== set.id) &&
+                  'text-red-500',
+              )}
             >
               #{set.order}
             </div>
             <div className="flex items-center gap-4">
               <div>
                 {set.order === 1 && (
-                  <Label htmlFor={`reps-${set.order}`} className="text-sm mb-1">
+                  <Label
+                    htmlFor={`reps-${set.order}`}
+                    className={cn('text-sm mb-1')}
+                  >
                     Reps
                     <Tooltip>
                       <TooltipTrigger>
@@ -410,7 +418,13 @@ function KanbanExerciseSets({
                           : Number.parseInt(e.target.value),
                       )
                     }}
-                    className="max-w-20"
+                    className={cn(
+                      'max-w-20',
+                      set.minReps &&
+                        set.maxReps &&
+                        set.minReps > set.maxReps &&
+                        'text-red-500',
+                    )}
                   />
                 </div>
               </div>

@@ -318,7 +318,12 @@ export function useTrainingPlanMutations(trainingId?: string) {
           if (exercise) {
             const currentSets = [...(exercise.sets || [])]
             const previousSet = currentSets.at(-1)
-            const newOrder = currentSets.length + 1
+            // Find the maximum existing order to ensure proper sequential ordering
+            const maxOrder =
+              currentSets.length > 0
+                ? Math.max(...currentSets.map((set) => set.order))
+                : 0
+            const newOrder = maxOrder + 1
 
             const newSet = {
               id: tempId || generateTempId('set'),
@@ -799,7 +804,12 @@ export function useTrainingPlanMutations(trainingId?: string) {
     debouncedInvalidateQueries()
 
     const currentSets = exercise.sets || []
-    const order = currentSets.length + 1
+    // Find the maximum existing order to ensure proper sequential ordering
+    const maxOrder =
+      currentSets.length > 0
+        ? Math.max(...currentSets.map((set) => set.order))
+        : 0
+    const order = maxOrder + 1
 
     return addSetOptimistic.optimisticMutate({
       input: {
