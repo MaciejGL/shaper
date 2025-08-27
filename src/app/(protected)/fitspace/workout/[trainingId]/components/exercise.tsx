@@ -14,11 +14,7 @@ import { ExerciseMetadata } from './exercise/exercise-metadata'
 import { ExerciseSets } from './exercise/exercise-sets'
 import { ExerciseProps } from './exercise/types'
 
-export function Exercise({
-  exercise,
-  exercises,
-  onPaginationClick,
-}: ExerciseProps) {
+export function Exercise({ exercise }: ExerciseProps) {
   const { getPastLogs } = useWorkout()
   const previousLogs = getPastLogs(exercise)
   const invalidateQuery = useInvalidateQuery()
@@ -68,17 +64,6 @@ export function Exercise({
     await removeExercise({
       exerciseId: exercise.id,
     })
-    const nextExercise = exercises.find((e) => e.order > exercise.order)
-    if (nextExercise) {
-      onPaginationClick(nextExercise.id, 'next')
-    } else {
-      const prevExercise = exercises.find((e) => e.order === exercise.order - 1)
-      if (prevExercise) {
-        onPaginationClick(prevExercise.id, 'prev')
-      } else {
-        onPaginationClick('summary', 'next')
-      }
-    }
   }
 
   return (

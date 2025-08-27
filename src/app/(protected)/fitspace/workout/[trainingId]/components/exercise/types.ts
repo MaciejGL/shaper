@@ -2,8 +2,6 @@ import { WorkoutExercise } from '../workout-page.client'
 
 export interface ExerciseProps {
   exercise: WorkoutExercise
-  exercises: WorkoutExercise[]
-  onPaginationClick: (exerciseId: string, type: 'prev' | 'next') => void
 }
 
 export interface ExerciseHeaderProps {

@@ -1,14 +1,10 @@
 import { BadgeCheckIcon } from 'lucide-react'
-import { useQueryState } from 'nuqs'
-import React, { startTransition, useEffect, useState } from 'react'
+import React from 'react'
 
-import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
-import { SwipeableWrapper } from '@/components/swipeable-wrapper'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { useWorkout } from '@/context/workout-context/workout-context'
-import { useTrainingView } from '@/hooks/use-training-view'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { QuickWorkout } from '../../quick-workout/quick-workout'
@@ -19,18 +15,6 @@ import { Summary } from './summary'
 
 export function Exercises() {
   const { activeDay } = useWorkout()
-  const [activeExerciseId, setActiveExerciseId] = useQueryState('exercise')
-  const [animationVariant, setAnimationVariant] = useState<
-    'slideFromLeft' | 'slideFromRight'
-  >('slideFromLeft')
-
-  useEffect(() => {
-    if (activeDay) {
-      setActiveExerciseId(activeDay.exercises.at(0)?.id ?? '')
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Change only when day changes with fallback to first exercise. Otherwise it does update on logs.
-  }, [activeDay?.id, setActiveExerciseId])
 
   if (!activeDay) return null
 
@@ -48,47 +32,6 @@ export function Exercises() {
 
   const progressPercentage = (completedSets / totalSets) * 100
   const exercises = activeDay.exercises
-
-  const handlePaginationClick = (
-    exerciseId: string | null,
-    type: 'prev' | 'next',
-  ) => {
-    startTransition(() => {
-      setAnimationVariant(type === 'prev' ? 'slideFromRight' : 'slideFromLeft')
-      setTimeout(() => {
-        setActiveExerciseId(exerciseId)
-      }, 50)
-    })
-  }
-
-  // Add swipe handlers
-  const handleSwipeLeft = () => {
-    const currentIndex = activeDay.exercises.findIndex(
-      (ex) => ex.id === activeExerciseId,
-    )
-    if (currentIndex < activeDay.exercises.length - 1) {
-      const nextExercise = activeDay.exercises[currentIndex + 1]
-      handlePaginationClick(nextExercise.id, 'next')
-    } else {
-      // Go to summary
-      handlePaginationClick('summary', 'next')
-    }
-  }
-
-  const handleSwipeRight = () => {
-    if (activeExerciseId === 'summary') {
-      const lastExercise = activeDay.exercises[activeDay.exercises.length - 1]
-      handlePaginationClick(lastExercise?.id ?? null, 'prev')
-    } else {
-      const currentIndex = activeDay.exercises.findIndex(
-        (ex) => ex.id === activeExerciseId,
-      )
-      if (currentIndex > 0) {
-        const prevExercise = activeDay.exercises[currentIndex - 1]
-        handlePaginationClick(prevExercise.id, 'prev')
-      }
-    }
-  }
 
   return (
     <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
@@ -116,12 +59,7 @@ export function Exercises() {
       {activeDay.exercises.length > 0 && (
         <div className="space-y-2">
           {activeDay.exercises.map((exercise) => (
-            <Exercise
-              key={exercise.id}
-              exercise={exercise}
-              exercises={exercises}
-              onPaginationClick={handlePaginationClick}
-            />
+            <Exercise key={exercise.id} exercise={exercise} />
           ))}
           <Summary open={true} />
         </div>
