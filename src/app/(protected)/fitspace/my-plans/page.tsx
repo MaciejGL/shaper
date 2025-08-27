@@ -50,8 +50,8 @@ export default function MyPlansPage() {
       >
         <PrimaryTabList
           options={[
-            { label: 'My Workouts', value: PlanTab.QuickWorkout },
-            { label: 'AssignedPlans', value: PlanTab.Plans },
+            { label: 'Templates', value: PlanTab.QuickWorkout },
+            { label: 'Assigned Plans', value: PlanTab.Plans },
           ]}
           onClick={setTab}
           active={tab ?? PlanTab.QuickWorkout}

@@ -240,6 +240,24 @@ export async function notifyClientTrainerReply(
   )
 }
 
+/**
+ * Send push notification when trainer shares a note with client
+ */
+export async function notifyClientTrainerNote(
+  clientId: string,
+  trainerName: string,
+  noteText: string,
+) {
+  const truncatedText =
+    noteText.length > 50 ? `${noteText.substring(0, 50)}...` : noteText
+  return await sendPushNotificationToUsers(
+    [clientId],
+    'Trainer note shared',
+    `${trainerName} shared a note with you: "${truncatedText}"`,
+    '/fitspace/my-trainer',
+  )
+}
+
 // ================================
 // MEAL & NUTRITION
 // ================================

@@ -2,6 +2,7 @@ import { ChevronRight } from 'lucide-react'
 import { useState } from 'react'
 
 import { CardSkeleton } from '@/components/card-skeleton'
+import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent } from '@/components/ui/card'
 import { GQLTrainingPlan } from '@/generated/graphql-client'
@@ -68,7 +69,7 @@ export function PlansTab({
 
   if (loading) {
     return (
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+      <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
         {Array.from({ length: 6 }).map((_, index) => (
           <CardSkeleton key={index} />
         ))}
@@ -83,18 +84,47 @@ export function PlansTab({
   return (
     <>
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
-        {allPlans
-          .filter(({ plan }) => plan != null)
-          .map(({ plan, isActive }) => (
+        <div className="flex flex-col gap-2">
+          <p className="text-lg font-medium">Active</p>
+          {activePlan ? (
             <PlanCard
-              key={plan.id}
-              plan={plan}
-              isActive={isActive}
+              plan={activePlan}
+              isActive
               onClick={handlePlanClick}
-              onAction={handleAction}
               loading={loading}
             />
-          ))}
+          ) : (
+            <EmptyPlansState />
+          )}
+        </div>
+
+        {availablePlans.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-lg font-medium">Available</p>
+            {availablePlans.map((plan) => (
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                onClick={handlePlanClick}
+                loading={loading}
+              />
+            ))}
+          </div>
+        )}
+
+        {completedPlans.length > 0 && (
+          <div className="flex flex-col gap-2">
+            <p className="text-lg font-medium">Completed</p>
+            {completedPlans.map((plan) => (
+              <PlanCard
+                key={plan.id}
+                plan={plan}
+                onClick={handlePlanClick}
+                loading={loading}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <PlanDetailsDrawer
@@ -111,36 +141,44 @@ export function PlansTab({
 
 function EmptyPlansState() {
   return (
-    <Card>
-      <CardContent className="flex-center flex-col gap-4 py-12">
-        <div className="size-16 bg-muted rounded-full flex items-center justify-center mx-auto">
-          <svg
-            className="size-8 text-muted-foreground"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-            />
-          </svg>
-        </div>
-        <h3 className="font-semibold">No Training Plans</h3>
-        <p className="text-muted-foreground text-center max-w-md">
-          You don't have any training plans yet. Create your first plan or check
-          our ready plans!
-        </p>
+    <div className="space-y-4">
+      <Card>
+        <CardContent className="flex-center flex-col gap-4 py-12">
+          <div className="size-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+            <svg
+              className="size-8 text-muted-foreground"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+              />
+            </svg>
+          </div>
+          <h3 className="font-semibold">No Training Plans</h3>
+          <p className="text-muted-foreground text-center max-w-md">
+            You don't have any training plans yet. Create your first plan or
+            check our ready plans!
+          </p>
 
-        <ButtonLink
-          href="/fitspace/explore?tab=plans"
-          iconEnd={<ChevronRight />}
-        >
-          Explore Plans
-        </ButtonLink>
-      </CardContent>
-    </Card>
+          <ButtonLink
+            href="/fitspace/explore?tab=plans"
+            iconEnd={<ChevronRight />}
+          >
+            Explore Plans
+          </ButtonLink>
+        </CardContent>
+      </Card>
+
+      <TrainerDiscoveryCta
+        variant="compact"
+        title="Need Help Getting Started?"
+        subtitle="Connect with a trainer for personalized guidance"
+      />
+    </div>
   )
 }

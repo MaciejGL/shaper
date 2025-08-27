@@ -2,13 +2,11 @@
 
 import {
   Calendar,
-  ChefHatIcon,
   ChevronRight,
   Dumbbell,
-  MoreHorizontalIcon,
-  Notebook,
   PersonStanding,
   SaladIcon,
+  SearchIcon,
   TrendingUp,
   UserCheck,
 } from 'lucide-react'
@@ -17,14 +15,15 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Icon } from '@/components/icons'
+import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card } from '@/components/ui/card'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
-import { useUser } from '@/context/user-context'
 import {
   useFitspaceGetActivePlanIdQuery,
   useFitspaceGetUserQuickWorkoutPlanQuery,
 } from '@/generated/graphql-client'
+import { useTrainerStatus } from '@/hooks/use-trainer-status'
 import { cn } from '@/lib/utils'
 
 import { AddMeasurementModal } from '../progress/components/add-measurement-modal'
@@ -37,6 +36,7 @@ export function MobileNav() {
   const { data, isLoading } = useFitspaceGetActivePlanIdQuery()
   const { data: quickWorkoutPlanData, isLoading: isQuickWorkoutPlanLoading } =
     useFitspaceGetUserQuickWorkoutPlanQuery({})
+  const { hasTrainer } = useTrainerStatus()
 
   const currentWorkoutId =
     data?.getActivePlanId || quickWorkoutPlanData?.getQuickWorkoutPlan?.id
@@ -57,17 +57,17 @@ export function MobileNav() {
         disabled: isLoading || isQuickWorkoutPlanLoading,
       },
       {
-        id: 'meals',
-        href: '/fitspace/meal-plan',
-        icon: SaladIcon,
-        label: 'Meals',
-        prefetch: true,
-      },
-      {
         id: 'plans',
         href: '/fitspace/my-plans',
         icon: Calendar,
         label: 'Plans',
+        prefetch: true,
+      },
+      {
+        id: 'meals',
+        href: '/fitspace/meal-plan',
+        icon: SaladIcon,
+        label: 'Meals',
         prefetch: true,
       },
       {
@@ -78,44 +78,51 @@ export function MobileNav() {
         prefetch: true,
       },
       {
-        id: 'more',
-        icon: MoreHorizontalIcon,
-        label: 'More',
+        id: 'trainer',
+        href: hasTrainer
+          ? '/fitspace/my-trainer'
+          : '/fitspace/explore?tab=trainers',
+        icon: UserCheck,
+        label: 'Trainer',
         prefetch: true,
-        onClick: () => {
-          setIsMoreOpen(true)
-        },
+      },
+      {
+        id: 'discover',
+        href: '/fitspace/explore',
+        icon: SearchIcon,
+        label: 'Discover',
+        prefetch: true,
       },
     ],
-    [currentWorkoutId, isLoading, isQuickWorkoutPlanLoading],
+    [currentWorkoutId, isLoading, isQuickWorkoutPlanLoading, hasTrainer],
   )
 
   return (
     <>
       <div className="h-[4.5rem]" />
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar safe-area-bottom safe-area-x">
-        <div className="grid grid-cols-5 items-center py-2 px-2 max-w-md mx-auto gap-1">
+        <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname === item.href
             const isClicked = clickedItem === item.label && !isActive
             const isHighlighted = isActive || isClicked
 
-            if (item.onClick) {
-              return (
-                <button
-                  key={item.id}
-                  onClick={item.onClick}
-                  className={cn(
-                    'flex flex-col text-muted-foreground hover:text-foreground items-center justify-center p-2 rounded-xl transition-colors min-w-[40px] cursor-pointer',
-                    isMoreOpen && 'text-primary bg-zinc-200 dark:bg-zinc-800',
-                  )}
-                >
-                  <Icon className="h-5 w-5 mb-1" />
-                  <span className="text-xs font-medium">{item.label}</span>
-                </button>
-              )
-            }
+            // if (item.onClick) {
+            //   return (
+            //     <button
+            //       key={item.id}
+            //       onClick={item.onClick}
+            //       className={cn(
+            //         'flex flex-col text-muted-foreground hover:text-foreground items-center justify-center p-2 rounded-xl transition-colors min-w-[40px] cursor-pointer',
+            //         isMoreOpen && 'text-primary bg-zinc-200 dark:bg-zinc-800',
+            //       )}
+            //     >
+            //       <Icon className="h-5 w-5 mb-1" />
+            //       <span className="text-xs font-medium">{item.label}</span>
+            //     </button>
+            //   )
+            // }
 
             return (
               <Link
@@ -130,7 +137,7 @@ export function MobileNav() {
                 )}
                 prefetch={item.prefetch}
               >
-                <Icon className="h-5 w-5 mb-1" />
+                <Icon className="size-4 mb-1" />
                 <span className="text-xs font-medium">{item.label}</span>
               </Link>
             )
@@ -149,45 +156,19 @@ function QuickActionDrawer({
   isOpen: boolean
   onOpenChange: (open: boolean) => void
 }) {
-  const { user } = useUser()
-  const hasTrainer = Boolean(user?.trainer?.id)
-
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
       <DrawerContent dialogTitle="Quick Actions">
         <div className="p-4 space-y-4">
           <div>
             <div className="flex flex-col gap-4">
-              <ExploreCtaButton
-                href="/fitspace/explore"
+              <TrainerDiscoveryCta
+                variant="banner"
+                title="Explore Coaches & Plans"
+                subtitle="Get matched to a coach or start a plan"
                 onClick={() => onOpenChange(false)}
               />
 
-              <div className="space-y-2">
-                <h3 className="text-md font-medium">Coach & Plans</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <QuickActionTile
-                    href={
-                      hasTrainer ? '/fitspace/my-trainer' : '/fitspace/explore'
-                    }
-                    label={hasTrainer ? 'My Trainer' : 'Find a Trainer'}
-                    icon={UserCheck}
-                    onClick={() => onOpenChange(false)}
-                  />
-                  <QuickActionTile
-                    href="/fitspace/my-plans"
-                    label="Training Plans"
-                    icon={Notebook}
-                    onClick={() => onOpenChange(false)}
-                  />
-                  <QuickActionTile
-                    href="/fitspace/meal-plans"
-                    label="Meal Plans"
-                    icon={ChefHatIcon}
-                    onClick={() => onOpenChange(false)}
-                  />
-                </div>
-              </div>
               <div className="space-y-2">
                 <h3 className="text-md font-medium">Progress</h3>
                 <DrawerMeasurement onOpenChange={() => onOpenChange(false)} />
@@ -320,7 +301,7 @@ export function QuickActionTile({
       variant="secondary"
       aria-label={ariaLabel || label}
       disabled={disabled}
-      className={cn('h-24 rounded-xl border', className)}
+      className={cn('h-24 rounded-xl', className)}
     >
       <div className="flex flex-col items-center justify-center gap-2">
         <Icon className={cn(disabled && 'opacity-50')} />

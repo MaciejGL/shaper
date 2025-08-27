@@ -1,5 +1,6 @@
-import { Dumbbell, SettingsIcon } from 'lucide-react'
+import { Dumbbell, Logs, SettingsIcon } from 'lucide-react'
 
+import { EmptyStateCard } from '@/components/empty-state-card'
 import { Button } from '@/components/ui/button'
 
 interface ExerciseEmptyStateProps {
@@ -13,23 +14,21 @@ export function ExerciseEmptyState({
 }: ExerciseEmptyStateProps) {
   if (!hasAvailableExercises) {
     return (
-      <div className="text-center py-8">
-        <Dumbbell className="size-12 mx-auto text-muted-foreground mb-4" />
-        <h3 className="text-lg font-semibold mb-2">No Exercises Found</h3>
-        <p className="text-muted-foreground mb-4">
-          No exercises found for this user
-        </p>
-      </div>
+      <EmptyStateCard
+        title="Not enough logged exercises"
+        description="Continue workouts, once you log enough, you will be able to view your progress"
+        icon={Logs}
+      />
     )
   }
 
   return (
-    <div className="text-center py-8">
-      <Dumbbell className="size-12 mx-auto text-muted-foreground mb-4" />
-      <h3 className="text-lg font-semibold mb-2">No Exercises Selected</h3>
-      <p className="text-muted-foreground mb-4">
-        Select exercises you want to track
-      </p>
+    <div className="space-y-4">
+      <EmptyStateCard
+        title="No Exercises Selected"
+        description="Select exercises you want to track"
+        icon={Dumbbell}
+      />
       <Button
         variant="secondary"
         className="mt-4 mx-auto"

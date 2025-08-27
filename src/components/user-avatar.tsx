@@ -33,7 +33,9 @@ export const UserAvatar = ({
   return (
     <Avatar className={cn('size-20 aspect-square', className)}>
       {displayImage && <AvatarImage src={displayImage} />}
-      <AvatarFallback>{fallbackInitials}</AvatarFallback>
+      <AvatarFallback className={cn('text-xs', className)}>
+        {fallbackInitials}
+      </AvatarFallback>
     </Avatar>
   )
 }

@@ -36,7 +36,7 @@ export function Exercises() {
   return (
     <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
       {!activeDay.isRestDay && (
-        <div className="flex flex-col py-4 space-y-2 w-full">
+        <div className="flex flex-col py-3 space-y-2 w-full">
           <div className="flex justify-between items-end gap-2">
             <p className="text-md">
               {formatWorkoutType(activeDay.workoutType)}
@@ -57,7 +57,7 @@ export function Exercises() {
         <QuickWorkout hideProgress={true} />
       ) : null}
       {activeDay.exercises.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {activeDay.exercises.map((exercise) => (
             <Exercise key={exercise.id} exercise={exercise} />
           ))}

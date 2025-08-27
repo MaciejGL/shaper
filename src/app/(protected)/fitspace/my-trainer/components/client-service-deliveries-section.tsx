@@ -31,7 +31,7 @@ export function ClientServiceDeliveriesSection({
 
   if (isLoading) {
     return (
-      <Card>
+      <Card borderless>
         <CardContent className="p-6">
           <div className="flex items-center justify-center min-h-[200px]">
             <Loader />
@@ -43,7 +43,7 @@ export function ClientServiceDeliveriesSection({
 
   if (trainerDeliveries.length === 0) {
     return (
-      <Card>
+      <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
@@ -63,7 +63,7 @@ export function ClientServiceDeliveriesSection({
   }
 
   return (
-    <Card>
+    <Card borderless>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Package className="h-5 w-5" />
@@ -116,13 +116,13 @@ function ServiceDeliveryItem({ delivery }: ServiceDeliveryItemProps) {
     <Card className="flex flex-row items-start gap-3 p-4 border rounded-lg">
       <div className="flex-shrink-0 mt-1">
         {isCompleted ? (
-          <CheckCircle className="h-5 w-5 text-success" />
+          <CheckCircle className="h-5 w-5 text-green-500" />
         ) : (
           <Circle
             className={cn('h-5 w-5', {
               'text-muted-foreground':
                 delivery.status === GQLDeliveryStatus.Pending,
-              'text-success': delivery.status === GQLDeliveryStatus.Completed,
+              'text-green-500': delivery.status === GQLDeliveryStatus.Completed,
               'text-amber-600':
                 delivery.status === GQLDeliveryStatus.InProgress,
             })}
@@ -136,7 +136,7 @@ function ServiceDeliveryItem({ delivery }: ServiceDeliveryItemProps) {
             <h3
               className={cn(
                 'font-medium',
-                isCompleted ? 'line-through text-muted-foreground' : '',
+                isCompleted ? 'text-muted-foreground' : '',
               )}
             >
               {delivery.packageName}
@@ -156,7 +156,7 @@ function ServiceDeliveryItem({ delivery }: ServiceDeliveryItemProps) {
               {getStatusText(delivery.status)}
             </Badge>
 
-            <div className="text-xs text-muted-foreground text-right">
+            <div className="text-xs text-muted-foreground text-right space-y-1">
               <p>
                 Ordered{' '}
                 <span className="font-medium whitespace-nowrap">
@@ -174,12 +174,6 @@ function ServiceDeliveryItem({ delivery }: ServiceDeliveryItemProps) {
             </div>
           </div>
         </div>
-
-        {delivery.deliveryNotes && (
-          <div className="mt-3 p-3 bg-muted/50 rounded-md">
-            <p className="text-sm">{delivery.deliveryNotes}</p>
-          </div>
-        )}
       </div>
     </Card>
   )

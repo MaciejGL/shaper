@@ -1,4 +1,4 @@
-import { UserAvatar } from '@/components/user-avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 
 import { AvailablePlan } from '../types'
@@ -12,20 +12,21 @@ export function PlanAuthor({
 }) {
   return (
     <div className="flex items-center gap-2">
-      <UserAvatar
-        firstName={createdBy?.firstName ?? ''}
-        lastName={createdBy?.lastName ?? ''}
-        imageUrl={createdBy?.image ?? ''}
-        sex={createdBy?.sex ?? ''}
-        withFallbackAvatar
+      <Avatar>
+        <AvatarImage src={createdBy?.image ?? ''} />
+        <AvatarFallback className={cn('text-xs')}>
+          {createdBy?.firstName?.charAt(0)}
+          {createdBy?.lastName?.charAt(0)}
+        </AvatarFallback>
+      </Avatar>
+      <span
         className={cn(
-          'size-8',
-          size === 'sm' && 'size-4',
-          size === 'md' && 'size-6',
-          size === 'lg' && 'size-8',
+          'text-xs text-muted-foreground',
+          size === 'sm' && 'text-xs',
+          size === 'md' && 'text-xs',
+          size === 'lg' && 'text-xs',
         )}
-      />
-      <span className="text-sm text-muted-foreground">
+      >
         by {createdBy?.firstName} {createdBy?.lastName}
       </span>
     </div>

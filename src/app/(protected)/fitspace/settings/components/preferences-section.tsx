@@ -3,7 +3,6 @@
 import {
   CalendarIcon,
   ClockIcon,
-  DumbbellIcon,
   RulerIcon,
   SunIcon,
   WeightIcon,
@@ -12,7 +11,6 @@ import {
 import { RadioButtons } from '@/components/radio-buttons'
 import { Label } from '@/components/ui/label'
 import { useUserPreferences } from '@/context/user-preferences-context'
-import { GQLTrainingView } from '@/generated/graphql-client'
 import { WeekStartDay } from '@/lib/date-utils'
 
 export function PreferencesSection() {
@@ -23,7 +21,6 @@ export function PreferencesSection() {
     setHeightUnit,
     setTheme,
     setTimeFormat,
-    setTrainingView,
   } = useUserPreferences()
 
   return (
@@ -108,7 +105,7 @@ export function PreferencesSection() {
       </div>
 
       {/* Training View */}
-      <div className="space-y-3">
+      {/* <div className="space-y-3">
         <div className="flex items-center space-x-2">
           <DumbbellIcon className="size-4 text-purple-500" />
           <Label htmlFor="training-view" className="text-sm font-medium">
@@ -134,7 +131,7 @@ export function PreferencesSection() {
 
           Advanced: Full workout tracking with sets, reps, and weights.`}
         />
-      </div>
+      </div> */}
 
       {/* Theme */}
       <div className="space-y-3">

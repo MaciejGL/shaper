@@ -318,15 +318,15 @@ function CreateNoteForm({
       <div className="flex items-center justify-between pt-2 border-t border-border">
         <div className="flex items-center space-x-2">
           <Switch
-            id="share-new-note"
+            id="share-new-note-trainer"
             checked={newNoteShareWithTrainer}
             onCheckedChange={onNewNoteShareWithTrainerChange}
           />
           <Label
-            htmlFor="share-new-note"
+            htmlFor="share-new-note-trainer"
             className="text-sm text-muted-foreground"
           >
-            Share with my trainer
+            Share with trainer
           </Label>
         </div>
 
@@ -453,12 +453,12 @@ function ExerciseNote({
 
                 <div className="flex items-center space-x-2">
                   <Switch
-                    id="share-edit-note"
+                    id="share-edit-note-trainer"
                     checked={editingShareWithTrainer}
                     onCheckedChange={onEditingShareWithTrainerChange}
                   />
                   <Label
-                    htmlFor="share-edit-note"
+                    htmlFor="share-edit-note-trainer"
                     className="text-sm text-muted-foreground"
                   >
                     Share with my trainer

@@ -67,7 +67,7 @@ export function Exercise({ exercise }: ExerciseProps) {
   }
 
   return (
-    <Card className="p-0 gap-2">
+    <Card borderless className="p-0 gap-2">
       <div className="px-2 pt-2">
         <ExerciseMetadata
           exercise={exercise}

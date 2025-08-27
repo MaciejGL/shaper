@@ -17,14 +17,19 @@ interface NotificationItemProps {
     GQLNotification,
     'id' | 'read' | 'type' | 'message' | 'link' | 'createdAt'
   >
+  isLast: boolean
 }
 
-export function NotificationItem({ notification }: NotificationItemProps) {
+export function NotificationItem({
+  notification,
+  isLast,
+}: NotificationItemProps) {
   return (
     <Card
       variant="secondary"
       className={cn(
-        'flex gap-3 p-3 w-full transition-colors rounded-none',
+        'flex gap-3 p-3 w-full transition-colors rounded-none border-0',
+        !isLast && 'border-b',
         notification.read
           ? 'hover:bg-muted/50'
           : 'bg-muted/80 hover:bg-muted/50',

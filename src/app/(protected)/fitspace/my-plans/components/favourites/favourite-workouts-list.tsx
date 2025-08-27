@@ -48,7 +48,7 @@ export function FavouriteWorkoutsList({
           <h3 className="text-lg font-semibold">Workouts</h3>
           <Button disabled iconOnly={<Plus />} />
         </div>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
           {Array.from({ length: 4 }).map((_, index) => (
             <CardSkeleton key={index} />
           ))}
@@ -60,7 +60,7 @@ export function FavouriteWorkoutsList({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Workouts</h3>
+        <h3 className="text-lg font-semibold">Templates</h3>
         <Button onClick={() => setIsCreateModalOpen(true)} iconOnly={<Plus />}>
           Create
         </Button>

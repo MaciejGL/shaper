@@ -1,7 +1,7 @@
 'use client'
 
 import { formatDistanceToNow } from 'date-fns'
-import { ChevronRight, Clock, Dumbbell, Edit, Trash2 } from 'lucide-react'
+import { ChevronRight, Clock, Edit, Trash2 } from 'lucide-react'
 
 import {
   Accordion,
@@ -96,12 +96,14 @@ export function FavouriteWorkoutCard({
     <Accordion type="single" collapsible>
       <AccordionItem
         value="body-fat-estimation-guide"
-        className="bg-card-on-card rounded-lg"
+        className="bg-card rounded-lg"
       >
         <AccordionTrigger className="flex items-center justify-between w-full p-4 text-left hover:bg-card-on-card/80 dark:hover:bg-card-on-card/80 transition-colors">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
-              <h3 className="font-semibold truncate">{favourite.title}</h3>
+              <h3 className="text-base font-medium truncate">
+                {favourite.title}
+              </h3>
             </div>
             <div className="flex items-center gap-1">
               {favourite.exercises.length > 0 && (
@@ -132,15 +134,8 @@ export function FavouriteWorkoutCard({
         <AccordionContent>
           <div>
             <CardHeader className="pb-3">
-              <div className="flex gap-2 flex-wrap">
-                <Badge variant="secondary">
-                  <Dumbbell className="w-3 h-3 mr-1" />
-                  {totalExercises} exercises
-                </Badge>
-                <Badge variant="secondary">
-                  <Clock className="w-3 h-3 mr-1" />
-                  {totalSets} sets
-                </Badge>
+              <div className="flex gap-1 flex-wrap">
+                <Badge variant="secondary">{totalSets} sets</Badge>
                 {estimatedTime > 0 && (
                   <Badge variant="secondary">
                     <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min

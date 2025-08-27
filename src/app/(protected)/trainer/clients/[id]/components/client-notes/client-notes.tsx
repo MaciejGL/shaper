@@ -23,8 +23,10 @@ export function ClientNotes({ clientId }: { clientId: string }) {
   // State management
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
   const [editingText, setEditingText] = useState('')
+  const [editingShareWithClient, setEditingShareWithClient] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
   const [newNoteText, setNewNoteText] = useState('')
+  const [newNoteShareWithClient, setNewNoteShareWithClient] = useState(false)
 
   // GQL
   const {
@@ -53,17 +55,23 @@ export function ClientNotes({ clientId }: { clientId: string }) {
   const handleStartEdit = (note: NoteType) => {
     setEditingNoteId(note.id)
     setEditingText(note.text)
+    setEditingShareWithClient(note.shareWithClient || false)
   }
 
   const handleSaveEdit = async () => {
     if (editingNoteId && editingText.trim()) {
       try {
         await updateNote({
-          input: { id: editingNoteId, note: editingText.trim() },
+          input: {
+            id: editingNoteId,
+            note: editingText.trim(),
+            shareWithClient: editingShareWithClient,
+          },
         })
         await refetch()
         setEditingNoteId(null)
         setEditingText('')
+        setEditingShareWithClient(false)
       } catch (error) {
         console.error('Failed to update note:', error)
       }
@@ -73,6 +81,7 @@ export function ClientNotes({ clientId }: { clientId: string }) {
   const handleCancelEdit = () => {
     setEditingNoteId(null)
     setEditingText('')
+    setEditingShareWithClient(false)
   }
 
   const handleDeleteNote = async (noteId: string) => {
@@ -91,10 +100,12 @@ export function ClientNotes({ clientId }: { clientId: string }) {
           input: {
             relatedTo: clientId,
             note: newNoteText.trim(),
+            shareWithClient: newNoteShareWithClient,
           },
         })
         await refetch()
         setNewNoteText('')
+        setNewNoteShareWithClient(false)
         setIsCreating(false)
       } catch (error) {
         console.error('Failed to create note:', error)
@@ -105,6 +116,7 @@ export function ClientNotes({ clientId }: { clientId: string }) {
   const handleCancelCreate = () => {
     setIsCreating(false)
     setNewNoteText('')
+    setNewNoteShareWithClient(false)
   }
 
   const handleOpenCreateNote = () => {
@@ -133,8 +145,10 @@ export function ClientNotes({ clientId }: { clientId: string }) {
         <CreateNoteForm
           isCreating={isCreating}
           newNoteText={newNoteText}
+          newNoteShareWithClient={newNoteShareWithClient}
           isCreatingNote={isCreatingNote}
           onNewNoteTextChange={setNewNoteText}
+          onNewNoteShareWithClientChange={setNewNoteShareWithClient}
           onCreateNote={handleCreateNote}
           onCancelCreate={handleCancelCreate}
         />
@@ -153,6 +167,7 @@ export function ClientNotes({ clientId }: { clientId: string }) {
                 note={note}
                 isEditing={editingNoteId === note.id}
                 editingText={editingText}
+                editingShareWithClient={editingShareWithClient}
                 isUpdatingNote={isUpdatingNote}
                 isDeletingNote={isDeletingNote}
                 onStartEdit={handleStartEdit}
@@ -160,6 +175,7 @@ export function ClientNotes({ clientId }: { clientId: string }) {
                 onCancelEdit={handleCancelEdit}
                 onDeleteNote={handleDeleteNote}
                 onEditingTextChange={setEditingText}
+                onEditingShareWithClientChange={setEditingShareWithClient}
               />
             ))}
           </div>

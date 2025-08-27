@@ -18,11 +18,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   GQLNotificationType,
+  GQLNotificationsQuery,
   useMarkAllNotificationsAsReadMutation,
   useMarkNotificationAsReadMutation,
   useNotificationsQuery,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
+import { createScrollUrl } from '@/lib/utils/scroll-to'
 import type { UserWithSession } from '@/types/UserWithSession'
 
 import { useMobileApp } from '../mobile-app-bridge'
@@ -105,19 +107,47 @@ const useNotifications = (
     ) {
       handleOpenOffer(notification.link)
     }
+
+    if (notification.type === GQLNotificationType.TrainerNoteShared) {
+      router.push(createScrollUrl('/fitspace/my-trainer', 'trainer-notes'))
+    }
   }
 
   const onClearAll = async () => {
-    await markAllNotificationsAsRead(
-      { userId: user.id },
-      {
-        onSuccess: () => {
-          queryClient.invalidateQueries({
-            queryKey: useNotificationsQuery.getKey({ userId: user.id }),
-          })
-        },
+    const queryKey = useNotificationsQuery.getKey({ userId: user.id })
+
+    // Optimistically update cache immediately
+    await queryClient.cancelQueries({ queryKey })
+    const previousData = queryClient.getQueryData(queryKey)
+
+    // Immediately mark all notifications as read in cache
+    queryClient.setQueryData(
+      queryKey,
+      (old: GQLNotificationsQuery | undefined) => {
+        if (!old?.notifications) return old
+        return {
+          ...old,
+          notifications: old.notifications.map(
+            (notification: GQLNotificationsQuery['notifications'][0]) => ({
+              ...notification,
+              read: true,
+            }),
+          ),
+        }
       },
     )
+
+    try {
+      await markAllNotificationsAsRead({ userId: user.id })
+      // Refetch to sync with server
+      queryClient.invalidateQueries({ queryKey })
+    } catch (error) {
+      // Rollback on error
+      if (previousData) {
+        queryClient.setQueryData(queryKey, previousData)
+      }
+      throw error
+    }
   }
 
   return {
@@ -179,9 +209,9 @@ export function NotificationBell({
                   className="absolute top-0 right-0 flex items-center justify-center"
                 >
                   <span className="relative flex size-[14px]">
-                    <span className="absolute inline-flex h-full w-full rounded-full bg-blue-600 opacity-75 animate-ping [animation-iteration-count:5]"></span>
+                    <span className="absolute inline-flex h-full w-full rounded-full bg-amber-600 opacity-75 animate-ping [animation-iteration-count:5]"></span>
 
-                    <span className="relative inline-flex rounded-full size-[14px] bg-blue-600 text-white text-[10px] font-medium items-center justify-center">
+                    <span className="relative inline-flex rounded-full size-[14px] bg-amber-600 text-white text-[10px] font-medium items-center justify-center">
                       {unreadCount > 9 ? '9+' : unreadCount}
                     </span>
                   </span>
@@ -192,7 +222,7 @@ export function NotificationBell({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" className="w-80 p-0 overflow-hidden">
-          <DropdownMenuLabel className="bg-zinc-100 dark:bg-zinc-900 flex items-center justify-between py-3 px-4 border-b">
+          <DropdownMenuLabel className="bg-zinc-100 dark:bg-zinc-900 flex items-center justify-between py-3 px-4">
             <span className="font-semibold">Notifications</span>
             {notifications.length > 0 && (
               <Button
@@ -215,9 +245,6 @@ export function NotificationBell({
           >
             {notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center p-4">
-                <div className="bg-zinc-200 dark:bg-zinc-700 rounded-full p-3 mb-3">
-                  <Bell className="h-6 w-6 text-zinc-400 dark:text-zinc-500" />
-                </div>
                 <p className="text-sm font-medium text-zinc-700 dark:text-zinc-200">
                   No notifications
                 </p>
@@ -227,7 +254,7 @@ export function NotificationBell({
               </div>
             ) : (
               <DropdownMenuGroup>
-                {notifications.map((notification) => (
+                {notifications.map((notification, index) => (
                   <React.Fragment key={notification.id}>
                     <DropdownMenuItem
                       key={notification.id}
@@ -238,7 +265,10 @@ export function NotificationBell({
                       className="p-0"
                       asChild
                     >
-                      <NotificationItem notification={notification} />
+                      <NotificationItem
+                        notification={notification}
+                        isLast={index === notifications.length - 1}
+                      />
                     </DropdownMenuItem>
                   </React.Fragment>
                 ))}

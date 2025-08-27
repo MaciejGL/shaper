@@ -80,8 +80,8 @@ export function ExerciseMetadata({
 
   return (
     <div>
-      <div className="flex gap-2 items-start">
-        <p className="text-md font-medium self-center line-clamp-2">
+      <div className="flex gap-2 items-start pl-1">
+        <p className="text-lg font-medium self-center line-clamp-2">
           {exercise.name}
         </p>
 

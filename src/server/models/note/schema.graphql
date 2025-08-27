@@ -5,6 +5,7 @@ type Note {
   createdAt: String!
   updatedAt: String!
   shareWithTrainer: Boolean
+  shareWithClient: Boolean
   parentNoteId: ID
   replies: [Note!]!
   createdBy: UserPublic!
@@ -21,6 +22,7 @@ type Query {
   exerciseNotes(exerciseName: String!): [Note!]!
   workoutExerciseNotes(exerciseNames: [String!]!): [WorkoutExerciseNotes!]!
   clientSharedNotes(clientId: String!): [Note!]!
+  trainerSharedNotes(limit: Int, offset: Int): [Note!]!
   noteReplies(noteId: String!): [Note!]!
 }
 
@@ -28,18 +30,28 @@ input CreateNoteInput {
   note: String!
   relatedTo: ID
   shareWithTrainer: Boolean
+  shareWithClient: Boolean
 }
 
 input UpdateNoteInput {
   id: ID!
   note: String!
   shareWithTrainer: Boolean
+  shareWithClient: Boolean
 }
 
 input CreateExerciseNoteInput {
   exerciseId: String!
   note: String!
   shareWithTrainer: Boolean
+  shareWithClient: Boolean
+}
+
+input CreateTrainerNoteForClientInput {
+  clientId: String!
+  exerciseId: String!
+  note: String!
+  shareWithClient: Boolean
 }
 
 input CreateNoteReplyInput {
@@ -52,5 +64,6 @@ type Mutation {
   updateNote(input: UpdateNoteInput!): Note!
   deleteNote(id: ID!): Boolean!
   createExerciseNote(input: CreateExerciseNoteInput!): Note!
+  createTrainerNoteForClient(input: CreateTrainerNoteForClientInput!): Note!
   createNoteReply(input: CreateNoteReplyInput!): Note!
 }

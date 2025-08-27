@@ -20,6 +20,9 @@ query FitspaceGetWorkout($trainingId: ID!) {
       isTemplate
       isDraft
       startDate
+      assignedTo {
+        id
+      }
 
       weeks {
         id

@@ -21,7 +21,7 @@ const badgeVariants = cva(
 
         success: cn(
           'border-transparent bg-green-500/70 text-black [a&]:hover:bg-green-500/90 focus-visible:ring-green-500/20 dark:focus-visible:ring-green-500/40 dark:bg-green-500/60',
-          'dark:bg-green-500/60',
+          'dark:bg-green-500/60 dark:text-white',
         ),
 
         info: cn(
@@ -39,7 +39,7 @@ const badgeVariants = cva(
         outline:
           'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         muscle:
-          'bg-green-500/70 text-black [a&]:hover:bg-green-500/90 focus-visible:ring-green-500/20 dark:focus-visible:ring-green-500/40 dark:bg-green-500/60 border-none text-white',
+          'bg-green-500/70 text-black [a&]:hover:bg-green-500/90 focus-visible:ring-green-500/20 dark:focus-visible:ring-green-500/40 dark:bg-green-500/60 border-none dark:text-white',
 
         equipment: cn(
           'bg-cyan-500/70 text-black [a&]:hover:bg-cyan-500/90 focus-visible:ring-cyan-500/20 dark:focus-visible:ring-cyan-500/40 dark:bg-cyan-500 border-none text-white',

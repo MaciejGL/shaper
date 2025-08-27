@@ -35,7 +35,7 @@ export function DetailedMeasurements() {
 
   return measurementCategories.slice(1).map((category) => {
     return (
-      <div key={category.id} className="px-2">
+      <div key={category.id}>
         <div className="font-semibold">{category.title}</div>
 
         <div className="pt-4 space-y-4">

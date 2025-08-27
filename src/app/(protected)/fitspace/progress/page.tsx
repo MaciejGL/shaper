@@ -1,13 +1,10 @@
 'use client'
 
-import { TrendingUp } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { Crown, Lock, TrendingUp } from 'lucide-react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import {
-  useExercisesProgressByUserQuery,
-  useProgressUserQuery,
-} from '@/generated/graphql-client'
+import { useUser } from '@/context/user-context'
+import { useExercisesProgressByUserQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
@@ -16,20 +13,12 @@ import { BodyMeasurements } from './components/body-measurements'
 import { SelectedExercisesProgress } from './components/selected-exercises-progress'
 
 export default function ProgressPage() {
-  const { data: userData } = useProgressUserQuery()
-  const [userId, setUserId] = useState<string | null>(null)
-
-  useEffect(() => {
-    // Get user ID from the user data
-    if (userData?.user?.id) {
-      setUserId(userData.user.id)
-    }
-  }, [userData])
+  const { user, hasPremium } = useUser()
 
   // Get progress data for all exercises
   const { data: exerciseProgress } = useExercisesProgressByUserQuery(
-    { userId: userId || '' },
-    { enabled: !!userId },
+    { userId: user?.id || '' },
+    { enabled: !!user?.id && hasPremium },
   )
 
   return (
@@ -50,8 +39,12 @@ export default function ProgressPage() {
           >
             BMI & BMR
           </TabsTrigger> */}
-          <TabsTrigger value="exercises" className="flex items-center gap-2">
-            Exercises
+          <TabsTrigger
+            value="exercises"
+            className="flex items-center gap-2"
+            disabled={!hasPremium}
+          >
+            Exercises {!hasPremium ? <Lock /> : <Crown />}
           </TabsTrigger>
         </TabsList>
 
@@ -66,7 +59,7 @@ export default function ProgressPage() {
         <TabsContent value="exercises">
           <SelectedExercisesProgress
             exerciseProgress={exerciseProgress?.exercisesProgressByUser || []}
-            userId={userId}
+            userId={user?.id || ''}
           />
         </TabsContent>
       </Tabs>
