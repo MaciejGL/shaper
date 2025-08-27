@@ -20,7 +20,6 @@ const markSetAsCompletedRelatedData = async (
   reps?: number | null,
   weight?: number | null,
 ) => {
-  console.log(setId, reps, weight)
   // 1. Mark set as completed
   const updatedSet = await prisma.exerciseSet.update({
     where: { id: setId },
@@ -189,8 +188,6 @@ export const markSetAsCompleted = async (
     await unmarkSetCompletedRelatedData(setId)
     return true
   }
-
-  console.log(setId, completed, reps, weight)
 
   await markSetAsCompletedRelatedData(setId, reps, weight)
 

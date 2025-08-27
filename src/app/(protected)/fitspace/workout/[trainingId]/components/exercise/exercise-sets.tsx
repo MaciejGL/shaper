@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { PlusIcon, XIcon } from 'lucide-react'
+import { PlusIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
@@ -211,26 +211,6 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
     })
   }
 
-  const removeExtraSet = async () => {
-    const exerciseSets = exercise.substitutedBy?.sets || exercise.sets
-    // Find the last extra set (highest order among extra sets)
-    const extraSets = exerciseSets.filter((set) => set.isExtra)
-    const lastExtraSet = extraSets.reduce(
-      (latest, current) => (current.order > latest.order ? current : latest),
-      extraSets[0],
-    )
-
-    if (lastExtraSet) {
-      await removeSet({
-        setId: lastExtraSet.id,
-      })
-    }
-  }
-
-  const hasExtraSets = (exercise.substitutedBy?.sets || exercise.sets).some(
-    (set) => set.isExtra,
-  )
-
   // Helper function to get previous set's logged value
   const getPreviousSetValue = (
     currentSetOrder: number,
@@ -286,19 +266,17 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
   }
 
   return (
-    <div className="flex flex-col rounded-[0.45rem]">
+    <div className="flex flex-col rounded-[0.45rem] ">
       <div className="flex items-center gap-1">
         <div
           className={cn(sharedLayoutStyles, 'text-[0.625rem] py-2 font-medium')}
         >
-          <div className="min-w-2.5">SET</div>
+          <div className="text-center">SET</div>
           <div className="text-center">PREVIOUS</div>
           <div className="text-center">REPS</div>
           <div className="text-center uppercase">{preferences.weightUnit}</div>
           <div className="text-center"></div>
         </div>
-
-        {hasExtraSets && <div className="w-8 shrink-0" />}
       </div>
 
       <div className="flex flex-col gap-0">
@@ -317,6 +295,7 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
               weight={setsLogs[set.id]?.weight ?? ''}
               onRepsChange={(reps) => handleRepsChange(reps, set.id)}
               onWeightChange={(weight) => handleWeightChange(weight, set.id)}
+              onDelete={() => removeSet({ setId: set.id })}
             />
           )
         })}
@@ -324,20 +303,8 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
         <div
           className={cn(
             'grid grid-cols-1 items-center justify-items-center gap-2 my-2',
-            hasExtraSets && 'grid-cols-2',
           )}
         >
-          {hasExtraSets && (
-            <Button
-              variant="ghost"
-              size="xs"
-              className="w-max"
-              iconStart={<XIcon />}
-              onClick={removeExtraSet}
-            >
-              Remove last set
-            </Button>
-          )}
           <Button
             variant="ghost"
             size="xs"

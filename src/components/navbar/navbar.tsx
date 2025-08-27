@@ -9,10 +9,12 @@ import {
   MenuIcon,
   NotebookTextIcon,
   Settings,
+  SunIcon,
   UserRoundCogIcon,
   Users2Icon,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
+import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
@@ -55,6 +57,7 @@ export const Navbar = ({
   user?: UserWithSession | null
   withSidebar?: boolean
 }) => {
+  const { theme, setTheme } = useTheme()
   const { isVisible } = useScrollVisibility()
   const { data: notifications } = useNotificationsQuery(
     {
@@ -128,6 +131,15 @@ export const Navbar = ({
               </div>
             </Link>
           </div>
+          {process.env.NODE_ENV === 'development' && (
+            <Button
+              variant="ghost"
+              iconOnly={<SunIcon />}
+              onClick={() => {
+                setTheme(theme === 'dark' ? 'light' : 'dark')
+              }}
+            />
+          )}
           <div className="flex items-center gap-2">
             {user && (
               <NotificationBell

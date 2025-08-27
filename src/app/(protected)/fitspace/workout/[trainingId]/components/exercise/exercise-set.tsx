@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { SwipeToReveal } from '@/components/ui/swipe-to-reveal'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutQuery,
@@ -33,6 +34,7 @@ export function ExerciseSet({
   weight,
   onRepsChange,
   onWeightChange,
+  onDelete,
 }: ExerciseSetProps) {
   const { trainingId } = useParams<{ trainingId: string }>()
   const { preferences } = useUserPreferences()
@@ -195,10 +197,6 @@ export function ExerciseSet({
     }
   }
 
-  const showLabel =
-    !set.isExtra &&
-    (set.reps || set.minReps || set.maxReps || set.weight || set.rpe)
-
   // Get data from previous workout for the "PREVIOUS" column (same set order from last workout)
   const lastLog = previousLogs[previousLogs.length - 1]
   const thisSet = lastLog?.sets[set.order - 1] // Same set order from previous workout
@@ -220,13 +218,29 @@ export function ExerciseSet({
 
   return (
     <AnimateChangeInHeight>
-      {showLabel && (
+      <SwipeToReveal
+        actions={[
+          {
+            id: 'remove',
+            label: 'Remove',
+            onClick: onDelete,
+          },
+        ]}
+        isSwipeable={set.isExtra && !isCompletingSet}
+        className="bg-card border-b border-border/50"
+      >
         <div className="flex items-center gap-1">
-          <div className={cn(sharedLayoutStyles, 'pb-0.5 pt-1 leading-none')}>
+          <div
+            className={cn(
+              sharedLayoutStyles,
+              'pb-0.5 pt-1 leading-none',
+              set.isExtra && 'opacity-0',
+            )}
+          >
             <div />
             <div />
             <div className="text-[0.625rem] text-muted-foreground text-center">
-              {repRange}
+              {set.isExtra ? 'Extra' : repRange}
             </div>
             <div className="text-[0.625rem] text-muted-foreground text-center">
               {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : ''}
@@ -234,84 +248,81 @@ export function ExerciseSet({
             <div />
           </div>
         </div>
-      )}
 
-      <div
-        className={cn(
-          'flex items-start gap-1 dark:bg-background py-1',
-          set.isExtra && 'pt-4',
-        )}
-      >
-        <div>
-          <div className={cn(sharedLayoutStyles, 'text-primary relative')}>
-            <div className="text-sm text-muted-foreground">{set.order}</div>
-            <div className="text-xs text-muted-foreground text-center space-y-0.5">
-              <div>
-                {!isNil(thisSet?.log?.reps || thisSet?.log?.weight) ? (
-                  <p>
-                    {typeof thisSet?.log?.reps === 'number'
-                      ? thisSet.log.reps.toString()
-                      : ''}
-                    {!isNil(thisSet?.log?.weight) &&
-                      !isNil(thisSet?.log?.reps) &&
-                      ' x '}
-                    {typeof thisSet?.log?.weight === 'number'
-                      ? toDisplayWeight(thisSet.log.weight)?.toString() +
-                        preferences.weightUnit
-                      : ''}
-                  </p>
-                ) : (
-                  <div className="bg-muted w-6 h-0.5 rounded-md mx-auto" />
-                )}
+        <div className={cn('flex items-start gap-1 pb-1')}>
+          <div>
+            <div className={cn(sharedLayoutStyles, 'text-primary relative')}>
+              <div className="text-sm text-muted-foreground text-center">
+                {set.order}
               </div>
-            </div>
-            <Input
-              id={`set-${set.id}-reps`}
-              value={reps}
-              onChange={(e) => handleInputChange(e, 'reps')}
-              inputMode="decimal"
-              variant={'secondary'}
-              placeholder={previousSetRepsLog?.toString() || ''}
-              className="text-center"
-              size="sm"
-            />
-            <ExerciseWeightInput
-              setId={set.id}
-              weightInKg={weight ? parseFloat(weight) : null}
-              onWeightChange={(weightInKg) => {
-                hasUserEdited.current = true
-                onWeightChange(weightInKg?.toString() || '')
-              }}
-              placeholder={
-                previousSetWeightLog
-                  ? toDisplayWeight(previousSetWeightLog)?.toString()
-                  : ''
-              }
-              disabled={false}
-              showWeightUnit={false}
-            />
-            <div className="flex justify-center">
-              <Button
-                variant="tertiary"
-                size="icon-xs"
-                iconOnly={
-                  <CheckIcon
-                    className={cn(
-                      'size-4 transition-colors',
-                      set.completedAt
-                        ? 'text-green-500'
-                        : 'text-muted-foreground/40',
-                    )}
-                  />
-                }
-                loading={isCompletingSet}
-                onClick={handleToggleSetCompletion}
-                className="self-center"
+              <div className="text-xs text-muted-foreground text-center">
+                <div>
+                  {!isNil(thisSet?.log?.reps || thisSet?.log?.weight) ? (
+                    <p>
+                      {typeof thisSet?.log?.reps === 'number'
+                        ? thisSet.log.reps.toString()
+                        : ''}
+                      {!isNil(thisSet?.log?.weight) &&
+                        !isNil(thisSet?.log?.reps) &&
+                        ' x '}
+                      {typeof thisSet?.log?.weight === 'number'
+                        ? toDisplayWeight(thisSet.log.weight)?.toString() +
+                          preferences.weightUnit
+                        : ''}
+                    </p>
+                  ) : (
+                    <div className="bg-muted w-6 h-0.5 rounded-md mx-auto" />
+                  )}
+                </div>
+              </div>
+              <Input
+                id={`set-${set.id}-reps`}
+                value={reps}
+                onChange={(e) => handleInputChange(e, 'reps')}
+                inputMode="decimal"
+                variant={'secondary'}
+                placeholder={previousSetRepsLog?.toString() || ''}
+                className="text-center"
+                size="sm"
               />
+              <ExerciseWeightInput
+                setId={set.id}
+                weightInKg={weight ? parseFloat(weight) : null}
+                onWeightChange={(weightInKg) => {
+                  hasUserEdited.current = true
+                  onWeightChange(weightInKg?.toString() || '')
+                }}
+                placeholder={
+                  previousSetWeightLog
+                    ? toDisplayWeight(previousSetWeightLog)?.toString()
+                    : ''
+                }
+                disabled={false}
+                showWeightUnit={false}
+              />
+              <div className="flex justify-center">
+                <Button
+                  variant="tertiary"
+                  size="icon-xs"
+                  iconOnly={
+                    <CheckIcon
+                      className={cn(
+                        'size-4 transition-colors',
+                        set.completedAt
+                          ? 'text-green-500'
+                          : 'text-muted-foreground/40',
+                      )}
+                    />
+                  }
+                  loading={isCompletingSet}
+                  onClick={handleToggleSetCompletion}
+                  className="self-center"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </SwipeToReveal>
     </AnimateChangeInHeight>
   )
 }

@@ -37,6 +37,7 @@ export interface ExerciseSetProps {
   weight: string
   onRepsChange: (reps: string) => void
   onWeightChange: (weight: string) => void
+  onDelete: () => void
 }
 
 export interface ExerciseMetadataProps {
