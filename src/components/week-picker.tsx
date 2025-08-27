@@ -59,7 +59,7 @@ export function WeekPicker({
     <Popover open={isOpen} onOpenChange={setIsOpen} modal>
       <PopoverTrigger asChild>
         <Button
-          variant="outline"
+          variant="tertiary"
           className={cn(
             'w-full justify-start text-left font-normal',
             !value && 'text-muted-foreground',
@@ -89,6 +89,7 @@ export function WeekPicker({
           selected={value}
           onSelect={handleDateSelect}
           initialFocus
+          className="mx-auto"
         />
         <div className="p-3 border-t">
           <div className="text-xs text-muted-foreground">
