@@ -597,8 +597,6 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
     Boolean(exercise?.completedAt) ||
     !canEdit
 
-  console.log(exercise)
-
   return (
     <div className="gap-2">
       <DialogHeader className="mb-8">
