@@ -26,7 +26,7 @@ export function SwipeToReveal({
   children,
   actions,
   disabled = false,
-  velocityThreshold = 400,
+  velocityThreshold = 0,
   className,
   actionsClassName,
   isSwipeable = true,
@@ -144,8 +144,6 @@ export function SwipeToReveal({
     }
 
     action.onClick()
-    // Close after action
-    setIsRevealed(false)
   }
 
   const handleContentClick = () => {
@@ -188,7 +186,7 @@ export function SwipeToReveal({
           damping: 100,
           mass: 0.8,
         }}
-        className={cn('relative z-10', className)}
+        className={cn('relative z-[2]', className)}
         style={{
           touchAction: 'pan-y', // Allow vertical scrolling
         }}
@@ -199,7 +197,7 @@ export function SwipeToReveal({
       {/* Actions background */}
       <div
         className={cn(
-          'absolute z-[9] inset-y-0 right-0 flex items-center',
+          'absolute z-[1] inset-y-0 right-0 flex items-center',
           actionsClassName,
         )}
         style={{ width: isSwipeable ? maxSwipeDistance : 0 }}

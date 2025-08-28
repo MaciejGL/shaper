@@ -79,13 +79,6 @@ export const Navbar = ({
   const pathname = usePathname()
   const isFitspace = pathname.startsWith('/fitspace')
 
-  if (
-    pathname === '/fitspace/meal-plan' ||
-    pathname.startsWith('/fitspace/workout')
-  ) {
-    return null
-  }
-
   return (
     <>
       {user && !isTrainer && (
