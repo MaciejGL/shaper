@@ -1,11 +1,17 @@
 'use client'
 
 import { formatDate } from 'date-fns'
-import { CheckCircle, Circle, Package } from 'lucide-react'
+import { CheckCircle, Package } from 'lucide-react'
 
-import { Loader } from '@/components/loader'
-import { Badge, BadgeProps } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { LoadingSkeleton } from '@/app/(protected)/trainer/collaboration/components/loading-skeleton'
+import { Badge } from '@/components/ui/badge'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import {
   GQLDeliveryStatus,
   GQLFitGetMyServiceDeliveriesQuery,
@@ -32,10 +38,14 @@ export function ClientServiceDeliveriesSection({
   if (isLoading) {
     return (
       <Card borderless>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center min-h-[200px]">
-            <Loader />
-          </div>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Package className="h-5 w-5" />
+            Purchased Services
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <LoadingSkeleton count={3} withBorder />
         </CardContent>
       </Card>
     )
@@ -47,11 +57,11 @@ export function ClientServiceDeliveriesSection({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Package className="h-5 w-5" />
-            Service Deliveries
+            No services purchased yet
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
+          <div className="text-center">
             <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-sm text-muted-foreground">
               No service deliveries from your trainer yet.
@@ -67,10 +77,10 @@ export function ClientServiceDeliveriesSection({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Package className="h-5 w-5" />
-          Service Deliveries
+          Purchased Services
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3">
         {trainerDeliveries.map((delivery) => (
           <ServiceDeliveryItem key={delivery.id} delivery={delivery} />
         ))}
@@ -84,97 +94,46 @@ interface ServiceDeliveryItemProps {
 }
 
 function ServiceDeliveryItem({ delivery }: ServiceDeliveryItemProps) {
-  const getStatusColor = (status: GQLDeliveryStatus): BadgeProps['variant'] => {
-    switch (status) {
-      case GQLDeliveryStatus.Completed:
-        return 'success'
-      case GQLDeliveryStatus.InProgress:
-        return 'warning'
-      case GQLDeliveryStatus.Pending:
-        return 'secondary'
-      default:
-        return 'secondary'
-    }
-  }
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case GQLDeliveryStatus.Completed:
-        return 'Completed'
-      case GQLDeliveryStatus.InProgress:
-        return 'In Progress'
-      case GQLDeliveryStatus.Pending:
-        return 'Pending'
-      default:
-        return status
-    }
-  }
-
   const isCompleted = delivery.status === GQLDeliveryStatus.Completed
 
   return (
-    <Card className="flex flex-row items-start gap-3 p-4 border rounded-lg">
-      <div className="flex-shrink-0 mt-1">
-        {isCompleted ? (
-          <CheckCircle className="h-5 w-5 text-green-500" />
-        ) : (
-          <Circle
-            className={cn('h-5 w-5', {
-              'text-muted-foreground':
-                delivery.status === GQLDeliveryStatus.Pending,
-              'text-green-500': delivery.status === GQLDeliveryStatus.Completed,
-              'text-amber-600':
-                delivery.status === GQLDeliveryStatus.InProgress,
-            })}
-          />
-        )}
-      </div>
-
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h3
-              className={cn(
-                'font-medium',
-                isCompleted ? 'text-muted-foreground' : '',
-              )}
-            >
-              {delivery.packageName}
-            </h3>
-            <p className="text-sm text-muted-foreground capitalize">
-              {delivery.serviceType?.replaceAll('_', ' ')}
-            </p>
-            {delivery.quantity && delivery.quantity > 1 && (
-              <p className="text-xs text-muted-foreground">
-                Quantity: {delivery.quantity}
-              </p>
+    <Card>
+      <CardContent className="flex flex-row gap-3">
+        <div className="flex-1 min-w-0">
+          <h3
+            className={cn(
+              'font-medium',
+              isCompleted ? 'text-muted-foreground' : '',
             )}
-          </div>
-
-          <div className="flex flex-col items-end gap-2">
-            <Badge variant={getStatusColor(delivery.status)}>
-              {getStatusText(delivery.status)}
-            </Badge>
-
-            <div className="text-xs text-muted-foreground text-right space-y-1">
-              <p>
-                Ordered{' '}
-                <span className="font-medium whitespace-nowrap">
-                  {formatDate(new Date(delivery.createdAt), 'MMM d, yyyy')}
-                </span>
-              </p>
-              {delivery.deliveredAt && (
-                <p>
-                  Delivered{' '}
-                  <span className="font-medium whitespace-nowrap">
-                    {formatDate(new Date(delivery.deliveredAt), 'MMM d, yyyy')}
-                  </span>
-                </p>
-              )}
-            </div>
-          </div>
+          >
+            {delivery.packageName.replaceAll('[TEST]', ' ')}
+          </h3>
         </div>
-      </div>
+      </CardContent>
+
+      <CardFooter className="flex justify-between text-xs text-muted-foreground">
+        <p>
+          Ordered{' '}
+          <span className="font-medium whitespace-nowrap">
+            {formatDate(new Date(delivery.createdAt), 'd. MMM yyyy')}
+          </span>
+        </p>
+
+        {(delivery.status === GQLDeliveryStatus.Pending ||
+          delivery.status === GQLDeliveryStatus.InProgress) && (
+          <Badge variant="secondary">In progress</Badge>
+        )}
+
+        {delivery.status === GQLDeliveryStatus.Cancelled && (
+          <Badge variant="secondary">Cancelled</Badge>
+        )}
+        {isCompleted && delivery.deliveredAt && (
+          <Badge variant="secondary">
+            <CheckCircle className="text-green-500 mr-1" />
+            {formatDate(new Date(delivery.deliveredAt), 'd. MMM yyyy')}
+          </Badge>
+        )}
+      </CardFooter>
     </Card>
   )
 }

@@ -3,6 +3,7 @@
 import { User } from 'lucide-react'
 import { useState } from 'react'
 
+import { LoadingSkeleton } from '@/app/(protected)/trainer/collaboration/components/loading-skeleton'
 import { TrainerCard, TrainerData } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Card, CardContent } from '@/components/ui/card'
@@ -45,20 +46,15 @@ export function TrainersTab() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {Array.from({ length: 2 }).map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-16 h-16 bg-muted rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-muted rounded w-1/3" />
-                  <div className="h-3 bg-muted rounded w-1/2" />
-                  <div className="h-3 bg-muted rounded w-full" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        <div className="text-center mb-6">
+          <h2 className="text-lg font-semibold">Featured Trainers</h2>
+          <p className="text-sm text-muted-foreground">
+            Connect with our expert trainers for personalized coaching
+          </p>
+        </div>
+        <div className="space-y-3">
+          <LoadingSkeleton count={3} variant="md" />
+        </div>
       </div>
     )
   }
@@ -71,7 +67,7 @@ export function TrainersTab() {
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {trainers.length === 0 ? (
           <Card>
             <CardContent className="p-6 text-center">
@@ -86,7 +82,6 @@ export function TrainersTab() {
             <TrainerCard
               key={trainer.id}
               trainer={trainer}
-              variant="gradient"
               onClick={() => handleTrainerClick(trainer)}
             />
           ))

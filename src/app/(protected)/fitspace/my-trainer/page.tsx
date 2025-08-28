@@ -139,22 +139,22 @@ function TrainerView({ trainer }: TrainerViewProps) {
         </CardFooter>
       </Card>
 
-      {/* Service Deliveries Section */}
-      <ClientServiceDeliveriesSection trainerId={trainer.id} />
-
       {/* Trainer Shared Notes Section */}
       <div id="trainer-notes-section">
         <TrainerSharedNotesSection />
       </div>
 
+      {/* Service Deliveries Section */}
+      <ClientServiceDeliveriesSection trainerId={trainer.id} />
+
       <div className="grid grid-cols-2 gap-2">
         <Button
           className="w-full"
           size="lg"
-          variant="destructive"
+          variant="ghost"
           onClick={handleCancelCoaching}
         >
-          Cancel Coaching
+          End Coaching
         </Button>
 
         <Button
@@ -164,7 +164,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
           iconStart={<MessageSquare />}
           onClick={handleSendMessage}
         >
-          Send Message
+          Contact Trainer
         </Button>
       </div>
     </div>

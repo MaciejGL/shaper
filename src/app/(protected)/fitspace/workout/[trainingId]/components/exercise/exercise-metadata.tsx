@@ -145,7 +145,7 @@ export function ExerciseMetadata({
                       <InfoIcon className="size-4 text-blue-600 flex-shrink-0" />
                       <h3 className="font-medium">Description</h3>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed p-4 rounded-lg bg-card-on-card">
+                    <p className="text-sm dark:text-muted-foreground leading-relaxed p-4 rounded-lg bg-card-on-card">
                       {exercise.description}
                     </p>
                   </div>
@@ -160,7 +160,7 @@ export function ExerciseMetadata({
                         <Target className="size-4 text-amber-600 flex-shrink-0" />
                         <h3 className="font-medium">Starting Position</h3>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed p-4 rounded-lg bg-card-on-card">
+                      <p className="text-sm dark:text-muted-foreground leading-relaxed p-4 rounded-lg bg-card-on-card">
                         {exercise.instructions[0]}
                       </p>
                     </div>
@@ -171,7 +171,7 @@ export function ExerciseMetadata({
                         <CheckCircle className="size-4 text-green-600 flex-shrink-0" />
                         <h3 className="font-medium">Execution</h3>
                       </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed p-4 rounded-lg bg-card-on-card">
+                      <p className="text-sm dark:text-muted-foreground leading-relaxed p-4 rounded-lg bg-card-on-card">
                         {exercise.instructions[1]}
                       </p>
                     </div>
@@ -188,7 +188,7 @@ export function ExerciseMetadata({
                     <ul className="space-y-2">
                       {exercise.tips.map((tip, index) => (
                         <li key={index} className="flex items-start gap-2">
-                          <p className="text-sm text-muted-foreground leading-relaxed p-4 rounded-lg bg-card-on-card">
+                          <p className="text-sm dark:text-muted-foreground leading-relaxed p-4 rounded-lg bg-card-on-card">
                             {tip}
                           </p>
                         </li>
@@ -279,7 +279,7 @@ export function ExerciseMetadata({
       </div>
 
       {exercise.additionalInstructions && (
-        <div className="text-xs text-muted-foreground bg-muted/50 p-2 rounded mt-2 flex items-center gap-2">
+        <div className="text-xs dark:text-muted-foreground bg-muted/50 p-2 rounded mt-2 flex items-center gap-2">
           <InfoIcon className="size-3 text-blue-500 flex-shrink-0" />
           <p className="whitespace-pre-wrap">
             {exercise.additionalInstructions}

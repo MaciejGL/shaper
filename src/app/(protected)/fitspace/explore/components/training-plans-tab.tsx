@@ -5,6 +5,7 @@ import { Clock, Crown, Dumbbell, Lock, Star } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { LoadingSkeleton } from '@/app/(protected)/trainer/collaboration/components/loading-skeleton'
 import {
   FilterType,
   TrainingPlanFilters,
@@ -77,16 +78,8 @@ export function TrainingPlansTab() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        {Array.from({ length: 3 }).map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardContent className="p-4">
-              <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-              <div className="h-3 bg-muted rounded w-1/2 mb-3" />
-              <div className="h-3 bg-muted rounded w-full" />
-            </CardContent>
-          </Card>
-        ))}
+      <div className="space-y-3">
+        <LoadingSkeleton count={3} variant="lg" />
       </div>
     )
   }
@@ -136,7 +129,7 @@ export function TrainingPlansTab() {
       <div className="space-y-3">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} borderless className="animate-pulse">
               <CardContent className="p-4">
                 <div className="h-4 bg-muted rounded w-3/4 mb-2" />
                 <div className="h-3 bg-muted rounded w-1/2 mb-3" />
@@ -145,7 +138,7 @@ export function TrainingPlansTab() {
             </Card>
           ))
         ) : filteredPlans.length === 0 ? (
-          <Card>
+          <Card borderless>
             <CardContent className="p-6 text-center">
               <Dumbbell className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground">
@@ -213,6 +206,7 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
 
   return (
     <Card
+      borderless
       className="cursor-pointer hover:border-primary/50 transition-colors"
       onClick={onClick}
     >

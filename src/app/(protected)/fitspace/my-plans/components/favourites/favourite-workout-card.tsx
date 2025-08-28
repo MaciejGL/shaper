@@ -174,38 +174,36 @@ export function FavouriteWorkoutCard({
                 Created {createdAgo}
               </span>
             </CardContent>
-            <CardFooter className="flex flex-col gap-2 items-start border-t !pt-4">
-              <div>
-                <div className="flex items-start gap-2">
-                  <Button
-                    size="sm"
-                    onClick={onDelete}
-                    variant="ghost"
-                    iconStart={<Trash2 />}
-                  >
-                    Delete
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={onEdit}
-                    iconStart={<Edit />}
-                  >
-                    Edit
-                  </Button>
-                </div>
-                {!buttonProps.disabled ? (
-                  <Button
-                    onClick={onStart}
-                    size="sm"
-                    variant={buttonProps.variant}
-                    disabled={buttonProps.disabled}
-                    iconEnd={<ChevronRight />}
-                  >
-                    {buttonProps.text}
-                  </Button>
-                ) : null}
-              </div>
+            <CardFooter className="flex gap-2 border-t [.border-t]:pt-4">
+              <Button
+                size="icon-sm"
+                onClick={onDelete}
+                variant="ghost"
+                iconOnly={<Trash2 />}
+              >
+                Delete
+              </Button>
+
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={onEdit}
+                iconStart={<Edit />}
+                className="ml-auto"
+              >
+                Edit
+              </Button>
+              {!buttonProps.disabled ? (
+                <Button
+                  onClick={onStart}
+                  size="sm"
+                  variant={buttonProps.variant}
+                  disabled={buttonProps.disabled}
+                  iconEnd={<ChevronRight />}
+                >
+                  {buttonProps.text}
+                </Button>
+              ) : null}
             </CardFooter>
           </div>
         </AccordionContent>

@@ -14,14 +14,11 @@ import {
 } from '@/components/ui/drawer'
 import {
   type GQLGetAllTrainerSharedNotesQuery,
-  type GQLGetTrainerSharedNotesLimitedQuery,
   useGetAllTrainerSharedNotesQuery,
   useGetTrainerSharedNotesLimitedQuery,
 } from '@/generated/graphql-client'
 
 // Type definitions
-type TrainerNote =
-  GQLGetTrainerSharedNotesLimitedQuery['trainerSharedNotes'][number]
 type AllTrainerNote =
   GQLGetAllTrainerSharedNotesQuery['trainerSharedNotes'][number]
 
@@ -123,38 +120,6 @@ export function TrainerSharedNotesSection() {
   )
 }
 
-interface TrainerNoteItemProps {
-  note: TrainerNote
-}
-
-function TrainerNoteItem({ note }: TrainerNoteItemProps) {
-  const trainerName =
-    note.createdBy?.firstName && note.createdBy?.lastName
-      ? `${note.createdBy.firstName} ${note.createdBy.lastName}`
-      : 'Your trainer'
-
-  return (
-    <div className="bg-muted rounded-lg p-4">
-      <p className="text-sm leading-relaxed whitespace-pre-wrap">{note.text}</p>
-      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-        <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
-          <Share className="h-3 w-3 shrink-0" />
-          <p>From {trainerName}</p>
-        </div>
-        <time className="text-xs text-muted-foreground">
-          {new Date(note.createdAt).toLocaleDateString('en-GB', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </time>
-      </div>
-    </div>
-  )
-}
-
 // Component for the "View All" drawer
 interface ViewAllNotesDrawerProps {
   isOpen: boolean
@@ -195,7 +160,7 @@ function ViewAllNotesDrawer({ isOpen, onOpenChange }: ViewAllNotesDrawerProps) {
           ) : (
             <div className="space-y-4">
               {allNotes.map((note) => (
-                <AllTrainerNoteItem key={note.id} note={note} />
+                <TrainerNoteItem key={note.id} note={note} />
               ))}
             </div>
           )}
@@ -210,21 +175,21 @@ interface AllTrainerNoteItemProps {
   note: AllTrainerNote
 }
 
-function AllTrainerNoteItem({ note }: AllTrainerNoteItemProps) {
+function TrainerNoteItem({ note }: AllTrainerNoteItemProps) {
   const trainerName =
     note.createdBy?.firstName && note.createdBy?.lastName
       ? `${note.createdBy.firstName} ${note.createdBy.lastName}`
       : 'Your trainer'
 
   return (
-    <div className="border rounded-lg p-4">
+    <div className="rounded-lg bg-card-on-card">
       <div className="space-y-2">
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+        <p className="text-sm leading-relaxed whitespace-pre-wrap p-4 pb-2">
           {note.text}
         </p>
 
-        <div className="flex items-center justify-between border-t border-border pt-2">
-          <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+        <div className="flex items-center justify-between border-t border-border pt-2 px-4 pb-2">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Share className="h-3 w-3 shrink-0" />
             <p>From {trainerName}</p>
           </div>
