@@ -218,33 +218,48 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
   ): number | null => {
     const exerciseSets = exercise.substitutedBy?.sets || exercise.sets
 
-    // Sort sets by order and look through previous sets (order < currentSetOrder)
+    // First, look through previous sets in the current workout (order < currentSetOrder)
     const previousSets = exerciseSets
       .filter((set) => set.order < currentSetOrder)
       .sort((a, b) => b.order - a.order) // Sort in descending order (most recent first)
 
     for (const previousSet of previousSets) {
-      // First check if there's a logged value in current session
+      // Check if there's a logged value from a previous set in this workout
+      const loggedValue = previousSet.log?.[valueType]
+      if (loggedValue !== null && loggedValue !== undefined) {
+        return loggedValue
+      }
+
+      // Check if user has entered a value for this set in current session
       const currentSessionValue = setsLogs[previousSet.id]?.[valueType]
       if (currentSessionValue && currentSessionValue !== '') {
         return parseFloat(currentSessionValue)
-      }
-
-      // Then check if there's a logged value from previous workout
-      const loggedValue = previousSet.log?.[valueType]
-      if (loggedValue) {
-        return loggedValue
       }
     }
 
     // If no previous set has a value, look at previous workout logs
     if (previousLogs.length > 0) {
-      const lastWorkoutLog = previousLogs[previousLogs.length - 1]
-      const correspondingSet = lastWorkoutLog.sets.find(
-        (s) => s.order === currentSetOrder,
-      )
-      if (correspondingSet?.log?.[valueType]) {
-        return correspondingSet.log[valueType]
+      // Look through previous workouts from most recent to oldest to find logged data
+      for (let i = previousLogs.length - 1; i >= 0; i--) {
+        const workoutLog = previousLogs[i]
+        const correspondingSet = workoutLog.sets.find(
+          (s) => s.order === currentSetOrder,
+        )
+        if (correspondingSet?.log?.[valueType]) {
+          return correspondingSet.log[valueType]
+        }
+      }
+
+      // If no corresponding set at same order found, try to get the last set's value from most recent workout with data
+      for (let i = previousLogs.length - 1; i >= 0; i--) {
+        const workoutLog = previousLogs[i]
+        if (workoutLog.sets.length > 0) {
+          const lastSetFromPreviousWorkout =
+            workoutLog.sets[workoutLog.sets.length - 1]
+          if (lastSetFromPreviousWorkout.log?.[valueType]) {
+            return lastSetFromPreviousWorkout.log[valueType]
+          }
+        }
       }
     }
 
@@ -283,6 +298,30 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
         {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
           const previousWeightLog = getPreviousSetValue(set.order, 'weight')
           const previousRepsLog = getPreviousSetValue(set.order, 'reps')
+
+          // Debug logging for troublesome exercises
+          if (
+            process.env.NODE_ENV === 'development' &&
+            exercise.name === 'Pec Deck Machine'
+          ) {
+            console.info('Pec Deck Machine - Debug Info:', {
+              exerciseName: exercise.name,
+              setOrder: set.order,
+              setId: set.id,
+              previousWeightLog,
+              previousRepsLog,
+              previousLogsLength: previousLogs.length,
+              previousLogs: previousLogs.map((log) => ({
+                name: log.name,
+                sets: log.sets.map((s) => ({
+                  order: s.order,
+                  log: s.log,
+                })),
+              })),
+              currentSetLog: set.log,
+              setsLogsForThisSet: setsLogs[set.id],
+            })
+          }
 
           return (
             <ExerciseSet

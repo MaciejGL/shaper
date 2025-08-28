@@ -197,9 +197,41 @@ export function ExerciseSet({
     }
   }
 
-  // Get data from previous workout for the "PREVIOUS" column (same set order from last workout)
-  const lastLog = previousLogs[previousLogs.length - 1]
-  const thisSet = lastLog?.sets[set.order - 1] // Same set order from previous workout
+  // Get data from previous workout for the "PREVIOUS" column (same set order from most recent workout with data)
+  const getPreviousSetForColumn = () => {
+    // Look through previous workouts from most recent to oldest to find logged data
+    for (let i = previousLogs.length - 1; i >= 0; i--) {
+      const workoutLog = previousLogs[i]
+      const correspondingSet = workoutLog.sets.find(
+        (s) => s.order === set.order,
+      )
+      if (correspondingSet?.log) {
+        return correspondingSet
+      }
+    }
+    return null
+  }
+
+  const thisSet = getPreviousSetForColumn()
+
+  // Debug logging for troublesome exercises
+  if (process.env.NODE_ENV === 'development' && set.order === 1) {
+    const exerciseName = previousLogs[0]?.name
+    if (exerciseName === 'Pec Deck Machine') {
+      console.info('Pec Deck Machine - Previous Column Debug:', {
+        exerciseName,
+        setOrder: set.order,
+        thisSet,
+        previousLogsLength: previousLogs.length,
+        allPreviousLogs: previousLogs.map((log, index) => ({
+          index,
+          name: log.name,
+          setsCount: log.sets.length,
+          targetSet: log.sets.find((s) => s.order === set.order),
+        })),
+      })
+    }
+  }
 
   const handleToggleSetCompletion = async () => {
     setIsCompletingSet(true)
