@@ -48,9 +48,34 @@
       "permissions": [
         "INTERNET",
         "android.permission.CAMERA",
-        "POST_NOTIFICATIONS"
+        "POST_NOTIFICATIONS",
+        "com.google.android.gms.permission.AD_ID"
       ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.VIBRATE"
+      ],
+
       "usesCleartextTraffic": false,
+      "androidManifest": {
+        "application": {
+          "android:name": ".MainApplication"
+        },
+        "queries": [
+          {
+            "intent": {
+              "action": "android.intent.action.VIEW",
+              "category": "android.intent.category.BROWSABLE",
+              "data": {
+                "scheme": "https"
+              }
+            }
+          }
+        ]
+      },
       "intentFilters": [
         {
           "action": "VIEW",
