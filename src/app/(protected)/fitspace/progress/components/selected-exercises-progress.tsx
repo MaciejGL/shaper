@@ -46,7 +46,7 @@ export function SelectedExercisesProgress({
     availableExercises.exercisesProgressByUser.length > 0
 
   const isLoading = isLoadingExercises || isLoadingAvailableExercises
-  console.log(hasAvailableExercises)
+
   return (
     <Section
       title="Exercises Progress"
