@@ -89,30 +89,10 @@ function initializeDatabase() {
   }
 }
 
-// True lazy initialization - only create connections when actually accessed
-let _initialized = false
+// Initialize database connections
+const { pool, prisma } = initializeDatabase()
 
-function ensureInitialized() {
-  if (!_initialized) {
-    initializeDatabase()
-    _initialized = true
-  }
-}
-
-// Export with getters for lazy initialization
-export const prisma = new Proxy({} as ExtendedPrismaClient, {
-  get(target, prop) {
-    ensureInitialized()
-    return globalForPrisma.prisma![prop as keyof ExtendedPrismaClient]
-  },
-})
-
-export const pool = new Proxy({} as Pool, {
-  get(target, prop) {
-    ensureInitialized()
-    return globalForPrisma.pool![prop as keyof Pool]
-  },
-})
+export { prisma, pool }
 
 export const getPoolStats = () => ({
   total: pool.totalCount,
