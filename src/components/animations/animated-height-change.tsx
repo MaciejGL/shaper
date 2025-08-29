@@ -42,11 +42,7 @@ export function AnimateChangeInHeight({
       animate={{ height }}
       transition={
         transition ?? {
-          type: 'spring',
-          stiffness: 80,
-          damping: 10,
-          mass: 0.5,
-          duration: 0.1,
+          duration: 0.15,
         }
       }
     >

@@ -1,9 +1,7 @@
 'use client'
 
-import { BookmarkIcon, HistoryIcon } from 'lucide-react'
 import { useState } from 'react'
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   GQLFavouriteWorkout,
   GQLGetFavouriteWorkoutsQuery,
@@ -14,31 +12,12 @@ import {
   useFavouriteWorkouts,
 } from '@/hooks/use-favourite-workouts'
 
-import { QuickWorkoutPlan } from '../../types'
 import { DeleteFavouriteDialog } from '../favourites/delete-favourite-dialog'
 import { EditFavouriteModal } from '../favourites/edit-favourite-modal'
 import { FavouriteWorkoutsList } from '../favourites/favourite-workouts-list'
 import { ReplacementConfirmationDialog } from '../favourites/replacement-confirmation-dialog'
 
-import { PastWorkoutsView } from './past-workouts/past-workouts-view'
-
-enum WorkoutTabView {
-  Favourites = 'favourites',
-  PastWorkouts = 'past-workouts',
-}
-
-interface EnhancedQuickWorkoutTabProps {
-  plan: QuickWorkoutPlan
-  loading: boolean
-}
-
-export function EnhancedQuickWorkoutTab({
-  plan,
-  loading,
-}: EnhancedQuickWorkoutTabProps) {
-  const [activeView, setActiveView] = useState<WorkoutTabView>(
-    WorkoutTabView.Favourites,
-  )
+export function EnhancedQuickWorkoutTab() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [favouriteToDelete, setFavouriteToDelete] =
     useState<GQLFavouriteWorkout | null>(null)
@@ -154,39 +133,16 @@ export function EnhancedQuickWorkoutTab({
 
   return (
     <div className="space-y-6">
-      {/* Tab Navigation */}
-      <Tabs
-        value={activeView}
-        onValueChange={(value) => setActiveView(value as WorkoutTabView)}
-      >
-        <TabsList className="grid grid-cols-2 w-full mb-6">
-          <TabsTrigger value={WorkoutTabView.Favourites}>
-            <BookmarkIcon /> Favourites
-          </TabsTrigger>
-          <TabsTrigger value={WorkoutTabView.PastWorkouts}>
-            <HistoryIcon /> History
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Favourites View */}
-        <TabsContent value={WorkoutTabView.Favourites}>
-          <FavouriteWorkoutsList
-            favouriteWorkouts={favouriteWorkouts?.getFavouriteWorkouts ?? []}
-            loading={isLoadingFavourites}
-            onStartWorkout={handleStartFromFavourite}
-            onEditWorkout={handleEditFavourite}
-            onDeleteWorkout={handleDeleteFavourite}
-            onRefetch={refetch}
-            workoutStatus={workoutStatus}
-            isStarting={isStarting}
-          />
-        </TabsContent>
-
-        {/* Past Workouts View */}
-        <TabsContent value={WorkoutTabView.PastWorkouts}>
-          <PastWorkoutsView plan={plan} loading={loading} />
-        </TabsContent>
-      </Tabs>
+      <FavouriteWorkoutsList
+        favouriteWorkouts={favouriteWorkouts?.getFavouriteWorkouts ?? []}
+        loading={isLoadingFavourites}
+        onStartWorkout={handleStartFromFavourite}
+        onEditWorkout={handleEditFavourite}
+        onDeleteWorkout={handleDeleteFavourite}
+        onRefetch={refetch}
+        workoutStatus={workoutStatus}
+        isStarting={isStarting}
+      />
 
       {/* Delete Confirmation Dialog */}
       <DeleteFavouriteDialog

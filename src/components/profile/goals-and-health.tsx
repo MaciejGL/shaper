@@ -28,7 +28,7 @@ export function GoalsAndHealth({
   handleChange,
 }: GoalsAndHealthProps) {
   return (
-    <Card className="mb-6">
+    <Card className="mb-6" borderless>
       <CardHeader>
         <CardTitle>Fitness Goals & Health Information</CardTitle>
       </CardHeader>

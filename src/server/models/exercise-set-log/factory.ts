@@ -200,10 +200,6 @@ export const updateSetLog = async (args: GQLMutationUpdateSetLogArgs) => {
   const set = await prisma.exerciseSet.update({
     where: { id: setId },
     data: {
-      completedAt:
-        typeof loggedReps === 'number' && typeof loggedWeight === 'number'
-          ? new Date()
-          : null,
       log: {
         upsert: {
           create: {

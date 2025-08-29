@@ -85,14 +85,8 @@ export function PlansTab({
     <>
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <p className="text-lg font-medium">Active</p>
           {activePlan ? (
-            <PlanCard
-              plan={activePlan}
-              isActive
-              onClick={handlePlanClick}
-              loading={loading}
-            />
+            <PlanCard plan={activePlan} isActive onClick={handlePlanClick} />
           ) : (
             <EmptyPlansState />
           )}
@@ -100,28 +94,18 @@ export function PlansTab({
 
         {availablePlans.length > 0 && (
           <div className="flex flex-col gap-2">
-            <p className="text-lg font-medium">Available</p>
+            <p className="text-base font-medium">Templates</p>
             {availablePlans.map((plan) => (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                onClick={handlePlanClick}
-                loading={loading}
-              />
+              <PlanCard key={plan.id} plan={plan} onClick={handlePlanClick} />
             ))}
           </div>
         )}
 
         {completedPlans.length > 0 && (
           <div className="flex flex-col gap-2">
-            <p className="text-lg font-medium">Completed</p>
+            <p className="text-base font-medium">Completed</p>
             {completedPlans.map((plan) => (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                onClick={handlePlanClick}
-                loading={loading}
-              />
+              <PlanCard key={plan.id} plan={plan} onClick={handlePlanClick} />
             ))}
           </div>
         )}

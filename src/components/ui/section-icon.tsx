@@ -32,10 +32,11 @@ const sectionIconVariants = cva(
   },
 )
 
-interface SectionIconProps
+export interface SectionIconProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof sectionIconVariants> {
   icon: LucideIcon
+  variant?: VariantProps<typeof sectionIconVariants>['variant']
 }
 
 export function SectionIcon({

@@ -19,8 +19,14 @@ export default function ProfilePage() {
 
   return (
     <AnimatedPageTransition id="profile">
-      <div className="container max-w-3xl mx-auto mb-16 relative pb-16">
-        <div className="sticky top-[16px] right-0 z-10 flex justify-end">
+      <div className="container-hypertro mx-auto pt-8">
+        <Header
+          profile={profile}
+          isEditing={isEditing}
+          onAvatarChange={(avatarUrl) => handleChange('avatarUrl', avatarUrl)}
+        />
+
+        <div className="flex justify-end mb-2 py-2">
           <AnimatePresence mode="wait">
             {!isEditing ? (
               <motion.div
@@ -32,7 +38,7 @@ export default function ProfilePage() {
               >
                 <Button
                   onClick={toggleEdit}
-                  iconOnly={<PenIcon />}
+                  iconStart={<PenIcon />}
                   variant="secondary"
                 >
                   Edit
@@ -50,15 +56,15 @@ export default function ProfilePage() {
                   <Button
                     onClick={toggleEdit}
                     variant="secondary"
-                    size="icon-md"
                     disabled={isSaving}
+                    iconStart={<XIcon />}
                   >
-                    <XIcon />
+                    Cancel
                   </Button>
                   <Button
                     onClick={handleSave}
                     disabled={isSaving}
-                    iconOnly={<CheckIcon />}
+                    iconStart={<CheckIcon />}
                   >
                     Save changes
                   </Button>
@@ -67,11 +73,6 @@ export default function ProfilePage() {
             )}
           </AnimatePresence>
         </div>
-        <Header
-          profile={profile}
-          isEditing={isEditing}
-          onAvatarChange={(avatarUrl) => handleChange('avatarUrl', avatarUrl)}
-        />
 
         <PersonalInfo
           isEditing={isEditing}

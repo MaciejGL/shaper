@@ -1,7 +1,7 @@
 import { ArrowLeft, LucideIcon } from 'lucide-react'
 
 import { ButtonLink } from '@/components/ui/button-link'
-import { SectionIcon } from '@/components/ui/section-icon'
+import { SectionIcon, SectionIconProps } from '@/components/ui/section-icon'
 import { cn } from '@/lib/utils'
 
 export function DashboardHeader({
@@ -10,6 +10,7 @@ export function DashboardHeader({
   icon,
   prevSegment,
   className,
+  variant,
 }: {
   title: string
   description?: string
@@ -19,6 +20,7 @@ export function DashboardHeader({
     label: string
     href: string
   }
+  variant?: SectionIconProps['variant']
 }) {
   return (
     <div className={cn('space-y-2 mb-12 mt-6', className)}>
@@ -34,7 +36,7 @@ export function DashboardHeader({
           </ButtonLink>
         )}
         <div className="flex items-center gap-2 text-3xl">
-          {icon && <SectionIcon icon={icon} />}
+          {icon && <SectionIcon icon={icon} variant={variant} />}
           <h1 className="font-medium tracking-tight">{title}</h1>
         </div>
       </div>

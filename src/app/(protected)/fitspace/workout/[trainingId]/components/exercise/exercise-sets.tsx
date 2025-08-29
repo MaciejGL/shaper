@@ -1,12 +1,15 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { AnimatePresence } from 'framer-motion'
 import { PlusIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
+import { useIsFirstRender } from '@/components/animated-grid'
 import { Button } from '@/components/ui/button'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutQuery,
+  GQLTrainingView,
   useFitspaceAddSetMutation,
   useFitspaceGetWorkoutQuery,
   useFitspaceRemoveSetMutation,
@@ -15,10 +18,14 @@ import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
 
 import { ExerciseSet } from './exercise-set'
-import { sharedLayoutStyles } from './shared-styles'
+import {
+  sharedLayoutAdvancedStyles,
+  sharedLayoutSimpleStyles,
+} from './shared-styles'
 import { ExerciseSetsProps } from './types'
 
 export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
+  const isFirstRender = useIsFirstRender()
   const { trainingId } = useParams<{ trainingId: string }>()
   const invalidateQuery = useInvalidateQuery()
   const queryClient = useQueryClient()
@@ -280,81 +287,70 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
     }))
   }
 
+  const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
+
   return (
     <div className="flex flex-col rounded-[0.45rem] ">
       <div className="flex items-center gap-1">
         <div
-          className={cn(sharedLayoutStyles, 'text-[0.625rem] py-2 font-medium')}
+          className={cn(
+            isAdvancedView
+              ? sharedLayoutAdvancedStyles
+              : sharedLayoutSimpleStyles,
+            'text-[0.625rem] py-2 font-medium',
+          )}
         >
           <div className="text-center">SET</div>
-          <div className="text-center">PREVIOUS</div>
+          {isAdvancedView && <div className="text-center">PREVIOUS</div>}
           <div className="text-center">REPS</div>
           <div className="text-center uppercase">{preferences.weightUnit}</div>
           <div className="text-center"></div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-0">
-        {(exercise.substitutedBy?.sets || exercise.sets).map((set) => {
+      <div className={cn('flex flex-col gap-0', !isAdvancedView && 'pb-1')}>
+        {(exercise.substitutedBy?.sets || exercise.sets).map((set, index) => {
           const previousWeightLog = getPreviousSetValue(set.order, 'weight')
           const previousRepsLog = getPreviousSetValue(set.order, 'reps')
 
-          // Debug logging for troublesome exercises
-          if (
-            process.env.NODE_ENV === 'development' &&
-            exercise.name === 'Pec Deck Machine'
-          ) {
-            console.info('Pec Deck Machine - Debug Info:', {
-              exerciseName: exercise.name,
-              setOrder: set.order,
-              setId: set.id,
-              previousWeightLog,
-              previousRepsLog,
-              previousLogsLength: previousLogs.length,
-              previousLogs: previousLogs.map((log) => ({
-                name: log.name,
-                sets: log.sets.map((s) => ({
-                  order: s.order,
-                  log: s.log,
-                })),
-              })),
-              currentSetLog: set.log,
-              setsLogsForThisSet: setsLogs[set.id],
-            })
-          }
-
           return (
-            <ExerciseSet
-              key={set.id}
-              set={set}
-              previousSetWeightLog={previousWeightLog}
-              previousSetRepsLog={previousRepsLog}
-              previousLogs={previousLogs}
-              reps={setsLogs[set.id]?.reps ?? ''}
-              weight={setsLogs[set.id]?.weight ?? ''}
-              onRepsChange={(reps) => handleRepsChange(reps, set.id)}
-              onWeightChange={(weight) => handleWeightChange(weight, set.id)}
-              onDelete={() => removeSet({ setId: set.id })}
-            />
+            <AnimatePresence key={set.id} mode="wait" initial={!isFirstRender}>
+              <ExerciseSet
+                key={set.id}
+                set={set}
+                previousSetWeightLog={previousWeightLog}
+                previousSetRepsLog={previousRepsLog}
+                previousLogs={previousLogs}
+                reps={setsLogs[set.id]?.reps ?? ''}
+                weight={setsLogs[set.id]?.weight ?? ''}
+                onRepsChange={(reps) => handleRepsChange(reps, set.id)}
+                onWeightChange={(weight) => handleWeightChange(weight, set.id)}
+                onDelete={() => removeSet({ setId: set.id })}
+                isLastSet={index === exercise.sets.length - 1}
+                restDuration={exercise.restSeconds}
+              />
+            </AnimatePresence>
           )
         })}
 
-        <div
-          className={cn(
-            'grid grid-cols-1 items-center justify-items-center gap-2 my-2',
-          )}
-        >
-          <Button
-            variant="ghost"
-            size="xs"
-            iconStart={<PlusIcon />}
-            className="w-max"
-            loading={isAddingSet}
-            onClick={handleAddSet}
+        {isAdvancedView && (
+          <div
+            className={cn(
+              'grid grid-cols-1 items-center justify-items-center gap-2 my-2 border-t border-border pt-2',
+            )}
           >
-            Add set
-          </Button>
-        </div>
+            <Button
+              variant="ghost"
+              size="xs"
+              iconStart={<PlusIcon />}
+              className="w-max"
+              loading={isAddingSet}
+              onClick={handleAddSet}
+            >
+              Add set
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   )

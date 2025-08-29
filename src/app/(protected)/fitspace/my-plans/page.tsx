@@ -35,38 +35,43 @@ export default function MyPlansPage() {
   const activePlan = data?.getMyPlansOverviewFull?.activePlan
   const availablePlans = data?.getMyPlansOverviewFull?.availablePlans
   const completedPlans = data?.getMyPlansOverviewFull?.completedPlans
-  const quickWorkoutPlan = data?.getMyPlansOverviewFull?.quickWorkoutPlan
 
   return (
-    <div className="container-hypertro mx-auto">
-      <DashboardHeader title="Training Plans" icon={LayoutList} />
+    <div className="container-hypertro mx-auto grid grid-rows-[max-content_1fr]">
+      <DashboardHeader
+        title="Training Plans"
+        icon={LayoutList}
+        variant="amber"
+        className="mb-6"
+      />
 
-      {/* Plans Tabs */}
       <Tabs
         value={tab ?? PlanTab.QuickWorkout}
         defaultValue={PlanTab.QuickWorkout}
         onValueChange={(value) => setTab(value as PlanTab)}
-        className="w-full"
+        className="gap-0 rounded-xl -mx-2"
       >
         <PrimaryTabList
           options={[
-            { label: 'Templates', value: PlanTab.QuickWorkout },
-            { label: 'Assigned Plans', value: PlanTab.Plans },
+            { label: 'Workouts', value: PlanTab.QuickWorkout },
+            { label: 'Plans', value: PlanTab.Plans },
           ]}
           onClick={setTab}
           active={tab ?? PlanTab.QuickWorkout}
+          className="grid grid-cols-2 py-1 mb-0"
         />
 
-        {/* Enhanced Quick Workout Plan with Favourites */}
-        <TabsContent value={PlanTab.QuickWorkout} className="space-y-4">
-          <EnhancedQuickWorkoutTab
-            plan={quickWorkoutPlan}
-            loading={isLoadingPlans}
-          />
+        <TabsContent
+          value={PlanTab.QuickWorkout}
+          className="space-y-4 px-2 pt-4 bg-primary/4 dark:bg-card-on-card/60 rounded-b-xl pb-4"
+        >
+          <EnhancedQuickWorkoutTab />
         </TabsContent>
 
-        {/* Training Plans - Unified View */}
-        <TabsContent value={PlanTab.Plans} className="space-y-4">
+        <TabsContent
+          value={PlanTab.Plans}
+          className="space-y-4 px-2 pt-4 bg-primary/4 dark:bg-card-on-card/60 rounded-b-xl pb-4"
+        >
           <PlansTab
             activePlan={activePlan}
             availablePlans={availablePlans}
@@ -77,7 +82,6 @@ export default function MyPlansPage() {
         </TabsContent>
       </Tabs>
 
-      {/* Action Dialog */}
       <PlanActionDialog
         isOpen={dialogState.isOpen}
         onClose={handleCloseDialog}

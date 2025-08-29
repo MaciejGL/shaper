@@ -43,6 +43,7 @@ function Card({
     <div
       data-slot="card"
       className={cn(
+        props.onClick && 'cursor-pointer',
         cardVariants({ variant }),
         className,
         borderless && 'border-0',

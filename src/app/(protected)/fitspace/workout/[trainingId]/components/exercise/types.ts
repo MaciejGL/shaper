@@ -38,6 +38,8 @@ export interface ExerciseSetProps {
   onRepsChange: (reps: string) => void
   onWeightChange: (weight: string) => void
   onDelete: () => void
+  isLastSet: boolean
+  restDuration?: number | null
 }
 
 export interface ExerciseMetadataProps {

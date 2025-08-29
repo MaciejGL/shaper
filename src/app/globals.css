@@ -215,6 +215,12 @@
 @utility container-hypertro {
   width: 100%;
   max-width: 60rem;
+  /* 60px - header height, 72px - footer height, 16px - margin of footer top */
+  min-height: calc(
+    100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom) - 60px -
+      72px - 16px
+  );
+  height: max-content;
 }
 
 @utility safe-area-top {

@@ -1,6 +1,6 @@
 'use client'
 
-import { CheckIcon, PauseIcon, PlayIcon, TimerIcon } from 'lucide-react'
+import { CheckIcon, PlayIcon, SkipForwardIcon, TimerIcon } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { cn } from '@/lib/utils'
@@ -14,12 +14,16 @@ interface CountdownTimerProps {
   restDuration: number
   /** Callback function called when countdown completes */
   onComplete?: () => void
+  /** Callback function called when timer is paused/reset */
+  onPause?: () => void
   /** Additional CSS classes */
   className?: string
   /** Button variant */
   variant?: ButtonProps['variant']
   /** Button size */
   size?: ButtonProps['size']
+  /** Auto-start the countdown when component mounts */
+  autoStart?: boolean
 }
 
 /**
@@ -31,19 +35,14 @@ interface CountdownTimerProps {
 export function CountdownTimer({
   restDuration,
   onComplete,
+  onPause,
   className,
   variant,
   size,
+  autoStart = false,
 }: CountdownTimerProps) {
   const [state, setState] = useState<CountdownState>('idle')
   const [timeRemaining, setTimeRemaining] = useState(restDuration)
-
-  // Format time as MM:SS
-  const formatTime = useCallback((seconds: number) => {
-    const minutes = Math.floor(seconds / 60)
-    const remainingSeconds = seconds % 60
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
-  }, [])
 
   // Start countdown
   const startCountdown = useCallback(() => {
@@ -62,11 +61,12 @@ export function CountdownTimer({
     if (state === 'idle') {
       startCountdown()
     } else if (state === 'running') {
-      resetCountdown()
+      // When pausing, call onPause to close the timer
+      onPause?.()
     } else if (state === 'completed') {
       resetCountdown()
     }
-  }, [state, startCountdown, resetCountdown])
+  }, [state, startCountdown, onPause, resetCountdown])
 
   // Countdown effect
   useEffect(() => {
@@ -98,16 +98,29 @@ export function CountdownTimer({
     setTimeRemaining(restDuration)
   }, [restDuration])
 
+  // Auto-start countdown if autoStart is enabled
+  useEffect(() => {
+    if (autoStart && state === 'idle') {
+      startCountdown()
+    }
+  }, [autoStart, state, startCountdown])
+
   const getButtonContent = () => {
     switch (state) {
       case 'idle':
-        return formatTime(restDuration)
+        return formatSecondsToMMSS(restDuration)
       case 'running':
-        return formatTime(timeRemaining)
+        return formatSecondsToMMSS(timeRemaining)
       case 'completed':
         return 'Done!'
     }
   }
+
+  // Calculate progress percentage for filling animation
+  const progressPercentage =
+    state === 'running'
+      ? ((restDuration - timeRemaining) / restDuration) * 100
+      : 0
 
   return (
     <Button
@@ -115,30 +128,64 @@ export function CountdownTimer({
       size={size}
       onClick={handleClick}
       className={cn(
-        'transition-all duration-250 tabular-nums gap-3',
+        'transition-all duration-250 tabular-nums gap-3 relative overflow-hidden',
         state === 'completed' &&
           'bg-green-500/20 hover:bg-green-600/20 text-white',
-        state === 'running' && 'animate-pulse',
+
         className,
       )}
+      style={
+        {
+          '--progress': `${progressPercentage}%`,
+        } as React.CSSProperties
+      }
       iconStart={
         state === 'running' ? (
-          <TimerIcon className="text-amber-500 animate-pulse" />
+          <TimerIcon className="text-amber-600 relative z-[1]" />
         ) : state === 'completed' ? (
-          <CheckIcon />
+          <CheckIcon className="relative z-[1]" />
         ) : (
-          <TimerIcon className="text-amber-500" />
+          <TimerIcon className="text-amber-600 relative z-[1]" />
         )
       }
       iconEnd={
         state === 'idle' ? (
-          <PlayIcon className="text-muted-foreground" />
+          <PlayIcon className="text-muted-foreground relative z-[1]" />
         ) : (
-          <PauseIcon />
+          <SkipForwardIcon className="relative z-[1]" />
         )
       }
     >
-      {getButtonContent()}
+      {/* Progress fill background */}
+      {state === 'running' && (
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-amber-500/60 to-amber-600/60 transition-[width] duration-[950ms] ease-linear animate-pulse"
+          style={{
+            width: `var(--progress, 0%)`,
+            zIndex: 0,
+          }}
+        />
+      )}
+      <div className="relative z-[1]">{getButtonContent()}</div>
     </Button>
   )
+}
+
+// Format time as MM:SS
+export const formatSecondsToMMSS = (
+  seconds: number,
+  options: {
+    hideEmptyMinutes?: boolean
+  } = {
+    hideEmptyMinutes: false,
+  },
+) => {
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+
+  if (options.hideEmptyMinutes && minutes === 0) {
+    return `${remainingSeconds.toString().padStart(2, '0')}s`
+  }
+
+  return `${minutes.toString().padStart(options.hideEmptyMinutes ? 0 : 2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`
 }

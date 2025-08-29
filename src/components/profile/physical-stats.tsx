@@ -24,7 +24,7 @@ export function PhysicalStats({
   handleChange,
 }: PhysicalStatsProps) {
   return (
-    <Card className="mb-6">
+    <Card className="mb-6" borderless>
       <CardHeader>
         <CardTitle>Physical Stats</CardTitle>
       </CardHeader>
@@ -100,15 +100,19 @@ export function PhysicalStats({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value={GQLActivityLevel.Sedentary}>
-                  Sedentary
+                  Sedentary (little or no exercise, office job)
                 </SelectItem>
-                <SelectItem value={GQLActivityLevel.Light}>Light</SelectItem>
+                <SelectItem value={GQLActivityLevel.Light}>
+                  Light (light exercise 1-3 days/week)
+                </SelectItem>
                 <SelectItem value={GQLActivityLevel.Moderate}>
-                  Moderate
+                  Moderate (moderate exercise 3-5 days/week)
                 </SelectItem>
-                <SelectItem value={GQLActivityLevel.Active}>Active</SelectItem>
+                <SelectItem value={GQLActivityLevel.Active}>
+                  Active (active exercise 6-7 days/week)
+                </SelectItem>
                 <SelectItem value={GQLActivityLevel.Athlete}>
-                  Athlete
+                  Athlete (very active exercise 6-7 days/week)
                 </SelectItem>
               </SelectContent>
             </Select>

@@ -29,40 +29,14 @@ export function usePostHogUserEnhanced() {
 
       // Only identify if it's a different user or first time
       if (lastUserIdRef.current !== userId || !hasIdentified) {
-        // Build comprehensive user properties
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const userProperties: Record<string, any> = {
+        // Simple user properties - just ID and email
+        const userProperties = {
+          userId: user.id,
           email: user.email,
-          session_start: new Date().toISOString(),
-        }
-
-        // Add basic session properties
-        if (user.name) {
-          userProperties.name = user.name
-          userProperties.first_name = user.profile?.firstName
-          userProperties.last_name = user.profile?.lastName
-          userProperties.full_name =
-            `${user.profile?.firstName || ''} ${user.profile?.lastName || ''}`.trim()
-        }
-
-        // Add detailed user properties from GraphQL data
-        if (user) {
-          userProperties.user_id = user.id
-          userProperties.user_role = user.role
-          userProperties.created_at = user.createdAt
-          userProperties.updated_at = user.updatedAt
-
-          // Add profile information
-          if (user.profile) {
-            const profile = user.profile
-            userProperties.first_name = profile.firstName
-            userProperties.last_name = profile.lastName
-            userProperties.full_name =
-              `${profile.firstName || ''} ${profile.lastName || ''}`.trim()
-            userProperties.phone = profile.phone
-            userProperties.birthday = profile.birthday
-            userProperties.sex = profile.sex
-          }
+          name: user.name,
+          firstName: user.profile?.firstName,
+          lastName: user.profile?.lastName,
+          role: user.role,
         }
 
         // Identify user with PostHog

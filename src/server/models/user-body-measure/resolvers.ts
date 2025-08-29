@@ -8,6 +8,45 @@ import { GQLContext } from '@/types/gql-context'
 
 import UserBodyMeasure from './model'
 
+/**
+ * Helper function to update user profile weight when a body measurement with weight is added/updated
+ * Only updates if the measurement is the most recent one to avoid outdated weight in profile
+ */
+async function updateProfileWeightFromMeasurement(
+  userProfileId: string,
+  measurementWeight: number | null | undefined,
+  measurementDate: Date,
+) {
+  // Only proceed if weight is provided
+  if (!measurementWeight) {
+    return
+  }
+
+  // Get the most recent body measurement to check if this should update the profile
+  const mostRecentMeasurement = await prisma.userBodyMeasure.findFirst({
+    where: {
+      userProfileId,
+      weight: { not: null }, // Only consider measurements with weight
+    },
+    orderBy: {
+      measuredAt: 'desc',
+    },
+  })
+
+  // Update profile weight if this is the most recent measurement with weight
+  // or if there are no existing measurements with weight
+  const shouldUpdateProfile =
+    !mostRecentMeasurement ||
+    measurementDate >= mostRecentMeasurement.measuredAt
+
+  if (shouldUpdateProfile) {
+    await prisma.userProfile.update({
+      where: { id: userProfileId },
+      data: { weight: measurementWeight },
+    })
+  }
+}
+
 export const Query: GQLQueryResolvers<GQLContext> = {
   bodyMeasures: async (_parent, _args, context) => {
     const userSession = context.user
@@ -139,6 +178,13 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       data,
     })
 
+    // Update profile weight if weight was provided in the measurement
+    await updateProfileWeightFromMeasurement(
+      userProfile.id,
+      input.weight,
+      bodyMeasurement.measuredAt,
+    )
+
     return new UserBodyMeasure(bodyMeasurement)
   },
 
@@ -184,6 +230,16 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       data,
     })
 
+    // Update profile weight if weight was provided in the update
+    // Use the weight from input if provided, otherwise use the existing weight from the updated measurement
+    const weightToUpdate =
+      input.weight !== undefined ? input.weight : updatedMeasurement.weight
+    await updateProfileWeightFromMeasurement(
+      userProfile.id,
+      weightToUpdate,
+      updatedMeasurement.measuredAt,
+    )
+
     return new UserBodyMeasure(updatedMeasurement)
   },
 
@@ -216,6 +272,25 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     await prisma.userBodyMeasure.delete({
       where: { id },
     })
+
+    // If the deleted measurement had weight, update profile weight to the next most recent measurement
+    if (existingMeasurement.weight) {
+      const nextMostRecentMeasurement = await prisma.userBodyMeasure.findFirst({
+        where: {
+          userProfileId: userProfile.id,
+          weight: { not: null },
+        },
+        orderBy: {
+          measuredAt: 'desc',
+        },
+      })
+
+      // Update profile weight to the next most recent measurement, or null if none exists
+      await prisma.userProfile.update({
+        where: { id: userProfile.id },
+        data: { weight: nextMostRecentMeasurement?.weight || null },
+      })
+    }
 
     return true
   },
