@@ -133,27 +133,31 @@ function ExerciseCard({
         )}
       >
         <CardContent className="p-0 flex items-center gap-3">
-          <div className="h-auto w-20 self-stretch relative">
-            {firstImage ? (
-              <Image
-                src={firstImage.url}
-                alt={exercise.name}
-                width={100}
-                height={100}
-                className="object-cover size-full"
-              />
-            ) : (
-              <Image
-                src={'/empty-rack.png'}
-                alt={exercise.name}
-                width={100}
-                height={100}
-                className="object-cover h-full"
-              />
-            )}
-          </div>
+          {exercise.images.length > 0 && (
+            <div className="h-auto w-20 self-stretch relative">
+              {firstImage ? (
+                <Image
+                  src={firstImage.url}
+                  alt={exercise.name}
+                  width={100}
+                  height={100}
+                  className="object-cover size-full"
+                />
+              ) : (
+                <Image
+                  src={'/empty-rack.png'}
+                  alt={exercise.name}
+                  width={100}
+                  height={100}
+                  className="object-cover h-full"
+                />
+              )}
+            </div>
+          )}
 
-          <div className="flex-1 py-2">
+          <div
+            className={cn('flex-1 py-2', exercise.images.length === 0 && 'p-3')}
+          >
             <div className="flex items-start justify-between gap-2">
               <div className="space-y-1">
                 <div className="font-medium text-md leading-tight text-left">

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { MobileAppAuthSync } from '@/components/mobile-app-auth-sync'
 import { MobileAppThemeSync } from '@/components/mobile-app-theme-sync'
+import { PostHogProvider } from '@/components/posthog-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 import { UserProvider } from '@/context/user-context'
 import { UserPreferencesProvider } from '@/context/user-preferences-context'
@@ -23,18 +24,20 @@ export default async function ProtectedLayout({
 
   return (
     <UserProvider>
-      <UserPreferencesProvider>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange={false}
-        >
-          <MobileAppAuthSync />
-          <MobileAppThemeSync />
-          {children}
-        </ThemeProvider>
-      </UserPreferencesProvider>
+      <PostHogProvider>
+        <UserPreferencesProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange={false}
+          >
+            <MobileAppAuthSync />
+            <MobileAppThemeSync />
+            {children}
+          </ThemeProvider>
+        </UserPreferencesProvider>
+      </PostHogProvider>
     </UserProvider>
   )
 }

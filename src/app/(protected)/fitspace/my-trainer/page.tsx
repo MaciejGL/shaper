@@ -48,7 +48,12 @@ export default function MyTrainerPage() {
 
   return (
     <div className="container-hypertro mx-auto max-w-md">
-      <DashboardHeader title="My Trainer" icon={UserCheck} />
+      <DashboardHeader
+        title="My Trainer"
+        icon={UserCheck}
+        variant="blue"
+        className="mb-6"
+      />
       {isLoadingTrainer && (
         <div className="min-h-[300px] flex-center">
           <Loader />

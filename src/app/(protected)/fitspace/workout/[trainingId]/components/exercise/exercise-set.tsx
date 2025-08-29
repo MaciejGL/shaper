@@ -1,16 +1,25 @@
 import { useQueryClient } from '@tanstack/react-query'
+import { AnimatePresence, motion } from 'framer-motion'
 import { debounce, isNil } from 'lodash'
 import { CheckIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, {
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
-import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { Button } from '@/components/ui/button'
+import { CountdownTimer } from '@/components/ui/countdown-timer'
 import { Input } from '@/components/ui/input'
 import { SwipeToReveal } from '@/components/ui/swipe-to-reveal'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutQuery,
+  GQLTrainingView,
   useFitspaceGetWorkoutQuery,
   useFitspaceMarkSetAsCompletedMutation,
   useFitspaceUpdateSetLogMutation,
@@ -20,9 +29,12 @@ import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
 
 import { ExerciseWeightInput } from '../exercise-weight-input'
-import { createOptimisticSetUpdate } from '../simple-exercise-list/optimistic-updates'
+import { createOptimisticSetUpdate } from '../optimistic-updates'
 
-import { sharedLayoutStyles } from './shared-styles'
+import {
+  sharedLayoutAdvancedStyles,
+  sharedLayoutSimpleStyles,
+} from './shared-styles'
 import { ExerciseSetProps } from './types'
 
 export function ExerciseSet({
@@ -35,15 +47,18 @@ export function ExerciseSet({
   onRepsChange,
   onWeightChange,
   onDelete,
+  isLastSet,
+  restDuration,
 }: ExerciseSetProps) {
   const { trainingId } = useParams<{ trainingId: string }>()
   const { preferences } = useUserPreferences()
-
+  const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
   const [isCompletingSet, setIsCompletingSet] = useState(false)
   const hasUserEdited = useRef(false)
   const { toDisplayWeight } = useWeightConversion()
   const invalidateQuery = useInvalidateQuery()
   const queryClient = useQueryClient()
+  const [isTimerOperations, setIsTimerOperations] = useState(false)
 
   const { mutateAsync: updateSetLog } = useFitspaceUpdateSetLogMutation({
     onMutate: async (newLog) => {
@@ -214,42 +229,49 @@ export function ExerciseSet({
 
   const thisSet = getPreviousSetForColumn()
 
-  // Debug logging for troublesome exercises
-  if (process.env.NODE_ENV === 'development' && set.order === 1) {
-    const exerciseName = previousLogs[0]?.name
-    if (exerciseName === 'Pec Deck Machine') {
-      console.info('Pec Deck Machine - Previous Column Debug:', {
-        exerciseName,
-        setOrder: set.order,
-        thisSet,
-        previousLogsLength: previousLogs.length,
-        allPreviousLogs: previousLogs.map((log, index) => ({
-          index,
-          name: log.name,
-          setsCount: log.sets.length,
-          targetSet: log.sets.find((s) => s.order === set.order),
-        })),
-      })
-    }
-  }
+  const handleToggleSetCompletion = useCallback(async () => {
+    const willBeCompleted = !set.completedAt
 
-  const handleToggleSetCompletion = async () => {
-    setIsCompletingSet(true)
+    startTransition(() => {
+      // Immediately set timer state for smooth animation
+      if (!willBeCompleted) {
+        setIsTimerOperations(false) // Close timer immediately for uncompleting
+      } else {
+        setIsTimerOperations(true)
+      }
+
+      setIsCompletingSet(true)
+    })
+
     try {
       await markSetAsCompleted({
         setId: set.id,
-        completed: !set.completedAt,
+        completed: willBeCompleted,
         reps: reps ? +reps : previousSetRepsLog || null,
         weight: weight ? +weight : previousSetWeightLog || null,
       })
     } catch (error) {
       console.error('Failed to toggle set completion:', error)
-      setIsCompletingSet(false)
+      setIsTimerOperations(false)
     }
-  }
+  }, [
+    markSetAsCompleted,
+    set.completedAt,
+    set.id,
+    reps,
+    weight,
+    previousSetRepsLog,
+    previousSetWeightLog,
+  ])
 
   return (
-    <AnimateChangeInHeight>
+    <motion.div
+      key={`set-${set.id}`}
+      initial={{ height: 0 }}
+      animate={{ height: 'auto' }}
+      exit={{ height: 0 }}
+      transition={{ duration: 0.15, ease: 'linear' }}
+    >
       <SwipeToReveal
         actions={[
           {
@@ -259,34 +281,46 @@ export function ExerciseSet({
           },
         ]}
         isSwipeable={set.isExtra && !isCompletingSet}
-        className="bg-card border-b border-border/50"
+        className={cn('bg-card', !isLastSet && 'border-b border-border/50')}
       >
-        <div className="flex items-center gap-1">
-          <div
-            className={cn(
-              sharedLayoutStyles,
-              'pb-0.5 pt-1 leading-none',
-              set.isExtra && 'opacity-0',
-            )}
-          >
-            <div />
-            <div />
-            <div className="text-[0.625rem] text-muted-foreground text-center">
-              {set.isExtra ? 'Extra' : repRange}
+        {isAdvancedView && (
+          <div className="flex items-center gap-1">
+            <div
+              className={cn(
+                isAdvancedView
+                  ? sharedLayoutAdvancedStyles
+                  : sharedLayoutSimpleStyles,
+                'pb-0.5 pt-1 leading-none',
+                set.isExtra && 'opacity-0',
+              )}
+            >
+              <div />
+              <div />
+              <div className="text-[0.625rem] text-muted-foreground text-center">
+                {set.isExtra ? 'Extra' : repRange}
+              </div>
+              <div className="text-[0.625rem] text-muted-foreground text-center">
+                {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : ''}
+              </div>
+              <div />
             </div>
-            <div className="text-[0.625rem] text-muted-foreground text-center">
-              {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : ''}
-            </div>
-            <div />
           </div>
-        </div>
+        )}
 
         <div className={cn('flex items-start gap-1 pb-1')}>
-          <div>
-            <div className={cn(sharedLayoutStyles, 'text-primary relative')}>
-              <div className="text-sm text-muted-foreground text-center">
-                {set.order}
-              </div>
+          <div
+            className={cn(
+              isAdvancedView
+                ? sharedLayoutAdvancedStyles
+                : sharedLayoutSimpleStyles,
+              'text-primary relative',
+              !isAdvancedView && 'pt-1',
+            )}
+          >
+            <div className="text-sm text-muted-foreground text-center">
+              {set.order}
+            </div>
+            {isAdvancedView && (
               <div className="text-xs text-muted-foreground text-center">
                 <div>
                   {!isNil(thisSet?.log?.reps || thisSet?.log?.weight) ? (
@@ -307,6 +341,8 @@ export function ExerciseSet({
                   )}
                 </div>
               </div>
+            )}
+            {isAdvancedView ? (
               <Input
                 id={`set-${set.id}-reps`}
                 value={reps}
@@ -317,6 +353,10 @@ export function ExerciseSet({
                 className="text-center"
                 size="sm"
               />
+            ) : (
+              <div className="text-center text-sm">{repRange}</div>
+            )}
+            {isAdvancedView ? (
               <ExerciseWeightInput
                 setId={set.id}
                 weightInKg={weight ? parseFloat(weight) : null}
@@ -332,29 +372,60 @@ export function ExerciseSet({
                 disabled={false}
                 showWeightUnit={false}
               />
-              <div className="flex justify-center">
-                <Button
-                  variant="tertiary"
-                  size="icon-xs"
-                  iconOnly={
-                    <CheckIcon
-                      className={cn(
-                        'size-4 transition-colors',
-                        set.completedAt
-                          ? 'text-green-500'
-                          : 'text-muted-foreground/40',
-                      )}
-                    />
-                  }
-                  loading={isCompletingSet}
-                  onClick={handleToggleSetCompletion}
-                  className="self-center"
-                />
+            ) : (
+              <div className="text-center text-sm text-muted-foreground">
+                {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : '--'}
               </div>
+            )}
+            <div className="flex justify-center">
+              <Button
+                variant="tertiary"
+                size="icon-xs"
+                iconOnly={
+                  <CheckIcon
+                    className={cn(
+                      'size-4 transition-colors',
+                      set.completedAt
+                        ? 'text-green-500'
+                        : 'text-muted-foreground/40',
+                    )}
+                  />
+                }
+                onClick={handleToggleSetCompletion}
+                className="self-center"
+              />
             </div>
           </div>
         </div>
+        <AnimatePresence mode="wait">
+          {isTimerOperations && restDuration && (
+            <motion.div
+              key={`timer-${set.id}`}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{
+                height: 'auto',
+                opacity: 1,
+              }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.15, ease: 'linear' }}
+              style={{ overflow: 'hidden' }}
+            >
+              {isTimerOperations && restDuration && (
+                <div className="py-1 px-2">
+                  <CountdownTimer
+                    restDuration={restDuration || 60}
+                    autoStart={isTimerOperations}
+                    onComplete={() => setIsTimerOperations(false)}
+                    onPause={() => setIsTimerOperations(false)}
+                    size="xs"
+                    className="w-full"
+                  />
+                </div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </SwipeToReveal>
-    </AnimateChangeInHeight>
+    </motion.div>
   )
 }

@@ -1,7 +1,7 @@
 import {
   ArrowLeftRight,
-  Check,
   CheckCircle,
+  CheckIcon,
   FlameIcon,
   GaugeIcon,
   InfoIcon,
@@ -9,16 +9,17 @@ import {
   MoreHorizontalIcon,
   Replace,
   Target,
+  TimerIcon,
   TrashIcon,
   VideoIcon,
 } from 'lucide-react'
 import Image from 'next/image'
 import { useParams } from 'next/navigation'
-import React from 'react'
+import React, { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CountdownTimer } from '@/components/ui/countdown-timer'
+import { formatSecondsToMMSS } from '@/components/ui/countdown-timer'
 import {
   Drawer,
   DrawerContent,
@@ -36,10 +37,12 @@ import { VideoPreview } from '@/components/video-preview'
 import {
   GQLExerciseType,
   useFitspaceGetWorkoutQuery,
-  useFitspaceMarkSetAsCompletedMutation,
+  useFitspaceSwapExerciseMutation,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
+
+import { SwapExerciseDrawer } from '../swap-exercise-drawer'
 
 import { ExerciseNotebook } from './exercise-notebook'
 import { ExerciseMetadataProps } from './types'
@@ -51,11 +54,16 @@ export function ExerciseMetadata({
   handleRemoveExercise,
   isRemoving,
 }: ExerciseMetadataProps) {
+  const [isSwapExerciseOpen, setIsSwapExerciseOpen] = useState(false)
+  const [selectedSubstituteId, setSelectedSubstituteId] = useState<
+    string | null
+  >(null)
+
   const { trainingId } = useParams<{ trainingId: string }>()
   const invalidateQuery = useInvalidateQuery()
 
-  const { mutateAsync: markSetAsCompleted } =
-    useFitspaceMarkSetAsCompletedMutation({
+  const { mutateAsync: swapExercise, isPending: isSwapping } =
+    useFitspaceSwapExerciseMutation({
       onSuccess: () => {
         invalidateQuery({
           queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
@@ -63,15 +71,15 @@ export function ExerciseMetadata({
       },
     })
 
-  const handleToggleSet = async (setId: string, completed: boolean) => {
-    try {
-      await markSetAsCompleted({
-        setId,
-        completed,
-      })
-    } catch (error) {
-      console.error('Failed to toggle set:', error)
-    }
+  const handleSwapExercise = async () => {
+    if (!selectedSubstituteId) return
+
+    await swapExercise({
+      exerciseId: exercise.id,
+      substituteId: selectedSubstituteId,
+    })
+    setIsSwapExerciseOpen(false)
+    setSelectedSubstituteId(null)
   }
 
   const isSuperset =
@@ -201,7 +209,14 @@ export function ExerciseMetadata({
           </Drawer>
           <ExerciseNotebook exercise={exercise} />
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+            <DropdownMenuTrigger
+              asChild
+              className={cn(
+                exercise.substitutes.length === 0 && !exercise.isExtra
+                  ? 'hidden'
+                  : '',
+              )}
+            >
               <Button
                 variant="tertiary"
                 size="icon-sm"
@@ -209,17 +224,6 @@ export function ExerciseMetadata({
               />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem
-                onClick={() => handleMarkAsCompleted(!isCompleted)}
-              >
-                <Check
-                  className={cn(
-                    'transition-all duration-200',
-                    isCompleted ? 'text-green-500' : 'text-muted-foreground',
-                  )}
-                />
-                {isCompleted ? 'Mark as incomplete' : 'Mark as completed'}
-              </DropdownMenuItem>
               {exercise.substitutes.length > 0 && (
                 <DropdownMenuItem>
                   <Replace /> Swap exercise
@@ -235,6 +239,15 @@ export function ExerciseMetadata({
               )}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button
+            variant="tertiary"
+            size="sm"
+            iconOnly={
+              <CheckIcon className={cn(isCompleted && 'text-green-600')} />
+            }
+            onClick={() => handleMarkAsCompleted(!isCompleted)}
+            className="self-start"
+          />
         </div>
       </div>
 
@@ -245,9 +258,18 @@ export function ExerciseMetadata({
             Superset A/B
           </Badge>
         )}
+        {exercise.restSeconds && (
+          <Badge variant="secondary" size="md">
+            <TimerIcon className="text-amber-500" />
+            {formatSecondsToMMSS(exercise.restSeconds, {
+              hideEmptyMinutes: true,
+            })}{' '}
+            rest
+          </Badge>
+        )}
         {exercise.warmupSets && (
           <Badge variant="secondary" size="md">
-            <FlameIcon className="text-amber-500" />
+            <FlameIcon className="text-amber-600" />
             {exercise.warmupSets} warmup{exercise.warmupSets > 1 ? 's' : ''}
           </Badge>
         )}
@@ -257,24 +279,6 @@ export function ExerciseMetadata({
             <GaugeIcon className="text-green-500" />
             {exercise.tempo}
           </Badge>
-        )}
-        {exercise.restSeconds && (
-          <div className="ml-auto">
-            <CountdownTimer
-              size="xs"
-              variant="tertiary"
-              restDuration={exercise.restSeconds}
-              onComplete={() => {
-                // Find the first uncompleted set and mark it as done
-                const firstUncompletedSet = (
-                  exercise.substitutedBy?.sets || exercise.sets
-                ).find((set) => !set.completedAt)
-                if (firstUncompletedSet) {
-                  handleToggleSet(firstUncompletedSet.id, true)
-                }
-              }}
-            />
-          </div>
         )}
       </div>
 
@@ -286,6 +290,16 @@ export function ExerciseMetadata({
           </p>
         </div>
       )}
+
+      <SwapExerciseDrawer
+        exercise={exercise}
+        isOpen={isSwapExerciseOpen}
+        onOpenChange={setIsSwapExerciseOpen}
+        selectedSubstituteId={selectedSubstituteId}
+        onSelectedSubstituteIdChange={setSelectedSubstituteId}
+        onSwap={handleSwapExercise}
+        isSwapping={isSwapping}
+      />
     </div>
   )
 }

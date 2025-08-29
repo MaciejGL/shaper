@@ -26,11 +26,11 @@ export function StatsItem({
     >
       {icon ? (
         <div
-          className={cn('flex items-center gap-2', {
+          className={cn('flex items-center gap-3', {
             'flex-col': iconPosition === 'top',
           })}
         >
-          <div>{icon}</div>
+          <div className="[&_svg]:size-5">{icon}</div>
           <div
             className={cn('flex flex-col items-start', {
               'items-center': iconPosition === 'top',

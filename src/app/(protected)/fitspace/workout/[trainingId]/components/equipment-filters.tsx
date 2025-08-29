@@ -41,6 +41,7 @@ export function EquipmentFilters({
                   alt={equipmentItem}
                   src={equipmentImages[equipmentItem]}
                   fill
+                  sizes="80px"
                   quality={50}
                   fetchPriority="high"
                   crop="auto"
@@ -90,6 +91,7 @@ export function EquipmentFilters({
                 alt={equipmentItem}
                 src={equipmentImages[equipmentItem]}
                 fill
+                sizes="(max-width: 640px) 25vw, 16.67vw"
                 quality={75}
                 fetchPriority="high"
                 crop="fill"
@@ -122,6 +124,7 @@ export function EquipmentFilters({
             alt={equipmentItem}
             src={equipmentImages[equipmentItem]}
             fill
+            sizes="32px"
             quality={75}
             fetchPriority="high"
             crop="fill"

@@ -17,7 +17,12 @@ export default function ExplorePage() {
 
   return (
     <div className="container-hypertro mx-auto max-w-md">
-      <DashboardHeader title="Discover" icon={SearchIcon} />
+      <DashboardHeader
+        title="Discover"
+        icon={SearchIcon}
+        variant="indigo"
+        className="mb-6"
+      />
 
       <Tabs defaultValue={defaultValue} className="w-full">
         <TabsList className="grid w-full grid-cols-2">

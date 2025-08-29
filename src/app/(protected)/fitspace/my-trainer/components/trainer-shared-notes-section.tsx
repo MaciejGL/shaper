@@ -1,8 +1,9 @@
 'use client'
 
-import { MessageSquare, Share } from 'lucide-react'
+import { MessageSquare } from 'lucide-react'
 import { useState } from 'react'
 
+import { LoadingSkeleton } from '@/app/(protected)/trainer/collaboration/components/loading-skeleton'
 import { Loader } from '@/components/loader'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -146,8 +147,8 @@ function ViewAllNotesDrawer({ isOpen, onOpenChange }: ViewAllNotesDrawerProps) {
 
         <div className="flex-1 overflow-y-auto px-4 pb-4">
           {isLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader />
+            <div className="space-y-4">
+              <LoadingSkeleton count={2} variant="lg" withBorder />
             </div>
           ) : error ? (
             <div className="text-center py-8 text-red-500">
@@ -190,8 +191,7 @@ function TrainerNoteItem({ note }: AllTrainerNoteItemProps) {
 
         <div className="flex items-center justify-between border-t border-border pt-2 px-4 pb-2">
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Share className="h-3 w-3 shrink-0" />
-            <p>From {trainerName}</p>
+            <p>{trainerName}</p>
           </div>
 
           <time className="text-xs text-muted-foreground">

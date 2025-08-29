@@ -1,9 +1,9 @@
 'use client'
 
 import {
-  Calendar,
   ChevronRight,
   Dumbbell,
+  LayoutList,
   PersonStanding,
   SaladIcon,
   SearchIcon,
@@ -33,6 +33,9 @@ export function MobileNav() {
   const pathname = usePathname()
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const [clickedItem, setClickedItem] = useState<string | null>(null)
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(
+    null,
+  )
   const { data, isLoading } = useFitspaceGetActivePlanIdQuery()
   const { data: quickWorkoutPlanData, isLoading: isQuickWorkoutPlanLoading } =
     useFitspaceGetUserQuickWorkoutPlanQuery({})
@@ -42,6 +45,7 @@ export function MobileNav() {
     data?.getActivePlanId || quickWorkoutPlanData?.getQuickWorkoutPlan?.id
   useEffect(() => {
     setClickedItem(null)
+    setPendingNavigation(null)
   }, [pathname])
 
   const navItems = useMemo(
@@ -59,7 +63,7 @@ export function MobileNav() {
       {
         id: 'plans',
         href: '/fitspace/my-plans',
-        icon: Calendar,
+        icon: LayoutList,
         label: 'Plans',
         prefetch: true,
       },
@@ -99,13 +103,14 @@ export function MobileNav() {
 
   return (
     <>
-      <div className="h-[4.5rem]" />
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar safe-area-bottom safe-area-x">
         <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = pathname === item.href
-            const isClicked = clickedItem === item.label && !isActive
+            const isActive = pathname === item.href && !pendingNavigation
+            const isClicked =
+              (clickedItem === item.label || pendingNavigation === item.href) &&
+              !isActive
             const isHighlighted = isActive || isClicked
 
             // if (item.onClick) {
@@ -128,7 +133,10 @@ export function MobileNav() {
               <Link
                 key={item.id}
                 href={item.href}
-                onClick={() => setClickedItem(item.label)}
+                onClick={() => {
+                  setClickedItem(item.label)
+                  setPendingNavigation(item.href)
+                }}
                 className={cn(
                   'flex flex-col items-center justify-center p-2 rounded-lg transition-colors',
                   isHighlighted
@@ -145,6 +153,7 @@ export function MobileNav() {
         </div>
       </nav>
       <QuickActionDrawer isOpen={isMoreOpen} onOpenChange={setIsMoreOpen} />
+      <div className="h-[4.5rem] mt-4" />
     </>
   )
 }

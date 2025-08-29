@@ -3,12 +3,12 @@
 import { motion } from 'framer-motion'
 import {
   LayoutDashboardIcon,
-  LayoutListIcon,
   LogInIcon,
   LogOutIcon,
   MenuIcon,
   NotebookTextIcon,
   Settings,
+  Settings2Icon,
   SunIcon,
   UserRoundCogIcon,
   Users2Icon,
@@ -310,20 +310,6 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
             </div>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <NavLink
-              href={CLIENT_LINKS.myPlans.href}
-              icon={<LayoutListIcon className="size-4" />}
-              label={CLIENT_LINKS.myPlans.label}
-            />
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <NavLink
-              href={CLIENT_LINKS.workout.href}
-              icon={<NotebookTextIcon className="size-4" />}
-              label={CLIENT_LINKS.workout.label}
-            />
-          </DropdownMenuItem>
 
           <DropdownMenuItem asChild>
             <NavLink
@@ -336,7 +322,7 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
           <DropdownMenuItem asChild>
             <NavLink
               href={CLIENT_LINKS.settings.href}
-              icon={<Settings className="size-4" />}
+              icon={<Settings2Icon className="size-4" />}
               label={CLIENT_LINKS.settings.label}
             />
           </DropdownMenuItem>

@@ -27,7 +27,7 @@ export function PersonalInfo({
   handleChange,
 }: PersonalInfoProps) {
   return (
-    <Card className="mb-6">
+    <Card className="mb-6" borderless>
       <CardHeader>
         <CardTitle>Personal Information</CardTitle>
       </CardHeader>

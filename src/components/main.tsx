@@ -30,7 +30,7 @@ export const Main = ({
     >
       {user && <Navbar user={user} withSidebar={withSidebar} />}
       <div
-        className={cn('w-full', {
+        className={cn('w-full grid', {
           'md:p-2 -mt-2 overflow-hidden': isTrainer,
         })}
       >
@@ -40,7 +40,7 @@ export const Main = ({
             'w-full h-full p-2 md:p-4 lg:p-8 bg-background safe-area-bottom',
             {
               'md:rounded-md overflow-y-auto': isTrainer,
-              'pt-[calc(var(--safe-area-inset-top))] min-h-screen': !isTrainer,
+              'pt-[calc(var(--safe-area-inset-top))] grow': !isTrainer,
             },
           )}
         >

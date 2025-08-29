@@ -1,4 +1,5 @@
 import { differenceInYears, secondsToMinutes } from 'date-fns'
+import { AnimatePresence, motion } from 'framer-motion'
 import { uniq } from 'lodash'
 import {
   ArrowLeftIcon,
@@ -23,6 +24,7 @@ import {
 } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { calculateCaloriesBurned } from '@/lib/workout/calculate-calories-burned'
+import { generateWeightComparison } from '@/utils/weight-comparisons'
 
 export function Summary({
   open,
@@ -43,6 +45,7 @@ export function Summary({
   const [displayedSets, setDisplayedSets] = useState(0)
   const [displayedWeight, setDisplayedWeight] = useState(0)
   const [displayedDuration, setDisplayedDuration] = useState(0)
+  const [weightComparison, setWeightComparison] = useState<string>('')
   const { activeDay } = useWorkout()
   const {
     mutateAsync: markWorkoutAsCompleted,
@@ -122,6 +125,14 @@ export function Summary({
         setDisplayedSets(totalSets)
         setDisplayedWeight(totalWeight)
         setDisplayedDuration(workoutDuration)
+
+        // Generate fun weight comparison if there's weight lifted
+        if (totalWeight > 0) {
+          const { comparison } = generateWeightComparison(totalWeight)
+          setWeightComparison(comparison)
+        } else {
+          setWeightComparison('')
+        }
       }, 1000)
       return () => clearTimeout(timer)
     } else {
@@ -130,6 +141,7 @@ export function Summary({
       setDisplayedSets(0)
       setDisplayedWeight(0)
       setDisplayedDuration(0)
+      setWeightComparison('')
     }
   }, [
     open,
@@ -187,6 +199,31 @@ export function Summary({
               />
             </div>
           </div>
+
+          {/* Fun Weight Comparison */}
+          <AnimatePresence>
+            {weightComparison && (
+              <motion.div
+                className="flex flex-col gap-4"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4">
+                  <div className="text-center">
+                    <p className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-1">
+                      You lifted {toDisplayWeight(totalWeight) || 0}{' '}
+                      {weightUnit}!
+                    </p>
+                    <p className="text-md text-purple-600 dark:text-purple-400">
+                      {weightComparison}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Exercises Completed */}
           {completedExercises && completedExercises.length > 0 && (

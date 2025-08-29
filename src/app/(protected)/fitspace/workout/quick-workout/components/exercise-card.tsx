@@ -74,25 +74,29 @@ export function ExerciseCard({
         }
       >
         <CardContent className="p-0 flex items-center gap-3">
-          <div className="size-20 overflow-hidden relative bg-white">
-            {firstImage ? (
-              <Image
-                src={firstImage.url}
-                alt={exercise.name}
-                width={100}
-                height={100}
-              />
-            ) : (
-              <Image
-                src={'/empty-rack.png'}
-                alt={exercise.name}
-                width={100}
-                height={100}
-              />
-            )}
-          </div>
+          {exercise.images.length > 0 && (
+            <div className="size-20 overflow-hidden relative bg-white">
+              {firstImage ? (
+                <Image
+                  src={firstImage.url}
+                  alt={exercise.name}
+                  width={100}
+                  height={100}
+                />
+              ) : (
+                <Image
+                  src={'/empty-rack.png'}
+                  alt={exercise.name}
+                  width={100}
+                  height={100}
+                />
+              )}
+            </div>
+          )}
 
-          <div className="flex-1 py-2">
+          <div
+            className={cn('flex-1 py-2', exercise.images.length === 0 && 'p-3')}
+          >
             <div className="flex items-start justify-between gap-2">
               <div className="font-medium text-md leading-tight text-left">
                 {exercise.name}

@@ -1,5 +1,11 @@
 import { formatDate } from 'date-fns'
-import { BicepsFlexed, Calendar, CheckCircle, Users } from 'lucide-react'
+import {
+  BicepsFlexed,
+  Calendar,
+  CheckCircle,
+  Loader,
+  Users,
+} from 'lucide-react'
 
 import { CollapsibleText } from '@/components/collapsible-text'
 import { RatingStars } from '@/components/rating-stars'
@@ -52,6 +58,18 @@ export function PlanDetailsDrawer({
     <Drawer open={open} onOpenChange={onClose}>
       <SimpleDrawerContent
         title={plan.title}
+        header={
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-lg font-medium">{plan.title}</h3>
+            {/* Plan Status and Basic Info */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <PlanStatusBadge status={status} plan={plan} />
+              {plan.difficulty && (
+                <Badge variant="outline">{plan.difficulty}</Badge>
+              )}
+            </div>
+          </div>
+        }
         footer={
           <div className="flex items-center justify-end gap-2">
             <Button
@@ -63,7 +81,7 @@ export function PlanDetailsDrawer({
               Delete
             </Button>
             <DrawerClose asChild>
-              <Button variant="secondary" disabled={isButtonLoading}>
+              <Button variant="tertiary" disabled={isButtonLoading}>
                 Close
               </Button>
             </DrawerClose>
@@ -80,23 +98,74 @@ export function PlanDetailsDrawer({
         }
       >
         <div className="space-y-6">
-          {/* Plan Status and Basic Info */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <PlanStatusBadge status={status} plan={plan} />
-            {plan.difficulty && (
-              <Badge variant="outline">{plan.difficulty}</Badge>
-            )}
-          </div>
-
+          {plan.startDate && plan.endDate && (
+            <div className="space-y-2">
+              {/* Progress Overview */}
+              {plan.completedWorkoutsDays > 0 || plan.adherence ? (
+                <CompletionStats
+                  completedWorkoutsDays={plan.completedWorkoutsDays}
+                  totalWorkouts={plan.totalWorkouts}
+                />
+              ) : null}
+              <div className="grid grid-cols-2 gap-2 empty:hidden">
+                <StatsItem
+                  label="Current Week"
+                  value={
+                    <p className="text-sm font-medium">
+                      {plan.currentWeekNumber} of {plan.weekCount}
+                    </p>
+                  }
+                  icon={<Loader className="text-muted-foreground" />}
+                />
+                {plan.startDate && plan.endDate && (
+                  <StatsItem
+                    label="Start Date"
+                    value={
+                      <p className="text-sm font-medium">
+                        {formatDate(new Date(plan.startDate), 'MMM d')} -{' '}
+                        {formatDate(new Date(plan.endDate), 'MMM d')}{' '}
+                      </p>
+                    }
+                    icon={<Calendar className="text-muted-foreground" />}
+                  />
+                )}
+              </div>
+            </div>
+          )}
           {/* Plan Statistics */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-2">
             <StatsItem value={plan.weekCount} label="Weeks" />
+            <StatsItem value={plan.totalWorkouts} label="Total workouts" />
             <StatsItem
               value={Math.round(plan.totalWorkouts / plan.weekCount)}
-              label="Per Week"
+              label="Days per week"
             />
-            <StatsItem value={plan.totalWorkouts} label="Total Workouts" />
           </div>
+
+          {'focusTags' in plan && plan.focusTags.length > 0 && (
+            <div>
+              <p className="text-sm font-medium">Training Method</p>
+              <div className="flex items-center gap-2">
+                {plan.focusTags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="capitalize">
+                    {tag.split('_').join(' ').toLowerCase()}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+          {'targetGoals' in plan && plan.targetGoals.length > 0 && (
+            <div>
+              <p className="text-sm font-medium">You'll Achieve</p>
+              <div className="flex items-center gap-2">
+                {plan.targetGoals.map((goal) => (
+                  <Badge key={goal} variant="outline" className="capitalize">
+                    {goal.split('_').join(' ').toLowerCase()}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Rating and Reviews */}
           {plan.rating && plan.totalReviews > 0 ? (
@@ -108,18 +177,6 @@ export function PlanDetailsDrawer({
             </div>
           ) : null}
 
-          {/* Progress Overview */}
-          {plan.completedWorkoutsDays > 0 || plan.adherence ? (
-            <div className="space-y-2">
-              <h3 className="font-medium">Progress</h3>
-              <CompletionStats
-                adherence={plan.adherence}
-                completedWorkoutsDays={plan.completedWorkoutsDays}
-                totalWorkouts={plan.totalWorkouts}
-              />
-            </div>
-          ) : null}
-
           {/* Plan Description */}
           {plan.description && (
             <div className="space-y-2">
@@ -127,9 +184,6 @@ export function PlanDetailsDrawer({
               <CollapsibleText text={plan.description} maxWords={50} />
             </div>
           )}
-
-          {/* Plan Dates */}
-          <PlanDates plan={plan} status={status} />
 
           {/* Plan Creator */}
           {'createdBy' in plan && plan.createdBy && (
@@ -184,49 +238,5 @@ function PlanStatusBadge({
       {config.icon}
       <span className="ml-1">{config.label}</span>
     </Badge>
-  )
-}
-
-function PlanDates({
-  plan,
-  status,
-}: {
-  plan: UnifiedPlan
-  status: PlanStatus
-}) {
-  if (!plan) return null
-
-  const hasStartDate = 'startDate' in plan && plan.startDate
-  const hasEndDate = 'endDate' in plan && plan.endDate
-  const hasCompletedDate = 'completedAt' in plan && plan.completedAt
-
-  if (!hasStartDate && !hasEndDate && !hasCompletedDate) return null
-
-  return (
-    <div className="space-y-2">
-      <h3 className="font-medium">Timeline</h3>
-      <div className="space-y-1 text-sm">
-        {hasStartDate && 'startDate' in plan && plan.startDate && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Started:</span>
-            <span>{formatDate(new Date(plan.startDate), 'MMM d, yyyy')}</span>
-          </div>
-        )}
-        {hasEndDate && 'endDate' in plan && plan.endDate && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">
-              {status === PlanStatus.Completed ? 'Ended:' : 'Planned End:'}
-            </span>
-            <span>{formatDate(new Date(plan.endDate), 'MMM d, yyyy')}</span>
-          </div>
-        )}
-        {hasCompletedDate && 'completedAt' in plan && plan.completedAt && (
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Completed:</span>
-            <span>{formatDate(new Date(plan.completedAt), 'MMM d, yyyy')}</span>
-          </div>
-        )}
-      </div>
-    </div>
   )
 }
