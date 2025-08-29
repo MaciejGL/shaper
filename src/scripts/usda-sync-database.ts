@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 // Direct CSV to Database sync for USDA data
-// Reads from existing CSV and does upserts with single database connection
+// Uses shared database connection to prevent connection leaks
 // OPTIMIZED FOR MEMORY EFFICIENCY - Uses streaming processing
-import { PrismaPg } from '@prisma/adapter-pg'
 import { parse } from 'csv-parse'
 import { createReadStream } from 'fs'
 import path from 'path'
-import { Pool } from 'pg'
 
-import { Prisma, PrismaClient } from '@/generated/prisma/client'
+import { Prisma } from '@/generated/prisma/client'
+import { prisma } from '@/lib/db'
 import { formatNumber } from '@/lib/utils'
 
 import fs from 'fs/promises'
@@ -19,16 +18,6 @@ const PAUSE_BETWEEN_BATCHES = 200 // Pause to reduce database load
 
 // START_FROM_RECORD allows resuming from a specific position (useful for debugging)
 const START_FROM_RECORD = 0
-
-// Single Prisma instance with sync-optimized connection settings
-const connectionString =
-  process.env.SYNC_DATABASE_URL || process.env.DATABASE_URL
-const pool = new Pool({ connectionString })
-const adapter = new PrismaPg(pool)
-
-const prisma = new PrismaClient({
-  adapter,
-})
 
 interface CSVFood {
   id: string
@@ -223,13 +212,8 @@ async function upsertFoodsBatch(
 }
 
 async function refreshConnection() {
-  try {
-    await prisma.$disconnect()
-    await prisma.$connect()
-    console.info('🔄 Database connection refreshed')
-  } catch (error) {
-    console.warn('⚠️  Warning: Failed to refresh connection:', error)
-  }
+  // Using shared prisma instance - no need to manually refresh connections
+  console.info('🔄 Connection refresh skipped (using shared pool)')
 }
 
 async function forceGarbageCollection() {
@@ -376,7 +360,8 @@ async function syncDatabase() {
     console.error('❌ Database sync failed:', error)
     process.exit(1)
   } finally {
-    await prisma.$disconnect()
+    // Using shared prisma instance - don't disconnect
+    console.info('✅ USDA sync completed, keeping shared connection open')
   }
 }
 

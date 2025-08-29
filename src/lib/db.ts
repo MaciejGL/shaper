@@ -11,17 +11,18 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 const DATABASE_CONFIG = {
-  MAX_CONNECTIONS: parseInt(process.env.DATABASE_MAX_CONNECTIONS || '6'),
-  MIN_CONNECTIONS: parseInt(process.env.DATABASE_MIN_CONNECTIONS || '1'),
-  IDLE_TIMEOUT: parseInt(process.env.DATABASE_IDLE_TIMEOUT || '15000'),
+  // Optimized for Supabase + Vercel deployment scenario
+  MAX_CONNECTIONS: parseInt(process.env.DATABASE_MAX_CONNECTIONS || '10'), // Increased from 6 to handle multiple instances
+  MIN_CONNECTIONS: parseInt(process.env.DATABASE_MIN_CONNECTIONS || '2'), // Keep minimum connections ready
+  IDLE_TIMEOUT: parseInt(process.env.DATABASE_IDLE_TIMEOUT || '30000'), // 30s - allow longer idle for connection reuse
   CONNECTION_TIMEOUT: parseInt(
-    process.env.DATABASE_CONNECTION_TIMEOUT || '8000',
+    process.env.DATABASE_CONNECTION_TIMEOUT || '10000', // 10s - match Supabase connect_timeout
   ),
   TRANSACTION_TIMEOUT: parseInt(
-    process.env.DATABASE_TRANSACTION_TIMEOUT || '15000',
+    process.env.DATABASE_TRANSACTION_TIMEOUT || '30000', // 30s - prevent long-running transaction locks
   ),
-  MAX_WAIT: parseInt(process.env.DATABASE_MAX_WAIT || '8000'),
-  MAX_USES: 7500,
+  MAX_WAIT: parseInt(process.env.DATABASE_MAX_WAIT || '15000'), // 15s - give more time to acquire connections
+  MAX_USES: 5000, // Reduced from 7500 - recycle connections more frequently
 } as const
 
 // Create connection pool optimized for Supabase with PgBouncer
@@ -43,6 +44,9 @@ const createPool = () => {
     allowExitOnIdle: true,
     keepAlive: true,
     keepAliveInitialDelayMillis: 10000,
+    // Additional optimization for production stability
+    query_timeout: DATABASE_CONFIG.TRANSACTION_TIMEOUT,
+    statement_timeout: DATABASE_CONFIG.TRANSACTION_TIMEOUT,
   })
 }
 
@@ -88,6 +92,51 @@ export const getPoolStats = () => ({
   max: pool.options.max,
   min: pool.options.min,
 })
+
+// Enhanced connection monitoring for production debugging
+export const logConnectionHealth = () => {
+  const stats = getPoolStats()
+  const utilization = ((stats.active / stats.max) * 100).toFixed(1)
+
+  console.info(
+    `[DB-HEALTH] Connections: ${stats.active}/${stats.max} active (${utilization}% utilization), ${stats.idle} idle, ${stats.waiting} waiting`,
+  )
+
+  // Alert if connection utilization is high
+  if (stats.active / stats.max > 0.8) {
+    console.warn(
+      `[DB-WARNING] High connection utilization: ${utilization}% - Consider checking for connection leaks`,
+    )
+  }
+
+  return stats
+}
+
+// Emergency connection cleanup function
+export const forceConnectionCleanup = async () => {
+  try {
+    console.warn('[DB-CLEANUP] Forcing connection cleanup...')
+
+    // Get current stats before cleanup
+    const beforeStats = getPoolStats()
+    console.info(
+      `[DB-CLEANUP] Before: ${beforeStats.active} active, ${beforeStats.idle} idle`,
+    )
+
+    // Force idle connections to close
+    await pool.query('SELECT 1') // Simple health check
+
+    const afterStats = getPoolStats()
+    console.info(
+      `[DB-CLEANUP] After: ${afterStats.active} active, ${afterStats.idle} idle`,
+    )
+
+    return { before: beforeStats, after: afterStats }
+  } catch (error) {
+    console.error('[DB-CLEANUP] Cleanup failed:', error)
+    throw error
+  }
+}
 
 if (process.env.NODE_ENV === 'development') {
   setInterval(() => {

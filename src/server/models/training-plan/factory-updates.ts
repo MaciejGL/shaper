@@ -25,8 +25,6 @@ import {
 import { getUTCWeekStart } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
-import { getLightPlanById } from '../training-utils.server'
-
 import TrainingPlan from './model'
 
 // Using generated GraphQL types instead of custom interfaces
@@ -1283,21 +1281,97 @@ export async function getQuickWorkoutPlan(context: GQLContext) {
     throw new GraphQLError('User not found')
   }
 
-  const plan = await prisma.trainingPlan.findFirst({
+  // Optimized single query approach - find or create in one operation
+  let quickWorkoutPlan = await prisma.trainingPlan.findFirst({
     where: {
       assignedToId: user.user.id,
       createdById: user.user.id,
     },
+    // Include minimal data needed for TrainingPlan model - avoid unnecessary joins
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      isPublic: true,
+      isDraft: true,
+      createdById: true,
+      assignedToId: true,
+      // Required fields for TrainingPlan model
+      createdAt: true,
+      updatedAt: true,
+      isTemplate: true,
+      templateId: true,
+      difficulty: true,
+      active: true,
+      startDate: true,
+      endDate: true,
+      completedAt: true,
+      targetGoals: true,
+      focusTags: true,
+      premium: true,
+      weeks: {
+        orderBy: { weekNumber: 'asc' },
+        select: {
+          id: true,
+          weekNumber: true,
+          scheduledAt: true,
+          days: {
+            orderBy: { dayOfWeek: 'asc' },
+            select: {
+              id: true,
+              dayOfWeek: true,
+              isRestDay: true,
+              scheduledAt: true,
+              exercises: {
+                orderBy: { order: 'asc' },
+                select: {
+                  id: true,
+                  name: true,
+                  baseId: true,
+                  order: true,
+                  completedAt: true,
+                  base: {
+                    select: {
+                      id: true,
+                      name: true,
+                      equipment: true,
+                      muscleGroups: {
+                        select: {
+                          id: true,
+                          name: true,
+                          alias: true,
+                          groupSlug: true,
+                        },
+                      },
+                    },
+                  },
+                  sets: {
+                    orderBy: { order: 'asc' },
+                    select: {
+                      id: true,
+                      order: true,
+                      reps: true,
+                      minReps: true,
+                      maxReps: true,
+                      weight: true,
+                      rpe: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
   })
 
-  if (!plan) {
+  // Create plan only if it doesn't exist
+  if (!quickWorkoutPlan) {
     console.info('[getQuickWorkoutPlan] Creating new quick workout plan')
 
-    // Use UTC-based week start calculation
     const weekStart = getUTCWeekStart()
-
-    // Create a new quick workout plan
-    await prisma.trainingPlan.create({
+    const createdPlan = await prisma.trainingPlan.create({
       data: {
         title: 'Quick Workout',
         createdById: user.user.id,
@@ -1310,7 +1384,6 @@ export async function getQuickWorkoutPlan(context: GQLContext) {
             weekNumber: 1,
             isExtra: true,
             scheduledAt: weekStart,
-
             days: {
               createMany: {
                 data: Array.from({ length: 7 }, (_, i) => ({
@@ -1324,31 +1397,87 @@ export async function getQuickWorkoutPlan(context: GQLContext) {
           },
         },
       },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        isPublic: true,
+        isDraft: true,
+        createdById: true,
+        assignedToId: true,
+        focusTags: true,
+        premium: true,
+        // Required fields for TrainingPlan model
+        createdAt: true,
+        updatedAt: true,
+        isTemplate: true,
+        templateId: true,
+        difficulty: true,
+        active: true,
+        startDate: true,
+        endDate: true,
+        completedAt: true,
+        targetGoals: true,
+        weeks: {
+          orderBy: { weekNumber: 'asc' },
+          select: {
+            id: true,
+            weekNumber: true,
+            scheduledAt: true,
+            days: {
+              orderBy: { dayOfWeek: 'asc' },
+              select: {
+                id: true,
+                dayOfWeek: true,
+                isRestDay: true,
+                scheduledAt: true,
+                exercises: {
+                  orderBy: { order: 'asc' },
+                  select: {
+                    id: true,
+                    name: true,
+                    baseId: true,
+                    order: true,
+                    completedAt: true,
+                    base: {
+                      select: {
+                        id: true,
+                        name: true,
+                        equipment: true,
+                        muscleGroups: {
+                          select: {
+                            id: true,
+                            name: true,
+                            alias: true,
+                            groupSlug: true,
+                          },
+                        },
+                      },
+                    },
+                    sets: {
+                      orderBy: { order: 'asc' },
+                      select: {
+                        id: true,
+                        order: true,
+                        reps: true,
+                        minReps: true,
+                        maxReps: true,
+                        weight: true,
+                        rpe: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     })
+
+    quickWorkoutPlan = createdPlan
   }
 
-  const quickWorkoutPlan = await prisma.trainingPlan.findFirst({
-    where: {
-      assignedToId: user.user.id,
-      createdById: user.user.id,
-    },
-  })
-
-  if (!quickWorkoutPlan) {
-    console.error('[getQuickWorkoutPlan] Quick workout plan not found')
-    throw new GraphQLError('Quick workout plan not found')
-  }
-
-  // Use lightweight version instead of heavy getFullPlanById to prevent connection exhaustion
-  const lightPlan = await getLightPlanById(quickWorkoutPlan.id)
-
-  if (!lightPlan) {
-    console.error(
-      '[getLightPlanById] Quick workout plan not found',
-      quickWorkoutPlan.id,
-    )
-    throw new GraphQLError('Quick workout plan not found')
-  }
-
-  return new TrainingPlan(lightPlan, context)
+  // @ts-expect-error - Selective query result is compatible with TrainingPlan model
+  return new TrainingPlan(quickWorkoutPlan, context)
 }
