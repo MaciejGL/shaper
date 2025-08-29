@@ -65,6 +65,7 @@
     "@types/csv-parse": "1.2.5",
     "@types/pg": "^8.15.5",
     "@types/unzipper": "0.10.11",
+    "@vercel/functions": "^2.2.13",
     "@yudiel/react-qr-scanner": "2.3.1",
     "browser-image-compression": "2.0.2",
     "class-variance-authority": "0.7.1",

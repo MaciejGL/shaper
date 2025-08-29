@@ -1,15 +1,14 @@
 import { PrismaPg } from '@prisma/adapter-pg'
+import { attachDatabasePool } from '@vercel/functions'
 import { Pool } from 'pg'
 
 import { PrismaClient } from '@/generated/prisma/client'
 
 import { createDetailedQueryLogger } from './prisma-query-logger'
 
-type ExtendedPrismaClient = ReturnType<typeof createExtendedPrismaClient>
-
 const globalForPrisma = globalThis as unknown as {
-  prisma: ExtendedPrismaClient | undefined
-  pool: Pool | undefined
+  prisma: PrismaClient
+  pool: Pool
 }
 
 const DATABASE_CONFIG = {
@@ -27,19 +26,14 @@ const DATABASE_CONFIG = {
   MAX_USES: 2000, // Higher reuse for production scale
 } as const
 
+// Create connection pool optimized for Supabase with PgBouncer
 const createPool = () => {
   // Detect if using Supabase based on connection string
   const isSupabase = process.env.DATABASE_URL?.includes('supabase.com')
+  console.info('[DB] Creating new connection pool')
 
-  // Build connection string with aggressive limits for Vercel
-  const connectionString = process.env.DATABASE_URL?.includes(
-    'connection_limit',
-  )
-    ? process.env.DATABASE_URL
-    : `${process.env.DATABASE_URL}${process.env.DATABASE_URL?.includes('?') ? '&' : '?'}connection_limit=5&pool_timeout=30&connect_timeout=10`
-
-  return new Pool({
-    connectionString,
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
     ssl:
       process.env.NODE_ENV === 'production' || isSupabase
         ? { rejectUnauthorized: false }
@@ -49,111 +43,74 @@ const createPool = () => {
     idleTimeoutMillis: DATABASE_CONFIG.IDLE_TIMEOUT,
     connectionTimeoutMillis: DATABASE_CONFIG.CONNECTION_TIMEOUT,
     maxUses: DATABASE_CONFIG.MAX_USES,
-    allowExitOnIdle: true, // Critical for serverless - allows process to exit
-    keepAlive: false, // Disable keepAlive for serverless
-    // Serverless-optimized settings
-    query_timeout: DATABASE_CONFIG.TRANSACTION_TIMEOUT,
-    statement_timeout: DATABASE_CONFIG.TRANSACTION_TIMEOUT,
+    allowExitOnIdle: true,
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10000,
   })
+
+  // Attach the pool to ensure idle connections close before suspension
+  attachDatabasePool(pool)
+
+  return pool
 }
 
-function createExtendedPrismaClient(pool: Pool) {
-  const adapter = new PrismaPg(pool)
+// Create pool singleton - always cache to prevent multiple connections
+const pool = globalForPrisma.pool ?? createPool()
+if (!globalForPrisma.pool) {
+  globalForPrisma.pool = pool
+}
+
+const adapter = new PrismaPg(pool)
+
+// Create Prisma singleton - always cache to prevent multiple clients
+const createPrismaClient = () => {
+  console.info('[DB] Creating new Prisma client')
+
   const basePrisma = new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === 'production' ? ['error', 'warn'] : [],
+    log: process.env.NODE_ENV === 'development' ? [] : ['error'],
     transactionOptions: {
       timeout: DATABASE_CONFIG.TRANSACTION_TIMEOUT,
       maxWait: DATABASE_CONFIG.MAX_WAIT,
       isolationLevel: 'ReadCommitted',
     },
   })
+
   return basePrisma.$extends(createDetailedQueryLogger())
 }
 
-// VERCEL SERVERLESS SINGLETON PATTERN - CRITICAL FOR PREVENTING CONNECTION STORMS
-function initializeDatabase() {
-  if (!globalForPrisma.pool) {
-    console.info('[DB] Creating new connection pool')
-    globalForPrisma.pool = createPool()
-  }
-
-  if (!globalForPrisma.prisma) {
-    console.info('[DB] Creating new Prisma client')
-    globalForPrisma.prisma = createExtendedPrismaClient(globalForPrisma.pool)
-  }
-
-  return {
-    pool: globalForPrisma.pool,
-    prisma: globalForPrisma.prisma,
-  }
+export const prisma = globalForPrisma.prisma ?? createPrismaClient()
+if (!globalForPrisma.prisma) {
+  globalForPrisma.prisma = prisma
 }
 
-// Initialize database connections
-const { pool, prisma } = initializeDatabase()
+export { pool }
 
-export { prisma, pool }
+export const gracefulShutdown = async () => {
+  console.info('[DB] Closing database connections...')
+  try {
+    await pool.end()
+    await prisma.$disconnect()
+    console.info('[DB] Database connections closed successfully')
+  } catch (error) {
+    console.error('[DB] Error closing database connections:', error)
+  }
+}
 
 export const getPoolStats = () => ({
   total: pool.totalCount,
   active: pool.totalCount - pool.idleCount,
   idle: pool.idleCount,
   waiting: pool.waitingCount,
-  max: pool.options.max ?? 0,
-  min: pool.options.min ?? 0,
+  max: pool.options.max,
+  min: pool.options.min,
 })
 
-// CRITICAL: Connection monitoring for production scale
-export const logConnectionHealth = () => {
-  const stats = getPoolStats()
-  const utilization =
-    stats.max > 0 ? ((stats.active / stats.max) * 100).toFixed(1) : '0'
-
-  // Log every health check in production for 2,000+ users
-  console.info(
-    `[DB-HEALTH] Connections: ${stats.active}/${stats.max} active (${utilization}% utilization), ${stats.idle} idle, ${stats.waiting} waiting`,
-  )
-
-  // Alert at 70% utilization for production scale
-  if (stats.max > 0 && stats.active / stats.max > 0.7) {
-    console.warn(
-      `[DB-WARNING] High connection utilization: ${utilization}% - Scale alert for ${stats.waiting} waiting requests`,
-    )
-  }
-
-  // CRITICAL: Alert on any waiting connections
-  if (stats.waiting > 0) {
-    console.error(
-      `[DB-CRITICAL] ${stats.waiting} requests waiting for connections - IMMEDIATE scaling required!`,
-    )
-  }
-
-  return stats
-}
-
-// Production monitoring for 2,000+ users - CRITICAL
-if (process.env.NODE_ENV === 'production') {
-  setInterval(() => {
-    const stats = logConnectionHealth()
-
-    // URGENT: Alert conditions for production scale
-    if (stats.waiting > 5) {
-      console.error(
-        `[DB-EMERGENCY] ${stats.waiting} waiting connections - Database overload!`,
-      )
-    }
-    if (stats.active / stats.max > 0.9) {
-      console.error(
-        `[DB-EMERGENCY] ${((stats.active / stats.max) * 100).toFixed(1)}% utilization - Critical load!`,
-      )
-    }
-  }, 30000) // Check every 30 seconds in production
-}
-
-// Development monitoring
 if (process.env.NODE_ENV === 'development') {
   setInterval(() => {
     const stats = getPoolStats()
+    // if (stats.total > 0) {
     console.info('[DB-POOL]', stats)
+    // }
   }, 60000)
 }
