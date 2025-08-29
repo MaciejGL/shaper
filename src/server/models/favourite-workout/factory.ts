@@ -5,7 +5,6 @@ import {
   GQLMutationStartWorkoutFromFavouriteArgs,
   GQLUpdateFavouriteWorkoutInput,
 } from '@/generated/graphql-server'
-import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { getUTCWeekStart } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
@@ -428,8 +427,7 @@ export async function startWorkoutFromFavourite(
     throw new Error('No workout day found for today')
   }
 
-  // Copy exercises from favourite to today's workout and schedule it
-  await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+  await prisma.$transaction(async (tx) => {
     // Set today's workout as scheduled for today
     await tx.trainingDay.update({
       where: { id: todaysWorkout.id },

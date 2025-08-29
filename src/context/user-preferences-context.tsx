@@ -212,7 +212,7 @@ export function UserPreferencesProvider({
         ...initialPreferences,
       })
     }
-  }, [profileData, profileError, profileLoading])
+  }, [profileData, profileError, profileLoading, initialPreferences])
 
   // Function to register theme setter from child ThemeProvider
   const registerThemeSetter = useCallback(
