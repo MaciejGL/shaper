@@ -16,12 +16,30 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     }
 
     // Use DataLoader to batch UserProfile queries and prevent N+1 queries
-    const userProfile = await context.loaders.user.userProfileByUserId.load(
+    let userProfile = await context.loaders.user.userProfileByUserId.load(
       userSession.user.id,
     )
 
+    // If no profile exists, create one with defaults (handles legacy users)
     if (!userProfile) {
-      throw new Error('User profile not found')
+      console.info(
+        `📝 [PROFILE-RESOLVER] Creating missing profile for user ${userSession.user.id}`,
+      )
+
+      userProfile = await prisma.userProfile.create({
+        data: {
+          userId: userSession.user.id,
+          firstName: '',
+          lastName: '',
+        },
+        include: {
+          user: true,
+          bodyMeasures: true,
+        },
+      })
+
+      // Clear the loader cache so subsequent requests get the new profile
+      context.loaders.user.userProfileByUserId.clear(userSession.user.id)
     }
 
     return new UserProfile(userProfile)

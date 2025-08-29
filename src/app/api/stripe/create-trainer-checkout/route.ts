@@ -106,12 +106,21 @@ export async function POST(request: NextRequest) {
     let user = await prisma.user.findUnique({ where: { email: clientEmail } })
 
     if (!user) {
-      // Create user account for new client
+      // Create user account for new client with profile
       user = await prisma.user.create({
         data: {
           email: clientEmail,
           name: clientEmail.split('@')[0], // Temporary name
           role: 'CLIENT',
+          profile: {
+            create: {
+              firstName: '',
+              lastName: '',
+            },
+          },
+        },
+        include: {
+          profile: true,
         },
       })
     }
