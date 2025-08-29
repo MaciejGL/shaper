@@ -150,7 +150,7 @@ export default class TrainingPlan implements GQLTrainingPlan {
 
   async assignedTo() {
     if (!this.data.assignedToId) return null
-    const user = await this.context.loaders.user.userById.load(
+    const user = await this.context.loaders.user.userBasic.load(
       this.data.assignedToId,
     )
     return user ? new UserPublic(user, this.context) : null

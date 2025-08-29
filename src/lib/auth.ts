@@ -4,6 +4,7 @@ import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/db'
 import { UserWithSession } from '@/types/UserWithSession'
 
+import { invalidateUserCache } from './getUser'
 import { createUserLoaders } from './loaders/user.loader'
 
 export const authOptions = {
@@ -86,9 +87,10 @@ export const authOptions = {
   },
 
   events: {
-    async signOut() {
-      // Clear any additional session data on logout
-      // This ensures a clean logout state
+    async signOut({ session }) {
+      if (session.user?.email) {
+        await invalidateUserCache(session.user.email)
+      }
     },
   },
 } satisfies NextAuthOptions

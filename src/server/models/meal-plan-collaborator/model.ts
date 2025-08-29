@@ -74,7 +74,7 @@ export default class MealPlanCollaborator implements GQLMealPlanCollaborator {
       console.error(
         `[MealPlanCollaborator] No collaborator found for collaborator ${this.id}. Loading from database.`,
       )
-      const collaborator = await this.context.loaders.user.userById.load(
+      const collaborator = await this.context.loaders.user.userBasic.load(
         this.data.collaboratorId,
       )
       if (!collaborator) {
@@ -93,7 +93,7 @@ export default class MealPlanCollaborator implements GQLMealPlanCollaborator {
       console.error(
         `[MealPlanCollaborator] No addedBy user found for collaborator ${this.id}. Loading from database.`,
       )
-      const addedBy = await this.context.loaders.user.userById.load(
+      const addedBy = await this.context.loaders.user.userBasic.load(
         this.data.addedById,
       )
       if (!addedBy) {

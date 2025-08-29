@@ -59,7 +59,7 @@ export default class CollaborationInvitation
       console.error(
         `[CollaborationInvitation] No sender found for invitation ${this.id}. Loading from database.`,
       )
-      const sender = await this.context.loaders.user.userById.load(
+      const sender = await this.context.loaders.user.userBasic.load(
         this.data.senderId,
       )
       if (!sender) {
@@ -78,7 +78,7 @@ export default class CollaborationInvitation
       console.error(
         `[CollaborationInvitation] No recipient found for invitation ${this.id}. Loading from database.`,
       )
-      const recipient = await this.context.loaders.user.userById.load(
+      const recipient = await this.context.loaders.user.userBasic.load(
         this.data.recipientId,
       )
       if (!recipient) {
