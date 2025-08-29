@@ -117,6 +117,13 @@ export function UserPreferencesProvider({
     ...initialPreferences,
   })
 
+  // Store current preferences to avoid stale closures without causing re-renders
+  const preferencesRef = useRef({
+    ...DEFAULT_PREFERENCES,
+    ...initialPreferences,
+  })
+  preferencesRef.current = preferences
+
   // Update preferences from database when profile data loads
   useEffect(() => {
     if (profileData?.profile) {
@@ -284,10 +291,13 @@ export function UserPreferencesProvider({
   const setNotifications = useCallback(
     (notificationUpdates: Partial<NotificationPreferences>) => {
       updatePreferences({
-        notifications: { ...preferences.notifications, ...notificationUpdates },
+        notifications: {
+          ...preferencesRef.current.notifications,
+          ...notificationUpdates,
+        },
       })
     },
-    [updatePreferences, preferences.notifications],
+    [updatePreferences],
   )
 
   const value = useMemo(

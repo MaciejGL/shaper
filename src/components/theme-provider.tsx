@@ -18,26 +18,30 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     setMounted(true)
   }, [])
 
-  if (!mounted) {
-    return <>{children}</> // Render children without ThemeProvider during SSR
-  }
-
   return (
     <NextThemesProvider {...props}>
-      <ThemeConnector>{children}</ThemeConnector>
+      <ThemeConnector mounted={mounted}>{children}</ThemeConnector>
     </NextThemesProvider>
   )
 }
 
 // Component that connects the theme provider with user preferences
-function ThemeConnector({ children }: { children: React.ReactNode }) {
+function ThemeConnector({
+  children,
+  mounted,
+}: {
+  children: React.ReactNode
+  mounted: boolean
+}) {
   const { setTheme } = useTheme()
   const { registerThemeSetter } = useUserPreferences()
 
   useEffect(() => {
-    // Register the theme setter function with UserPreferencesProvider
-    registerThemeSetter(setTheme)
-  }, [setTheme, registerThemeSetter])
+    // Only register when component is mounted to avoid SSR/hydration issues
+    if (mounted) {
+      registerThemeSetter(setTheme)
+    }
+  }, [setTheme, registerThemeSetter, mounted])
 
   return <>{children}</>
 }

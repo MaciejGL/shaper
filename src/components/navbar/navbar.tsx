@@ -17,7 +17,7 @@ import { signOut } from 'next-auth/react'
 import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
 import { GQLUserRole, useNotificationsQuery } from '@/generated/graphql-client'
@@ -57,8 +57,13 @@ export const Navbar = ({
   user?: UserWithSession | null
   withSidebar?: boolean
 }) => {
+  const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
   const { isVisible } = useScrollVisibility()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
   const { data: notifications } = useNotificationsQuery(
     {
       userId: user!.user.id!,
@@ -124,7 +129,7 @@ export const Navbar = ({
               </div>
             </Link>
           </div>
-          {process.env.NODE_ENV === 'development' && (
+          {process.env.NODE_ENV === 'development' && mounted && (
             <Button
               variant="ghost"
               iconOnly={<SunIcon />}
