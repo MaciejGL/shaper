@@ -11,7 +11,10 @@ export function EmptyStateCard({
   icon: React.ElementType
 }) {
   return (
-    <Card className="flex flex-col items-center justify-center py-12">
+    <Card
+      borderless
+      className="flex flex-col items-center justify-center py-12"
+    >
       <div className="flex flex-col items-center justify-center">
         <BiggyIcon icon={icon} variant="default" />
         <div className="text-lg font-medium mb-2 mt-4">{title}</div>

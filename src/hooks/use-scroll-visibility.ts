@@ -5,7 +5,7 @@ interface UseScrollVisibilityOptions {
   threshold?: number
   /** Whether the element should be visible initially */
   initialVisible?: boolean
-  /** Custom scroll container element, defaults to element with id "main-content" */
+  /** Custom scroll container element, defaults to window scrolling */
   scrollContainer?: HTMLElement | null
   /** Distance from top in pixels to force visibility, defaults to 200px */
   topProximityThreshold?: number
@@ -16,14 +16,14 @@ interface UseScrollVisibilityOptions {
  *
  * Hides elements when scrolling down 100px, shows them when scrolling up 100px
  * Forces visibility when within 200px of the top of the page
- * Uses scroll container with id "main-content" by default
+ * Uses window scrolling by default, or custom container if provided
  * Useful for headers, floating action buttons, navigation bars, etc.
  *
  * @param options Configuration options for scroll behavior
  * @returns Object with isVisible state and manual control function
  *
  * @example
- * Basic usage - uses #main-content container:
+ * Basic usage - uses window scrolling:
  * const { isVisible } = useScrollVisibility()
  *
  * @example
@@ -57,19 +57,15 @@ export function useScrollVisibility(options: UseScrollVisibilityOptions = {}) {
 
   useEffect(() => {
     // Determine the target scroll container
-    const targetElement =
-      scrollContainer || document.getElementById('main-content')
-
-    // Exit early if no container is found
-    if (!targetElement) {
-      console.warn(
-        'useScrollVisibility: No scroll container found. Please ensure element with id="main-content" exists or provide a custom scrollContainer.',
-      )
-      return
-    }
+    // If no custom container is provided, use window for document-level scrolling
+    const useWindowScroll = !scrollContainer
+    const targetElement = scrollContainer
 
     const handleScroll = () => {
-      const currentScrollY = targetElement.scrollTop
+      // Get current scroll position based on scroll type
+      const currentScrollY = useWindowScroll
+        ? window.scrollY || document.documentElement.scrollTop
+        : targetElement!.scrollTop
 
       // Force visibility when near the top of the page
       if (currentScrollY <= topProximityThreshold) {
@@ -112,12 +108,23 @@ export function useScrollVisibility(options: UseScrollVisibilityOptions = {}) {
       lastScrollY.current = currentScrollY
     }
 
-    // Add scroll listener to the container
-    targetElement.addEventListener('scroll', handleScroll, { passive: true })
+    // Add scroll listener based on scroll type
+    if (useWindowScroll) {
+      window.addEventListener('scroll', handleScroll, { passive: true })
+    } else if (targetElement) {
+      targetElement.addEventListener('scroll', handleScroll, { passive: true })
+    } else {
+      console.warn('useScrollVisibility: No valid scroll container provided.')
+      return
+    }
 
     // Cleanup
     return () => {
-      targetElement.removeEventListener('scroll', handleScroll)
+      if (useWindowScroll) {
+        window.removeEventListener('scroll', handleScroll)
+      } else if (targetElement) {
+        targetElement.removeEventListener('scroll', handleScroll)
+      }
     }
   }, [threshold, scrollContainer, topProximityThreshold])
 

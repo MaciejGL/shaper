@@ -2,14 +2,19 @@ import { prisma } from '@lib/db'
 
 import {
   GQLMutationResolvers,
+  GQLNotificationType,
   GQLQueryResolvers,
+  GQLUserRole,
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
 import {
+  notifyClientTrainerNote,
   notifyExerciseCommentReply,
   notifyTrainerExerciseNote,
 } from '@/lib/notifications/push-notification-service'
 import { GQLContext } from '@/types/gql-context'
+
+import { createNotification } from '../notification/factory'
 
 import Note from './model'
 
@@ -255,6 +260,45 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     return notes.map((note) => new Note(note, context))
   },
 
+  trainerSharedNotes: async (_, { limit, offset }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Get notes created by the user's trainer that are shared with client (excluding replies)
+    const notes = await prisma.note.findMany({
+      where: {
+        createdBy: {
+          clients: {
+            some: { id: user.user.id },
+          },
+        },
+        metadata: {
+          path: ['shareWithClient'],
+          equals: true,
+        },
+      },
+      include: {
+        createdBy: {
+          include: { profile: true },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: limit || undefined,
+      skip: offset || undefined,
+    })
+
+    // Filter out replies in post-processing
+    const filteredNotes = notes.filter((note) => {
+      if (!note.metadata || typeof note.metadata !== 'object') return true
+      const metadata = note.metadata as { parentNoteId?: string }
+      return !metadata.parentNoteId
+    })
+
+    return filteredNotes.map((note) => new Note(note, context))
+  },
+
   noteReplies: async (_, { noteId }, context) => {
     const user = context.user
     if (!user) {
@@ -306,18 +350,26 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    const { note, relatedTo, shareWithTrainer } = input
+    const { note, relatedTo, shareWithTrainer, shareWithClient } = input
 
     // Build metadata object
-    const metadata =
-      shareWithTrainer !== undefined ? { shareWithTrainer } : undefined
+    const metadata: Record<string, unknown> = {}
+    if (shareWithTrainer !== undefined)
+      metadata.shareWithTrainer = shareWithTrainer
+    if (shareWithClient !== undefined)
+      metadata.shareWithClient = shareWithClient
+
+    const finalMetadata =
+      Object.keys(metadata).length > 0
+        ? (metadata as Prisma.InputJsonValue)
+        : undefined
 
     const newNote = await prisma.note.create({
       data: {
         text: note,
         relatedToId: relatedTo,
         createdById: user.user.id,
-        metadata,
+        metadata: finalMetadata,
       },
       include: {
         createdBy: {
@@ -325,6 +377,44 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         },
       },
     })
+
+    // Send notifications if trainer is sharing note with client
+    if (shareWithClient && user.user.role === 'TRAINER' && relatedTo) {
+      // Verify the relatedTo user is a client of this trainer
+      const client = await prisma.user.findFirst({
+        where: {
+          id: relatedTo,
+          trainerId: user.user.id,
+        },
+        include: {
+          profile: true,
+        },
+      })
+
+      if (client) {
+        // Get trainer name
+        const trainerName =
+          user.user.profile?.firstName && user.user.profile?.lastName
+            ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
+            : user.user.name || 'Your trainer'
+
+        // Send in-app notification
+        await createNotification(
+          {
+            userId: relatedTo,
+            createdBy: user.user.id,
+            type: GQLNotificationType.TrainerNoteShared,
+            message: `${trainerName} shared a note with you`,
+            link: '/fitspace/my-trainer',
+            relatedItemId: newNote.id,
+          },
+          context,
+        )
+
+        // Send push notification
+        await notifyClientTrainerNote(relatedTo, trainerName, note)
+      }
+    }
 
     return new Note(newNote, context)
   },
@@ -335,7 +425,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    const { exerciseId, note, shareWithTrainer } = input
+    const { exerciseId, note, shareWithTrainer, shareWithClient } = input
 
     // Verify the exercise belongs to the user's training plans and get trainer info
     const exercise = await prisma.trainingExercise.findFirst({
@@ -379,15 +469,23 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     }
 
     // Build metadata object
-    const metadata =
-      shareWithTrainer !== undefined ? { shareWithTrainer } : undefined
+    const metadata: Record<string, unknown> = {}
+    if (shareWithTrainer !== undefined)
+      metadata.shareWithTrainer = shareWithTrainer
+    if (shareWithClient !== undefined)
+      metadata.shareWithClient = shareWithClient
+
+    const finalMetadata =
+      Object.keys(metadata).length > 0
+        ? (metadata as Prisma.InputJsonValue)
+        : undefined
 
     const newNote = await prisma.note.create({
       data: {
         text: note,
         relatedToId: exerciseId,
         createdById: user.user.id,
-        metadata,
+        metadata: finalMetadata,
       },
       include: {
         createdBy: {
@@ -409,6 +507,98 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
         await notifyTrainerExerciseNote(plan.createdBy.id, clientName, note)
       }
+    }
+
+    return new Note(newNote, context)
+  },
+
+  createTrainerNoteForClient: async (_, { input }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    // Verify user is a trainer
+    if (user.user.role !== 'TRAINER') {
+      throw new Error('Only trainers can create notes for clients')
+    }
+
+    const { clientId, exerciseId, note, shareWithClient } = input
+
+    // Verify the client is assigned to this trainer
+    const client = await prisma.user.findFirst({
+      where: {
+        id: clientId,
+        trainerId: user.user.id,
+      },
+      include: {
+        profile: true,
+      },
+    })
+
+    if (!client) {
+      throw new Error('Client not found or access denied')
+    }
+
+    // Verify the exercise belongs to a training plan assigned to this client
+    const exercise = await prisma.trainingExercise.findFirst({
+      where: {
+        id: exerciseId,
+        day: {
+          week: {
+            plan: {
+              assignedToId: clientId,
+              createdById: user.user.id,
+            },
+          },
+        },
+      },
+    })
+
+    if (!exercise) {
+      throw new Error('Exercise not found or access denied')
+    }
+
+    // Build metadata object
+    const metadata =
+      shareWithClient !== undefined ? { shareWithClient } : undefined
+
+    const newNote = await prisma.note.create({
+      data: {
+        text: note,
+        relatedToId: exerciseId,
+        createdById: user.user.id,
+        metadata,
+      },
+      include: {
+        createdBy: {
+          include: { profile: true },
+        },
+      },
+    })
+
+    // Send notification to client if note is shared
+    if (shareWithClient) {
+      const trainerName =
+        user.user.profile?.firstName && user.user.profile?.lastName
+          ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
+          : user.user.name || 'Your trainer'
+
+      // Create app notification
+      await createNotification(
+        {
+          userId: clientId,
+          createdBy: user.user.id,
+          type: GQLNotificationType.TrainerNoteShared,
+          message: `${trainerName} shared a note with you`,
+          link: '/fitspace/my-trainer',
+          relatedItemId: newNote.id,
+        },
+        context,
+      )
+
+      // Send push notification
+      await notifyClientTrainerNote(clientId, trainerName, note)
     }
 
     return new Note(newNote, context)
@@ -440,7 +630,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     // 2. The original note creator (client replying to trainer reply)
     let canReply = false
 
-    if (user.user.role === 'TRAINER') {
+    if (user.user.role === GQLUserRole.Trainer) {
       // Verify the note creator is the trainer's client
       const client = await prisma.user.findFirst({
         where: {
@@ -448,10 +638,37 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
           trainerId: user.user.id,
         },
       })
+
       canReply = !!client
     } else {
-      // Client can reply to their own notes or trainer replies to their notes
-      canReply = parentNote.createdById === user.user.id
+      // Client can reply if:
+      // 1. They created the note themselves, OR
+      // 2. The note was shared with them by their trainer
+
+      if (parentNote.createdById === user.user.id) {
+        // Client replying to their own note
+        canReply = true
+      } else {
+        // Check if this is a trainer note shared with the client
+        const noteMetadata = parentNote.metadata as {
+          shareWithClient?: boolean
+        } | null
+        const isSharedWithClient = noteMetadata?.shareWithClient === true
+
+        if (isSharedWithClient) {
+          // Verify the note creator is this client's trainer
+          const trainer = await prisma.user.findFirst({
+            where: {
+              id: parentNote.createdById,
+              role: 'TRAINER',
+              clients: {
+                some: { id: user.user.id },
+              },
+            },
+          })
+          canReply = !!trainer
+        }
+      }
     }
 
     if (!canReply) {
@@ -489,28 +706,56 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   },
 
   updateNote: async (_, { input }, context) => {
-    const { id, note, shareWithTrainer } = input
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
 
-    // Build metadata object, preserving existing metadata if shareWithTrainer is not provided
+    const { id, note, shareWithTrainer, shareWithClient } = input
+
+    // Get existing note to check current sharing status
+    const existingNote = await prisma.note.findUnique({
+      where: { id },
+      select: {
+        metadata: true,
+        relatedToId: true,
+        createdById: true,
+      },
+    })
+
+    if (!existingNote) {
+      throw new Error('Note not found')
+    }
+
+    // Check if user owns the note
+    if (existingNote.createdById !== user.user.id) {
+      throw new Error('You can only update your own notes')
+    }
+
+    const existingMetadata =
+      (existingNote?.metadata as Record<string, unknown>) || {}
+    const wasSharedWithClient = existingMetadata.shareWithClient === true
+
+    // Build metadata object, preserving existing metadata if sharing options are not provided
     const updateData: { text: string; metadata?: Prisma.InputJsonValue } = {
       text: note,
     }
 
-    if (shareWithTrainer !== undefined) {
-      // Get existing metadata to preserve other fields
-      const existingNote = await prisma.note.findUnique({
-        where: { id },
-        select: { metadata: true },
-      })
-
-      const existingMetadata =
-        (existingNote?.metadata as Record<string, unknown>) || {}
-      updateData.metadata = {
+    if (shareWithTrainer !== undefined || shareWithClient !== undefined) {
+      const newMetadata = {
         ...(typeof existingMetadata === 'object' && existingMetadata !== null
           ? existingMetadata
           : {}),
-        shareWithTrainer,
       }
+
+      if (shareWithTrainer !== undefined) {
+        newMetadata.shareWithTrainer = shareWithTrainer
+      }
+      if (shareWithClient !== undefined) {
+        newMetadata.shareWithClient = shareWithClient
+      }
+
+      updateData.metadata = newMetadata as Prisma.InputJsonValue
     }
 
     const newNote = await prisma.note.update({
@@ -522,6 +767,53 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         },
       },
     })
+
+    // Send notifications if trainer is newly sharing note with client
+    if (
+      shareWithClient &&
+      !wasSharedWithClient &&
+      user.user.role === 'TRAINER' &&
+      existingNote.relatedToId
+    ) {
+      // Verify the relatedTo user is a client of this trainer
+      const client = await prisma.user.findFirst({
+        where: {
+          id: existingNote.relatedToId,
+          trainerId: user.user.id,
+        },
+        include: {
+          profile: true,
+        },
+      })
+
+      if (client) {
+        // Get trainer name
+        const trainerName =
+          user.user.profile?.firstName && user.user.profile?.lastName
+            ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
+            : user.user.name || 'Your trainer'
+
+        // Send in-app notification
+        await createNotification(
+          {
+            userId: existingNote.relatedToId,
+            createdBy: user.user.id,
+            type: GQLNotificationType.TrainerNoteShared,
+            message: `${trainerName} shared a note with you`,
+            link: '/fitspace/my-trainer',
+            relatedItemId: newNote.id,
+          },
+          context,
+        )
+
+        // Send push notification
+        await notifyClientTrainerNote(
+          existingNote.relatedToId,
+          trainerName,
+          note,
+        )
+      }
+    }
 
     return new Note(newNote, context)
   },

@@ -44,9 +44,9 @@ export function RepFocusSelector({
 }: RepFocusSelectorProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.2 }}
+      transition={{ duration: 0.07, delay: 0.03 }}
       className={className}
     >
       <Card>
@@ -59,7 +59,7 @@ export function RepFocusSelector({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {REP_FOCUS_OPTIONS.map((option) => (
               <RadioOption
                 key={option.value}
@@ -70,6 +70,7 @@ export function RepFocusSelector({
                 description={option.description}
                 name="repFocus"
                 variant="default"
+                className="py-2"
               />
             ))}
           </div>

@@ -33,21 +33,21 @@ export function DeleteFavouriteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent dialogTitle="Delete Favourite Workout">
+      <DialogContent dialogTitle="Delete Template Workout">
         <DialogHeader>
-          <DialogTitle>Delete Favourite Workout</DialogTitle>
+          <DialogTitle>Delete Template Workout</DialogTitle>
           <DialogDescription>
             Are you sure you want to delete "{favourite.title}"?
           </DialogDescription>
         </DialogHeader>
 
-        <div className="bg-muted/50 p-4 rounded-lg">
-          <p className="text-sm text-muted-foreground">
-            This action cannot be undone. The favourite workout and all its
+        <div className="bg-card-on-card p-4 rounded-lg">
+          <p className="text-sm dark:text-muted-foreground">
+            This action cannot be undone. The template workout and all its
             exercises will be permanently deleted.
           </p>
           {favourite.exercises.length > 0 && (
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm dark:text-muted-foreground mt-2">
               <strong>{favourite.exercises.length} exercises</strong> will be
               removed.
             </p>
@@ -64,7 +64,7 @@ export function DeleteFavouriteDialog({
             disabled={isDeleting}
             loading={isDeleting}
           >
-            Delete Favourite
+            Delete Template
           </Button>
         </div>
       </DialogContent>

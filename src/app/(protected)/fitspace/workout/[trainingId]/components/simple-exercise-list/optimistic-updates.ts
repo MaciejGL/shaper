@@ -6,6 +6,7 @@ import type { GQLFitspaceGetWorkoutQuery } from '@/generated/graphql-client'
 export const createOptimisticSetUpdate = (
   setId: string,
   completed: boolean,
+  logValues?: { reps?: number | null; weight?: number | null },
 ) => {
   return (oldData: GQLFitspaceGetWorkoutQuery) => {
     if (!oldData?.getWorkout?.plan) return oldData
@@ -23,6 +24,17 @@ export const createOptimisticSetUpdate = (
           setsToUpdate.forEach((set) => {
             if (set.id === setId) {
               set.completedAt = completed ? new Date().toISOString() : null
+
+              // Update log values if completing the set and log values are provided
+              if (completed && logValues) {
+                set.log = {
+                  id: set.log?.id || 'temp-id',
+                  reps: logValues.reps || null,
+                  weight: logValues.weight || null,
+                  rpe: set.log?.rpe || null,
+                  createdAt: new Date().toISOString(),
+                }
+              }
             }
           })
         })

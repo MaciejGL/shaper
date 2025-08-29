@@ -272,9 +272,12 @@ export function OptimizedExerciseForm({
   const handleAddSet = useCallback(async () => {
     if (!exerciseId) return
 
+    // Find the maximum existing order to ensure proper sequential ordering
+    const maxOrder =
+      localSets.length > 0 ? Math.max(...localSets.map((set) => set.order)) : 0
     const newSet: LocalSet = {
       id: crypto.randomUUID(),
-      order: localSets.length + 1,
+      order: maxOrder + 1,
       minReps: '',
       maxReps: '',
       weight: '',
@@ -313,17 +316,29 @@ export function OptimizedExerciseForm({
           },
           onError: (error) => {
             console.error('Failed to add set:', error)
-            setLocalSets((currentSets) =>
-              currentSets.filter((set) => set.id !== newSet.id),
-            )
+            setLocalSets((currentSets) => {
+              const filteredSets = currentSets.filter(
+                (set) => set.id !== newSet.id,
+              )
+              // Reorder remaining sets to maintain sequential ordering
+              return filteredSets.map((set, index) => ({
+                ...set,
+                order: index + 1,
+              }))
+            })
           },
         },
       )
     } catch (error) {
       console.error('Failed to add set:', error)
-      setLocalSets((currentSets) =>
-        currentSets.filter((set) => set.id !== newSet.id),
-      )
+      setLocalSets((currentSets) => {
+        const filteredSets = currentSets.filter((set) => set.id !== newSet.id)
+        // Reorder remaining sets to maintain sequential ordering
+        return filteredSets.map((set, index) => ({
+          ...set,
+          order: index + 1,
+        }))
+      })
     }
   }, [exerciseId, addSetMutation, localSets, debouncedInvalidateQueries])
 
@@ -333,10 +348,15 @@ export function OptimizedExerciseForm({
       const setToRemove = localSets.find((set) => set.id === setId)
       if (!setToRemove) return
 
-      // Optimistic update - remove immediately
-      setLocalSets((currentSets) =>
-        currentSets.filter((set) => set.id !== setId),
-      )
+      // Optimistic update - remove immediately and reorder remaining sets
+      setLocalSets((currentSets) => {
+        const filteredSets = currentSets.filter((set) => set.id !== setId)
+        // Reorder remaining sets to maintain sequential ordering
+        return filteredSets.map((set, index) => ({
+          ...set,
+          order: index + 1,
+        }))
+      })
 
       removeSetMutation(
         { setId },

@@ -56,8 +56,8 @@ export function PlanActionDialog({
     activate: {
       title: isPaused ? 'Resume Plan' : 'Activate Plan',
       description: isPaused
-        ? `Are you sure you want to resume "${plan.title}"? This will become your active training plan.`
-        : `Are you sure you want to activate "${plan.title}"? This will become your active training plan.`,
+        ? `"${plan.title}" will become your active training plan.`
+        : `"${plan.title}" will become your active training plan.`,
       confirmText: isPaused ? 'Resume Plan' : 'Activate Plan',
       icon: <BicepsFlexed className="size-4" />,
     },

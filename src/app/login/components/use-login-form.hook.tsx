@@ -60,7 +60,7 @@ export const useLoginForm = () => {
         email,
         otp,
         redirect: false,
-        callbackUrl: '/fitspace/dashboard',
+        callbackUrl: '/fitspace/workout',
       })
 
       if (result?.error) {

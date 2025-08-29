@@ -1,4 +1,5 @@
 import {
+  GQLDeliveryStatus,
   GQLMutationUpdateServiceTaskArgs,
   GQLQueryGetServiceDeliveryTasksArgs,
   GQLQueryGetTrainerTasksArgs,
@@ -7,6 +8,8 @@ import {
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
+
+import { updateServiceDelivery } from '../subscription/factory'
 
 import ServiceTask from './model'
 
@@ -209,5 +212,75 @@ export async function updateServiceTask(
     },
   })
 
+  // Check if all tasks in this service delivery are completed
+  // and update delivery status accordingly
+  await checkAndUpdateServiceDeliveryStatus(
+    updatedTask.serviceDeliveryId,
+    context,
+  )
+
   return new ServiceTask(updatedTask, context)
+}
+
+/**
+ * Check if all tasks in a service delivery are completed and update delivery status
+ */
+async function checkAndUpdateServiceDeliveryStatus(
+  serviceDeliveryId: string,
+  context: GQLContext,
+) {
+  // Get the current service delivery
+  const serviceDelivery = await prisma.serviceDelivery.findUnique({
+    where: { id: serviceDeliveryId },
+    select: { status: true },
+  })
+
+  if (!serviceDelivery) {
+    return // Service delivery not found, nothing to update
+  }
+
+  // Skip if already completed or cancelled
+  if (
+    serviceDelivery.status === 'COMPLETED' ||
+    serviceDelivery.status === 'CANCELLED'
+  ) {
+    return
+  }
+
+  // Get all tasks for this service delivery
+  const allTasks = await prisma.serviceTask.findMany({
+    where: { serviceDeliveryId },
+    select: { status: true, isRequired: true },
+  })
+
+  // Check if all required tasks are completed
+  const requiredTasks = allTasks.filter((task) => task.isRequired)
+  const completedRequiredTasks = requiredTasks.filter(
+    (task) => task.status === GQLTaskStatus.Completed,
+  )
+
+  // If all required tasks are completed, mark delivery as completed
+  if (
+    requiredTasks.length > 0 &&
+    completedRequiredTasks.length === requiredTasks.length
+  ) {
+    await updateServiceDelivery(
+      serviceDeliveryId,
+      GQLDeliveryStatus.Completed,
+      'All required tasks completed automatically',
+      context,
+    )
+  }
+  // If at least one task is in progress, mark delivery as in progress
+  else if (
+    allTasks.some((task) => task.status === GQLTaskStatus.InProgress) &&
+    serviceDelivery.status === 'PENDING'
+  ) {
+    await updateServiceDelivery(
+      serviceDeliveryId,
+      GQLDeliveryStatus.InProgress,
+      undefined,
+      context,
+    )
+  }
 }

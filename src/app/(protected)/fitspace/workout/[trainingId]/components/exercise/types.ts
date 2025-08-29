@@ -2,8 +2,6 @@ import { WorkoutExercise } from '../workout-page.client'
 
 export interface ExerciseProps {
   exercise: WorkoutExercise
-  exercises: WorkoutExercise[]
-  onPaginationClick: (exerciseId: string, type: 'prev' | 'next') => void
 }
 
 export interface ExerciseHeaderProps {
@@ -25,16 +23,21 @@ export interface ExerciseSetsProps {
     performedOnWeekNumber: number
     performedOnDayNumber: number
   })[]
-  isExerciseCompleted: boolean
 }
 
 export interface ExerciseSetProps {
   set: WorkoutExercise['sets'][number]
+  previousSetWeightLog?: number | null
+  previousSetRepsLog?: number | null
   previousLogs: (WorkoutExercise & {
     performedOnWeekNumber: number
     performedOnDayNumber: number
   })[]
-  isExerciseCompleted: boolean
+  reps: string
+  weight: string
+  onRepsChange: (reps: string) => void
+  onWeightChange: (weight: string) => void
+  onDelete: () => void
 }
 
 export interface ExerciseMetadataProps {

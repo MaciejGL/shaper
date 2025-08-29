@@ -36,8 +36,8 @@ export function SuccessPage({
   const packageSummary = offer.packageSummary as unknown as PackageSummaryItem[]
 
   const packageIds = packageSummary.map((item) => item.packageId).join(',')
-  const appDeepLink = `hypertro://fitspace/dashboard?token=${offer.token}&trainer=${offer.trainerId}&packages=${packageIds}`
-  const url = `${getBaseUrl()}/fitspace/dashboard`
+  const appDeepLink = `hypertro://fitspace/workout?token=${offer.token}&trainer=${offer.trainerId}&packages=${packageIds}`
+  const url = `${getBaseUrl()}/fitspace/workout`
 
   const handleReturnToApp = useCallback(() => {
     // Try to open the app with deep link

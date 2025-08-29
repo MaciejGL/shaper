@@ -52,9 +52,16 @@ export function PlanDetailsDrawer({
     <Drawer open={open} onOpenChange={onClose}>
       <SimpleDrawerContent
         title={plan.title}
-        headerIcon={<BicepsFlexed className="size-5" />}
         footer={
           <div className="flex items-center justify-end gap-2">
+            <Button
+              variant="destructive"
+              disabled={isButtonLoading}
+              onClick={() => onAction('delete', plan)}
+              className="mr-auto"
+            >
+              Delete
+            </Button>
             <DrawerClose asChild>
               <Button variant="secondary" disabled={isButtonLoading}>
                 Close
@@ -126,12 +133,7 @@ export function PlanDetailsDrawer({
 
           {/* Plan Creator */}
           {'createdBy' in plan && plan.createdBy && (
-            <div className="border-t pt-4">
-              <div className="text-sm text-muted-foreground mb-2">
-                Created by
-              </div>
-              <PlanAuthor createdBy={plan.createdBy} />
-            </div>
+            <PlanAuthor createdBy={plan.createdBy} />
           )}
         </div>
       </SimpleDrawerContent>

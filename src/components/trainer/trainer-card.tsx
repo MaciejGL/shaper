@@ -69,6 +69,7 @@ export function TrainerCard({
       className={`${onClick ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''} ${className}`}
       variant={variant}
       onClick={onClick}
+      borderless
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">

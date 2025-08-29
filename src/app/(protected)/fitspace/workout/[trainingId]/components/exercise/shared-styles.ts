@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
 
 export const sharedLayoutStyles = cn(
-  'w-full py-1 px-2.5 grid grid-cols-[auto_1fr_1fr_1fr_auto] gap-3 items-center',
+  'w-full px-2 grid grid-cols-[1.5rem_4fr_4fr_4fr_1.75rem] gap-2 items-center',
 )

@@ -86,6 +86,7 @@ export async function getMyServiceDeliveries(
   const deliveries = await prisma.serviceDelivery.findMany({
     where,
     include: {
+      tasks: true,
       trainer: {
         include: {
           profile: true,

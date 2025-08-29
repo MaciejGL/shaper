@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { debounce } from 'lodash'
+import { debounce, isNil } from 'lodash'
 import { CheckIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
@@ -7,6 +7,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { SwipeToReveal } from '@/components/ui/swipe-to-reveal'
+import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutQuery,
   useFitspaceGetWorkoutQuery,
@@ -23,10 +25,20 @@ import { createOptimisticSetUpdate } from '../simple-exercise-list/optimistic-up
 import { sharedLayoutStyles } from './shared-styles'
 import { ExerciseSetProps } from './types'
 
-export function ExerciseSet({ set, previousLogs }: ExerciseSetProps) {
+export function ExerciseSet({
+  set,
+  previousSetWeightLog,
+  previousSetRepsLog,
+  previousLogs,
+  reps,
+  weight,
+  onRepsChange,
+  onWeightChange,
+  onDelete,
+}: ExerciseSetProps) {
   const { trainingId } = useParams<{ trainingId: string }>()
-  const [reps, setReps] = useState('')
-  const [weight, setWeight] = useState('')
+  const { preferences } = useUserPreferences()
+
   const [isCompletingSet, setIsCompletingSet] = useState(false)
   const hasUserEdited = useRef(false)
   const { toDisplayWeight } = useWeightConversion()
@@ -94,7 +106,7 @@ export function ExerciseSet({ set, previousLogs }: ExerciseSetProps) {
 
   const { mutateAsync: markSetAsCompleted } =
     useFitspaceMarkSetAsCompletedMutation({
-      onMutate: async ({ setId, completed }) => {
+      onMutate: async ({ setId, completed, reps, weight }) => {
         // Cancel outgoing queries to prevent race conditions
         const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
         await queryClient.cancelQueries({ queryKey })
@@ -103,10 +115,10 @@ export function ExerciseSet({ set, previousLogs }: ExerciseSetProps) {
         const previousData =
           queryClient.getQueryData<GQLFitspaceGetWorkoutQuery>(queryKey)
 
-        // Optimistically update the cache
+        // Optimistically update the cache with both completion status and log values
         queryClient.setQueryData(
           queryKey,
-          createOptimisticSetUpdate(setId, completed),
+          createOptimisticSetUpdate(setId, completed, { reps, weight }),
         )
 
         return { previousData }
@@ -127,25 +139,8 @@ export function ExerciseSet({ set, previousLogs }: ExerciseSetProps) {
       },
     })
 
-  const handleToggleSetCompletion = async () => {
-    setIsCompletingSet(true)
-    try {
-      await markSetAsCompleted({
-        setId: set.id,
-        completed: !set.completedAt,
-      })
-    } catch (error) {
-      console.error('Failed to toggle set completion:', error)
-      setIsCompletingSet(false)
-    }
-  }
-
-  useEffect(() => {
-    if (set.log && !hasUserEdited.current) {
-      setReps(set.log.reps?.toString() ?? '')
-      setWeight(set.log.weight?.toString() ?? '')
-    }
-  }, [set.log])
+  // Remove the useEffect as state is now managed by parent component
+  // The initial values are already set in the parent's setsLogs state
 
   const debouncedUpdate = useMemo(
     () =>
@@ -167,10 +162,22 @@ export function ExerciseSet({ set, previousLogs }: ExerciseSetProps) {
     return () => debouncedUpdate.cancel()
   }, [reps, weight, debouncedUpdate])
 
-  const repRange =
-    set.minReps && set.maxReps
-      ? `${set.minReps}-${set.maxReps}`
-      : (set.minReps ?? set.maxReps ?? set.reps)
+  const repRange = useMemo(() => {
+    switch (true) {
+      case typeof set.minReps === 'number' &&
+        typeof set.maxReps === 'number' &&
+        set.minReps === set.maxReps:
+        return `${set.minReps}`
+      case typeof set.minReps === 'number' && typeof set.maxReps === 'number':
+        return `${set.minReps}-${set.maxReps}`
+      case typeof set.minReps === 'number':
+        return `${set.minReps}`
+      case typeof set.maxReps === 'number':
+        return `${set.maxReps}`
+      default:
+        return set.reps
+    }
+  }, [set.minReps, set.maxReps, set.reps])
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -184,99 +191,170 @@ export function ExerciseSet({ set, previousLogs }: ExerciseSetProps) {
     hasUserEdited.current = true
 
     if (key === 'reps') {
-      setReps(sanitizedValue)
+      onRepsChange(sanitizedValue)
     } else {
-      setWeight(sanitizedValue)
+      onWeightChange(sanitizedValue)
     }
   }
 
-  const showLabel =
-    !set.isExtra &&
-    (set.reps || set.minReps || set.maxReps || set.weight || set.rpe)
+  // Get data from previous workout for the "PREVIOUS" column (same set order from most recent workout with data)
+  const getPreviousSetForColumn = () => {
+    // Look through previous workouts from most recent to oldest to find logged data
+    for (let i = previousLogs.length - 1; i >= 0; i--) {
+      const workoutLog = previousLogs[i]
+      const correspondingSet = workoutLog.sets.find(
+        (s) => s.order === set.order,
+      )
+      if (correspondingSet?.log) {
+        return correspondingSet
+      }
+    }
+    return null
+  }
 
-  const lastLog = previousLogs[previousLogs.length - 1]
-  const thisSet = lastLog?.sets[set.order - 1]
+  const thisSet = getPreviousSetForColumn()
+
+  // Debug logging for troublesome exercises
+  if (process.env.NODE_ENV === 'development' && set.order === 1) {
+    const exerciseName = previousLogs[0]?.name
+    if (exerciseName === 'Pec Deck Machine') {
+      console.info('Pec Deck Machine - Previous Column Debug:', {
+        exerciseName,
+        setOrder: set.order,
+        thisSet,
+        previousLogsLength: previousLogs.length,
+        allPreviousLogs: previousLogs.map((log, index) => ({
+          index,
+          name: log.name,
+          setsCount: log.sets.length,
+          targetSet: log.sets.find((s) => s.order === set.order),
+        })),
+      })
+    }
+  }
+
+  const handleToggleSetCompletion = async () => {
+    setIsCompletingSet(true)
+    try {
+      await markSetAsCompleted({
+        setId: set.id,
+        completed: !set.completedAt,
+        reps: reps ? +reps : previousSetRepsLog || null,
+        weight: weight ? +weight : previousSetWeightLog || null,
+      })
+    } catch (error) {
+      console.error('Failed to toggle set completion:', error)
+      setIsCompletingSet(false)
+    }
+  }
 
   return (
     <AnimateChangeInHeight>
-      {showLabel && (
+      <SwipeToReveal
+        actions={[
+          {
+            id: 'remove',
+            label: 'Remove',
+            onClick: onDelete,
+          },
+        ]}
+        isSwipeable={set.isExtra && !isCompletingSet}
+        className="bg-card border-b border-border/50"
+      >
         <div className="flex items-center gap-1">
           <div
             className={cn(
               sharedLayoutStyles,
-              'bg-secondary/50 dark:bg-card/50 pb-2 -mb-2 dark:border-none',
+              'pb-0.5 pt-1 leading-none',
+              set.isExtra && 'opacity-0',
             )}
           >
-            <div className="min-w-2.5"></div>
-            <div className="text-xs text-muted-foreground text-center min-w-[96px]">
-              {repRange}
+            <div />
+            <div />
+            <div className="text-[0.625rem] text-muted-foreground text-center">
+              {set.isExtra ? 'Extra' : repRange}
             </div>
-            <div className="text-xs text-muted-foreground text-center min-w-[96px]">
+            <div className="text-[0.625rem] text-muted-foreground text-center">
               {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : ''}
             </div>
-            <div className="" />
-            <div className="min-w-[40px]" />
+            <div />
           </div>
         </div>
-      )}
 
-      <div className={cn('flex items-start gap-1', set.isExtra && 'pt-2')}>
-        <div>
-          <div
-            className={cn(
-              sharedLayoutStyles,
-              'rounded-md bg-muted dark:bg-secondary text-primary relative',
-            )}
-          >
-            <div className="min-w-2.5 text-sm text-muted-foreground">
-              {set.order}.
-            </div>
-            <Input
-              id={`set-${set.id}-reps`}
-              value={reps}
-              onChange={(e) => handleInputChange(e, 'reps')}
-              inputMode="decimal"
-              variant={'secondary'}
-              placeholder={thisSet?.log?.reps?.toString() || ''}
-              className="min-w-[96px] text-center bg-white"
-            />
-            <ExerciseWeightInput
-              setId={set.id}
-              weightInKg={weight ? parseFloat(weight) : null}
-              onWeightChange={(weightInKg) => {
-                hasUserEdited.current = true
-                setWeight(weightInKg?.toString() || '')
-              }}
-              placeholder={
-                thisSet?.log?.weight
-                  ? toDisplayWeight(thisSet.log.weight)?.toString()
-                  : ''
-              }
-              disabled={false}
-            />
-            <div className="text-sm text-center">{set.rpe}</div>
-            <div className="flex justify-center">
-              <Button
-                variant="tertiary"
-                size="icon-sm"
-                iconOnly={
-                  <CheckIcon
-                    className={cn(
-                      'size-4 transition-colors',
-                      set.completedAt
-                        ? 'text-green-500'
-                        : 'text-muted-foreground/40',
-                    )}
-                  />
-                }
-                loading={isCompletingSet}
-                onClick={handleToggleSetCompletion}
-                className="self-center"
+        <div className={cn('flex items-start gap-1 pb-1')}>
+          <div>
+            <div className={cn(sharedLayoutStyles, 'text-primary relative')}>
+              <div className="text-sm text-muted-foreground text-center">
+                {set.order}
+              </div>
+              <div className="text-xs text-muted-foreground text-center">
+                <div>
+                  {!isNil(thisSet?.log?.reps || thisSet?.log?.weight) ? (
+                    <p>
+                      {typeof thisSet?.log?.reps === 'number'
+                        ? thisSet.log.reps.toString()
+                        : ''}
+                      {!isNil(thisSet?.log?.weight) &&
+                        !isNil(thisSet?.log?.reps) &&
+                        ' x '}
+                      {typeof thisSet?.log?.weight === 'number'
+                        ? toDisplayWeight(thisSet.log.weight)?.toString() +
+                          preferences.weightUnit
+                        : ''}
+                    </p>
+                  ) : (
+                    <div className="bg-muted w-6 h-0.5 rounded-md mx-auto" />
+                  )}
+                </div>
+              </div>
+              <Input
+                id={`set-${set.id}-reps`}
+                value={reps}
+                onChange={(e) => handleInputChange(e, 'reps')}
+                inputMode="decimal"
+                variant={'secondary'}
+                placeholder={previousSetRepsLog?.toString() || ''}
+                className="text-center"
+                size="sm"
               />
+              <ExerciseWeightInput
+                setId={set.id}
+                weightInKg={weight ? parseFloat(weight) : null}
+                onWeightChange={(weightInKg) => {
+                  hasUserEdited.current = true
+                  onWeightChange(weightInKg?.toString() || '')
+                }}
+                placeholder={
+                  previousSetWeightLog
+                    ? toDisplayWeight(previousSetWeightLog)?.toString()
+                    : ''
+                }
+                disabled={false}
+                showWeightUnit={false}
+              />
+              <div className="flex justify-center">
+                <Button
+                  variant="tertiary"
+                  size="icon-xs"
+                  iconOnly={
+                    <CheckIcon
+                      className={cn(
+                        'size-4 transition-colors',
+                        set.completedAt
+                          ? 'text-green-500'
+                          : 'text-muted-foreground/40',
+                      )}
+                    />
+                  }
+                  loading={isCompletingSet}
+                  onClick={handleToggleSetCompletion}
+                  className="self-center"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </SwipeToReveal>
     </AnimateChangeInHeight>
   )
 }

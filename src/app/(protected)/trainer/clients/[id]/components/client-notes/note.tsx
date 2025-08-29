@@ -1,8 +1,10 @@
-import { Check, Edit3, Trash2, X } from 'lucide-react'
+import { Check, Edit3, Share, Trash2, X } from 'lucide-react'
 
 import { AnimatedContainer } from '@/components/animations/animated-container'
 import { Divider } from '@/components/divider'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 
@@ -13,6 +15,7 @@ export function Note({
   note,
   isEditing,
   editingText,
+  editingShareWithClient,
   isUpdatingNote,
   isDeletingNote,
   loading,
@@ -21,10 +24,12 @@ export function Note({
   onCancelEdit,
   onDeleteNote,
   onEditingTextChange,
+  onEditingShareWithClientChange,
 }: {
   note: Note
   isEditing: boolean
   editingText: string
+  editingShareWithClient: boolean
   isUpdatingNote: boolean
   isDeletingNote: boolean
   loading: boolean
@@ -33,6 +38,7 @@ export function Note({
   onCancelEdit: () => void
   onDeleteNote: (id: string) => void
   onEditingTextChange: (text: string) => void
+  onEditingShareWithClientChange: (share: boolean) => void
 }) {
   return (
     <div
@@ -52,6 +58,20 @@ export function Note({
                 className="min-h-[120px] resize-none border-none dark:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none -m-2 p-2 leading-relaxed"
                 autoFocus
               />
+
+              <div className="flex items-center space-x-2 mt-3">
+                <Switch
+                  id="share-edit-note-client"
+                  checked={editingShareWithClient}
+                  onCheckedChange={onEditingShareWithClientChange}
+                />
+                <Label
+                  htmlFor="share-edit-note-client"
+                  className="text-sm text-muted-foreground"
+                >
+                  Share with client
+                </Label>
+              </div>
 
               <Divider className="mb-2" />
 
@@ -98,15 +118,27 @@ export function Note({
               >
                 {note.text}
               </p>
-              <p className="text-xs text-muted-foreground">
-                {new Date(note.createdAt).toLocaleDateString('en-GB', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </p>
+
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center gap-3">
+                  {note.shareWithClient && (
+                    <div className="flex items-center gap-1.5 text-xs text-green-600 dark:text-green-400">
+                      <Share className="h-3 w-3" />
+                      <span>Shared with client</span>
+                    </div>
+                  )}
+                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  {new Date(note.createdAt).toLocaleDateString('en-GB', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </p>
+              </div>
             </>
           )}
         </div>

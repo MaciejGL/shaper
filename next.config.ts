@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/fitspace',
-        destination: '/fitspace/dashboard',
+        destination: '/fitspace/workout',
         permanent: true,
       },
     ]

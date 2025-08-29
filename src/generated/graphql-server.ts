@@ -368,6 +368,7 @@ export type GQLCreateExerciseInput = {
 export type GQLCreateExerciseNoteInput = {
   exerciseId: Scalars['String']['input'];
   note: Scalars['String']['input'];
+  shareWithClient?: InputMaybe<Scalars['Boolean']['input']>;
   shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -465,6 +466,7 @@ export type GQLCreateMealWeekInput = {
 export type GQLCreateNoteInput = {
   note: Scalars['String']['input'];
   relatedTo?: InputMaybe<Scalars['ID']['input']>;
+  shareWithClient?: InputMaybe<Scalars['Boolean']['input']>;
   shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -498,6 +500,13 @@ export type GQLCreateReviewInput = {
   comment?: InputMaybe<Scalars['String']['input']>;
   rating: Scalars['Int']['input'];
   trainingPlanId: Scalars['ID']['input'];
+};
+
+export type GQLCreateTrainerNoteForClientInput = {
+  clientId: Scalars['String']['input'];
+  exerciseId: Scalars['String']['input'];
+  note: Scalars['String']['input'];
+  shareWithClient?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type GQLCreateTrainingDayInput = {
@@ -1002,6 +1011,7 @@ export type GQLMutation = {
   createPushSubscription: EntireFieldWrapper<GQLPushSubscription>;
   createQuickWorkout: EntireFieldWrapper<GQLTrainingPlan>;
   createReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  createTrainerNoteForClient: EntireFieldWrapper<GQLNote>;
   createTrainingPlan: EntireFieldWrapper<GQLCreateTrainingPlanPayload>;
   deactivateUser: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteBodyMeasurement: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1277,6 +1287,11 @@ export type GQLMutationCreateReviewArgs = {
 };
 
 
+export type GQLMutationCreateTrainerNoteForClientArgs = {
+  input: GQLCreateTrainerNoteForClientInput;
+};
+
+
 export type GQLMutationCreateTrainingPlanArgs = {
   input: GQLCreateTrainingPlanInput;
 };
@@ -1413,7 +1428,9 @@ export type GQLMutationMarkNotificationReadArgs = {
 
 export type GQLMutationMarkSetAsCompletedArgs = {
   completed: Scalars['Boolean']['input'];
+  reps?: InputMaybe<Scalars['Int']['input']>;
   setId: Scalars['ID']['input'];
+  weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
 
@@ -1697,6 +1714,7 @@ export type GQLNote = {
   parentNoteId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
   relatedTo?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
   replies: EntireFieldWrapper<Array<GQLNote>>;
+  shareWithClient?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   shareWithTrainer?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   text: EntireFieldWrapper<Scalars['String']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -1753,6 +1771,7 @@ export enum GQLNotificationType {
   PlanCompleted = 'PLAN_COMPLETED',
   Reminder = 'REMINDER',
   System = 'SYSTEM',
+  TrainerNoteShared = 'TRAINER_NOTE_SHARED',
   TrainerOfferReceived = 'TRAINER_OFFER_RECEIVED',
   TrainerWorkoutCompleted = 'TRAINER_WORKOUT_COMPLETED',
   TrainingPlanCollaboration = 'TRAINING_PLAN_COLLABORATION',
@@ -1919,6 +1938,7 @@ export type GQLQuery = {
   pushSubscription?: EntireFieldWrapper<Maybe<GQLPushSubscription>>;
   pushSubscriptions: EntireFieldWrapper<Array<GQLPushSubscription>>;
   sentCollaborationInvitations: EntireFieldWrapper<Array<GQLCollaborationInvitation>>;
+  trainerSharedNotes: EntireFieldWrapper<Array<GQLNote>>;
   trainingPlanCollaborators: EntireFieldWrapper<Array<GQLTrainingPlanCollaborator>>;
   user?: EntireFieldWrapper<Maybe<GQLUser>>;
   userBasic?: EntireFieldWrapper<Maybe<GQLUser>>;
@@ -2161,6 +2181,12 @@ export type GQLQueryPublicExercisesArgs = {
 
 export type GQLQueryPushSubscriptionArgs = {
   endpoint: Scalars['String']['input'];
+};
+
+
+export type GQLQueryTrainerSharedNotesArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -2662,6 +2688,7 @@ export type GQLUpdateMealPlanDetailsInput = {
 export type GQLUpdateNoteInput = {
   id: Scalars['ID']['input'];
   note: Scalars['String']['input'];
+  shareWithClient?: InputMaybe<Scalars['Boolean']['input']>;
   shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
@@ -3140,6 +3167,7 @@ export type GQLResolversTypes = {
   CreatePushSubscriptionInput: GQLCreatePushSubscriptionInput;
   CreateQuickWorkoutInput: GQLCreateQuickWorkoutInput;
   CreateReviewInput: GQLCreateReviewInput;
+  CreateTrainerNoteForClientInput: GQLCreateTrainerNoteForClientInput;
   CreateTrainingDayInput: GQLCreateTrainingDayInput;
   CreateTrainingExerciseInput: GQLCreateTrainingExerciseInput;
   CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
@@ -3334,6 +3362,7 @@ export type GQLResolversParentTypes = {
   CreatePushSubscriptionInput: GQLCreatePushSubscriptionInput;
   CreateQuickWorkoutInput: GQLCreateQuickWorkoutInput;
   CreateReviewInput: GQLCreateReviewInput;
+  CreateTrainerNoteForClientInput: GQLCreateTrainerNoteForClientInput;
   CreateTrainingDayInput: GQLCreateTrainingDayInput;
   CreateTrainingExerciseInput: GQLCreateTrainingExerciseInput;
   CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
@@ -3912,6 +3941,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   createPushSubscription?: Resolver<GQLResolversTypes['PushSubscription'], ParentType, ContextType, RequireFields<GQLMutationCreatePushSubscriptionArgs, 'input'>>;
   createQuickWorkout?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLMutationCreateQuickWorkoutArgs, 'input'>>;
   createReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCreateReviewArgs, 'input'>>;
+  createTrainerNoteForClient?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationCreateTrainerNoteForClientArgs, 'input'>>;
   createTrainingPlan?: Resolver<GQLResolversTypes['CreateTrainingPlanPayload'], ParentType, ContextType, RequireFields<GQLMutationCreateTrainingPlanArgs, 'input'>>;
   deactivateUser?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeactivateUserArgs, 'userId'>>;
   deleteBodyMeasurement?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteBodyMeasurementArgs, 'id'>>;
@@ -4015,6 +4045,7 @@ export type GQLNoteResolvers<ContextType = GQLContext, ParentType extends GQLRes
   parentNoteId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
   relatedTo?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
   replies?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType>;
+  shareWithClient?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType>;
   shareWithTrainer?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType>;
   text?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -4196,6 +4227,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   pushSubscription?: Resolver<Maybe<GQLResolversTypes['PushSubscription']>, ParentType, ContextType, RequireFields<GQLQueryPushSubscriptionArgs, 'endpoint'>>;
   pushSubscriptions?: Resolver<Array<GQLResolversTypes['PushSubscription']>, ParentType, ContextType>;
   sentCollaborationInvitations?: Resolver<Array<GQLResolversTypes['CollaborationInvitation']>, ParentType, ContextType>;
+  trainerSharedNotes?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType, Partial<GQLQueryTrainerSharedNotesArgs>>;
   trainingPlanCollaborators?: Resolver<Array<GQLResolversTypes['TrainingPlanCollaborator']>, ParentType, ContextType, RequireFields<GQLQueryTrainingPlanCollaboratorsArgs, 'trainingPlanId'>>;
   user?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
   userBasic?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;

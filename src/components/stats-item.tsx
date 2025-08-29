@@ -19,7 +19,7 @@ export function StatsItem({
 }) {
   return (
     <div
-      className={cn('text-center p-3 bg-background rounded-lg', {
+      className={cn('text-center p-3 bg-card-on-card rounded-lg', {
         'bg-card': variant === 'secondary',
         'masked-placeholder-text': loading,
       })}

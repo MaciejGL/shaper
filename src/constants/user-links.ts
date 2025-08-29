@@ -31,10 +31,6 @@ export const TRAINER_LINKS = {
 }
 
 export const CLIENT_LINKS = {
-  dashboard: {
-    href: '/fitspace/dashboard',
-    label: 'Dashboard',
-  },
   myPlans: {
     href: '/fitspace/my-plans',
     label: 'Training Plans',

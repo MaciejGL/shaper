@@ -34,8 +34,8 @@ export default function NotFound() {
           </div>
 
           <div className="flex-center w-full">
-            <ButtonLink href="/fitspace/dashboard" iconStart={<Home />}>
-              Go To Dashboard
+            <ButtonLink href="/fitspace/workout" iconStart={<Home />}>
+              Go To Workout
             </ButtonLink>
           </div>
 

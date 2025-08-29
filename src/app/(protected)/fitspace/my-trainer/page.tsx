@@ -1,7 +1,7 @@
 'use client'
 
-import { formatDate } from 'date-fns'
 import { Calendar, Clock, MessageSquare, UserCheck, Users } from 'lucide-react'
+import Link from 'next/link'
 import { useState } from 'react'
 
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
@@ -18,17 +18,18 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import {
-  GQLCoachingRequestStatus,
   GQLGetMyTrainerQuery,
   GQLMyCoachingRequestsQuery,
   useCancelCoachingMutation,
   useGetMyTrainerQuery,
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
+import { useScrollToFromParams } from '@/hooks/use-scroll-to'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { ClientServiceDeliveriesSection } from './components/client-service-deliveries-section'
+import { TrainerSharedNotesSection } from './components/trainer-shared-notes-section'
 
 type CoachingRequest = GQLMyCoachingRequestsQuery['coachingRequests'][0]
 
@@ -41,6 +42,9 @@ export default function MyTrainerPage() {
     useGetMyTrainerQuery()
 
   const trainer = trainerData?.getMyTrainer
+
+  // Handle scrolling to specific sections from notifications
+  useScrollToFromParams([isLoadingTrainer, trainer])
 
   return (
     <div className="container-hypertro mx-auto max-w-md">
@@ -66,7 +70,6 @@ interface TrainerViewProps {
 function TrainerView({ trainer }: TrainerViewProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { openModal } = useConfirmationModalContext()
-  const { data: coachingRequests } = useMyCoachingRequestsQuery()
   const { refetch: refetchTrainer } = useGetMyTrainerQuery()
   const { mutateAsync: cancelCoaching } = useCancelCoachingMutation()
 
@@ -99,13 +102,6 @@ function TrainerView({ trainer }: TrainerViewProps) {
     // TODO: Implement send message functionality
   }
 
-  const trainerCoachingRequest = coachingRequests?.coachingRequests.find(
-    (request) =>
-      (request.recipient?.id === trainer.id ||
-        request.sender?.id === trainer.id) &&
-      request.status === GQLCoachingRequestStatus.Accepted,
-  )
-
   return (
     <div className="space-y-4">
       <TrainerCard
@@ -123,26 +119,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
         showRequestCoaching={false}
       />
 
-      <Card>
-        <CardContent>
-          <div className="flex flex-col gap-2">
-            <h3 className="text-lg font-semibold">Coaching Informations</h3>
-            {trainerCoachingRequest?.id && (
-              <div className="flex items-center gap-2">
-                <p className="text-md">Connected since </p>
-                <Badge variant="secondary">
-                  {formatDate(trainerCoachingRequest.createdAt, 'd. MMM yyyy')}
-                </Badge>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Service Deliveries Section */}
-      <ClientServiceDeliveriesSection trainerId={trainer.id} />
-
-      <Card>
+      <Card borderless>
         <CardContent>
           {/* Scheduled Sessions */}
           <div className="flex flex-col gap-2 opacity-50">
@@ -162,14 +139,22 @@ function TrainerView({ trainer }: TrainerViewProps) {
         </CardFooter>
       </Card>
 
+      {/* Trainer Shared Notes Section */}
+      <div id="trainer-notes-section">
+        <TrainerSharedNotesSection />
+      </div>
+
+      {/* Service Deliveries Section */}
+      <ClientServiceDeliveriesSection trainerId={trainer.id} />
+
       <div className="grid grid-cols-2 gap-2">
         <Button
           className="w-full"
           size="lg"
-          variant="destructive"
+          variant="ghost"
           onClick={handleCancelCoaching}
         >
-          Cancel Coaching
+          End Coaching
         </Button>
 
         <Button
@@ -179,7 +164,7 @@ function TrainerView({ trainer }: TrainerViewProps) {
           iconStart={<MessageSquare />}
           onClick={handleSendMessage}
         >
-          Send Message
+          Contact Trainer
         </Button>
       </div>
     </div>
@@ -201,7 +186,7 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
   return (
     <div className="space-y-6">
       {/* Status Card */}
-      <Card>
+      <Card borderless>
         <CardContent className="p-6 text-center">
           <UserCheck className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
 
@@ -226,9 +211,11 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
                 You haven't connected with a trainer yet. Explore our featured
                 trainers to find the perfect match for your fitness goals.
               </p>
-              <Button className="mt-2">
-                <Users className="h-4 w-4 mr-2" />
-                Find a Trainer
+              <Button asChild className="mt-2">
+                <Link href="/fitspace/explore?tab=trainers">
+                  <Users className="h-4 w-4 mr-2" />
+                  Find a Trainer
+                </Link>
               </Button>
             </>
           )}
@@ -237,7 +224,7 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
 
       {/* Pending Requests */}
       {pendingRequests.length > 0 && (
-        <Card>
+        <Card borderless>
           <CardHeader>
             <CardTitle className="text-base">Pending Requests</CardTitle>
           </CardHeader>
@@ -267,7 +254,7 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
 
       {/* Request History */}
       {rejectedRequests.length > 0 && (
-        <Card>
+        <Card borderless>
           <CardHeader>
             <CardTitle className="text-base">Request History</CardTitle>
           </CardHeader>

@@ -18,7 +18,7 @@ export default async function AdminLayout({
 
   if (!hasAdminAccess) {
     // Redirect non-admin users to appropriate dashboard
-    redirect('/fitspace/dashboard')
+    redirect('/fitspace/workout')
   }
 
   return (

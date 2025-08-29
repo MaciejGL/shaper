@@ -44,6 +44,7 @@ query FitspaceMyPlans {
             completedAt
             sets {
               id
+              order
             }
           }
         }
@@ -101,6 +102,40 @@ query FitspaceMyPlans {
       startDate
       endDate
       updatedAt
+
+      weeks {
+        id
+        weekNumber
+        scheduledAt
+        completedAt
+        isExtra
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          workoutType
+          completedAt
+          scheduledAt
+          exercises {
+            id
+            restSeconds
+            videoUrl
+            instructions
+            name
+            warmupSets
+            muscleGroups {
+              id
+              name
+              alias
+            }
+            completedAt
+            sets {
+              id
+              order
+            }
+          }
+        }
+      }
 
       createdBy {
         id

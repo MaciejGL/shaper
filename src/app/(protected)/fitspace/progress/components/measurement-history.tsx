@@ -14,13 +14,13 @@ export function MeasurementHistory() {
 
   return (
     <div className="mt-10">
-      <div className="px-2">
+      <div>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5" />
           Measurement History
         </CardTitle>
       </div>
-      <div className="px-2">
+      <div>
         <div className="pt-6">
           <MeasurementHistoryList
             measurements={bodyMeasures}

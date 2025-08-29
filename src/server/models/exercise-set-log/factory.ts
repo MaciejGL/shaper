@@ -15,11 +15,29 @@ import {
 
 import ExerciseSetLog from './model'
 
-const markSetAsCompletedRelatedData = async (setId: string) => {
+const markSetAsCompletedRelatedData = async (
+  setId: string,
+  reps?: number | null,
+  weight?: number | null,
+) => {
   // 1. Mark set as completed
   const updatedSet = await prisma.exerciseSet.update({
     where: { id: setId },
-    data: { completedAt: new Date() },
+    data: {
+      completedAt: new Date(),
+      log: {
+        upsert: {
+          create: {
+            reps,
+            weight,
+          },
+          update: {
+            reps,
+            weight,
+          },
+        },
+      },
+    },
     select: {
       exerciseId: true,
     },
@@ -163,7 +181,7 @@ const unmarkSetCompletedRelatedData = async (setId: string) => {
 export const markSetAsCompleted = async (
   args: GQLMutationMarkSetAsCompletedArgs,
 ) => {
-  const { setId, completed } = args
+  const { setId, completed, reps, weight } = args
 
   // 1. Mark set as incomplete with all the related data
   if (!completed) {
@@ -171,7 +189,7 @@ export const markSetAsCompleted = async (
     return true
   }
 
-  await markSetAsCompletedRelatedData(setId)
+  await markSetAsCompletedRelatedData(setId, reps, weight)
 
   return true
 }

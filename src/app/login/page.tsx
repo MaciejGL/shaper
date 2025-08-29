@@ -19,7 +19,7 @@ export default async function RequestOtpPage() {
   }
 
   if (user?.user?.email) {
-    return redirect('/fitspace/dashboard')
+    return redirect('/fitspace/workout')
   }
 
   return (

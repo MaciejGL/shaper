@@ -31,7 +31,7 @@ const inputVariants = cva(
         ),
       },
       size: {
-        sm: 'h-7',
+        sm: 'h-7 text-sm',
         md: 'h-9',
       },
     },

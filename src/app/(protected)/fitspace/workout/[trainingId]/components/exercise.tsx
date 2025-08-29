@@ -10,16 +10,11 @@ import {
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 
-import { ExerciseHeader } from './exercise/exercise-header'
 import { ExerciseMetadata } from './exercise/exercise-metadata'
 import { ExerciseSets } from './exercise/exercise-sets'
 import { ExerciseProps } from './exercise/types'
 
-export function Exercise({
-  exercise,
-  exercises,
-  onPaginationClick,
-}: ExerciseProps) {
+export function Exercise({ exercise }: ExerciseProps) {
   const { getPastLogs } = useWorkout()
   const previousLogs = getPastLogs(exercise)
   const invalidateQuery = useInvalidateQuery()
@@ -69,28 +64,11 @@ export function Exercise({
     await removeExercise({
       exerciseId: exercise.id,
     })
-    const nextExercise = exercises.find((e) => e.order > exercise.order)
-    if (nextExercise) {
-      onPaginationClick(nextExercise.id, 'next')
-    } else {
-      const prevExercise = exercises.find((e) => e.order === exercise.order - 1)
-      if (prevExercise) {
-        onPaginationClick(prevExercise.id, 'prev')
-      } else {
-        onPaginationClick('summary', 'next')
-      }
-    }
   }
 
   return (
-    <div>
-      <ExerciseHeader
-        exercise={exercise}
-        exercises={exercises}
-        onPaginationClick={onPaginationClick}
-      />
-
-      <Card className="px-2 mt-4 gap-4">
+    <Card borderless className="p-0 gap-2">
+      <div className="px-2 pt-2">
         <ExerciseMetadata
           exercise={exercise}
           handleMarkAsCompleted={handleMarkAsCompleted}
@@ -98,15 +76,8 @@ export function Exercise({
           handleRemoveExercise={handleRemoveExercise}
           isRemoving={isRemoving}
         />
-        <ExerciseSets
-          exercise={exercise}
-          previousLogs={previousLogs}
-          isExerciseCompleted={isExerciseCompleted}
-        />
-      </Card>
-    </div>
+      </div>
+      <ExerciseSets exercise={exercise} previousLogs={previousLogs} />
+    </Card>
   )
 }
-
-// Re-export ExerciseSelector for backward compatibility
-export { ExerciseSelector } from './exercise/exercise-selector'

@@ -9,16 +9,18 @@ import {
   MenuIcon,
   NotebookTextIcon,
   Settings,
+  SunIcon,
   UserRoundCogIcon,
   Users2Icon,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
+import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
-import { useNotificationsQuery } from '@/generated/graphql-client'
+import { GQLUserRole, useNotificationsQuery } from '@/generated/graphql-client'
 import { useScrollVisibility } from '@/hooks/use-scroll-visibility'
 import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
@@ -55,6 +57,7 @@ export const Navbar = ({
   user?: UserWithSession | null
   withSidebar?: boolean
 }) => {
+  const { theme, setTheme } = useTheme()
   const { isVisible } = useScrollVisibility()
   const { data: notifications } = useNotificationsQuery(
     {
@@ -67,62 +70,81 @@ export const Navbar = ({
       refetchInterval: 100000,
     },
   )
+  const isTrainer = user?.user?.role === GQLUserRole.Trainer
+
   const linkToDashboard =
     user?.user?.role === 'TRAINER'
       ? TRAINER_LINKS.dashboard.href
-      : CLIENT_LINKS.dashboard.href
+      : CLIENT_LINKS.workout.href
   const pathname = usePathname()
   const isFitspace = pathname.startsWith('/fitspace')
 
-  if (
-    pathname === '/fitspace/meal-plan' ||
-    pathname.startsWith('/fitspace/workout')
-  ) {
-    return null
-  }
-
   return (
-    <motion.div
-      key={isFitspace ? 'fitspace' : 'default'}
-      initial={
-        isFitspace ? { opacity: 0, y: 0, height: 60, padding: '12px 16px' } : {}
-      }
-      animate={
-        isFitspace
-          ? {
-              opacity: isVisible ? 1 : 0,
-              y: isVisible ? 0 : -100,
-              height: isVisible ? 60 : 0,
-              padding: isVisible ? '12px 16px' : '0px 16px',
-            }
-          : {}
-      }
-      transition={{ duration: 0.3 }}
-      className={cn(
-        'py-3 px-4 flex justify-between items-center bg-transparent',
-        'mt-[var(--safe-area-inset-top)]', // Add safe area padding for iOS PWA
-        withSidebar && 'mb-2',
+    <>
+      {user && !isTrainer && (
+        <motion.div
+          key={isFitspace ? 'fitspace-navbar' : 'default-navbar'}
+          className="h-[60px]"
+        />
       )}
-    >
-      <div className="flex items-center gap-2">
-        {withSidebar && <SidebarTrigger />}
-        <Link href={linkToDashboard}>
-          <div className="flex items-center">
-            <AnimatedLogo infinite={false} size={32} />
-            <AnimatedLogoText />
+
+      <div
+        className={!isTrainer ? 'z-10 fixed top-0 left-0 right-0' : 'relative'}
+      >
+        <motion.div
+          key={isFitspace ? 'fitspace' : 'default'}
+          initial={
+            isFitspace
+              ? { opacity: 0, y: 0, height: 60, padding: '12px 16px' }
+              : {}
+          }
+          animate={
+            isFitspace
+              ? {
+                  opacity: isVisible ? 1 : 0,
+                  y: isVisible ? 0 : -100,
+                  // height: isVisible ? 60 : 0,
+                  padding: isVisible ? '12px 16px' : '0px 16px',
+                }
+              : {}
+          }
+          transition={{ duration: 0.3 }}
+          className={cn(
+            'py-3 px-4 flex justify-between items-center bg-sidebar',
+            'mt-[var(--safe-area-inset-top)]', // Add safe area padding for iOS PWA
+            withSidebar && 'mb-2',
+          )}
+        >
+          <div className="flex items-center gap-2">
+            {withSidebar && <SidebarTrigger />}
+            <Link href={linkToDashboard}>
+              <div className="flex items-center">
+                <AnimatedLogo infinite={false} size={32} />
+                <AnimatedLogoText />
+              </div>
+            </Link>
           </div>
-        </Link>
+          {process.env.NODE_ENV === 'development' && (
+            <Button
+              variant="ghost"
+              iconOnly={<SunIcon />}
+              onClick={() => {
+                setTheme(theme === 'dark' ? 'light' : 'dark')
+              }}
+            />
+          )}
+          <div className="flex items-center gap-2">
+            {user && (
+              <NotificationBell
+                notifications={notifications?.notifications}
+                user={user?.user}
+              />
+            )}
+            <NavbarUser user={user} />
+          </div>
+        </motion.div>
       </div>
-      <div className="flex items-center gap-2">
-        {user && (
-          <NotificationBell
-            notifications={notifications?.notifications}
-            user={user?.user}
-          />
-        )}
-        <NavbarUser user={user} />
-      </div>
-    </motion.div>
+    </>
   )
 }
 
@@ -288,13 +310,6 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
             </div>
           </div>
           <DropdownMenuSeparator />
-          <DropdownMenuItem asChild>
-            <NavLink
-              href={CLIENT_LINKS.dashboard.href}
-              icon={<LayoutDashboardIcon className="size-4" />}
-              label={CLIENT_LINKS.dashboard.label}
-            />
-          </DropdownMenuItem>
           <DropdownMenuItem asChild>
             <NavLink
               href={CLIENT_LINKS.myPlans.href}

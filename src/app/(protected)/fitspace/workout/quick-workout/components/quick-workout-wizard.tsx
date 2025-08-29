@@ -103,6 +103,7 @@ interface QuickWorkoutWizardProps {
   onStepChange?: (step: number) => void
   footerClassName?: string
   finishButtonText?: string
+  hideProgress?: boolean
 }
 
 export function QuickWorkoutWizard({
@@ -126,6 +127,7 @@ export function QuickWorkoutWizard({
   onStepChange,
   footerClassName,
   finishButtonText = 'Start Workout',
+  hideProgress = false,
 }: QuickWorkoutWizardProps) {
   // Check premium access for AI flow
   const { hasPremium: hasPremiumAccess } = useUser()
@@ -213,9 +215,9 @@ export function QuickWorkoutWizard({
     : ((currentStep + 1) / currentSteps.length) * 100
 
   return (
-    <div className="dark:bg-background pb-[80px]">
+    <div className="dark:bg-background">
       {/* Header with Progress */}
-      {!isOnLanding && (
+      {!isOnLanding && !hideProgress && (
         <div className="container py-4 space-y-4 mx-auto">
           <div className="text-center mx-auto">
             <p className="text-sm text-muted-foreground">
@@ -228,7 +230,13 @@ export function QuickWorkoutWizard({
       )}
 
       {/* Step Content */}
-      <div className={cn('container pt-6 mx-auto', isOnLanding && 'pt-12')}>
+      <div
+        className={cn(
+          'container pt-6 mx-auto',
+          isOnLanding && 'pt-12',
+          hideProgress && 'pt-0',
+        )}
+      >
         <AnimatePresence mode="wait">
           <motion.div
             key={`${workoutFlow}-${currentStep}`}
@@ -249,7 +257,7 @@ export function QuickWorkoutWizard({
             </div>
 
             {/* Step Content Container */}
-            <div className="min-h-[60vh]">{renderStepContent()}</div>
+            <div>{renderStepContent()}</div>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -429,7 +437,7 @@ export function QuickWorkoutWizardSkeleton() {
           </div>
 
           {/* Step Content Container */}
-          <div className="min-h-[60vh] space-y-6">
+          <div className="space-y-6">
             {/* Main content area skeleton */}
             <div className="space-y-4">
               {Array.from({ length: 4 }).map((_, i) => (

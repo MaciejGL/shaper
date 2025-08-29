@@ -44,7 +44,7 @@ export const gqlFetch = async <TData, TVariables = object>(
 
   try {
     const res = await fetch(endpoint, {
-      signal: AbortSignal?.timeout?.(60000),
+      signal: AbortSignal?.timeout?.(120000), // 2 minutes for AI operations
       method: 'POST',
       headers,
       credentials: 'include',

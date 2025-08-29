@@ -1,6 +1,13 @@
 'use client'
 
-import { Bell, Shield, Sliders } from 'lucide-react'
+import {
+  Bell,
+  FileTextIcon,
+  LockIcon,
+  MessageCircleIcon,
+  Shield,
+  Sliders,
+} from 'lucide-react'
 import Link from 'next/link'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -74,12 +81,10 @@ export function SettingsContent() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Link
               href="/privacy"
-              className="flex items-center p-4 rounded-lg border hover:border-primary transition-colors group"
+              className="flex items-center p-4 rounded-lg border hover:border-primary/50 transition-colors group"
             >
-              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-3 group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
-                <span className="text-blue-600 dark:text-blue-400 text-sm font-bold">
-                  🔒
-                </span>
+              <div className="size-8 bg-blue-100 dark:bg-blue-800 rounded-lg flex items-center justify-center mr-3 group-hover:bg-blue-200 dark:group-hover:bg-blue-700 transition-colors">
+                <LockIcon className="size-4" />
               </div>
               <div>
                 <div className="font-semibold text-foreground">
@@ -93,12 +98,10 @@ export function SettingsContent() {
 
             <Link
               href="/terms"
-              className="flex items-center p-4 rounded-lg border hover:border-primary transition-colors group"
+              className="flex items-center p-4 rounded-lg border hover:border-primary/50 transition-colors group"
             >
-              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mr-3 group-hover:bg-purple-200 dark:group-hover:bg-purple-800/50 transition-colors">
-                <span className="text-purple-600 dark:text-purple-400 text-sm font-bold">
-                  📋
-                </span>
+              <div className="size-8 bg-purple-100 dark:bg-purple-800 rounded-lg flex items-center justify-center mr-3 group-hover:bg-purple-200 dark:group-hover:bg-purple-700 transition-colors">
+                <FileTextIcon className="size-4" />
               </div>
               <div>
                 <div className="font-semibold text-foreground">
@@ -112,12 +115,10 @@ export function SettingsContent() {
 
             <Link
               href="/support"
-              className="flex items-center p-4 rounded-lg border hover:border-primary transition-colors group"
+              className="flex items-center p-4 rounded-lg border hover:border-primary/50 transition-colors group"
             >
-              <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-3 group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
-                <span className="text-green-600 dark:text-green-400 text-sm font-bold">
-                  💬
-                </span>
+              <div className="size-8 bg-green-100 dark:bg-green-800 rounded-lg flex items-center justify-center mr-3 group-hover:bg-green-200 dark:group-hover:bg-green-700 transition-colors">
+                <MessageCircleIcon className="size-4" />
               </div>
               <div>
                 <div className="font-semibold text-foreground">Support</div>

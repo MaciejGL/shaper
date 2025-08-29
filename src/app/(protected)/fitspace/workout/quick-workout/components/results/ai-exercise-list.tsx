@@ -1,12 +1,14 @@
 'use client'
 
 import { DragControls, Reorder, motion, useDragControls } from 'framer-motion'
-import { GripIcon } from 'lucide-react'
+import { Grip } from 'lucide-react'
+import Image from 'next/image'
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { VideoPreview } from '@/components/video-preview'
 import { GQLFitspaceGenerateAiWorkoutMutation } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
 import { translateEquipment } from '@/utils/translate-equipment'
 
 interface AiExerciseListProps {
@@ -27,25 +29,24 @@ export function AiExerciseList({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
-      className={`space-y-4 ${className}`}
+      className={cn('space-y-4', className)}
     >
       {onReorderExercises ? (
         <Reorder.Group
           axis="y"
           values={exercises}
           onReorder={onReorderExercises}
-          className="space-y-3"
+          className="space-y-3 touch-manipulation"
         >
-          {exercises.map((workoutExercise, index) => (
+          {exercises.map((workoutExercise) => (
             <DraggableExerciseItem
               key={workoutExercise.exercise.id}
               workoutExercise={workoutExercise}
-              index={index}
             />
           ))}
         </Reorder.Group>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-0">
           {exercises.map((workoutExercise, index) => (
             <motion.div
               key={workoutExercise.exercise.id}
@@ -53,7 +54,7 @@ export function AiExerciseList({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: index * 0.05 }}
             >
-              <ExerciseCard workoutExercise={workoutExercise} index={index} />
+              <ExerciseCard workoutExercise={workoutExercise} />
             </motion.div>
           ))}
         </div>
@@ -64,12 +65,10 @@ export function AiExerciseList({
 
 interface DraggableExerciseItemProps {
   workoutExercise: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'][number]
-  index: number
 }
 
 function DraggableExerciseItem({
   workoutExercise,
-  index,
 }: DraggableExerciseItemProps) {
   const dragControls = useDragControls()
 
@@ -82,7 +81,6 @@ function DraggableExerciseItem({
     >
       <ExerciseCard
         workoutExercise={workoutExercise}
-        index={index}
         isDraggable
         dragControls={dragControls}
       />
@@ -92,85 +90,107 @@ function DraggableExerciseItem({
 
 interface ExerciseCardProps {
   workoutExercise: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'][number]
-  index: number
   isDraggable?: boolean
   dragControls?: DragControls
 }
 
 function ExerciseCard({
   workoutExercise,
-  index,
   isDraggable = false,
   dragControls,
 }: ExerciseCardProps) {
   const { exercise, sets } = workoutExercise
+  const firstImage = exercise.images?.at(0)
+
+  // Handle drag start with proper event prevention
+  const handleDragStart = (e: React.PointerEvent) => {
+    e.preventDefault() // Prevent default browser behavior
+    if (dragControls) {
+      dragControls.start(e)
+    }
+  }
 
   return (
-    <Card
-      className={`shadow-sm hover:shadow-md transition-all duration-200 py-0 ${isDraggable ? 'hover:shadow-lg' : ''}`}
-    >
-      <CardContent className="p-4">
-        <div className="flex gap-4">
-          {/* Exercise Number */}
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-muted-foreground text-sm font-medium">
-            {index + 1}
+    <div className="flex gap-2 items-center">
+      {isDraggable && dragControls && (
+        <div
+          className="flex-shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-manipulation select-none"
+          onPointerDown={handleDragStart}
+          style={{
+            touchAction: 'none', // Completely disable touch actions on drag handle
+            userSelect: 'none', // Prevent text selection
+          }}
+        >
+          <Grip className="h-4 w-4" />
+        </div>
+      )}
+      <Card
+        className={cn(
+          'group/exercise-card p-0 border-b border-t-0 overflow-hidden flex-1 rounded-none pr-2',
+          isDraggable && 'rounded-md border',
+          'bg-card hover:border-primary/20 transition-all duration-200',
+          isDraggable && 'hover:shadow-lg',
+        )}
+      >
+        <CardContent className="p-0 flex items-center gap-3">
+          <div className="h-auto w-20 self-stretch relative">
+            {firstImage ? (
+              <Image
+                src={firstImage.url}
+                alt={exercise.name}
+                width={100}
+                height={100}
+                className="object-cover size-full"
+              />
+            ) : (
+              <Image
+                src={'/empty-rack.png'}
+                alt={exercise.name}
+                width={100}
+                height={100}
+                className="object-cover h-full"
+              />
+            )}
           </div>
 
-          {/* Exercise Content */}
-          <div className="flex-1 space-y-3">
-            {/* Exercise Header */}
-            <div className="flex items-start justify-between">
+          <div className="flex-1 py-2">
+            <div className="flex items-start justify-between gap-2">
               <div className="space-y-1">
-                <h4 className="font-semibold text-lg">{exercise.name}</h4>
-                {/* <p className="text-sm text-muted-foreground">
-                  {exercise.description}
-                </p> */}
+                <div className="font-medium text-md leading-tight text-left">
+                  {exercise.name}
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>
+                    {sets.length} sets x {sets[0]?.reps || 0} reps
+                  </span>
+                </div>
               </div>
-              {exercise.videoUrl && <VideoPreview url={exercise.videoUrl} />}
+              <div className="flex items-center gap-1">
+                {exercise.videoUrl && <VideoPreview url={exercise.videoUrl} />}
+              </div>
             </div>
-
-            {/* Sets and Reps */}
-            <div className="flex items-center gap-4 text-sm">
-              <span className="font-medium">
-                {sets.length} sets × {sets[0]?.reps || 0} reps
-              </span>
-              {sets[0]?.rpe && (
-                <span className="text-muted-foreground">RPE {sets[0].rpe}</span>
-              )}
-            </div>
-
-            {/* Badges */}
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-0.5 mt-1">
               {exercise.equipment && (
-                <Badge variant="equipment" className="capitalize">
+                <Badge variant="equipment" size="2xs">
                   {translateEquipment(exercise.equipment)}
                 </Badge>
               )}
-              {exercise.muscleGroups.map((group, idx) => (
-                <Badge
-                  key={`${group.groupSlug}-${idx}`}
-                  variant="muscle"
-                  className="capitalize"
-                >
+
+              {/* Primary muscle groups - limit to 3 and show +count if more */}
+              {exercise.muscleGroups.slice(0, 2).map((group) => (
+                <Badge key={group.id} variant="muscle" size="2xs">
                   {group.alias}
                 </Badge>
               ))}
+              {exercise.muscleGroups.length > 2 && (
+                <Badge variant="muscle" size="2xs">
+                  +{exercise.muscleGroups.length - 2}
+                </Badge>
+              )}
             </div>
-
-            {/* AI Explanation */}
           </div>
-
-          {/* Drag handle for draggable items */}
-          {isDraggable && dragControls && (
-            <div
-              className="flex items-center text-muted-foreground cursor-grab active:cursor-grabbing touch-none select-none p-2 -m-2 hover:bg-muted/50 rounded transition-colors"
-              onPointerDown={(e) => dragControls.start(e)}
-            >
-              <GripIcon className="w-4 h-4" />
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   )
 }

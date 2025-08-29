@@ -20,6 +20,9 @@ query FitspaceGetWorkout($trainingId: ID!) {
       isTemplate
       isDraft
       startDate
+      assignedTo {
+        id
+      }
 
       weeks {
         id
@@ -235,8 +238,18 @@ mutation FitspaceAddAiExerciseToWorkout($input: AddAiExerciseToWorkoutInput!) {
   }
 }
 
-mutation FitspaceMarkSetAsCompleted($setId: ID!, $completed: Boolean!) {
-  markSetAsCompleted(setId: $setId, completed: $completed)
+mutation FitspaceMarkSetAsCompleted(
+  $setId: ID!
+  $completed: Boolean!
+  $reps: Int
+  $weight: Float
+) {
+  markSetAsCompleted(
+    setId: $setId
+    completed: $completed
+    reps: $reps
+    weight: $weight
+  )
 }
 mutation FitspaceMarkExerciseAsCompleted(
   $exerciseId: ID!

@@ -5,6 +5,7 @@ query GetNotes($relatedTo: ID) {
     createdAt
     updatedAt
     shareWithTrainer
+    shareWithClient
     createdBy {
       id
       firstName
@@ -101,6 +102,73 @@ query GetClientSharedNotes($clientId: String!) {
   }
 }
 
+query GetTrainerSharedNotes($limit: Int, $offset: Int) {
+  trainerSharedNotes(limit: $limit, offset: $offset) {
+    id
+    text
+    relatedTo
+    createdAt
+    updatedAt
+    shareWithClient
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+    replies {
+      id
+      text
+      createdAt
+      updatedAt
+      createdBy {
+        id
+        firstName
+        lastName
+        image
+        role
+      }
+    }
+  }
+}
+
+query GetTrainerSharedNotesLimited {
+  trainerSharedNotes(limit: 5) {
+    id
+    text
+    relatedTo
+    createdAt
+    updatedAt
+    shareWithClient
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+
+query GetAllTrainerSharedNotes {
+  trainerSharedNotes {
+    id
+    text
+    relatedTo
+    createdAt
+    updatedAt
+    shareWithClient
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
+}
+
 query GetNoteReplies($noteId: String!) {
   noteReplies(noteId: $noteId) {
     id
@@ -179,4 +247,22 @@ mutation UpdateNote($input: UpdateNoteInput!) {
 
 mutation DeleteNote($id: ID!) {
   deleteNote(id: $id)
+}
+
+mutation CreateTrainerNoteForClient($input: CreateTrainerNoteForClientInput!) {
+  createTrainerNoteForClient(input: $input) {
+    id
+    text
+    relatedTo
+    createdAt
+    updatedAt
+    shareWithClient
+    createdBy {
+      id
+      firstName
+      lastName
+      image
+      role
+    }
+  }
 }

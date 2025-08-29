@@ -15,7 +15,11 @@ export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
     <Drawer>
       <DrawerTrigger asChild>
         <div className="flex items-center gap-1 relative">
-          <Button variant="tertiary" iconOnly={<NotebookPenIcon />} />
+          <Button
+            variant="tertiary"
+            size="icon-sm"
+            iconOnly={<NotebookPenIcon />}
+          />
           {notesCount > 0 && (
             <div className="text-xs absolute -top-1 -right-1 bg-amber-500/60 rounded-full size-4 shrink-0 flex items-center justify-center">
               {notesCount}

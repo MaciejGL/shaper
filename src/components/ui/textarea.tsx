@@ -20,7 +20,7 @@ const textareaVariants = cva(
     variants: {
       variant: {
         default: '',
-        ghost: 'border-none bg-primary/5  dark:bg-secondary shadow-none',
+        ghost: 'border-none bg-primary/5  dark:bg-input/30 shadow-none',
       },
     },
   },
@@ -35,7 +35,7 @@ function Textarea({
   ...props
 }: TextareaProps & VariantProps<typeof textareaVariants>) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-1 w-full">
       {label && (
         <Label htmlFor={id} className="text-sm font-medium">
           {label}

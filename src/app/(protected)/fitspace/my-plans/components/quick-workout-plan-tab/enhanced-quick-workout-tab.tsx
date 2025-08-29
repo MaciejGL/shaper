@@ -164,7 +164,7 @@ export function EnhancedQuickWorkoutTab({
             <BookmarkIcon /> Favourites
           </TabsTrigger>
           <TabsTrigger value={WorkoutTabView.PastWorkouts}>
-            <HistoryIcon /> Past Workouts
+            <HistoryIcon /> History
           </TabsTrigger>
         </TabsList>
 

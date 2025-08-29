@@ -13,7 +13,7 @@ interface MainProps {
   withSidebar?: boolean
 }
 
-export const Main = async ({
+export const Main = ({
   children,
   className,
   user,
@@ -24,30 +24,23 @@ export const Main = async ({
   return (
     <main
       className={cn(
-        'h-dvh grid grid-cols-1 grid-rows-[auto_1fr] w-full bg-sidebar',
+        'h-dvh grid grid-cols-1 grid-rows-[auto_1fr] w-full',
         className,
       )}
     >
+      {user && <Navbar user={user} withSidebar={withSidebar} />}
       <div
-        className={
-          !isTrainer ? 'z-10 bg-sidebar fixed top-0 left-0 right-0' : 'relative'
-        }
-      >
-        {user && <Navbar user={user} withSidebar={withSidebar} />}
-      </div>
-      <div
-        className={cn('w-full h-[calc(100%+0.5rem)] overflow-hidden', {
-          'md:p-2 -mt-2': isTrainer,
+        className={cn('w-full', {
+          'md:p-2 -mt-2 overflow-hidden': isTrainer,
         })}
       >
         <div
           id="main-content"
           className={cn(
-            'w-full h-full p-2 md:p-4 lg:p-8 bg-background overflow-y-auto safe-area-bottom',
+            'w-full h-full p-2 md:p-4 lg:p-8 bg-background safe-area-bottom',
             {
-              'md:rounded-md': isTrainer,
-              'pt-[calc(var(--safe-area-inset-top)+60px)] min-h-screen':
-                !isTrainer,
+              'md:rounded-md overflow-y-auto': isTrainer,
+              'pt-[calc(var(--safe-area-inset-top))] min-h-screen': !isTrainer,
             },
           )}
         >

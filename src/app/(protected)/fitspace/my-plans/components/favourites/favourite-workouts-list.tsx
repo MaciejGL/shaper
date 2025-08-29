@@ -45,13 +45,10 @@ export function FavouriteWorkoutsList({
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Favourite Workouts</h3>
-          <Button disabled>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Favourite
-          </Button>
+          <h3 className="text-lg font-semibold">Workouts</h3>
+          <Button disabled iconOnly={<Plus />} />
         </div>
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
           {Array.from({ length: 4 }).map((_, index) => (
             <CardSkeleton key={index} />
           ))}
@@ -63,8 +60,8 @@ export function FavouriteWorkoutsList({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Favourite Workouts</h3>
-        <Button onClick={() => setIsCreateModalOpen(true)} iconStart={<Plus />}>
+        <h3 className="text-lg font-semibold">Templates</h3>
+        <Button onClick={() => setIsCreateModalOpen(true)} iconOnly={<Plus />}>
           Create
         </Button>
       </div>
@@ -75,7 +72,7 @@ export function FavouriteWorkoutsList({
           workoutStatus={workoutStatus}
         />
       ) : (
-        <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+        <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
           {favouriteWorkouts.map((favourite) => (
             <FavouriteWorkoutCard
               key={favourite.id}

@@ -18,6 +18,7 @@ export type OptimisticNote = {
   createdAt: string
   updatedAt: string
   shareWithTrainer?: boolean | null
+  shareWithClient?: boolean | null
   createdBy: {
     __typename: 'UserPublic'
     id: string
@@ -58,11 +59,13 @@ export const NOTES_QUERY_KEYS = {
 export const createOptimisticNote = (
   text: string,
   shareWithTrainer: boolean,
+  shareWithClient?: boolean,
 ): OptimisticNote => ({
   __typename: 'Note',
   id: `temp-${Date.now()}`,
   text,
   shareWithTrainer,
+  shareWithClient,
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   createdBy: {
@@ -262,7 +265,11 @@ export function useOptimisticNotes(exerciseName: string) {
 
   const updateNoteOptimistically = (
     noteId: string,
-    updates: { text: string; shareWithTrainer: boolean },
+    updates: {
+      text: string
+      shareWithTrainer?: boolean
+      shareWithClient?: boolean
+    },
   ) =>
     updateNotesCache((notes) =>
       notes.map((note) =>
@@ -270,7 +277,12 @@ export function useOptimisticNotes(exerciseName: string) {
           ? {
               ...note,
               text: updates.text,
-              shareWithTrainer: updates.shareWithTrainer,
+              ...(updates.shareWithTrainer !== undefined && {
+                shareWithTrainer: updates.shareWithTrainer,
+              }),
+              ...(updates.shareWithClient !== undefined && {
+                shareWithClient: updates.shareWithClient,
+              }),
               updatedAt: new Date().toISOString(),
             }
           : note,

@@ -205,7 +205,7 @@ export function useFavouriteWorkoutOperations() {
 export interface FavouriteWorkoutExerciseData {
   exerciseId: string
   order: number
-  name?: string
+  name: string // Required field - should always be provided
   baseId?: string
   restSeconds?: number
   description?: string
@@ -359,7 +359,7 @@ export function useUpdateFavouriteFromWizard() {
       title: workoutData.title,
       description: workoutData.description || null,
       exercises: workoutData.exercises.map((exercise) => ({
-        name: exercise.name || `Exercise ${exercise.order}`,
+        name: exercise.name, // Exercise name should always be provided from the wizard now
         order: exercise.order,
         baseId: exercise.baseId || null,
         restSeconds: exercise.restSeconds || null,

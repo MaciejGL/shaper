@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter, Inter_Tight } from 'next/font/google'
+import { Inter, Roboto_Mono } from 'next/font/google'
 
 import Providers from '@/components/providers'
 
@@ -8,14 +8,16 @@ import './globals.css'
 const inter = Inter({
   variable: '--font-inter',
   subsets: ['latin'],
-  display: 'block',
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
   preload: true,
 })
 
-const interTight = Inter_Tight({
-  variable: '--font-inter-tight',
+const robotoMono = Roboto_Mono({
+  variable: '--font-roboto-mono',
   subsets: ['latin'],
-  display: 'block',
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
   preload: true,
 })
 
@@ -101,7 +103,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} ${interTight.variable} antialiased min-h-svh`}
+        className={`${inter.variable} ${robotoMono.variable} antialiased min-h-svh`}
       >
         {isDevelopment && (
           <div className="fixed top-0 left-0 size-2 rounded-full bg-red-500 z-50"></div>

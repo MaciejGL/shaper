@@ -51,6 +51,14 @@ export default class Note implements GQLNote {
     return metadata.shareWithTrainer ?? null
   }
 
+  get shareWithClient() {
+    if (!this.data.metadata || typeof this.data.metadata !== 'object') {
+      return null
+    }
+    const metadata = this.data.metadata as { shareWithClient?: boolean }
+    return metadata.shareWithClient ?? null
+  }
+
   get parentNoteId() {
     if (!this.data.metadata || typeof this.data.metadata !== 'object') {
       return null

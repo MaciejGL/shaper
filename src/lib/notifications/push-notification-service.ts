@@ -36,7 +36,7 @@ export async function notifyCoachingRequestAccepted(
     [senderId],
     'Coaching request accepted',
     `${acceptorName} has accepted your coaching request.`,
-    '/fitspace/dashboard',
+    '/fitspace/my-trainer',
   )
 }
 
@@ -51,7 +51,6 @@ export async function notifyCoachingRequestRejected(
     [senderId],
     'Coaching request declined',
     `${rejectorName} has declined your coaching request.`,
-    '/fitspace/dashboard',
   )
 }
 
@@ -241,6 +240,24 @@ export async function notifyClientTrainerReply(
   )
 }
 
+/**
+ * Send push notification when trainer shares a note with client
+ */
+export async function notifyClientTrainerNote(
+  clientId: string,
+  trainerName: string,
+  noteText: string,
+) {
+  const truncatedText =
+    noteText.length > 50 ? `${noteText.substring(0, 50)}...` : noteText
+  return await sendPushNotificationToUsers(
+    [clientId],
+    'Trainer note shared',
+    `${trainerName} shared a note with you: "${truncatedText}"`,
+    '/fitspace/my-trainer',
+  )
+}
+
 // ================================
 // MEAL & NUTRITION
 // ================================
@@ -304,18 +321,6 @@ export async function notifyRestDay(userId: string) {
     'Rest day',
     'Today is your scheduled rest day. Consider light activity or stretching for recovery.',
     '/fitspace/progress',
-  )
-}
-
-/**
- * Send push notification for hydration reminders
- */
-export async function notifyHydrationReminder(userId: string) {
-  return await sendPushNotificationToUsers(
-    [userId],
-    'Hydration reminder',
-    'Time for a water break. Staying hydrated supports performance and recovery.',
-    '/fitspace/dashboard',
   )
 }
 
@@ -407,7 +412,7 @@ export async function notifySystemAnnouncement(
     userIds,
     title,
     message,
-    '/fitspace/dashboard',
+    '/fitspace/workout',
   )
 }
 
@@ -419,7 +424,7 @@ export async function notifyAppUpdate(userIds: string[]) {
     userIds,
     'App update available',
     'A new version of Hypertro is available with new features and improvements.',
-    '/fitspace/dashboard',
+    '/fitspace/workout',
   )
 }
 
@@ -444,7 +449,7 @@ export async function sendBatchNotifications(
         notification.userIds,
         notification.title,
         notification.message,
-        notification.url || '/fitspace/dashboard',
+        notification.url || '/fitspace/workout',
       ),
     ),
   )

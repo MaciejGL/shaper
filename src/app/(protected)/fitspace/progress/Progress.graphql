@@ -24,16 +24,6 @@ input AddBodyMeasurementInput {
   notes: String
 }
 
-# Specific query for progress page - only requests what's needed
-query ProgressUser {
-  user {
-    id
-    email
-    name
-    role
-  }
-}
-
 # Query for getting exercises the user has progress data for
 query AvailableExercisesForProgress($userId: ID!) {
   exercisesProgressByUser(userId: $userId) {
