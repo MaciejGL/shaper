@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
+import posthog from 'posthog-js'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -116,6 +117,11 @@ function ErrorState({
   error: string
   onRetry?: () => void
 }) {
+  useEffect(() => {
+    // Capture error with PostHog
+    posthog.captureException(error)
+  }, [error])
+
   return (
     <div className="space-y-4 text-center flex flex-col items-center justify-center">
       <div className="space-y-2">

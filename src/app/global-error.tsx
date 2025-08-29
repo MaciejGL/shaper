@@ -2,6 +2,7 @@
 
 import { Home, RefreshCw } from 'lucide-react'
 import Image from 'next/image'
+import posthog from 'posthog-js'
 import { useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -16,8 +17,8 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
-    console.error(error)
+    // Capture error with PostHog
+    posthog.captureException(error)
   }, [error])
 
   return (

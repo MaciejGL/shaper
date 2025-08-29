@@ -1,5 +1,8 @@
 'use client'
 
+import posthog from 'posthog-js'
+import { useEffect } from 'react'
+
 import { Button } from '@/components/ui/button'
 
 export default function ErrorPage({
@@ -9,6 +12,11 @@ export default function ErrorPage({
   error: Error
   reset: () => void
 }) {
+  useEffect(() => {
+    // Capture error with PostHog
+    posthog.captureException(error)
+  }, [error])
+
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <h1 className="text-2xl font-bold">Something went wrong</h1>
