@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
     const videoFilter = searchParams.get('video') || 'all'
     const descriptionFilter = searchParams.get('description') || 'all'
     const muscleFilter = searchParams.get('muscle') || 'all'
+    const creatorFilter = searchParams.get('creator') || 'all'
 
     // Build where clause
     const conditions: Prisma.BaseExerciseWhereInput[] = []
@@ -104,6 +105,14 @@ export async function GET(request: NextRequest) {
     }
     // 'all' means no muscle filter
 
+    // Creator filter
+    if (creatorFilter !== 'all') {
+      conditions.push({
+        createdById: creatorFilter,
+      })
+    }
+    // 'all' means no creator filter
+
     // Combine all conditions with AND
     const where: Prisma.BaseExerciseWhereInput =
       conditions.length > 0 ? { AND: conditions } : {}
@@ -168,6 +177,18 @@ export async function GET(request: NextRequest) {
         },
         createdAt: true,
         updatedAt: true,
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+            profile: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
       },
       orderBy: [
         { isPremium: 'desc' }, // Premium first

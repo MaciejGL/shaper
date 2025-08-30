@@ -13,12 +13,12 @@ import { ExerciseImagesVideoSection } from './exercise-images-video-section'
 import { ExerciseSettingsSection } from './exercise-settings-section'
 import { ExerciseTipsSection } from './exercise-tips-section'
 import { Exercise } from './types'
-import { hasSimilarPublicExercise } from './utils/check-similar-exercise'
 
 interface ExerciseCardProps {
   exercise: Exercise
   updateEndpoint: string
   allExercises: Exercise[] // For substitute handling
+  hasSimilarPublicExercise: (exercise: Exercise) => boolean // Function to check for similar public exercises
   onSilentRefresh?: () => void // Silent background refresh after save
   onDelete: (exercise: Exercise) => void
 }
@@ -27,6 +27,7 @@ export function ExerciseCard({
   exercise,
   updateEndpoint,
   allExercises,
+  hasSimilarPublicExercise,
   onSilentRefresh,
   onDelete,
 }: ExerciseCardProps) {
@@ -49,7 +50,7 @@ export function ExerciseCard({
   const { isVerified, toggleVerified } = useVerifiedExercises()
 
   // Check if this non-public exercise has a similar public exercise
-  const hasCollision = hasSimilarPublicExercise(currentExercise, allExercises)
+  const hasCollision = hasSimilarPublicExercise(currentExercise)
 
   const handleSave = async () => {
     await saveChanges()

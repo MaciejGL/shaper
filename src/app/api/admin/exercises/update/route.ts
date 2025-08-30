@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { isAdminUser } from '@/lib/admin-auth'
+import { deleteImages } from '@/lib/aws/s3'
 import { prisma } from '@/lib/db'
 
 interface ExerciseUpdate {
@@ -16,6 +17,11 @@ interface ExerciseUpdate {
   additionalInstructions?: string | null
   instructions?: string | null
   tips?: string | null
+  images?: {
+    id: string
+    url: string
+    order: number
+  }[]
 }
 
 export async function PATCH(request: NextRequest) {
@@ -48,7 +54,50 @@ export async function PATCH(request: NextRequest) {
     // Perform updates in a transaction
     const results = await prisma.$transaction(async (tx) => {
       const updatePromises = updates.map(async (update) => {
-        const { id, ...updateData } = update
+        const { id, images, ...updateData } = update
+
+        // Handle image updates if present
+        if (images !== undefined) {
+          // Get current images for S3 cleanup
+          const currentImages = await tx.image.findMany({
+            where: {
+              entityType: 'exercise',
+              entityId: id,
+            },
+            select: { id: true, url: true },
+          })
+
+          // Find images to delete (current images not in new images list)
+          const newImageUrls = images.map((img) => img.url)
+          const imagesToDelete = currentImages.filter(
+            (img) => !newImageUrls.includes(img.url),
+          )
+
+          // Delete removed images from S3
+          if (imagesToDelete.length > 0) {
+            await deleteImages(imagesToDelete.map((img) => img.url))
+          }
+
+          // Delete all current images from database
+          await tx.image.deleteMany({
+            where: {
+              entityType: 'exercise',
+              entityId: id,
+            },
+          })
+
+          // Create new images
+          if (images.length > 0) {
+            await tx.image.createMany({
+              data: images.map((img) => ({
+                url: img.url,
+                order: img.order,
+                entityType: 'exercise' as const,
+                entityId: id,
+              })),
+            })
+          }
+        }
 
         // Remove undefined values to avoid Prisma errors
         const cleanUpdateData: Record<string, unknown> = {}
@@ -58,7 +107,7 @@ export async function PATCH(request: NextRequest) {
           }
         }
 
-        if (Object.keys(cleanUpdateData).length === 0) {
+        if (Object.keys(cleanUpdateData).length === 0 && images === undefined) {
           return null // Skip if no actual changes
         }
 
@@ -69,7 +118,18 @@ export async function PATCH(request: NextRequest) {
               ...cleanUpdateData,
               updatedAt: new Date(),
             },
-            select: { id: true, name: true },
+            select: {
+              id: true,
+              name: true,
+              images: {
+                select: {
+                  id: true,
+                  url: true,
+                  order: true,
+                },
+                orderBy: { order: 'asc' },
+              },
+            },
           })
         } catch (error) {
           console.error(`Failed to update exercise ${id}:`, error)

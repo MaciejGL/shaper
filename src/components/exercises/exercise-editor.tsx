@@ -22,11 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useExerciseNames } from '@/hooks/use-exercise-names'
 import { useVerifiedExercises } from '@/hooks/use-verified-exercises'
 
 import { Skeleton } from '../ui/skeleton'
 
 import { type Exercise, ExerciseCard } from './index'
+import { getCreatorDisplayName } from './utils/get-creator-display-name'
 
 interface ExerciseEditorProps {
   apiEndpoint: string
@@ -110,14 +112,26 @@ export function ExerciseEditor({
       .withDefault('all')
       .withOptions({ clearOnDefault: true }),
   )
+  const [filterCreator, setFilterCreator] = useQueryState('creator', {
+    defaultValue: 'all',
+    clearOnDefault: true,
+  })
 
   // Component state
   const [allExercises, setAllExercises] = useState<Exercise[]>([]) // Raw data from API
   const [exercises, setExercises] = useState<Exercise[]>([]) // Filtered exercises for display
   const [loading, setLoading] = useState(true)
+  const [availableCreators, setAvailableCreators] = useState<
+    { id: string; name: string; email: string }[]
+  >([])
 
   // Verified exercises hook (localStorage)
   const { isVerified } = useVerifiedExercises()
+
+  // Exercise names for duplicate detection
+  const { hasSimilarPublicExercise } = useExerciseNames({
+    includePrivate: true,
+  })
 
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
@@ -173,6 +187,7 @@ export function ExerciseEditor({
         video: filterVideo,
         description: filterDescription,
         muscle: filterMuscleGroup,
+        creator: filterCreator,
       })
 
       const response = await fetch(`${apiEndpoint}?${params}`)
@@ -186,6 +201,22 @@ export function ExerciseEditor({
       setAllExercises(data.exercises)
       setTotalPages(data.pagination.totalPages)
       setTotalItems(data.pagination.totalItems)
+
+      // Extract unique creators from exercises
+      const creatorsMap = new Map<
+        string,
+        { id: string; name: string; email: string }
+      >()
+      data.exercises.forEach((exercise: Exercise) => {
+        if (exercise.createdBy && !creatorsMap.has(exercise.createdBy.id)) {
+          creatorsMap.set(exercise.createdBy.id, {
+            id: exercise.createdBy.id,
+            name: getCreatorDisplayName(exercise.createdBy),
+            email: exercise.createdBy.email,
+          })
+        }
+      })
+      setAvailableCreators(Array.from(creatorsMap.values()))
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch exercises')
     } finally {
@@ -202,6 +233,7 @@ export function ExerciseEditor({
     filterVideo,
     filterDescription,
     filterMuscleGroup,
+    filterCreator,
     itemsPerPage,
   ])
 
@@ -219,6 +251,7 @@ export function ExerciseEditor({
         video: filterVideo,
         description: filterDescription,
         muscle: filterMuscleGroup,
+        creator: filterCreator,
       })
 
       const response = await fetch(`${apiEndpoint}?${params}`)
@@ -251,6 +284,7 @@ export function ExerciseEditor({
     filterVideo,
     filterDescription,
     filterMuscleGroup,
+    filterCreator,
     itemsPerPage,
   ])
 
@@ -266,6 +300,7 @@ export function ExerciseEditor({
     filterDescription,
     filterMuscleGroup,
     filterVerified,
+    filterCreator,
     itemsPerPage,
     setCurrentPage,
   ])
@@ -516,12 +551,27 @@ export function ExerciseEditor({
             </SelectContent>
           </Select>
 
+          <Select value={filterCreator} onValueChange={setFilterCreator}>
+            <SelectTrigger className="w-[140px] h-9" variant="tertiary">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Creators</SelectItem>
+              {availableCreators.map((creator) => (
+                <SelectItem key={creator.id} value={creator.id}>
+                  {creator.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           {/* Clear content filters button */}
           {(filterImages !== 'all' ||
             filterVideo !== 'all' ||
             filterDescription !== 'all' ||
             filterMuscleGroup !== 'all' ||
-            filterVerified !== 'all') && (
+            filterVerified !== 'all' ||
+            filterCreator !== 'all') && (
             <Button
               variant="outline"
               size="sm"
@@ -531,6 +581,7 @@ export function ExerciseEditor({
                 setFilterDescription('all')
                 setFilterMuscleGroup('all')
                 setFilterVerified('all')
+                setFilterCreator('all')
               }}
               className="h-9"
             >
@@ -548,6 +599,7 @@ export function ExerciseEditor({
             filterVideo !== 'all' ||
             filterDescription !== 'all' ||
             filterMuscleGroup !== 'all' ||
+            filterCreator !== 'all' ||
             itemsPerPage !== 25) && (
             <Button
               variant="outline"
@@ -561,6 +613,7 @@ export function ExerciseEditor({
                 setFilterVideo('all')
                 setFilterDescription('all')
                 setFilterMuscleGroup('all')
+                setFilterCreator('all')
                 setItemsPerPage(25)
                 setCurrentPage(1)
               }}
@@ -607,6 +660,7 @@ export function ExerciseEditor({
                 exercise={exercise}
                 updateEndpoint={updateEndpoint}
                 allExercises={exercises}
+                hasSimilarPublicExercise={hasSimilarPublicExercise}
                 onSilentRefresh={silentRefreshExercises}
                 onDelete={(ex) =>
                   setDeleteConfirm({

@@ -203,12 +203,12 @@ export function ExerciseSettingsSection({
       {/* Toggles */}
       <div className="grid grid-cols-2 gap-4">
         <Label
-          htmlFor="isPublic"
+          htmlFor={`isPublic-${currentExercise.id}`}
           className="p-2 bg-muted rounded-md flex items-center justify-between"
         >
           Public
           <Switch
-            id="isPublic"
+            id={`isPublic-${currentExercise.id}`}
             checked={currentExercise.isPublic}
             onCheckedChange={(checked) =>
               handleFieldUpdate('isPublic', checked)
@@ -217,12 +217,12 @@ export function ExerciseSettingsSection({
         </Label>
 
         <Label
-          htmlFor="isPremium"
+          htmlFor={`isPremium-${currentExercise.id}`}
           className="p-2 bg-muted rounded-md flex items-center justify-between"
         >
           Premium
           <Switch
-            id="isPremium"
+            id={`isPremium-${currentExercise.id}`}
             checked={currentExercise.isPremium}
             onCheckedChange={(checked) =>
               handleFieldUpdate('isPremium', checked)

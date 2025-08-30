@@ -5,6 +5,7 @@ import {
   moderatorAccessDeniedResponse,
   requireModeratorUser,
 } from '@/lib/admin-auth'
+import { deleteImages } from '@/lib/aws/s3'
 import { prisma } from '@/lib/db'
 
 interface ExerciseUpdate {
@@ -18,6 +19,11 @@ interface ExerciseUpdate {
   isPremium?: boolean
   version?: number
   videoUrl?: string | null
+  images?: {
+    id: string
+    url: string
+    order: number
+  }[]
   muscleGroupIds?: string[]
   secondaryMuscleGroupIds?: string[]
   substituteIds?: string[]
@@ -44,6 +50,7 @@ export async function PATCH(request: NextRequest) {
         muscleGroupIds,
         secondaryMuscleGroupIds,
         substituteIds,
+        images,
         ...updateData
       } = update
 
@@ -86,6 +93,39 @@ export async function PATCH(request: NextRequest) {
         }
       }
 
+      // Handle image updates
+      if (images !== undefined) {
+        // Get current images for S3 cleanup
+        const currentImages = await prisma.image.findMany({
+          where: {
+            entityType: 'exercise',
+            entityId: id,
+          },
+          select: { id: true, url: true },
+        })
+
+        // Find images to delete (current images not in new images list)
+        const newImageUrls = images.map((img) => img.url)
+        const imagesToDelete = currentImages.filter(
+          (img) => !newImageUrls.includes(img.url),
+        )
+
+        // Delete removed images from S3
+        if (imagesToDelete.length > 0) {
+          await deleteImages(imagesToDelete.map((img) => img.url))
+        }
+
+        // Update images in database
+        relationUpdates.images = {
+          deleteMany: {}, // Delete all existing images
+          create: images.map((img) => ({
+            url: img.url,
+            order: img.order,
+            entityType: 'exercise' as const,
+          })),
+        }
+      }
+
       // Combine all updates
       const allUpdates = { ...cleanedData, ...relationUpdates }
 
@@ -107,6 +147,14 @@ export async function PATCH(request: NextRequest) {
           isPremium: true,
           version: true,
           videoUrl: true,
+          images: {
+            select: {
+              id: true,
+              url: true,
+              order: true,
+            },
+            orderBy: { order: 'asc' },
+          },
           muscleGroups: {
             select: {
               id: true,

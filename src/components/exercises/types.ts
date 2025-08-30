@@ -11,6 +11,14 @@ export interface Exercise {
   createdAt: string
   updatedAt: string
   videoUrl?: string | null
+  createdBy?: {
+    id: string
+    email: string
+    profile?: {
+      firstName: string | null
+      lastName: string | null
+    } | null
+  } | null
   images?: {
     id: string
     url: string
