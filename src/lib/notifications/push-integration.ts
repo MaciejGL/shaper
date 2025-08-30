@@ -15,6 +15,7 @@ import {
   notifyMealPlanAssigned,
   notifyPlanCompleted,
   notifySystemAnnouncement,
+  notifyTeamInvitation,
   notifyTrainerExerciseNote,
   notifyTrainerOfferReceived,
   notifyTrainerWorkoutCompleted,
@@ -43,6 +44,7 @@ export async function sendPushForNotification(
     trainerName?: string
     packageDescription?: string
     offerToken?: string
+    teamName?: string
   },
 ) {
   try {
@@ -122,6 +124,13 @@ export async function sendPushForNotification(
           additionalData?.trainerName || 'Your trainer',
           additionalData?.packageDescription || 'training package',
           additionalData?.offerToken || '',
+        )
+
+      case GQLNotificationType.TeamInvitation:
+        return await notifyTeamInvitation(
+          userId,
+          additionalData?.senderName || 'Someone',
+          additionalData?.teamName || 'a team',
         )
 
       case GQLNotificationType.System:

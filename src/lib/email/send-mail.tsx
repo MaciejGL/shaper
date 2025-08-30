@@ -11,6 +11,7 @@ import {
   TrialEndingEmail,
   WelcomeEmail,
 } from './templates/subscription-emails'
+import { TeamInvitationEmail } from './templates/team-invitation-email'
 import { TrainerOfferEmail } from './templates/trainer-offer-email'
 
 const NO_REPLY_EMAIL = 'noreply@hypertro.app'
@@ -251,6 +252,41 @@ export const sendEmail = {
       from: FROM_EMAIL,
       to,
       subject: `${trainerName} created a custom training package for you`,
+      html,
+    })
+  },
+
+  // Team invitation email
+  teamInvitation: async (
+    to: string,
+    {
+      invitedUserName,
+      inviterName,
+      teamName,
+      locations,
+      invitationUrl,
+    }: {
+      invitedUserName?: string | null
+      inviterName: string
+      teamName: string
+      locations: string[]
+      invitationUrl: string
+    },
+  ) => {
+    const html = await render(
+      <TeamInvitationEmail
+        invitedUserName={invitedUserName}
+        inviterName={inviterName}
+        teamName={teamName}
+        locations={locations}
+        invitationUrl={invitationUrl}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `${inviterName} invited you to join the ${teamName} team`,
       html,
     })
   },

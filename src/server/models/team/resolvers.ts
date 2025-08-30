@@ -5,6 +5,7 @@ import {
 } from '@/generated/graphql-server'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/getUser'
+import { sendTeamInvitationNotifications } from '@/lib/team-invitation-utils'
 import { GQLContext } from '@/types/gql-context'
 
 import Team, { TeamInvitation } from './model'
@@ -17,7 +18,11 @@ const includeTeamWithMembers = {
   },
   members: {
     include: {
-      user: true,
+      user: {
+        include: {
+          profile: true,
+        },
+      },
     },
   },
   _count: {
@@ -85,7 +90,11 @@ export const Query: GQLQueryResolvers<GQLContext> = {
             },
           },
         },
-        invitedBy: true,
+        invitedBy: {
+          include: {
+            profile: true,
+          },
+        },
       },
     })
 
@@ -355,6 +364,25 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         },
         invitedBy: true,
       },
+    })
+
+    // Send all notifications (email, in-app, push)
+    const inviterName =
+      user.user.profile?.firstName && user.user.profile?.lastName
+        ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
+        : user.user.name || 'Someone'
+
+    const locations = invitation.team.locations.map(
+      (tl) => `${tl.location.city}, ${tl.location.country}`,
+    )
+
+    await sendTeamInvitationNotifications({
+      invitedEmail: input.email,
+      inviterName,
+      invitedById: user.user.id,
+      teamName: invitation.team.name,
+      locations,
+      invitationId: invitation.id,
     })
 
     return new TeamInvitation(invitation, context)

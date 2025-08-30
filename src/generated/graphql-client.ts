@@ -1732,6 +1732,7 @@ export enum GQLNotificationType {
   PlanCompleted = 'PLAN_COMPLETED',
   Reminder = 'REMINDER',
   System = 'SYSTEM',
+  TeamInvitation = 'TEAM_INVITATION',
   TrainerNoteShared = 'TRAINER_NOTE_SHARED',
   TrainerOfferReceived = 'TRAINER_OFFER_RECEIVED',
   TrainerWorkoutCompleted = 'TRAINER_WORKOUT_COMPLETED',
@@ -3679,6 +3680,13 @@ export type GQLRespondToTeamInvitationMutationVariables = Exact<{
 
 
 export type GQLRespondToTeamInvitationMutation = { __typename?: 'Mutation', respondToTeamInvitation: { __typename?: 'TeamInvitation', id: string, status: GQLInvitationStatus } };
+
+export type GQLUpdateTeamMutationVariables = Exact<{
+  input: GQLUpdateTeamInput;
+}>;
+
+
+export type GQLUpdateTeamMutation = { __typename?: 'Mutation', updateTeam: { __typename?: 'Team', id: string, name: string } };
 
 export type GQLTrainingTemplateFragment = { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, isPublic: boolean, isTemplate: boolean, isDraft: boolean, difficulty?: GQLDifficulty | undefined | null, createdAt: string, updatedAt: string, assignedCount: number, completedAt?: string | undefined | null, assignedTo?: { __typename?: 'UserPublic', id: string } | undefined | null, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, name: string, description?: string | undefined | null, completedAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, completedAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, description?: string | undefined | null, instructions?: Array<string> | undefined | null, tips?: Array<string> | undefined | null, difficulty?: string | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, completedAt?: string | undefined | null }> }> }> }> };
 
@@ -9521,6 +9529,33 @@ useRespondToTeamInvitationMutation.getKey = () => ['RespondToTeamInvitation'];
 
 
 useRespondToTeamInvitationMutation.fetcher = (variables: GQLRespondToTeamInvitationMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRespondToTeamInvitationMutation, GQLRespondToTeamInvitationMutationVariables>(RespondToTeamInvitationDocument, variables, options);
+
+export const UpdateTeamDocument = `
+    mutation UpdateTeam($input: UpdateTeamInput!) {
+  updateTeam(input: $input) {
+    id
+    name
+  }
+}
+    `;
+
+export const useUpdateTeamMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateTeamMutation, TError, GQLUpdateTeamMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateTeamMutation, TError, GQLUpdateTeamMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateTeam'],
+    mutationFn: (variables?: GQLUpdateTeamMutationVariables) => fetchData<GQLUpdateTeamMutation, GQLUpdateTeamMutationVariables>(UpdateTeamDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateTeamMutation.getKey = () => ['UpdateTeam'];
+
+
+useUpdateTeamMutation.fetcher = (variables: GQLUpdateTeamMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateTeamMutation, GQLUpdateTeamMutationVariables>(UpdateTeamDocument, variables, options);
 
 export const GetTemplatesDocument = `
     query GetTemplates($draft: Boolean, $limit: Int) {

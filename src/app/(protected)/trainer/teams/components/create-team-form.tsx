@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Loader2, Plus, X } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -9,8 +9,13 @@ import { z } from 'zod'
 
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  OPERATIONAL_LOCATIONS,
+  formatLocationName,
+} from '@/data/operational-locations'
 import { useCreateTeamMutation } from '@/generated/graphql-client'
 
 const createTeamSchema = z.object({
@@ -18,27 +23,20 @@ const createTeamSchema = z.object({
     .string()
     .min(1, 'Team name is required')
     .max(100, 'Team name too long'),
-  locations: z
-    .array(
-      z.object({
-        city: z.string().min(1, 'City is required'),
-        country: z.string().min(1, 'Country is required'),
-        countryCode: z.string().min(2).max(3),
-      }),
-    )
-    .min(1, 'At least one location is required'),
+  locationIds: z
+    .array(z.string())
+    .min(1, 'At least one location must be selected'),
 })
 
 type CreateTeamForm = z.infer<typeof createTeamSchema>
 
 interface CreateTeamFormProps {
   onCancel: () => void
+  onSuccess: () => void
 }
 
-export function CreateTeamForm({ onCancel }: CreateTeamFormProps) {
-  const [locations, setLocations] = useState([
-    { city: '', country: '', countryCode: '' },
-  ])
+export function CreateTeamForm({ onCancel, onSuccess }: CreateTeamFormProps) {
+  const [selectedLocationIds, setSelectedLocationIds] = useState<string[]>([])
 
   const {
     register,
@@ -49,14 +47,14 @@ export function CreateTeamForm({ onCancel }: CreateTeamFormProps) {
     resolver: zodResolver(createTeamSchema),
     defaultValues: {
       name: '',
-      locations: [{ city: '', country: '', countryCode: '' }],
+      locationIds: [],
     },
   })
 
   const createTeamMutation = useCreateTeamMutation({
     onSuccess: () => {
       toast.success('Team created successfully!')
-      onCancel()
+      onSuccess()
     },
     onError: (error) => {
       toast.error('Failed to create team. Please try again.')
@@ -64,35 +62,30 @@ export function CreateTeamForm({ onCancel }: CreateTeamFormProps) {
     },
   })
 
-  const addLocation = () => {
-    const newLocations = [
-      ...locations,
-      { city: '', country: '', countryCode: '' },
-    ]
-    setLocations(newLocations)
-    setValue('locations', newLocations)
+  const toggleLocation = (locationId: string) => {
+    const newSelectedIds = selectedLocationIds.includes(locationId)
+      ? selectedLocationIds.filter((id) => id !== locationId)
+      : [...selectedLocationIds, locationId]
+
+    setSelectedLocationIds(newSelectedIds)
+    setValue('locationIds', newSelectedIds)
   }
 
-  const removeLocation = (index: number) => {
-    if (locations.length > 1) {
-      const newLocations = locations.filter((_, i) => i !== index)
-      setLocations(newLocations)
-      setValue('locations', newLocations)
-    }
-  }
+  const onSubmit = async (data: CreateTeamForm) => {
+    // Convert location IDs to the format expected by the API
+    const locations = data.locationIds.map((id) => {
+      const location = OPERATIONAL_LOCATIONS.find((loc) => loc.id === id)!
+      return {
+        city: location.city,
+        country: location.country,
+        countryCode: location.countryCode,
+      }
+    })
 
-  const updateLocation = (index: number, field: string, value: string) => {
-    const newLocations = [...locations]
-    newLocations[index] = { ...newLocations[index], [field]: value }
-    setLocations(newLocations)
-    setValue('locations', newLocations)
-  }
-
-  const onSubmit = (data: CreateTeamForm) => {
-    createTeamMutation.mutate({
+    await createTeamMutation.mutateAsync({
       input: {
         name: data.name,
-        locations: data.locations,
+        locations,
       },
     })
   }
@@ -113,87 +106,40 @@ export function CreateTeamForm({ onCancel }: CreateTeamFormProps) {
         )}
       </div>
 
-      {/* Locations */}
+      {/* Operating Locations */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label>Operating Locations</Label>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={addLocation}
-            disabled={createTeamMutation.isPending}
-          >
-            <Plus className="size-4 mr-2" />
-            Add Location
-          </Button>
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <MapPin className="size-4" />
+            Operating Locations
+          </Label>
+          <p className="text-sm text-muted-foreground">
+            Select the cities where your team will operate
+          </p>
         </div>
 
         <div className="space-y-3">
-          {locations.map((location, index) => (
-            <div key={index} className="flex gap-3 items-start">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 flex-1">
-                <div>
-                  <Input
-                    id="city"
-                    placeholder="City"
-                    value={location.city}
-                    onChange={(e) =>
-                      updateLocation(index, 'city', e.target.value)
-                    }
-                    disabled={createTeamMutation.isPending}
-                  />
-                </div>
-                <div>
-                  <Input
-                    id="country"
-                    placeholder="Country"
-                    value={location.country}
-                    onChange={(e) =>
-                      updateLocation(index, 'country', e.target.value)
-                    }
-                    disabled={createTeamMutation.isPending}
-                  />
-                </div>
-                <div>
-                  <Input
-                    id="countryCode"
-                    placeholder="Country Code (NO, US, etc.)"
-                    value={location.countryCode}
-                    onChange={(e) =>
-                      updateLocation(
-                        index,
-                        'countryCode',
-                        e.target.value.toUpperCase(),
-                      )
-                    }
-                    disabled={createTeamMutation.isPending}
-                    maxLength={3}
-                  />
-                </div>
-              </div>
-
-              {locations.length > 1 && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeLocation(index)}
-                  disabled={createTeamMutation.isPending}
-                  className="shrink-0 mt-0"
-                >
-                  <X className="size-4" />
-                </Button>
-              )}
+          {OPERATIONAL_LOCATIONS.map((location) => (
+            <div key={location.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={location.id}
+                checked={selectedLocationIds.includes(location.id)}
+                onCheckedChange={() => toggleLocation(location.id)}
+                disabled={createTeamMutation.isPending}
+              />
+              <Label
+                htmlFor={location.id}
+                className="text-sm font-normal cursor-pointer"
+              >
+                {formatLocationName(location)}
+              </Label>
             </div>
           ))}
         </div>
 
-        {errors.locations && (
+        {errors.locationIds && (
           <Alert variant="destructive">
-            <AlertDescription>
-              {errors.locations.message || 'Please check location information'}
-            </AlertDescription>
+            <AlertDescription>{errors.locationIds.message}</AlertDescription>
           </Alert>
         )}
       </div>
@@ -204,10 +150,8 @@ export function CreateTeamForm({ onCancel }: CreateTeamFormProps) {
           type="submit"
           disabled={createTeamMutation.isPending}
           className="flex-1 sm:flex-none"
+          loading={createTeamMutation.isPending}
         >
-          {createTeamMutation.isPending && (
-            <Loader2 className="size-4 mr-2 animate-spin" />
-          )}
           Create Team
         </Button>
 

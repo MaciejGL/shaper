@@ -4,6 +4,7 @@ import { formatDistanceToNow } from 'date-fns'
 import {
   Calendar,
   Crown,
+  Edit3,
   MapPin,
   Settings,
   UserPlus,
@@ -23,31 +24,37 @@ import {
 } from '@/components/ui/card'
 import { GQLMyTeamsQuery } from '@/generated/graphql-client'
 
-import { InviteTeamMemberForm } from './invite-team-member-form'
-import { TeamMemberManagement } from './team-member-management'
+import { EditTeamNameModal } from './edit-team-name-modal'
+import { InviteMemberModal } from './invite-member-modal'
+import { ManageMembersModal } from './manage-members-modal'
 
 interface TeamDetailsProps {
   team: GQLMyTeamsQuery['myTeams'][number]
 }
 
 export function TeamDetails({ team }: TeamDetailsProps) {
-  const [showInviteForm, setShowInviteForm] = useState(false)
-  const [showMemberManagement, setShowMemberManagement] = useState(false)
+  const [showEditNameModal, setShowEditNameModal] = useState(false)
+  const [showInviteModal, setShowInviteModal] = useState(false)
+  const [showManageMembersModal, setShowManageMembersModal] = useState(false)
 
   return (
     <div className="space-y-6">
       {/* Team Overview Card */}
-      <Card>
+      <Card borderless>
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <CardTitle className="flex items-center gap-2">
-                {team.name}
+                <span>{team.name}</span>
                 {team.isAdmin && (
-                  <Badge variant="secondary" className="text-xs">
-                    <Crown className="size-3 mr-1" />
-                    Admin
-                  </Badge>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowEditNameModal(true)}
+                    className="h-6 px-2 text-muted-foreground hover:text-foreground"
+                  >
+                    <Edit3 className="size-3" />
+                  </Button>
                 )}
               </CardTitle>
               <CardDescription className="flex items-center gap-4">
@@ -65,27 +72,27 @@ export function TeamDetails({ team }: TeamDetailsProps) {
             {team.isAdmin && (
               <div className="flex gap-2">
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
-                  onClick={() => setShowInviteForm(true)}
+                  onClick={() => setShowInviteModal(true)}
+                  iconStart={<UserPlus />}
                 >
-                  <UserPlus className="size-4 mr-2" />
                   Invite Member
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="secondary"
                   size="sm"
-                  onClick={() => setShowMemberManagement(true)}
+                  onClick={() => setShowManageMembersModal(true)}
+                  iconStart={<Settings />}
                 >
-                  <Settings className="size-4 mr-2" />
-                  Manage
+                  Manage Members
                 </Button>
               </div>
             )}
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           {/* Locations */}
           {team.locations.length > 0 && (
             <div>
@@ -121,28 +128,33 @@ export function TeamDetails({ team }: TeamDetailsProps) {
                       alt={`${member.user.firstName || ''} ${member.user.lastName || ''}`}
                     />
                     <AvatarFallback>
-                      {member.user.firstName?.[0] || '?'}
-                      {member.user.lastName?.[0] || '?'}
+                      {member.user.firstName?.[0] || ''}
+                      {member.user.lastName?.[0] || ''}
                     </AvatarFallback>
                   </Avatar>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-start justify-between gap-2">
                       <p className="text-sm font-medium truncate">
                         {member.user.firstName || ''}{' '}
                         {member.user.lastName || ''}
                       </p>
                       {member.role === 'ADMIN' && (
-                        <Crown className="size-3 text-yellow-600" />
+                        <Badge variant="secondary" className="text-xs">
+                          <Crown className="size-3 mr-1" />
+                          Admin
+                        </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {member.user.email}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Joined {formatDistanceToNow(new Date(member.joinedAt))}{' '}
-                      ago
-                    </p>
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground truncate">
+                        {member.user.email}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Joined {formatDistanceToNow(new Date(member.joinedAt))}{' '}
+                        ago
+                      </p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -151,46 +163,25 @@ export function TeamDetails({ team }: TeamDetailsProps) {
         </CardContent>
       </Card>
 
-      {/* Invite Form Modal */}
-      {showInviteForm && (
-        <Card className="border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
-          <CardHeader>
-            <CardTitle className="text-blue-900 dark:text-blue-100">
-              Invite Team Member
-            </CardTitle>
-            <CardDescription className="text-blue-700 dark:text-blue-300">
-              Send an invitation to another trainer to join your team
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <InviteTeamMemberForm
-              teamId={team.id}
-              onCancel={() => setShowInviteForm(false)}
-              onSuccess={() => setShowInviteForm(false)}
-            />
-          </CardContent>
-        </Card>
-      )}
+      {/* Modals */}
+      <EditTeamNameModal
+        open={showEditNameModal}
+        onOpenChange={setShowEditNameModal}
+        teamId={team.id}
+        currentName={team.name}
+      />
 
-      {/* Member Management Modal */}
-      {showMemberManagement && team.isAdmin && (
-        <Card className="border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950">
-          <CardHeader>
-            <CardTitle className="text-orange-900 dark:text-orange-100">
-              Manage Team Members
-            </CardTitle>
-            <CardDescription className="text-orange-700 dark:text-orange-300">
-              Remove team members or manage permissions
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TeamMemberManagement
-              team={team}
-              onCancel={() => setShowMemberManagement(false)}
-            />
-          </CardContent>
-        </Card>
-      )}
+      <InviteMemberModal
+        open={showInviteModal}
+        onOpenChange={setShowInviteModal}
+        teamId={team.id}
+      />
+
+      <ManageMembersModal
+        open={showManageMembersModal}
+        onOpenChange={setShowManageMembersModal}
+        team={team}
+      />
     </div>
   )
 }

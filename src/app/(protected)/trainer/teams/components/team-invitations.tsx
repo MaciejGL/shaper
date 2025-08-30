@@ -14,9 +14,13 @@ import {
 
 interface TeamInvitationsProps {
   invitations: GQLTeamInvitationsQuery['teamInvitations']
+  refetchInvitations: () => void
 }
 
-export function TeamInvitations({ invitations }: TeamInvitationsProps) {
+export function TeamInvitations({
+  invitations,
+  refetchInvitations,
+}: TeamInvitationsProps) {
   const respondMutation = useRespondToTeamInvitationMutation({
     onSuccess: (data) => {
       if (data.respondToTeamInvitation.status === 'ACCEPTED') {
@@ -24,6 +28,7 @@ export function TeamInvitations({ invitations }: TeamInvitationsProps) {
       } else {
         toast.success('Team invitation declined.')
       }
+      refetchInvitations()
     },
     onError: (error) => {
       const message =
@@ -104,19 +109,17 @@ export function TeamInvitations({ invitations }: TeamInvitationsProps) {
               size="sm"
               onClick={() => handleRespond(invitation.id, true)}
               disabled={respondMutation.isPending}
-              className="bg-green-600 hover:bg-green-700 text-white"
+              iconStart={<Check />}
             >
-              <Check className="size-4 mr-1" />
               Accept
             </Button>
             <Button
               size="sm"
-              variant="outline"
+              variant="secondary"
               onClick={() => handleRespond(invitation.id, false)}
               disabled={respondMutation.isPending}
-              className="text-destructive hover:text-destructive-foreground hover:bg-destructive"
+              iconStart={<X />}
             >
-              <X className="size-4 mr-1" />
               Decline
             </Button>
           </div>

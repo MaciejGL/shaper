@@ -119,7 +119,8 @@ export function AppSidebar() {
   const queryClient = useQueryClient()
   const router = useRouter()
   const [isModerator, setIsModerator] = useState(false)
-  const isTeamsEnabled = useFeatureFlag(FEATURE_FLAGS.teams)
+  const { isEnabled: isTeamsEnabled, isLoading: isTeamsFeatureLoading } =
+    useFeatureFlag(FEATURE_FLAGS.teams)
 
   // Check if user is a moderator
   useEffect(() => {
@@ -208,8 +209,8 @@ export function AppSidebar() {
 
   const items: SidebarItemType[] = useMemo(
     () => [
-      // Teams item - only show if feature flag is enabled
-      ...(isTeamsEnabled
+      // Teams item - only show if feature flag is enabled and not loading
+      ...(isTeamsEnabled && !isTeamsFeatureLoading
         ? [
             {
               title: TRAINER_LINKS.teams.label,
@@ -288,6 +289,7 @@ export function AppSidebar() {
     ],
     [
       isTeamsEnabled,
+      isTeamsFeatureLoading,
       clients,
       templates,
       mealPlans,

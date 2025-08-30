@@ -348,7 +348,19 @@ export async function notifyWeeklyProgress(
 /**
  * Send push notification for team invitations
  */
-// TODO: Team
+export async function notifyTeamInvitation(
+  invitedUserId: string,
+  inviterName: string,
+  teamName: string,
+) {
+  return await sendPushNotificationToUsers(
+    [invitedUserId],
+    'Team invitation received',
+    `${inviterName} invited you to join the ${teamName} team.`,
+    '/fitspace/teams',
+  )
+}
+
 /**
  * Send push notification for trainer package offers
  */

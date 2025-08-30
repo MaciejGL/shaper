@@ -15,24 +15,27 @@ export const FEATURE_FLAGS = {
 /**
  * Hook to check if a feature flag is enabled
  * @param flagKey - The feature flag key
- * @returns boolean indicating if the feature is enabled
+ * @returns object with isEnabled boolean and isLoading boolean
  */
 export function useFeatureFlag(
   flagKey: (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS],
-): boolean {
+): { isEnabled: boolean; isLoading: boolean } {
   const [isEnabled, setIsEnabled] = useState<boolean>(false)
+  const [isLoading, setIsLoading] = useState<boolean>(true)
   const posthog = getPostHogInstance()
 
   useEffect(() => {
     if (!posthog) {
       console.warn('PostHog not initialized, feature flag will be false')
       setIsEnabled(false)
+      setIsLoading(false)
       return
     }
 
     // Check the feature flag
     const enabled = isFeatureEnabled(flagKey)
     setIsEnabled(enabled)
+    setIsLoading(false)
 
     // Listen for feature flag changes
     const handleFeatureFlagChange = () => {
@@ -56,7 +59,7 @@ export function useFeatureFlag(
     }
   }, [flagKey, posthog])
 
-  return isEnabled
+  return { isEnabled, isLoading }
 }
 
 /**

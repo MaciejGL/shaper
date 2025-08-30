@@ -1734,6 +1734,7 @@ export enum GQLNotificationType {
   PlanCompleted = 'PLAN_COMPLETED',
   Reminder = 'REMINDER',
   System = 'SYSTEM',
+  TeamInvitation = 'TEAM_INVITATION',
   TrainerNoteShared = 'TRAINER_NOTE_SHARED',
   TrainerOfferReceived = 'TRAINER_OFFER_RECEIVED',
   TrainerWorkoutCompleted = 'TRAINER_WORKOUT_COMPLETED',
