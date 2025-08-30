@@ -30,8 +30,41 @@ export default class Notification implements GQLNotification {
   }
 
   get type(): GQLNotificationType {
-    // Ensure type matches your enum
-    return this.data.type as GQLNotificationType
+    switch (this.data.type) {
+      case 'COACHING_REQUEST':
+        return GQLNotificationType.CoachingRequest
+      case 'COACHING_REQUEST_ACCEPTED':
+        return GQLNotificationType.CoachingRequestAccepted
+      case 'COACHING_REQUEST_REJECTED':
+        return GQLNotificationType.CoachingRequestRejected
+      case 'COACHING_CANCELLED':
+        return GQLNotificationType.CoachingCancelled
+      case 'NEW_TRAINING_PLAN_ASSIGNED':
+        return GQLNotificationType.NewTrainingPlanAssigned
+      case 'NEW_MEAL_PLAN_ASSIGNED':
+        return GQLNotificationType.NewMealPlanAssigned
+      case 'WORKOUT_COMPLETED':
+        return GQLNotificationType.WorkoutCompleted
+      case 'PLAN_COMPLETED':
+        return GQLNotificationType.PlanCompleted
+      case 'EXERCISE_NOTE_ADDED':
+        return GQLNotificationType.ExerciseNoteAdded
+      case 'EXERCISE_NOTE_REPLY':
+        return GQLNotificationType.ExerciseNoteReply
+      case 'TRAINER_NOTE_SHARED':
+        return GQLNotificationType.TrainerNoteShared
+      case 'TRAINER_WORKOUT_COMPLETED':
+        return GQLNotificationType.TrainerWorkoutCompleted
+      case 'TRAINER_OFFER_RECEIVED':
+        return GQLNotificationType.TrainerOfferReceived
+      case 'REMINDER':
+        return GQLNotificationType.Reminder
+      case 'SYSTEM':
+        return GQLNotificationType.System
+      case 'MESSAGE':
+        return GQLNotificationType.Message
+    }
+    return GQLNotificationType.System
   }
 
   get read() {

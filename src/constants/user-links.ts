@@ -11,17 +11,18 @@ export const TRAINER_LINKS = {
     label: 'Meal Plans',
     disabled: false,
   },
+  teams: {
+    href: '/trainer/teams',
+    label: 'Teams',
+    disabled: false,
+  },
   exercises: { href: '/trainer/exercises', label: 'Exercises', disabled: true },
   exerciseManagement: {
     href: '/trainer/exercises-management',
     label: 'Exercise Management',
     disabled: false,
   },
-  collaboration: {
-    href: '/trainer/collaboration',
-    label: 'Collaboration',
-    disabled: false,
-  },
+
   profile: { href: '/trainer/profile', label: 'Profile', disabled: false },
   publicProfile: {
     href: '/trainer/public-profile',

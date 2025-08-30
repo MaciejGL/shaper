@@ -85,30 +85,6 @@ function getNotificationTitle(
       return 'New Training Plan'
     case GQLNotificationType.NewMealPlanAssigned:
       return 'New Meal Plan'
-    case GQLNotificationType.CollaborationInvitation:
-      return 'Collaboration Invitation'
-    case GQLNotificationType.CollaborationResponse:
-      return 'Collaboration Response'
-    case GQLNotificationType.MealPlanCollaboration:
-      // Check if this is a permission update or initial collaboration
-      if (
-        notification.message.includes('updated your collaboration permission')
-      ) {
-        return 'Meal Plan Permission Updated'
-      }
-      return 'Meal Plan Access Granted'
-    case GQLNotificationType.MealPlanCollaborationRemoved:
-      return 'Meal Plan Access Removed'
-    case GQLNotificationType.TrainingPlanCollaboration:
-      // Check if this is a permission update or initial collaboration
-      if (
-        notification.message.includes('updated your collaboration permission')
-      ) {
-        return 'Training Plan Permission Updated'
-      }
-      return 'Training Plan Access Granted'
-    case GQLNotificationType.TrainingPlanCollaborationRemoved:
-      return 'Training Plan Access Removed'
     case GQLNotificationType.TrainerOfferReceived:
       return 'New Training Offer'
 

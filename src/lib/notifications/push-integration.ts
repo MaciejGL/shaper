@@ -11,8 +11,6 @@ import {
   notifyCoachingRequest,
   notifyCoachingRequestAccepted,
   notifyCoachingRequestRejected,
-  notifyCollaborationInvitation,
-  notifyCollaborationResponse,
   notifyExerciseCommentReply,
   notifyMealPlanAssigned,
   notifyPlanCompleted,
@@ -85,22 +83,6 @@ export async function sendPushForNotification(
           userId,
           additionalData?.planTitle || 'Meal Plan',
           additionalData?.senderName,
-        )
-
-      case GQLNotificationType.CollaborationInvitation:
-        return await notifyCollaborationInvitation(
-          userId,
-          additionalData?.senderName || 'Someone',
-          additionalData?.planTitle || 'a plan',
-        )
-
-      case GQLNotificationType.CollaborationResponse:
-        // Note: This would need additional logic to determine if accepted/rejected
-        return await notifyCollaborationResponse(
-          userId,
-          additionalData?.senderName || 'Someone',
-          true, // Would need to pass this from context
-          additionalData?.planTitle || 'a plan',
         )
 
       // New coaching-related notifications

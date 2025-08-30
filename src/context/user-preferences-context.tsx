@@ -32,7 +32,6 @@ export interface NotificationPreferences {
   workoutReminders: boolean
   mealReminders: boolean
   progressUpdates: boolean
-  collaborationNotifications: boolean
   systemNotifications: boolean
   emailNotifications: boolean
   pushNotifications: boolean
@@ -70,7 +69,6 @@ const DEFAULT_NOTIFICATIONS: NotificationPreferences = {
   workoutReminders: true,
   mealReminders: true,
   progressUpdates: true,
-  collaborationNotifications: true,
   systemNotifications: true,
   emailNotifications: true,
   pushNotifications: false, // Disabled for now as requested
@@ -155,8 +153,6 @@ export function UserPreferencesProvider({
           mealReminders: profile.notificationPreferences?.mealReminders ?? true,
           progressUpdates:
             profile.notificationPreferences?.progressUpdates ?? true,
-          collaborationNotifications:
-            profile.notificationPreferences?.collaborationNotifications ?? true,
           systemNotifications:
             profile.notificationPreferences?.systemNotifications ?? true,
           emailNotifications:

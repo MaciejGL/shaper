@@ -7,13 +7,10 @@ export const createContext = async () => {
   const context = {
     user: userSession,
     loaders: {
-      plan: null as unknown as ReturnType<typeof createPlanLoaders>, // Will be set below
+      plan: createPlanLoaders(),
       user: createUserLoaders(),
     },
   }
-
-  // Set plan loaders with context reference
-  context.loaders.plan = createPlanLoaders(context)
 
   return context
 }

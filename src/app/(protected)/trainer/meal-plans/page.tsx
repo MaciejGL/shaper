@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
   useCreateDraftMealTemplateMutation,
-  useGetCollaborationMealPlanTemplatesQuery,
   useGetMealPlanTemplatesQuery,
 } from '@/generated/graphql-client'
 
@@ -17,8 +16,6 @@ import { MealPlansList } from './components/meal-plans-list'
 
 export default function MealPlansPage() {
   const { data, isLoading } = useGetMealPlanTemplatesQuery()
-  const { data: collaborationData, isLoading: isLoadingCollaboration } =
-    useGetCollaborationMealPlanTemplatesQuery()
 
   const queryClient = useQueryClient()
 
@@ -60,10 +57,7 @@ export default function MealPlansPage() {
 
       <MealPlansList
         plans={data?.getMealPlanTemplates || []}
-        collaborationPlans={
-          collaborationData?.getCollaborationMealPlanTemplates || []
-        }
-        isLoading={isLoading || isLoadingCollaboration}
+        isLoading={isLoading}
       />
     </div>
   )

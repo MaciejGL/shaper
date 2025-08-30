@@ -3,7 +3,7 @@
 import { formatDate } from 'date-fns'
 import { CheckCircle, Package } from 'lucide-react'
 
-import { LoadingSkeleton } from '@/app/(protected)/trainer/collaboration/components/loading-skeleton'
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Badge } from '@/components/ui/badge'
 import {
   Card,

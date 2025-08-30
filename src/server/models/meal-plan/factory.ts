@@ -25,10 +25,6 @@ import {
 import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { notifyMealPlanAssigned } from '@/lib/notifications/push-notification-service'
-import {
-  CollaborationAction,
-  checkMealPlanPermission,
-} from '@/lib/permissions/collaboration-permissions'
 import { compareWeeksUTC, getStartOfWeekUTC } from '@/lib/utc-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
@@ -90,81 +86,6 @@ export async function getMealPlanTemplates(
   return mealPlans.map((plan) => new MealPlan(plan, context))
 }
 
-export async function getCollaborationMealPlanTemplates(
-  args: GQLQueryGetMealPlanTemplatesArgs,
-  context: GQLContext,
-) {
-  const user = context.user
-  if (!user) {
-    throw new Error('User not found')
-  }
-
-  const where: Prisma.MealPlanWhereInput = {
-    isTemplate: true,
-    createdById: { not: user.user.id }, // Not created by current user
-    collaborators: {
-      some: {
-        collaboratorId: user.user.id, // Current user is a collaborator
-      },
-    },
-  }
-
-  if (typeof args.draft === 'boolean') {
-    where.isDraft = args.draft
-  }
-
-  const mealPlans = await prisma.mealPlan.findMany({
-    where,
-    orderBy: {
-      updatedAt: 'desc',
-    },
-    include: {
-      createdBy: {
-        include: {
-          profile: true,
-        },
-      },
-      collaborators: {
-        include: {
-          collaborator: {
-            include: {
-              profile: true,
-            },
-          },
-        },
-      },
-      weeks: {
-        orderBy: {
-          weekNumber: 'asc',
-        },
-        include: {
-          days: {
-            orderBy: {
-              dayOfWeek: 'asc',
-            },
-            include: {
-              meals: {
-                orderBy: {
-                  dateTime: 'asc',
-                },
-                include: {
-                  foods: {
-                    orderBy: {
-                      createdAt: 'asc',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
-
-  return mealPlans.map((plan) => new MealPlan(plan, context))
-}
-
 export async function getMealPlanById(
   args: GQLQueryGetMealPlanByIdArgs,
   context: GQLContext,
@@ -174,15 +95,6 @@ export async function getMealPlanById(
   if (!user) {
     throw new Error('User not found')
   }
-
-  // Check collaboration permissions
-  await checkMealPlanPermission(
-    context,
-    user.user.id,
-    id,
-    CollaborationAction.VIEW,
-    'view meal plan',
-  )
 
   try {
     const mealPlan = await prisma.mealPlan.findUnique({
@@ -513,15 +425,6 @@ export async function assignMealPlanToClient(
     throw new Error('User not found')
   }
 
-  // Check collaboration permissions
-  await checkMealPlanPermission(
-    context,
-    user.user.id,
-    planId,
-    CollaborationAction.SHARE,
-    'assign meal plan to client',
-  )
-
   try {
     // Get the template plan
     const templatePlan = await getMealPlanById({ id: planId }, context)
@@ -581,15 +484,6 @@ export async function removeMealPlanFromClient(
   }
   const { planId, clientId } = args
 
-  // Check collaboration permissions
-  await checkMealPlanPermission(
-    context,
-    user.user.id,
-    planId,
-    CollaborationAction.DELETE,
-    'remove meal plan from client',
-  )
-
   try {
     // Get the meal plan with weeks to check the constraint
     const mealPlan = await prisma.mealPlan.findUnique({
@@ -641,15 +535,6 @@ export async function duplicateMealPlan(
   if (!user) {
     throw new Error('User not found')
   }
-
-  // Check collaboration permissions - only ADMIN level users can duplicate plans
-  await checkMealPlanPermission(
-    context,
-    user.user.id,
-    args.id,
-    CollaborationAction.MANAGE_COLLABORATORS,
-    'duplicate meal plan',
-  )
 
   try {
     // Get the original plan with all nested data (raw Prisma data)
@@ -1304,15 +1189,6 @@ export async function saveMeal(
       throw new Error('Day not found')
     }
 
-    // Check collaboration permissions
-    await checkMealPlanPermission(
-      context,
-      user.user.id,
-      day.week.plan.id,
-      CollaborationAction.EDIT,
-      'save meal',
-    )
-
     // Create the target datetime for this hour
     // Store as UTC with the logical hour - consistent with existing meals
     // This way the hour represents the intended meal time regardless of timezone
@@ -1458,15 +1334,6 @@ export async function updateMealPlanDetails(
   }
 
   const { id, ...updateData } = args.input
-
-  // Check collaboration permissions
-  await checkMealPlanPermission(
-    context,
-    user.user.id,
-    id,
-    CollaborationAction.EDIT,
-    'update meal plan details',
-  )
 
   try {
     // Verify the meal plan exists

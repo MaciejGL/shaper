@@ -3,7 +3,7 @@
 import { User } from 'lucide-react'
 import { useState } from 'react'
 
-import { LoadingSkeleton } from '@/app/(protected)/trainer/collaboration/components/loading-skeleton'
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { TrainerCard, TrainerData } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Card, CardContent } from '@/components/ui/card'

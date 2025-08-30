@@ -31,10 +31,6 @@ import {
   translateDayOfWeekForUser,
 } from '@/lib/date-utils'
 import { notifyTrainingPlanAssigned } from '@/lib/notifications/push-notification-service'
-import {
-  CollaborationAction,
-  checkTrainingPlanPermission,
-} from '@/lib/permissions/collaboration-permissions'
 import { getFromCache, setInCache } from '@/lib/redis'
 import { parseUTCDate } from '@/lib/server-date-utils'
 import { getWeekStartUTC } from '@/lib/server-date-utils'
@@ -56,15 +52,6 @@ export async function getTrainingPlanById(
     throw new Error('User not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    id,
-    CollaborationAction.VIEW,
-    'view training plan',
-  )
-
   try {
     const trainingPlan = await prisma.trainingPlan.findUnique({
       where: { id },
@@ -72,15 +59,6 @@ export async function getTrainingPlanById(
         createdBy: {
           include: {
             profile: true,
-          },
-        },
-        collaborators: {
-          include: {
-            collaborator: {
-              include: {
-                profile: true,
-              },
-            },
           },
         },
         weeks: {
@@ -253,54 +231,6 @@ export async function getPublicTrainingPlans(
   await setInCache(cacheKey, publicPlans, ttlSeconds)
 
   return publicPlans.map((plan) => new TrainingPlan(plan, context))
-}
-
-export async function getCollaborationTemplates(
-  args: GQLQueryGetTemplatesArgs,
-  context: GQLContext,
-) {
-  const user = context.user
-  if (!user) {
-    throw new Error('User not found')
-  }
-
-  const where: Prisma.TrainingPlanWhereInput = {
-    isTemplate: true,
-    createdById: { not: user.user.id }, // Not created by current user
-    collaborators: {
-      some: {
-        collaboratorId: user.user.id, // Current user is a collaborator
-      },
-    },
-  }
-
-  if (typeof args.draft === 'boolean') {
-    where.isDraft = args.draft
-  }
-
-  const templates = await prisma.trainingPlan.findMany({
-    where,
-    orderBy: {
-      createdAt: 'desc',
-    },
-    include: {
-      createdBy: {
-        include: {
-          profile: true,
-        },
-      },
-      collaborators: {
-        include: {
-          collaborator: {
-            include: {
-              profile: true,
-            },
-          },
-        },
-      },
-    },
-  })
-  return templates.map((template) => new TrainingPlan(template, context))
 }
 
 export async function getClientTrainingPlans(
@@ -844,15 +774,6 @@ export async function updateTrainingPlan(
     throw new Error('User not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    input.id,
-    CollaborationAction.EDIT,
-    'update training plan',
-  )
-
   const createdAt = await prisma.trainingPlan.findUnique({
     where: { id: input.id },
     select: { createdAt: true },
@@ -1175,15 +1096,6 @@ export async function duplicateTrainingPlan(
     throw new Error('User not found')
   }
 
-  // Check collaboration permissions - only ADMIN level users can duplicate plans
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    args.id,
-    CollaborationAction.MANAGE_COLLABORATORS,
-    'duplicate training plan',
-  )
-
   const plan = await getFullPlanById(args.id)
 
   if (!plan) {
@@ -1212,15 +1124,6 @@ export async function deleteTrainingPlan(
 
   const { id } = args
 
-  // Check collaboration permissions - only creators can delete plans
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    id,
-    CollaborationAction.DELETE,
-    'delete training plan',
-  )
-
   // Check if the training plan exists
   const trainingPlan = await prisma.trainingPlan.findUnique({
     where: { id },
@@ -1248,15 +1151,6 @@ export async function assignTrainingPlanToClient(
   if (!user) {
     throw new Error('User not found')
   }
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    planId,
-    CollaborationAction.SHARE,
-    'assign training plan to client',
-  )
 
   const plan = await getFullPlanById(planId)
 
@@ -1322,15 +1216,6 @@ export async function removeTrainingPlanFromClient(
     throw new Error('User not found')
   }
   const { planId, clientId } = args
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    planId,
-    CollaborationAction.DELETE,
-    'remove training plan from client',
-  )
 
   await prisma.trainingPlan.delete({
     where: {
@@ -1827,15 +1712,6 @@ export async function removeWeek(
   if (!user) {
     throw new Error('User not found')
   }
-
-  // Check collaboration permissions - only ADMIN level users can remove weeks
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    planId,
-    CollaborationAction.EDIT,
-    'remove week',
-  )
 
   // Verify the plan exists and get the week to remove
   const plan = await getFullPlanById(planId)

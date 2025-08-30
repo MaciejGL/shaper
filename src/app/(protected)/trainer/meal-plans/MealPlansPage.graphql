@@ -18,24 +18,6 @@ fragment MealPlanTemplate on MealPlan {
     email
   }
 
-  collaborators {
-    id
-    collaborator {
-      id
-      firstName
-      lastName
-      email
-    }
-    permission
-    addedBy {
-      id
-      firstName
-      lastName
-      email
-    }
-    createdAt
-  }
-
   weeks {
     id
     weekNumber
@@ -91,40 +73,7 @@ query GetMealPlanTemplates($draft: Boolean, $limit: Int) {
     dailyFat
     weekCount
     assignedCount
-    collaboratorCount
-    createdAt
-    updatedAt
-  }
-}
 
-query GetCollaborationMealPlanTemplates($draft: Boolean) {
-  getCollaborationMealPlanTemplates(draft: $draft) {
-    id
-    title
-    description
-    isDraft
-    dailyCalories
-    dailyProtein
-    dailyCarbs
-    dailyFat
-    weekCount
-    assignedCount
-    collaboratorCount
-    createdBy {
-      id
-      firstName
-      lastName
-    }
-    collaborators {
-      id
-      collaborator {
-        id
-        firstName
-        lastName
-        email
-      }
-      permission
-    }
     createdAt
     updatedAt
   }

@@ -121,18 +121,4 @@ export default class MealPlan implements GQLMealPlan {
     // TODO: Implement count of how many clients have this plan assigned
     return 0
   }
-
-  async collaboratorCount() {
-    return this.context.loaders.plan.collaboratorCountByMealPlanId.load(
-      this.data.id,
-    )
-  }
-
-  async collaborators() {
-    const collaborators =
-      await this.context.loaders.plan.collaboratorsByMealPlanId.load(
-        this.data.id,
-      )
-    return collaborators
-  }
 }

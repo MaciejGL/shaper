@@ -122,12 +122,6 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     if (rest.notificationPreferences?.progressUpdates !== undefined) {
       updateData.progressUpdates = rest.notificationPreferences.progressUpdates
     }
-    if (
-      rest.notificationPreferences?.collaborationNotifications !== undefined
-    ) {
-      updateData.collaborationNotifications =
-        rest.notificationPreferences.collaborationNotifications
-    }
     if (rest.notificationPreferences?.systemNotifications !== undefined) {
       updateData.systemNotifications =
         rest.notificationPreferences.systemNotifications

@@ -5,7 +5,7 @@ import { Clock, Crown, Dumbbell, Lock, Star } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import { LoadingSkeleton } from '@/app/(protected)/trainer/collaboration/components/loading-skeleton'
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import {
   FilterType,
   TrainingPlanFilters,

@@ -17,7 +17,6 @@ alwaysApply: true
 - **Users**: Trainers (manage clients) + Trainees (personal workouts)
 - **Training**: Plans, sessions, exercises, sets, reps, weight, RPE
 - **Nutrition**: Meal plans, USDA food database, macro tracking
-- **Collaboration**: Trainer-client relationships, shared content
 - **Premium**: Stripe subscriptions, advanced features
 
 ## Tech Stack

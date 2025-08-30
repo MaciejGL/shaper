@@ -151,7 +151,7 @@ export default async function SupportPage() {
                       },
                       {
                         q: 'Is Hypertro free to use?',
-                        a: 'Yes! Hypertro is completely free with all core features included: workout tracking, meal planning, progress photos, trainer collaboration, and more. Premium features may be added in the future.',
+                        a: 'Yes! Hypertro is completely free with all core features included: workout tracking, meal planning, progress photos, trainer teams, and more. Premium features may be added in the future.',
                       },
                       {
                         q: 'How does the trainer-client system work?',
@@ -322,7 +322,7 @@ export default async function SupportPage() {
                     },
                     {
                       q: 'How do mobile push notifications work?',
-                      a: 'Our mobile app uses native push notifications to remind you about workouts, meals, and collaboration updates. You can customize notification types in the app settings.',
+                      a: 'Our mobile app uses native push notifications to remind you about workouts, meals, and team updates. You can customize notification types in the app settings.',
                     },
                     {
                       q: 'Is the mobile app the same as the website?',

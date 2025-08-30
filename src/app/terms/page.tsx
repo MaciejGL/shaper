@@ -120,7 +120,7 @@ export default async function TermsOfServicePage() {
                     </h4>
                     <ul className="space-y-2 text-green-800 dark:text-green-200 text-sm">
                       <li>• Meal planning and nutrition tracking</li>
-                      <li>• Trainer-client collaboration tools</li>
+                      <li>• Trainer team management tools</li>
                       <li>• Mobile app with native push notifications</li>
                       <li>• Data export and privacy controls</li>
                     </ul>

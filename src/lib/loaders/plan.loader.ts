@@ -2,11 +2,8 @@
 import DataLoader from 'dataloader'
 
 import { prisma } from '@/lib/db'
-import MealPlanCollaborator from '@/server/models/meal-plan-collaborator/model'
-import TrainingPlanCollaborator from '@/server/models/training-plan-collaborator/model'
-import { GQLContext } from '@/types/gql-context'
 
-export const createPlanLoaders = (context: GQLContext) => ({
+export const createPlanLoaders = () => ({
   // LIGHTWEIGHT: Basic plan info for listings and navigation
   trainingPlanBasic: new DataLoader(async (planIds: readonly string[]) => {
     const plans = await prisma.trainingPlan.findMany({
@@ -146,90 +143,6 @@ export const createPlanLoaders = (context: GQLContext) => ({
       )
 
       return templateIds.map((id) => map.get(id) ?? 0)
-    },
-  ),
-
-  collaboratorCountByTrainingPlanId: new DataLoader(
-    async (planIds: readonly string[]) => {
-      const counts = await prisma.trainingPlanCollaborator.groupBy({
-        by: ['trainingPlanId'],
-        where: {
-          trainingPlanId: { in: planIds as string[] },
-        },
-        _count: { trainingPlanId: true },
-      })
-
-      const map = new Map(
-        counts.map((item) => [item.trainingPlanId, item._count.trainingPlanId]),
-      )
-
-      return planIds.map((id) => map.get(id) ?? 0)
-    },
-  ),
-
-  collaboratorCountByMealPlanId: new DataLoader(
-    async (planIds: readonly string[]) => {
-      const counts = await prisma.mealPlanCollaborator.groupBy({
-        by: ['mealPlanId'],
-        where: {
-          mealPlanId: { in: planIds as string[] },
-        },
-        _count: { mealPlanId: true },
-      })
-
-      const map = new Map(
-        counts.map((item) => [item.mealPlanId, item._count.mealPlanId]),
-      )
-
-      return planIds.map((id) => map.get(id) ?? 0)
-    },
-  ),
-
-  collaboratorsByTrainingPlanId: new DataLoader(
-    async (planIds: readonly string[]) => {
-      const collaborators = await prisma.trainingPlanCollaborator.findMany({
-        where: {
-          trainingPlanId: { in: planIds as string[] },
-        },
-        include: {
-          collaborator: {
-            include: {
-              profile: true,
-            },
-          },
-        },
-      })
-
-      const grouped = planIds.map((planId) =>
-        collaborators
-          .filter((collab) => collab.trainingPlanId === planId)
-          .map((collab) => new TrainingPlanCollaborator(collab, context)),
-      )
-      return grouped
-    },
-  ),
-
-  collaboratorsByMealPlanId: new DataLoader(
-    async (planIds: readonly string[]) => {
-      const collaborators = await prisma.mealPlanCollaborator.findMany({
-        where: {
-          mealPlanId: { in: planIds as string[] },
-        },
-        include: {
-          collaborator: {
-            include: {
-              profile: true,
-            },
-          },
-        },
-      })
-
-      const grouped = planIds.map((planId) =>
-        collaborators
-          .filter((collab) => collab.mealPlanId === planId)
-          .map((collab) => new MealPlanCollaborator(collab, context)),
-      )
-      return grouped
     },
   ),
 

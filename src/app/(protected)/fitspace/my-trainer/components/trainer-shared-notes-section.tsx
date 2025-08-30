@@ -3,8 +3,8 @@
 import { MessageSquare } from 'lucide-react'
 import { useState } from 'react'
 
-import { LoadingSkeleton } from '@/app/(protected)/trainer/collaboration/components/loading-skeleton'
 import { Loader } from '@/components/loader'
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {

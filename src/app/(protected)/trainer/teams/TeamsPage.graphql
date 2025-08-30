@@ -1,0 +1,102 @@
+query MyTeams {
+  myTeams {
+    id
+    name
+    memberCount
+    isAdmin
+    createdAt
+    updatedAt
+    locations {
+      id
+      city
+      country
+      countryCode
+    }
+    members {
+      id
+      role
+      joinedAt
+      user {
+        id
+        firstName
+        lastName
+        email
+        image
+      }
+    }
+  }
+}
+
+query TeamInvitations {
+  teamInvitations {
+    id
+    invitedEmail
+    status
+    createdAt
+    team {
+      id
+      name
+      locations {
+        id
+        city
+        country
+        countryCode
+      }
+    }
+    invitedBy {
+      id
+      firstName
+      lastName
+      email
+      image
+    }
+  }
+}
+
+mutation CreateTeam($input: CreateTeamInput!) {
+  createTeam(input: $input) {
+    id
+    name
+    memberCount
+    isAdmin
+    createdAt
+    locations {
+      id
+      city
+      country
+      countryCode
+    }
+    members {
+      id
+      role
+      joinedAt
+      user {
+        id
+        firstName
+        lastName
+        email
+        image
+      }
+    }
+  }
+}
+
+mutation InviteTeamMember($input: InviteTeamMemberInput!) {
+  inviteTeamMember(input: $input) {
+    id
+    invitedEmail
+    status
+    createdAt
+  }
+}
+
+mutation RemoveTeamMember($input: RemoveTeamMemberInput!) {
+  removeTeamMember(input: $input)
+}
+
+mutation RespondToTeamInvitation($input: RespondToTeamInvitationInput!) {
+  respondToTeamInvitation(input: $input) {
+    id
+    status
+  }
+}

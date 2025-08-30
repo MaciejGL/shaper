@@ -31,8 +31,7 @@ type TrainingPlan {
   weekCount: Int!
   assignedCount: Int!
   assignmentCount: Int!
-  collaboratorCount: Int!
-  collaborators: [TrainingPlanCollaborator!]!
+
   currentWeekNumber: Int
   completedWorkoutsDays: Int!
   adherence: Float!
@@ -105,7 +104,6 @@ type CurrentWorkoutWeekPayload {
 
 type Query {
   getTemplates(draft: Boolean, limit: Int): [TrainingPlan!]!
-  getCollaborationTemplates(draft: Boolean): [TrainingPlan!]!
   getPublicTrainingPlans(limit: Int): [TrainingPlan!]!
   getTrainingPlanById(id: ID!): TrainingPlan!
   getClientTrainingPlans(clientId: ID!): [TrainingPlan!]!

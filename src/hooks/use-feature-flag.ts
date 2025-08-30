@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState } from 'react'
 
 import {
@@ -6,17 +8,25 @@ import {
   isFeatureEnabled,
 } from '@/lib/posthog'
 
+export const FEATURE_FLAGS = {
+  teams: 'teams-feature',
+}
+
 /**
  * Hook to check if a feature flag is enabled
  * @param flagKey - The feature flag key
  * @returns boolean indicating if the feature is enabled
  */
-export function useFeatureFlag(flagKey: string): boolean {
+export function useFeatureFlag(
+  flagKey: (typeof FEATURE_FLAGS)[keyof typeof FEATURE_FLAGS],
+): boolean {
   const [isEnabled, setIsEnabled] = useState<boolean>(false)
+  const posthog = getPostHogInstance()
 
   useEffect(() => {
-    const posthog = getPostHogInstance()
     if (!posthog) {
+      console.warn('PostHog not initialized, feature flag will be false')
+      setIsEnabled(false)
       return
     }
 
@@ -44,7 +54,7 @@ export function useFeatureFlag(flagKey: string): boolean {
       clearInterval(interval)
       window.removeEventListener('focus', handleFocus)
     }
-  }, [flagKey])
+  }, [flagKey, posthog])
 
   return isEnabled
 }

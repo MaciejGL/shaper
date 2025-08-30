@@ -53,7 +53,7 @@ type NotificationPreferences {
   workoutReminders: Boolean!
   mealReminders: Boolean!
   progressUpdates: Boolean!
-  collaborationNotifications: Boolean!
+
   systemNotifications: Boolean!
   emailNotifications: Boolean!
   pushNotifications: Boolean!
@@ -134,7 +134,7 @@ input NotificationPreferencesInput {
   workoutReminders: Boolean
   mealReminders: Boolean
   progressUpdates: Boolean
-  collaborationNotifications: Boolean
+
   systemNotifications: Boolean
   emailNotifications: Boolean
   pushNotifications: Boolean

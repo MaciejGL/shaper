@@ -32,7 +32,6 @@ fragment ProfileFragment on UserProfile {
     workoutReminders
     mealReminders
     progressUpdates
-    collaborationNotifications
     systemNotifications
     emailNotifications
     pushNotifications

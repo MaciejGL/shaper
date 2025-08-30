@@ -1,10 +1,6 @@
 import { GraphQLError } from 'graphql'
 
 import { prisma } from '@/lib/db'
-import {
-  CollaborationAction,
-  checkTrainingPlanPermission,
-} from '@/lib/permissions/collaboration-permissions'
 import { GQLContext } from '@/types/gql-context'
 
 /**
@@ -71,23 +67,6 @@ export const copyExercisesFromDay = async (
   if (!sourceDay || !targetDay) {
     throw new GraphQLError('Source or target day not found')
   }
-
-  // Check collaboration permissions for both source and target plans
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    sourceDay.week.plan.id,
-    CollaborationAction.EDIT,
-    'copy exercises from source day',
-  )
-
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    targetDay.week.plan.id,
-    CollaborationAction.EDIT,
-    'copy exercises to target day',
-  )
 
   if (!sourceDay.exercises || sourceDay.exercises.length === 0) {
     throw new GraphQLError('Source day has no exercises to copy')

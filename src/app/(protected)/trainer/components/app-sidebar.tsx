@@ -6,7 +6,6 @@ import {
   DumbbellIcon,
   FileIcon,
   FilesIcon,
-  HandshakeIcon,
   LayoutDashboardIcon,
   PlusCircleIcon,
   ShieldIcon,
@@ -44,6 +43,7 @@ import {
   useGetMealPlanTemplatesQuery,
   useGetTemplatesQuery,
 } from '@/generated/graphql-client'
+import { FEATURE_FLAGS, useFeatureFlag } from '@/hooks/use-feature-flag'
 import { cn } from '@/lib/utils'
 
 type SidebarItemType = {
@@ -92,7 +92,6 @@ const placeholderTemplates = {
       isDraft: false,
       weekCount: 0,
       assignedCount: 0,
-      collaboratorCount: 0,
     })),
 }
 
@@ -110,7 +109,6 @@ const placeholderMealPlans = {
       dailyFat: 0,
       weekCount: 0,
       assignedCount: 0,
-      collaboratorCount: 0,
       createdAt: new Date('2025-01-01').toISOString(),
       updatedAt: new Date('2025-01-01').toISOString(),
     })),
@@ -121,6 +119,7 @@ export function AppSidebar() {
   const queryClient = useQueryClient()
   const router = useRouter()
   const [isModerator, setIsModerator] = useState(false)
+  const isTeamsEnabled = useFeatureFlag(FEATURE_FLAGS.teams)
 
   // Check if user is a moderator
   useEffect(() => {
@@ -209,13 +208,17 @@ export function AppSidebar() {
 
   const items: SidebarItemType[] = useMemo(
     () => [
-      // Dashboard item
-      {
-        title: TRAINER_LINKS.dashboard.label,
-        url: TRAINER_LINKS.dashboard.href,
-        icon: LayoutDashboardIcon,
-        disabled: TRAINER_LINKS.dashboard.disabled,
-      },
+      // Teams item - only show if feature flag is enabled
+      ...(isTeamsEnabled
+        ? [
+            {
+              title: TRAINER_LINKS.teams.label,
+              url: TRAINER_LINKS.teams.href,
+              icon: LayoutDashboardIcon,
+              disabled: TRAINER_LINKS.teams.disabled,
+            },
+          ]
+        : []),
       // Clients item
       {
         title: TRAINER_LINKS.clients.label,
@@ -282,16 +285,9 @@ export function AppSidebar() {
         icon: DumbbellIcon,
         disabled: TRAINER_LINKS.exercises.disabled,
       },
-
-      // Collaboration item
-      {
-        title: TRAINER_LINKS.collaboration.label,
-        url: TRAINER_LINKS.collaboration.href,
-        icon: HandshakeIcon,
-        disabled: TRAINER_LINKS.collaboration.disabled,
-      },
     ],
     [
+      isTeamsEnabled,
       clients,
       templates,
       mealPlans,

@@ -18,10 +18,6 @@ import {
   GQLMutationUpdateTrainingPlanDetailsArgs,
   GQLMutationUpdateTrainingWeekDetailsArgs,
 } from '@/generated/graphql-server'
-import {
-  CollaborationAction,
-  checkTrainingPlanPermission,
-} from '@/lib/permissions/collaboration-permissions'
 import { getUTCWeekStart } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
 
@@ -49,15 +45,6 @@ export async function updateTrainingPlanDetails(
   if (!user) {
     throw new GraphQLError('User not found')
   }
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    input.id,
-    CollaborationAction.EDIT,
-    'update training plan details',
-  )
 
   // Get plan for additional checks
   const plan = await prisma.trainingPlan.findUnique({
@@ -109,15 +96,6 @@ export async function updateTrainingWeekDetails(
     throw new GraphQLError('Training week not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    week.plan.id,
-    CollaborationAction.EDIT,
-    'update training week details',
-  )
-
   // Prevent editing completed weeks
   if (isEditPlanNotAllowed(user, week.completedAt)) {
     throw new GraphQLError('Cannot edit completed training week')
@@ -143,15 +121,6 @@ export async function duplicateTrainingWeek(
   if (!user) {
     throw new GraphQLError('User not found')
   }
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    input.trainingPlanId,
-    CollaborationAction.EDIT,
-    'duplicate training week',
-  )
 
   // Get the plan to determine the next week number
   const plan = await prisma.trainingPlan.findUnique({
@@ -314,15 +283,6 @@ export async function removeTrainingWeek(
     throw new GraphQLError('Training week not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    week.plan.id,
-    CollaborationAction.EDIT,
-    'remove training week',
-  )
-
   // Prevent removing weeks from completed training plans or completed weeks
   if (isEditPlanNotAllowed(user, week.completedAt)) {
     throw new GraphQLError('Cannot remove completed training week')
@@ -363,15 +323,6 @@ export async function addTrainingWeek(
   if (!user) {
     throw new GraphQLError('User not found')
   }
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    input.trainingPlanId,
-    CollaborationAction.EDIT,
-    'add training week',
-  )
 
   const plan = await prisma.trainingPlan.findUnique({
     where: { id: input.trainingPlanId },
@@ -449,15 +400,6 @@ export async function updateTrainingDayData(
     throw new GraphQLError('Training day not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    day.week.plan.id,
-    CollaborationAction.EDIT,
-    'update training day data',
-  )
-
   // Prevent editing completed days or days in completed weeks
   if (isEditPlanNotAllowed(user, day.completedAt)) {
     throw new GraphQLError('Cannot edit completed training day')
@@ -509,15 +451,6 @@ export async function updateTrainingExercise(
   if (!exercise) {
     throw new GraphQLError('Training exercise not found')
   }
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    exercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'update training exercise',
-  )
 
   // Prevent editing completed exercises, days, or weeks
   if (isEditPlanNotAllowed(user, exercise.completedAt)) {
@@ -644,15 +577,6 @@ export async function updateExerciseSet(
     throw new GraphQLError('Exercise set not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    set.exercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'update training exercise',
-  )
-
   // Prevent editing completed sets, exercises, days, or weeks
   if (isEditPlanNotAllowed(user, set.completedAt)) {
     throw new GraphQLError('Cannot edit completed exercise set')
@@ -709,15 +633,6 @@ export async function addExerciseToDay(
   if (!day) {
     throw new GraphQLError('Training day not found')
   }
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    day.week.plan.id,
-    CollaborationAction.EDIT,
-    'add exercise to day',
-  )
 
   // Prevent adding exercises to completed days or weeks
   if (isEditPlanNotAllowed(user, day.completedAt)) {
@@ -806,15 +721,6 @@ export async function removeExerciseFromDay(
     throw new GraphQLError('Training exercise not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    exercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'update training exercise',
-  )
-
   // Prevent removing exercises from completed items
   if (isEditPlanNotAllowed(user, exercise.completedAt)) {
     throw new GraphQLError('Cannot remove completed training exercise')
@@ -885,15 +791,6 @@ export async function removeAllExercisesFromDay(
     throw new GraphQLError('Training day not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    day.week.plan.id,
-    CollaborationAction.EDIT,
-    'remove all exercises from day',
-  )
-
   // Prevent removing exercises from completed day or week
   if (isEditPlanNotAllowed(user, day.completedAt)) {
     throw new GraphQLError(
@@ -959,15 +856,6 @@ export async function moveExercise(
     throw new GraphQLError('Training exercise not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    exercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'update training exercise',
-  )
-
   // Prevent moving completed exercises or exercises in completed items
   if (isEditPlanNotAllowed(user, exercise.completedAt)) {
     throw new GraphQLError('Cannot move completed training exercise')
@@ -1008,15 +896,6 @@ export async function moveExercise(
         if (!targetDay) {
           throw new GraphQLError('Target day not found')
         }
-
-        // Check collaboration permissions for target plan
-        await checkTrainingPlanPermission(
-          context,
-          user.user.id,
-          targetDay.week.plan.id,
-          CollaborationAction.EDIT,
-          'move exercise to target day',
-        )
       }
 
       // Remove from source day: decrement order of exercises that came after
@@ -1120,15 +999,6 @@ export async function addSetToExercise(
     throw new GraphQLError('Training exercise not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    exercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'update training exercise',
-  )
-
   // Prevent adding sets to completed items
   if (isEditPlanNotAllowed(user, exercise.completedAt)) {
     throw new GraphQLError('Cannot add sets to completed training exercise')
@@ -1205,15 +1075,6 @@ export async function removeSetFromExercise(
   if (!set) {
     throw new GraphQLError('Exercise set not found')
   }
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    set.exercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'update training exercise',
-  )
 
   // Prevent removing sets from completed items
   if (isEditPlanNotAllowed(user, set.completedAt)) {

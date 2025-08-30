@@ -19,24 +19,6 @@ fragment TrainingTemplate on TrainingPlan {
     lastName
     email
   }
-  collaborators {
-    id
-    collaborator {
-      id
-      firstName
-      lastName
-      email
-    }
-    addedBy {
-      id
-      firstName
-      lastName
-      email
-    }
-    permission
-    createdAt
-    updatedAt
-  }
 
   weeks {
     id
@@ -92,35 +74,6 @@ query GetTemplates($draft: Boolean, $limit: Int) {
     isDraft
     weekCount
     assignedCount
-    collaboratorCount
-  }
-}
-
-query GetCollaborationTemplates($draft: Boolean) {
-  getCollaborationTemplates(draft: $draft) {
-    id
-    title
-    description
-    isPublic
-    isDraft
-    weekCount
-    assignedCount
-    collaboratorCount
-    createdBy {
-      id
-      firstName
-      lastName
-    }
-    collaborators {
-      id
-      collaborator {
-        id
-        firstName
-        lastName
-        email
-      }
-      permission
-    }
   }
 }
 

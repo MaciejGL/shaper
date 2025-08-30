@@ -219,7 +219,6 @@ export default class UserProfile implements GQLUserProfile {
       workoutReminders: this.data.workoutReminders ?? true,
       mealReminders: this.data.mealReminders ?? true,
       progressUpdates: this.data.progressUpdates ?? true,
-      collaborationNotifications: this.data.collaborationNotifications ?? true,
       systemNotifications: this.data.systemNotifications ?? true,
       emailNotifications: this.data.emailNotifications ?? true,
       pushNotifications: this.data.pushNotifications ?? false,

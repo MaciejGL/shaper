@@ -22,16 +22,14 @@ model User {
   BaseExercise                     BaseExercise[]
   receivedRequests                 CoachingRequest[]          @relation("ReceivedRequests")
   sentRequests                     CoachingRequest[]          @relation("SentRequests")
-  receivedCollaborationInvitations CollaborationInvitation[]  @relation("ReceivedCollaborationInvitations")
-  sentCollaborationInvitations     CollaborationInvitation[]  @relation("SentCollaborationInvitations")
+
   exerciseLogs                     ExerciseLog[]
   createdFavouriteWorkouts         FavouriteWorkout[]         @relation("CreatedFavouriteWorkouts")
   addedMealFoods                   MealFood[]                 @relation("AddedMealFoods")
   mealFoodLogs                     MealFoodLog[]              @relation("MealFoodLogs")
   assignedMealPlans                MealPlan[]                 @relation("AssignedMealPlans")
   createdMealPlans                 MealPlan[]                 @relation("CreatedMealPlans")
-  addedMealPlanCollaborators       MealPlanCollaborator[]     @relation("AddedMealPlanCollaborators")
-  mealPlanCollaborations           MealPlanCollaborator[]     @relation("MealPlanCollaborations")
+
   mobilePushTokens                 MobilePushToken[]
   createdNotes                     Note[]                     @relation("CreatedNotes")
   createdNotifications             Notification[]             @relation("NotificationCreator")
@@ -40,8 +38,7 @@ model User {
   reviews                          Review[]
   assignedPlans                    TrainingPlan[]             @relation("AssignedPlans")
   createdPlans                     TrainingPlan[]             @relation("CreatedPlans")
-  addedTrainingPlanCollaborators   TrainingPlanCollaborator[] @relation("AddedTrainingPlanCollaborators")
-  trainingPlanCollaborations       TrainingPlanCollaborator[] @relation("TrainingPlanCollaborations")
+
   trainer                          User?                      @relation("TrainerClients", fields: [trainerId], references: [id])
   clients                          User[]                     @relation("TrainerClients")
   profile                          UserProfile?
@@ -103,7 +100,6 @@ model UserProfile {
   weight                     Float?
   goals                      String[]
   weekStartsOn               Int?              @default(1)
-  collaborationNotifications Boolean?          @default(true)
   emailNotifications         Boolean?          @default(true)
   heightUnit                 String?           @default("cm")
   mealReminders              Boolean?          @default(true)
@@ -238,7 +234,7 @@ model TrainingPlan {
   createdBy     User                       @relation("CreatedPlans", fields: [createdById], references: [id])
   template      TrainingPlan?              @relation("Template", fields: [templateId], references: [id])
   templates     TrainingPlan[]             @relation("Template")
-  collaborators TrainingPlanCollaborator[]
+
   weeks         TrainingWeek[]
 
   @@index([completedAt])
@@ -498,57 +494,11 @@ model BaseExerciseSubstitute {
   @@index([substituteId])
 }
 
-model CollaborationInvitation {
-  id          String   @id @default(uuid())
-  senderId    String
-  recipientId String
-  status      String   @default("PENDING")
-  message     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  recipient   User     @relation("ReceivedCollaborationInvitations", fields: [recipientId], references: [id])
-  sender      User     @relation("SentCollaborationInvitations", fields: [senderId], references: [id])
 
-  @@index([senderId])
-  @@index([recipientId])
-  @@index([status])
-}
 
-model TrainingPlanCollaborator {
-  id             String       @id @default(uuid())
-  trainingPlanId String
-  collaboratorId String
-  addedById      String
-  permission     String       @default("EDIT")
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  addedBy        User         @relation("AddedTrainingPlanCollaborators", fields: [addedById], references: [id])
-  collaborator   User         @relation("TrainingPlanCollaborations", fields: [collaboratorId], references: [id])
-  trainingPlan   TrainingPlan @relation(fields: [trainingPlanId], references: [id], onDelete: Cascade)
 
-  @@unique([trainingPlanId, collaboratorId])
-  @@index([trainingPlanId])
-  @@index([collaboratorId])
-  @@index([addedById])
-}
 
-model MealPlanCollaborator {
-  id             String   @id @default(uuid())
-  mealPlanId     String
-  collaboratorId String
-  addedById      String
-  permission     String   @default("EDIT")
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  addedBy        User     @relation("AddedMealPlanCollaborators", fields: [addedById], references: [id])
-  collaborator   User     @relation("MealPlanCollaborations", fields: [collaboratorId], references: [id])
-  mealPlan       MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
 
-  @@unique([mealPlanId, collaboratorId])
-  @@index([mealPlanId])
-  @@index([collaboratorId])
-  @@index([addedById])
-}
 
 model MealPlan {
   id            String                 @id @default(uuid())
@@ -574,7 +524,6 @@ model MealPlan {
   createdBy     User                   @relation("CreatedMealPlans", fields: [createdById], references: [id])
   template      MealPlan?              @relation("MealTemplate", fields: [templateId], references: [id])
   templates     MealPlan[]             @relation("MealTemplate")
-  collaborators MealPlanCollaborator[]
   weeks         MealWeek[]
 
   @@index([completedAt])

@@ -342,43 +342,13 @@ export async function notifyWeeklyProgress(
 }
 
 // ================================
-// COLLABORATION
+// TEAM INVITATIONS
 // ================================
 
 /**
- * Send push notification for collaboration invitations
+ * Send push notification for team invitations
  */
-export async function notifyCollaborationInvitation(
-  recipientId: string,
-  inviterName: string,
-  planTitle: string,
-) {
-  return await sendPushNotificationToUsers(
-    [recipientId],
-    'Collaboration invitation',
-    `${inviterName} invited you to collaborate on "${planTitle}".`,
-    '/fitspace/my-plans',
-  )
-}
-
-/**
- * Send push notification for collaboration responses
- */
-export async function notifyCollaborationResponse(
-  senderId: string,
-  responderName: string,
-  accepted: boolean,
-  planTitle: string,
-) {
-  const status = accepted ? 'accepted' : 'declined'
-  return await sendPushNotificationToUsers(
-    [senderId],
-    `Collaboration ${accepted ? 'accepted' : 'declined'}`,
-    `${responderName} ${status} your collaboration invitation for "${planTitle}".`,
-    '/fitspace/my-plans',
-  )
-}
-
+// TODO: Team
 /**
  * Send push notification for trainer package offers
  */

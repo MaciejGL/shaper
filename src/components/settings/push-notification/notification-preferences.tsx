@@ -98,31 +98,6 @@ export function NotificationPreferences({
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
           <Label
-            htmlFor={getId('collaboration-notifications')}
-            className="font-medium"
-          >
-            Collaboration & Coaching
-          </Label>
-          <p className="text-sm text-muted-foreground">
-            New coaching requests, plan assignments, and trainer messages
-          </p>
-        </div>
-        <Switch
-          id={getId('collaboration-notifications')}
-          checked={
-            preferences.notifications?.collaborationNotifications ?? true
-          }
-          onCheckedChange={(enabled) =>
-            handleNotificationTypeToggle('collaborationNotifications', enabled)
-          }
-        />
-      </div>
-
-      <Separator />
-
-      <div className="flex items-center justify-between gap-4">
-        <div className="space-y-1">
-          <Label
             htmlFor={getId('system-notifications')}
             className="font-medium"
           >

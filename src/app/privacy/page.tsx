@@ -180,14 +180,14 @@ export default async function PrivacyPolicyPage() {
 
                   <div className="bg-muted/30 p-6 rounded-lg">
                     <h3 className="text-lg font-semibold mb-3 text-foreground">
-                      Communication & Collaboration
+                      Communication & Teams
                     </h3>
                     <ul className="space-y-2 text-muted-foreground">
                       <li>
                         <strong className="text-foreground">
                           Trainer-Client Communications:
                         </strong>{' '}
-                        Notes, coaching requests, collaboration invitations
+                        Notes, coaching requests, team invitations
                       </li>
                       <li>
                         <strong className="text-foreground">
@@ -607,7 +607,7 @@ export default async function PrivacyPolicyPage() {
                       </li>
                       <li>
                         • Disable specific notification types (workouts, meals,
-                        collaboration)
+                        teams)
                       </li>
                       <li>• Opt out of all non-essential communications</li>
                     </ul>

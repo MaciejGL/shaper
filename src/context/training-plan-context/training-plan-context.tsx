@@ -10,11 +10,9 @@ import {
   useState,
 } from 'react'
 
-import { useUser } from '@/context/user-context'
 import { useGetTemplateTrainingPlanByIdQuery } from '@/generated/graphql-client'
 import { useTrainingPlanMutations } from '@/hooks/use-training-plan-mutations'
 import { useUnsavedChangesWarning } from '@/hooks/use-unsaved-changes-warning'
-import { useUserPermissions } from '@/lib/collaboration-utils'
 
 import { useTrainingPlanMutations as useLegacyMutations } from './mutations'
 import type { TrainingPlanContextType } from './types'
@@ -31,9 +29,6 @@ export function TrainingPlanProvider({
   // ## State - Only keep UI-specific state, not data state
   const [activeWeek, setActiveWeek] = useState(0)
 
-  // ## User context for permissions
-  const { user } = useUser()
-
   // ## Queries - React Query cache as single source of truth
   const { data: templateTrainingPlan, isLoading: isLoadingInitialData } =
     useGetTemplateTrainingPlanByIdQuery(
@@ -44,16 +39,6 @@ export function TrainingPlanProvider({
         // No need for select transformation - use data directly
       },
     )
-
-  // ## Permission utilities
-  const plan = templateTrainingPlan?.getTrainingPlanById
-  const {
-    hasAdmin: canAdmin,
-    hasEdit: canEdit,
-    hasView: canView,
-    isCreator,
-    permission: currentUserPermission,
-  } = useUserPermissions(plan ?? null, user)
 
   // ## Unified Optimistic Mutations - Replace all handler files
   const {
@@ -199,14 +184,6 @@ export function TrainingPlanProvider({
       updatedAt: templateTrainingPlan?.getTrainingPlanById?.updatedAt,
       assignedCount: templateTrainingPlan?.getTrainingPlanById?.assignedCount,
 
-      // Permission information
-      currentUserPermission: currentUserPermission || undefined,
-      isCreator,
-      isViewingOthersPlans: !isCreator && !!plan,
-      canView,
-      canEdit,
-      canAdmin,
-
       // UI Actions
       setActiveWeek,
 
@@ -243,12 +220,6 @@ export function TrainingPlanProvider({
       templateTrainingPlan?.getTrainingPlanById?.createdAt,
       templateTrainingPlan?.getTrainingPlanById?.updatedAt,
       templateTrainingPlan?.getTrainingPlanById?.assignedCount,
-      currentUserPermission,
-      isCreator,
-      plan,
-      canView,
-      canEdit,
-      canAdmin,
       updateDetails,
       updateDay,
       updateExercise,

@@ -690,20 +690,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
             where: { OR: [{ userId }, { createdBy: userId }] },
           }),
 
-          // Coaching and collaboration requests
+          // Coaching requests
           tx.coachingRequest.deleteMany({
             where: { OR: [{ senderId: userId }, { recipientId: userId }] },
-          }),
-          tx.collaborationInvitation.deleteMany({
-            where: { OR: [{ senderId: userId }, { recipientId: userId }] },
-          }),
-
-          // Plan collaborations
-          tx.trainingPlanCollaborator.deleteMany({
-            where: { OR: [{ addedById: userId }, { collaboratorId: userId }] },
-          }),
-          tx.mealPlanCollaborator.deleteMany({
-            where: { OR: [{ addedById: userId }, { collaboratorId: userId }] },
           }),
 
           // User-generated content and logs

@@ -25,10 +25,6 @@ import {
   getLastAssistantMessage,
   parseAssistantJsonResponse,
 } from '@/lib/open-ai/assistant-utils'
-import {
-  CollaborationAction,
-  checkTrainingPlanPermission,
-} from '@/lib/permissions/collaboration-permissions'
 import { getUTCWeekStart } from '@/lib/server-date-utils'
 import { checkPremiumAccess } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
@@ -85,15 +81,6 @@ export const getTrainingExercise = async (
     throw new GraphQLError('Exercise not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    exercise.day.week.plan.id,
-    CollaborationAction.VIEW,
-    'view training exercise',
-  )
-
   return new TrainingExercise(exercise, context)
 }
 
@@ -129,15 +116,6 @@ export const updateExerciseForm = async (
   if (!exercise) {
     throw new GraphQLError('Exercise not found')
   }
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    exercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'update training exercise',
-  )
 
   if (isEditPlanNotAllowed(user, exercise.completedAt)) {
     throw new GraphQLError('Cannot edit completed exercise')
@@ -274,15 +252,6 @@ export const addExercisesToWorkout = async (
     throw new Error('Training day not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    trainingDay.week.plan.id,
-    CollaborationAction.EDIT,
-    'add exercises to workout',
-  )
-
   const trainingExercises = await Promise.all(
     baseExericse.map(async (ex, index) => {
       return await prisma.trainingExercise.create({
@@ -370,15 +339,6 @@ export const addAiExerciseToWorkout = async (
     throw new Error('Training day not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    trainingDay.week.plan.id,
-    CollaborationAction.EDIT,
-    'add AI exercise to workout',
-  )
-
   const trainingExercise = await prisma.trainingExercise.create({
     data: {
       baseId: baseExericse.id,
@@ -438,15 +398,6 @@ export const removeExerciseFromWorkout = async (
   if (!workout) {
     throw new Error('Workout not found')
   }
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    workout.week.plan.id,
-    CollaborationAction.EDIT,
-    'remove exercise from workout',
-  )
 
   const removedExercise = workout.exercises.find(
     (exercise) => exercise.id === exerciseId,
@@ -550,15 +501,6 @@ export const clearTodaysWorkout = async (context: GQLContext) => {
     return true // Nothing to clear
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    quickWorkoutPlan.id,
-    CollaborationAction.EDIT,
-    "clear today's workout",
-  )
-
   // Remove all exercises from today's workout in a transaction
   await prisma.$transaction(async (tx) => {
     await tx.trainingExercise.deleteMany({
@@ -631,15 +573,6 @@ export const addSet = async (exerciseId: string, context: GQLContext) => {
     throw new Error('Training exercise not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    trainingExercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'add set to exercise',
-  )
-
   // Find the maximum existing order to ensure proper sequential ordering
   const maxOrder =
     trainingExercise.sets.length > 0
@@ -691,15 +624,6 @@ export const removeSet = async (setId: string, context: GQLContext) => {
   if (!exercise) {
     throw new Error('Training exercise not found')
   }
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    exercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'remove set from exercise',
-  )
 
   const removedSet = exercise.sets.find((set) => set.id === setId)
   if (!removedSet) {
@@ -1041,15 +965,6 @@ export const addSetExerciseForm = async (
     throw new Error('Training exercise not found')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    trainingExercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'add set to exercise form',
-  )
-
   if (isEditPlanNotAllowed(user, trainingExercise.completedAt)) {
     throw new GraphQLError('Cannot add sets to completed exercise')
   }
@@ -1110,15 +1025,6 @@ export const removeSetExerciseForm = async (
   if (!set) {
     throw new Error('Set not found')
   }
-
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    set.exercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'remove set from exercise form',
-  )
 
   if (isEditPlanNotAllowed(user, set.exercise.completedAt)) {
     throw new GraphQLError('Cannot remove completed set')
@@ -1397,14 +1303,6 @@ export const swapExercise = async (
     throw new GraphQLError('We could not find the exercise to swap')
   }
 
-  // Check collaboration permissions
-  await checkTrainingPlanPermission(
-    context,
-    user.user.id,
-    exercise.day.week.plan.id,
-    CollaborationAction.EDIT,
-    'swap exercise',
-  )
   //Check if user wants to revert the substitution
   if (exercise.id === substituteId) {
     const revertedExercise = await prisma.trainingExercise.update({

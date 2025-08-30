@@ -32,7 +32,6 @@ import {
   getActivePlanId,
   getClientActivePlan,
   getClientTrainingPlans,
-  getCollaborationTemplates,
   getCurrentWorkoutWeek,
   getMyPlansOverview,
   getMyPlansOverviewFull,
@@ -98,9 +97,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   getQuickWorkoutPlan: async (_, __, context) => {
     return getQuickWorkoutPlan(context)
   },
-  getCollaborationTemplates: async (_, args, context) => {
-    return getCollaborationTemplates(args, context)
-  },
+
   getCurrentWorkoutWeek: async (_, __, context) => {
     return getCurrentWorkoutWeek(context)
   },
