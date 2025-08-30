@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, CheckCircle, Trash2, X } from 'lucide-react'
+import { AlertTriangle, Check, CheckCircle, Trash2, X } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,7 @@ import { ExerciseImagesVideoSection } from './exercise-images-video-section'
 import { ExerciseSettingsSection } from './exercise-settings-section'
 import { ExerciseTipsSection } from './exercise-tips-section'
 import { Exercise } from './types'
+import { hasSimilarPublicExercise } from './utils/check-similar-exercise'
 
 interface ExerciseCardProps {
   exercise: Exercise
@@ -46,6 +47,9 @@ export function ExerciseCard({
   })
 
   const { isVerified, toggleVerified } = useVerifiedExercises()
+
+  // Check if this non-public exercise has a similar public exercise
+  const hasCollision = hasSimilarPublicExercise(currentExercise, allExercises)
 
   const handleSave = async () => {
     await saveChanges()
@@ -112,6 +116,14 @@ export function ExerciseCard({
         </div>
 
         <div className="flex items-center gap-4">
+          {/* Similar Exercise Warning Badge */}
+          {hasCollision && (
+            <Badge variant="warning" className="flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" />
+              Similar exercise already exists in public
+            </Badge>
+          )}
+
           {/* Verified Badge */}
           <Badge
             variant={isVerified(exercise.id) ? 'success' : 'secondary'}
