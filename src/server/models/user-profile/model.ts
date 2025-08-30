@@ -11,17 +11,22 @@ import {
   GQLWeightUnit,
 } from '@/generated/graphql-server'
 import {
+  Location as PrismaLocation,
   User as PrismaUser,
   UserBodyMeasure as PrismaUserBodyMeasure,
+  UserLocation as PrismaUserLocation,
   UserProfile as PrismaUserProfile,
 } from '@/generated/prisma/client'
 
+import Location from '../location/model'
 import UserBodyMeasure from '../user-body-measure/model'
 
 export default class UserProfile implements GQLUserProfile {
   constructor(
     protected data: PrismaUserProfile & {
-      user?: PrismaUser
+      user?: PrismaUser & {
+        locations?: (PrismaUserLocation & { location: PrismaLocation })[]
+      }
       bodyMeasures?: PrismaUserBodyMeasure[]
     },
   ) {}
@@ -56,6 +61,12 @@ export default class UserProfile implements GQLUserProfile {
 
   get avatarUrl() {
     return this.data.avatarUrl
+  }
+
+  get locations() {
+    return (
+      this.data.user?.locations?.map((ul) => new Location(ul.location)) || []
+    )
   }
 
   get height() {

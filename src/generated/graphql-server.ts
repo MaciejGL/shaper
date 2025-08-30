@@ -137,6 +137,13 @@ export type GQLAddSubstituteExerciseInput = {
   substituteId: Scalars['ID']['input'];
 };
 
+export type GQLAddTeamLocationInput = {
+  city: Scalars['String']['input'];
+  country: Scalars['String']['input'];
+  countryCode: Scalars['String']['input'];
+  teamId: Scalars['ID']['input'];
+};
+
 export type GQLAddTrainingPlanCollaboratorInput = {
   collaboratorEmail: Scalars['String']['input'];
   permission: GQLCollaborationPermission;
@@ -146,6 +153,12 @@ export type GQLAddTrainingPlanCollaboratorInput = {
 export type GQLAddTrainingWeekInput = {
   trainingPlanId: Scalars['ID']['input'];
   weekNumber: Scalars['Int']['input'];
+};
+
+export type GQLAddUserLocationInput = {
+  city: Scalars['String']['input'];
+  country: Scalars['String']['input'];
+  countryCode: Scalars['String']['input'];
 };
 
 export type GQLAdminUserFilters = {
@@ -503,9 +516,7 @@ export type GQLCreateReviewInput = {
 };
 
 export type GQLCreateTeamInput = {
-  city: Scalars['String']['input'];
-  country: Scalars['String']['input'];
-  countryCode: Scalars['String']['input'];
+  locations: Array<GQLTeamLocationInput>;
   name: Scalars['String']['input'];
 };
 
@@ -785,6 +796,17 @@ export type GQLImage = {
   url: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
+export enum GQLInvitationStatus {
+  Accepted = 'ACCEPTED',
+  Pending = 'PENDING',
+  Rejected = 'REJECTED'
+}
+
+export type GQLInviteTeamMemberInput = {
+  email: Scalars['String']['input'];
+  teamId: Scalars['ID']['input'];
+};
+
 export type GQLLocation = {
   __typename?: 'Location';
   city: EntireFieldWrapper<Scalars['String']['output']>;
@@ -999,8 +1021,10 @@ export type GQLMutation = {
   addSetExerciseForm: EntireFieldWrapper<GQLExerciseSet>;
   addSetToExercise: EntireFieldWrapper<Scalars['ID']['output']>;
   addSubstituteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  addTeamLocation: EntireFieldWrapper<GQLTeam>;
   addTrainingPlanCollaborator: EntireFieldWrapper<GQLTrainingPlanCollaborator>;
   addTrainingWeek: EntireFieldWrapper<Scalars['ID']['output']>;
+  addUserLocation: EntireFieldWrapper<GQLUserProfile>;
   assignMealPlanToClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   assignTemplateToSelf: EntireFieldWrapper<Scalars['Boolean']['output']>;
   assignTrainingPlanToClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1050,6 +1074,7 @@ export type GQLMutation = {
   generateAiWorkout: EntireFieldWrapper<GQLAiWorkoutResult>;
   getAiExerciseSuggestions: EntireFieldWrapper<Array<GQLAiExerciseSuggestion>>;
   giveLifetimePremium: EntireFieldWrapper<GQLUserSubscription>;
+  inviteTeamMember: EntireFieldWrapper<GQLTeamInvitation>;
   logWorkoutProgress: EntireFieldWrapper<Scalars['ID']['output']>;
   logWorkoutSessionEvent: EntireFieldWrapper<Scalars['ID']['output']>;
   markAllNotificationsRead: EntireFieldWrapper<Array<GQLNotification>>;
@@ -1071,13 +1096,17 @@ export type GQLMutation = {
   removeSetExerciseForm: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeSetFromExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeSubstituteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  removeTeamLocation: EntireFieldWrapper<GQLTeam>;
+  removeTeamMember: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeTrainingPlanCollaborator: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeTrainingPlanFromClient: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeTrainingWeek: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  removeUserLocation: EntireFieldWrapper<GQLUserProfile>;
   removeUserSubscription: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeWeek: EntireFieldWrapper<Scalars['Boolean']['output']>;
   resetUserLogs: EntireFieldWrapper<Scalars['Boolean']['output']>;
   respondToCollaborationInvitation: EntireFieldWrapper<GQLCollaborationInvitation>;
+  respondToTeamInvitation: EntireFieldWrapper<GQLTeamInvitation>;
   saveMeal?: EntireFieldWrapper<Maybe<GQLMeal>>;
   sendCollaborationInvitation: EntireFieldWrapper<GQLCollaborationInvitation>;
   startWorkoutFromFavourite: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -1099,6 +1128,7 @@ export type GQLMutation = {
   updateServiceTask: EntireFieldWrapper<GQLServiceTask>;
   updateSetLog?: EntireFieldWrapper<Maybe<GQLExerciseSetLog>>;
   updateSubstituteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  updateTeam: EntireFieldWrapper<GQLTeam>;
   updateTrainingDayData: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateTrainingExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateTrainingPlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1187,6 +1217,11 @@ export type GQLMutationAddSubstituteExerciseArgs = {
 };
 
 
+export type GQLMutationAddTeamLocationArgs = {
+  input: GQLAddTeamLocationInput;
+};
+
+
 export type GQLMutationAddTrainingPlanCollaboratorArgs = {
   input: GQLAddTrainingPlanCollaboratorInput;
 };
@@ -1194,6 +1229,11 @@ export type GQLMutationAddTrainingPlanCollaboratorArgs = {
 
 export type GQLMutationAddTrainingWeekArgs = {
   input: GQLAddTrainingWeekInput;
+};
+
+
+export type GQLMutationAddUserLocationArgs = {
+  input: GQLAddUserLocationInput;
 };
 
 
@@ -1419,6 +1459,11 @@ export type GQLMutationGiveLifetimePremiumArgs = {
 };
 
 
+export type GQLMutationInviteTeamMemberArgs = {
+  input: GQLInviteTeamMemberInput;
+};
+
+
 export type GQLMutationLogWorkoutProgressArgs = {
   dayId: Scalars['ID']['input'];
   tick: Scalars['Int']['input'];
@@ -1531,6 +1576,16 @@ export type GQLMutationRemoveSubstituteExerciseArgs = {
 };
 
 
+export type GQLMutationRemoveTeamLocationArgs = {
+  input: GQLRemoveTeamLocationInput;
+};
+
+
+export type GQLMutationRemoveTeamMemberArgs = {
+  input: GQLRemoveTeamMemberInput;
+};
+
+
 export type GQLMutationRemoveTrainingPlanCollaboratorArgs = {
   input: GQLRemoveTrainingPlanCollaboratorInput;
 };
@@ -1547,6 +1602,11 @@ export type GQLMutationRemoveTrainingWeekArgs = {
 };
 
 
+export type GQLMutationRemoveUserLocationArgs = {
+  locationId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationRemoveUserSubscriptionArgs = {
   userId: Scalars['ID']['input'];
 };
@@ -1560,6 +1620,11 @@ export type GQLMutationRemoveWeekArgs = {
 
 export type GQLMutationRespondToCollaborationInvitationArgs = {
   input: GQLRespondToCollaborationInvitationInput;
+};
+
+
+export type GQLMutationRespondToTeamInvitationArgs = {
+  input: GQLRespondToTeamInvitationInput;
 };
 
 
@@ -1670,6 +1735,11 @@ export type GQLMutationUpdateSetLogArgs = {
 
 export type GQLMutationUpdateSubstituteExerciseArgs = {
   input: GQLUpdateSubstituteExerciseInput;
+};
+
+
+export type GQLMutationUpdateTeamArgs = {
+  input: GQLUpdateTeamInput;
 };
 
 
@@ -1960,6 +2030,9 @@ export type GQLQuery = {
   pushSubscription?: EntireFieldWrapper<Maybe<GQLPushSubscription>>;
   pushSubscriptions: EntireFieldWrapper<Array<GQLPushSubscription>>;
   sentCollaborationInvitations: EntireFieldWrapper<Array<GQLCollaborationInvitation>>;
+  sentTeamInvitations: EntireFieldWrapper<Array<GQLTeamInvitation>>;
+  team?: EntireFieldWrapper<Maybe<GQLTeam>>;
+  teamInvitations: EntireFieldWrapper<Array<GQLTeamInvitation>>;
   trainerSharedNotes: EntireFieldWrapper<Array<GQLNote>>;
   trainingPlanCollaborators: EntireFieldWrapper<Array<GQLTrainingPlanCollaborator>>;
   user?: EntireFieldWrapper<Maybe<GQLUser>>;
@@ -2205,6 +2278,11 @@ export type GQLQueryPushSubscriptionArgs = {
 };
 
 
+export type GQLQueryTeamArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type GQLQueryTrainerSharedNotesArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
@@ -2258,6 +2336,16 @@ export type GQLRemoveSubstituteExerciseInput = {
   substituteId: Scalars['ID']['input'];
 };
 
+export type GQLRemoveTeamLocationInput = {
+  locationId: Scalars['ID']['input'];
+  teamId: Scalars['ID']['input'];
+};
+
+export type GQLRemoveTeamMemberInput = {
+  memberId: Scalars['ID']['input'];
+  teamId: Scalars['ID']['input'];
+};
+
 export type GQLRemoveTrainingPlanCollaboratorInput = {
   collaboratorId: Scalars['ID']['input'];
 };
@@ -2270,6 +2358,11 @@ export enum GQLRepFocus {
 
 export type GQLRespondToCollaborationInvitationInput = {
   action: GQLCollaborationInvitationAction;
+  invitationId: Scalars['ID']['input'];
+};
+
+export type GQLRespondToTeamInvitationInput = {
+  accept: Scalars['Boolean']['input'];
   invitationId: Scalars['ID']['input'];
 };
 
@@ -2452,21 +2545,42 @@ export type GQLTeam = {
   __typename?: 'Team';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
-  location: EntireFieldWrapper<GQLLocation>;
+  isAdmin: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  locations: EntireFieldWrapper<Array<GQLLocation>>;
   memberCount: EntireFieldWrapper<Scalars['Int']['output']>;
+  members: EntireFieldWrapper<Array<GQLTeamMember>>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
-export type GQLTeamMember = {
-  __typename?: 'TeamMember';
-  addedBy: EntireFieldWrapper<GQLUserPublic>;
+export type GQLTeamInvitation = {
+  __typename?: 'TeamInvitation';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
-  isCurrentUserSender: EntireFieldWrapper<Scalars['Boolean']['output']>;
-  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  invitedBy: EntireFieldWrapper<GQLUserPublic>;
+  invitedEmail: EntireFieldWrapper<Scalars['String']['output']>;
+  status: EntireFieldWrapper<GQLInvitationStatus>;
+  team: EntireFieldWrapper<GQLTeam>;
+};
+
+export type GQLTeamLocationInput = {
+  city: Scalars['String']['input'];
+  country: Scalars['String']['input'];
+  countryCode: Scalars['String']['input'];
+};
+
+export type GQLTeamMember = {
+  __typename?: 'TeamMember';
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  joinedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  role: EntireFieldWrapper<GQLTeamRole>;
   user: EntireFieldWrapper<GQLUserPublic>;
 };
+
+export enum GQLTeamRole {
+  Admin = 'ADMIN',
+  Member = 'MEMBER'
+}
 
 export enum GQLTheme {
   Dark = 'dark',
@@ -2745,6 +2859,9 @@ export type GQLUpdateProfileInput = {
   height?: InputMaybe<Scalars['Float']['input']>;
   heightUnit?: InputMaybe<GQLHeightUnit>;
   lastName?: InputMaybe<Scalars['String']['input']>;
+  locationCity?: InputMaybe<Scalars['String']['input']>;
+  locationCountry?: InputMaybe<Scalars['String']['input']>;
+  locationCountryCode?: InputMaybe<Scalars['String']['input']>;
   notificationPreferences?: InputMaybe<GQLNotificationPreferencesInput>;
   phone?: InputMaybe<Scalars['String']['input']>;
   sex?: InputMaybe<Scalars['String']['input']>;
@@ -2781,6 +2898,11 @@ export type GQLUpdateSubstituteExerciseInput = {
   originalId: Scalars['ID']['input'];
   reason?: InputMaybe<Scalars['String']['input']>;
   substituteId: Scalars['ID']['input'];
+};
+
+export type GQLUpdateTeamInput = {
+  name?: InputMaybe<Scalars['String']['input']>;
+  teamId: Scalars['ID']['input'];
 };
 
 export type GQLUpdateTrainingDayDataInput = {
@@ -2924,6 +3046,7 @@ export type GQLUserProfile = {
   heightUnit: EntireFieldWrapper<GQLHeightUnit>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   lastName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  locations: EntireFieldWrapper<Array<GQLLocation>>;
   notificationPreferences: EntireFieldWrapper<GQLNotificationPreferences>;
   phone?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   sex?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -3154,8 +3277,10 @@ export type GQLResolversTypes = {
   AddSetExerciseFormSetInput: GQLAddSetExerciseFormSetInput;
   AddSetToExerciseInput: GQLAddSetToExerciseInput;
   AddSubstituteExerciseInput: GQLAddSubstituteExerciseInput;
+  AddTeamLocationInput: GQLAddTeamLocationInput;
   AddTrainingPlanCollaboratorInput: GQLAddTrainingPlanCollaboratorInput;
   AddTrainingWeekInput: GQLAddTrainingWeekInput;
+  AddUserLocationInput: GQLAddUserLocationInput;
   AdminUserFilters: GQLAdminUserFilters;
   AdminUserListItem: ResolverTypeWrapper<GQLAdminUserListItem>;
   AdminUserListResponse: ResolverTypeWrapper<GQLAdminUserListResponse>;
@@ -3232,6 +3357,8 @@ export type GQLResolversTypes = {
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Image: ResolverTypeWrapper<GQLImage>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  InvitationStatus: GQLInvitationStatus;
+  InviteTeamMemberInput: GQLInviteTeamMemberInput;
   Location: ResolverTypeWrapper<GQLLocation>;
   LogSetInput: GQLLogSetInput;
   Meal: ResolverTypeWrapper<GQLMeal>;
@@ -3268,9 +3395,12 @@ export type GQLResolversTypes = {
   RemoveAllExercisesFromDayInput: GQLRemoveAllExercisesFromDayInput;
   RemoveMealPlanCollaboratorInput: GQLRemoveMealPlanCollaboratorInput;
   RemoveSubstituteExerciseInput: GQLRemoveSubstituteExerciseInput;
+  RemoveTeamLocationInput: GQLRemoveTeamLocationInput;
+  RemoveTeamMemberInput: GQLRemoveTeamMemberInput;
   RemoveTrainingPlanCollaboratorInput: GQLRemoveTrainingPlanCollaboratorInput;
   RepFocus: GQLRepFocus;
   RespondToCollaborationInvitationInput: GQLRespondToCollaborationInvitationInput;
+  RespondToTeamInvitationInput: GQLRespondToTeamInvitationInput;
   Review: ResolverTypeWrapper<GQLReview>;
   RpeRange: GQLRpeRange;
   SaveMealInput: GQLSaveMealInput;
@@ -3290,7 +3420,10 @@ export type GQLResolversTypes = {
   TaskStatus: GQLTaskStatus;
   TaskType: GQLTaskType;
   Team: ResolverTypeWrapper<GQLTeam>;
+  TeamInvitation: ResolverTypeWrapper<GQLTeamInvitation>;
+  TeamLocationInput: GQLTeamLocationInput;
   TeamMember: ResolverTypeWrapper<GQLTeamMember>;
+  TeamRole: GQLTeamRole;
   Theme: GQLTheme;
   TimeFormat: GQLTimeFormat;
   TrainingDay: ResolverTypeWrapper<GQLTrainingDay>;
@@ -3316,6 +3449,7 @@ export type GQLResolversTypes = {
   UpdateReviewInput: GQLUpdateReviewInput;
   UpdateServiceTaskInput: GQLUpdateServiceTaskInput;
   UpdateSubstituteExerciseInput: GQLUpdateSubstituteExerciseInput;
+  UpdateTeamInput: GQLUpdateTeamInput;
   UpdateTrainingDayDataInput: GQLUpdateTrainingDayDataInput;
   UpdateTrainingDayInput: GQLUpdateTrainingDayInput;
   UpdateTrainingExerciseInput: GQLUpdateTrainingExerciseInput;
@@ -3356,8 +3490,10 @@ export type GQLResolversParentTypes = {
   AddSetExerciseFormSetInput: GQLAddSetExerciseFormSetInput;
   AddSetToExerciseInput: GQLAddSetToExerciseInput;
   AddSubstituteExerciseInput: GQLAddSubstituteExerciseInput;
+  AddTeamLocationInput: GQLAddTeamLocationInput;
   AddTrainingPlanCollaboratorInput: GQLAddTrainingPlanCollaboratorInput;
   AddTrainingWeekInput: GQLAddTrainingWeekInput;
+  AddUserLocationInput: GQLAddUserLocationInput;
   AdminUserFilters: GQLAdminUserFilters;
   AdminUserListItem: GQLAdminUserListItem;
   AdminUserListResponse: GQLAdminUserListResponse;
@@ -3422,6 +3558,7 @@ export type GQLResolversParentTypes = {
   ID: Scalars['ID']['output'];
   Image: GQLImage;
   Int: Scalars['Int']['output'];
+  InviteTeamMemberInput: GQLInviteTeamMemberInput;
   Location: GQLLocation;
   LogSetInput: GQLLogSetInput;
   Meal: GQLMeal;
@@ -3457,8 +3594,11 @@ export type GQLResolversParentTypes = {
   RemoveAllExercisesFromDayInput: GQLRemoveAllExercisesFromDayInput;
   RemoveMealPlanCollaboratorInput: GQLRemoveMealPlanCollaboratorInput;
   RemoveSubstituteExerciseInput: GQLRemoveSubstituteExerciseInput;
+  RemoveTeamLocationInput: GQLRemoveTeamLocationInput;
+  RemoveTeamMemberInput: GQLRemoveTeamMemberInput;
   RemoveTrainingPlanCollaboratorInput: GQLRemoveTrainingPlanCollaboratorInput;
   RespondToCollaborationInvitationInput: GQLRespondToCollaborationInvitationInput;
+  RespondToTeamInvitationInput: GQLRespondToTeamInvitationInput;
   Review: GQLReview;
   SaveMealInput: GQLSaveMealInput;
   SendCollaborationInvitationInput: GQLSendCollaborationInvitationInput;
@@ -3471,6 +3611,8 @@ export type GQLResolversParentTypes = {
   SuggestedSets: GQLSuggestedSets;
   SuggestedSetsInput: GQLSuggestedSetsInput;
   Team: GQLTeam;
+  TeamInvitation: GQLTeamInvitation;
+  TeamLocationInput: GQLTeamLocationInput;
   TeamMember: GQLTeamMember;
   TrainingDay: GQLTrainingDay;
   TrainingExercise: GQLTrainingExercise;
@@ -3494,6 +3636,7 @@ export type GQLResolversParentTypes = {
   UpdateReviewInput: GQLUpdateReviewInput;
   UpdateServiceTaskInput: GQLUpdateServiceTaskInput;
   UpdateSubstituteExerciseInput: GQLUpdateSubstituteExerciseInput;
+  UpdateTeamInput: GQLUpdateTeamInput;
   UpdateTrainingDayDataInput: GQLUpdateTrainingDayDataInput;
   UpdateTrainingDayInput: GQLUpdateTrainingDayInput;
   UpdateTrainingExerciseInput: GQLUpdateTrainingExerciseInput;
@@ -3959,8 +4102,10 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   addSetExerciseForm?: Resolver<GQLResolversTypes['ExerciseSet'], ParentType, ContextType, RequireFields<GQLMutationAddSetExerciseFormArgs, 'input'>>;
   addSetToExercise?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAddSetToExerciseArgs, 'input'>>;
   addSubstituteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAddSubstituteExerciseArgs, 'input'>>;
+  addTeamLocation?: Resolver<GQLResolversTypes['Team'], ParentType, ContextType, RequireFields<GQLMutationAddTeamLocationArgs, 'input'>>;
   addTrainingPlanCollaborator?: Resolver<GQLResolversTypes['TrainingPlanCollaborator'], ParentType, ContextType, RequireFields<GQLMutationAddTrainingPlanCollaboratorArgs, 'input'>>;
   addTrainingWeek?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAddTrainingWeekArgs, 'input'>>;
+  addUserLocation?: Resolver<GQLResolversTypes['UserProfile'], ParentType, ContextType, RequireFields<GQLMutationAddUserLocationArgs, 'input'>>;
   assignMealPlanToClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignMealPlanToClientArgs, 'input'>>;
   assignTemplateToSelf?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignTemplateToSelfArgs, 'planId'>>;
   assignTrainingPlanToClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAssignTrainingPlanToClientArgs, 'input'>>;
@@ -4010,6 +4155,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   generateAiWorkout?: Resolver<GQLResolversTypes['AiWorkoutResult'], ParentType, ContextType, RequireFields<GQLMutationGenerateAiWorkoutArgs, 'input'>>;
   getAiExerciseSuggestions?: Resolver<Array<GQLResolversTypes['AiExerciseSuggestion']>, ParentType, ContextType, RequireFields<GQLMutationGetAiExerciseSuggestionsArgs, 'dayId'>>;
   giveLifetimePremium?: Resolver<GQLResolversTypes['UserSubscription'], ParentType, ContextType, RequireFields<GQLMutationGiveLifetimePremiumArgs, 'userId'>>;
+  inviteTeamMember?: Resolver<GQLResolversTypes['TeamInvitation'], ParentType, ContextType, RequireFields<GQLMutationInviteTeamMemberArgs, 'input'>>;
   logWorkoutProgress?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutProgressArgs, 'dayId' | 'tick'>>;
   logWorkoutSessionEvent?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationLogWorkoutSessionEventArgs, 'dayId' | 'event'>>;
   markAllNotificationsRead?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLMutationMarkAllNotificationsReadArgs, 'userId'>>;
@@ -4031,13 +4177,17 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   removeSetExerciseForm?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveSetExerciseFormArgs, 'setId'>>;
   removeSetFromExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveSetFromExerciseArgs, 'setId'>>;
   removeSubstituteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveSubstituteExerciseArgs, 'input'>>;
+  removeTeamLocation?: Resolver<GQLResolversTypes['Team'], ParentType, ContextType, RequireFields<GQLMutationRemoveTeamLocationArgs, 'input'>>;
+  removeTeamMember?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTeamMemberArgs, 'input'>>;
   removeTrainingPlanCollaborator?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingPlanCollaboratorArgs, 'input'>>;
   removeTrainingPlanFromClient?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingPlanFromClientArgs, 'clientId' | 'planId'>>;
   removeTrainingWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveTrainingWeekArgs, 'weekId'>>;
+  removeUserLocation?: Resolver<GQLResolversTypes['UserProfile'], ParentType, ContextType, RequireFields<GQLMutationRemoveUserLocationArgs, 'locationId'>>;
   removeUserSubscription?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveUserSubscriptionArgs, 'userId'>>;
   removeWeek?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveWeekArgs, 'planId' | 'weekId'>>;
   resetUserLogs?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   respondToCollaborationInvitation?: Resolver<GQLResolversTypes['CollaborationInvitation'], ParentType, ContextType, RequireFields<GQLMutationRespondToCollaborationInvitationArgs, 'input'>>;
+  respondToTeamInvitation?: Resolver<GQLResolversTypes['TeamInvitation'], ParentType, ContextType, RequireFields<GQLMutationRespondToTeamInvitationArgs, 'input'>>;
   saveMeal?: Resolver<Maybe<GQLResolversTypes['Meal']>, ParentType, ContextType, RequireFields<GQLMutationSaveMealArgs, 'input'>>;
   sendCollaborationInvitation?: Resolver<GQLResolversTypes['CollaborationInvitation'], ParentType, ContextType, RequireFields<GQLMutationSendCollaborationInvitationArgs, 'input'>>;
   startWorkoutFromFavourite?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationStartWorkoutFromFavouriteArgs, 'input'>>;
@@ -4059,6 +4209,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateServiceTask?: Resolver<GQLResolversTypes['ServiceTask'], ParentType, ContextType, RequireFields<GQLMutationUpdateServiceTaskArgs, 'input' | 'taskId'>>;
   updateSetLog?: Resolver<Maybe<GQLResolversTypes['ExerciseSetLog']>, ParentType, ContextType, RequireFields<GQLMutationUpdateSetLogArgs, 'input'>>;
   updateSubstituteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateSubstituteExerciseArgs, 'input'>>;
+  updateTeam?: Resolver<GQLResolversTypes['Team'], ParentType, ContextType, RequireFields<GQLMutationUpdateTeamArgs, 'input'>>;
   updateTrainingDayData?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingDayDataArgs, 'input'>>;
   updateTrainingExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingExerciseArgs, 'input'>>;
   updateTrainingPlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingPlanArgs, 'input'>>;
@@ -4274,6 +4425,9 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   pushSubscription?: Resolver<Maybe<GQLResolversTypes['PushSubscription']>, ParentType, ContextType, RequireFields<GQLQueryPushSubscriptionArgs, 'endpoint'>>;
   pushSubscriptions?: Resolver<Array<GQLResolversTypes['PushSubscription']>, ParentType, ContextType>;
   sentCollaborationInvitations?: Resolver<Array<GQLResolversTypes['CollaborationInvitation']>, ParentType, ContextType>;
+  sentTeamInvitations?: Resolver<Array<GQLResolversTypes['TeamInvitation']>, ParentType, ContextType>;
+  team?: Resolver<Maybe<GQLResolversTypes['Team']>, ParentType, ContextType, RequireFields<GQLQueryTeamArgs, 'id'>>;
+  teamInvitations?: Resolver<Array<GQLResolversTypes['TeamInvitation']>, ParentType, ContextType>;
   trainerSharedNotes?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType, Partial<GQLQueryTrainerSharedNotesArgs>>;
   trainingPlanCollaborators?: Resolver<Array<GQLResolversTypes['TrainingPlanCollaborator']>, ParentType, ContextType, RequireFields<GQLQueryTrainingPlanCollaboratorsArgs, 'trainingPlanId'>>;
   user?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
@@ -4377,19 +4531,29 @@ export type GQLSuggestedSetsResolvers<ContextType = GQLContext, ParentType exten
 export type GQLTeamResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Team'] = GQLResolversParentTypes['Team']> = {
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
-  location?: Resolver<GQLResolversTypes['Location'], ParentType, ContextType>;
+  isAdmin?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  locations?: Resolver<Array<GQLResolversTypes['Location']>, ParentType, ContextType>;
   memberCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  members?: Resolver<Array<GQLResolversTypes['TeamMember']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type GQLTeamMemberResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['TeamMember'] = GQLResolversParentTypes['TeamMember']> = {
-  addedBy?: Resolver<GQLResolversTypes['UserPublic'], ParentType, ContextType>;
+export type GQLTeamInvitationResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['TeamInvitation'] = GQLResolversParentTypes['TeamInvitation']> = {
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
-  isCurrentUserSender?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
-  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  invitedBy?: Resolver<GQLResolversTypes['UserPublic'], ParentType, ContextType>;
+  invitedEmail?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  status?: Resolver<GQLResolversTypes['InvitationStatus'], ParentType, ContextType>;
+  team?: Resolver<GQLResolversTypes['Team'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLTeamMemberResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['TeamMember'] = GQLResolversParentTypes['TeamMember']> = {
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  joinedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  role?: Resolver<GQLResolversTypes['TeamRole'], ParentType, ContextType>;
   user?: Resolver<GQLResolversTypes['UserPublic'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -4564,6 +4728,7 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   heightUnit?: Resolver<GQLResolversTypes['HeightUnit'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   lastName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  locations?: Resolver<Array<GQLResolversTypes['Location']>, ParentType, ContextType>;
   notificationPreferences?: Resolver<GQLResolversTypes['NotificationPreferences'], ParentType, ContextType>;
   phone?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   sex?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
@@ -4728,6 +4893,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   Substitute?: GQLSubstituteResolvers<ContextType>;
   SuggestedSets?: GQLSuggestedSetsResolvers<ContextType>;
   Team?: GQLTeamResolvers<ContextType>;
+  TeamInvitation?: GQLTeamInvitationResolvers<ContextType>;
   TeamMember?: GQLTeamMemberResolvers<ContextType>;
   TrainingDay?: GQLTrainingDayResolvers<ContextType>;
   TrainingExercise?: GQLTrainingExerciseResolvers<ContextType>;

@@ -75,6 +75,7 @@ type UserProfile {
   activityLevel: ActivityLevel
   goals: [Goal!]!
   bio: String
+  locations: [Location!]!
 
   # Trainer-specific fields
   specialization: [String!]!
@@ -154,6 +155,10 @@ input UpdateProfileInput {
   activityLevel: ActivityLevel
   goals: [Goal!]
   bio: String
+  # Location fields (for adding new locations)
+  locationCity: String
+  locationCountry: String
+  locationCountryCode: String
   # Trainer-specific fields
   specialization: [String!]
   credentials: [String!]
@@ -203,9 +208,17 @@ input UpdateBodyMeasurementInput {
   notes: String
 }
 
+input AddUserLocationInput {
+  city: String!
+  country: String!
+  countryCode: String!
+}
+
 type Mutation {
   updateProfile(input: UpdateProfileInput!): UserProfile
   addBodyMeasurement(input: AddBodyMeasurementInput!): UserBodyMeasure!
   updateBodyMeasurement(input: UpdateBodyMeasurementInput!): UserBodyMeasure!
   deleteBodyMeasurement(id: ID!): Boolean!
+  addUserLocation(input: AddUserLocationInput!): UserProfile!
+  removeUserLocation(locationId: ID!): UserProfile!
 }

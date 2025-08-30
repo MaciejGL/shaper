@@ -1,23 +1,97 @@
 type Team {
   id: ID!
   name: String!
-  location: Location!
+  locations: [Location!]!
   memberCount: Int!
+  members: [TeamMember!]!
+  isAdmin: Boolean!
   createdAt: String!
   updatedAt: String!
 }
 
+type TeamMember {
+  id: ID!
+  user: UserPublic!
+  role: TeamRole!
+  joinedAt: String!
+}
+
+type TeamInvitation {
+  id: ID!
+  team: Team!
+  invitedEmail: String!
+  invitedBy: UserPublic!
+  status: InvitationStatus!
+  createdAt: String!
+}
+
+enum TeamRole {
+  ADMIN
+  MEMBER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 input CreateTeamInput {
   name: String!
+  locations: [TeamLocationInput!]!
+}
+
+input UpdateTeamInput {
+  teamId: ID!
+  name: String
+}
+
+input TeamLocationInput {
   city: String!
   country: String!
   countryCode: String!
 }
 
+input AddTeamLocationInput {
+  teamId: ID!
+  city: String!
+  country: String!
+  countryCode: String!
+}
+
+input RemoveTeamLocationInput {
+  teamId: ID!
+  locationId: ID!
+}
+
+input InviteTeamMemberInput {
+  teamId: ID!
+  email: String!
+}
+
+input RemoveTeamMemberInput {
+  teamId: ID!
+  memberId: ID!
+}
+
+input RespondToTeamInvitationInput {
+  invitationId: ID!
+  accept: Boolean!
+}
+
 type Query {
   myTeams: [Team!]!
+  team(id: ID!): Team
+  teamInvitations: [TeamInvitation!]!
+  sentTeamInvitations: [TeamInvitation!]!
 }
 
 type Mutation {
   createTeam(input: CreateTeamInput!): Team!
+  updateTeam(input: UpdateTeamInput!): Team!
+  addTeamLocation(input: AddTeamLocationInput!): Team!
+  removeTeamLocation(input: RemoveTeamLocationInput!): Team!
+  inviteTeamMember(input: InviteTeamMemberInput!): TeamInvitation!
+  removeTeamMember(input: RemoveTeamMemberInput!): Boolean!
+  respondToTeamInvitation(input: RespondToTeamInvitationInput!): TeamInvitation!
 }

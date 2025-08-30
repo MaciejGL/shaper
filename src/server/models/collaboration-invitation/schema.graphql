@@ -29,15 +29,6 @@ enum CollaborationInvitationAction {
   REJECT
 }
 
-type TeamMember {
-  id: ID!
-  user: UserPublic!
-  addedBy: UserPublic!
-  isCurrentUserSender: Boolean!
-  createdAt: String!
-  updatedAt: String!
-}
-
 type PlanCollaboratorSummary {
   id: ID!
   collaborator: UserPublic!

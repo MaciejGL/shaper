@@ -64,6 +64,10 @@ model User {
 
   // Team relations
   teamMemberships TeamMember[]
+  sentTeamInvitations TeamInvitation[] @relation("SentTeamInvitations")
+
+  // Location relations
+  locations UserLocation[]
 
   @@index([trainerId])
   @@index([stripeCustomerId])
@@ -115,12 +119,8 @@ model UserProfile {
   specialization             String[]          @default([])
   successStories             String[]          @default([])
   trainerSince               DateTime?
-  locationId                 String?
   bodyMeasures               UserBodyMeasure[]
-  location                   Location?         @relation(fields: [locationId], references: [id])
   user                       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([locationId])
 }
 
 model UserBodyMeasure {
@@ -1068,8 +1068,8 @@ model Location {
   country     String
   countryCode String @db.Char(2)
   
-  teams        Team[]
-  userProfiles UserProfile[]
+  teams TeamLocation[]
+  users UserLocation[]
   
   @@unique([city, country])
   @@index([city])
@@ -1077,17 +1077,15 @@ model Location {
 
 // Team model
 model Team {
-  id         String   @id @default(uuid())
-  name       String
-  stripeId   String?  @unique
-  locationId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(uuid())
+  name      String
+  stripeId  String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
   
-  location Location     @relation(fields: [locationId], references: [id])
-  members  TeamMember[]
-  
-  @@index([locationId])
+  locations   TeamLocation[]
+  members     TeamMember[]
+  invitations TeamInvitation[]
 }
 
 // Team membership
@@ -1104,4 +1102,52 @@ model TeamMember {
   @@unique([teamId, userId])
   @@index([teamId])
   @@index([userId])
+}
+
+// Team invitations
+model TeamInvitation {
+  id           String   @id @default(uuid())
+  teamId       String
+  invitedEmail String
+  invitedById  String
+  status       String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+  createdAt    DateTime @default(now())
+  
+  team      Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  invitedBy User @relation("SentTeamInvitations", fields: [invitedById], references: [id])
+  
+  @@unique([teamId, invitedEmail])
+  @@index([teamId])
+  @@index([invitedEmail])
+  @@index([invitedById])
+}
+
+// User locations (many-to-many)
+model UserLocation {
+  id         String   @id @default(uuid())
+  userId     String
+  locationId String
+  createdAt  DateTime @default(now())
+  
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id])
+  
+  @@unique([userId, locationId])
+  @@index([userId])
+  @@index([locationId])
+}
+
+// Team locations (many-to-many)
+model TeamLocation {
+  id         String   @id @default(uuid())
+  teamId     String
+  locationId String
+  createdAt  DateTime @default(now())
+  
+  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id])
+  
+  @@unique([teamId, locationId])
+  @@index([teamId])
+  @@index([locationId])
 }
