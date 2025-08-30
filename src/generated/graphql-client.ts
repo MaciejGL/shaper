@@ -500,6 +500,13 @@ export type GQLCreateReviewInput = {
   trainingPlanId: Scalars['ID']['input'];
 };
 
+export type GQLCreateTeamInput = {
+  city: Scalars['String']['input'];
+  country: Scalars['String']['input'];
+  countryCode: Scalars['String']['input'];
+  name: Scalars['String']['input'];
+};
+
 export type GQLCreateTrainerNoteForClientInput = {
   clientId: Scalars['String']['input'];
   exerciseId: Scalars['String']['input'];
@@ -776,6 +783,14 @@ export type GQLImage = {
   url: Scalars['String']['output'];
 };
 
+export type GQLLocation = {
+  __typename?: 'Location';
+  city: Scalars['String']['output'];
+  country: Scalars['String']['output'];
+  countryCode: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+};
+
 export type GQLLogSetInput = {
   loggedReps?: InputMaybe<Scalars['Int']['input']>;
   loggedWeight?: InputMaybe<Scalars['Float']['input']>;
@@ -1009,6 +1024,7 @@ export type GQLMutation = {
   createPushSubscription: GQLPushSubscription;
   createQuickWorkout: GQLTrainingPlan;
   createReview: Scalars['Boolean']['output'];
+  createTeam: GQLTeam;
   createTrainerNoteForClient: GQLNote;
   createTrainingPlan: GQLCreateTrainingPlanPayload;
   deactivateUser: Scalars['Boolean']['output'];
@@ -1282,6 +1298,11 @@ export type GQLMutationCreateQuickWorkoutArgs = {
 
 export type GQLMutationCreateReviewArgs = {
   input: GQLCreateReviewInput;
+};
+
+
+export type GQLMutationCreateTeamArgs = {
+  input: GQLCreateTeamInput;
 };
 
 
@@ -1915,6 +1936,7 @@ export type GQLQuery = {
   getTrainingPlanById: GQLTrainingPlan;
   getWorkout?: Maybe<GQLGetWorkoutPayload>;
   getWorkoutInfo: GQLTrainingDay;
+  locations: Array<GQLLocation>;
   mealPlanCollaborators: Array<GQLMealPlanCollaborator>;
   muscleGroupCategories: Array<GQLMuscleGroupCategory>;
   muscleGroupCategory: GQLMuscleGroupCategory;
@@ -1923,6 +1945,7 @@ export type GQLQuery = {
   myMealPlanCollaborations: Array<GQLMealPlanCollaborator>;
   myPlanCollaborators: Array<GQLPlanCollaboratorSummary>;
   myTeamMembers: Array<GQLTeamMember>;
+  myTeams: Array<GQLTeam>;
   myTrainer?: Maybe<GQLUserPublic>;
   myTrainingPlanCollaborations: Array<GQLTrainingPlanCollaborator>;
   note?: Maybe<GQLNote>;
@@ -2422,6 +2445,16 @@ export enum GQLTaskType {
   PlanCreation = 'PLAN_CREATION',
   PlanDelivery = 'PLAN_DELIVERY'
 }
+
+export type GQLTeam = {
+  __typename?: 'Team';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  location: GQLLocation;
+  memberCount: Scalars['Int']['output'];
+  name: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
 
 export type GQLTeamMember = {
   __typename?: 'TeamMember';
