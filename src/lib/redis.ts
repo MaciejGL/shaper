@@ -1,53 +1,77 @@
 import Redis from 'ioredis'
 
-// Redis connection state
-let redisClient: Redis | null = null
-let isConnected = false
+// Use global to persist Redis connection across module reloads in development
+declare global {
+  var __redis: Redis | undefined
+  var __redisConnected: boolean | undefined
+}
 
 /**
- * Initialize Redis connection
+ * Create single Redis instance with proper configuration
+ * Uses global variable to persist across Next.js module reloads
  */
-function initRedis(): Redis | null {
+function getRedisClient(): Redis | null {
   // Only connect if Redis URL is provided
   if (!process.env.REDIS_URL) {
     return null
   }
 
-  if (redisClient) {
-    return redisClient // Return existing connection
+  // Return existing global connection if available and connected
+  if (global.__redis && global.__redisConnected) {
+    return global.__redis
   }
 
+  // Create new connection if none exists or previous one is disconnected
   try {
-    redisClient = new Redis(process.env.REDIS_URL, {
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
+    console.info('[REDIS] Creating new Redis connection...')
+
+    const client = new Redis(process.env.REDIS_URL, {
+      maxRetriesPerRequest: 2,
+      lazyConnect: false,
+      keepAlive: 30000,
+      connectTimeout: 10000,
+      commandTimeout: 5000,
     })
 
-    // Set up event handlers after creating the client
-    redisClient.on('ready', () => {
-      isConnected = true
+    // Set up event handlers
+    client.on('ready', () => {
+      console.info('[REDIS] Connection ready')
+      global.__redisConnected = true
     })
 
-    redisClient.on('connect', () => {
-      isConnected = true
+    client.on('connect', () => {
+      console.info('[REDIS] Connected successfully')
+      global.__redisConnected = true
     })
 
-    redisClient.on('error', (error: Error) => {
+    client.on('error', (error: Error) => {
       console.error('[REDIS] Connection error:', error.message)
-      isConnected = false
+      global.__redisConnected = false
     })
 
-    redisClient.on('close', () => {
-      isConnected = false
+    client.on('close', () => {
+      console.warn('[REDIS] Connection closed')
+      global.__redisConnected = false
     })
 
-    redisClient.on('reconnecting', () => {
-      console.info('[REDIS] Reconnecting...')
+    client.on('reconnecting', (time: number) => {
+      console.info(`[REDIS] Reconnecting in ${time}ms...`)
+      global.__redisConnected = false
     })
 
-    return redisClient
+    client.on('end', () => {
+      console.warn('[REDIS] Connection ended')
+      global.__redisConnected = false
+      global.__redis = undefined
+    })
+
+    // Store in global for reuse
+    global.__redis = client
+    global.__redisConnected = false // Will be set to true on 'ready' event
+
+    return client
   } catch (error) {
-    console.error('[REDIS] Failed to create client:', error)
+    console.error('[REDIS] Failed to create Redis client:', error)
     return null
   }
 }
@@ -56,17 +80,17 @@ function initRedis(): Redis | null {
  * Ensure Redis connection is established
  */
 async function ensureConnection(client: Redis): Promise<boolean> {
-  if (isConnected) {
+  if (global.__redisConnected) {
     return true
   }
 
   try {
     await client.ping()
-    isConnected = true
+    global.__redisConnected = true
     return true
   } catch (error) {
     console.error('[REDIS] Connection test failed:', error)
-    isConnected = false
+    global.__redisConnected = false
     return false
   }
 }
@@ -75,7 +99,7 @@ async function ensureConnection(client: Redis): Promise<boolean> {
  * Get cached value from Redis
  */
 async function getFromCache<T>(key: string): Promise<T | null> {
-  const client = initRedis()
+  const client = getRedisClient()
   if (!client) {
     return null
   }
@@ -108,7 +132,7 @@ async function setInCache<T>(
   value: T,
   ttlSeconds: number = 3600,
 ): Promise<void> {
-  const client = initRedis()
+  const client = getRedisClient()
   if (!client) {
     return
   }
@@ -131,8 +155,11 @@ async function setInCache<T>(
  * Check if key exists in Redis
  */
 async function existsInCache(key: string): Promise<boolean> {
-  const client = initRedis()
-  if (!client || !isConnected) return false
+  const client = getRedisClient()
+  if (!client) return false
+
+  const connected = await ensureConnection(client)
+  if (!connected) return false
 
   try {
     const result = await client.exists(key)
@@ -147,8 +174,11 @@ async function existsInCache(key: string): Promise<boolean> {
  * Delete key from Redis
  */
 async function deleteFromCache(key: string): Promise<void> {
-  const client = initRedis()
-  if (!client || !isConnected) return
+  const client = getRedisClient()
+  if (!client) return
+
+  const connected = await ensureConnection(client)
+  if (!connected) return
 
   try {
     await client.del(key)
@@ -161,8 +191,11 @@ async function deleteFromCache(key: string): Promise<void> {
  * Clear all keys matching pattern from Redis
  */
 async function clearCachePattern(pattern: string): Promise<void> {
-  const client = initRedis()
-  if (!client || !isConnected) return
+  const client = getRedisClient()
+  if (!client) return
+
+  const connected = await ensureConnection(client)
+  if (!connected) return
 
   try {
     const keys = await client.keys(pattern)
@@ -179,19 +212,25 @@ async function clearCachePattern(pattern: string): Promise<void> {
  */
 function getRedisStatus(): { connected: boolean; client: boolean } {
   return {
-    connected: isConnected,
-    client: redisClient !== null,
+    connected: global.__redisConnected || false,
+    client: global.__redis !== undefined,
   }
 }
 
 /**
- * Close Redis connection
+ * Close Redis connection gracefully
  */
 async function closeRedis(): Promise<void> {
-  if (redisClient) {
-    await redisClient.quit()
-    redisClient = null
-    isConnected = false
+  if (global.__redis) {
+    try {
+      await global.__redis.quit()
+      console.info('[REDIS] Connection closed gracefully')
+    } catch (error) {
+      console.error('[REDIS] Error during close:', error)
+    } finally {
+      global.__redis = undefined
+      global.__redisConnected = false
+    }
   }
 }
 
@@ -230,7 +269,7 @@ export const FoodSearchCacheTTL = {
 
 // Export the functions
 export {
-  initRedis,
+  getRedisClient,
   getFromCache,
   setInCache,
   existsInCache,

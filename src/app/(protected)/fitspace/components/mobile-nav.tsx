@@ -19,10 +19,6 @@ import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card } from '@/components/ui/card'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
-import {
-  useFitspaceGetActivePlanIdQuery,
-  useFitspaceGetUserQuickWorkoutPlanQuery,
-} from '@/generated/graphql-client'
 import { useTrainerStatus } from '@/hooks/use-trainer-status'
 import { cn } from '@/lib/utils'
 
@@ -36,13 +32,9 @@ export function MobileNav() {
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
     null,
   )
-  const { data, isLoading } = useFitspaceGetActivePlanIdQuery()
-  const { data: quickWorkoutPlanData, isLoading: isQuickWorkoutPlanLoading } =
-    useFitspaceGetUserQuickWorkoutPlanQuery({})
+
   const { hasTrainer } = useTrainerStatus()
 
-  const currentWorkoutId =
-    data?.getActivePlanId || quickWorkoutPlanData?.getQuickWorkoutPlan?.id
   useEffect(() => {
     setClickedItem(null)
     setPendingNavigation(null)
@@ -52,13 +44,10 @@ export function MobileNav() {
     () => [
       {
         id: 'workout',
-        href: currentWorkoutId
-          ? `/fitspace/workout/${currentWorkoutId}`
-          : '/fitspace/my-plans',
+        href: '/fitspace/workout',
         icon: Dumbbell,
         label: 'Workout',
         prefetch: true,
-        disabled: isLoading || isQuickWorkoutPlanLoading,
       },
       {
         id: 'plans',
@@ -98,7 +87,7 @@ export function MobileNav() {
         prefetch: true,
       },
     ],
-    [currentWorkoutId, isLoading, isQuickWorkoutPlanLoading, hasTrainer],
+    [hasTrainer],
   )
 
   return (

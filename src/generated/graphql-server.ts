@@ -1908,7 +1908,6 @@ export type GQLQuery = {
   getPackageTemplate?: EntireFieldWrapper<Maybe<GQLPackageTemplate>>;
   getPublicTrainingPlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getQuickWorkoutPlan: EntireFieldWrapper<GQLTrainingPlan>;
-  getRecentCompletedWorkouts: EntireFieldWrapper<Array<GQLTrainingDay>>;
   getServiceDeliveryTasks: EntireFieldWrapper<Array<GQLServiceTask>>;
   getSubscriptionStats: EntireFieldWrapper<GQLSubscriptionStats>;
   getTemplates: EntireFieldWrapper<Array<GQLTrainingPlan>>;
@@ -1944,7 +1943,6 @@ export type GQLQuery = {
   userBasic?: EntireFieldWrapper<Maybe<GQLUser>>;
   userExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
   userPublic?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
-  userWithAllData?: EntireFieldWrapper<Maybe<GQLUser>>;
   workoutExerciseNotes: EntireFieldWrapper<Array<GQLWorkoutExerciseNotes>>;
 };
 
@@ -4197,7 +4195,6 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getPackageTemplate?: Resolver<Maybe<GQLResolversTypes['PackageTemplate']>, ParentType, ContextType, RequireFields<GQLQueryGetPackageTemplateArgs, 'id'>>;
   getPublicTrainingPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetPublicTrainingPlansArgs>>;
   getQuickWorkoutPlan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
-  getRecentCompletedWorkouts?: Resolver<Array<GQLResolversTypes['TrainingDay']>, ParentType, ContextType>;
   getServiceDeliveryTasks?: Resolver<Array<GQLResolversTypes['ServiceTask']>, ParentType, ContextType, RequireFields<GQLQueryGetServiceDeliveryTasksArgs, 'serviceDeliveryId'>>;
   getSubscriptionStats?: Resolver<GQLResolversTypes['SubscriptionStats'], ParentType, ContextType>;
   getTemplates?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetTemplatesArgs>>;
@@ -4233,7 +4230,6 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   userBasic?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
   userExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType, Partial<GQLQueryUserExercisesArgs>>;
   userPublic?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType, RequireFields<GQLQueryUserPublicArgs, 'id'>>;
-  userWithAllData?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
   workoutExerciseNotes?: Resolver<Array<GQLResolversTypes['WorkoutExerciseNotes']>, ParentType, ContextType, RequireFields<GQLQueryWorkoutExerciseNotesArgs, 'exerciseNames'>>;
 };
 

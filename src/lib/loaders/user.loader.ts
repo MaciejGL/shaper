@@ -8,7 +8,6 @@ import { prisma } from '@/lib/db'
  * 🟢 PREFERRED: Use userBasic for most cases (profile + trainer)
  * 🟢 PREFERRED: Use getCurrentUser for email lookups (profile + trainer)
  * 🟡 CAUTION: userById includes bodyMeasures (won't batch with others)
- * 🔴 AVOID: getCurrentUserFull, userWithAllData (very heavy)
  *
  * To maximize batching, use consistent include patterns!
  */
@@ -23,38 +22,6 @@ export const createUserLoaders = () => ({
       include: {
         profile: true,
         trainer: true, // Added for consistency with userBasic
-      },
-    })
-
-    const map = new Map(users.map((u) => [u.email, u]))
-    return emails.map((email) => map.get(email) ?? null)
-  }),
-
-  // HEAVY: Full user data (only use when specifically needed)
-  getCurrentUserFull: new DataLoader(async (emails: readonly string[]) => {
-    console.warn(
-      '[USER-LOADER] Using heavy getCurrentUserFull - ensure this is necessary',
-    )
-    const users = await prisma.user.findMany({
-      where: { email: { in: emails as string[] } },
-      include: {
-        profile: {
-          include: {
-            bodyMeasures: true,
-          },
-        },
-        trainer: {
-          include: {
-            profile: true,
-          },
-        },
-        clients: {
-          include: {
-            profile: true,
-          },
-        },
-        sessions: true,
-        notifications: true,
       },
     })
 
@@ -110,46 +77,6 @@ export const createUserLoaders = () => ({
         profile: true, // Include full profile (bodyMeasures will be lazy-loaded if needed)
         trainer: true,
         // Exclude trainer relations, clients, sessions, notifications, and other heavy data
-      },
-    })
-    const map = new Map(users.map((u) => [u.id, u]))
-    return ids.map((id) => map.get(id) ?? null)
-  }),
-
-  // HEAVY: Full user data by ID (only use when specifically needed)
-  userWithAllData: new DataLoader(async (ids: readonly string[]) => {
-    console.warn(
-      '[USER-LOADER] Using heavy userWithAllData - ensure this is necessary for user:',
-      ids[0],
-    )
-    const users = await prisma.user.findMany({
-      where: { id: { in: ids as string[] } },
-      include: {
-        profile: {
-          include: {
-            bodyMeasures: true,
-          },
-        },
-        trainer: {
-          include: {
-            profile: true,
-          },
-        },
-        clients: {
-          include: {
-            profile: true,
-          },
-        },
-        sessions: true,
-        notifications: {
-          include: {
-            creator: {
-              include: {
-                profile: true,
-              },
-            },
-          },
-        },
       },
     })
     const map = new Map(users.map((u) => [u.id, u]))

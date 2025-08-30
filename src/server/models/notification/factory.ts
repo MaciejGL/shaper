@@ -4,81 +4,29 @@ import {
   GQLQueryNotificationsArgs,
   GQLUpdateNotificationInput,
 } from '@/generated/graphql-server'
-import { Notification as PrismaNotification } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
-import { deleteFromCache, getFromCache, setInCache } from '@/lib/redis'
 import { GQLContext } from '@/types/gql-context'
 
 import Notification from './model'
-
-// Cache TTL: 30 days for older notifications
-const CACHE_TTL_DAYS = 30 * 24 * 60 * 60
 
 // Fetch notifications for a user with optional filters and pagination
 export async function getNotifications(
   { userId, read, type, skip = 0, take = 20 }: GQLQueryNotificationsArgs,
   context: GQLContext,
 ) {
-  const tenDaysAgo = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000)
-  const oneMonthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-
-  // Get fresh notifications from DB (last 10 days)
-  const freshNotifications = await prisma.notification.findMany({
+  // Single optimized query - let the database handle sorting and pagination
+  const notifications = await prisma.notification.findMany({
     where: {
       userId,
       read: read ?? undefined,
       type: type ?? undefined,
-      createdAt: { gte: tenDaysAgo },
     },
     orderBy: { createdAt: 'desc' },
+    skip: skip || 0,
+    take: take || 20,
   })
 
-  // Get cached older notifications (10-30 days old)
-  const cacheKey = `notifications:${userId}:${read ?? 'all'}:${type ?? 'all'}`
-  let olderNotifications: PrismaNotification[] = []
-
-  try {
-    olderNotifications =
-      (await getFromCache<PrismaNotification[]>(cacheKey)) || []
-  } catch {
-    // Cache miss - fetch from DB and cache
-    const dbOlderNotifications = await prisma.notification.findMany({
-      where: {
-        userId,
-        read: read ?? undefined,
-        type: type ?? undefined,
-        createdAt: { gte: oneMonthAgo, lt: tenDaysAgo },
-      },
-      orderBy: { createdAt: 'desc' },
-    })
-    await setInCache(cacheKey, dbOlderNotifications, CACHE_TTL_DAYS)
-    olderNotifications = dbOlderNotifications
-  }
-
-  // Combine, sort, and paginate
-  const allNotifications = [...freshNotifications, ...olderNotifications]
-    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-    .slice(skip || 0, (skip || 0) + (take || 20))
-
-  return allNotifications.map((n) => new Notification(n, context))
-}
-
-// Helper function to invalidate notification cache for a user
-async function invalidateNotificationCache(userId: string): Promise<void> {
-  try {
-    // Clear all possible cache combinations for this user
-    const cacheKeys = [
-      `notifications:${userId}:all:all`,
-      `notifications:${userId}:true:all`,
-      `notifications:${userId}:false:all`,
-    ]
-
-    for (const key of cacheKeys) {
-      await deleteFromCache(key)
-    }
-  } catch (error) {
-    console.error('[CACHE] Failed to invalidate notification cache:', error)
-  }
+  return notifications.map((n) => new Notification(n, context))
 }
 
 // Fetch a single notification by ID
@@ -106,7 +54,6 @@ export async function createNotification(
     },
   })
 
-  await invalidateNotificationCache(input.userId)
   return new Notification(notification, context)
 }
 
@@ -134,7 +81,6 @@ export async function markNotificationRead(id: string, context: GQLContext) {
     data: { read: true },
   })
 
-  await invalidateNotificationCache(notification.userId)
   return new Notification(notification, context)
 }
 
@@ -147,8 +93,6 @@ export async function markAllNotificationsRead(
     where: { userId, read: false },
     data: { read: true },
   })
-
-  await invalidateNotificationCache(userId)
 
   const notifications = await prisma.notification.findMany({
     where: { userId },

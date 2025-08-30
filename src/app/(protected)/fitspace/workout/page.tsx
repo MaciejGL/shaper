@@ -1,29 +1,35 @@
 import { redirect } from 'next/navigation'
 
-import {
-  FitspaceGetActivePlanIdDocument,
-  FitspaceGetUserQuickWorkoutPlanDocument,
-  GQLFitspaceGetActivePlanIdQuery,
-  GQLFitspaceGetUserQuickWorkoutPlanQuery,
-} from '@/generated/graphql-client'
-import { gqlServerFetch } from '@/lib/gqlServerFetch'
+import { prisma } from '@/lib/db'
+import { getCurrentUser } from '@/lib/getUser'
 
 export default async function SessionPage() {
-  const { data } = await gqlServerFetch<GQLFitspaceGetActivePlanIdQuery>(
-    FitspaceGetActivePlanIdDocument,
+  const user = await getCurrentUser()
+  const activePlans = await prisma.trainingPlan.findMany({
+    where: {
+      assignedToId: user?.user.id,
+      active: true,
+    },
+    select: {
+      id: true,
+      assignedToId: true,
+      createdById: true,
+    },
+  })
+
+  const quickWorkoutId = activePlans.find(
+    (plan) =>
+      plan.assignedToId === user?.user.id && plan.createdById === user?.user.id,
+  )
+  const trainingFromTrainer = activePlans.find(
+    (plan) =>
+      plan.assignedToId === user?.user.id && plan.createdById !== user?.user.id,
   )
 
-  const { data: quickWorkoutPlanData } =
-    await gqlServerFetch<GQLFitspaceGetUserQuickWorkoutPlanQuery>(
-      FitspaceGetUserQuickWorkoutPlanDocument,
-    )
-
-  if (data?.getActivePlanId) {
-    return redirect(`/fitspace/workout/${data.getActivePlanId}`)
-  } else if (quickWorkoutPlanData?.getQuickWorkoutPlan?.id) {
-    return redirect(
-      `/fitspace/workout/${quickWorkoutPlanData.getQuickWorkoutPlan.id}`,
-    )
+  if (trainingFromTrainer) {
+    return redirect(`/fitspace/workout/${trainingFromTrainer.id}`)
+  } else if (quickWorkoutId) {
+    return redirect(`/fitspace/workout/${quickWorkoutId.id}`)
   } else {
     return redirect('/fitspace/my-plans')
   }

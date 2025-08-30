@@ -41,7 +41,6 @@ export async function getCurrentUser(): Promise<
   if (cachedUser) {
     // Security: Check if session matches (prevents stale cache after logout)
     if (cachedUser.session.expires === session.expires) {
-      console.info(`🔄 [CACHE-HIT] getCurrentUser for ${session.user.email}`)
       return cachedUser
     }
     // Session changed, clear cache
@@ -51,14 +50,8 @@ export async function getCurrentUser(): Promise<
   // Check if there's already a pending request for this user (race condition protection)
   const userEmail = session.user.email
   if (pendingRequests.has(userEmail)) {
-    console.info(`⏳ [DEDUP] Waiting for ongoing request for ${userEmail}`)
     return await pendingRequests.get(userEmail)!
   }
-
-  // Cache miss - fetch from database
-  console.info(
-    `🔍 [CACHE-MISS] Fetching getCurrentUser from DB for ${userEmail}`,
-  )
 
   // Create and store the pending request
   const fetchPromise = (async (): Promise<UserWithSession | null> => {
@@ -77,9 +70,6 @@ export async function getCurrentUser(): Promise<
 
       // Cache for 30 seconds
       await setInCache(cacheKey, userWithSession, 120)
-      console.info(
-        `💾 [CACHE-SET] Cached getCurrentUser for ${userEmail} (120s TTL)`,
-      )
 
       return userWithSession
     } finally {
@@ -118,7 +108,6 @@ export async function invalidateUserCache(email: string): Promise<void> {
   await deleteFromCache(cacheKey)
   // Security: Also clear any pending requests
   pendingRequests.delete(email)
-  console.info(`🗑️ [CACHE-INVALIDATE] Cleared cache for user ${email}`)
 }
 
 // Helper function to use in API routes or server components to require authentication

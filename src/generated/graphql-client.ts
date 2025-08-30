@@ -1906,7 +1906,6 @@ export type GQLQuery = {
   getPackageTemplate?: Maybe<GQLPackageTemplate>;
   getPublicTrainingPlans: Array<GQLTrainingPlan>;
   getQuickWorkoutPlan: GQLTrainingPlan;
-  getRecentCompletedWorkouts: Array<GQLTrainingDay>;
   getServiceDeliveryTasks: Array<GQLServiceTask>;
   getSubscriptionStats: GQLSubscriptionStats;
   getTemplates: Array<GQLTrainingPlan>;
@@ -1942,7 +1941,6 @@ export type GQLQuery = {
   userBasic?: Maybe<GQLUser>;
   userExercises: Array<GQLBaseExercise>;
   userPublic?: Maybe<GQLUserPublic>;
-  userWithAllData?: Maybe<GQLUser>;
   workoutExerciseNotes: Array<GQLWorkoutExerciseNotes>;
 };
 
@@ -3678,16 +3676,6 @@ export type GQLBulkUpdatePlanPermissionsMutationVariables = Exact<{
 
 export type GQLBulkUpdatePlanPermissionsMutation = { __typename?: 'Mutation', bulkUpdatePlanPermissions: Array<{ __typename?: 'PlanCollaboratorSummary', id: string, planId: string, planTitle: string, planType: string, permission: GQLCollaborationPermission, createdAt: string, updatedAt: string, collaborator: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string }, addedBy: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } }> };
 
-export type GQLTrainerDashboardUserQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GQLTrainerDashboardUserQuery = { __typename?: 'Query', userWithAllData?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, createdAt: string, updatedAt: string, bodyMeasures: Array<{ __typename?: 'UserBodyMeasure', id: string, measuredAt: string, weight?: number | undefined | null, chest?: number | undefined | null, waist?: number | undefined | null, hips?: number | undefined | null, neck?: number | undefined | null, bicepsLeft?: number | undefined | null, bicepsRight?: number | undefined | null, thighLeft?: number | undefined | null, thighRight?: number | undefined | null, calfLeft?: number | undefined | null, calfRight?: number | undefined | null, bodyFat?: number | undefined | null, notes?: string | undefined | null }> } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string } | undefined | null, clients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string }>, sessions: Array<{ __typename?: 'UserSession', id: string, createdAt: string, expiresAt: string }> } | undefined | null };
-
-export type GQLBasicUserQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GQLBasicUserQuery = { __typename?: 'Query', user?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string } | undefined | null };
-
 export type GQLGetTrainerServiceDeliveriesQueryVariables = Exact<{
   trainerId: Scalars['ID']['input'];
 }>;
@@ -4285,11 +4273,6 @@ export type GQLAssignTemplateToSelfMutationVariables = Exact<{
 
 
 export type GQLAssignTemplateToSelfMutation = { __typename?: 'Mutation', assignTemplateToSelf: boolean };
-
-export type GQLUserWithAllDataQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GQLUserWithAllDataQuery = { __typename?: 'Query', userWithAllData?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string } | undefined | null, clients: Array<{ __typename?: 'UserPublic', id: string }> } | undefined | null };
 
 export type GQLUserBasicQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -9282,174 +9265,6 @@ useBulkUpdatePlanPermissionsMutation.getKey = () => ['BulkUpdatePlanPermissions'
 
 useBulkUpdatePlanPermissionsMutation.fetcher = (variables: GQLBulkUpdatePlanPermissionsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLBulkUpdatePlanPermissionsMutation, GQLBulkUpdatePlanPermissionsMutationVariables>(BulkUpdatePlanPermissionsDocument, variables, options);
 
-export const TrainerDashboardUserDocument = `
-    query TrainerDashboardUser {
-  userWithAllData {
-    id
-    email
-    name
-    image
-    role
-    createdAt
-    updatedAt
-    profile {
-      id
-      firstName
-      lastName
-      phone
-      birthday
-      sex
-      avatarUrl
-      activityLevel
-      goals
-      bio
-      createdAt
-      updatedAt
-      bodyMeasures {
-        id
-        measuredAt
-        weight
-        chest
-        waist
-        hips
-        neck
-        bicepsLeft
-        bicepsRight
-        thighLeft
-        thighRight
-        calfLeft
-        calfRight
-        bodyFat
-        notes
-      }
-    }
-    trainer {
-      id
-      email
-      firstName
-      lastName
-      image
-      role
-      createdAt
-      updatedAt
-    }
-    clients {
-      id
-      email
-      firstName
-      lastName
-      image
-      role
-      createdAt
-      updatedAt
-    }
-    sessions {
-      id
-      createdAt
-      expiresAt
-    }
-  }
-}
-    `;
-
-export const useTrainerDashboardUserQuery = <
-      TData = GQLTrainerDashboardUserQuery,
-      TError = unknown
-    >(
-      variables?: GQLTrainerDashboardUserQueryVariables,
-      options?: Omit<UseQueryOptions<GQLTrainerDashboardUserQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLTrainerDashboardUserQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useQuery<GQLTrainerDashboardUserQuery, TError, TData>(
-      {
-    queryKey: variables === undefined ? ['TrainerDashboardUser'] : ['TrainerDashboardUser', variables],
-    queryFn: fetchData<GQLTrainerDashboardUserQuery, GQLTrainerDashboardUserQueryVariables>(TrainerDashboardUserDocument, variables),
-    ...options
-  }
-    )};
-
-useTrainerDashboardUserQuery.getKey = (variables?: GQLTrainerDashboardUserQueryVariables) => variables === undefined ? ['TrainerDashboardUser'] : ['TrainerDashboardUser', variables];
-
-export const useInfiniteTrainerDashboardUserQuery = <
-      TData = InfiniteData<GQLTrainerDashboardUserQuery>,
-      TError = unknown
-    >(
-      variables: GQLTrainerDashboardUserQueryVariables,
-      options: Omit<UseInfiniteQueryOptions<GQLTrainerDashboardUserQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLTrainerDashboardUserQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useInfiniteQuery<GQLTrainerDashboardUserQuery, TError, TData>(
-      (() => {
-    const { queryKey: optionsQueryKey, ...restOptions } = options;
-    return {
-      queryKey: optionsQueryKey ?? variables === undefined ? ['TrainerDashboardUser.infinite'] : ['TrainerDashboardUser.infinite', variables],
-      queryFn: (metaData) => fetchData<GQLTrainerDashboardUserQuery, GQLTrainerDashboardUserQueryVariables>(TrainerDashboardUserDocument, {...variables, ...(metaData.pageParam ?? {})})(),
-      ...restOptions
-    }
-  })()
-    )};
-
-useInfiniteTrainerDashboardUserQuery.getKey = (variables?: GQLTrainerDashboardUserQueryVariables) => variables === undefined ? ['TrainerDashboardUser.infinite'] : ['TrainerDashboardUser.infinite', variables];
-
-
-useTrainerDashboardUserQuery.fetcher = (variables?: GQLTrainerDashboardUserQueryVariables, options?: RequestInit['headers']) => fetchData<GQLTrainerDashboardUserQuery, GQLTrainerDashboardUserQueryVariables>(TrainerDashboardUserDocument, variables, options);
-
-export const BasicUserDocument = `
-    query BasicUser {
-  user {
-    id
-    email
-    name
-    image
-    role
-    createdAt
-    updatedAt
-  }
-}
-    `;
-
-export const useBasicUserQuery = <
-      TData = GQLBasicUserQuery,
-      TError = unknown
-    >(
-      variables?: GQLBasicUserQueryVariables,
-      options?: Omit<UseQueryOptions<GQLBasicUserQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLBasicUserQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useQuery<GQLBasicUserQuery, TError, TData>(
-      {
-    queryKey: variables === undefined ? ['BasicUser'] : ['BasicUser', variables],
-    queryFn: fetchData<GQLBasicUserQuery, GQLBasicUserQueryVariables>(BasicUserDocument, variables),
-    ...options
-  }
-    )};
-
-useBasicUserQuery.getKey = (variables?: GQLBasicUserQueryVariables) => variables === undefined ? ['BasicUser'] : ['BasicUser', variables];
-
-export const useInfiniteBasicUserQuery = <
-      TData = InfiniteData<GQLBasicUserQuery>,
-      TError = unknown
-    >(
-      variables: GQLBasicUserQueryVariables,
-      options: Omit<UseInfiniteQueryOptions<GQLBasicUserQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLBasicUserQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useInfiniteQuery<GQLBasicUserQuery, TError, TData>(
-      (() => {
-    const { queryKey: optionsQueryKey, ...restOptions } = options;
-    return {
-      queryKey: optionsQueryKey ?? variables === undefined ? ['BasicUser.infinite'] : ['BasicUser.infinite', variables],
-      queryFn: (metaData) => fetchData<GQLBasicUserQuery, GQLBasicUserQueryVariables>(BasicUserDocument, {...variables, ...(metaData.pageParam ?? {})})(),
-      ...restOptions
-    }
-  })()
-    )};
-
-useInfiniteBasicUserQuery.getKey = (variables?: GQLBasicUserQueryVariables) => variables === undefined ? ['BasicUser.infinite'] : ['BasicUser.infinite', variables];
-
-
-useBasicUserQuery.fetcher = (variables?: GQLBasicUserQueryVariables, options?: RequestInit['headers']) => fetchData<GQLBasicUserQuery, GQLBasicUserQueryVariables>(BasicUserDocument, variables, options);
-
 export const GetTrainerServiceDeliveriesDocument = `
     query GetTrainerServiceDeliveries($trainerId: ID!) {
   getTrainerDeliveries(trainerId: $trainerId) {
@@ -13071,75 +12886,6 @@ useAssignTemplateToSelfMutation.getKey = () => ['AssignTemplateToSelf'];
 
 
 useAssignTemplateToSelfMutation.fetcher = (variables: GQLAssignTemplateToSelfMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAssignTemplateToSelfMutation, GQLAssignTemplateToSelfMutationVariables>(AssignTemplateToSelfDocument, variables, options);
-
-export const UserWithAllDataDocument = `
-    query UserWithAllData {
-  userWithAllData {
-    id
-    email
-    name
-    role
-    createdAt
-    updatedAt
-    profile {
-      id
-      firstName
-      lastName
-      phone
-      birthday
-      sex
-    }
-    trainer {
-      id
-    }
-    clients {
-      id
-    }
-  }
-}
-    `;
-
-export const useUserWithAllDataQuery = <
-      TData = GQLUserWithAllDataQuery,
-      TError = unknown
-    >(
-      variables?: GQLUserWithAllDataQueryVariables,
-      options?: Omit<UseQueryOptions<GQLUserWithAllDataQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLUserWithAllDataQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useQuery<GQLUserWithAllDataQuery, TError, TData>(
-      {
-    queryKey: variables === undefined ? ['UserWithAllData'] : ['UserWithAllData', variables],
-    queryFn: fetchData<GQLUserWithAllDataQuery, GQLUserWithAllDataQueryVariables>(UserWithAllDataDocument, variables),
-    ...options
-  }
-    )};
-
-useUserWithAllDataQuery.getKey = (variables?: GQLUserWithAllDataQueryVariables) => variables === undefined ? ['UserWithAllData'] : ['UserWithAllData', variables];
-
-export const useInfiniteUserWithAllDataQuery = <
-      TData = InfiniteData<GQLUserWithAllDataQuery>,
-      TError = unknown
-    >(
-      variables: GQLUserWithAllDataQueryVariables,
-      options: Omit<UseInfiniteQueryOptions<GQLUserWithAllDataQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLUserWithAllDataQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useInfiniteQuery<GQLUserWithAllDataQuery, TError, TData>(
-      (() => {
-    const { queryKey: optionsQueryKey, ...restOptions } = options;
-    return {
-      queryKey: optionsQueryKey ?? variables === undefined ? ['UserWithAllData.infinite'] : ['UserWithAllData.infinite', variables],
-      queryFn: (metaData) => fetchData<GQLUserWithAllDataQuery, GQLUserWithAllDataQueryVariables>(UserWithAllDataDocument, {...variables, ...(metaData.pageParam ?? {})})(),
-      ...restOptions
-    }
-  })()
-    )};
-
-useInfiniteUserWithAllDataQuery.getKey = (variables?: GQLUserWithAllDataQueryVariables) => variables === undefined ? ['UserWithAllData.infinite'] : ['UserWithAllData.infinite', variables];
-
-
-useUserWithAllDataQuery.fetcher = (variables?: GQLUserWithAllDataQueryVariables, options?: RequestInit['headers']) => fetchData<GQLUserWithAllDataQuery, GQLUserWithAllDataQueryVariables>(UserWithAllDataDocument, variables, options);
 
 export const UserBasicDocument = `
     query UserBasic {

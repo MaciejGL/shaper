@@ -48,24 +48,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     return new User(user, context)
   },
-  // Comprehensive resolver for when all user data is needed (trainer dashboard)
-  userWithAllData: async (_, __, context) => {
-    const userSession = context.user
-    if (!userSession) {
-      throw new Error('User not found')
-    }
 
-    // Use DataLoader to batch heavy user queries and prevent N+1 queries
-    const user = await context.loaders.user.userWithAllData.load(
-      userSession.user.id,
-    )
-
-    if (!user) {
-      throw new Error('User not found')
-    }
-
-    return new User(user, context)
-  },
   // Lightweight resolver for global context - only essential data
   userBasic: async (_, __, context: GQLContext) => {
     const userSession = context.user
@@ -130,7 +113,6 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   // Public queries
   getFeaturedTrainers: async (_, { limit = 10 }, context) => {
     const cacheKey = `featured-trainers:${limit}`
-    const ttlSeconds = 5 * 60 // 5 minutes
 
     const cachedTrainers = await getFromCache<UserWithIncludes[]>(cacheKey)
     if (cachedTrainers) {
@@ -146,13 +128,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       },
       include: {
         profile: true,
-        sessions: {
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-        },
         _count: {
           select: {
-            sessions: true,
             clients: true,
           },
         },
@@ -161,7 +138,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       take: limit ?? 20,
     })
 
-    await setInCache(cacheKey, featuredTrainers, ttlSeconds)
+    await setInCache(cacheKey, featuredTrainers, 60 * 60 * 1) // 1 hour
     return featuredTrainers.map(
       (trainer) => new PublicTrainer(trainer, context),
     )
@@ -175,6 +152,12 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     if (!user.user.trainerId) {
       return null
+    }
+
+    const cacheKey = `my-trainer:user-id:${user.user.id}:user-trainer-id:${user.user.trainerId}`
+    const cachedTrainer = await getFromCache<UserWithIncludes>(cacheKey)
+    if (cachedTrainer) {
+      return new PublicTrainer(cachedTrainer, context)
     }
 
     const trainer = await prisma.user.findUnique({
@@ -192,6 +175,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     if (!trainer) {
       return null
     }
+
+    await setInCache(cacheKey, trainer, 60 * 60 * 1) // 1 hour
 
     return new PublicTrainer(trainer, context)
   },
