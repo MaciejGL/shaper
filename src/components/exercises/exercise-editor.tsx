@@ -1,8 +1,16 @@
 'use client'
 
-import { Check, ChevronLeft, ChevronRight, Settings, X } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Grid3X3,
+  List,
+  Settings,
+  X,
+} from 'lucide-react'
 import { parseAsInteger, parseAsStringEnum, useQueryState } from 'nuqs'
 import { useCallback, useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -22,11 +30,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useDebounce } from '@/hooks/use-debounce'
 import { useExerciseNames } from '@/hooks/use-exercise-names'
 import { useVerifiedExercises } from '@/hooks/use-verified-exercises'
 
 import { Skeleton } from '../ui/skeleton'
 
+import { ExerciseTable } from './exercise-table'
 import { type Exercise, ExerciseCard } from './index'
 import { getCreatorDisplayName } from './utils/get-creator-display-name'
 
@@ -50,6 +60,22 @@ export function ExerciseEditor({
     defaultValue: '',
     clearOnDefault: true,
   })
+
+  // Local search input state for immediate UI feedback
+  const [searchInput, setSearchInput] = useState(searchTerm)
+
+  // Debounced search term to prevent excessive API calls
+  const debouncedSearchTerm = useDebounce(searchInput, 300)
+
+  // Update URL search term when debounced value changes
+  useEffect(() => {
+    setSearchTerm(debouncedSearchTerm)
+  }, [debouncedSearchTerm, setSearchTerm])
+
+  // Sync input with URL when searchTerm changes externally (e.g., clear all filters)
+  useEffect(() => {
+    setSearchInput(searchTerm)
+  }, [searchTerm])
   const [currentPage, setCurrentPage] = useQueryState(
     'page',
     parseAsInteger.withDefault(1).withOptions({ clearOnDefault: true }),
@@ -133,10 +159,17 @@ export function ExerciseEditor({
     includePrivate: true,
   })
 
+  // View mode toggle with persistence
+  const [viewMode, setViewMode] = useQueryState(
+    'view',
+    parseAsStringEnum<'card' | 'table'>(['card', 'table'])
+      .withDefault('card')
+      .withOptions({ clearOnDefault: true }),
+  )
+
   const [totalPages, setTotalPages] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
   const [error, setError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
   // Apply verified filter to exercises
   const applyVerifiedFilter = useCallback(
@@ -165,12 +198,52 @@ export function ExerciseEditor({
   const [deleteConfirm, setDeleteConfirm] = useState<{
     isOpen: boolean
     exercise: Exercise | null
-    isDeleting: boolean
   }>({
     isOpen: false,
     exercise: null,
-    isDeleting: false,
   })
+
+  // Handle optimistic updates for table toggles
+  const handleExerciseUpdate = useCallback(
+    (exerciseId: string, field: 'isPublic' | 'isPremium', value: boolean) => {
+      setExercises((prev) =>
+        prev.map((exercise) =>
+          exercise.id === exerciseId
+            ? { ...exercise, [field]: value }
+            : exercise,
+        ),
+      )
+      setAllExercises((prev) =>
+        prev.map((exercise) =>
+          exercise.id === exerciseId
+            ? { ...exercise, [field]: value }
+            : exercise,
+        ),
+      )
+    },
+    [],
+  )
+
+  // Handle optimistic updates for name changes
+  const handleNameUpdate = useCallback(
+    (exerciseId: string, newName: string) => {
+      setExercises((prev) =>
+        prev.map((exercise) =>
+          exercise.id === exerciseId
+            ? { ...exercise, name: newName }
+            : exercise,
+        ),
+      )
+      setAllExercises((prev) =>
+        prev.map((exercise) =>
+          exercise.id === exerciseId
+            ? { ...exercise, name: newName }
+            : exercise,
+        ),
+      )
+    },
+    [],
+  )
   const fetchExercises = useCallback(async () => {
     try {
       setLoading(true)
@@ -289,7 +362,7 @@ export function ExerciseEditor({
   ])
 
   useEffect(() => {
-    setCurrentPage(1) // Reset to first page when filters change
+    setCurrentPage(1) // Reset to first page when filters change (but not view mode)
   }, [
     searchTerm,
     filterPremium,
@@ -317,8 +390,6 @@ export function ExerciseEditor({
 
   const deleteExercise = async (exercise: Exercise) => {
     try {
-      setDeleteConfirm((prev) => ({ ...prev, isDeleting: true }))
-
       const response = await fetch(deleteEndpoint, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
@@ -329,20 +400,27 @@ export function ExerciseEditor({
         throw new Error('Failed to delete exercise')
       }
 
-      setSuccessMessage(`Successfully deleted "${exercise.name}"`)
-      setDeleteConfirm({ isOpen: false, exercise: null, isDeleting: false })
+      // Close dialog and show success toast
+      setDeleteConfirm({ isOpen: false, exercise: null })
+      toast.success(`Successfully deleted "${exercise.name}"`)
 
-      // Remove the deleted exercise from local state instead of refetching all
-      setExercises((prev) => prev.filter((ex) => ex.id !== exercise.id))
-      // Remove from both allExercises and exercises
-      setAllExercises((prev) => prev.filter((ex) => ex.id !== exercise.id))
-      setTotalItems((prev) => prev - 1)
+      // Check if we need to go back a page (if this was the last item on current page)
+      const itemsOnCurrentPage = exercises.length
+      const shouldGoToPreviousPage = itemsOnCurrentPage === 1 && currentPage > 1
+
+      if (shouldGoToPreviousPage) {
+        setCurrentPage(currentPage - 1)
+      }
+
+      // Use silent refresh to maintain consistency and current view/pagination
+      await silentRefreshExercises()
 
       // Trigger stats update only for deletion (significant change)
       onStatsUpdate?.()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete exercise')
-      setDeleteConfirm((prev) => ({ ...prev, isDeleting: false }))
+      toast.error(
+        err instanceof Error ? err.message : 'Failed to delete exercise',
+      )
     }
   }
 
@@ -379,19 +457,29 @@ export function ExerciseEditor({
           <h1 className="text-2xl font-bold">{title}</h1>
           <p className="text-muted-foreground">Total: {totalItems} exercises</p>
         </div>
-        <div className="flex items-center space-x-2">
-          {/* Global save/discard removed - now handled per exercise */}
-        </div>
-      </div>
-
-      {successMessage && (
-        <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-          <div className="flex items-center space-x-2">
-            <Check className="h-4 w-4 text-green-600" />
-            <p className="text-sm text-green-700">{successMessage}</p>
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center border rounded-lg p-1 bg-muted/30">
+            <Button
+              variant={viewMode === 'card' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('card')}
+              className="h-8"
+            >
+              <Grid3X3 className="h-4 w-4 mr-2" />
+              Cards
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setViewMode('table')}
+              className="h-8"
+            >
+              <List className="h-4 w-4 mr-2" />
+              Table
+            </Button>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Filters */}
       <div className="space-y-4">
@@ -402,8 +490,8 @@ export function ExerciseEditor({
               id="search-exercises"
               variant="secondary"
               placeholder="Search exercises..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className="h-9"
             />
           </div>
@@ -605,6 +693,7 @@ export function ExerciseEditor({
               variant="outline"
               size="sm"
               onClick={() => {
+                setSearchInput('')
                 setSearchTerm('')
                 setFilterPremium('free')
                 setFilterVersion('all')
@@ -626,33 +715,44 @@ export function ExerciseEditor({
         </div>
       </div>
 
-      {/* Exercise Cards Grid */}
+      {/* Exercise Content */}
       <div className="space-y-4">
         {loading ? (
-          <div className="grid gap-4 grid-cols-1">
-            {Array.from({ length: itemsPerPage }).map((_, i) => (
-              <Card key={i}>
-                <CardHeader className="pb-3">
-                  <Skeleton className="h-12 w-3/4" />
-                  <Skeleton className="h-8 w-1/2" />
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <Skeleton className="h-10 w-full" />
-                    <Skeleton className="h-10 w-2/3" />
-                    <Skeleton className="h-10 w-full" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          viewMode === 'card' ? (
+            <div className="grid gap-4 grid-cols-1">
+              {Array.from({ length: itemsPerPage }).map((_, i) => (
+                <Card key={i}>
+                  <CardHeader className="pb-3">
+                    <Skeleton className="h-12 w-3/4" />
+                    <Skeleton className="h-8 w-1/2" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <Skeleton className="h-10 w-full" />
+                      <Skeleton className="h-10 w-2/3" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-lg border">
+              <div className="p-4">
+                <Skeleton className="h-8 w-full mb-4" />
+                {Array.from({ length: itemsPerPage }).map((_, i) => (
+                  <Skeleton key={i} className="h-12 w-full mb-2" />
+                ))}
+              </div>
+            </div>
+          )
         ) : exercises.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-lg">
             <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <h3 className="text-lg font-medium mb-2">No exercises found</h3>
             <p>No exercises match your current filter criteria.</p>
           </div>
-        ) : (
+        ) : viewMode === 'card' ? (
           <div className="space-y-4">
             {exercises.map((exercise) => (
               <ExerciseCard
@@ -666,12 +766,25 @@ export function ExerciseEditor({
                   setDeleteConfirm({
                     isOpen: true,
                     exercise: ex,
-                    isDeleting: false,
                   })
                 }
               />
             ))}
           </div>
+        ) : (
+          <ExerciseTable
+            exercises={exercises}
+            updateEndpoint={updateEndpoint}
+            hasSimilarPublicExercise={hasSimilarPublicExercise}
+            onExerciseUpdate={handleExerciseUpdate}
+            onNameUpdate={handleNameUpdate}
+            onDelete={(ex) =>
+              setDeleteConfirm({
+                isOpen: true,
+                exercise: ex,
+              })
+            }
+          />
         )}
       </div>
 
@@ -729,8 +842,7 @@ export function ExerciseEditor({
       <Dialog
         open={deleteConfirm.isOpen}
         onOpenChange={(open) =>
-          !open &&
-          setDeleteConfirm({ isOpen: false, exercise: null, isDeleting: false })
+          !open && setDeleteConfirm({ isOpen: false, exercise: null })
         }
       >
         <DialogContent dialogTitle="Delete Exercise">
@@ -748,10 +860,8 @@ export function ExerciseEditor({
                 setDeleteConfirm({
                   isOpen: false,
                   exercise: null,
-                  isDeleting: false,
                 })
               }
-              disabled={deleteConfirm.isDeleting}
             >
               Cancel
             </Button>
@@ -760,7 +870,6 @@ export function ExerciseEditor({
               onClick={() =>
                 deleteConfirm.exercise && deleteExercise(deleteConfirm.exercise)
               }
-              loading={deleteConfirm.isDeleting}
             >
               Delete
             </Button>
