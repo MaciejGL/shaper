@@ -62,6 +62,9 @@ model User {
   trainerDeliveries ServiceDelivery[] @relation("TrainerDeliveries")
   clientDeliveries  ServiceDelivery[] @relation("ClientDeliveries")
 
+  // Team relations
+  teamMemberships TeamMember[]
+
   @@index([trainerId])
   @@index([stripeCustomerId])
 }
@@ -112,8 +115,12 @@ model UserProfile {
   specialization             String[]          @default([])
   successStories             String[]          @default([])
   trainerSince               DateTime?
+  locationId                 String?
   bodyMeasures               UserBodyMeasure[]
+  location                   Location?         @relation(fields: [locationId], references: [id])
   user                       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([locationId])
 }
 
 model UserBodyMeasure {
@@ -1052,4 +1059,49 @@ enum DeliveryStatus {
   IN_PROGRESS // Trainer has started working on delivery
   COMPLETED // Service fully delivered to client
   CANCELLED // Service delivery cancelled/refunded
+}
+
+// Location for teams and users
+model Location {
+  id          String @id @default(uuid())
+  city        String
+  country     String
+  countryCode String @db.Char(2)
+  
+  teams        Team[]
+  userProfiles UserProfile[]
+  
+  @@unique([city, country])
+  @@index([city])
+}
+
+// Team model
+model Team {
+  id         String   @id @default(uuid())
+  name       String
+  stripeId   String?  @unique
+  locationId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  location Location     @relation(fields: [locationId], references: [id])
+  members  TeamMember[]
+  
+  @@index([locationId])
+}
+
+// Team membership
+model TeamMember {
+  id     String   @id @default(uuid())
+  teamId String
+  userId String
+  role   String   @default("MEMBER") // ADMIN, MEMBER
+  joinedAt DateTime @default(now())
+  
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
 }
