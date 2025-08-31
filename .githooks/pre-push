@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Pre-push hook: Run tests before allowing push
+# This prevents pushing code that fails tests
+
+echo "🧪 Running tests before push..."
+
+# Run tests with output
+npm test
+
+# Check if tests passed
+if [ $? -ne 0 ]; then
+    echo ""
+    echo "❌ Tests failed! Push aborted."
+    echo "💡 Fix failing tests before pushing to prevent breaking production."
+    echo ""
+    exit 1
+fi
+
+echo ""
+echo "✅ All tests passed! Proceeding with push..."
+echo ""

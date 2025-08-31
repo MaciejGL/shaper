@@ -9,6 +9,13 @@ import {
   hasInPersonDiscount,
 } from '@/lib/stripe/discount-utils'
 import { getStripePricingInfo } from '@/lib/stripe/pricing-utils'
+import {
+  type PayoutDestination,
+  type RevenueCalculation,
+  calculateRevenueSharing,
+  createPaymentIntentData,
+  getPayoutDestination,
+} from '@/lib/stripe/revenue-sharing-utils'
 import { stripe } from '@/lib/stripe/stripe'
 
 export async function POST(request: NextRequest) {
@@ -245,6 +252,29 @@ export async function POST(request: NextRequest) {
       }),
     )
 
+    // Setup revenue sharing for trainer payments (payment mode only)
+    let payout: PayoutDestination = {
+      connectedAccountId: null,
+      destination: 'none',
+      displayName: 'none',
+    }
+    let revenue: RevenueCalculation = {
+      totalAmount: 0,
+      applicationFeeAmount: 0,
+      trainerPayoutAmount: 0,
+    }
+
+    if (mode === 'payment' && offer.trainerId) {
+      payout = await getPayoutDestination(offer.trainerId)
+
+      if (payout.connectedAccountId) {
+        revenue = await calculateRevenueSharing(lineItems)
+        console.info(
+          `💰 Revenue sharing: ${payout.displayName} → Platform: ${revenue.applicationFeeAmount / 100}, Recipient: ${revenue.trainerPayoutAmount / 100}`,
+        )
+      }
+    }
+
     // Create checkout session with trainer assignment
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -252,6 +282,15 @@ export async function POST(request: NextRequest) {
       line_items: lineItems,
       mode,
       allow_promotion_codes: true,
+      // Add revenue sharing for trainer payments
+      ...(mode === 'payment' &&
+        payout.connectedAccountId && {
+          payment_intent_data: createPaymentIntentData(
+            payout,
+            revenue,
+            offer.trainerId,
+          ),
+        }),
       success_url:
         successUrl ||
         `${process.env.NEXT_PUBLIC_APP_URL}/offer/${offerToken}/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -275,6 +314,13 @@ export async function POST(request: NextRequest) {
           .slice(0, 3)
           .map((item) => item.package.name)
           .join(', '),
+        // Revenue sharing info
+        revenueShareEnabled: (
+          mode === 'payment' && !!payout.connectedAccountId
+        ).toString(),
+        payoutDestination: payout.displayName,
+        platformFeeAmount: revenue.applicationFeeAmount.toString(),
+        trainerPayoutAmount: revenue.trainerPayoutAmount.toString(),
       },
       // For subscriptions, include trainer assignment in subscription metadata
       ...(mode === 'subscription' && {

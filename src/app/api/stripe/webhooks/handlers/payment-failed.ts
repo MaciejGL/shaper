@@ -11,9 +11,14 @@ import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'
 
-export async function handlePaymentFailed(invoice: Stripe.Invoice) {
+// Extend Stripe Invoice type to include subscription field that exists in API
+interface InvoiceWithSubscription extends Stripe.Invoice {
+  subscription?: string | null
+}
+
+export async function handlePaymentFailed(invoice: InvoiceWithSubscription) {
   try {
-    const subscriptionId = invoice.id
+    const subscriptionId = invoice.subscription
 
     if (subscriptionId) {
       const subscription = await findSubscriptionWithPackage(subscriptionId)

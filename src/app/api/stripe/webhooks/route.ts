@@ -16,8 +16,6 @@ import { handleSubscriptionDeleted } from './handlers/subscription-deleted'
 import { handleSubscriptionUpdated } from './handlers/subscription-updated'
 import { handleTrialWillEnd } from './handlers/trial-will-end'
 
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET!
-
 export async function POST(request: NextRequest) {
   try {
     const signature = request.headers.get('stripe-signature')
@@ -28,6 +26,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing signature' }, { status: 400 })
     }
 
+    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET
     if (!endpointSecret) {
       console.error('Missing STRIPE_WEBHOOK_SECRET environment variable')
       return NextResponse.json(

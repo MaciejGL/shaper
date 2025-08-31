@@ -46,6 +46,7 @@ model User {
 
   // Stripe integration
   stripeCustomerId String? @unique
+  stripeConnectedAccountId String? @unique  // For trainer revenue sharing
 
   // Subscription relations
   subscriptions       UserSubscription[] @relation("UserSubscriptions")
@@ -1028,7 +1029,11 @@ model Location {
 model Team {
   id        String   @id @default(uuid())
   name      String
-  stripeId  String?  @unique
+  
+  // Stripe Connect integration for team-based payouts
+  stripeConnectedAccountId String?  @unique  // For receiving team revenue share
+  stripeCustomerId         String?  @unique  // For team-level purchases (if needed)
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
