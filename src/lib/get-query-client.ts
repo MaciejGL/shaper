@@ -5,6 +5,11 @@ import {
 } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
+import {
+  getUserFriendlyErrorMessage,
+  shouldShowErrorToUser,
+} from './error-utils'
+
 function makeQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -20,8 +25,17 @@ function makeQueryClient() {
       },
       mutations: {
         onError: (error) => {
-          console.error(error)
-          toast.error(error.message)
+          // Always log the error for debugging
+          console.error('Mutation error:', error)
+
+          // Only show toast for non-network errors to avoid alarming users during offline scenarios
+          if (shouldShowErrorToUser(error)) {
+            const friendlyMessage = getUserFriendlyErrorMessage(error)
+            toast.error(friendlyMessage)
+          } else {
+            // Log network errors silently for debugging but don't show toasts
+            console.warn('Network error (suppressed toast):', error)
+          }
         },
       },
     },
