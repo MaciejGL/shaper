@@ -2035,6 +2035,7 @@ export type GQLQueryMuscleGroupCategoryArgs = {
 export type GQLQueryMyClientsArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+  trainerId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -3440,6 +3441,7 @@ export type GQLFitspaceAddExercisesToQuickWorkoutMutation = { __typename?: 'Muta
 export type GQLGetClientsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+  trainerId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
@@ -7820,8 +7822,8 @@ useFitspaceAddExercisesToQuickWorkoutMutation.getKey = () => ['FitspaceAddExerci
 useFitspaceAddExercisesToQuickWorkoutMutation.fetcher = (variables: GQLFitspaceAddExercisesToQuickWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceAddExercisesToQuickWorkoutMutation, GQLFitspaceAddExercisesToQuickWorkoutMutationVariables>(FitspaceAddExercisesToQuickWorkoutDocument, variables, options);
 
 export const GetClientsDocument = `
-    query GetClients($limit: Int, $offset: Int) {
-  myClients(limit: $limit, offset: $offset) {
+    query GetClients($limit: Int, $offset: Int, $trainerId: ID) {
+  myClients(limit: $limit, offset: $offset, trainerId: $trainerId) {
     id
     email
     firstName

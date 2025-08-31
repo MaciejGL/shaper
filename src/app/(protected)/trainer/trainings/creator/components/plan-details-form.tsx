@@ -63,7 +63,7 @@ export function PlanDetailsForm() {
 
 function PlanDetailsHeader() {
   // Use unified training plan context
-  const { formData, updateDetails, canEdit } = useTrainingPlan()
+  const { formData, updateDetails } = useTrainingPlan()
 
   // Call hooks unconditionally
   const titleInput = useAutoSyncedInput(
@@ -83,7 +83,7 @@ function PlanDetailsHeader() {
 
   const data = formData.details
 
-  const isDisabled = !!data.completedAt || !canEdit
+  const isDisabled = !!data.completedAt
 
   return (
     <Card>
@@ -166,14 +166,14 @@ function PlanPublicications({
   assignedCount?: number
 }) {
   // Use unified training plan context
-  const { formData, updateDetails, canEdit } = useTrainingPlan()
+  const { formData, updateDetails } = useTrainingPlan()
 
   if (!formData) return null
 
   const data = formData.details
   const isDraft = data.isDraft ?? false
   const setIsDraft = (value: boolean) => updateDetails({ isDraft: value })
-  const isDisabled = !!data.completedAt || !canEdit
+  const isDisabled = !!data.completedAt
 
   return (
     <Card>

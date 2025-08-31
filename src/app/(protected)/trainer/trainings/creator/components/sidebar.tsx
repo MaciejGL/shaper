@@ -14,7 +14,6 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
-import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import {
   GQLTrainerExercisesQuery,
   useMuscleGroupCategoriesQuery,
@@ -48,7 +47,7 @@ export function Sidebar({
   onEquipmentChange,
 }: SidebarProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
-  const { canEdit } = useTrainingPlan()
+
   const {
     data: muscleGroupCategoriesData,
     isLoading: muscleGroupCategoriesLoading,
@@ -138,7 +137,6 @@ export function Sidebar({
             onClick={() => setIsCreateDialogOpen(true)}
             variant="secondary"
             iconOnly={<PlusIcon />}
-            disabled={!canEdit}
           >
             Create exercise
           </Button>
@@ -164,7 +162,6 @@ export function Sidebar({
               categories={allMuscleGroups}
               publicExercises={publicExercises}
               userExercises={trainerExercises}
-              canEdit={canEdit}
             />
           ))}
         </div>

@@ -30,7 +30,7 @@ export function AddFoodDrawer({
   dayId: string
   handleCloseSheet: () => void
 }) {
-  const { getMealByHour, saveMeal, canEdit } = useMealPlanContext()
+  const { getMealByHour, saveMeal } = useMealPlanContext()
   const { openModal } = useConfirmationModalContext()
   const [foods, setFoods] = useState<EditableFood[]>([])
   const [hasChanges, setHasChanges] = useState(false)
@@ -141,7 +141,6 @@ export function AddFoodDrawer({
               foods={foods}
               setFoods={setFoods}
               setHasChanges={setHasChanges}
-              canEdit={canEdit}
             />
           )}
 
@@ -165,7 +164,6 @@ export function AddFoodDrawer({
                 removeFood={removeFood}
                 setHasChanges={setHasChanges}
                 setFoods={setFoods}
-                canEdit={canEdit}
               />
             </div>
           )}
@@ -201,7 +199,7 @@ export function AddFoodDrawer({
               </Button>
               <Button
                 onClick={handleSave}
-                disabled={isSaving || !canEdit}
+                disabled={isSaving}
                 loading={isSaving}
               >
                 Save

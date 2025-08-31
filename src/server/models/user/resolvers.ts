@@ -65,14 +65,40 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     return new User(user, context)
   },
-  myClients: async (_, { limit, offset }, context) => {
+  myClients: async (_, { limit, offset, trainerId }, context) => {
     const user = context.user
     if (!user) {
       throw new Error('User not found')
     }
 
+    // If trainerId is provided, verify team membership first
+    if (trainerId && trainerId !== user.user.id) {
+      const sharedTeam = await prisma.team.findFirst({
+        where: {
+          members: {
+            some: {
+              userId: user.user.id,
+            },
+          },
+          AND: {
+            members: {
+              some: {
+                userId: trainerId,
+              },
+            },
+          },
+        },
+      })
+
+      if (!sharedTeam) {
+        throw new Error('You can only view clients of trainers on your team')
+      }
+    }
+
+    const targetTrainerId = trainerId || user.user.id
+
     const clients = await prisma.user.findMany({
-      where: { trainerId: user.user.id },
+      where: { trainerId: targetTrainerId },
       include: {
         profile: true,
         assignedPlans: {

@@ -16,7 +16,6 @@ import { parseAsStringEnum, useQueryState } from 'nuqs'
 import React, { useState } from 'react'
 
 import { DashboardHeader } from '@/app/(protected)/trainer/components/dashboard-header'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
@@ -49,10 +48,6 @@ export default function WorkoutPlanner() {
     moveExercise,
     handleDelete,
     handleDuplicate,
-    currentUserPermission,
-    isCreator,
-    isViewingOthersPlans,
-    canEdit,
   } = useTrainingPlan()
 
   const [tab, setTab] = useQueryState(
@@ -77,43 +72,6 @@ export default function WorkoutPlanner() {
     ...(exercisesData?.userExercises || []),
     ...(exercisesData?.publicExercises || []),
   ]
-
-  // Permission badge helper
-  const getPermissionBadge = () => {
-    if (isLoadingInitialData) return null
-
-    if (isCreator) {
-      return null
-    }
-
-    if (isViewingOthersPlans) {
-      const permissionLabel = currentUserPermission?.toLowerCase() || 'view'
-      const variant = canEdit ? 'primary' : 'secondary'
-      if (permissionLabel === 'view') {
-        return (
-          <Badge variant={variant} className="capitalize">
-            View mode
-          </Badge>
-        )
-      }
-      if (permissionLabel === 'edit') {
-        return (
-          <Badge variant={variant} className="capitalize">
-            Edit mode
-          </Badge>
-        )
-      }
-      if (permissionLabel === 'admin') {
-        return (
-          <Badge variant={variant} className="capitalize">
-            Edit mode
-          </Badge>
-        )
-      }
-    }
-
-    return null
-  }
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -256,7 +214,6 @@ export default function WorkoutPlanner() {
               className="mb-10 mt-0"
             />
           </div>
-          <div className="mb-2">{getPermissionBadge()}</div>
         </div>
         <div className="flex justify-between items-end">
           <TabsList size="lg">

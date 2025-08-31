@@ -61,7 +61,6 @@ interface FoodSearchProps {
   foods: EditableFood[]
   setFoods: Dispatch<SetStateAction<EditableFood[]>>
   setHasChanges: Dispatch<SetStateAction<boolean>>
-  canEdit: boolean
 }
 
 export default function FoodSearch({
@@ -70,7 +69,6 @@ export default function FoodSearch({
   foods,
   setFoods,
   setHasChanges,
-  canEdit,
 }: FoodSearchProps) {
   const { getMealByHour } = useMealPlanContext()
 
@@ -107,11 +105,6 @@ export default function FoodSearch({
   // Add food to local state
   const addFood = useCallback(
     (foodItem: SearchResult) => {
-      if (!canEdit) {
-        toast.error('You do not have permission to add foods')
-        return
-      }
-
       const newFood: EditableFood = {
         name: foodItem.name,
         quantity: 100,
@@ -149,7 +142,7 @@ export default function FoodSearch({
         currentSearchController.current = null
       }
     },
-    [canEdit, foods, setFoods, setHasChanges],
+    [foods, setFoods, setHasChanges],
   )
 
   // Handle search using API route (server-side) with request cancellation
@@ -236,7 +229,7 @@ export default function FoodSearch({
     <div className="flex flex-col pb-4 space-y-4">
       <Input
         id="food-search"
-        placeholder={canEdit ? 'Search for foods...' : 'View foods (read-only)'}
+        placeholder="Search for foods..."
         variant="secondary"
         value={searchTerm}
         onChange={(e) => {
@@ -258,7 +251,6 @@ export default function FoodSearch({
             }}
           />
         }
-        disabled={!canEdit}
       />
 
       {isSearching && <FoodSearchLoading />}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { Prisma } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/getUser'
 
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
     const includePrivate = searchParams.get('includePrivate') === 'true'
 
     // Build where clause based on access level
-    const whereClause: any = {}
+    const whereClause: Prisma.BaseExerciseWhereInput = {}
 
     // Only include user's own private exercises if requested
     if (includePrivate) {

@@ -80,7 +80,7 @@ export const SortableExercise = React.memo(
     dayOfWeek,
     exerciseIndex,
   }: SortableExerciseProps) {
-    const { formData, activeWeek, removeExercise, canEdit } = useTrainingPlan()
+    const { formData, activeWeek, removeExercise } = useTrainingPlan()
     const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
 
     // Revert to original stable key
@@ -103,7 +103,6 @@ export const SortableExercise = React.memo(
 
     // Permission checks
     const isDisabled = Boolean(exercise?.completedAt)
-    const canEditExercise = canEdit && !isDisabled
 
     const {
       attributes,
@@ -121,7 +120,7 @@ export const SortableExercise = React.memo(
         dayIndex: dayOfWeek,
         exerciseIndex,
       },
-      disabled: !canEditExercise,
+      disabled: isDisabled,
       // Optimize animations
       animateLayoutChanges: () => false, // Disable layout animations for better performance
     })
@@ -168,11 +167,11 @@ export const SortableExercise = React.memo(
         <Card
           ref={setNodeRef}
           style={style}
-          {...(canEditExercise ? attributes : {})}
-          {...(canEditExercise ? listeners : {})}
+          {...(isDisabled ? attributes : {})}
+          {...(isDisabled ? listeners : {})}
           className={cn(
             'p-0 transition-all duration-200 ease-out min-h-[120px] select-none',
-            canEditExercise
+            isDisabled
               ? 'cursor-grab active:cursor-grabbing'
               : 'cursor-default',
             // Remove border and background when dragging. It's a wrapper in sorting context
@@ -243,9 +242,9 @@ export const SortableExercise = React.memo(
             <DropdownMenuContent>
               <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
                 <Pencil className="w-3 h-3" />
-                {canEdit ? 'Edit' : 'View'}
+                Edit
               </DropdownMenuItem>
-              {canEditExercise && (
+              {isDisabled && (
                 <DropdownMenuItem
                   onClick={handleRemoveExercise}
                   className="cursor-pointer"
@@ -529,9 +528,6 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
     },
   )
 
-  // Get permission context
-  const { canEdit } = useTrainingPlan()
-
   const debouncedBoardInvalidation = useDebouncedInvalidation({
     queryKeys: ['GetTemplateTrainingPlanById'],
     delay: 100,
@@ -594,20 +590,17 @@ function ExerciseDialogContent({ exerciseId }: ExerciseDialogContentProps) {
     isLoading ||
     isRemovingExercise ||
     isTemporaryId(exerciseId) ||
-    Boolean(exercise?.completedAt) ||
-    !canEdit
+    Boolean(exercise?.completedAt)
 
   return (
     <div className="gap-2">
       <DialogHeader className="mb-8">
         <DialogTitle className="flex flex-row items-center gap-2">
-          {canEdit ? 'Edit' : 'View'} exercise{' '}
+          Edit exercise
           {hasPendingMutations && <Loader2 className="w-4 h-4 animate-spin" />}
         </DialogTitle>
         <DialogDescription>
-          {canEdit
-            ? 'Edit the exercise details and sets.'
-            : 'View the exercise details and sets.'}
+          Edit the exercise details and sets.
         </DialogDescription>
       </DialogHeader>
       <div className="space-y-8">

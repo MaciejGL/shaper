@@ -1,10 +1,9 @@
 'use client'
 
-import { Calendar, Edit, UserPlus, Users } from 'lucide-react'
+import { Calendar, Edit, Users } from 'lucide-react'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
 import {
   Card,
@@ -14,9 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { useUser } from '@/context/user-context'
 import { GQLGetTemplatesQuery } from '@/generated/graphql-client'
-import { getDisplayName } from '@/lib/user-utils'
 
 export function TrainingPlansList({
   plans,

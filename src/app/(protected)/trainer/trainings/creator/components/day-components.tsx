@@ -14,7 +14,7 @@ import { SortableExercise } from './sortable-exercise'
 
 // Memoized day header to prevent unnecessary rerenders
 export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
-  const { formData, updateDay, activeWeek, canEdit } = useTrainingPlan()
+  const { formData, updateDay, activeWeek } = useTrainingPlan()
   const day = formData?.weeks[activeWeek]?.days[dayIndex]
 
   const [isRestDay, setIsRestDay] = useState(day?.isRestDay ?? false)
@@ -36,7 +36,7 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
     [activeWeek, dayIndex, updateDay],
   )
 
-  const isDisabled = Boolean(day?.completedAt) || !canEdit
+  const isDisabled = Boolean(day?.completedAt)
 
   return (
     <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
