@@ -1,9 +1,11 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
 import { Card } from '@/components/ui/card'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
+  GQLFitspaceGetWorkoutQuery,
   useFitspaceGetWorkoutQuery,
   useFitspaceMarkExerciseAsCompletedMutation,
   useFitspaceRemoveExerciseFromWorkoutMutation,
@@ -13,19 +15,44 @@ import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { ExerciseMetadata } from './exercise/exercise-metadata'
 import { ExerciseSets } from './exercise/exercise-sets'
 import { ExerciseProps } from './exercise/types'
+import { createOptimisticExerciseUpdate } from './optimistic-updates'
 
 export function Exercise({ exercise }: ExerciseProps) {
   const { getPastLogs } = useWorkout()
   const previousLogs = getPastLogs(exercise)
   const invalidateQuery = useInvalidateQuery()
+  const queryClient = useQueryClient()
   const { trainingId } = useParams<{ trainingId: string }>()
+
   const { mutateAsync: markExerciseAsCompleted } =
     useFitspaceMarkExerciseAsCompletedMutation({
-      onSuccess: () => {
+      onMutate: async ({ exerciseId, completed }) => {
+        // Cancel outgoing queries to prevent race conditions
+        const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
+        await queryClient.cancelQueries({ queryKey })
+
+        // Get current data for rollback
+        const previousData =
+          queryClient.getQueryData<GQLFitspaceGetWorkoutQuery>(queryKey)
+
+        // Optimistically update the cache
+        queryClient.setQueryData(
+          queryKey,
+          createOptimisticExerciseUpdate(exerciseId, completed),
+        )
+
+        return { previousData }
+      },
+      onError: (err, variables, context) => {
+        // Rollback on error
+        if (context?.previousData) {
+          const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
+          queryClient.setQueryData(queryKey, context.previousData)
+        }
+      },
+      onSettled: () => {
         invalidateQuery({
-          queryKey: useFitspaceGetWorkoutQuery.getKey({
-            trainingId: trainingId,
-          }),
+          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
         })
       },
     })
@@ -40,23 +67,16 @@ export function Exercise({ exercise }: ExerciseProps) {
         })
       },
     })
-  const [isExerciseCompleted, setIsExerciseCompleted] = useState(
-    Boolean(exercise.completedAt),
-  )
-
-  useEffect(() => {
-    setIsExerciseCompleted(Boolean(exercise.completedAt))
-  }, [exercise.completedAt])
 
   const handleMarkAsCompleted = async (checked: boolean) => {
-    setIsExerciseCompleted(checked)
     try {
       await markExerciseAsCompleted({
-        exerciseId: exercise.id,
+        exerciseId: exercise.substitutedBy?.id || exercise.id,
         completed: checked,
       })
     } catch (error) {
-      setIsExerciseCompleted(!checked)
+      console.error('Failed to toggle exercise completion:', error)
+      // Error handling is done in the mutation onError callback
     }
   }
 
@@ -65,6 +85,10 @@ export function Exercise({ exercise }: ExerciseProps) {
       exerciseId: exercise.id,
     })
   }
+
+  // Get the completion state from the exercise data (cache will update optimistically)
+  const currentExercise = exercise.substitutedBy || exercise
+  const isExerciseCompleted = Boolean(currentExercise.completedAt)
 
   return (
     <Card borderless className="p-0 gap-2">

@@ -53,7 +53,6 @@ export function ExerciseSet({
   const { trainingId } = useParams<{ trainingId: string }>()
   const { preferences } = useUserPreferences()
   const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
-  const [isCompletingSet, setIsCompletingSet] = useState(false)
   const hasUserEdited = useRef(false)
   const { toDisplayWeight } = useWeightConversion()
   const invalidateQuery = useInvalidateQuery()
@@ -121,7 +120,7 @@ export function ExerciseSet({
     },
   })
 
-  const { mutateAsync: markSetAsCompleted, isPending: isMarkingSetCompleted } =
+  const { mutateAsync: markSetAsCompleted } =
     useFitspaceMarkSetAsCompletedMutation({
       onMutate: async ({ setId, completed, reps, weight }) => {
         // Cancel outgoing queries to prevent race conditions
@@ -146,24 +145,22 @@ export function ExerciseSet({
           const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
           queryClient.setQueryData(queryKey, context.previousData)
         }
-        setIsCompletingSet(false)
+        // Reset timer states on error
         setIsTimerOperations(false)
-        setSkipTimer(false) // Reset skip timer flag on error
+        setSkipTimer(false)
       },
       onSuccess: (data, variables) => {
         // Only start timer if we completed the set (not uncompleted it) and not skipping timer
         if (variables.completed && !skipTimer) {
           setIsTimerOperations(true)
         }
-        setIsCompletingSet(false)
         setSkipTimer(false) // Reset skip timer flag
-
-        // Invalidate after a short delay to ensure optimistic update is preserved
-        setTimeout(() => {
-          invalidateQuery({
-            queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
-          })
-        }, 100)
+      },
+      onSettled: () => {
+        // Invalidate queries after mutation completes (success or error)
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+        })
       },
     })
 
@@ -253,9 +250,6 @@ export function ExerciseSet({
 
   const handleToggleSetCompletion = useCallback(
     async (isDoubleClick = false) => {
-      // Prevent multiple clicks during mutation
-      if (isMarkingSetCompleted || isCompletingSet) return
-
       const willBeCompleted = !set.completedAt
 
       // Set skip timer flag for double clicks
@@ -268,7 +262,6 @@ export function ExerciseSet({
         if (!willBeCompleted) {
           setIsTimerOperations(false)
         }
-        setIsCompletingSet(true)
       })
 
       try {
@@ -280,15 +273,13 @@ export function ExerciseSet({
         })
       } catch (error) {
         console.error('Failed to toggle set completion:', error)
+        // Reset timer states on error (error handling is also done in the mutation onError)
         setIsTimerOperations(false)
-        setIsCompletingSet(false)
         setSkipTimer(false)
       }
     },
     [
       markSetAsCompleted,
-      isMarkingSetCompleted,
-      isCompletingSet,
       set.completedAt,
       set.id,
       reps,
@@ -335,7 +326,7 @@ export function ExerciseSet({
             onClick: onDelete,
           },
         ]}
-        isSwipeable={set.isExtra && !isCompletingSet}
+        isSwipeable={set.isExtra}
         className={cn('bg-card', !isLastSet && 'border-b border-border/50')}
       >
         {isAdvancedView && (
@@ -449,8 +440,6 @@ export function ExerciseSet({
                 onClick={handleClick}
                 onDoubleClick={handleDoubleClick}
                 className="self-center"
-                disabled={isMarkingSetCompleted || isCompletingSet}
-                loading={isMarkingSetCompleted || isCompletingSet}
               />
             </div>
           </div>

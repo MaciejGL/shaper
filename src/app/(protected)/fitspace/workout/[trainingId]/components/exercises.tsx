@@ -8,8 +8,7 @@ import { Progress } from '@/components/ui/progress'
 import { Switch } from '@/components/ui/switch'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { useWorkout } from '@/context/workout-context/workout-context'
-import { GQLTrainingView } from '@/generated/graphql-client'
-import { isProd } from '@/lib/get-base-url'
+import { GQLTrainingView, GQLWorkoutType } from '@/generated/graphql-client'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { QuickWorkout } from '../../quick-workout/quick-workout'
@@ -41,27 +40,29 @@ export function Exercises() {
 
   return (
     <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
-      {!isProd && (
-        <Label className="flex items-center gap-2 mt-2 ml-auto w-max">
-          <Switch
-            checked={preferences.trainingView === GQLTrainingView.Advanced}
-            onCheckedChange={() =>
-              setTrainingView(
-                preferences.trainingView === GQLTrainingView.Advanced
-                  ? GQLTrainingView.Simple
-                  : GQLTrainingView.Advanced,
-              )
-            }
-          />
-          Swap mode
-        </Label>
-      )}
       {!activeDay.isRestDay && (
         <div className="flex flex-col py-3 space-y-2 w-full">
-          <div className="flex justify-between items-end gap-2">
-            <p className="text-md">
-              {formatWorkoutType(activeDay.workoutType)}
-            </p>
+          <div className="grid grid-flow-col gap-2">
+            {activeDay.workoutType &&
+              activeDay.workoutType !== GQLWorkoutType.Custom && (
+                <p className="text-lg">
+                  {formatWorkoutType(activeDay.workoutType)}
+                </p>
+              )}
+
+            <Label className="flex items-center justify-center gap-2  whitespace-nowrap rounded-md p-1.5 bg-muted-foreground/10 dark:bg-muted-foreground/10 w-full">
+              <Switch
+                checked={preferences.trainingView === GQLTrainingView.Advanced}
+                onCheckedChange={() =>
+                  setTrainingView(
+                    preferences.trainingView === GQLTrainingView.Advanced
+                      ? GQLTrainingView.Simple
+                      : GQLTrainingView.Advanced,
+                  )
+                }
+              />
+              Logging Mode
+            </Label>
 
             {exercises.length > 0 && (
               <ExercisesCompleted
@@ -97,7 +98,7 @@ function ExercisesCompleted({
   totalExercises: number
 }) {
   return (
-    <Badge variant="secondary" size="sm" className="self-end">
+    <Badge variant="secondary" size="lg" className="self-end w-full">
       {completedExercises}/{totalExercises} completed{' '}
       {completedExercises === totalExercises ? (
         <BadgeCheckIcon className="text-green-500" />

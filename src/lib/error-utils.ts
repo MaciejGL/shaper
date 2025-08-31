@@ -51,6 +51,16 @@ export function isNetworkError(error: unknown): boolean {
   const errorMessage = error instanceof Error ? error.message : String(error)
   const lowerMessage = errorMessage.toLowerCase()
 
+  // Check for AbortError (includes timeout errors from AbortSignal.timeout())
+  if (error instanceof Error && error.name === 'AbortError') {
+    return true
+  }
+
+  // Check for DOMException abort errors (alternative AbortError implementation)
+  if (error instanceof DOMException && error.name === 'AbortError') {
+    return true
+  }
+
   // Check for common network error patterns
   const hasNetworkPattern = NETWORK_ERROR_PATTERNS.some((pattern) =>
     lowerMessage.includes(pattern.toLowerCase()),

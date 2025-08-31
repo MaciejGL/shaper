@@ -192,7 +192,7 @@ function WeekSelector() {
                 />
               ) : week.scheduledAt &&
                 isThisWeek(week.scheduledAt, preferences.weekStartsOn) ? (
-                '(current)'
+                ' - current'
               ) : (
                 ''
               )}

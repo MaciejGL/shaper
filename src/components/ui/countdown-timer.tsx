@@ -68,17 +68,22 @@ export function CountdownTimer({
     }
   }, [state, startCountdown, onPause, resetCountdown])
 
-  // Countdown effect
+  // Add a new useEffect to handle completion callback
+  useEffect(() => {
+    if (state === 'completed') {
+      onComplete?.()
+    }
+  }, [state, onComplete])
+
+  // Countdown effect - modified to remove onComplete call
   useEffect(() => {
     if (state !== 'running') return
 
     const interval = setInterval(() => {
       setTimeRemaining((prev) => {
-        if (prev <= 1) {
+        if (prev <= 0) {
           setState('completed')
-          onComplete?.()
           // Auto-reset to idle after 3 seconds
-
           setTimeout(() => {
             setState('idle')
             setTimeRemaining(restDuration)
@@ -90,7 +95,7 @@ export function CountdownTimer({
     }, 1000)
 
     return () => clearInterval(interval)
-  }, [state, onComplete, restDuration])
+  }, [state, restDuration])
 
   // Reset when restDuration changes
   useEffect(() => {
@@ -159,7 +164,7 @@ export function CountdownTimer({
       {/* Progress fill background */}
       {state === 'running' && (
         <div
-          className="absolute inset-0 bg-gradient-to-r from-amber-500/60 to-amber-600/60 transition-[width] duration-[950ms] ease-linear animate-pulse"
+          className="absolute inset-0 bg-gradient-to-r from-amber-500/60 to-amber-600/60 transition-[width] duration-1000 ease-linear animate-pulse"
           style={{
             width: `var(--progress, 0%)`,
             zIndex: 0,
