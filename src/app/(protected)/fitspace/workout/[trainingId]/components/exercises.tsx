@@ -3,8 +3,9 @@ import React from 'react'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
+import { Switch } from '@/components/ui/switch'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import { GQLTrainingView } from '@/generated/graphql-client'
@@ -41,19 +42,19 @@ export function Exercises() {
   return (
     <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
       {!isProd && (
-        <Button
-          size={'xs'}
-          className="w-full mt-2"
-          onClick={() =>
-            setTrainingView(
-              preferences.trainingView === GQLTrainingView.Advanced
-                ? GQLTrainingView.Simple
-                : GQLTrainingView.Advanced,
-            )
-          }
-        >
-          Swap view
-        </Button>
+        <Label className="flex items-center gap-2 mt-2 ml-auto w-max">
+          <Switch
+            checked={preferences.trainingView === GQLTrainingView.Advanced}
+            onCheckedChange={() =>
+              setTrainingView(
+                preferences.trainingView === GQLTrainingView.Advanced
+                  ? GQLTrainingView.Simple
+                  : GQLTrainingView.Advanced,
+              )
+            }
+          />
+          Swap mode
+        </Label>
       )}
       {!activeDay.isRestDay && (
         <div className="flex flex-col py-3 space-y-2 w-full">
