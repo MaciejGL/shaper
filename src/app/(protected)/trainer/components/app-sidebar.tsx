@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import {
   ChevronRight,
   DumbbellIcon,
@@ -19,6 +20,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
+import { AnimatedLogo, AnimatedLogoText } from '@/components/animated-logo'
 import { Divider } from '@/components/divider'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,6 +28,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroupContent,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -337,7 +340,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar variant="inset" collapsible="icon">
-      <SidebarContent className="mt-16">
+      <SidebarHeaderComponent />
+      <SidebarContent className="mt-8">
         <SidebarGroupContent>
           <SidebarMenu>
             {items.map((item, index) => (
@@ -456,5 +460,35 @@ function SidebarItem({
         </SidebarMenuSub>
       )}
     </SidebarMenuItem>
+  )
+}
+
+function SidebarHeaderComponent() {
+  const { open } = useSidebar()
+  return (
+    <SidebarHeader className="flex flex-row items-center overflow-hidden">
+      <AnimatedLogo infinite={false} size={open ? 32 : 24} />
+      <motion.div
+        variants={{
+          hidden: {
+            opacity: 0,
+            transition: {
+              duration: 0.1,
+            },
+          },
+          visible: {
+            opacity: 1,
+            transition: {
+              duration: 0.1,
+            },
+          },
+        }}
+        initial="hidden"
+        animate={open ? 'visible' : 'hidden'}
+        className="w-max"
+      >
+        <AnimatedLogoText className="whitespace-nowrap" />
+      </motion.div>
+    </SidebarHeader>
   )
 }

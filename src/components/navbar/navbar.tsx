@@ -116,17 +116,18 @@ export const Navbar = ({
           className={cn(
             'py-3 px-4 flex justify-between items-center bg-sidebar',
             'mt-[var(--safe-area-inset-top)]', // Add safe area padding for iOS PWA
-            withSidebar && 'mb-2',
           )}
         >
           <div className="flex items-center gap-2">
             {withSidebar && <SidebarTrigger />}
-            <Link href={linkToDashboard}>
-              <div className="flex items-center">
-                <AnimatedLogo infinite={false} size={32} />
-                <AnimatedLogoText />
-              </div>
-            </Link>
+            {isFitspace ? (
+              <Link href={linkToDashboard}>
+                <div className="flex items-center">
+                  <AnimatedLogo infinite={false} size={32} />
+                  <AnimatedLogoText />
+                </div>
+              </Link>
+            ) : null}
           </div>
           {process.env.NODE_ENV === 'development' && mounted && (
             <Button
