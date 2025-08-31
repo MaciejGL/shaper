@@ -121,7 +121,7 @@ export function requireAuth(
 
   if (authLevel && userSession.user?.role !== authLevel) {
     if (userSession.user?.role === GQLUserRole.Trainer) {
-      redirect('/trainer/dashboard')
+      redirect('/trainer/clients')
     } else if (userSession.user?.role === GQLUserRole.Client) {
       redirect('/fitspace/workout')
     }

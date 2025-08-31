@@ -10,7 +10,7 @@ export default async function ExerciseManagementPage() {
 
   if (!hasModeratorAccess) {
     // Redirect non-moderator users to their dashboard
-    redirect('/trainer/dashboard')
+    redirect('/trainer/clients')
   }
 
   return (

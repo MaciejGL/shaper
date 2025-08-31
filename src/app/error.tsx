@@ -23,7 +23,7 @@ export default function Error({
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-md">
+      <Card borderless className="w-full max-w-md">
         <CardContent className="flex flex-col items-center text-center p-8 space-y-6">
           <div className="relative">
             <Image

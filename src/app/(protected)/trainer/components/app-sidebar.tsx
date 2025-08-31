@@ -209,17 +209,6 @@ export function AppSidebar() {
 
   const items: SidebarItemType[] = useMemo(
     () => [
-      // Teams item - only show if feature flag is enabled and not loading
-      ...(isTeamsEnabled && !isTeamsFeatureLoading
-        ? [
-            {
-              title: TRAINER_LINKS.teams.label,
-              url: TRAINER_LINKS.teams.href,
-              icon: LayoutDashboardIcon,
-              disabled: TRAINER_LINKS.teams.disabled,
-            },
-          ]
-        : []),
       // Clients item
       {
         title: TRAINER_LINKS.clients.label,
@@ -286,6 +275,17 @@ export function AppSidebar() {
         icon: DumbbellIcon,
         disabled: TRAINER_LINKS.exercises.disabled,
       },
+      // Teams item - only show if feature flag is enabled and not loading
+      ...(isTeamsEnabled && !isTeamsFeatureLoading
+        ? [
+            {
+              title: TRAINER_LINKS.teams.label,
+              url: TRAINER_LINKS.teams.href,
+              icon: LayoutDashboardIcon,
+              disabled: TRAINER_LINKS.teams.disabled,
+            },
+          ]
+        : []),
     ],
     [
       isTeamsEnabled,

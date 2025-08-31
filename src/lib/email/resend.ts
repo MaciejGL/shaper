@@ -15,6 +15,7 @@ export const resend = {
       to: string | string[]
       subject: string
       html: string
+      forceSend?: boolean
     }) => {
       if (shouldSendEmails) {
         // Send real email in production or when explicitly enabled

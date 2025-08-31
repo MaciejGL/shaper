@@ -2,7 +2,6 @@
 
 import { motion } from 'framer-motion'
 import {
-  LayoutDashboardIcon,
   LogInIcon,
   LogOutIcon,
   MenuIcon,
@@ -79,7 +78,7 @@ export const Navbar = ({
 
   const linkToDashboard =
     user?.user?.role === 'TRAINER'
-      ? TRAINER_LINKS.dashboard.href
+      ? TRAINER_LINKS.clients.href
       : CLIENT_LINKS.workout.href
   const pathname = usePathname()
   const isFitspace = pathname.startsWith('/fitspace')
@@ -202,11 +201,11 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
         </DrawerHeader>
         <div className="border-b w-full my-4" />
         <div className="flex flex-col gap-2 p-4">
-          <NavLink
-            href={TRAINER_LINKS.dashboard.href}
+          {/* <NavLink
+            href={TRAINER_LINKS.clients.href}
             icon={<LayoutDashboardIcon className="h-5 w-5" />}
             label={TRAINER_LINKS.dashboard.label}
-          />
+          /> */}
 
           <NavLink
             href={TRAINER_LINKS.clients.href}
