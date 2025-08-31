@@ -59,6 +59,8 @@ export function ExerciseSet({
   const invalidateQuery = useInvalidateQuery()
   const queryClient = useQueryClient()
   const [isTimerOperations, setIsTimerOperations] = useState(false)
+  const [skipTimer, setSkipTimer] = useState(false)
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const { mutateAsync: updateSetLog } = useFitspaceUpdateSetLogMutation({
     onMutate: async (newLog) => {
@@ -146,13 +148,15 @@ export function ExerciseSet({
         }
         setIsCompletingSet(false)
         setIsTimerOperations(false)
+        setSkipTimer(false) // Reset skip timer flag on error
       },
       onSuccess: (data, variables) => {
-        // Only start timer if we completed the set (not uncompleted it)
-        if (variables.completed) {
+        // Only start timer if we completed the set (not uncompleted it) and not skipping timer
+        if (variables.completed && !skipTimer) {
           setIsTimerOperations(true)
         }
         setIsCompletingSet(false)
+        setSkipTimer(false) // Reset skip timer flag
 
         // Invalidate after a short delay to ensure optimistic update is preserved
         setTimeout(() => {
@@ -238,43 +242,82 @@ export function ExerciseSet({
 
   const thisSet = getPreviousSetForColumn()
 
-  const handleToggleSetCompletion = useCallback(async () => {
-    // Prevent multiple clicks during mutation
-    if (isMarkingSetCompleted || isCompletingSet) return
-
-    const willBeCompleted = !set.completedAt
-
-    startTransition(() => {
-      // Close timer immediately for uncompleting
-      if (!willBeCompleted) {
-        setIsTimerOperations(false)
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current)
       }
-      setIsCompletingSet(true)
-    })
-
-    try {
-      await markSetAsCompleted({
-        setId: set.id,
-        completed: willBeCompleted,
-        reps: reps ? +reps : previousSetRepsLog || null,
-        weight: weight ? +weight : previousSetWeightLog || null,
-      })
-    } catch (error) {
-      console.error('Failed to toggle set completion:', error)
-      setIsTimerOperations(false)
-      setIsCompletingSet(false)
     }
-  }, [
-    markSetAsCompleted,
-    isMarkingSetCompleted,
-    isCompletingSet,
-    set.completedAt,
-    set.id,
-    reps,
-    weight,
-    previousSetRepsLog,
-    previousSetWeightLog,
-  ])
+  }, [])
+
+  const handleToggleSetCompletion = useCallback(
+    async (isDoubleClick = false) => {
+      // Prevent multiple clicks during mutation
+      if (isMarkingSetCompleted || isCompletingSet) return
+
+      const willBeCompleted = !set.completedAt
+
+      // Set skip timer flag for double clicks
+      if (isDoubleClick) {
+        setSkipTimer(true)
+      }
+
+      startTransition(() => {
+        // Close timer immediately for uncompleting
+        if (!willBeCompleted) {
+          setIsTimerOperations(false)
+        }
+        setIsCompletingSet(true)
+      })
+
+      try {
+        await markSetAsCompleted({
+          setId: set.id,
+          completed: willBeCompleted,
+          reps: reps ? +reps : previousSetRepsLog || null,
+          weight: weight ? +weight : previousSetWeightLog || null,
+        })
+      } catch (error) {
+        console.error('Failed to toggle set completion:', error)
+        setIsTimerOperations(false)
+        setIsCompletingSet(false)
+        setSkipTimer(false)
+      }
+    },
+    [
+      markSetAsCompleted,
+      isMarkingSetCompleted,
+      isCompletingSet,
+      set.completedAt,
+      set.id,
+      reps,
+      weight,
+      previousSetRepsLog,
+      previousSetWeightLog,
+    ],
+  )
+
+  const handleClick = useCallback(() => {
+    // Clear any existing timeout
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current)
+    }
+
+    // Set timeout for single click
+    clickTimeoutRef.current = setTimeout(() => {
+      handleToggleSetCompletion(false) // Single click
+    }, 250) // 250ms delay to detect double click
+  }, [handleToggleSetCompletion])
+
+  const handleDoubleClick = useCallback(() => {
+    // Clear single click timeout
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current)
+    }
+
+    handleToggleSetCompletion(true) // Double click - skip timer
+  }, [handleToggleSetCompletion])
 
   return (
     <motion.div
@@ -403,7 +446,8 @@ export function ExerciseSet({
                     )}
                   />
                 }
-                onClick={handleToggleSetCompletion}
+                onClick={handleClick}
+                onDoubleClick={handleDoubleClick}
                 className="self-center"
                 disabled={isMarkingSetCompleted || isCompletingSet}
                 loading={isMarkingSetCompleted || isCompletingSet}
