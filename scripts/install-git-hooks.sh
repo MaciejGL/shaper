@@ -16,7 +16,7 @@ chmod +x .git/hooks/pre-push
 echo "✅ Git hooks installed successfully!"
 echo ""
 echo "📋 What this does:"
-echo "  • Runs 'npm test' before every git push"
+echo "  • Runs 'pnpm test:ci' before every git push"
 echo "  • Prevents pushing if tests fail"
 echo "  • Keeps your main branch stable"
 echo ""

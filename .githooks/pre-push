@@ -6,7 +6,7 @@
 echo "🧪 Running tests before push..."
 
 # Run tests with output
-npm test
+pnpm test:ci
 
 # Check if tests passed
 if [ $? -ne 0 ]; then
