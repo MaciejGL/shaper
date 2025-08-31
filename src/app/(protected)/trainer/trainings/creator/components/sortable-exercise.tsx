@@ -167,11 +167,11 @@ export const SortableExercise = React.memo(
         <Card
           ref={setNodeRef}
           style={style}
-          {...(isDisabled ? attributes : {})}
-          {...(isDisabled ? listeners : {})}
+          {...(!isDisabled ? attributes : {})}
+          {...(!isDisabled ? listeners : {})}
           className={cn(
             'p-0 transition-all duration-200 ease-out min-h-[120px] select-none',
-            isDisabled
+            !isDisabled
               ? 'cursor-grab active:cursor-grabbing'
               : 'cursor-default',
             // Remove border and background when dragging. It's a wrapper in sorting context
@@ -244,7 +244,7 @@ export const SortableExercise = React.memo(
                 <Pencil className="w-3 h-3" />
                 Edit
               </DropdownMenuItem>
-              {isDisabled && (
+              {!isDisabled && (
                 <DropdownMenuItem
                   onClick={handleRemoveExercise}
                   className="cursor-pointer"

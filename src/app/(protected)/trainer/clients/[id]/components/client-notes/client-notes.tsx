@@ -124,7 +124,7 @@ export function ClientNotes({ clientId }: { clientId: string }) {
   }
 
   return (
-    <Card>
+    <Card borderless>
       <CardHeader>
         <div className="flex justify-between">
           <CardTitle>Notes</CardTitle>

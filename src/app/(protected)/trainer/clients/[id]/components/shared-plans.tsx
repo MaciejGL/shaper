@@ -1,5 +1,6 @@
 import {
   Calendar,
+  Edit,
   LucideFilePlus2,
   LucideList,
   MoreVertical,
@@ -11,6 +12,7 @@ import { toast } from 'sonner'
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { CardTitle } from '@/components/ui/card'
 import {
@@ -167,12 +169,22 @@ export function TrainingCard({
         </div>
       </CardHeader>
       <CardFooter>
-        <div className="flex gap-2">
-          <Badge variant="outline">
-            <Calendar className="size-4" />
-            <span>{plan.weekCount} weeks</span>
-          </Badge>
-          {plan.active && <Badge variant="primary">Active</Badge>}
+        <div className="flex gap-2 items-center justify-between w-full">
+          <div className="flex gap-2">
+            <Badge variant="outline">
+              <Calendar className="size-4" />
+              <span>{plan.weekCount} weeks</span>
+            </Badge>
+            {plan.active && <Badge variant="primary">Active</Badge>}
+          </div>
+          <ButtonLink
+            href={`/trainer/trainings/creator/${plan.id}`}
+            variant="secondary"
+            size="sm"
+            iconStart={<Edit />}
+          >
+            Edit Plan
+          </ButtonLink>
         </div>
       </CardFooter>
     </Card>

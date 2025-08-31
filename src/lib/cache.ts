@@ -44,6 +44,12 @@ const keys = {
     exercisesAll: () => 'exercise*',
     packagesAll: () => 'package*',
   },
+  trainerClientAccess: {
+    trainerClientAccess: (trainerId: string, clientId: string) =>
+      `access:trainer:${trainerId}:client:${clientId}`,
+    trainerAllAccess: (trainerId: string) => `access:trainer:${trainerId}:*`,
+    clientAllAccess: (clientId: string) => `access:*:client:${clientId}`,
+  },
 }
 
 // Cache operations

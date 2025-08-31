@@ -1,12 +1,11 @@
 'use client'
 
-import { Users2 } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { useMemo, useState } from 'react'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
@@ -39,8 +38,8 @@ interface TaskWithDelivery {
 
 export function ClientsTabs() {
   const { user } = useUser()
-  const { isEnabled } = useFeatureFlag(FEATURE_FLAGS.teams)
-
+  const { isEnabled, isLoading } = useFeatureFlag(FEATURE_FLAGS.teams)
+  const [selectedTeamTab, setSelectedTeamTab] = useState<string | null>(null)
   // State for selected team member
   const [selectedTeamMember, setSelectedTeamMember] = useState<{
     memberId: string
@@ -49,7 +48,7 @@ export function ClientsTabs() {
   } | null>(null)
 
   // Fetch teams
-  const { data: teamsData } = useMyTeamsQuery(
+  const { data: teamsData, isLoading: teamsLoading } = useMyTeamsQuery(
     {},
     {
       enabled: Boolean(isEnabled),
@@ -58,7 +57,7 @@ export function ClientsTabs() {
   )
 
   // Get clients - use selected team member's ID if available
-  const { data } = useGetClientsQuery(
+  const { data, isLoading: isLoadingTeamMemberClients } = useGetClientsQuery(
     { trainerId: selectedTeamMember?.memberId || undefined },
     {
       refetchOnWindowFocus: false,
@@ -84,6 +83,7 @@ export function ClientsTabs() {
 
   const clients = data?.myClients ?? []
   const teams = teamsData?.myTeams ?? []
+  const isLoadingTeams = isLoading || teamsLoading
 
   // Group tasks by client
   const tasksByClient = useMemo(() => {
@@ -119,8 +119,6 @@ export function ClientsTabs() {
     return grouped
   }, [deliveriesData, tasksData])
 
-  if (!data) return null
-
   const filteredClients = smartSearch<Client>(clients, search, [
     'firstName',
     'lastName',
@@ -129,9 +127,23 @@ export function ClientsTabs() {
 
   return (
     <AnimatedPageTransition id="clients-tabs">
-      <Tabs defaultValue="my-clients" className="w-full">
+      <Tabs
+        value={selectedTeamTab || 'my-clients'}
+        className="w-full"
+        onValueChange={(value) => {
+          if (value === 'my-clients') {
+            setSelectedTeamMember(null)
+          }
+          setSelectedTeamTab(value)
+        }}
+      >
         <TabsList className="mb-4">
           <TabsTrigger value="my-clients">My Clients</TabsTrigger>
+          {isLoadingTeams && (
+            <TabsTrigger value="loading" disabled className="animate-pulse">
+              Loading...
+            </TabsTrigger>
+          )}
           {isEnabled &&
             teams.map((team) => (
               <TabsTrigger key={team.id} value={team.id}>
@@ -161,75 +173,40 @@ export function ClientsTabs() {
         {/* Team Tabs */}
         {isEnabled &&
           teams.map((team) => (
-            <TabsContent key={team.id} value={team.id} className="space-y-4">
-              {selectedTeamMember?.teamId === team.id ? (
-                // Show selected member's clients
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-medium">
-                        {selectedTeamMember.memberName}'s Clients
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {clients.length} client{clients.length !== 1 ? 's' : ''}
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={() => setSelectedTeamMember(null)}
-                    >
-                      <Users2 className="size-4 mr-2" />
-                      Back to Team
-                    </Button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
-                    {filteredClients.map((client) => (
-                      <ClientCard
-                        key={client.id}
-                        client={client}
-                        tasks={[]} // Don't show tasks for team member clients
-                      />
-                    ))}
-                    {filteredClients.length === 0 && (
-                      <div className="bg-foreground/20 p-4 rounded-md col-span-full text-center text-sm">
-                        {selectedTeamMember.memberName} has no clients
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                // Show team member selection
-                <div className="space-y-4">
-                  <div className="text-center py-6">
-                    <Users2 className="size-12 text-muted-foreground mx-auto mb-3" />
-                    <h3 className="text-lg font-medium mb-2">
-                      Select Team Member
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Choose a trainer from <strong>{team.name}</strong> to view
-                      their clients
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {team.members.map((member) => {
+            <TabsContent key={team.id} value={team.id} className="space-y-6">
+              {/* Always show trainers */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Team Members</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {team.members
+                    .filter((member) => member.user.id !== user?.id)
+                    .map((member) => {
                       const memberName =
                         member.user.firstName && member.user.lastName
                           ? `${member.user.firstName} ${member.user.lastName}`
                           : member.user.email
 
+                      const isSelected =
+                        selectedTeamMember?.memberId === member.user.id
+
                       return (
                         <Card
                           key={member.id}
-                          className="cursor-pointer transition-all duration-200 hover:shadow-md hover:bg-muted/50"
-                          onClick={() =>
+                          borderless
+                          className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                            isSelected
+                              ? 'ring-2 ring-primary bg-primary/5'
+                              : 'hover:bg-muted/50'
+                          }`}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
                             setSelectedTeamMember({
                               memberId: member.user.id,
                               memberName,
                               teamId: team.id,
                             })
-                          }
+                          }}
                         >
                           <CardHeader className="pb-3">
                             <div className="flex items-center gap-3">
@@ -257,7 +234,41 @@ export function ClientsTabs() {
                         </Card>
                       )
                     })}
+                </div>
+              </div>
+
+              {/* Show selected trainer's clients */}
+              {selectedTeamMember?.teamId === team.id && (
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-lg font-medium">
+                      {selectedTeamMember.memberName}'s Clients
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {clients.length} client{clients.length !== 1 ? 's' : ''}
+                    </p>
                   </div>
+
+                  {isLoadingTeamMemberClients ? (
+                    <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
+                      <LoadingSkeleton count={4} variant="lg" />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
+                      {filteredClients.map((client) => (
+                        <ClientCard
+                          key={client.id}
+                          client={client}
+                          tasks={[]} // Don't show tasks for team member clients
+                        />
+                      ))}
+                      {filteredClients.length === 0 && (
+                        <div className="bg-foreground/20 p-4 rounded-md col-span-full text-center text-sm">
+                          {selectedTeamMember.memberName} has no clients
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </TabsContent>

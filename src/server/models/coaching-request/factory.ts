@@ -5,6 +5,10 @@ import {
   GQLNotificationType,
   GQLUserRole,
 } from '@/generated/graphql-server'
+import {
+  invalidateClientAccessCache,
+  invalidateTrainerAccessCache,
+} from '@/lib/access-control'
 import { prisma } from '@/lib/db'
 import {
   notifyCoachingRequest,
@@ -275,6 +279,20 @@ export async function acceptCoachingRequest({
       coachingRequest.senderId,
       coachingRequest.sender?.name || 'Someone',
     )
+
+    // Invalidate access control cache for both users since their relationship changed
+    await Promise.all([
+      invalidateTrainerAccessCache(
+        recipientRole === GQLUserRole.Trainer
+          ? recipientId
+          : coachingRequest.senderId,
+      ),
+      invalidateClientAccessCache(
+        recipientRole === GQLUserRole.Client
+          ? recipientId
+          : coachingRequest.senderId,
+      ),
+    ])
 
     return coachingRequest
       ? new CoachingRequest(coachingRequest, context)

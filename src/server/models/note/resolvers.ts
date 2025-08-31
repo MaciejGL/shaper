@@ -8,6 +8,10 @@ import {
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
 import {
+  ensureTrainerClientAccess,
+  verifyTrainerClientAccess,
+} from '@/lib/access-control'
+import {
   notifyClientTrainerNote,
   notifyExerciseCommentReply,
   notifyTrainerExerciseNote,
@@ -228,17 +232,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    // Verify the user is a trainer and clientId is their client
-    const client = await prisma.user.findFirst({
-      where: {
-        id: clientId,
-        trainerId: user.user.id,
-      },
-    })
-
-    if (!client) {
-      throw new Error('Client not found or access denied')
-    }
+    // Verify the trainer-client access (direct trainer or team member)
+    await ensureTrainerClientAccess(user.user.id, clientId)
 
     // Get all notes created by the client that are shared with trainer (excluding replies)
     const notes = await prisma.note.findMany({
@@ -380,39 +375,39 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Send notifications if trainer is sharing note with client
     if (shareWithClient && user.user.role === 'TRAINER' && relatedTo) {
-      // Verify the relatedTo user is a client of this trainer
-      const client = await prisma.user.findFirst({
-        where: {
-          id: relatedTo,
-          trainerId: user.user.id,
-        },
-        include: {
-          profile: true,
-        },
-      })
+      // Verify the relatedTo user is a client of this trainer (direct or team access)
+      const hasAccess = await verifyTrainerClientAccess(user.user.id, relatedTo)
 
-      if (client) {
-        // Get trainer name
-        const trainerName =
-          user.user.profile?.firstName && user.user.profile?.lastName
-            ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
-            : user.user.name || 'Your trainer'
+      if (hasAccess) {
+        // Get client details for notification
+        const client = await prisma.user.findUnique({
+          where: { id: relatedTo },
+          include: { profile: true },
+        })
 
-        // Send in-app notification
-        await createNotification(
-          {
-            userId: relatedTo,
-            createdBy: user.user.id,
-            type: GQLNotificationType.TrainerNoteShared,
-            message: `${trainerName} shared a note with you`,
-            link: '/fitspace/my-trainer',
-            relatedItemId: newNote.id,
-          },
-          context,
-        )
+        if (client) {
+          // Get trainer name
+          const trainerName =
+            user.user.profile?.firstName && user.user.profile?.lastName
+              ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
+              : user.user.name || 'Your trainer'
 
-        // Send push notification
-        await notifyClientTrainerNote(relatedTo, trainerName, note)
+          // Send in-app notification
+          await createNotification(
+            {
+              userId: relatedTo,
+              createdBy: user.user.id,
+              type: GQLNotificationType.TrainerNoteShared,
+              message: `${trainerName} shared a note with you`,
+              link: '/fitspace/my-trainer',
+              relatedItemId: newNote.id,
+            },
+            context,
+          )
+
+          // Send push notification
+          await notifyClientTrainerNote(relatedTo, trainerName, note)
+        }
       }
     }
 
@@ -525,19 +520,17 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     const { clientId, exerciseId, note, shareWithClient } = input
 
-    // Verify the client is assigned to this trainer
-    const client = await prisma.user.findFirst({
-      where: {
-        id: clientId,
-        trainerId: user.user.id,
-      },
-      include: {
-        profile: true,
-      },
+    // Verify the trainer-client access (direct trainer or team member)
+    await ensureTrainerClientAccess(user.user.id, clientId)
+
+    // Get client details
+    const client = await prisma.user.findUnique({
+      where: { id: clientId },
+      include: { profile: true },
     })
 
     if (!client) {
-      throw new Error('Client not found or access denied')
+      throw new Error('Client not found')
     }
 
     // Verify the exercise belongs to a training plan assigned to this client
@@ -631,15 +624,11 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     let canReply = false
 
     if (user.user.role === GQLUserRole.Trainer) {
-      // Verify the note creator is the trainer's client
-      const client = await prisma.user.findFirst({
-        where: {
-          id: parentNote.createdById,
-          trainerId: user.user.id,
-        },
-      })
-
-      canReply = !!client
+      // Verify the note creator is the trainer's client (direct or team access)
+      canReply = await verifyTrainerClientAccess(
+        user.user.id,
+        parentNote.createdById,
+      )
     } else {
       // Client can reply if:
       // 1. They created the note themselves, OR
@@ -775,48 +764,52 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       user.user.role === 'TRAINER' &&
       existingNote.relatedToId
     ) {
-      // Verify the relatedTo user is a client of this trainer
-      const client = await prisma.user.findFirst({
-        where: {
-          id: existingNote.relatedToId,
-          trainerId: user.user.id,
-        },
-        include: {
-          profile: true,
-        },
-      })
+      // Verify the relatedTo user is a client of this trainer (direct or team access)
+      const hasAccess = await verifyTrainerClientAccess(
+        user.user.id,
+        existingNote.relatedToId,
+      )
 
-      if (client) {
-        // Get trainer name
-        const trainerName =
-          user.user.profile?.firstName && user.user.profile?.lastName
-            ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
-            : user.user.name || 'Your trainer'
+      if (hasAccess) {
+        // Get client details for notification
+        const client = await prisma.user.findUnique({
+          where: { id: existingNote.relatedToId },
+          include: { profile: true },
+        })
 
-        // Send in-app notification
-        await createNotification(
-          {
-            userId: existingNote.relatedToId,
-            createdBy: user.user.id,
-            type: GQLNotificationType.TrainerNoteShared,
-            message: `${trainerName} shared a note with you`,
-            link: '/fitspace/my-trainer',
-            relatedItemId: newNote.id,
-          },
-          context,
-        )
+        if (client) {
+          // Get trainer name
+          const trainerName =
+            user.user.profile?.firstName && user.user.profile?.lastName
+              ? `${user.user.profile.firstName} ${user.user.profile.lastName}`
+              : user.user.name || 'Your trainer'
 
-        // Send push notification
-        await notifyClientTrainerNote(
-          existingNote.relatedToId,
-          trainerName,
-          note,
-        )
+          // Send in-app notification
+          await createNotification(
+            {
+              userId: existingNote.relatedToId,
+              createdBy: user.user.id,
+              type: GQLNotificationType.TrainerNoteShared,
+              message: `${trainerName} shared a note with you`,
+              link: '/fitspace/my-trainer',
+              relatedItemId: newNote.id,
+            },
+            context,
+          )
+
+          // Send push notification
+          await notifyClientTrainerNote(
+            existingNote.relatedToId,
+            trainerName,
+            newNote.text,
+          )
+        }
       }
     }
 
     return new Note(newNote, context)
   },
+
   deleteNote: async (_, { id }, context) => {
     const user = context.user
     if (!user) {

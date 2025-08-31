@@ -9,6 +9,10 @@ import {
   UserProfile as PrismaUserProfile,
   UserSession as PrismaUserSession,
 } from '@/generated/prisma/client'
+import {
+  invalidateClientAccessCache,
+  invalidateTrainerAccessCache,
+} from '@/lib/access-control'
 import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { notifyCoachingCancelled } from '@/lib/notifications/push-notification-service'
@@ -822,6 +826,12 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       )
 
       await notifyCoachingCancelled(trainerId, clientName)
+
+      // Invalidate access control cache for both users since their relationship ended
+      await Promise.all([
+        invalidateTrainerAccessCache(trainerId),
+        invalidateClientAccessCache(userId),
+      ])
 
       return true
     } catch (error) {

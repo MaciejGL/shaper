@@ -3,6 +3,7 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
+import { ensureTrainerClientAccess } from '@/lib/access-control'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
@@ -79,17 +80,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    // Verify the trainer-client relationship exists
-    const client = await prisma.user.findUnique({
-      where: {
-        id: clientId,
-        trainerId: userSession.user.id, // Ensure the client belongs to this trainer
-      },
-    })
-
-    if (!client) {
-      throw new Error('Client not found or not associated with this trainer')
-    }
+    // Verify the trainer-client access (direct trainer or team member)
+    await ensureTrainerClientAccess(userSession.user.id, clientId)
 
     // Get the client's user profile
     const userProfile = await prisma.userProfile.findUnique({

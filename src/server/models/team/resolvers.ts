@@ -3,6 +3,7 @@ import {
   GQLMutationResolvers,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
+import { invalidateTrainerAccessCache } from '@/lib/access-control'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/getUser'
 import { sendTeamInvitationNotifications } from '@/lib/team-invitation-utils'
@@ -422,6 +423,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       where: { id: input.memberId },
     })
 
+    // Invalidate access control cache for the removed user
+    await invalidateTrainerAccessCache(memberToRemove.userId)
+
     return true
   },
 
@@ -481,6 +485,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
           role: 'MEMBER',
         },
       })
+
+      // Invalidate access control cache for the new team member
+      await invalidateTrainerAccessCache(user.user.id)
     }
 
     return new TeamInvitation(updatedInvitation, context)

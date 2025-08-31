@@ -82,7 +82,7 @@ export default function ClientCard({ client, tasks = [] }: ClientCardProps) {
     return priorityA - priorityB
   })
   return (
-    <Card className="overflow-hidden py-0 gap-0">
+    <Card borderless className="overflow-hidden py-0 gap-0">
       <CardHeader className="p-0">
         <div className="bg-primary/10 p-4">
           <div className="flex items-center justify-between">

@@ -45,7 +45,7 @@ export default function ClientDetailPage({
         prevSegment={{ label: 'Clients', href: '/trainer/clients' }}
       />
       <Tabs defaultValue="info">
-        <div className="overflow-x-auto hide-scrollbar -mx-2 px-2">
+        <div className="overflow-x-auto hide-scrollbar -mx-2 px-2 mb-4">
           <TabsList size="lg" className="w-max min-w-full">
             <TabsTrigger size="lg" value="info">
               Client Info
@@ -76,7 +76,7 @@ export default function ClientDetailPage({
         </div>
         <AnimatedPageTransition id="info">
           <TabsContent value="info">
-            <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_4fr] gap-12">
+            <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_4fr] gap-6">
               <ClientInfo
                 client={client}
                 clientName={clientName}
