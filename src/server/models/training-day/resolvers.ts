@@ -1,10 +1,9 @@
-import { prisma } from '@lib/db'
-
 import {
   GQLMutationResolvers,
   GQLQueryResolvers,
   GQLWorkoutSessionEvent,
 } from '@/generated/graphql-server'
+import { prisma } from '@/lib/db'
 
 import { copyExercisesFromDay } from './factory'
 import TrainingDay from './model'

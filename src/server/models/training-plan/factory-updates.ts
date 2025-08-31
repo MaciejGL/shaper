@@ -1,4 +1,3 @@
-import { prisma } from '@lib/db'
 import * as crypto from 'crypto'
 import { addDays, getISOWeek } from 'date-fns'
 import { GraphQLError } from 'graphql'
@@ -18,6 +17,7 @@ import {
   GQLMutationUpdateTrainingPlanDetailsArgs,
   GQLMutationUpdateTrainingWeekDetailsArgs,
 } from '@/generated/graphql-server'
+import { prisma } from '@/lib/db'
 import { getUTCWeekStart } from '@/lib/server-date-utils'
 import { GQLContext } from '@/types/gql-context'
 

@@ -1,4 +1,3 @@
-import { prisma } from '@lib/db'
 import * as crypto from 'crypto'
 import { addDays, addWeeks, differenceInCalendarDays } from 'date-fns'
 import { GraphQLError } from 'graphql'
@@ -31,6 +30,7 @@ import {
   calculateTrainingDayScheduledDate,
   translateDayOfWeekForUser,
 } from '@/lib/date-utils'
+import { prisma } from '@/lib/db'
 import { notifyTrainingPlanAssigned } from '@/lib/notifications/push-notification-service'
 import { getFromCache, setInCache } from '@/lib/redis'
 import { parseUTCDate } from '@/lib/server-date-utils'

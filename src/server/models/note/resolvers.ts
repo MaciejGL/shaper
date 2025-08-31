@@ -1,5 +1,3 @@
-import { prisma } from '@lib/db'
-
 import {
   GQLMutationResolvers,
   GQLNotificationType,
@@ -11,6 +9,7 @@ import {
   ensureTrainerClientAccess,
   verifyTrainerClientAccess,
 } from '@/lib/access-control'
+import { prisma } from '@/lib/db'
 import {
   notifyClientTrainerNote,
   notifyExerciseCommentReply,

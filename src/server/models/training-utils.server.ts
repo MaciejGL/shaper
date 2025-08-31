@@ -1,5 +1,3 @@
-import { prisma } from '@lib/db'
-
 import {
   BaseExercise as PrismaBaseExercise,
   ExerciseSet as PrismaExerciseSet,
@@ -8,6 +6,7 @@ import {
   TrainingPlan as PrismaTrainingPlan,
   TrainingWeek as PrismaTrainingWeek,
 } from '@/generated/prisma/client'
+import { prisma } from '@/lib/db'
 
 type FullTrainingPlan = PrismaTrainingPlan & {
   weeks: (PrismaTrainingWeek & {

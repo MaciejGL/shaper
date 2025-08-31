@@ -1,5 +1,3 @@
-import { prisma } from '@lib/db'
-
 import {
   GQLMutationMarkExerciseAsCompletedArgs,
   GQLMutationMarkSetAsCompletedArgs,
@@ -7,6 +5,7 @@ import {
   GQLMutationUpdateSetLogArgs,
   GQLWorkoutSessionEvent,
 } from '@/generated/graphql-server'
+import { prisma } from '@/lib/db'
 import {
   notifyPlanCompleted,
   notifyTrainerWorkoutCompleted,

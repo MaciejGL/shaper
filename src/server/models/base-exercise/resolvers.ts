@@ -1,4 +1,3 @@
-import { prisma } from '@lib/db'
 import { formatISO, startOfDay, startOfISOWeek } from 'date-fns'
 import { GraphQLError } from 'graphql'
 import { groupBy } from 'lodash'
@@ -13,6 +12,7 @@ import {
   getPublicExerciseById,
   getPublicExercises,
 } from '@/lib/cache/base-exercise-cache'
+import { prisma } from '@/lib/db'
 import { getExerciseVersionWhereClause } from '@/lib/exercise-version-filter'
 import { GQLContext } from '@/types/gql-context'
 

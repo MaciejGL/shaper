@@ -1,9 +1,8 @@
-import { prisma } from '@lib/db'
-
 import {
   GQLMutationResolvers,
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
+import { prisma } from '@/lib/db'
 
 import MuscleGroupCategory from './model'
 
