@@ -32,10 +32,12 @@ export async function sendTeamInvitationNotifications({
       include: { profile: true },
     })
 
+    const baseUrl = getBaseUrl()
+
     // Generate invitation URL (assuming teams are viewed at this path)
     const invitationUrl = invitedUser
-      ? `${getBaseUrl()}/trainer/teams?invitation=${invitationId}`
-      : `${getBaseUrl()}/login?redirect=/trainer/teams&invitation=${invitationId}`
+      ? `${baseUrl}/trainer/teams?invitation=${invitationId}`
+      : `${baseUrl}/login?redirect=/trainer/teams&invitation=${invitationId}`
 
     // Send email notification (always sent, regardless of user registration)
     const invitedUserName = invitedUser?.profile
