@@ -3,6 +3,8 @@ import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { sendPushForNotification } from '@/lib/notifications/push-integration'
 
+import { getBaseUrl } from './get-base-url'
+
 interface TeamInvitationNotificationParams {
   invitedEmail: string
   inviterName: string
@@ -32,8 +34,8 @@ export async function sendTeamInvitationNotifications({
 
     // Generate invitation URL (assuming teams are viewed at this path)
     const invitationUrl = invitedUser
-      ? `${process.env.NEXT_PUBLIC_APP_URL}/trainer/teams?invitation=${invitationId}`
-      : `${process.env.NEXT_PUBLIC_APP_URL}/login?redirect=/trainer/teams&invitation=${invitationId}`
+      ? `${getBaseUrl()}/trainer/teams?invitation=${invitationId}`
+      : `${getBaseUrl()}/login?redirect=/trainer/teams&invitation=${invitationId}`
 
     // Send email notification (always sent, regardless of user registration)
     const invitedUserName = invitedUser?.profile
