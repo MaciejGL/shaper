@@ -98,7 +98,7 @@ function ExercisesCompleted({
   totalExercises: number
 }) {
   return (
-    <Badge variant="secondary" size="lg" className="self-end w-full">
+    <Badge variant="secondary" size="lg" className="w-full">
       {completedExercises}/{totalExercises} completed{' '}
       {completedExercises === totalExercises ? (
         <BadgeCheckIcon className="text-green-500" />

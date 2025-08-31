@@ -5,7 +5,6 @@ import {
   Cloud,
   CreditCard,
   Dumbbell,
-  Package,
   UserCheck,
   Users,
   Utensils,
@@ -20,35 +19,18 @@ import {
   LazyExercisesTab as ExercisesTab,
   LazyFoodsTab as FoodsTab,
   LazyPushNotificationsTab as PushNotificationsTab,
-  LazySubscriptionsTab as SubscriptionsTab,
+  LazyStripeTab as StripeTab,
   LazyTrainersTab as TrainersTab,
   LazyUsersTab as UsersTab,
 } from './components/lazy-admin-tabs'
-import { UnifiedProductManagement } from './components/unified-product-management'
 
 export default function AdminPage() {
   // Use nuqs for tab persistence
   const [activeTab, setActiveTab] = useQueryState(
     'tab',
     parseAsStringEnum<
-      | 'users'
-      | 'trainers'
-      | 'exercises'
-      | 'foods'
-      | 'push'
-      | 'products'
-      | 'aws'
-      | 'subscriptions'
-    >([
-      'users',
-      'trainers',
-      'exercises',
-      'foods',
-      'push',
-      'products',
-      'aws',
-      'subscriptions',
-    ])
+      'users' | 'trainers' | 'exercises' | 'foods' | 'push' | 'stripe' | 'aws'
+    >(['users', 'trainers', 'exercises', 'foods', 'push', 'stripe', 'aws'])
       .withDefault('users')
       .withOptions({ clearOnDefault: true }),
   )
@@ -66,9 +48,8 @@ export default function AdminPage() {
               | 'exercises'
               | 'foods'
               | 'push'
-              | 'products'
-              | 'aws'
-              | 'subscriptions',
+              | 'stripe'
+              | 'aws',
           )
         }
       >
@@ -81,9 +62,9 @@ export default function AdminPage() {
             <UserCheck className="h-4 w-4" />
             Trainers
           </TabsTrigger>
-          <TabsTrigger value="subscriptions">
+          <TabsTrigger value="stripe">
             <CreditCard className="h-4 w-4" />
-            Subscriptions
+            Stripe
           </TabsTrigger>
           <TabsTrigger value="exercises">
             <Dumbbell className="h-4 w-4" />
@@ -96,10 +77,6 @@ export default function AdminPage() {
           <TabsTrigger value="push">
             <Bell className="h-4 w-4" />
             Push Notifications
-          </TabsTrigger>
-          <TabsTrigger value="products">
-            <Package className="h-4 w-4" />
-            Products
           </TabsTrigger>
           <TabsTrigger value="aws">
             <Cloud className="h-4 w-4" />
@@ -117,8 +94,8 @@ export default function AdminPage() {
           <TrainersTab />
         </TabsContent>
 
-        <TabsContent value="subscriptions" className="mt-6">
-          <SubscriptionsTab />
+        <TabsContent value="stripe" className="mt-6">
+          <StripeTab />
         </TabsContent>
 
         <TabsContent value="exercises" className="mt-6">
@@ -131,10 +108,6 @@ export default function AdminPage() {
 
         <TabsContent value="push" className="mt-6">
           <PushNotificationsTab />
-        </TabsContent>
-
-        <TabsContent value="products" className="mt-6">
-          <UnifiedProductManagement />
         </TabsContent>
 
         <TabsContent value="aws" className="mt-6">
