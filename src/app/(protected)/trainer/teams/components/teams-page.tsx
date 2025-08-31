@@ -36,7 +36,12 @@ export function TeamsPage() {
     error: teamsError,
     isRefetching: teamsRefetching,
     refetch: refetchTeams,
-  } = useMyTeamsQuery()
+  } = useMyTeamsQuery(
+    {},
+    {
+      refetchOnWindowFocus: false,
+    },
+  )
 
   const {
     data: invitationsData,

@@ -26,6 +26,7 @@ import {
   GQLQueryGetTrainingPlanByIdArgs,
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
+import { ensureTrainerClientAccess } from '@/lib/access-control'
 import {
   calculateTrainingDayScheduledDate,
   translateDayOfWeekForUser,
@@ -242,10 +243,26 @@ export async function getClientTrainingPlans(
   if (!user) {
     throw new Error('User not found')
   }
+
+  // Verify trainer has access to this client's data and get authorized trainer IDs
+  const authorizedTrainerIds = await ensureTrainerClientAccess(
+    user.user.id,
+    clientId,
+    {
+      returnTrainerIds: true,
+    },
+  )
+
+  if (authorizedTrainerIds.length === 0) {
+    return []
+  }
+
   const plans = await prisma.trainingPlan.findMany({
     where: {
       assignedToId: clientId,
-      createdById: user.user.id,
+      createdById: {
+        in: authorizedTrainerIds,
+      },
       startDate: null,
     },
   })
@@ -262,10 +279,26 @@ export async function getClientActivePlan(
   if (!user) {
     throw new Error('User not found')
   }
+
+  // Verify trainer has access to this client's data and get authorized trainer IDs
+  const authorizedTrainerIds = await ensureTrainerClientAccess(
+    user.user.id,
+    clientId,
+    {
+      returnTrainerIds: true,
+    },
+  )
+
+  if (authorizedTrainerIds.length === 0) {
+    return null
+  }
+
   const plan = await prisma.trainingPlan.findFirst({
     where: {
       assignedToId: clientId,
-      createdById: user.user.id,
+      createdById: {
+        in: authorizedTrainerIds,
+      },
       startDate: { not: null },
       active: true,
     },
@@ -302,6 +335,7 @@ export async function getClientActivePlan(
       },
     },
   })
+
   return plan ? new TrainingPlan(plan, context) : null
 }
 

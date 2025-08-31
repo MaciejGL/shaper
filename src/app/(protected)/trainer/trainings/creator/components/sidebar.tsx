@@ -1,7 +1,7 @@
 'use client'
 
 import { PlusIcon, SearchIcon } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -59,8 +59,27 @@ export function Sidebar({
   )
   const allMuscleGroups = muscleGroupCategoriesData?.muscleGroupCategories || []
 
-  const filteredExercises = [...trainerExercises, ...publicExercises].filter(
-    (exercise) => {
+  // Deduplicate exercises by ID and apply filters with memoization for performance
+  const filteredExercises = useMemo(() => {
+    // Deduplicate exercises by ID, prioritizing trainer exercises over public ones
+    const exerciseMap: Map<
+      string,
+      GQLTrainerExercisesQuery['userExercises'][number]
+    > = new Map()
+
+    // Add public exercises first
+    publicExercises.forEach((exercise) => {
+      exerciseMap.set(exercise.id, exercise)
+    })
+
+    // Add trainer exercises (will override public ones with same ID)
+    trainerExercises.forEach((exercise) => {
+      exerciseMap.set(exercise.id, exercise)
+    })
+
+    // Convert back to array and apply filters
+    const allExercises = Array.from(exerciseMap.values())
+    return allExercises.filter((exercise) => {
       const matchesSearch = exercise.name
         .toLowerCase()
         .includes(searchTerm.toLowerCase())
@@ -72,8 +91,14 @@ export function Sidebar({
       const matchesEquipment =
         selectedEquipment === 'all' || exercise.equipment === selectedEquipment
       return matchesSearch && matchesMuscleGroup && matchesEquipment
-    },
-  )
+    })
+  }, [
+    trainerExercises,
+    publicExercises,
+    searchTerm,
+    selectedMuscleGroup,
+    selectedEquipment,
+  ])
 
   return (
     <div className="w-80 bg-card dark:bg-card-on-card shadow-xs rounded-lg p-4 h-full max-h-full min-w-[260px]">

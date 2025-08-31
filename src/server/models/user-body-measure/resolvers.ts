@@ -81,7 +81,17 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     }
 
     // Verify the trainer-client access (direct trainer or team member)
-    await ensureTrainerClientAccess(userSession.user.id, clientId)
+    const authorizedTrainerIds = await ensureTrainerClientAccess(
+      userSession.user.id,
+      clientId,
+      {
+        returnTrainerIds: true,
+      },
+    )
+
+    if (authorizedTrainerIds.length === 0) {
+      return []
+    }
 
     // Get the client's user profile
     const userProfile = await prisma.userProfile.findUnique({

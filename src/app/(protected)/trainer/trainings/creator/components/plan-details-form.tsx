@@ -86,7 +86,7 @@ function PlanDetailsHeader() {
   const isDisabled = !!data.completedAt
 
   return (
-    <Card>
+    <Card borderless>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="w-5 h-5" />
@@ -120,7 +120,7 @@ function PlanDetailsHeader() {
               }
               disabled={isDisabled}
             >
-              <SelectTrigger>
+              <SelectTrigger variant="tertiary">
                 <SelectValue placeholder="Select difficulty" />
               </SelectTrigger>
               <SelectContent>
@@ -139,6 +139,7 @@ function PlanDetailsHeader() {
           <Textarea
             id="description"
             placeholder="Describe the goals, target audience, and key features of this training plan..."
+            variant="ghost"
             value={descriptionInput.value}
             onChange={(e) => descriptionInput.onChange(e.target.value)}
             onFocus={descriptionInput.onFocus}

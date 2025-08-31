@@ -23,6 +23,7 @@ import {
   GQLQueryGetMealPlanTemplatesArgs,
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
+import { ensureTrainerClientAccess } from '@/lib/access-control'
 import { prisma } from '@/lib/db'
 import { notifyMealPlanAssigned } from '@/lib/notifications/push-notification-service'
 import { compareWeeksUTC, getStartOfWeekUTC } from '@/lib/utc-date-utils'
@@ -152,10 +153,25 @@ export async function getClientMealPlans(
     throw new Error('User not found')
   }
 
+  // Verify trainer has access to this client's data and get authorized trainer IDs
+  const authorizedTrainerIds = await ensureTrainerClientAccess(
+    user.user.id,
+    clientId,
+    {
+      returnTrainerIds: true,
+    },
+  )
+
+  if (authorizedTrainerIds.length === 0) {
+    return []
+  }
+
   const plans = await prisma.mealPlan.findMany({
     where: {
       assignedToId: clientId,
-      createdById: user.user.id,
+      createdById: {
+        in: authorizedTrainerIds,
+      },
     },
     include: {
       createdBy: true,

@@ -69,6 +69,11 @@ function getSidebarStateFromCookie(): boolean {
   return true // default to expanded
 }
 
+function getInitialSidebarState(): boolean {
+  // Always return true for SSR and initial client render to prevent hydration mismatch
+  return true
+}
+
 function SidebarProvider({
   open: openProp,
   onOpenChange: setOpenProp,
@@ -87,7 +92,7 @@ function SidebarProvider({
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(() => {
-    return openProp ?? getSidebarStateFromCookie()
+    return openProp ?? getInitialSidebarState()
   })
   const open = openProp ?? _open
   const setOpen = React.useCallback(
@@ -104,6 +109,16 @@ function SidebarProvider({
     },
     [setOpenProp, open],
   )
+
+  // Sync with cookie after hydration to prevent hydration mismatch
+  React.useEffect(() => {
+    if (openProp === undefined) {
+      const cookieState = getSidebarStateFromCookie()
+      if (cookieState !== _open) {
+        _setOpen(cookieState)
+      }
+    }
+  }, [openProp, _open])
 
   // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {

@@ -18,6 +18,7 @@ import {
 } from '@/generated/graphql-client'
 import { FEATURE_FLAGS, useFeatureFlag } from '@/hooks/use-feature-flag'
 import { smartSearch } from '@/lib/smart-search'
+import { cn } from '@/lib/utils'
 
 import ClientCard from './client-card'
 
@@ -175,9 +176,9 @@ export function ClientsTabs() {
           teams.map((team) => (
             <TabsContent key={team.id} value={team.id} className="space-y-6">
               {/* Always show trainers */}
-              <div className="space-y-4">
+              <div className="space-y-4 @container/section">
                 <h3 className="text-lg font-medium">Team Members</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 @4xl/section:grid-cols-3 gap-4">
                   {team.members
                     .filter((member) => member.user.id !== user?.id)
                     .map((member) => {
@@ -193,11 +194,12 @@ export function ClientsTabs() {
                         <Card
                           key={member.id}
                           borderless
-                          className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
+                          className={cn(
+                            'cursor-pointer transition-all duration-200 hover:shadow-md',
                             isSelected
                               ? 'ring-2 ring-primary bg-primary/5'
-                              : 'hover:bg-muted/50'
-                          }`}
+                              : 'hover:bg-muted/50',
+                          )}
                           onClick={(e) => {
                             e.preventDefault()
                             e.stopPropagation()

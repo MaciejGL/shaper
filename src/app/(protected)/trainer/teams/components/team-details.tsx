@@ -43,8 +43,8 @@ export function TeamDetails({ team }: TeamDetailsProps) {
       <Card borderless>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <CardTitle className="flex items-center gap-2">
+            <div className="space-y-3 w-full">
+              <CardTitle className="flex items-center gap-2 w-full">
                 <span>{team.name}</span>
                 {team.isAdmin && (
                   <Button
@@ -56,7 +56,28 @@ export function TeamDetails({ team }: TeamDetailsProps) {
                     <Edit3 className="size-3" />
                   </Button>
                 )}
+                {team.isAdmin && (
+                  <div className="flex gap-2 ml-auto max-md:hidden">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setShowInviteModal(true)}
+                      iconStart={<UserPlus />}
+                    >
+                      Invite Member
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setShowManageMembersModal(true)}
+                      iconStart={<Settings />}
+                    >
+                      Manage Members
+                    </Button>
+                  </div>
+                )}
               </CardTitle>
+
               <CardDescription className="flex items-center gap-4">
                 <span className="flex items-center gap-1">
                   <Users className="size-4" />
@@ -67,28 +88,28 @@ export function TeamDetails({ team }: TeamDetailsProps) {
                   Created {formatDistanceToNow(new Date(team.createdAt))} ago
                 </span>
               </CardDescription>
-            </div>
 
-            {team.isAdmin && (
-              <div className="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setShowInviteModal(true)}
-                  iconStart={<UserPlus />}
-                >
-                  Invite Member
-                </Button>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setShowManageMembersModal(true)}
-                  iconStart={<Settings />}
-                >
-                  Manage Members
-                </Button>
-              </div>
-            )}
+              {team.isAdmin && (
+                <div className="flex gap-2 md:hidden">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowInviteModal(true)}
+                    iconStart={<UserPlus />}
+                  >
+                    Invite Member
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowManageMembersModal(true)}
+                    iconStart={<Settings />}
+                  >
+                    Manage Members
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </CardHeader>
 
@@ -116,7 +137,7 @@ export function TeamDetails({ team }: TeamDetailsProps) {
               <Users className="size-4" />
               Team Members
             </h4>
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {team.members.map((member) => (
                 <div
                   key={member.id}

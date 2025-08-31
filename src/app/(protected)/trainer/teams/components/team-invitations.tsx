@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import {
   GQLTeamInvitationsQuery,
   useRespondToTeamInvitationMutation,
@@ -51,9 +52,9 @@ export function TeamInvitations({
   return (
     <div className="space-y-4">
       {invitations.map((invitation) => (
-        <div
+        <Card
           key={invitation.id}
-          className="flex items-center justify-between p-4 rounded-lg border bg-card"
+          className="flex flex-col md:flex-row md:items-center justify-between gap-6 px-4"
         >
           <div className="flex items-center gap-4 flex-1 min-w-0">
             <Avatar className="size-12">
@@ -104,7 +105,7 @@ export function TeamInvitations({
             </div>
           </div>
 
-          <div className="flex gap-2 ml-4">
+          <div className="flex flex-col md:flex-row gap-2">
             <Button
               size="sm"
               onClick={() => handleRespond(invitation.id, true)}
@@ -123,7 +124,7 @@ export function TeamInvitations({
               Decline
             </Button>
           </div>
-        </div>
+        </Card>
       ))}
     </div>
   )
