@@ -1,19 +1,17 @@
 'use client'
 
+import { PostHog } from 'posthog-js'
 import { useEffect, useState } from 'react'
 
-import {
-  getFeatureFlag,
-  getPostHogInstance,
-  isFeatureEnabled,
-} from '@/lib/posthog'
+import { getPostHogInstance } from '@/lib/posthog'
 
 export const FEATURE_FLAGS = {
   teams: 'teams-feature',
 }
 
 /**
- * Hook to check if a feature flag is enabled
+ * Simple hook to check if a feature flag is enabled
+ * Uses PostHog's onFeatureFlags callback to wait for flags to load
  * @param flagKey - The feature flag key
  * @returns object with isEnabled boolean and isLoading boolean
  */
@@ -22,146 +20,49 @@ export function useFeatureFlag(
 ): { isEnabled: boolean; isLoading: boolean } {
   const [isEnabled, setIsEnabled] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(true)
-  const posthog = getPostHogInstance()
 
   useEffect(() => {
-    if (!posthog) {
-      console.warn('PostHog not initialized, feature flag will be false')
-      setIsEnabled(false)
+    let timeoutId: NodeJS.Timeout
+    let removeListener: (() => void) | undefined
+
+    // Function to check and update the feature flag value
+    const updateFeatureFlag = (posthogInstance: PostHog) => {
+      const enabled = posthogInstance.isFeatureEnabled(flagKey) ?? false
+      setIsEnabled(enabled)
       setIsLoading(false)
-      return
     }
 
-    // Check the feature flag
-    const enabled = isFeatureEnabled(flagKey)
-    setIsEnabled(enabled)
-    setIsLoading(false)
+    // Function to wait for PostHog to initialize and then set up feature flag listener
+    const waitForPostHog = () => {
+      const posthog = getPostHogInstance()
 
-    // Listen for feature flag changes
-    const handleFeatureFlagChange = () => {
-      const newEnabled = isFeatureEnabled(flagKey)
-      setIsEnabled(newEnabled)
+      if (posthog) {
+        // PostHog is ready, set up the feature flag listener
+        removeListener = posthog.onFeatureFlags(() =>
+          updateFeatureFlag(posthog),
+        )
+
+        // Also check immediately in case flags are already loaded
+        updateFeatureFlag(posthog)
+      } else {
+        // PostHog not ready yet, check again in 100ms
+        timeoutId = setTimeout(waitForPostHog, 100)
+      }
     }
 
-    // PostHog doesn't have a direct event listener for feature flag changes
-    // So we'll check periodically or on focus
-    const interval = setInterval(handleFeatureFlagChange, 30000) // Check every 30 seconds
+    // Start waiting for PostHog
+    waitForPostHog()
 
-    const handleFocus = () => {
-      handleFeatureFlagChange()
-    }
-
-    window.addEventListener('focus', handleFocus)
-
+    // Cleanup function
     return () => {
-      clearInterval(interval)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [flagKey, posthog])
-
-  return { isEnabled, isLoading }
-}
-
-/**
- * Hook to get the value of a feature flag (boolean, string, or undefined)
- * @param flagKey - The feature flag key
- * @returns The feature flag value
- */
-export function useFeatureFlagValue(flagKey: string): {
-  value: boolean | string | undefined
-  isLoading: boolean
-} {
-  const [value, setValue] = useState<boolean | string | undefined>(undefined)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-
-  useEffect(() => {
-    const posthog = getPostHogInstance()
-    if (!posthog) {
-      setIsLoading(false)
-      return
-    }
-
-    // Get the feature flag value
-    const flagValue = getFeatureFlag(flagKey)
-    setValue(flagValue)
-    setIsLoading(false)
-
-    // Listen for feature flag changes
-    const handleFeatureFlagChange = () => {
-      const newValue = getFeatureFlag(flagKey)
-      setValue(newValue)
-    }
-
-    // Check periodically or on focus
-    const interval = setInterval(handleFeatureFlagChange, 30000) // Check every 30 seconds
-
-    const handleFocus = () => {
-      handleFeatureFlagChange()
-    }
-
-    window.addEventListener('focus', handleFocus)
-
-    return () => {
-      clearInterval(interval)
-      window.removeEventListener('focus', handleFocus)
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+      if (removeListener) {
+        removeListener()
+      }
     }
   }, [flagKey])
 
-  return { value, isLoading }
-}
-
-/**
- * Hook to get multiple feature flags at once
- * @param flagKeys - Array of feature flag keys
- * @returns Object with feature flag values
- */
-export function useFeatureFlags(flagKeys: string[]): {
-  flags: Record<string, boolean | string | undefined>
-  isLoading: boolean
-} {
-  const [flags, setFlags] = useState<
-    Record<string, boolean | string | undefined>
-  >({})
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-
-  useEffect(() => {
-    const posthog = getPostHogInstance()
-    if (!posthog) {
-      setIsLoading(false)
-      return
-    }
-
-    // Get all feature flag values
-    const flagValues: Record<string, boolean | string | undefined> = {}
-    flagKeys.forEach((key) => {
-      flagValues[key] = getFeatureFlag(key)
-    })
-    setFlags(flagValues)
-    setIsLoading(false)
-
-    // Listen for feature flag changes
-    const handleFeatureFlagChange = () => {
-      const newFlags: Record<string, boolean | string | undefined> = {}
-      flagKeys.forEach((key) => {
-        newFlags[key] = getFeatureFlag(key)
-      })
-      setFlags(newFlags)
-    }
-
-    // Check periodically or on focus
-    const interval = setInterval(handleFeatureFlagChange, 30000) // Check every 30 seconds
-
-    const handleFocus = () => {
-      handleFeatureFlagChange()
-    }
-
-    window.addEventListener('focus', handleFocus)
-
-    return () => {
-      clearInterval(interval)
-      window.removeEventListener('focus', handleFocus)
-    }
-  }, [flagKeys])
-
-  return { flags, isLoading }
+  return { isEnabled, isLoading }
 }

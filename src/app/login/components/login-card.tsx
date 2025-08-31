@@ -35,7 +35,7 @@ export const LoginCard = () => {
   } = useLoginForm()
 
   return (
-    <Card className="dark flex flex-col gap-8 w-full max-w-md">
+    <Card borderless className="dark flex flex-col gap-8 w-full max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle>Login</CardTitle>
         <CardDescription>
@@ -48,7 +48,7 @@ export const LoginCard = () => {
         {!showOtp ? (
           <EmailForm
             email={email}
-            isLoading={isLoading}
+            isLoading={isLoading || isResending}
             onEmailChange={handleEmailChange}
             onSubmit={handleSendOtp}
           />

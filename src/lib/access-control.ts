@@ -12,6 +12,7 @@ const ACCESS_CONTROL_TTL = 30 * 60 // 30 minutes
  * 2. The user is a team member with the client's trainer
  *
  * Results are cached for 30 minutes to improve performance.
+ * Falls back gracefully when Redis is unavailable.
  *
  * @param trainerId - The ID of the user requesting access (should be a trainer)
  * @param clientId - The ID of the client whose data is being accessed
@@ -26,11 +27,18 @@ export async function verifyTrainerClientAccess(
     clientId,
   )
 
-  // Try to get from cache first
-  const cachedResult = await cache.get<boolean>(cacheKey)
-  if (cachedResult !== null) {
-    console.info(`[ACCESS_CONTROL] Cache HIT for ${cacheKey}`)
-    return cachedResult
+  // Try to get from cache first (will return null if Redis unavailable)
+  try {
+    const cachedResult = await cache.get<boolean>(cacheKey)
+    if (cachedResult !== null) {
+      console.info(`[ACCESS_CONTROL] Cache HIT for ${cacheKey}`)
+      return cachedResult
+    }
+  } catch (error) {
+    // Redis cache failed - continue without cache
+    console.warn(
+      `[ACCESS_CONTROL] Cache unavailable, proceeding with database check`,
+    )
   }
 
   console.info(`[ACCESS_CONTROL] Cache MISS for ${cacheKey}`)
@@ -45,7 +53,14 @@ export async function verifyTrainerClientAccess(
     })
 
     if (directClient) {
-      await cache.set(cacheKey, true, ACCESS_CONTROL_TTL)
+      // Try to cache the result, but don't fail if Redis is down
+      try {
+        await cache.set(cacheKey, true, ACCESS_CONTROL_TTL)
+      } catch (error) {
+        console.warn(
+          `[ACCESS_CONTROL] Failed to cache result: ${error instanceof Error ? error.message : String(error)}`,
+        )
+      }
       return true
     }
 
@@ -57,7 +72,14 @@ export async function verifyTrainerClientAccess(
 
     // If client has no trainer, access denied
     if (!clientWithTrainer?.trainerId) {
-      await cache.set(cacheKey, false, ACCESS_CONTROL_TTL)
+      // Try to cache the result, but don't fail if Redis is down
+      try {
+        await cache.set(cacheKey, false, ACCESS_CONTROL_TTL)
+      } catch (error) {
+        console.warn(
+          `[ACCESS_CONTROL] Failed to cache result: ${error instanceof Error ? error.message : String(error)}`,
+        )
+      }
       return false
     }
 
@@ -76,11 +98,19 @@ export async function verifyTrainerClientAccess(
     })
 
     const hasAccess = !!teamConnection
-    await cache.set(cacheKey, hasAccess, ACCESS_CONTROL_TTL)
+
+    // Try to cache the result, but don't fail if Redis is down
+    try {
+      await cache.set(cacheKey, hasAccess, ACCESS_CONTROL_TTL)
+    } catch (error) {
+      console.warn(
+        `[ACCESS_CONTROL] Failed to cache result: ${error instanceof Error ? error.message : String(error)}`,
+      )
+    }
+
     return hasAccess
   } catch (error) {
     console.error('Error verifying trainer-client access:', error)
-    // Don't cache errors
     return false
   }
 }
@@ -137,6 +167,7 @@ export async function getClientWithAccess(trainerId: string, clientId: string) {
 /**
  * Invalidates access control cache for a specific trainer.
  * Call this when a trainer's team membership changes.
+ * Gracefully handles Redis unavailability.
  *
  * @param trainerId - The ID of the trainer whose cache should be invalidated
  */
@@ -148,13 +179,17 @@ export async function invalidateTrainerAccessCache(
     await cache.removePattern(pattern)
     console.info(`[ACCESS_CONTROL] Invalidated cache for trainer: ${trainerId}`)
   } catch (error) {
-    console.error('Error invalidating trainer access cache:', error)
+    console.warn(
+      `[ACCESS_CONTROL] Failed to invalidate cache for trainer ${trainerId}: ${error instanceof Error ? error.message : String(error)}`,
+    )
+    // Continue gracefully - cache invalidation failure isn't critical
   }
 }
 
 /**
  * Invalidates access control cache for a specific client.
  * Call this when a client's trainer assignment changes.
+ * Gracefully handles Redis unavailability.
  *
  * @param clientId - The ID of the client whose cache should be invalidated
  */
@@ -166,13 +201,17 @@ export async function invalidateClientAccessCache(
     await cache.removePattern(pattern)
     console.info(`[ACCESS_CONTROL] Invalidated cache for client: ${clientId}`)
   } catch (error) {
-    console.error('Error invalidating client access cache:', error)
+    console.warn(
+      `[ACCESS_CONTROL] Failed to invalidate cache for client ${clientId}: ${error instanceof Error ? error.message : String(error)}`,
+    )
+    // Continue gracefully - cache invalidation failure isn't critical
   }
 }
 
 /**
  * Invalidates access control cache for multiple users.
  * Useful when a team is dissolved or multiple users are affected.
+ * Gracefully handles Redis unavailability.
  *
  * @param userIds - Array of user IDs whose cache should be invalidated
  */
@@ -192,13 +231,17 @@ export async function invalidateMultipleUsersAccessCache(
       `[ACCESS_CONTROL] Invalidated cache for ${userIds.length} users`,
     )
   } catch (error) {
-    console.error('Error invalidating multiple users access cache:', error)
+    console.warn(
+      `[ACCESS_CONTROL] Failed to invalidate cache for multiple users: ${error instanceof Error ? error.message : String(error)}`,
+    )
+    // Continue gracefully - cache invalidation failure isn't critical
   }
 }
 
 /**
  * Invalidates access control cache for a specific trainer-client pair.
  * Use this for targeted cache invalidation when you know the specific relationship.
+ * Gracefully handles Redis unavailability.
  *
  * @param trainerId - The ID of the trainer
  * @param clientId - The ID of the client
@@ -215,6 +258,9 @@ export async function invalidateSpecificAccessCache(
     await cache.remove(cacheKey)
     console.info(`[ACCESS_CONTROL] Invalidated specific cache: ${cacheKey}`)
   } catch (error) {
-    console.error('Error invalidating specific access cache:', error)
+    console.warn(
+      `[ACCESS_CONTROL] Failed to invalidate cache for ${trainerId}-${clientId}: ${error instanceof Error ? error.message : String(error)}`,
+    )
+    // Continue gracefully - cache invalidation failure isn't critical
   }
 }

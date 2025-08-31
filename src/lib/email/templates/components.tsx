@@ -114,6 +114,7 @@ export const EmailHeader = ({
             height: '32px',
             width: '32px',
             marginRight: '12px',
+            borderRadius: '50%',
           }}
         />
         <h1

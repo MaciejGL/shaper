@@ -63,7 +63,7 @@ export function TeamsPage() {
   }
 
   // Feature flag check
-  if (!isTeamsEnabled) {
+  if (!isTeamsEnabled && !isFeatureFlagLoading) {
     return (
       <div className="container max-w-6xl py-8">
         <Alert>
