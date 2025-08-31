@@ -119,7 +119,7 @@ export function ExerciseSet({
     },
   })
 
-  const { mutateAsync: markSetAsCompleted } =
+  const { mutateAsync: markSetAsCompleted, isPending: isMarkingSetCompleted } =
     useFitspaceMarkSetAsCompletedMutation({
       onMutate: async ({ setId, completed, reps, weight }) => {
         // Cancel outgoing queries to prevent race conditions
@@ -145,12 +145,21 @@ export function ExerciseSet({
           queryClient.setQueryData(queryKey, context.previousData)
         }
         setIsCompletingSet(false)
+        setIsTimerOperations(false)
       },
-      onSuccess: () => {
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
-        })
+      onSuccess: (data, variables) => {
+        // Only start timer if we completed the set (not uncompleted it)
+        if (variables.completed) {
+          setIsTimerOperations(true)
+        }
         setIsCompletingSet(false)
+
+        // Invalidate after a short delay to ensure optimistic update is preserved
+        setTimeout(() => {
+          invalidateQuery({
+            queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+          })
+        }, 100)
       },
     })
 
@@ -230,16 +239,16 @@ export function ExerciseSet({
   const thisSet = getPreviousSetForColumn()
 
   const handleToggleSetCompletion = useCallback(async () => {
+    // Prevent multiple clicks during mutation
+    if (isMarkingSetCompleted || isCompletingSet) return
+
     const willBeCompleted = !set.completedAt
 
     startTransition(() => {
-      // Immediately set timer state for smooth animation
+      // Close timer immediately for uncompleting
       if (!willBeCompleted) {
-        setIsTimerOperations(false) // Close timer immediately for uncompleting
-      } else {
-        setIsTimerOperations(true)
+        setIsTimerOperations(false)
       }
-
       setIsCompletingSet(true)
     })
 
@@ -253,9 +262,12 @@ export function ExerciseSet({
     } catch (error) {
       console.error('Failed to toggle set completion:', error)
       setIsTimerOperations(false)
+      setIsCompletingSet(false)
     }
   }, [
     markSetAsCompleted,
+    isMarkingSetCompleted,
+    isCompletingSet,
     set.completedAt,
     set.id,
     reps,
@@ -393,6 +405,8 @@ export function ExerciseSet({
                 }
                 onClick={handleToggleSetCompletion}
                 className="self-center"
+                disabled={isMarkingSetCompleted || isCompletingSet}
+                loading={isMarkingSetCompleted || isCompletingSet}
               />
             </div>
           </div>
