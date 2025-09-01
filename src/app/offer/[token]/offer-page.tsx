@@ -5,6 +5,7 @@ import { CheckCircle, CreditCard, Shield } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
+import { CoachingServiceTerms } from '@/components/subscription/coaching-service-terms'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -37,12 +38,28 @@ interface BundleOfferPageProps {
 
 export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [showTermsDialog, setShowTermsDialog] = useState(false)
+  const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false)
+  const [showTermsError, setShowTermsError] = useState(false)
 
   const packageSummary = offer.packageSummary as unknown as PackageSummaryItem[]
 
   const trainerName = offer.trainer.profile?.firstName
     ? `${offer.trainer.profile.firstName} ${offer.trainer.profile.lastName || ''}`.trim()
     : offer.trainer.name || 'Your Trainer'
+
+  const handleShowTerms = () => {
+    setShowTermsDialog(true)
+  }
+
+  const handleCheckoutClick = () => {
+    setShowTermsError(false)
+    if (!hasAgreedToTerms) {
+      setShowTermsError(true)
+      return
+    }
+    handleProceedToCheckout()
+  }
 
   const handleProceedToCheckout = async () => {
     setIsLoading(true)
@@ -88,6 +105,8 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
       }
 
       setIsLoading(false)
+    } finally {
+      setShowTermsDialog(false)
     }
   }
 
@@ -190,22 +209,90 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
             </CardContent>
           </Card>
 
-          {/* Action Button */}
-          <Button
-            onClick={handleProceedToCheckout}
-            loading={isLoading}
-            size="lg"
-            className="w-full"
-          >
-            {isLoading ? (
-              'Processing...'
-            ) : (
-              <>
-                <CreditCard className="w-5 h-5" />
-                Proceed to Checkout
-              </>
+          {/* Terms Agreement & Checkout */}
+          <div className="space-y-4">
+            {/* Terms Agreement Checkbox */}
+            <div className="flex items-start space-x-3">
+              <input
+                type="checkbox"
+                id="terms-agreement"
+                checked={hasAgreedToTerms}
+                onChange={(e) => {
+                  setHasAgreedToTerms(e.target.checked)
+                  if (e.target.checked) {
+                    setShowTermsError(false)
+                  }
+                }}
+                className={`mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${
+                  showTermsError ? 'border-red-500 ring-red-500' : ''
+                }`}
+              />
+              <label
+                htmlFor="terms-agreement"
+                className="text-sm text-muted-foreground leading-5"
+              >
+                I agree to the{' '}
+                <button
+                  type="button"
+                  onClick={handleShowTerms}
+                  className="text-primary hover:text-primary/80 underline font-medium"
+                >
+                  coaching service terms
+                </button>
+                {', '}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  className="text-primary hover:text-primary/80 underline"
+                >
+                  terms of service
+                </a>
+                {', and '}
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  className="text-primary hover:text-primary/80 underline"
+                >
+                  privacy policy
+                </a>
+              </label>
+            </div>
+
+            {/* Terms Error Message */}
+            {showTermsError && (
+              <div className="flex items-center space-x-2 text-red-600 text-sm">
+                <svg
+                  className="h-4 w-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span>Please agree to the terms and conditions to proceed</span>
+              </div>
             )}
-          </Button>
+
+            {/* Action Button */}
+            <Button
+              onClick={handleCheckoutClick}
+              loading={isLoading}
+              size="lg"
+              className="w-full"
+            >
+              {isLoading ? (
+                'Processing...'
+              ) : (
+                <>
+                  <CreditCard className="w-5 h-5" />
+                  Proceed to Checkout
+                </>
+              )}
+            </Button>
+          </div>
 
           {/* Trust indicators */}
           <div className="text-center space-y-3">
@@ -236,6 +323,20 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
             </p>
           </div>
         </div>
+
+        {/* Coaching Service Terms Dialog */}
+        <CoachingServiceTerms
+          isOpen={showTermsDialog}
+          onClose={() => setShowTermsDialog(false)}
+          onAccept={() => setShowTermsDialog(false)}
+          serviceType="coaching"
+          trainerName={trainerName}
+          packages={packageSummary.map((item) => ({
+            name: item.name,
+            description: item.description || undefined,
+          }))}
+          readOnly={true}
+        />
       </div>
     </div>
   )

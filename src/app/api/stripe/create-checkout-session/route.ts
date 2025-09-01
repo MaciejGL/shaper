@@ -5,6 +5,7 @@ import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { SUBSCRIPTION_CONFIG } from '@/lib/stripe/config'
 import { stripe } from '@/lib/stripe/stripe'
+import { recordTermsAgreement } from '@/lib/terms-utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -172,6 +173,14 @@ export async function POST(request: NextRequest) {
     console.info(
       `🛒 Checkout session created for user ${userId}, package ${packageId}${hasUsedTrial ? ' (no trial)' : ` (${SUBSCRIPTION_CONFIG.TRIAL_PERIOD_DAYS}-day trial)`}`,
     )
+
+    try {
+      await recordTermsAgreement({
+        userId,
+      })
+    } catch (error) {
+      console.error('Failed to record terms agreement:', error)
+    }
 
     return NextResponse.json({
       checkoutUrl: checkoutSession.url,

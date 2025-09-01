@@ -67,6 +67,9 @@ model User {
   // Location relations
   locations UserLocation[]
 
+  // Terms agreement relations
+  termsAgreements UserTermsAgreement[]
+
   @@index([trainerId])
   @@index([stripeCustomerId])
 }
@@ -1104,4 +1107,20 @@ model TeamLocation {
   @@unique([teamId, locationId])
   @@index([teamId])
   @@index([locationId])
+}
+
+// Simple terms agreement tracking
+model UserTermsAgreement {
+  id        String   @id @default(uuid())
+  userId    String
+  version   String   // e.g., "v1.0", "2024-12-01"
+  offerId   String?  // Optional: link to specific offer
+  agreedAt  DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([version])
+  @@index([agreedAt])
 }

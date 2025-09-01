@@ -1,5 +1,8 @@
 'use client'
 
+import { useState } from 'react'
+
+import { CoachingServiceTerms } from '@/components/subscription/coaching-service-terms'
 import { useUser } from '@/context/user-context'
 import {
   useGetActivePackageTemplatesQuery,
@@ -41,6 +44,12 @@ export function SubscriptionSection() {
   const subscriptionStatus = subscriptionData?.getMySubscriptionStatus
   const availablePackages = packagesData?.getActivePackageTemplates || []
   const mySubscriptions = mySubscriptionsData?.getMySubscriptions || []
+
+  // Terms dialog state
+  const [showTermsDialog, setShowTermsDialog] = useState(false)
+
+  const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false)
+  const [showTermsError, setShowTermsError] = useState(false)
 
   // Simple package selection - just get monthly and yearly options
   const monthlyPackage = availablePackages.find(
@@ -105,14 +114,29 @@ export function SubscriptionSection() {
   })()
 
   // For upgrade functionality, we still need the hook for the UpgradeCard
-  const { isUpgrading, handleUpgrade } = useSubscriptionActions({
-    userId: user?.id || '',
-    premiumPackage: monthlyPackage
-      ? {
-          id: monthlyPackage.id,
-        }
-      : undefined,
-  })
+  const { isUpgrading, handleUpgrade: originalHandleUpgrade } =
+    useSubscriptionActions({
+      userId: user?.id || '',
+      premiumPackage: monthlyPackage
+        ? {
+            id: monthlyPackage.id,
+          }
+        : undefined,
+    })
+
+  // Modified upgrade handler to check terms agreement first
+  const handleUpgradeWithTerms = (packageId?: string) => {
+    setShowTermsError(false)
+    if (!hasAgreedToTerms) {
+      setShowTermsError(true)
+      return
+    }
+    originalHandleUpgrade(packageId)
+  }
+
+  const handleShowTerms = () => {
+    setShowTermsDialog(true)
+  }
 
   if (isLoading) {
     return (
@@ -138,26 +162,95 @@ export function SubscriptionSection() {
       {/* Render different components based on subscription state */}
       {subscriptionState.type === 'none' ? (
         /* No subscription - show upgrade options */
-        <UpgradeCard
-          monthlyPackage={
-            monthlyPackage
-              ? {
-                  ...monthlyPackage,
-                  description: monthlyPackage.description || undefined,
-                }
-              : undefined
-          }
-          yearlyPackage={
-            yearlyPackage
-              ? {
-                  ...yearlyPackage,
-                  description: yearlyPackage.description || undefined,
-                }
-              : undefined
-          }
-          isUpgrading={isUpgrading}
-          onUpgrade={handleUpgrade}
-        />
+        <div className="space-y-6">
+          {/* Terms Agreement for Premium */}
+          <div className="bg-card p-4 rounded-lg border">
+            <div className="flex items-start space-x-3">
+              <input
+                type="checkbox"
+                id="premium-terms-agreement"
+                checked={hasAgreedToTerms}
+                onChange={(e) => {
+                  setHasAgreedToTerms(e.target.checked)
+                  if (e.target.checked) {
+                    setShowTermsError(false)
+                  }
+                }}
+                className={`mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${
+                  showTermsError ? 'border-red-500 ring-red-500' : ''
+                }`}
+              />
+              <label
+                htmlFor="premium-terms-agreement"
+                className="text-sm text-muted-foreground leading-5"
+              >
+                I agree to the{' '}
+                <button
+                  type="button"
+                  onClick={handleShowTerms}
+                  className="text-primary hover:text-primary/80 underline font-medium"
+                >
+                  premium service terms
+                </button>
+                {', '}
+                <a
+                  href="/terms"
+                  target="_blank"
+                  className="text-primary hover:text-primary/80 underline"
+                >
+                  terms of service
+                </a>
+                {', and '}
+                <a
+                  href="/privacy"
+                  target="_blank"
+                  className="text-primary hover:text-primary/80 underline"
+                >
+                  privacy policy
+                </a>
+              </label>
+            </div>
+
+            {/* Terms Error Message */}
+            {showTermsError && (
+              <div className="flex items-center space-x-2 text-red-600 text-sm mt-2">
+                <svg
+                  className="h-4 w-4"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span>Please agree to the terms and conditions to proceed</span>
+              </div>
+            )}
+          </div>
+
+          <UpgradeCard
+            monthlyPackage={
+              monthlyPackage
+                ? {
+                    ...monthlyPackage,
+                    description: monthlyPackage.description || undefined,
+                  }
+                : undefined
+            }
+            yearlyPackage={
+              yearlyPackage
+                ? {
+                    ...yearlyPackage,
+                    description: yearlyPackage.description || undefined,
+                  }
+                : undefined
+            }
+            isUpgrading={isUpgrading}
+            onUpgrade={handleUpgradeWithTerms}
+          />
+        </div>
       ) : (
         /* Has some form of subscription - show management */
         <PremiumBenefitsCard
@@ -165,6 +258,16 @@ export function SubscriptionSection() {
           userId={user?.id || ''}
         />
       )}
+
+      {/* Premium Service Terms Dialog */}
+      <CoachingServiceTerms
+        isOpen={showTermsDialog}
+        onClose={() => setShowTermsDialog(false)}
+        onAccept={() => setShowTermsDialog(false)}
+        serviceType="premium"
+        packages={[]}
+        readOnly={true}
+      />
     </div>
   )
 }

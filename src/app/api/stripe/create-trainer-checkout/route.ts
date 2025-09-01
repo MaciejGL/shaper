@@ -17,6 +17,7 @@ import {
   getPayoutDestination,
 } from '@/lib/stripe/revenue-sharing-utils'
 import { stripe } from '@/lib/stripe/stripe'
+import { recordTermsAgreement } from '@/lib/terms-utils'
 
 export async function POST(request: NextRequest) {
   try {
@@ -354,6 +355,15 @@ export async function POST(request: NextRequest) {
       where: { id: offer.id },
       data: { status: 'PROCESSING' },
     })
+
+    try {
+      await recordTermsAgreement({
+        userId: user.id,
+        offerId: offer.id,
+      })
+    } catch (error) {
+      console.error('Failed to record terms agreement:', error)
+    }
 
     const bundleDescription =
       checkoutItems.length === 1
