@@ -1,13 +1,18 @@
 /**
  * Complete Hypertro Mobile App with Push Notifications and Deep Linking
+ * Enhanced for bulletproof user switching
  * This component integrates all the functionality together
  */
 import Constants from 'expo-constants'
 import { StatusBar } from 'expo-status-bar'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { AppState, SafeAreaView, StyleSheet } from 'react-native'
 
 import { useThemeManager } from '../hooks/use-theme-manager'
+import {
+  resetForUserSwitch,
+  resetPushNotificationState,
+} from '../services/push-notifications'
 
 import { EnhancedWebView } from './enhanced-webview'
 import {
@@ -36,8 +41,35 @@ function HypertroAppContent({ authToken }: HypertroAppProps) {
       '📱 Received auth token from web app:',
       token.slice(0, 10) + '...',
     )
+
+    // Extract user ID for comparison (more robust than full token comparison)
+    const newUserId = token.split(':')[1] || token.slice(0, 50)
+    const currentUserId =
+      currentAuthToken?.split(':')[1] || currentAuthToken?.slice(0, 50)
+
+    // If this is a different user, reset push notification state
+    if (currentAuthToken && currentUserId !== newUserId) {
+      console.info(
+        '📱 Different user detected, resetting push notification state',
+      )
+      // Use enhanced reset function for user switching
+      resetForUserSwitch(token).catch((error) => {
+        console.warn('⚠️ Error during user switch reset:', error)
+        // Fallback to basic reset if enhanced reset fails
+        resetPushNotificationState()
+      })
+    }
+
     setCurrentAuthToken(token)
   }
+
+  // Reset push notification state when user logs out
+  useEffect(() => {
+    if (!currentAuthToken) {
+      console.info('📱 User logged out, resetting push notification state')
+      resetPushNotificationState()
+    }
+  }, [currentAuthToken])
 
   // Monitor app state changes to detect when user enables permissions externally
   useEffect(() => {

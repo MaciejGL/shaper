@@ -1,5 +1,5 @@
 /**
- * Mobile Push Notification Service
+ * Mobile Push Notification Service - Enhanced for User Switching
  * Integrates with the web app's existing push notification system
  */
 import Constants from 'expo-constants'
@@ -12,6 +12,13 @@ import { APP_CONFIG } from '../config/app-config'
 // Store current push token in memory
 let currentPushToken: string | null = null
 let isInitialized = false
+let currentUserId: string | null = null // Enhanced: Track current user
+
+// Helper to extract user ID from auth token
+function extractUserIdFromToken(authToken: string): string {
+  // Auth token format: "session:email:timestamp"
+  return authToken.split(':')[1] || authToken.slice(0, 50) // Fallback to first 50 chars
+}
 
 // Configure notification handling behavior
 Notifications.setNotificationHandler({
@@ -180,7 +187,7 @@ export async function setBadgeCount(count: number) {
 
 /**
  * Initialize push notifications system
- * Only call this when user is authenticated
+ * Enhanced to detect user switching and force re-initialization
  */
 export async function initializePushNotifications(
   authToken?: string,
@@ -197,10 +204,25 @@ export async function initializePushNotifications(
       return null
     }
 
-    // Check if already initialized (unless forced)
+    const newUserId = extractUserIdFromToken(authToken)
+
+    // Check if this is a different user
+    const isDifferentUser = currentUserId && currentUserId !== newUserId
+
+    if (isDifferentUser) {
+      console.info('📱 Different user detected, forcing re-initialization')
+      await resetForUserSwitch(authToken)
+      force = true // Force re-initialization for new user
+    } else {
+      currentUserId = newUserId
+    }
+
+    // Check if already initialized (unless forced or different user)
     if (isInitialized && !force && currentPushToken) {
       if (APP_CONFIG.IS_DEV) {
-        console.info('📱 Push notifications already initialized')
+        console.info(
+          '📱 Push notifications already initialized for current user',
+        )
       }
       return {
         token: currentPushToken,
@@ -208,7 +230,9 @@ export async function initializePushNotifications(
       }
     }
 
-    // Register for push notifications
+    console.info('📱 Initializing push notifications for user:', newUserId)
+
+    // Always register for push notifications (get fresh token)
     const token = await registerForPushNotifications()
 
     if (!token) {
@@ -216,20 +240,21 @@ export async function initializePushNotifications(
       return null
     }
 
-    // Only sync if token changed or forced
-    if (token !== currentPushToken || force) {
-      const synced = await syncPushTokenWithBackend(token, authToken)
+    // Always sync token for new users or when forced
+    const synced = await syncPushTokenWithBackend(token, authToken)
 
-      if (!synced) {
-        console.warn('⚠️ Could not sync push token with backend')
-        // Still return success as the token is valid, sync can be retried later
-      }
+    if (!synced) {
+      console.warn('⚠️ Could not sync push token with backend')
+      // Still return success as the token is valid, sync can be retried later
     }
 
     // Setup notification handlers (prevents duplicates internally)
     const cleanup = setupNotificationHandlers()
 
     isInitialized = true
+    currentUserId = newUserId
+
+    console.info('✅ Push notifications initialized for user:', newUserId)
 
     return {
       token,
@@ -273,11 +298,41 @@ export function getCurrentPushToken(): string | null {
 
 /**
  * Reset initialization state (for testing or when disabling notifications)
+ * Enhanced to handle user switching properly
  */
 export function resetPushNotificationState() {
+  console.info('📱 Resetting push notification state')
   isInitialized = false
   handlersSetup = false
   currentPushToken = null
+  currentUserId = null
+}
+
+/**
+ * Reset state for user switching - more aggressive cleanup
+ */
+export async function resetForUserSwitch(newAuthToken?: string) {
+  console.info('📱 Resetting push state for user switch')
+
+  // Disable previous user's token in backend if we have one
+  if (currentPushToken && currentUserId) {
+    try {
+      await updatePushNotificationPreferences(
+        false,
+        `session:${currentUserId}:0`,
+      )
+    } catch (error) {
+      console.warn('⚠️ Could not disable previous user token:', error)
+    }
+  }
+
+  // Reset all state
+  resetPushNotificationState()
+
+  // Update current user
+  if (newAuthToken) {
+    currentUserId = extractUserIdFromToken(newAuthToken)
+  }
 }
 
 /**

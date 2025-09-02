@@ -20,6 +20,7 @@ import { NotificationPreferences } from './notification-preferences'
 
 /**
  * Native Mobile App Push Notification Settings
+ * Enhanced for bulletproof permission handling
  * Only works in the native mobile app - prompts web users to download app
  */
 export function MobilePushSettings() {
@@ -43,12 +44,27 @@ export function MobilePushSettings() {
 
     setIsLoading(true)
     try {
-      await requestPushPermissions()
-      setNotifications({ pushNotifications: true })
-      // The mobile app will handle the success/error messaging
+      // Request permissions from mobile app (this will show the system dialog)
+      requestPushPermissions()
+
+      // Give user time to respond to permission dialog
+      await new Promise((resolve) => setTimeout(resolve, 3000))
+
+      // Check the actual permission status after user interaction
+      checkPushPermissions()
+
+      // Wait for status check to complete
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // Note: Don't optimistically update the state here!
+      // The actual permission status will be synced via mobile app bridge
+      // and the mobile app will show success/error alerts
+      toast.info(
+        'Permission request sent. The system will update your settings automatically.',
+      )
     } catch (error) {
-      console.error('Error enabling push notifications:', error)
-      toast.error('Failed to enable push notifications')
+      console.error('Error requesting push permissions:', error)
+      toast.error('Failed to request push permissions')
     } finally {
       setIsLoading(false)
     }
@@ -85,7 +101,7 @@ export function MobilePushSettings() {
       // Disable in mobile app (which updates backend)
       disablePushPermissions()
 
-      // Update local preferences
+      // Update local preferences only for disable (safer than enable)
       setNotifications({ pushNotifications: false })
 
       toast.success('Push notifications disabled successfully')
@@ -165,7 +181,9 @@ export function MobilePushSettings() {
                 className="gap-2"
               >
                 <Bell className="w-4 h-4" />
-                {isLoading ? 'Enabling...' : 'Enable Push Notifications'}
+                {isLoading
+                  ? 'Requesting Permission...'
+                  : 'Enable Push Notifications'}
               </Button>
             ) : (
               <Button
