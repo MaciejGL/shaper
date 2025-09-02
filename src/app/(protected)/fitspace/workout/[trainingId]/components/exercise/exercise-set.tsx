@@ -399,7 +399,11 @@ export function ExerciseSet({
                 size="sm"
               />
             ) : (
-              <div className="text-center text-sm">{repRange}</div>
+              <div className="text-center text-sm">
+                {set.log?.reps
+                  ? set.log.reps.toString()
+                  : repRange || (previousSetRepsLog?.toString() ?? '--')}
+              </div>
             )}
             {isAdvancedView ? (
               <ExerciseWeightInput
@@ -419,7 +423,13 @@ export function ExerciseSet({
               />
             ) : (
               <div className="text-center text-sm text-muted-foreground">
-                {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : '--'}
+                {set.log?.weight
+                  ? toDisplayWeight(set.log.weight)?.toFixed(1)
+                  : set.weight
+                    ? toDisplayWeight(set.weight)?.toFixed(1)
+                    : previousSetWeightLog
+                      ? toDisplayWeight(previousSetWeightLog)?.toFixed(1)
+                      : '--'}
               </div>
             )}
             <div className="flex justify-center">
