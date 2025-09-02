@@ -230,17 +230,17 @@ export function Summary({
             <div className="flex flex-col gap-4">
               <h2 className="text-lg font-semibold">Exercises Completed</h2>
               <div className="space-y-2 bg-card rounded-lg p-4 shadow-xs">
-                <div className="space-y-1">
+                <div>
                   {completedExercises.map((exercise, index) => (
                     <Fragment key={index}>
                       <div
                         key={index}
-                        className="flex items-center justify-between py-2"
+                        className="flex items-center justify-between py-1.5"
                       >
                         <div>
                           <p className="text-sm font-medium">{exercise.name}</p>
                           <p className="text-xs text-muted-foreground">
-                            {exercise.sets?.length || 0} sets completed
+                            {exercise.sets?.length || 0} sets
                           </p>
                         </div>
                         <CheckIcon className="h-4 w-4 text-green-500" />
@@ -269,6 +269,7 @@ export function Summary({
           <Button
             variant="default"
             className="flex-1"
+            size="lg"
             onClick={handleCompleteWorkout}
             loading={isMarkingWorkoutAsCompleted}
             iconStart={<CheckIcon />}

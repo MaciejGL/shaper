@@ -1,5 +1,5 @@
 import { NotebookPenIcon } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerTrigger } from '@/components/ui/drawer'
@@ -10,9 +10,10 @@ import { ExerciseNotebookProps } from './types'
 
 export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
   const notesCount = useExerciseNotesCount(exercise)
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <Drawer>
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
         <div className="flex items-center gap-1 relative">
           <Button
@@ -21,14 +22,14 @@ export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
             iconOnly={<NotebookPenIcon />}
           />
           {notesCount > 0 && (
-            <div className="text-xs absolute -top-1 -right-1 bg-amber-500/60 rounded-full size-4 shrink-0 flex items-center justify-center">
+            <div className="text-[10px] absolute -top-1.5 -right-1.5 bg-sky-500/60 rounded-full size-4 shrink-0 flex items-center justify-center">
               {notesCount}
             </div>
           )}
         </div>
       </DrawerTrigger>
 
-      <ExerciseNotes exercise={exercise} />
+      {isOpen && <ExerciseNotes exercise={exercise} />}
     </Drawer>
   )
 }

@@ -96,7 +96,7 @@ export function MobileNav() {
         <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = pathname === item.href && !pendingNavigation
+            const isActive = pathname.includes(item.href) && !pendingNavigation
             const isClicked =
               (clickedItem === item.label || pendingNavigation === item.href) &&
               !isActive

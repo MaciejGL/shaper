@@ -1,4 +1,4 @@
-import { BadgeCheckIcon } from 'lucide-react'
+import { CheckCheck } from 'lucide-react'
 import React from 'react'
 
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
@@ -50,7 +50,7 @@ export function Exercises() {
                 </p>
               )}
 
-            <Label className="flex items-center justify-center gap-2  whitespace-nowrap rounded-md p-1.5 bg-muted-foreground/10 dark:bg-muted-foreground/10 w-full">
+            <Label className="flex items-center justify-center gap-2  whitespace-nowrap rounded-md p-1.5 bg-secondary dark:bg-muted-foreground/10 w-full">
               <Switch
                 checked={preferences.trainingView === GQLTrainingView.Advanced}
                 onCheckedChange={() =>
@@ -98,10 +98,10 @@ function ExercisesCompleted({
   totalExercises: number
 }) {
   return (
-    <Badge variant="secondary" size="lg" className="w-full">
+    <Badge variant="secondary" size="lg" className="w-full bg-secondary">
       {completedExercises}/{totalExercises} completed{' '}
       {completedExercises === totalExercises ? (
-        <BadgeCheckIcon className="text-green-500" />
+        <CheckCheck className="text-emerald-600" />
       ) : (
         ''
       )}

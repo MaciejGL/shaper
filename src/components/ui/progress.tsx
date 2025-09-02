@@ -33,7 +33,7 @@ function Progress({
           'bg-green-400': fallbackValue >= 60,
           'bg-green-500': fallbackValue >= 70,
           'bg-green-600': fallbackValue >= 80,
-          'bg-green-700': fallbackValue >= 90,
+          'bg-green-600 dark:bg-green-700': fallbackValue >= 90,
         })}
         style={{
           transitionDuration: `${duration}ms`,

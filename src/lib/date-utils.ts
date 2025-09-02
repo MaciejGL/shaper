@@ -317,3 +317,32 @@ export function translateDayOfWeekToTemplate(
     return (userDayOfWeek + 1) % 7 // Shift forward by 1 to get back to template format
   }
 }
+
+/**
+ * Format a week date range in compact format
+ * Examples: "1. - 7. Sep", "30 Jan - 5. Feb"
+ * @param date - Start date of the week
+ * @param weekStartsOn - Week start preference (0 = Sunday, 1 = Monday)
+ * @returns Formatted week range string
+ */
+export function formatWeekRange(
+  date: Date | string,
+  weekStartsOn: WeekStartDay = DEFAULT_WEEK_START,
+): string {
+  const startDate = typeof date === 'string' ? parseISO(date) : date
+  const weekStart = startOfWeek(startDate, { weekStartsOn })
+  const weekEnd = endOfWeek(startDate, { weekStartsOn })
+
+  const startDay = format(weekStart, 'd')
+  const endDay = format(weekEnd, 'd')
+  const startMonth = format(weekStart, 'MMM')
+  const endMonth = format(weekEnd, 'MMM')
+
+  // If start and end are in the same month
+  if (startMonth === endMonth) {
+    return `${startDay} - ${endDay} ${startMonth}`
+  }
+
+  // If start and end are in different months
+  return `${startDay} ${startMonth} - ${endDay} ${endMonth}`
+}

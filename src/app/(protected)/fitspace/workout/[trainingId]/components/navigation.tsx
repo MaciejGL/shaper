@@ -15,7 +15,7 @@ import {
 import { useUserPreferences } from '@/context/user-preferences-context'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import { useTrackWorkoutSession } from '@/hooks/use-track-workout-session'
-import { isThisWeek, sortDaysForDisplay } from '@/lib/date-utils'
+import { formatWeekRange, sortDaysForDisplay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 import { WorkoutDay } from './workout-page.client'
@@ -173,28 +173,31 @@ function WeekSelector() {
         <SelectTrigger
           size="sm"
           variant="tertiary"
-          className="[&_svg]:data-[icon=mark]:size-3.5 truncate"
+          className="[&_svg]:data-[icon=mark]:size-3.5 truncate text-sm font-medium flex items-center gap-2 w-full"
         >
           <SelectValue
             defaultValue={activeWeek?.id}
             placeholder="Select a workout"
-            className=""
           />
         </SelectTrigger>
         <SelectContent>
           {weeks.map((week) => (
             <SelectItem key={week.id} value={week.id}>
-              {week.name}
+              {week.name}{' '}
               {week.completedAt ? (
                 <BadgeCheckIcon
                   data-icon="mark"
                   className="text-green-500 size-3"
                 />
-              ) : week.scheduledAt &&
-                isThisWeek(week.scheduledAt, preferences.weekStartsOn) ? (
-                ' - current'
               ) : (
-                ''
+                week.scheduledAt && (
+                  <span className="text-muted-foreground text-xs ml-2">
+                    {formatWeekRange(
+                      week.scheduledAt,
+                      preferences.weekStartsOn,
+                    )}
+                  </span>
+                )
               )}
             </SelectItem>
           ))}
