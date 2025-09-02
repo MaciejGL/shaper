@@ -3,110 +3,14 @@
 import * as React from 'react'
 import { Drawer as DrawerPrimitive } from 'vaul'
 
-import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
 
 function Drawer({
-  open,
-  onOpenChange,
-  onClose,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root> & {
   onClose?: () => void
 }) {
-  const isMobile = useIsMobile()
-  const historyPushedRef = React.useRef(false)
-  const isClosingFromPopstateRef = React.useRef(false)
-  const closeTimeoutRef = React.useRef<NodeJS.Timeout | number | null>(null)
-
-  // Create a unified close handler that works with both onOpenChange and onClose patterns
-  const handleDrawerClose = React.useCallback(() => {
-    if (onOpenChange) {
-      onOpenChange(false)
-    } else if (onClose) {
-      onClose()
-    }
-  }, [onOpenChange, onClose])
-
-  // Handle back button behavior on mobile
-  React.useEffect(() => {
-    if (!isMobile) return
-    const handlePopstate = () => {
-      // If drawer is open when popstate fires, close it with animation delay
-      if (open && historyPushedRef.current) {
-        // Prevent default navigation by pushing state back
-        window.history.pushState({ drawerOpen: true }, '')
-
-        // Mark as closing from popstate to prevent cleanup interference
-        isClosingFromPopstateRef.current = true
-
-        // Start closing animation
-        handleDrawerClose()
-
-        // After animation completes, go back in history
-        closeTimeoutRef.current = setTimeout(() => {
-          if (historyPushedRef.current) {
-            historyPushedRef.current = false
-            isClosingFromPopstateRef.current = false
-            window.history.back()
-          }
-          closeTimeoutRef.current = null
-        }, 200) // Allow 200ms for closing animation
-      }
-    }
-
-    if (open && !historyPushedRef.current) {
-      // Push history state when drawer opens
-      window.history.pushState({ drawerOpen: true }, '')
-      historyPushedRef.current = true
-
-      // Add popstate listener
-      window.addEventListener('popstate', handlePopstate)
-    }
-
-    return () => {
-      window.removeEventListener('popstate', handlePopstate)
-      // Clear any pending timeout
-      if (closeTimeoutRef.current) {
-        clearTimeout(closeTimeoutRef.current)
-        closeTimeoutRef.current = null
-      }
-    }
-  }, [isMobile, open, handleDrawerClose])
-
-  // Reset tracking when drawer closes
-  React.useEffect(() => {
-    if (
-      !open &&
-      historyPushedRef.current &&
-      !isClosingFromPopstateRef.current
-    ) {
-      // Reset refs when drawer closes normally (not from back button)
-      historyPushedRef.current = false
-      isClosingFromPopstateRef.current = false
-
-      // Clear any pending timeout
-      if (closeTimeoutRef.current) {
-        clearTimeout(closeTimeoutRef.current)
-        closeTimeoutRef.current = null
-      }
-    }
-  }, [open])
-
-  return (
-    <DrawerPrimitive.Root
-      data-slot="drawer"
-      open={open}
-      onOpenChange={(newOpen) => {
-        if (!newOpen) {
-          handleDrawerClose()
-        } else if (onOpenChange) {
-          onOpenChange(newOpen)
-        }
-      }}
-      {...props}
-    />
-  )
+  return <DrawerPrimitive.Root data-slot="drawer" {...props} />
 }
 
 function DrawerTrigger({
@@ -161,7 +65,7 @@ function DrawerContent({
         className={cn(
           'group/drawer-content bg-sidebar fixed z-50 flex flex-col h-auto',
           'data-[vaul-drawer-direction=top]:inset-x-0 data-[vaul-drawer-direction=top]:top-0 data-[vaul-drawer-direction=top]:mb-24 data-[vaul-drawer-direction=top]:max-h-[80vh] data-[vaul-drawer-direction=top]:rounded-b-lg data-[vaul-drawer-direction=top]:border-b',
-          'data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[95vh] data-[vaul-drawer-direction=bottom]:rounded-t-2xl',
+          'data-[vaul-drawer-direction=bottom]:inset-x-0 data-[vaul-drawer-direction=bottom]:bottom-0 data-[vaul-drawer-direction=bottom]:mt-24 data-[vaul-drawer-direction=bottom]:max-h-[calc(95dvh-var(--safe-area-inset-bottom,0px)-var(--safe-area-inset-top,0px))] data-[vaul-drawer-direction=bottom]:rounded-t-2xl',
           'data-[vaul-drawer-direction=right]:inset-y-0 data-[vaul-drawer-direction=right]:right-0 data-[vaul-drawer-direction=right]:w-3/4 data-[vaul-drawer-direction=right]:border-l data-[vaul-drawer-direction=right]:sm:max-w-sm',
           'data-[vaul-drawer-direction=left]:inset-y-0 data-[vaul-drawer-direction=left]:left-0 data-[vaul-drawer-direction=left]:w-3/4 data-[vaul-drawer-direction=left]:border-r data-[vaul-drawer-direction=left]:sm:max-w-sm focus-visible:outline-none',
           className,
