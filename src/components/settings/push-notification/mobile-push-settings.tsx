@@ -1,6 +1,7 @@
 'use client'
 
-import { Bell, BellOff, Settings } from 'lucide-react'
+import { useQueryClient } from '@tanstack/react-query'
+import { Bell, BellOff } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -15,6 +16,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { useUserPreferences } from '@/context/user-preferences-context'
+import { useProfileQuery } from '@/generated/graphql-client'
 
 import { NotificationPreferences } from './notification-preferences'
 
@@ -33,8 +35,17 @@ export function MobilePushSettings() {
     capabilities,
   } = useMobileApp()
   const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingStatus, setIsCheckingStatus] = useState(false)
+  const queryClient = useQueryClient()
 
   const pushEnabled = preferences.notifications?.pushNotifications ?? false
+
+  // Function to invalidate profile query and force refresh
+  const invalidateProfile = async () => {
+    await queryClient.invalidateQueries({
+      queryKey: useProfileQuery.getKey(),
+    })
+  }
 
   const handleEnablePushNotifications = async () => {
     if (!isNativeApp) {
@@ -53,14 +64,14 @@ export function MobilePushSettings() {
       // Check the actual permission status after user interaction
       checkPushPermissions()
 
-      // Wait for status check to complete
+      // Wait for initial status check to complete
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
-      // Note: Don't optimistically update the state here!
-      // The actual permission status will be synced via mobile app bridge
-      // and the mobile app will show success/error alerts
-      toast.info(
-        'Permission request sent. The system will update your settings automatically.',
+      // Start checking for status updates with exponential backoff
+      await checkPermissionStatusWithRetry()
+
+      toast.success(
+        'Permission check complete. Your settings have been updated if permissions were granted.',
       )
     } catch (error) {
       console.error('Error requesting push permissions:', error)
@@ -70,22 +81,42 @@ export function MobilePushSettings() {
     }
   }
 
-  const handleCheckPermissions = async () => {
-    if (!isNativeApp) {
-      toast.error('Permission check is only available in the mobile app')
-      return
+  // Enhanced permission status checking with retry mechanism
+  const checkPermissionStatusWithRetry = async (maxRetries = 3) => {
+    setIsCheckingStatus(true)
+    let attempts = 0
+    const baseDelay = 2000 // Start with 2 seconds
+
+    while (attempts < maxRetries) {
+      try {
+        // Force check permissions in mobile app
+        checkPushPermissions()
+
+        // Wait for mobile app to sync with backend
+        await new Promise((resolve) => setTimeout(resolve, baseDelay))
+
+        // Force refresh the profile data from server
+        await invalidateProfile()
+
+        // Wait a bit more for the query to complete
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        attempts++
+
+        // If this isn't the last attempt, add exponential backoff delay
+        if (attempts < maxRetries) {
+          const delayMultiplier = Math.pow(2, attempts) // 2^attempt
+          await new Promise((resolve) =>
+            setTimeout(resolve, baseDelay * delayMultiplier),
+          )
+        }
+      } catch (error) {
+        console.error(`Permission check attempt ${attempts + 1} failed:`, error)
+        attempts++
+      }
     }
 
-    setIsLoading(true)
-    try {
-      await checkPushPermissions()
-      toast.success('Checking permissions status...')
-    } catch (error) {
-      console.error('Error checking permissions:', error)
-      toast.error('Failed to check permissions')
-    } finally {
-      setIsLoading(false)
-    }
+    setIsCheckingStatus(false)
   }
 
   const handleDisablePushNotifications = async () => {
@@ -98,15 +129,23 @@ export function MobilePushSettings() {
 
     setIsLoading(true)
     try {
+      // Optimistically update UI immediately
+      setNotifications({ pushNotifications: false })
+
       // Disable in mobile app (which updates backend)
       disablePushPermissions()
 
-      // Update local preferences only for disable (safer than enable)
-      setNotifications({ pushNotifications: false })
+      // Wait for backend sync
+      await new Promise((resolve) => setTimeout(resolve, 1500))
+
+      // Force refresh profile data to ensure consistency
+      await invalidateProfile()
 
       toast.success('Push notifications disabled successfully')
     } catch (error) {
       console.error('Error disabling push notifications:', error)
+      // Revert optimistic update on error
+      await invalidateProfile()
       toast.error('Failed to disable push notifications')
     } finally {
       setIsLoading(false)
@@ -116,6 +155,8 @@ export function MobilePushSettings() {
   if (!isNativeApp) {
     return <MobileAppBanner />
   }
+
+  console.log('isNativeApp', isNativeApp, pushEnabled)
 
   // Native app interface
   return (
@@ -177,42 +218,59 @@ export function MobilePushSettings() {
             {!pushEnabled ? (
               <Button
                 onClick={handleEnablePushNotifications}
-                disabled={isLoading || !capabilities.canRequestPushPermissions}
+                disabled={
+                  isLoading ||
+                  isCheckingStatus ||
+                  !capabilities.canRequestPushPermissions
+                }
                 className="gap-2"
               >
                 <Bell className="w-4 h-4" />
                 {isLoading
                   ? 'Requesting Permission...'
-                  : 'Enable Push Notifications'}
+                  : isCheckingStatus
+                    ? 'Checking Status...'
+                    : 'Enable Push Notifications'}
               </Button>
             ) : (
               <Button
                 variant="outline"
                 onClick={handleDisablePushNotifications}
-                disabled={isLoading || !capabilities.canDisablePushPermissions}
+                disabled={
+                  isLoading ||
+                  isCheckingStatus ||
+                  !capabilities.canDisablePushPermissions
+                }
                 className="gap-2"
               >
                 <BellOff className="w-4 h-4" />
                 {isLoading ? 'Disabling...' : 'Disable Notifications'}
               </Button>
             )}
-
-            <Button
-              variant="outline"
-              onClick={handleCheckPermissions}
-              disabled={isLoading || !capabilities.canCheckPushPermissions}
-              className="gap-2"
-            >
-              <Settings className="w-4 h-4" />
-              {isLoading ? 'Checking...' : 'Check Status'}
-            </Button>
           </div>
+
+          {/* Status checking indicator */}
+          {isCheckingStatus && (
+            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                <div className="flex flex-col gap-1">
+                  <p className="text-sm font-medium text-blue-900">
+                    Syncing notification status...
+                  </p>
+                  <p className="text-xs text-blue-700">
+                    Checking with your device settings and updating preferences.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="text-xs text-muted-foreground">
             <p>
               <strong>Tip:</strong> If you previously denied notifications, you
-              may need to enable them in your device settings. Use "Check
-              Status" to detect when you've enabled them externally.
+              may need to enable them in your device settings. The app will
+              automatically detect when you've enabled them.
             </p>
           </div>
         </CardContent>

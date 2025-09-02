@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
           platform,
           deviceInfo: deviceInfo ? JSON.stringify(deviceInfo) : null,
           lastActiveAt: new Date(),
+          pushNotificationsEnabled: true, // Re-enable when token is re-registered
         },
       })
     } else {
@@ -62,6 +63,29 @@ export async function POST(request: NextRequest) {
           lastActiveAt: new Date(),
         },
       })
+    }
+
+    // CRITICAL: Also update the user's profile notification preferences
+    // This ensures the web UI shows the correct state
+    if (userId) {
+      try {
+        await prisma.userProfile.update({
+          where: { userId },
+          data: {
+            pushNotifications: true, // Enable push notifications in profile
+          },
+        })
+        console.info(
+          `📱 Updated profile push notifications preference for user ${userId}`,
+        )
+      } catch (profileError) {
+        console.error(
+          `❌ Failed to update profile preferences for user ${userId}:`,
+          profileError,
+        )
+        // Don't fail the entire request if profile update fails
+        // The push token is still registered successfully
+      }
     }
 
     console.info(
@@ -132,6 +156,7 @@ export async function PATCH(request: NextRequest) {
       )
     }
 
+    // Update push token table
     await prisma.mobilePushToken.updateMany({
       where: {
         expoPushToken,
@@ -143,7 +168,26 @@ export async function PATCH(request: NextRequest) {
       },
     })
 
-    console.info(`📱 Updated push preferences for user ${currentUser.user.id}`)
+    // CRITICAL: Also update the user's profile notification preferences
+    // This ensures the web UI shows the correct state
+    try {
+      await prisma.userProfile.update({
+        where: { userId: currentUser.user.id },
+        data: {
+          pushNotifications: pushNotificationsEnabled ?? true,
+        },
+      })
+      console.info(
+        `📱 Updated push preferences for user ${currentUser.user.id} (both token and profile)`,
+      )
+    } catch (profileError) {
+      console.error(
+        `❌ Failed to update profile preferences for user ${currentUser.user.id}:`,
+        profileError,
+      )
+      // Don't fail the entire request if profile update fails
+      // The push token preference is still updated successfully
+    }
 
     return NextResponse.json({
       success: true,

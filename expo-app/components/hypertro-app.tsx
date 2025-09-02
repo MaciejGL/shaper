@@ -32,7 +32,7 @@ interface HypertroAppProps {
 function HypertroAppContent({ authToken }: HypertroAppProps) {
   const { webViewRef } = useWebViewNavigation()
   const { handleWebThemeChange, colors } = useThemeManager()
-  const [currentAuthToken, setCurrentAuthToken] = React.useState(authToken)
+  const [currentAuthToken, setCurrentAuthToken] = useState(authToken)
   const { requestPermissions, checkAndSyncPermissions, disableNotifications } =
     useRequestPushPermissions(currentAuthToken)
 
