@@ -2324,12 +2324,14 @@ export enum GQLTaskType {
 export type GQLTeam = {
   __typename?: 'Team';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  hasStripeConnect: EntireFieldWrapper<Scalars['Boolean']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   isAdmin: EntireFieldWrapper<Scalars['Boolean']['output']>;
   locations: EntireFieldWrapper<Array<GQLLocation>>;
   memberCount: EntireFieldWrapper<Scalars['Int']['output']>;
   members: EntireFieldWrapper<Array<GQLTeamMember>>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
+  stripeConnectedAccountId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
@@ -4171,12 +4173,14 @@ export type GQLSuggestedSetsResolvers<ContextType = GQLContext, ParentType exten
 
 export type GQLTeamResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Team'] = GQLResolversParentTypes['Team']> = {
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  hasStripeConnect?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   isAdmin?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   locations?: Resolver<Array<GQLResolversTypes['Location']>, ParentType, ContextType>;
   memberCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   members?: Resolver<Array<GQLResolversTypes['TeamMember']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  stripeConnectedAccountId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

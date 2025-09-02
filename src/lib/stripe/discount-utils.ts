@@ -1,14 +1,10 @@
+import Stripe from 'stripe'
+
 import { GQLServiceType } from '@/generated/graphql-client'
 
 import { getStripePricingInfo } from './pricing-utils'
-
-interface PackageWithDiscount {
-  id: string
-  name: string
-  stripePriceId: string | null
-  metadata: Record<string, unknown> | null
-  serviceType?: string | null
-}
+import { stripe } from './stripe'
+import { CheckoutItem, PackageWithDiscount } from './types'
 
 /**
  * Finds the in-person discount percentage from packages in a bundle
@@ -74,7 +70,7 @@ export async function createDiscountedLineItem(
   pkg: PackageWithDiscount,
   quantity: number,
   discountedAmount: number,
-) {
+): Promise<Stripe.Checkout.SessionCreateParams.LineItem> {
   if (!pkg.stripePriceId) {
     throw new Error(`Package ${pkg.name} does not have a valid Stripe price ID`)
   }
@@ -123,4 +119,98 @@ export function mapServiceType(
   }
 
   return mapping[serviceType] || null
+}
+
+/**
+ * Finds packages that are in-person sessions from checkout items
+ */
+export function findInPersonPackages(
+  checkoutItems: CheckoutItem[],
+): CheckoutItem[] {
+  return checkoutItems.filter((item) => {
+    const metadata = (item.package.metadata as Record<string, unknown>) || {}
+    return metadata.service_type === 'in_person_meeting'
+  })
+}
+
+/**
+ * Gets Stripe product IDs from price IDs
+ */
+export async function getProductIdsFromPrices(
+  priceIds: (string | null | undefined)[],
+): Promise<string[]> {
+  const productIds: string[] = []
+
+  for (const priceId of priceIds) {
+    if (priceId) {
+      try {
+        const price = await stripe.prices.retrieve(priceId)
+        if (typeof price.product === 'string') {
+          productIds.push(price.product)
+        }
+      } catch (error) {
+        console.warn(`Failed to retrieve product for price ${priceId}:`, error)
+      }
+    }
+  }
+
+  return productIds
+}
+
+/**
+ * Creates a coupon for 50% discount on in-person sessions when coaching combo is present
+ */
+export async function createInPersonCoachingComboCoupon(
+  productIds: string[],
+  offerToken: string,
+): Promise<Stripe.Coupon> {
+  return await stripe.coupons.create({
+    percent_off: 50,
+    duration: 'once',
+    name: 'In-Person Sessions 50% Off',
+    applies_to: {
+      products: productIds,
+    },
+    metadata: {
+      source: 'trainer_offer',
+      discountType: 'in_person_coaching_combo',
+      offerToken,
+    },
+  })
+}
+
+/**
+ * Creates discount coupon for in-person sessions if coaching combo is present
+ */
+export async function createInPersonDiscountIfEligible(
+  checkoutItems: CheckoutItem[],
+  hasCoachingCombo: boolean,
+  offerToken: string,
+): Promise<{ coupon: string } | null> {
+  if (!hasCoachingCombo) {
+    return null
+  }
+
+  // Find in-person session packages
+  const inPersonPackages = findInPersonPackages(checkoutItems)
+
+  if (inPersonPackages.length === 0) {
+    return null
+  }
+
+  // Get product IDs from price IDs
+  const priceIds = inPersonPackages
+    .map((pkg) => pkg.package.stripePriceId)
+    .filter(Boolean)
+
+  const productIds = await getProductIdsFromPrices(priceIds)
+
+  if (productIds.length === 0) {
+    return null
+  }
+
+  // Create the coupon
+  const coupon = await createInPersonCoachingComboCoupon(productIds, offerToken)
+
+  return { coupon: coupon.id }
 }

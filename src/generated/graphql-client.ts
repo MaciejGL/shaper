@@ -2322,12 +2322,14 @@ export enum GQLTaskType {
 export type GQLTeam = {
   __typename?: 'Team';
   createdAt: Scalars['String']['output'];
+  hasStripeConnect: Scalars['Boolean']['output'];
   id: Scalars['ID']['output'];
   isAdmin: Scalars['Boolean']['output'];
   locations: Array<GQLLocation>;
   memberCount: Scalars['Int']['output'];
   members: Array<GQLTeamMember>;
   name: Scalars['String']['output'];
+  stripeConnectedAccountId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
 
@@ -3648,7 +3650,7 @@ export type GQLUpdateMealPlanDetailsMutation = { __typename?: 'Mutation', update
 export type GQLMyTeamsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLMyTeamsQuery = { __typename?: 'Query', myTeams: Array<{ __typename?: 'Team', id: string, name: string, memberCount: number, isAdmin: boolean, createdAt: string, updatedAt: string, locations: Array<{ __typename?: 'Location', id: string, city: string, country: string, countryCode: string }>, members: Array<{ __typename?: 'TeamMember', id: string, role: GQLTeamRole, joinedAt: string, user: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, image?: string | undefined | null } }> }> };
+export type GQLMyTeamsQuery = { __typename?: 'Query', myTeams: Array<{ __typename?: 'Team', id: string, name: string, memberCount: number, isAdmin: boolean, createdAt: string, updatedAt: string, hasStripeConnect: boolean, stripeConnectedAccountId?: string | undefined | null, locations: Array<{ __typename?: 'Location', id: string, city: string, country: string, countryCode: string }>, members: Array<{ __typename?: 'TeamMember', id: string, role: GQLTeamRole, joinedAt: string, user: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, image?: string | undefined | null } }> }> };
 
 export type GQLTeamInvitationsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -9270,6 +9272,8 @@ export const MyTeamsDocument = `
     isAdmin
     createdAt
     updatedAt
+    hasStripeConnect
+    stripeConnectedAccountId
     locations {
       id
       city

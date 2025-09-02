@@ -17,6 +17,18 @@ export async function recordTermsAgreement({
   const version = getCurrentTermsVersion()
 
   try {
+    const existingAgreement = await prisma.userTermsAgreement.findFirst({
+      where: {
+        userId,
+        version,
+        offerId,
+      },
+    })
+
+    if (existingAgreement) {
+      return existingAgreement
+    }
+
     const agreement = await prisma.userTermsAgreement.create({
       data: {
         userId,

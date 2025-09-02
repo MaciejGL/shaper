@@ -5,6 +5,8 @@ type Team {
   memberCount: Int!
   members: [TeamMember!]!
   isAdmin: Boolean!
+  stripeConnectedAccountId: String
+  hasStripeConnect: Boolean!
   createdAt: String!
   updatedAt: String!
 }

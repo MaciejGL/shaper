@@ -27,6 +27,7 @@ import { GQLMyTeamsQuery } from '@/generated/graphql-client'
 import { EditTeamNameModal } from './edit-team-name-modal'
 import { InviteMemberModal } from './invite-member-modal'
 import { ManageMembersModal } from './manage-members-modal'
+import { TeamStripeConnect } from './team-stripe-connect'
 
 interface TeamDetailsProps {
   team: GQLMyTeamsQuery['myTeams'][number]
@@ -181,6 +182,8 @@ export function TeamDetails({ team }: TeamDetailsProps) {
               ))}
             </div>
           </div>
+          {/* Stripe Connect Setup - Only for Admins */}
+          <TeamStripeConnect team={team} />
         </CardContent>
       </Card>
 

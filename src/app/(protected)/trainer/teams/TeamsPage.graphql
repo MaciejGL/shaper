@@ -6,6 +6,8 @@ query MyTeams {
     isAdmin
     createdAt
     updatedAt
+    hasStripeConnect
+    stripeConnectedAccountId
     locations {
       id
       city

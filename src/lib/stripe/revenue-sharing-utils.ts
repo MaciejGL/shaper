@@ -1,6 +1,7 @@
 import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
+import { COMMISSION_CONFIG } from '@/lib/stripe/config'
 import { stripe } from '@/lib/stripe/stripe'
 
 // Types for revenue sharing
@@ -14,6 +15,7 @@ export type RevenueCalculation = {
   totalAmount: number
   applicationFeeAmount: number
   trainerPayoutAmount: number
+  stripeFeeAmount: number // Stripe fees (deducted from trainer payout)
 }
 
 /**
@@ -67,7 +69,7 @@ export async function getPayoutDestination(
 }
 
 /**
- * Calculates revenue split amounts (10% platform / 90% trainer)
+ * Calculates revenue split amounts (10% platform fee, 90% trainer minus Stripe fees)
  */
 export async function calculateRevenueSharing(
   lineItems: Stripe.Checkout.SessionCreateParams.LineItem[],
@@ -86,13 +88,26 @@ export async function calculateRevenueSharing(
     }
   }
 
-  const applicationFeeAmount = Math.round(totalAmount * 0.1) // 10% platform fee
-  const trainerPayoutAmount = totalAmount - applicationFeeAmount // 90% to trainer/team
+  // Calculate platform fee (10% of total)
+  const applicationFeeAmount = Math.round(
+    totalAmount * (COMMISSION_CONFIG.PLATFORM_PERCENTAGE / 100),
+  )
+
+  // Calculate Stripe fees (trainer pays these)
+  const stripeFeePercentage =
+    totalAmount * (COMMISSION_CONFIG.STRIPE_FEES.DEFAULT_PERCENTAGE / 100)
+  const stripeFeeFixed = COMMISSION_CONFIG.STRIPE_FEES.DEFAULT_FIXED_FEE
+  const stripeFeeAmount = Math.round(stripeFeePercentage + stripeFeeFixed)
+
+  // Trainer gets: Total - Platform fee - Stripe fees
+  const trainerPayoutAmount =
+    totalAmount - applicationFeeAmount - stripeFeeAmount
 
   return {
     totalAmount,
-    applicationFeeAmount,
-    trainerPayoutAmount,
+    applicationFeeAmount, // Platform keeps full 10%
+    trainerPayoutAmount, // Trainer gets remainder after platform fee and Stripe fees
+    stripeFeeAmount, // Track Stripe fees for transparency
   }
 }
 
@@ -118,6 +133,7 @@ export function createPaymentIntentData(
       trainerId,
       platformFeeAmount: revenue.applicationFeeAmount.toString(),
       trainerPayoutAmount: revenue.trainerPayoutAmount.toString(),
+      stripeFeeAmount: revenue.stripeFeeAmount.toString(),
       revenueShareApplied: 'true',
       payoutDestination: payout.displayName,
     },

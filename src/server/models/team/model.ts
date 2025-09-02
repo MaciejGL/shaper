@@ -126,6 +126,14 @@ export default class Team implements GQLTeam {
     )
   }
 
+  get stripeConnectedAccountId() {
+    return this.data.stripeConnectedAccountId || null
+  }
+
+  get hasStripeConnect() {
+    return !!this.data.stripeConnectedAccountId
+  }
+
   get createdAt() {
     return this.data.createdAt.toISOString()
   }

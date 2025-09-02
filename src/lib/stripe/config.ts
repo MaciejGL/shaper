@@ -71,10 +71,27 @@ export const STRIPE_PRODUCTS = {
   IN_PERSON_SESSION: process.env.STRIPE_PRICE_IN_PERSON_SESSION,
 } as const
 
-// Commission Configuration: Trainers get 90%, Platform takes 10%
+// Commission Configuration: Trainers get 90% minus Stripe fees, Platform takes 10%
 export const COMMISSION_CONFIG = {
   PLATFORM_PERCENTAGE: 10, // Platform commission percentage
-  TRAINER_PERCENTAGE: 90, // Trainer payout percentage
+  TRAINER_PERCENTAGE: 90, // Trainer base percentage (before Stripe fees)
+
+  // Stripe fee configuration (trainers cover these)
+  STRIPE_FEES: {
+    // European card rates (for Norway/EU customers)
+    EU_PERCENTAGE: 1.4, // 1.4% processing fee for European cards
+    EU_FIXED_FEE_NOK: 25, // 25 øre fixed fee (in øre)
+    EU_FIXED_FEE_EUR: 2, // 2 cents fixed fee (in cents)
+
+    // International card rates (for other customers)
+    INTL_PERCENTAGE: 2.9, // 2.9% processing fee for international cards
+    INTL_FIXED_FEE_USD: 30, // 30 cents fixed fee (in cents)
+    INTL_FIXED_FEE_NOK: 300, // ~30 cents in øre
+
+    // Default to EU rates for Norway-based business
+    DEFAULT_PERCENTAGE: 1.4,
+    DEFAULT_FIXED_FEE: 25, // in smallest currency unit (øre for NOK, cents for USD/EUR)
+  },
 
   // Product-specific commission settings (if needed for different rates)
   PRODUCT_COMMISSION: {

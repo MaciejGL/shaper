@@ -15,8 +15,10 @@ const cardVariants = cva(
         tertiary: 'border-0 shadow-xs bg-zinc-300 dark:bg-gray-600/50',
         gradient:
           'border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-white via-white to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800',
-        premium:
-          'bg-gradient-to-br from-amber-400 via-amber-400 to-amber-600 border-0 shadow-sm dark:from-amber-500 dark:via-amber-500 dark:to-amber-600 text-primary-foreground [&_svg]:text-primary-foreground',
+        premium: cn(
+          'bg-gradient-to-br border-0 shadow-sm text-primary-foreground [&_svg]:text-primary-foreground',
+          'border-zinc-200 dark:border-amber-500 bg-gradient-to-br from-white via-white to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800',
+        ),
       },
     },
     defaultVariants: {

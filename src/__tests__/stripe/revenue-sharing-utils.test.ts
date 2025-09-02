@@ -133,7 +133,7 @@ describe('Revenue Sharing Utils', () => {
   })
 
   describe('calculateRevenueSharing', () => {
-    it('should calculate 10%/90% split for dynamic pricing', async () => {
+    it('should calculate 10% platform fee, minus Stripe fees for trainer', async () => {
       // Arrange
       const lineItems = [
         createLineItem({ price_data: { unit_amount: 10000 }, quantity: 1 }), // $100
@@ -143,11 +143,12 @@ describe('Revenue Sharing Utils', () => {
       // Act
       const result = await calculateRevenueSharing(lineItems)
 
-      // Assert
+      // Assert - $200 total, $20 platform (10%), $30.5 Stripe fees (1.4% + 25¢), $149.5 trainer
       expect(result).toEqual({
         totalAmount: 20000, // $200 total
-        applicationFeeAmount: 2000, // $20 (10%)
-        trainerPayoutAmount: 18000, // $180 (90%)
+        applicationFeeAmount: 2000, // $20 (10% platform fee)
+        stripeFeeAmount: 305, // $3.05 (1.4% + 25¢ Stripe fees)
+        trainerPayoutAmount: 17695, // $176.95 (remainder after platform fee + Stripe fees)
       })
     })
 
@@ -164,11 +165,12 @@ describe('Revenue Sharing Utils', () => {
       // Act
       const result = await calculateRevenueSharing(lineItems)
 
-      // Assert
+      // Assert - $150 total, $15 platform (10%), $2.35 Stripe fees (1.4% + 25¢), $132.65 trainer
       expect(result).toEqual({
         totalAmount: 15000, // $150
-        applicationFeeAmount: 1500, // $15 (10%)
-        trainerPayoutAmount: 13500, // $135 (90%)
+        applicationFeeAmount: 1500, // $15 (10% platform fee)
+        stripeFeeAmount: 235, // $2.35 (1.4% + 25¢ Stripe fees)
+        trainerPayoutAmount: 13265, // $132.65 (remainder)
       })
       expect(mockStripe.stripe.prices.retrieve).toHaveBeenCalledWith(
         'price_test123',
@@ -191,11 +193,12 @@ describe('Revenue Sharing Utils', () => {
       // Act
       const result = await calculateRevenueSharing(lineItems)
 
-      // Assert
+      // Assert - $180 total, $18 platform (10%), $2.77 Stripe fees (1.4% + 25¢), $159.23 trainer
       expect(result).toEqual({
         totalAmount: 18000, // $180 total
-        applicationFeeAmount: 1800, // $18 (10%)
-        trainerPayoutAmount: 16200, // $162 (90%)
+        applicationFeeAmount: 1800, // $18 (10% platform fee)
+        stripeFeeAmount: 277, // $2.77 (1.4% + 25¢ Stripe fees)
+        trainerPayoutAmount: 15923, // $159.23 (remainder)
       })
     })
 
@@ -210,7 +213,8 @@ describe('Revenue Sharing Utils', () => {
       expect(result).toEqual({
         totalAmount: 0,
         applicationFeeAmount: 0,
-        trainerPayoutAmount: 0,
+        stripeFeeAmount: 25, // Fixed fee still applies (25 øre minimum)
+        trainerPayoutAmount: -25, // Negative because only fixed fee applies
       })
     })
   })
@@ -226,7 +230,8 @@ describe('Revenue Sharing Utils', () => {
       const revenue: RevenueCalculation = {
         totalAmount: 10000,
         applicationFeeAmount: 1000,
-        trainerPayoutAmount: 9000,
+        trainerPayoutAmount: 8800,
+        stripeFeeAmount: 200,
       }
       const trainerId = 'trainer-123'
 
@@ -243,7 +248,8 @@ describe('Revenue Sharing Utils', () => {
         metadata: {
           trainerId: 'trainer-123',
           platformFeeAmount: '1000',
-          trainerPayoutAmount: '9000',
+          trainerPayoutAmount: '8800',
+          stripeFeeAmount: '200',
           revenueShareApplied: 'true',
           payoutDestination: 'team:Awesome Team',
         },
@@ -260,7 +266,8 @@ describe('Revenue Sharing Utils', () => {
       const revenue: RevenueCalculation = {
         totalAmount: 10000,
         applicationFeeAmount: 1000,
-        trainerPayoutAmount: 9000,
+        trainerPayoutAmount: 8800,
+        stripeFeeAmount: 200,
       }
 
       // Act
@@ -280,7 +287,8 @@ describe('Revenue Sharing Utils', () => {
       const revenue: RevenueCalculation = {
         totalAmount: 0,
         applicationFeeAmount: 0,
-        trainerPayoutAmount: 0,
+        trainerPayoutAmount: -25,
+        stripeFeeAmount: 25,
       }
 
       // Act

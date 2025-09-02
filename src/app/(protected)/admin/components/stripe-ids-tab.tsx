@@ -1,6 +1,15 @@
 'use client'
 
-import { Building2, Save, Search, Users } from 'lucide-react'
+import {
+  AlertCircle,
+  Building2,
+  CheckCircle,
+  Save,
+  Search,
+  TestTube,
+  Users,
+  XCircle,
+} from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -12,6 +21,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -43,6 +59,27 @@ interface StripeAccountsData {
   teams?: Team[]
 }
 
+interface TestResult {
+  accountId: string
+  isValid: boolean
+  status: string
+  details?: {
+    type?: string
+    country?: string
+    charges_enabled?: boolean
+    payouts_enabled?: boolean
+    capabilities?: Record<string, unknown>
+    business_type?: string | null
+  }
+  error?: string
+  testTransfer?: {
+    success: boolean
+    amount: number
+    currency: string
+    error?: string
+  }
+}
+
 export function StripeIdsTab() {
   const [data, setData] = useState<StripeAccountsData>({})
   const [loading, setLoading] = useState(true)
@@ -51,6 +88,13 @@ export function StripeIdsTab() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingValue, setEditingValue] = useState('')
   const [saving, setSaving] = useState<string | null>(null)
+
+  // Test-related state
+  const [testing, setTesting] = useState<string | null>(null)
+  const [testResults, setTestResults] = useState<Record<string, TestResult>>({})
+  const [showTestDialog, setShowTestDialog] = useState(false)
+  const [selectedTestResult, setSelectedTestResult] =
+    useState<TestResult | null>(null)
 
   const fetchData = useCallback(async () => {
     try {
@@ -159,6 +203,90 @@ export function StripeIdsTab() {
     }
   }
 
+  const handleTestAccount = async (accountId: string, entityId: string) => {
+    if (!accountId) {
+      alert('No account ID to test')
+      return
+    }
+
+    try {
+      setTesting(entityId)
+      const response = await fetch('/api/admin/stripe/test-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accountId }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to test account')
+      }
+
+      const { testResult } = await response.json()
+
+      // Store test result
+      setTestResults((prev) => ({
+        ...prev,
+        [entityId]: testResult,
+      }))
+
+      // Show detailed results in dialog
+      setSelectedTestResult(testResult)
+      setShowTestDialog(true)
+    } catch (error) {
+      console.error('Failed to test account:', error)
+      alert('Failed to test Stripe account')
+    } finally {
+      setTesting(null)
+    }
+  }
+
+  const getStatusIcon = (testResult?: TestResult) => {
+    if (!testResult) return null
+
+    switch (testResult.status) {
+      case 'connected_and_working':
+        return <CheckCircle className="h-4 w-4 text-green-500" />
+      case 'incomplete_onboarding':
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />
+      case 'not_found':
+      case 'account_invalid':
+      case 'permission_denied':
+      case 'transfer_restricted':
+      case 'transfer_error':
+      case 'error':
+        return <XCircle className="h-4 w-4 text-red-500" />
+      default:
+        return <AlertCircle className="h-4 w-4 text-gray-500" />
+    }
+  }
+
+  const getStatusBadge = (testResult?: TestResult) => {
+    if (!testResult) return null
+
+    const badgeVariants: Record<
+      string,
+      'primary' | 'secondary' | 'destructive' | 'outline'
+    > = {
+      connected_and_working: 'primary',
+      incomplete_onboarding: 'secondary',
+      not_found: 'destructive',
+      account_invalid: 'destructive',
+      permission_denied: 'destructive',
+      transfer_restricted: 'destructive',
+      transfer_error: 'destructive',
+      error: 'destructive',
+    }
+
+    return (
+      <Badge
+        variant={badgeVariants[testResult.status] || 'outline'}
+        className="text-xs"
+      >
+        {testResult.isValid ? 'Valid' : 'Invalid'}
+      </Badge>
+    )
+  }
+
   const filteredUsers = data.users || []
   const filteredTeams = data.teams || []
 
@@ -225,6 +353,7 @@ export function StripeIdsTab() {
                     <TableHead>User</TableHead>
                     <TableHead>Role</TableHead>
                     <TableHead>Stripe Account ID</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -245,13 +374,16 @@ export function StripeIdsTab() {
                           <div className="h-4 bg-muted rounded animate-pulse w-32" />
                         </TableCell>
                         <TableCell>
+                          <div className="h-6 bg-muted rounded animate-pulse w-20" />
+                        </TableCell>
+                        <TableCell>
                           <div className="h-8 bg-muted rounded animate-pulse w-16" />
                         </TableCell>
                       </TableRow>
                     ))
                   ) : filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-8">
+                      <TableCell colSpan={5} className="text-center py-8">
                         No users found
                       </TableCell>
                     </TableRow>
@@ -319,20 +451,48 @@ export function StripeIdsTab() {
                           )}
                         </TableCell>
                         <TableCell>
-                          {editingId !== user.id && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                handleEdit(
-                                  user.id,
-                                  user.stripeConnectedAccountId,
-                                )
-                              }
-                            >
-                              Edit
-                            </Button>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {getStatusIcon(testResults[user.id])}
+                            {getStatusBadge(testResults[user.id])}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {editingId !== user.id && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    handleEdit(
+                                      user.id,
+                                      user.stripeConnectedAccountId,
+                                    )
+                                  }
+                                >
+                                  Edit
+                                </Button>
+                                {user.stripeConnectedAccountId && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleTestAccount(
+                                        user.stripeConnectedAccountId!,
+                                        user.id,
+                                      )
+                                    }
+                                    disabled={testing === user.id}
+                                  >
+                                    <TestTube className="h-3 w-3 mr-1" />
+                                    {testing === user.id
+                                      ? 'Testing...'
+                                      : 'Test'}
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -358,6 +518,7 @@ export function StripeIdsTab() {
                     <TableHead>Team</TableHead>
                     <TableHead>Members</TableHead>
                     <TableHead>Stripe Account ID</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -375,13 +536,16 @@ export function StripeIdsTab() {
                           <div className="h-4 bg-muted rounded animate-pulse w-32" />
                         </TableCell>
                         <TableCell>
+                          <div className="h-6 bg-muted rounded animate-pulse w-20" />
+                        </TableCell>
+                        <TableCell>
                           <div className="h-8 bg-muted rounded animate-pulse w-16" />
                         </TableCell>
                       </TableRow>
                     ))
                   ) : filteredTeams.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={4} className="text-center py-8">
+                      <TableCell colSpan={5} className="text-center py-8">
                         No teams found
                       </TableCell>
                     </TableRow>
@@ -438,20 +602,48 @@ export function StripeIdsTab() {
                           )}
                         </TableCell>
                         <TableCell>
-                          {editingId !== team.id && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() =>
-                                handleEdit(
-                                  team.id,
-                                  team.stripeConnectedAccountId,
-                                )
-                              }
-                            >
-                              Edit
-                            </Button>
-                          )}
+                          <div className="flex items-center gap-2">
+                            {getStatusIcon(testResults[team.id])}
+                            {getStatusBadge(testResults[team.id])}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            {editingId !== team.id && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    handleEdit(
+                                      team.id,
+                                      team.stripeConnectedAccountId,
+                                    )
+                                  }
+                                >
+                                  Edit
+                                </Button>
+                                {team.stripeConnectedAccountId && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() =>
+                                      handleTestAccount(
+                                        team.stripeConnectedAccountId!,
+                                        team.id,
+                                      )
+                                    }
+                                    disabled={testing === team.id}
+                                  >
+                                    <TestTube className="h-3 w-3 mr-1" />
+                                    {testing === team.id
+                                      ? 'Testing...'
+                                      : 'Test'}
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -462,6 +654,128 @@ export function StripeIdsTab() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Test Results Dialog */}
+      <Dialog open={showTestDialog} onOpenChange={setShowTestDialog}>
+        <DialogContent dialogTitle="Stripe Connect Account Test Results">
+          <DialogHeader>
+            <DialogTitle>Stripe Connect Account Test Results</DialogTitle>
+            <DialogDescription>
+              Detailed test results for account: {selectedTestResult?.accountId}
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedTestResult && (
+            <div className="space-y-4">
+              {/* Status Summary */}
+              <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/50">
+                {getStatusIcon(selectedTestResult)}
+                <div>
+                  <div className="font-semibold flex items-center gap-2">
+                    Account Status
+                    {getStatusBadge(selectedTestResult)}
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    {selectedTestResult.isValid ? (
+                      <span className="text-green-600">
+                        ✅ Account is properly connected and can receive
+                        payments
+                      </span>
+                    ) : (
+                      <span className="text-red-600">
+                        ❌ {selectedTestResult.error}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Details */}
+              {selectedTestResult.details && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Account Details</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="font-medium">Type:</span>{' '}
+                      {selectedTestResult.details.type}
+                    </div>
+                    <div>
+                      <span className="font-medium">Country:</span>{' '}
+                      {selectedTestResult.details.country?.toUpperCase()}
+                    </div>
+                    <div>
+                      <span className="font-medium">Charges Enabled:</span>{' '}
+                      {selectedTestResult.details.charges_enabled ? '✅' : '❌'}
+                    </div>
+                    <div>
+                      <span className="font-medium">Payouts Enabled:</span>{' '}
+                      {selectedTestResult.details.payouts_enabled ? '✅' : '❌'}
+                    </div>
+                    {selectedTestResult.details.business_type && (
+                      <div>
+                        <span className="font-medium">Business Type:</span>{' '}
+                        {selectedTestResult.details.business_type}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Transfer Test Results */}
+              {selectedTestResult.testTransfer && (
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Transfer Test</h4>
+                  <div className="p-3 rounded-lg bg-muted/30">
+                    {selectedTestResult.testTransfer.success ? (
+                      <div className="text-green-600">
+                        ✅ Test transfer successful ($1.00 USD test - reversed
+                        immediately)
+                      </div>
+                    ) : (
+                      <div className="text-red-600">
+                        ❌ Transfer failed:{' '}
+                        {selectedTestResult.testTransfer.error}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Recommendations */}
+              <div className="space-y-3">
+                <h4 className="font-semibold">Recommendations</h4>
+                <div className="text-sm space-y-2">
+                  {selectedTestResult.status === 'connected_and_working' && (
+                    <div className="text-green-600">
+                      🎉 This account is ready to receive payments! No action
+                      needed.
+                    </div>
+                  )}
+                  {selectedTestResult.status === 'incomplete_onboarding' && (
+                    <div className="text-yellow-600">
+                      ⚠️ The trainer needs to complete Stripe onboarding. Send
+                      them the onboarding link.
+                    </div>
+                  )}
+                  {selectedTestResult.status === 'not_found' && (
+                    <div className="text-red-600">
+                      ❌ This account doesn't exist. The trainer needs to create
+                      a Connect account through your platform.
+                    </div>
+                  )}
+                  {selectedTestResult.status === 'account_invalid' && (
+                    <div className="text-red-600">
+                      ❌ This account exists but isn't connected to your
+                      platform. The trainer needs to create a Connect account
+                      through your onboarding flow.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

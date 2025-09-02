@@ -2,13 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
-import {
-  createDiscountedLineItem,
-  findInPersonDiscountPercentage,
-  getDiscountedAmount,
-  hasInPersonDiscount,
-} from '@/lib/stripe/discount-utils'
-import { getStripePricingInfo } from '@/lib/stripe/pricing-utils'
+import { COMMISSION_CONFIG } from '@/lib/stripe/config'
+import { createInPersonDiscountIfEligible } from '@/lib/stripe/discount-utils'
 import {
   type PayoutDestination,
   type RevenueCalculation,
@@ -158,6 +153,18 @@ export async function POST(request: NextRequest) {
           { status: 400 },
         )
       }
+      // Additional validation to ensure price ID is a valid string
+      if (
+        typeof item.package.stripePriceId !== 'string' ||
+        item.package.stripePriceId.trim() === ''
+      ) {
+        return NextResponse.json(
+          {
+            error: `Package "${item.package.name}" has invalid price ID: ${item.package.stripePriceId}`,
+          },
+          { status: 400 },
+        )
+      }
     }
 
     // Check if Complete Coaching Combo is in the bundle
@@ -198,60 +205,22 @@ export async function POST(request: NextRequest) {
 
     const mode = hasSubscription ? 'subscription' : 'payment'
 
-    // Calculate bundle discount for in-person meeting packages
-    const packagesForDiscount = checkoutItems.map((item) => ({
-      id: item.package.id,
-      name: item.package.name || '',
-      stripePriceId: item.package.stripePriceId,
-      metadata: (item.package.metadata as Record<string, unknown>) || {},
-      serviceType:
-        ((item.package.metadata as Record<string, unknown>)
-          ?.service_type as string) || null,
+    // Use original price IDs for all items (enables adaptive pricing)
+    const lineItems = checkoutItems.map((item) => ({
+      price: item.package.stripePriceId!,
+      quantity: item.quantity,
     }))
 
-    const bundleDiscount = findInPersonDiscountPercentage(packagesForDiscount)
-
-    // Create line items with dynamic pricing for discounted packages
-    const lineItems = await Promise.all(
-      checkoutItems.map(async (item) => {
-        const packageForDiscount = packagesForDiscount.find(
-          (p) => p.id === item.package.id,
-        )!
-
-        // Check if this package qualifies for discount
-        if (hasInPersonDiscount(packageForDiscount, bundleDiscount)) {
-          // Get original price for discount calculation
-          const originalPrice = await getStripePricingInfo(
-            item.package.stripePriceId!,
-          )
-          if (!originalPrice) {
-            throw new Error(
-              `Could not retrieve pricing for package ${item.package.name}`,
-            )
-          }
-
-          // Calculate discounted amount
-          const discountedAmount = getDiscountedAmount(
-            packageForDiscount,
-            originalPrice.amount,
-            bundleDiscount,
-          )
-
-          // Create dynamic pricing line item
-          return await createDiscountedLineItem(
-            packageForDiscount,
-            item.quantity,
-            discountedAmount,
-          )
-        } else {
-          // Use regular price ID for non-discounted items
-          return {
-            price: item.package.stripePriceId!,
-            quantity: item.quantity,
-          }
-        }
-      }),
+    // Apply 50% discount to in-person sessions if bundle contains coaching combo
+    const discounts = []
+    const discount = await createInPersonDiscountIfEligible(
+      checkoutItems,
+      hasCoachingCombo,
+      offerToken,
     )
+    if (discount) {
+      discounts.push(discount)
+    }
 
     // Setup revenue sharing for trainer payments (payment mode only)
     let payout: PayoutDestination = {
@@ -263,15 +232,20 @@ export async function POST(request: NextRequest) {
       totalAmount: 0,
       applicationFeeAmount: 0,
       trainerPayoutAmount: 0,
+      stripeFeeAmount: 0,
     }
 
-    if (mode === 'payment' && offer.trainerId) {
+    if (offer.trainerId) {
       payout = await getPayoutDestination(offer.trainerId)
 
       if (payout.connectedAccountId) {
         revenue = await calculateRevenueSharing(lineItems)
         console.info(
-          `💰 Revenue sharing: ${payout.displayName} → Platform: ${revenue.applicationFeeAmount / 100}, Recipient: ${revenue.trainerPayoutAmount / 100}`,
+          `💰 Revenue sharing: ${payout.displayName} → Platform: ${revenue.applicationFeeAmount / 100}, Trainer: ${revenue.trainerPayoutAmount / 100}, Stripe fees: ${revenue.stripeFeeAmount / 100}
+${JSON.stringify(lineItems, null, 2)}
+${JSON.stringify(payout, null, 2)}
+${JSON.stringify(revenue, null, 2)}
+`,
         )
       }
     }
@@ -282,8 +256,10 @@ export async function POST(request: NextRequest) {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode,
-      allow_promotion_codes: true,
-      // Add revenue sharing for trainer payments
+      // Apply bundle discount as coupon (preserves adaptive pricing)
+      ...(discounts.length > 0 && { discounts }),
+      // Allow promotion codes only if we don't have our own discounts
+      ...(discounts.length === 0 && { allow_promotion_codes: true }),
       ...(mode === 'payment' &&
         payout.connectedAccountId && {
           payment_intent_data: createPaymentIntentData(
@@ -306,26 +282,32 @@ export async function POST(request: NextRequest) {
         bundleItemCount: checkoutItems.length.toString(),
         originalItemCount: offer_items.length.toString(),
         hasCoachingCombo: hasCoachingCombo.toString(),
-        bundleDiscount: bundleDiscount.toString(),
-        hasDiscountedItems: packagesForDiscount
-          .some((pkg) => hasInPersonDiscount(pkg, bundleDiscount))
-          .toString(),
+        inPersonDiscount: hasCoachingCombo ? '50' : '0',
+        hasDiscountCoupon: (
+          hasCoachingCombo && discounts.length > 0
+        ).toString(),
         // Include first few package names for reference (charged items only)
         bundlePackages: checkoutItems
           .slice(0, 3)
           .map((item) => item.package.name)
           .join(', '),
         // Revenue sharing info
-        revenueShareEnabled: (
-          mode === 'payment' && !!payout.connectedAccountId
-        ).toString(),
+        revenueShareEnabled: (!!payout.connectedAccountId).toString(),
         payoutDestination: payout.displayName,
         platformFeeAmount: revenue.applicationFeeAmount.toString(),
         trainerPayoutAmount: revenue.trainerPayoutAmount.toString(),
+        stripeFeeAmount: revenue.stripeFeeAmount.toString(),
       },
-      // For subscriptions, include trainer assignment in subscription metadata
+      // For subscriptions, include trainer assignment and revenue sharing
       ...(mode === 'subscription' && {
         subscription_data: {
+          // Add revenue sharing for subscriptions using application_fee_percent
+          ...(payout.connectedAccountId && {
+            application_fee_percent: COMMISSION_CONFIG.PLATFORM_PERCENTAGE, // 10%
+            transfer_data: {
+              destination: payout.connectedAccountId,
+            },
+          }),
           metadata: {
             offerToken,
             trainerId: offer.trainerId,
@@ -333,15 +315,20 @@ export async function POST(request: NextRequest) {
             source: 'trainer_offer',
             bundleItemCount: checkoutItems.length.toString(),
             hasCoachingCombo: hasCoachingCombo.toString(),
-            bundleDiscount: bundleDiscount.toString(),
-            hasDiscountedItems: packagesForDiscount
-              .some((pkg) => hasInPersonDiscount(pkg, bundleDiscount))
-              .toString(),
+            inPersonDiscount: hasCoachingCombo ? '50' : '0',
+            hasDiscountCoupon: (
+              hasCoachingCombo && discounts.length > 0
+            ).toString(),
+            // Revenue sharing info for subscriptions
+            revenueShareEnabled: (!!payout.connectedAccountId).toString(),
+            payoutDestination: payout.displayName,
+            platformFeePercent:
+              COMMISSION_CONFIG.PLATFORM_PERCENTAGE.toString(),
           },
         },
       }),
-      // Customize checkout experience
-      billing_address_collection: 'auto',
+      // These settings help Stripe detect location for adaptive pricing
+      billing_address_collection: 'required', // Changed from 'auto' to 'required'
       customer_update: {
         address: 'auto',
         name: 'auto',
@@ -376,10 +363,6 @@ export async function POST(request: NextRequest) {
         item.package.name?.toLowerCase().includes('premium'),
       )
 
-    const discountedItemsCount = packagesForDiscount.filter((pkg) =>
-      hasInPersonDiscount(pkg, bundleDiscount),
-    ).length
-
     return NextResponse.json({
       checkoutUrl: checkoutSession.url,
       sessionId: checkoutSession.id,
@@ -390,9 +373,12 @@ export async function POST(request: NextRequest) {
       hasCoachingCombo,
       premiumIncluded,
       trainerName: offer.trainer.profile?.firstName || offer.trainer.name,
-      bundleDiscount,
-      hasDiscountedItems: discountedItemsCount > 0,
-      discountedItemsCount,
+      inPersonDiscount: hasCoachingCombo ? 50 : 0,
+      hasDiscountCoupon: hasCoachingCombo && discounts.length > 0,
+      discountDescription:
+        hasCoachingCombo && discounts.length > 0
+          ? '50% off In-Person Sessions'
+          : null,
     })
   } catch (error) {
     console.error('Error creating trainer checkout:', error)
