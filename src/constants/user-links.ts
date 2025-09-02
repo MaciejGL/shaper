@@ -29,6 +29,11 @@ export const TRAINER_LINKS = {
     label: 'Public Profile',
     disabled: false,
   },
+  settings: {
+    href: '/trainer/settings',
+    label: 'Settings',
+    disabled: false,
+  },
 }
 
 export const CLIENT_LINKS = {

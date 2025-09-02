@@ -9,6 +9,7 @@ import {
   FilesIcon,
   LayoutDashboardIcon,
   PlusCircleIcon,
+  Settings,
   ShieldIcon,
   UserIcon,
   UserRoundCogIcon,
@@ -318,6 +319,12 @@ export function AppSidebar() {
       url: TRAINER_LINKS.publicProfile.href,
       icon: UserIcon,
       disabled: TRAINER_LINKS.publicProfile.disabled,
+    },
+    {
+      title: TRAINER_LINKS.settings.label,
+      url: TRAINER_LINKS.settings.href,
+      icon: Settings,
+      disabled: TRAINER_LINKS.settings.disabled,
     },
     // Exercise Management item (for moderators only)
     ...(isModerator
