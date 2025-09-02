@@ -155,9 +155,8 @@ export function ExerciseSet({
           setIsTimerOperations(true)
         }
         setSkipTimer(false) // Reset skip timer flag
-      },
-      onSettled: () => {
-        // Invalidate queries after mutation completes (success or error)
+
+        // Only invalidate on success to prevent race conditions with optimistic updates
         invalidateQuery({
           queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
         })

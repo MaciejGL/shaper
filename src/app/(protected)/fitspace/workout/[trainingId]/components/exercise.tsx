@@ -50,7 +50,8 @@ export function Exercise({ exercise }: ExerciseProps) {
           queryClient.setQueryData(queryKey, context.previousData)
         }
       },
-      onSettled: () => {
+      onSuccess: () => {
+        // Only invalidate on success to prevent race conditions with optimistic updates
         invalidateQuery({
           queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
         })

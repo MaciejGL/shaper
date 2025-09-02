@@ -147,8 +147,8 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
             return newWorkout
           },
         )
-      },
-      onSettled: () => {
+
+        // Only invalidate on success to prevent race conditions with optimistic updates
         invalidateQuery({
           queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
         })
