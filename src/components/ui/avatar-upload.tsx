@@ -1,7 +1,8 @@
 'use client'
 
 import imageCompression from 'browser-image-compression'
-import { Camera, X } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { Camera, Check, Pencil, Trash2 } from 'lucide-react'
 import { useCallback, useState } from 'react'
 
 import { IMAGE_CONFIGS, type ImageType } from '@/lib/aws/s3'
@@ -17,7 +18,6 @@ interface AvatarUploadProps {
   onImageRemoved?: () => void
   className?: string
   disabled?: boolean
-  showRemoveButton?: boolean
   fallbackUrl?: string
   alt?: string
 }
@@ -28,13 +28,16 @@ interface UploadState {
   error: string | null
 }
 
+interface EditState {
+  isEditing: boolean
+}
+
 export function AvatarUpload({
   currentImageUrl,
   onImageUploaded,
   onImageRemoved,
   className = '',
   disabled = false,
-  showRemoveButton = true,
   fallbackUrl,
   alt = 'Avatar',
 }: AvatarUploadProps) {
@@ -44,6 +47,10 @@ export function AvatarUpload({
     error: null,
   })
 
+  const [editState, setEditState] = useState<EditState>({
+    isEditing: false,
+  })
+
   const imageType: ImageType = 'avatar'
   const config = IMAGE_CONFIGS[imageType]
 
@@ -51,6 +58,18 @@ export function AvatarUpload({
   const resetUploadState = () => {
     setUploadState({ uploading: false, progress: 0, error: null })
   }
+
+  // Toggle edit mode
+  const toggleEditMode = () => {
+    setEditState((prev) => ({ isEditing: !prev.isEditing }))
+    resetUploadState()
+  }
+
+  // Exit edit mode
+  const exitEditMode = useCallback(() => {
+    setEditState({ isEditing: false })
+    resetUploadState()
+  }, [])
 
   // Handle file upload
   const handleFileUpload = useCallback(
@@ -120,8 +139,11 @@ export function AvatarUpload({
         // Call success callback
         onImageUploaded(publicUrl)
 
-        // Reset state after short delay
-        setTimeout(resetUploadState, 1000)
+        // Exit edit mode and reset state after short delay
+        setTimeout(() => {
+          resetUploadState()
+          exitEditMode()
+        }, 1000)
       } catch (error) {
         console.error('Upload error:', error)
         setUploadState({
@@ -131,7 +153,7 @@ export function AvatarUpload({
         })
       }
     },
-    [config, imageType, onImageUploaded, disabled],
+    [config, imageType, onImageUploaded, disabled, exitEditMode],
   )
 
   // Handle file input change
@@ -146,12 +168,12 @@ export function AvatarUpload({
     if (onImageRemoved) {
       onImageRemoved()
     }
-    resetUploadState()
+    exitEditMode()
   }
 
   // Trigger file input
   const triggerFileInput = () => {
-    if (!disabled && !uploadState.uploading) {
+    if (!disabled && !uploadState.uploading && editState.isEditing) {
       document.getElementById('avatar-file-input')?.click()
     }
   }
@@ -165,38 +187,63 @@ export function AvatarUpload({
         <AvatarImage src={displayImageUrl || ''} alt={alt} />
       </Avatar>
 
-      {/* Upload Button */}
-      <ProgressButton
-        icon={Camera}
-        size="sm"
-        variant="default"
-        progress={uploadState.progress}
-        isLoading={uploadState.uploading}
-        onClick={triggerFileInput}
-        disabled={disabled}
-        className="absolute bottom-0 right-0 transform translate-x-1 translate-y-1 shadow-lg"
-        title="Upload new avatar"
-      />
-
-      {/* Remove Button */}
-      {showRemoveButton && currentImageUrl && !uploadState.uploading && (
-        <Button
-          onClick={handleRemoveImage}
-          size="icon-sm"
-          variant="destructive"
-          className="absolute top-0 right-0 transform translate-x-1 -translate-y-1 opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 shadow-lg"
-          title="Remove avatar"
-        >
-          <X className="w-3 h-3" />
-        </Button>
-      )}
-
-      {/* Error Message */}
-      {uploadState.error && (
-        <div className="absolute top-full left-0 right-0 mt-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-xs">
-          <p className="text-red-700 dark:text-red-400">{uploadState.error}</p>
+      {/* Edit Button - shown when not in edit mode */}
+      <AnimatePresence mode="wait">
+        <div className="absolute -bottom-2 -right-3 flex flex-row flex-nowrap gap-2">
+          {/* Upload Button - shown when in edit mode */}
+          {editState.isEditing && (
+            <div className="flex flex-row flex-nowrap gap-2">
+              {/* Remove Button - shown when in edit mode */}
+              {currentImageUrl && !uploadState.uploading && (
+                <motion.div
+                  key="remove-button"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.1 }}
+                >
+                  <Button
+                    onClick={handleRemoveImage}
+                    size="icon-md"
+                    variant="outline"
+                    className="transition-opacity shadow-lg rounded-full dark:bg-input"
+                    title="Remove avatar"
+                    iconOnly={<Trash2 />}
+                  />
+                </motion.div>
+              )}
+              <motion.div
+                key="upload-button"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.1 }}
+              >
+                <ProgressButton
+                  icon={Camera}
+                  size="sm"
+                  variant="default"
+                  progress={uploadState.progress}
+                  isLoading={uploadState.uploading}
+                  onClick={triggerFileInput}
+                  disabled={disabled}
+                  className="shadow-lg size-9"
+                  title="Upload new avatar"
+                />
+              </motion.div>
+            </div>
+          )}
+          <Button
+            onClick={toggleEditMode}
+            size="icon-md"
+            variant="default"
+            disabled={disabled}
+            className="shadow-lg rounded-full"
+            title="Edit avatar"
+            iconOnly={editState.isEditing ? <Check /> : <Pencil />}
+          />
         </div>
-      )}
+      </AnimatePresence>
 
       {/* Hidden File Input */}
       <input

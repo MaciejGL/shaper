@@ -1,6 +1,8 @@
+import { AnimatePresence, motion } from 'framer-motion'
 import { uniq } from 'lodash'
-import { CheckIcon } from 'lucide-react'
+import { Activity, CheckIcon, PenIcon, XIcon } from 'lucide-react'
 
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -9,28 +11,85 @@ import { cn } from '@/lib/utils'
 import { goalOptions } from '@/utils/goals'
 
 import { Badge } from '../ui/badge'
+import { SectionIcon } from '../ui/section-icon'
 
 import { Profile } from './types'
 
 type GoalsAndHealthProps = {
-  isEditing: boolean
   profile: Pick<Profile, 'goals' | 'allergies'>
-
   handleChange: (
     field: keyof Profile,
     value: string | string[] | number | null,
   ) => void
+  isSectionEditing: boolean
+  onToggleEdit: () => void
+  onSave: () => void
+  isSaving: boolean
 }
 
 export function GoalsAndHealth({
-  isEditing,
   profile,
   handleChange,
+  isSectionEditing,
+  onToggleEdit,
+  onSave,
+  isSaving,
 }: GoalsAndHealthProps) {
   return (
     <Card className="mb-6" borderless>
-      <CardHeader>
-        <CardTitle>Fitness Goals & Health Information</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="flex items-center gap-2">
+          <SectionIcon size="sm" icon={Activity} variant="orange" />
+          Fitness Goals & Health
+        </CardTitle>
+        <AnimatePresence mode="wait">
+          {!isSectionEditing ? (
+            <motion.div
+              key="edit-button"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.13 }}
+            >
+              <Button
+                onClick={onToggleEdit}
+                iconOnly={<PenIcon />}
+                variant="secondary"
+                size="icon-md"
+              >
+                Edit
+              </Button>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="save-button"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.13 }}
+            >
+              <div className="flex gap-2">
+                <Button
+                  onClick={onToggleEdit}
+                  variant="secondary"
+                  disabled={isSaving}
+                  iconOnly={<XIcon />}
+                  size="icon-md"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={onSave}
+                  disabled={isSaving}
+                  iconOnly={<CheckIcon />}
+                  size="icon-md"
+                >
+                  Save
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </CardHeader>
       <CardContent className="grid gap-4">
         <div className="space-y-2">
@@ -39,7 +98,7 @@ export function GoalsAndHealth({
             <GoalsField
               profile={profile}
               handleChange={handleChange}
-              disabled={!isEditing}
+              disabled={!isSectionEditing}
             />
           </div>
         </div>
@@ -50,7 +109,7 @@ export function GoalsAndHealth({
           <AllergiesField
             allergies={profile?.allergies ?? ''}
             handleChange={handleChange}
-            disabled={!isEditing}
+            disabled={!isSectionEditing}
           />
         </div>
       </CardContent>
@@ -82,12 +141,14 @@ function GoalsField({
   return goalOptions.map((goal) => (
     <Badge
       key={goal.value}
-      className={cn(!disabled && 'cursor-pointer')}
+      className={cn(
+        'w-full py-2 opacity-50',
+        !disabled && 'cursor-pointer opacity-100',
+      )}
       size="lg"
       variant={profile?.goals.includes(goal.value) ? 'primary' : 'outline'}
       onClick={() => !disabled && handleGoalClick(goal.value)}
     >
-      {profile?.goals.includes(goal.value) && <CheckIcon />}
       {goal.label}
     </Badge>
   ))

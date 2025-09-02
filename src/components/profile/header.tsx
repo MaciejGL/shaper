@@ -1,4 +1,3 @@
-import { Avatar, AvatarImage } from '@/components/ui/avatar'
 import { AvatarUpload } from '@/components/ui/avatar-upload'
 
 import { Profile } from './types'
@@ -8,11 +7,10 @@ type HeaderProps = {
     Profile,
     'firstName' | 'lastName' | 'avatarUrl' | 'sex' | 'email'
   >
-  isEditing: boolean
   onAvatarChange: (avatarUrl: string) => void
 }
 
-export function Header({ profile, isEditing, onAvatarChange }: HeaderProps) {
+export function Header({ profile, onAvatarChange }: HeaderProps) {
   const handleAvatarUpload = (imageUrl: string) => {
     onAvatarChange(imageUrl)
   }
@@ -23,25 +21,15 @@ export function Header({ profile, isEditing, onAvatarChange }: HeaderProps) {
 
   return (
     <div className="mx-auto">
-      <div className="flex flex-col items-center mb-6 md:flex-row md:justify-center md:gap-6">
+      <div className="flex flex-col items-center mb-6 md:flex-row md:justify-center md:gap-6 relative">
         <div className="relative mb-4 md:mb-0">
-          {isEditing ? (
-            <AvatarUpload
-              currentImageUrl={profile?.avatarUrl || undefined}
-              fallbackUrl={getAvatarUrl(profile?.sex) || undefined}
-              onImageUploaded={handleAvatarUpload}
-              onImageRemoved={handleAvatarRemove}
-              showRemoveButton={true}
-              alt={`${profile?.firstName || ''} ${profile?.lastName || ''}`}
-            />
-          ) : (
-            <Avatar className="w-24 h-24 border-4 border-white dark:border-zinc-800 shadow-xs bg-zinc-100 dark:bg-zinc-700 shadow-zinc-200 dark:shadow-black">
-              <AvatarImage
-                src={profile?.avatarUrl || getAvatarUrl(profile?.sex) || ''}
-                alt={`${profile?.firstName} ${profile?.lastName}`}
-              />
-            </Avatar>
-          )}
+          <AvatarUpload
+            currentImageUrl={profile?.avatarUrl || undefined}
+            fallbackUrl={getAvatarUrl(profile?.sex) || undefined}
+            onImageUploaded={handleAvatarUpload}
+            onImageRemoved={handleAvatarRemove}
+            alt={`${profile?.firstName || ''} ${profile?.lastName || ''}`}
+          />
         </div>
 
         {profile?.firstName && profile?.lastName && (

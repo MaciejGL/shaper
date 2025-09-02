@@ -13,14 +13,23 @@ import { useInvalidateQuery } from '@/lib/invalidate-query'
 
 import { Profile } from './types'
 
+type ProfileSection =
+  | 'header'
+  | 'personalInfo'
+  | 'physicalStats'
+  | 'goalsAndHealth'
+  | 'bio'
+
 export function useProfile() {
-  const [isEditing, setIsEditing] = useState(false)
+  const [editingSections, setEditingSections] = useState<Set<ProfileSection>>(
+    new Set(),
+  )
   const { data } = useProfileQuery()
   const invalidateQueries = useInvalidateQuery()
   const { mutateAsync: updateProfile, isPending: isSaving } =
     useUpdateProfileMutation({
       onSuccess: () => {
-        setIsEditing(false)
+        setEditingSections(new Set()) // Clear all editing states
         toast.success('Profile updated successfully')
         invalidateQueries({ queryKey: useProfileQuery.getKey() })
         invalidateQueries({ queryKey: useUserBasicQuery.getKey() })
@@ -87,32 +96,55 @@ export function useProfile() {
     [setProfile],
   )
 
-  const toggleEdit = () => {
-    setIsEditing((prev) => !prev)
-  }
-
-  const handleSave = useCallback(async () => {
-    const input = {
-      ...profile,
-      height: profile.height,
-      weight: profile.weight,
-      birthday: profile.birthday
-        ? new Date(profile.birthday).toISOString()
-        : null,
-    }
-    await updateProfile({
-      input,
+  const toggleSectionEdit = useCallback((section: ProfileSection) => {
+    setEditingSections((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(section)) {
+        newSet.delete(section)
+      } else {
+        newSet.add(section)
+      }
+      return newSet
     })
+  }, [])
 
-    setIsEditing(false)
-  }, [profile, updateProfile])
+  const isSectionEditing = useCallback(
+    (section: ProfileSection) => {
+      return editingSections.has(section)
+    },
+    [editingSections],
+  )
+
+  const handleSectionSave = useCallback(
+    async (section: ProfileSection) => {
+      const input = {
+        ...profile,
+        height: profile.height,
+        weight: profile.weight,
+        birthday: profile.birthday
+          ? new Date(profile.birthday).toISOString()
+          : null,
+      }
+      await updateProfile({
+        input,
+      })
+
+      // Remove this section from editing
+      setEditingSections((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(section)
+        return newSet
+      })
+    },
+    [profile, updateProfile],
+  )
 
   return {
     isSaving,
     profile,
-    isEditing,
     handleChange,
-    handleSave,
-    toggleEdit,
+    handleSectionSave,
+    toggleSectionEdit,
+    isSectionEditing,
   }
 }

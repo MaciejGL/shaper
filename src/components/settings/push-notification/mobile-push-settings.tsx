@@ -156,8 +156,6 @@ export function MobilePushSettings() {
     return <MobileAppBanner />
   }
 
-  console.log('isNativeApp', isNativeApp, pushEnabled)
-
   // Native app interface
   return (
     <div className="space-y-6">
