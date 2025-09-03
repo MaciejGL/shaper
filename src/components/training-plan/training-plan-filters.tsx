@@ -17,32 +17,24 @@ type FilterType = 'all' | 'free' | 'premium'
 const focusTagLabels: Record<GQLFocusTag, string> = {
   [GQLFocusTag.Strength]: 'Strength',
   [GQLFocusTag.Cardio]: 'Cardio',
-  [GQLFocusTag.Hypertrophy]: 'Hypertrophy',
-  [GQLFocusTag.AthleticPerformance]: 'Athletic Performance',
   [GQLFocusTag.BeginnerFriendly]: 'Beginner Friendly',
   [GQLFocusTag.BodyRecomposition]: 'Body Recomposition',
   [GQLFocusTag.Powerlifting]: 'Powerlifting',
   [GQLFocusTag.WeightLoss]: 'Weight Loss',
   [GQLFocusTag.Endurance]: 'Endurance',
-  [GQLFocusTag.Flexibility]: 'Flexibility',
   [GQLFocusTag.FunctionalFitness]: 'Functional Fitness',
   [GQLFocusTag.Bodyweight]: 'Bodyweight',
   [GQLFocusTag.MuscleBuilding]: 'Muscle Building',
-  [GQLFocusTag.FatLoss]: 'Fat Loss',
-  [GQLFocusTag.Conditioning]: 'Conditioning',
 }
 
 const focusTagOptions: GQLFocusTag[] = [
   GQLFocusTag.Strength,
-  GQLFocusTag.Hypertrophy,
   GQLFocusTag.Cardio,
-  GQLFocusTag.AthleticPerformance,
   GQLFocusTag.BeginnerFriendly,
   GQLFocusTag.BodyRecomposition,
   GQLFocusTag.Powerlifting,
   GQLFocusTag.WeightLoss,
   GQLFocusTag.Endurance,
-  GQLFocusTag.Flexibility,
   GQLFocusTag.FunctionalFitness,
   GQLFocusTag.Bodyweight,
 ]
