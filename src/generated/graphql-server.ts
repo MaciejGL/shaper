@@ -1750,6 +1750,13 @@ export type GQLOneRmLog = {
   weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
 };
 
+export type GQLPackageSummaryItem = {
+  __typename?: 'PackageSummaryItem';
+  name: EntireFieldWrapper<Scalars['String']['output']>;
+  packageId: EntireFieldWrapper<Scalars['String']['output']>;
+  quantity: EntireFieldWrapper<Scalars['Int']['output']>;
+};
+
 export type GQLPackageTemplate = {
   __typename?: 'PackageTemplate';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -1809,6 +1816,7 @@ export type GQLQuery = {
   getAllUsersWithSubscriptions: EntireFieldWrapper<GQLUsersWithSubscriptionsResult>;
   getClientActivePlan?: EntireFieldWrapper<Maybe<GQLTrainingPlan>>;
   getClientMealPlans: EntireFieldWrapper<Array<GQLMealPlan>>;
+  getClientTrainerOffers: EntireFieldWrapper<Array<GQLTrainerOffer>>;
   getClientTrainingPlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getCurrentWorkoutWeek?: EntireFieldWrapper<Maybe<GQLCurrentWorkoutWeekPayload>>;
   getDefaultMealPlan: EntireFieldWrapper<GQLMealPlan>;
@@ -1931,6 +1939,13 @@ export type GQLQueryGetClientActivePlanArgs = {
 
 export type GQLQueryGetClientMealPlansArgs = {
   clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetClientTrainerOffersArgs = {
+  clientEmail: Scalars['String']['input'];
+  status?: InputMaybe<GQLTrainerOfferStatus>;
+  trainerId: Scalars['ID']['input'];
 };
 
 
@@ -2186,6 +2201,7 @@ export type GQLServiceDelivery = {
   quantity: EntireFieldWrapper<Scalars['Int']['output']>;
   serviceType?: EntireFieldWrapper<Maybe<GQLServiceType>>;
   status: EntireFieldWrapper<GQLDeliveryStatus>;
+  tasks: EntireFieldWrapper<Array<GQLServiceTask>>;
   trainer: EntireFieldWrapper<GQLUser>;
   trainerId: EntireFieldWrapper<Scalars['ID']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -2368,6 +2384,32 @@ export enum GQLTheme {
 export enum GQLTimeFormat {
   H12 = 'h12',
   H24 = 'h24'
+}
+
+export type GQLTrainerOffer = {
+  __typename?: 'TrainerOffer';
+  clientEmail: EntireFieldWrapper<Scalars['String']['output']>;
+  completedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  expiresAt: EntireFieldWrapper<Scalars['String']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  packageSummary: EntireFieldWrapper<Array<GQLPackageSummaryItem>>;
+  personalMessage?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  serviceDeliveries: EntireFieldWrapper<Array<GQLServiceDelivery>>;
+  status: EntireFieldWrapper<GQLTrainerOfferStatus>;
+  stripeCheckoutSessionId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  stripePaymentIntentId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  token: EntireFieldWrapper<Scalars['String']['output']>;
+  trainer: EntireFieldWrapper<GQLUser>;
+  trainerId: EntireFieldWrapper<Scalars['ID']['output']>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
+export enum GQLTrainerOfferStatus {
+  Cancelled = 'CANCELLED',
+  Expired = 'EXPIRED',
+  Paid = 'PAID',
+  Pending = 'PENDING'
 }
 
 export type GQLTrainingDay = {
@@ -3128,6 +3170,7 @@ export type GQLResolversTypes = {
   NotificationType: GQLNotificationType;
   OneRmEntry: ResolverTypeWrapper<GQLOneRmEntry>;
   OneRmLog: ResolverTypeWrapper<GQLOneRmLog>;
+  PackageSummaryItem: ResolverTypeWrapper<GQLPackageSummaryItem>;
   PackageTemplate: ResolverTypeWrapper<GQLPackageTemplate>;
   PublicTrainer: ResolverTypeWrapper<GQLPublicTrainer>;
   PushSubscription: ResolverTypeWrapper<GQLPushSubscription>;
@@ -3164,6 +3207,8 @@ export type GQLResolversTypes = {
   TeamRole: GQLTeamRole;
   Theme: GQLTheme;
   TimeFormat: GQLTimeFormat;
+  TrainerOffer: ResolverTypeWrapper<GQLTrainerOffer>;
+  TrainerOfferStatus: GQLTrainerOfferStatus;
   TrainingDay: ResolverTypeWrapper<GQLTrainingDay>;
   TrainingExercise: ResolverTypeWrapper<GQLTrainingExercise>;
   TrainingPlan: ResolverTypeWrapper<GQLTrainingPlan>;
@@ -3311,6 +3356,7 @@ export type GQLResolversParentTypes = {
   NotificationPreferencesInput: GQLNotificationPreferencesInput;
   OneRmEntry: GQLOneRmEntry;
   OneRmLog: GQLOneRmLog;
+  PackageSummaryItem: GQLPackageSummaryItem;
   PackageTemplate: GQLPackageTemplate;
   PublicTrainer: GQLPublicTrainer;
   PushSubscription: GQLPushSubscription;
@@ -3336,6 +3382,7 @@ export type GQLResolversParentTypes = {
   TeamInvitation: GQLTeamInvitation;
   TeamLocationInput: GQLTeamLocationInput;
   TeamMember: GQLTeamMember;
+  TrainerOffer: GQLTrainerOffer;
   TrainingDay: GQLTrainingDay;
   TrainingExercise: GQLTrainingExercise;
   TrainingPlan: GQLTrainingPlan;
@@ -3962,6 +4009,13 @@ export type GQLOneRmLogResolvers<ContextType = GQLContext, ParentType extends GQ
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLPackageSummaryItemResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PackageSummaryItem'] = GQLResolversParentTypes['PackageSummaryItem']> = {
+  name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  packageId?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  quantity?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLPackageTemplateResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PackageTemplate'] = GQLResolversParentTypes['PackageTemplate']> = {
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   description?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
@@ -4020,6 +4074,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getAllUsersWithSubscriptions?: Resolver<GQLResolversTypes['UsersWithSubscriptionsResult'], ParentType, ContextType, Partial<GQLQueryGetAllUsersWithSubscriptionsArgs>>;
   getClientActivePlan?: Resolver<Maybe<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientActivePlanArgs, 'clientId'>>;
   getClientMealPlans?: Resolver<Array<GQLResolversTypes['MealPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientMealPlansArgs, 'clientId'>>;
+  getClientTrainerOffers?: Resolver<Array<GQLResolversTypes['TrainerOffer']>, ParentType, ContextType, RequireFields<GQLQueryGetClientTrainerOffersArgs, 'clientEmail' | 'trainerId'>>;
   getClientTrainingPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientTrainingPlansArgs, 'clientId'>>;
   getCurrentWorkoutWeek?: Resolver<Maybe<GQLResolversTypes['CurrentWorkoutWeekPayload']>, ParentType, ContextType>;
   getDefaultMealPlan?: Resolver<GQLResolversTypes['MealPlan'], ParentType, ContextType, Partial<GQLQueryGetDefaultMealPlanArgs>>;
@@ -4100,6 +4155,7 @@ export type GQLServiceDeliveryResolvers<ContextType = GQLContext, ParentType ext
   quantity?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   serviceType?: Resolver<Maybe<GQLResolversTypes['ServiceType']>, ParentType, ContextType>;
   status?: Resolver<GQLResolversTypes['DeliveryStatus'], ParentType, ContextType>;
+  tasks?: Resolver<Array<GQLResolversTypes['ServiceTask']>, ParentType, ContextType>;
   trainer?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
   trainerId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -4195,6 +4251,25 @@ export type GQLTeamMemberResolvers<ContextType = GQLContext, ParentType extends 
   joinedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   role?: Resolver<GQLResolversTypes['TeamRole'], ParentType, ContextType>;
   user?: Resolver<GQLResolversTypes['UserPublic'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLTrainerOfferResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['TrainerOffer'] = GQLResolversParentTypes['TrainerOffer']> = {
+  clientEmail?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  completedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  expiresAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  packageSummary?: Resolver<Array<GQLResolversTypes['PackageSummaryItem']>, ParentType, ContextType>;
+  personalMessage?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  serviceDeliveries?: Resolver<Array<GQLResolversTypes['ServiceDelivery']>, ParentType, ContextType>;
+  status?: Resolver<GQLResolversTypes['TrainerOfferStatus'], ParentType, ContextType>;
+  stripeCheckoutSessionId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  stripePaymentIntentId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  token?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  trainer?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
+  trainerId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -4504,6 +4579,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   NotificationPreferences?: GQLNotificationPreferencesResolvers<ContextType>;
   OneRmEntry?: GQLOneRmEntryResolvers<ContextType>;
   OneRmLog?: GQLOneRmLogResolvers<ContextType>;
+  PackageSummaryItem?: GQLPackageSummaryItemResolvers<ContextType>;
   PackageTemplate?: GQLPackageTemplateResolvers<ContextType>;
   PublicTrainer?: GQLPublicTrainerResolvers<ContextType>;
   PushSubscription?: GQLPushSubscriptionResolvers<ContextType>;
@@ -4517,6 +4593,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   Team?: GQLTeamResolvers<ContextType>;
   TeamInvitation?: GQLTeamInvitationResolvers<ContextType>;
   TeamMember?: GQLTeamMemberResolvers<ContextType>;
+  TrainerOffer?: GQLTrainerOfferResolvers<ContextType>;
   TrainingDay?: GQLTrainingDayResolvers<ContextType>;
   TrainingExercise?: GQLTrainingExerciseResolvers<ContextType>;
   TrainingPlan?: GQLTrainingPlanResolvers<ContextType>;

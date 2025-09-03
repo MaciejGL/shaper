@@ -374,7 +374,7 @@ async function createSingleServiceDelivery({
     return await prisma.$transaction(async (tx) => {
       // Create service delivery (always quantity = 1)
       const packageName = deliveryNumber
-        ? `${packageTemplate.name} #${deliveryNumber}`
+        ? `${packageTemplate.name}`
         : packageTemplate.name
 
       const delivery = await tx.serviceDelivery.create({

@@ -1748,6 +1748,13 @@ export type GQLOneRmLog = {
   weight?: Maybe<Scalars['Float']['output']>;
 };
 
+export type GQLPackageSummaryItem = {
+  __typename?: 'PackageSummaryItem';
+  name: Scalars['String']['output'];
+  packageId: Scalars['String']['output'];
+  quantity: Scalars['Int']['output'];
+};
+
 export type GQLPackageTemplate = {
   __typename?: 'PackageTemplate';
   createdAt: Scalars['String']['output'];
@@ -1807,6 +1814,7 @@ export type GQLQuery = {
   getAllUsersWithSubscriptions: GQLUsersWithSubscriptionsResult;
   getClientActivePlan?: Maybe<GQLTrainingPlan>;
   getClientMealPlans: Array<GQLMealPlan>;
+  getClientTrainerOffers: Array<GQLTrainerOffer>;
   getClientTrainingPlans: Array<GQLTrainingPlan>;
   getCurrentWorkoutWeek?: Maybe<GQLCurrentWorkoutWeekPayload>;
   getDefaultMealPlan: GQLMealPlan;
@@ -1929,6 +1937,13 @@ export type GQLQueryGetClientActivePlanArgs = {
 
 export type GQLQueryGetClientMealPlansArgs = {
   clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetClientTrainerOffersArgs = {
+  clientEmail: Scalars['String']['input'];
+  status?: InputMaybe<GQLTrainerOfferStatus>;
+  trainerId: Scalars['ID']['input'];
 };
 
 
@@ -2184,6 +2199,7 @@ export type GQLServiceDelivery = {
   quantity: Scalars['Int']['output'];
   serviceType?: Maybe<GQLServiceType>;
   status: GQLDeliveryStatus;
+  tasks: Array<GQLServiceTask>;
   trainer: GQLUser;
   trainerId: Scalars['ID']['output'];
   updatedAt: Scalars['String']['output'];
@@ -2366,6 +2382,32 @@ export enum GQLTheme {
 export enum GQLTimeFormat {
   H12 = 'h12',
   H24 = 'h24'
+}
+
+export type GQLTrainerOffer = {
+  __typename?: 'TrainerOffer';
+  clientEmail: Scalars['String']['output'];
+  completedAt?: Maybe<Scalars['String']['output']>;
+  createdAt: Scalars['String']['output'];
+  expiresAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  packageSummary: Array<GQLPackageSummaryItem>;
+  personalMessage?: Maybe<Scalars['String']['output']>;
+  serviceDeliveries: Array<GQLServiceDelivery>;
+  status: GQLTrainerOfferStatus;
+  stripeCheckoutSessionId?: Maybe<Scalars['String']['output']>;
+  stripePaymentIntentId?: Maybe<Scalars['String']['output']>;
+  token: Scalars['String']['output'];
+  trainer: GQLUser;
+  trainerId: Scalars['ID']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
+export enum GQLTrainerOfferStatus {
+  Cancelled = 'CANCELLED',
+  Expired = 'EXPIRED',
+  Paid = 'PAID',
+  Pending = 'PENDING'
 }
 
 export type GQLTrainingDay = {
@@ -3185,12 +3227,14 @@ export type GQLCancelCoachingMutationVariables = Exact<{ [key: string]: never; }
 
 export type GQLCancelCoachingMutation = { __typename?: 'Mutation', cancelCoaching: boolean };
 
-export type GQLFitGetMyServiceDeliveriesQueryVariables = Exact<{
-  status?: InputMaybe<GQLDeliveryStatus>;
+export type GQLFitGetMyTrainerOffersQueryVariables = Exact<{
+  clientEmail: Scalars['String']['input'];
+  trainerId: Scalars['ID']['input'];
+  status?: InputMaybe<GQLTrainerOfferStatus>;
 }>;
 
 
-export type GQLFitGetMyServiceDeliveriesQuery = { __typename?: 'Query', getMyServiceDeliveries: Array<{ __typename?: 'ServiceDelivery', id: string, serviceType?: GQLServiceType | undefined | null, packageName: string, quantity: number, status: GQLDeliveryStatus, deliveredAt?: string | undefined | null, deliveryNotes?: string | undefined | null, createdAt: string, updatedAt: string, trainer: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } }> };
+export type GQLFitGetMyTrainerOffersQuery = { __typename?: 'Query', getClientTrainerOffers: Array<{ __typename?: 'TrainerOffer', id: string, token: string, trainerId: string, clientEmail: string, personalMessage?: string | undefined | null, status: GQLTrainerOfferStatus, createdAt: string, updatedAt: string, expiresAt: string, completedAt?: string | undefined | null, packageSummary: Array<{ __typename?: 'PackageSummaryItem', packageId: string, quantity: number, name: string }>, serviceDeliveries: Array<{ __typename?: 'ServiceDelivery', id: string, serviceType?: GQLServiceType | undefined | null, packageName: string, quantity: number, status: GQLDeliveryStatus, deliveredAt?: string | undefined | null, deliveryNotes?: string | undefined | null, createdAt: string, updatedAt: string, tasks: Array<{ __typename?: 'ServiceTask', id: string, title: string, taskType: GQLTaskType, status: GQLTaskStatus, isRequired: boolean, requiresScheduling: boolean, scheduledAt?: string | undefined | null, completedAt?: string | undefined | null, notes?: string | undefined | null, order: number }> }>, trainer: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } }> };
 
 export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, mealReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } };
 
@@ -6114,16 +6158,47 @@ useCancelCoachingMutation.getKey = () => ['CancelCoaching'];
 
 useCancelCoachingMutation.fetcher = (variables?: GQLCancelCoachingMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCancelCoachingMutation, GQLCancelCoachingMutationVariables>(CancelCoachingDocument, variables, options);
 
-export const FitGetMyServiceDeliveriesDocument = `
-    query FitGetMyServiceDeliveries($status: DeliveryStatus) {
-  getMyServiceDeliveries(status: $status) {
+export const FitGetMyTrainerOffersDocument = `
+    query FitGetMyTrainerOffers($clientEmail: String!, $trainerId: ID!, $status: TrainerOfferStatus) {
+  getClientTrainerOffers(
+    clientEmail: $clientEmail
+    trainerId: $trainerId
+    status: $status
+  ) {
     id
-    serviceType
-    packageName
-    quantity
+    token
+    trainerId
+    clientEmail
+    personalMessage
     status
-    deliveredAt
-    deliveryNotes
+    packageSummary {
+      packageId
+      quantity
+      name
+    }
+    serviceDeliveries {
+      id
+      serviceType
+      packageName
+      quantity
+      status
+      deliveredAt
+      deliveryNotes
+      tasks {
+        id
+        title
+        taskType
+        status
+        isRequired
+        requiresScheduling
+        scheduledAt
+        completedAt
+        notes
+        order
+      }
+      createdAt
+      updatedAt
+    }
     trainer {
       id
       name
@@ -6131,51 +6206,53 @@ export const FitGetMyServiceDeliveriesDocument = `
     }
     createdAt
     updatedAt
+    expiresAt
+    completedAt
   }
 }
     `;
 
-export const useFitGetMyServiceDeliveriesQuery = <
-      TData = GQLFitGetMyServiceDeliveriesQuery,
+export const useFitGetMyTrainerOffersQuery = <
+      TData = GQLFitGetMyTrainerOffersQuery,
       TError = unknown
     >(
-      variables?: GQLFitGetMyServiceDeliveriesQueryVariables,
-      options?: Omit<UseQueryOptions<GQLFitGetMyServiceDeliveriesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitGetMyServiceDeliveriesQuery, TError, TData>['queryKey'] }
+      variables: GQLFitGetMyTrainerOffersQueryVariables,
+      options?: Omit<UseQueryOptions<GQLFitGetMyTrainerOffersQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitGetMyTrainerOffersQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<GQLFitGetMyServiceDeliveriesQuery, TError, TData>(
+    return useQuery<GQLFitGetMyTrainerOffersQuery, TError, TData>(
       {
-    queryKey: variables === undefined ? ['FitGetMyServiceDeliveries'] : ['FitGetMyServiceDeliveries', variables],
-    queryFn: fetchData<GQLFitGetMyServiceDeliveriesQuery, GQLFitGetMyServiceDeliveriesQueryVariables>(FitGetMyServiceDeliveriesDocument, variables),
+    queryKey: ['FitGetMyTrainerOffers', variables],
+    queryFn: fetchData<GQLFitGetMyTrainerOffersQuery, GQLFitGetMyTrainerOffersQueryVariables>(FitGetMyTrainerOffersDocument, variables),
     ...options
   }
     )};
 
-useFitGetMyServiceDeliveriesQuery.getKey = (variables?: GQLFitGetMyServiceDeliveriesQueryVariables) => variables === undefined ? ['FitGetMyServiceDeliveries'] : ['FitGetMyServiceDeliveries', variables];
+useFitGetMyTrainerOffersQuery.getKey = (variables: GQLFitGetMyTrainerOffersQueryVariables) => ['FitGetMyTrainerOffers', variables];
 
-export const useInfiniteFitGetMyServiceDeliveriesQuery = <
-      TData = InfiniteData<GQLFitGetMyServiceDeliveriesQuery>,
+export const useInfiniteFitGetMyTrainerOffersQuery = <
+      TData = InfiniteData<GQLFitGetMyTrainerOffersQuery>,
       TError = unknown
     >(
-      variables: GQLFitGetMyServiceDeliveriesQueryVariables,
-      options: Omit<UseInfiniteQueryOptions<GQLFitGetMyServiceDeliveriesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitGetMyServiceDeliveriesQuery, TError, TData>['queryKey'] }
+      variables: GQLFitGetMyTrainerOffersQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLFitGetMyTrainerOffersQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitGetMyTrainerOffersQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useInfiniteQuery<GQLFitGetMyServiceDeliveriesQuery, TError, TData>(
+    return useInfiniteQuery<GQLFitGetMyTrainerOffersQuery, TError, TData>(
       (() => {
     const { queryKey: optionsQueryKey, ...restOptions } = options;
     return {
-      queryKey: optionsQueryKey ?? variables === undefined ? ['FitGetMyServiceDeliveries.infinite'] : ['FitGetMyServiceDeliveries.infinite', variables],
-      queryFn: (metaData) => fetchData<GQLFitGetMyServiceDeliveriesQuery, GQLFitGetMyServiceDeliveriesQueryVariables>(FitGetMyServiceDeliveriesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      queryKey: optionsQueryKey ?? ['FitGetMyTrainerOffers.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLFitGetMyTrainerOffersQuery, GQLFitGetMyTrainerOffersQueryVariables>(FitGetMyTrainerOffersDocument, {...variables, ...(metaData.pageParam ?? {})})(),
       ...restOptions
     }
   })()
     )};
 
-useInfiniteFitGetMyServiceDeliveriesQuery.getKey = (variables?: GQLFitGetMyServiceDeliveriesQueryVariables) => variables === undefined ? ['FitGetMyServiceDeliveries.infinite'] : ['FitGetMyServiceDeliveries.infinite', variables];
+useInfiniteFitGetMyTrainerOffersQuery.getKey = (variables: GQLFitGetMyTrainerOffersQueryVariables) => ['FitGetMyTrainerOffers.infinite', variables];
 
 
-useFitGetMyServiceDeliveriesQuery.fetcher = (variables?: GQLFitGetMyServiceDeliveriesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitGetMyServiceDeliveriesQuery, GQLFitGetMyServiceDeliveriesQueryVariables>(FitGetMyServiceDeliveriesDocument, variables, options);
+useFitGetMyTrainerOffersQuery.fetcher = (variables: GQLFitGetMyTrainerOffersQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitGetMyTrainerOffersQuery, GQLFitGetMyTrainerOffersQueryVariables>(FitGetMyTrainerOffersDocument, variables, options);
 
 export const ProfileDocument = `
     query Profile {

@@ -1,0 +1,47 @@
+enum TrainerOfferStatus {
+  PENDING
+  PAID
+  EXPIRED
+  CANCELLED
+}
+
+type PackageSummaryItem {
+  packageId: String!
+  quantity: Int!
+  name: String!
+}
+
+type TrainerOffer {
+  id: ID!
+  token: String!
+  trainerId: ID!
+  clientEmail: String!
+  personalMessage: String
+  status: TrainerOfferStatus!
+
+  # Package information
+  packageSummary: [PackageSummaryItem!]!
+
+  # Stripe integration
+  stripeCheckoutSessionId: String
+  stripePaymentIntentId: String
+
+  # Timestamps
+  createdAt: String!
+  updatedAt: String!
+  expiresAt: String!
+  completedAt: String
+
+  # Relations
+  trainer: User!
+  serviceDeliveries: [ServiceDelivery!]!
+}
+
+type Query {
+  # Get paid trainer offers for a specific client and trainer
+  getClientTrainerOffers(
+    clientEmail: String!
+    trainerId: ID!
+    status: TrainerOfferStatus
+  ): [TrainerOffer!]!
+}

@@ -8,11 +8,13 @@ import {
 import {
   PackageTemplate as PrismaPackageTemplate,
   ServiceDelivery as PrismaServiceDelivery,
+  ServiceTask as PrismaServiceTask,
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
 } from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
+import ServiceTask from '../service-task/model'
 import User from '../user/model'
 
 export class PackageTemplate implements GQLPackageTemplate {
@@ -106,6 +108,7 @@ export class ServiceDelivery implements GQLServiceDelivery {
             profile?: PrismaUserProfile | null
           })
         | null
+      tasks?: PrismaServiceTask[]
     },
     protected context: GQLContext,
   ) {}
@@ -179,5 +182,12 @@ export class ServiceDelivery implements GQLServiceDelivery {
       throw new Error('Client data not loaded')
     }
     return new User(this.data.client, this.context)
+  }
+
+  get tasks() {
+    if (!this.data.tasks) {
+      return []
+    }
+    return this.data.tasks.map((task) => new ServiceTask(task, this.context))
   }
 }

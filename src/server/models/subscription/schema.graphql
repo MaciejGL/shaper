@@ -79,6 +79,7 @@ type ServiceDelivery {
   # Relations
   trainer: User!
   client: User!
+  tasks: [ServiceTask!]!
 
   createdAt: String!
   updatedAt: String!

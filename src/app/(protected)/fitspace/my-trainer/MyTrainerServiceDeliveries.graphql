@@ -1,12 +1,47 @@
-query FitGetMyServiceDeliveries($status: DeliveryStatus) {
-  getMyServiceDeliveries(status: $status) {
+query FitGetMyTrainerOffers(
+  $clientEmail: String!
+  $trainerId: ID!
+  $status: TrainerOfferStatus
+) {
+  getClientTrainerOffers(
+    clientEmail: $clientEmail
+    trainerId: $trainerId
+    status: $status
+  ) {
     id
-    serviceType
-    packageName
-    quantity
+    token
+    trainerId
+    clientEmail
+    personalMessage
     status
-    deliveredAt
-    deliveryNotes
+    packageSummary {
+      packageId
+      quantity
+      name
+    }
+    serviceDeliveries {
+      id
+      serviceType
+      packageName
+      quantity
+      status
+      deliveredAt
+      deliveryNotes
+      tasks {
+        id
+        title
+        taskType
+        status
+        isRequired
+        requiresScheduling
+        scheduledAt
+        completedAt
+        notes
+        order
+      }
+      createdAt
+      updatedAt
+    }
     trainer {
       id
       name
@@ -14,5 +49,7 @@ query FitGetMyServiceDeliveries($status: DeliveryStatus) {
     }
     createdAt
     updatedAt
+    expiresAt
+    completedAt
   }
 }
