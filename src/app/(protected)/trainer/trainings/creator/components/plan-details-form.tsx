@@ -27,6 +27,9 @@ import { useTrainingPlan } from '@/context/training-plan-context/training-plan-c
 import { GQLDifficulty } from '@/generated/graphql-client'
 import { useAutoSyncedInput } from '@/hooks/use-auto-synced-input'
 
+import { FocusTagsSelector } from './focus-tags-selector'
+import { TargetGoalsSelector } from './target-goals-selector'
+
 const DIFFICULTIES: { label: string; value: GQLDifficulty }[] = [
   { label: 'Beginner', value: GQLDifficulty.Beginner },
   { label: 'Intermediate', value: GQLDifficulty.Intermediate },
@@ -151,6 +154,21 @@ function PlanDetailsHeader() {
             Help clients understand what this plan offers and who it's designed
             for
           </p>
+        </div>
+
+        <Separator />
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <FocusTagsSelector
+            selected={data.focusTags || []}
+            onChange={(focusTags) => updateDetails({ focusTags })}
+            disabled={isDisabled}
+          />
+          <TargetGoalsSelector
+            selected={data.targetGoals || []}
+            onChange={(targetGoals) => updateDetails({ targetGoals })}
+            disabled={isDisabled}
+          />
         </div>
       </CardContent>
     </Card>

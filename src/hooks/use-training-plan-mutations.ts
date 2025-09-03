@@ -74,6 +74,11 @@ export function useTrainingPlanMutations(trainingId?: string) {
           difficulty:
             variables.input.difficulty ??
             oldData.getTrainingPlanById.difficulty,
+          focusTags:
+            variables.input.focusTags ?? oldData.getTrainingPlanById.focusTags,
+          targetGoals:
+            variables.input.targetGoals ??
+            oldData.getTrainingPlanById.targetGoals,
         },
       }
     },

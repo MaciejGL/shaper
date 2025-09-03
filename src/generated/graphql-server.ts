@@ -673,17 +673,12 @@ export enum GQLFitnessLevel {
 }
 
 export enum GQLFocusTag {
-  AthleticPerformance = 'ATHLETIC_PERFORMANCE',
   BeginnerFriendly = 'BEGINNER_FRIENDLY',
   Bodyweight = 'BODYWEIGHT',
   BodyRecomposition = 'BODY_RECOMPOSITION',
   Cardio = 'CARDIO',
-  Conditioning = 'CONDITIONING',
   Endurance = 'ENDURANCE',
-  FatLoss = 'FAT_LOSS',
-  Flexibility = 'FLEXIBILITY',
   FunctionalFitness = 'FUNCTIONAL_FITNESS',
-  Hypertrophy = 'HYPERTROPHY',
   MuscleBuilding = 'MUSCLE_BUILDING',
   Powerlifting = 'POWERLIFTING',
   Strength = 'STRENGTH',

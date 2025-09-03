@@ -15,7 +15,13 @@ export type TrainingPlanFormData = {
 
 export type TrainingDetails = Pick<
   GQLTrainingPlan,
-  'title' | 'description' | 'isPublic' | 'isDraft' | 'completedAt'
+  | 'title'
+  | 'description'
+  | 'isPublic'
+  | 'isDraft'
+  | 'completedAt'
+  | 'focusTags'
+  | 'targetGoals'
 > & {
   difficulty?: GQLDifficulty | null
   assignedTo?: Pick<GQLUser, 'id'> | null

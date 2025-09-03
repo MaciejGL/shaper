@@ -86,18 +86,24 @@ export default class TrainingPlan implements GQLTrainingPlan {
   }
 
   get focusTags() {
-    return (
-      this.data.focusTags.map(
-        (tag) => GQLFocusTag[tag as keyof typeof GQLFocusTag],
-      ) || []
+    if (!this.data.focusTags || !Array.isArray(this.data.focusTags)) {
+      return []
+    }
+
+    // The database values should match the GraphQL enum values directly
+    return this.data.focusTags.filter((tag): tag is GQLFocusTag =>
+      Object.values(GQLFocusTag).includes(tag as GQLFocusTag),
     )
   }
 
   get targetGoals() {
-    return (
-      this.data.targetGoals.map(
-        (goal) => GQLTargetGoal[goal as keyof typeof GQLTargetGoal],
-      ) || []
+    if (!this.data.targetGoals || !Array.isArray(this.data.targetGoals)) {
+      return []
+    }
+
+    // The database values should match the GraphQL enum values directly
+    return this.data.targetGoals.filter((goal): goal is GQLTargetGoal =>
+      Object.values(GQLTargetGoal).includes(goal as GQLTargetGoal),
     )
   }
 

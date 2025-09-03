@@ -9,6 +9,7 @@ import { LoadingSkeleton } from '@/components/loading-skeleton'
 import {
   FilterType,
   TrainingPlanFilters,
+  focusTagLabels,
 } from '@/components/training-plan/training-plan-filters'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -104,10 +105,10 @@ export function TrainingPlansTab() {
     if (activeFilter === 'free' && plan.isPremium) return false
     if (activeFilter === 'premium' && !plan.isPremium) return false
 
-    // Filter by focus tags
+    // Filter by focus tags - plan must have ALL selected tags (AND logic)
     if (selectedFocusTags.length > 0) {
-      return selectedFocusTags.some((tag) =>
-        plan.focusTags?.some((planTag: string) => planTag.includes(tag)),
+      return selectedFocusTags.every((selectedTag) =>
+        plan.focusTags?.includes(selectedTag),
       )
     }
 
@@ -128,15 +129,7 @@ export function TrainingPlansTab() {
       {/* Results */}
       <div className="space-y-3">
         {isLoading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} borderless className="animate-pulse">
-              <CardContent className="p-4">
-                <div className="h-4 bg-muted rounded w-3/4 mb-2" />
-                <div className="h-3 bg-muted rounded w-1/2 mb-3" />
-                <div className="h-3 bg-muted rounded w-full" />
-              </CardContent>
-            </Card>
-          ))
+          <LoadingSkeleton count={3} variant="lg" />
         ) : filteredPlans.length === 0 ? (
           <Card borderless>
             <CardContent className="p-6 text-center">
@@ -148,10 +141,10 @@ export function TrainingPlansTab() {
                 Try adjusting your filters or browse all plans
               </p>
               <Button
-                variant="outline"
+                variant="tertiary"
                 size="sm"
                 onClick={clearAllFilters}
-                className="mt-3"
+                className="mt-6 mx-auto"
               >
                 Clear Filters
               </Button>
@@ -162,6 +155,12 @@ export function TrainingPlansTab() {
             <div className="text-sm text-muted-foreground mb-2">
               {filteredPlans.length} plan{filteredPlans.length !== 1 ? 's' : ''}{' '}
               found
+              {selectedFocusTags.length > 0 && (
+                <span className="ml-1">
+                  with {selectedFocusTags.length} focus tag
+                  {selectedFocusTags.length !== 1 ? 's' : ''}
+                </span>
+              )}
             </div>
             {filteredPlans.map((plan) => (
               <TrainingPlanCard
@@ -245,9 +244,9 @@ function TrainingPlanCard({ plan, onClick }: TrainingPlanCardProps) {
               <div className="flex flex-wrap gap-1">
                 {plan.focusTags
                   .slice(0, 2)
-                  .map((tag: string, index: number) => (
+                  .map((tag: GQLFocusTag, index: number) => (
                     <Badge key={index} variant="secondary">
-                      {tag}
+                      {focusTagLabels[tag] || tag}
                     </Badge>
                   ))}
                 {plan.focusTags.length > 2 && (
@@ -359,8 +358,8 @@ function TrainingPlanPreview({
               <h3 className="font-semibold mb-2 text-sm">Training Focus</h3>
               <div className="flex flex-wrap gap-2">
                 {plan.focusTags.map((tag: string, index: number) => (
-                  <Badge key={index} variant="secondary">
-                    {tag}
+                  <Badge key={index} variant="secondary" className="capitalize">
+                    {tag.replace('_', ' ').toLowerCase()}
                   </Badge>
                 ))}
               </div>

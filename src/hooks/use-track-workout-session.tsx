@@ -13,7 +13,11 @@ export function useTrackWorkoutSession(
   const intervalRef = useRef<NodeJS.Timeout | number | null>(null)
 
   const { mutateAsync: logWorkoutProgress } =
-    useFitspaceLogWorkoutProgressMutation()
+    useFitspaceLogWorkoutProgressMutation({
+      onError: (error) => {
+        console.info('Failed to send workout progress tick', error)
+      },
+    })
 
   const sendTick = async () => {
     if (!dayId) return

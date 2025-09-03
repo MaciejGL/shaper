@@ -68,6 +68,8 @@ export async function updateTrainingPlanDetails(
       isPublic: input.isPublic ?? undefined,
       isDraft: input.isDraft ?? undefined,
       difficulty: input.difficulty,
+      focusTags: input.focusTags ?? undefined,
+      targetGoals: input.targetGoals ?? undefined,
     },
   })
 

@@ -82,6 +82,8 @@ export function TrainingPlanProvider({
         difficulty: plan.difficulty,
         assignedTo: plan.assignedTo,
         completedAt: plan.completedAt,
+        focusTags: plan.focusTags || [],
+        targetGoals: plan.targetGoals || [],
       },
       weeks: plan.weeks,
     }
