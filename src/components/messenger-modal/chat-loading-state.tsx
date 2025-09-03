@@ -54,8 +54,8 @@ const mockConversation: ChatMessageSkeleton[] = [
 ]
 
 const messageVariants = {
-  hidden: { opacity: 0, y: 10, scale: 0.95 },
-  visible: { opacity: 1, y: 0, scale: 1 },
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: { opacity: 1, scale: 1 },
 }
 
 const containerVariants = {

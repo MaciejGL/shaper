@@ -142,6 +142,52 @@ export async function getMyChats(context: GQLContext) {
     throw new Error('Authentication required')
   }
 
+  // Check if current user is a trainer
+  const currentUser = await prisma.user.findUnique({
+    where: { id: currentUserId },
+    select: { role: true },
+  })
+
+  if (!currentUser) {
+    throw new Error('User not found')
+  }
+
+  // If user is a trainer, auto-create chats with all clients that don't have chats yet
+  if (currentUser.role === 'TRAINER') {
+    // Get all clients of this trainer
+    const clients = await prisma.user.findMany({
+      where: { trainerId: currentUserId },
+      select: { id: true },
+    })
+
+    // Get existing chats for this trainer
+    const existingChats = await prisma.chat.findMany({
+      where: { trainerId: currentUserId },
+      select: { clientId: true },
+    })
+
+    const existingClientIds = new Set(
+      existingChats.map((chat) => chat.clientId),
+    )
+
+    // Find clients without chats
+    const clientsWithoutChats = clients.filter(
+      (client) => !existingClientIds.has(client.id),
+    )
+
+    // Create chats for clients that don't have them
+    if (clientsWithoutChats.length > 0) {
+      await prisma.chat.createMany({
+        data: clientsWithoutChats.map((client) => ({
+          trainerId: currentUserId,
+          clientId: client.id,
+        })),
+        skipDuplicates: true, // Safety net in case of race conditions
+      })
+    }
+  }
+
+  // Now fetch all chats (existing + newly created)
   const chats = await prisma.chat.findMany({
     where: {
       OR: [{ trainerId: currentUserId }, { clientId: currentUserId }],
@@ -177,10 +223,21 @@ export async function getMyChats(context: GQLContext) {
         },
       },
     },
-    orderBy: { updatedAt: 'desc' },
   })
 
-  return chats.map((chat) => new Chat(chat, context))
+  // Sort chats by last message creation time (most recent first)
+  // Chats without messages will appear at the bottom
+  const sortedChats = chats.sort((a, b) => {
+    const aLastMessageTime = a.messages[0]?.createdAt
+      ? new Date(a.messages[0].createdAt).getTime()
+      : 0
+    const bLastMessageTime = b.messages[0]?.createdAt
+      ? new Date(b.messages[0].createdAt).getTime()
+      : 0
+    return bLastMessageTime - aLastMessageTime
+  })
+
+  return sortedChats.map((chat) => new Chat(chat, context))
 }
 
 export async function markMessagesAsRead(

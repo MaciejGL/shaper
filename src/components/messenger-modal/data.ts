@@ -64,7 +64,7 @@ export function useMessengerData(
     },
     enabled: !!chat?.id,
     staleTime: 30000, // 30 seconds - data is fresh for 30s
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
     refetchInterval: isOpen ? 10000 : false, // Only refetch when modal is open, less frequently
     initialPageParam: 0,
   })

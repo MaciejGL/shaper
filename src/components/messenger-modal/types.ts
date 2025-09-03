@@ -31,6 +31,7 @@ export interface MessageProps {
   message: MessageType
   isOwnMessage: boolean
   isGrouped: boolean
+  shouldAnimate?: boolean
   currentUserId?: string
   onEdit: (message: MessageType) => void
   onDelete: (messageId: string) => void

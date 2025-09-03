@@ -1,5 +1,5 @@
 import { Loader2, MessageSquare } from 'lucide-react'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { ChatLoadingState } from './chat-loading-state'
 import { Message } from './message'
@@ -28,6 +28,8 @@ export function MessagesArea({
   const messagesContainerRef = useRef<HTMLDivElement>(null)
   const previousScrollHeight = useRef<number>(0)
   const currentChatId = useRef<string | null>(null)
+  const initialMessageIds = useRef<Set<string>>(new Set())
+  const [isInitialLoadComplete, setIsInitialLoadComplete] = useState(false)
 
   // Check if user is near the bottom of the chat
   const isNearBottom = useCallback(() => {
@@ -56,8 +58,20 @@ export function MessagesArea({
     // Always scroll on chat change or initial load
     if (isChatChange) {
       currentChatId.current = newChatId
+      // Reset initial load tracking for new chat
+      initialMessageIds.current = new Set(messages.map((m) => m.id))
+      setIsInitialLoadComplete(false)
       scrollToBottom(true) // Instant scroll for chat changes
+
+      // Mark initial load as complete after a brief delay to prevent animations
+      setTimeout(() => setIsInitialLoadComplete(true), 100)
       return
+    }
+
+    // For existing chat, mark initial load complete if not already
+    if (!isInitialLoadComplete && messages.length > 0) {
+      initialMessageIds.current = new Set(messages.map((m) => m.id))
+      setIsInitialLoadComplete(true)
     }
 
     // For new messages in same chat, only scroll if user is near bottom
@@ -66,7 +80,7 @@ export function MessagesArea({
     }
     // Only depend on length and chatId to avoid unnecessary re-runs
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.length, messages[0]?.chatId])
+  }, [messages.length, messages[0]?.chatId, isInitialLoadComplete])
 
   // Handle infinite scroll for older messages
   const handleScroll = useCallback(() => {
@@ -145,12 +159,17 @@ export function MessagesArea({
         const previousMessage = index > 0 ? messages[index - 1] : undefined
         const isGrouped = shouldGroupWithPrevious(message, previousMessage)
 
+        // Only animate messages that weren't part of initial load
+        const shouldAnimate =
+          isInitialLoadComplete && !initialMessageIds.current.has(message.id)
+
         return (
           <Message
             key={message.id}
             message={message}
             isOwnMessage={isOwnMessage}
             isGrouped={isGrouped}
+            shouldAnimate={shouldAnimate}
             onEdit={onEditMessage}
             onDelete={onDeleteMessage}
             editingMessageId={editingMessageId}
