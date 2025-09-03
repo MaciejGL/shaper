@@ -1,11 +1,12 @@
 'use client'
 
-import { CreditCard, Crown, ExternalLink } from 'lucide-react'
+import { CreditCard, ExternalLink, SparklesIcon } from 'lucide-react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SectionIcon } from '@/components/ui/section-icon'
 import { useUser } from '@/context/user-context'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
 
@@ -46,7 +47,7 @@ export function SubscriptionInfoSection() {
       <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Crown className="h-5 w-5" />
+            <SectionIcon icon={SparklesIcon} size="sm" variant="amber" />
             Subscription
           </CardTitle>
         </CardHeader>
@@ -126,7 +127,12 @@ export function SubscriptionInfoSection() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <div className="flex items-center gap-2 justify-between w-full">
-            <h3 className="text-lg font-semibold">{subscriptionInfo.title}</h3>
+            <div className="flex items-center gap-2">
+              <SectionIcon icon={SparklesIcon} size="sm" variant="amber" />
+              <h3 className="text-lg font-semibold">
+                {subscriptionInfo.title}
+              </h3>
+            </div>
             {hasActiveSubscription && (
               <span
                 className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${

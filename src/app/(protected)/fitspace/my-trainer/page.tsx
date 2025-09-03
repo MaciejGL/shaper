@@ -1,7 +1,6 @@
 'use client'
 
 import { Calendar, Clock, MessageSquare, UserCheck, Users } from 'lucide-react'
-import Link from 'next/link'
 import { useState } from 'react'
 
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
@@ -10,6 +9,7 @@ import { TrainerCard } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import {
   Card,
   CardContent,
@@ -17,13 +17,18 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { useUser } from '@/context/user-context'
 import {
   GQLGetMyTrainerQuery,
   GQLMyCoachingRequestsQuery,
+  GQLTrainerOfferStatus,
   useCancelCoachingMutation,
+  useFitGetMyTrainerOffersQuery,
   useGetMyTrainerQuery,
+  useGetTrainerSharedNotesLimitedQuery,
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
+import { useCurrentSubscription } from '@/hooks/use-current-subscription'
 import { useScrollToFromParams } from '@/hooks/use-scroll-to'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
@@ -35,7 +40,8 @@ import { TrainerSharedNotesSection } from './components/trainer-shared-notes-sec
 type CoachingRequest = GQLMyCoachingRequestsQuery['coachingRequests'][0]
 
 export default function MyTrainerPage() {
-  const { data: requestsData } = useMyCoachingRequestsQuery()
+  const { data: requestsData, refetch: refetchRequests } =
+    useMyCoachingRequestsQuery()
 
   const coachingRequests = requestsData?.coachingRequests || []
 
@@ -60,7 +66,9 @@ export default function MyTrainerPage() {
           <Loader />
         </div>
       )}
-      {!isLoadingTrainer && trainer && <TrainerView trainer={trainer} />}
+      {!isLoadingTrainer && trainer && (
+        <TrainerView trainer={trainer} refetchRequests={refetchRequests} />
+      )}
 
       {!isLoadingTrainer && !trainer && (
         <NoTrainerView requests={coachingRequests} />
@@ -71,12 +79,29 @@ export default function MyTrainerPage() {
 
 interface TrainerViewProps {
   trainer: NonNullable<GQLGetMyTrainerQuery['getMyTrainer']>
+  refetchRequests: () => void
 }
 
-function TrainerView({ trainer }: TrainerViewProps) {
+function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const { openModal } = useConfirmationModalContext()
+  const { user } = useUser()
+
+  // Get refetch functions for all queries that need to be refreshed
   const { refetch: refetchTrainer } = useGetMyTrainerQuery()
+  const { refetch: refetchTrainerOffers } = useFitGetMyTrainerOffersQuery(
+    {
+      clientEmail: user?.email || '',
+      trainerId: trainer.id,
+      status: GQLTrainerOfferStatus.Paid,
+    },
+    {
+      enabled: !!user?.email,
+    },
+  )
+  const { refetch: refetchTrainerNotes } =
+    useGetTrainerSharedNotesLimitedQuery()
+  const { refetch: refetchSubscription } = useCurrentSubscription(user?.id)
   const { mutateAsync: cancelCoaching } = useCancelCoachingMutation()
 
   const handleCancelCoaching = () => {
@@ -94,8 +119,14 @@ function TrainerView({ trainer }: TrainerViewProps) {
       onConfirm: async () => {
         try {
           await cancelCoaching({})
-          // Refetch data to update the UI
-          await refetchTrainer()
+          // Refetch all data to update the UI
+          await Promise.all([
+            refetchTrainer(),
+            refetchRequests(),
+            refetchTrainerOffers(),
+            refetchTrainerNotes(),
+            refetchSubscription(),
+          ])
         } catch (error) {
           console.error('Failed to cancel coaching:', error)
           throw error // Re-throw to prevent modal from closing
@@ -220,12 +251,13 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
                 You haven't connected with a trainer yet. Explore our featured
                 trainers to find the perfect match for your fitness goals.
               </p>
-              <Button asChild className="mt-2">
-                <Link href="/fitspace/explore?tab=trainers">
-                  <Users className="h-4 w-4 mr-2" />
-                  Find a Trainer
-                </Link>
-              </Button>
+              <ButtonLink
+                href="/fitspace/explore?tab=trainers"
+                className="mt-2"
+                iconStart={<Users />}
+              >
+                Find a Trainer
+              </ButtonLink>
             </>
           )}
         </CardContent>

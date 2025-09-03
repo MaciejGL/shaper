@@ -19,7 +19,6 @@ import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card } from '@/components/ui/card'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
-import { useTrainerStatus } from '@/hooks/use-trainer-status'
 import { cn } from '@/lib/utils'
 
 import { AddMeasurementModal } from '../progress/components/add-measurement-modal'
@@ -32,8 +31,6 @@ export function MobileNav() {
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
     null,
   )
-
-  const { hasTrainer } = useTrainerStatus()
 
   useEffect(() => {
     setClickedItem(null)
@@ -72,9 +69,7 @@ export function MobileNav() {
       },
       {
         id: 'trainer',
-        href: hasTrainer
-          ? '/fitspace/my-trainer'
-          : '/fitspace/explore?tab=trainers',
+        href: '/fitspace/my-trainer',
         icon: UserCheck,
         label: 'Trainer',
         prefetch: true,
@@ -87,7 +82,7 @@ export function MobileNav() {
         prefetch: true,
       },
     ],
-    [hasTrainer],
+    [],
   )
 
   return (

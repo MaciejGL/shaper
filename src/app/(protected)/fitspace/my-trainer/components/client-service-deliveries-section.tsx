@@ -11,6 +11,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { SectionIcon } from '@/components/ui/section-icon'
 import { useUser } from '@/context/user-context'
 import {
   GQLFitGetMyTrainerOffersQuery,
@@ -45,7 +46,7 @@ export function ClientServiceDeliveriesSection({
       <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
+            <SectionIcon icon={Package} size="sm" variant="green" />
             Purchased Services
           </CardTitle>
         </CardHeader>
@@ -61,13 +62,12 @@ export function ClientServiceDeliveriesSection({
       <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
+            <SectionIcon icon={Package} size="sm" variant="green" />
             No services purchased yet
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center">
-            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
             <p className="text-sm text-muted-foreground">
               No training packages purchased yet.
             </p>
@@ -81,7 +81,7 @@ export function ClientServiceDeliveriesSection({
     <Card borderless>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Package className="h-5 w-5" />
+          <SectionIcon icon={Package} size="sm" variant="green" />
           Purchased Training Packages
         </CardTitle>
       </CardHeader>

@@ -13,6 +13,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
+import { SectionIcon } from '@/components/ui/section-icon'
 import {
   type GQLGetAllTrainerSharedNotesQuery,
   useGetAllTrainerSharedNotesQuery,
@@ -46,7 +47,7 @@ export function TrainerSharedNotesSection() {
       <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
+            <SectionIcon icon={MessageSquare} size="sm" />
             Trainer Notes
           </CardTitle>
         </CardHeader>
@@ -67,7 +68,7 @@ export function TrainerSharedNotesSection() {
       <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
+            <SectionIcon icon={MessageSquare} size="sm" />
             Trainer Notes
           </CardTitle>
         </CardHeader>
@@ -91,11 +92,8 @@ export function TrainerSharedNotesSection() {
     <Card borderless>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5" />
+          <SectionIcon icon={MessageSquare} size="sm" variant="sky" />
           Notes from trainer
-          <span className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full">
-            {trainerNotes.length}
-          </span>
           <Button
             variant="ghost"
             size="xs"
