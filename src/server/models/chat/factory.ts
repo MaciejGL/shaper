@@ -12,21 +12,15 @@ export async function getOrCreateChat(
     throw new Error('Authentication required')
   }
 
-  // Determine if current user is trainer or client by checking their relationship
-  const currentUser = await prisma.user.findUnique({
-    where: { id: currentUserId },
-    select: { trainerId: true, role: true },
-  })
+  // Use DataLoaders for batched user lookups
+  const [currentUser, partner] = await Promise.all([
+    context.loaders.user.userBasic.load(currentUserId),
+    context.loaders.user.userBasic.load(partnerId),
+  ])
 
   if (!currentUser) {
     throw new Error('User not found')
   }
-
-  // Check if the partner is in a trainer-client relationship with current user
-  const partner = await prisma.user.findUnique({
-    where: { id: partnerId },
-    select: { trainerId: true, role: true },
-  })
 
   if (!partner) {
     throw new Error('Partner not found')
@@ -51,50 +45,14 @@ export async function getOrCreateChat(
     throw new Error('No trainer-client relationship exists between users')
   }
 
-  // Try to find existing chat
-  let chat = await prisma.chat.findUnique({
-    where: {
-      trainerId_clientId: {
-        trainerId,
-        clientId,
-      },
-    },
-    include: {
-      trainer: {
-        include: {
-          profile: true,
-        },
-      },
-      client: {
-        include: {
-          profile: true,
-        },
-      },
-      messages: {
-        orderBy: { createdAt: 'desc' },
-        take: 1,
-        include: {
-          sender: {
-            select: {
-              id: true,
-              name: true,
-              profile: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  avatarUrl: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
+  // Use DataLoader to find existing chat
+  let chat = await context.loaders.chat.chatByParticipants.load(
+    `${trainerId}:${clientId}`,
+  )
 
   // Create chat if it doesn't exist
   if (!chat) {
-    chat = await prisma.chat.create({
+    const newChat = await prisma.chat.create({
       data: {
         trainerId,
         clientId,
@@ -131,6 +89,15 @@ export async function getOrCreateChat(
         },
       },
     })
+
+    // Prime the DataLoader cache with the new chat
+    context.loaders.chat.chatByParticipants.prime(
+      `${trainerId}:${clientId}`,
+      newChat,
+    )
+    context.loaders.chat.chatBasic.prime(newChat.id, newChat)
+
+    chat = newChat
   }
 
   return new Chat(chat, context)
@@ -142,11 +109,8 @@ export async function getMyChats(context: GQLContext) {
     throw new Error('Authentication required')
   }
 
-  // Check if current user is a trainer
-  const currentUser = await prisma.user.findUnique({
-    where: { id: currentUserId },
-    select: { role: true },
-  })
+  // Use DataLoader for user lookup
+  const currentUser = await context.loaders.user.userBasic.load(currentUserId)
 
   if (!currentUser) {
     throw new Error('User not found')
@@ -187,51 +151,26 @@ export async function getMyChats(context: GQLContext) {
     }
   }
 
-  // Now fetch all chats (existing + newly created)
-  const chats = await prisma.chat.findMany({
+  // Get chat IDs first with lightweight query
+  const chatIds = await prisma.chat.findMany({
     where: {
       OR: [{ trainerId: currentUserId }, { clientId: currentUserId }],
     },
-    include: {
-      trainer: {
-        include: {
-          profile: true,
-        },
-      },
-      client: {
-        include: {
-          profile: true,
-        },
-      },
-      messages: {
-        orderBy: { createdAt: 'desc' },
-        take: 1,
-        include: {
-          sender: {
-            select: {
-              id: true,
-              name: true,
-              profile: {
-                select: {
-                  firstName: true,
-                  lastName: true,
-                  avatarUrl: true,
-                },
-              },
-            },
-          },
-        },
-      },
-    },
+    select: { id: true },
   })
 
-  // Sort chats by last message creation time (most recent first)
-  // Chats without messages will appear at the bottom
-  const sortedChats = chats.sort((a, b) => {
-    const aLastMessageTime = a.messages[0]?.createdAt
+  // Load complete chat data (including trainer, client, latest message) via DataLoader
+  const chats = await Promise.all(
+    chatIds.map((chat) => context.loaders.chat.chatBasic.load(chat.id)),
+  )
+
+  // Filter out any null results and sort by last message time
+  const validChats = chats.filter((chat) => chat !== null)
+  const sortedChats = validChats.sort((a, b) => {
+    const aLastMessageTime = a.messages?.[0]?.createdAt
       ? new Date(a.messages[0].createdAt).getTime()
       : 0
-    const bLastMessageTime = b.messages[0]?.createdAt
+    const bLastMessageTime = b.messages?.[0]?.createdAt
       ? new Date(b.messages[0].createdAt).getTime()
       : 0
     return bLastMessageTime - aLastMessageTime

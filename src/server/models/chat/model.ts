@@ -82,6 +82,7 @@ export default class Chat implements GQLChat {
     skip = 0,
     take = 50,
   }: { skip?: number; take?: number } = {}) {
+    // Fall back to individual query for pagination or when not prefetched
     return getChatMessages({ chatId: this.id, skip, take }, this.context)
   }
 
@@ -89,17 +90,9 @@ export default class Chat implements GQLChat {
     const currentUserId = this.context.user?.user.id
     if (!currentUserId) return 0
 
-    const { prisma } = await import('@/lib/db')
-
-    const count = await prisma.message.count({
-      where: {
-        chatId: this.id,
-        senderId: { not: currentUserId }, // Messages from other person
-        readAt: null,
-        isDeleted: false,
-      },
-    })
-
-    return count
+    // Fall back to DataLoader for individual requests
+    return await this.context.loaders.chat.unreadCount.load(
+      `${this.id}:${currentUserId}`,
+    )
   }
 }
