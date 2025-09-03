@@ -1,6 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 
+import { AnnouncementBanner } from '@/components/announcement-banner'
 import { MobileAppAuthSync } from '@/components/mobile-app-auth-sync'
 import { MobileAppThemeSync } from '@/components/mobile-app-theme-sync'
 import { PostHogProvider } from '@/components/posthog-provider'
@@ -34,6 +35,7 @@ export default async function ProtectedLayout({
           >
             <MobileAppAuthSync />
             <MobileAppThemeSync />
+            <AnnouncementBanner />
             {children}
           </ThemeProvider>
         </UserPreferencesProvider>
