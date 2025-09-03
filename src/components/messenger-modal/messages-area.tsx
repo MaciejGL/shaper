@@ -1,8 +1,7 @@
 import { Loader2, MessageSquare } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
 
-import { Skeleton } from '@/components/ui/skeleton'
-
+import { ChatLoadingState } from './chat-loading-state'
 import { Message } from './message'
 import type { MessagesAreaProps } from './types'
 import { shouldGroupWithPrevious } from './utils'
@@ -109,19 +108,7 @@ export function MessagesArea({
   }, [handleScroll])
 
   if (isLoading) {
-    return (
-      <div className="h-full overflow-y-auto px-4 py-2 space-y-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div key={i} className="flex gap-2">
-            <Skeleton className="size-8 rounded-full" />
-            <div className="space-y-1">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-10 w-48" />
-            </div>
-          </div>
-        ))}
-      </div>
-    )
+    return <ChatLoadingState />
   }
 
   if (messages.length === 0) {

@@ -5,7 +5,6 @@ import { MessageSquare, X } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { UserAvatar } from '@/components/user-avatar'
 import { useGetMyChatsQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
@@ -103,7 +102,7 @@ export function ChatSidebar({
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-80 bg-background border-r border-border flex flex-col',
+          'fixed inset-y-0 left-0 z-50 w-80 bg-background border-r border-muted flex flex-col',
           'lg:relative lg:z-auto lg:translate-x-0',
           'transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
@@ -117,13 +116,12 @@ export function ChatSidebar({
             size="sm"
             onClick={onClose}
             className="lg:hidden"
-          >
-            <X className="size-4" />
-          </Button>
+            iconOnly={<X />}
+          />
         </div>
 
         {/* Chat List */}
-        <ScrollArea className="flex-1">
+        <div className="flex-1 overflow-y-auto">
           {isLoading ? (
             <div className="p-4 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -160,12 +158,12 @@ export function ChatSidebar({
                     key={chat.id}
                     onClick={() => handleChatClick(chat)}
                     className={cn(
-                      'w-full p-3 text-left rounded-lg transition-colors hover:bg-muted/50',
-                      isActive && 'bg-muted',
+                      'w-full p-3 text-left rounded-lg transition-colors hover:bg-muted/50 overflow-hidden',
+                      isActive && 'bg-card-on-card',
                     )}
                   >
-                    <div className="flex gap-3">
-                      <div className="relative">
+                    <div className="flex gap-3 min-w-0">
+                      <div className="relative flex-shrink-0">
                         <UserAvatar
                           withFallbackAvatar
                           firstName={partner.profile?.firstName || ''}
@@ -178,17 +176,17 @@ export function ChatSidebar({
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
+                        <div className="flex items-center justify-between mb-1 min-w-0">
                           <p
                             className={cn(
-                              'text-sm truncate',
+                              'text-sm truncate flex-1 min-w-0',
                               hasUnread ? 'font-semibold' : 'font-medium',
                             )}
                           >
                             {getUserDisplayName(partner)}
                           </p>
                           {chat.lastMessage && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-muted-foreground flex-shrink-0 ml-2">
                               {formatDistanceToNow(
                                 new Date(chat.lastMessage.createdAt),
                                 {
@@ -201,7 +199,7 @@ export function ChatSidebar({
                         {chat.lastMessage && (
                           <p
                             className={cn(
-                              'text-xs text-muted-foreground truncate',
+                              'text-xs text-muted-foreground truncate min-w-0',
                               hasUnread && 'font-medium text-foreground',
                             )}
                           >
@@ -222,7 +220,7 @@ export function ChatSidebar({
               })}
             </div>
           )}
-        </ScrollArea>
+        </div>
       </div>
     </>
   )
