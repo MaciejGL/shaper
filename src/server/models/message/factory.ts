@@ -119,8 +119,8 @@ export async function sendMessage(
     await sendPushForNotification(
       recipientId,
       GQLNotificationType.Message,
-      `${senderName} sent you a message`,
-      `/fitspace/messages/${input.chatId}`,
+      message.content,
+      undefined,
       {
         senderName,
       },
