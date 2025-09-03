@@ -14,12 +14,22 @@ import User from '../user/model'
 export default class Chat implements GQLChat {
   constructor(
     protected data: PrismaChat & {
-      trainer?: PrismaUser | null
-      client?: PrismaUser | null
+      trainer?:
+        | (PrismaUser & {
+            profile?: PrismaUserProfile | null
+          })
+        | null
+      client?:
+        | (PrismaUser & {
+            profile?: PrismaUserProfile | null
+          })
+        | null
       messages?: (PrismaMessage & {
-        sender?: PrismaUser & {
-          profile?: PrismaUserProfile | null
-        }
+        sender?:
+          | (PrismaUser & {
+              profile?: PrismaUserProfile | null
+            })
+          | null
       })[]
     },
     protected context: GQLContext,

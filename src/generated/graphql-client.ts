@@ -4259,7 +4259,7 @@ export type GQLGetChatMessagesQuery = { __typename?: 'Query', getChatMessages: A
 export type GQLGetMyChatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetMyChatsQuery = { __typename?: 'Query', getMyChats: Array<{ __typename?: 'Chat', id: string, trainerId: string, clientId: string, unreadCount: number, createdAt: string, updatedAt: string, trainer: { __typename?: 'User', id: string, name?: string | undefined | null, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null, avatarUrl?: string | undefined | null } | undefined | null }, client: { __typename?: 'User', id: string, name?: string | undefined | null, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null, avatarUrl?: string | undefined | null } | undefined | null }, lastMessage?: { __typename?: 'Message', id: string, content: string, createdAt: string, sender: { __typename?: 'User', id: string, name?: string | undefined | null } } | undefined | null }> };
+export type GQLGetMyChatsQuery = { __typename?: 'Query', getMyChats: Array<{ __typename?: 'Chat', id: string, trainerId: string, clientId: string, unreadCount: number, createdAt: string, updatedAt: string, trainer: { __typename?: 'User', id: string, name?: string | undefined | null, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null, avatarUrl?: string | undefined | null } | undefined | null }, client: { __typename?: 'User', id: string, name?: string | undefined | null, profile?: { __typename?: 'UserProfile', firstName?: string | undefined | null, lastName?: string | undefined | null, avatarUrl?: string | undefined | null } | undefined | null }, lastMessage?: { __typename?: 'Message', id: string, content: string, createdAt: string } | undefined | null }> };
 
 export type GQLSendMessageMutationVariables = Exact<{
   input: GQLSendMessageInput;
@@ -12423,10 +12423,6 @@ export const GetMyChatsDocument = `
       id
       content
       createdAt
-      sender {
-        id
-        name
-      }
     }
     createdAt
     updatedAt

@@ -87,10 +87,6 @@ query GetMyChats {
       id
       content
       createdAt
-      sender {
-        id
-        name
-      }
     }
     createdAt
     updatedAt

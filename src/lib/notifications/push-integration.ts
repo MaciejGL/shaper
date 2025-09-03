@@ -13,6 +13,7 @@ import {
   notifyCoachingRequestRejected,
   notifyExerciseCommentReply,
   notifyMealPlanAssigned,
+  notifyNewMessage,
   notifyPlanCompleted,
   notifySystemAnnouncement,
   notifyTeamInvitation,
@@ -132,10 +133,15 @@ export async function sendPushForNotification(
           additionalData?.senderName || 'Someone',
           additionalData?.teamName || 'a team',
         )
+      case GQLNotificationType.Message:
+        return await notifyNewMessage(
+          userId,
+          additionalData?.senderName || '',
+          message,
+        )
 
       case GQLNotificationType.System:
       case GQLNotificationType.Reminder:
-      case GQLNotificationType.Message:
         return await notifySystemAnnouncement([userId], 'Notification', message)
 
       default:

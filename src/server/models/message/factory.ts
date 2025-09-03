@@ -42,7 +42,7 @@ export async function getChatMessages(
         },
       },
     },
-    orderBy: { createdAt: 'asc' },
+    orderBy: { createdAt: 'desc' },
     skip: skip || 0,
     take: take || 50,
   })
@@ -148,8 +148,16 @@ export async function editMessage(
     },
     include: {
       sender: {
-        include: {
-          profile: true,
+        select: {
+          id: true,
+          name: true,
+          profile: {
+            select: {
+              firstName: true,
+              lastName: true,
+              avatarUrl: true,
+            },
+          },
         },
       },
     },

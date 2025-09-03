@@ -3,8 +3,6 @@ import { GQLContext } from '@/types/gql-context'
 
 import Chat from './model'
 
-// Dynamic import to avoid circular dependency
-
 export async function getOrCreateChat(
   { partnerId }: { partnerId: string },
   context: GQLContext,
@@ -62,15 +60,31 @@ export async function getOrCreateChat(
       },
     },
     include: {
-      trainer: true,
-      client: true,
+      trainer: {
+        include: {
+          profile: true,
+        },
+      },
+      client: {
+        include: {
+          profile: true,
+        },
+      },
       messages: {
         orderBy: { createdAt: 'desc' },
         take: 1,
         include: {
           sender: {
-            include: {
-              profile: true,
+            select: {
+              id: true,
+              name: true,
+              profile: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                },
+              },
             },
           },
         },
@@ -86,15 +100,31 @@ export async function getOrCreateChat(
         clientId,
       },
       include: {
-        trainer: true,
-        client: true,
+        trainer: {
+          include: {
+            profile: true,
+          },
+        },
+        client: {
+          include: {
+            profile: true,
+          },
+        },
         messages: {
           orderBy: { createdAt: 'desc' },
           take: 1,
           include: {
             sender: {
-              include: {
-                profile: true,
+              select: {
+                id: true,
+                name: true,
+                profile: {
+                  select: {
+                    firstName: true,
+                    lastName: true,
+                    avatarUrl: true,
+                  },
+                },
               },
             },
           },
@@ -117,15 +147,31 @@ export async function getMyChats(context: GQLContext) {
       OR: [{ trainerId: currentUserId }, { clientId: currentUserId }],
     },
     include: {
-      trainer: true,
-      client: true,
+      trainer: {
+        include: {
+          profile: true,
+        },
+      },
+      client: {
+        include: {
+          profile: true,
+        },
+      },
       messages: {
         orderBy: { createdAt: 'desc' },
         take: 1,
         include: {
           sender: {
-            include: {
-              profile: true,
+            select: {
+              id: true,
+              name: true,
+              profile: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  avatarUrl: true,
+                },
+              },
             },
           },
         },
@@ -134,7 +180,6 @@ export async function getMyChats(context: GQLContext) {
     orderBy: { updatedAt: 'desc' },
   })
 
-  const { default: Chat } = await import('./model')
   return chats.map((chat) => new Chat(chat, context))
 }
 

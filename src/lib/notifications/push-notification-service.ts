@@ -11,6 +11,22 @@ import { sendPushNotificationToUsers } from '@/app/actions/push-notifications'
 // ================================
 
 /**
+ * Send push notification when new message is received
+ */
+export async function notifyNewMessage(
+  recipientId: string,
+  senderName: string,
+  message: string,
+) {
+  return await sendPushNotificationToUsers(
+    [recipientId],
+    `New message${senderName ? ` from ${senderName}` : ''}`,
+    message,
+    '/fitspace/messages',
+  )
+}
+
+/**
  * Send push notification when coaching request is received
  */
 export async function notifyCoachingRequest(

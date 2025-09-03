@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
   LogInIcon,
@@ -56,6 +57,25 @@ import { DropdownProvider, NavLink } from './nav-link'
 import { NotificationBell } from './notification-bell'
 import { SwapAccountButton } from './swap-account'
 
+// Custom hook to get total unread message count
+function useUnreadMessageCount(user?: UserWithSession | null) {
+  const { data: chatsData } = useGetMyChatsQuery(
+    {},
+    {
+      enabled: !!user?.user?.id,
+      refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
+    },
+  )
+
+  const unreadCount =
+    chatsData?.getMyChats?.reduce(
+      (total, chat) => total + (chat.unreadCount || 0),
+      0,
+    ) || 0
+
+  return unreadCount
+}
+
 export const Navbar = ({
   user,
   withSidebar,
@@ -67,6 +87,17 @@ export const Navbar = ({
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const { isVisible } = useScrollVisibility()
+  const unreadCount = useUnreadMessageCount(user)
+  const queryClient = useQueryClient()
+
+  // Invalidate unread count when messenger modal opens
+  useEffect(() => {
+    if (isMessengerOpen) {
+      queryClient.invalidateQueries({
+        queryKey: useGetMyChatsQuery.getKey({}),
+      })
+    }
+  }, [isMessengerOpen, queryClient])
 
   useEffect(() => {
     setMounted(true)
@@ -154,11 +185,19 @@ export const Navbar = ({
               />
             )}
             {user?.user?.role === GQLUserRole.Client && user?.user?.trainer && (
-              <Button
-                variant="ghost"
-                iconOnly={<MessageSquare className="size-5" />}
-                onClick={() => setIsMessengerOpen(true)}
-              />
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  iconOnly={<MessageSquare />}
+                  onClick={() => setIsMessengerOpen(true)}
+                  className="rounded-full"
+                />
+                {unreadCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-sky-700 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </div>
             )}
             <NavbarUser user={user} />
           </div>
@@ -211,15 +250,33 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
   const [selectedChatPartnerId, setSelectedChatPartnerId] = useState<
     string | null
   >(null)
+  const unreadCount = useUnreadMessageCount(user)
+  const queryClient = useQueryClient()
+
+  // Invalidate unread count when chat list or messenger opens
+  useEffect(() => {
+    if (isChatListOpen || isMessengerOpen) {
+      queryClient.invalidateQueries({
+        queryKey: useGetMyChatsQuery.getKey({}),
+      })
+    }
+  }, [isChatListOpen, isMessengerOpen, queryClient])
 
   return (
     <>
       <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          iconOnly={<MessageSquare className="size-5" />}
-          onClick={() => setIsChatListOpen(true)}
-        />
+        <div className="relative">
+          <Button
+            variant="ghost"
+            iconOnly={<MessageSquare className="size-5" />}
+            onClick={() => setIsChatListOpen(true)}
+          />
+          {unreadCount > 0 && (
+            <span className="absolute top-0 right-0 bg-amber-600 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </div>
         <Drawer direction="right">
           <DrawerTrigger asChild>
             <Button variant="ghost" iconOnly={<MenuIcon />} />
@@ -439,10 +496,24 @@ function TrainerChatListModal({
   onClose,
   onSelectChat,
 }: TrainerChatListModalProps) {
+  const queryClient = useQueryClient()
+
   const { data: chatsData, isLoading } = useGetMyChatsQuery(
     {},
-    { enabled: isOpen },
+    {
+      enabled: isOpen,
+      refetchInterval: isOpen ? 30000 : false, // Refetch every 30s when modal is open
+    },
   )
+
+  // Invalidate cache when modal opens to refresh unread counts
+  useEffect(() => {
+    if (isOpen) {
+      queryClient.invalidateQueries({
+        queryKey: useGetMyChatsQuery.getKey({}),
+      })
+    }
+  }, [isOpen, queryClient])
 
   const chats = chatsData?.getMyChats || []
 
