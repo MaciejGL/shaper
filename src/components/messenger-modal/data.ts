@@ -1,5 +1,5 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { toast } from 'sonner'
 
 import { useUser } from '@/context/user-context'
@@ -18,15 +18,18 @@ import { fetchData } from '@/lib/graphql'
 
 import type { MessageType } from './types'
 
-export function useMessengerData(partnerId: string, isOpen: boolean) {
+export function useMessengerData(
+  partnerId: string | undefined,
+  isOpen: boolean,
+) {
   const hasMarkedAsRead = useRef<string | null>(null)
   const { user } = useUser()
   const queryClient = useQueryClient()
 
   // Queries
   const { data: chatData, isLoading: isLoadingChat } = useGetOrCreateChatQuery(
-    { partnerId },
-    { enabled: isOpen },
+    { partnerId: partnerId! },
+    { enabled: isOpen && !!partnerId },
   )
 
   const chat = chatData?.getOrCreateChat
@@ -60,17 +63,22 @@ export function useMessengerData(partnerId: string, isOpen: boolean) {
       return allPages.flat().length
     },
     enabled: !!chat?.id,
-    refetchInterval: isOpen ? 5000 : false,
+    staleTime: 30000, // 30 seconds - data is fresh for 30s
+    refetchOnWindowFocus: true,
+    refetchInterval: isOpen ? 10000 : false, // Only refetch when modal is open, less frequently
     initialPageParam: 0,
   })
 
-  // Reverse the order of pages, then reverse each page to get chronological order (oldest to newest)
-  const messages =
-    messagesData?.pages
+  // Memoize messages processing to prevent unnecessary re-renders
+  const messages = useMemo(() => {
+    if (!messagesData?.pages) return []
+
+    return messagesData.pages
       .slice()
       .reverse()
       .map((page) => page.slice().reverse())
-      .flat() || []
+      .flat()
+  }, [messagesData?.pages])
 
   // Get partner information
   const currentUserId = user?.id
@@ -90,7 +98,7 @@ export function useMessengerData(partnerId: string, isOpen: boolean) {
 
       // Create optimistic message
       const optimisticMessage: MessageType = {
-        id: `temp-${Date.now()}`,
+        id: `optimistic-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
         chatId: variables.input.chatId,
         content: variables.input.content,
         imageUrl: variables.input.imageUrl || null,
@@ -105,7 +113,7 @@ export function useMessengerData(partnerId: string, isOpen: boolean) {
           profile: {
             firstName: user?.profile?.firstName || null,
             lastName: user?.profile?.lastName || null,
-            avatarUrl: null,
+            avatarUrl: user?.profile?.avatarUrl || null,
           },
         },
       }
@@ -135,9 +143,49 @@ export function useMessengerData(partnerId: string, isOpen: boolean) {
       }
       toast.error('Failed to send message')
     },
-    onSettled: (data, error, variables) => {
+    onSuccess: (data, variables, context) => {
       const queryKey = ['chat-messages', variables.input.chatId]
-      queryClient.invalidateQueries({ queryKey })
+
+      // Update the optimistic message with real server data, keeping the same ID to prevent re-animation
+      if (data?.sendMessage && context) {
+        queryClient.setQueryData(
+          queryKey,
+          (
+            old: { pages: MessageType[][]; pageParams: number[] } | undefined,
+          ) => {
+            if (!old || !old.pages.length) return old
+
+            const newPages = old.pages.map((page) =>
+              page.map((msg) => {
+                // Find the optimistic message by content and timestamp (since it was just sent)
+                const isOptimisticMessage =
+                  msg.id.startsWith('optimistic-') &&
+                  msg.content === variables.input.content &&
+                  msg.sender.id === user?.id
+
+                if (isOptimisticMessage) {
+                  // Update with real server data but keep the optimistic ID to prevent re-animation
+                  return {
+                    ...data.sendMessage,
+                    id: msg.id, // Keep optimistic ID for stable React key
+                  }
+                }
+                return msg
+              }),
+            )
+
+            return {
+              ...old,
+              pages: newPages,
+            }
+          },
+        )
+      }
+
+      // Only invalidate chat list to update last message, not the messages themselves
+      queryClient.invalidateQueries({
+        queryKey: useGetMyChatsQuery.getKey({}),
+      })
     },
   })
 
@@ -186,6 +234,7 @@ export function useMessengerData(partnerId: string, isOpen: boolean) {
     onSettled: () => {
       if (!chat) return
       const queryKey = ['chat-messages', chat.id]
+      // Only invalidate messages, not the chat list since editing doesn't change last message timestamp
       queryClient.invalidateQueries({ queryKey })
     },
   })
@@ -226,12 +275,60 @@ export function useMessengerData(partnerId: string, isOpen: boolean) {
     onSettled: () => {
       if (!chat) return
       const queryKey = ['chat-messages', chat.id]
+      // Invalidate both messages and chat list since deleting might change the last message
       queryClient.invalidateQueries({ queryKey })
+      queryClient.invalidateQueries({
+        queryKey: useGetMyChatsQuery.getKey({}),
+      })
     },
   })
 
   const markAsReadMutation = useMarkMessagesAsReadMutation({
+    onMutate: async (variables) => {
+      // Cancel any outgoing refetches for chats
+      const chatsQueryKey = useGetMyChatsQuery.getKey({})
+      await queryClient.cancelQueries({ queryKey: chatsQueryKey })
+
+      // Snapshot the previous chats data
+      const previousChats = queryClient.getQueryData(chatsQueryKey)
+
+      // Optimistically update the unread count to 0 for this chat
+      queryClient.setQueryData(
+        chatsQueryKey,
+        (
+          old:
+            | {
+                getMyChats?: {
+                  id: string
+                  unreadCount: number
+                  [key: string]: unknown
+                }[]
+              }
+            | undefined,
+        ) => {
+          if (!old?.getMyChats) return old
+
+          return {
+            ...old,
+            getMyChats: old.getMyChats.map((chat) =>
+              chat.id === variables.input.chatId
+                ? { ...chat, unreadCount: 0 }
+                : chat,
+            ),
+          }
+        },
+      )
+
+      return { previousChats, chatsQueryKey }
+    },
+    onError: (error, variables, context) => {
+      // Rollback optimistic update on error
+      if (context?.previousChats && context?.chatsQueryKey) {
+        queryClient.setQueryData(context.chatsQueryKey, context.previousChats)
+      }
+    },
     onSuccess: () => {
+      // Invalidate to get the real server state
       queryClient.invalidateQueries({
         queryKey: useGetMyChatsQuery.getKey({}),
       })
@@ -264,9 +361,16 @@ export function useMessengerData(partnerId: string, isOpen: boolean) {
   }
 
   const markMessagesAsRead = () => {
-    if (chat && hasMarkedAsRead.current !== chat.id) {
-      hasMarkedAsRead.current = chat.id
-      markAsReadMutation.mutate({ input: { chatId: chat.id } })
+    if (chat) {
+      // Always mark messages as read when called, don't rely on ref check
+      // The ref is only used to prevent duplicate calls within the same session
+      if (
+        hasMarkedAsRead.current !== chat.id ||
+        !markAsReadMutation.isPending
+      ) {
+        hasMarkedAsRead.current = chat.id
+        markAsReadMutation.mutate({ input: { chatId: chat.id } })
+      }
     }
   }
 

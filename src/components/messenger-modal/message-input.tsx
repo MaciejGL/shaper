@@ -20,28 +20,25 @@ export function MessageInput({
   }
 
   return (
-    <div className="px-4 py-3 w-full">
-      <div className="grid grid-cols-[1fr_auto] gap-2 w-full">
-        <Textarea
-          id="message-input"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Aa"
-          className="flex-1 min-h-max resize-none"
-          autoComplete="off"
-          variant="ghost"
-          autoFocus={false}
-          tabIndex={allowFocus ? 0 : -1}
-        />
-        <Button
-          onClick={onSend}
-          disabled={!value.trim() || disabled}
-          iconOnly={<Send className="size-4" />}
-        >
-          <span className="sr-only">Send message</span>
-        </Button>
-      </div>
+    <div className="grid grid-cols-[1fr_auto] gap-2 w-full items-center px-4 py-3">
+      <Textarea
+        id="message-input"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        placeholder="Aa"
+        className="flex-1 min-h-max resize-none"
+        autoComplete="off"
+        variant="ghost"
+        autoFocus={false}
+        tabIndex={allowFocus ? 0 : -1}
+      />
+      <Button
+        onClick={!disabled && value.trim() ? onSend : undefined}
+        iconOnly={<Send className="size-4" />}
+      >
+        <span className="sr-only">Send message</span>
+      </Button>
     </div>
   )
 }

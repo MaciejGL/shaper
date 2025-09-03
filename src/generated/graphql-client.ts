@@ -4238,7 +4238,7 @@ export type GQLAssignTemplateToSelfMutation = { __typename?: 'Mutation', assignT
 export type GQLUserBasicQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLUserBasicQuery = { __typename?: 'Query', userBasic?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string } | undefined | null } | undefined | null };
+export type GQLUserBasicQuery = { __typename?: 'Query', userBasic?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string } | undefined | null } | undefined | null };
 
 export type GQLGetOrCreateChatQueryVariables = Exact<{
   partnerId: Scalars['ID']['input'];
@@ -12195,6 +12195,7 @@ export const UserBasicDocument = `
       phone
       birthday
       sex
+      avatarUrl
     }
     trainer {
       id

@@ -1,7 +1,8 @@
 export interface MessengerModalProps {
   isOpen: boolean
   onClose: () => void
-  partnerId: string
+  partnerId?: string
+  onPartnerChange?: (partnerId: string) => void
 }
 
 export interface MessageType {

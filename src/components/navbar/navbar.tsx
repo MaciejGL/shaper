@@ -35,7 +35,6 @@ import { MessengerModal } from '../messenger-modal'
 import { useMobileApp } from '../mobile-app-bridge'
 import { Button } from '../ui/button'
 import { ButtonLink } from '../ui/button-link'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import {
   Drawer,
   DrawerContent,
@@ -246,21 +245,20 @@ function NavbarUser({ user }: { user?: UserWithSession | null }) {
 function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
   const isProduction = process.env.NODE_ENV === 'production'
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
-  const [isChatListOpen, setIsChatListOpen] = useState(false)
-  const [selectedChatPartnerId, setSelectedChatPartnerId] = useState<
-    string | null
-  >(null)
+  const [selectedPartnerId, setSelectedPartnerId] = useState<
+    string | undefined
+  >(undefined)
   const unreadCount = useUnreadMessageCount(user)
   const queryClient = useQueryClient()
 
-  // Invalidate unread count when chat list or messenger opens
+  // Invalidate unread count when messenger opens
   useEffect(() => {
-    if (isChatListOpen || isMessengerOpen) {
+    if (isMessengerOpen) {
       queryClient.invalidateQueries({
         queryKey: useGetMyChatsQuery.getKey({}),
       })
     }
-  }, [isChatListOpen, isMessengerOpen, queryClient])
+  }, [isMessengerOpen, queryClient])
 
   return (
     <>
@@ -269,7 +267,7 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
           <Button
             variant="ghost"
             iconOnly={<MessageSquare className="size-5" />}
-            onClick={() => setIsChatListOpen(true)}
+            onClick={() => setIsMessengerOpen(true)}
           />
           {unreadCount > 0 && (
             <span className="absolute top-0 right-0 bg-amber-600 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
@@ -338,28 +336,16 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
         </Drawer>
       </div>
 
-      {/* Chat List Modal */}
-      <TrainerChatListModal
-        isOpen={isChatListOpen}
-        onClose={() => setIsChatListOpen(false)}
-        onSelectChat={(partnerId) => {
-          setSelectedChatPartnerId(partnerId)
-          setIsChatListOpen(false)
-          setIsMessengerOpen(true)
-        }}
-      />
-
       {/* Messenger Modal */}
-      {selectedChatPartnerId && (
-        <MessengerModal
-          isOpen={isMessengerOpen}
-          onClose={() => {
-            setIsMessengerOpen(false)
-            setSelectedChatPartnerId(null)
-          }}
-          partnerId={selectedChatPartnerId}
-        />
-      )}
+      <MessengerModal
+        isOpen={isMessengerOpen}
+        onClose={() => {
+          setIsMessengerOpen(false)
+          setSelectedPartnerId(undefined)
+        }}
+        partnerId={selectedPartnerId}
+        onPartnerChange={setSelectedPartnerId}
+      />
     </>
   )
 }
@@ -482,108 +468,5 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
         </DropdownProvider>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-}
-
-interface TrainerChatListModalProps {
-  isOpen: boolean
-  onClose: () => void
-  onSelectChat: (partnerId: string) => void
-}
-
-function TrainerChatListModal({
-  isOpen,
-  onClose,
-  onSelectChat,
-}: TrainerChatListModalProps) {
-  const queryClient = useQueryClient()
-
-  const { data: chatsData, isLoading } = useGetMyChatsQuery(
-    {},
-    {
-      enabled: isOpen,
-      refetchInterval: isOpen ? 30000 : false, // Refetch every 30s when modal is open
-    },
-  )
-
-  // Invalidate cache when modal opens to refresh unread counts
-  useEffect(() => {
-    if (isOpen) {
-      queryClient.invalidateQueries({
-        queryKey: useGetMyChatsQuery.getKey({}),
-      })
-    }
-  }, [isOpen, queryClient])
-
-  const chats = chatsData?.getMyChats || []
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent dialogTitle="Messages" className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Messages</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-2 max-h-96 overflow-y-auto">
-          {isLoading ? (
-            <div className="text-center py-4 text-muted-foreground">
-              Loading chats...
-            </div>
-          ) : chats.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <MessageSquare className="size-12 mx-auto mb-2 opacity-50" />
-              <p>No messages yet</p>
-              <p className="text-sm">
-                Your client conversations will appear here
-              </p>
-            </div>
-          ) : (
-            chats.map((chat) => {
-              // For trainers, show client info
-              const client = chat.client
-              const clientName =
-                client.profile?.firstName && client.profile?.lastName
-                  ? `${client.profile.firstName} ${client.profile.lastName}`
-                  : client.name || 'Client'
-
-              return (
-                <button
-                  key={chat.id}
-                  onClick={() => onSelectChat(client.id)}
-                  className="w-full p-3 rounded-lg border hover:bg-accent text-left transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <UserAvatar
-                      className="size-10"
-                      imageUrl={client.profile?.avatarUrl}
-                      firstName={client.profile?.firstName || ''}
-                      lastName={client.profile?.lastName || ''}
-                      withFallbackAvatar
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="font-medium text-sm truncate">
-                          {clientName}
-                        </p>
-                        {chat.unreadCount > 0 && (
-                          <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
-                            {chat.unreadCount}
-                          </span>
-                        )}
-                      </div>
-                      {chat.lastMessage && (
-                        <p className="text-sm text-muted-foreground truncate">
-                          {chat.lastMessage.content}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </button>
-              )
-            })
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
   )
 }

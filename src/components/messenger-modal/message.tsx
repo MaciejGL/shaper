@@ -52,7 +52,7 @@ export function Message({
         />
       )}
 
-      <div className={cn('flex-1 max-w-max', isOwnMessage && 'text-left')}>
+      <div className={cn('w-max max-w-[80%]', isOwnMessage && 'text-left')}>
         {/* Timestamp - only show for first message in group */}
         {!isGrouped && (
           <div

@@ -13,6 +13,7 @@ query UserBasic {
       phone
       birthday
       sex
+      avatarUrl
     }
     trainer {
       id
