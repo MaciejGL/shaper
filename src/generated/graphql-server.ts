@@ -291,13 +291,13 @@ export type GQLBatchLogMealFoodItemInput = {
 
 export type GQLChat = {
   __typename?: 'Chat';
-  client: EntireFieldWrapper<GQLUser>;
+  client: EntireFieldWrapper<GQLUserPublic>;
   clientId: EntireFieldWrapper<Scalars['ID']['output']>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   lastMessage?: EntireFieldWrapper<Maybe<GQLMessage>>;
   messages: EntireFieldWrapper<Array<GQLMessage>>;
-  trainer: EntireFieldWrapper<GQLUser>;
+  trainer: EntireFieldWrapper<GQLUserPublic>;
   trainerId: EntireFieldWrapper<Scalars['ID']['output']>;
   unreadCount: EntireFieldWrapper<Scalars['Int']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -307,6 +307,21 @@ export type GQLChat = {
 export type GQLChatMessagesArgs = {
   skip?: InputMaybe<Scalars['Int']['input']>;
   take?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type GQLChatWithMessages = {
+  __typename?: 'ChatWithMessages';
+  client: EntireFieldWrapper<GQLUserPublic>;
+  clientId: EntireFieldWrapper<Scalars['ID']['output']>;
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  hasMoreMessages: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  lastMessage?: EntireFieldWrapper<Maybe<GQLMessage>>;
+  messages: EntireFieldWrapper<Array<GQLMessage>>;
+  trainer: EntireFieldWrapper<GQLUserPublic>;
+  trainerId: EntireFieldWrapper<Scalars['ID']['output']>;
+  unreadCount: EntireFieldWrapper<Scalars['Int']['output']>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
 export type GQLCoachingRequest = {
@@ -935,9 +950,15 @@ export type GQLMessage = {
   isDeleted: EntireFieldWrapper<Scalars['Boolean']['output']>;
   isEdited: EntireFieldWrapper<Scalars['Boolean']['output']>;
   readAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  sender: EntireFieldWrapper<GQLUser>;
+  sender: EntireFieldWrapper<GQLUserPublic>;
   senderId: EntireFieldWrapper<Scalars['ID']['output']>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
+export type GQLMessengerInitialData = {
+  __typename?: 'MessengerInitialData';
+  chats: EntireFieldWrapper<Array<GQLChatWithMessages>>;
+  totalUnreadCount: EntireFieldWrapper<Scalars['Int']['output']>;
 };
 
 export type GQLModerateReviewInput = {
@@ -1895,6 +1916,7 @@ export type GQLQuery = {
   getFeaturedTrainers: EntireFieldWrapper<Array<GQLPublicTrainer>>;
   getMealPlanById: EntireFieldWrapper<GQLMealPlan>;
   getMealPlanTemplates: EntireFieldWrapper<Array<GQLMealPlan>>;
+  getMessengerInitialData: EntireFieldWrapper<GQLMessengerInitialData>;
   getMyChats: EntireFieldWrapper<Array<GQLChat>>;
   getMyMealPlansOverview: EntireFieldWrapper<GQLMyMealPlansPayload>;
   getMyPlansOverview: EntireFieldWrapper<GQLMyPlansPayload>;
@@ -1911,6 +1933,7 @@ export type GQLQuery = {
   getServiceDeliveryTasks: EntireFieldWrapper<Array<GQLServiceTask>>;
   getSubscriptionStats: EntireFieldWrapper<GQLSubscriptionStats>;
   getTemplates: EntireFieldWrapper<Array<GQLTrainingPlan>>;
+  getTotalUnreadCount: EntireFieldWrapper<Scalars['Int']['output']>;
   getTrainerDeliveries: EntireFieldWrapper<Array<GQLServiceDelivery>>;
   getTrainerTasks: EntireFieldWrapper<Array<GQLServiceTask>>;
   getTrainingExercise?: EntireFieldWrapper<Maybe<GQLTrainingExercise>>;
@@ -2055,6 +2078,11 @@ export type GQLQueryGetMealPlanByIdArgs = {
 export type GQLQueryGetMealPlanTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQueryGetMessengerInitialDataArgs = {
+  messagesPerChat?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -3180,6 +3208,7 @@ export type GQLResolversTypes = {
   BatchLogMealFoodItemInput: GQLBatchLogMealFoodItemInput;
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Chat: ResolverTypeWrapper<GQLChat>;
+  ChatWithMessages: ResolverTypeWrapper<GQLChatWithMessages>;
   CoachingRequest: ResolverTypeWrapper<GQLCoachingRequest>;
   CoachingRequestStatus: GQLCoachingRequestStatus;
   CopyExercisesFromDayInput: GQLCopyExercisesFromDayInput;
@@ -3249,6 +3278,7 @@ export type GQLResolversTypes = {
   MealPlan: ResolverTypeWrapper<GQLMealPlan>;
   MealWeek: ResolverTypeWrapper<GQLMealWeek>;
   Message: ResolverTypeWrapper<GQLMessage>;
+  MessengerInitialData: ResolverTypeWrapper<GQLMessengerInitialData>;
   ModerateReviewInput: GQLModerateReviewInput;
   MoveExerciseInput: GQLMoveExerciseInput;
   MuscleGroup: ResolverTypeWrapper<GQLMuscleGroup>;
@@ -3382,6 +3412,7 @@ export type GQLResolversParentTypes = {
   BatchLogMealFoodItemInput: GQLBatchLogMealFoodItemInput;
   Boolean: Scalars['Boolean']['output'];
   Chat: GQLChat;
+  ChatWithMessages: GQLChatWithMessages;
   CoachingRequest: GQLCoachingRequest;
   CopyExercisesFromDayInput: GQLCopyExercisesFromDayInput;
   CreateExerciseInput: GQLCreateExerciseInput;
@@ -3441,6 +3472,7 @@ export type GQLResolversParentTypes = {
   MealPlan: GQLMealPlan;
   MealWeek: GQLMealWeek;
   Message: GQLMessage;
+  MessengerInitialData: GQLMessengerInitialData;
   ModerateReviewInput: GQLModerateReviewInput;
   MoveExerciseInput: GQLMoveExerciseInput;
   MuscleGroup: GQLMuscleGroup;
@@ -3624,13 +3656,28 @@ export type GQLBaseExerciseSubstituteResolvers<ContextType = GQLContext, ParentT
 };
 
 export type GQLChatResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Chat'] = GQLResolversParentTypes['Chat']> = {
-  client?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
+  client?: Resolver<GQLResolversTypes['UserPublic'], ParentType, ContextType>;
   clientId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   lastMessage?: Resolver<Maybe<GQLResolversTypes['Message']>, ParentType, ContextType>;
   messages?: Resolver<Array<GQLResolversTypes['Message']>, ParentType, ContextType, Partial<GQLChatMessagesArgs>>;
-  trainer?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
+  trainer?: Resolver<GQLResolversTypes['UserPublic'], ParentType, ContextType>;
+  trainerId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  unreadCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLChatWithMessagesResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ChatWithMessages'] = GQLResolversParentTypes['ChatWithMessages']> = {
+  client?: Resolver<GQLResolversTypes['UserPublic'], ParentType, ContextType>;
+  clientId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  hasMoreMessages?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  lastMessage?: Resolver<Maybe<GQLResolversTypes['Message']>, ParentType, ContextType>;
+  messages?: Resolver<Array<GQLResolversTypes['Message']>, ParentType, ContextType>;
+  trainer?: Resolver<GQLResolversTypes['UserPublic'], ParentType, ContextType>;
   trainerId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   unreadCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -3919,9 +3966,15 @@ export type GQLMessageResolvers<ContextType = GQLContext, ParentType extends GQL
   isDeleted?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   isEdited?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   readAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  sender?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
+  sender?: Resolver<GQLResolversTypes['UserPublic'], ParentType, ContextType>;
   senderId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLMessengerInitialDataResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MessengerInitialData'] = GQLResolversParentTypes['MessengerInitialData']> = {
+  chats?: Resolver<Array<GQLResolversTypes['ChatWithMessages']>, ParentType, ContextType>;
+  totalUnreadCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -4217,6 +4270,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getFeaturedTrainers?: Resolver<Array<GQLResolversTypes['PublicTrainer']>, ParentType, ContextType, Partial<GQLQueryGetFeaturedTrainersArgs>>;
   getMealPlanById?: Resolver<GQLResolversTypes['MealPlan'], ParentType, ContextType, RequireFields<GQLQueryGetMealPlanByIdArgs, 'id'>>;
   getMealPlanTemplates?: Resolver<Array<GQLResolversTypes['MealPlan']>, ParentType, ContextType, Partial<GQLQueryGetMealPlanTemplatesArgs>>;
+  getMessengerInitialData?: Resolver<GQLResolversTypes['MessengerInitialData'], ParentType, ContextType, Partial<GQLQueryGetMessengerInitialDataArgs>>;
   getMyChats?: Resolver<Array<GQLResolversTypes['Chat']>, ParentType, ContextType>;
   getMyMealPlansOverview?: Resolver<GQLResolversTypes['MyMealPlansPayload'], ParentType, ContextType>;
   getMyPlansOverview?: Resolver<GQLResolversTypes['MyPlansPayload'], ParentType, ContextType>;
@@ -4233,6 +4287,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getServiceDeliveryTasks?: Resolver<Array<GQLResolversTypes['ServiceTask']>, ParentType, ContextType, RequireFields<GQLQueryGetServiceDeliveryTasksArgs, 'serviceDeliveryId'>>;
   getSubscriptionStats?: Resolver<GQLResolversTypes['SubscriptionStats'], ParentType, ContextType>;
   getTemplates?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetTemplatesArgs>>;
+  getTotalUnreadCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   getTrainerDeliveries?: Resolver<Array<GQLResolversTypes['ServiceDelivery']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainerDeliveriesArgs, 'trainerId'>>;
   getTrainerTasks?: Resolver<Array<GQLResolversTypes['ServiceTask']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainerTasksArgs, 'trainerId'>>;
   getTrainingExercise?: Resolver<Maybe<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainingExerciseArgs, 'id'>>;
@@ -4683,6 +4738,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   BaseExercise?: GQLBaseExerciseResolvers<ContextType>;
   BaseExerciseSubstitute?: GQLBaseExerciseSubstituteResolvers<ContextType>;
   Chat?: GQLChatResolvers<ContextType>;
+  ChatWithMessages?: GQLChatWithMessagesResolvers<ContextType>;
   CoachingRequest?: GQLCoachingRequestResolvers<ContextType>;
   CreateMealPlanPayload?: GQLCreateMealPlanPayloadResolvers<ContextType>;
   CreateTrainingPlanPayload?: GQLCreateTrainingPlanPayloadResolvers<ContextType>;
@@ -4706,6 +4762,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   MealPlan?: GQLMealPlanResolvers<ContextType>;
   MealWeek?: GQLMealWeekResolvers<ContextType>;
   Message?: GQLMessageResolvers<ContextType>;
+  MessengerInitialData?: GQLMessengerInitialDataResolvers<ContextType>;
   MuscleGroup?: GQLMuscleGroupResolvers<ContextType>;
   MuscleGroupCategory?: GQLMuscleGroupCategoryResolvers<ContextType>;
   Mutation?: GQLMutationResolvers<ContextType>;

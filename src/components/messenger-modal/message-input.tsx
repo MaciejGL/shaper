@@ -27,7 +27,7 @@ export function MessageInput({
         onChange={(e) => onChange(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Aa"
-        className="flex-1 min-h-max resize-none"
+        className="flex-1 py-2.5 min-h-max resize-none rounded-lg"
         autoComplete="off"
         variant="ghost"
         autoFocus={false}
@@ -35,7 +35,9 @@ export function MessageInput({
       />
       <Button
         onClick={!disabled && value.trim() ? onSend : undefined}
-        iconOnly={<Send className="size-4" />}
+        iconOnly={<Send />}
+        size="icon-lg"
+        className="rounded-lg"
       >
         <span className="sr-only">Send message</span>
       </Button>

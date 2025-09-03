@@ -2,8 +2,8 @@ type Chat {
   id: ID!
   trainerId: ID!
   clientId: ID!
-  trainer: User!
-  client: User!
+  trainer: UserPublic!
+  client: UserPublic!
   messages(skip: Int, take: Int): [Message!]!
   lastMessage: Message
   unreadCount: Int!
@@ -11,9 +11,30 @@ type Chat {
   updatedAt: String!
 }
 
+type ChatWithMessages {
+  id: ID!
+  trainerId: ID!
+  clientId: ID!
+  trainer: UserPublic!
+  client: UserPublic!
+  messages: [Message!]!
+  hasMoreMessages: Boolean!
+  lastMessage: Message
+  unreadCount: Int!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type MessengerInitialData {
+  chats: [ChatWithMessages!]!
+  totalUnreadCount: Int!
+}
+
 type Query {
   getOrCreateChat(partnerId: ID!): Chat!
   getMyChats: [Chat!]!
+  getTotalUnreadCount: Int!
+  getMessengerInitialData(messagesPerChat: Int): MessengerInitialData!
 }
 
 input MarkMessagesAsReadInput {

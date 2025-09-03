@@ -9,7 +9,7 @@ import { GQLContext } from '@/types/gql-context'
 
 import { getChatMessages } from '../message/factory'
 import Message from '../message/model'
-import User from '../user/model'
+import UserPublic from '../user-public/model'
 
 export default class Chat implements GQLChat {
   constructor(
@@ -61,14 +61,14 @@ export default class Chat implements GQLChat {
     if (!this.data.trainer) {
       throw new Error('Trainer data not loaded')
     }
-    return new User(this.data.trainer, this.context)
+    return new UserPublic(this.data.trainer, this.context)
   }
 
   get client() {
     if (!this.data.client) {
       throw new Error('Client data not loaded')
     }
-    return new User(this.data.client, this.context)
+    return new UserPublic(this.data.client, this.context)
   }
 
   get lastMessage() {

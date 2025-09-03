@@ -1,16 +1,16 @@
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query'
-import { useMemo, useRef } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { useUser } from '@/context/user-context'
 import {
   GQLGetChatMessagesQuery,
   GQLGetChatMessagesQueryVariables,
+  GQLGetMessengerInitialDataQuery,
   GetChatMessagesDocument,
   useDeleteMessageMutation,
   useEditMessageMutation,
-  useGetMyChatsQuery,
-  useGetOrCreateChatQuery,
+  useGetMessengerInitialDataQuery,
   useMarkMessagesAsReadMutation,
   useSendMessageMutation,
 } from '@/generated/graphql-client'
@@ -25,76 +25,134 @@ export function useMessengerData(
   const hasMarkedAsRead = useRef<string | null>(null)
   const { user } = useUser()
   const queryClient = useQueryClient()
-
-  // Queries
-  const { data: chatData, isLoading: isLoadingChat } = useGetOrCreateChatQuery(
-    { partnerId: partnerId! },
-    { enabled: isOpen && !!partnerId },
-  )
-
-  const chat = chatData?.getOrCreateChat
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null)
 
   const messagesPerPage = 30
 
+  // Single query to get all messenger data
+  const { data: messengerData, isLoading: isLoadingMessenger } =
+    useGetMessengerInitialDataQuery(
+      { messagesPerChat: messagesPerPage },
+      {
+        enabled: isOpen,
+        staleTime: 30000, // 30 seconds - data is fresh for 30s
+        refetchOnWindowFocus: false,
+        refetchInterval: isOpen ? 10000 : false, // Only refetch when modal is open
+      },
+    )
+
+  // Find the selected chat
+  const selectedChat = useMemo(() => {
+    if (!messengerData?.getMessengerInitialData?.chats) return null
+
+    // If no chat is selected but we have a partnerId, find that chat
+    if (!selectedChatId && partnerId) {
+      const currentUserId = user?.id
+      const chat = messengerData.getMessengerInitialData.chats.find(
+        (chat) =>
+          (chat.trainerId === currentUserId && chat.clientId === partnerId) ||
+          (chat.clientId === currentUserId && chat.trainerId === partnerId),
+      )
+      if (chat) {
+        setSelectedChatId(chat.id)
+        return chat
+      }
+    }
+
+    // Return the selected chat if we have one
+    if (selectedChatId) {
+      return (
+        messengerData.getMessengerInitialData.chats.find(
+          (chat) => chat.id === selectedChatId,
+        ) || null
+      )
+    }
+
+    return null
+  }, [
+    messengerData?.getMessengerInitialData?.chats,
+    selectedChatId,
+    partnerId,
+    user?.id,
+  ])
+
+  // Get additional messages for the selected chat (pagination)
+  // Only fetch when user actually requests more messages
   const {
-    data: messagesData,
-    isLoading: isLoadingMessages,
+    data: additionalMessagesData,
     isFetchingNextPage,
-    hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ['chat-messages', chat?.id],
+    queryKey: ['additional-chat-messages', selectedChat?.id],
     queryFn: async ({ pageParam = 0 }) => {
-      if (!chat?.id) throw new Error('No chat ID')
+      if (!selectedChat?.id) throw new Error('No chat ID')
       const result = await fetchData<
         GQLGetChatMessagesQuery,
         GQLGetChatMessagesQueryVariables
       >(GetChatMessagesDocument, {
-        chatId: chat.id,
-        skip: pageParam,
+        chatId: selectedChat.id,
+        skip: messagesPerPage + pageParam, // Skip initial messages + previously fetched pages
         take: messagesPerPage,
       })()
       return result.getChatMessages
     },
     getNextPageParam: (lastPage, allPages) => {
-      // If the last page has fewer messages than requested, we've reached the end
       if (lastPage.length < messagesPerPage) return undefined
-      // Return the total count of messages loaded so far (this becomes the skip parameter)
       return allPages.flat().length
     },
-    enabled: !!chat?.id,
-    staleTime: 30000, // 30 seconds - data is fresh for 30s
+    // Only enable when we actually have more messages to fetch
+    enabled: false, // We'll manually trigger this when needed
+    staleTime: 30000,
     refetchOnWindowFocus: false,
-    refetchInterval: isOpen ? 10000 : false, // Only refetch when modal is open, less frequently
     initialPageParam: 0,
   })
 
-  // Memoize messages processing to prevent unnecessary re-renders
-  const messages = useMemo(() => {
-    if (!messagesData?.pages) return []
+  // Check if we can fetch more messages
+  const hasNextPage = selectedChat?.hasMoreMessages && !isFetchingNextPage
 
-    return messagesData.pages
-      .slice()
-      .reverse()
-      .map((page) => page.slice().reverse())
-      .flat()
-  }, [messagesData?.pages])
+  // Combine initial messages with additional paginated messages
+  const messages = useMemo(() => {
+    if (!selectedChat?.messages) return []
+
+    const initialMessages = selectedChat.messages
+    const additionalMessages = additionalMessagesData?.pages?.flat() || []
+
+    // Combine and deduplicate by ID to prevent duplicates
+    const allMessages = [...initialMessages, ...additionalMessages]
+    const uniqueMessages = allMessages.filter(
+      (message, index, array) =>
+        array.findIndex((m) => m.id === message.id) === index,
+    )
+
+    // Sort by creation time (oldest first for display)
+    return uniqueMessages.sort(
+      (a, b) =>
+        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+    )
+  }, [selectedChat?.messages, additionalMessagesData?.pages])
 
   // Get partner information
   const currentUserId = user?.id
-  const partner = chat
-    ? currentUserId === chat.trainerId
-      ? chat.client
-      : chat.trainer
+  const partner = selectedChat
+    ? currentUserId === selectedChat.trainerId
+      ? selectedChat.client
+      : selectedChat.trainer
     : null
+
+  // All chats for the messenger list
+  const allChats = messengerData?.getMessengerInitialData?.chats || []
+  const totalUnreadCount =
+    messengerData?.getMessengerInitialData?.totalUnreadCount || 0
 
   // Mutations with optimistic updates
   const sendMessageMutation = useSendMessageMutation({
     onMutate: async (variables) => {
-      const queryKey = ['chat-messages', variables.input.chatId]
-      await queryClient.cancelQueries({ queryKey })
+      const messengerQueryKey = useGetMessengerInitialDataQuery.getKey({
+        messagesPerChat: messagesPerPage,
+      })
+      await queryClient.cancelQueries({ queryKey: messengerQueryKey })
 
-      const previousMessages = queryClient.getQueryData(queryKey)
+      const previousMessengerData = queryClient.getQueryData(messengerQueryKey)
 
       // Create optimistic message
       const optimisticMessage: MessageType = {
@@ -109,238 +167,185 @@ export function useMessengerData(
         updatedAt: new Date().toISOString(),
         sender: {
           id: user?.id || '',
-          name: user?.name || 'You',
-          profile: {
-            firstName: user?.profile?.firstName || null,
-            lastName: user?.profile?.lastName || null,
-            avatarUrl: user?.profile?.avatarUrl || null,
-          },
+          firstName: user?.profile?.firstName || 'You',
+          lastName: user?.profile?.lastName || null,
+          image: user?.profile?.avatarUrl || null,
+          email: user?.email || '',
         },
       }
 
-      // Optimistically update the infinite query
+      // Optimistically update the messenger data
       queryClient.setQueryData(
-        queryKey,
-        (old: { pages: MessageType[][]; pageParams: number[] } | undefined) => {
-          if (!old || !old.pages.length) return old
-
-          // Add the optimistic message to the beginning of the first page (since backend returns newest first)
-          const newPages = [...old.pages]
-          newPages[0] = [optimisticMessage, ...newPages[0]]
+        messengerQueryKey,
+        (old: GQLGetMessengerInitialDataQuery | undefined) => {
+          if (!old?.getMessengerInitialData?.chats) return old
 
           return {
             ...old,
-            pages: newPages,
+            getMessengerInitialData: {
+              ...old.getMessengerInitialData,
+              chats: old.getMessengerInitialData.chats.map((chat) => {
+                if (chat.id === variables.input.chatId) {
+                  return {
+                    ...chat,
+                    messages: [optimisticMessage, ...chat.messages],
+                    lastMessage: optimisticMessage,
+                    updatedAt: new Date().toISOString(),
+                  }
+                }
+                return chat
+              }),
+            },
           }
         },
       )
 
-      return { previousMessages, queryKey }
+      return { previousMessengerData, messengerQueryKey }
     },
     onError: (error, variables, context) => {
-      if (context?.previousMessages && context?.queryKey) {
-        queryClient.setQueryData(context.queryKey, context.previousMessages)
+      if (context?.previousMessengerData && context?.messengerQueryKey) {
+        queryClient.setQueryData(
+          context.messengerQueryKey,
+          context.previousMessengerData,
+        )
       }
       toast.error('Failed to send message')
     },
     onSuccess: (data, variables, context) => {
-      const queryKey = ['chat-messages', variables.input.chatId]
-
-      // Update the optimistic message with real server data, keeping the same ID to prevent re-animation
+      // Update the optimistic message with real server data
       if (data?.sendMessage && context) {
+        const messengerQueryKey = context.messengerQueryKey
         queryClient.setQueryData(
-          queryKey,
-          (
-            old: { pages: MessageType[][]; pageParams: number[] } | undefined,
-          ) => {
-            if (!old || !old.pages.length) return old
-
-            const newPages = old.pages.map((page) =>
-              page.map((msg) => {
-                // Find the optimistic message by content and timestamp (since it was just sent)
-                const isOptimisticMessage =
-                  msg.id.startsWith('optimistic-') &&
-                  msg.content === variables.input.content &&
-                  msg.sender.id === user?.id
-
-                if (isOptimisticMessage) {
-                  // Update with real server data but keep the optimistic ID to prevent re-animation
-                  return {
-                    ...data.sendMessage,
-                    id: msg.id, // Keep optimistic ID for stable React key
-                  }
-                }
-                return msg
-              }),
-            )
+          messengerQueryKey,
+          (old: GQLGetMessengerInitialDataQuery | undefined) => {
+            if (!old?.getMessengerInitialData?.chats) return old
 
             return {
               ...old,
-              pages: newPages,
+              getMessengerInitialData: {
+                ...old.getMessengerInitialData,
+                chats: old.getMessengerInitialData.chats.map((chat) => {
+                  if (chat.id === variables.input.chatId) {
+                    return {
+                      ...chat,
+                      messages: chat.messages.map((msg) => {
+                        const isOptimisticMessage =
+                          msg.id.startsWith('optimistic-') &&
+                          msg.content === variables.input.content &&
+                          msg.sender.id === user?.id
+
+                        if (isOptimisticMessage) {
+                          return {
+                            ...data.sendMessage,
+                            id: msg.id, // Keep optimistic ID for stable React key
+                          }
+                        }
+                        return msg
+                      }),
+                      lastMessage: data.sendMessage,
+                    }
+                  }
+                  return chat
+                }),
+              },
             }
           },
         )
       }
+    },
+  })
 
-      // Only invalidate chat list to update last message, not the messages themselves
+  // Simplified mutations - let's keep them simple and just invalidate the main query
+  const editMessageMutation = useEditMessageMutation({
+    onError: () => toast.error('Failed to update message'),
+    onSettled: () => {
+      // Invalidate the main messenger data to refresh
       queryClient.invalidateQueries({
-        queryKey: useGetMyChatsQuery.getKey({}),
+        queryKey: useGetMessengerInitialDataQuery.getKey({
+          messagesPerChat: messagesPerPage,
+        }),
       })
     },
   })
 
-  const editMessageMutation = useEditMessageMutation({
-    onMutate: async (variables) => {
-      if (!chat) return
-
-      const queryKey = ['chat-messages', chat.id]
-      await queryClient.cancelQueries({ queryKey })
-
-      const previousMessages = queryClient.getQueryData(queryKey)
-
-      queryClient.setQueryData(
-        queryKey,
-        (old: { pages: MessageType[][]; pageParams: number[] } | undefined) => {
-          if (!old) return old
-
-          const newPages = old.pages.map((page) =>
-            page.map((msg) =>
-              msg.id === variables.input.id
-                ? {
-                    ...msg,
-                    content: variables.input.content,
-                    isEdited: true,
-                    updatedAt: new Date().toISOString(),
-                  }
-                : msg,
-            ),
-          )
-
-          return {
-            ...old,
-            pages: newPages,
-          }
-        },
-      )
-
-      return { previousMessages, queryKey }
-    },
-    onError: (error, variables, context) => {
-      if (context?.previousMessages && context?.queryKey) {
-        queryClient.setQueryData(context.queryKey, context.previousMessages)
-      }
-      toast.error('Failed to update message')
-    },
-    onSettled: () => {
-      if (!chat) return
-      const queryKey = ['chat-messages', chat.id]
-      // Only invalidate messages, not the chat list since editing doesn't change last message timestamp
-      queryClient.invalidateQueries({ queryKey })
-    },
-  })
-
   const deleteMessageMutation = useDeleteMessageMutation({
-    onMutate: async (variables) => {
-      if (!chat) return
-
-      const queryKey = ['chat-messages', chat.id]
-      await queryClient.cancelQueries({ queryKey })
-
-      const previousMessages = queryClient.getQueryData(queryKey)
-
-      queryClient.setQueryData(
-        queryKey,
-        (old: { pages: MessageType[][]; pageParams: number[] } | undefined) => {
-          if (!old) return old
-
-          const newPages = old.pages.map((page) =>
-            page.filter((msg) => msg.id !== variables.id),
-          )
-
-          return {
-            ...old,
-            pages: newPages,
-          }
-        },
-      )
-
-      return { previousMessages, queryKey }
-    },
-    onError: (error, variables, context) => {
-      if (context?.previousMessages && context?.queryKey) {
-        queryClient.setQueryData(context.queryKey, context.previousMessages)
-      }
-      toast.error('Failed to delete message')
-    },
+    onError: () => toast.error('Failed to delete message'),
     onSettled: () => {
-      if (!chat) return
-      const queryKey = ['chat-messages', chat.id]
-      // Invalidate both messages and chat list since deleting might change the last message
-      queryClient.invalidateQueries({ queryKey })
+      // Invalidate the main messenger data to refresh
       queryClient.invalidateQueries({
-        queryKey: useGetMyChatsQuery.getKey({}),
+        queryKey: useGetMessengerInitialDataQuery.getKey({
+          messagesPerChat: messagesPerPage,
+        }),
       })
     },
   })
 
   const markAsReadMutation = useMarkMessagesAsReadMutation({
     onMutate: async (variables) => {
-      // Cancel any outgoing refetches for chats
-      const chatsQueryKey = useGetMyChatsQuery.getKey({})
-      await queryClient.cancelQueries({ queryKey: chatsQueryKey })
+      const messengerQueryKey = useGetMessengerInitialDataQuery.getKey({
+        messagesPerChat: messagesPerPage,
+      })
+      await queryClient.cancelQueries({ queryKey: messengerQueryKey })
 
-      // Snapshot the previous chats data
-      const previousChats = queryClient.getQueryData(chatsQueryKey)
+      const previousData = queryClient.getQueryData(messengerQueryKey)
 
-      // Optimistically update the unread count to 0 for this chat
+      // Get current unread count for this chat
+      const currentChat = allChats.find(
+        (chat) => chat.id === variables.input.chatId,
+      )
+      const currentUnreadCount = currentChat?.unreadCount || 0
+
+      // Optimistically update unread counts
       queryClient.setQueryData(
-        chatsQueryKey,
-        (
-          old:
-            | {
-                getMyChats?: {
-                  id: string
-                  unreadCount: number
-                  [key: string]: unknown
-                }[]
-              }
-            | undefined,
-        ) => {
-          if (!old?.getMyChats) return old
+        messengerQueryKey,
+        (old: GQLGetMessengerInitialDataQuery | undefined) => {
+          if (!old?.getMessengerInitialData) return old
 
           return {
             ...old,
-            getMyChats: old.getMyChats.map((chat) =>
-              chat.id === variables.input.chatId
-                ? { ...chat, unreadCount: 0 }
-                : chat,
-            ),
+            getMessengerInitialData: {
+              ...old.getMessengerInitialData,
+              totalUnreadCount: Math.max(
+                0,
+                old.getMessengerInitialData.totalUnreadCount -
+                  currentUnreadCount,
+              ),
+              chats: old.getMessengerInitialData.chats.map((chat) =>
+                chat.id === variables.input.chatId
+                  ? { ...chat, unreadCount: 0 }
+                  : chat,
+              ),
+            },
           }
         },
       )
 
-      return { previousChats, chatsQueryKey }
+      return { previousData, messengerQueryKey }
     },
     onError: (error, variables, context) => {
-      // Rollback optimistic update on error
-      if (context?.previousChats && context?.chatsQueryKey) {
-        queryClient.setQueryData(context.chatsQueryKey, context.previousChats)
+      if (context?.previousData && context?.messengerQueryKey) {
+        queryClient.setQueryData(
+          context.messengerQueryKey,
+          context.previousData,
+        )
       }
     },
-    onSuccess: () => {
-      // Invalidate to get the real server state
+    onSettled: () => {
+      // Refresh to get real server state
       queryClient.invalidateQueries({
-        queryKey: useGetMyChatsQuery.getKey({}),
+        queryKey: useGetMessengerInitialDataQuery.getKey({
+          messagesPerChat: messagesPerPage,
+        }),
       })
     },
   })
 
   // Helper functions
   const sendMessage = (content: string) => {
-    if (!content.trim() || !chat) return
+    if (!content.trim() || !selectedChat) return
     sendMessageMutation.mutate({
       input: {
-        chatId: chat.id,
+        chatId: selectedChat.id,
         content: content.trim(),
       },
     })
@@ -361,15 +366,13 @@ export function useMessengerData(
   }
 
   const markMessagesAsRead = () => {
-    if (chat) {
-      // Always mark messages as read when called, don't rely on ref check
-      // The ref is only used to prevent duplicate calls within the same session
+    if (selectedChat) {
       if (
-        hasMarkedAsRead.current !== chat.id ||
+        hasMarkedAsRead.current !== selectedChat.id ||
         !markAsReadMutation.isPending
       ) {
-        hasMarkedAsRead.current = chat.id
-        markAsReadMutation.mutate({ input: { chatId: chat.id } })
+        hasMarkedAsRead.current = selectedChat.id
+        markAsReadMutation.mutate({ input: { chatId: selectedChat.id } })
       }
     }
   }
@@ -378,17 +381,24 @@ export function useMessengerData(
     hasMarkedAsRead.current = null
   }
 
+  const selectChat = (chatId: string) => {
+    setSelectedChatId(chatId)
+    resetReadStatus()
+  }
+
   return {
     // Data
-    chat,
+    chat: selectedChat,
+    allChats,
     messages,
     partner,
     currentUserId,
+    totalUnreadCount,
 
     // Loading states
-    isLoadingChat,
-    isLoadingMessages,
-    isLoading: isLoadingChat || isLoadingMessages,
+    isLoadingChat: isLoadingMessenger,
+    isLoadingMessages: isLoadingMessenger, // No additional loading since we pre-fetch
+    isLoading: isLoadingMessenger,
     isFetchingNextPage,
     hasNextPage,
 
@@ -401,6 +411,11 @@ export function useMessengerData(
     deleteMessage,
     markMessagesAsRead,
     resetReadStatus,
-    loadMoreMessages: fetchNextPage,
+    selectChat,
+    loadMoreMessages: () => {
+      if (hasNextPage && selectedChat?.id) {
+        fetchNextPage()
+      }
+    },
   }
 }

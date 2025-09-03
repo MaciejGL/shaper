@@ -7,7 +7,7 @@ type Message {
   isEdited: Boolean!
   isDeleted: Boolean!
   readAt: String
-  sender: User!
+  sender: UserPublic!
   createdAt: String!
   updatedAt: String!
 }

@@ -4,12 +4,21 @@ import {
 } from '@/generated/graphql-server'
 import { GQLContext } from '@/types/gql-context'
 
-import { getMyChats, getOrCreateChat, markMessagesAsRead } from './factory'
+import {
+  getMessengerInitialData,
+  getMyChats,
+  getOrCreateChat,
+  getTotalUnreadCount,
+  markMessagesAsRead,
+} from './factory'
 
 export const Query: GQLQueryResolvers<GQLContext> = {
   getOrCreateChat: (_, { partnerId }, context) =>
     getOrCreateChat({ partnerId }, context),
   getMyChats: (_, __, context) => getMyChats(context),
+  getTotalUnreadCount: (_, __, context) => getTotalUnreadCount(context),
+  getMessengerInitialData: (_, { messagesPerChat }, context) =>
+    getMessengerInitialData({ messagesPerChat }, context),
 }
 
 export const Mutation: GQLMutationResolvers<GQLContext> = {

@@ -34,21 +34,19 @@ export function shouldGroupWithPrevious(
   const previousTime = new Date(previousMessage.createdAt).getTime()
   const timeDiffMinutes = (currentTime - previousTime) / (1000 * 60)
 
-  return timeDiffMinutes < 2
+  return timeDiffMinutes < 15
 }
 
 /**
  * Gets display name for a user from their profile or fallback name
  */
 export function getUserDisplayName(user: {
-  name?: string | null
-  profile?: {
-    firstName?: string | null
-    lastName?: string | null
-  } | null
+  firstName?: string | null
+  lastName?: string | null
+  email?: string | null
 }): string {
-  if (user.profile?.firstName || user.profile?.lastName) {
-    return `${user.profile?.firstName || ''} ${user.profile?.lastName || ''}`.trim()
+  if (user.firstName || user.lastName) {
+    return `${user.firstName || ''} ${user.lastName || ''}`.trim()
   }
-  return user.name || 'User'
+  return user.email || 'User'
 }

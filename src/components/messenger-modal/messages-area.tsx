@@ -17,6 +17,7 @@ export function MessagesArea({
   partnerName,
   editingMessageId,
   editContent,
+  shouldScrollToBottom,
   onEditMessage,
   onDeleteMessage,
   onEditContentChange,
@@ -48,16 +49,18 @@ export function MessagesArea({
     })
   }, [])
 
+  // Extract chat ID for dependency array
+  const currentMessagesChatId = messages[0]?.chatId
+
   // Handle scroll to bottom on messages change
   useEffect(() => {
     if (messages.length === 0) return
 
-    const newChatId = messages[0]?.chatId
-    const isChatChange = currentChatId.current !== newChatId
+    const isChatChange = currentChatId.current !== currentMessagesChatId
 
     // Always scroll on chat change or initial load
     if (isChatChange) {
-      currentChatId.current = newChatId
+      currentChatId.current = currentMessagesChatId
       // Reset initial load tracking for new chat
       initialMessageIds.current = new Set(messages.map((m) => m.id))
       setIsInitialLoadComplete(false)
@@ -74,13 +77,25 @@ export function MessagesArea({
       setIsInitialLoadComplete(true)
     }
 
+    // Force scroll if explicitly requested (e.g., after sending a message)
+    if (shouldScrollToBottom) {
+      scrollToBottom(false) // Smooth scroll for sent messages
+      return
+    }
+
     // For new messages in same chat, only scroll if user is near bottom
     if (isNearBottom()) {
       scrollToBottom(false) // Smooth scroll for new messages
     }
-    // Only depend on length and chatId to avoid unnecessary re-runs
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages.length, messages[0]?.chatId, isInitialLoadComplete])
+  }, [
+    messages.length,
+    currentMessagesChatId,
+    isInitialLoadComplete,
+    shouldScrollToBottom,
+    scrollToBottom,
+    isNearBottom,
+    messages,
+  ])
 
   // Handle infinite scroll for older messages
   const handleScroll = useCallback(() => {
@@ -101,7 +116,7 @@ export function MessagesArea({
   // Maintain scroll position after loading older messages
   useEffect(() => {
     const container = messagesContainerRef.current
-    if (!container || !isFetchingNextPage) return
+    if (!container || isFetchingNextPage) return // Only run when fetching completes
 
     // Restore scroll position after new messages are loaded at the top
     const newScrollHeight = container.scrollHeight
@@ -110,7 +125,7 @@ export function MessagesArea({
     if (heightDifference > 0) {
       container.scrollTop = heightDifference
     }
-  }, [isFetchingNextPage])
+  }, [isFetchingNextPage, messages.length])
 
   // Attach scroll listener
   useEffect(() => {

@@ -18,12 +18,10 @@ export interface MessageType {
   updatedAt: string
   sender: {
     id: string
-    name?: string | null
-    profile?: {
-      firstName?: string | null
-      lastName?: string | null
-      avatarUrl?: string | null
-    } | null
+    email: string
+    firstName?: string | null
+    lastName?: string | null
+    image?: string | null
   }
 }
 
@@ -59,6 +57,7 @@ export interface MessagesAreaProps {
   partnerName: string
   editingMessageId?: string | null
   editContent: string
+  shouldScrollToBottom?: boolean
   onEditMessage: (message: MessageType) => void
   onDeleteMessage: (messageId: string) => void
   onEditContentChange: (content: string) => void

@@ -1,6 +1,5 @@
 'use client'
 
-import { useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
   LogInIcon,
@@ -23,7 +22,7 @@ import { useEffect, useState } from 'react'
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
 import {
   GQLUserRole,
-  useGetMyChatsQuery,
+  useGetTotalUnreadCountQuery,
   useNotificationsQuery,
 } from '@/generated/graphql-client'
 import { useScrollVisibility } from '@/hooks/use-scroll-visibility'
@@ -58,7 +57,7 @@ import { SwapAccountButton } from './swap-account'
 
 // Custom hook to get total unread message count
 function useUnreadMessageCount(user?: UserWithSession | null) {
-  const { data: chatsData } = useGetMyChatsQuery(
+  const { data } = useGetTotalUnreadCountQuery(
     {},
     {
       enabled: !!user?.user?.id,
@@ -66,13 +65,7 @@ function useUnreadMessageCount(user?: UserWithSession | null) {
     },
   )
 
-  const unreadCount =
-    chatsData?.getMyChats?.reduce(
-      (total, chat) => total + (chat.unreadCount || 0),
-      0,
-    ) || 0
-
-  return unreadCount
+  return data?.getTotalUnreadCount || 0
 }
 
 export const Navbar = ({
@@ -87,16 +80,6 @@ export const Navbar = ({
   const { theme, setTheme } = useTheme()
   const { isVisible } = useScrollVisibility()
   const unreadCount = useUnreadMessageCount(user)
-  const queryClient = useQueryClient()
-
-  // Invalidate unread count when messenger modal opens
-  useEffect(() => {
-    if (isMessengerOpen) {
-      queryClient.invalidateQueries({
-        queryKey: useGetMyChatsQuery.getKey({}),
-      })
-    }
-  }, [isMessengerOpen, queryClient])
 
   useEffect(() => {
     setMounted(true)
@@ -249,16 +232,6 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
     string | undefined
   >(undefined)
   const unreadCount = useUnreadMessageCount(user)
-  const queryClient = useQueryClient()
-
-  // Invalidate unread count when messenger opens
-  useEffect(() => {
-    if (isMessengerOpen) {
-      queryClient.invalidateQueries({
-        queryKey: useGetMyChatsQuery.getKey({}),
-      })
-    }
-  }, [isMessengerOpen, queryClient])
 
   return (
     <>
@@ -266,6 +239,7 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
         <div className="relative">
           <Button
             variant="ghost"
+            className="rounded-full"
             iconOnly={<MessageSquare className="size-5" />}
             onClick={() => setIsMessengerOpen(true)}
           />

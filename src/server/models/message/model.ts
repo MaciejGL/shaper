@@ -5,7 +5,7 @@ import {
 } from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
-import User from '../user/model'
+import UserPublic from '../user-public/model'
 
 export default class Message implements GQLMessage {
   constructor(
@@ -61,6 +61,6 @@ export default class Message implements GQLMessage {
     if (!this.data.sender) {
       throw new Error('Sender data not loaded')
     }
-    return new User(this.data.sender, this.context)
+    return new UserPublic(this.data.sender, this.context)
   }
 }

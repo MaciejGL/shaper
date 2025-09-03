@@ -5,21 +5,18 @@ query GetOrCreateChat($partnerId: ID!) {
     clientId
     trainer {
       id
-      name
-      profile {
-        firstName
-        lastName
-        avatarUrl
-      }
+      email
+
+      firstName
+      lastName
+      image
     }
     client {
       id
-      name
-      profile {
-        firstName
-        lastName
-        avatarUrl
-      }
+      email
+      firstName
+      lastName
+      image
     }
     unreadCount
     lastMessage {
@@ -28,7 +25,8 @@ query GetOrCreateChat($partnerId: ID!) {
       createdAt
       sender {
         id
-        name
+        firstName
+        lastName
       }
     }
     createdAt
@@ -49,12 +47,10 @@ query GetChatMessages($chatId: ID!, $skip: Int, $take: Int) {
     updatedAt
     sender {
       id
-      name
-      profile {
-        firstName
-        lastName
-        avatarUrl
-      }
+      firstName
+      lastName
+      email
+      image
     }
   }
 }
@@ -66,21 +62,17 @@ query GetMyChats {
     clientId
     trainer {
       id
-      name
-      profile {
-        firstName
-        lastName
-        avatarUrl
-      }
+      firstName
+      lastName
+      email
+      image
     }
     client {
       id
-      name
-      profile {
-        firstName
-        lastName
-        avatarUrl
-      }
+      firstName
+      lastName
+      email
+      image
     }
     unreadCount
     lastMessage {
@@ -90,6 +82,69 @@ query GetMyChats {
     }
     createdAt
     updatedAt
+  }
+}
+
+query GetTotalUnreadCount {
+  getTotalUnreadCount
+}
+
+query GetMessengerInitialData($messagesPerChat: Int) {
+  getMessengerInitialData(messagesPerChat: $messagesPerChat) {
+    chats {
+      id
+      trainerId
+      clientId
+      trainer {
+        id
+        firstName
+        lastName
+        email
+        image
+      }
+      client {
+        id
+        firstName
+        lastName
+        email
+        image
+      }
+      messages {
+        id
+        chatId
+        content
+        imageUrl
+        isEdited
+        isDeleted
+        readAt
+        createdAt
+        updatedAt
+        sender {
+          id
+          email
+          firstName
+          lastName
+          image
+        }
+      }
+      hasMoreMessages
+      lastMessage {
+        id
+        content
+        createdAt
+        sender {
+          id
+          email
+          firstName
+          lastName
+          image
+        }
+      }
+      unreadCount
+      createdAt
+      updatedAt
+    }
+    totalUnreadCount
   }
 }
 
@@ -106,12 +161,10 @@ mutation SendMessage($input: SendMessageInput!) {
     updatedAt
     sender {
       id
-      name
-      profile {
-        firstName
-        lastName
-        avatarUrl
-      }
+
+      firstName
+      lastName
+      image
     }
   }
 }
@@ -129,12 +182,9 @@ mutation EditMessage($input: EditMessageInput!) {
     updatedAt
     sender {
       id
-      name
-      profile {
-        firstName
-        lastName
-        avatarUrl
-      }
+      firstName
+      lastName
+      image
     }
   }
 }

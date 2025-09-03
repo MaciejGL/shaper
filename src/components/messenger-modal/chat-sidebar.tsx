@@ -2,11 +2,10 @@
 
 import { formatDistanceToNow } from 'date-fns'
 import { MessageSquare, X } from 'lucide-react'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { UserAvatar } from '@/components/user-avatar'
-import { useGetMyChatsQuery } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
 import { getUserDisplayName } from './utils'
@@ -17,6 +16,28 @@ export interface ChatSidebarProps {
   currentPartnerId?: string
   onChatSelect: (partnerId: string) => void
   currentUserId?: string
+  chats?: {
+    id: string
+    trainerId: string
+    clientId: string
+    trainer: {
+      id: string
+      email: string
+      firstName?: string | null
+      lastName?: string | null
+      image?: string | null
+    }
+    client: {
+      id: string
+      email: string
+      firstName?: string | null
+      lastName?: string | null
+      image?: string | null
+    }
+    lastMessage?: { id: string; content: string; createdAt: string } | null
+    unreadCount: number
+  }[]
+  isLoading?: boolean
 }
 
 export function ChatSidebar({
@@ -25,16 +46,9 @@ export function ChatSidebar({
   currentPartnerId,
   onChatSelect,
   currentUserId,
+  chats = [],
+  isLoading = false,
 }: ChatSidebarProps) {
-  const { data: chatsData, isLoading } = useGetMyChatsQuery(
-    {},
-    {
-      staleTime: 60000, // 60 seconds - chat list doesn't change frequently
-      refetchOnWindowFocus: false, // Don't refetch when window gains focus
-    },
-  )
-  const chats = useMemo(() => chatsData?.getMyChats || [], [chatsData])
-
   const handleChatClick = (chat: (typeof chats)[0]) => {
     const partnerId =
       currentUserId === chat.trainerId ? chat.clientId : chat.trainerId
@@ -102,7 +116,7 @@ export function ChatSidebar({
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-80 bg-background border-r border-muted flex flex-col',
+          'fixed inset-y-0 left-0 z-50 w-80 bg-card dark:bg-background border-r border-muted flex flex-col',
           'lg:relative lg:z-auto lg:translate-x-0',
           'transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
@@ -158,7 +172,7 @@ export function ChatSidebar({
                     key={chat.id}
                     onClick={() => handleChatClick(chat)}
                     className={cn(
-                      'w-full p-3 text-left rounded-lg transition-colors hover:bg-muted/50 overflow-hidden',
+                      'w-full p-3 text-left rounded-lg transition-colors hover:bg-muted/50 overflow-hidden cursor-pointer',
                       isActive && 'bg-card-on-card',
                     )}
                   >
@@ -166,9 +180,9 @@ export function ChatSidebar({
                       <div className="relative flex-shrink-0">
                         <UserAvatar
                           withFallbackAvatar
-                          firstName={partner.profile?.firstName || ''}
-                          lastName={partner.profile?.lastName || ''}
-                          imageUrl={partner.profile?.avatarUrl || undefined}
+                          firstName={partner.firstName || ''}
+                          lastName={partner.lastName || ''}
+                          imageUrl={partner.image || undefined}
                           className="size-10"
                         />
                         {hasUnread && (

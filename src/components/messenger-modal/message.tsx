@@ -31,12 +31,12 @@ export function Message({
         isOwnMessage && 'flex-row-reverse',
         isGrouped && 'mt-0',
       )}
-      initial={shouldAnimate ? { opacity: 0, y: 20, scale: 0.95 } : false}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      initial={shouldAnimate ? { opacity: 0, scale: 0.98 } : false}
+      animate={{ opacity: 1, scale: 1 }}
       transition={
         shouldAnimate
           ? {
-              duration: 0.3,
+              duration: 0.2,
               ease: [0.23, 1, 0.32, 1],
               delay: 0.05,
             }
@@ -50,9 +50,9 @@ export function Message({
       ) : (
         <UserAvatar
           withFallbackAvatar
-          firstName={message.sender.profile?.firstName || ''}
-          lastName={message.sender.profile?.lastName || ''}
-          imageUrl={message.sender.profile?.avatarUrl || undefined}
+          firstName={message.sender.firstName || ''}
+          lastName={message.sender.lastName || ''}
+          imageUrl={message.sender.image || undefined}
           className="size-8"
         />
       )}
@@ -128,9 +128,19 @@ export function Message({
             </div>
           </div>
         ) : (
-          <div className="bg-card-on-card rounded-xl px-3 py-2">
+          <div
+            className={cn(
+              'rounded-xl px-3 py-2 bg-gradient-to-br',
+              isOwnMessage
+                ? 'from-amber-400/30 to-amber-400/50 dark:from-amber-500/60 dark:to-amber-500/50'
+                : 'from-primary/5 to-primary/10',
+            )}
+          >
             <p
-              className="text-sm whitespace-pre-wrap"
+              className={cn(
+                'text-sm whitespace-pre-wrap',
+                message.isDeleted && 'italic text-muted-foreground text-xs',
+              )}
               onClick={() => isOwnMessage && onEdit(message)}
             >
               {message.content}

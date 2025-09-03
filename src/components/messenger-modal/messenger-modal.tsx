@@ -31,11 +31,13 @@ export function MessengerModal({
   const [editContent, setEditContent] = useState('')
   const [allowInputFocus, setAllowInputFocus] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [shouldScrollToBottom, setShouldScrollToBottom] = useState(false)
 
   const { user } = useUser()
 
   const {
     chat,
+    allChats,
     messages,
     partner,
     currentUserId,
@@ -48,12 +50,13 @@ export function MessengerModal({
     deleteMessage,
     markMessagesAsRead,
     resetReadStatus,
+    selectChat,
     loadMoreMessages,
   } = useMessengerData(partnerId, isOpen)
 
   // Get partner display info
   const partnerName = partner ? getUserDisplayName(partner) : 'User'
-  const partnerAvatar = partner?.profile?.avatarUrl || undefined
+  const partnerAvatar = partner?.image || undefined
 
   // Mark messages as read when modal opens
   useEffect(() => {
@@ -103,6 +106,10 @@ export function MessengerModal({
   const handleSendMessage = () => {
     sendMessage(newMessage)
     setNewMessage('')
+    // Trigger scroll to bottom after sending
+    setShouldScrollToBottom(true)
+    // Reset the flag after a brief delay to allow for re-triggering
+    setTimeout(() => setShouldScrollToBottom(false), 100)
   }
 
   const handleEditMessage = (message: (typeof messages)[0]) => {
@@ -127,6 +134,17 @@ export function MessengerModal({
   }
 
   const handleChatSelect = (newPartnerId: string) => {
+    // Find the chat ID for the selected partner
+    const selectedChatForPartner = allChats.find(
+      (chat) =>
+        (chat.trainerId === user?.id && chat.clientId === newPartnerId) ||
+        (chat.clientId === user?.id && chat.trainerId === newPartnerId),
+    )
+
+    if (selectedChatForPartner) {
+      selectChat(selectedChatForPartner.id)
+    }
+
     if (onPartnerChange) {
       onPartnerChange(newPartnerId)
     }
@@ -152,10 +170,12 @@ export function MessengerModal({
           currentPartnerId={partnerId}
           onChatSelect={handleChatSelect}
           currentUserId={user?.id}
+          chats={allChats}
+          isLoading={isLoading}
         />
 
         {/* Main Chat Area */}
-        <div className="flex-1 flex flex-col min-w-0 h-full lg:border-l lg:border-border overflow-hidden">
+        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
           {/* Header */}
           <DialogHeader className="px-4 py-3">
             <div className="flex items-center gap-3">
@@ -169,8 +189,8 @@ export function MessengerModal({
               </Button>
               <UserAvatar
                 withFallbackAvatar
-                firstName={partner?.profile?.firstName || ''}
-                lastName={partner?.profile?.lastName || ''}
+                firstName={partner?.firstName || ''}
+                lastName={partner?.lastName || ''}
                 imageUrl={partnerAvatar}
                 className="size-8"
               />
@@ -199,6 +219,7 @@ export function MessengerModal({
               partnerName={partnerName}
               editingMessageId={editingMessageId}
               editContent={editContent}
+              shouldScrollToBottom={shouldScrollToBottom}
               onEditMessage={handleEditMessage}
               onDeleteMessage={handleDeleteMessage}
               onEditContentChange={setEditContent}
