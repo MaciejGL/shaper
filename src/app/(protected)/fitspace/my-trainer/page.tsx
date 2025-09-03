@@ -29,6 +29,7 @@ import { useScrollToFromParams } from '@/hooks/use-scroll-to'
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { ClientServiceDeliveriesSection } from './components/client-service-deliveries-section'
+import { SubscriptionInfoSection } from './components/subscription-info-section'
 import { TrainerSharedNotesSection } from './components/trainer-shared-notes-section'
 
 type CoachingRequest = GQLMyCoachingRequestsQuery['coachingRequests'][0]
@@ -124,6 +125,11 @@ function TrainerView({ trainer }: TrainerViewProps) {
         showRequestCoaching={false}
       />
 
+      {/* Trainer Shared Notes Section */}
+      <div id="trainer-notes-section">
+        <TrainerSharedNotesSection />
+      </div>
+
       <Card borderless>
         <CardContent>
           {/* Scheduled Sessions */}
@@ -144,19 +150,17 @@ function TrainerView({ trainer }: TrainerViewProps) {
         </CardFooter>
       </Card>
 
-      {/* Trainer Shared Notes Section */}
-      <div id="trainer-notes-section">
-        <TrainerSharedNotesSection />
-      </div>
-
       {/* Service Deliveries Section */}
       <ClientServiceDeliveriesSection trainerId={trainer.id} />
+
+      {/* Subscription Information */}
+      <SubscriptionInfoSection />
 
       <div className="grid grid-cols-2 gap-2">
         <Button
           className="w-full"
           size="lg"
-          variant="ghost"
+          variant="outline"
           onClick={handleCancelCoaching}
         >
           End Coaching

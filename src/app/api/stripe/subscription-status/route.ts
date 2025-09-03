@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { SUBSCRIPTION_HELPERS } from '@/lib/stripe/config'
+import { stripe } from '@/lib/stripe/stripe'
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,10 +48,28 @@ export async function GET(request: NextRequest) {
     // Find the most recent active/pending subscription for display
     const primarySubscription = subscriptions[0]
 
+    // Check if subscription is cancelled but still active (cancel_at_period_end)
+    let isCancelledButActive = false
+    if (primarySubscription.stripeSubscriptionId) {
+      try {
+        const stripeSubscription = await stripe.subscriptions.retrieve(
+          primarySubscription.stripeSubscriptionId,
+        )
+        isCancelledButActive = stripeSubscription.cancel_at_period_end || false
+      } catch (error) {
+        console.error('Error retrieving Stripe subscription:', error)
+        // Continue without cancellation status if Stripe call fails
+      }
+    }
+
     // Check if user has premium access from ANY subscription
     const hasPremiumAccess = subscriptions.some((sub) => {
       const packageName = sub.package.name.toLowerCase()
-      const isNotExpired = now <= sub.endDate
+
+      // For trial subscriptions, check trialEnd; for regular subscriptions, check endDate
+      const effectiveEndDate =
+        sub.isTrialActive && sub.trialEnd ? sub.trialEnd : sub.endDate
+      const isNotExpired = now <= effectiveEndDate
 
       // Premium access granted by:
       // 1. Traditional premium subscription
@@ -88,9 +107,14 @@ export async function GET(request: NextRequest) {
       now <= subscription.gracePeriodEnd
 
     // Check if subscription is still valid
+    // For trial subscriptions, check trialEnd; for regular subscriptions, check endDate
+    const effectiveEndDate =
+      subscription.isTrialActive && subscription.trialEnd
+        ? subscription.trialEnd
+        : subscription.endDate
     const isSubscriptionValid =
       subscription.status === SubscriptionStatus.ACTIVE &&
-      now <= subscription.endDate
+      now <= effectiveEndDate
 
     // Premium access already calculated above based on subscription types
 
@@ -111,10 +135,9 @@ export async function GET(request: NextRequest) {
           (1000 * 60 * 60 * 24),
       )
     } else if (isSubscriptionValid) {
-      expiresAt = subscription.endDate
+      expiresAt = effectiveEndDate
       daysRemaining = Math.ceil(
-        (subscription.endDate.getTime() - now.getTime()) /
-          (1000 * 60 * 60 * 24),
+        (effectiveEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
       )
     }
 
@@ -124,6 +147,8 @@ export async function GET(request: NextRequest) {
       status = 'TRIAL'
     } else if (isInGracePeriod) {
       status = 'GRACE_PERIOD'
+    } else if (isSubscriptionValid && isCancelledButActive) {
+      status = 'CANCELLED_ACTIVE'
     } else if (isSubscriptionValid) {
       status = 'ACTIVE'
     }
@@ -137,12 +162,13 @@ export async function GET(request: NextRequest) {
         id: subscription.id,
         status: subscription.status,
         startDate: subscription.startDate,
-        endDate: subscription.endDate,
+        endDate: effectiveEndDate,
         package: {
           name: subscription.package.name,
           duration: subscription.package.duration,
         },
         stripeSubscriptionId: subscription.stripeSubscriptionId,
+        isCancelledButActive,
       },
       trial: isInTrial
         ? {

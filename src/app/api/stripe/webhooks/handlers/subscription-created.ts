@@ -21,6 +21,7 @@ export async function handleSubscriptionCreated(
   try {
     const customerId = subscription.customer as string
     const priceId = subscription.items.data[0]?.price.id
+    // Use Stripe's subscription data directly - trust their calculations
     const startDate = new Date(
       subscription.items.data[0].current_period_start * 1000,
     )
@@ -72,6 +73,20 @@ export async function handleSubscriptionCreated(
       trialEnd,
       isTrial,
       assignedTrainerId,
+    })
+
+    // Log what was stored in database
+    console.info(`💾 Created subscription record:`, {
+      userId: user.id,
+      packageId: packageTemplate.id,
+      packageName: packageTemplate.name,
+      stripeSubscriptionId: subscription.id,
+      startDate: startDate.toISOString(),
+      endDate: endDate.toISOString(),
+      trialStart: trialStart?.toISOString() || null,
+      trialEnd: trialEnd?.toISOString() || null,
+      isTrialActive: isTrial,
+      trainerId: assignedTrainerId || null,
     })
 
     // Mark customer as having used a trial in Stripe

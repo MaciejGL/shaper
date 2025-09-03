@@ -87,11 +87,18 @@ async function updateSubscriptionAfterPayment(
     lastPaymentAttempt: new Date(),
   }
 
-  // DON'T update endDate for trial subscriptions
-  // Trial invoice period_end is the same as period_start (setup date)
-  // The subscription.created webhook already set the correct trial endDate
+  // DON'T update endDate for trial subscriptions OR initial setup invoices
+  // Initial setup invoices have period_end = period_start (setup date)
+  // The subscription.created webhook already set the correct endDate
   const invoicePeriodEnd = invoice.period_end
-  if (!subscription.isTrialActive && invoicePeriodEnd) {
+  const invoicePeriodStart = invoice.period_start
+  const isInitialSetupInvoice = invoicePeriodEnd === invoicePeriodStart
+
+  if (
+    !subscription.isTrialActive &&
+    invoicePeriodEnd &&
+    !isInitialSetupInvoice
+  ) {
     updateData.endDate = new Date(invoicePeriodEnd * 1000)
   }
 

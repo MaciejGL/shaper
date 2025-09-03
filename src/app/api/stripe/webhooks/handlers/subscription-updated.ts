@@ -9,11 +9,16 @@ export async function handleSubscriptionUpdated(
   try {
     const status = mapStripeStatusToSubscriptionStatus(subscription.status)
 
+    // Use subscription's current_period_end from items data
+    const endDate = new Date(
+      subscription.items.data[0].current_period_end * 1000,
+    )
+
     await prisma.userSubscription.updateMany({
       where: { stripeSubscriptionId: subscription.id },
       data: {
         status,
-        endDate: new Date(subscription.items.data[0].current_period_end * 1000),
+        endDate,
       },
     })
 

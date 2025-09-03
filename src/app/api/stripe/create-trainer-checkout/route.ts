@@ -301,6 +301,8 @@ ${JSON.stringify(revenue, null, 2)}
       // For subscriptions, include trainer assignment and revenue sharing
       ...(mode === 'subscription' && {
         subscription_data: {
+          // Coaching subscriptions should never have trials (trainers need immediate payment)
+          trial_period_days: undefined,
           // Add revenue sharing for subscriptions using application_fee_percent
           ...(payout.connectedAccountId && {
             application_fee_percent: COMMISSION_CONFIG.PLATFORM_PERCENTAGE, // 10%

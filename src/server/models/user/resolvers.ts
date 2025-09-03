@@ -8,6 +8,7 @@ import {
   User as PrismaUser,
   UserProfile as PrismaUserProfile,
   UserSession as PrismaUserSession,
+  SubscriptionStatus,
 } from '@/generated/prisma/client'
 import {
   invalidateClientAccessCache,
@@ -17,6 +18,7 @@ import { requireAdminUser } from '@/lib/admin-auth'
 import { prisma } from '@/lib/db'
 import { notifyCoachingCancelled } from '@/lib/notifications/push-notification-service'
 import { getFromCache, setInCache } from '@/lib/redis'
+import { stripe } from '@/lib/stripe/stripe'
 import { GQLContext } from '@/types/gql-context'
 
 import { createNotification } from '../notification/factory'
@@ -33,6 +35,45 @@ type UserWithIncludes = PrismaUser & {
   _count?: {
     sessions: number
     clients: number
+  }
+}
+
+// Helper function to cancel user's Stripe subscriptions at period end
+async function cancelUserStripeSubscriptions(userId: string) {
+  try {
+    // Find active subscriptions with Stripe subscription IDs
+    const activeSubscriptions = await prisma.userSubscription.findMany({
+      where: {
+        userId,
+        status: SubscriptionStatus.ACTIVE,
+        stripeSubscriptionId: { not: null },
+      },
+    })
+
+    // Cancel each subscription at period end
+    for (const subscription of activeSubscriptions) {
+      if (subscription.stripeSubscriptionId) {
+        try {
+          // Cancel at period end - user keeps access until current period ends
+          await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
+            cancel_at_period_end: true,
+          })
+
+          console.info(
+            `✅ Scheduled Stripe subscription ${subscription.stripeSubscriptionId} for cancellation at period end`,
+          )
+        } catch (stripeError) {
+          console.error(
+            `Failed to cancel Stripe subscription ${subscription.stripeSubscriptionId}:`,
+            stripeError,
+          )
+          // Don't throw - we don't want to fail the entire coaching cancellation if Stripe fails
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Error cancelling user Stripe subscriptions:', error)
+    // Don't throw - we don't want to fail the entire coaching cancellation
   }
 }
 
@@ -826,6 +867,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       )
 
       await notifyCoachingCancelled(trainerId, clientName)
+
+      // Cancel any active Stripe subscriptions at period end
+      await cancelUserStripeSubscriptions(userId)
 
       // Invalidate access control cache for both users since their relationship ended
       await Promise.all([

@@ -6,6 +6,7 @@ import {
   Loader2,
   RefreshCw,
   Shield,
+  Trash2,
   UserCheck,
   UserPlus,
   UserX,
@@ -41,6 +42,9 @@ export function UsersTab() {
   const [stats, setStats] = useState<UserStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [cleanupLoading, setCleanupLoading] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [cleanupResult, setCleanupResult] = useState<any>(null)
 
   const fetchStats = async () => {
     try {
@@ -64,6 +68,47 @@ export function UsersTab() {
       )
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleCleanupTestData = async (dryRun = false) => {
+    if (!dryRun) {
+      const confirmed = window.confirm(
+        'Are you sure you want to clean up test data? This will permanently delete ServiceTasks, ServiceDeliveries, TrainerOffers, and UserSubscriptions for the specified test user.',
+      )
+      if (!confirmed) return
+    }
+
+    try {
+      setCleanupLoading(true)
+      setCleanupResult(null)
+      setError(null)
+
+      const response = await fetch('/api/admin/cleanup-test-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dryRun }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to cleanup test data')
+      }
+
+      const result = await response.json()
+      setCleanupResult(result)
+
+      if (!dryRun) {
+        // Refresh stats after cleanup
+        await fetchStats()
+      }
+    } catch (error) {
+      console.error('Error cleaning up test data:', error)
+      setError(
+        error instanceof Error ? error.message : 'Failed to cleanup test data',
+      )
+    } finally {
+      setCleanupLoading(false)
     }
   }
 
@@ -239,6 +284,81 @@ export function UsersTab() {
             </AlertDescription>
           </Alert>
         )}
+
+      {/* Test Data Cleanup */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Trash2 className="h-5 w-5" />
+            Test Data Cleanup
+          </CardTitle>
+          <CardDescription>
+            Clean up test data for specific user: cma8vis7c0004uh392ewu2vnb
+            (m.glowacki01@gmail.com)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              onClick={() => handleCleanupTestData(true)}
+              disabled={cleanupLoading}
+              variant="outline"
+              size="sm"
+            >
+              {cleanupLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Dry Run (Preview)
+            </Button>
+            <Button
+              onClick={() => handleCleanupTestData(false)}
+              disabled={cleanupLoading}
+              variant="destructive"
+              size="sm"
+            >
+              {cleanupLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Trash2 className="h-4 w-4 mr-2" />
+              )}
+              Execute Cleanup
+            </Button>
+          </div>
+
+          {cleanupResult && (
+            <Alert variant={cleanupResult.success ? 'default' : 'destructive'}>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <div className="space-y-2">
+                  <p>
+                    <strong>{cleanupResult.message}</strong>
+                  </p>
+                  {cleanupResult.stats && (
+                    <div className="text-sm">
+                      <p>User: {cleanupResult.stats.userEmail}</p>
+                      <p>Service Tasks: {cleanupResult.stats.serviceTasks}</p>
+                      <p>
+                        Service Deliveries:{' '}
+                        {cleanupResult.stats.serviceDeliveries}
+                      </p>
+                      <p>Trainer Offers: {cleanupResult.stats.trainerOffers}</p>
+                      <p>
+                        User Subscriptions:{' '}
+                        {cleanupResult.stats.userSubscriptions}
+                      </p>
+                      {cleanupResult.stats.stripeCustomerIdCleared && (
+                        <p>✅ Stripe Customer ID cleared</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
 
       {/* User Management Table */}
       <Card>
