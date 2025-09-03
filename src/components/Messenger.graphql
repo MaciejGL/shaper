@@ -1,0 +1,152 @@
+query GetOrCreateChat($partnerId: ID!) {
+  getOrCreateChat(partnerId: $partnerId) {
+    id
+    trainerId
+    clientId
+    trainer {
+      id
+      name
+      profile {
+        firstName
+        lastName
+        avatarUrl
+      }
+    }
+    client {
+      id
+      name
+      profile {
+        firstName
+        lastName
+        avatarUrl
+      }
+    }
+    unreadCount
+    lastMessage {
+      id
+      content
+      createdAt
+      sender {
+        id
+        name
+      }
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+query GetChatMessages($chatId: ID!, $skip: Int, $take: Int) {
+  getChatMessages(chatId: $chatId, skip: $skip, take: $take) {
+    id
+    chatId
+    content
+    imageUrl
+    isEdited
+    isDeleted
+    readAt
+    createdAt
+    updatedAt
+    sender {
+      id
+      name
+      profile {
+        firstName
+        lastName
+        avatarUrl
+      }
+    }
+  }
+}
+
+query GetMyChats {
+  getMyChats {
+    id
+    trainerId
+    clientId
+    trainer {
+      id
+      name
+      profile {
+        firstName
+        lastName
+        avatarUrl
+      }
+    }
+    client {
+      id
+      name
+      profile {
+        firstName
+        lastName
+        avatarUrl
+      }
+    }
+    unreadCount
+    lastMessage {
+      id
+      content
+      createdAt
+      sender {
+        id
+        name
+      }
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+mutation SendMessage($input: SendMessageInput!) {
+  sendMessage(input: $input) {
+    id
+    chatId
+    content
+    imageUrl
+    isEdited
+    isDeleted
+    readAt
+    createdAt
+    updatedAt
+    sender {
+      id
+      name
+      profile {
+        firstName
+        lastName
+        avatarUrl
+      }
+    }
+  }
+}
+
+mutation EditMessage($input: EditMessageInput!) {
+  editMessage(input: $input) {
+    id
+    chatId
+    content
+    imageUrl
+    isEdited
+    isDeleted
+    readAt
+    createdAt
+    updatedAt
+    sender {
+      id
+      name
+      profile {
+        firstName
+        lastName
+        avatarUrl
+      }
+    }
+  }
+}
+
+mutation DeleteMessage($id: ID!) {
+  deleteMessage(id: $id)
+}
+
+mutation MarkMessagesAsRead($input: MarkMessagesAsReadInput!) {
+  markMessagesAsRead(input: $input)
+}

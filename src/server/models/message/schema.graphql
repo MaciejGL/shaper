@@ -1,0 +1,34 @@
+type Message {
+  id: ID!
+  chatId: ID!
+  senderId: ID!
+  content: String!
+  imageUrl: String
+  isEdited: Boolean!
+  isDeleted: Boolean!
+  readAt: String
+  sender: User!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input SendMessageInput {
+  chatId: ID!
+  content: String!
+  imageUrl: String
+}
+
+input EditMessageInput {
+  id: ID!
+  content: String!
+}
+
+type Query {
+  getChatMessages(chatId: ID!, skip: Int, take: Int): [Message!]!
+}
+
+type Mutation {
+  sendMessage(input: SendMessageInput!): Message!
+  editMessage(input: EditMessageInput!): Message!
+  deleteMessage(id: ID!): Boolean!
+}

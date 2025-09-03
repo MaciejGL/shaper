@@ -5,6 +5,7 @@ import {
   LogInIcon,
   LogOutIcon,
   MenuIcon,
+  MessageSquare,
   NotebookTextIcon,
   Settings,
   Settings2Icon,
@@ -19,15 +20,21 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
-import { GQLUserRole, useNotificationsQuery } from '@/generated/graphql-client'
+import {
+  GQLUserRole,
+  useGetMyChatsQuery,
+  useNotificationsQuery,
+} from '@/generated/graphql-client'
 import { useScrollVisibility } from '@/hooks/use-scroll-visibility'
 import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
 import { AnimatedLogo, AnimatedLogoText } from '../animated-logo'
+import { MessengerModal } from '../messenger-modal'
 import { useMobileApp } from '../mobile-app-bridge'
 import { Button } from '../ui/button'
 import { ButtonLink } from '../ui/button-link'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import {
   Drawer,
   DrawerContent,
@@ -57,6 +64,7 @@ export const Navbar = ({
   withSidebar?: boolean
 }) => {
   const [mounted, setMounted] = useState(false)
+  const [isMessengerOpen, setIsMessengerOpen] = useState(false)
   const { theme, setTheme } = useTheme()
   const { isVisible } = useScrollVisibility()
 
@@ -145,10 +153,26 @@ export const Navbar = ({
                 user={user?.user}
               />
             )}
+            {user?.user?.role === GQLUserRole.Client && user?.user?.trainer && (
+              <Button
+                variant="ghost"
+                iconOnly={<MessageSquare className="size-5" />}
+                onClick={() => setIsMessengerOpen(true)}
+              />
+            )}
             <NavbarUser user={user} />
           </div>
         </motion.div>
       </div>
+
+      {/* Messenger Modal for Clients */}
+      {user?.user?.role === GQLUserRole.Client && user?.user?.trainer && (
+        <MessengerModal
+          isOpen={isMessengerOpen}
+          onClose={() => setIsMessengerOpen(false)}
+          partnerId={user.user.trainer.id}
+        />
+      )}
     </>
   )
 }
@@ -182,64 +206,104 @@ function NavbarUser({ user }: { user?: UserWithSession | null }) {
 
 function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
   const isProduction = process.env.NODE_ENV === 'production'
+  const [isMessengerOpen, setIsMessengerOpen] = useState(false)
+  const [isChatListOpen, setIsChatListOpen] = useState(false)
+  const [selectedChatPartnerId, setSelectedChatPartnerId] = useState<
+    string | null
+  >(null)
+
   return (
-    <Drawer direction="right">
-      <DrawerTrigger asChild>
-        <Button variant="ghost" iconOnly={<MenuIcon />} />
-      </DrawerTrigger>
-      <DrawerContent dialogTitle="Trainer Menu">
-        <DrawerHeader>
-          <div className="flex flex-col items-center gap-2">
-            <UserAvatar
-              imageUrl={user?.user.profile?.avatarUrl}
-              firstName={user?.user.profile?.firstName ?? ''}
-              lastName={user?.user.profile?.lastName ?? ''}
-              sex={user?.user.profile?.sex}
-              withFallbackAvatar
-            />
-            <div>{user?.user.email}</div>
-          </div>
-        </DrawerHeader>
-        <div className="border-b w-full my-4" />
-        <div className="flex flex-col gap-2 p-4">
-          {/* <NavLink
+    <>
+      <div className="flex items-center gap-2">
+        <Button
+          variant="ghost"
+          iconOnly={<MessageSquare className="size-5" />}
+          onClick={() => setIsChatListOpen(true)}
+        />
+        <Drawer direction="right">
+          <DrawerTrigger asChild>
+            <Button variant="ghost" iconOnly={<MenuIcon />} />
+          </DrawerTrigger>
+          <DrawerContent dialogTitle="Trainer Menu">
+            <DrawerHeader>
+              <div className="flex flex-col items-center gap-2">
+                <UserAvatar
+                  imageUrl={user?.user.profile?.avatarUrl}
+                  firstName={user?.user.profile?.firstName ?? ''}
+                  lastName={user?.user.profile?.lastName ?? ''}
+                  sex={user?.user.profile?.sex}
+                  withFallbackAvatar
+                />
+                <div>{user?.user.email}</div>
+              </div>
+            </DrawerHeader>
+            <div className="border-b w-full my-4" />
+            <div className="flex flex-col gap-2 p-4">
+              {/* <NavLink
             href={TRAINER_LINKS.clients.href}
             icon={<LayoutDashboardIcon className="h-5 w-5" />}
             label={TRAINER_LINKS.dashboard.label}
           /> */}
 
-          <NavLink
-            href={TRAINER_LINKS.clients.href}
-            icon={<Users2Icon className="h-5 w-5" />}
-            label={TRAINER_LINKS.clients.label}
-          />
-          <NavLink
-            href={TRAINER_LINKS.trainings.href}
-            icon={<NotebookTextIcon className="h-5 w-5" />}
-            label={TRAINER_LINKS.trainings.label}
-          />
-        </div>
-        <div className="border-b w-full my-4" />
-        <div className="flex flex-col gap-2 p-4">
-          <NavLink
-            href={TRAINER_LINKS.profile.href}
-            icon={<UserRoundCogIcon className="h-5 w-5" />}
-            label={TRAINER_LINKS.profile.label}
-          />
-          <NavLink
-            href="#"
-            onClick={() => signOut({ callbackUrl: '/login', redirect: true })}
-            icon={<LogOutIcon className="h-5 w-5" />}
-            label="Logout"
-          />
-        </div>
-        {!isProduction && (
-          <DrawerFooter>
-            <SwapAccountButton />
-          </DrawerFooter>
-        )}
-      </DrawerContent>
-    </Drawer>
+              <NavLink
+                href={TRAINER_LINKS.clients.href}
+                icon={<Users2Icon className="h-5 w-5" />}
+                label={TRAINER_LINKS.clients.label}
+              />
+              <NavLink
+                href={TRAINER_LINKS.trainings.href}
+                icon={<NotebookTextIcon className="h-5 w-5" />}
+                label={TRAINER_LINKS.trainings.label}
+              />
+            </div>
+            <div className="border-b w-full my-4" />
+            <div className="flex flex-col gap-2 p-4">
+              <NavLink
+                href={TRAINER_LINKS.profile.href}
+                icon={<UserRoundCogIcon className="h-5 w-5" />}
+                label={TRAINER_LINKS.profile.label}
+              />
+              <NavLink
+                href="#"
+                onClick={() =>
+                  signOut({ callbackUrl: '/login', redirect: true })
+                }
+                icon={<LogOutIcon className="h-5 w-5" />}
+                label="Logout"
+              />
+            </div>
+            {!isProduction && (
+              <DrawerFooter>
+                <SwapAccountButton />
+              </DrawerFooter>
+            )}
+          </DrawerContent>
+        </Drawer>
+      </div>
+
+      {/* Chat List Modal */}
+      <TrainerChatListModal
+        isOpen={isChatListOpen}
+        onClose={() => setIsChatListOpen(false)}
+        onSelectChat={(partnerId) => {
+          setSelectedChatPartnerId(partnerId)
+          setIsChatListOpen(false)
+          setIsMessengerOpen(true)
+        }}
+      />
+
+      {/* Messenger Modal */}
+      {selectedChatPartnerId && (
+        <MessengerModal
+          isOpen={isMessengerOpen}
+          onClose={() => {
+            setIsMessengerOpen(false)
+            setSelectedChatPartnerId(null)
+          }}
+          partnerId={selectedChatPartnerId}
+        />
+      )}
+    </>
   )
 }
 
@@ -361,5 +425,94 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
         </DropdownProvider>
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+interface TrainerChatListModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onSelectChat: (partnerId: string) => void
+}
+
+function TrainerChatListModal({
+  isOpen,
+  onClose,
+  onSelectChat,
+}: TrainerChatListModalProps) {
+  const { data: chatsData, isLoading } = useGetMyChatsQuery(
+    {},
+    { enabled: isOpen },
+  )
+
+  const chats = chatsData?.getMyChats || []
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent dialogTitle="Messages" className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Messages</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-2 max-h-96 overflow-y-auto">
+          {isLoading ? (
+            <div className="text-center py-4 text-muted-foreground">
+              Loading chats...
+            </div>
+          ) : chats.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <MessageSquare className="size-12 mx-auto mb-2 opacity-50" />
+              <p>No messages yet</p>
+              <p className="text-sm">
+                Your client conversations will appear here
+              </p>
+            </div>
+          ) : (
+            chats.map((chat) => {
+              // For trainers, show client info
+              const client = chat.client
+              const clientName =
+                client.profile?.firstName && client.profile?.lastName
+                  ? `${client.profile.firstName} ${client.profile.lastName}`
+                  : client.name || 'Client'
+
+              return (
+                <button
+                  key={chat.id}
+                  onClick={() => onSelectChat(client.id)}
+                  className="w-full p-3 rounded-lg border hover:bg-accent text-left transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <UserAvatar
+                      className="size-10"
+                      imageUrl={client.profile?.avatarUrl}
+                      firstName={client.profile?.firstName || ''}
+                      lastName={client.profile?.lastName || ''}
+                      withFallbackAvatar
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <p className="font-medium text-sm truncate">
+                          {clientName}
+                        </p>
+                        {chat.unreadCount > 0 && (
+                          <span className="bg-primary text-primary-foreground text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
+                            {chat.unreadCount}
+                          </span>
+                        )}
+                      </div>
+                      {chat.lastMessage && (
+                        <p className="text-sm text-muted-foreground truncate">
+                          {chat.lastMessage.content}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              )
+            })
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }

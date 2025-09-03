@@ -5,6 +5,7 @@ import { useState } from 'react'
 
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Loader } from '@/components/loader'
+import { MessengerModal } from '@/components/messenger-modal'
 import { TrainerCard } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Badge } from '@/components/ui/badge'
@@ -84,6 +85,7 @@ interface TrainerViewProps {
 
 function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [isMessengerOpen, setIsMessengerOpen] = useState(false)
   const { openModal } = useConfirmationModalContext()
   const { user } = useUser()
 
@@ -136,7 +138,7 @@ function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
   }
 
   const handleSendMessage = () => {
-    // TODO: Implement send message functionality
+    setIsMessengerOpen(true)
   }
 
   return (
@@ -200,13 +202,19 @@ function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
         <Button
           className="w-full"
           size="lg"
-          disabled
           iconStart={<MessageSquare />}
           onClick={handleSendMessage}
         >
           Contact Trainer
         </Button>
       </div>
+
+      {/* Messenger Modal */}
+      <MessengerModal
+        isOpen={isMessengerOpen}
+        onClose={() => setIsMessengerOpen(false)}
+        partnerId={trainer.id}
+      />
     </div>
   )
 }

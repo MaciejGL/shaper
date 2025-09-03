@@ -1,0 +1,25 @@
+type Chat {
+  id: ID!
+  trainerId: ID!
+  clientId: ID!
+  trainer: User!
+  client: User!
+  messages(skip: Int, take: Int): [Message!]!
+  lastMessage: Message
+  unreadCount: Int!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Query {
+  getOrCreateChat(partnerId: ID!): Chat!
+  getMyChats: [Chat!]!
+}
+
+input MarkMessagesAsReadInput {
+  chatId: ID!
+}
+
+type Mutation {
+  markMessagesAsRead(input: MarkMessagesAsReadInput!): Boolean!
+}

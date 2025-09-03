@@ -70,6 +70,11 @@ model User {
   // Terms agreement relations
   termsAgreements UserTermsAgreement[]
 
+  // Messenger relations
+  trainerChats  Chat[]    @relation("TrainerChats")
+  clientChats   Chat[]    @relation("ClientChats")
+  sentMessages  Message[] @relation("SentMessages")
+
   @@index([trainerId])
   @@index([stripeCustomerId])
 }
@@ -1123,4 +1128,42 @@ model UserTermsAgreement {
   @@index([userId])
   @@index([version])
   @@index([agreedAt])
+}
+
+// Messenger System Models
+
+model Chat {
+  id          String    @id @default(uuid())
+  trainerId   String
+  clientId    String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  trainer     User      @relation("TrainerChats", fields: [trainerId], references: [id])
+  client      User      @relation("ClientChats", fields: [clientId], references: [id])
+  messages    Message[]
+  
+  @@unique([trainerId, clientId])
+  @@index([trainerId])
+  @@index([clientId])
+}
+
+model Message {
+  id          String    @id @default(uuid())
+  chatId      String
+  senderId    String
+  content     String
+  imageUrl    String?   // For future image support
+  isEdited    Boolean   @default(false)
+  isDeleted   Boolean   @default(false)
+  readAt      DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  chat        Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender      User      @relation("SentMessages", fields: [senderId], references: [id])
+  
+  @@index([chatId])
+  @@index([senderId])
+  @@index([createdAt])
 }
