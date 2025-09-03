@@ -125,32 +125,27 @@ export function SubscriptionInfoSection() {
     <Card borderless>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Crown className="h-5 w-5" />
-          Current Subscription
+          <div className="flex items-center gap-2 justify-between w-full">
+            <h3 className="text-lg font-semibold">{subscriptionInfo.title}</h3>
+            {hasActiveSubscription && (
+              <span
+                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                  subscriptionData?.status === 'CANCELLED_ACTIVE'
+                    ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400'
+                    : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                }`}
+              >
+                {subscriptionData?.status === 'CANCELLED_ACTIVE'
+                  ? 'Cancelled'
+                  : 'Active'}
+              </span>
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <h3 className="text-lg font-semibold">
-                {subscriptionInfo.title}
-              </h3>
-              {hasActiveSubscription && (
-                <span
-                  className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                    subscriptionData?.status === 'CANCELLED_ACTIVE'
-                      ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400'
-                      : 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                  }`}
-                >
-                  {subscriptionData?.status === 'CANCELLED_ACTIVE'
-                    ? 'Cancelled'
-                    : 'Active'}
-                </span>
-              )}
-            </div>
-
             <p className="text-sm text-muted-foreground">
               {subscriptionInfo.description}
             </p>

@@ -83,10 +83,13 @@ export function PlansTab({
 
   return (
     <>
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+      <div className="grid gap-8 grid-cols-1 md:grid-cols-2">
         <div className="flex flex-col gap-2">
           {activePlan ? (
-            <PlanCard plan={activePlan} isActive onClick={handlePlanClick} />
+            <>
+              <p className="text-base font-medium">Active Plan</p>
+              <PlanCard plan={activePlan} isActive onClick={handlePlanClick} />
+            </>
           ) : (
             <EmptyPlansState />
           )}
@@ -94,7 +97,7 @@ export function PlansTab({
 
         {availablePlans.length > 0 && (
           <div className="flex flex-col gap-2">
-            <p className="text-base font-medium">Templates</p>
+            <p className="text-base font-medium">Training Templates</p>
             {availablePlans.map((plan) => (
               <PlanCard key={plan.id} plan={plan} onClick={handlePlanClick} />
             ))}

@@ -3,7 +3,7 @@
 import { LayoutList } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 
-import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useFitspaceMyPlansQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
@@ -49,29 +49,21 @@ export default function MyPlansPage() {
         value={tab ?? PlanTab.QuickWorkout}
         defaultValue={PlanTab.QuickWorkout}
         onValueChange={(value) => setTab(value as PlanTab)}
-        className="gap-0 rounded-xl -mx-2"
+        className="gap-0 rounded-xl"
       >
-        <PrimaryTabList
-          options={[
-            { label: 'Workouts', value: PlanTab.QuickWorkout },
-            { label: 'Plans', value: PlanTab.Plans },
-          ]}
-          onClick={setTab}
-          active={tab ?? PlanTab.QuickWorkout}
-          className="grid grid-cols-2 py-1 mb-0"
-        />
+        <TabsList size="lg" className="w-full">
+          <TabsTrigger value={PlanTab.QuickWorkout}>Workout Days</TabsTrigger>
+          <TabsTrigger value={PlanTab.Plans}>Plans</TabsTrigger>
+        </TabsList>
 
         <TabsContent
           value={PlanTab.QuickWorkout}
-          className="space-y-4 px-2 pt-4 bg-primary/4 dark:bg-card-on-card/60 rounded-b-xl pb-4"
+          className="space-y-4 pt-4 pb-4"
         >
           <EnhancedQuickWorkoutTab />
         </TabsContent>
 
-        <TabsContent
-          value={PlanTab.Plans}
-          className="space-y-4 px-2 pt-4 bg-primary/4 dark:bg-card-on-card/60 rounded-b-xl pb-4"
-        >
+        <TabsContent value={PlanTab.Plans} className="space-y-4 pt-4 pb-4">
           <PlansTab
             activePlan={activePlan}
             availablePlans={availablePlans}

@@ -133,7 +133,7 @@ export function FavouriteWorkoutCard({
 
         <AccordionContent>
           <div>
-            <CardHeader className="pb-3">
+            <CardHeader className="py-3">
               <div className="flex gap-1 flex-wrap">
                 <Badge variant="secondary">{totalSets} sets</Badge>
                 {estimatedTime > 0 && (

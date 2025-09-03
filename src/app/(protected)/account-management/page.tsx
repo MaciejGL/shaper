@@ -5,7 +5,8 @@ import { CreditCard, UserRoundCogIcon } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 import { AccountSection } from '../fitspace/settings/components/account-section'
-import { SubscriptionSection } from '../fitspace/settings/components/subscription-section'
+
+import { SubscriptionManagementSection } from './components/subscription-management-section'
 
 export default function AccountManagementPage() {
   return (
@@ -45,7 +46,7 @@ export default function AccountManagementPage() {
               </div>
             </CardHeader>
             <CardContent className="pt-0">
-              <SubscriptionSection />
+              <SubscriptionManagementSection />
             </CardContent>
           </Card>
 
