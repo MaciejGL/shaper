@@ -2774,6 +2774,7 @@ export type GQLUpdateProfileInput = {
   firstName?: InputMaybe<Scalars['String']['input']>;
   fitnessLevel?: InputMaybe<GQLFitnessLevel>;
   goals?: InputMaybe<Array<GQLGoal>>;
+  hasCompletedOnboarding?: InputMaybe<Scalars['Boolean']['input']>;
   height?: InputMaybe<Scalars['Float']['input']>;
   heightUnit?: InputMaybe<GQLHeightUnit>;
   lastName?: InputMaybe<Scalars['String']['input']>;
@@ -2955,6 +2956,7 @@ export type GQLUserProfile = {
   firstName?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   fitnessLevel?: EntireFieldWrapper<Maybe<GQLFitnessLevel>>;
   goals: EntireFieldWrapper<Array<GQLGoal>>;
+  hasCompletedOnboarding: EntireFieldWrapper<Scalars['Boolean']['output']>;
   height?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   heightUnit: EntireFieldWrapper<GQLHeightUnit>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -4616,6 +4618,7 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   firstName?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   fitnessLevel?: Resolver<Maybe<GQLResolversTypes['FitnessLevel']>, ParentType, ContextType>;
   goals?: Resolver<Array<GQLResolversTypes['Goal']>, ParentType, ContextType>;
+  hasCompletedOnboarding?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   height?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   heightUnit?: Resolver<GQLResolversTypes['HeightUnit'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;

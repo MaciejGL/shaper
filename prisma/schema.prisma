@@ -121,6 +121,7 @@ model UserProfile {
   weightUnit                 String?           @default("kg")
   workoutReminders           Boolean?          @default(true)
   trainingView               String?           @default("advanced")
+  hasCompletedOnboarding     Boolean?          @default(false)
   credentials                String[]          @default([])
   specialization             String[]          @default([])
   successStories             String[]          @default([])

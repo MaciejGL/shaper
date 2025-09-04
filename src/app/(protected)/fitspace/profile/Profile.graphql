@@ -28,6 +28,7 @@ fragment ProfileFragment on UserProfile {
   theme
   timeFormat
   trainingView
+  hasCompletedOnboarding
   notificationPreferences {
     workoutReminders
     mealReminders

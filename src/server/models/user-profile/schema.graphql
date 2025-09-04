@@ -90,6 +90,7 @@ type UserProfile {
   theme: Theme!
   timeFormat: TimeFormat!
   trainingView: TrainingView!
+  hasCompletedOnboarding: Boolean!
   notificationPreferences: NotificationPreferences!
 
   createdAt: String!
@@ -170,6 +171,7 @@ input UpdateProfileInput {
   theme: Theme
   timeFormat: TimeFormat
   trainingView: TrainingView
+  hasCompletedOnboarding: Boolean
   notificationPreferences: NotificationPreferencesInput
 }
 
