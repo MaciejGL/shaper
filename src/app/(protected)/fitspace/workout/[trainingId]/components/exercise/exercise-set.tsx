@@ -454,7 +454,7 @@ export function ExerciseSet({
           </div>
         </div>
         <AnimatePresence mode="wait">
-          {isTimerOperations && restDuration && (
+          {isAdvancedView && isTimerOperations && restDuration && (
             <motion.div
               key={`timer-${set.id}`}
               initial={{ height: 0, opacity: 0 }}
@@ -466,18 +466,16 @@ export function ExerciseSet({
               transition={{ duration: 0.15, ease: 'linear' }}
               style={{ overflow: 'hidden' }}
             >
-              {isTimerOperations && restDuration && (
-                <div className="py-1 px-2">
-                  <CountdownTimer
-                    restDuration={restDuration || 60}
-                    autoStart={isTimerOperations}
-                    onComplete={() => setIsTimerOperations(false)}
-                    onPause={() => setIsTimerOperations(false)}
-                    size="xs"
-                    className="w-full"
-                  />
-                </div>
-              )}
+              <div className="py-1 px-2">
+                <CountdownTimer
+                  restDuration={restDuration || 60}
+                  autoStart={isTimerOperations}
+                  onComplete={() => setIsTimerOperations(false)}
+                  onPause={() => setIsTimerOperations(false)}
+                  size="xs"
+                  className="w-full"
+                />
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
