@@ -5,6 +5,7 @@ import { CardSkeleton } from '@/components/card-skeleton'
 import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent } from '@/components/ui/card'
+import { useUser } from '@/context/user-context'
 import { GQLTrainingPlan } from '@/generated/graphql-client'
 
 import {
@@ -91,7 +92,7 @@ export function PlansTab({
               <PlanCard plan={activePlan} isActive onClick={handlePlanClick} />
             </>
           ) : (
-            <EmptyPlansState />
+            <EmptyActivePlansState />
           )}
         </div>
 
@@ -123,6 +124,60 @@ export function PlansTab({
         isLoading={loading}
       />
     </>
+  )
+}
+
+function EmptyActivePlansState() {
+  const { user } = useUser()
+  const hasTrainer = user?.trainer?.id
+  return (
+    <Card borderless>
+      <CardContent className="flex-center flex-col gap-4 py-6">
+        <div className="size-16 bg-muted rounded-full flex items-center justify-center mx-auto">
+          <svg
+            className="size-8 text-muted-foreground"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+            />
+          </svg>
+        </div>
+        <h3 className="font-semibold">No Active Plan</h3>
+        {hasTrainer ? (
+          <p className="text-muted-foreground text-center max-w-md">
+            You don't have any active plan yet. Activate one of your template
+            plans or the one assigned by your trainer.
+          </p>
+        ) : (
+          <p className="text-muted-foreground text-center max-w-md">
+            You don't have any active plan yet. Activate one of your template
+            plans or find a plan that suits you best.
+          </p>
+        )}
+
+        {!hasTrainer && (
+          <ButtonLink
+            href="/fitspace/explore?tab=plans"
+            iconEnd={<ChevronRight />}
+          >
+            Explore Plans
+          </ButtonLink>
+        )}
+        {!hasTrainer && (
+          <TrainerDiscoveryCta
+            variant="compact"
+            title="Need Help Getting Started?"
+            subtitle="Connect with a trainer for personalized guidance"
+          />
+        )}
+      </CardContent>
+    </Card>
   )
 }
 
