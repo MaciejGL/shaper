@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { ChevronDownIcon } from 'lucide-react'
+import { CalendarIcon } from 'lucide-react'
 import * as React from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -56,7 +56,7 @@ export function DatePicker({
             {...rest}
           >
             {date ? format(date, dateFormat) : 'Select date'}
-            <ChevronDownIcon />
+            <CalendarIcon />
           </Button>
         </PopoverTrigger>
         <PopoverPortal>

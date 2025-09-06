@@ -55,7 +55,7 @@ export const SwapAccountButton = () => {
     },
     {
       email: client2Email,
-      label: 'Dawid Client',
+      label: 'kukafrankie@gmail.com',
     },
     {
       email: client3Email,

@@ -1,13 +1,11 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { isArray } from 'lodash'
+import { useRouter } from 'next/navigation'
 import { useCallback, useEffect } from 'react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
-import {
-  GQLProfileQuery,
-  useProfileQuery,
-  useUserBasicQuery,
-} from '@/generated/graphql-client'
+import { GQLProfileQuery, useProfileQuery } from '@/generated/graphql-client'
 import { useUpdateProfileMutation } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 
@@ -21,6 +19,8 @@ type ProfileSection =
   | 'bio'
 
 export function useProfile() {
+  const router = useRouter()
+  const queryClient = useQueryClient()
   const [editingSections, setEditingSections] = useState<Set<ProfileSection>>(
     new Set(),
   )
@@ -31,10 +31,43 @@ export function useProfile() {
       onSuccess: () => {
         setEditingSections(new Set()) // Clear all editing states
         toast.success('Profile updated successfully')
-        invalidateQueries({ queryKey: useProfileQuery.getKey() })
-        invalidateQueries({ queryKey: useUserBasicQuery.getKey() })
+        invalidateQueries({ queryKey: useProfileQuery.getKey({}) })
       },
     })
+
+  // Separate mutation for avatar changes with optimistic updates
+  const { mutateAsync: updateAvatarOnly } = useUpdateProfileMutation({
+    onMutate: async () => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: useProfileQuery.getKey({}) })
+
+      // Snapshot the previous value
+      const previousProfile = data?.profile
+
+      // Return a context with the previous data
+      return { previousProfile }
+    },
+    onError: (err, variables, context) => {
+      // If the mutation fails, use the context returned from onMutate to roll back
+      if (context?.previousProfile) {
+        // Rollback the local state
+        setProfile((prev) => ({
+          ...prev,
+          avatarUrl: context.previousProfile?.avatarUrl || '',
+        }))
+      }
+      toast.error('Failed to update avatar')
+    },
+    onSuccess: () => {
+      // Refresh server components to get fresh data
+      // Redis cache is automatically invalidated on backend
+      router.refresh()
+    },
+    onSettled: () => {
+      // Always refetch after mutation
+      invalidateQueries({ queryKey: useProfileQuery.getKey({}) })
+    },
+  })
 
   const [profile, setProfile] = useState<Profile>({
     firstName: '',
@@ -139,10 +172,29 @@ export function useProfile() {
     [profile, updateProfile],
   )
 
+  const handleAvatarChange = useCallback(
+    async (avatarUrl: string) => {
+      // Update local state first
+      setProfile((prev) => ({
+        ...prev,
+        avatarUrl,
+      }))
+
+      // Auto-save only avatar to backend without refetching
+      await updateAvatarOnly({
+        input: {
+          avatarUrl,
+        },
+      })
+    },
+    [updateAvatarOnly],
+  )
+
   return {
     isSaving,
     profile,
     handleChange,
+    handleAvatarChange,
     handleSectionSave,
     toggleSectionEdit,
     isSectionEditing,

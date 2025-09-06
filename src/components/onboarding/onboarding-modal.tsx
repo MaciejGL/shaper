@@ -1,9 +1,11 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
@@ -13,22 +15,39 @@ import {
   GQLGoal,
   GQLHeightUnit,
   GQLTrainingView,
+  GQLUpdateProfileInput,
+  GQLUserBasicQuery,
   GQLWeightUnit,
   useUpdateProfileMutation,
+  useUserBasicQuery,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
 import { BasicInfoStep } from './steps/basic-info-step'
 import { FitnessProfileStep } from './steps/fitness-profile-step'
+import { PhysicalStatsStep } from './steps/physical-stats-step'
 import { PreferencesStep } from './steps/preferences-step'
+import { QuickWorkoutChoiceStep } from './steps/quick-workout-choice-step'
+import { TrainingChoiceStep } from './steps/training-choice-step'
 import { WelcomeStep } from './steps/welcome-step'
-import { WhatsNextStep } from './steps/whats-next-step'
 
-export type OnboardingPath = 'setup' | 'training' | null
+export type OnboardingPath = 'setup' | 'training' | 'quick-workout' | null
+
+// Move initial state outside component to prevent Fast Refresh resets
+const INITIAL_ONBOARDING_DATA: OnboardingData = {
+  firstName: '',
+  lastName: '',
+  avatarUrl: '',
+  goals: [],
+  weightUnit: GQLWeightUnit.Kg,
+  heightUnit: GQLHeightUnit.Cm,
+  trainingView: GQLTrainingView.Simple,
+}
 
 export interface OnboardingData {
   firstName: string
   lastName: string
+  avatarUrl: string
   birthday?: string
   sex?: string
   fitnessLevel?: GQLFitnessLevel
@@ -43,58 +62,88 @@ export interface OnboardingData {
 const SETUP_STEPS = [
   'welcome',
   'basic-info',
+  'physical-stats',
   'fitness-profile',
   'preferences',
-  'whats-next',
+  'training-choice',
 ] as const
 const TRAINING_STEPS = ['welcome', 'training-choice'] as const
+const QUICK_WORKOUT_STEPS = ['welcome', 'quick-workout-choice'] as const
 
 type SetupStep = (typeof SETUP_STEPS)[number]
 type TrainingStep = (typeof TRAINING_STEPS)[number]
-type Step = SetupStep | TrainingStep
+type QuickWorkoutStep = (typeof QUICK_WORKOUT_STEPS)[number]
+type Step = SetupStep | TrainingStep | QuickWorkoutStep
 
 interface OnboardingModalProps {
   open: boolean
-  onClose: () => void
+  markOnboardingCompleted?: () => void
 }
 
-export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
+export function OnboardingModal({
+  open,
+  markOnboardingCompleted,
+}: OnboardingModalProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [currentStep, setCurrentStep] = useState<Step>('welcome')
   const [path, setPath] = useState<OnboardingPath>(null)
-  const [data, setData] = useState<OnboardingData>({
-    firstName: '',
-    lastName: '',
-    goals: [],
-    weightUnit: GQLWeightUnit.Kg,
-    heightUnit: GQLHeightUnit.Cm,
-    trainingView: GQLTrainingView.Advanced,
-  })
+
+  // Use stable initial state reference to prevent Fast Refresh resets
+  const [data, setData] = useState<OnboardingData>(INITIAL_ONBOARDING_DATA)
+  const [trainingChoice, setTrainingChoice] = useState<
+    'custom' | 'plans' | 'trainer'
+  >('custom')
 
   const updateProfile = useUpdateProfileMutation({
-    onSuccess: () => {
-      onClose()
+    onError: (error) => {
+      console.error('Failed to save onboarding data:', error)
+      toast.error('Something went wrong with updating your account')
     },
   })
 
-  const steps =
-    path === 'setup'
-      ? SETUP_STEPS
-      : path === 'training'
-        ? TRAINING_STEPS
-        : ['welcome']
-  const currentStepIndex = steps.findIndex((step) => step === currentStep)
-  const totalSteps = steps.length
-  const progress = ((currentStepIndex + 1) / totalSteps) * 100
+  const steps = useMemo(
+    () =>
+      path === 'setup'
+        ? SETUP_STEPS
+        : path === 'training'
+          ? TRAINING_STEPS
+          : path === 'quick-workout'
+            ? QUICK_WORKOUT_STEPS
+            : ['welcome'],
+    [path],
+  )
 
-  const handleNext = () => {
+  const currentStepIndex = useMemo(
+    () => steps.findIndex((step) => step === currentStep),
+    [steps, currentStep],
+  )
+
+  // Calculate progress excluding welcome step
+  const isWelcomeStep = currentStep === 'welcome'
+  const { progress } = useMemo(() => {
+    const progressSteps = steps.filter((step) => step !== 'welcome')
+    const currentProgressIndex = progressSteps.findIndex(
+      (step) => step === currentStep,
+    )
+    const totalProgressSteps = progressSteps.length
+    const progress = isWelcomeStep
+      ? 0
+      : ((currentProgressIndex + 1) / totalProgressSteps) * 100
+
+    return {
+      progress,
+    }
+  }, [steps, currentStep, isWelcomeStep])
+
+  const handleNext = useCallback(() => {
     const nextIndex = currentStepIndex + 1
     if (nextIndex < steps.length) {
       setCurrentStep(steps[nextIndex] as Step)
     }
-  }
+  }, [currentStepIndex, steps])
 
-  const handleBack = () => {
+  const handleBack = useCallback(() => {
     const prevIndex = currentStepIndex - 1
     if (prevIndex >= 0) {
       setCurrentStep(steps[prevIndex] as Step)
@@ -102,249 +151,301 @@ export function OnboardingModal({ open, onClose }: OnboardingModalProps) {
       setCurrentStep('welcome')
       setPath(null)
     }
-  }
+  }, [currentStepIndex, steps, currentStep])
 
-  const handlePathSelection = (selectedPath: OnboardingPath) => {
+  const handlePathSelection = useCallback((selectedPath: OnboardingPath) => {
     setPath(selectedPath)
     if (selectedPath === 'setup') {
       setCurrentStep('basic-info')
     } else if (selectedPath === 'training') {
       setCurrentStep('training-choice')
+    } else if (selectedPath === 'quick-workout') {
+      setCurrentStep('quick-workout-choice')
     }
-  }
+  }, [])
 
-  const handleTrainingChoice = (choice: 'custom' | 'plans' | 'trainer') => {
-    // Mark onboarding as completed
-    updateProfile.mutate({
-      input: {
+  const handleTrainingChoice = useCallback(
+    (choice: 'custom' | 'plans' | 'trainer') => {
+      // Determine navigation path based on choice
+      let navigationPath: string
+      switch (choice) {
+        case 'custom':
+          navigationPath = '/fitspace/workout'
+          break
+        case 'plans':
+          navigationPath = '/fitspace/explore?tab=training-plans'
+          break
+        case 'trainer':
+          navigationPath = '/fitspace/explore?tab=trainers'
+          break
+      }
+
+      // 1. BULLETPROOF: Mark onboarding completed locally first
+      markOnboardingCompleted?.()
+
+      // 2. Navigate immediately for instant UX
+      router.push(navigationPath)
+
+      // 3. Update cache immediately to sync UI
+      const queryKey = useUserBasicQuery.getKey({})
+      queryClient.setQueryData(
+        queryKey,
+        (old: GQLUserBasicQuery | undefined) => {
+          if (!old?.userBasic?.profile) return old
+
+          return {
+            ...old,
+            userBasic: {
+              ...old.userBasic,
+              profile: {
+                ...old.userBasic.profile,
+                hasCompletedOnboarding: true,
+                firstName:
+                  data.firstName.trim() || old.userBasic.profile.firstName,
+                lastName:
+                  data.lastName.trim() || old.userBasic.profile.lastName,
+                birthday: data.birthday || old.userBasic.profile.birthday,
+                sex: data.sex || old.userBasic.profile.sex,
+                avatarUrl: data.avatarUrl || old.userBasic.profile.avatarUrl,
+              },
+            },
+          }
+        },
+      )
+
+      // 4. Prepare and send update to server in background
+      const updateInput: GQLUpdateProfileInput = {
         hasCompletedOnboarding: true,
-      },
-    })
+        trainingView: data.trainingView,
+        weightUnit: data.weightUnit,
+        heightUnit: data.heightUnit,
+      }
 
-    // Navigate based on choice
-    switch (choice) {
-      case 'custom':
-        router.push('/fitspace/workout/quick-workout')
-        break
-      case 'plans':
-        router.push('/fitspace/explore?tab=training-plans')
-        break
-      case 'trainer':
-        router.push('/fitspace/explore?tab=trainers')
-        break
-    }
-  }
+      // Map onboarding data to profile fields
+      if (data.firstName.trim()) {
+        updateInput.firstName = data.firstName.trim()
+      }
+      if (data.lastName.trim()) {
+        updateInput.lastName = data.lastName.trim()
+      }
+      if (data.birthday) {
+        updateInput.birthday = data.birthday
+      }
+      if (data.sex) {
+        updateInput.sex = data.sex
+      }
+      if (data.fitnessLevel) {
+        updateInput.fitnessLevel = data.fitnessLevel
+      }
+      if (data.goals.length > 0) {
+        updateInput.goals = data.goals
+      }
+      if (data.height) {
+        updateInput.height = data.height
+      }
+      if (data.weight) {
+        updateInput.weight = data.weight
+      }
+      if (data.avatarUrl) {
+        updateInput.avatarUrl = data.avatarUrl
+      }
 
-  const handleComplete = () => {
-    // Update profile with all collected data
-    updateProfile.mutate({
-      input: {
-        ...data,
+      // Save to server in background
+      updateProfile.mutate({
+        input: updateInput,
+      })
+    },
+    [markOnboardingCompleted, router, queryClient, data, updateProfile],
+  )
+
+  const handleQuickStart = useCallback(() => {
+    // Navigate to quick workout choice step instead of directly to workout
+    setPath('quick-workout')
+    setCurrentStep('quick-workout-choice')
+  }, [])
+
+  // Memoized data update handler for stable reference
+  const handleDataUpdate = useCallback((updates: Partial<OnboardingData>) => {
+    setData((prev) => ({ ...prev, ...updates }))
+  }, [])
+
+  const handleTrainingChoiceChange = useCallback((value: string) => {
+    setTrainingChoice(value as 'custom' | 'plans' | 'trainer')
+  }, [])
+
+  const handleQuickWorkoutChoice = useCallback(
+    (choice: 'custom' | 'plans') => {
+      // Determine navigation path based on choice
+      let navigationPath: string
+      if (choice === 'custom') {
+        navigationPath = '/fitspace/workout'
+      } else {
+        navigationPath = '/fitspace/explore?tab=training-plans'
+      }
+
+      // 1. BULLETPROOF: Mark onboarding completed locally first
+      markOnboardingCompleted?.()
+
+      // 2. Navigate immediately for instant UX
+      router.push(navigationPath)
+
+      // 3. Update cache immediately to sync UI
+      const queryKey = useUserBasicQuery.getKey({})
+      queryClient.setQueryData(
+        queryKey,
+        (old: GQLUserBasicQuery | undefined) => {
+          if (!old?.userBasic?.profile) return old
+
+          return {
+            ...old,
+            userBasic: {
+              ...old.userBasic,
+              profile: {
+                ...old.userBasic.profile,
+                hasCompletedOnboarding: true,
+                firstName:
+                  data.firstName.trim() || old.userBasic.profile.firstName,
+                lastName:
+                  data.lastName.trim() || old.userBasic.profile.lastName,
+              },
+            },
+          }
+        },
+      )
+
+      // 4. Prepare and send update to server in background
+      const updateInput: GQLUpdateProfileInput = {
         hasCompletedOnboarding: true,
-      },
-    })
-  }
+        trainingView: data.trainingView,
+        weightUnit: data.weightUnit,
+        heightUnit: data.heightUnit,
+      }
 
-  const handleQuickStart = () => {
-    // Mark onboarding as completed and go to workout
-    updateProfile.mutate({
-      input: {
-        hasCompletedOnboarding: true,
-      },
-    })
-    router.push('/fitspace/workout')
-  }
-
-  const canGoNext = () => {
-    switch (currentStep) {
-      case 'basic-info':
-        return data.firstName.trim() && data.lastName.trim()
-      case 'fitness-profile':
-        return data.fitnessLevel && data.goals.length > 0
-      default:
-        return true
-    }
-  }
-
-  const renderStep = () => {
-    switch (currentStep) {
-      case 'welcome':
-        return (
-          <WelcomeStep
-            onPathSelect={handlePathSelection}
-            onQuickStart={handleQuickStart}
-          />
-        )
-      case 'basic-info':
-        return (
-          <BasicInfoStep
-            data={data}
-            onChange={(updates) => setData((prev) => ({ ...prev, ...updates }))}
-          />
-        )
-      case 'fitness-profile':
-        return (
-          <FitnessProfileStep
-            data={data}
-            onChange={(updates) => setData((prev) => ({ ...prev, ...updates }))}
-          />
-        )
-      case 'preferences':
-        return (
-          <PreferencesStep
-            data={data}
-            onChange={(updates) => setData((prev) => ({ ...prev, ...updates }))}
-          />
-        )
-      case 'whats-next':
-        return (
-          <WhatsNextStep
-            onChoice={handleTrainingChoice}
-            onComplete={handleComplete}
-          />
-        )
-      case 'training-choice':
-        return (
-          <div className="text-center space-y-6">
-            <div className="space-y-2">
-              <h2 className="text-2xl font-semibold">
-                How would you like to train?
-              </h2>
-              <p className="text-muted-foreground">
-                Choose your preferred way to get started
-              </p>
-            </div>
-            <div className="space-y-3">
-              <Button
-                onClick={() => handleTrainingChoice('custom')}
-                variant="outline"
-                className="w-full h-auto p-4 justify-start"
-              >
-                <div className="text-left">
-                  <div className="font-medium">Build Custom Workout</div>
-                  <div className="text-sm text-muted-foreground">
-                    Create your own workout with our wizard
-                  </div>
-                </div>
-              </Button>
-              <Button
-                onClick={() => handleTrainingChoice('plans')}
-                variant="outline"
-                className="w-full h-auto p-4 justify-start"
-              >
-                <div className="text-left">
-                  <div className="font-medium">Browse Training Plans</div>
-                  <div className="text-sm text-muted-foreground">
-                    Explore structured workout programs
-                  </div>
-                </div>
-              </Button>
-              <Button
-                onClick={() => handleTrainingChoice('trainer')}
-                variant="outline"
-                className="w-full h-auto p-4 justify-start"
-              >
-                <div className="text-left">
-                  <div className="font-medium">Find a Trainer</div>
-                  <div className="text-sm text-muted-foreground">
-                    Get personalized coaching
-                  </div>
-                </div>
-              </Button>
-            </div>
-          </div>
-        )
-      default:
-        return null
-    }
-  }
+      // Map any available onboarding data
+      if (data.firstName.trim()) {
+        updateInput.firstName = data.firstName.trim()
+      }
+      if (data.lastName.trim()) {
+        updateInput.lastName = data.lastName.trim()
+      }
+      if (data.avatarUrl) {
+        updateInput.avatarUrl = data.avatarUrl
+      }
+      // Save to server in background
+      updateProfile.mutate({
+        input: updateInput,
+      })
+    },
+    [markOnboardingCompleted, router, queryClient, data, updateProfile],
+  )
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent
+        fullScreen
         dialogTitle="Welcome to Hypertro"
-        className={cn(
-          'sm:max-w-lg max-h-[90vh] overflow-y-auto',
-          'md:max-w-xl',
-        )}
+        className="p-0"
         withCloseButton={false}
       >
-        <div className="space-y-6">
-          {/* Progress Bar */}
-          {path && currentStep !== 'welcome' && (
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>
-                  Step {currentStepIndex + 1} of {totalSteps}
-                </span>
-                <span>{Math.round(progress)}%</span>
-              </div>
-              <Progress value={progress} className="h-2" />
-            </div>
-          )}
+        <div className={cn('grid grid-rows-[auto_1fr_auto] h-full')}>
+          {/* Progress Bar - Hidden on welcome step and quick-workout-choice step */}
+          <div
+            className={cn(
+              'space-y-2 p-4 transition-opacity duration-300 pb-10',
+              (isWelcomeStep || currentStep === 'quick-workout-choice') &&
+                'opacity-0',
+            )}
+          >
+            <Progress value={progress} className="h-2" />
+          </div>
 
           {/* Step Content */}
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
+              layout
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="p-4"
             >
-              {renderStep()}
+              {currentStep === 'welcome' ? (
+                <WelcomeStep
+                  onPathSelect={handlePathSelection}
+                  onQuickStart={handleQuickStart}
+                />
+              ) : null}
+              {currentStep === 'basic-info' ? (
+                <BasicInfoStep data={data} onChange={handleDataUpdate} />
+              ) : null}
+              {currentStep === 'physical-stats' ? (
+                <PhysicalStatsStep data={data} onChange={handleDataUpdate} />
+              ) : null}
+              {currentStep === 'fitness-profile' ? (
+                <FitnessProfileStep data={data} onChange={handleDataUpdate} />
+              ) : null}
+              {currentStep === 'preferences' ? (
+                <PreferencesStep data={data} onChange={handleDataUpdate} />
+              ) : null}
+              {currentStep === 'training-choice' ? (
+                <TrainingChoiceStep
+                  trainingChoice={trainingChoice}
+                  onTrainingChoiceChange={handleTrainingChoiceChange}
+                />
+              ) : null}
+              {currentStep === 'quick-workout-choice' ? (
+                <QuickWorkoutChoiceStep
+                  onWorkoutChoice={handleQuickWorkoutChoice}
+                />
+              ) : null}
             </motion.div>
           </AnimatePresence>
 
           {/* Navigation */}
-          {path &&
-            currentStep !== 'welcome' &&
-            currentStep !== 'whats-next' &&
-            currentStep !== 'training-choice' && (
-              <div className="flex items-center justify-between pt-4 border-t">
+          <div className="min-h-20 flex flex-col justify-end">
+            {path && currentStep !== 'welcome' && (
+              <div className="flex items-center justify-between p-4">
                 <Button
                   onClick={handleBack}
-                  variant="outline"
-                  size="sm"
+                  variant="tertiary"
                   disabled={updateProfile.isPending}
+                  iconStart={<ArrowLeft />}
                 >
-                  <ArrowLeft className="size-4 mr-2" />
                   Back
                 </Button>
 
-                <div className="flex items-center gap-2">
-                  <Button
-                    onClick={handleNext}
-                    variant="ghost"
-                    size="sm"
-                    disabled={updateProfile.isPending}
-                  >
-                    Skip
-                  </Button>
+                {currentStep !== 'quick-workout-choice' ? (
                   <Button
                     onClick={
-                      currentStep === 'preferences'
-                        ? handleComplete
+                      currentStep === 'training-choice'
+                        ? () => handleTrainingChoice(trainingChoice)
                         : handleNext
                     }
-                    disabled={!canGoNext() || updateProfile.isPending}
-                    size="sm"
+                    variant={
+                      currentStep === 'training-choice' ? 'gradient' : 'default'
+                    }
+                    iconStart={
+                      currentStep === 'training-choice' ? (
+                        <Sparkles />
+                      ) : undefined
+                    }
+                    iconEnd={
+                      currentStep !== 'training-choice' ? (
+                        <ArrowRight />
+                      ) : undefined
+                    }
                   >
-                    {currentStep === 'preferences' ? (
-                      <>
-                        <Sparkles className="size-4 mr-2" />
-                        Complete
-                      </>
+                    {currentStep === 'training-choice' ? (
+                      <>Complete</>
                     ) : (
-                      <>
-                        Continue
-                        <ArrowRight className="size-4 ml-2" />
-                      </>
+                      <>Continue</>
                     )}
                   </Button>
-                </div>
+                ) : null}
               </div>
             )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>

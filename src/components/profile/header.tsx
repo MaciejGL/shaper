@@ -43,7 +43,7 @@ export function Header({ profile, onAvatarChange }: HeaderProps) {
   )
 }
 
-const getAvatarUrl = (sex?: string | null) => {
+export const getAvatarUrl = (sex?: string | null) => {
   if (!sex) return null
   if (sex.toLowerCase() === 'male') return '/avatar-male.png'
   if (sex.toLowerCase() === 'female') return '/avatar-female.png'

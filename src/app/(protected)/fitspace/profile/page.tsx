@@ -12,6 +12,7 @@ export default function ProfilePage() {
   const {
     profile,
     handleChange,
+    handleAvatarChange,
     handleSectionSave,
     toggleSectionEdit,
     isSectionEditing,
@@ -21,10 +22,7 @@ export default function ProfilePage() {
   return (
     <AnimatedPageTransition id="profile">
       <div className="container-hypertro mx-auto pt-8">
-        <Header
-          profile={profile}
-          onAvatarChange={(avatarUrl) => handleChange('avatarUrl', avatarUrl)}
-        />
+        <Header profile={profile} onAvatarChange={handleAvatarChange} />
 
         <PersonalInfo
           profile={profile}

@@ -20,6 +20,7 @@ interface AvatarUploadProps {
   disabled?: boolean
   fallbackUrl?: string
   alt?: string
+  id?: string
 }
 
 interface UploadState {
@@ -40,6 +41,7 @@ export function AvatarUpload({
   disabled = false,
   fallbackUrl,
   alt = 'Avatar',
+  id = 'avatar-file-input',
 }: AvatarUploadProps) {
   const [uploadState, setUploadState] = useState<UploadState>({
     uploading: false,
@@ -174,7 +176,7 @@ export function AvatarUpload({
   // Trigger file input
   const triggerFileInput = () => {
     if (!disabled && !uploadState.uploading && editState.isEditing) {
-      document.getElementById('avatar-file-input')?.click()
+      document.getElementById(id)?.click()
     }
   }
 
@@ -187,67 +189,85 @@ export function AvatarUpload({
         <AvatarImage src={displayImageUrl || ''} alt={alt} />
       </Avatar>
 
-      {/* Edit Button - shown when not in edit mode */}
+      {/* Action Buttons */}
       <AnimatePresence mode="wait">
         <div className="absolute -bottom-2 -right-3 flex flex-row flex-nowrap gap-2">
-          {/* Upload Button - shown when in edit mode */}
-          {editState.isEditing && (
-            <div className="flex flex-row flex-nowrap gap-2">
-              {/* Remove Button - shown when in edit mode */}
-              {currentImageUrl && !uploadState.uploading && (
-                <motion.div
-                  key="remove-button"
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.5 }}
-                  transition={{ duration: 0.1 }}
-                >
-                  <Button
-                    onClick={handleRemoveImage}
-                    size="icon-md"
-                    variant="outline"
-                    className="transition-opacity shadow-lg rounded-full dark:bg-input"
-                    title="Remove avatar"
-                    iconOnly={<Trash2 />}
-                  />
-                </motion.div>
+          {/* If no avatar, show upload button directly */}
+          {!currentImageUrl ? (
+            <ProgressButton
+              icon={Camera}
+              size="sm"
+              variant="default"
+              progress={uploadState.progress}
+              isLoading={uploadState.uploading}
+              onClick={() => document.getElementById(id)?.click()}
+              disabled={disabled}
+              className="shadow-lg size-9"
+              title="Upload avatar"
+            />
+          ) : (
+            <>
+              {/* Edit mode buttons - shown when user has avatar and is editing */}
+              {editState.isEditing && (
+                <div className="flex flex-row flex-nowrap gap-2">
+                  {/* Remove Button */}
+                  {!uploadState.uploading && (
+                    <motion.div
+                      key="remove-button"
+                      initial={{ opacity: 0, scale: 0.5 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.5 }}
+                      transition={{ duration: 0.1 }}
+                    >
+                      <Button
+                        onClick={handleRemoveImage}
+                        size="icon-md"
+                        variant="outline"
+                        className="transition-opacity shadow-lg rounded-full dark:bg-input"
+                        title="Remove avatar"
+                        iconOnly={<Trash2 />}
+                      />
+                    </motion.div>
+                  )}
+                  <motion.div
+                    key="upload-button"
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.1 }}
+                  >
+                    <ProgressButton
+                      icon={Camera}
+                      size="sm"
+                      variant="default"
+                      progress={uploadState.progress}
+                      isLoading={uploadState.uploading}
+                      onClick={triggerFileInput}
+                      disabled={disabled}
+                      className="shadow-lg size-9"
+                      title="Upload new avatar"
+                    />
+                  </motion.div>
+                </div>
               )}
-              <motion.div
-                key="upload-button"
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                transition={{ duration: 0.1 }}
-              >
-                <ProgressButton
-                  icon={Camera}
-                  size="sm"
-                  variant="default"
-                  progress={uploadState.progress}
-                  isLoading={uploadState.uploading}
-                  onClick={triggerFileInput}
-                  disabled={disabled}
-                  className="shadow-lg size-9"
-                  title="Upload new avatar"
-                />
-              </motion.div>
-            </div>
+              {/* Edit/Done toggle button - only shown when user has avatar */}
+              <Button
+                onClick={toggleEditMode}
+                size="icon-md"
+                variant="default"
+                disabled={disabled}
+                className="shadow-lg rounded-full"
+                title="Edit avatar"
+                iconOnly={editState.isEditing ? <Check /> : <Pencil />}
+              />
+            </>
           )}
-          <Button
-            onClick={toggleEditMode}
-            size="icon-md"
-            variant="default"
-            disabled={disabled}
-            className="shadow-lg rounded-full"
-            title="Edit avatar"
-            iconOnly={editState.isEditing ? <Check /> : <Pencil />}
-          />
         </div>
       </AnimatePresence>
 
       {/* Hidden File Input */}
       <input
-        id="avatar-file-input"
+        id={id}
         type="file"
         accept="image/jpeg,image/png,image/webp"
         onChange={handleFileInputChange}

@@ -1,0 +1,20 @@
+query MuscleGroupDistribution($userId: ID!, $days: Int = 30) {
+  muscleGroupDistribution(userId: $userId, days: $days) {
+    chest
+    back
+    shoulders
+    arms
+    legs
+    core
+  }
+}
+
+query MuscleGroupFrequency($userId: ID!, $days: Int = 30) {
+  muscleGroupFrequency(userId: $userId, days: $days) {
+    groupSlug
+    groupName
+    sessionsCount
+    totalSets
+    lastTrained
+  }
+}

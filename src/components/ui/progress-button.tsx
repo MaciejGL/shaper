@@ -55,7 +55,7 @@ const ProgressButton = forwardRef<HTMLButtonElement, ProgressButtonProps>(
       <button
         ref={ref}
         className={cn(
-          'relative rounded-full flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50',
+          'relative rounded-full flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 cursor-pointer',
           sizeClasses[size],
           variantClasses[variant],
           className,

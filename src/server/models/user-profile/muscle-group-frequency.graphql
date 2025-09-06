@@ -1,0 +1,23 @@
+# Muscle Group Training Frequency Schema
+type MuscleGroupFrequency {
+  groupSlug: String!
+  groupName: String!
+  sessionsCount: Int!
+  totalSets: Int!
+  lastTrained: String
+}
+
+type MuscleGroupDistribution {
+  chest: Int!
+  back: Int!
+  shoulders: Int!
+  arms: Int!
+  legs: Int!
+  core: Int!
+}
+
+extend type Query {
+  muscleGroupFrequency(userId: ID!, days: Int = 30): [MuscleGroupFrequency!]!
+
+  muscleGroupDistribution(userId: ID!, days: Int = 30): MuscleGroupDistribution!
+}

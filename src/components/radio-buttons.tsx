@@ -10,6 +10,7 @@ export interface RadioGridOption<T extends string> {
   value: T
   label: string
   description?: string
+  icon?: React.ReactNode
 }
 
 interface RadioGridGroupProps<T extends string> {
@@ -40,7 +41,7 @@ interface RadioGridGroupProps<T extends string> {
  *   { value: 'lbs', label: 'Pounds (lbs)' }
  * ]
  *
- * <RadioGridGroup
+ * <RadioButtons
  *   value={selectedWeight}
  *   onValueChange={setSelectedWeight}
  *   options={weightOptions}
@@ -60,7 +61,7 @@ export function RadioButtons<T extends string>({
   return (
     <div className={cn('space-y-3', className)}>
       <RadioGroup
-        className={cn(`grid gap-2`, `grid-cols-${columns}`)}
+        className={cn('grid gap-2', `grid-cols-${columns}`)}
         value={value}
         onValueChange={onValueChange}
       >
@@ -88,6 +89,7 @@ export function RadioButtons<T extends string>({
                 </p>
               )}
             </div>
+            {option.icon && option.icon}
           </Label>
         ))}
       </RadioGroup>

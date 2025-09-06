@@ -994,6 +994,25 @@ export type GQLMuscleGroupCategory = {
   slug: Scalars['String']['output'];
 };
 
+export type GQLMuscleGroupDistribution = {
+  __typename?: 'MuscleGroupDistribution';
+  arms: Scalars['Int']['output'];
+  back: Scalars['Int']['output'];
+  chest: Scalars['Int']['output'];
+  core: Scalars['Int']['output'];
+  legs: Scalars['Int']['output'];
+  shoulders: Scalars['Int']['output'];
+};
+
+export type GQLMuscleGroupFrequency = {
+  __typename?: 'MuscleGroupFrequency';
+  groupName: Scalars['String']['output'];
+  groupSlug: Scalars['String']['output'];
+  lastTrained?: Maybe<Scalars['String']['output']>;
+  sessionsCount: Scalars['Int']['output'];
+  totalSets: Scalars['Int']['output'];
+};
+
 export type GQLMutation = {
   __typename?: 'Mutation';
   acceptCoachingRequest?: Maybe<GQLCoachingRequest>;
@@ -1941,6 +1960,8 @@ export type GQLQuery = {
   locations: Array<GQLLocation>;
   muscleGroupCategories: Array<GQLMuscleGroupCategory>;
   muscleGroupCategory: GQLMuscleGroupCategory;
+  muscleGroupDistribution: GQLMuscleGroupDistribution;
+  muscleGroupFrequency: Array<GQLMuscleGroupFrequency>;
   myClients: Array<GQLUserPublic>;
   myTeams: Array<GQLTeam>;
   myTrainer?: Maybe<GQLUserPublic>;
@@ -2150,6 +2171,18 @@ export type GQLQueryGetWorkoutInfoArgs = {
 
 export type GQLQueryMuscleGroupCategoryArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryMuscleGroupDistributionArgs = {
+  days?: InputMaybe<Scalars['Int']['input']>;
+  userId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryMuscleGroupFrequencyArgs = {
+  days?: InputMaybe<Scalars['Int']['input']>;
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -2970,6 +3003,7 @@ export type GQLUserProfile = {
   trainerSince?: Maybe<Scalars['String']['output']>;
   trainingView: GQLTrainingView;
   updatedAt: Scalars['String']['output'];
+  username?: Maybe<Scalars['String']['output']>;
   weekStartsOn?: Maybe<Scalars['Int']['output']>;
   weight?: Maybe<Scalars['Float']['output']>;
   weightUnit: GQLWeightUnit;
@@ -3394,6 +3428,22 @@ export type GQLDeleteBodyMeasurementMutationVariables = Exact<{
 
 
 export type GQLDeleteBodyMeasurementMutation = { __typename?: 'Mutation', deleteBodyMeasurement: boolean };
+
+export type GQLMuscleGroupDistributionQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+  days?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLMuscleGroupDistributionQuery = { __typename?: 'Query', muscleGroupDistribution: { __typename?: 'MuscleGroupDistribution', chest: number, back: number, shoulders: number, arms: number, legs: number, core: number } };
+
+export type GQLMuscleGroupFrequencyQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+  days?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLMuscleGroupFrequencyQuery = { __typename?: 'Query', muscleGroupFrequency: Array<{ __typename?: 'MuscleGroupFrequency', groupSlug: string, groupName: string, sessionsCount: number, totalSets: number, lastTrained?: string | undefined | null }> };
 
 export type GQLAvailableExercisesForProgressQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -4268,7 +4318,7 @@ export type GQLAssignTemplateToSelfMutation = { __typename?: 'Mutation', assignT
 export type GQLUserBasicQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLUserBasicQuery = { __typename?: 'Query', userBasic?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string } | undefined | null } | undefined | null };
+export type GQLUserBasicQuery = { __typename?: 'Query', userBasic?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, hasCompletedOnboarding: boolean } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string } | undefined | null } | undefined | null };
 
 export type GQLGetOrCreateChatQueryVariables = Exact<{
   partnerId: Scalars['ID']['input'];
@@ -6678,6 +6728,115 @@ useDeleteBodyMeasurementMutation.getKey = () => ['DeleteBodyMeasurement'];
 
 
 useDeleteBodyMeasurementMutation.fetcher = (variables: GQLDeleteBodyMeasurementMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteBodyMeasurementMutation, GQLDeleteBodyMeasurementMutationVariables>(DeleteBodyMeasurementDocument, variables, options);
+
+export const MuscleGroupDistributionDocument = `
+    query MuscleGroupDistribution($userId: ID!, $days: Int = 30) {
+  muscleGroupDistribution(userId: $userId, days: $days) {
+    chest
+    back
+    shoulders
+    arms
+    legs
+    core
+  }
+}
+    `;
+
+export const useMuscleGroupDistributionQuery = <
+      TData = GQLMuscleGroupDistributionQuery,
+      TError = unknown
+    >(
+      variables: GQLMuscleGroupDistributionQueryVariables,
+      options?: Omit<UseQueryOptions<GQLMuscleGroupDistributionQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLMuscleGroupDistributionQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLMuscleGroupDistributionQuery, TError, TData>(
+      {
+    queryKey: ['MuscleGroupDistribution', variables],
+    queryFn: fetchData<GQLMuscleGroupDistributionQuery, GQLMuscleGroupDistributionQueryVariables>(MuscleGroupDistributionDocument, variables),
+    ...options
+  }
+    )};
+
+useMuscleGroupDistributionQuery.getKey = (variables: GQLMuscleGroupDistributionQueryVariables) => ['MuscleGroupDistribution', variables];
+
+export const useInfiniteMuscleGroupDistributionQuery = <
+      TData = InfiniteData<GQLMuscleGroupDistributionQuery>,
+      TError = unknown
+    >(
+      variables: GQLMuscleGroupDistributionQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLMuscleGroupDistributionQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLMuscleGroupDistributionQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLMuscleGroupDistributionQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['MuscleGroupDistribution.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLMuscleGroupDistributionQuery, GQLMuscleGroupDistributionQueryVariables>(MuscleGroupDistributionDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteMuscleGroupDistributionQuery.getKey = (variables: GQLMuscleGroupDistributionQueryVariables) => ['MuscleGroupDistribution.infinite', variables];
+
+
+useMuscleGroupDistributionQuery.fetcher = (variables: GQLMuscleGroupDistributionQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMuscleGroupDistributionQuery, GQLMuscleGroupDistributionQueryVariables>(MuscleGroupDistributionDocument, variables, options);
+
+export const MuscleGroupFrequencyDocument = `
+    query MuscleGroupFrequency($userId: ID!, $days: Int = 30) {
+  muscleGroupFrequency(userId: $userId, days: $days) {
+    groupSlug
+    groupName
+    sessionsCount
+    totalSets
+    lastTrained
+  }
+}
+    `;
+
+export const useMuscleGroupFrequencyQuery = <
+      TData = GQLMuscleGroupFrequencyQuery,
+      TError = unknown
+    >(
+      variables: GQLMuscleGroupFrequencyQueryVariables,
+      options?: Omit<UseQueryOptions<GQLMuscleGroupFrequencyQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLMuscleGroupFrequencyQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLMuscleGroupFrequencyQuery, TError, TData>(
+      {
+    queryKey: ['MuscleGroupFrequency', variables],
+    queryFn: fetchData<GQLMuscleGroupFrequencyQuery, GQLMuscleGroupFrequencyQueryVariables>(MuscleGroupFrequencyDocument, variables),
+    ...options
+  }
+    )};
+
+useMuscleGroupFrequencyQuery.getKey = (variables: GQLMuscleGroupFrequencyQueryVariables) => ['MuscleGroupFrequency', variables];
+
+export const useInfiniteMuscleGroupFrequencyQuery = <
+      TData = InfiniteData<GQLMuscleGroupFrequencyQuery>,
+      TError = unknown
+    >(
+      variables: GQLMuscleGroupFrequencyQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLMuscleGroupFrequencyQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLMuscleGroupFrequencyQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLMuscleGroupFrequencyQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['MuscleGroupFrequency.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLMuscleGroupFrequencyQuery, GQLMuscleGroupFrequencyQueryVariables>(MuscleGroupFrequencyDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteMuscleGroupFrequencyQuery.getKey = (variables: GQLMuscleGroupFrequencyQueryVariables) => ['MuscleGroupFrequency.infinite', variables];
+
+
+useMuscleGroupFrequencyQuery.fetcher = (variables: GQLMuscleGroupFrequencyQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMuscleGroupFrequencyQuery, GQLMuscleGroupFrequencyQueryVariables>(MuscleGroupFrequencyDocument, variables, options);
 
 export const AvailableExercisesForProgressDocument = `
     query AvailableExercisesForProgress($userId: ID!) {
@@ -12239,6 +12398,7 @@ export const UserBasicDocument = `
       birthday
       sex
       avatarUrl
+      hasCompletedOnboarding
     }
     trainer {
       id

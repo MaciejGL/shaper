@@ -1,6 +1,6 @@
 'use client'
 
-import { Crown, Lock, TrendingUp } from 'lucide-react'
+import { Crown, Lock, Target, TrendingUp } from 'lucide-react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
@@ -10,6 +10,7 @@ import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 // import { BodyComposition } from './components/body-composition'
 import { BodyMeasurements } from './components/body-measurements'
+import { MuscleDistribution } from './components/muscle-distribution'
 import { SelectedExercisesProgress } from './components/selected-exercises-progress'
 
 export default function ProgressPage() {
@@ -38,6 +39,13 @@ export default function ProgressPage() {
           >
             Body Measures
           </TabsTrigger>
+          <TabsTrigger
+            value="muscle-distribution"
+            className="flex items-center gap-2"
+          >
+            <Target className="h-4 w-4" />
+            Muscle Balance
+          </TabsTrigger>
           {/* <TabsTrigger
             value="body-composition"
             className="flex items-center gap-2"
@@ -55,6 +63,10 @@ export default function ProgressPage() {
 
         <TabsContent value="body-measures">
           <BodyMeasurements />
+        </TabsContent>
+
+        <TabsContent value="muscle-distribution">
+          <MuscleDistribution />
         </TabsContent>
 
         {/* <TabsContent value="body-composition">
