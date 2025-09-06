@@ -1,7 +1,8 @@
 'use client'
 
-import { Crown, Lock, Target, TrendingUp } from 'lucide-react'
+import { Crown, TrendingUp } from 'lucide-react'
 
+import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 import { useExercisesProgressByUserQuery } from '@/generated/graphql-client'
@@ -37,14 +38,15 @@ export default function ProgressPage() {
             value="body-measures"
             className="flex items-center gap-2"
           >
-            Body Measures
+            Measures
           </TabsTrigger>
           <TabsTrigger
             value="muscle-distribution"
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 relative"
+            disabled={!hasPremium || true}
           >
-            <Target className="h-4 w-4" />
             Muscle Balance
+            {!hasPremium ? <PremiumBadge /> : null}
           </TabsTrigger>
           {/* <TabsTrigger
             value="body-composition"
@@ -54,10 +56,10 @@ export default function ProgressPage() {
           </TabsTrigger> */}
           <TabsTrigger
             value="exercises"
-            className="flex items-center gap-2"
-            disabled={!hasPremium}
+            className="flex items-center gap-2 relative"
+            disabled={!hasPremium || true}
           >
-            Exercises {!hasPremium ? <Lock /> : <Crown />}
+            Exercises {!hasPremium ? <PremiumBadge /> : null}
           </TabsTrigger>
         </TabsList>
 
@@ -81,5 +83,13 @@ export default function ProgressPage() {
         </TabsContent>
       </Tabs>
     </div>
+  )
+}
+
+function PremiumBadge() {
+  return (
+    <Badge variant="premium" className="p-1 rounded-md">
+      <Crown className="size-3 rounded-full" />
+    </Badge>
   )
 }

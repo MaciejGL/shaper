@@ -2,11 +2,17 @@
 
 import {
   AlertCircle,
+  AlertTriangle,
+  ArrowRight,
   Bot,
+  Check,
   Dumbbell,
+  Link,
   Loader2,
   RefreshCw,
   Sparkles,
+  Wrench,
+  X,
 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -21,6 +27,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 
 interface ExerciseStats {
@@ -57,6 +65,49 @@ interface DescriptionGenerationState {
   error: string | null
 }
 
+interface BrokenExercise {
+  id: string
+  name: string
+  createdAt: string
+  baseId: string | null
+}
+
+interface BrokenExerciseStats {
+  totalBroken: number
+  exercises: BrokenExercise[]
+}
+
+interface FixRelationshipsState {
+  isRunning: boolean
+  progress: string | null
+  error: string | null
+  lastResult: {
+    totalBroken: number
+    fixed: number
+    notFound: number
+  } | null
+}
+
+type SingleFixState = Record<
+  string,
+  {
+    isFixing: boolean
+    isFixed: boolean
+    error: string | null
+    result: string | null
+  }
+>
+
+interface ManualMappingState {
+  isMapping: boolean
+  progress: string | null
+  error: string | null
+  lastResult: {
+    matched: number
+    updated: number
+  } | null
+}
+
 export function ExercisesTab() {
   const [stats, setStats] = useState<ExerciseStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -72,14 +123,38 @@ export function ExercisesTab() {
       error: null,
     })
 
+  const [brokenExercises, setBrokenExercises] =
+    useState<BrokenExerciseStats | null>(null)
+  const [fixRelationships, setFixRelationships] =
+    useState<FixRelationshipsState>({
+      isRunning: false,
+      progress: null,
+      error: null,
+      lastResult: null,
+    })
+
+  const [singleFixes, setSingleFixes] = useState<SingleFixState>({})
+
+  const [manualMapping, setManualMapping] = useState<ManualMappingState>({
+    isMapping: false,
+    progress: null,
+    error: null,
+    lastResult: null,
+  })
+
+  const [brokenExerciseName, setBrokenExerciseName] = useState('')
+  const [correctBaseExerciseName, setCorrectBaseExerciseName] = useState('')
+
   const fetchStats = async () => {
     try {
       setLoading(true)
       setError(null)
-      const [statsResponse, descriptionResponse] = await Promise.all([
-        fetch('/api/admin/exercises/stats'),
-        fetch('/api/admin/exercises/generate-descriptions'),
-      ])
+      const [statsResponse, descriptionResponse, brokenExercisesResponse] =
+        await Promise.all([
+          fetch('/api/admin/exercises/stats'),
+          fetch('/api/admin/exercises/generate-descriptions'),
+          fetch('/api/admin/exercises/broken-relationships'),
+        ])
 
       if (!statsResponse.ok) {
         throw new Error('Failed to fetch exercise statistics')
@@ -87,16 +162,173 @@ export function ExercisesTab() {
       if (!descriptionResponse.ok) {
         throw new Error('Failed to fetch description statistics')
       }
+      if (!brokenExercisesResponse.ok) {
+        throw new Error('Failed to fetch broken exercise data')
+      }
 
       const statsData = await statsResponse.json()
       const descriptionData = await descriptionResponse.json()
+      const brokenExercisesData = await brokenExercisesResponse.json()
 
       setStats(statsData)
       setDescriptionStats(descriptionData)
+      setBrokenExercises(brokenExercisesData)
+
+      // Clear single fix states when refreshing data
+      setSingleFixes({})
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error occurred')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fixBrokenRelationships = async () => {
+    try {
+      setFixRelationships({
+        isRunning: true,
+        progress: 'Analyzing broken exercise relationships...',
+        error: null,
+        lastResult: null,
+      })
+
+      const response = await fetch('/api/admin/exercises/fix-relationships', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fix relationships: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+
+      setFixRelationships({
+        isRunning: false,
+        progress: `Fixed ${result.fixed} exercises, ${result.notFound} still need attention`,
+        error: null,
+        lastResult: result,
+      })
+
+      // Clear single fix states since they'll be outdated
+      setSingleFixes({})
+
+      // Refresh stats after fixing
+      await fetchStats()
+    } catch (err) {
+      setFixRelationships({
+        isRunning: false,
+        progress: null,
+        error: err instanceof Error ? err.message : 'Fix operation failed',
+        lastResult: null,
+      })
+    }
+  }
+
+  const fixSingleExercise = async (exerciseId: string) => {
+    try {
+      // Set loading state for this specific exercise
+      setSingleFixes((prev) => ({
+        ...prev,
+        [exerciseId]: {
+          isFixing: true,
+          isFixed: false,
+          error: null,
+          result: null,
+        },
+      }))
+
+      const response = await fetch('/api/admin/exercises/fix-single', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ exerciseId }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to fix exercise: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+
+      // Set success state
+      setSingleFixes((prev) => ({
+        ...prev,
+        [exerciseId]: {
+          isFixing: false,
+          isFixed: true,
+          error: null,
+          result: result.message,
+        },
+      }))
+
+      // Refresh stats after fixing
+      await fetchStats()
+    } catch (err) {
+      // Set error state
+      setSingleFixes((prev) => ({
+        ...prev,
+        [exerciseId]: {
+          isFixing: false,
+          isFixed: false,
+          error: err instanceof Error ? err.message : 'Fix failed',
+          result: null,
+        },
+      }))
+    }
+  }
+
+  const mapExerciseManually = async () => {
+    if (!brokenExerciseName.trim() || !correctBaseExerciseName.trim()) {
+      setManualMapping((prev: ManualMappingState) => ({
+        ...prev,
+        error: 'Both exercise names are required',
+      }))
+      return
+    }
+
+    try {
+      setManualMapping({
+        isMapping: true,
+        progress: `Mapping "${brokenExerciseName}" to "${correctBaseExerciseName}"...`,
+        error: null,
+        lastResult: null,
+      })
+
+      const response = await fetch('/api/admin/exercises/manual-mapping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brokenExerciseName: brokenExerciseName.trim(),
+          correctBaseExerciseName: correctBaseExerciseName.trim(),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to map exercises: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+
+      setManualMapping({
+        isMapping: false,
+        progress: `Successfully mapped ${result.updated} exercises`,
+        error: null,
+        lastResult: result,
+      })
+
+      // Clear form on success
+      setBrokenExerciseName('')
+      setCorrectBaseExerciseName('')
+
+      // Refresh stats after mapping
+      await fetchStats()
+    } catch (err) {
+      setManualMapping({
+        isMapping: false,
+        progress: null,
+        error: err instanceof Error ? err.message : 'Mapping failed',
+        lastResult: null,
+      })
     }
   }
 
@@ -243,6 +475,360 @@ export function ExercisesTab() {
               <RefreshCw className="h-4 w-4 mr-1" />
               Refresh
             </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Broken Exercise Relationships */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Wrench className="h-5 w-5" />
+            Exercise Relationship Issues
+            {brokenExercises && brokenExercises.totalBroken > 0 && (
+              <Badge variant="destructive" className="ml-2">
+                {brokenExercises.totalBroken} Issues
+              </Badge>
+            )}
+          </CardTitle>
+          <CardDescription>
+            Manage training exercises with missing or broken base exercise
+            relationships
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {brokenExercises && (
+            <>
+              {/* Stats Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="text-center p-4 rounded-lg bg-card-on-card">
+                  <div
+                    className={`text-2xl font-bold ${brokenExercises.totalBroken > 0 ? 'text-red-600' : 'text-green-600'}`}
+                  >
+                    {formatNumber(brokenExercises.totalBroken)}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Broken Relationships
+                  </p>
+                </div>
+
+                {fixRelationships.lastResult && (
+                  <>
+                    <div className="text-center p-4 rounded-lg bg-card-on-card">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {formatNumber(fixRelationships.lastResult.fixed)}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Last Fixed
+                      </p>
+                    </div>
+
+                    <div className="text-center p-4 rounded-lg bg-card-on-card">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {formatNumber(fixRelationships.lastResult.notFound)}
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Need Manual Fix
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Fix Progress */}
+              {fixRelationships.progress && (
+                <Alert
+                  className={`mb-6 ${fixRelationships.error ? 'border-red-200' : 'border-blue-200'}`}
+                >
+                  <Wrench className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="flex items-center gap-2">
+                      {fixRelationships.isRunning && (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      )}
+                      <span>{fixRelationships.progress}</span>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* Fix Error */}
+              {fixRelationships.error && (
+                <Alert variant="destructive" className="mb-6">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>{fixRelationships.error}</AlertDescription>
+                </Alert>
+              )}
+
+              {/* Broken Exercises List */}
+              {brokenExercises.totalBroken > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-medium mb-3 flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-orange-500" />
+                    Exercises with Issues ({
+                      brokenExercises.exercises.length
+                    }{' '}
+                    shown)
+                  </h4>
+                  <div className="rounded-lg border">
+                    <div className="max-h-60 overflow-y-auto">
+                      {brokenExercises.exercises.map((exercise) => {
+                        const fixState = singleFixes[exercise.id]
+                        const isFixed = fixState?.isFixed
+                        const isFixing = fixState?.isFixing
+                        const fixError = fixState?.error
+                        const fixResult = fixState?.result
+
+                        return (
+                          <div
+                            key={exercise.id}
+                            className="flex items-center justify-between p-3 border-b last:border-b-0 gap-3"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">
+                                {exercise.name}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Created:{' '}
+                                {new Date(
+                                  exercise.createdAt,
+                                ).toLocaleDateString()}
+                              </p>
+                              {fixResult && (
+                                <p className="text-xs text-green-600 mt-1">
+                                  {fixResult}
+                                </p>
+                              )}
+                              {fixError && (
+                                <p className="text-xs text-red-600 mt-1">
+                                  {fixError}
+                                </p>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              {isFixed ? (
+                                <Badge
+                                  variant="outline"
+                                  className="text-green-600 border-green-200"
+                                >
+                                  <Check className="h-3 w-3 mr-1" />
+                                  Fixed
+                                </Badge>
+                              ) : fixError ? (
+                                <Badge
+                                  variant="outline"
+                                  className="text-red-600 border-red-200"
+                                >
+                                  <X className="h-3 w-3 mr-1" />
+                                  Error
+                                </Badge>
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className="text-red-600 border-red-200"
+                                >
+                                  No Base Exercise
+                                </Badge>
+                              )}
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => fixSingleExercise(exercise.id)}
+                                disabled={isFixed || isFixing}
+                                loading={isFixing}
+                                className="min-w-[60px]"
+                              >
+                                {isFixed ? (
+                                  <Check className="h-3 w-3" />
+                                ) : isFixing ? (
+                                  'Fixing...'
+                                ) : (
+                                  'Fix'
+                                )}
+                              </Button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Fix Actions */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h5 className="font-medium text-blue-600">
+                      Auto-Fix Relationships
+                    </h5>
+                    <p className="text-sm text-muted-foreground">
+                      Automatically match training exercises to existing base
+                      exercises by name
+                    </p>
+                  </div>
+                  <Button
+                    onClick={fixBrokenRelationships}
+                    disabled={
+                      fixRelationships.isRunning ||
+                      brokenExercises.totalBroken === 0
+                    }
+                    loading={fixRelationships.isRunning}
+                  >
+                    <Wrench className="h-4 w-4 mr-2" />
+                    {fixRelationships.isRunning
+                      ? 'Fixing...'
+                      : 'Fix Relationships'}
+                  </Button>
+                </div>
+
+                {/* Information Alert */}
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>How it works:</strong> The system will attempt to
+                    match training exercises to existing base exercises by name.
+                    For exercises without matches, new base exercises will be
+                    created with default muscle group assignments. You can
+                    manually adjust muscle groups in the Exercise Editor below.
+                  </AlertDescription>
+                </Alert>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Manual Exercise Mapping */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Link className="h-5 w-5" />
+            Manual Exercise Mapping
+          </CardTitle>
+          <CardDescription>
+            Manually link training exercises to correct base exercises by name
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Mapping Form */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="broken-exercise">Broken Exercise Name</Label>
+                <Input
+                  id="broken-exercise"
+                  value={brokenExerciseName}
+                  onChange={(e) => setBrokenExerciseName(e.target.value)}
+                  placeholder="e.g., Chest Press Machine"
+                  disabled={manualMapping.isMapping}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Exercise name that has missing baseId relationships
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="correct-exercise">
+                  Correct Base Exercise Name
+                </Label>
+                <Input
+                  id="correct-exercise"
+                  value={correctBaseExerciseName}
+                  onChange={(e) => setCorrectBaseExerciseName(e.target.value)}
+                  placeholder="e.g., Chest Press"
+                  disabled={manualMapping.isMapping}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Existing base exercise name to link to
+                </p>
+              </div>
+            </div>
+
+            {/* Map Button */}
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={mapExerciseManually}
+                disabled={
+                  manualMapping.isMapping ||
+                  !brokenExerciseName.trim() ||
+                  !correctBaseExerciseName.trim()
+                }
+                loading={manualMapping.isMapping}
+                className="min-w-[120px]"
+              >
+                <Link className="h-4 w-4 mr-2" />
+                {manualMapping.isMapping ? 'Mapping...' : 'Map Exercises'}
+              </Button>
+
+              {brokenExerciseName && correctBaseExerciseName && (
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <span className="font-medium">{brokenExerciseName}</span>
+                  <ArrowRight className="h-3 w-3 mx-2" />
+                  <span className="font-medium">{correctBaseExerciseName}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Mapping Progress */}
+            {manualMapping.progress && (
+              <Alert
+                className={`${manualMapping.error ? 'border-red-200' : 'border-blue-200'}`}
+              >
+                <Link className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="flex items-center gap-2">
+                    {manualMapping.isMapping && (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    )}
+                    <span>{manualMapping.progress}</span>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Mapping Error */}
+            {manualMapping.error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{manualMapping.error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Last Result */}
+            {manualMapping.lastResult && (
+              <div className="grid grid-cols-2 gap-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    {manualMapping.lastResult.matched}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Base Exercise Found
+                  </p>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    {manualMapping.lastResult.updated}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Exercises Updated
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Information Alert */}
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>How it works:</strong> Enter the exact name of broken
+                training exercises and the name of the base exercise they should
+                link to. The system will find the base exercise and update all
+                matching training exercises with null baseId relationships.
+              </AlertDescription>
+            </Alert>
           </div>
         </CardContent>
       </Card>

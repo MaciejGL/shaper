@@ -63,7 +63,6 @@ type UserProfile {
   id: ID!
   firstName: String
   lastName: String
-  username: String
   phone: String
   birthday: String
   sex: String

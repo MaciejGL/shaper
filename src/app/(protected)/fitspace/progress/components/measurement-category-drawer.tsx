@@ -61,7 +61,7 @@ export function MeasurementCategoryDrawer({
     <Drawer direction={drawerDirection}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <SimpleDrawerContent title={drawerTitle}>
-        <div className="space-y-6">
+        <div className="space-y-6 pb-6">
           {/* Current Stats */}
           <div
             className={cn(

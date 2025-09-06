@@ -30,6 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { EQUIPMENT_OPTIONS } from '@/constants/equipment'
 import { useDebounce } from '@/hooks/use-debounce'
 import { useExerciseNames } from '@/hooks/use-exercise-names'
 import { useVerifiedExercises } from '@/hooks/use-verified-exercises'
@@ -139,6 +140,10 @@ export function ExerciseEditor({
       .withOptions({ clearOnDefault: true }),
   )
   const [filterCreator, setFilterCreator] = useQueryState('creator', {
+    defaultValue: 'all',
+    clearOnDefault: true,
+  })
+  const [filterEquipment, setFilterEquipment] = useQueryState('equipment', {
     defaultValue: 'all',
     clearOnDefault: true,
   })
@@ -261,6 +266,7 @@ export function ExerciseEditor({
         description: filterDescription,
         muscle: filterMuscleGroup,
         creator: filterCreator,
+        equipment: filterEquipment,
       })
 
       const response = await fetch(`${apiEndpoint}?${params}`)
@@ -307,6 +313,7 @@ export function ExerciseEditor({
     filterDescription,
     filterMuscleGroup,
     filterCreator,
+    filterEquipment,
     itemsPerPage,
   ])
 
@@ -325,6 +332,7 @@ export function ExerciseEditor({
         description: filterDescription,
         muscle: filterMuscleGroup,
         creator: filterCreator,
+        equipment: filterEquipment,
       })
 
       const response = await fetch(`${apiEndpoint}?${params}`)
@@ -358,6 +366,7 @@ export function ExerciseEditor({
     filterDescription,
     filterMuscleGroup,
     filterCreator,
+    filterEquipment,
     itemsPerPage,
   ])
 
@@ -374,6 +383,7 @@ export function ExerciseEditor({
     filterMuscleGroup,
     filterVerified,
     filterCreator,
+    filterEquipment,
     itemsPerPage,
     setCurrentPage,
   ])
@@ -653,13 +663,28 @@ export function ExerciseEditor({
             </SelectContent>
           </Select>
 
+          <Select value={filterEquipment} onValueChange={setFilterEquipment}>
+            <SelectTrigger className="w-[140px] h-9" variant="tertiary">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Equipment</SelectItem>
+              {EQUIPMENT_OPTIONS.map((equipment) => (
+                <SelectItem key={equipment.value} value={equipment.value}>
+                  {equipment.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           {/* Clear content filters button */}
           {(filterImages !== 'all' ||
             filterVideo !== 'all' ||
             filterDescription !== 'all' ||
             filterMuscleGroup !== 'all' ||
             filterVerified !== 'all' ||
-            filterCreator !== 'all') && (
+            filterCreator !== 'all' ||
+            filterEquipment !== 'all') && (
             <Button
               variant="outline"
               size="sm"
@@ -670,6 +695,7 @@ export function ExerciseEditor({
                 setFilterMuscleGroup('all')
                 setFilterVerified('all')
                 setFilterCreator('all')
+                setFilterEquipment('all')
               }}
               className="h-9"
             >
@@ -688,6 +714,7 @@ export function ExerciseEditor({
             filterDescription !== 'all' ||
             filterMuscleGroup !== 'all' ||
             filterCreator !== 'all' ||
+            filterEquipment !== 'all' ||
             itemsPerPage !== 25) && (
             <Button
               variant="outline"
@@ -695,20 +722,21 @@ export function ExerciseEditor({
               onClick={() => {
                 setSearchInput('')
                 setSearchTerm('')
-                setFilterPremium('free')
+                setFilterPremium('all')
                 setFilterVersion('all')
-                setFilterPublic('public')
+                setFilterPublic('all')
                 setFilterImages('all')
                 setFilterVideo('all')
                 setFilterDescription('all')
                 setFilterMuscleGroup('all')
                 setFilterCreator('all')
-                setItemsPerPage(25)
+                setFilterEquipment('all')
+                setItemsPerPage(100)
                 setCurrentPage(1)
               }}
               className="h-9"
+              iconStart={<X />}
             >
-              <X className="h-4 w-4 mr-1" />
               Reset All Filters
             </Button>
           )}

@@ -772,7 +772,7 @@ export async function createTrainingPlan(
                   type: exercise.type,
                   order: exercise.order,
                   warmupSets: exercise.warmupSets,
-                  baseId: exercise.baseId ?? undefined,
+                  baseId: exercise.baseId,
                   sets: {
                     create: exercise.sets?.map((set) => ({
                       order: set.order,

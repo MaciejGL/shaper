@@ -61,78 +61,73 @@ export function MuscleDistribution() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Muscle Group Distribution</CardTitle>
-          <div className="flex gap-1">
-            {TIME_PERIODS.map((period) => (
-              <Button
-                key={period.value}
-                variant={
-                  selectedPeriod === period.value ? 'default' : 'outline'
-                }
-                size="sm"
-                onClick={() => setSelectedPeriod(period.value)}
-              >
-                {period.label}
-              </Button>
-            ))}
-          </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-medium">Muscle Group Distribution</h2>
+      </div>
+
+      <div className="space-y-4">
+        <div className="grid grid-cols-3 gap-1">
+          {TIME_PERIODS.map((period) => (
+            <Button
+              key={period.value}
+              variant={selectedPeriod === period.value ? 'default' : 'tertiary'}
+              size="sm"
+              onClick={() => setSelectedPeriod(period.value)}
+            >
+              {period.label}
+            </Button>
+          ))}
         </div>
         <p className="text-sm text-muted-foreground">
           Sets completed per muscle group in the last {selectedPeriod} days
         </p>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {/* Radar Chart */}
-          <MuscleGroupRadarChart data={distribution} />
+        {/* Radar Chart */}
+        <MuscleGroupRadarChart data={distribution} />
 
-          {/* Summary Stats */}
-          <div className="grid grid-cols-3 gap-4 text-center">
-            <div>
-              <div className="text-2xl font-bold">{totalSets}</div>
-              <div className="text-sm text-muted-foreground">Total Sets</div>
+        {/* Summary Stats */}
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <div>
+            <div className="text-2xl font-bold">{totalSets}</div>
+            <div className="text-sm text-muted-foreground">Total Sets</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold">
+              {Object.values(distribution).filter((sets) => sets > 0).length}
             </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {Object.values(distribution).filter((sets) => sets > 0).length}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Muscle Groups Trained
-              </div>
-            </div>
-            <div>
-              <div className="text-2xl font-bold">
-                {totalSets > 0
-                  ? Math.round(
-                      totalSets /
-                        Object.values(distribution).filter((sets) => sets > 0)
-                          .length,
-                    )
-                  : 0}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Avg Sets per Group
-              </div>
+            <div className="text-sm text-muted-foreground">
+              Muscle Groups Trained
             </div>
           </div>
-
-          {/* Detailed Breakdown */}
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            {Object.entries(distribution).map(([muscle, sets]) => (
-              <div
-                key={muscle}
-                className="flex justify-between p-2 rounded bg-muted/50"
-              >
-                <span className="capitalize">{muscle}</span>
-                <span className="font-medium">{sets} sets</span>
-              </div>
-            ))}
+          <div>
+            <div className="text-2xl font-bold">
+              {totalSets > 0
+                ? Math.round(
+                    totalSets /
+                      Object.values(distribution).filter((sets) => sets > 0)
+                        .length,
+                  )
+                : 0}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              Avg Sets per Group
+            </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Detailed Breakdown */}
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          {Object.entries(distribution).map(([muscle, sets]) => (
+            <div
+              key={muscle}
+              className="flex justify-between p-2 rounded bg-muted/50"
+            >
+              <span className="capitalize">{muscle}</span>
+              <span className="font-medium">{sets} sets</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   )
 }

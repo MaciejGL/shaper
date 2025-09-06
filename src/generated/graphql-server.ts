@@ -3005,7 +3005,6 @@ export type GQLUserProfile = {
   trainerSince?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainingView: EntireFieldWrapper<GQLTrainingView>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
-  username?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   weekStartsOn?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
   weightUnit: EntireFieldWrapper<GQLWeightUnit>;
@@ -4693,7 +4692,6 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   trainerSince?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainingView?: Resolver<GQLResolversTypes['TrainingView'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  username?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   weekStartsOn?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
   weightUnit?: Resolver<GQLResolversTypes['WeightUnit'], ParentType, ContextType>;

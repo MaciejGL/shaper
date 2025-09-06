@@ -96,7 +96,6 @@ model UserProfile {
   userId                     String            @unique
   firstName                  String?
   lastName                   String?
-  username                   String?
   phone                      String?
   birthday                   DateTime?
   sex                        String?

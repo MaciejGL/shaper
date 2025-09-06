@@ -190,10 +190,11 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       stabilizers: 'core',
     }
 
-    // Add this enhanced debugging before the mapping logic
-    console.info('🔍 Enhanced debugging muscle group mapping...')
+    // Enhanced debugging disabled - use admin panel to fix broken exercise relationships
+    // console.info('🔍 Enhanced debugging muscle group mapping...')
 
-    // Log all unique groupSlug values found in the data
+    // Debugging code commented out - use admin panel instead
+    /* 
     const allGroupSlugs = new Set<string>()
     const exercisesWithIssues: string[] = []
 
@@ -325,6 +326,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         )
       }
     })
+    */
 
     // Count sets per muscle group category
     completedExercises.forEach((exercise) => {
@@ -338,7 +340,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       })
     })
 
-    console.info(distribution)
+    // console.info(distribution) // Debug output disabled
 
     return distribution
   },

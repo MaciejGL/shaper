@@ -223,7 +223,7 @@ export async function duplicatePlan({
               order: exercise.order,
               warmupSets: exercise.warmupSets,
               dayId: newDayId,
-              baseId: exercise.baseId ?? null,
+              baseId: exercise.baseId,
             })
 
             for (const set of exercise.sets) {

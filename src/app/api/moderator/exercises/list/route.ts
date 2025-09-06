@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
     const descriptionFilter = searchParams.get('description') || 'all'
     const muscleFilter = searchParams.get('muscle') || 'all'
     const creatorFilter = searchParams.get('creator') || 'all'
+    const equipmentFilter = searchParams.get('equipment') || 'all'
 
     // Build where clause
     const conditions: Prisma.BaseExerciseWhereInput[] = []
@@ -115,6 +116,14 @@ export async function GET(request: NextRequest) {
       })
     }
     // 'all' means no creator filter
+
+    // Equipment filter
+    if (equipmentFilter !== 'all') {
+      conditions.push({
+        equipment: equipmentFilter,
+      })
+    }
+    // 'all' means no equipment filter
 
     // Combine all conditions with AND
     const where: Prisma.BaseExerciseWhereInput =

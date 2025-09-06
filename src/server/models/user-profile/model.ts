@@ -43,10 +43,6 @@ export default class UserProfile implements GQLUserProfile {
     return this.data.lastName
   }
 
-  get username() {
-    return this.data.user?.username
-  }
-
   get email() {
     return this.data.user?.email
   }

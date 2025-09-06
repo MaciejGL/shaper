@@ -6,8 +6,9 @@ import {
   PolarRadiusAxis,
   Radar,
   RadarChart,
-  ResponsiveContainer,
 } from 'recharts'
+
+import { cn } from '@/lib/utils'
 
 import {
   ChartConfig,
@@ -30,7 +31,7 @@ interface MuscleGroupRadarChartProps {
 
 export function MuscleGroupRadarChart({
   data,
-  className = 'h-[400px] w-full',
+  className,
 }: MuscleGroupRadarChartProps) {
   // Transform data for radar chart
   const chartData = [
@@ -69,24 +70,28 @@ export function MuscleGroupRadarChart({
   }
 
   return (
-    <div className={className}>
-      <ResponsiveContainer width="100%" height="100%">
-        <ChartContainer config={chartConfig}>
-          <RadarChart data={chartData}>
-            <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-            <PolarAngleAxis dataKey="muscle" />
-            <PolarRadiusAxis domain={domain} tick={false} />
-            <PolarGrid strokeOpacity={0.5} />
-            <Radar
-              dataKey="sets"
-              fill="hsl(var(--secondary))"
-              fillOpacity={0.7}
-              stroke="hsl(var(--secondary))"
-              strokeWidth={1}
-            />
-          </RadarChart>
-        </ChartContainer>
-      </ResponsiveContainer>
+    <div className="w-full h-full py-4 bg-white dark:bg-black rounded-lg">
+      <ChartContainer config={chartConfig} className={cn('', className)}>
+        <RadarChart
+          data={chartData}
+          margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+          compact={true}
+          width={400}
+          height={400}
+        >
+          <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+          <PolarAngleAxis dataKey="muscle" tick={{ fontSize: 12 }} />
+          <PolarRadiusAxis domain={domain} tick={false} axisLine={false} />
+          <PolarGrid stroke="var(--color-border)" />
+          <Radar
+            dataKey="sets"
+            fill="var(--color-amber-500)"
+            fillOpacity={0.4}
+            stroke="var(--color-amber-500)"
+            strokeWidth={0.5}
+          />
+        </RadarChart>
+      </ChartContainer>
     </div>
   )
 }

@@ -3003,7 +3003,6 @@ export type GQLUserProfile = {
   trainerSince?: Maybe<Scalars['String']['output']>;
   trainingView: GQLTrainingView;
   updatedAt: Scalars['String']['output'];
-  username?: Maybe<Scalars['String']['output']>;
   weekStartsOn?: Maybe<Scalars['Int']['output']>;
   weight?: Maybe<Scalars['Float']['output']>;
   weightUnit: GQLWeightUnit;
