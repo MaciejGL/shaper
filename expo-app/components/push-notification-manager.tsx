@@ -175,6 +175,14 @@ export function PushNotificationManager({
     path: string,
     queryParams?: Record<string, string>,
   ) => {
+    // Strip fitspace/ or trainer/ prefix for mapping lookup
+    let lookupPath = path
+    if (path.startsWith('fitspace/')) {
+      lookupPath = path.substring('fitspace/'.length)
+    } else if (path.startsWith('trainer/')) {
+      lookupPath = path.substring('trainer/'.length)
+    }
+
     // Map common deep link patterns to web routes
     const pathMappings: Record<string, string> = {
       // Profile and settings
@@ -182,24 +190,44 @@ export function PushNotificationManager({
       settings: '/fitspace/settings',
 
       // Training
-      workouts: '/fitspace/workouts',
+      workout: '/fitspace/workout',
+      workouts: '/fitspace/workout',
+      training: '/fitspace/workout',
       plans: '/fitspace/my-plans',
-      training: '/fitspace/workouts',
+      'my-plans': '/fitspace/my-plans',
 
       // Nutrition
-      nutrition: '/fitspace/nutrition',
-      meals: '/fitspace/nutrition',
+      nutrition: '/fitspace/meal-plans',
+      meals: '/fitspace/meal-plans',
+      'meal-plans': '/fitspace/meal-plans',
+      'meal-plan': '/fitspace/meal-plan',
 
-      // Social
-      trainers: '/fitspace/trainers',
+      // Progress and social
+      progress: '/fitspace/progress',
+      'my-trainer': '/fitspace/my-trainer',
+      explore: '/fitspace/explore',
+      trainers: '/fitspace/explore',
+
+      // Trainer routes
       clients: '/trainer/clients',
+      dashboard: '/trainer/dashboard',
+      exercises: '/trainer/exercises',
+      trainings: '/trainer/trainings',
+      teams: '/trainer/teams',
+      'exercises-management': '/trainer/exercises-management',
+      'public-profile': '/trainer/public-profile',
 
       // Default
       '': '/fitspace',
       home: '/fitspace',
     }
 
-    let webPath = pathMappings[path] || `/fitspace/${path}`
+    let webPath = pathMappings[lookupPath] || `/fitspace/${lookupPath}`
+
+    // Handle trainer paths specifically
+    if (path.startsWith('trainer/')) {
+      webPath = pathMappings[lookupPath] || `/trainer/${lookupPath}`
+    }
 
     // Add query parameters if they exist
     if (queryParams && Object.keys(queryParams).length > 0) {
