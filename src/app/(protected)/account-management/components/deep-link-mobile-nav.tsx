@@ -101,7 +101,7 @@ export function DeepLinkMobileNav() {
                 className={cn(
                   'flex flex-col items-center justify-center p-2 rounded-lg transition-colors',
                   isActive
-                    ? 'text-primary bg-zinc-200 dark:bg-zinc-800'
+                    ? 'text-primary'
                     : 'text-muted-foreground hover:text-foreground',
                 )}
               >
