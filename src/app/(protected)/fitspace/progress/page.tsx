@@ -1,6 +1,7 @@
 'use client'
 
 import { Crown, TrendingUp } from 'lucide-react'
+import { parseAsStringEnum, useQueryState } from 'nuqs'
 
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -17,6 +18,18 @@ import { SelectedExercisesProgress } from './components/selected-exercises-progr
 export default function ProgressPage() {
   const { user, hasPremium } = useUser()
 
+  // Use nuqs for tab persistence
+  const [activeTab, setActiveTab] = useQueryState(
+    'tab',
+    parseAsStringEnum<'body-measures' | 'muscle-distribution' | 'exercises'>([
+      'body-measures',
+      'muscle-distribution',
+      'exercises',
+    ])
+      .withDefault('body-measures')
+      .withOptions({ clearOnDefault: true }),
+  )
+
   // Get progress data for all exercises
   const { data: exerciseProgress } = useExercisesProgressByUserQuery(
     { userId: user?.id || '' },
@@ -32,7 +45,11 @@ export default function ProgressPage() {
         variant="green"
       />
 
-      <Tabs defaultValue="body-measures" className="space-y-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as typeof activeTab)}
+        className="space-y-6"
+      >
         <TabsList className="w-full">
           <TabsTrigger
             value="body-measures"
@@ -43,7 +60,7 @@ export default function ProgressPage() {
           <TabsTrigger
             value="muscle-distribution"
             className="flex items-center gap-2 relative"
-            disabled={!hasPremium || true}
+            // disabled={!hasPremium || true}
           >
             Muscle Balance
             {!hasPremium ? <PremiumBadge /> : null}

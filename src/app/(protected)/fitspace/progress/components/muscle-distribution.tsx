@@ -3,12 +3,15 @@
 import { omit } from 'lodash'
 import { useState } from 'react'
 
-import { Loader } from '@/components/loader'
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { MuscleGroupRadarChart } from '@/components/muscle-group-radar-chart'
+import { StatsItem } from '@/components/stats-item'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 import { useMuscleGroupDistributionQuery } from '@/generated/graphql-client'
+
+import { Section } from './section'
 
 const TIME_PERIODS = [
   { value: 7, label: '7 days' },
@@ -35,17 +38,9 @@ export function MuscleDistribution() {
     ? Object.values(distribution).reduce((sum, sets) => sum + sets, 0)
     : 0
 
-  if (isLoading) {
+  if ((!distribution || totalSets === 0) && !isLoading) {
     return (
-      <div className="flex items-center justify-center h-[400px]">
-        <Loader />
-      </div>
-    )
-  }
-
-  if (!distribution || totalSets === 0) {
-    return (
-      <Card>
+      <Card borderless>
         <CardHeader>
           <CardTitle>Muscle Group Distribution</CardTitle>
         </CardHeader>
@@ -62,72 +57,74 @@ export function MuscleDistribution() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-medium">Muscle Group Distribution</h2>
-      </div>
-
-      <div className="space-y-4">
-        <div className="grid grid-cols-3 gap-1">
-          {TIME_PERIODS.map((period) => (
-            <Button
-              key={period.value}
-              variant={selectedPeriod === period.value ? 'default' : 'tertiary'}
-              size="sm"
-              onClick={() => setSelectedPeriod(period.value)}
-            >
-              {period.label}
-            </Button>
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Sets completed per muscle group in the last {selectedPeriod} days
-        </p>
-        {/* Radar Chart */}
-        <MuscleGroupRadarChart data={distribution} />
-
-        {/* Summary Stats */}
-        <div className="grid grid-cols-3 gap-4 text-center">
-          <div>
-            <div className="text-2xl font-bold">{totalSets}</div>
-            <div className="text-sm text-muted-foreground">Total Sets</div>
+      <Section title="Muscle Group Distribution">
+        <div className="space-y-4">
+          <div className="grid grid-cols-3 gap-1">
+            {TIME_PERIODS.map((period) => (
+              <Button
+                key={period.value}
+                variant={
+                  selectedPeriod === period.value ? 'default' : 'tertiary'
+                }
+                size="xs"
+                onClick={() => setSelectedPeriod(period.value)}
+              >
+                {period.label}
+              </Button>
+            ))}
           </div>
-          <div>
-            <div className="text-2xl font-bold">
-              {Object.values(distribution).filter((sets) => sets > 0).length}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Muscle Groups Trained
-            </div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold">
-              {totalSets > 0
-                ? Math.round(
-                    totalSets /
-                      Object.values(distribution).filter((sets) => sets > 0)
-                        .length,
-                  )
-                : 0}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Avg Sets per Group
-            </div>
-          </div>
-        </div>
 
-        {/* Detailed Breakdown */}
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          {Object.entries(distribution).map(([muscle, sets]) => (
-            <div
-              key={muscle}
-              className="flex justify-between p-2 rounded bg-muted/50"
-            >
-              <span className="capitalize">{muscle}</span>
-              <span className="font-medium">{sets} sets</span>
-            </div>
-          ))}
+          {isLoading ? (
+            <LoadingSkeleton count={2} variant="lg" />
+          ) : (
+            <>
+              {/* Radar Chart */}
+              <MuscleGroupRadarChart data={distribution} />
+              {/* Summary Stats */}
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <StatsItem value={totalSets} label="Total Sets" />
+                <StatsItem
+                  value={
+                    Object.values(distribution).filter((sets) => sets > 0)
+                      .length
+                  }
+                  label="Muscle Groups Trained"
+                />
+                <StatsItem
+                  value={
+                    totalSets > 0
+                      ? Math.round(
+                          totalSets /
+                            Object.values(distribution).filter(
+                              (sets) => sets > 0,
+                            ).length,
+                        )
+                      : 0
+                  }
+                  label="Avg Sets per Group"
+                />
+              </div>
+
+              {/* Detailed Breakdown */}
+              <Section
+                title={`Sets per Muscle Group (${selectedPeriod} days)`}
+                size="sm"
+              >
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {Object.entries(distribution).map(([muscle, sets]) => (
+                    <StatsItem
+                      key={muscle}
+                      value={sets}
+                      label={muscle}
+                      variant="secondary"
+                    />
+                  ))}
+                </div>
+              </Section>
+            </>
+          )}
         </div>
-      </div>
+      </Section>
     </div>
   )
 }

@@ -8,6 +8,10 @@ alwaysApply: true
 
 # Code Standards
 
+## General code standars
+
+- **ALWAYS**: Write MINIMUM code.
+
 ## TypeScript - Strict & Clean
 
 - **NEVER**: `any`, `@ts-ignore`, type assertions without reason

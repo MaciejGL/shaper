@@ -9,7 +9,7 @@ export function WeightProgressChart() {
   const { weightUnit } = useWeightConversion()
 
   return (
-    <Section title="Weight Progress">
+    <Section title="Weight Progress" size="sm">
       <MeasurementChart
         measurements={bodyMeasures}
         field="weight"
