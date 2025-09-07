@@ -5,6 +5,7 @@ import { PackageTemplate, Prisma, ServiceType } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { User } from '@/lib/getUser'
 import { stripe } from '@/lib/stripe/stripe'
+import { createSupportChatForUser } from '@/lib/support-chat'
 
 import { StripeServiceType } from '../../enums'
 import {
@@ -87,6 +88,9 @@ async function handleInvoiceBasedCheckout(
   console.info(
     `✅ ${session.mode} processed: ${user.email} → ${deliveryTasks.length} delivery tasks created`,
   )
+
+  // Create support chat for user after successful payment
+  await createSupportChatForUser(user.id)
 }
 
 // Create deliveries from trainer offer package summary (most reliable approach)
@@ -247,6 +251,9 @@ async function handlePaymentCheckout(
   console.info(
     `✅ Payment processed: ${user.email} → ${deliveryTasks.length} delivery tasks created (${paymentIntent.amount / 100} ${paymentIntent.currency.toUpperCase()})`,
   )
+
+  // Create support chat for user after successful payment
+  await createSupportChatForUser(user.id)
 }
 
 async function createServiceDeliveriesForPayment(

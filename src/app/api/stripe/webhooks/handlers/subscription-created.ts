@@ -9,6 +9,7 @@ import {
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 import { stripe } from '@/lib/stripe/stripe'
+import { createSupportChatForUser } from '@/lib/support-chat'
 
 import {
   findPackageByStripePriceId,
@@ -98,6 +99,9 @@ export async function handleSubscriptionCreated(
 
     // Send welcome email
     await sendWelcomeEmail(user, packageTemplate, false)
+
+    // Create support chat for user after successful subscription
+    await createSupportChatForUser(user.id)
   } catch (error) {
     console.error('Error handling subscription created:', error)
   }
