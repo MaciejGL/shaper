@@ -258,6 +258,39 @@ export async function duplicatePlan({
           : Promise.resolve(),
       ])
 
+      // If this is not a template (i.e., being assigned to a user), cleanup empty workout days
+      if (!asTemplate) {
+        // Find empty workout days (not rest days but with no exercises) and mark them as rest days
+        const emptyWorkoutDays = await tx.trainingDay.findMany({
+          where: {
+            week: {
+              planId: newPlanId,
+            },
+            isRestDay: false,
+            exercises: {
+              none: {},
+            },
+          },
+          select: {
+            id: true,
+          },
+        })
+
+        // Update empty workout days to be rest days
+        if (emptyWorkoutDays.length > 0) {
+          await tx.trainingDay.updateMany({
+            where: {
+              id: {
+                in: emptyWorkoutDays.map((day) => day.id),
+              },
+            },
+            data: {
+              isRestDay: true,
+            },
+          })
+        }
+      }
+
       return await tx.trainingPlan.findUnique({
         where: { id: newPlanId },
       })
