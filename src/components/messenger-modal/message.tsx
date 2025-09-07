@@ -42,18 +42,17 @@ export function Message({
             }
           : { duration: 0 }
       }
-      layout
     >
       {/* Avatar - only show for first message in group */}
       {isGrouped ? (
-        <div className="size-8" />
+        <div className="size-7" />
       ) : (
         <UserAvatar
           withFallbackAvatar
           firstName={message.sender.firstName || ''}
           lastName={message.sender.lastName || ''}
           imageUrl={message.sender.image || undefined}
-          className="size-8"
+          className="size-7"
         />
       )}
 
@@ -66,9 +65,11 @@ export function Message({
               isOwnMessage && 'justify-end',
             )}
           >
-            <span className="text-[10px] text-muted-foreground dark:text-muted-foreground/50">
-              {formatMessageTime(message.createdAt)}
-            </span>
+            {isEditing && (
+              <span className="text-[10px] text-muted-foreground dark:text-muted-foreground/50">
+                {formatMessageTime(message.createdAt)}
+              </span>
+            )}
             {message.isEdited && (
               <span className="text-xs text-muted-foreground dark:text-muted-foreground/50 italic">
                 edited

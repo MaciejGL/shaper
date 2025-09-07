@@ -1,6 +1,6 @@
 'use client'
 
-import { Menu, X } from 'lucide-react'
+import { ChevronDown, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -53,6 +53,9 @@ export function MessengerModal({
     selectChat,
     loadMoreMessages,
   } = useMessengerData(partnerId, isOpen)
+
+  // Get the current partner ID from the selected chat, fallback to prop while loading
+  const currentPartnerId = partner?.id || partnerId
 
   // Get partner display info
   const partnerName = partner ? getUserDisplayName(partner) : 'User'
@@ -167,7 +170,7 @@ export function MessengerModal({
         <ChatSidebar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
-          currentPartnerId={partnerId}
+          currentPartnerId={currentPartnerId}
           onChatSelect={handleChatSelect}
           currentUserId={user?.id}
           chats={allChats}
@@ -177,28 +180,28 @@ export function MessengerModal({
         {/* Main Chat Area */}
         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
           {/* Header */}
-          <DialogHeader className="px-4 py-3">
+          <DialogHeader className="pr-4 py-3">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleSidebarToggle}
                 className="lg:hidden"
+                iconEnd={<ChevronDown className="size-4" />}
               >
-                <Menu className="size-4" />
+                <UserAvatar
+                  withFallbackAvatar
+                  firstName={partner?.firstName || ''}
+                  lastName={partner?.lastName || ''}
+                  imageUrl={partnerAvatar}
+                  className="size-8"
+                />
+                <div className={isLoading ? 'masked-placeholder-text' : ''}>
+                  <DialogTitle className="text-base font-medium">
+                    {partnerName}
+                  </DialogTitle>
+                </div>
               </Button>
-              <UserAvatar
-                withFallbackAvatar
-                firstName={partner?.firstName || ''}
-                lastName={partner?.lastName || ''}
-                imageUrl={partnerAvatar}
-                className="size-8"
-              />
-              <div>
-                <DialogTitle className="text-base font-medium">
-                  {partnerName}
-                </DialogTitle>
-              </div>
               <Button
                 variant="ghost"
                 onClick={onClose}

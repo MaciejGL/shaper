@@ -26,14 +26,10 @@ const textareaVariants = cva(
   },
 )
 
-function Textarea({
-  className,
-  error,
-  label,
-  id,
-  variant = 'default',
-  ...props
-}: TextareaProps & VariantProps<typeof textareaVariants>) {
+const Textarea = React.forwardRef<
+  HTMLTextAreaElement,
+  TextareaProps & VariantProps<typeof textareaVariants>
+>(({ className, error, label, id, variant = 'default', ...props }, ref) => {
   return (
     <div className="space-y-1 w-full">
       {label && (
@@ -42,6 +38,7 @@ function Textarea({
         </Label>
       )}
       <textarea
+        ref={ref}
         id={id}
         data-slot="textarea"
         data-error={error}
@@ -50,6 +47,8 @@ function Textarea({
       />
     </div>
   )
-}
+})
+
+Textarea.displayName = 'Textarea'
 
 export { Textarea }

@@ -25,6 +25,7 @@ export const SwapAccountButton = () => {
   const trainerEmail = process.env.NEXT_PUBLIC_TEST_TRAINER_EMAIL
   const trainer2Email = process.env.NEXT_PUBLIC_TEST_TRAINER2_EMAIL
   const trainer3Email = process.env.NEXT_PUBLIC_TEST_TRAINER3_EMAIL
+  const supportEmail = process.env.NEXT_PUBLIC_TEST_SUPPORT_EMAIL
 
   const handleSwap = async (email?: string) => {
     if (!email) {
@@ -60,6 +61,10 @@ export const SwapAccountButton = () => {
     {
       email: client3Email,
       label: 'Irka Client',
+    },
+    {
+      email: supportEmail,
+      label: 'Support',
     },
   ]
 

@@ -116,7 +116,7 @@ export function ChatSidebar({
       {/* Sidebar */}
       <div
         className={cn(
-          'fixed inset-y-0 left-0 z-50 w-80 bg-card dark:bg-background border-r border-muted flex flex-col',
+          'fixed inset-y-0 left-0 z-50 w-80 bg-card dark:bg-background border-r border-muted flex flex-col overflow-hidden',
           'lg:relative lg:z-auto lg:translate-x-0',
           'transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
