@@ -13,6 +13,9 @@ export interface TrainerData {
   role?: string | null
   clientCount?: number | null
   email: string
+  capacity?: number | null
+  spotsLeft?: number | null
+  isAtCapacity?: boolean | null
   profile?: {
     firstName?: string | null
     lastName?: string | null
@@ -88,7 +91,7 @@ export function TrainerCard({
                 <h3 className="font-semibold text-lg">{trainerName}</h3>
                 <div className="flex items-center gap-1.5">
                   {showExperience && trainer.profile?.trainerSince && (
-                    <Badge variant="gradient" size="sm">
+                    <Badge variant="premium" size="sm">
                       {getExperienceText()} of experience
                     </Badge>
                   )}
@@ -99,6 +102,16 @@ export function TrainerCard({
                         {trainer.clientCount} clients
                       </Badge>
                     )}
+                  {trainer.capacity && trainer.spotsLeft !== null && (
+                    <Badge
+                      variant={trainer.isAtCapacity ? 'warning' : 'secondary'}
+                      size="sm"
+                    >
+                      {trainer.spotsLeft === 0
+                        ? 'At capacity'
+                        : `${trainer.spotsLeft} ${trainer.spotsLeft === 1 ? 'spot' : 'spots'} left`}
+                    </Badge>
+                  )}
                 </div>
                 <div className="flex items-center gap-1.5">
                   {trainer.profile?.specialization?.slice(0, 2).map((spec) => (

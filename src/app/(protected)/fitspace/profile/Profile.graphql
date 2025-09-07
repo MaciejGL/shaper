@@ -43,6 +43,10 @@ query Profile {
   profile {
     ...ProfileFragment
   }
+  user {
+    id
+    capacity
+  }
 }
 
 mutation UpdateProfile($input: UpdateProfileInput!) {

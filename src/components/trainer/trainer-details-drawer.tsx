@@ -4,14 +4,11 @@ import { differenceInYears } from 'date-fns'
 import {
   BadgeCheckIcon,
   BookOpenCheck,
-  Calendar,
   CheckCircle,
   FlameIcon,
   Mail,
   MessageSquare,
   Sparkles,
-  User2,
-  Users,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -96,54 +93,40 @@ export function TrainerDetailsDrawer({
             <div className="flex-1 space-y-2">
               <h2 className="text-xl font-bold">{trainerName}</h2>
               <div className="flex items-center gap-2">
-                <Badge variant="gradient" size="md">
+                <Badge variant="premium" size="md">
                   {trainer.role === 'TRAINER'
                     ? 'Personal Trainer'
                     : trainer.role}
                 </Badge>
-                {trainer.clientCount !== null &&
-                  trainer.clientCount !== undefined && (
-                    <Badge>{trainer.clientCount} clients</Badge>
-                  )}
+                {trainer.capacity && trainer.spotsLeft !== null && (
+                  <Badge
+                    variant={trainer.isAtCapacity ? 'destructive' : 'secondary'}
+                  >
+                    {trainer.spotsLeft === 0
+                      ? 'At capacity'
+                      : `${trainer.spotsLeft} ${trainer.spotsLeft === 1 ? 'spot' : 'spots'} left`}
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
-
-          {/* Bio */}
-          {trainer.profile?.bio && (
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <SectionIcon size="sm" icon={User2} variant="indigo" />{' '}
-                <h3 className="font-semibold">About</h3>
-              </div>
-              <p className="text-sm text-muted-foreground prose prose-sm whitespace-pre-wrap bg-card-on-card p-4 rounded-md">
-                {trainer.profile.bio}
-              </p>
-            </div>
-          )}
 
           {/* Experience */}
           {trainer.profile?.trainerSince && (
             <div className="space-y-2">
               <h3 className="font-semibold flex items-center gap-2">
                 <SectionIcon size="sm" icon={FlameIcon} variant="amber" />{' '}
-                Experience
+                {differenceInYears(new Date(), trainer.profile.trainerSince)}{' '}
+                years of experience
               </h3>
-              <div className="flex flex-col gap-1">
-                <div className="bg-card-on-card p-3 rounded-md text-sm flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  {differenceInYears(
-                    new Date(),
-                    trainer.profile.trainerSince,
-                  )}{' '}
-                  years of experience
-                </div>
-                <div className="bg-card-on-card p-3 rounded-md text-sm flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  {trainer.clientCount} clients
-                </div>
-              </div>
             </div>
+          )}
+
+          {/* Bio */}
+          {trainer.profile?.bio && (
+            <p className="text-sm prose prose-sm leading-relaxed whitespace-pre-wrap bg-card-on-card p-4 rounded-md">
+              {trainer.profile.bio}
+            </p>
           )}
 
           {/* Specialization */}
@@ -198,7 +181,7 @@ export function TrainerDetailsDrawer({
                   {trainer.profile.successStories.map((story, index) => (
                     <li
                       key={index}
-                      className="bg-card-on-card p-3 rounded-md text-sm flex items-center gap-2"
+                      className="bg-card-on-card p-3 rounded-md text-sm leading-relaxed flex items-center gap-2"
                     >
                       {story}
                     </li>
@@ -225,13 +208,22 @@ export function TrainerDetailsDrawer({
                 <div className="space-y-4">
                   <h3 className="font-semibold">Request Coaching</h3>
                   <p className="text-sm text-muted-foreground">
-                    Send a coaching request to {trainerName}. They will contact
-                    you to discuss your goals and coaching options.
+                    {trainer.isAtCapacity ? (
+                      <>
+                        {trainerName} is currently at full capacity and not
+                        accepting new clients.
+                      </>
+                    ) : (
+                      <>
+                        Send a coaching request to {trainerName}. They will
+                        contact you to discuss your goals and coaching options.
+                      </>
+                    )}
                   </p>
 
                   <Button
                     onClick={handleRequestCoaching}
-                    disabled={isRequestingCoaching}
+                    disabled={isRequestingCoaching || !!trainer.isAtCapacity}
                     className="w-full"
                     size="lg"
                   >
@@ -239,6 +231,11 @@ export function TrainerDetailsDrawer({
                       <>
                         <MessageSquare className="h-4 w-4 mr-2 animate-pulse" />
                         Sending Request...
+                      </>
+                    ) : trainer.isAtCapacity ? (
+                      <>
+                        <FlameIcon className="h-4 w-4 mr-2" />
+                        Trainer at Capacity
                       </>
                     ) : (
                       <>

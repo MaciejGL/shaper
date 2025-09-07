@@ -19,6 +19,7 @@ model User {
   role                             String                     @default("CLIENT")
   trainerId                        String?
   featured                         Boolean                    @default(false)
+  capacity                         Int?                       // Maximum number of clients trainer can have
   BaseExercise                     BaseExercise[]
   receivedRequests                 CoachingRequest[]          @relation("ReceivedRequests")
   sentRequests                     CoachingRequest[]          @relation("SentRequests")

@@ -470,6 +470,32 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 }
 
 export const Mutation: GQLMutationResolvers<GQLContext> = {
+  updateTrainerCapacity: async (_, { input }, context) => {
+    const user = context.user
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    if (user.user.role !== 'TRAINER') {
+      throw new Error('Only trainers can set their capacity')
+    }
+
+    const updatedUser = await prisma.user.update({
+      where: { id: user.user.id },
+      data: {
+        capacity: input.capacity,
+      },
+      include: {
+        profile: true,
+        sessions: true,
+        notifications: true,
+        createdNotifications: true,
+      },
+    })
+
+    return new User(updatedUser, context)
+  },
+
   updateUserRole: async (_, { input }, context) => {
     const adminUser = await requireAdminUser()
 

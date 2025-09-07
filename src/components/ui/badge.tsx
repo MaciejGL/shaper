@@ -45,8 +45,6 @@ const badgeVariants = cva(
           'bg-cyan-500/70 text-black [a&]:hover:bg-cyan-500/90 focus-visible:ring-cyan-500/20 dark:focus-visible:ring-cyan-500/40 dark:bg-cyan-500 border-none text-white',
           'dark:bg-cyan-500/60',
         ),
-        gradient:
-          'bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-700 dark:to-amber-500 border-none text-white',
         premium:
           'bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0',
       },

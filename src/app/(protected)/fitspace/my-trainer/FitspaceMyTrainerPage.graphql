@@ -5,6 +5,9 @@ query GetMyTrainer {
     role
     clientCount
     email
+    capacity
+    spotsLeft
+    isAtCapacity
     profile {
       firstName
       lastName

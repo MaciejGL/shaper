@@ -64,4 +64,20 @@ export default class PublicTrainer implements GQLPublicTrainer {
 
     return this.data.profile?.trainerSince?.toISOString() ?? null
   }
+
+  get capacity() {
+    return this.data.capacity ?? null
+  }
+
+  get spotsLeft() {
+    if (!this.data.capacity) return null
+    const clientCount = this.data._count?.clients ?? 0
+    return Math.max(0, this.data.capacity - clientCount)
+  }
+
+  get isAtCapacity() {
+    if (!this.data.capacity) return false
+    const clientCount = this.data._count?.clients ?? 0
+    return clientCount >= this.data.capacity
+  }
 }

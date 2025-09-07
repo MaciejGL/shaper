@@ -55,6 +55,10 @@ export default class User implements GQLUser {
     return this.data.updatedAt.toISOString()
   }
 
+  get capacity() {
+    return this.data.capacity ?? null
+  }
+
   // Placeholder for relations, implement as needed
   async clients() {
     const clients = this.data.clients

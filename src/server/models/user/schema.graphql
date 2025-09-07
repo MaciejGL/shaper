@@ -12,6 +12,7 @@ type User {
   role: UserRole!
   createdAt: String!
   updatedAt: String!
+  capacity: Int
 
   profile: UserProfile
   trainer: UserPublic
@@ -81,6 +82,10 @@ input UpdateUserFeaturedInput {
   featured: Boolean!
 }
 
+input UpdateTrainerCapacityInput {
+  capacity: Int
+}
+
 type PublicTrainer {
   id: ID!
   name: String
@@ -92,6 +97,9 @@ type PublicTrainer {
   successStories: [String!]!
   trainerSince: String
   clientCount: Int!
+  capacity: Int
+  spotsLeft: Int
+  isAtCapacity: Boolean!
 }
 
 type Query {
@@ -114,6 +122,8 @@ type Query {
 }
 
 type Mutation {
+  updateTrainerCapacity(input: UpdateTrainerCapacityInput!): User!
+
   # Admin-only mutations
   updateUserRole(input: UpdateUserRoleInput!): AdminUserListItem!
   updateUserFeatured(input: UpdateUserFeaturedInput!): AdminUserListItem!

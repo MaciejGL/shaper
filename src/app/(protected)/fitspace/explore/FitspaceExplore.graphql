@@ -33,6 +33,9 @@ query GetFeaturedTrainers($limit: Int) {
     role
     clientCount
     email
+    capacity
+    spotsLeft
+    isAtCapacity
     profile {
       firstName
       lastName

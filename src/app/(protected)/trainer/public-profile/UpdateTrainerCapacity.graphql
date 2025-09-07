@@ -1,0 +1,6 @@
+mutation UpdateTrainerCapacity($input: UpdateTrainerCapacityInput!) {
+  updateTrainerCapacity(input: $input) {
+    id
+    capacity
+  }
+}
