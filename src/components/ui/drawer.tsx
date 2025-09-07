@@ -10,7 +10,9 @@ function Drawer({
 }: React.ComponentProps<typeof DrawerPrimitive.Root> & {
   onClose?: () => void
 }) {
-  return <DrawerPrimitive.Root data-slot="drawer" {...props} />
+  return (
+    <DrawerPrimitive.Root data-slot="drawer" disablePreventScroll {...props} />
+  )
 }
 
 function DrawerTrigger({
