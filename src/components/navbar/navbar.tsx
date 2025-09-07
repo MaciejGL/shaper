@@ -30,7 +30,7 @@ import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
 import { AnimatedLogo, AnimatedLogoText } from '../animated-logo'
-import { MessengerModal } from '../messenger-modal'
+import { MessengerModal } from '../messenger-modal/messenger-modal'
 import { useMobileApp } from '../mobile-app-bridge'
 import { Button } from '../ui/button'
 import { ButtonLink } from '../ui/button-link'

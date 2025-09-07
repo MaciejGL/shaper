@@ -4319,6 +4319,31 @@ export type GQLUserBasicQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GQLUserBasicQuery = { __typename?: 'Query', userBasic?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, hasCompletedOnboarding: boolean } | undefined | null, trainer?: { __typename?: 'UserPublic', id: string } | undefined | null } | undefined | null };
 
+export type GQLNotificationsQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+  read?: InputMaybe<Scalars['Boolean']['input']>;
+  type?: InputMaybe<GQLNotificationType>;
+  skip?: InputMaybe<Scalars['Int']['input']>;
+  take?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLNotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'Notification', id: string, message: string, createdAt: string, type: GQLNotificationType, read: boolean, link?: string | undefined | null, createdBy?: string | undefined | null, relatedItemId?: string | undefined | null }> };
+
+export type GQLMarkNotificationAsReadMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLMarkNotificationAsReadMutation = { __typename?: 'Mutation', markNotificationRead: { __typename?: 'Notification', id: string } };
+
+export type GQLMarkAllNotificationsAsReadMutationVariables = Exact<{
+  userId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLMarkAllNotificationsAsReadMutation = { __typename?: 'Mutation', markAllNotificationsRead: Array<{ __typename?: 'Notification', id: string }> };
+
 export type GQLGetOrCreateChatQueryVariables = Exact<{
   partnerId: Scalars['ID']['input'];
 }>;
@@ -4379,31 +4404,6 @@ export type GQLMarkMessagesAsReadMutationVariables = Exact<{
 
 
 export type GQLMarkMessagesAsReadMutation = { __typename?: 'Mutation', markMessagesAsRead: boolean };
-
-export type GQLNotificationsQueryVariables = Exact<{
-  userId: Scalars['ID']['input'];
-  read?: InputMaybe<Scalars['Boolean']['input']>;
-  type?: InputMaybe<GQLNotificationType>;
-  skip?: InputMaybe<Scalars['Int']['input']>;
-  take?: InputMaybe<Scalars['Int']['input']>;
-}>;
-
-
-export type GQLNotificationsQuery = { __typename?: 'Query', notifications: Array<{ __typename?: 'Notification', id: string, message: string, createdAt: string, type: GQLNotificationType, read: boolean, link?: string | undefined | null, createdBy?: string | undefined | null, relatedItemId?: string | undefined | null }> };
-
-export type GQLMarkNotificationAsReadMutationVariables = Exact<{
-  id: Scalars['ID']['input'];
-}>;
-
-
-export type GQLMarkNotificationAsReadMutation = { __typename?: 'Mutation', markNotificationRead: { __typename?: 'Notification', id: string } };
-
-export type GQLMarkAllNotificationsAsReadMutationVariables = Exact<{
-  userId: Scalars['ID']['input'];
-}>;
-
-
-export type GQLMarkAllNotificationsAsReadMutation = { __typename?: 'Mutation', markAllNotificationsRead: Array<{ __typename?: 'Notification', id: string }> };
 
 
 export const ProfileFragmentFragmentDoc = `
@@ -12448,6 +12448,121 @@ useInfiniteUserBasicQuery.getKey = (variables?: GQLUserBasicQueryVariables) => v
 
 useUserBasicQuery.fetcher = (variables?: GQLUserBasicQueryVariables, options?: RequestInit['headers']) => fetchData<GQLUserBasicQuery, GQLUserBasicQueryVariables>(UserBasicDocument, variables, options);
 
+export const NotificationsDocument = `
+    query Notifications($userId: ID!, $read: Boolean, $type: NotificationType, $skip: Int, $take: Int) {
+  notifications(
+    userId: $userId
+    read: $read
+    type: $type
+    skip: $skip
+    take: $take
+  ) {
+    id
+    message
+    createdAt
+    type
+    read
+    link
+    createdBy
+    relatedItemId
+  }
+}
+    `;
+
+export const useNotificationsQuery = <
+      TData = GQLNotificationsQuery,
+      TError = unknown
+    >(
+      variables: GQLNotificationsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLNotificationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLNotificationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLNotificationsQuery, TError, TData>(
+      {
+    queryKey: ['Notifications', variables],
+    queryFn: fetchData<GQLNotificationsQuery, GQLNotificationsQueryVariables>(NotificationsDocument, variables),
+    ...options
+  }
+    )};
+
+useNotificationsQuery.getKey = (variables: GQLNotificationsQueryVariables) => ['Notifications', variables];
+
+export const useInfiniteNotificationsQuery = <
+      TData = InfiniteData<GQLNotificationsQuery>,
+      TError = unknown
+    >(
+      variables: GQLNotificationsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLNotificationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLNotificationsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLNotificationsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['Notifications.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLNotificationsQuery, GQLNotificationsQueryVariables>(NotificationsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteNotificationsQuery.getKey = (variables: GQLNotificationsQueryVariables) => ['Notifications.infinite', variables];
+
+
+useNotificationsQuery.fetcher = (variables: GQLNotificationsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLNotificationsQuery, GQLNotificationsQueryVariables>(NotificationsDocument, variables, options);
+
+export const MarkNotificationAsReadDocument = `
+    mutation MarkNotificationAsRead($id: ID!) {
+  markNotificationRead(id: $id) {
+    id
+  }
+}
+    `;
+
+export const useMarkNotificationAsReadMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLMarkNotificationAsReadMutation, TError, GQLMarkNotificationAsReadMutationVariables, TContext>) => {
+    
+    return useMutation<GQLMarkNotificationAsReadMutation, TError, GQLMarkNotificationAsReadMutationVariables, TContext>(
+      {
+    mutationKey: ['MarkNotificationAsRead'],
+    mutationFn: (variables?: GQLMarkNotificationAsReadMutationVariables) => fetchData<GQLMarkNotificationAsReadMutation, GQLMarkNotificationAsReadMutationVariables>(MarkNotificationAsReadDocument, variables)(),
+    ...options
+  }
+    )};
+
+useMarkNotificationAsReadMutation.getKey = () => ['MarkNotificationAsRead'];
+
+
+useMarkNotificationAsReadMutation.fetcher = (variables: GQLMarkNotificationAsReadMutationVariables, options?: RequestInit['headers']) => fetchData<GQLMarkNotificationAsReadMutation, GQLMarkNotificationAsReadMutationVariables>(MarkNotificationAsReadDocument, variables, options);
+
+export const MarkAllNotificationsAsReadDocument = `
+    mutation MarkAllNotificationsAsRead($userId: ID!) {
+  markAllNotificationsRead(userId: $userId) {
+    id
+  }
+}
+    `;
+
+export const useMarkAllNotificationsAsReadMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLMarkAllNotificationsAsReadMutation, TError, GQLMarkAllNotificationsAsReadMutationVariables, TContext>) => {
+    
+    return useMutation<GQLMarkAllNotificationsAsReadMutation, TError, GQLMarkAllNotificationsAsReadMutationVariables, TContext>(
+      {
+    mutationKey: ['MarkAllNotificationsAsRead'],
+    mutationFn: (variables?: GQLMarkAllNotificationsAsReadMutationVariables) => fetchData<GQLMarkAllNotificationsAsReadMutation, GQLMarkAllNotificationsAsReadMutationVariables>(MarkAllNotificationsAsReadDocument, variables)(),
+    ...options
+  }
+    )};
+
+useMarkAllNotificationsAsReadMutation.getKey = () => ['MarkAllNotificationsAsRead'];
+
+
+useMarkAllNotificationsAsReadMutation.fetcher = (variables: GQLMarkAllNotificationsAsReadMutationVariables, options?: RequestInit['headers']) => fetchData<GQLMarkAllNotificationsAsReadMutation, GQLMarkAllNotificationsAsReadMutationVariables>(MarkAllNotificationsAsReadDocument, variables, options);
+
 export const GetOrCreateChatDocument = `
     query GetOrCreateChat($partnerId: ID!) {
   getOrCreateChat(partnerId: $partnerId) {
@@ -12944,118 +13059,3 @@ useMarkMessagesAsReadMutation.getKey = () => ['MarkMessagesAsRead'];
 
 
 useMarkMessagesAsReadMutation.fetcher = (variables: GQLMarkMessagesAsReadMutationVariables, options?: RequestInit['headers']) => fetchData<GQLMarkMessagesAsReadMutation, GQLMarkMessagesAsReadMutationVariables>(MarkMessagesAsReadDocument, variables, options);
-
-export const NotificationsDocument = `
-    query Notifications($userId: ID!, $read: Boolean, $type: NotificationType, $skip: Int, $take: Int) {
-  notifications(
-    userId: $userId
-    read: $read
-    type: $type
-    skip: $skip
-    take: $take
-  ) {
-    id
-    message
-    createdAt
-    type
-    read
-    link
-    createdBy
-    relatedItemId
-  }
-}
-    `;
-
-export const useNotificationsQuery = <
-      TData = GQLNotificationsQuery,
-      TError = unknown
-    >(
-      variables: GQLNotificationsQueryVariables,
-      options?: Omit<UseQueryOptions<GQLNotificationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLNotificationsQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useQuery<GQLNotificationsQuery, TError, TData>(
-      {
-    queryKey: ['Notifications', variables],
-    queryFn: fetchData<GQLNotificationsQuery, GQLNotificationsQueryVariables>(NotificationsDocument, variables),
-    ...options
-  }
-    )};
-
-useNotificationsQuery.getKey = (variables: GQLNotificationsQueryVariables) => ['Notifications', variables];
-
-export const useInfiniteNotificationsQuery = <
-      TData = InfiniteData<GQLNotificationsQuery>,
-      TError = unknown
-    >(
-      variables: GQLNotificationsQueryVariables,
-      options: Omit<UseInfiniteQueryOptions<GQLNotificationsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLNotificationsQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useInfiniteQuery<GQLNotificationsQuery, TError, TData>(
-      (() => {
-    const { queryKey: optionsQueryKey, ...restOptions } = options;
-    return {
-      queryKey: optionsQueryKey ?? ['Notifications.infinite', variables],
-      queryFn: (metaData) => fetchData<GQLNotificationsQuery, GQLNotificationsQueryVariables>(NotificationsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
-      ...restOptions
-    }
-  })()
-    )};
-
-useInfiniteNotificationsQuery.getKey = (variables: GQLNotificationsQueryVariables) => ['Notifications.infinite', variables];
-
-
-useNotificationsQuery.fetcher = (variables: GQLNotificationsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLNotificationsQuery, GQLNotificationsQueryVariables>(NotificationsDocument, variables, options);
-
-export const MarkNotificationAsReadDocument = `
-    mutation MarkNotificationAsRead($id: ID!) {
-  markNotificationRead(id: $id) {
-    id
-  }
-}
-    `;
-
-export const useMarkNotificationAsReadMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLMarkNotificationAsReadMutation, TError, GQLMarkNotificationAsReadMutationVariables, TContext>) => {
-    
-    return useMutation<GQLMarkNotificationAsReadMutation, TError, GQLMarkNotificationAsReadMutationVariables, TContext>(
-      {
-    mutationKey: ['MarkNotificationAsRead'],
-    mutationFn: (variables?: GQLMarkNotificationAsReadMutationVariables) => fetchData<GQLMarkNotificationAsReadMutation, GQLMarkNotificationAsReadMutationVariables>(MarkNotificationAsReadDocument, variables)(),
-    ...options
-  }
-    )};
-
-useMarkNotificationAsReadMutation.getKey = () => ['MarkNotificationAsRead'];
-
-
-useMarkNotificationAsReadMutation.fetcher = (variables: GQLMarkNotificationAsReadMutationVariables, options?: RequestInit['headers']) => fetchData<GQLMarkNotificationAsReadMutation, GQLMarkNotificationAsReadMutationVariables>(MarkNotificationAsReadDocument, variables, options);
-
-export const MarkAllNotificationsAsReadDocument = `
-    mutation MarkAllNotificationsAsRead($userId: ID!) {
-  markAllNotificationsRead(userId: $userId) {
-    id
-  }
-}
-    `;
-
-export const useMarkAllNotificationsAsReadMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLMarkAllNotificationsAsReadMutation, TError, GQLMarkAllNotificationsAsReadMutationVariables, TContext>) => {
-    
-    return useMutation<GQLMarkAllNotificationsAsReadMutation, TError, GQLMarkAllNotificationsAsReadMutationVariables, TContext>(
-      {
-    mutationKey: ['MarkAllNotificationsAsRead'],
-    mutationFn: (variables?: GQLMarkAllNotificationsAsReadMutationVariables) => fetchData<GQLMarkAllNotificationsAsReadMutation, GQLMarkAllNotificationsAsReadMutationVariables>(MarkAllNotificationsAsReadDocument, variables)(),
-    ...options
-  }
-    )};
-
-useMarkAllNotificationsAsReadMutation.getKey = () => ['MarkAllNotificationsAsRead'];
-
-
-useMarkAllNotificationsAsReadMutation.fetcher = (variables: GQLMarkAllNotificationsAsReadMutationVariables, options?: RequestInit['headers']) => fetchData<GQLMarkAllNotificationsAsReadMutation, GQLMarkAllNotificationsAsReadMutationVariables>(MarkAllNotificationsAsReadDocument, variables, options);

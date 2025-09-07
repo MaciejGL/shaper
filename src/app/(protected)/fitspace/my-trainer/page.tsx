@@ -5,7 +5,7 @@ import { useState } from 'react'
 
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Loader } from '@/components/loader'
-import { MessengerModal } from '@/components/messenger-modal'
+import { MessengerModal } from '@/components/messenger-modal/messenger-modal'
 import { TrainerCard } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Badge } from '@/components/ui/badge'

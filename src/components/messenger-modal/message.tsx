@@ -31,8 +31,8 @@ export function Message({
         isOwnMessage && 'flex-row-reverse',
         isGrouped && 'mt-0',
       )}
-      initial={shouldAnimate ? { opacity: 0, scale: 0.98 } : false}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={shouldAnimate ? { opacity: 0 } : false}
+      animate={{ opacity: 1 }}
       transition={
         shouldAnimate
           ? {

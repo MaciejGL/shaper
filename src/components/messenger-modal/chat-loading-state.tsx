@@ -115,76 +115,14 @@ export function ChatLoadingState() {
               {/* Message bubbles */}
               <div className="space-y-1">
                 {msg.messageWidths.map((width, msgIndex) => (
-                  <div
-                    key={msgIndex}
-                    className="bg-card-on-card rounded-xl px-3 py-2"
-                  >
-                    <Skeleton className={cn('h-4', width)} />
-                  </div>
+                  <Skeleton key={msgIndex} className="rounded-xl px-3 py-2">
+                    <div className={cn('h-4', width)} />
+                  </Skeleton>
                 ))}
               </div>
             </div>
           </motion.div>
         ))}
-
-        {/* Typing indicator */}
-        <motion.div
-          className="flex gap-2 group"
-          variants={messageVariants}
-          transition={{
-            duration: 0.4,
-            ease: [0.23, 1, 0.32, 1],
-            delay: 0.3,
-          }}
-        >
-          <Skeleton className="size-8 rounded-full flex-shrink-0" />
-          <div className="w-max max-w-[80%]">
-            <div className="bg-card-on-card rounded-xl px-3 py-2">
-              <div className="flex items-center gap-1">
-                <div className="flex gap-1">
-                  <motion.div
-                    className="size-2 bg-muted-foreground/40 rounded-full"
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0.4, 0.8, 0.4],
-                    }}
-                    transition={{
-                      duration: 1.2,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                  />
-                  <motion.div
-                    className="size-2 bg-muted-foreground/40 rounded-full"
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0.4, 0.8, 0.4],
-                    }}
-                    transition={{
-                      duration: 1.2,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                      delay: 0.2,
-                    }}
-                  />
-                  <motion.div
-                    className="size-2 bg-muted-foreground/40 rounded-full"
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      opacity: [0.4, 0.8, 0.4],
-                    }}
-                    transition={{
-                      duration: 1.2,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                      delay: 0.4,
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
       </motion.div>
     </div>
   )
