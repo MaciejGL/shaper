@@ -14,7 +14,7 @@ export default function AccountManagementPage() {
       <div>
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center flex-col mb-4">
+          <div className="flex items-center flex-col mb-4 gap-4">
             <div className="size-12 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex-center shrink-0">
               <UserRoundCogIcon className="w-6 h-6 text-black" />
             </div>
