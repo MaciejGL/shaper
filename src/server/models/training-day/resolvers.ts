@@ -14,20 +14,6 @@ export const Query: GQLQueryResolvers = {
       where: { id: dayId },
       include: {
         events: true,
-        week: {
-          select: {
-            id: true,
-          },
-        },
-        exercises: {
-          include: {
-            sets: {
-              include: {
-                log: true,
-              },
-            },
-          },
-        },
       },
     })
 
