@@ -64,7 +64,7 @@ export function NavLink({
   }
 
   return (
-    <NextLink href={href} className="w-full">
+    <NextLink href={href} className="w-full" scroll>
       <Button
         variant="ghost"
         disabled={disabled}

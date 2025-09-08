@@ -128,6 +128,7 @@ export function MobileNav() {
                     : 'text-muted-foreground hover:text-foreground',
                 )}
                 prefetch={item.prefetch}
+                scroll
               >
                 <Icon className="size-4 mb-1" />
                 <span className="text-xs font-medium">{item.label}</span>

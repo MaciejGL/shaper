@@ -79,6 +79,7 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
+    scrollRestoration: false,
   },
   devIndicators:
     process.env.NEXT_PUBLIC_DEVTOOLS === 'true'

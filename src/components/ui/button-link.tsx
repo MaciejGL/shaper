@@ -31,6 +31,7 @@ function ButtonLink({
         'shrink-0',
         buttonVariants({ variant, size: defaultSize, className }),
       )}
+      scroll
       {...props}
     >
       {iconStart && <span className="mr-2">{iconStart}</span>}

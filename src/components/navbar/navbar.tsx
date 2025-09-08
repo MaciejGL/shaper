@@ -155,7 +155,7 @@ export const Navbar = ({
           <div className="flex items-center gap-2">
             {withSidebar && <SidebarTrigger />}
             {isFitspace ? (
-              <Link href={linkToDashboard}>
+              <Link href={linkToDashboard} scroll>
                 <div className="flex items-center">
                   <AnimatedLogo infinite={false} size={32} />
                   <AnimatedLogoText />

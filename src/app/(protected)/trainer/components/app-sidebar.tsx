@@ -409,6 +409,7 @@ function SidebarItem({
             href={item.url}
             className="inline-flex py-4"
             onClick={handleMobileNavigation}
+            scroll
           >
             <item.icon />
             <span>{item.title}</span>
