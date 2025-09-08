@@ -14,7 +14,6 @@ import {
   useFitspaceGetWorkoutQuery,
   useFitspaceRemoveSetMutation,
 } from '@/generated/graphql-client'
-import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
 
 import { ExerciseSet } from './exercise-set'
@@ -27,7 +26,6 @@ import { ExerciseSetsProps } from './types'
 export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
   const isFirstRender = useIsFirstRender()
   const { trainingId } = useParams<{ trainingId: string }>()
-  const invalidateQuery = useInvalidateQuery()
   const queryClient = useQueryClient()
   const { preferences } = useUserPreferences()
   // Initialize state with current log values for each set
@@ -148,10 +146,8 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
           },
         )
 
-        // Only invalidate on success to prevent race conditions with optimistic updates
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
-        })
+        // ✅ Removed invalidation - manual cache update above is sufficient
+        // Server data is already integrated via the onSuccess cache update
       },
     })
 
@@ -206,9 +202,8 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
       }
     },
     onSuccess: () => {
-      invalidateQuery({
-        queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
-      })
+      // ✅ Removed invalidation - optimistic update above handles the removal
+      // No need to refetch after successful deletion
     },
   })
 

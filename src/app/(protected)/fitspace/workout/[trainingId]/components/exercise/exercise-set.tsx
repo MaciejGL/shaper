@@ -19,6 +19,7 @@ import { SwipeToReveal } from '@/components/ui/swipe-to-reveal'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutQuery,
+  GQLFitspaceMarkSetAsCompletedMutation,
   GQLTrainingView,
   useFitspaceGetWorkoutQuery,
   useFitspaceMarkSetAsCompletedMutation,
@@ -26,6 +27,7 @@ import {
 } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
+import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 import { cn } from '@/lib/utils'
 
 import { ExerciseWeightInput } from '../exercise-weight-input'
@@ -120,46 +122,38 @@ export function ExerciseSet({
     },
   })
 
-  const { mutateAsync: markSetAsCompleted } =
-    useFitspaceMarkSetAsCompletedMutation({
-      onMutate: async ({ setId, completed, reps, weight }) => {
-        // Cancel outgoing queries to prevent race conditions
-        const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
-        await queryClient.cancelQueries({ queryKey })
-
-        // Get current data for rollback
-        const previousData =
-          queryClient.getQueryData<GQLFitspaceGetWorkoutQuery>(queryKey)
-
-        // Optimistically update the cache with both completion status and log values
-        queryClient.setQueryData(
-          queryKey,
-          createOptimisticSetUpdate(setId, completed, { reps, weight }),
-        )
-
-        return { previousData }
-      },
-      onError: (err, variables, context) => {
-        // Rollback on error
-        if (context?.previousData) {
-          const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
-          queryClient.setQueryData(queryKey, context.previousData)
-        }
-        // Reset timer states on error
-        setIsTimerOperations(false)
-        setSkipTimer(false)
+  // ✅ Simplified using existing useOptimisticMutation pattern
+  const { optimisticMutate: markSetAsCompletedOptimistic } =
+    useOptimisticMutation<
+      GQLFitspaceGetWorkoutQuery,
+      GQLFitspaceMarkSetAsCompletedMutation,
+      {
+        setId: string
+        completed: boolean
+        reps?: number | null
+        weight?: number | null
+      }
+    >({
+      queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+      mutationFn: useFitspaceMarkSetAsCompletedMutation().mutateAsync,
+      updateFn: (oldData, { setId, completed, reps, weight }) => {
+        const updateFn = createOptimisticSetUpdate(setId, completed, {
+          reps,
+          weight,
+        })
+        return updateFn(oldData)
       },
       onSuccess: (data, variables) => {
-        // Only start timer if we completed the set (not uncompleted it) and not skipping timer
+        // Timer logic
         if (variables.completed && !skipTimer) {
           setIsTimerOperations(true)
         }
-        setSkipTimer(false) // Reset skip timer flag
-
-        // Only invalidate on success to prevent race conditions with optimistic updates
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
-        })
+        setSkipTimer(false)
+      },
+      onError: () => {
+        // Reset timer states on error
+        setIsTimerOperations(false)
+        setSkipTimer(false)
       },
     })
 
@@ -264,7 +258,7 @@ export function ExerciseSet({
       })
 
       try {
-        await markSetAsCompleted({
+        await markSetAsCompletedOptimistic({
           setId: set.id,
           completed: willBeCompleted,
           reps: reps ? +reps : previousSetRepsLog || null,
@@ -278,7 +272,7 @@ export function ExerciseSet({
       }
     },
     [
-      markSetAsCompleted,
+      markSetAsCompletedOptimistic,
       set.completedAt,
       set.id,
       reps,
