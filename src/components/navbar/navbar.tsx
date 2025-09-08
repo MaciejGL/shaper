@@ -57,10 +57,23 @@ import { SwapAccountButton } from './swap-account'
 
 // Custom hook to get total unread message count
 function useUnreadMessageCount(user?: UserWithSession | null) {
+  const [enableQuery, setEnableQuery] = useState(false)
+
+  useEffect(() => {
+    if (user?.user?.id) {
+      // Delay the query by 3 seconds to let more critical queries load first
+      const timer = setTimeout(() => {
+        setEnableQuery(true)
+      }, 3000)
+
+      return () => clearTimeout(timer)
+    }
+  }, [user?.user?.id])
+
   const { data } = useGetTotalUnreadCountQuery(
     {},
     {
-      enabled: !!user?.user?.id,
+      enabled: enableQuery,
       refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
     },
   )
