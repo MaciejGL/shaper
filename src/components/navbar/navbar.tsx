@@ -93,6 +93,18 @@ export const Navbar = ({
   const { theme, setTheme } = useTheme()
   const { isVisible } = useScrollVisibility()
   const unreadCount = useUnreadMessageCount(user)
+  const [enableQuery, setEnableQuery] = useState(false)
+
+  useEffect(() => {
+    if (user?.user?.id) {
+      // Delay the query by 3 seconds to let more critical queries load first
+      const timer = setTimeout(() => {
+        setEnableQuery(true)
+      }, 5000)
+
+      return () => clearTimeout(timer)
+    }
+  }, [user?.user?.id])
 
   useEffect(() => {
     setMounted(true)
@@ -104,7 +116,7 @@ export const Navbar = ({
       take: 10,
     },
     {
-      enabled: !!user?.user?.id,
+      enabled: enableQuery,
       refetchInterval: 100000,
     },
   )

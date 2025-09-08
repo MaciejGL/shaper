@@ -12,13 +12,10 @@ interface ReturnToAppProps {
 
 export function ReturnToApp({ variant = 'complete' }: ReturnToAppProps) {
   const { isNativeApp, navigateToPath } = useMobileApp()
-
   const handleReturn = () => {
     if (isNativeApp) {
-      // Use native navigation
       navigateToPath('/fitspace/settings')
     } else {
-      // ✅ Use bulletproof deep link utility
       navigateToDeepLink('/fitspace/settings')
     }
   }

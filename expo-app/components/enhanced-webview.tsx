@@ -245,13 +245,14 @@ export const EnhancedWebView = forwardRef<
     useImperativeHandle(ref, () => ({
       navigateToPath: (path: string) => {
         webViewRef.current?.injectJavaScript(`
-          // Use HTML5 History API for smooth navigation
+          // Use HTML5 History API for smooth navigation without reloading
           if (window.history && window.history.pushState) {
             window.history.pushState(null, '', '${path}');
             
-            // Trigger navigation in React Router or your routing system
+            // Trigger React Router navigation without page reload
             if (window.location.pathname !== '${path}') {
-              window.location.assign('${path}');
+              const event = new PopStateEvent('popstate', { state: null });
+              window.dispatchEvent(event);
             }
           } else {
             // Fallback for older browsers
@@ -326,7 +327,7 @@ export const EnhancedWebView = forwardRef<
         style={styles.webview}
         javaScriptEnabled={true}
         domStorageEnabled={true}
-        startInLoadingState={true}
+        startInLoadingState={false}
         userAgent={APP_CONFIG.USER_AGENT}
         injectedJavaScript={injectedJavaScript}
         onMessage={handleMessage}

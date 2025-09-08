@@ -25,10 +25,11 @@ function normalizeDeepLink(url: string): string {
 
   let normalized = url.trim()
 
-  // Fix multiple slash patterns
+  // 🛡️ BULLETPROOF: Handle all known malformed URL patterns
   normalized = normalized
-    .replace(/hypertro:\/{3,}/g, 'hypertro://') // hypertro:/// -> hypertro://
+    .replace(/hypertro:\/{3,}/g, 'hypertro://') // hypertro:///+ -> hypertro://
     .replace(/hypertro:\/{1}([^\/])/g, 'hypertro://$1') // hypertro:/path -> hypertro://path
+    .replace(/hypertro:\/{2}([^\/])/g, 'hypertro://$1') // hypertro://path -> hypertro://path (keep correct)
 
   // Ensure double slash after scheme if missing
   if (
@@ -36,6 +37,18 @@ function normalizeDeepLink(url: string): string {
     !normalized.startsWith('hypertro://')
   ) {
     normalized = normalized.replace('hypertro:', 'hypertro://')
+  }
+
+  // 🔍 EXTRA: Handle edge cases from URL encoding/system processing
+  normalized = normalized
+    .replace(/hypertro:\/+/g, 'hypertro://') // Any number of slashes -> exactly 2
+    .replace(/hypertro:\s+/g, 'hypertro://') // Handle spaces after colon
+    .replace(/hypertro:$/g, 'hypertro://fitspace') // Handle bare scheme
+
+  // Final validation - ensure valid format
+  if (normalized.startsWith('hypertro:') && !normalized.includes('://')) {
+    const pathPart = normalized.replace(/^hypertro:\/*/g, '')
+    normalized = `hypertro://${pathPart || 'fitspace'}`
   }
 
   return normalized

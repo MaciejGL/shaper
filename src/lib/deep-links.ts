@@ -58,11 +58,6 @@ export function navigateToDeepLink(
 ) {
   const deepLink = createDeepLink(path, queryParams)
 
-  console.info('🚀 Attempting navigation to:', deepLink)
-  if (fallbackUrl) {
-    console.info('🔄 Fallback URL:', fallbackUrl)
-  }
-
   try {
     // Try deep link first
     window.location.href = deepLink
