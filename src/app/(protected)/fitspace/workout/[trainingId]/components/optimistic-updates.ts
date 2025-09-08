@@ -74,6 +74,7 @@ export const createOptimisticSetUpdate = (
 
 /**
  * Creates an optimistic update function for marking an exercise as completed/uncompleted
+ * Also updates all sets to match the exercise completion state
  */
 export const createOptimisticExerciseUpdate = (
   exerciseId: string,
@@ -87,16 +88,75 @@ export const createOptimisticExerciseUpdate = (
     ) as NonNullable<GQLFitspaceGetWorkoutQuery>
     if (!newWorkout.getWorkout?.plan) return newWorkout
 
-    // Update the specific exercise
+    // Update the specific exercise and all its sets
     newWorkout.getWorkout.plan.weeks.forEach((week) => {
       week.days.forEach((day) => {
         day.exercises.forEach((exercise) => {
           const targetExerciseId = exercise.substitutedBy?.id || exercise.id
           if (targetExerciseId === exerciseId) {
             const exerciseToUpdate = exercise.substitutedBy || exercise
+            const setsToUpdate = exercise.substitutedBy?.sets || exercise.sets
+
+            // ✅ Update exercise completion
             exerciseToUpdate.completedAt = completed
               ? new Date().toISOString()
               : null
+
+            // ✅ Update all sets to match exercise completion state
+            setsToUpdate.forEach((set) => {
+              set.completedAt = completed ? new Date().toISOString() : null
+            })
+          }
+        })
+      })
+    })
+
+    return newWorkout
+  }
+}
+
+/**
+ * Creates an optimistic update function for removing a set from an exercise
+ * Also updates exercise completion if all remaining sets are completed
+ */
+export const createOptimisticRemoveSetUpdate = (setId: string) => {
+  return (oldData: GQLFitspaceGetWorkoutQuery) => {
+    if (!oldData?.getWorkout?.plan) return oldData
+
+    const newWorkout = JSON.parse(
+      JSON.stringify(oldData),
+    ) as NonNullable<GQLFitspaceGetWorkoutQuery>
+    if (!newWorkout.getWorkout?.plan) return newWorkout
+
+    // Find and remove the set, then check exercise completion
+    newWorkout.getWorkout.plan.weeks.forEach((week) => {
+      week.days.forEach((day) => {
+        day.exercises.forEach((exercise) => {
+          const setsToUpdate = exercise.substitutedBy?.sets || exercise.sets
+          const setIndex = setsToUpdate.findIndex((s) => s.id === setId)
+
+          if (setIndex !== -1) {
+            // Remove the set
+            setsToUpdate.splice(setIndex, 1)
+
+            // Reorder remaining sets
+            setsToUpdate.forEach((remainingSet, index) => {
+              remainingSet.order = index + 1
+            })
+
+            // ✅ Check if exercise should be marked as completed
+            const exerciseToUpdate = exercise.substitutedBy || exercise
+            const allSetsCompleted = setsToUpdate.every(
+              (set) => set.completedAt,
+            )
+
+            if (allSetsCompleted && setsToUpdate.length > 0) {
+              // All remaining sets completed → mark exercise as completed
+              exerciseToUpdate.completedAt = new Date().toISOString()
+            } else {
+              // Not all sets completed → mark exercise as incomplete
+              exerciseToUpdate.completedAt = null
+            }
           }
         })
       })

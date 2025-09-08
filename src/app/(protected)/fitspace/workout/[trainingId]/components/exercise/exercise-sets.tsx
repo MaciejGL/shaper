@@ -9,12 +9,16 @@ import { Button } from '@/components/ui/button'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutQuery,
+  GQLFitspaceRemoveSetMutation,
   GQLTrainingView,
   useFitspaceAddSetMutation,
   useFitspaceGetWorkoutQuery,
   useFitspaceRemoveSetMutation,
 } from '@/generated/graphql-client'
+import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 import { cn } from '@/lib/utils'
+
+import { createOptimisticRemoveSetUpdate } from '../optimistic-updates'
 
 import { ExerciseSet } from './exercise-set'
 import {
@@ -85,10 +89,10 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
     })
   }, [exercise.substitutedBy?.sets, exercise.sets])
 
+  // ✅ Add Set: Get real ID from server, mark exercise as incomplete
   const { mutateAsync: addSet, isPending: isAddingSet } =
     useFitspaceAddSetMutation({
       onSuccess: (data) => {
-        // Manually update the cache with the new set
         queryClient.setQueryData(
           useFitspaceGetWorkoutQuery.getKey({ trainingId }),
           (old: GQLFitspaceGetWorkoutQuery) => {
@@ -99,7 +103,6 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
             ) as NonNullable<GQLFitspaceGetWorkoutQuery>
             if (!newWorkout.getWorkout?.plan) return newWorkout
 
-            // Find the exercise and add the new set
             newWorkout.getWorkout.plan.weeks.forEach((week) => {
               week.days.forEach((day) => {
                 day.exercises.forEach((exerciseItem) => {
@@ -111,32 +114,30 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
                   if (currentExerciseId === targetExerciseId) {
                     const setsToUpdate =
                       exerciseItem.substitutedBy?.sets || exerciseItem.sets
-
-                    // Get the last set to inherit target values from
                     const lastSet = setsToUpdate[setsToUpdate.length - 1]
-
-                    // Create a properly structured set with correct order and isExtra = true
-                    // Find the maximum existing order to ensure proper sequential ordering
                     const maxOrder =
                       setsToUpdate.length > 0
                         ? Math.max(...setsToUpdate.map((set) => set.order))
                         : 0
-                    const newSet = {
+
+                    // Add new set with real server ID
+                    setsToUpdate.push({
                       ...data.addSet,
                       order: maxOrder + 1,
                       isExtra: true,
-                      // Inherit target values from the last set
                       reps: lastSet?.reps || null,
                       minReps: lastSet?.minReps || null,
                       maxReps: lastSet?.maxReps || null,
                       weight: lastSet?.weight || null,
                       rpe: lastSet?.rpe || null,
-                      // Always null for new sets
                       log: null,
                       completedAt: null,
-                    }
+                    })
 
-                    setsToUpdate.push(newSet)
+                    // ✅ Mark exercise as incomplete (new set added)
+                    const exerciseToUpdate =
+                      exerciseItem.substitutedBy || exerciseItem
+                    exerciseToUpdate.completedAt = null
                   }
                 })
               })
@@ -145,65 +146,20 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
             return newWorkout
           },
         )
-
-        // ✅ Removed invalidation - manual cache update above is sufficient
-        // Server data is already integrated via the onSuccess cache update
       },
     })
 
-  const { mutateAsync: removeSet } = useFitspaceRemoveSetMutation({
-    onMutate: async (variables) => {
-      // Cancel outgoing queries to prevent race conditions
-      const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
-      await queryClient.cancelQueries({ queryKey })
-
-      // Get current data for rollback
-      const previousData =
-        queryClient.getQueryData<GQLFitspaceGetWorkoutQuery>(queryKey)
-
-      // Optimistically update cache to remove the set
-      queryClient.setQueryData(queryKey, (old: GQLFitspaceGetWorkoutQuery) => {
-        if (!old?.getWorkout?.plan) return old
-
-        const newWorkout = JSON.parse(
-          JSON.stringify(old),
-        ) as NonNullable<GQLFitspaceGetWorkoutQuery>
-        if (!newWorkout.getWorkout?.plan) return newWorkout
-
-        // Find and remove the set from the workout data
-        newWorkout.getWorkout.plan.weeks.forEach((week) => {
-          week.days.forEach((day) => {
-            day.exercises.forEach((exercise) => {
-              const setsToUpdate = exercise.substitutedBy?.sets || exercise.sets
-              const setIndex = setsToUpdate.findIndex(
-                (s) => s.id === variables.setId,
-              )
-              if (setIndex !== -1) {
-                setsToUpdate.splice(setIndex, 1)
-                // Reorder remaining sets
-                setsToUpdate.forEach((remainingSet, index) => {
-                  remainingSet.order = index + 1
-                })
-              }
-            })
-          })
-        })
-
-        return newWorkout
-      })
-
-      return { previousData }
-    },
-    onError: (err, variables, context) => {
-      // Rollback on error
-      if (context?.previousData) {
-        const queryKey = useFitspaceGetWorkoutQuery.getKey({ trainingId })
-        queryClient.setQueryData(queryKey, context.previousData)
-      }
-    },
-    onSuccess: () => {
-      // ✅ Removed invalidation - optimistic update above handles the removal
-      // No need to refetch after successful deletion
+  // ✅ Remove Set: Optimistic update + check if all remaining sets completed
+  const { optimisticMutate: removeSet } = useOptimisticMutation<
+    GQLFitspaceGetWorkoutQuery,
+    GQLFitspaceRemoveSetMutation,
+    { setId: string }
+  >({
+    queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+    mutationFn: useFitspaceRemoveSetMutation().mutateAsync,
+    updateFn: (oldData, { setId }) => {
+      const updateFn = createOptimisticRemoveSetUpdate(setId)
+      return updateFn(oldData)
     },
   })
 
