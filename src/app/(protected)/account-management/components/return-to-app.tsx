@@ -4,6 +4,7 @@ import { ArrowLeft, CheckCircle } from 'lucide-react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
+import { navigateToPath as navigateToDeepLink } from '@/lib/deep-links'
 
 interface ReturnToAppProps {
   variant?: 'back' | 'complete'
@@ -17,16 +18,8 @@ export function ReturnToApp({ variant = 'complete' }: ReturnToAppProps) {
       // Use native navigation
       navigateToPath('/fitspace/settings')
     } else {
-      // Try deeplink first, fallback to web
-      try {
-        window.location.href = 'hypertro://fitspace/settings'
-        // Fallback to web app after short delay
-        setTimeout(() => {
-          window.location.href = `${window.location.origin}/fitspace/settings`
-        }, 1000)
-      } catch {
-        window.location.href = `${window.location.origin}/fitspace/settings`
-      }
+      // ✅ Use bulletproof deep link utility
+      navigateToDeepLink('/fitspace/settings')
     }
   }
 

@@ -16,6 +16,31 @@ import {
 
 import { useWebViewNavigation } from './webview-navigation-manager'
 
+/**
+ * Bulletproof URL normalization for deep links
+ * Handles all known malformed URL patterns from iOS/Android/WebView
+ */
+function normalizeDeepLink(url: string): string {
+  if (!url) return url
+
+  let normalized = url.trim()
+
+  // Fix multiple slash patterns
+  normalized = normalized
+    .replace(/hypertro:\/{3,}/g, 'hypertro://') // hypertro:/// -> hypertro://
+    .replace(/hypertro:\/{1}([^\/])/g, 'hypertro://$1') // hypertro:/path -> hypertro://path
+
+  // Ensure double slash after scheme if missing
+  if (
+    normalized.startsWith('hypertro:') &&
+    !normalized.startsWith('hypertro://')
+  ) {
+    normalized = normalized.replace('hypertro:', 'hypertro://')
+  }
+
+  return normalized
+}
+
 interface PushNotificationManagerProps {
   children: React.ReactNode
   // Optional: pass user authentication token when available
@@ -36,12 +61,22 @@ export function PushNotificationManager({
   const handleDeepLink = useCallback(
     (url: string) => {
       try {
-        // Parse the URL
-        const parsed = Linking.parse(url)
+        // ✅ BULLETPROOF: Normalize URL first
+        const normalizedUrl = normalizeDeepLink(url)
+
+        if (normalizedUrl !== url) {
+          console.info('🔧 URL normalized:', url, '->', normalizedUrl)
+        }
+
+        // Parse the normalized URL
+        const parsed = Linking.parse(normalizedUrl)
         console.info('🔗 Parsed deep link:', parsed)
 
         // Handle different URL schemes
-        if (url.includes('hypertro.app') || url.startsWith('hypertro://')) {
+        if (
+          normalizedUrl.includes('hypertro.app') ||
+          normalizedUrl.startsWith('hypertro://')
+        ) {
           // This is a Hypertro deep link
           let targetPath = parsed.path || '/'
 
@@ -52,14 +87,14 @@ export function PushNotificationManager({
 
           // Check if this is a path we should handle (fitspace/ or trainer/ or custom scheme)
           const shouldHandle =
-            url.startsWith('hypertro://') ||
+            normalizedUrl.startsWith('hypertro://') ||
             targetPath.startsWith('fitspace/') ||
             targetPath.startsWith('trainer/')
 
           if (!shouldHandle) {
             console.info(
               '❌ Deep link ignored (not fitspace/trainer path):',
-              url,
+              normalizedUrl,
             )
             return
           }
@@ -87,10 +122,18 @@ export function PushNotificationManager({
             }, 1000)
           }
         } else {
-          console.info('❌ Deep link ignored (not Hypertro URL):', url)
+          console.info(
+            '❌ Deep link ignored (not Hypertro URL):',
+            normalizedUrl,
+          )
         }
       } catch (error) {
-        console.error('❌ Error handling deep link:', error)
+        console.error(
+          '❌ Error handling deep link:',
+          error,
+          'Original URL:',
+          url,
+        )
       }
     },
     [isReady, navigateToPath],

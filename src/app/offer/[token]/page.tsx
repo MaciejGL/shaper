@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { prisma } from '@/lib/db'
+import { createDeepLink } from '@/lib/deep-links'
 
 import { OfferPage } from './offer-page'
 
@@ -68,8 +69,11 @@ export default async function TrainerOfferPage({
 
   // Check if already completed
   if (offer.status === 'COMPLETED') {
-    // Get the app deep link for success
-    const appDeepLink = `hypertro://offer/success?token=${token}&trainer=${offer.trainerId}`
+    // ✅ Use bulletproof deep link utility with query parameters
+    const appDeepLink = createDeepLink('offer/success', {
+      token,
+      trainer: offer.trainerId,
+    })
 
     return (
       <div className="min-h-screen bg-background">

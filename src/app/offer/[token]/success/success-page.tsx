@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ServiceType } from '@/generated/prisma/client'
+import { createDeepLink } from '@/lib/deep-links'
 import { getBaseUrl } from '@/lib/get-base-url'
 import { PackageSummaryItem } from '@/types/trainer-offer'
 
@@ -36,7 +37,12 @@ export function SuccessPage({
   const packageSummary = offer.packageSummary as unknown as PackageSummaryItem[]
 
   const packageIds = packageSummary.map((item) => item.packageId).join(',')
-  const appDeepLink = `hypertro://fitspace/workout?token=${offer.token}&trainer=${offer.trainerId}&packages=${packageIds}`
+  // ✅ Use bulletproof deep link utility with query parameters
+  const appDeepLink = createDeepLink('fitspace/workout', {
+    token: offer.token,
+    trainer: offer.trainerId,
+    packages: packageIds,
+  })
   const url = `${getBaseUrl()}/fitspace/workout`
 
   const handleReturnToApp = useCallback(() => {

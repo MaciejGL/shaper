@@ -12,6 +12,7 @@ import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
+import { navigateToPath as navigateToDeepLink } from '@/lib/deep-links'
 import { cn } from '@/lib/utils'
 
 export function DeepLinkMobileNav() {
@@ -71,18 +72,8 @@ export function DeepLinkMobileNav() {
       // Use native navigation
       navigateToPath(href)
     } else {
-      // Use deep link to open mobile app
-      try {
-        const deepLink = `hypertro://${href.startsWith('/') ? href.substring(1) : href}`
-        window.location.href = deepLink
-
-        // Fallback to web app after short delay
-        setTimeout(() => {
-          window.location.href = `${window.location.origin}${href}`
-        }, 1000)
-      } catch {
-        window.location.href = `${window.location.origin}${href}`
-      }
+      // ✅ Use bulletproof deep link utility
+      navigateToDeepLink(href)
     }
   }
 
