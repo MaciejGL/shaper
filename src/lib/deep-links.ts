@@ -12,9 +12,17 @@ export function createDeepLink(
   queryParams?: Record<string, string>,
 ): string {
   // Clean the path - remove leading slash if present
-  const cleanPath = path.startsWith('/') ? path.substring(1) : path
+  let cleanPath = path.startsWith('/') ? path.substring(1) : path
 
-  // Build base deep link with double slashes
+  // Ensure path doesn't start with extra slashes
+  cleanPath = cleanPath.replace(/^\/+/, '')
+
+  // Ensure path is not empty (default to fitspace)
+  if (!cleanPath || cleanPath === '/') {
+    cleanPath = 'fitspace'
+  }
+
+  // Build base deep link with exactly double slashes
   let deepLink = `hypertro://${cleanPath}`
 
   // Add query parameters if provided
@@ -22,6 +30,19 @@ export function createDeepLink(
     const searchParams = new URLSearchParams(queryParams)
     deepLink += `?${searchParams.toString()}`
   }
+
+  // 🛡️ BULLETPROOF: Validate and fix any malformed URLs
+  deepLink = deepLink.replace(/hypertro:\/{3,}/g, 'hypertro://') // Fix triple+ slashes
+  deepLink = deepLink.replace(/hypertro:\/{1}([^\/])/g, 'hypertro://$1') // Fix single slash
+
+  // Final validation - ensure it starts with exactly hypertro://
+  if (!deepLink.startsWith('hypertro://')) {
+    const pathPart = deepLink.replace(/^hypertro:\/*/g, '')
+    deepLink = `hypertro://${pathPart}`
+  }
+
+  // 🔍 DEBUG: Log what we're generating
+  console.info('🔗 Generated deep link:', deepLink)
 
   return deepLink
 }
@@ -37,6 +58,11 @@ export function navigateToDeepLink(
 ) {
   const deepLink = createDeepLink(path, queryParams)
 
+  console.info('🚀 Attempting navigation to:', deepLink)
+  if (fallbackUrl) {
+    console.info('🔄 Fallback URL:', fallbackUrl)
+  }
+
   try {
     // Try deep link first
     window.location.href = deepLink
@@ -44,12 +70,15 @@ export function navigateToDeepLink(
     // Fallback to web app after delay if provided
     if (fallbackUrl) {
       setTimeout(() => {
+        console.info('⏰ Fallback triggered, navigating to:', fallbackUrl)
         window.location.href = fallbackUrl
       }, 1000)
     }
-  } catch {
+  } catch (error) {
+    console.error('❌ Deep link navigation failed:', error)
     // Immediate fallback on error
     if (fallbackUrl) {
+      console.info('🔄 Using immediate fallback:', fallbackUrl)
       window.location.href = fallbackUrl
     }
   }

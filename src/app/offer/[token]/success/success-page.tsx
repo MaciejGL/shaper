@@ -46,11 +46,21 @@ export function SuccessPage({
   const url = `${getBaseUrl()}/fitspace/workout`
 
   const handleReturnToApp = useCallback(() => {
-    // Try to open the app with deep link
+    // Try to open the mobile app with deep link
     if (isNativeApp) {
+      // Already in mobile app, navigate within app
       window.location.href = appDeepLink
     } else {
-      window.open(url, '_blank')
+      // On web browser, try to open mobile app via deep link
+      try {
+        window.location.href = appDeepLink
+        // Fallback to web if mobile app doesn't respond
+        setTimeout(() => {
+          window.open(url, '_blank')
+        }, 1000)
+      } catch {
+        window.open(url, '_blank')
+      }
     }
   }, [appDeepLink, isNativeApp, url])
 
