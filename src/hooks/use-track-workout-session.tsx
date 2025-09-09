@@ -4,7 +4,7 @@ import { useRef } from 'react'
 import { useFitspaceLogWorkoutProgressMutation } from '@/generated/graphql-client'
 
 const TICK_INTERVAL = 20
-const INACTIVITY_THRESHOLD = 10 * 60 * 1000 // 10 minutes in milliseconds
+const INACTIVITY_THRESHOLD = 5 * 60 * 1000 // 5 minutes in milliseconds
 
 export function useTrackWorkoutSession(
   dayId?: string,
