@@ -1,4 +1,5 @@
 import { useUserPreferences } from '@/context/user-preferences-context'
+import { GQLTimeFormat } from '@/generated/graphql-client'
 import {
   formatDateTime,
   formatTime,
@@ -30,11 +31,13 @@ export function useTimeFormatting() {
   const getTimeFormat = () => preferences.timeFormat
 
   const getTimePlaceholder = () => {
-    return preferences.timeFormat === '12h' ? 'e.g. 2:30 PM' : 'e.g. 14:30'
+    return preferences.timeFormat === GQLTimeFormat.H12
+      ? 'e.g. 2:30 PM'
+      : 'e.g. 14:30'
   }
 
   const getTimeLabel = (baseLabel: string = 'Time') => {
-    const format = preferences.timeFormat === '12h' ? '12h' : '24h'
+    const format = preferences.timeFormat === GQLTimeFormat.H12 ? '12h' : '24h'
     return `${baseLabel} (${format})`
   }
 

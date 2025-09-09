@@ -1,4 +1,5 @@
 import { WeightUnit } from '@/context/user-preferences-context'
+import { GQLWeightUnit } from '@/generated/graphql-client'
 
 /**
  * Convert weight between kg and lbs
@@ -41,7 +42,11 @@ export function formatWeightWithPreference(
   preferredUnit: WeightUnit,
   decimals: number = 1,
 ): string {
-  const convertedWeight = convertWeight(weightInKg, 'kg', preferredUnit)
+  const convertedWeight = convertWeight(
+    weightInKg,
+    GQLWeightUnit.Kg,
+    preferredUnit,
+  )
   return formatWeight(convertedWeight, preferredUnit, decimals)
 }
 
@@ -49,12 +54,12 @@ export function formatWeightWithPreference(
  * Convert weight from user's preferred unit to kg for storage
  */
 export function convertToKg(weight: number, fromUnit: WeightUnit): number {
-  return convertWeight(weight, fromUnit, 'kg')
+  return convertWeight(weight, fromUnit, GQLWeightUnit.Kg)
 }
 
 /**
  * Convert weight from kg to user's preferred unit for display
  */
 export function convertFromKg(weightInKg: number, toUnit: WeightUnit): number {
-  return convertWeight(weightInKg, 'kg', toUnit)
+  return convertWeight(weightInKg, GQLWeightUnit.Kg, toUnit)
 }

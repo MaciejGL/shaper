@@ -1,6 +1,8 @@
 import { format } from 'date-fns'
 
-export type TimeFormat = '12h' | '24h'
+import { GQLTimeFormat } from '@/generated/graphql-client'
+
+export type TimeFormat = GQLTimeFormat
 
 /**
  * Format time according to user preference
@@ -11,7 +13,7 @@ export function formatTime(
 ): string {
   const dateObj = typeof date === 'string' ? new Date(date) : date
 
-  if (timeFormat === '12h') {
+  if (timeFormat === GQLTimeFormat.H12) {
     return format(dateObj, 'h:mm a')
   }
 
@@ -49,7 +51,7 @@ export function formatDateTime(
     datePattern += dateFormat === 'long' ? 'd MMMM' : 'd MMM'
   }
 
-  const timePattern = timeFormat === '12h' ? 'h:mm a' : 'HH:mm'
+  const timePattern = timeFormat === GQLTimeFormat.H12 ? 'h:mm a' : 'HH:mm'
 
   return format(dateObj, `${datePattern} ${timePattern}`)
 }

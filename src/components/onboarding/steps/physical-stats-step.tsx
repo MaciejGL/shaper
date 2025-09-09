@@ -47,7 +47,7 @@ export function PhysicalStatsStep({ data, onChange }: PhysicalStatsStepProps) {
       const displayWeight =
         data.weightUnit === GQLWeightUnit.Kg
           ? data.weight
-          : convertWeight(data.weight, 'kg', 'lbs')
+          : convertWeight(data.weight, GQLWeightUnit.Kg, GQLWeightUnit.Lbs)
       setWeightDisplay(formatNumberSmart(displayWeight, 1))
     } else {
       setWeightDisplay('')
@@ -89,7 +89,7 @@ export function PhysicalStatsStep({ data, onChange }: PhysicalStatsStepProps) {
     const weightInKg =
       data.weightUnit === GQLWeightUnit.Kg
         ? numericValue
-        : convertWeight(numericValue, 'lbs', 'kg')
+        : convertWeight(numericValue, GQLWeightUnit.Lbs, GQLWeightUnit.Kg)
 
     onChange({ weight: weightInKg })
   }

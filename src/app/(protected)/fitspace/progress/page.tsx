@@ -10,7 +10,6 @@ import { useExercisesProgressByUserQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
-// import { BodyComposition } from './components/body-composition'
 import { BodyMeasurements } from './components/body-measurements'
 import { MuscleDistribution } from './components/muscle-distribution'
 import { SelectedExercisesProgress } from './components/selected-exercises-progress'
@@ -65,12 +64,7 @@ export default function ProgressPage() {
             Muscle Balance
             {!hasPremium ? <PremiumBadge /> : null}
           </TabsTrigger>
-          {/* <TabsTrigger
-            value="body-composition"
-            className="flex items-center gap-2"
-          >
-            BMI & BMR
-          </TabsTrigger> */}
+
           <TabsTrigger
             value="exercises"
             className="flex items-center gap-2 relative"
@@ -87,10 +81,6 @@ export default function ProgressPage() {
         <TabsContent value="muscle-distribution">
           <MuscleDistribution />
         </TabsContent>
-
-        {/* <TabsContent value="body-composition">
-          <BodyComposition />
-        </TabsContent> */}
 
         <TabsContent value="exercises">
           <SelectedExercisesProgress

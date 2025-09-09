@@ -11,6 +11,12 @@ import {
 import { RadioButtons } from '@/components/radio-buttons'
 import { Label } from '@/components/ui/label'
 import { useUserPreferences } from '@/context/user-preferences-context'
+import {
+  GQLHeightUnit,
+  GQLTheme,
+  GQLTimeFormat,
+  GQLWeightUnit,
+} from '@/generated/graphql-server'
 import type { WeekStartDay } from '@/lib/date-utils'
 
 /**
@@ -42,8 +48,8 @@ export function TrainerPreferencesSection() {
           value={preferences.weightUnit}
           onValueChange={setWeightUnit}
           options={[
-            { value: 'kg', label: 'Kilograms' },
-            { value: 'lbs', label: 'Pounds' },
+            { value: GQLWeightUnit.Kg, label: 'Kilograms' },
+            { value: GQLWeightUnit.Lbs, label: 'Pounds' },
           ]}
           description="Choose your preferred unit for displaying weights in training plans"
         />
@@ -61,8 +67,8 @@ export function TrainerPreferencesSection() {
           value={preferences.heightUnit}
           onValueChange={setHeightUnit}
           options={[
-            { value: 'cm', label: 'Centimeters' },
-            { value: 'ft', label: 'Feet & Inches' },
+            { value: GQLHeightUnit.Cm, label: 'Centimeters' },
+            { value: GQLHeightUnit.Ft, label: 'Feet & Inches' },
           ]}
           description="Choose your preferred unit for displaying heights"
         />
@@ -101,8 +107,8 @@ export function TrainerPreferencesSection() {
           value={preferences.timeFormat}
           onValueChange={setTimeFormat}
           options={[
-            { value: '12h', label: '12 Hour (AM/PM)' },
-            { value: '24h', label: '24 Hour' },
+            { value: GQLTimeFormat.H12, label: '12 Hour (AM/PM)' },
+            { value: GQLTimeFormat.H24, label: '24 Hour' },
           ]}
           description="Choose how times are displayed throughout the app"
         />
@@ -120,9 +126,9 @@ export function TrainerPreferencesSection() {
           value={preferences.theme}
           onValueChange={setTheme}
           options={[
-            { value: 'light', label: 'Light' },
-            { value: 'dark', label: 'Dark' },
-            { value: 'system', label: 'System' },
+            { value: GQLTheme.Light, label: 'Light' },
+            { value: GQLTheme.Dark, label: 'Dark' },
+            { value: GQLTheme.System, label: 'System' },
           ]}
           columns={3}
           description="Choose your preferred color theme for the application"
