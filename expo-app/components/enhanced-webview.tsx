@@ -244,21 +244,39 @@ export const EnhancedWebView = forwardRef<
     // Expose methods to parent components
     useImperativeHandle(ref, () => ({
       navigateToPath: (path: string) => {
+        const target = JSON.stringify(path)
         webViewRef.current?.injectJavaScript(`
-          // Use HTML5 History API for smooth navigation without reloading
-          if (window.history && window.history.pushState) {
-            window.history.pushState(null, '', '${path}');
-            
-            // Trigger React Router navigation without page reload
-            if (window.location.pathname !== '${path}') {
-              const event = new PopStateEvent('popstate', { state: null });
-              window.dispatchEvent(event);
+          (function() {
+            try {
+              const target = ${target};
+              const isAbsolute = /^https?:\/\//i.test(target);
+              if (isAbsolute) {
+                // If absolute URL is same-origin, use History API, else full navigation
+                const targetUrl = new URL(target);
+                const currentOrigin = window.location.origin;
+                if (targetUrl.origin === currentOrigin && window.history && window.history.pushState) {
+                  const fullPath = targetUrl.pathname + targetUrl.search + targetUrl.hash;
+                  window.history.pushState(null, '', fullPath);
+                  const event = new PopStateEvent('popstate', { state: null });
+                  window.dispatchEvent(event);
+                } else {
+                  window.location.href = target;
+                }
+              } else {
+                // Relative path navigation within the same origin
+                if (window.history && window.history.pushState) {
+                  window.history.pushState(null, '', target);
+                  const event = new PopStateEvent('popstate', { state: null });
+                  window.dispatchEvent(event);
+                } else {
+                  window.location.href = target;
+                }
+              }
+            } catch (e) {
+              console.error('Navigation error:', e);
             }
-          } else {
-            // Fallback for older browsers
-            window.location.href = '${path}';
-          }
-          true; // Required return statement
+            true;
+          })();
         `)
       },
 

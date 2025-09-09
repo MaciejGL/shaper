@@ -85,6 +85,19 @@ export function PushNotificationManager({
         const parsed = Linking.parse(normalizedUrl)
         console.info('🔗 Parsed deep link:', parsed)
 
+        // Support pattern: hypertro://?url=https://... (open exact URL in WebView)
+        const urlParam = (parsed.queryParams?.url as string) || undefined
+        if (urlParam) {
+          if (isReady()) {
+            navigateToPath(urlParam)
+          } else {
+            setTimeout(() => {
+              if (isReady()) navigateToPath(urlParam)
+            }, 800)
+          }
+          return
+        }
+
         // Handle different URL schemes
         if (
           normalizedUrl.includes('hypertro.app') ||

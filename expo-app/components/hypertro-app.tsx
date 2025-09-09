@@ -4,6 +4,7 @@
  * This component integrates all the functionality together
  */
 import Constants from 'expo-constants'
+import * as Linking from 'expo-linking'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import { AppState, SafeAreaView, StyleSheet } from 'react-native'
@@ -109,6 +110,22 @@ function HypertroAppContent({ authToken }: HypertroAppProps) {
     disableNotifications()
   }
 
+  const [initialWebUrl, setInitialWebUrl] = useState<string | undefined>(
+    undefined,
+  )
+
+  useEffect(() => {
+    // Handle initial deep link at cold start: hypertro://?url=...
+    Linking.getInitialURL().then((url) => {
+      if (!url) return
+      try {
+        const parsed = Linking.parse(url)
+        const urlParam = (parsed.queryParams?.url as string) || undefined
+        if (urlParam) setInitialWebUrl(urlParam)
+      } catch {}
+    })
+  }, [])
+
   return (
     <PushNotificationManager authToken={currentAuthToken}>
       <SafeAreaView
@@ -120,6 +137,7 @@ function HypertroAppContent({ authToken }: HypertroAppProps) {
         />
         <EnhancedWebView
           ref={webViewRef}
+          initialUrl={initialWebUrl}
           onThemeChange={handleWebThemeChange}
           onAuthToken={handleAuthToken}
           onRequestPushPermission={handleRequestPushPermission}

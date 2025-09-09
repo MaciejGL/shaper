@@ -5,45 +5,15 @@
 
 /**
  * Create a properly formatted deep link
- * Always generates hypertro://path format (double slashes)
+ * Generates hypertro://?url=<encoded absolute web url>
  */
 export function createDeepLink(
   path: string,
   queryParams?: Record<string, string>,
 ): string {
-  // Clean the path - remove leading slash if present
-  let cleanPath = path.startsWith('/') ? path.substring(1) : path
-
-  // Ensure path doesn't start with extra slashes
-  cleanPath = cleanPath.replace(/^\/+/, '')
-
-  // Ensure path is not empty (default to fitspace)
-  if (!cleanPath || cleanPath === '/') {
-    cleanPath = 'fitspace'
-  }
-
-  // Build base deep link with exactly double slashes
-  let deepLink = `hypertro://${cleanPath}`
-
-  // Add query parameters if provided
-  if (queryParams && Object.keys(queryParams).length > 0) {
-    const searchParams = new URLSearchParams(queryParams)
-    deepLink += `?${searchParams.toString()}`
-  }
-
-  // 🛡️ BULLETPROOF: Validate and fix any malformed URLs
-  deepLink = deepLink.replace(/hypertro:\/{3,}/g, 'hypertro://') // Fix triple+ slashes
-  deepLink = deepLink.replace(/hypertro:\/{1}([^\/])/g, 'hypertro://$1') // Fix single slash
-
-  // Final validation - ensure it starts with exactly hypertro://
-  if (!deepLink.startsWith('hypertro://')) {
-    const pathPart = deepLink.replace(/^hypertro:\/*/g, '')
-    deepLink = `hypertro://${pathPart}`
-  }
-
-  // 🔍 DEBUG: Log what we're generating
+  const webUrl = createWebUrl(path, queryParams)
+  const deepLink = `hypertro://?url=${encodeURIComponent(webUrl)}`
   console.info('🔗 Generated deep link:', deepLink)
-
   return deepLink
 }
 
@@ -56,7 +26,10 @@ export function navigateToDeepLink(
   queryParams?: Record<string, string>,
   fallbackUrl?: string,
 ) {
-  const deepLink = createDeepLink(path, queryParams)
+  // Prefer scheme with URL param for robust routing through index route
+  const webUrl = createWebUrl(path, queryParams)
+  const encoded = encodeURIComponent(webUrl)
+  const deepLink = `hypertro://?url=${encoded}`
 
   try {
     // Try deep link first
