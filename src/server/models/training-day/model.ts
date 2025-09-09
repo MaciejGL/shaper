@@ -95,6 +95,13 @@ export default class TrainingDay implements GQLTrainingDay {
   }
 
   async duration() {
+    // First try new smart duration calculation based on actual activity
+    const smartDuration = this.calculateSmartDuration()
+    if (smartDuration > 0) {
+      return smartDuration
+    }
+
+    // Fallback to event-based tracking for backwards compatibility
     const events = this.data.events
     if (events) {
       return events.find(
@@ -106,6 +113,44 @@ export default class TrainingDay implements GQLTrainingDay {
       )
       return 0
     }
+  }
+
+  private calculateSmartDuration(): number {
+    if (!this.data.exercises || this.data.exercises.length === 0) {
+      return 0
+    }
+
+    // Get all completed set timestamps
+    const completedTimestamps = this.data.exercises
+      .flatMap((ex) => ex.sets || [])
+      .filter((set) => set.completedAt)
+      .map((set) => new Date(set.completedAt!).getTime())
+      .sort((a, b) => a - b) // Sort chronologically
+
+    if (completedTimestamps.length === 0) {
+      return 0
+    }
+
+    // Calculate duration filtering out long gaps (>15 minutes)
+    const GAP_THRESHOLD = 15 * 60 * 1000 // 15 minutes in milliseconds
+    let totalDuration = 0
+    let lastTimestamp = completedTimestamps[0]
+
+    for (let i = 1; i < completedTimestamps.length; i++) {
+      const currentTimestamp = completedTimestamps[i]
+      const gap = currentTimestamp - lastTimestamp
+
+      if (gap <= GAP_THRESHOLD) {
+        // Normal activity - add the gap
+        totalDuration += gap
+      }
+      // If gap > 15 minutes, don't add it (filter out break/pause time)
+
+      lastTimestamp = currentTimestamp
+    }
+
+    // Convert to seconds
+    return Math.round(totalDuration / 1000)
   }
 
   get scheduledAt() {

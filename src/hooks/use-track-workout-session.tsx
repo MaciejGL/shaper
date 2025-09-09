@@ -4,13 +4,16 @@ import { useRef } from 'react'
 import { useFitspaceLogWorkoutProgressMutation } from '@/generated/graphql-client'
 
 const TICK_INTERVAL = 20
+const INACTIVITY_THRESHOLD = 10 * 60 * 1000 // 10 minutes in milliseconds
 
 export function useTrackWorkoutSession(
   dayId?: string,
   isActive?: boolean,
   isCompleted?: boolean,
+  lastActivityTimestamp?: number, // When user last interacted with sets
 ) {
   const intervalRef = useRef<NodeJS.Timeout | number | null>(null)
+  const lastTickRef = useRef<number>(Date.now())
 
   const { mutateAsync: logWorkoutProgress } =
     useFitspaceLogWorkoutProgressMutation({
@@ -21,11 +24,27 @@ export function useTrackWorkoutSession(
 
   const sendTick = async () => {
     if (!dayId) return
+
+    // Check for inactivity - if user hasn't done anything for 10+ minutes, don't send tick
+    const now = Date.now()
+    const timeSinceLastActivity = lastActivityTimestamp
+      ? now - lastActivityTimestamp
+      : 0
+
+    if (timeSinceLastActivity > INACTIVITY_THRESHOLD) {
+      console.info(
+        'Auto-pausing workout tracking due to inactivity (>10 minutes)',
+      )
+      if (intervalRef.current) clearInterval(intervalRef.current)
+      return
+    }
+
     try {
       await logWorkoutProgress({
         dayId: dayId,
         tick: TICK_INTERVAL,
       })
+      lastTickRef.current = now
     } catch (e) {
       console.error('Failed to send workout progress tick', e)
     }
@@ -45,7 +64,7 @@ export function useTrackWorkoutSession(
       if (intervalRef.current) clearInterval(intervalRef.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActive, isCompleted, dayId])
+  }, [isActive, isCompleted, dayId, lastActivityTimestamp])
 
   useEffect(() => {
     const handleVisibility = () => {

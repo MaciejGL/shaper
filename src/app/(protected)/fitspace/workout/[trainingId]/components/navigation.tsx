@@ -23,11 +23,23 @@ import { WorkoutDay } from './workout-page.client'
 export function Navigation() {
   const { activeDay } = useWorkout()
   const dayId = activeDay?.id
-  const isActive = activeDay?.exercises.some((ex) =>
-    ex.sets.some((set) => set.log?.reps || set.log?.weight),
-  )
+  // Only start tracking after user has completed at least 2 sets (indicates real workout)
+  const completedSetsCount =
+    activeDay?.exercises.reduce(
+      (total, ex) => total + ex.sets.filter((set) => set.completedAt).length,
+      0,
+    ) || 0
+  const isActive = completedSetsCount >= 2
   const isCompleted = activeDay?.completedAt ? true : false
-  useTrackWorkoutSession(dayId, isActive, isCompleted)
+
+  // Find the most recent activity (last completed set) for auto-pause detection
+  const lastActivityTimestamp = activeDay?.exercises
+    .flatMap((ex) => ex.sets)
+    .filter((set) => set.completedAt)
+    .map((set) => new Date(set.completedAt!).getTime())
+    .sort((a, b) => b - a)[0] // Most recent timestamp
+
+  useTrackWorkoutSession(dayId, isActive, isCompleted, lastActivityTimestamp)
 
   return (
     <div
