@@ -1,19 +1,47 @@
-'use client'
-
 import { Calendar, SearchIcon, Users } from 'lucide-react'
-import { useSearchParams } from 'next/navigation'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import {
+  GQLGetFeaturedTrainersQuery,
+  GQLGetPublicTrainingPlansQuery,
+  GetFeaturedTrainersDocument,
+  GetPublicTrainingPlansDocument,
+} from '@/generated/graphql-client'
+import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { TrainersTab } from './components/trainers-tab'
 import { TrainingPlansTab } from './components/training-plans-tab'
 
-export default function ExplorePage() {
-  const searchParams = useSearchParams()
-  const tabParam = searchParams.get('tab')
+// ISR - revalidate every 30 minutes
+export const revalidate = 1800
+
+interface ExplorePageProps {
+  searchParams: {
+    tab?: string
+  }
+}
+
+export default async function ExplorePage({ searchParams }: ExplorePageProps) {
+  const tabParam = searchParams.tab
   const defaultValue = tabParam === 'trainers' ? 'trainers' : 'plans'
+
+  // Pre-fetch data with ISR caching
+  const [trainersResult, plansResult] = await Promise.all([
+    gqlServerFetch<GQLGetFeaturedTrainersQuery>(GetFeaturedTrainersDocument, {
+      limit: 30,
+    }),
+    gqlServerFetch<GQLGetPublicTrainingPlansQuery>(
+      GetPublicTrainingPlansDocument,
+      {
+        limit: 30,
+      },
+    ),
+  ])
+
+  const trainersData = trainersResult.data
+  const plansData = plansResult.data
 
   return (
     <div className="container-hypertro mx-auto max-w-md">
@@ -37,11 +65,15 @@ export default function ExplorePage() {
         </TabsList>
 
         <TabsContent value="plans" className="mt-6">
-          <TrainingPlansTab />
+          <TrainingPlansTab
+            initialPlans={plansData?.getPublicTrainingPlans || []}
+          />
         </TabsContent>
 
         <TabsContent value="trainers" className="mt-6">
-          <TrainersTab />
+          <TrainersTab
+            initialTrainers={trainersData?.getFeaturedTrainers || []}
+          />
         </TabsContent>
       </Tabs>
     </div>

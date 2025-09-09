@@ -16,12 +16,25 @@ import {
 type FeaturedTrainer =
   GQLGetFeaturedTrainersQuery['getFeaturedTrainers'][number]
 
-export function TrainersTab() {
+interface TrainersTabProps {
+  initialTrainers?: FeaturedTrainer[]
+}
+
+export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
   const [selectedTrainer, setSelectedTrainer] =
     useState<FeaturedTrainer | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
 
-  const { data, isLoading } = useGetFeaturedTrainersQuery({ limit: 30 })
+  const { data, isLoading } = useGetFeaturedTrainersQuery(
+    { limit: 30 },
+    {
+      initialData:
+        initialTrainers.length > 0
+          ? { getFeaturedTrainers: initialTrainers }
+          : undefined,
+      staleTime: 30 * 60 * 1000, // 30 minutes - match ISR revalidation
+    },
+  )
   const createCoachingRequestMutation = useCreateCoachingRequestMutation()
 
   const trainers = data?.getFeaturedTrainers || []

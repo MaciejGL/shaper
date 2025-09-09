@@ -25,7 +25,14 @@ import {
   useGetPublicTrainingPlansQuery,
 } from '@/generated/graphql-client'
 
-export function TrainingPlansTab() {
+type PublicTrainingPlan =
+  GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number]
+
+interface TrainingPlansTabProps {
+  initialPlans?: PublicTrainingPlan[]
+}
+
+export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
   const [selectedPlan, setSelectedPlan] = useState<
     GQLGetPublicTrainingPlansQuery['getPublicTrainingPlans'][number] | null
   >(null)
@@ -34,12 +41,21 @@ export function TrainingPlansTab() {
   const [selectedFocusTags, setSelectedFocusTags] = useState<GQLFocusTag[]>([])
   const queryClient = useQueryClient()
   // Fetch public training plans
-  const { data, isLoading } = useGetPublicTrainingPlansQuery({
-    limit: 30,
-  })
+  const { data, isLoading } = useGetPublicTrainingPlansQuery(
+    {
+      limit: 30,
+    },
+    {
+      initialData:
+        initialPlans.length > 0
+          ? { getPublicTrainingPlans: initialPlans }
+          : undefined,
+      staleTime: 30 * 60 * 1000, // 30 minutes - match ISR revalidation
+    },
+  )
 
   // Fetch subscription status and assignment mutation
-  const { data: subscriptionData } = useGetMySubscriptionStatusQuery()
+  const { data: subscriptionData } = useGetMySubscriptionStatusQuery({})
   const { mutateAsync: assignTemplate, isPending: isAssigning } =
     useAssignTemplateToSelfMutation({})
 
