@@ -3,10 +3,10 @@
 import { createContext, useCallback, useContext, useMemo } from 'react'
 
 import { Loader } from '@/components/loader'
+import { useUser } from '@/context/user-context'
 import {
   GQLBodyMeasuresQuery,
   useBodyMeasuresQuery,
-  useProfileQuery,
 } from '@/generated/graphql-client'
 
 import { MeasurementsEmptyState } from './measurements-empty-state'
@@ -54,7 +54,7 @@ export function BodyMeasurementsProvider({
   children,
 }: BodyMeasurementsProviderProps) {
   const { data, refetch, isLoading } = useBodyMeasuresQuery()
-  const { data: profileData } = useProfileQuery()
+  const { user } = useUser()
 
   const bodyMeasures = useMemo(
     () => data?.bodyMeasures || [],
@@ -72,7 +72,7 @@ export function BodyMeasurementsProvider({
     getEstimatedBodyFat,
     fieldHasHistoricalData,
     measurementsByMonth,
-  } = useBodyMeasurements(bodyMeasures, profileData?.profile)
+  } = useBodyMeasurements(bodyMeasures, user?.profile)
 
   const contextValue = useMemo(
     () => ({

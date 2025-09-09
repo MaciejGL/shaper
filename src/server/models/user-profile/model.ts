@@ -79,9 +79,9 @@ export default class UserProfile implements GQLUserProfile {
       const latestMeasure = bodyMeasures.at(0)
       return latestMeasure?.weight ?? this.data.weight
     } else {
-      console.error(
-        `[UserProfile] No body measures (Weight) found for user ${this.id}. Loading from database.`,
-      )
+      if (this.data.weight) {
+        return this.data.weight
+      }
       return null
     }
   }

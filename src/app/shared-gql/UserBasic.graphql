@@ -15,7 +15,27 @@ query UserBasic {
       sex
       avatarUrl
       hasCompletedOnboarding
+      height
+      weight
+
+      # preferences
+      weekStartsOn
+      weightUnit
+      heightUnit
+      theme
+      timeFormat
+      trainingView
+      hasCompletedOnboarding
+      notificationPreferences {
+        workoutReminders
+        mealReminders
+        progressUpdates
+        systemNotifications
+        emailNotifications
+        pushNotifications
+      }
     }
+    capacity
     trainer {
       id
     }

@@ -701,6 +701,7 @@ export async function getWorkout(
   if (!id) {
     const plan = await prisma.trainingPlan.findFirst({
       where: { assignedToId: user.user.id, active: true },
+      select: { id: true },
     })
     id = plan?.id
   }

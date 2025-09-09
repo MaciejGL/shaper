@@ -16,25 +16,25 @@ import {
   GQLTimeFormat,
   GQLTrainingView,
   type GQLUpdateProfileInput,
+  GQLUserBasicQuery,
   GQLWeightUnit,
-  useProfileQuery,
   useUpdateProfileMutation,
 } from '@/generated/graphql-client'
 import { DEFAULT_WEEK_START, WeekStartDay } from '@/lib/date-utils'
 
-export type WeightUnit = 'kg' | 'lbs'
-export type HeightUnit = 'cm' | 'ft'
-export type ThemePreference = 'light' | 'dark' | 'system'
-export type TimeFormat = '12h' | '24h'
+export type WeightUnit = GQLWeightUnit
+export type HeightUnit = GQLHeightUnit
+export type ThemePreference = GQLTheme
+export type TimeFormat = GQLTimeFormat
 export type TrainingView = GQLTrainingView
 
 export interface NotificationPreferences {
-  workoutReminders: boolean
-  mealReminders: boolean
-  progressUpdates: boolean
-  systemNotifications: boolean
-  emailNotifications: boolean
-  pushNotifications: boolean
+  workoutReminders?: boolean
+  mealReminders?: boolean
+  progressUpdates?: boolean
+  systemNotifications?: boolean
+  emailNotifications?: boolean
+  pushNotifications?: boolean
 }
 
 interface UserPreferences {
@@ -58,7 +58,6 @@ interface UserPreferencesContextType {
   setTrainingView: (trainingView: TrainingView) => void
   setNotifications: (notifications: Partial<NotificationPreferences>) => void
   registerThemeSetter: (setTheme: (theme: string) => void) => void
-  isLoading: boolean
 }
 
 const UserPreferencesContext = createContext<UserPreferencesContextType | null>(
@@ -76,10 +75,10 @@ const DEFAULT_NOTIFICATIONS: NotificationPreferences = {
 
 const DEFAULT_PREFERENCES: UserPreferences = {
   weekStartsOn: DEFAULT_WEEK_START,
-  weightUnit: 'kg',
-  heightUnit: 'cm',
-  theme: 'system',
-  timeFormat: '24h',
+  weightUnit: GQLWeightUnit.Kg,
+  heightUnit: GQLHeightUnit.Cm,
+  theme: GQLTheme.System,
+  timeFormat: GQLTimeFormat.H24,
   trainingView: GQLTrainingView.Advanced,
   notifications: DEFAULT_NOTIFICATIONS,
 }
@@ -96,15 +95,16 @@ export function useUserPreferences() {
 
 interface UserPreferencesProviderProps {
   children: React.ReactNode
-  initialPreferences?: Partial<UserPreferences>
+  initialData: NonNullable<GQLUserBasicQuery>
 }
 
 export function UserPreferencesProvider({
   children,
-  initialPreferences = {},
+  initialData,
 }: UserPreferencesProviderProps) {
+  const profile = initialData.userBasic?.profile
+  const initialPreferences = initialData.userBasic?.profile
   // Get user profile data from GraphQL
-  const { data: profileData, isLoading: profileLoading } = useProfileQuery()
   const { mutateAsync: updateProfile } = useUpdateProfileMutation()
 
   // Store theme setter function from ThemeProvider child
@@ -112,7 +112,13 @@ export function UserPreferencesProvider({
 
   const [preferences, setPreferences] = useState<UserPreferences>({
     ...DEFAULT_PREFERENCES,
-    ...initialPreferences,
+    heightUnit: profile?.heightUnit ?? DEFAULT_PREFERENCES.heightUnit,
+    weightUnit: profile?.weightUnit ?? DEFAULT_PREFERENCES.weightUnit,
+    theme: profile?.theme ?? DEFAULT_PREFERENCES.theme,
+    timeFormat: profile?.timeFormat ?? DEFAULT_PREFERENCES.timeFormat,
+    trainingView: profile?.trainingView ?? DEFAULT_PREFERENCES.trainingView,
+    notifications:
+      profile?.notificationPreferences ?? DEFAULT_PREFERENCES.notifications,
   })
 
   // Store current preferences to avoid stale closures without causing re-renders
@@ -124,20 +130,26 @@ export function UserPreferencesProvider({
 
   // Update preferences from database when profile data loads
   useEffect(() => {
-    if (profileData?.profile) {
-      const profile = profileData.profile
-
+    if (profile) {
       // Convert GraphQL enums to our types
-      const weightUnit: WeightUnit = profile.weightUnit === 'lbs' ? 'lbs' : 'kg'
-      const heightUnit: HeightUnit = profile.heightUnit === 'ft' ? 'ft' : 'cm'
+      const weightUnit: WeightUnit =
+        profile.weightUnit === GQLWeightUnit.Lbs
+          ? GQLWeightUnit.Lbs
+          : GQLWeightUnit.Kg
+      const heightUnit: HeightUnit =
+        profile.heightUnit === GQLHeightUnit.Ft
+          ? GQLHeightUnit.Ft
+          : GQLHeightUnit.Cm
       const theme: ThemePreference =
         profile.theme === 'light'
-          ? 'light'
-          : profile.theme === 'dark'
-            ? 'dark'
-            : 'system'
+          ? GQLTheme.Light
+          : profile.theme === GQLTheme.Dark
+            ? GQLTheme.Dark
+            : GQLTheme.System
       const timeFormat: TimeFormat =
-        profile.timeFormat === 'h12' ? '12h' : '24h'
+        profile.timeFormat === GQLTimeFormat.H12
+          ? GQLTimeFormat.H12
+          : GQLTimeFormat.H24
 
       const dbPreferences: UserPreferences = {
         weekStartsOn: (profile.weekStartsOn ??
@@ -169,7 +181,7 @@ export function UserPreferencesProvider({
         themeSetterRef.current(theme)
       }
     }
-  }, [profileData])
+  }, [profile])
 
   // Function to register theme setter from child ThemeProvider
   const registerThemeSetter = useCallback(
@@ -209,7 +221,9 @@ export function UserPreferencesProvider({
         }
         if (updates.timeFormat !== undefined) {
           input.timeFormat =
-            updates.timeFormat === '12h' ? GQLTimeFormat.H12 : GQLTimeFormat.H24
+            updates.timeFormat === GQLTimeFormat.H12
+              ? GQLTimeFormat.H12
+              : GQLTimeFormat.H24
         }
         if (updates.trainingView !== undefined) {
           input.trainingView = updates.trainingView
@@ -308,7 +322,6 @@ export function UserPreferencesProvider({
       setTrainingView,
       setNotifications,
       registerThemeSetter,
-      isLoading: profileLoading,
     }),
     [
       preferences,
@@ -321,7 +334,6 @@ export function UserPreferencesProvider({
       setTrainingView,
       setNotifications,
       registerThemeSetter,
-      profileLoading,
     ],
   )
 
@@ -335,5 +347,5 @@ export function UserPreferencesProvider({
 // Hook to easily access just the week start preference
 export function useWeekStartPreference(): WeekStartDay {
   const { preferences } = useUserPreferences()
-  return preferences.weekStartsOn
+  return preferences.weekStartsOn ?? DEFAULT_WEEK_START
 }

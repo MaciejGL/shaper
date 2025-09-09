@@ -1,4 +1,3 @@
-import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 
 import { AnnouncementBanner } from '@/components/announcement-banner'
@@ -9,25 +8,30 @@ import { PostHogProvider } from '@/components/posthog-provider'
 import { ThemeProvider } from '@/components/theme-provider'
 import { UserProvider } from '@/context/user-context'
 import { UserPreferencesProvider } from '@/context/user-preferences-context'
-import { authOptions } from '@/lib/auth'
+import {
+  GQLUserBasicQuery,
+  UserBasicDocument,
+} from '@/generated/graphql-client'
+import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
 export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Server-side authentication check
-  const session = await getServerSession(authOptions)
+  const { data } = await gqlServerFetch<GQLUserBasicQuery>(
+    UserBasicDocument,
+    {},
+  )
 
-  // Redirect unauthenticated users to login
-  if (!session?.user?.email) {
-    redirect('/login')
+  if (!data) {
+    return redirect('/login')
   }
 
   return (
-    <UserProvider>
+    <UserProvider initialData={data}>
       <PostHogProvider>
-        <UserPreferencesProvider>
+        <UserPreferencesProvider initialData={data}>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"

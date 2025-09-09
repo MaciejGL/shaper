@@ -4,8 +4,6 @@ import { getCurrentUser, requireAuth } from '@/lib/getUser'
 
 import { MobileNav } from './components/mobile-nav'
 
-// import { PrefetchFitspacePages } from './prefetch-pages'
-
 export default async function ProtectedLayout({
   children,
 }: {

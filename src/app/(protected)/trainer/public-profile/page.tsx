@@ -65,8 +65,8 @@ export default function PublicProfilePage() {
       )
     }
 
-    if (profileData?.user) {
-      setCapacity(profileData.user.capacity || null)
+    if (profileData?.userBasic) {
+      setCapacity(profileData.userBasic.capacity || null)
     }
   }, [profileData])
 

@@ -43,7 +43,7 @@ query Profile {
   profile {
     ...ProfileFragment
   }
-  user {
+  userBasic {
     id
     capacity
   }

@@ -1,3 +1,5 @@
+'use client'
+
 import { ReactNode } from 'react'
 
 import { GQLUserRole } from '@/generated/graphql-client'
@@ -28,7 +30,8 @@ export const Main = ({
         className,
       )}
     >
-      {user && <Navbar user={user} withSidebar={withSidebar} />}
+      <Navbar user={user} withSidebar={withSidebar} />
+
       <div
         className={cn('w-full grid', {
           'md:p-2 -mt-2 overflow-hidden': isTrainer,

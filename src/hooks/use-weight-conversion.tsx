@@ -15,7 +15,7 @@ export function useWeightConversion() {
     weightInKg: number | null | undefined,
   ): number | null => {
     if (weightInKg == null) return null
-    return convertFromKg(weightInKg, preferences.weightUnit)
+    return Number(convertFromKg(weightInKg, preferences.weightUnit).toFixed(2))
   }
 
   const toStorageWeight = (

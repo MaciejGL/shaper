@@ -16,11 +16,11 @@ import { AnimateNumber } from '@/components/animate-number'
 import { StatsItem } from '@/components/stats-item'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { useUser } from '@/context/user-context'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
   useFitspaceGetWorkoutInfoQuery,
   useFitspaceMarkWorkoutAsCompletedMutation,
-  useProfileQuery,
 } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { calculateCaloriesBurned } from '@/lib/workout/calculate-calories-burned'
@@ -283,14 +283,14 @@ export function Summary({
 }
 
 const useProfileMetrics = () => {
-  const { data } = useProfileQuery()
-  const age = data?.profile?.birthday
-    ? differenceInYears(new Date(), new Date(data?.profile?.birthday))
+  const { user } = useUser()
+  const age = user?.profile?.birthday
+    ? differenceInYears(new Date(), new Date(user?.profile?.birthday))
     : 0
 
-  const weightKg = data?.profile?.weight
-  const heightCm = data?.profile?.height
-  const sex = data?.profile?.sex
+  const weightKg = user?.profile?.weight
+  const heightCm = user?.profile?.height
+  const sex = user?.profile?.sex
 
   return {
     age,

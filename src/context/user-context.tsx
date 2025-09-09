@@ -24,15 +24,17 @@ const UserContext = createContext<UserContextType | undefined>(undefined)
 
 interface UserProviderProps {
   children: React.ReactNode
+  initialData?: GQLUserBasicQuery
 }
 
-export function UserProvider({ children }: UserProviderProps) {
+export function UserProvider({ children, initialData }: UserProviderProps) {
   const session = useSession()
   const queryClient = useQueryClient()
 
   const { data } = useUserBasicQuery(
     {},
     {
+      initialData,
       enabled:
         session.status === 'authenticated' &&
         Boolean(session.data?.user?.email),

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 import { Input } from '@/components/ui/input'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
-import { formatDecimalInput } from '@/lib/format-tempo'
+import { formatDecimalInput, formatNumberSmart } from '@/lib/format-tempo'
 
 interface ExerciseWeightInputProps {
   setId: string
@@ -11,6 +11,7 @@ interface ExerciseWeightInputProps {
   placeholder?: string
   disabled?: boolean
   showWeightUnit?: boolean
+  decimals?: number
 }
 
 export function ExerciseWeightInput({
@@ -20,6 +21,7 @@ export function ExerciseWeightInput({
   placeholder,
   disabled = false,
   showWeightUnit = true,
+  decimals = 1,
 }: ExerciseWeightInputProps) {
   const { toDisplayWeight, toStorageWeight, weightUnit } = useWeightConversion()
 
@@ -31,9 +33,11 @@ export function ExerciseWeightInput({
   useEffect(() => {
     if (!isFocused) {
       const displayWeight = toDisplayWeight(weightInKg)
-      setInputValue(displayWeight?.toString() || '')
+      const formattedValue =
+        displayWeight !== null ? formatNumberSmart(displayWeight, decimals) : ''
+      setInputValue(formattedValue)
     }
-  }, [weightInKg, toDisplayWeight, isFocused])
+  }, [weightInKg, toDisplayWeight, decimals, isFocused])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Use formatDecimalInput to allow decimal points but clean other characters
@@ -60,6 +64,14 @@ export function ExerciseWeightInput({
 
   const handleBlur = () => {
     setIsFocused(false)
+    // Format the value when focus is lost
+    const numericValue = parseFloat(inputValue)
+    if (!isNaN(numericValue)) {
+      const displayWeight = toDisplayWeight(toStorageWeight(numericValue))
+      if (displayWeight !== null) {
+        setInputValue(formatNumberSmart(displayWeight, decimals))
+      }
+    }
   }
 
   return (

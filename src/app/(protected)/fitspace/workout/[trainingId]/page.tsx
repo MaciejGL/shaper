@@ -1,33 +1,36 @@
-'use client'
+import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 
-import { redirect, useParams } from 'next/navigation'
+import {
+  FitspaceGetWorkoutDocument,
+  GQLFitspaceGetWorkoutQuery,
+} from '@/generated/graphql-client'
+import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
-import { Loader } from '@/components/loader'
-import { useFitspaceGetWorkoutQuery } from '@/generated/graphql-client'
-
+import { WorkoutPageSkeleton } from './components/workout-page-skeleton'
 import { WorkoutPageClient } from './components/workout-page.client'
 
-export default function WorkoutPage() {
-  const params = useParams<{ trainingId: string }>()
-  const trainingId = params.trainingId
-  const { data, isLoading } = useFitspaceGetWorkoutQuery(
+interface WorkoutPageProps {
+  params: Promise<{ trainingId: string }>
+}
+
+export default async function WorkoutPage({ params }: WorkoutPageProps) {
+  const { trainingId } = await params
+
+  const { data, error } = await gqlServerFetch<GQLFitspaceGetWorkoutQuery>(
+    FitspaceGetWorkoutDocument,
     {
       trainingId,
     },
-    {
-      enabled: !!trainingId,
-    },
   )
 
-  if (isLoading) {
-    return <Loader />
+  if (error || !data?.getWorkout) {
+    return redirect('/fitspace/workout')
   }
 
-  if (!data?.getWorkout) {
-    return redirect('/fitspace/workout/quick-workout')
-  }
-
-  return data?.getWorkout ? (
-    <WorkoutPageClient plan={data.getWorkout.plan} />
-  ) : null
+  return (
+    <Suspense fallback={<WorkoutPageSkeleton isLoading={true} />}>
+      <WorkoutPageClient plan={data.getWorkout.plan} />
+    </Suspense>
+  )
 }

@@ -10,6 +10,7 @@ import {
 
 import { Exercises } from './exercises'
 import { Navigation } from './navigation'
+import { WorkoutPageSkeleton } from './workout-page-skeleton'
 
 export type WorkoutPlan = NonNullable<
   GQLFitspaceGetWorkoutQuery['getWorkout']
@@ -40,7 +41,7 @@ export function WorkoutPageClient({ plan }: WorkoutPageClientProps) {
   )
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return <WorkoutPageSkeleton isLoading={true} />
   }
 
   if (!data?.getWorkout && !isLoading) {

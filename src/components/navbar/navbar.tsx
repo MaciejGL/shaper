@@ -9,12 +9,10 @@ import {
   NotebookTextIcon,
   Settings,
   Settings2Icon,
-  SunIcon,
   UserRoundCogIcon,
   Users2Icon,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
-import { useTheme } from 'next-themes'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -29,9 +27,9 @@ import { useScrollVisibility } from '@/hooks/use-scroll-visibility'
 import { cn } from '@/lib/utils'
 import { UserWithSession } from '@/types/UserWithSession'
 
-import { AnimatedLogo, AnimatedLogoText } from '../animated-logo'
 import { MessengerModal } from '../messenger-modal/messenger-modal'
 import { useMobileApp } from '../mobile-app-bridge'
+import { SimpleLogo } from '../simple-logo'
 import { Button } from '../ui/button'
 import { ButtonLink } from '../ui/button-link'
 import {
@@ -70,45 +68,6 @@ function useUnreadMessageCount(user?: UserWithSession | null) {
     }
   }, [user?.user?.id])
 
-  const { data } = useGetTotalUnreadCountQuery(
-    {},
-    {
-      enabled: enableQuery,
-      refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
-    },
-  )
-
-  return data?.getTotalUnreadCount || 0
-}
-
-export const Navbar = ({
-  user,
-  withSidebar,
-}: {
-  user?: UserWithSession | null
-  withSidebar?: boolean
-}) => {
-  const [mounted, setMounted] = useState(false)
-  const [isMessengerOpen, setIsMessengerOpen] = useState(false)
-  const { theme, setTheme } = useTheme()
-  const { isVisible } = useScrollVisibility()
-  const unreadCount = useUnreadMessageCount(user)
-  const [enableQuery, setEnableQuery] = useState(false)
-
-  useEffect(() => {
-    if (user?.user?.id) {
-      // Delay the query by 3 seconds to let more critical queries load first
-      const timer = setTimeout(() => {
-        setEnableQuery(true)
-      }, 5000)
-
-      return () => clearTimeout(timer)
-    }
-  }, [user?.user?.id])
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
   const { data: notifications } = useNotificationsQuery(
     {
       userId: user!.user.id!,
@@ -120,6 +79,32 @@ export const Navbar = ({
       refetchInterval: 100000,
     },
   )
+
+  const { data: totalUnreadCount } = useGetTotalUnreadCountQuery(
+    {},
+    {
+      enabled: enableQuery,
+      refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
+    },
+  )
+
+  return {
+    totalUnreadCount: totalUnreadCount?.getTotalUnreadCount || 0,
+    notifications: notifications?.notifications,
+  }
+}
+
+export const Navbar = ({
+  user,
+  withSidebar,
+}: {
+  user?: UserWithSession | null
+  withSidebar?: boolean
+}) => {
+  const [isMessengerOpen, setIsMessengerOpen] = useState(false)
+  const { isVisible } = useScrollVisibility({ initialVisible: true })
+  const { totalUnreadCount, notifications } = useUnreadMessageCount(user)
+
   const isTrainer = user?.user?.role === GQLUserRole.Trainer
 
   const linkToDashboard =
@@ -131,65 +116,39 @@ export const Navbar = ({
 
   return (
     <>
-      {user && !isTrainer && (
-        <motion.div
-          key={isFitspace ? 'fitspace-navbar' : 'default-navbar'}
-          className="h-[60px]"
-        />
-      )}
+      {user && !isTrainer && <motion.div className="h-[60px]" />}
 
       <div
         className={!isTrainer ? 'z-10 fixed top-0 left-0 right-0' : 'relative'}
       >
-        <motion.div
-          key={isFitspace ? 'fitspace' : 'default'}
-          initial={
-            isFitspace
-              ? { opacity: 0, y: 0, height: 60, padding: '12px 16px' }
-              : {}
-          }
-          animate={
-            isFitspace
-              ? {
-                  opacity: isVisible ? 1 : 0,
-                  y: isVisible ? 0 : -100,
-                  // height: isVisible ? 60 : 0,
-                  padding: isVisible ? '12px 16px' : '0px 16px',
-                }
-              : {}
-          }
-          transition={{ duration: 0.3 }}
+        <div
+          data-visible={isVisible}
           className={cn(
-            'py-3 px-4 flex justify-between items-center bg-sidebar',
+            'py-3 px-4 flex justify-between items-center bg-sidebar h-[60px]',
+            'data-[visible=true]:opacity-100 data-[visible=true]:translate-y-0',
+            'data-[visible=false]:opacity-0 data-[visible=false]:translate-y-[-100px]',
             'mt-[var(--safe-area-inset-top)]', // Add safe area padding for iOS PWA
+            isFitspace ? 'py-3 px-4' : 'py-0 px-0',
           )}
         >
           <div className="flex items-center gap-2">
             {withSidebar && <SidebarTrigger />}
             {isFitspace ? (
-              <Link href={linkToDashboard} scroll>
-                <div className="flex items-center">
-                  <AnimatedLogo infinite={false} size={32} />
-                  <AnimatedLogoText />
-                </div>
+              <Link href={linkToDashboard} scroll className="flex items-center">
+                <SimpleLogo size={32} />
+                <h2 className="text-base font-medium">Hypertro</h2>
               </Link>
             ) : null}
           </div>
-          {process.env.NODE_ENV === 'development' && mounted && (
-            <Button
-              variant="ghost"
-              iconOnly={<SunIcon />}
-              onClick={() => {
-                setTheme(theme === 'dark' ? 'light' : 'dark')
-              }}
-            />
-          )}
+
           <div className="flex items-center gap-2">
-            {user && (
+            {user ? (
               <NotificationBell
-                notifications={notifications?.notifications}
+                notifications={notifications}
                 user={user?.user}
               />
+            ) : (
+              <div className="h-[60px]" />
             )}
             {user?.user?.role === GQLUserRole.Client && user?.user?.trainer && (
               <div className="relative">
@@ -199,16 +158,20 @@ export const Navbar = ({
                   onClick={() => setIsMessengerOpen(true)}
                   className="rounded-full"
                 />
-                {unreadCount > 0 && (
+                {totalUnreadCount > 0 && (
                   <span className="absolute top-0 right-0 bg-sky-700 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+                    {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
                   </span>
                 )}
               </div>
             )}
-            <NavbarUser user={user} />
+            {user ? (
+              <NavbarUser user={user} />
+            ) : (
+              <div className="h-[60px] rounded-full animate-pulse" />
+            )}
           </div>
-        </motion.div>
+        </div>
       </div>
 
       {/* Messenger Modal for Clients */}
@@ -256,7 +219,7 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
   const [selectedPartnerId, setSelectedPartnerId] = useState<
     string | undefined
   >(undefined)
-  const unreadCount = useUnreadMessageCount(user)
+  const { totalUnreadCount } = useUnreadMessageCount(user)
 
   return (
     <>
@@ -268,9 +231,9 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
             iconOnly={<MessageSquare className="size-5" />}
             onClick={() => setIsMessengerOpen(true)}
           />
-          {unreadCount > 0 && (
+          {totalUnreadCount > 0 && (
             <span className="absolute top-0 right-0 bg-amber-600 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
-              {unreadCount > 9 ? '9+' : unreadCount}
+              {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
             </span>
           )}
         </div>
