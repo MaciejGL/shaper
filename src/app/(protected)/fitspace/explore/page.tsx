@@ -14,8 +14,8 @@ import { DashboardHeader } from '../../trainer/components/dashboard-header'
 import { TrainersTab } from './components/trainers-tab'
 import { TrainingPlansTab } from './components/training-plans-tab'
 
-// ISR - revalidate every 30 minutes
-export const revalidate = 1800
+// ISR - revalidate every 5 minutes
+export const revalidate = 300
 
 interface ExplorePageProps {
   searchParams: {

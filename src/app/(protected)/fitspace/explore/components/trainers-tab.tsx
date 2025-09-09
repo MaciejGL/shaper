@@ -32,7 +32,7 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
         initialTrainers.length > 0
           ? { getFeaturedTrainers: initialTrainers }
           : undefined,
-      staleTime: 30 * 60 * 1000, // 30 minutes - match ISR revalidation
+      staleTime: 5 * 60 * 1000, // 5 minutes - match ISR revalidation
     },
   )
   const createCoachingRequestMutation = useCreateCoachingRequestMutation()

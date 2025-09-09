@@ -50,7 +50,7 @@ export function TrainingPlansTab({ initialPlans = [] }: TrainingPlansTabProps) {
         initialPlans.length > 0
           ? { getPublicTrainingPlans: initialPlans }
           : undefined,
-      staleTime: 30 * 60 * 1000, // 30 minutes - match ISR revalidation
+      staleTime: 5 * 60 * 1000, // 5 minutes - match ISR revalidation
     },
   )
 
