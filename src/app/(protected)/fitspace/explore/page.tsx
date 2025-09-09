@@ -18,13 +18,13 @@ import { TrainingPlansTab } from './components/training-plans-tab'
 export const revalidate = 300
 
 interface ExplorePageProps {
-  searchParams: {
+  searchParams: Promise<{
     tab?: string
-  }
+  }>
 }
 
 export default async function ExplorePage({ searchParams }: ExplorePageProps) {
-  const tabParam = searchParams.tab
+  const tabParam = (await searchParams).tab
   const defaultValue = tabParam === 'trainers' ? 'trainers' : 'plans'
 
   // Pre-fetch data with ISR caching
