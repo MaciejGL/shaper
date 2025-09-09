@@ -80,3 +80,24 @@ export function navigateToPath(
   const webUrl = createWebUrl(path, queryParams)
   navigateToDeepLink(path, queryParams, webUrl)
 }
+
+/**
+ * Fire-and-forget attempt to open the native app without web fallback.
+ * Use this when you also trigger SPA navigation via Next.js to avoid full reloads.
+ */
+export function tryOpenAppDeepLink(
+  path: string,
+  queryParams?: Record<string, string>,
+) {
+  const webUrl = createWebUrl(path, queryParams)
+  const deepLink = `hypertro://?url=${encodeURIComponent(webUrl)}`
+
+  // Defer so it doesn't interfere with current click/navigation handlers
+  setTimeout(() => {
+    try {
+      window.location.href = deepLink
+    } catch {
+      // No-op: this is best-effort only
+    }
+  }, 0)
+}

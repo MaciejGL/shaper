@@ -25,7 +25,8 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
   )
 
   if (error || !data?.getWorkout) {
-    return redirect('/fitspace/workout')
+    console.error(error)
+    return redirect('/fitspace/my-plans')
   }
 
   return (

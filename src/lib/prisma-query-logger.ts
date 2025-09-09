@@ -340,7 +340,7 @@ function logDetailedQueryExecution({
   model,
   operation,
   totalDuration,
-  steps,
+  // steps,
   success,
   error,
 }: Omit<LogQueryParams, 'args'>) {
@@ -351,7 +351,7 @@ function logDetailedQueryExecution({
     return '🔴'
   }
 
-  const mainEmoji = success ? '🗄️' : '❌'
+  const mainEmoji = success ? '✅' : '❌'
   const queryName = `${model}.${operation}`
   const timingEmoji = getTimingEmoji(totalDuration)
 
@@ -364,14 +364,14 @@ function logDetailedQueryExecution({
   }
 
   // Log each step
-  steps.forEach((step, index) => {
-    const stepEmoji = getTimingEmoji(step.duration)
-    const isLast = index === steps.length - 1
-    const prefix = isLast ? '   └─' : '   ├─'
-    console.info(
-      `${prefix} ${step.icon} ${step.name} ${stepEmoji} ${step.duration.toFixed(2)}ms`,
-    )
-  })
+  // steps.forEach((step, index) => {
+  //   const stepEmoji = getTimingEmoji(step.duration)
+  //   const isLast = index === steps.length - 1
+  //   const prefix = isLast ? '   └─' : '   ├─'
+  //   console.info(
+  //     `${prefix} ${step.icon} ${step.name} ${stepEmoji} ${step.duration.toFixed(2)}ms`,
+  //   )
+  // })
 
-  console.info('')
+  // console.info('')
 }

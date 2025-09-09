@@ -15,10 +15,12 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import { Icon } from '@/components/icons'
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import { TrainerDiscoveryCta } from '@/components/trainer-discovery-cta'
 import { ButtonLink } from '@/components/ui/button-link'
 import { Card } from '@/components/ui/card'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
+import { tryOpenAppDeepLink } from '@/lib/deep-links'
 import { cn } from '@/lib/utils'
 
 import { AddMeasurementModal } from '../progress/components/add-measurement-modal'
@@ -26,6 +28,7 @@ import { MeasurementFieldEnum } from '../progress/components/measurement-constan
 
 export function MobileNav() {
   const pathname = usePathname()
+  const { isNativeApp } = useMobileApp()
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const [clickedItem, setClickedItem] = useState<string | null>(null)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
@@ -120,6 +123,9 @@ export function MobileNav() {
                 onClick={() => {
                   setClickedItem(item.label)
                   setPendingNavigation(item.href)
+                  // Best-effort: try to open native app in parallel.
+                  // Don't prevent default so Next.js preserves SPA navigation.
+                  if (!isNativeApp) tryOpenAppDeepLink(item.href)
                 }}
                 className={cn(
                   'flex flex-col items-center justify-center p-2 rounded-lg transition-colors',

@@ -1,6 +1,7 @@
 import { CheckCheck } from 'lucide-react'
 import React from 'react'
 
+import { useIsFirstRender } from '@/components/animated-grid'
 import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
@@ -18,6 +19,7 @@ import { RestDay } from './rest-day'
 import { Summary } from './summary'
 
 export function Exercises() {
+  const isFirstRender = useIsFirstRender()
   const { activeDay } = useWorkout()
   const { preferences, setTrainingView } = useUserPreferences()
 
@@ -39,7 +41,11 @@ export function Exercises() {
   const exercises = activeDay.exercises
 
   return (
-    <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
+    <AnimatedPageTransition
+      id={activeDay.id}
+      variant={isFirstRender ? undefined : 'reveal'}
+      mode="wait"
+    >
       {!activeDay.isRestDay && (
         <div className="flex flex-col py-3 space-y-2 w-full">
           <div className="grid grid-flow-col gap-2">

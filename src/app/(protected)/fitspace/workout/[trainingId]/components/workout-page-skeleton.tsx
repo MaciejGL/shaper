@@ -16,7 +16,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { WorkoutProvider } from '@/context/workout-context/workout-context'
 import { GQLWorkoutType } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
@@ -139,15 +138,13 @@ interface WorkoutPageSkeletonProps {
 }
 
 export function WorkoutPageSkeleton({ isLoading }: WorkoutPageSkeletonProps) {
-  const dummyPlan = createDummyPlan()
-
   return (
-    <WorkoutProvider plan={dummyPlan}>
+    <div>
       <SkeletonNavigation isLoading={isLoading} />
       <div className="max-w-sm mx-auto pb-4">
         <SkeletonExercises isLoading={isLoading} />
       </div>
-    </WorkoutProvider>
+    </div>
   )
 }
 

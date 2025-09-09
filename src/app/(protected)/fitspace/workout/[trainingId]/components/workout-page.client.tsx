@@ -44,10 +44,6 @@ export function WorkoutPageClient({ plan }: WorkoutPageClientProps) {
     return <WorkoutPageSkeleton isLoading={true} />
   }
 
-  if (!data?.getWorkout && !isLoading) {
-    return <div>Error</div>
-  }
-
   return (
     <WorkoutProvider plan={data?.getWorkout?.plan}>
       <Navigation />
