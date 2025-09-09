@@ -2,14 +2,12 @@
 
 import { createContext, useCallback, useContext, useMemo } from 'react'
 
-import { Loader } from '@/components/loader'
 import { useUser } from '@/context/user-context'
 import {
   GQLBodyMeasuresQuery,
   useBodyMeasuresQuery,
 } from '@/generated/graphql-client'
 
-import { MeasurementsEmptyState } from './measurements-empty-state'
 import { useBodyMeasurements } from './use-body-measurements'
 
 // Context for body measurements data and operations
@@ -77,7 +75,7 @@ export function BodyMeasurementsProvider({
   const contextValue = useMemo(
     () => ({
       bodyMeasures,
-      isLoading,
+      isLoading: isLoading,
       onMeasurementAdded: handleMeasurementAdded,
       getLatestMeasurement,
       getTrend,
@@ -96,21 +94,6 @@ export function BodyMeasurementsProvider({
       handleMeasurementAdded,
     ],
   )
-
-  // Handle loading and empty states at the provider level
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full min-h-[400px]">
-        <Loader />
-      </div>
-    )
-  }
-
-  if (bodyMeasures.length === 0) {
-    return (
-      <MeasurementsEmptyState onMeasurementAdded={handleMeasurementAdded} />
-    )
-  }
 
   return (
     <BodyMeasurementsContext.Provider value={contextValue}>

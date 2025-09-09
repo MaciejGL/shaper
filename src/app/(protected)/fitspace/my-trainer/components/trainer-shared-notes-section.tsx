@@ -3,7 +3,6 @@
 import { MessageSquare } from 'lucide-react'
 import { useState } from 'react'
 
-import { Loader } from '@/components/loader'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -33,10 +32,17 @@ export function TrainerSharedNotesSection() {
   if (isLoading) {
     return (
       <Card borderless>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center min-h-[200px]">
-            <Loader />
-          </div>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SectionIcon icon={MessageSquare} size="sm" variant="sky" />
+            Notes from trainer
+            <Button variant="ghost" size="xs" className="ml-auto" disabled>
+              View All
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <LoadingSkeleton count={2} variant="md" />
         </CardContent>
       </Card>
     )

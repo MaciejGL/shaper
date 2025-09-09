@@ -8,8 +8,13 @@ import { measurementCategories } from './measurement-constants'
 import { StatCard } from './stat-card'
 
 export function DetailedMeasurements() {
-  const { bodyMeasures, getLatestMeasurement, getTrend, onMeasurementAdded } =
-    useBodyMeasurementsContext()
+  const {
+    bodyMeasures,
+    getLatestMeasurement,
+    getTrend,
+    onMeasurementAdded,
+    isLoading,
+  } = useBodyMeasurementsContext()
   const { toDisplayWeight, weightUnit } = useWeightConversion()
   const { toDisplayCircumference, circumferenceUnit } =
     useCircumferenceConversion()
@@ -28,10 +33,6 @@ export function DetailedMeasurements() {
     'calfLeft',
     'calfRight',
   ]
-
-  if (bodyMeasures.length === 0) {
-    return null
-  }
 
   return measurementCategories.slice(1).map((category) => {
     return (
@@ -83,6 +84,7 @@ export function DetailedMeasurements() {
                               : field.unit
                         }
                         trend={getTrend(field.key)}
+                        isLoading={isLoading}
                       />
                     </button>
                   </MeasurementCategoryDrawer>
@@ -97,6 +99,7 @@ export function DetailedMeasurements() {
                   value={getLatestMeasurement(field.key)}
                   unit={resolveUnit(field.key, field.unit)}
                   trend={getTrend(field.key)}
+                  isLoading={isLoading}
                 />
               )
             })}

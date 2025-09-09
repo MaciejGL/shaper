@@ -51,6 +51,10 @@ export function ExerciseSet({
   onDelete,
   isLastSet,
   restDuration,
+  isTimerActive,
+  onSetCompleted,
+  onSetUncompleted,
+  onTimerComplete,
 }: ExerciseSetProps) {
   const { trainingId } = useParams<{ trainingId: string }>()
   const { preferences } = useUserPreferences()
@@ -59,7 +63,6 @@ export function ExerciseSet({
   const { toDisplayWeight } = useWeightConversion()
   const invalidateQuery = useInvalidateQuery()
   const queryClient = useQueryClient()
-  const [isTimerOperations, setIsTimerOperations] = useState(false)
   const [skipTimer, setSkipTimer] = useState(false)
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -146,13 +149,12 @@ export function ExerciseSet({
       onSuccess: (data, variables) => {
         // Timer logic
         if (variables.completed && !skipTimer) {
-          setIsTimerOperations(true)
+          onSetCompleted(false)
         }
         setSkipTimer(false)
       },
       onError: () => {
         // Reset timer states on error
-        setIsTimerOperations(false)
         setSkipTimer(false)
       },
     })
@@ -253,7 +255,7 @@ export function ExerciseSet({
       startTransition(() => {
         // Close timer immediately for uncompleting
         if (!willBeCompleted) {
-          setIsTimerOperations(false)
+          onSetUncompleted()
         }
       })
 
@@ -267,7 +269,6 @@ export function ExerciseSet({
       } catch (error) {
         console.error('Failed to toggle set completion:', error)
         // Reset timer states on error (error handling is also done in the mutation onError)
-        setIsTimerOperations(false)
         setSkipTimer(false)
       }
     },
@@ -279,6 +280,7 @@ export function ExerciseSet({
       weight,
       previousSetRepsLog,
       previousSetWeightLog,
+      onSetUncompleted,
     ],
   )
 
@@ -323,7 +325,7 @@ export function ExerciseSet({
         className={cn('bg-card', !isLastSet && 'border-b border-border/50')}
       >
         {isAdvancedView && (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 mb-0.5">
             <div
               className={cn(
                 isAdvancedView
@@ -335,10 +337,10 @@ export function ExerciseSet({
             >
               <div />
               <div />
-              <div className="text-[0.625rem] text-muted-foreground text-center">
+              <div className="text-[0.75rem] text-muted-foreground text-center">
                 {set.isExtra ? 'Extra' : repRange}
               </div>
-              <div className="text-[0.625rem] text-muted-foreground text-center">
+              <div className="text-[0.75rem] text-muted-foreground text-center">
                 {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : ''}
               </div>
               <div />
@@ -447,25 +449,25 @@ export function ExerciseSet({
             </div>
           </div>
         </div>
-        <AnimatePresence mode="wait">
-          {isAdvancedView && isTimerOperations && restDuration && (
+        <AnimatePresence>
+          {isAdvancedView && isTimerActive && restDuration && (
             <motion.div
               key={`timer-${set.id}`}
               initial={{ height: 0, opacity: 0 }}
               animate={{
-                height: 'auto',
+                height: 44, // Fixed height: py-1 (8px) + h-7 (28px) + py-1 (8px) = 44px
                 opacity: 1,
               }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.15, ease: 'linear' }}
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
               style={{ overflow: 'hidden' }}
             >
               <div className="py-1 px-2">
                 <CountdownTimer
                   restDuration={restDuration || 60}
-                  autoStart={isTimerOperations}
-                  onComplete={() => setIsTimerOperations(false)}
-                  onPause={() => setIsTimerOperations(false)}
+                  autoStart={isTimerActive}
+                  onComplete={onTimerComplete}
+                  onPause={onTimerComplete}
                   size="xs"
                   className="w-full"
                 />

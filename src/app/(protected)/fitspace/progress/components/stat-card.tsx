@@ -10,6 +10,7 @@ interface StatCardProps {
   size?: 'default' | 'sm'
   isOnCard?: boolean
   subtitle?: string
+  isLoading?: boolean
 }
 
 export function StatCard({
@@ -20,6 +21,7 @@ export function StatCard({
   size = 'default',
   isOnCard = false,
   subtitle,
+  isLoading = false,
 }: StatCardProps) {
   const formatTrend = (trend: number) => {
     const isPositive = trend > 0
@@ -27,7 +29,7 @@ export function StatCard({
     const TrendIcon = isPositive ? TrendingUp : TrendingDown
 
     return (
-      <div
+      <span
         className={`flex items-center gap-1 text-xs ${
           isPositive
             ? 'text-amber-500'
@@ -41,7 +43,7 @@ export function StatCard({
           {isPositive ? '+' : ''}
           {formatNumber(trend, 1)} {unit}
         </span>
-      </div>
+      </span>
     )
   }
 
@@ -69,6 +71,7 @@ export function StatCard({
             'font-bold',
             size === 'sm' ? 'text-lg' : 'text-2xl',
             value === undefined && 'text-muted-foreground',
+            isLoading && 'masked-placeholder-text max-w-max',
           )}
         >
           {value ? `${formatNumber(value, 1)} ${unit}` : '—'}
@@ -76,7 +79,14 @@ export function StatCard({
         {subtitle && (
           <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
         )}
-        {trend !== null && trend !== undefined && formatTrend(trend)}
+        <p
+          className={cn(
+            'mt-0.5',
+            isLoading && 'masked-placeholder-text max-w-max',
+          )}
+        >
+          {trend !== null && trend !== undefined && formatTrend(trend)}
+        </p>
       </div>
     </div>
   )

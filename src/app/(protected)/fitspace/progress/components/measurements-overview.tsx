@@ -13,6 +13,7 @@ export function MeasurementsOverview() {
     getLatestMeasurement,
     getTrend,
     getEstimatedBodyFat,
+    isLoading,
     onMeasurementAdded,
   } = useBodyMeasurementsContext()
 
@@ -49,6 +50,7 @@ export function MeasurementsOverview() {
               }
               unit={weightUnit}
               trend={getTrend('weight')}
+              isLoading={isLoading}
             />
           </button>
         </MeasurementCategoryDrawer>
@@ -61,7 +63,12 @@ export function MeasurementsOverview() {
           focusField={'bodyFat'}
         >
           <button className="text-left h-full">
-            <StatCard label={bodyFatLabel} value={displayBodyFat} unit="%" />
+            <StatCard
+              label={bodyFatLabel}
+              value={displayBodyFat}
+              unit="%"
+              isLoading={isLoading}
+            />
           </button>
         </MeasurementCategoryDrawer>
       </div>

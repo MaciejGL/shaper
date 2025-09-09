@@ -4,7 +4,7 @@ import { Calendar, Clock, MessageSquare, UserCheck, Users } from 'lucide-react'
 import { useState } from 'react'
 
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
-import { Loader } from '@/components/loader'
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { MessengerModal } from '@/components/messenger-modal/messenger-modal'
 import { TrainerCard } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
@@ -63,8 +63,8 @@ export default function MyTrainerPage() {
         className="mb-6"
       />
       {isLoadingTrainer && (
-        <div className="min-h-[300px] flex-center">
-          <Loader />
+        <div className="space-y-4">
+          <LoadingSkeleton count={4} variant="lg" />
         </div>
       )}
       {!isLoadingTrainer && trainer && (

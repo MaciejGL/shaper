@@ -3,7 +3,6 @@
 import { omit } from 'lodash'
 import { useState } from 'react'
 
-import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { MuscleGroupRadarChart } from '@/components/muscle-group-radar-chart'
 import { StatsItem } from '@/components/stats-item'
 import { Button } from '@/components/ui/button'
@@ -31,7 +30,16 @@ export function MuscleDistribution() {
     { enabled: !!user?.id },
   )
 
-  const distribution = omit(data?.muscleGroupDistribution, ['__typename'])
+  const distribution = data?.muscleGroupDistribution
+    ? omit(data?.muscleGroupDistribution, ['__typename'])
+    : {
+        chest: 0,
+        back: 0,
+        shoulders: 0,
+        arms: 0,
+        legs: 0,
+        core: 0,
+      }
 
   // Calculate total sets for summary
   const totalSets = distribution
@@ -74,55 +82,54 @@ export function MuscleDistribution() {
             ))}
           </div>
 
-          {isLoading ? (
-            <LoadingSkeleton count={2} variant="lg" />
-          ) : (
-            <>
-              {/* Radar Chart */}
-              <MuscleGroupRadarChart data={distribution} />
-              {/* Summary Stats */}
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <StatsItem value={totalSets} label="Total Sets" />
-                <StatsItem
-                  value={
-                    Object.values(distribution).filter((sets) => sets > 0)
-                      .length
-                  }
-                  label="Muscle Groups Trained"
-                />
-                <StatsItem
-                  value={
-                    totalSets > 0
-                      ? Math.round(
-                          totalSets /
-                            Object.values(distribution).filter(
-                              (sets) => sets > 0,
-                            ).length,
-                        )
-                      : 0
-                  }
-                  label="Avg Sets per Group"
-                />
-              </div>
+          {/* Radar Chart */}
+          <MuscleGroupRadarChart data={distribution} />
+          {/* Summary Stats */}
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <StatsItem
+              value={totalSets}
+              label="Total Sets"
+              loading={isLoading}
+            />
+            <StatsItem
+              value={
+                Object.values(distribution).filter((sets) => sets > 0).length
+              }
+              label="Muscle Groups Trained"
+              loading={isLoading}
+            />
+            <StatsItem
+              value={
+                totalSets > 0
+                  ? Math.round(
+                      totalSets /
+                        Object.values(distribution).filter((sets) => sets > 0)
+                          .length,
+                    )
+                  : 0
+              }
+              label="Avg Sets per Group"
+              loading={isLoading}
+            />
+          </div>
 
-              {/* Detailed Breakdown */}
-              <Section
-                title={`Sets per Muscle Group (${selectedPeriod} days)`}
-                size="sm"
-              >
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  {Object.entries(distribution).map(([muscle, sets]) => (
-                    <StatsItem
-                      key={muscle}
-                      value={sets}
-                      label={muscle}
-                      variant="secondary"
-                    />
-                  ))}
-                </div>
-              </Section>
-            </>
-          )}
+          {/* Detailed Breakdown */}
+          <Section
+            title={`Sets per Muscle Group (${selectedPeriod} days)`}
+            size="sm"
+          >
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              {Object.entries(distribution).map(([muscle, sets]) => (
+                <StatsItem
+                  key={muscle}
+                  value={sets}
+                  label={muscle}
+                  variant="secondary"
+                  loading={isLoading}
+                />
+              ))}
+            </div>
+          </Section>
         </div>
       </Section>
     </div>

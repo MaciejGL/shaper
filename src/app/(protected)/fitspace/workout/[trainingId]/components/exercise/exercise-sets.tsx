@@ -47,6 +47,9 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
     return initialState
   })
 
+  // Timer state management - only one timer can be active at a time
+  const [activeTimerSetId, setActiveTimerSetId] = useState<string | null>(null)
+
   // Keep setsLogs in sync with exercise sets (for when new sets are added/removed/updated)
   useEffect(() => {
     const exerciseSets = exercise.substitutedBy?.sets || exercise.sets
@@ -238,6 +241,21 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
     }))
   }
 
+  // Timer management functions
+  const handleSetCompleted = (setId: string, skipTimer: boolean = false) => {
+    if (!skipTimer) {
+      setActiveTimerSetId(setId)
+    }
+  }
+
+  const handleTimerComplete = () => {
+    setActiveTimerSetId(null)
+  }
+
+  const handleSetUncompleted = () => {
+    setActiveTimerSetId(null)
+  }
+
   const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
 
   return (
@@ -279,6 +297,12 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
                 onDelete={() => removeSet({ setId: set.id })}
                 isLastSet={index === exercise.sets.length - 1}
                 restDuration={exercise.restSeconds}
+                isTimerActive={activeTimerSetId === set.id}
+                onSetCompleted={(skipTimer) =>
+                  handleSetCompleted(set.id, skipTimer)
+                }
+                onSetUncompleted={handleSetUncompleted}
+                onTimerComplete={handleTimerComplete}
               />
             </AnimatePresence>
           )
