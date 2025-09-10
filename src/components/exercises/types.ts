@@ -11,6 +11,7 @@ export interface Exercise {
   createdAt: string
   updatedAt: string
   videoUrl?: string | null
+  tempImageUrls?: string[]
   createdBy?: {
     id: string
     email: string
@@ -59,6 +60,7 @@ export interface ExerciseUpdate {
     url: string
     order: number
   }[]
+  tempImageUrls?: string[] // Temp images before save
   muscleGroupIds?: string[]
   secondaryMuscleGroupIds?: string[]
   substituteIds?: string[]

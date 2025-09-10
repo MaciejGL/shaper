@@ -101,6 +101,7 @@ export function MultiImageUpload({
             fileName: file.name,
             contentType: compressedFile.type,
             imageType,
+            // No relatedId = always uploads to temp
           }),
         })
 
@@ -136,8 +137,19 @@ export function MultiImageUpload({
 
         // Update the images array using ref to get latest state for concurrent uploads
         const newImageUrls = [...latestImageUrls.current]
+
+        // Ensure array is large enough
+        while (newImageUrls.length <= slotIndex) {
+          newImageUrls.push('')
+        }
+
         newImageUrls[slotIndex] = publicUrl
-        onImagesChange(newImageUrls.filter(Boolean))
+        const filteredUrls = newImageUrls.filter(Boolean)
+
+        // Update the ref immediately to prevent race conditions
+        latestImageUrls.current = filteredUrls
+
+        onImagesChange(filteredUrls)
 
         // Reset state after short delay
         setTimeout(() => resetUploadState(slotIndex), 1000)
@@ -234,27 +246,34 @@ export function MultiImageUpload({
     resetUploadState(indexToRemove)
   }
 
+  // Simple random ID for this component instance
+  const uniqueId = `${imageType}-${Math.random().toString(36).substr(2, 9)}`
+
   // Trigger file input for specific slot
   const triggerFileInput = (slotIndex: number) => {
     if (!disabled && !uploadStates[slotIndex]?.uploading) {
-      document.getElementById(`file-input-${imageType}-${slotIndex}`)?.click()
+      document.getElementById(`file-input-${uniqueId}-${slotIndex}`)?.click()
     }
   }
 
   // Trigger multiple file input
   const triggerMultipleFileInput = () => {
     if (!disabled) {
-      document.getElementById(`multiple-file-input-${imageType}`)?.click()
+      document.getElementById(`multiple-file-input-${uniqueId}`)?.click()
     }
   }
 
   const canAddMore = currentImageUrls.length < maxImages
+  const hasUploadingImages = Object.values(uploadStates).some(
+    (state) => state.uploading,
+  )
 
   return (
     <div className={cn('space-y-4', className)}>
-      {/* Current Images Grid */}
-      {currentImageUrls.length > 0 && (
+      {/* Images Grid - Current + Uploading */}
+      {(currentImageUrls.length > 0 || hasUploadingImages) && (
         <div className="grid grid-cols-2 gap-4">
+          {/* Current Images */}
           {currentImageUrls.map((imageUrl, index) => (
             <div
               key={index}
@@ -299,6 +318,33 @@ export function MultiImageUpload({
               </Button>
             </div>
           ))}
+
+          {/* Uploading Slots */}
+          {Object.entries(uploadStates).map(([slotIndex, state]) => {
+            const index = parseInt(slotIndex)
+            // Only show uploading slots that don't have corresponding images yet
+            if (state.uploading && index >= currentImageUrls.length) {
+              return (
+                <div
+                  key={`uploading-${slotIndex}`}
+                  className="relative aspect-video rounded-lg overflow-hidden border border-primary bg-primary/5"
+                >
+                  {/* Upload Progress Overlay */}
+                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="text-primary text-sm font-medium">
+                        {Math.round(state.progress)}%
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1">
+                        Uploading...
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            }
+            return null
+          })}
         </div>
       )}
 
@@ -306,11 +352,11 @@ export function MultiImageUpload({
       {canAddMore && (
         <div
           className={cn(
-            'border border-dashed rounded-lg p-6 text-center transition-colors',
+            'border border-dashed rounded-lg p-6 text-center transition-colors relative',
             dragActive
               ? 'border-primary bg-primary/5'
               : 'border-gray-300 dark:border-gray-600',
-            disabled
+            disabled || hasUploadingImages
               ? 'opacity-50 cursor-not-allowed'
               : 'cursor-pointer hover:border-primary hover:bg-primary/5',
           )}
@@ -318,16 +364,31 @@ export function MultiImageUpload({
           onDragLeave={handleDragOut}
           onDragOver={handleDrag}
           onDrop={handleDrop}
-          onClick={() => !disabled && triggerMultipleFileInput()}
+          onClick={() =>
+            !disabled && !hasUploadingImages && triggerMultipleFileInput()
+          }
         >
+          {/* Upload Progress Overlay */}
+          {hasUploadingImages && (
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-lg">
+              <div className="text-primary text-sm font-medium">
+                Uploading...
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col items-center space-y-3">
             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
               <Plus className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <p className="text-sm font-medium">Add Images</p>
+              <p className="text-sm font-medium">
+                {hasUploadingImages ? 'Uploading Images...' : 'Add Images'}
+              </p>
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                Drag & drop or click to browse
+                {hasUploadingImages
+                  ? 'Please wait while images are being uploaded'
+                  : 'Drag & drop or click to browse'}
               </p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                 Up to {maxImages} images • Max {config.maxSize / (1024 * 1024)}
@@ -358,7 +419,7 @@ export function MultiImageUpload({
 
       {/* Multiple File Input for adding new images */}
       <input
-        id={`multiple-file-input-${imageType}`}
+        id={`multiple-file-input-${uniqueId}`}
         type="file"
         accept="image/jpeg,image/png,image/webp"
         multiple
@@ -371,7 +432,7 @@ export function MultiImageUpload({
       {Array.from({ length: maxImages }, (_, index) => (
         <input
           key={index}
-          id={`file-input-${imageType}-${index}`}
+          id={`file-input-${uniqueId}-${index}`}
           type="file"
           accept="image/jpeg,image/png,image/webp"
           onChange={(e) => handleFileInputChange(e, index)}

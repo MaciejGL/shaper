@@ -1,4 +1,5 @@
 import {
+  CopyObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
   PutObjectCommand,
@@ -63,11 +64,11 @@ export function generateFileName(
   } else if (type === 'exercise') {
     // For exercise images:
     // - If we have an exerciseId (editing), use it for organization
-    // - If no exerciseId (creating), use userId/temp folder
+    // - If no exerciseId (temp), use exercises/temp folder
     if (id) {
       return `${folder}/${id}/${timestamp}-${sanitizedName}`
     } else {
-      return `${folder}/temp/${userId}/${timestamp}-${sanitizedName}`
+      return `exercises/temp/${userId}/${timestamp}-${sanitizedName}`
     }
   } else if (type === 'progress') {
     return `${folder}/${userId}/${timestamp}-${sanitizedName}`
@@ -96,7 +97,12 @@ export function getImageUrl(fileName: string, imageType: ImageType): string {
   const config = IMAGE_CONFIGS[imageType]
 
   if (config.isPublic) {
-    // Public images: direct S3/CloudFront URL
+    // For temp images, always use direct S3 URLs (CloudFront might not serve temp folder)
+    if (fileName.startsWith('exercises/temp/')) {
+      return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'eu-north-1'}.amazonaws.com/${fileName}`
+    }
+
+    // For final images, use CloudFront if available
     const cloudFrontDomain = process.env.AWS_CLOUDFRONT_DOMAIN
     if (cloudFrontDomain) {
       return `https://${cloudFrontDomain}/${fileName}`
@@ -167,6 +173,53 @@ export async function deleteImages(imageUrls: string[]): Promise<void> {
   })
 
   await Promise.all(deletePromises)
+}
+
+// Move images from temp to final location
+export async function moveImagesFromTemp(
+  imageUrls: string[],
+  exerciseId: string,
+): Promise<string[]> {
+  const movedUrls: string[] = []
+
+  for (const url of imageUrls) {
+    if (url.includes('/exercises/temp/')) {
+      // Extract filename from temp URL
+      const urlParts = url.split('/')
+      const filename = urlParts[urlParts.length - 1]
+
+      // Create new key in exercises folder
+      const oldKey = url.split('.com/')[1] // Remove domain
+      const newKey = `exercises/${exerciseId}/${filename}`
+
+      try {
+        // Copy from temp to final location
+        await s3Client.send(
+          new CopyObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: newKey,
+            CopySource: `${BUCKET_NAME}/${oldKey}`,
+          }),
+        )
+
+        // Delete from temp location
+        await deleteImage(url)
+
+        // Create new URL
+        const newUrl = getImageUrl(newKey, 'exercise')
+        movedUrls.push(newUrl)
+      } catch (error) {
+        console.error('Failed to move image from temp:', { url, error })
+        // Keep original URL if move fails
+        movedUrls.push(url)
+      }
+    } else {
+      // Not a temp image, keep as is
+      movedUrls.push(url)
+    }
+  }
+
+  return movedUrls
 }
 
 // Validate image file

@@ -123,6 +123,7 @@ export async function getFullPlanById(id: string) {
                   substitutes: true,
                   base: {
                     include: {
+                      images: true,
                       muscleGroups: true,
                       substitutes: {
                         include: {

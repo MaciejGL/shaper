@@ -5,7 +5,7 @@ import {
   moderatorAccessDeniedResponse,
   requireModeratorUser,
 } from '@/lib/admin-auth'
-import { deleteImages } from '@/lib/aws/s3'
+import { deleteImages, moveImagesFromTemp } from '@/lib/aws/s3'
 import { prisma } from '@/lib/db'
 
 interface ExerciseUpdate {
@@ -95,6 +95,10 @@ export async function PATCH(request: NextRequest) {
 
       // Handle image updates
       if (images !== undefined) {
+        // Move images from temp to final location
+        const newImageUrls = images.map((img) => img.url)
+        const finalImageUrls = await moveImagesFromTemp(newImageUrls, id)
+
         // Get current images for S3 cleanup
         const currentImages = await prisma.image.findMany({
           where: {
@@ -105,9 +109,8 @@ export async function PATCH(request: NextRequest) {
         })
 
         // Find images to delete (current images not in new images list)
-        const newImageUrls = images.map((img) => img.url)
         const imagesToDelete = currentImages.filter(
-          (img) => !newImageUrls.includes(img.url),
+          (img) => !finalImageUrls.includes(img.url),
         )
 
         // Delete removed images from S3
@@ -115,12 +118,12 @@ export async function PATCH(request: NextRequest) {
           await deleteImages(imagesToDelete.map((img) => img.url))
         }
 
-        // Update images in database
+        // Update images in database with final URLs
         relationUpdates.images = {
           deleteMany: {}, // Delete all existing images
-          create: images.map((img) => ({
-            url: img.url,
-            order: img.order,
+          create: finalImageUrls.map((url, index) => ({
+            url,
+            order: index,
             entityType: 'exercise' as const,
           })),
         }

@@ -25,18 +25,13 @@ export function ExerciseImagesVideoSection({
     onUpdate(exercise.id, 'videoUrl', newUrl || null)
   }
 
-  // Convert exercise images to URL array for MultiImageUpload
-  const currentImageUrls = exercise.images?.map((img) => img.url) || []
+  // Get current images (both saved and temp)
+  const currentImageUrls =
+    exercise.tempImageUrls || exercise.images?.map((img) => img.url) || []
 
-  // Handle images change from MultiImageUpload
+  // Handle temp image uploads - just store URLs
   const handleImagesChange = (imageUrls: string[]) => {
-    const newImages = imageUrls.map((url, index) => ({
-      id: `temp-${Date.now()}-${index}`, // Temporary ID
-      url,
-      order: index,
-    }))
-
-    onUpdate(exercise.id, 'images', newImages)
+    onUpdate(exercise.id, 'tempImageUrls', imageUrls)
   }
 
   // Get embedded video URL

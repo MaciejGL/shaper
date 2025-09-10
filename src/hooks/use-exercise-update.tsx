@@ -184,14 +184,22 @@ export function useExerciseUpdate({
         return true
       }
 
-      const updatePayload = { id: exercise.id, ...updatesWithoutId }
+      // Handle temp images - convert to proper images format
+      let finalPayload = { id: exercise.id, ...updatesWithoutId }
+      if (updatesWithoutId.tempImageUrls) {
+        const { tempImageUrls, ...restUpdates } = updatesWithoutId
+        finalPayload = {
+          id: exercise.id,
+          ...restUpdates,
+          images: tempImageUrls.map((url, index) => ({
+            id: `temp-${Date.now()}-${index}`,
+            url,
+            order: index,
+          })),
+        }
+      }
 
-      // Debug log to verify we're only sending changed fields
-      console.info('💾 Saving exercise changes:', {
-        exerciseId: exercise.id,
-        changedFields: Object.keys(updatesWithoutId),
-        payload: updatePayload,
-      })
+      const updatePayload = finalPayload
 
       const response = await fetch(updateEndpoint, {
         method: 'PATCH',
@@ -200,10 +208,21 @@ export function useExerciseUpdate({
       })
 
       if (!response.ok) {
-        throw new Error('Failed to save changes')
+        const errorText = await response.text()
+        console.error('❌ Save failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorText,
+          payload: updatePayload,
+        })
+        throw new Error(
+          `Failed to save changes: ${response.status} ${response.statusText}`,
+        )
       }
 
-      // Clear changes after successful save
+      void (await response.json())
+
+      // Clear changes after successful save (but keep temp images until refresh)
       setChanges({ id: exercise.id })
       toast.success('Exercise saved successfully')
 
