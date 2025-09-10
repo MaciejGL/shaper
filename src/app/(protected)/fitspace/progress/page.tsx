@@ -6,7 +6,6 @@ import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { Badge } from '@/components/ui/badge'
 import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
-import { useExercisesProgressByUserQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
@@ -26,12 +25,6 @@ export default function ProgressPage() {
     >(['body-measures', 'body-progress', 'muscle-distribution', 'exercises'])
       .withDefault('body-measures')
       .withOptions({ clearOnDefault: true }),
-  )
-
-  // Get progress data for all exercises
-  const { data: exerciseProgress } = useExercisesProgressByUserQuery(
-    { userId: user?.id || '' },
-    { enabled: !!user?.id && hasPremium },
   )
 
   return (
@@ -89,10 +82,7 @@ export default function ProgressPage() {
         </TabsContent>
 
         <TabsContent value="exercises">
-          <SelectedExercisesProgress
-            exerciseProgress={exerciseProgress?.exercisesProgressByUser || []}
-            userId={user?.id || ''}
-          />
+          <SelectedExercisesProgress userId={user?.id || ''} />
         </TabsContent>
       </Tabs>
     </div>
@@ -101,8 +91,8 @@ export default function ProgressPage() {
 
 function PremiumBadge() {
   return (
-    <Badge variant="premium" className="p-1 rounded-md">
-      <Crown className="size-3 rounded-full" />
+    <Badge variant="premium" className="p-1 rounded-md opacity-75" size="2xs">
+      <Crown />
     </Badge>
   )
 }

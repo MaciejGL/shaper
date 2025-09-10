@@ -3,9 +3,10 @@
 import { useState } from 'react'
 
 import { Loader } from '@/components/loader'
+import { useUser } from '@/context/user-context'
 import {
-  GQLExercisesProgressByUserQuery,
   useAvailableExercisesForProgressQuery,
+  useExercisesProgressByUserQuery,
 } from '@/generated/graphql-client'
 
 import { ExerciseEmptyState } from './exercise-empty-state'
@@ -15,15 +16,20 @@ import { Section } from './section'
 import { useExerciseProgress } from './use-exercise-progress'
 
 interface SelectedExercisesProgressProps {
-  exerciseProgress: GQLExercisesProgressByUserQuery['exercisesProgressByUser']
   userId: string | null
 }
 
 export function SelectedExercisesProgress({
-  exerciseProgress,
   userId,
 }: SelectedExercisesProgressProps) {
+  const { user, hasPremium } = useUser()
   const [isOpen, setIsOpen] = useState(false)
+
+  // Get progress data for all exercises
+  const { data: exerciseProgress } = useExercisesProgressByUserQuery(
+    { userId: user?.id || '' },
+    { enabled: !!user?.id && hasPremium },
+  )
 
   // Get available exercises for selection
   const { data: availableExercises, isLoading: isLoadingAvailableExercises } =
@@ -39,7 +45,10 @@ export function SelectedExercisesProgress({
     handleRemoveExercise,
     handleMoveToTop,
     isLoading: isLoadingExercises,
-  } = useExerciseProgress(exerciseProgress, userId)
+  } = useExerciseProgress(
+    exerciseProgress?.exercisesProgressByUser || [],
+    userId,
+  )
 
   const hasAvailableExercises =
     availableExercises?.exercisesProgressByUser &&
