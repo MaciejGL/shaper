@@ -115,12 +115,12 @@ export function PrivateImageGallery({
                   <Image
                     src={imageUrl}
                     alt={imageLabels?.[index] || 'Progress Photo'}
+                    quality={20}
                     fill
                     className={cn(
                       'object-cover cursor-pointer transition-opacity duration-300',
                       imageStates[index] ? 'opacity-100' : 'opacity-0',
                     )}
-                    unoptimized={imageUrl.startsWith('/api/images/private/')}
                     priority
                     onLoad={() =>
                       setImageStates((prev) => ({ ...prev, [index]: true }))
@@ -176,9 +176,6 @@ export function PrivateImageGallery({
                           width={800}
                           height={1066}
                           className="w-full h-full object-cover"
-                          unoptimized={imageUrl.startsWith(
-                            '/api/images/private/',
-                          )}
                         />
                       </div>
                     </CarouselItem>

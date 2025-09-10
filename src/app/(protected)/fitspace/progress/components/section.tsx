@@ -17,12 +17,9 @@ export function Section({
 }: SectionProps) {
   return (
     <div className={cn('', className)}>
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 mb-3">
         <h3
-          className={cn(
-            'font-semibold text-lg mb-3',
-            size === 'sm' && 'text-base',
-          )}
+          className={cn('font-semibold text-lg ', size === 'sm' && 'text-base')}
         >
           {title}
         </h3>

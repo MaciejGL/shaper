@@ -5,6 +5,8 @@ import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 
+import { Section } from '../section'
+
 import { BodyProgressTimeline } from './body-progress-timeline'
 import { CreateProgressLogDialog } from './create-progress-log-dialog'
 
@@ -43,9 +45,9 @@ export function BodyProgressContent({}: BodyProgressContentProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold">Body Snapshot Timeline</h2>
+    <Section
+      title="Body Snapshot Timeline"
+      action={
         <Button
           onClick={() => setIsCreateDialogOpen(true)}
           variant="default"
@@ -54,17 +56,21 @@ export function BodyProgressContent({}: BodyProgressContentProps) {
         >
           Add Progress Log
         </Button>
+      }
+    >
+      <div className="space-y-6">
+        <div className="flex justify-between items-center"></div>
+
+        {/* Timeline */}
+        <BodyProgressTimeline onEditLog={handleEditLog} />
+
+        {/* Create/Edit Dialog */}
+        <CreateProgressLogDialog
+          open={isCreateDialogOpen}
+          onOpenChange={handleCloseDialog}
+          editLog={editLog}
+        />
       </div>
-
-      {/* Timeline */}
-      <BodyProgressTimeline onEditLog={handleEditLog} />
-
-      {/* Create/Edit Dialog */}
-      <CreateProgressLogDialog
-        open={isCreateDialogOpen}
-        onOpenChange={handleCloseDialog}
-        editLog={editLog}
-      />
-    </div>
+    </Section>
   )
 }
