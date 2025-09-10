@@ -1,0 +1,61 @@
+query GetUserBodyProgressLogs($userProfileId: String!) {
+  userBodyProgressLogs(userProfileId: $userProfileId) {
+    id
+    loggedAt
+    notes
+    image1Url
+    image2Url
+    image3Url
+    shareWithTrainer
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateBodyProgressLog($input: CreateBodyProgressLogInput!) {
+  createBodyProgressLog(input: $input) {
+    id
+    loggedAt
+    notes
+    image1Url
+    image2Url
+    image3Url
+    shareWithTrainer
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpdateBodyProgressLog(
+  $id: String!
+  $input: UpdateBodyProgressLogInput!
+) {
+  updateBodyProgressLog(id: $id, input: $input) {
+    id
+    loggedAt
+    notes
+    image1Url
+    image2Url
+    image3Url
+    shareWithTrainer
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteBodyProgressLog($id: String!) {
+  deleteBodyProgressLog(id: $id)
+}
+
+mutation UpdateBodyProgressLogSharingStatus(
+  $id: String!
+  $shareWithTrainer: Boolean!
+) {
+  updateBodyProgressLogSharingStatus(
+    id: $id
+    shareWithTrainer: $shareWithTrainer
+  ) {
+    id
+    shareWithTrainer
+  }
+}

@@ -287,6 +287,19 @@ export type GQLBatchLogMealFoodItemInput = {
   unit: Scalars['String']['input'];
 };
 
+export type GQLBodyProgressLog = {
+  __typename?: 'BodyProgressLog';
+  createdAt: Scalars['String']['output'];
+  id: Scalars['String']['output'];
+  image1Url?: Maybe<Scalars['String']['output']>;
+  image2Url?: Maybe<Scalars['String']['output']>;
+  image3Url?: Maybe<Scalars['String']['output']>;
+  loggedAt: Scalars['String']['output'];
+  notes?: Maybe<Scalars['String']['output']>;
+  shareWithTrainer: Scalars['Boolean']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export type GQLChat = {
   __typename?: 'Chat';
   client: GQLUserPublic;
@@ -343,6 +356,15 @@ export enum GQLCoachingRequestStatus {
 export type GQLCopyExercisesFromDayInput = {
   sourceDayId: Scalars['ID']['input'];
   targetDayId: Scalars['ID']['input'];
+};
+
+export type GQLCreateBodyProgressLogInput = {
+  image1Url?: InputMaybe<Scalars['String']['input']>;
+  image2Url?: InputMaybe<Scalars['String']['input']>;
+  image3Url?: InputMaybe<Scalars['String']['input']>;
+  loggedAt?: InputMaybe<Scalars['String']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type GQLCreateExerciseInput = {
@@ -1043,6 +1065,7 @@ export type GQLMutation = {
   closePlan: Scalars['Boolean']['output'];
   completeMeal: Scalars['Boolean']['output'];
   copyExercisesFromDay: Scalars['Boolean']['output'];
+  createBodyProgressLog: GQLBodyProgressLog;
   createCoachingRequest: GQLCoachingRequest;
   createDraftMealTemplate: GQLMealPlan;
   createDraftTemplate: GQLTrainingPlan;
@@ -1061,6 +1084,7 @@ export type GQLMutation = {
   createTrainingPlan: GQLCreateTrainingPlanPayload;
   deactivateUser: Scalars['Boolean']['output'];
   deleteBodyMeasurement: Scalars['Boolean']['output'];
+  deleteBodyProgressLog: Scalars['Boolean']['output'];
   deleteExercise: Scalars['Boolean']['output'];
   deleteFavouriteWorkout: Scalars['Boolean']['output'];
   deleteMessage: Scalars['Boolean']['output'];
@@ -1119,6 +1143,8 @@ export type GQLMutation = {
   swapExercise: GQLSubstitute;
   uncompleteMeal: Scalars['Boolean']['output'];
   updateBodyMeasurement: GQLUserBodyMeasure;
+  updateBodyProgressLog: GQLBodyProgressLog;
+  updateBodyProgressLogSharingStatus: GQLBodyProgressLog;
   updateExercise: Scalars['Boolean']['output'];
   updateExerciseForm: GQLTrainingExercise;
   updateExerciseSet: Scalars['Boolean']['output'];
@@ -1277,6 +1303,11 @@ export type GQLMutationCopyExercisesFromDayArgs = {
 };
 
 
+export type GQLMutationCreateBodyProgressLogArgs = {
+  input: GQLCreateBodyProgressLogInput;
+};
+
+
 export type GQLMutationCreateCoachingRequestArgs = {
   message?: InputMaybe<Scalars['String']['input']>;
   recipientEmail: Scalars['String']['input'];
@@ -1355,6 +1386,11 @@ export type GQLMutationDeactivateUserArgs = {
 
 export type GQLMutationDeleteBodyMeasurementArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDeleteBodyProgressLogArgs = {
+  id: Scalars['String']['input'];
 };
 
 
@@ -1649,6 +1685,18 @@ export type GQLMutationUpdateBodyMeasurementArgs = {
 };
 
 
+export type GQLMutationUpdateBodyProgressLogArgs = {
+  id: Scalars['String']['input'];
+  input: GQLUpdateBodyProgressLogInput;
+};
+
+
+export type GQLMutationUpdateBodyProgressLogSharingStatusArgs = {
+  id: Scalars['String']['input'];
+  shareWithTrainer: Scalars['Boolean']['input'];
+};
+
+
 export type GQLMutationUpdateExerciseArgs = {
   id: Scalars['ID']['input'];
   input: GQLUpdateExerciseInput;
@@ -1919,6 +1967,7 @@ export type GQLQuery = {
   bodyMeasures: Array<GQLUserBodyMeasure>;
   checkPremiumAccess: Scalars['Boolean']['output'];
   clientBodyMeasures: Array<GQLUserBodyMeasure>;
+  clientBodyProgressLogs: Array<GQLBodyProgressLog>;
   clientSharedNotes: Array<GQLNote>;
   coachingRequest?: Maybe<GQLCoachingRequest>;
   coachingRequests: Array<GQLCoachingRequest>;
@@ -1989,6 +2038,7 @@ export type GQLQuery = {
   trainerSharedNotes: Array<GQLNote>;
   user?: Maybe<GQLUser>;
   userBasic?: Maybe<GQLUser>;
+  userBodyProgressLogs: Array<GQLBodyProgressLog>;
   userExercises: Array<GQLBaseExercise>;
   userPublic?: Maybe<GQLUserPublic>;
   workoutExerciseNotes: Array<GQLWorkoutExerciseNotes>;
@@ -2009,6 +2059,11 @@ export type GQLQueryAdminUserListArgs = {
 
 export type GQLQueryClientBodyMeasuresArgs = {
   clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryClientBodyProgressLogsArgs = {
+  clientId: Scalars['String']['input'];
 };
 
 
@@ -2250,6 +2305,11 @@ export type GQLQueryTeamArgs = {
 export type GQLQueryTrainerSharedNotesArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
   offset?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQueryUserBodyProgressLogsArgs = {
+  userProfileId: Scalars['String']['input'];
 };
 
 
@@ -2694,6 +2754,15 @@ export type GQLUpdateBodyMeasurementInput = {
   thighRight?: InputMaybe<Scalars['Float']['input']>;
   waist?: InputMaybe<Scalars['Float']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type GQLUpdateBodyProgressLogInput = {
+  image1Url?: InputMaybe<Scalars['String']['input']>;
+  image2Url?: InputMaybe<Scalars['String']['input']>;
+  image3Url?: InputMaybe<Scalars['String']['input']>;
+  loggedAt?: InputMaybe<Scalars['String']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 export type GQLUpdateExerciseFormInput = {
@@ -3472,6 +3541,43 @@ export type GQLSelectedExercisesProgressQueryVariables = Exact<{
 
 
 export type GQLSelectedExercisesProgressQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', averageRpe?: number | undefined | null, totalSets?: number | undefined | null, lastPerformed?: string | undefined | null, baseExercise?: { __typename?: 'BaseExercise', id: string, name: string, muscleGroups: Array<{ __typename?: 'MuscleGroup', alias?: string | undefined | null, name: string, groupSlug: string, category: { __typename?: 'MuscleGroupCategory', name: string } }> } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }>, totalVolumeProgress: Array<{ __typename?: 'VolumeEntry', week: string, totalVolume: number, totalSets: number }> }> };
+
+export type GQLGetUserBodyProgressLogsQueryVariables = Exact<{
+  userProfileId: Scalars['String']['input'];
+}>;
+
+
+export type GQLGetUserBodyProgressLogsQuery = { __typename?: 'Query', userBodyProgressLogs: Array<{ __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, image1Url?: string | undefined | null, image2Url?: string | undefined | null, image3Url?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string }> };
+
+export type GQLCreateBodyProgressLogMutationVariables = Exact<{
+  input: GQLCreateBodyProgressLogInput;
+}>;
+
+
+export type GQLCreateBodyProgressLogMutation = { __typename?: 'Mutation', createBodyProgressLog: { __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, image1Url?: string | undefined | null, image2Url?: string | undefined | null, image3Url?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string } };
+
+export type GQLUpdateBodyProgressLogMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+  input: GQLUpdateBodyProgressLogInput;
+}>;
+
+
+export type GQLUpdateBodyProgressLogMutation = { __typename?: 'Mutation', updateBodyProgressLog: { __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, image1Url?: string | undefined | null, image2Url?: string | undefined | null, image3Url?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string } };
+
+export type GQLDeleteBodyProgressLogMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type GQLDeleteBodyProgressLogMutation = { __typename?: 'Mutation', deleteBodyProgressLog: boolean };
+
+export type GQLUpdateBodyProgressLogSharingStatusMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+  shareWithTrainer: Scalars['Boolean']['input'];
+}>;
+
+
+export type GQLUpdateBodyProgressLogSharingStatusMutation = { __typename?: 'Mutation', updateBodyProgressLogSharingStatus: { __typename?: 'BodyProgressLog', id: string, shareWithTrainer: boolean } };
 
 export type GQLResetUserLogsMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -7003,6 +7109,183 @@ useInfiniteSelectedExercisesProgressQuery.getKey = (variables: GQLSelectedExerci
 
 
 useSelectedExercisesProgressQuery.fetcher = (variables: GQLSelectedExercisesProgressQueryVariables, options?: RequestInit['headers']) => fetchData<GQLSelectedExercisesProgressQuery, GQLSelectedExercisesProgressQueryVariables>(SelectedExercisesProgressDocument, variables, options);
+
+export const GetUserBodyProgressLogsDocument = `
+    query GetUserBodyProgressLogs($userProfileId: String!) {
+  userBodyProgressLogs(userProfileId: $userProfileId) {
+    id
+    loggedAt
+    notes
+    image1Url
+    image2Url
+    image3Url
+    shareWithTrainer
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useGetUserBodyProgressLogsQuery = <
+      TData = GQLGetUserBodyProgressLogsQuery,
+      TError = unknown
+    >(
+      variables: GQLGetUserBodyProgressLogsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetUserBodyProgressLogsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetUserBodyProgressLogsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetUserBodyProgressLogsQuery, TError, TData>(
+      {
+    queryKey: ['GetUserBodyProgressLogs', variables],
+    queryFn: fetchData<GQLGetUserBodyProgressLogsQuery, GQLGetUserBodyProgressLogsQueryVariables>(GetUserBodyProgressLogsDocument, variables),
+    ...options
+  }
+    )};
+
+useGetUserBodyProgressLogsQuery.getKey = (variables: GQLGetUserBodyProgressLogsQueryVariables) => ['GetUserBodyProgressLogs', variables];
+
+export const useInfiniteGetUserBodyProgressLogsQuery = <
+      TData = InfiniteData<GQLGetUserBodyProgressLogsQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetUserBodyProgressLogsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetUserBodyProgressLogsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetUserBodyProgressLogsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetUserBodyProgressLogsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetUserBodyProgressLogs.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetUserBodyProgressLogsQuery, GQLGetUserBodyProgressLogsQueryVariables>(GetUserBodyProgressLogsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetUserBodyProgressLogsQuery.getKey = (variables: GQLGetUserBodyProgressLogsQueryVariables) => ['GetUserBodyProgressLogs.infinite', variables];
+
+
+useGetUserBodyProgressLogsQuery.fetcher = (variables: GQLGetUserBodyProgressLogsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetUserBodyProgressLogsQuery, GQLGetUserBodyProgressLogsQueryVariables>(GetUserBodyProgressLogsDocument, variables, options);
+
+export const CreateBodyProgressLogDocument = `
+    mutation CreateBodyProgressLog($input: CreateBodyProgressLogInput!) {
+  createBodyProgressLog(input: $input) {
+    id
+    loggedAt
+    notes
+    image1Url
+    image2Url
+    image3Url
+    shareWithTrainer
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useCreateBodyProgressLogMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateBodyProgressLogMutation, TError, GQLCreateBodyProgressLogMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateBodyProgressLogMutation, TError, GQLCreateBodyProgressLogMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateBodyProgressLog'],
+    mutationFn: (variables?: GQLCreateBodyProgressLogMutationVariables) => fetchData<GQLCreateBodyProgressLogMutation, GQLCreateBodyProgressLogMutationVariables>(CreateBodyProgressLogDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateBodyProgressLogMutation.getKey = () => ['CreateBodyProgressLog'];
+
+
+useCreateBodyProgressLogMutation.fetcher = (variables: GQLCreateBodyProgressLogMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateBodyProgressLogMutation, GQLCreateBodyProgressLogMutationVariables>(CreateBodyProgressLogDocument, variables, options);
+
+export const UpdateBodyProgressLogDocument = `
+    mutation UpdateBodyProgressLog($id: String!, $input: UpdateBodyProgressLogInput!) {
+  updateBodyProgressLog(id: $id, input: $input) {
+    id
+    loggedAt
+    notes
+    image1Url
+    image2Url
+    image3Url
+    shareWithTrainer
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useUpdateBodyProgressLogMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateBodyProgressLogMutation, TError, GQLUpdateBodyProgressLogMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateBodyProgressLogMutation, TError, GQLUpdateBodyProgressLogMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateBodyProgressLog'],
+    mutationFn: (variables?: GQLUpdateBodyProgressLogMutationVariables) => fetchData<GQLUpdateBodyProgressLogMutation, GQLUpdateBodyProgressLogMutationVariables>(UpdateBodyProgressLogDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateBodyProgressLogMutation.getKey = () => ['UpdateBodyProgressLog'];
+
+
+useUpdateBodyProgressLogMutation.fetcher = (variables: GQLUpdateBodyProgressLogMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateBodyProgressLogMutation, GQLUpdateBodyProgressLogMutationVariables>(UpdateBodyProgressLogDocument, variables, options);
+
+export const DeleteBodyProgressLogDocument = `
+    mutation DeleteBodyProgressLog($id: String!) {
+  deleteBodyProgressLog(id: $id)
+}
+    `;
+
+export const useDeleteBodyProgressLogMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDeleteBodyProgressLogMutation, TError, GQLDeleteBodyProgressLogMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDeleteBodyProgressLogMutation, TError, GQLDeleteBodyProgressLogMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteBodyProgressLog'],
+    mutationFn: (variables?: GQLDeleteBodyProgressLogMutationVariables) => fetchData<GQLDeleteBodyProgressLogMutation, GQLDeleteBodyProgressLogMutationVariables>(DeleteBodyProgressLogDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDeleteBodyProgressLogMutation.getKey = () => ['DeleteBodyProgressLog'];
+
+
+useDeleteBodyProgressLogMutation.fetcher = (variables: GQLDeleteBodyProgressLogMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteBodyProgressLogMutation, GQLDeleteBodyProgressLogMutationVariables>(DeleteBodyProgressLogDocument, variables, options);
+
+export const UpdateBodyProgressLogSharingStatusDocument = `
+    mutation UpdateBodyProgressLogSharingStatus($id: String!, $shareWithTrainer: Boolean!) {
+  updateBodyProgressLogSharingStatus(id: $id, shareWithTrainer: $shareWithTrainer) {
+    id
+    shareWithTrainer
+  }
+}
+    `;
+
+export const useUpdateBodyProgressLogSharingStatusMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateBodyProgressLogSharingStatusMutation, TError, GQLUpdateBodyProgressLogSharingStatusMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateBodyProgressLogSharingStatusMutation, TError, GQLUpdateBodyProgressLogSharingStatusMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateBodyProgressLogSharingStatus'],
+    mutationFn: (variables?: GQLUpdateBodyProgressLogSharingStatusMutationVariables) => fetchData<GQLUpdateBodyProgressLogSharingStatusMutation, GQLUpdateBodyProgressLogSharingStatusMutationVariables>(UpdateBodyProgressLogSharingStatusDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateBodyProgressLogSharingStatusMutation.getKey = () => ['UpdateBodyProgressLogSharingStatus'];
+
+
+useUpdateBodyProgressLogSharingStatusMutation.fetcher = (variables: GQLUpdateBodyProgressLogSharingStatusMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateBodyProgressLogSharingStatusMutation, GQLUpdateBodyProgressLogSharingStatusMutationVariables>(UpdateBodyProgressLogSharingStatusDocument, variables, options);
 
 export const ResetUserLogsDocument = `
     mutation ResetUserLogs {

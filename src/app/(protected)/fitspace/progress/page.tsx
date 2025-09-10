@@ -4,13 +4,14 @@ import { Crown, TrendingUp } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 import { useExercisesProgressByUserQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { BodyMeasurements } from './components/body-measurements'
+import { BodyProgress } from './components/body-progress'
 import { MuscleDistribution } from './components/muscle-distribution'
 import { SelectedExercisesProgress } from './components/selected-exercises-progress'
 
@@ -20,11 +21,9 @@ export default function ProgressPage() {
   // Use nuqs for tab persistence
   const [activeTab, setActiveTab] = useQueryState(
     'tab',
-    parseAsStringEnum<'body-measures' | 'muscle-distribution' | 'exercises'>([
-      'body-measures',
-      'muscle-distribution',
-      'exercises',
-    ])
+    parseAsStringEnum<
+      'body-measures' | 'body-progress' | 'muscle-distribution' | 'exercises'
+    >(['body-measures', 'body-progress', 'muscle-distribution', 'exercises'])
       .withDefault('body-measures')
       .withOptions({ clearOnDefault: true }),
   )
@@ -49,33 +48,40 @@ export default function ProgressPage() {
         onValueChange={(value) => setActiveTab(value as typeof activeTab)}
         className="space-y-6"
       >
-        <TabsList className="w-full">
-          <TabsTrigger
-            value="body-measures"
-            className="flex items-center gap-2"
-          >
-            Measures
-          </TabsTrigger>
-          <TabsTrigger
-            value="muscle-distribution"
-            className="flex items-center gap-2 relative"
-            // disabled={!hasPremium || true}
-          >
-            Muscle Balance
-            {!hasPremium ? <PremiumBadge /> : null}
-          </TabsTrigger>
-
-          <TabsTrigger
-            value="exercises"
-            className="flex items-center gap-2 relative"
-            disabled={!hasPremium || true}
-          >
-            Exercises {!hasPremium ? <PremiumBadge /> : null}
-          </TabsTrigger>
-        </TabsList>
+        <PrimaryTabList
+          size="sm"
+          className="w-full grid grid-cols-4"
+          options={[
+            { label: 'Measures', value: 'body-measures' },
+            {
+              label: 'Snapshots',
+              value: 'body-progress',
+              disabled: !hasPremium,
+              disabledIcon: <PremiumBadge />,
+            },
+            {
+              label: 'Muscles',
+              value: 'muscle-distribution',
+              disabled: !hasPremium,
+              disabledIcon: <PremiumBadge />,
+            },
+            {
+              label: 'Exercises',
+              value: 'exercises',
+              disabled: !hasPremium,
+              disabledIcon: <PremiumBadge />,
+            },
+          ]}
+          onClick={setActiveTab}
+          active={activeTab}
+        />
 
         <TabsContent value="body-measures">
           <BodyMeasurements />
+        </TabsContent>
+
+        <TabsContent value="body-progress">
+          <BodyProgress />
         </TabsContent>
 
         <TabsContent value="muscle-distribution">

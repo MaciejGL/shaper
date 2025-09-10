@@ -110,7 +110,7 @@ export function getImageUrl(fileName: string, imageType: ImageType): string {
     return `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'eu-north-1'}.amazonaws.com/${fileName}`
   } else {
     // Private images: go through our API for authentication
-    return `/api/images/private/${encodeURIComponent(fileName)}`
+    return `/api/images/private/${fileName}`
   }
 }
 

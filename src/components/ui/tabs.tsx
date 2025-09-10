@@ -125,11 +125,19 @@ function PrimaryTabList<T extends string>({
   onClick,
   active,
   className,
+  size = 'lg',
 }: {
-  options: { label: string; value: T; icon?: React.ReactNode }[]
+  options: {
+    label: string
+    value: T
+    icon?: React.ReactNode
+    disabled?: boolean
+    disabledIcon?: React.ReactNode
+  }[]
   onClick: (value: T) => void
   active: T
   className?: string
+  size?: 'md' | 'sm' | 'lg'
 }) {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const [underlineStyle, setUnderlineStyle] = React.useState({
@@ -168,13 +176,15 @@ function PrimaryTabList<T extends string>({
           key={option.value}
           data-value={option.value}
           variant="variantless"
-          size="lg"
+          size={size}
           onClick={() => onClick(option.value)}
+          disabled={option.disabled}
           className={cn(
             'relative rounded-none transition-colors duration-200',
             active === option.value ? 'text-foreground' : 'text-foreground/80',
           )}
           iconStart={option.icon}
+          iconEnd={option.disabled ? option.disabledIcon : undefined}
         >
           {option.label}
         </Button>

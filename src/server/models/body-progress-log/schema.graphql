@@ -1,0 +1,47 @@
+type BodyProgressLog {
+  id: String!
+  loggedAt: String!
+  notes: String
+  image1Url: String
+  image2Url: String
+  image3Url: String
+  shareWithTrainer: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateBodyProgressLogInput {
+  loggedAt: String
+  notes: String
+  image1Url: String
+  image2Url: String
+  image3Url: String
+  shareWithTrainer: Boolean
+}
+
+input UpdateBodyProgressLogInput {
+  loggedAt: String
+  notes: String
+  image1Url: String
+  image2Url: String
+  image3Url: String
+  shareWithTrainer: Boolean
+}
+
+extend type Query {
+  userBodyProgressLogs(userProfileId: String!): [BodyProgressLog!]!
+  clientBodyProgressLogs(clientId: String!): [BodyProgressLog!]!
+}
+
+extend type Mutation {
+  createBodyProgressLog(input: CreateBodyProgressLogInput!): BodyProgressLog!
+  updateBodyProgressLog(
+    id: String!
+    input: UpdateBodyProgressLogInput!
+  ): BodyProgressLog!
+  deleteBodyProgressLog(id: String!): Boolean!
+  updateBodyProgressLogSharingStatus(
+    id: String!
+    shareWithTrainer: Boolean!
+  ): BodyProgressLog!
+}
