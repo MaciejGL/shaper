@@ -118,7 +118,7 @@ export function PrivateImageGallery({
                     quality={20}
                     fill
                     className={cn(
-                      'object-cover cursor-pointer transition-opacity duration-300',
+                      'object-cover cursor-pointer transition-opacity duration-150',
                       imageStates[index] ? 'opacity-100' : 'opacity-0',
                     )}
                     priority
