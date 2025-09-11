@@ -5,7 +5,9 @@ import {
   moderatorAccessDeniedResponse,
   requireModeratorUser,
 } from '@/lib/admin-auth'
+import { ImageHandler } from '@/lib/aws/image-handler'
 import { prisma } from '@/lib/db'
+import { processExerciseImageToOptimized } from '@/lib/image-optimization'
 
 interface CreatePublicExerciseInput {
   name: string
@@ -141,15 +143,37 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Add images if provided
+    // Add images with optimization if provided
     if (input.imageUrls?.length) {
+      // Step 1: Move images from temp to final location
+      const moveResult = await ImageHandler.move({
+        fromUrls: input.imageUrls,
+        toId: exercise.id,
+        imageType: 'exercise',
+      })
+
+      if (!moveResult.success || !moveResult.data) {
+        throw new Error('Failed to move images to final location')
+      }
+
+      // Step 2: Process each moved image to create optimized versions
+      const processedImages = await Promise.all(
+        moveResult.data.movedUrls.map(async (url, index) => {
+          const optimized = await processExerciseImageToOptimized(url)
+          return {
+            url,
+            thumbnail: optimized.thumbnail,
+            medium: optimized.medium,
+            large: optimized.large,
+            order: index,
+            entityType: 'exercise' as const,
+            entityId: exercise.id,
+          }
+        }),
+      )
+
       await prisma.image.createMany({
-        data: input.imageUrls.map((url, index) => ({
-          url,
-          order: index,
-          entityType: 'exercise',
-          entityId: exercise.id,
-        })),
+        data: processedImages,
       })
     }
 

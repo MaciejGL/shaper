@@ -1,6 +1,9 @@
 type Image {
   id: ID!
   url: String!
+  thumbnail: String # Optimized thumbnail version ~150px
+  medium: String # Optimized medium version ~400px
+  large: String # Optimized large version ~800px
   order: Int!
   entityType: String!
   entityId: ID!

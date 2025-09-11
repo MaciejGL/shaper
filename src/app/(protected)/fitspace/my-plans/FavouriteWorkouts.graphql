@@ -39,7 +39,8 @@ query GetFavouriteWorkouts {
         }
         images {
           id
-          url
+          thumbnail
+          medium
           order
         }
       }
@@ -90,7 +91,8 @@ query GetFavouriteWorkout($id: ID!) {
         }
         images {
           id
-          url
+          thumbnail
+          medium
           order
         }
       }

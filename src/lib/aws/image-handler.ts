@@ -13,7 +13,7 @@ import { IMAGE_CONFIGS, type ImageType } from './s3'
 export type { ImageType }
 
 // Initialize S3 client
-const s3Client = new S3Client({
+export const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'eu-north-1',
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
@@ -21,7 +21,7 @@ const s3Client = new S3Client({
   },
 })
 
-const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME!
+export const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME!
 
 export interface ImageOperationResult<T = unknown> {
   success: boolean

@@ -429,6 +429,9 @@ model BaseExercise {
 model Image {
   id         String       @id @default(uuid())
   url        String
+  thumbnail  String?      // Optimized thumbnail version ~150px
+  medium     String?      // Optimized medium version ~400px  
+  large      String?      // Optimized large version ~800px
   order      Int          @default(0)
   entityType String
   entityId   String

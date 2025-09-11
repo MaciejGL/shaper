@@ -58,7 +58,8 @@ query FitspaceGetWorkout($trainingId: ID!) {
             videoUrl
             images {
               id
-              url
+              thumbnail
+              medium
               order
             }
             completedAt
@@ -142,7 +143,8 @@ query FitspaceGetExercises {
       difficulty
       images {
         id
-        url
+        thumbnail
+        medium
         order
       }
       muscleGroups {
@@ -168,7 +170,8 @@ query FitspaceGetExercises {
       difficulty
       images {
         id
-        url
+        thumbnail
+        medium
         order
       }
       muscleGroups {

@@ -303,11 +303,6 @@ export default class BaseExercise implements GQLBaseExercise {
     if (this.data.images) {
       return this.data.images.map((image) => new Image(image, this.context))
     } else {
-      // if (!isProd) {
-      //   console.error(
-      //     `[BaseExercise] No images found for exercise ${this.id}. Skipping.`,
-      //   )
-      // }
       return []
     }
   }

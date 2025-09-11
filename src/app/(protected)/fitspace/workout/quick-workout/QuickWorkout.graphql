@@ -37,7 +37,8 @@ query QuickWorkoutExercises($where: ExerciseWhereInput) {
     description
     images {
       id
-      url
+      thumbnail
+      medium
       order
     }
     muscleGroups {
@@ -78,7 +79,8 @@ query FitspaceGetUserQuickWorkoutPlan {
           equipment
           images {
             id
-            url
+            thumbnail
+            medium
             order
           }
           muscleGroups {
@@ -125,7 +127,8 @@ mutation FitspaceCreateQuickWorkout($input: CreateQuickWorkoutInput!) {
           baseId
           images {
             id
-            url
+            thumbnail
+            medium
             order
           }
           muscleGroups {
@@ -160,7 +163,8 @@ mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
         equipment
         images {
           id
-          url
+          thumbnail
+          medium
           order
         }
         muscleGroups {

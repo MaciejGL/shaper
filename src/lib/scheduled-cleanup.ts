@@ -1,17 +1,6 @@
-import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
+import { ListObjectsV2Command } from '@aws-sdk/client-s3'
 
-import { ImageHandler } from '@/lib/aws/image-handler'
-
-// Initialize S3 client
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'eu-north-1',
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-})
-
-const BUCKET_NAME = process.env.AWS_S3_BUCKET_NAME!
+import { BUCKET_NAME, ImageHandler, s3Client } from '@/lib/aws/image-handler'
 
 export interface CleanupOptions {
   maxAgeHours: number

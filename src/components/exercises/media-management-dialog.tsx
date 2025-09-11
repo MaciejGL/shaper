@@ -111,7 +111,7 @@ export function MediaManagementDialog({
                 {exercise.images.map((image, index) => (
                   <div key={image.id} className="relative group">
                     <img
-                      src={image.url}
+                      src={image.medium || image.large || image.url}
                       alt={`Exercise ${exercise.name} - Image ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg border"
                     />
@@ -120,7 +120,9 @@ export function MediaManagementDialog({
                         variant="secondary"
                         size="sm"
                         className="opacity-0 group-hover:opacity-100 transition-opacity"
-                        onClick={() => window.open(image.url, '_blank')}
+                        onClick={() =>
+                          window.open(image.large || image.url, '_blank')
+                        }
                       >
                         <Eye className="h-4 w-4" />
                       </Button>

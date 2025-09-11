@@ -35,4 +35,16 @@ export default class Image implements GQLImage {
   get updatedAt() {
     return this.data.updatedAt.toISOString()
   }
+
+  get thumbnail() {
+    return this.data.thumbnail
+  }
+
+  get medium() {
+    return this.data.medium
+  }
+
+  get large() {
+    return this.data.large
+  }
 }

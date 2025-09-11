@@ -793,7 +793,10 @@ export type GQLImage = {
   entityId: EntireFieldWrapper<Scalars['ID']['output']>;
   entityType: EntireFieldWrapper<Scalars['String']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
+  large?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  medium?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   order: EntireFieldWrapper<Scalars['Int']['output']>;
+  thumbnail?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
   url: EntireFieldWrapper<Scalars['String']['output']>;
 };
@@ -3975,7 +3978,10 @@ export type GQLImageResolvers<ContextType = GQLContext, ParentType extends GQLRe
   entityId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   entityType?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  large?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  medium?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   order?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  thumbnail?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   url?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

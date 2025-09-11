@@ -907,6 +907,3 @@ export function ExerciseEditor({
     </div>
   )
 }
-
-// ExerciseCard and MediaManagementDialog are now in separate files
-// They are imported from './index' above

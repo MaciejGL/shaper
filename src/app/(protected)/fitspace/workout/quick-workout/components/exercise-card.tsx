@@ -17,7 +17,7 @@ export type Exercise = Pick<GQLBaseExercise, 'id' | 'name' | 'equipment'> & {
   muscleGroups: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
   secondaryMuscleGroups?: Pick<GQLMuscleGroup, 'alias' | 'groupSlug' | 'id'>[]
   completedAt?: string | null
-  images: Pick<GQLImage, 'id' | 'url' | 'order'>[]
+  images: Pick<GQLImage, 'id' | 'thumbnail' | 'order'>[]
 }
 
 type ExerciseCardProps = {
@@ -41,7 +41,7 @@ export function ExerciseCard({
   isFirst,
   isLast,
 }: ExerciseCardProps) {
-  const firstImage = exercise.images.at(0)
+  const firstImage = exercise.images.at(1) || exercise.images.at(0)
 
   return (
     <div className="flex gap-2 items-center">
@@ -76,9 +76,9 @@ export function ExerciseCard({
         <CardContent className="p-0 flex items-center gap-3">
           {exercise.images.length > 0 && (
             <div className="size-20 overflow-hidden relative bg-white">
-              {firstImage ? (
+              {firstImage?.thumbnail ? (
                 <Image
-                  src={firstImage.url}
+                  src={firstImage.thumbnail}
                   alt={exercise.name}
                   width={100}
                   height={100}

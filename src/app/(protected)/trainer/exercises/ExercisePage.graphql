@@ -40,7 +40,8 @@ query TrainerExercises($where: ExerciseWhereInput) {
     videoUrl
     images {
       id
-      url
+      thumbnail
+      medium
       order
     }
     muscleGroups {
@@ -70,7 +71,8 @@ query TrainerExercises($where: ExerciseWhereInput) {
     isPublic
     images {
       id
-      url
+      thumbnail
+      medium
       order
     }
     muscleGroups {

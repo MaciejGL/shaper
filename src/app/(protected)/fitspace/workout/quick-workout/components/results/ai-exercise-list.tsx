@@ -135,9 +135,13 @@ function ExerciseCard({
         <CardContent className="p-0 flex items-center gap-3">
           {exercise.images.length > 0 && (
             <div className="h-auto w-20 self-stretch relative">
-              {firstImage ? (
+              {firstImage?.thumbnail || firstImage?.medium ? (
                 <Image
-                  src={firstImage.url}
+                  src={
+                    firstImage.thumbnail ||
+                    firstImage.medium ||
+                    '/placeholder.svg'
+                  }
                   alt={exercise.name}
                   width={100}
                   height={100}

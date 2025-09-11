@@ -14,6 +14,10 @@ import {
 } from '@/lib/cache/base-exercise-cache'
 import { prisma } from '@/lib/db'
 import { getExerciseVersionWhereClause } from '@/lib/exercise-version-filter'
+import {
+  deleteExerciseImageVariants,
+  processExerciseImageToOptimized,
+} from '@/lib/image-optimization'
 import { GQLContext } from '@/types/gql-context'
 
 import BaseExercise from './model'
@@ -370,13 +374,35 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Add images if provided
     if (input.imageUrls && input.imageUrls.length > 0) {
+      // Step 1: Move images from temp to final location
+      const moveResult = await ImageHandler.move({
+        fromUrls: input.imageUrls,
+        toId: exercise.id,
+        imageType: 'exercise',
+      })
+
+      if (!moveResult.success || !moveResult.data) {
+        throw new Error('Failed to move images to final location')
+      }
+
+      // Step 2: Process each moved image to create optimized versions
+      const processedImages = await Promise.all(
+        moveResult.data.movedUrls.map(async (url, index) => {
+          const optimized = await processExerciseImageToOptimized(url)
+          return {
+            url,
+            thumbnail: optimized.thumbnail,
+            medium: optimized.medium,
+            large: optimized.large,
+            order: index,
+            entityType: 'exercise',
+            entityId: exercise.id,
+          }
+        }),
+      )
+
       await prisma.image.createMany({
-        data: input.imageUrls.map((url, index) => ({
-          url,
-          order: index,
-          entityType: 'exercise',
-          entityId: exercise.id,
-        })),
+        data: processedImages,
       })
     }
 
@@ -489,10 +515,13 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
         select: { url: true },
       })
 
-      // Delete existing images from S3
+      // Delete existing images and all variants from S3
       if (existingImages.length > 0) {
-        const existingImageUrls = existingImages.map((img) => img.url)
-        await ImageHandler.delete({ images: existingImageUrls })
+        const deletePromises = existingImages.map(async (img) => {
+          // Delete all variants (original, thumbnail, medium, large)
+          await deleteExerciseImageVariants(img.url)
+        })
+        await Promise.all(deletePromises)
       }
 
       // Remove existing images from database
@@ -505,13 +534,35 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
       // Add new images
       if (input.imageUrls && input.imageUrls.length > 0) {
+        // Step 1: Move images from temp to final location
+        const moveResult = await ImageHandler.move({
+          fromUrls: input.imageUrls,
+          toId: id,
+          imageType: 'exercise',
+        })
+
+        if (!moveResult.success || !moveResult.data) {
+          throw new Error('Failed to move images to final location')
+        }
+
+        // Step 2: Process each moved image to create optimized versions
+        const processedImages = await Promise.all(
+          moveResult.data.movedUrls.map(async (url, index) => {
+            const optimized = await processExerciseImageToOptimized(url)
+            return {
+              url,
+              thumbnail: optimized.thumbnail,
+              medium: optimized.medium,
+              large: optimized.large,
+              order: index,
+              entityType: 'exercise',
+              entityId: id,
+            }
+          }),
+        )
+
         await prisma.image.createMany({
-          data: input.imageUrls.map((url, index) => ({
-            url,
-            order: index,
-            entityType: 'exercise',
-            entityId: id,
-          })),
+          data: processedImages,
         })
       }
     }
@@ -545,10 +596,13 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       select: { url: true },
     })
 
-    // Delete images from S3
+    // Delete images and all variants from S3
     if (exerciseImages.length > 0) {
-      const imageUrls = exerciseImages.map((img) => img.url)
-      await ImageHandler.delete({ images: imageUrls })
+      const deletePromises = exerciseImages.map(async (img) => {
+        // Delete all variants (original, thumbnail, medium, large)
+        await deleteExerciseImageVariants(img.url)
+      })
+      await Promise.all(deletePromises)
     }
 
     // Delete the exercise (this will cascade delete images via foreign key)

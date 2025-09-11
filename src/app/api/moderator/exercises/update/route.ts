@@ -7,6 +7,10 @@ import {
 } from '@/lib/admin-auth'
 import { ImageHandler } from '@/lib/aws/image-handler'
 import { prisma } from '@/lib/db'
+import {
+  deleteExerciseImageVariants,
+  processExerciseImageToOptimized,
+} from '@/lib/image-optimization'
 
 interface ExerciseUpdate {
   id: string
@@ -95,46 +99,66 @@ export async function PATCH(request: NextRequest) {
 
       // Handle image updates
       if (images !== undefined) {
-        // Move images from temp to final location
-        const newImageUrls = images.map((img) => img.url)
-        const moveResult = await ImageHandler.move({
-          fromUrls: newImageUrls,
-          toId: id,
-          imageType: 'exercise',
-        })
-        const finalImageUrls = moveResult.success
-          ? moveResult.data?.movedUrls || []
-          : newImageUrls
-
-        // Get current images for S3 cleanup
-        const currentImages = await prisma.image.findMany({
+        // Get existing images to clean up from S3 (delete all variants)
+        const existingImages = await prisma.image.findMany({
           where: {
             entityType: 'exercise',
             entityId: id,
           },
-          select: { id: true, url: true },
+          select: { url: true },
         })
 
-        // Find images to delete (current images not in new images list)
-        const imagesToDelete = currentImages.filter(
-          (img) => !finalImageUrls.includes(img.url),
-        )
-
-        // Delete removed images from S3
-        if (imagesToDelete.length > 0) {
-          await ImageHandler.delete({
-            images: imagesToDelete.map((img) => img.url),
+        // Delete existing images and all variants from S3
+        if (existingImages.length > 0) {
+          const deletePromises = existingImages.map(async (img) => {
+            // Delete all variants (original, thumbnail, medium, large)
+            await deleteExerciseImageVariants(img.url)
           })
+          await Promise.all(deletePromises)
         }
 
-        // Update images in database with final URLs
-        relationUpdates.images = {
-          deleteMany: {}, // Delete all existing images
-          create: finalImageUrls.map((url, index) => ({
-            url,
-            order: index,
-            entityType: 'exercise' as const,
-          })),
+        // Remove existing images from database
+        await prisma.image.deleteMany({
+          where: {
+            entityType: 'exercise',
+            entityId: id,
+          },
+        })
+
+        // Add new images with optimization
+        if (images && images.length > 0) {
+          const newImageUrls = images.map((img) => img.url)
+
+          // Step 1: Move images from temp to final location
+          const moveResult = await ImageHandler.move({
+            fromUrls: newImageUrls,
+            toId: id,
+            imageType: 'exercise',
+          })
+
+          if (!moveResult.success || !moveResult.data) {
+            throw new Error('Failed to move images to final location')
+          }
+
+          // Step 2: Process each moved image to create optimized versions
+          const processedImages = await Promise.all(
+            moveResult.data.movedUrls.map(async (url, index) => {
+              const optimized = await processExerciseImageToOptimized(url)
+              return {
+                url,
+                thumbnail: optimized.thumbnail,
+                medium: optimized.medium,
+                large: optimized.large,
+                order: index,
+                entityType: 'exercise' as const,
+                entityId: id,
+              }
+            }),
+          )
+
+          await prisma.image.createMany({
+            data: processedImages,
+          })
         }
       }
 

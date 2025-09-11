@@ -13,7 +13,7 @@ import { Exercise } from '../components/exercise-card'
 type GraphQLExercise = Pick<GQLBaseExercise, 'id' | 'name' | 'equipment'> & {
   muscleGroups: Pick<GQLMuscleGroup, 'id' | 'alias' | 'groupSlug'>[]
   secondaryMuscleGroups?: Pick<GQLMuscleGroup, 'id' | 'alias' | 'groupSlug'>[]
-  images: Pick<GQLImage, 'id' | 'url' | 'order'>[]
+  images: Pick<GQLImage, 'id' | 'thumbnail' | 'order'>[]
 }
 
 /**
