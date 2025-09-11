@@ -101,9 +101,19 @@ export const Navbar = ({
   user?: UserWithSession | null
   withSidebar?: boolean
 }) => {
-  const [isMessengerOpen, setIsMessengerOpen] = useState(false)
+  const pathname = usePathname()
   const { isVisible } = useScrollVisibility({ initialVisible: true })
   const { totalUnreadCount, notifications } = useUnreadMessageCount(user)
+  const [isMessengerOpen, setIsMessengerOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
 
   const isTrainer = user?.user?.role === GQLUserRole.Trainer
 
@@ -111,7 +121,6 @@ export const Navbar = ({
     user?.user?.role === 'TRAINER'
       ? TRAINER_LINKS.clients.href
       : CLIENT_LINKS.workout.href
-  const pathname = usePathname()
   const isFitspace = pathname.startsWith('/fitspace')
 
   return (
