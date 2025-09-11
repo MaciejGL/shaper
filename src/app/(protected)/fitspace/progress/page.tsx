@@ -12,10 +12,11 @@ import { DashboardHeader } from '../../trainer/components/dashboard-header'
 import { BodyMeasurements } from './components/body-measurements'
 import { BodyProgress } from './components/body-progress'
 import { MuscleDistribution } from './components/muscle-distribution'
-import { SelectedExercisesProgress } from './components/selected-exercises-progress'
+
+// import { SelectedExercisesProgress } from './components/selected-exercises-progress'
 
 export default function ProgressPage() {
-  const { user, hasPremium } = useUser()
+  const { hasPremium } = useUser()
 
   // Use nuqs for tab persistence
   const [activeTab, setActiveTab] = useQueryState(
@@ -43,7 +44,7 @@ export default function ProgressPage() {
       >
         <PrimaryTabList
           size="sm"
-          className="w-full grid grid-cols-4"
+          className="w-full grid grid-cols-3"
           options={[
             { label: 'Measures', value: 'body-measures' },
             {
@@ -58,12 +59,12 @@ export default function ProgressPage() {
               disabled: !hasPremium,
               disabledIcon: <PremiumBadge />,
             },
-            {
-              label: 'Exercises',
-              value: 'exercises',
-              disabled: !hasPremium,
-              disabledIcon: <PremiumBadge />,
-            },
+            // {
+            //   label: 'Exercises',
+            //   value: 'exercises',
+            //   disabled: !hasPremium,
+            //   disabledIcon: <PremiumBadge />,
+            // },
           ]}
           onClick={setActiveTab}
           active={activeTab}
@@ -81,9 +82,9 @@ export default function ProgressPage() {
           <MuscleDistribution />
         </TabsContent>
 
-        <TabsContent value="exercises">
+        {/* <TabsContent value="exercises">
           <SelectedExercisesProgress userId={user?.id || ''} />
-        </TabsContent>
+        </TabsContent> */}
       </Tabs>
     </div>
   )
