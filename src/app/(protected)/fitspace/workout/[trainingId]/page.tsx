@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import { Suspense } from 'react'
 
 import {
   FitspaceGetWorkoutDocument,
@@ -7,7 +6,6 @@ import {
 } from '@/generated/graphql-client'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
-import { WorkoutPageSkeleton } from './components/workout-page-skeleton'
 import { WorkoutPageClient } from './components/workout-page.client'
 
 interface WorkoutPageProps {
@@ -29,9 +27,5 @@ export default async function WorkoutPage({ params }: WorkoutPageProps) {
     return redirect('/fitspace/my-plans')
   }
 
-  return (
-    <Suspense fallback={<WorkoutPageSkeleton isLoading={true} />}>
-      <WorkoutPageClient plan={data.getWorkout.plan} />
-    </Suspense>
-  )
+  return <WorkoutPageClient plan={data.getWorkout.plan} />
 }

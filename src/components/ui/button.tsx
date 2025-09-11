@@ -147,6 +147,7 @@ function Button({
     <Comp
       data-slot="button"
       data-loading={loading}
+      suppressHydrationWarning
       className={cn(
         buttonVariants({
           variant,

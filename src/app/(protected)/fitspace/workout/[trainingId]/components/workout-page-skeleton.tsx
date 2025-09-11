@@ -1,10 +1,7 @@
-'use client'
-
 import { formatDate } from 'date-fns'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
-import { AnimatedPageTransition } from '@/components/animations/animated-page-transition'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -259,7 +256,7 @@ function SkeletonExercises({ isLoading }: { isLoading: boolean }) {
   const progressPercentage = 0 // Show some progress for skeleton
 
   return (
-    <AnimatedPageTransition id={activeDay.id} variant="reveal" mode="wait">
+    <div id={activeDay.id}>
       {!activeDay.isRestDay && (
         <div className="flex flex-col py-3 space-y-2 w-full">
           <div className="grid grid-cols-2 gap-2">
@@ -286,7 +283,7 @@ function SkeletonExercises({ isLoading }: { isLoading: boolean }) {
           />
         ))}
       </div>
-    </AnimatedPageTransition>
+    </div>
   )
 }
 

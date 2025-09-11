@@ -10,7 +10,6 @@ import {
 
 import { Exercises } from './exercises'
 import { Navigation } from './navigation'
-import { WorkoutPageSkeleton } from './workout-page-skeleton'
 
 export type WorkoutPlan = NonNullable<
   GQLFitspaceGetWorkoutQuery['getWorkout']
@@ -27,11 +26,12 @@ type WorkoutPageClientProps = {
 
 export function WorkoutPageClient({ plan }: WorkoutPageClientProps) {
   const { trainingId } = useParams<{ trainingId: string }>()
-  const { data, isLoading } = useFitspaceGetWorkoutQuery(
+  const { data } = useFitspaceGetWorkoutQuery(
     {
       trainingId,
     },
     {
+      experimental_prefetchInRender: true,
       initialData: {
         getWorkout: {
           plan,
@@ -39,10 +39,6 @@ export function WorkoutPageClient({ plan }: WorkoutPageClientProps) {
       },
     },
   )
-
-  if (isLoading) {
-    return <WorkoutPageSkeleton isLoading={true} />
-  }
 
   return (
     <WorkoutProvider plan={data?.getWorkout?.plan}>

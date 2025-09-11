@@ -105,15 +105,6 @@ export const Navbar = ({
   const { isVisible } = useScrollVisibility({ initialVisible: true })
   const { totalUnreadCount, notifications } = useUnreadMessageCount(user)
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return null
-  }
 
   const isTrainer = user?.user?.role === GQLUserRole.Trainer
 
@@ -439,5 +430,13 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
         </DropdownProvider>
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+export function LoadingNavbar() {
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-[60px] rounded-full animate-pulse" />
+    </div>
   )
 }
