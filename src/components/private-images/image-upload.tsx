@@ -65,7 +65,7 @@ export function PrivateImageUpload({
       const { presignedUrl, publicUrl } = await response.json()
 
       // Upload file to S3 using presigned URL
-      const uploadResponse = await fetch(presignedUrl, {
+      await fetch(presignedUrl, {
         method: 'PUT',
         body: file,
         headers: {
@@ -73,18 +73,13 @@ export function PrivateImageUpload({
         },
       })
 
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload file')
-      }
-
-      // Wait a moment for S3 to make the image available
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
       // Update the image URL
       onImageChange(publicUrl)
     } catch (error) {
       console.error('Error uploading image:', error)
-      toast.error('Failed to upload image. Please try again.')
+      toast.error('Failed to upload image. Please try again.', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
     } finally {
       setIsUploading(false)
     }

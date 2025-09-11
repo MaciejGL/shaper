@@ -100,7 +100,7 @@ export function CreateProgressLogDialog({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent
-        className="max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="max-h-[90vh] overflow-y-auto"
         dialogTitle={isEditing ? 'Edit Progress Log' : 'Add Progress Log'}
       >
         <DrawerHeader className="flex flex-row items-center gap-2">
