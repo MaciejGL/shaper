@@ -126,7 +126,7 @@ export const Navbar = ({
           className={cn(
             'py-3 px-4 flex justify-between items-center bg-sidebar h-[60px]',
             'data-[visible=true]:opacity-100 data-[visible=true]:translate-y-0',
-            'data-[visible=false]:opacity-0 data-[visible=false]:translate-y-[-100px]',
+            'data-[visible=false]:opacity-0 data-[visible=false]:translate-y-[-100px] transition-all duration-200',
             'mt-[var(--safe-area-inset-top)]', // Add safe area padding for iOS PWA
             isFitspace ? 'py-3 px-4' : 'py-0 px-0',
           )}

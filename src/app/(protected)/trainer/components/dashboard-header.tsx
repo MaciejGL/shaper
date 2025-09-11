@@ -36,8 +36,8 @@ export function DashboardHeader({
           </ButtonLink>
         )}
         <div className="flex items-center gap-2 text-3xl">
-          {icon && <SectionIcon icon={icon} variant={variant} />}
-          <h1 className="font-medium tracking-tight">{title}</h1>
+          {icon && <SectionIcon icon={icon} variant={variant} size="sm" />}
+          <h1 className="font-medium tracking-tight text-xl">{title}</h1>
         </div>
       </div>
       {description && <p className="text-muted-foreground">{description}</p>}
