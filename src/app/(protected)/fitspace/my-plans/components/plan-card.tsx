@@ -53,7 +53,7 @@ export function PlanCard({ plan, isActive = false, onClick }: PlanCardProps) {
               <CardTitle className="text-base font-medium line-clamp-2">
                 {plan.title}
               </CardTitle>
-              <MoreHorizontalIcon />
+              <MoreHorizontalIcon size={16} />
             </div>
             <div className="flex items-center gap-2 mb-2">
               <PlanStatusBadge status={status} plan={plan} />
@@ -178,7 +178,7 @@ export function PlanCard({ plan, isActive = false, onClick }: PlanCardProps) {
             <StatsItem label="Weeks" value={plan.weekCount} />
             <StatsItem label="Total workouts" value={plan.totalWorkouts} />
             <StatsItem
-              label="Workouts per week"
+              label="Days per week"
               value={Math.round(plan.totalWorkouts / plan.weekCount)}
             />
           </div>
