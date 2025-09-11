@@ -224,22 +224,19 @@ export async function getTotalUnreadCount(context: GQLContext) {
     return 0
   }
 
-  // Get all chat IDs for this user
-  const chats = await prisma.chat.findMany({
+  // Single query: get total unread count across all user's chats
+  const result = await prisma.message.aggregate({
+    _count: { id: true },
     where: {
-      OR: [{ trainerId: currentUserId }, { clientId: currentUserId }],
+      readAt: null,
+      senderId: { not: currentUserId },
+      chat: {
+        OR: [{ trainerId: currentUserId }, { clientId: currentUserId }],
+      },
     },
-    select: { id: true },
   })
 
-  // Sum up unread counts for all chats using DataLoader for efficient batching
-  const unreadCounts = await Promise.all(
-    chats.map((chat) =>
-      context.loaders.chat.unreadCount.load(`${chat.id}:${currentUserId}`),
-    ),
-  )
-
-  return unreadCounts.reduce((total, count) => total + count, 0)
+  return result._count.id
 }
 
 export async function getMessengerInitialData(
