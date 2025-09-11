@@ -3,9 +3,24 @@ query GetUserBodyProgressLogs($userProfileId: String!) {
     id
     loggedAt
     notes
-    image1Url
-    image2Url
-    image3Url
+    image1 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image2 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image3 {
+      thumbnail
+      medium
+      large
+      url
+    }
     shareWithTrainer
     createdAt
     updatedAt
@@ -17,9 +32,24 @@ mutation CreateBodyProgressLog($input: CreateBodyProgressLogInput!) {
     id
     loggedAt
     notes
-    image1Url
-    image2Url
-    image3Url
+    image1 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image2 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image3 {
+      thumbnail
+      medium
+      large
+      url
+    }
     shareWithTrainer
     createdAt
     updatedAt
@@ -34,9 +64,24 @@ mutation UpdateBodyProgressLog(
     id
     loggedAt
     notes
-    image1Url
-    image2Url
-    image3Url
+    image1 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image2 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image3 {
+      thumbnail
+      medium
+      large
+      url
+    }
     shareWithTrainer
     createdAt
     updatedAt

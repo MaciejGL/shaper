@@ -37,9 +37,7 @@ export function CreateProgressLogDialog({
   editLog = null,
 }: CreateProgressLogDialogProps) {
   const [formData, setFormData] = useState({
-    loggedAt: editLog?.loggedAt
-      ? editLog.loggedAt.split('T')[0]
-      : new Date().toISOString().split('T')[0],
+    loggedAt: editLog?.loggedAt || new Date().toISOString(),
     shareWithTrainer: editLog?.shareWithTrainer || false,
     image1Url: editLog?.image1Url,
     image2Url: editLog?.image2Url,
@@ -53,9 +51,7 @@ export function CreateProgressLogDialog({
   useEffect(() => {
     if (open) {
       setFormData({
-        loggedAt: editLog?.loggedAt
-          ? editLog.loggedAt.split('T')[0]
-          : new Date().toISOString().split('T')[0],
+        loggedAt: editLog?.loggedAt || new Date().toISOString(),
         shareWithTrainer: editLog?.shareWithTrainer || false,
         image1Url: editLog?.image1Url,
         image2Url: editLog?.image2Url,
@@ -85,7 +81,7 @@ export function CreateProgressLogDialog({
 
     // Reset form and close dialog immediately (optimistic)
     setFormData({
-      loggedAt: new Date().toISOString().split('T')[0],
+      loggedAt: new Date().toISOString(),
       shareWithTrainer: false,
       image1Url: undefined,
       image2Url: undefined,
@@ -115,13 +111,23 @@ export function CreateProgressLogDialog({
             <DatePicker
               date={new Date(formData.loggedAt)}
               dateFormat="d MMM yyyy"
-              setDate={(date) =>
-                date &&
-                setFormData((prev) => ({
-                  ...prev,
-                  loggedAt: date.toISOString(),
-                }))
-              }
+              setDate={(date) => {
+                if (date) {
+                  // Preserve the original time when updating the date
+                  const originalTime = new Date(formData.loggedAt)
+                  const newDateTime = new Date(date)
+                  newDateTime.setHours(
+                    originalTime.getHours(),
+                    originalTime.getMinutes(),
+                    originalTime.getSeconds(),
+                    originalTime.getMilliseconds(),
+                  )
+                  setFormData((prev) => ({
+                    ...prev,
+                    loggedAt: newDateTime.toISOString(),
+                  }))
+                }
+              }}
               buttonProps={{
                 variant: 'tertiary',
                 className: 'min-w-1/2 w-max',

@@ -7,7 +7,7 @@ import {
   GQLQueryResolvers,
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
-import { deleteImages } from '@/lib/aws/s3'
+import { ImageHandler } from '@/lib/aws/image-handler'
 import {
   getPublicExerciseById,
   getPublicExercises,
@@ -492,7 +492,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       // Delete existing images from S3
       if (existingImages.length > 0) {
         const existingImageUrls = existingImages.map((img) => img.url)
-        await deleteImages(existingImageUrls)
+        await ImageHandler.delete({ images: existingImageUrls })
       }
 
       // Remove existing images from database
@@ -548,7 +548,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     // Delete images from S3
     if (exerciseImages.length > 0) {
       const imageUrls = exerciseImages.map((img) => img.url)
-      await deleteImages(imageUrls)
+      await ImageHandler.delete({ images: imageUrls })
     }
 
     // Delete the exercise (this will cascade delete images via foreign key)

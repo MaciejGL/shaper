@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import { deleteImages } from '@/lib/aws/s3'
+import { ImageHandler } from '@/lib/aws/image-handler'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/getUser'
 
@@ -66,7 +66,11 @@ export async function DELETE(request: NextRequest) {
     // }
 
     // Delete from S3
-    await deleteImages([image.url])
+    const deleteResult = await ImageHandler.delete({ images: image.url })
+    if (!deleteResult.success) {
+      console.error('S3 deletion failed:', deleteResult.error)
+      // Continue with database deletion even if S3 fails
+    }
 
     // Delete from database
     await prisma.image.delete({

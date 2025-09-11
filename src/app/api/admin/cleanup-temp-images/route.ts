@@ -2,7 +2,7 @@ import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { requireAdminUser } from '@/lib/admin-auth'
-import { deleteImages } from '@/lib/aws/s3'
+import { ImageHandler } from '@/lib/aws/image-handler'
 
 // Initialize S3 client
 const s3Client = new S3Client({
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
         return `https://${s3Domain}/${obj.key}`
       })
 
-      await deleteImages(oldTempUrls)
+      await ImageHandler.delete({ images: oldTempUrls })
     }
 
     return NextResponse.json({

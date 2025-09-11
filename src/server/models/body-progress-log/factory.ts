@@ -1,19 +1,10 @@
 import { GQLMutationUpdateBodyProgressLogArgs } from '@/generated/graphql-server'
-import {
-  Prisma,
-  BodyProgressLog as PrismaBodyProgressLog,
-} from '@/generated/prisma/client'
+import { Prisma } from '@/generated/prisma/client'
 import { ensureTrainerClientAccess } from '@/lib/access-control'
-import { deleteImages } from '@/lib/aws/s3'
+import { ImageHandler } from '@/lib/aws/image-handler'
 import { prisma } from '@/lib/db'
 
 import BodyProgressLog from './model'
-
-export function createBodyProgressLog(
-  data: PrismaBodyProgressLog,
-): BodyProgressLog {
-  return new BodyProgressLog(data)
-}
 
 export async function getUserBodyProgressLogs(
   userId: string,
@@ -40,7 +31,7 @@ export async function getUserBodyProgressLogs(
     },
   })
 
-  return progressLogs.map((log) => createBodyProgressLog(log))
+  return progressLogs.map((log) => new BodyProgressLog(log))
 }
 
 export async function getClientBodyProgressLogs(
@@ -80,7 +71,7 @@ export async function getClientBodyProgressLogs(
     },
   })
 
-  return progressLogs.map((log) => createBodyProgressLog(log))
+  return progressLogs.map((log) => new BodyProgressLog(log))
 }
 
 export async function createBodyProgressLogEntry(
@@ -130,7 +121,7 @@ export async function createBodyProgressLogEntry(
     data,
   })
 
-  return createBodyProgressLog(progressLog)
+  return new BodyProgressLog(progressLog)
 }
 
 export async function updateBodyProgressLogEntry(
@@ -236,7 +227,7 @@ export async function updateBodyProgressLogEntry(
   // Delete removed images from S3 after successful DB update
   if (imagesToDelete.length > 0) {
     try {
-      await deleteImages(imagesToDelete)
+      await ImageHandler.delete({ images: imagesToDelete })
     } catch (error) {
       console.error('Failed to delete images from S3:', error)
       // Don't throw error here - the DB update was successful
@@ -244,7 +235,7 @@ export async function updateBodyProgressLogEntry(
     }
   }
 
-  return createBodyProgressLog(updatedLog)
+  return new BodyProgressLog(updatedLog)
 }
 
 export async function updateBodyProgressLogSharingStatus(
@@ -277,7 +268,7 @@ export async function updateBodyProgressLogSharingStatus(
     data: { shareWithTrainer },
   })
 
-  return createBodyProgressLog(updatedLog)
+  return new BodyProgressLog(updatedLog)
 }
 
 export async function deleteBodyProgressLogEntry(
@@ -318,7 +309,7 @@ export async function deleteBodyProgressLogEntry(
   // Delete associated images from S3 after successful DB deletion
   if (imagesToDelete.length > 0) {
     try {
-      await deleteImages(imagesToDelete)
+      await ImageHandler.delete({ images: imagesToDelete })
     } catch (error) {
       console.error('Failed to delete images from S3:', error)
       // Don't throw error here - the DB deletion was successful

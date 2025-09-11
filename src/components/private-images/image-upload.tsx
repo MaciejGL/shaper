@@ -64,7 +64,10 @@ export function PrivateImageUpload({
 
       const { presignedUrl, publicUrl } = await response.json()
 
-      // Upload file to S3 using presigned URL
+      // Store high-quality originals since we have on-demand processing
+      // No need to compress here - keep originals for detailed analysis
+
+      // Upload original file to S3 using presigned URL
       await fetch(presignedUrl, {
         method: 'PUT',
         body: file,
@@ -98,13 +101,7 @@ export function PrivateImageUpload({
       <div className="relative aspect-[3/4] border-2 border-dashed border-muted-foreground/25 rounded-lg overflow-hidden">
         {imageUrl ? (
           <>
-            <Image
-              src={imageUrl}
-              alt={label}
-              fill
-              className="object-cover"
-              unoptimized={imageUrl.startsWith('/api/images/private/')}
-            />
+            <Image src={imageUrl} alt={label} fill className="object-cover" />
             <Button
               variant="tertiary"
               size="icon-xs"

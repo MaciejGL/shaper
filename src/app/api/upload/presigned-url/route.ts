@@ -1,12 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-import {
-  type ImageType,
-  generateFileName,
-  generatePresignedUploadUrl,
-  getImageUrl,
-  validateImageFile,
-} from '@/lib/aws/s3'
+import { ImageHandler, type ImageType } from '@/lib/aws/image-handler'
 import { getCurrentUser } from '@/lib/getUser'
 
 interface PresignedUrlRequest {
@@ -39,51 +33,26 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate image type
-    if (!['avatar', 'exercise', 'progress'].includes(imageType)) {
-      return NextResponse.json(
-        { error: 'Invalid image type. Must be: avatar, exercise, or progress' },
-        { status: 400 },
-      )
-    }
-
-    // Validate content type
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp']
-    if (!allowedTypes.includes(contentType)) {
-      return NextResponse.json(
-        { error: 'Invalid content type. Only JPEG, PNG, and WebP are allowed' },
-        { status: 400 },
-      )
-    }
-
-    // For exercise images, relatedId (exerciseId) is optional during creation
-    // but recommended for updates to maintain file organization
-    // Note: Images uploaded without relatedId during exercise creation
-    // will be linked to the exercise when it's created via the GraphQL mutation
-
-    // Generate unique file name
-    const s3FileName = generateFileName(
+    // Use centralized image handler
+    const result = await ImageHandler.upload({
       fileName,
-      user.user.id,
-      imageType,
-      relatedId,
-    )
-
-    // Generate presigned URL
-    const presignedUrl = await generatePresignedUploadUrl(
-      s3FileName,
       contentType,
-    )
+      imageType,
+      userId: user.user.id,
+      relatedId,
+    })
 
-    // Get the appropriate URL that will be used after upload (public or private based on image type)
-    const publicUrl = getImageUrl(s3FileName, imageType)
+    if (!result.success) {
+      return NextResponse.json({ error: result.error }, { status: 400 })
+    }
 
+    const uploadData = result.data!
     return NextResponse.json({
       success: true,
-      presignedUrl,
-      publicUrl,
-      fileName: s3FileName,
-      expiresIn: 300, // 5 minutes
+      presignedUrl: uploadData.presignedUrl,
+      publicUrl: uploadData.displayUrl || uploadData.finalUrl, // Use displayUrl for private images
+      fileName: uploadData.s3FileName,
+      expiresIn: uploadData.expiresIn,
     })
   } catch (error) {
     console.error('Error generating presigned URL:', error)
@@ -110,17 +79,14 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Create a mock file object for validation
-    const mockFile = {
-      name: fileName,
-      size: parseInt(fileSize),
-      type: fileType,
-    } as File
-
-    const validation = validateImageFile(mockFile, imageType)
+    // Use centralized validation
+    const validation = ImageHandler.validateFile({
+      contentType: fileType,
+      imageType,
+    })
 
     return NextResponse.json({
-      valid: validation.valid,
+      valid: validation.success,
       error: validation.error,
     })
   } catch (error) {

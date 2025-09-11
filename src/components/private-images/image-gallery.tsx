@@ -4,6 +4,7 @@ import { ImageIcon, X } from 'lucide-react'
 import Image from 'next/image'
 import React, { useEffect, useState } from 'react'
 
+import { GQLOptimizedImage } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
 import { Button } from '../ui/button'
@@ -18,12 +19,38 @@ import {
 import { Dialog, DialogClose, DialogContent } from '../ui/dialog'
 
 interface PrivateImageGalleryProps {
-  /** Array of image URLs to display */
-  images: (string | null | undefined)[]
+  /** Array of optimized images to display */
+  images: (GQLOptimizedImage | null)[]
   /** Labels for each image position */
   imageLabels?: string[]
   /** Additional CSS classes */
   className?: string
+}
+
+/**
+ * Image Size Selection Strategy:
+ * - Thumbnail: Fast loading for grid views with many images
+ * - Medium: Good quality for modal views, balances performance and clarity
+ * - Large: High quality for full-screen or detailed viewing
+ * - URL: Original/fallback when optimized sizes aren't available
+ */
+
+/**
+ * Get the best available image URL for thumbnail display (grid view)
+ * Priority: thumbnail → medium → url (optimized for fast loading)
+ */
+function getThumbnailUrl(image: GQLOptimizedImage | null): string | null {
+  if (!image) return null
+  return image.thumbnail || image.medium || image.url || null
+}
+
+/**
+ * Get the best available image URL for modal display (larger view)
+ * Priority: medium → large → url (balances quality and performance)
+ */
+function getModalUrl(image: GQLOptimizedImage | null): string | null {
+  if (!image) return null
+  return image.medium || image.large || image.url || null
 }
 
 /**
@@ -40,9 +67,27 @@ export function PrivateImageGallery({
   )
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0)
-  const hasAnyImage = images.some(Boolean)
-  const validImages = images.filter(Boolean) as string[]
+  const hasAnyImage = images.some((img) => getThumbnailUrl(img) !== null)
+  const validImages = images
+    .map((img) => getModalUrl(img))
+    .filter((url): url is string => url !== null)
   const [imageStates, setImageStates] = useState<Record<number, boolean>>({})
+  const [carouselImageStates, setCarouselImageStates] = useState<
+    Record<string, boolean>
+  >({})
+
+  // Preload images for faster carousel display
+  useEffect(() => {
+    validImages.forEach((imageUrl) => {
+      if (imageUrl && !carouselImageStates[imageUrl]) {
+        const img = new window.Image()
+        img.src = imageUrl
+        img.onload = () => {
+          setCarouselImageStates((prev) => ({ ...prev, [imageUrl]: true }))
+        }
+      }
+    })
+  }, [validImages, carouselImageStates])
 
   // Track carousel position changes
   useEffect(() => {
@@ -58,11 +103,14 @@ export function PrivateImageGallery({
   // Navigate to specific image when modal opens (only once)
   useEffect(() => {
     if (selectedImageIndex !== null && carouselApi) {
-      const imageUrl = images[selectedImageIndex]
-      if (!imageUrl) return
+      const selectedImage = images[selectedImageIndex]
+      const selectedImageUrl = getModalUrl(selectedImage)
+      if (!selectedImageUrl) return
 
       // Find the index of this image in the validImages array
-      const validImageIndex = validImages.findIndex((img) => img === imageUrl)
+      const validImageIndex = validImages.findIndex(
+        (img) => img === selectedImageUrl,
+      )
       if (validImageIndex !== -1) {
         // Small delay to ensure carousel is ready
         setTimeout(() => {
@@ -74,7 +122,7 @@ export function PrivateImageGallery({
   }, [selectedImageIndex, carouselApi]) // Intentionally excluding images and validImages to prevent re-triggering
 
   const openGallery = (index: number) => {
-    const imageUrl = images[index]
+    const imageUrl = getThumbnailUrl(images[index])
     if (!imageUrl) return
     setSelectedImageIndex(index)
   }
@@ -102,40 +150,43 @@ export function PrivateImageGallery({
         className={cn('grid gap-2', className)}
         style={{ gridTemplateColumns: `repeat(${images.length}, 1fr)` }}
       >
-        {images.map((imageUrl, index) => (
-          <div key={index} className="space-y-1">
-            {imageLabels && imageLabels[index] && (
-              <div className="text-[10px] text-center text-muted-foreground font-medium">
-                {imageLabels[index]}
-              </div>
-            )}
-            <div className="relative aspect-[3/4] bg-muted rounded-sm overflow-hidden">
-              {imageUrl ? (
-                <>
-                  <Image
-                    src={imageUrl}
-                    alt={imageLabels?.[index] || 'Progress Photo'}
-                    quality={20}
-                    fill
-                    className={cn(
-                      'object-cover cursor-pointer transition-opacity duration-150',
-                      imageStates[index] ? 'opacity-100' : 'opacity-0',
-                    )}
-                    priority
-                    onLoad={() =>
-                      setImageStates((prev) => ({ ...prev, [index]: true }))
-                    }
-                    onClick={() => openGallery(index)}
-                  />
-                </>
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <ImageIcon className="size-8 text-muted-foreground" />
+        {images.map((image, index) => {
+          const thumbnailUrl = getThumbnailUrl(image)
+          return (
+            <div key={index} className="space-y-1">
+              {imageLabels && imageLabels[index] && (
+                <div className="text-[10px] text-center text-muted-foreground font-medium">
+                  {imageLabels[index]}
                 </div>
               )}
+              <div className="relative aspect-[3/4] bg-muted rounded-sm overflow-hidden">
+                {thumbnailUrl ? (
+                  <>
+                    <Image
+                      src={thumbnailUrl}
+                      alt={imageLabels?.[index] || 'Progress Photo'}
+                      fill
+                      sizes="(max-width: 768px) 33vw, 20vw"
+                      className={cn(
+                        'object-cover cursor-pointer transition-opacity duration-150',
+                        imageStates[index] ? 'opacity-100' : 'opacity-0',
+                      )}
+                      onLoad={() =>
+                        setImageStates((prev) => ({ ...prev, [index]: true }))
+                      }
+                      onClick={() => openGallery(index)}
+                      priority={index < 2} // Prioritize first 2 images
+                    />
+                  </>
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <ImageIcon className="size-8 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Carousel modal dialog */}
@@ -168,15 +219,39 @@ export function PrivateImageGallery({
               >
                 <CarouselContent>
                   {validImages.map((imageUrl, index) => (
-                    <CarouselItem key={index}>
-                      <div className="aspect-[3/4] bg-muted">
+                    <CarouselItem key={imageUrl}>
+                      <div className="aspect-[3/4] bg-muted relative">
                         <Image
                           src={imageUrl}
                           alt={`Progress Photo ${index + 1}`}
-                          width={800}
-                          height={1066}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="(max-width: 768px) 100vw, 90vw"
+                          className={cn(
+                            'object-cover transition-opacity duration-300',
+                            carouselImageStates[imageUrl]
+                              ? 'opacity-100'
+                              : 'opacity-0',
+                          )}
+                          onLoad={() =>
+                            setCarouselImageStates((prev) => ({
+                              ...prev,
+                              [imageUrl]: true,
+                            }))
+                          }
+                          onError={() => {
+                            console.error(
+                              'Failed to load carousel image:',
+                              imageUrl,
+                            )
+                            // Show error state or retry logic could go here
+                          }}
+                          priority={true} // High priority for carousel images
                         />
+                        {!carouselImageStates[imageUrl] && (
+                          <div className="absolute inset-0 flex items-center justify-center bg-muted">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                          </div>
+                        )}
                       </div>
                     </CarouselItem>
                   ))}

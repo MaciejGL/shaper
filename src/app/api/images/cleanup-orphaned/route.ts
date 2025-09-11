@@ -1,7 +1,7 @@
 import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 import { NextResponse } from 'next/server'
 
-import { deleteImages } from '@/lib/aws/s3'
+import { ImageHandler } from '@/lib/aws/image-handler'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/getUser'
 
@@ -84,7 +84,7 @@ export async function POST() {
         return `https://${s3Domain}/${key}`
       })
 
-      await deleteImages(orphanedUrls)
+      await ImageHandler.delete({ images: orphanedUrls })
     }
 
     return NextResponse.json({

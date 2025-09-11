@@ -1,10 +1,23 @@
+type OptimizedImage {
+  # Thumbnail for gallery/list views (300x400, webp)
+  thumbnail: String
+  # Medium size for general display (600x800, webp)
+  medium: String
+  # Large size for detailed analysis (1200x1600, webp)
+  large: String
+  # Original URL for backward compatibility
+  url: String
+}
+
 type BodyProgressLog {
   id: String!
   loggedAt: String!
   notes: String
-  image1Url: String
-  image2Url: String
-  image3Url: String
+  # Optimized image variants for different use cases
+  image1: OptimizedImage
+  image2: OptimizedImage
+  image3: OptimizedImage
+
   shareWithTrainer: Boolean!
   createdAt: String!
   updatedAt: String!

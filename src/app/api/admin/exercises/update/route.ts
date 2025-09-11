@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 import { isAdminUser } from '@/lib/admin-auth'
-import { deleteImages } from '@/lib/aws/s3'
+import { ImageHandler } from '@/lib/aws/image-handler'
 import { prisma } from '@/lib/db'
 
 interface ExerciseUpdate {
@@ -75,7 +75,9 @@ export async function PATCH(request: NextRequest) {
 
           // Delete removed images from S3
           if (imagesToDelete.length > 0) {
-            await deleteImages(imagesToDelete.map((img) => img.url))
+            await ImageHandler.delete({
+              images: imagesToDelete.map((img) => img.url),
+            })
           }
 
           // Delete all current images from database

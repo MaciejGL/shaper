@@ -291,9 +291,9 @@ export type GQLBodyProgressLog = {
   __typename?: 'BodyProgressLog';
   createdAt: Scalars['String']['output'];
   id: Scalars['String']['output'];
-  image1Url?: Maybe<Scalars['String']['output']>;
-  image2Url?: Maybe<Scalars['String']['output']>;
-  image3Url?: Maybe<Scalars['String']['output']>;
+  image1?: Maybe<GQLOptimizedImage>;
+  image2?: Maybe<GQLOptimizedImage>;
+  image3?: Maybe<GQLOptimizedImage>;
   loggedAt: Scalars['String']['output'];
   notes?: Maybe<Scalars['String']['output']>;
   shareWithTrainer: Scalars['Boolean']['output'];
@@ -1908,6 +1908,14 @@ export type GQLOneRmLog = {
   estimated1RM: Scalars['Float']['output'];
   reps?: Maybe<Scalars['Int']['output']>;
   weight?: Maybe<Scalars['Float']['output']>;
+};
+
+export type GQLOptimizedImage = {
+  __typename?: 'OptimizedImage';
+  large?: Maybe<Scalars['String']['output']>;
+  medium?: Maybe<Scalars['String']['output']>;
+  thumbnail?: Maybe<Scalars['String']['output']>;
+  url?: Maybe<Scalars['String']['output']>;
 };
 
 export type GQLPackageSummaryItem = {
@@ -3547,14 +3555,14 @@ export type GQLGetUserBodyProgressLogsQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetUserBodyProgressLogsQuery = { __typename?: 'Query', userBodyProgressLogs: Array<{ __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, image1Url?: string | undefined | null, image2Url?: string | undefined | null, image3Url?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string }> };
+export type GQLGetUserBodyProgressLogsQuery = { __typename?: 'Query', userBodyProgressLogs: Array<{ __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string, image1?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image2?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image3?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null }> };
 
 export type GQLCreateBodyProgressLogMutationVariables = Exact<{
   input: GQLCreateBodyProgressLogInput;
 }>;
 
 
-export type GQLCreateBodyProgressLogMutation = { __typename?: 'Mutation', createBodyProgressLog: { __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, image1Url?: string | undefined | null, image2Url?: string | undefined | null, image3Url?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string } };
+export type GQLCreateBodyProgressLogMutation = { __typename?: 'Mutation', createBodyProgressLog: { __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string, image1?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image2?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image3?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null } };
 
 export type GQLUpdateBodyProgressLogMutationVariables = Exact<{
   id: Scalars['String']['input'];
@@ -3562,7 +3570,7 @@ export type GQLUpdateBodyProgressLogMutationVariables = Exact<{
 }>;
 
 
-export type GQLUpdateBodyProgressLogMutation = { __typename?: 'Mutation', updateBodyProgressLog: { __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, image1Url?: string | undefined | null, image2Url?: string | undefined | null, image3Url?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string } };
+export type GQLUpdateBodyProgressLogMutation = { __typename?: 'Mutation', updateBodyProgressLog: { __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string, image1?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image2?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image3?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null } };
 
 export type GQLDeleteBodyProgressLogMutationVariables = Exact<{
   id: Scalars['String']['input'];
@@ -7116,9 +7124,24 @@ export const GetUserBodyProgressLogsDocument = `
     id
     loggedAt
     notes
-    image1Url
-    image2Url
-    image3Url
+    image1 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image2 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image3 {
+      thumbnail
+      medium
+      large
+      url
+    }
     shareWithTrainer
     createdAt
     updatedAt
@@ -7174,9 +7197,24 @@ export const CreateBodyProgressLogDocument = `
     id
     loggedAt
     notes
-    image1Url
-    image2Url
-    image3Url
+    image1 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image2 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image3 {
+      thumbnail
+      medium
+      large
+      url
+    }
     shareWithTrainer
     createdAt
     updatedAt
@@ -7208,9 +7246,24 @@ export const UpdateBodyProgressLogDocument = `
     id
     loggedAt
     notes
-    image1Url
-    image2Url
-    image3Url
+    image1 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image2 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image3 {
+      thumbnail
+      medium
+      large
+      url
+    }
     shareWithTrainer
     createdAt
     updatedAt

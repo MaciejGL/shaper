@@ -54,9 +54,9 @@ export function BodyProgressTimeline({ onEditLog }: BodyProgressTimelineProps) {
         id: log.id,
         loggedAt: log.loggedAt,
         notes: log.notes,
-        image1Url: log.image1Url,
-        image2Url: log.image2Url,
-        image3Url: log.image3Url,
+        image1Url: log.image1?.url || null,
+        image2Url: log.image2?.url || null,
+        image3Url: log.image3?.url || null,
         shareWithTrainer: log.shareWithTrainer,
       })
     }
@@ -193,7 +193,11 @@ export function BodyProgressTimeline({ onEditLog }: BodyProgressTimelineProps) {
             </div>
           </div>
           <PrivateImageGallery
-            images={[log.image1Url, log.image2Url, log.image3Url]}
+            images={[
+              log.image1 || null,
+              log.image2 || null,
+              log.image3 || null,
+            ]}
           />
         </div>
       ))}

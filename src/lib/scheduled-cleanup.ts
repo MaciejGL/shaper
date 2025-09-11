@@ -1,6 +1,6 @@
 import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
 
-import { deleteImages } from '@/lib/aws/s3'
+import { ImageHandler } from '@/lib/aws/image-handler'
 
 // Initialize S3 client
 const s3Client = new S3Client({
@@ -155,7 +155,7 @@ async function cleanupTempFolder(maxAgeHours: number, dryRun: boolean = false) {
       return `https://${s3Domain}/${obj.key}`
     })
 
-    await deleteImages(oldTempUrls)
+    await ImageHandler.delete({ images: oldTempUrls })
   }
 
   return result
@@ -228,7 +228,7 @@ async function cleanupOrphanedExerciseImages(dryRun: boolean = false) {
       return `https://${s3Domain}/${key}`
     })
 
-    await deleteImages(orphanedUrls)
+    await ImageHandler.delete({ images: orphanedUrls })
   }
 
   return result

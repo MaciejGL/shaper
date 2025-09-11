@@ -57,6 +57,17 @@ export function useBodyProgressLogs() {
     userProfileId: userProfileId || '',
   })
 
+  // Helper function to create optimistic image from URL
+  const createOptimisticImage = (url: string | null | undefined) => {
+    if (!url) return null
+    return {
+      url,
+      thumbnail: null,
+      medium: null,
+      large: null,
+    }
+  }
+
   // Mutation for creating progress logs
   const createProgressLogMutation = useCreateBodyProgressLogMutation({
     onMutate: async (variables) => {
@@ -68,11 +79,13 @@ export function useBodyProgressLogs() {
 
       // Optimistically update UI immediately
       const optimisticLog = {
+        __typename: 'BodyProgressLog' as const,
         id: `temp-${Date.now()}`,
         loggedAt: variables.input.loggedAt || new Date().toISOString(),
-        image1Url: variables.input.image1Url || null,
-        image2Url: variables.input.image2Url || null,
-        image3Url: variables.input.image3Url || null,
+        notes: variables.input.notes || null,
+        image1: createOptimisticImage(variables.input.image1Url),
+        image2: createOptimisticImage(variables.input.image2Url),
+        image3: createOptimisticImage(variables.input.image3Url),
         shareWithTrainer: variables.input.shareWithTrainer || false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -128,16 +141,20 @@ export function useBodyProgressLogs() {
                 ? {
                     ...log,
                     // Handle image updates and removals for optimistic UI
-                    image1Url: variables.input.hasOwnProperty('image1Url')
-                      ? variables.input.image1Url
-                      : log.image1Url,
-                    image2Url: variables.input.hasOwnProperty('image2Url')
-                      ? variables.input.image2Url
-                      : log.image2Url,
-                    image3Url: variables.input.hasOwnProperty('image3Url')
-                      ? variables.input.image3Url
-                      : log.image3Url,
+                    image1: variables.input.hasOwnProperty('image1Url')
+                      ? createOptimisticImage(variables.input.image1Url)
+                      : log.image1,
+                    image2: variables.input.hasOwnProperty('image2Url')
+                      ? createOptimisticImage(variables.input.image2Url)
+                      : log.image2,
+                    image3: variables.input.hasOwnProperty('image3Url')
+                      ? createOptimisticImage(variables.input.image3Url)
+                      : log.image3,
                     loggedAt: variables.input.loggedAt || log.loggedAt,
+                    notes:
+                      variables.input.notes !== undefined
+                        ? variables.input.notes
+                        : log.notes,
                     shareWithTrainer:
                       variables.input.shareWithTrainer !== undefined
                         ? variables.input.shareWithTrainer

@@ -293,9 +293,9 @@ export type GQLBodyProgressLog = {
   __typename?: 'BodyProgressLog';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   id: EntireFieldWrapper<Scalars['String']['output']>;
-  image1Url?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  image2Url?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
-  image3Url?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  image1?: EntireFieldWrapper<Maybe<GQLOptimizedImage>>;
+  image2?: EntireFieldWrapper<Maybe<GQLOptimizedImage>>;
+  image3?: EntireFieldWrapper<Maybe<GQLOptimizedImage>>;
   loggedAt: EntireFieldWrapper<Scalars['String']['output']>;
   notes?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   shareWithTrainer: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1912,6 +1912,14 @@ export type GQLOneRmLog = {
   weight?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
 };
 
+export type GQLOptimizedImage = {
+  __typename?: 'OptimizedImage';
+  large?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  medium?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  thumbnail?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  url?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+};
+
 export type GQLPackageSummaryItem = {
   __typename?: 'PackageSummaryItem';
   name: EntireFieldWrapper<Scalars['String']['output']>;
@@ -3415,6 +3423,7 @@ export type GQLResolversTypes = {
   NotificationType: GQLNotificationType;
   OneRmEntry: ResolverTypeWrapper<GQLOneRmEntry>;
   OneRmLog: ResolverTypeWrapper<GQLOneRmLog>;
+  OptimizedImage: ResolverTypeWrapper<GQLOptimizedImage>;
   PackageSummaryItem: ResolverTypeWrapper<GQLPackageSummaryItem>;
   PackageTemplate: ResolverTypeWrapper<GQLPackageTemplate>;
   PublicTrainer: ResolverTypeWrapper<GQLPublicTrainer>;
@@ -3614,6 +3623,7 @@ export type GQLResolversParentTypes = {
   NotificationPreferencesInput: GQLNotificationPreferencesInput;
   OneRmEntry: GQLOneRmEntry;
   OneRmLog: GQLOneRmLog;
+  OptimizedImage: GQLOptimizedImage;
   PackageSummaryItem: GQLPackageSummaryItem;
   PackageTemplate: GQLPackageTemplate;
   PublicTrainer: GQLPublicTrainer;
@@ -3788,9 +3798,9 @@ export type GQLBaseExerciseSubstituteResolvers<ContextType = GQLContext, ParentT
 export type GQLBodyProgressLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['BodyProgressLog'] = GQLResolversParentTypes['BodyProgressLog']> = {
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
-  image1Url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  image2Url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
-  image3Url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  image1?: Resolver<Maybe<GQLResolversTypes['OptimizedImage']>, ParentType, ContextType>;
+  image2?: Resolver<Maybe<GQLResolversTypes['OptimizedImage']>, ParentType, ContextType>;
+  image3?: Resolver<Maybe<GQLResolversTypes['OptimizedImage']>, ParentType, ContextType>;
   loggedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   notes?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   shareWithTrainer?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
@@ -4358,6 +4368,14 @@ export type GQLOneRmLogResolvers<ContextType = GQLContext, ParentType extends GQ
   estimated1RM?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   reps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   weight?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLOptimizedImageResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['OptimizedImage'] = GQLResolversParentTypes['OptimizedImage']> = {
+  large?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  medium?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  thumbnail?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  url?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -4952,6 +4970,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   NotificationPreferences?: GQLNotificationPreferencesResolvers<ContextType>;
   OneRmEntry?: GQLOneRmEntryResolvers<ContextType>;
   OneRmLog?: GQLOneRmLogResolvers<ContextType>;
+  OptimizedImage?: GQLOptimizedImageResolvers<ContextType>;
   PackageSummaryItem?: GQLPackageSummaryItemResolvers<ContextType>;
   PackageTemplate?: GQLPackageTemplateResolvers<ContextType>;
   PublicTrainer?: GQLPublicTrainerResolvers<ContextType>;

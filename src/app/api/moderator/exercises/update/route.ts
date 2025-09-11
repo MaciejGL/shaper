@@ -5,7 +5,7 @@ import {
   moderatorAccessDeniedResponse,
   requireModeratorUser,
 } from '@/lib/admin-auth'
-import { deleteImages, moveImagesFromTemp } from '@/lib/aws/s3'
+import { ImageHandler } from '@/lib/aws/image-handler'
 import { prisma } from '@/lib/db'
 
 interface ExerciseUpdate {
@@ -97,7 +97,14 @@ export async function PATCH(request: NextRequest) {
       if (images !== undefined) {
         // Move images from temp to final location
         const newImageUrls = images.map((img) => img.url)
-        const finalImageUrls = await moveImagesFromTemp(newImageUrls, id)
+        const moveResult = await ImageHandler.move({
+          fromUrls: newImageUrls,
+          toId: id,
+          imageType: 'exercise',
+        })
+        const finalImageUrls = moveResult.success
+          ? moveResult.data?.movedUrls || []
+          : newImageUrls
 
         // Get current images for S3 cleanup
         const currentImages = await prisma.image.findMany({
@@ -115,7 +122,9 @@ export async function PATCH(request: NextRequest) {
 
         // Delete removed images from S3
         if (imagesToDelete.length > 0) {
-          await deleteImages(imagesToDelete.map((img) => img.url))
+          await ImageHandler.delete({
+            images: imagesToDelete.map((img) => img.url),
+          })
         }
 
         // Update images in database with final URLs
