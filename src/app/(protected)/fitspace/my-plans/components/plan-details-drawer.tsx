@@ -1,5 +1,6 @@
 import { formatDate } from 'date-fns'
 import {
+  ArrowRightIcon,
   BicepsFlexed,
   Calendar,
   CheckCircle,
@@ -12,6 +13,7 @@ import { RatingStars } from '@/components/rating-stars'
 import { StatsItem } from '@/components/stats-item'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { ButtonLink } from '@/components/ui/button-link'
 import {
   Drawer,
   DrawerClose,
@@ -65,7 +67,9 @@ export function PlanDetailsDrawer({
             <div className="flex items-center gap-2 flex-wrap">
               <PlanStatusBadge status={status} plan={plan} />
               {plan.difficulty && (
-                <Badge variant="outline">{plan.difficulty}</Badge>
+                <Badge variant="secondary" className="capitalize">
+                  {plan.difficulty.toLowerCase()}
+                </Badge>
               )}
             </div>
           </div>
@@ -98,6 +102,13 @@ export function PlanDetailsDrawer({
         }
       >
         <div className="space-y-6">
+          <ButtonLink
+            href={`/fitspace/workout/${plan.id}`}
+            className="w-full"
+            iconEnd={<ArrowRightIcon />}
+          >
+            Go to Plan
+          </ButtonLink>
           {plan.startDate && plan.endDate && (
             <div className="space-y-2">
               {/* Progress Overview */}
@@ -147,7 +158,7 @@ export function PlanDetailsDrawer({
               <p className="text-sm font-medium">Training Method</p>
               <div className="flex items-center gap-2">
                 {plan.focusTags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="capitalize">
+                  <Badge key={tag} variant="secondary" className="capitalize">
                     {tag.split('_').join(' ').toLowerCase()}
                   </Badge>
                 ))}
@@ -159,7 +170,7 @@ export function PlanDetailsDrawer({
               <p className="text-sm font-medium">You'll Achieve</p>
               <div className="flex items-center gap-2">
                 {plan.targetGoals.map((goal) => (
-                  <Badge key={goal} variant="outline" className="capitalize">
+                  <Badge key={goal} variant="secondary" className="capitalize">
                     {goal.split('_').join(' ').toLowerCase()}
                   </Badge>
                 ))}
@@ -181,7 +192,7 @@ export function PlanDetailsDrawer({
           {plan.description && (
             <div className="space-y-2">
               <h3 className="font-medium">Description</h3>
-              <CollapsibleText text={plan.description} maxWords={50} />
+              <CollapsibleText text={plan.description} maxWords={80} />
             </div>
           )}
 

@@ -1,5 +1,6 @@
 import { formatDate } from 'date-fns'
 import {
+  ArrowRightIcon,
   BicepsFlexed,
   Calendar,
   CheckCircle,
@@ -12,6 +13,7 @@ import {
 import { RatingStars } from '@/components/rating-stars'
 import { StatsItem } from '@/components/stats-item'
 import { Badge } from '@/components/ui/badge'
+import { ButtonLink } from '@/components/ui/button-link'
 import {
   Card,
   CardContent,
@@ -56,7 +58,7 @@ export function PlanCard({ plan, isActive = false, onClick }: PlanCardProps) {
             <div className="flex items-center gap-2 mb-2">
               <PlanStatusBadge status={status} plan={plan} />
               {plan.difficulty && (
-                <Badge variant="outline" className="capitalize">
+                <Badge variant="secondary" className="capitalize">
                   {plan.difficulty.toLowerCase()}
                 </Badge>
               )}
@@ -65,69 +67,87 @@ export function PlanCard({ plan, isActive = false, onClick }: PlanCardProps) {
         </div>
       </CardHeader>
       {isActive ? (
-        <CardContent className="space-y-2">
-          {'focusTags' in plan && plan.focusTags.length > 0 && (
-            <div>
-              <p className="text-sm font-medium">Training Method</p>
-              <div className="flex items-center gap-2">
-                {plan.focusTags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="capitalize">
-                    {tag.split('_').join(' ').toLowerCase()}
-                  </Badge>
-                ))}
+        <>
+          <CardContent className="space-y-2">
+            {'focusTags' in plan && plan.focusTags.length > 0 && (
+              <div>
+                <p className="text-sm font-medium">Training Method</p>
+                <div className="flex items-center gap-2">
+                  {plan.focusTags.map((tag) => (
+                    <Badge key={tag} variant="secondary" className="capitalize">
+                      {tag.split('_').join(' ').toLowerCase()}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-          {'targetGoals' in plan && plan.targetGoals.length > 0 && (
-            <div>
-              <p className="text-sm font-medium">You'll Achieve</p>
-              <div className="flex items-center gap-2">
-                {plan.targetGoals.map((goal) => (
-                  <Badge key={goal} variant="outline" className="capitalize">
-                    {goal.split('_').join(' ').toLowerCase()}
-                  </Badge>
-                ))}
+            )}
+            {'targetGoals' in plan && plan.targetGoals.length > 0 && (
+              <div>
+                <p className="text-sm font-medium">You'll Achieve</p>
+                <div className="flex items-center gap-2">
+                  {plan.targetGoals.map((goal) => (
+                    <Badge
+                      key={goal}
+                      variant="secondary"
+                      className="capitalize"
+                    >
+                      {goal.split('_').join(' ').toLowerCase()}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
-          <div className="space-y-1">
-            <div className="flex items-baseline justify-between gap-2">
-              <p className="text-sm font-medium">Progress</p>
-              <p className="text-sm font-medium">
-                {Math.round(
-                  (plan.completedWorkoutsDays / plan.totalWorkouts) * 100,
-                )}
-                %
-              </p>
-            </div>
-            <Progress
-              value={(plan.completedWorkoutsDays / plan.totalWorkouts) * 100}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-2 empty:hidden">
-            <StatsItem
-              label="Current Week"
-              value={
+            )}
+            <div className="space-y-1">
+              <div className="flex items-baseline justify-between gap-2">
+                <p className="text-sm font-medium">Progress</p>
                 <p className="text-sm font-medium">
-                  {plan.currentWeekNumber} of {plan.weekCount}
+                  {Math.round(
+                    (plan.completedWorkoutsDays / plan.totalWorkouts) * 100,
+                  )}
+                  %
                 </p>
-              }
-              icon={<Loader className="text-muted-foreground" />}
-            />
-            {plan.startDate && plan.endDate && (
+              </div>
+              <Progress
+                value={(plan.completedWorkoutsDays / plan.totalWorkouts) * 100}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-2 empty:hidden">
               <StatsItem
-                label="Start Date"
+                label="Current Week"
                 value={
                   <p className="text-sm font-medium">
-                    {formatDate(new Date(plan.startDate), 'MMM d')} -{' '}
-                    {formatDate(new Date(plan.endDate), 'MMM d')}{' '}
+                    {plan.currentWeekNumber} of {plan.weekCount}
                   </p>
                 }
-                icon={<Calendar className="text-muted-foreground" />}
+                icon={<Loader className="text-muted-foreground" />}
               />
-            )}
-          </div>
-        </CardContent>
+              {plan.startDate && plan.endDate && (
+                <StatsItem
+                  label="Start Date"
+                  value={
+                    <p className="text-sm font-medium">
+                      {formatDate(new Date(plan.startDate), 'MMM d')} -{' '}
+                      {formatDate(new Date(plan.endDate), 'MMM d')}{' '}
+                    </p>
+                  }
+                  icon={<Calendar className="text-muted-foreground" />}
+                />
+              )}
+            </div>
+          </CardContent>
+          <CardFooter>
+            <ButtonLink
+              href={`/fitspace/workout/${plan.id}`}
+              className="w-full"
+              iconEnd={<ArrowRightIcon />}
+              onClick={(e) => {
+                e.stopPropagation()
+              }}
+            >
+              Go to Plan
+            </ButtonLink>
+          </CardFooter>
+        </>
       ) : (
         <CardContent>
           {'focusTags' in plan && plan.focusTags.length > 0 && (
@@ -135,7 +155,7 @@ export function PlanCard({ plan, isActive = false, onClick }: PlanCardProps) {
               <p className="text-sm font-medium">Training Method</p>
               <div className="flex items-center gap-2">
                 {plan.focusTags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="capitalize">
+                  <Badge key={tag} variant="secondary" className="capitalize">
                     {tag.split('_').join(' ').toLowerCase()}
                   </Badge>
                 ))}
@@ -147,7 +167,7 @@ export function PlanCard({ plan, isActive = false, onClick }: PlanCardProps) {
               <p className="text-sm font-medium">You'll Achieve</p>
               <div className="flex items-center gap-2">
                 {plan.targetGoals.map((goal) => (
-                  <Badge key={goal} variant="outline" className="capitalize">
+                  <Badge key={goal} variant="secondary" className="capitalize">
                     {goal.split('_').join(' ').toLowerCase()}
                   </Badge>
                 ))}
@@ -205,7 +225,7 @@ function PlanStatusBadge({
         }
       case PlanStatus.Template:
         return {
-          variant: 'outline' as const,
+          variant: 'secondary' as const,
           icon: <FileText />,
           label: 'Template',
         }

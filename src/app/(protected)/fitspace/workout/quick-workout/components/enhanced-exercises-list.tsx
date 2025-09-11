@@ -136,10 +136,10 @@ export function EnhancedExercisesList({
               // Normal alphabetical sorting for everything else
               return a.localeCompare(b)
             })
-            .map(([letter, exercises]) => {
+            .map(([letter, exercises], index) => {
               const isNumber = /^\d/.test(letter)
               return (
-                <div key={letter}>
+                <div key={letter + index}>
                   {!isNumber && (
                     <h3 className="text-2xl font-semibold bg-background/80 backdrop-blur-xs px-2 sticky top-0 z-10">
                       {letter}

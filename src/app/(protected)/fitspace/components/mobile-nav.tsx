@@ -79,7 +79,7 @@ export function MobileNav() {
   return (
     <>
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar safe-area-bottom safe-area-x">
-        <div className="grid grid-cols-6 items-center py-2 px-2 max-w-md mx-auto gap-1">
+        <div className="grid grid-cols-5 items-center py-2 px-2 max-w-md mx-auto gap-1">
           {navItems.map((item) => {
             const Icon = item.icon
             const isActive = pathname.includes(item.href) && !pendingNavigation

@@ -25,7 +25,7 @@ export function CollapsibleText({
 
   return (
     <p className="text-sm text-foreground">
-      <span className="whitespace-pre-wrap">
+      <span className="whitespace-pre-wrap leading-relaxed">
         {truncatedText}
         {!isExpanded && '...'}
         {isExpanded && (

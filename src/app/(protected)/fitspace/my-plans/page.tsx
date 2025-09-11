@@ -46,22 +46,17 @@ export default function MyPlansPage() {
       />
 
       <Tabs
-        value={tab ?? PlanTab.QuickWorkout}
-        defaultValue={PlanTab.QuickWorkout}
+        value={tab ?? PlanTab.Plans}
+        defaultValue={PlanTab.Plans}
         onValueChange={(value) => setTab(value as PlanTab)}
         className="gap-0 rounded-xl"
       >
         <TabsList size="lg" className="w-full">
-          <TabsTrigger value={PlanTab.QuickWorkout}>Workout Days</TabsTrigger>
           <TabsTrigger value={PlanTab.Plans}>Plans</TabsTrigger>
+          <TabsTrigger value={PlanTab.QuickWorkout}>
+            Custom Workouts
+          </TabsTrigger>
         </TabsList>
-
-        <TabsContent
-          value={PlanTab.QuickWorkout}
-          className="space-y-4 pt-4 pb-4"
-        >
-          <EnhancedQuickWorkoutTab />
-        </TabsContent>
 
         <TabsContent value={PlanTab.Plans} className="space-y-4 pt-4 pb-4">
           <PlansTab
@@ -71,6 +66,13 @@ export default function MyPlansPage() {
             handlePlanAction={handlePlanAction}
             loading={isLoadingPlans}
           />
+        </TabsContent>
+
+        <TabsContent
+          value={PlanTab.QuickWorkout}
+          className="space-y-4 pt-4 pb-4"
+        >
+          <EnhancedQuickWorkoutTab />
         </TabsContent>
       </Tabs>
 

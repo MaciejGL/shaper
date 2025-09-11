@@ -45,7 +45,7 @@ export function FavouriteWorkoutsList({
     return (
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-semibold">Workouts</h3>
+          <h3 className="text-lg font-semibold">Custom Templates</h3>
           <Button disabled iconOnly={<Plus />} />
         </div>
         <div className="grid gap-2 grid-cols-1 md:grid-cols-2">
@@ -60,7 +60,7 @@ export function FavouriteWorkoutsList({
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Templates</h3>
+        <h3 className="text-lg font-semibold">Custom Templates</h3>
         <Button onClick={() => setIsCreateModalOpen(true)} iconOnly={<Plus />}>
           Create
         </Button>
@@ -117,11 +117,9 @@ function EmptyFavouritesState({
         <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
           <Dumbbell className="w-6 h-6 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold mb-2">
-          No Favourite Workouts Yet
-        </h3>
+        <h3 className="text-lg font-semibold mb-2">No Custom Templates Yet</h3>
         <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
-          Create your first favourite workout to quickly start your preferred
+          Create your first custom template to quickly start your preferred
           exercise routines.
         </p>
         {workoutStatus.status === 'active-plan-workout' && (
