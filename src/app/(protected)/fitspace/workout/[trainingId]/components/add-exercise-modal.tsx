@@ -1,6 +1,8 @@
 import { AnimatePresence } from 'framer-motion'
 import { uniq } from 'lodash'
 import { PlusIcon, Search } from 'lucide-react'
+import { useParams } from 'next/navigation'
+import { useQueryState } from 'nuqs'
 import React, { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -12,12 +14,12 @@ import {
   SimpleDrawerContent,
 } from '@/components/ui/drawer'
 import { Input } from '@/components/ui/input'
-import { useWorkout } from '@/context/workout-context/workout-context'
 import {
   GQLEquipment,
   useFitspaceAddExercisesToWorkoutMutation,
   useFitspaceGetExercisesQuery,
-  useFitspaceGetWorkoutQuery,
+  useFitspaceGetWorkoutDayQuery,
+  useFitspaceGetWorkoutNavigationQuery,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 
@@ -35,7 +37,8 @@ export function AddExerciseModal({
   handlePaginationClick,
 }: AddExerciseModalProps) {
   const invalidateQuery = useInvalidateQuery()
-  const { activeDay, plan } = useWorkout()
+  const { trainingId } = useParams<{ trainingId: string }>()
+  const [dayId] = useQueryState('day')
   const { data } = useFitspaceGetExercisesQuery()
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedExercises, setSelectedExercises] = useState<string[]>([])
@@ -46,9 +49,12 @@ export function AddExerciseModal({
     useFitspaceAddExercisesToWorkoutMutation({
       onSuccess: async (data) => {
         await invalidateQuery({
-          queryKey: useFitspaceGetWorkoutQuery.getKey({
-            trainingId: plan?.id ?? '',
+          queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+            dayId: dayId ?? '',
           }),
+        })
+        await invalidateQuery({
+          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
         })
         handlePaginationClick(data.addExercisesToWorkout[0].id, 'prev')
       },
@@ -97,13 +103,13 @@ export function AddExerciseModal({
   }
 
   const handleAddExercise = async () => {
-    if (!activeDay?.id || !selectedExercises.length) {
+    if (!dayId || !selectedExercises.length) {
       return
     }
 
     await addExercises({
       input: {
-        workoutId: activeDay?.id,
+        workoutId: dayId,
         exerciseIds: selectedExercises,
       },
     })

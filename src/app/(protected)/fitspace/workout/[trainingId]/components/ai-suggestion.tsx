@@ -1,5 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { Check, PlusIcon, SparklesIcon } from 'lucide-react'
+import { useParams } from 'next/navigation'
+import { useQueryState } from 'nuqs'
 import { Fragment, useEffect, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -10,7 +12,8 @@ import {
   GQLFitspaceGetAiExerciseSuggestionsMutation,
   useFitspaceAddAiExerciseToWorkoutMutation,
   useFitspaceGetAiExerciseSuggestionsMutation,
-  useFitspaceGetWorkoutQuery,
+  useFitspaceGetWorkoutDayQuery,
+  useFitspaceGetWorkoutNavigationQuery,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { cn } from '@/lib/utils'
@@ -43,7 +46,8 @@ function useAiLoadingText() {
 }
 
 export function AiSuggestion() {
-  const { activeDay } = useWorkout()
+  const [dayId] = useQueryState('day')
+
   const {
     mutateAsync: getAiExerciseSuggestions,
     isPending: isGettingAiExerciseSuggestion,
@@ -59,10 +63,8 @@ export function AiSuggestion() {
           variant="secondary"
           iconStart={<SparklesIcon className="text-amber-500" />}
           loading={isGettingAiExerciseSuggestion}
-          disabled={!activeDay?.id}
-          onClick={() =>
-            activeDay?.id && getAiExerciseSuggestions({ dayId: activeDay.id })
-          }
+          disabled={!dayId}
+          onClick={() => dayId && getAiExerciseSuggestions({ dayId: dayId })}
           className="grow w-full"
         >
           Get suggestions
@@ -85,25 +87,30 @@ function AiSuggestionItem({
   aiResult: GQLFitspaceGetAiExerciseSuggestionsMutation['getAiExerciseSuggestions'][number]
 }) {
   const invalidateQueries = useInvalidateQuery()
-  const { plan } = useWorkout()
-
-  const { activeDay } = useWorkout()
+  const { trainingId } = useParams<{ trainingId: string }>()
+  const [dayId] = useQueryState('day')
+  const { exercises } = useWorkout()
   const { mutateAsync: addAiExerciseToWorkout, isPending: isLoading } =
     useFitspaceAddAiExerciseToWorkoutMutation({
       onSuccess: async () => {
-        if (!plan?.id) return
+        if (!dayId) return
         await invalidateQueries({
-          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId: plan.id }),
+          queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+            dayId: dayId,
+          }),
+        })
+        await invalidateQueries({
+          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
         })
       },
     })
 
   const handleAddAiExerciseToWorkout = async (exerciseId: string) => {
-    if (!activeDay?.id || !aiResult) return
+    if (!dayId || !aiResult) return
 
     await addAiExerciseToWorkout({
       input: {
-        dayId: activeDay.id,
+        dayId: dayId,
         exerciseId: exerciseId,
         sets: aiResult.sets.map((set) => ({
           reps: set?.reps ?? 0,
@@ -113,7 +120,7 @@ function AiSuggestionItem({
     })
   }
 
-  const isAdded = activeDay?.exercises.some(
+  const isAdded = exercises.some(
     (exercise) => exercise.name === aiResult.exercise.name,
   )
   return (

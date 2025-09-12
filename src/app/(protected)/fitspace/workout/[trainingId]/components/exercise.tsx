@@ -1,11 +1,13 @@
 import { useParams } from 'next/navigation'
+import { useQueryState } from 'nuqs'
 import React from 'react'
 
 import { Card } from '@/components/ui/card'
 import {
-  GQLFitspaceGetWorkoutQuery,
+  GQLFitspaceGetWorkoutDayQuery,
   GQLFitspaceMarkExerciseAsCompletedMutation,
-  useFitspaceGetWorkoutQuery,
+  useFitspaceGetWorkoutDayQuery,
+  useFitspaceGetWorkoutNavigationQuery,
   useFitspaceMarkExerciseAsCompletedMutation,
   useFitspaceRemoveExerciseFromWorkoutMutation,
 } from '@/generated/graphql-client'
@@ -18,18 +20,17 @@ import { ExerciseProps } from './exercise/types'
 import { createOptimisticExerciseUpdate } from './optimistic-updates'
 
 export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
-  // const { getPastLogs } = useWorkout()
-  // const previousLogs = getPastLogs(exercise)
   const invalidateQuery = useInvalidateQuery()
   const { trainingId } = useParams<{ trainingId: string }>()
+  const [dayId] = useQueryState('day')
 
   const { optimisticMutate: markExerciseAsCompletedOptimistic } =
     useOptimisticMutation<
-      GQLFitspaceGetWorkoutQuery,
+      GQLFitspaceGetWorkoutDayQuery,
       GQLFitspaceMarkExerciseAsCompletedMutation,
       { exerciseId: string; completed: boolean }
     >({
-      queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+      queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
       mutationFn: useFitspaceMarkExerciseAsCompletedMutation().mutateAsync,
       updateFn: (oldData, { exerciseId, completed }) => {
         const updateFn = createOptimisticExerciseUpdate(exerciseId, completed)
@@ -37,7 +38,12 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
       },
       onSuccess: () => {
         invalidateQuery({
-          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+          queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+            dayId: dayId ?? '',
+          }),
+        })
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
         })
       },
     })
@@ -46,9 +52,12 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
     useFitspaceRemoveExerciseFromWorkoutMutation({
       onSuccess: () => {
         invalidateQuery({
-          queryKey: useFitspaceGetWorkoutQuery.getKey({
-            trainingId: trainingId,
+          queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+            dayId: dayId ?? '',
           }),
+        })
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
         })
       },
     })

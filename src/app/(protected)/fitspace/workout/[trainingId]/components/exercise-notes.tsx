@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { useWorkout } from '@/context/workout-context/workout-context'
 import {
+  GQLFitspaceGetWorkoutDayQuery,
   type GQLGetWorkoutExerciseNotesQuery,
   useCreateExerciseNoteMutation,
   useCreateNoteReplyMutation,
@@ -26,15 +27,15 @@ import {
 } from '@/hooks/use-optimistic-notes'
 import { cn } from '@/lib/utils'
 
-import { WorkoutExercise } from './workout-page.client'
-
 // Type definitions
 type NoteReply = NonNullable<
   GQLGetWorkoutExerciseNotesQuery['workoutExerciseNotes'][number]['notes'][number]['replies']
 >[number]
 
 interface ExerciseNotesProps {
-  exercise: WorkoutExercise
+  exercise: NonNullable<
+    GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
+  >['day']['exercises'][number]
 }
 
 interface Note {
@@ -53,7 +54,11 @@ interface Note {
 }
 
 // Hook to get notes count for the indicator
-export function useExerciseNotesCount(exercise: WorkoutExercise) {
+export function useExerciseNotesCount(
+  exercise: NonNullable<
+    GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
+  >['day']['exercises'][number],
+) {
   const exerciseName = exercise.substitutedBy?.name || exercise.name
   const { notesCountForExercise } = useWorkout()
 

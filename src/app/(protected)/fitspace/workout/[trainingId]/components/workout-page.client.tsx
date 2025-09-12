@@ -131,8 +131,6 @@ const WorkoutDay = ({
     },
   )
 
-  console.log('isLoading', isFetching)
-
   return (
     <WorkoutProvider
       exercises={

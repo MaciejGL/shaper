@@ -2,19 +2,22 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence } from 'framer-motion'
 import { PlusIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import { useQueryState } from 'nuqs'
 import React, { useEffect, useState } from 'react'
 
 import { useIsFirstRender } from '@/components/animated-grid'
 import { Button } from '@/components/ui/button'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
-  GQLFitspaceGetWorkoutQuery,
+  GQLFitspaceGetWorkoutDayQuery,
   GQLFitspaceRemoveSetMutation,
   GQLTrainingView,
   useFitspaceAddSetMutation,
-  useFitspaceGetWorkoutQuery,
+  useFitspaceGetWorkoutDayQuery,
+  useFitspaceGetWorkoutNavigationQuery,
   useFitspaceRemoveSetMutation,
 } from '@/generated/graphql-client'
+import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 import { cn } from '@/lib/utils'
 
@@ -30,8 +33,10 @@ import { ExerciseSetsProps } from './types'
 export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
   const isFirstRender = useIsFirstRender()
   const { trainingId } = useParams<{ trainingId: string }>()
+  const [dayId] = useQueryState('day')
   const queryClient = useQueryClient()
   const { preferences } = useUserPreferences()
+  const invalidateQuery = useInvalidateQuery()
   // Initialize state with current log values for each set
   const [setsLogs, setSetsLogs] = useState<
     Record<string, { weight: string; reps: string }>
@@ -97,68 +102,68 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
     useFitspaceAddSetMutation({
       onSuccess: (data) => {
         queryClient.setQueryData(
-          useFitspaceGetWorkoutQuery.getKey({ trainingId }),
-          (old: GQLFitspaceGetWorkoutQuery) => {
-            if (!old?.getWorkout?.plan || !data?.addSet) return old
+          useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
+          (old: GQLFitspaceGetWorkoutDayQuery) => {
+            if (!old?.getWorkoutDay?.day || !data?.addSet) return old
 
-            const newWorkout = JSON.parse(
+            const newData = JSON.parse(
               JSON.stringify(old),
-            ) as NonNullable<GQLFitspaceGetWorkoutQuery>
-            if (!newWorkout.getWorkout?.plan) return newWorkout
+            ) as NonNullable<GQLFitspaceGetWorkoutDayQuery>
+            if (!newData.getWorkoutDay?.day) return newData
 
-            newWorkout.getWorkout.plan.weeks.forEach((week) => {
-              week.days.forEach((day) => {
-                day.exercises.forEach((exerciseItem) => {
-                  const targetExerciseId =
-                    exercise.substitutedBy?.id || exercise.id
-                  const currentExerciseId =
-                    exerciseItem.substitutedBy?.id || exerciseItem.id
+            newData.getWorkoutDay.day.exercises.forEach((exerciseItem) => {
+              const targetExerciseId = exercise.substitutedBy?.id || exercise.id
+              const currentExerciseId =
+                exerciseItem.substitutedBy?.id || exerciseItem.id
 
-                  if (currentExerciseId === targetExerciseId) {
-                    const setsToUpdate =
-                      exerciseItem.substitutedBy?.sets || exerciseItem.sets
-                    const lastSet = setsToUpdate[setsToUpdate.length - 1]
-                    const maxOrder =
-                      setsToUpdate.length > 0
-                        ? Math.max(...setsToUpdate.map((set) => set.order))
-                        : 0
+              if (currentExerciseId === targetExerciseId) {
+                const setsToUpdate =
+                  exerciseItem.substitutedBy?.sets || exerciseItem.sets
+                const lastSet = setsToUpdate[setsToUpdate.length - 1]
+                const maxOrder =
+                  setsToUpdate.length > 0
+                    ? Math.max(...setsToUpdate.map((set) => set.order))
+                    : 0
 
-                    // Add new set with real server ID
-                    setsToUpdate.push({
-                      ...data.addSet,
-                      order: maxOrder + 1,
-                      isExtra: true,
-                      reps: lastSet?.reps || null,
-                      minReps: lastSet?.minReps || null,
-                      maxReps: lastSet?.maxReps || null,
-                      weight: lastSet?.weight || null,
-                      rpe: lastSet?.rpe || null,
-                      log: null,
-                      completedAt: null,
-                    })
-
-                    // ✅ Mark exercise as incomplete (new set added)
-                    const exerciseToUpdate =
-                      exerciseItem.substitutedBy || exerciseItem
-                    exerciseToUpdate.completedAt = null
-                  }
+                // Add new set with real server ID
+                setsToUpdate.push({
+                  ...data.addSet,
+                  order: maxOrder + 1,
+                  isExtra: true,
+                  reps: lastSet?.reps || null,
+                  minReps: lastSet?.minReps || null,
+                  maxReps: lastSet?.maxReps || null,
+                  weight: lastSet?.weight || null,
+                  rpe: lastSet?.rpe || null,
+                  log: null,
+                  completedAt: null,
                 })
-              })
+
+                // ✅ Mark exercise as incomplete (new set added)
+                const exerciseToUpdate =
+                  exerciseItem.substitutedBy || exerciseItem
+                exerciseToUpdate.completedAt = null
+              }
             })
 
-            return newWorkout
+            return newData
           },
         )
+
+        // Also invalidate navigation to update day progress
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
+        })
       },
     })
 
   // ✅ Remove Set: Optimistic update + check if all remaining sets completed
   const { optimisticMutate: removeSet } = useOptimisticMutation<
-    GQLFitspaceGetWorkoutQuery,
+    GQLFitspaceGetWorkoutDayQuery,
     GQLFitspaceRemoveSetMutation,
     { setId: string }
   >({
-    queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+    queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
     mutationFn: useFitspaceRemoveSetMutation().mutateAsync,
     updateFn: (oldData, { setId }) => {
       const updateFn = createOptimisticRemoveSetUpdate(setId)

@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'framer-motion'
 import { debounce, isNil } from 'lodash'
 import { CheckIcon } from 'lucide-react'
-import { useParams } from 'next/navigation'
+import { useQueryState } from 'nuqs'
 import React, {
   startTransition,
   useCallback,
@@ -18,10 +18,10 @@ import { Input } from '@/components/ui/input'
 import { SwipeToReveal } from '@/components/ui/swipe-to-reveal'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
-  GQLFitspaceGetWorkoutQuery,
+  GQLFitspaceGetWorkoutDayQuery,
   GQLFitspaceMarkSetAsCompletedMutation,
   GQLTrainingView,
-  useFitspaceGetWorkoutQuery,
+  useFitspaceGetWorkoutDayQuery,
   useFitspaceMarkSetAsCompletedMutation,
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
@@ -55,7 +55,7 @@ export function ExerciseSet({
   onSetUncompleted,
   onTimerComplete,
 }: ExerciseSetProps) {
-  const { trainingId } = useParams<{ trainingId: string }>()
+  const [dayId] = useQueryState('day')
   const { preferences } = useUserPreferences()
   const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
   const hasUserEdited = useRef(false)
@@ -68,26 +68,24 @@ export function ExerciseSet({
   const { mutateAsync: updateSetLog } = useFitspaceUpdateSetLogMutation({
     onMutate: async (newLog) => {
       await queryClient.cancelQueries({
-        queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+        queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
       })
 
       const previousWorkout = queryClient.getQueryData(
-        useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+        useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
       )
 
       queryClient.setQueryData(
-        useFitspaceGetWorkoutQuery.getKey({ trainingId }),
-        (old: GQLFitspaceGetWorkoutQuery) => {
-          if (!old?.getWorkout?.plan) return old
+        useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
+        (old: GQLFitspaceGetWorkoutDayQuery) => {
+          if (!old?.getWorkoutDay?.day) return old
 
-          const newWorkout = JSON.parse(
+          const newData = JSON.parse(
             JSON.stringify(old),
-          ) as NonNullable<GQLFitspaceGetWorkoutQuery>
-          if (!newWorkout.getWorkout?.plan) return newWorkout
+          ) as NonNullable<GQLFitspaceGetWorkoutDayQuery>
+          if (!newData.getWorkoutDay?.day) return newData
 
-          const updatedSet = newWorkout.getWorkout.plan.weeks
-            .flatMap((week) => week.days)
-            .flatMap((day) => day.exercises)
+          const updatedSet = newData.getWorkoutDay.day.exercises
             .flatMap(
               (exercise) => exercise.substitutedBy?.sets || exercise.sets,
             )
@@ -103,7 +101,7 @@ export function ExerciseSet({
             }
           }
 
-          return newWorkout
+          return newData
         },
       )
 
@@ -112,14 +110,14 @@ export function ExerciseSet({
     onError: (err, newLog, context) => {
       if (context?.previousWorkout) {
         queryClient.setQueryData(
-          useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+          useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
           context.previousWorkout,
         )
       }
     },
     onSettled: () => {
       invalidateQuery({
-        queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+        queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
       })
     },
   })
@@ -127,7 +125,7 @@ export function ExerciseSet({
   // ✅ Simplified using existing useOptimisticMutation pattern
   const { optimisticMutate: markSetAsCompletedOptimistic } =
     useOptimisticMutation<
-      GQLFitspaceGetWorkoutQuery,
+      GQLFitspaceGetWorkoutDayQuery,
       GQLFitspaceMarkSetAsCompletedMutation,
       {
         setId: string
@@ -136,7 +134,7 @@ export function ExerciseSet({
         weight?: number | null
       }
     >({
-      queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+      queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
       mutationFn: useFitspaceMarkSetAsCompletedMutation().mutateAsync,
       updateFn: (oldData, { setId, completed, reps, weight }) => {
         const updateFn = createOptimisticSetUpdate(setId, completed, {

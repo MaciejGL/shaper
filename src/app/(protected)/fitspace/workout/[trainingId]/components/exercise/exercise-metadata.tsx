@@ -10,6 +10,7 @@ import {
   TrashIcon,
 } from 'lucide-react'
 import { useParams } from 'next/navigation'
+import { useQueryState } from 'nuqs'
 import React, { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
@@ -23,7 +24,8 @@ import {
 } from '@/components/ui/dropdown-menu'
 import {
   GQLExerciseType,
-  useFitspaceGetWorkoutQuery,
+  useFitspaceGetWorkoutDayQuery,
+  useFitspaceGetWorkoutNavigationQuery,
   useFitspaceSwapExerciseMutation,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
@@ -32,7 +34,7 @@ import { cn } from '@/lib/utils'
 import { SwapExerciseDrawer } from '../swap-exercise-drawer'
 
 import { ExerciseDetailDrawer } from './exercise-detail-drawer'
-// import { ExerciseNotebook } from './exercise-notebook'
+import { ExerciseNotebook } from './exercise-notebook'
 import { ExerciseMetadataProps } from './types'
 
 export function ExerciseMetadata({
@@ -48,13 +50,19 @@ export function ExerciseMetadata({
   >(null)
 
   const { trainingId } = useParams<{ trainingId: string }>()
+  const [dayId] = useQueryState('day')
   const invalidateQuery = useInvalidateQuery()
 
   const { mutateAsync: swapExercise, isPending: isSwapping } =
     useFitspaceSwapExerciseMutation({
       onSuccess: () => {
         invalidateQuery({
-          queryKey: useFitspaceGetWorkoutQuery.getKey({ trainingId }),
+          queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+            dayId: dayId ?? '',
+          }),
+        })
+        invalidateQuery({
+          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
         })
       },
     })
@@ -83,7 +91,7 @@ export function ExerciseMetadata({
 
         <div className="flex gap-2 ml-auto">
           <ExerciseDetailDrawer exercise={exercise} />
-          {/* <ExerciseNotebook exercise={exercise} /> */}
+          <ExerciseNotebook exercise={exercise} />
           <DropdownMenu>
             <DropdownMenuTrigger
               asChild
