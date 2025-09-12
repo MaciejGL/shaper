@@ -98,7 +98,6 @@ const handleStaticAsset = async (request) => {
     const cached = await cache.match(request)
 
     if (cached) {
-      console.log('⚡ Static cache hit:', new URL(request.url).pathname)
       return cached
     }
 
@@ -107,7 +106,6 @@ const handleStaticAsset = async (request) => {
     if (response && response.status === 200) {
       const responseClone = response.clone()
       await cache.put(request, responseClone)
-      console.log('✅ Cached static asset:', new URL(request.url).pathname)
     }
 
     return response
