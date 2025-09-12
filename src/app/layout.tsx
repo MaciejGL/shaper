@@ -115,26 +115,9 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                  const isLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
-                  
-                  if (isLocalhost) {
-                    // Clear old caches in development to avoid manifest caching issues
-                    navigator.serviceWorker.getRegistrations().then(rs => rs.forEach(r => r.unregister()));
-                    if (window.caches) {
-                      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-                    }
-                    
-                    // Register SW after clearing
-                    setTimeout(() => {
-                      navigator.serviceWorker.register('/sw.js').catch((err) => {
-                        console.log('SW registration failed: ', err);
-                      });
-                    }, 100);
-                  } else {
-                    navigator.serviceWorker.register('/sw.js').catch((err) => {
-                      console.log('SW registration failed: ', err);
-                    });
-                  }
+                  navigator.serviceWorker.register('/sw.js').catch((err) => {
+                    console.log('SW registration failed: ', err);
+                  });
                 });
               }
             `,

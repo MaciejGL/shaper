@@ -10,8 +10,8 @@ export {
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
-  // Keep splash screen visible until WebView loads
-  // SplashScreen.hideAsync() is now called when WebView is ready
+  // Hide splash screen immediately since our app handles loading
+  SplashScreen.hideAsync()
 
   return (
     <Stack>

@@ -2,7 +2,6 @@
  * Enhanced WebView with Push Notifications and Deep Linking
  * Replaces basic WebView with full functionality
  */
-import * as SplashScreen from 'expo-splash-screen'
 import React, { forwardRef, useImperativeHandle, useRef } from 'react'
 import { StyleSheet } from 'react-native'
 import { WebView } from 'react-native-webview'
@@ -339,12 +338,6 @@ export const EnhancedWebView = forwardRef<
       }
     }
 
-    const handleWebViewLoad = () => {
-      // Hide splash screen when WebView is fully loaded
-      SplashScreen.hideAsync()
-      onLoad?.()
-    }
-
     return (
       <WebView
         ref={webViewRef}
@@ -357,7 +350,7 @@ export const EnhancedWebView = forwardRef<
         injectedJavaScript={injectedJavaScript}
         onMessage={handleMessage}
         onNavigationStateChange={onNavigationStateChange}
-        onLoad={handleWebViewLoad}
+        onLoad={onLoad}
         onError={(syntheticEvent) => {
           const { nativeEvent } = syntheticEvent
           console.error('❌ WebView error:', nativeEvent)
