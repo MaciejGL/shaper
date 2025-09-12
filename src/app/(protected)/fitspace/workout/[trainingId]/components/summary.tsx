@@ -10,6 +10,7 @@ import {
   WeightIcon,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useQueryState } from 'nuqs'
 import { Fragment, useEffect, useMemo, useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
@@ -46,21 +47,22 @@ export function Summary({
   const [displayedWeight, setDisplayedWeight] = useState(0)
   const [displayedDuration, setDisplayedDuration] = useState(0)
   const [weightComparison, setWeightComparison] = useState<string>('')
-  const { activeDay } = useWorkout()
+  const [dayId] = useQueryState('day')
+  const { exercises } = useWorkout()
   const {
     mutateAsync: markWorkoutAsCompleted,
     isPending: isMarkingWorkoutAsCompleted,
   } = useFitspaceMarkWorkoutAsCompletedMutation()
   const { data } = useFitspaceGetWorkoutInfoQuery(
     {
-      dayId: activeDay!.id,
+      dayId: dayId!,
     },
     {
-      enabled: !!activeDay?.id && open,
+      enabled: !!dayId && open,
     },
   )
 
-  const completedExercises = activeDay?.exercises.filter(
+  const completedExercises = exercises.filter(
     (exercise) => exercise.completedAt,
   )
 
@@ -108,10 +110,8 @@ export function Summary({
     [workoutDuration, weightKg, heightCm, age, sex, muscleGroups],
   )
 
-  const completionRate = activeDay?.exercises
-    ? Math.round(
-        ((completedExercises?.length || 0) / activeDay.exercises.length) * 100,
-      )
+  const completionRate = exercises.length
+    ? Math.round(((completedExercises?.length || 0) / exercises.length) * 100)
     : 100
 
   // Add this effect to update values after 1 second
@@ -155,11 +155,11 @@ export function Summary({
 
   const handleCompleteWorkout = async () => {
     try {
-      if (!activeDay) {
+      if (!dayId) {
         return
       }
-      await markWorkoutAsCompleted({ dayId: activeDay!.id })
-      router.push('/fitspace/my-plans?tab=active')
+      await markWorkoutAsCompleted({ dayId: dayId! })
+      router.push('/fitspace/my-plans')
     } catch (error) {
       console.error(error)
     }

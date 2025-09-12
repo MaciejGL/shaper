@@ -1,25 +1,13 @@
 'use client'
 
-import { useQueryState } from 'nuqs'
-import {
-  ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-} from 'react'
+import { ReactNode, createContext, useContext, useMemo } from 'react'
 
-import { WorkoutExercise } from '@/app/(protected)/fitspace/workout/[trainingId]/components/workout-page.client'
-import { useUserPreferences } from '@/context/user-preferences-context'
 import {
+  GQLFitspaceGetWorkoutDayQuery,
   GQLFitspaceGetWorkoutQuery,
   GQLGetWorkoutExerciseNotesQuery,
 } from '@/generated/graphql-client'
 import { useWorkoutNotesBatch } from '@/hooks/use-workout-notes-batch'
-import { getCurrentWeekAndDay } from '@/lib/get-current-week-and-day'
-
-import { getPreviousLogsByExercise } from './utils'
 
 const WorkoutContext = createContext<WorkoutContextType | null>(null)
 
@@ -28,17 +16,10 @@ export type WorkoutContextPlan = NonNullable<
 >['plan']
 
 type WorkoutContextType = {
-  plan?: WorkoutContextPlan
-
-  activeWeek?: WorkoutContextPlan['weeks'][number]
-  activeDay?: WorkoutContextPlan['weeks'][number]['days'][number]
-  setActiveWeekId: (weekId: string) => void
-  setActiveDayId: (dayId: string) => void
-  getPastLogs: (
-    exercise: WorkoutExercise,
-  ) => ReturnType<typeof getPreviousLogsByExercise>
-
   // Notes functionality - batched for all exercises in active day
+  exercises: NonNullable<
+    GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
+  >['day']['exercises']
   notesForExercise: (
     exerciseName: string,
   ) => GQLGetWorkoutExerciseNotesQuery['workoutExerciseNotes'][number]['notes']
@@ -55,69 +36,16 @@ type WorkoutContextType = {
 
 export function WorkoutProvider({
   children,
-  plan,
+  exercises,
 }: {
   children: ReactNode
-  plan?: NonNullable<GQLFitspaceGetWorkoutQuery['getWorkout']>['plan']
+  exercises: NonNullable<
+    GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
+  >['day']['exercises']
 }) {
-  const { preferences } = useUserPreferences()
-  const [activeWeekId, setActiveWeekId] = useQueryState('week')
-  const [activeDayId, setActiveDayId] = useQueryState('day')
-
-  useEffect(() => {
-    if (!activeWeekId || !activeDayId) {
-      const { currentWeek, currentDay } = getCurrentWeekAndDay(
-        plan?.weeks,
-        preferences.weekStartsOn,
-      )
-
-      setActiveWeekId(currentWeek?.id ?? '')
-      setActiveDayId(currentDay?.id ?? '')
-    }
-  }, [
-    plan,
-    activeWeekId,
-    activeDayId,
-    setActiveWeekId,
-    setActiveDayId,
-    preferences.weekStartsOn,
-  ])
-
-  const handleSetActiveWeek = useCallback(
-    (weekId: string) => {
-      const activeWeekIndex = plan?.weeks.findIndex(
-        (week) => week.id === activeWeekId,
-      )
-      const activeDayIndex = plan?.weeks[activeWeekIndex ?? 0].days.findIndex(
-        (day) => day.id === activeDayId,
-      )
-
-      const newWeekIndex = plan?.weeks.findIndex((week) => week.id === weekId)
-
-      const newWeekId = plan?.weeks[newWeekIndex ?? 0].id
-      const newDayId =
-        plan?.weeks[newWeekIndex ?? 0].days[activeDayIndex ?? 0].id
-      if (newWeekId && newDayId) {
-        setActiveWeekId(newWeekId)
-        setActiveDayId(newDayId)
-      }
-    },
-    [plan?.weeks, activeDayId, activeWeekId, setActiveWeekId, setActiveDayId],
-  )
-  const getPastLogs = useCallback(
-    (exercise: WorkoutExercise) =>
-      getPreviousLogsByExercise(exercise, plan, activeWeekId),
-    [plan, activeWeekId],
-  )
-
-  // Get active day for notes batching
-  const activeDay = plan?.weeks
-    .find((week) => week.id === activeWeekId)
-    ?.days.find((day) => day.id === activeDayId)
-
   // Batch fetch notes for all exercises in the active day
   const notesBatch = useWorkoutNotesBatch(
-    activeDay?.exercises.map((ex) => ({
+    exercises.map((ex) => ({
       name: ex.substitutedBy?.name || ex.name,
       id: ex.substitutedBy?.id || ex.id,
     })) || [],
@@ -125,14 +53,7 @@ export function WorkoutProvider({
 
   const value = useMemo(
     () => ({
-      plan,
-
-      activeWeek: plan?.weeks.find((week) => week.id === activeWeekId),
-      activeDay,
-      setActiveWeekId: handleSetActiveWeek,
-      setActiveDayId,
-      getPastLogs,
-
+      exercises,
       // Notes functionality - batched for all exercises
       notesForExercise: notesBatch.getNotesForExercise,
       notesCountForExercise: notesBatch.getNotesCountForExercise,
@@ -144,12 +65,7 @@ export function WorkoutProvider({
       repliesCountForNote: notesBatch.getRepliesCountForNote,
     }),
     [
-      plan,
-      activeWeekId,
-      activeDay,
-      handleSetActiveWeek,
-      setActiveDayId,
-      getPastLogs,
+      exercises,
       notesBatch.getNotesForExercise,
       notesBatch.getNotesCountForExercise,
       notesBatch.isLoading,

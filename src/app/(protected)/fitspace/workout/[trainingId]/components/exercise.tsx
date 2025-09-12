@@ -2,7 +2,6 @@ import { useParams } from 'next/navigation'
 import React from 'react'
 
 import { Card } from '@/components/ui/card'
-import { useWorkout } from '@/context/workout-context/workout-context'
 import {
   GQLFitspaceGetWorkoutQuery,
   GQLFitspaceMarkExerciseAsCompletedMutation,
@@ -18,9 +17,9 @@ import { ExerciseSets } from './exercise/exercise-sets'
 import { ExerciseProps } from './exercise/types'
 import { createOptimisticExerciseUpdate } from './optimistic-updates'
 
-export function Exercise({ exercise }: ExerciseProps) {
-  const { getPastLogs } = useWorkout()
-  const previousLogs = getPastLogs(exercise)
+export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
+  // const { getPastLogs } = useWorkout()
+  // const previousLogs = getPastLogs(exercise)
   const invalidateQuery = useInvalidateQuery()
   const { trainingId } = useParams<{ trainingId: string }>()
 
@@ -76,6 +75,10 @@ export function Exercise({ exercise }: ExerciseProps) {
   const currentExercise = exercise.substitutedBy || exercise
   const isExerciseCompleted = Boolean(currentExercise.completedAt)
 
+  const exercisePreviousLogs = previousDayLogs?.find(
+    (log) => log.exerciseName === exercise.name,
+  )
+
   return (
     <Card borderless className="p-0 gap-2">
       <div className="px-2 pt-2">
@@ -87,7 +90,10 @@ export function Exercise({ exercise }: ExerciseProps) {
           isRemoving={isRemoving}
         />
       </div>
-      <ExerciseSets exercise={exercise} previousLogs={previousLogs} />
+      <ExerciseSets
+        exercise={exercise}
+        previousLogs={exercisePreviousLogs?.sets}
+      />
     </Card>
   )
 }

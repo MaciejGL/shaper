@@ -25,16 +25,20 @@ import MuscleGroup from '../muscle-group/model'
 export default class TrainingExercise implements GQLTrainingExercise {
   constructor(
     protected data: PrismaTrainingExercise & {
-      substitutedBy?: PrismaTrainingExercise & {
-        base?: PrismaBaseExercise & {
-          muscleGroups: PrismaMuscleGroup[]
-        }
-        sets?: (PrismaExerciseSet & {
-          log?: PrismaExerciseSetLog
-        })[]
-      }
+      substitutedBy?:
+        | (PrismaTrainingExercise & {
+            base?:
+              | (PrismaBaseExercise & {
+                  muscleGroups: PrismaMuscleGroup[]
+                })
+              | null
+            sets?: (PrismaExerciseSet & {
+              log?: PrismaExerciseSetLog | null
+            })[]
+          })
+        | null
       sets?: (PrismaExerciseSet & {
-        log?: PrismaExerciseSetLog
+        log?: PrismaExerciseSetLog | null
       })[]
       base?:
         | (PrismaBaseExercise & {
@@ -245,7 +249,7 @@ export class ExerciseSubstitute implements GQLSubstitute {
           })
         | null
       sets?: (PrismaExerciseSet & {
-        log?: PrismaExerciseSetLog
+        log?: PrismaExerciseSetLog | null
       })[]
     },
     protected context: GQLContext,

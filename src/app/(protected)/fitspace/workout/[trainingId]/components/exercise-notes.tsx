@@ -56,6 +56,7 @@ interface Note {
 export function useExerciseNotesCount(exercise: WorkoutExercise) {
   const exerciseName = exercise.substitutedBy?.name || exercise.name
   const { notesCountForExercise } = useWorkout()
+
   return notesCountForExercise(exerciseName)
 }
 

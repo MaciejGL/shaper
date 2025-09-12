@@ -205,6 +205,143 @@ query FitspaceGetWorkoutInfo($dayId: ID!) {
   }
 }
 
+query FitspaceGetWorkoutDay($dayId: ID!) {
+  getWorkoutDay(dayId: $dayId) {
+    day {
+      id
+      dayOfWeek
+      isRestDay
+      workoutType
+      startedAt
+      completedAt
+      scheduledAt
+      duration
+
+      exercises {
+        id
+        name
+        restSeconds
+        tempo
+        warmupSets
+        description
+        tips
+        difficulty
+        instructions
+        additionalInstructions
+        type
+        order
+        videoUrl
+        images {
+          id
+          thumbnail
+          medium
+          order
+        }
+        completedAt
+        isExtra
+        substitutedBy {
+          id
+          name
+          instructions
+          additionalInstructions
+          type
+          videoUrl
+          completedAt
+          baseId
+          sets {
+            id
+            order
+            reps
+            minReps
+            maxReps
+            weight
+            rpe
+            isExtra
+            completedAt
+            log {
+              id
+              weight
+              rpe
+              reps
+              createdAt
+            }
+          }
+        }
+        substitutes {
+          id
+          substitute {
+            id
+            name
+          }
+        }
+        muscleGroups {
+          id
+          alias
+          groupSlug
+        }
+        sets {
+          id
+          order
+          reps
+          minReps
+          maxReps
+          weight
+          rpe
+          isExtra
+          completedAt
+          log {
+            id
+            weight
+            rpe
+            reps
+            createdAt
+          }
+        }
+      }
+    }
+    previousDayLogs {
+      id
+      exerciseName
+      sets {
+        id
+        order
+        log {
+          id
+          weight
+          reps
+          createdAt
+        }
+      }
+    }
+  }
+}
+
+query FitspaceGetWorkoutNavigation($trainingId: ID!) {
+  getWorkoutNavigation(trainingId: $trainingId) {
+    plan {
+      id
+      startDate
+      weeks {
+        id
+        weekNumber
+        completedAt
+        scheduledAt
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          completedAt
+          scheduledAt
+          exercises {
+            id
+            completedAt
+          }
+        }
+      }
+    }
+  }
+}
+
 mutation FitspaceGetAiExerciseSuggestions($dayId: ID!) {
   getAiExerciseSuggestions(dayId: $dayId) {
     exercise {

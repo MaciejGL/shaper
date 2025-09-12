@@ -32,7 +32,7 @@ import { cn } from '@/lib/utils'
 import { SwapExerciseDrawer } from '../swap-exercise-drawer'
 
 import { ExerciseDetailDrawer } from './exercise-detail-drawer'
-import { ExerciseNotebook } from './exercise-notebook'
+// import { ExerciseNotebook } from './exercise-notebook'
 import { ExerciseMetadataProps } from './types'
 
 export function ExerciseMetadata({
@@ -83,7 +83,7 @@ export function ExerciseMetadata({
 
         <div className="flex gap-2 ml-auto">
           <ExerciseDetailDrawer exercise={exercise} />
-          <ExerciseNotebook exercise={exercise} />
+          {/* <ExerciseNotebook exercise={exercise} /> */}
           <DropdownMenu>
             <DropdownMenuTrigger
               asChild

@@ -9,7 +9,7 @@ import ExerciseSetLog from '../exercise-set-log/model'
 export default class ExerciseSet implements GQLExerciseSet {
   constructor(
     protected data: PrismaExerciseSet & {
-      log?: PrismaExerciseSetLog
+      log?: PrismaExerciseSetLog | null
     },
   ) {}
 
@@ -64,10 +64,16 @@ export default class ExerciseSet implements GQLExerciseSet {
   }
 
   get createdAt() {
+    if (typeof this.data.createdAt === 'string') {
+      return this.data.createdAt
+    }
     return this.data.createdAt.toISOString()
   }
 
   get updatedAt() {
+    if (typeof this.data.updatedAt === 'string') {
+      return this.data.updatedAt
+    }
     return this.data.updatedAt.toISOString()
   }
 }

@@ -113,7 +113,7 @@ export default function RootLayout({
         <Providers>{children}</Providers>
 
         {/* Service Worker Registration - LogRocket best practice */}
-        <ServiceWorkerRegistration />
+        {/* <ServiceWorkerRegistration /> */}
       </body>
     </html>
   )

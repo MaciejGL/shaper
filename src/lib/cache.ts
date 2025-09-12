@@ -33,6 +33,8 @@ const keys = {
     public: () => 'exercises:public',
     publicFiltered: (hash: string) => `exercises:public:${hash}`,
     single: (id: string) => `exercise:${id}`,
+    previousExercises: (planId: string, dayId: string) =>
+      `previous-exercises-v4:${planId}:${dayId}`,
   },
   packages: {
     active: () => 'packages:active',

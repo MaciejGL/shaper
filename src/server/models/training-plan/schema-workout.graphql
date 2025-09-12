@@ -2,6 +2,24 @@ type GetWorkoutPayload {
   plan: TrainingPlan!
 }
 
+type GetWorkoutNavigationPayload {
+  plan: TrainingPlan!
+}
+
+type PreviousExerciseLog {
+  id: ID!
+  exerciseName: String!
+  completedAt: String
+  sets: [ExerciseSet!]!
+}
+
+type GetWorkoutDayPayload {
+  day: TrainingDay!
+  previousDayLogs: [PreviousExerciseLog!]!
+}
+
 type Query {
   getWorkout(trainingId: ID): GetWorkoutPayload
+  getWorkoutNavigation(trainingId: ID): GetWorkoutNavigationPayload
+  getWorkoutDay(dayId: ID): GetWorkoutDayPayload
 }

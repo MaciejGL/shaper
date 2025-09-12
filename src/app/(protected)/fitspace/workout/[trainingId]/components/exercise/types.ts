@@ -1,7 +1,16 @@
-import { WorkoutExercise } from '../workout-page.client'
+import { GQLFitspaceGetWorkoutDayQuery } from '@/generated/graphql-client'
+
+type WorkoutExercise = NonNullable<
+  GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
+>['day']['exercises'][number]
+
+type PreviousDayLogs = NonNullable<
+  GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
+>['previousDayLogs']
 
 export interface ExerciseProps {
   exercise: WorkoutExercise
+  previousDayLogs?: PreviousDayLogs
 }
 
 export interface ExerciseHeaderProps {
@@ -19,20 +28,13 @@ export interface ExerciseSelectorProps {
 
 export interface ExerciseSetsProps {
   exercise: WorkoutExercise
-  previousLogs: (WorkoutExercise & {
-    performedOnWeekNumber: number
-    performedOnDayNumber: number
-  })[]
+  previousLogs?: PreviousDayLogs[number]['sets'][number][] | null
 }
 
 export interface ExerciseSetProps {
   set: WorkoutExercise['sets'][number]
   previousSetWeightLog?: number | null
   previousSetRepsLog?: number | null
-  previousLogs: (WorkoutExercise & {
-    performedOnWeekNumber: number
-    performedOnDayNumber: number
-  })[]
   reps: string
   weight: string
   onRepsChange: (reps: string) => void

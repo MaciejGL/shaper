@@ -23,9 +23,12 @@ import {
   GQLQueryGetClientTrainingPlansArgs,
   GQLQueryGetTemplatesArgs,
   GQLQueryGetTrainingPlanByIdArgs,
+  GQLQueryGetWorkoutDayArgs,
+  GQLQueryGetWorkoutNavigationArgs,
 } from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
 import { ensureTrainerClientAccess } from '@/lib/access-control'
+import { cache } from '@/lib/cache'
 import {
   calculateTrainingDayScheduledDate,
   translateDayOfWeekForUser,
@@ -38,7 +41,9 @@ import { getWeekStartUTC } from '@/lib/server-date-utils'
 import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
 
+import ExerciseSet from '../exercise-set/model'
 import { createNotification } from '../notification/factory'
+import TrainingDay from '../training-day/model'
 import { duplicatePlan, getFullPlanById } from '../training-utils.server'
 
 import TrainingPlan from './model'
@@ -1071,7 +1076,6 @@ export async function updateTrainingPlan(
                       dayId: newDay.id,
                       name: exerciseInput.name ?? '',
                       restSeconds: exerciseInput.restSeconds,
-                      tempo: exerciseInput.tempo,
                       instructions: exerciseInput.instructions ?? [],
                       tips: exerciseInput.tips ?? [],
                       difficulty: exerciseInput.difficulty,
@@ -1914,4 +1918,301 @@ export async function getCurrentWorkoutWeek(context: GQLContext) {
     currentWeekIndex,
     totalWeeks: plan.weeks.length,
   }
+}
+
+export async function getWorkoutNavigation(
+  args: GQLQueryGetWorkoutNavigationArgs,
+  context: GQLContext,
+) {
+  const { trainingId } = args
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  if (!trainingId) {
+    return null
+  }
+
+  // Lightweight query optimized for navigation - only fetch weeks and days without exercises/sets
+  const plan = await prisma.trainingPlan.findUnique({
+    where: {
+      id: trainingId,
+      active: true,
+      OR: [
+        { assignedToId: user.user.id },
+        { createdById: user.user.id, assignedToId: user.user.id },
+      ],
+    },
+    include: {
+      weeks: {
+        orderBy: {
+          weekNumber: 'asc',
+        },
+        include: {
+          days: {
+            orderBy: {
+              dayOfWeek: 'asc',
+            },
+            // Only include essential day data for navigation
+            select: {
+              id: true,
+              dayOfWeek: true,
+              isRestDay: true,
+              completedAt: true,
+              scheduledAt: true,
+              exercises: {
+                select: {
+                  id: true,
+                  completedAt: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!plan || plan.assignedToId !== user.user.id) {
+    return null
+  }
+
+  // For self-created plans, allow access regardless of start date
+  if (plan.assignedToId === user.user.id && plan.createdById === user.user.id) {
+    return {
+      plan: new TrainingPlan(plan, context),
+    }
+  }
+
+  // For assigned plans, require a start date
+  if (!plan.startDate) {
+    return null
+  }
+
+  return {
+    plan: new TrainingPlan(plan, context),
+  }
+}
+
+export async function getWorkoutDay(
+  args: GQLQueryGetWorkoutDayArgs,
+  context: GQLContext,
+) {
+  const { dayId } = args
+  const user = context.user
+  if (!user) {
+    throw new Error('User not found')
+  }
+
+  if (!dayId) {
+    return null
+  }
+
+  // Fetch the day with all exercise data
+  const day = await prisma.trainingDay.findUnique({
+    where: { id: dayId },
+    include: {
+      week: {
+        include: {
+          plan: {
+            select: {
+              id: true,
+              assignedToId: true,
+              createdById: true,
+              active: true,
+              weeks: {
+                select: {
+                  weekNumber: true,
+                },
+              },
+            },
+          },
+        },
+      },
+      events: true,
+      exercises: {
+        orderBy: {
+          order: 'asc',
+        },
+        include: {
+          substitutedBy: {
+            include: {
+              base: {
+                include: {
+                  muscleGroups: true,
+                },
+              },
+              sets: {
+                include: {
+                  log: true,
+                },
+                orderBy: {
+                  order: 'asc',
+                },
+              },
+            },
+          },
+          substitutes: true,
+          base: {
+            include: {
+              images: true,
+              muscleGroups: true,
+              substitutes: {
+                include: {
+                  substitute: true,
+                },
+              },
+            },
+          },
+          logs: true,
+          sets: {
+            include: {
+              log: true,
+            },
+            orderBy: {
+              order: 'asc',
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!day) {
+    throw new Error('Day not found')
+  }
+
+  // Check if user has access to this day
+  const plan = day.week.plan
+  if (plan.assignedToId !== user.user.id) {
+    throw new Error('Access denied')
+  }
+
+  // For assigned plans, require the plan to be active
+  if (plan.createdById !== user.user.id && !plan.active) {
+    throw new Error('Plan is not active')
+  }
+
+  // Fetch previous exercise logs for all exercises in this day
+  const currentWeekNumber = day.week.weekNumber
+  const exerciseNames = day.exercises
+    .map((ex) => ex.base?.name)
+    .filter((name) => name !== undefined)
+  const exerciseIds = day.exercises.map((ex) => ex.id)
+
+  const cacheKey = cache.keys.exercises.previousExercises(plan.id, dayId)
+
+  const cached = await cache.get<
+    Prisma.TrainingExerciseGetPayload<{
+      select: {
+        id: true
+        name: true
+        completedAt: true
+        sets: {
+          include: {
+            log: true
+          }
+        }
+      }
+    }>[]
+  >(cacheKey)
+
+  if (cached) {
+    return {
+      day: new TrainingDay(day, context),
+      previousDayLogs: getPreviousLogsByExerciseName(cached),
+    }
+  }
+
+  // Find all previous exercises with matching names (single query)
+  const allPreviousExercises = await prisma.trainingExercise.findMany({
+    where: {
+      name: { in: exerciseNames },
+      id: { notIn: exerciseIds }, // Exclude current day's exercises
+      completedAt: { not: null }, // Only completed exercises with logs
+      day: {
+        week: {
+          planId: plan.id,
+          weekNumber: { lt: currentWeekNumber }, // Only from previous weeks
+        },
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      completedAt: true,
+      sets: {
+        where: {
+          log: { isNot: null }, // Only sets with actual logs
+        },
+        include: {
+          log: true,
+        },
+        orderBy: {
+          order: 'asc',
+        },
+      },
+      day: {
+        select: {
+          week: {
+            select: {
+              weekNumber: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: [
+      { day: { week: { weekNumber: 'desc' } } }, // Most recent first
+      { day: { dayOfWeek: 'desc' } },
+    ],
+  })
+
+  // Keep only the most recent exercise for each name
+  const seenExerciseNames = new Set<string>()
+  const previousExercises = allPreviousExercises.filter((exercise) => {
+    if (seenExerciseNames.has(exercise.name)) {
+      return false
+    }
+    seenExerciseNames.add(exercise.name)
+    return true
+  })
+
+  await cache.set(cacheKey, previousExercises)
+  const previousLogsByExerciseName =
+    getPreviousLogsByExerciseName(previousExercises)
+
+  return {
+    day: new TrainingDay(day, context),
+    previousDayLogs: previousLogsByExerciseName,
+  }
+}
+
+const getPreviousLogsByExerciseName = async (
+  previousExercises: Prisma.TrainingExerciseGetPayload<{
+    select: {
+      id: true
+      name: true
+      completedAt: true
+      sets: {
+        include: {
+          log: true
+        }
+      }
+    }
+  }>[],
+) => {
+  const previousLogsByExerciseName = previousExercises
+    .filter((exercise) => exercise !== null)
+    .map((exercise) => ({
+      id: exercise.id,
+      exerciseName: exercise.name,
+      completedAt: exercise.completedAt
+        ? new Date(exercise.completedAt).toISOString()
+        : null,
+      sets: exercise.sets.map((set) => new ExerciseSet(set)),
+    }))
+
+  return previousLogsByExerciseName
 }

@@ -20,21 +20,27 @@ export default class TrainingDay implements GQLTrainingDay {
     protected data: PrismaTrainingDay & {
       events?: PrismaWorkoutSessionEvent[]
       exercises?: (PrismaTrainingExercise & {
-        substitutedBy?: PrismaTrainingExercise & {
-          base?: PrismaBaseExercise & {
-            muscleGroups: PrismaMuscleGroup[]
-          }
-          sets?: (PrismaExerciseSet & {
-            log?: PrismaExerciseSetLog
-          })[]
-        }
+        substitutedBy?:
+          | (PrismaTrainingExercise & {
+              base?:
+                | (PrismaBaseExercise & {
+                    muscleGroups: PrismaMuscleGroup[]
+                  })
+                | null
+              sets?: (PrismaExerciseSet & {
+                log?: PrismaExerciseSetLog | null
+              })[]
+            })
+          | null
         sets?: (PrismaExerciseSet & {
-          log?: PrismaExerciseSetLog
+          log?: PrismaExerciseSetLog | null
         })[]
-        base?: PrismaBaseExercise & {
-          muscleGroups: PrismaMuscleGroup[]
-          images: PrismaImage[]
-        }
+        base?:
+          | (PrismaBaseExercise & {
+              muscleGroups: PrismaMuscleGroup[]
+              images: PrismaImage[]
+            })
+          | null
       })[]
     },
     protected context: GQLContext,

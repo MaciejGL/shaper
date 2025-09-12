@@ -43,7 +43,6 @@ export function ExerciseSet({
   set,
   previousSetWeightLog,
   previousSetRepsLog,
-  previousLogs,
   reps,
   weight,
   onRepsChange,
@@ -219,17 +218,11 @@ export function ExerciseSet({
 
   // Get data from previous workout for the "PREVIOUS" column (same set order from most recent workout with data)
   const getPreviousSetForColumn = () => {
-    // Look through previous workouts from most recent to oldest to find logged data
-    for (let i = previousLogs.length - 1; i >= 0; i--) {
-      const workoutLog = previousLogs[i]
-      const correspondingSet = workoutLog.sets.find(
-        (s) => s.order === set.order,
-      )
-      if (correspondingSet?.log) {
-        return correspondingSet
-      }
+    if (!previousSetRepsLog || !previousSetWeightLog) return null
+    return {
+      reps: previousSetRepsLog,
+      weight: previousSetWeightLog,
     }
-    return null
   }
 
   const thisSet = getPreviousSetForColumn()
@@ -364,16 +357,16 @@ export function ExerciseSet({
             {isAdvancedView && (
               <div className="text-xs text-muted-foreground text-center">
                 <div>
-                  {!isNil(thisSet?.log?.reps || thisSet?.log?.weight) ? (
+                  {!isNil(thisSet?.reps || thisSet?.weight) ? (
                     <p>
-                      {typeof thisSet?.log?.reps === 'number'
-                        ? thisSet.log.reps.toString()
+                      {typeof thisSet?.reps === 'number'
+                        ? thisSet.reps.toString()
                         : ''}
-                      {!isNil(thisSet?.log?.weight) &&
-                        !isNil(thisSet?.log?.reps) &&
+                      {!isNil(thisSet?.weight) &&
+                        !isNil(thisSet?.reps) &&
                         ' x '}
-                      {typeof thisSet?.log?.weight === 'number'
-                        ? toDisplayWeight(thisSet.log.weight)?.toString() +
+                      {typeof thisSet?.weight === 'number'
+                        ? toDisplayWeight(thisSet.weight)?.toString() +
                           preferences.weightUnit
                         : ''}
                     </p>

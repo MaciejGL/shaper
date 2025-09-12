@@ -1,31 +1,40 @@
-import { redirect } from 'next/navigation'
-
 import {
-  FitspaceGetWorkoutDocument,
-  GQLFitspaceGetWorkoutQuery,
+  FitspaceGetWorkoutDayDocument,
+  FitspaceGetWorkoutNavigationDocument,
+  GQLFitspaceGetWorkoutDayQuery,
+  GQLFitspaceGetWorkoutNavigationQuery,
 } from '@/generated/graphql-client'
 import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
-import { WorkoutPageClient } from './components/workout-page.client'
+import { WorkoutPageClientNew } from './components/workout-page.client'
 
 interface WorkoutPageProps {
   params: Promise<{ trainingId: string }>
+  searchParams: Promise<{ day: string }>
 }
 
-export default async function WorkoutPage({ params }: WorkoutPageProps) {
+export default async function WorkoutPage({
+  params,
+  searchParams,
+}: WorkoutPageProps) {
   const { trainingId } = await params
+  const { day: dayId } = await searchParams
 
-  const { data, error } = await gqlServerFetch<GQLFitspaceGetWorkoutQuery>(
-    FitspaceGetWorkoutDocument,
-    {
-      trainingId,
-    },
+  const navigationPromise =
+    gqlServerFetch<GQLFitspaceGetWorkoutNavigationQuery>(
+      FitspaceGetWorkoutNavigationDocument,
+      { trainingId },
+    )
+  const dayPromise = gqlServerFetch<GQLFitspaceGetWorkoutDayQuery>(
+    FitspaceGetWorkoutDayDocument,
+    { dayId },
   )
 
-  if (error || !data?.getWorkout) {
-    console.error(error)
-    return redirect('/fitspace/my-plans')
-  }
-
-  return <WorkoutPageClient plan={data.getWorkout.plan} />
+  return (
+    <WorkoutPageClientNew
+      trainingId={trainingId}
+      navigationPromise={navigationPromise}
+      dayPromise={dayPromise}
+    />
+  )
 }

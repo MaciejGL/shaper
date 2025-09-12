@@ -1,7 +1,9 @@
 import { formatDate } from 'date-fns'
+import { useIsomorphicLayoutEffect } from 'framer-motion'
 import { BadgeCheckIcon, ChevronLeft } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 import { useQueryState } from 'nuqs'
+import { useMemo, useState } from 'react'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { Button } from '@/components/ui/button'
@@ -13,33 +15,41 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useUserPreferences } from '@/context/user-preferences-context'
-import { useWorkout } from '@/context/workout-context/workout-context'
-import { useTrackWorkoutSession } from '@/hooks/use-track-workout-session'
 import { formatWeekRange, sortDaysForDisplay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
-import { WorkoutDay } from './workout-page.client'
+import { NavigationDay, NavigationPlan } from './workout-page.client'
 
-export function Navigation() {
-  const { activeDay } = useWorkout()
-  const dayId = activeDay?.id
-  // Only start tracking after user has completed at least 2 sets (indicates real workout)
-  const completedSetsCount =
-    activeDay?.exercises.reduce(
-      (total, ex) => total + ex.sets.filter((set) => set.completedAt).length,
-      0,
-    ) || 0
-  const isActive = completedSetsCount >= 2
-  const isCompleted = activeDay?.completedAt ? true : false
+interface NavigationProps {
+  plan?: NavigationPlan | null
+}
 
-  // Find the most recent activity (last completed set) for auto-pause detection
-  const lastActivityTimestamp = activeDay?.exercises
-    .flatMap((ex) => ex.sets)
-    .filter((set) => set.completedAt)
-    .map((set) => new Date(set.completedAt!).getTime())
-    .sort((a, b) => b - a)[0] // Most recent timestamp
+export function Navigation({ plan }: NavigationProps) {
+  const [isClient, setIsClient] = useState(false)
 
-  useTrackWorkoutSession(dayId, isActive, isCompleted, lastActivityTimestamp)
+  useIsomorphicLayoutEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  if (!plan) return null
+
+  if (!isClient) {
+    // Server-side fallback without Select component
+    return (
+      <div
+        className={cn(
+          'bg-sidebar rounded-b-xl',
+          '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
+          'px-2 py-4 md:px-4 lg:p-8',
+        )}
+      >
+        <div className="mx-auto max-w-sm">
+          <div className="h-8 bg-muted rounded animate-pulse mb-4" />
+          <div className="h-20 bg-muted rounded animate-pulse" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -51,19 +61,16 @@ export function Navigation() {
       )}
     >
       <div className="mx-auto max-w-sm">
-        <WeekSelector />
-        <DaySelector />
+        <WeekSelector plan={plan} />
+        <DaySelector plan={plan} />
       </div>
     </div>
   )
 }
 
-function Day({ day }: { day: WorkoutDay }) {
-  const { activeDay } = useWorkout()
+function Day({ day, isSelected }: { day: NavigationDay; isSelected: boolean }) {
   const [, setActiveDayId] = useQueryState('day')
   const [, setActiveExerciseId] = useQueryState('exercise')
-
-  const isSelected = activeDay?.id === day.id
 
   const handleClick = () => {
     setActiveExerciseId(day.exercises.at(0)?.id ?? '')
@@ -115,9 +122,23 @@ function Day({ day }: { day: WorkoutDay }) {
   )
 }
 
-function DaySelector() {
-  const { activeWeek } = useWorkout()
+function DaySelector({ plan }: { plan: NavigationPlan }) {
   const { preferences } = useUserPreferences()
+  const [activeWeekId] = useQueryState('week')
+  const [activeDayId] = useQueryState('day')
+
+  // Get default selection
+  const { weekId: defaultWeekId } = useMemo(
+    () => getDefaultSelection(plan),
+    [plan],
+  )
+
+  const effectiveWeekId = activeWeekId || defaultWeekId
+
+  // Find the active week from the plan
+  const activeWeek = useMemo(() => {
+    return plan.weeks.find((week) => week.id === effectiveWeekId)
+  }, [plan.weeks, effectiveWeekId])
 
   if (!activeWeek) return null
 
@@ -130,43 +151,132 @@ function DaySelector() {
   return (
     <div className="flex gap-[4px] w-full justify-between mt-2">
       {sortedDays.map((day) => (
-        <Day key={day.id} day={day} />
+        <Day key={day.id} day={day} isSelected={activeDayId === day.id} />
       ))}
     </div>
   )
 }
 
-function WeekSelector() {
-  const {
-    plan,
-    activeWeek,
-    activeDay,
-    setActiveWeekId: setActiveWeekIdContext,
-  } = useWorkout()
+// Helper function to determine default week and day selection
+function getDefaultSelection(plan: NavigationPlan) {
+  if (!plan.weeks.length) return { weekId: null, dayId: null }
+
+  // Try to find the current week based on start date and schedule
+  const now = new Date()
+  const planStartDate = plan.startDate ? new Date(plan.startDate) : now
+
+  // Calculate which week we should be in based on plan start date
+  const daysSinceStart = Math.floor(
+    (now.getTime() - planStartDate.getTime()) / (1000 * 60 * 60 * 24),
+  )
+  const expectedWeekIndex = Math.max(0, Math.floor(daysSinceStart / 7))
+
+  // Find the appropriate week
+  let defaultWeek =
+    plan.weeks[Math.min(expectedWeekIndex, plan.weeks.length - 1)]
+
+  // If we calculated beyond available weeks, use the last week
+  if (!defaultWeek) {
+    defaultWeek = plan.weeks[plan.weeks.length - 1]
+  }
+
+  // Find the appropriate day in that week
+  const currentDayOfWeek = now.getDay() // 0 = Sunday, 1 = Monday, etc.
+  let defaultDay = defaultWeek.days.find(
+    (day) => day.dayOfWeek === currentDayOfWeek,
+  )
+
+  // If no matching day, find the first non-completed day, or first day
+  if (!defaultDay) {
+    defaultDay =
+      defaultWeek.days.find((day) => !day.completedAt) || defaultWeek.days[0]
+  }
+
+  return {
+    weekId: defaultWeek.id,
+    dayId: defaultDay?.id || null,
+  }
+}
+
+function WeekSelector({ plan }: { plan: NavigationPlan }) {
   const { preferences } = useUserPreferences()
+  const { weekId: defaultWeekId, dayId: defaultDayId } = useMemo(
+    () => getDefaultSelection(plan),
+    [plan],
+  )
+
   const [activeWeekId, setActiveWeekId] = useQueryState('week')
-  const [, setActiveDayId] = useQueryState('day')
-  if (!plan || !activeWeek) return null
+  const [activeDayId, setActiveDayId] = useQueryState('day')
+
+  // Set defaults if no values are present in URL
+  const effectiveWeekId = activeWeekId || defaultWeekId
+  const effectiveDayId = activeDayId || defaultDayId
+
+  // Initialize defaults on first load
+  useMemo(() => {
+    if (!activeWeekId && defaultWeekId) {
+      setActiveWeekId(defaultWeekId)
+    }
+    if (!activeDayId && defaultDayId) {
+      setActiveDayId(defaultDayId)
+    }
+  }, [
+    activeWeekId,
+    activeDayId,
+    defaultWeekId,
+    defaultDayId,
+    setActiveWeekId,
+    setActiveDayId,
+  ])
+
   const weeks = plan.weeks
+  const activeWeek = weeks.find((week) => week.id === effectiveWeekId)
 
   const handleWeekChange = (type: 'prev' | 'next') => {
     const currentWeekIndex = weeks.findIndex(
-      (week) => week.id === activeWeek.id,
+      (week) => week.id === effectiveWeekId,
     )
-    const activeDayOfWeek = activeDay?.dayOfWeek ?? 0
+    const currentActiveDayOfWeek =
+      activeWeek?.days.find((day) => day.id === effectiveDayId)?.dayOfWeek ?? 0
 
-    if (type === 'prev') {
-      setActiveWeekId(weeks[currentWeekIndex - 1].id)
-      setActiveDayId(weeks[currentWeekIndex - 1].days[activeDayOfWeek].id)
-    } else if (type === 'next') {
-      setActiveWeekId(weeks[currentWeekIndex + 1].id)
-      setActiveDayId(weeks[currentWeekIndex + 1].days[activeDayOfWeek].id)
+    if (type === 'prev' && currentWeekIndex > 0) {
+      const newWeek = weeks[currentWeekIndex - 1]
+      const newDay =
+        newWeek.days.find((day) => day.dayOfWeek === currentActiveDayOfWeek) ||
+        newWeek.days[0]
+      setActiveWeekId(newWeek.id)
+      setActiveDayId(newDay.id)
+    } else if (type === 'next' && currentWeekIndex < weeks.length - 1) {
+      const newWeek = weeks[currentWeekIndex + 1]
+      const newDay =
+        newWeek.days.find((day) => day.dayOfWeek === currentActiveDayOfWeek) ||
+        newWeek.days[0]
+      setActiveWeekId(newWeek.id)
+      setActiveDayId(newDay.id)
     }
   }
 
-  const currentWeekIndex = weeks.findIndex((week) => week.id === activeWeek.id)
+  const currentWeekIndex = weeks.findIndex(
+    (week) => week.id === effectiveWeekId,
+  )
   const hasPrevWeek = currentWeekIndex > 0
   const hasNextWeek = currentWeekIndex < weeks.length - 1
+
+  const handleWeekSelect = (weekId: string) => {
+    const newWeek = weeks.find((week) => week.id === weekId)
+    if (!newWeek) return
+
+    setActiveWeekId(weekId)
+    // When changing weeks, try to keep the same day of week, or pick first day
+    const currentActiveDayOfWeek =
+      activeWeek?.days.find((day) => day.id === effectiveDayId)?.dayOfWeek ?? 0
+    const newDay =
+      newWeek.days.find((day) => day.dayOfWeek === currentActiveDayOfWeek) ||
+      newWeek.days[0]
+    setActiveDayId(newDay.id)
+  }
+
+  if (!activeWeek) return null
 
   return (
     <div className="flex justify-between gap-2">
@@ -178,24 +288,20 @@ function WeekSelector() {
         onClick={() => handleWeekChange('prev')}
       />
       <Select
-        onValueChange={(value) => setActiveWeekIdContext(value)}
-        defaultValue={activeWeekId ?? undefined}
-        value={activeWeekId ?? undefined}
+        onValueChange={handleWeekSelect}
+        value={effectiveWeekId ?? undefined}
       >
         <SelectTrigger
           size="sm"
           variant="tertiary"
           className="[&_svg]:data-[icon=mark]:size-3.5 truncate text-sm font-medium flex items-center gap-2 w-full"
         >
-          <SelectValue
-            defaultValue={activeWeek?.id}
-            placeholder="Select a workout"
-          />
+          <SelectValue placeholder="Select a workout" />
         </SelectTrigger>
         <SelectContent>
           {weeks.map((week) => (
             <SelectItem key={week.id} value={week.id}>
-              {week.name}{' '}
+              Week {week.weekNumber}{' '}
               {week.completedAt ? (
                 <BadgeCheckIcon
                   data-icon="mark"

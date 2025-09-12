@@ -40,6 +40,8 @@ import {
   getTemplates,
   getTrainingPlanById,
   getWorkout,
+  getWorkoutDay,
+  getWorkoutNavigation,
   pausePlan,
   removeTrainingPlanFromClient,
   removeWeek,
@@ -100,6 +102,12 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
   getCurrentWorkoutWeek: async (_, __, context) => {
     return getCurrentWorkoutWeek(context)
+  },
+  getWorkoutNavigation: async (_, args, context) => {
+    return getWorkoutNavigation(args, context)
+  },
+  getWorkoutDay: async (_, args, context) => {
+    return getWorkoutDay(args, context)
   },
 }
 

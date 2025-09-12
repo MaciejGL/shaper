@@ -112,11 +112,11 @@ const variants: Record<string, Variants> = {
         duration: 0.2, // Increased duration for smoother animation
         ease: [0.4, 0, 0.2, 1],
         maskPosition: {
-          duration: 0.2, // Match the main duration
+          duration: 0.05, // Match the main duration
           ease: [0.4, 0, 0.2, 1], // Add easing to mask position
         },
         opacity: {
-          duration: 0.15, // Match the main duration
+          duration: 0.2, // Match the main duration
           ease: [0.4, 0, 0.2, 1], // Add easing to opacity
         },
       },
@@ -124,6 +124,10 @@ const variants: Record<string, Variants> = {
     exit: {
       opacity: 0,
       maskPosition: '200% 0',
+      transition: {
+        duration: 0.2, // Match the main duration
+        ease: [0.4, 0, 0.2, 1],
+      },
     },
   },
   fade: {

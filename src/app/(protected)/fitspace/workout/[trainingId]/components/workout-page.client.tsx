@@ -1,50 +1,162 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { useQueryState } from 'nuqs'
+import { Suspense, use, useMemo } from 'react'
 
 import { WorkoutProvider } from '@/context/workout-context/workout-context'
 import {
-  GQLFitspaceGetWorkoutQuery,
-  useFitspaceGetWorkoutQuery,
+  GQLFitspaceGetWorkoutDayQuery,
+  GQLFitspaceGetWorkoutNavigationQuery,
+  useFitspaceGetWorkoutDayQuery,
+  useFitspaceGetWorkoutNavigationQuery,
 } from '@/generated/graphql-client'
 
 import { Exercises } from './exercises'
 import { Navigation } from './navigation'
+import { SkeletonExercises } from './workout-page-skeleton'
 
-export type WorkoutPlan = NonNullable<
-  GQLFitspaceGetWorkoutQuery['getWorkout']
+// Navigation pagination types
+export type NavigationPlan = NonNullable<
+  NonNullable<GQLFitspaceGetWorkoutNavigationQuery['getWorkoutNavigation']>
 >['plan']
-export type WorkoutWeek = NonNullable<WorkoutPlan>['weeks'][number]
-export type WorkoutDay = NonNullable<WorkoutWeek>['days'][number]
-export type WorkoutExercise = NonNullable<WorkoutDay>['exercises'][number]
-export type WorkoutSet = NonNullable<WorkoutExercise>['sets'][number]
-export type WorkoutSetLog = NonNullable<WorkoutSet>['log']
+export type NavigationWeek = NonNullable<NavigationPlan>['weeks'][number]
+export type NavigationDay = NonNullable<NavigationWeek>['days'][number]
 
-type WorkoutPageClientProps = {
-  plan: WorkoutPlan
+// Day data types
+export type WorkoutDayData = NonNullable<
+  GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
+>['day']
+
+type WorkoutPageClientNewProps = {
+  navigationPromise: Promise<
+    | {
+        data: GQLFitspaceGetWorkoutNavigationQuery
+        error: null
+      }
+    | {
+        data: null
+        error: string
+      }
+  >
+  dayPromise: Promise<
+    | {
+        data: GQLFitspaceGetWorkoutDayQuery
+        error: null
+      }
+    | {
+        data: null
+        error: string
+      }
+  >
+  trainingId: string
 }
 
-export function WorkoutPageClient({ plan }: WorkoutPageClientProps) {
-  const { trainingId } = useParams<{ trainingId: string }>()
-  const { data } = useFitspaceGetWorkoutQuery(
+export function WorkoutPageClientNew({
+  navigationPromise,
+  dayPromise,
+  trainingId,
+}: WorkoutPageClientNewProps) {
+  const [dayId] = useQueryState('day')
+  const { data: navigationData } = use(navigationPromise)
+  const { data: dayData } = use(dayPromise)
+
+  if (!navigationData?.getWorkoutNavigation) {
+    return <div>No navigation data available</div>
+  }
+
+  return (
+    <div>
+      <Suspense fallback={<div>Loading Navigation...</div>}>
+        <NavigationWrapper
+          navigationData={navigationData}
+          trainingId={trainingId}
+        />
+      </Suspense>
+      <Suspense fallback={<div>Loading Day...</div>}>
+        <WorkoutDay dayId={dayId} dayData={dayData} />
+      </Suspense>
+    </div>
+  )
+}
+
+const NavigationWrapper = ({
+  navigationData,
+  trainingId,
+}: {
+  navigationData: GQLFitspaceGetWorkoutNavigationQuery
+  trainingId: string
+}) => {
+  const hasInitialDataForCurrentDay =
+    navigationData?.getWorkoutNavigation?.plan?.id === trainingId
+  const { data: navigationDataQuery } = useFitspaceGetWorkoutNavigationQuery(
     {
       trainingId,
     },
     {
-      experimental_prefetchInRender: true,
-      initialData: {
-        getWorkout: {
-          plan,
-        },
-      },
+      initialData: navigationData ?? undefined,
+      enabled: !!trainingId && !hasInitialDataForCurrentDay, // Only check if trainingId exists
     },
   )
 
   return (
-    <WorkoutProvider plan={data?.getWorkout?.plan}>
-      <Navigation />
+    <Navigation
+      plan={
+        navigationDataQuery?.getWorkoutNavigation?.plan ??
+        navigationData.getWorkoutNavigation?.plan
+      }
+    />
+  )
+}
+
+const WorkoutDay = ({
+  dayId,
+  dayData,
+}: {
+  dayId: string | null
+  dayData: GQLFitspaceGetWorkoutDayQuery | null
+}) => {
+  // Check if we have initial data for the current dayId
+  const hasInitialDataForCurrentDay = useMemo(() => {
+    return dayData?.getWorkoutDay?.day?.id === dayId && dayData?.getWorkoutDay
+  }, [dayData, dayId])
+
+  const { data: dayDataQuery, isFetching } = useFitspaceGetWorkoutDayQuery(
+    {
+      dayId: dayId ?? '',
+    },
+    {
+      initialData: dayData ?? undefined,
+      initialDataUpdatedAt: hasInitialDataForCurrentDay ? Date.now() : 0,
+      enabled: !!dayId && !hasInitialDataForCurrentDay, // Disable if we have fresh initial data
+    },
+  )
+
+  console.log('isLoading', isFetching)
+
+  return (
+    <WorkoutProvider
+      exercises={
+        dayDataQuery?.getWorkoutDay?.day?.exercises ??
+        dayData?.getWorkoutDay?.day?.exercises ??
+        []
+      }
+    >
       <div className="max-w-sm mx-auto pb-4">
-        <Exercises />
+        {isFetching ? (
+          <SkeletonExercises />
+        ) : (
+          (dayDataQuery?.getWorkoutDay?.day ?? dayData?.getWorkoutDay?.day) && (
+            <Exercises
+              day={
+                dayDataQuery?.getWorkoutDay?.day ?? dayData?.getWorkoutDay?.day
+              }
+              previousDayLogs={
+                dayDataQuery?.getWorkoutDay?.previousDayLogs ??
+                dayData?.getWorkoutDay?.previousDayLogs
+              }
+            />
+          )
+        )}
       </div>
     </WorkoutProvider>
   )
