@@ -1,5 +1,7 @@
 // Optimized service worker for fast loading
-const CACHE_NAME = 'hypertro-fast-v1'
+// VERSION: Update this when you deploy to force cache invalidation
+const CACHE_VERSION = 'v2'
+const CACHE_NAME = `hypertro-fast-${CACHE_VERSION}`
 
 // 🎯 Only the essentials for fast loading
 const CRITICAL_CACHE = [
@@ -31,15 +33,15 @@ self.addEventListener('install', (event) => {
   )
 })
 
-// Activate: Clean old caches
+// Activate: Clean old caches and force refresh
 self.addEventListener('activate', (event) => {
-  console.log('✅ SW activated')
+  console.log('✅ SW activated, version:', CACHE_VERSION)
   event.waitUntil(
     Promise.all([
       // Take control immediately
       self.clients.claim(),
 
-      // Clean old caches
+      // Clean old caches - CRITICAL for version updates
       caches.keys().then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
@@ -49,6 +51,18 @@ self.addEventListener('activate', (event) => {
             }
           }),
         )
+      }),
+
+      // 🔄 Force reload all open tabs when SW updates
+      self.clients.matchAll().then((clients) => {
+        clients.forEach((client) => {
+          console.log('🔄 Notifying client of SW update:', client.url)
+          client.postMessage({
+            type: 'SW_UPDATED',
+            version: CACHE_VERSION,
+            action: 'reload_recommended',
+          })
+        })
       }),
     ]),
   )
