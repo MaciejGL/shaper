@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Roboto_Mono } from 'next/font/google'
 
 import Providers from '@/components/providers'
+import { ServiceWorkerRegistration } from '@/components/service-worker-registration'
 
 import './globals.css'
 
@@ -110,38 +111,9 @@ export default function RootLayout({
         )}
 
         <Providers>{children}</Providers>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                // Listen for service worker messages
-                navigator.serviceWorker.addEventListener('message', (event) => {
-                  if (event.data && event.data.type === 'SW_UPDATED') {
-                    console.log('🚀 New app version available:', event.data.version);
-                    location.reload();
-                    // Optional: Show notification to user about update
-                    // For now, we'll rely on natural reload cycles
-                  }
-                });
 
-                window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                      console.log('✅ SW registered successfully');
-                      
-                      // Check for updates every hour
-                      setInterval(() => {
-                        registration.update();
-                      }, 60 * 60 * 1000); // 1 hour
-                    })
-                    .catch((err) => {
-                      console.log('❌ SW registration failed:', err);
-                    });
-                });
-              }
-            `,
-          }}
-        />
+        {/* Service Worker Registration - LogRocket best practice */}
+        <ServiceWorkerRegistration />
       </body>
     </html>
   )
