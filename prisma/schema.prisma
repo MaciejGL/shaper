@@ -1,7 +1,6 @@
 generator client {
   provider        = "prisma-client"
   output          = "../src/generated/prisma"
-  previewFeatures = ["queryCompiler", "driverAdapters"]
 }
 
 datasource db {
@@ -346,6 +345,8 @@ model TrainingExercise {
   @@index([dayId])
   @@index([baseId])
   @@index([completedAt])
+  @@index([dayId, completedAt])
+  @@index([dayId, order])
 }
 
 model ExerciseSet {

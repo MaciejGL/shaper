@@ -1815,14 +1815,12 @@ export async function getWorkoutNavigation(
   }
 
   // Lightweight query optimized for navigation - only fetch weeks and days without exercises/sets
-  const plan = await prisma.trainingPlan.findUnique({
+  let plan = await prisma.trainingPlan.findUnique({
     where: {
       id: trainingId,
       active: true,
-      OR: [
-        { assignedToId: user.user.id },
-        { createdById: user.user.id, assignedToId: user.user.id },
-      ],
+      assignedToId: user.user.id,
+      createdById: { not: user.user.id },
     },
     include: {
       weeks: {
@@ -1853,6 +1851,46 @@ export async function getWorkoutNavigation(
       },
     },
   })
+
+  if (!plan) {
+    // Fallback to default user plan
+    plan = await prisma.trainingPlan.findUnique({
+      where: {
+        id: trainingId,
+        active: true,
+        assignedToId: user.user.id,
+        createdById: user.user.id,
+      },
+      include: {
+        weeks: {
+          orderBy: {
+            weekNumber: 'asc',
+          },
+          include: {
+            days: {
+              orderBy: {
+                dayOfWeek: 'asc',
+              },
+              // Only include essential day data for navigation
+              select: {
+                id: true,
+                dayOfWeek: true,
+                isRestDay: true,
+                completedAt: true,
+                scheduledAt: true,
+                exercises: {
+                  select: {
+                    id: true,
+                    completedAt: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    })
+  }
 
   if (!plan || plan.assignedToId !== user.user.id) {
     return null
@@ -1956,7 +1994,7 @@ export async function getWorkoutDay(
           },
         },
       },
-      events: true,
+      // events: true,
       exercises: {
         orderBy: {
           order: 'asc',

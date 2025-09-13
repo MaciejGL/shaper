@@ -21,7 +21,6 @@ export const createUserLoaders = () => ({
       where: { email: { in: emails as string[] } },
       include: {
         profile: true,
-        trainer: true, // Added for consistency with userBasic
       },
     })
 
@@ -75,8 +74,6 @@ export const createUserLoaders = () => ({
       where: { id: { in: ids as string[] } },
       include: {
         profile: true, // Include full profile (bodyMeasures will be lazy-loaded if needed)
-        trainer: true,
-        // Exclude trainer relations, clients, sessions, notifications, and other heavy data
       },
     })
     const map = new Map(users.map((u) => [u.id, u]))
