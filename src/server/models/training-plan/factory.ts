@@ -2055,7 +2055,7 @@ export async function getWorkoutDay(
   // Fetch previous exercise logs for all exercises in this day
   const currentWeekNumber = day.week.weekNumber
   const exerciseNames = day.exercises
-    .map((ex) => ex.base?.name)
+    .map((ex) => ex.name)
     .filter((name) => name !== undefined)
   const exerciseIds = day.exercises.map((ex) => ex.id)
 

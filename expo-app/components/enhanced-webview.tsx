@@ -2,11 +2,13 @@
  * Enhanced WebView with Push Notifications and Deep Linking
  * Replaces basic WebView with full functionality
  */
-import React, { forwardRef, useImperativeHandle, useRef } from 'react'
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import { StyleSheet } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import { APP_CONFIG } from '../config/app-config'
+
+import { WebViewLoading } from './webview-loading'
 
 /**
  * Creates clean, readable injected JavaScript for the WebView
@@ -240,6 +242,7 @@ export const EnhancedWebView = forwardRef<
     ref,
   ) => {
     const webViewRef = useRef<WebView>(null)
+    const [loadingProgress, setLoadingProgress] = useState(0)
 
     // Expose methods to parent components
     useImperativeHandle(ref, () => ({
@@ -345,7 +348,11 @@ export const EnhancedWebView = forwardRef<
         style={styles.webview}
         javaScriptEnabled={true}
         domStorageEnabled={true}
-        startInLoadingState={false}
+        startInLoadingState={true}
+        renderLoading={() => <WebViewLoading progress={loadingProgress} />}
+        onLoadProgress={(event) => {
+          setLoadingProgress(event.nativeEvent.progress)
+        }}
         userAgent={APP_CONFIG.USER_AGENT}
         injectedJavaScript={injectedJavaScript}
         onMessage={handleMessage}
