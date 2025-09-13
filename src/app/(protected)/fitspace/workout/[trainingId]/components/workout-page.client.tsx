@@ -137,7 +137,7 @@ const WorkoutDay = ({
     return dayData?.getWorkoutDay?.day?.id === dayId && dayData?.getWorkoutDay
   }, [dayData, dayId])
 
-  const { data: dayDataQuery, isFetching } = useFitspaceGetWorkoutDayQuery(
+  const { data: dayDataQuery, isRefetching } = useFitspaceGetWorkoutDayQuery(
     {
       dayId: dayId ?? '',
     },
@@ -157,7 +157,7 @@ const WorkoutDay = ({
       }
     >
       <div className="max-w-sm mx-auto pb-4">
-        {isFetching ? (
+        {isRefetching ? (
           <SkeletonExercises />
         ) : (
           (dayDataQuery?.getWorkoutDay?.day ?? dayData?.getWorkoutDay?.day) && (
