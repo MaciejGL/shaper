@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { GQLFocusTag } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
 
 type FilterType = 'all' | 'free' | 'premium'
 
@@ -57,27 +58,33 @@ export function TrainingPlanFilters({
   return (
     <div className="space-y-4">
       {/* Main Filter Buttons */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap border border-border/50 rounded-lg p-1">
         <Button
-          variant={activeFilter === 'all' ? 'default' : 'tertiary'}
+          variant={activeFilter === 'all' ? 'tertiary' : 'ghost'}
           size="sm"
           onClick={() => onFilterChange('all')}
         >
           All Plans
         </Button>
         <Button
-          variant={activeFilter === 'free' ? 'default' : 'tertiary'}
+          variant={activeFilter === 'free' ? 'tertiary' : 'ghost'}
           size="sm"
           onClick={() => onFilterChange('free')}
         >
           Free
         </Button>
         <Button
-          variant={activeFilter === 'premium' ? 'default' : 'tertiary'}
+          variant={activeFilter === 'premium' ? 'tertiary' : 'ghost'}
           size="sm"
           onClick={() => onFilterChange('premium')}
-          className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white border-0"
-          iconStart={<Crown />}
+          iconStart={
+            <Crown
+              className={cn(
+                'text-amber-500',
+                activeFilter === 'premium' && 'text-amber-600',
+              )}
+            />
+          }
         >
           Premium
         </Button>

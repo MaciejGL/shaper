@@ -23,7 +23,7 @@ export function DashboardHeader({
   variant?: SectionIconProps['variant']
 }) {
   return (
-    <div className={cn('space-y-2 mb-12 mt-6', className)}>
+    <div className={cn('space-y-2 mb-6 mt-8', className)}>
       <div className="flex items-center gap-2">
         {prevSegment && (
           <ButtonLink

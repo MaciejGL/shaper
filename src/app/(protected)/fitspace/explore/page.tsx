@@ -64,7 +64,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="plans" className="mt-6">
+        <TabsContent value="plans" className="mt-2">
           <TrainingPlansTab
             initialPlans={plansData?.getPublicTrainingPlans || []}
           />
