@@ -21,6 +21,9 @@ export type NavigationPlan = NonNullable<
 >['plan']
 export type NavigationWeek = NonNullable<NavigationPlan>['weeks'][number]
 export type NavigationDay = NonNullable<NavigationWeek>['days'][number]
+export type WorkoutExercise = NonNullable<
+  NonNullable<GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']>['day']
+>['exercises'][number]
 
 // Day data types
 export type WorkoutDayData = NonNullable<

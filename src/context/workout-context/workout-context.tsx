@@ -4,7 +4,6 @@ import { ReactNode, createContext, useContext, useMemo } from 'react'
 
 import {
   GQLFitspaceGetWorkoutDayQuery,
-  GQLFitspaceGetWorkoutQuery,
   GQLGetWorkoutExerciseNotesQuery,
 } from '@/generated/graphql-client'
 import { useWorkoutNotesBatch } from '@/hooks/use-workout-notes-batch'
@@ -12,8 +11,8 @@ import { useWorkoutNotesBatch } from '@/hooks/use-workout-notes-batch'
 const WorkoutContext = createContext<WorkoutContextType | null>(null)
 
 export type WorkoutContextPlan = NonNullable<
-  GQLFitspaceGetWorkoutQuery['getWorkout']
->['plan']
+  GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
+>['day']
 
 type WorkoutContextType = {
   // Notes functionality - batched for all exercises in active day

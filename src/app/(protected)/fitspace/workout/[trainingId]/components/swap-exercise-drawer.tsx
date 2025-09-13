@@ -6,7 +6,7 @@ import type { WorkoutContextPlan } from '@/context/workout-context/workout-conte
 import { cn } from '@/lib/utils'
 
 interface SwapExerciseDrawerProps {
-  exercise: WorkoutContextPlan['weeks'][number]['days'][number]['exercises'][number]
+  exercise: WorkoutContextPlan['exercises'][number]
   isOpen: boolean
   onOpenChange: (open: boolean) => void
   selectedSubstituteId: string | null

@@ -1,15 +1,15 @@
 import { getDay } from 'date-fns'
 
 import {
-  WorkoutDay,
-  WorkoutPlan,
-  WorkoutWeek,
+  NavigationPlan,
+  NavigationWeek,
+  WorkoutDayData,
 } from './[trainingId]/components/workout-page.client'
 
 export const getExpectedDayDate = (
-  day: WorkoutDay,
-  plan?: WorkoutPlan,
-  activeWeek?: WorkoutWeek,
+  day: WorkoutDayData,
+  plan?: NavigationPlan,
+  activeWeek?: NavigationWeek,
 ) => {
   if (!plan?.startDate || !activeWeek) return null
 
@@ -33,7 +33,7 @@ export const getExpectedDayDate = (
   return expectedDate
 }
 
-export const getWeekRange = (week: WorkoutWeek, plan: WorkoutPlan) => {
+export const getWeekRange = (week: NavigationWeek, plan: NavigationPlan) => {
   if (!plan.startDate) return null
 
   const trainingStartDate = new Date(plan.startDate)

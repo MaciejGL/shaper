@@ -99,11 +99,11 @@ export const createOptimisticReply = (text: string): OptimisticReply => ({
 // Hook for optimistic note mutations
 export function useOptimisticNotes(exerciseName: string) {
   const queryClient = useQueryClient()
-  const { activeDay } = useWorkout()
+  const { exercises } = useWorkout()
 
   // Generate the cache key with ALL exercises in the workout (batched)
   const allExerciseNames =
-    activeDay?.exercises.map((ex) => ex.substitutedBy?.name || ex.name) || []
+    exercises.map((ex) => ex.substitutedBy?.name || ex.name) || []
 
   const updateNotesCache = (updater: (notes: NotesArray) => NotesArray) => {
     // The actual query key includes ALL exercise names for the workout batch
@@ -322,11 +322,11 @@ export function useOptimisticNotes(exerciseName: string) {
 // Hook for optimistic reply mutations using batched cache
 export function useOptimisticReplies(noteId: string) {
   const queryClient = useQueryClient()
-  const { activeDay } = useWorkout()
+  const { exercises } = useWorkout()
 
   // Generate the cache key with ALL exercises in the workout (batched)
   const allExerciseNames =
-    activeDay?.exercises.map((ex) => ex.substitutedBy?.name || ex.name) || []
+    exercises.map((ex) => ex.substitutedBy?.name || ex.name) || []
 
   const performOptimisticReplyMutation = async (
     optimisticReply: OptimisticReply,
