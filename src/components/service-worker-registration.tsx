@@ -8,6 +8,11 @@ import { useEffect } from 'react'
  */
 export function ServiceWorkerRegistration() {
   useEffect(() => {
+    // Skip service worker in development to avoid HMR conflicts
+    if (process.env.NODE_ENV === 'development') {
+      return
+    }
+
     if ('serviceWorker' in navigator) {
       const registerSW = async () => {
         try {

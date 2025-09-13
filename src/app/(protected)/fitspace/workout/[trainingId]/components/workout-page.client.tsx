@@ -8,11 +8,10 @@ import {
   GQLFitspaceGetWorkoutDayQuery,
   GQLFitspaceGetWorkoutNavigationQuery,
   useFitspaceGetWorkoutDayQuery,
-  useFitspaceGetWorkoutNavigationQuery,
 } from '@/generated/graphql-client'
 
 import { Exercises } from './exercises'
-import { Navigation } from './navigation'
+import { NavigationWrapper } from './navigation-wrapper'
 import { SkeletonExercises, SkeletonNavigation } from './workout-page-skeleton'
 
 // Navigation pagination types
@@ -73,45 +72,6 @@ export function WorkoutPageClientNew({
         <WorkoutDay dayId={dayId} dayDataPromise={dayPromise} />
       </Suspense>
     </div>
-  )
-}
-
-const NavigationWrapper = ({
-  navigationDataPromise,
-  trainingId,
-}: {
-  navigationDataPromise: Promise<
-    | {
-        data: GQLFitspaceGetWorkoutNavigationQuery
-        error: null
-      }
-    | {
-        data: null
-        error: string
-      }
-  >
-  trainingId: string
-}) => {
-  const { data: navigationData } = use(navigationDataPromise)
-
-  const { data: navigationDataQuery } = useFitspaceGetWorkoutNavigationQuery(
-    {
-      trainingId,
-    },
-    {
-      initialData: navigationData ?? undefined,
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      enabled: !!trainingId, // Disable if we have fresh initial data
-    },
-  )
-
-  return (
-    <Navigation
-      plan={
-        navigationDataQuery?.getWorkoutNavigation?.plan ??
-        navigationData?.getWorkoutNavigation?.plan
-      }
-    />
   )
 }
 
