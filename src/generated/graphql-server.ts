@@ -706,6 +706,20 @@ export type GQLLogSetInput = {
   setId: Scalars['ID']['input'];
 };
 
+export type GQLMacroTarget = {
+  __typename?: 'MacroTarget';
+  calories?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  carbs?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  clientId: EntireFieldWrapper<Scalars['String']['output']>;
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  fat?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  notes?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  protein?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  trainerId: EntireFieldWrapper<Scalars['String']['output']>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
 export type GQLMarkMessagesAsReadInput = {
   chatId: Scalars['ID']['input'];
 };
@@ -875,6 +889,7 @@ export type GQLMutation = {
   resetUserLogs: EntireFieldWrapper<Scalars['Boolean']['output']>;
   respondToTeamInvitation: EntireFieldWrapper<GQLTeamInvitation>;
   sendMessage: EntireFieldWrapper<GQLMessage>;
+  setMacroTargets: EntireFieldWrapper<GQLMacroTarget>;
   startWorkoutFromFavourite: EntireFieldWrapper<Scalars['ID']['output']>;
   swapExercise: EntireFieldWrapper<GQLSubstitute>;
   updateBodyMeasurement: EntireFieldWrapper<GQLUserBodyMeasure>;
@@ -1332,6 +1347,11 @@ export type GQLMutationSendMessageArgs = {
 };
 
 
+export type GQLMutationSetMacroTargetsArgs = {
+  input: GQLSetMacroTargetsInput;
+};
+
+
 export type GQLMutationStartWorkoutFromFavouriteArgs = {
   input: GQLStartWorkoutFromFavouriteInput;
 };
@@ -1644,6 +1664,7 @@ export type GQLQuery = {
   getAllUsersWithSubscriptions: EntireFieldWrapper<GQLUsersWithSubscriptionsResult>;
   getChatMessages: EntireFieldWrapper<Array<GQLMessage>>;
   getClientActivePlan?: EntireFieldWrapper<Maybe<GQLTrainingPlan>>;
+  getClientMacroTargets?: EntireFieldWrapper<Maybe<GQLMacroTarget>>;
   getClientTrainerOffers: EntireFieldWrapper<Array<GQLTrainerOffer>>;
   getClientTrainingPlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getExercises: EntireFieldWrapper<GQLGetExercisesResponse>;
@@ -1652,6 +1673,7 @@ export type GQLQuery = {
   getFeaturedTrainers: EntireFieldWrapper<Array<GQLPublicTrainer>>;
   getMessengerInitialData: EntireFieldWrapper<GQLMessengerInitialData>;
   getMyChats: EntireFieldWrapper<Array<GQLChat>>;
+  getMyMacroTargets?: EntireFieldWrapper<Maybe<GQLMacroTarget>>;
   getMyPlansOverview: EntireFieldWrapper<GQLMyPlansPayload>;
   getMyPlansOverviewFull: EntireFieldWrapper<GQLMyPlansPayload>;
   getMyPlansOverviewLite: EntireFieldWrapper<GQLMyPlansPayload>;
@@ -1771,6 +1793,11 @@ export type GQLQueryGetChatMessagesArgs = {
 
 
 export type GQLQueryGetClientActivePlanArgs = {
+  clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetClientMacroTargetsArgs = {
   clientId: Scalars['ID']['input'];
 };
 
@@ -2085,6 +2112,15 @@ export enum GQLServiceType {
   PremiumAccess = 'premium_access',
   WorkoutPlan = 'workout_plan'
 }
+
+export type GQLSetMacroTargetsInput = {
+  calories?: InputMaybe<Scalars['Int']['input']>;
+  carbs?: InputMaybe<Scalars['Float']['input']>;
+  clientId: Scalars['ID']['input'];
+  fat?: InputMaybe<Scalars['Float']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  protein?: InputMaybe<Scalars['Float']['input']>;
+};
 
 export type GQLStartWorkoutFromFavouriteInput = {
   favouriteWorkoutId: Scalars['ID']['input'];
@@ -2994,6 +3030,7 @@ export type GQLResolversTypes = {
   InviteTeamMemberInput: GQLInviteTeamMemberInput;
   Location: ResolverTypeWrapper<GQLLocation>;
   LogSetInput: GQLLogSetInput;
+  MacroTarget: ResolverTypeWrapper<GQLMacroTarget>;
   MarkMessagesAsReadInput: GQLMarkMessagesAsReadInput;
   Message: ResolverTypeWrapper<GQLMessage>;
   MessengerInitialData: ResolverTypeWrapper<GQLMessengerInitialData>;
@@ -3033,6 +3070,7 @@ export type GQLResolversTypes = {
   ServiceDelivery: ResolverTypeWrapper<GQLServiceDelivery>;
   ServiceTask: ResolverTypeWrapper<GQLServiceTask>;
   ServiceType: GQLServiceType;
+  SetMacroTargetsInput: GQLSetMacroTargetsInput;
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   SubscriptionDuration: GQLSubscriptionDuration;
@@ -3174,6 +3212,7 @@ export type GQLResolversParentTypes = {
   InviteTeamMemberInput: GQLInviteTeamMemberInput;
   Location: GQLLocation;
   LogSetInput: GQLLogSetInput;
+  MacroTarget: GQLMacroTarget;
   MarkMessagesAsReadInput: GQLMarkMessagesAsReadInput;
   Message: GQLMessage;
   MessengerInitialData: GQLMessengerInitialData;
@@ -3209,6 +3248,7 @@ export type GQLResolversParentTypes = {
   SendMessageInput: GQLSendMessageInput;
   ServiceDelivery: GQLServiceDelivery;
   ServiceTask: GQLServiceTask;
+  SetMacroTargetsInput: GQLSetMacroTargetsInput;
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
   String: Scalars['String']['output'];
   SubscriptionStats: GQLSubscriptionStats;
@@ -3547,6 +3587,20 @@ export type GQLLocationResolvers<ContextType = GQLContext, ParentType extends GQ
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLMacroTargetResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MacroTarget'] = GQLResolversParentTypes['MacroTarget']> = {
+  calories?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  carbs?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  clientId?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  fat?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  notes?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  protein?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  trainerId?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLMessageResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Message'] = GQLResolversParentTypes['Message']> = {
   chatId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   content?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -3697,6 +3751,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   resetUserLogs?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   respondToTeamInvitation?: Resolver<GQLResolversTypes['TeamInvitation'], ParentType, ContextType, RequireFields<GQLMutationRespondToTeamInvitationArgs, 'input'>>;
   sendMessage?: Resolver<GQLResolversTypes['Message'], ParentType, ContextType, RequireFields<GQLMutationSendMessageArgs, 'input'>>;
+  setMacroTargets?: Resolver<GQLResolversTypes['MacroTarget'], ParentType, ContextType, RequireFields<GQLMutationSetMacroTargetsArgs, 'input'>>;
   startWorkoutFromFavourite?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationStartWorkoutFromFavouriteArgs, 'input'>>;
   swapExercise?: Resolver<GQLResolversTypes['Substitute'], ParentType, ContextType, RequireFields<GQLMutationSwapExerciseArgs, 'exerciseId' | 'substituteId'>>;
   updateBodyMeasurement?: Resolver<GQLResolversTypes['UserBodyMeasure'], ParentType, ContextType, RequireFields<GQLMutationUpdateBodyMeasurementArgs, 'input'>>;
@@ -3868,6 +3923,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getAllUsersWithSubscriptions?: Resolver<GQLResolversTypes['UsersWithSubscriptionsResult'], ParentType, ContextType, Partial<GQLQueryGetAllUsersWithSubscriptionsArgs>>;
   getChatMessages?: Resolver<Array<GQLResolversTypes['Message']>, ParentType, ContextType, RequireFields<GQLQueryGetChatMessagesArgs, 'chatId'>>;
   getClientActivePlan?: Resolver<Maybe<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientActivePlanArgs, 'clientId'>>;
+  getClientMacroTargets?: Resolver<Maybe<GQLResolversTypes['MacroTarget']>, ParentType, ContextType, RequireFields<GQLQueryGetClientMacroTargetsArgs, 'clientId'>>;
   getClientTrainerOffers?: Resolver<Array<GQLResolversTypes['TrainerOffer']>, ParentType, ContextType, RequireFields<GQLQueryGetClientTrainerOffersArgs, 'clientEmail' | 'trainerId'>>;
   getClientTrainingPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientTrainingPlansArgs, 'clientId'>>;
   getExercises?: Resolver<GQLResolversTypes['GetExercisesResponse'], ParentType, ContextType>;
@@ -3876,6 +3932,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getFeaturedTrainers?: Resolver<Array<GQLResolversTypes['PublicTrainer']>, ParentType, ContextType, Partial<GQLQueryGetFeaturedTrainersArgs>>;
   getMessengerInitialData?: Resolver<GQLResolversTypes['MessengerInitialData'], ParentType, ContextType, Partial<GQLQueryGetMessengerInitialDataArgs>>;
   getMyChats?: Resolver<Array<GQLResolversTypes['Chat']>, ParentType, ContextType>;
+  getMyMacroTargets?: Resolver<Maybe<GQLResolversTypes['MacroTarget']>, ParentType, ContextType>;
   getMyPlansOverview?: Resolver<GQLResolversTypes['MyPlansPayload'], ParentType, ContextType>;
   getMyPlansOverviewFull?: Resolver<GQLResolversTypes['MyPlansPayload'], ParentType, ContextType>;
   getMyPlansOverviewLite?: Resolver<GQLResolversTypes['MyPlansPayload'], ParentType, ContextType>;
@@ -4364,6 +4421,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   GetWorkoutNavigationPayload?: GQLGetWorkoutNavigationPayloadResolvers<ContextType>;
   Image?: GQLImageResolvers<ContextType>;
   Location?: GQLLocationResolvers<ContextType>;
+  MacroTarget?: GQLMacroTargetResolvers<ContextType>;
   Message?: GQLMessageResolvers<ContextType>;
   MessengerInitialData?: GQLMessengerInitialDataResolvers<ContextType>;
   MuscleGroup?: GQLMuscleGroupResolvers<ContextType>;

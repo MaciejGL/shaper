@@ -72,6 +72,10 @@ model User {
   clientChats   Chat[]    @relation("ClientChats")
   sentMessages  Message[] @relation("SentMessages")
 
+  // Macro tracking relations
+  macroTargets     MacroTarget[] @relation("ClientMacroTargets")
+  setMacroTargets  MacroTarget[] @relation("TrainerMacroTargets")
+
   @@index([trainerId])
   @@index([stripeCustomerId])
   @@index([trainerId, role])  // For trainer-client relationship queries
@@ -944,4 +948,28 @@ model Message {
   @@index([chatId, senderId, readAt])  // For unread message queries
   @@index([chatId, createdAt(sort: Desc)])  // For message ordering
   @@index([senderId, readAt])  // For user's unread messages across all chats
+}
+
+model MacroTarget {
+  id        String   @id @default(uuid())
+  clientId  String   @unique // One macro target per client
+  trainerId String   // Who set these targets
+  
+  // Daily macro targets
+  calories  Int?     // Daily calorie target
+  protein   Float?   // Daily protein target (grams)
+  carbs     Float?   // Daily carbohydrate target (grams)  
+  fat       Float?   // Daily fat target (grams)
+  
+  notes     String?  // Optional notes from trainer
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  client    User     @relation("ClientMacroTargets", fields: [clientId], references: [id], onDelete: Cascade)
+  trainer   User     @relation("TrainerMacroTargets", fields: [trainerId], references: [id])
+  
+  @@index([clientId])
+  @@index([trainerId])
 }

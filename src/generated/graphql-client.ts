@@ -704,6 +704,20 @@ export type GQLLogSetInput = {
   setId: Scalars['ID']['input'];
 };
 
+export type GQLMacroTarget = {
+  __typename?: 'MacroTarget';
+  calories?: Maybe<Scalars['Int']['output']>;
+  carbs?: Maybe<Scalars['Float']['output']>;
+  clientId: Scalars['String']['output'];
+  createdAt: Scalars['String']['output'];
+  fat?: Maybe<Scalars['Float']['output']>;
+  id: Scalars['ID']['output'];
+  notes?: Maybe<Scalars['String']['output']>;
+  protein?: Maybe<Scalars['Float']['output']>;
+  trainerId: Scalars['String']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export type GQLMarkMessagesAsReadInput = {
   chatId: Scalars['ID']['input'];
 };
@@ -873,6 +887,7 @@ export type GQLMutation = {
   resetUserLogs: Scalars['Boolean']['output'];
   respondToTeamInvitation: GQLTeamInvitation;
   sendMessage: GQLMessage;
+  setMacroTargets: GQLMacroTarget;
   startWorkoutFromFavourite: Scalars['ID']['output'];
   swapExercise: GQLSubstitute;
   updateBodyMeasurement: GQLUserBodyMeasure;
@@ -1330,6 +1345,11 @@ export type GQLMutationSendMessageArgs = {
 };
 
 
+export type GQLMutationSetMacroTargetsArgs = {
+  input: GQLSetMacroTargetsInput;
+};
+
+
 export type GQLMutationStartWorkoutFromFavouriteArgs = {
   input: GQLStartWorkoutFromFavouriteInput;
 };
@@ -1642,6 +1662,7 @@ export type GQLQuery = {
   getAllUsersWithSubscriptions: GQLUsersWithSubscriptionsResult;
   getChatMessages: Array<GQLMessage>;
   getClientActivePlan?: Maybe<GQLTrainingPlan>;
+  getClientMacroTargets?: Maybe<GQLMacroTarget>;
   getClientTrainerOffers: Array<GQLTrainerOffer>;
   getClientTrainingPlans: Array<GQLTrainingPlan>;
   getExercises: GQLGetExercisesResponse;
@@ -1650,6 +1671,7 @@ export type GQLQuery = {
   getFeaturedTrainers: Array<GQLPublicTrainer>;
   getMessengerInitialData: GQLMessengerInitialData;
   getMyChats: Array<GQLChat>;
+  getMyMacroTargets?: Maybe<GQLMacroTarget>;
   getMyPlansOverview: GQLMyPlansPayload;
   getMyPlansOverviewFull: GQLMyPlansPayload;
   getMyPlansOverviewLite: GQLMyPlansPayload;
@@ -1769,6 +1791,11 @@ export type GQLQueryGetChatMessagesArgs = {
 
 
 export type GQLQueryGetClientActivePlanArgs = {
+  clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetClientMacroTargetsArgs = {
   clientId: Scalars['ID']['input'];
 };
 
@@ -2083,6 +2110,15 @@ export enum GQLServiceType {
   PremiumAccess = 'premium_access',
   WorkoutPlan = 'workout_plan'
 }
+
+export type GQLSetMacroTargetsInput = {
+  calories?: InputMaybe<Scalars['Int']['input']>;
+  carbs?: InputMaybe<Scalars['Float']['input']>;
+  clientId: Scalars['ID']['input'];
+  fat?: InputMaybe<Scalars['Float']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  protein?: InputMaybe<Scalars['Float']['input']>;
+};
 
 export type GQLStartWorkoutFromFavouriteInput = {
   favouriteWorkoutId: Scalars['ID']['input'];

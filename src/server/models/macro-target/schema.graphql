@@ -1,0 +1,30 @@
+type MacroTarget {
+  id: ID!
+  clientId: String!
+  trainerId: String!
+  calories: Int
+  protein: Float
+  carbs: Float
+  fat: Float
+  notes: String
+  createdAt: String!
+  updatedAt: String!
+}
+
+type Query {
+  getClientMacroTargets(clientId: ID!): MacroTarget
+  getMyMacroTargets: MacroTarget
+}
+
+input SetMacroTargetsInput {
+  clientId: ID!
+  calories: Int
+  protein: Float
+  carbs: Float
+  fat: Float
+  notes: String
+}
+
+type Mutation {
+  setMacroTargets(input: SetMacroTargetsInput!): MacroTarget!
+}
