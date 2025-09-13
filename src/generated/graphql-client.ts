@@ -3042,6 +3042,11 @@ export type GQLFitGetMyTrainerOffersQueryVariables = Exact<{
 
 export type GQLFitGetMyTrainerOffersQuery = { __typename?: 'Query', getClientTrainerOffers: Array<{ __typename?: 'TrainerOffer', id: string, token: string, trainerId: string, clientEmail: string, personalMessage?: string | undefined | null, status: GQLTrainerOfferStatus, createdAt: string, updatedAt: string, expiresAt: string, completedAt?: string | undefined | null, packageSummary: Array<{ __typename?: 'PackageSummaryItem', packageId: string, quantity: number, name: string }>, serviceDeliveries: Array<{ __typename?: 'ServiceDelivery', id: string, serviceType?: GQLServiceType | undefined | null, packageName: string, quantity: number, status: GQLDeliveryStatus, deliveredAt?: string | undefined | null, deliveryNotes?: string | undefined | null, createdAt: string, updatedAt: string, tasks: Array<{ __typename?: 'ServiceTask', id: string, title: string, taskType: GQLTaskType, status: GQLTaskStatus, isRequired: boolean, requiresScheduling: boolean, scheduledAt?: string | undefined | null, completedAt?: string | undefined | null, notes?: string | undefined | null, order: number }> }>, trainer: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } }> };
 
+export type GQLGetMyMacroTargetsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetMyMacroTargetsQuery = { __typename?: 'Query', getMyMacroTargets?: { __typename?: 'MacroTarget', id: string, clientId: string, trainerId: string, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, notes?: string | undefined | null, createdAt: string, updatedAt: string } | undefined | null };
+
 export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, hasCompletedOnboarding: boolean, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } };
 
 export type GQLProfileQueryVariables = Exact<{ [key: string]: never; }>;
@@ -3382,6 +3387,20 @@ export type GQLExercisesProgressByUserQueryVariables = Exact<{
 
 
 export type GQLExercisesProgressByUserQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', averageRpe?: number | undefined | null, totalSets?: number | undefined | null, lastPerformed?: string | undefined | null, baseExercise?: { __typename?: 'BaseExercise', id: string, name: string, muscleGroups: Array<{ __typename?: 'MuscleGroup', alias?: string | undefined | null, name: string, groupSlug: string, category: { __typename?: 'MuscleGroupCategory', name: string } }> } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }>, totalVolumeProgress: Array<{ __typename?: 'VolumeEntry', week: string, totalVolume: number, totalSets: number }> }> };
+
+export type GQLGetClientMacroTargetsQueryVariables = Exact<{
+  clientId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetClientMacroTargetsQuery = { __typename?: 'Query', getClientMacroTargets?: { __typename?: 'MacroTarget', id: string, clientId: string, trainerId: string, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, notes?: string | undefined | null, createdAt: string, updatedAt: string } | undefined | null };
+
+export type GQLSetMacroTargetsMutationVariables = Exact<{
+  input: GQLSetMacroTargetsInput;
+}>;
+
+
+export type GQLSetMacroTargetsMutation = { __typename?: 'Mutation', setMacroTargets: { __typename?: 'MacroTarget', id: string, clientId: string, trainerId: string, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, notes?: string | undefined | null, createdAt: string, updatedAt: string } };
 
 export type GQLGetTrainerServiceDeliveriesQueryVariables = Exact<{
   trainerId: Scalars['ID']['input'];
@@ -5401,6 +5420,65 @@ useInfiniteFitGetMyTrainerOffersQuery.getKey = (variables: GQLFitGetMyTrainerOff
 
 
 useFitGetMyTrainerOffersQuery.fetcher = (variables: GQLFitGetMyTrainerOffersQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitGetMyTrainerOffersQuery, GQLFitGetMyTrainerOffersQueryVariables>(FitGetMyTrainerOffersDocument, variables, options);
+
+export const GetMyMacroTargetsDocument = `
+    query GetMyMacroTargets {
+  getMyMacroTargets {
+    id
+    clientId
+    trainerId
+    calories
+    protein
+    carbs
+    fat
+    notes
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useGetMyMacroTargetsQuery = <
+      TData = GQLGetMyMacroTargetsQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetMyMacroTargetsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetMyMacroTargetsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetMyMacroTargetsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetMyMacroTargetsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetMyMacroTargets'] : ['GetMyMacroTargets', variables],
+    queryFn: fetchData<GQLGetMyMacroTargetsQuery, GQLGetMyMacroTargetsQueryVariables>(GetMyMacroTargetsDocument, variables),
+    ...options
+  }
+    )};
+
+useGetMyMacroTargetsQuery.getKey = (variables?: GQLGetMyMacroTargetsQueryVariables) => variables === undefined ? ['GetMyMacroTargets'] : ['GetMyMacroTargets', variables];
+
+export const useInfiniteGetMyMacroTargetsQuery = <
+      TData = InfiniteData<GQLGetMyMacroTargetsQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetMyMacroTargetsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetMyMacroTargetsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetMyMacroTargetsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetMyMacroTargetsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetMyMacroTargets.infinite'] : ['GetMyMacroTargets.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetMyMacroTargetsQuery, GQLGetMyMacroTargetsQueryVariables>(GetMyMacroTargetsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetMyMacroTargetsQuery.getKey = (variables?: GQLGetMyMacroTargetsQueryVariables) => variables === undefined ? ['GetMyMacroTargets.infinite'] : ['GetMyMacroTargets.infinite', variables];
+
+
+useGetMyMacroTargetsQuery.fetcher = (variables?: GQLGetMyMacroTargetsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMyMacroTargetsQuery, GQLGetMyMacroTargetsQueryVariables>(GetMyMacroTargetsDocument, variables, options);
 
 export const ProfileDocument = `
     query Profile {
@@ -7802,6 +7880,100 @@ useInfiniteExercisesProgressByUserQuery.getKey = (variables: GQLExercisesProgres
 
 
 useExercisesProgressByUserQuery.fetcher = (variables: GQLExercisesProgressByUserQueryVariables, options?: RequestInit['headers']) => fetchData<GQLExercisesProgressByUserQuery, GQLExercisesProgressByUserQueryVariables>(ExercisesProgressByUserDocument, variables, options);
+
+export const GetClientMacroTargetsDocument = `
+    query GetClientMacroTargets($clientId: ID!) {
+  getClientMacroTargets(clientId: $clientId) {
+    id
+    clientId
+    trainerId
+    calories
+    protein
+    carbs
+    fat
+    notes
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useGetClientMacroTargetsQuery = <
+      TData = GQLGetClientMacroTargetsQuery,
+      TError = unknown
+    >(
+      variables: GQLGetClientMacroTargetsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetClientMacroTargetsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetClientMacroTargetsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetClientMacroTargetsQuery, TError, TData>(
+      {
+    queryKey: ['GetClientMacroTargets', variables],
+    queryFn: fetchData<GQLGetClientMacroTargetsQuery, GQLGetClientMacroTargetsQueryVariables>(GetClientMacroTargetsDocument, variables),
+    ...options
+  }
+    )};
+
+useGetClientMacroTargetsQuery.getKey = (variables: GQLGetClientMacroTargetsQueryVariables) => ['GetClientMacroTargets', variables];
+
+export const useInfiniteGetClientMacroTargetsQuery = <
+      TData = InfiniteData<GQLGetClientMacroTargetsQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetClientMacroTargetsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetClientMacroTargetsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetClientMacroTargetsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetClientMacroTargetsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetClientMacroTargets.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetClientMacroTargetsQuery, GQLGetClientMacroTargetsQueryVariables>(GetClientMacroTargetsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetClientMacroTargetsQuery.getKey = (variables: GQLGetClientMacroTargetsQueryVariables) => ['GetClientMacroTargets.infinite', variables];
+
+
+useGetClientMacroTargetsQuery.fetcher = (variables: GQLGetClientMacroTargetsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetClientMacroTargetsQuery, GQLGetClientMacroTargetsQueryVariables>(GetClientMacroTargetsDocument, variables, options);
+
+export const SetMacroTargetsDocument = `
+    mutation SetMacroTargets($input: SetMacroTargetsInput!) {
+  setMacroTargets(input: $input) {
+    id
+    clientId
+    trainerId
+    calories
+    protein
+    carbs
+    fat
+    notes
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useSetMacroTargetsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLSetMacroTargetsMutation, TError, GQLSetMacroTargetsMutationVariables, TContext>) => {
+    
+    return useMutation<GQLSetMacroTargetsMutation, TError, GQLSetMacroTargetsMutationVariables, TContext>(
+      {
+    mutationKey: ['SetMacroTargets'],
+    mutationFn: (variables?: GQLSetMacroTargetsMutationVariables) => fetchData<GQLSetMacroTargetsMutation, GQLSetMacroTargetsMutationVariables>(SetMacroTargetsDocument, variables)(),
+    ...options
+  }
+    )};
+
+useSetMacroTargetsMutation.getKey = () => ['SetMacroTargets'];
+
+
+useSetMacroTargetsMutation.fetcher = (variables: GQLSetMacroTargetsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLSetMacroTargetsMutation, GQLSetMacroTargetsMutationVariables>(SetMacroTargetsDocument, variables, options);
 
 export const GetTrainerServiceDeliveriesDocument = `
     query GetTrainerServiceDeliveries($trainerId: ID!) {

@@ -51,7 +51,6 @@ export function MobileNav() {
         icon: SaladIcon,
         label: 'Nutrition',
         prefetch: true,
-        disabled: true,
       },
       {
         id: 'progress',

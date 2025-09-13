@@ -1,0 +1,29 @@
+query GetClientMacroTargets($clientId: ID!) {
+  getClientMacroTargets(clientId: $clientId) {
+    id
+    clientId
+    trainerId
+    calories
+    protein
+    carbs
+    fat
+    notes
+    createdAt
+    updatedAt
+  }
+}
+
+mutation SetMacroTargets($input: SetMacroTargetsInput!) {
+  setMacroTargets(input: $input) {
+    id
+    clientId
+    trainerId
+    calories
+    protein
+    carbs
+    fat
+    notes
+    createdAt
+    updatedAt
+  }
+}

@@ -1,0 +1,14 @@
+query GetMyMacroTargets {
+  getMyMacroTargets {
+    id
+    clientId
+    trainerId
+    calories
+    protein
+    carbs
+    fat
+    notes
+    createdAt
+    updatedAt
+  }
+}

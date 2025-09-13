@@ -12,6 +12,7 @@ import { DashboardHeader } from '../../components/dashboard-header'
 
 import { ClientActivePlan } from './components/client-active-plan'
 import { ClientInfo } from './components/client-info/client-info'
+import { ClientMacroTargets } from './components/client-macro-targets'
 import { ClientMeasurements } from './components/client-measurements'
 import { ClientNotes } from './components/client-notes/client-notes'
 import { ClientServiceDeliveries } from './components/client-service-deliveries/client-service-deliveries'
@@ -112,7 +113,7 @@ export default function ClientDetailPage({
         </AnimatedPageTransition>
         <AnimatedPageTransition id="nutrition">
           <TabsContent value="nutrition">
-            <div>Nutrition</div>
+            <ClientMacroTargets clientId={client.id} clientName={clientName} />
           </TabsContent>
         </AnimatedPageTransition>
         <AnimatedPageTransition id="services">
