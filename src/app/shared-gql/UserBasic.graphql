@@ -36,8 +36,6 @@ query UserBasic {
       }
     }
     capacity
-    trainer {
-      id
-    }
+    trainerId
   }
 }

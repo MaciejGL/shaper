@@ -129,7 +129,7 @@ export function PlansTab({
 
 function EmptyActivePlansState() {
   const { user } = useUser()
-  const hasTrainer = user?.trainer?.id
+  const hasTrainer = user?.trainerId
   return (
     <Card borderless>
       <CardContent className="flex-center flex-col gap-4 py-6">

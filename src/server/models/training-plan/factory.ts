@@ -1839,12 +1839,6 @@ export async function getWorkoutNavigation(
               isRestDay: true,
               completedAt: true,
               scheduledAt: true,
-              exercises: {
-                select: {
-                  id: true,
-                  completedAt: true,
-                },
-              },
             },
           },
         },

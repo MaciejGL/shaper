@@ -47,17 +47,13 @@ export function Navigation({ plan }: NavigationProps) {
 
 function Day({ day, isSelected }: { day: NavigationDay; isSelected: boolean }) {
   const [, setActiveDayId] = useQueryState('day')
-  const [, setActiveExerciseId] = useQueryState('exercise')
 
   const handleClick = () => {
-    setActiveExerciseId(day.exercises.at(0)?.id ?? '')
     setActiveDayId(day.id)
   }
 
   const isDayCompleted = day.completedAt
-  const completionRate =
-    day.exercises.filter((exercise) => exercise.completedAt).length /
-    day.exercises.length
+  const completionRate = isDayCompleted ? 1 : 0
 
   return (
     <div>

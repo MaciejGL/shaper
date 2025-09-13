@@ -16,6 +16,7 @@ type User {
 
   profile: UserProfile
   trainer: UserPublic
+  trainerId: ID
   clients: [UserPublic!]!
   sessions: [UserSession!]!
   notifications: [Notification!]!

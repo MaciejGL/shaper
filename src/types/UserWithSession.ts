@@ -11,7 +11,7 @@ export type UserWithSession = {
 
 type User = PrismaUser & {
   profile?: PrismaUserProfile | null
-  trainer?: PrismaUser | null
+  trainerId?: string | null
   clients?: PrismaUser[] | null
   sessions?: PrismaUserSession[] | null
 }

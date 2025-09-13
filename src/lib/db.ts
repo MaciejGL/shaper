@@ -26,7 +26,7 @@ const DATABASE_CONFIG = {
   // Build-time: Use minimal connections since it's temporary
   MAX_CONNECTIONS: isBuildTime
     ? 2
-    : parseInt(process.env.DATABASE_MAX_CONNECTIONS || '5'),
+    : parseInt(process.env.DATABASE_MAX_CONNECTIONS || '10'),
   MIN_CONNECTIONS: isBuildTime
     ? 1
     : parseInt(process.env.DATABASE_MIN_CONNECTIONS || '1'),

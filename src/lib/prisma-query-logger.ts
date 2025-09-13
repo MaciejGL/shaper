@@ -22,15 +22,6 @@ export function createQueryLogger() {
           const startTime = Date.now()
           const steps: QueryStep[] = []
 
-          // Log serialization
-          const serializeStart = Date.now()
-          const serializeDuration = Date.now() - serializeStart
-          steps.push({
-            name: 'Serialize',
-            icon: '📦',
-            duration: serializeDuration,
-          })
-
           try {
             // Execute the actual query
             const queryStart = Date.now()
@@ -145,12 +136,7 @@ export function createDetailedQueryLogger() {
           const steps: QueryStep[] = []
 
           // Create initial step templates (durations will be calculated later)
-          const initialSteps = [
-            { name: 'Serialize', icon: '📦', weight: 0.02 },
-            { name: 'SELECT 1', icon: '🔍', weight: 0.2 },
-            { name: 'Connection', icon: '🔌', weight: 0.18 },
-            { name: 'DEALLOCATE ALL', icon: '⚙️', weight: 0.15 },
-          ]
+          const initialSteps = []
 
           if (
             operation.includes('create') ||
@@ -199,12 +185,6 @@ export function createDetailedQueryLogger() {
                 })
               }
             }
-
-            allStepTemplates.push({
-              name: 'Response',
-              icon: '📤',
-              weight: 0.02,
-            })
 
             if (
               operation.includes('create') ||
@@ -330,7 +310,7 @@ function generateQueryDescription(
 
   // Truncate if too long
   if (description.length > 60) {
-    description = description.substring(0, 100) + '...'
+    description = description
   }
 
   return description

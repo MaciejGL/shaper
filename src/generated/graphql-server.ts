@@ -3059,6 +3059,7 @@ export type GQLUser = {
   role: EntireFieldWrapper<GQLUserRole>;
   sessions: EntireFieldWrapper<Array<GQLUserSession>>;
   trainer?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
+  trainerId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
@@ -4800,6 +4801,7 @@ export type GQLUserResolvers<ContextType = GQLContext, ParentType extends GQLRes
   role?: Resolver<GQLResolversTypes['UserRole'], ParentType, ContextType>;
   sessions?: Resolver<Array<GQLResolversTypes['UserSession']>, ParentType, ContextType>;
   trainer?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
+  trainerId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

@@ -213,10 +213,6 @@ query FitspaceGetWorkoutNavigation($trainingId: ID!) {
           isRestDay
           completedAt
           scheduledAt
-          exercises {
-            id
-            completedAt
-          }
         }
       }
     }
