@@ -57,26 +57,6 @@ export function NotificationPreferences({
 
       <div className="flex items-center justify-between gap-4">
         <div className="space-y-1">
-          <Label htmlFor={getId('meal-reminders')} className="font-medium">
-            Meal Reminders
-          </Label>
-          <p className="text-sm text-muted-foreground">
-            Reminders to log your meals and stay on track
-          </p>
-        </div>
-        <Switch
-          id={getId('meal-reminders')}
-          checked={preferences.notifications?.mealReminders ?? true}
-          onCheckedChange={(enabled) =>
-            handleNotificationTypeToggle('mealReminders', enabled)
-          }
-        />
-      </div>
-
-      <Separator />
-
-      <div className="flex items-center justify-between gap-4">
-        <div className="space-y-1">
           <Label htmlFor={getId('progress-updates')} className="font-medium">
             Progress Updates
           </Label>

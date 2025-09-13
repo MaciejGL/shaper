@@ -418,9 +418,6 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       updateData.workoutReminders =
         rest.notificationPreferences.workoutReminders
     }
-    if (rest.notificationPreferences?.mealReminders !== undefined) {
-      updateData.mealReminders = rest.notificationPreferences.mealReminders
-    }
     if (rest.notificationPreferences?.progressUpdates !== undefined) {
       updateData.progressUpdates = rest.notificationPreferences.progressUpdates
     }

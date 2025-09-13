@@ -30,7 +30,6 @@ export type TrainingView = GQLTrainingView
 
 export interface NotificationPreferences {
   workoutReminders?: boolean
-  mealReminders?: boolean
   progressUpdates?: boolean
   systemNotifications?: boolean
   emailNotifications?: boolean
@@ -66,7 +65,6 @@ const UserPreferencesContext = createContext<UserPreferencesContextType | null>(
 
 const DEFAULT_NOTIFICATIONS: NotificationPreferences = {
   workoutReminders: true,
-  mealReminders: true,
   progressUpdates: true,
   systemNotifications: true,
   emailNotifications: true,
@@ -162,7 +160,6 @@ export function UserPreferencesProvider({
         notifications: {
           workoutReminders:
             profile.notificationPreferences?.workoutReminders ?? true,
-          mealReminders: profile.notificationPreferences?.mealReminders ?? true,
           progressUpdates:
             profile.notificationPreferences?.progressUpdates ?? true,
           systemNotifications:

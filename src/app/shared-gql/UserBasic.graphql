@@ -28,7 +28,6 @@ query UserBasic {
       hasCompletedOnboarding
       notificationPreferences {
         workoutReminders
-        mealReminders
         progressUpdates
         systemNotifications
         emailNotifications

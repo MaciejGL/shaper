@@ -275,39 +275,6 @@ export async function notifyClientTrainerNote(
 }
 
 // ================================
-// MEAL & NUTRITION
-// ================================
-
-/**
- * Send push notification when daily nutrition goal is completed
- */
-export async function notifyDailyNutritionCompleted(userId: string) {
-  return await sendPushNotificationToUsers(
-    [userId],
-    'Daily nutrition complete',
-    'You have logged all your meals for today.',
-    '/fitspace/meal-plan',
-  )
-}
-
-/**
- * Send push notification for meal reminders
- */
-export async function notifyMealReminder(
-  userId: string,
-  mealType: string,
-  scheduledTime?: string,
-) {
-  const timeDetail = scheduledTime ? ` scheduled for ${scheduledTime}` : ''
-  return await sendPushNotificationToUsers(
-    [userId],
-    'Meal reminder',
-    `Time to log your ${mealType}${timeDetail}.`,
-    '/fitspace/meal-plan',
-  )
-}
-
-// ================================
 // REMINDERS & MOTIVATION
 // ================================
 

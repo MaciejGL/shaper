@@ -14,7 +14,6 @@ import {
   UserIcon,
   UserRoundCogIcon,
   Users2Icon,
-  UtensilsIcon,
 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
@@ -41,10 +40,8 @@ import {
 import { TRAINER_LINKS } from '@/constants/user-links'
 import {
   GQLUserRole,
-  useCreateDraftMealTemplateMutation,
   useCreateDraftTemplateMutation,
   useGetClientsQuery,
-  useGetMealPlanTemplatesQuery,
   useGetTemplatesQuery,
 } from '@/generated/graphql-client'
 import { FEATURE_FLAGS, useFeatureFlag } from '@/hooks/use-feature-flag'
@@ -99,25 +96,6 @@ const placeholderTemplates = {
     })),
 }
 
-const placeholderMealPlans = {
-  getMealPlanTemplates: Array(2)
-    .fill(null)
-    .map((_, index) => ({
-      id: `meal-plan-placeholder-${index}`,
-      title: 'Loading...',
-      description: null,
-      isDraft: false,
-      dailyCalories: 0,
-      dailyProtein: 0,
-      dailyCarbs: 0,
-      dailyFat: 0,
-      weekCount: 0,
-      assignedCount: 0,
-      createdAt: new Date('2025-01-01').toISOString(),
-      updatedAt: new Date('2025-01-01').toISOString(),
-    })),
-}
-
 export function AppSidebar() {
   const { data: session } = useSession()
   const queryClient = useQueryClient()
@@ -162,15 +140,6 @@ export function AppSidebar() {
       },
     )
 
-  const { data: mealPlansData, isPlaceholderData: isPlaceholderMealPlans } =
-    useGetMealPlanTemplatesQuery(
-      { limit: 3 },
-      {
-        placeholderData: placeholderMealPlans,
-        refetchOnWindowFocus: false,
-      },
-    )
-
   const { mutate: createDraftTemplate, isPending: isCreatingDraftTemplate } =
     useCreateDraftTemplateMutation({
       onSuccess: (data) => {
@@ -185,30 +154,9 @@ export function AppSidebar() {
       },
     })
 
-  const {
-    mutate: createDraftMealTemplate,
-    isPending: isCreatingDraftMealTemplate,
-  } = useCreateDraftMealTemplateMutation({
-    onSuccess: (data) => {
-      const newPlan = data.createDraftMealTemplate
-
-      queryClient.invalidateQueries({ queryKey: ['GetMealPlanTemplates'] })
-
-      router.push(`/trainer/meal-plans/creator/${newPlan.id}`)
-    },
-    onError: (error) => {
-      console.error('❌ Failed to create draft meal template:', error)
-    },
-  })
-
   const templates = useMemo(
     () => templatesData?.getTemplates || [],
     [templatesData],
-  )
-
-  const mealPlans = useMemo(
-    () => mealPlansData?.getMealPlanTemplates || [],
-    [mealPlansData],
   )
 
   const items: SidebarItemType[] = useMemo(
@@ -250,28 +198,6 @@ export function AppSidebar() {
           })),
         ],
       },
-      // Meal Plans item
-      {
-        title: TRAINER_LINKS.mealPlans.label,
-        url: TRAINER_LINKS.mealPlans.href,
-        icon: UtensilsIcon,
-        disabled: TRAINER_LINKS.mealPlans.disabled,
-        subItems: [
-          {
-            title: 'Create',
-            onClick: () => createDraftMealTemplate({}),
-            icon: PlusCircleIcon,
-            loading: isCreatingDraftMealTemplate,
-            disabled: false,
-          },
-          ...mealPlans.map((plan) => ({
-            title: plan.title,
-            url: TRAINER_LINKS.mealPlans.href + `/creator/${plan.id}`,
-            icon: FileIcon,
-            disabled: false,
-          })),
-        ],
-      },
       // Exercises item
       {
         title: TRAINER_LINKS.exercises.label,
@@ -296,11 +222,8 @@ export function AppSidebar() {
       isTeamsFeatureLoading,
       clients,
       templates,
-      mealPlans,
       createDraftTemplate,
       isCreatingDraftTemplate,
-      createDraftMealTemplate,
-      isCreatingDraftMealTemplate,
     ],
   )
 
@@ -355,11 +278,7 @@ export function AppSidebar() {
               <SidebarItem
                 key={item.title + index}
                 item={item}
-                isLoading={
-                  isPlaceholderClients ||
-                  isPlaceholderTemplates ||
-                  isPlaceholderMealPlans
-                }
+                isLoading={isPlaceholderClients || isPlaceholderTemplates}
               />
             ))}
           </SidebarMenu>

@@ -273,39 +273,6 @@ async function closeRedis(): Promise<void> {
   }
 }
 
-/**
- * Normalize search query for better cache hit rates
- * Removes special characters, extra spaces, and standardizes format
- */
-export function normalizeSearchQuery(query: string): string {
-  return query
-    .trim()
-    .toLowerCase()
-    .replace(/[^\w\s]/g, '') // Remove special characters
-    .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-    .trim()
-}
-
-// Cache key generators for food search
-export const FoodSearchCacheKeys = {
-  searchResults: (query: string) =>
-    `food:search:${normalizeSearchQuery(query)}`,
-  productDetails: (barcode: string) => `food:product:${barcode}`,
-  popularQuery: (query: string) =>
-    `food:popular:${normalizeSearchQuery(query)}`,
-  // Pattern to clear all food search cache
-  allFoodSearch: () => 'food:search:*',
-  allFoodProduct: () => 'food:product:*',
-  allPopular: () => 'food:popular:*',
-} as const
-
-// Cache TTL constants (in seconds) - Optimized for performance
-export const FoodSearchCacheTTL = {
-  searchResults: 60 * 60 * 6, // 6 hours (increased from 1 hour for better hit rate)
-  productDetails: 60 * 60 * 24 * 7, // 1 week (product details rarely change)
-  popularQueries: 60 * 60 * 24, // 24 hours for frequently searched terms
-} as const
-
 // Export the functions
 export {
   getRedisClient,

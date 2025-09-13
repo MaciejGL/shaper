@@ -31,7 +31,6 @@ fragment ProfileFragment on UserProfile {
   hasCompletedOnboarding
   notificationPreferences {
     workoutReminders
-    mealReminders
     progressUpdates
     systemNotifications
     emailNotifications

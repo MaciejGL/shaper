@@ -25,7 +25,6 @@ import {
 } from './push-notification-service'
 // Legacy helper functions - use centralized service instead
 import {
-  notifyMealReminder,
   notifyWorkoutReminder,
   sendBatchNotifications,
 } from './push-notification-service'
@@ -182,15 +181,4 @@ export async function sendWorkoutReminderPush(
   scheduledTime?: string,
 ) {
   return await notifyWorkoutReminder(userId, workoutName, scheduledTime)
-}
-
-/**
- * @deprecated Use specific notification functions from push-notification-service instead
- */
-export async function sendMealReminderPush(
-  userId: string,
-  mealName: string,
-  scheduledTime?: string,
-) {
-  return await notifyMealReminder(userId, mealName, scheduledTime)
 }

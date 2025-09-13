@@ -27,7 +27,6 @@ const TTL = {
 const keys = {
   user: {
     trainingPlans: (userId: string) => `user:${userId}:training-plans`,
-    mealPlans: (userId: string) => `user:${userId}:meal-plans`,
   },
   exercises: {
     public: () => 'exercises:public',

@@ -7,7 +7,6 @@ import {
   Dumbbell,
   UserCheck,
   Users,
-  Utensils,
 } from 'lucide-react'
 import { parseAsStringEnum } from 'nuqs'
 import { useQueryState } from 'nuqs'
@@ -17,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   LazyAwsTab as AwsTab,
   LazyExercisesTab as ExercisesTab,
-  LazyFoodsTab as FoodsTab,
   LazyPushNotificationsTab as PushNotificationsTab,
   LazyStripeTab as StripeTab,
   LazyTrainersTab as TrainersTab,
@@ -29,8 +27,8 @@ export default function AdminPage() {
   const [activeTab, setActiveTab] = useQueryState(
     'tab',
     parseAsStringEnum<
-      'users' | 'trainers' | 'exercises' | 'foods' | 'push' | 'stripe' | 'aws'
-    >(['users', 'trainers', 'exercises', 'foods', 'push', 'stripe', 'aws'])
+      'users' | 'trainers' | 'exercises' | 'push' | 'stripe' | 'aws'
+    >(['users', 'trainers', 'exercises', 'push', 'stripe', 'aws'])
       .withDefault('users')
       .withOptions({ clearOnDefault: true }),
   )
@@ -46,7 +44,6 @@ export default function AdminPage() {
               | 'users'
               | 'trainers'
               | 'exercises'
-              | 'foods'
               | 'push'
               | 'stripe'
               | 'aws',
@@ -70,10 +67,7 @@ export default function AdminPage() {
             <Dumbbell className="h-4 w-4" />
             Exercise Management
           </TabsTrigger>
-          <TabsTrigger value="foods">
-            <Utensils className="h-4 w-4" />
-            Food Management
-          </TabsTrigger>
+
           <TabsTrigger value="push">
             <Bell className="h-4 w-4" />
             Push Notifications
@@ -100,10 +94,6 @@ export default function AdminPage() {
 
         <TabsContent value="exercises" className="mt-6">
           <ExercisesTab />
-        </TabsContent>
-
-        <TabsContent value="foods" className="mt-6">
-          <FoodsTab />
         </TabsContent>
 
         <TabsContent value="push" className="mt-6">

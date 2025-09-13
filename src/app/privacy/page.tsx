@@ -166,8 +166,7 @@ export default async function PrivacyPolicyPage() {
                         <strong className="text-foreground">
                           Nutrition Data:
                         </strong>{' '}
-                        Meal plans, food logs, nutritional targets, dietary
-                        preferences
+                        Meal plans, nutritional targets, dietary preferences
                       </li>
                       <li>
                         <strong className="text-foreground">
@@ -245,13 +244,6 @@ export default async function PrivacyPolicyPage() {
                       Third-Party Data Sources
                     </h3>
                     <ul className="space-y-2 text-muted-foreground">
-                      <li>
-                        <strong className="text-foreground">
-                          Food Databases:
-                        </strong>{' '}
-                        Nutritional information from OpenFoodFacts and USDA Food
-                        Data Central
-                      </li>
                       <li>
                         <strong className="text-foreground">
                           Email Services:

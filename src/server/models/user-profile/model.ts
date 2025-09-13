@@ -217,7 +217,6 @@ export default class UserProfile implements GQLUserProfile {
   get notificationPreferences(): GQLNotificationPreferences {
     return {
       workoutReminders: this.data.workoutReminders ?? true,
-      mealReminders: this.data.mealReminders ?? true,
       progressUpdates: this.data.progressUpdates ?? true,
       systemNotifications: this.data.systemNotifications ?? true,
       emailNotifications: this.data.emailNotifications ?? true,

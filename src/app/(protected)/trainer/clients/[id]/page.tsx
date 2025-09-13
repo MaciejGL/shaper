@@ -12,7 +12,6 @@ import { DashboardHeader } from '../../components/dashboard-header'
 
 import { ClientActivePlan } from './components/client-active-plan'
 import { ClientInfo } from './components/client-info/client-info'
-import { ClientMealPlans } from './components/client-meal-plans/client-meal-plans'
 import { ClientMeasurements } from './components/client-measurements'
 import { ClientNotes } from './components/client-notes/client-notes'
 import { ClientServiceDeliveries } from './components/client-service-deliveries/client-service-deliveries'
@@ -63,8 +62,8 @@ export default function ClientDetailPage({
             <TabsTrigger size="lg" value="measurements">
               Measurements Logs
             </TabsTrigger>
-            <TabsTrigger size="lg" value="meal-plans">
-              Meal Plans
+            <TabsTrigger size="lg" value="nutrition">
+              Nutrition
             </TabsTrigger>
             <TabsTrigger size="lg" value="services">
               Services & Offers
@@ -111,9 +110,9 @@ export default function ClientDetailPage({
             <ClientMeasurements client={client} clientName={clientName} />
           </TabsContent>
         </AnimatedPageTransition>
-        <AnimatedPageTransition id="meal-plans">
-          <TabsContent value="meal-plans">
-            <ClientMealPlans client={client} clientName={clientName} />
+        <AnimatedPageTransition id="nutrition">
+          <TabsContent value="nutrition">
+            <div>Nutrition</div>
           </TabsContent>
         </AnimatedPageTransition>
         <AnimatedPageTransition id="services">

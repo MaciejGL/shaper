@@ -51,9 +51,7 @@ enum TrainingView {
 
 type NotificationPreferences {
   workoutReminders: Boolean!
-  mealReminders: Boolean!
   progressUpdates: Boolean!
-
   systemNotifications: Boolean!
   emailNotifications: Boolean!
   pushNotifications: Boolean!
@@ -133,7 +131,6 @@ type Query {
 
 input NotificationPreferencesInput {
   workoutReminders: Boolean
-  mealReminders: Boolean
   progressUpdates: Boolean
 
   systemNotifications: Boolean

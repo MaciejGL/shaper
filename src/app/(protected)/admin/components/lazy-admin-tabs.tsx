@@ -58,14 +58,6 @@ const LazyExercisesTab = dynamic(
   },
 )
 
-const LazyFoodsTab = dynamic(
-  () => import('./foods-tab').then((mod) => ({ default: mod.FoodsTab })),
-  {
-    loading: () => <AdminTabSkeleton />,
-    ssr: false,
-  },
-)
-
 const LazyPushNotificationsTab = dynamic(
   () =>
     import('./push-notifications-tab').then((mod) => ({
@@ -97,7 +89,6 @@ export {
   LazyUsersTab,
   LazyTrainersTab,
   LazyExercisesTab,
-  LazyFoodsTab,
   LazyPushNotificationsTab,
   LazyAwsTab,
   LazyStripeTab,

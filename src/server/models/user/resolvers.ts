@@ -678,11 +678,6 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
           where: { createdById: userId },
         })
 
-        // Delete meal food logs
-        await tx.mealFoodLog.deleteMany({
-          where: { userId },
-        })
-
         // Clear completion status for user's training plans (bulk operations)
         await tx.exerciseSet.updateMany({
           where: {
@@ -739,20 +734,6 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
           where: { assignedToId: userId },
           data: { completedAt: null },
         })
-
-        // Clear meal completion status (bulk operation)
-        await tx.meal.updateMany({
-          where: {
-            day: {
-              week: {
-                plan: {
-                  assignedToId: userId,
-                },
-              },
-            },
-          },
-          data: { completedAt: null },
-        })
       })
 
       return true
@@ -794,7 +775,6 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
           // User-generated content and logs
           tx.exerciseLog.deleteMany({ where: { userId } }),
-          tx.mealFoodLog.deleteMany({ where: { userId } }),
           tx.review.deleteMany({ where: { createdById: userId } }),
           tx.note.deleteMany({ where: { createdById: userId } }),
 
@@ -802,14 +782,10 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
           tx.trainingPlan.deleteMany({
             where: { OR: [{ assignedToId: userId }, { createdById: userId }] },
           }),
-          tx.mealPlan.deleteMany({
-            where: { OR: [{ assignedToId: userId }, { createdById: userId }] },
-          }),
 
           // Other user-created content
           tx.favouriteWorkout.deleteMany({ where: { createdById: userId } }),
           tx.baseExercise.deleteMany({ where: { createdById: userId } }),
-          tx.mealFood.deleteMany({ where: { addedById: userId } }),
         ]
 
         // Execute all deletions in parallel for better performance

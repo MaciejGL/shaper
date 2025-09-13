@@ -43,11 +43,16 @@ export function WebViewLoading({ progress = 0 }: WebViewLoadingProps) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#000000', // Black background
     paddingHorizontal: 40,
+    zIndex: 1000,
   },
   progressContainer: {
     width: '100%',

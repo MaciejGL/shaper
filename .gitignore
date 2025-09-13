@@ -43,12 +43,6 @@ next-env.d.ts
 # generated prisma client
 /src/generated/prisma
 
-# data directories (USDA datasets, etc.)
-/data
-**/data/usda/
-**/downloads/
-*.zip
-
 expo-app/node_modules
 expo-app/hypertro-579ddbded873.json
 expo-app/hypertro-mobile-firebase-*
