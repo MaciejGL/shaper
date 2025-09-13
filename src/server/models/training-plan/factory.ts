@@ -9,7 +9,6 @@ import {
   GQLMutationExtendPlanArgs,
   GQLMutationPausePlanArgs,
   GQLQueryGetClientActivePlanArgs,
-  GQLQueryGetWorkoutArgs,
 } from '@/generated/graphql-client'
 import {
   GQLMutationAssignTemplateToSelfArgs,
@@ -691,48 +690,6 @@ export async function getActivePlanId(context: GQLContext) {
   })
 
   return activePlan?.id || null
-}
-
-export async function getWorkout(
-  args: GQLQueryGetWorkoutArgs,
-  context: GQLContext,
-) {
-  const { trainingId } = args
-  const user = context.user
-  if (!user) {
-    throw new Error('User not found')
-  }
-  let id = trainingId
-  if (!id) {
-    const plan = await prisma.trainingPlan.findFirst({
-      where: { assignedToId: user.user.id, active: true },
-      select: { id: true },
-    })
-    id = plan?.id
-  }
-  if (!id) {
-    return null
-  }
-
-  const plan = await getFullPlanById(id)
-
-  if (!plan || plan.assignedToId !== user.user.id) {
-    return null
-  }
-
-  if (plan.assignedToId === user.user.id && plan.createdById === user.user.id) {
-    return {
-      plan: new TrainingPlan(plan, context),
-    }
-  }
-
-  if (!plan.startDate) {
-    return null
-  }
-
-  return {
-    plan: new TrainingPlan(plan, context),
-  }
 }
 
 export async function createTrainingPlan(
@@ -1843,83 +1800,6 @@ export async function createDraftTemplate(context: GQLContext) {
   return new TrainingPlan(trainingPlan, context)
 }
 
-export async function getCurrentWorkoutWeek(context: GQLContext) {
-  const user = context.user
-  if (!user) {
-    throw new Error('User not found')
-  }
-
-  const plan = await prisma.trainingPlan.findFirst({
-    where: { assignedToId: user.user.id, active: true },
-    include: {
-      weeks: {
-        orderBy: {
-          weekNumber: 'asc',
-        },
-        include: {
-          days: {
-            orderBy: {
-              dayOfWeek: 'asc',
-            },
-            include: {
-              events: true,
-              exercises: {
-                orderBy: {
-                  order: 'asc',
-                },
-                include: {
-                  sets: {
-                    orderBy: {
-                      order: 'asc',
-                    },
-                  },
-                  base: {
-                    include: {
-                      muscleGroups: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  })
-
-  if (!plan) {
-    return null
-  }
-
-  const today = new Date()
-  const planStartDate = plan.startDate ? new Date(plan.startDate) : today
-  const daysSinceStart = Math.floor(
-    (today.getTime() - planStartDate.getTime()) / (1000 * 60 * 60 * 24),
-  )
-  const currentWeekIndex = Math.floor(daysSinceStart / 7)
-
-  // Instead of manipulating the structure, just return the plan with limited weeks
-  let limitedWeeks = plan.weeks.slice(
-    Math.max(0, currentWeekIndex - 4),
-    currentWeekIndex + 1,
-  )
-
-  if (limitedWeeks.length === 0) {
-    limitedWeeks = plan.weeks.slice(0, 1)
-  }
-
-  const limitedPlan = {
-    ...plan,
-    weeks: limitedWeeks,
-  }
-
-  return {
-    plan: new TrainingPlan(limitedPlan, context),
-    currentWeekIndex,
-    totalWeeks: plan.weeks.length,
-  }
-}
-
 export async function getWorkoutNavigation(
   args: GQLQueryGetWorkoutNavigationArgs,
   context: GQLContext,
@@ -2002,16 +1882,62 @@ export async function getWorkoutDay(
   const { dayId } = args
   const user = context.user
   if (!user) {
-    throw new Error('User not found')
+    throw new GraphQLError('User not found')
   }
 
+  let targetDayId = dayId
+
+  // If no dayId provided, find today's scheduled day from active plan
   if (!dayId) {
-    return null
+    // Convert JavaScript day to training system format
+    // JavaScript: 0=Sunday, 1=Monday, ..., 6=Saturday
+    // Training system: 0=Monday, 1=Tuesday, ..., 6=Sunday
+    const jsDay = new Date().getDay()
+    const trainingDay = jsDay === 0 ? 6 : jsDay - 1
+
+    const activePlan = await prisma.trainingPlan.findFirst({
+      where: {
+        assignedToId: user.user.id,
+        active: true,
+      },
+      include: {
+        weeks: {
+          include: {
+            days: {
+              where: {
+                dayOfWeek: trainingDay,
+                // Also ensure the day is scheduled (not a template)
+                scheduledAt: { not: null },
+              },
+            },
+          },
+        },
+      },
+    })
+
+    if (!activePlan?.weeks?.length) {
+      throw new GraphQLError('Active plan not found')
+    }
+
+    // Find today's day by dayOfWeek (should be current or upcoming days)
+    const todayDay = activePlan.weeks
+      .flatMap((week) => week.days)
+      .find((day) => day.dayOfWeek === trainingDay)
+
+    if (!todayDay) {
+      throw new GraphQLError("Today's day not found")
+    }
+
+    targetDayId = todayDay.id
+  }
+
+  if (!targetDayId) {
+    throw new GraphQLError('Target day not found')
   }
 
   // Fetch the day with all exercise data
   const day = await prisma.trainingDay.findUnique({
-    where: { id: dayId },
+    where: { id: targetDayId },
     include: {
       week: {
         include: {
@@ -2080,18 +2006,18 @@ export async function getWorkoutDay(
   })
 
   if (!day) {
-    throw new Error('Day not found')
+    throw new GraphQLError('Day not found')
   }
 
   // Check if user has access to this day
   const plan = day.week.plan
   if (plan.assignedToId !== user.user.id) {
-    throw new Error('Access denied')
+    throw new GraphQLError('Access denied')
   }
 
   // For assigned plans, require the plan to be active
   if (plan.createdById !== user.user.id && !plan.active) {
-    throw new Error('Plan is not active')
+    throw new GraphQLError('Plan is not active')
   }
 
   // Fetch previous exercise logs for all exercises in this day
@@ -2101,7 +2027,7 @@ export async function getWorkoutDay(
     .filter((name) => name !== undefined)
   const exerciseIds = day.exercises.map((ex) => ex.id)
 
-  const cacheKey = cache.keys.exercises.previousExercises(plan.id, dayId)
+  const cacheKey = cache.keys.exercises.previousExercises(plan.id, targetDayId)
 
   const cached = await cache.get<
     Prisma.TrainingExerciseGetPayload<{
@@ -2121,7 +2047,7 @@ export async function getWorkoutDay(
   if (cached) {
     return {
       day: new TrainingDay(day, context),
-      previousDayLogs: getPreviousLogsByExerciseName(cached),
+      previousDayLogs: await getPreviousLogsByExerciseName(cached),
     }
   }
 
@@ -2181,7 +2107,7 @@ export async function getWorkoutDay(
 
   await cache.set(cacheKey, previousExercises)
   const previousLogsByExerciseName =
-    getPreviousLogsByExerciseName(previousExercises)
+    await getPreviousLogsByExerciseName(previousExercises)
 
   return {
     day: new TrainingDay(day, context),

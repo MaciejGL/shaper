@@ -578,13 +578,6 @@ export type GQLCreateTrainingWeekInput = {
   weekNumber: Scalars['Int']['input'];
 };
 
-export type GQLCurrentWorkoutWeekPayload = {
-  __typename?: 'CurrentWorkoutWeekPayload';
-  currentWeekIndex: EntireFieldWrapper<Scalars['Int']['output']>;
-  plan?: EntireFieldWrapper<Maybe<GQLTrainingPlan>>;
-  totalWeeks: EntireFieldWrapper<Scalars['Int']['output']>;
-};
-
 export type GQLDeleteReviewInput = {
   reviewId: Scalars['ID']['input'];
 };
@@ -775,11 +768,6 @@ export type GQLGetWorkoutDayPayload = {
 
 export type GQLGetWorkoutNavigationPayload = {
   __typename?: 'GetWorkoutNavigationPayload';
-  plan: EntireFieldWrapper<GQLTrainingPlan>;
-};
-
-export type GQLGetWorkoutPayload = {
-  __typename?: 'GetWorkoutPayload';
   plan: EntireFieldWrapper<GQLTrainingPlan>;
 };
 
@@ -2015,7 +2003,6 @@ export type GQLQuery = {
   getClientMealPlans: EntireFieldWrapper<Array<GQLMealPlan>>;
   getClientTrainerOffers: EntireFieldWrapper<Array<GQLTrainerOffer>>;
   getClientTrainingPlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
-  getCurrentWorkoutWeek?: EntireFieldWrapper<Maybe<GQLCurrentWorkoutWeekPayload>>;
   getDefaultMealPlan: EntireFieldWrapper<GQLMealPlan>;
   getExercises: EntireFieldWrapper<GQLGetExercisesResponse>;
   getFavouriteWorkout?: EntireFieldWrapper<Maybe<GQLFavouriteWorkout>>;
@@ -2045,7 +2032,6 @@ export type GQLQuery = {
   getTrainerTasks: EntireFieldWrapper<Array<GQLServiceTask>>;
   getTrainingExercise?: EntireFieldWrapper<Maybe<GQLTrainingExercise>>;
   getTrainingPlanById: EntireFieldWrapper<GQLTrainingPlan>;
-  getWorkout?: EntireFieldWrapper<Maybe<GQLGetWorkoutPayload>>;
   getWorkoutDay?: EntireFieldWrapper<Maybe<GQLGetWorkoutDayPayload>>;
   getWorkoutInfo: EntireFieldWrapper<GQLTrainingDay>;
   getWorkoutNavigation?: EntireFieldWrapper<Maybe<GQLGetWorkoutNavigationPayload>>;
@@ -2254,11 +2240,6 @@ export type GQLQueryGetTrainingExerciseArgs = {
 
 export type GQLQueryGetTrainingPlanByIdArgs = {
   id: Scalars['ID']['input'];
-};
-
-
-export type GQLQueryGetWorkoutArgs = {
-  trainingId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -3399,7 +3380,6 @@ export type GQLResolversTypes = {
   CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
   CreateTrainingPlanPayload: ResolverTypeWrapper<GQLCreateTrainingPlanPayload>;
   CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
-  CurrentWorkoutWeekPayload: ResolverTypeWrapper<GQLCurrentWorkoutWeekPayload>;
   DeleteReviewInput: GQLDeleteReviewInput;
   DeliveryStatus: GQLDeliveryStatus;
   Difficulty: GQLDifficulty;
@@ -3423,7 +3403,6 @@ export type GQLResolversTypes = {
   GetMealPlanPayload: ResolverTypeWrapper<GQLGetMealPlanPayload>;
   GetWorkoutDayPayload: ResolverTypeWrapper<GQLGetWorkoutDayPayload>;
   GetWorkoutNavigationPayload: ResolverTypeWrapper<GQLGetWorkoutNavigationPayload>;
-  GetWorkoutPayload: ResolverTypeWrapper<GQLGetWorkoutPayload>;
   Goal: GQLGoal;
   HeightUnit: GQLHeightUnit;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
@@ -3612,7 +3591,6 @@ export type GQLResolversParentTypes = {
   CreateTrainingPlanInput: GQLCreateTrainingPlanInput;
   CreateTrainingPlanPayload: GQLCreateTrainingPlanPayload;
   CreateTrainingWeekInput: GQLCreateTrainingWeekInput;
-  CurrentWorkoutWeekPayload: GQLCurrentWorkoutWeekPayload;
   DeleteReviewInput: GQLDeleteReviewInput;
   DuplicateTrainingWeekInput: GQLDuplicateTrainingWeekInput;
   EditMessageInput: GQLEditMessageInput;
@@ -3630,7 +3608,6 @@ export type GQLResolversParentTypes = {
   GetMealPlanPayload: GQLGetMealPlanPayload;
   GetWorkoutDayPayload: GQLGetWorkoutDayPayload;
   GetWorkoutNavigationPayload: GQLGetWorkoutNavigationPayload;
-  GetWorkoutPayload: GQLGetWorkoutPayload;
   ID: Scalars['ID']['output'];
   Image: GQLImage;
   Int: Scalars['Int']['output'];
@@ -3900,13 +3877,6 @@ export type GQLCreateTrainingPlanPayloadResolvers<ContextType = GQLContext, Pare
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type GQLCurrentWorkoutWeekPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CurrentWorkoutWeekPayload'] = GQLResolversParentTypes['CurrentWorkoutWeekPayload']> = {
-  currentWeekIndex?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  plan?: Resolver<Maybe<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType>;
-  totalWeeks?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
 export type GQLExerciseLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ExerciseLog'] = GQLResolversParentTypes['ExerciseLog']> = {
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   exerciseId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
@@ -4012,11 +3982,6 @@ export type GQLGetWorkoutDayPayloadResolvers<ContextType = GQLContext, ParentTyp
 };
 
 export type GQLGetWorkoutNavigationPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetWorkoutNavigationPayload'] = GQLResolversParentTypes['GetWorkoutNavigationPayload']> = {
-  plan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
-  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
-};
-
-export type GQLGetWorkoutPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['GetWorkoutPayload'] = GQLResolversParentTypes['GetWorkoutPayload']> = {
   plan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -4513,7 +4478,6 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getClientMealPlans?: Resolver<Array<GQLResolversTypes['MealPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientMealPlansArgs, 'clientId'>>;
   getClientTrainerOffers?: Resolver<Array<GQLResolversTypes['TrainerOffer']>, ParentType, ContextType, RequireFields<GQLQueryGetClientTrainerOffersArgs, 'clientEmail' | 'trainerId'>>;
   getClientTrainingPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientTrainingPlansArgs, 'clientId'>>;
-  getCurrentWorkoutWeek?: Resolver<Maybe<GQLResolversTypes['CurrentWorkoutWeekPayload']>, ParentType, ContextType>;
   getDefaultMealPlan?: Resolver<GQLResolversTypes['MealPlan'], ParentType, ContextType, Partial<GQLQueryGetDefaultMealPlanArgs>>;
   getExercises?: Resolver<GQLResolversTypes['GetExercisesResponse'], ParentType, ContextType>;
   getFavouriteWorkout?: Resolver<Maybe<GQLResolversTypes['FavouriteWorkout']>, ParentType, ContextType, RequireFields<GQLQueryGetFavouriteWorkoutArgs, 'id'>>;
@@ -4543,7 +4507,6 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getTrainerTasks?: Resolver<Array<GQLResolversTypes['ServiceTask']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainerTasksArgs, 'trainerId'>>;
   getTrainingExercise?: Resolver<Maybe<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType, RequireFields<GQLQueryGetTrainingExerciseArgs, 'id'>>;
   getTrainingPlanById?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType, RequireFields<GQLQueryGetTrainingPlanByIdArgs, 'id'>>;
-  getWorkout?: Resolver<Maybe<GQLResolversTypes['GetWorkoutPayload']>, ParentType, ContextType, Partial<GQLQueryGetWorkoutArgs>>;
   getWorkoutDay?: Resolver<Maybe<GQLResolversTypes['GetWorkoutDayPayload']>, ParentType, ContextType, Partial<GQLQueryGetWorkoutDayArgs>>;
   getWorkoutInfo?: Resolver<GQLResolversTypes['TrainingDay'], ParentType, ContextType, RequireFields<GQLQueryGetWorkoutInfoArgs, 'dayId'>>;
   getWorkoutNavigation?: Resolver<Maybe<GQLResolversTypes['GetWorkoutNavigationPayload']>, ParentType, ContextType, Partial<GQLQueryGetWorkoutNavigationArgs>>;
@@ -5001,7 +4964,6 @@ export type GQLResolvers<ContextType = GQLContext> = {
   CoachingRequest?: GQLCoachingRequestResolvers<ContextType>;
   CreateMealPlanPayload?: GQLCreateMealPlanPayloadResolvers<ContextType>;
   CreateTrainingPlanPayload?: GQLCreateTrainingPlanPayloadResolvers<ContextType>;
-  CurrentWorkoutWeekPayload?: GQLCurrentWorkoutWeekPayloadResolvers<ContextType>;
   ExerciseLog?: GQLExerciseLogResolvers<ContextType>;
   ExerciseProgress?: GQLExerciseProgressResolvers<ContextType>;
   ExerciseSet?: GQLExerciseSetResolvers<ContextType>;
@@ -5013,7 +4975,6 @@ export type GQLResolvers<ContextType = GQLContext> = {
   GetMealPlanPayload?: GQLGetMealPlanPayloadResolvers<ContextType>;
   GetWorkoutDayPayload?: GQLGetWorkoutDayPayloadResolvers<ContextType>;
   GetWorkoutNavigationPayload?: GQLGetWorkoutNavigationPayloadResolvers<ContextType>;
-  GetWorkoutPayload?: GQLGetWorkoutPayloadResolvers<ContextType>;
   Image?: GQLImageResolvers<ContextType>;
   Location?: GQLLocationResolvers<ContextType>;
   Meal?: GQLMealResolvers<ContextType>;

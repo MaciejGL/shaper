@@ -32,14 +32,12 @@ import {
   getActivePlanId,
   getClientActivePlan,
   getClientTrainingPlans,
-  getCurrentWorkoutWeek,
   getMyPlansOverview,
   getMyPlansOverviewFull,
   getMyPlansOverviewLite,
   getPublicTrainingPlans,
   getTemplates,
   getTrainingPlanById,
-  getWorkout,
   getWorkoutDay,
   getWorkoutNavigation,
   pausePlan,
@@ -93,15 +91,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
   getActivePlanId: async (_, __, context) => {
     return getActivePlanId(context)
   },
-  getWorkout: async (_, args, context) => {
-    return getWorkout(args, context)
-  },
   getQuickWorkoutPlan: async (_, __, context) => {
     return getQuickWorkoutPlan(context)
-  },
-
-  getCurrentWorkoutWeek: async (_, __, context) => {
-    return getCurrentWorkoutWeek(context)
   },
   getWorkoutNavigation: async (_, args, context) => {
     return getWorkoutNavigation(args, context)

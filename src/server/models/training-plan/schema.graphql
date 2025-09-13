@@ -91,12 +91,6 @@ type MyPlansPayload {
   quickWorkoutPlan: TrainingPlan
 }
 
-type CurrentWorkoutWeekPayload {
-  plan: TrainingPlan
-  currentWeekIndex: Int!
-  totalWeeks: Int!
-}
-
 type Query {
   getTemplates(draft: Boolean, limit: Int): [TrainingPlan!]!
   getPublicTrainingPlans(limit: Int): [TrainingPlan!]!
@@ -107,7 +101,7 @@ type Query {
   getMyPlansOverviewLite: MyPlansPayload!
   getMyPlansOverviewFull: MyPlansPayload!
   getActivePlanId: ID
-  getCurrentWorkoutWeek: CurrentWorkoutWeekPayload
+
   getQuickWorkoutPlan: TrainingPlan!
 }
 

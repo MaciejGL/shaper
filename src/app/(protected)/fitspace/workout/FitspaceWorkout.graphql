@@ -10,125 +10,6 @@ query FitspaceGetActivePlanId {
   getActivePlanId
 }
 
-query FitspaceGetWorkout($trainingId: ID!) {
-  getWorkout(trainingId: $trainingId) {
-    plan {
-      id
-      title
-      description
-      isPublic
-      isTemplate
-      isDraft
-      startDate
-      assignedTo {
-        id
-      }
-
-      weeks {
-        id
-        weekNumber
-        name
-        description
-        completedAt
-        scheduledAt
-
-        days {
-          id
-          dayOfWeek
-          isRestDay
-          workoutType
-          startedAt
-          completedAt
-          scheduledAt
-          duration
-
-          exercises {
-            id
-            name
-            restSeconds
-            tempo
-            warmupSets
-            description
-            tips
-            difficulty
-            instructions
-            additionalInstructions
-            type
-            order
-            videoUrl
-            images {
-              id
-              thumbnail
-              medium
-              order
-            }
-            completedAt
-            isExtra
-            substitutedBy {
-              id
-              name
-              instructions
-              additionalInstructions
-              type
-              videoUrl
-              completedAt
-              baseId
-              sets {
-                id
-                order
-                reps
-                minReps
-                maxReps
-                weight
-                rpe
-                isExtra
-                completedAt
-                log {
-                  id
-                  weight
-                  rpe
-                  reps
-                  createdAt
-                }
-              }
-            }
-            substitutes {
-              id
-              substitute {
-                id
-                name
-              }
-            }
-            muscleGroups {
-              id
-              alias
-              groupSlug
-            }
-            sets {
-              id
-              order
-              reps
-              minReps
-              maxReps
-              weight
-              rpe
-              isExtra
-              completedAt
-              log {
-                id
-                weight
-                rpe
-                reps
-                createdAt
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
 query FitspaceGetExercises {
   getExercises {
     publicExercises {
@@ -205,7 +86,7 @@ query FitspaceGetWorkoutInfo($dayId: ID!) {
   }
 }
 
-query FitspaceGetWorkoutDay($dayId: ID!) {
+query FitspaceGetWorkoutDay($dayId: ID) {
   getWorkoutDay(dayId: $dayId) {
     day {
       id

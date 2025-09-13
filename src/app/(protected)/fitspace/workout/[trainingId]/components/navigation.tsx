@@ -1,9 +1,10 @@
+'use client'
+
 import { formatDate } from 'date-fns'
-import { useIsomorphicLayoutEffect } from 'framer-motion'
 import { BadgeCheckIcon, ChevronLeft } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 import { useQueryState } from 'nuqs'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { Button } from '@/components/ui/button'
@@ -25,31 +26,7 @@ interface NavigationProps {
 }
 
 export function Navigation({ plan }: NavigationProps) {
-  const [isClient, setIsClient] = useState(false)
-
-  useIsomorphicLayoutEffect(() => {
-    setIsClient(true)
-  }, [])
-
   if (!plan) return null
-
-  if (!isClient) {
-    // Server-side fallback without Select component
-    return (
-      <div
-        className={cn(
-          'bg-sidebar rounded-b-xl',
-          '-mx-2 md:-mx-4 lg:-mx-8 -mt-2 md:-mt-4 lg:-mt-8',
-          'px-2 py-4 md:px-4 lg:p-8',
-        )}
-      >
-        <div className="mx-auto max-w-sm">
-          <div className="h-8 bg-muted rounded animate-pulse mb-4" />
-          <div className="h-20 bg-muted rounded animate-pulse" />
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div
@@ -181,10 +158,12 @@ function getDefaultSelection(plan: NavigationPlan) {
   }
 
   // Find the appropriate day in that week
-  const currentDayOfWeek = now.getDay() // 0 = Sunday, 1 = Monday, etc.
-  let defaultDay = defaultWeek.days.find(
-    (day) => day.dayOfWeek === currentDayOfWeek,
-  )
+  // Convert JavaScript day to training system format
+  // JavaScript: 0=Sunday, 1=Monday, ..., 6=Saturday
+  // Training system: 0=Monday, 1=Tuesday, ..., 6=Sunday
+  const jsDay = now.getDay()
+  const trainingDay = jsDay === 0 ? 6 : jsDay - 1
+  let defaultDay = defaultWeek.days.find((day) => day.dayOfWeek === trainingDay)
 
   // If no matching day, find the first non-completed day, or first day
   if (!defaultDay) {

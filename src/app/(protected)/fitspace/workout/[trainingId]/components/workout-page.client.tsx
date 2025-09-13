@@ -13,7 +13,7 @@ import {
 
 import { Exercises } from './exercises'
 import { Navigation } from './navigation'
-import { SkeletonExercises } from './workout-page-skeleton'
+import { SkeletonExercises, SkeletonNavigation } from './workout-page-skeleton'
 
 // Navigation pagination types
 export type NavigationPlan = NonNullable<
@@ -57,44 +57,48 @@ export function WorkoutPageClientNew({
   trainingId,
 }: WorkoutPageClientNewProps) {
   const [dayId] = useQueryState('day')
-  const { data: navigationData } = use(navigationPromise)
-  const { data: dayData } = use(dayPromise)
-
-  if (!navigationData?.getWorkoutNavigation) {
-    return <div>No navigation data available</div>
-  }
 
   return (
     <div>
-      <Suspense fallback={<div>Loading Navigation...</div>}>
+      <Suspense fallback={<SkeletonNavigation />}>
         <NavigationWrapper
-          navigationData={navigationData}
+          navigationDataPromise={navigationPromise}
           trainingId={trainingId}
         />
       </Suspense>
-      <Suspense fallback={<div>Loading Day...</div>}>
-        <WorkoutDay dayId={dayId} dayData={dayData} />
+      <Suspense fallback={<SkeletonExercises />}>
+        <WorkoutDay dayId={dayId} dayDataPromise={dayPromise} />
       </Suspense>
     </div>
   )
 }
 
 const NavigationWrapper = ({
-  navigationData,
+  navigationDataPromise,
   trainingId,
 }: {
-  navigationData: GQLFitspaceGetWorkoutNavigationQuery
+  navigationDataPromise: Promise<
+    | {
+        data: GQLFitspaceGetWorkoutNavigationQuery
+        error: null
+      }
+    | {
+        data: null
+        error: string
+      }
+  >
   trainingId: string
 }) => {
-  const hasInitialDataForCurrentDay =
-    navigationData?.getWorkoutNavigation?.plan?.id === trainingId
+  const { data: navigationData } = use(navigationDataPromise)
+
   const { data: navigationDataQuery } = useFitspaceGetWorkoutNavigationQuery(
     {
       trainingId,
     },
     {
       initialData: navigationData ?? undefined,
-      enabled: !!trainingId && !hasInitialDataForCurrentDay, // Only check if trainingId exists
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      enabled: !!trainingId, // Disable if we have fresh initial data
     },
   )
 
@@ -102,7 +106,7 @@ const NavigationWrapper = ({
     <Navigation
       plan={
         navigationDataQuery?.getWorkoutNavigation?.plan ??
-        navigationData.getWorkoutNavigation?.plan
+        navigationData?.getWorkoutNavigation?.plan
       }
     />
   )
@@ -110,11 +114,21 @@ const NavigationWrapper = ({
 
 const WorkoutDay = ({
   dayId,
-  dayData,
+  dayDataPromise,
 }: {
   dayId: string | null
-  dayData: GQLFitspaceGetWorkoutDayQuery | null
+  dayDataPromise: Promise<
+    | {
+        data: GQLFitspaceGetWorkoutDayQuery
+        error: null
+      }
+    | {
+        data: null
+        error: string
+      }
+  >
 }) => {
+  const { data: dayData } = use(dayDataPromise)
   // Check if we have initial data for the current dayId
   const hasInitialDataForCurrentDay = useMemo(() => {
     return dayData?.getWorkoutDay?.day?.id === dayId && dayData?.getWorkoutDay

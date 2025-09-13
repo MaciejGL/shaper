@@ -1,7 +1,3 @@
-type GetWorkoutPayload {
-  plan: TrainingPlan!
-}
-
 type GetWorkoutNavigationPayload {
   plan: TrainingPlan!
 }
@@ -19,7 +15,6 @@ type GetWorkoutDayPayload {
 }
 
 type Query {
-  getWorkout(trainingId: ID): GetWorkoutPayload
   getWorkoutNavigation(trainingId: ID): GetWorkoutNavigationPayload
   getWorkoutDay(dayId: ID): GetWorkoutDayPayload
 }

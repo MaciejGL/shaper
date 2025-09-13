@@ -125,7 +125,7 @@ export function WorkoutPageSkeleton() {
   )
 }
 
-function SkeletonNavigation() {
+export function SkeletonNavigation() {
   return (
     <div
       className={cn(
@@ -229,7 +229,7 @@ export function SkeletonExercises() {
   const progressPercentage = 0 // Show some progress for skeleton
 
   return (
-    <div id={activeDay.id}>
+    <div id={activeDay.id} className="max-w-sm mx-auto pb-4">
       {!activeDay.isRestDay && (
         <div className="flex flex-col py-3 space-y-2 w-full">
           <div className="grid grid-cols-2 gap-2">
