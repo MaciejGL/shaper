@@ -89,8 +89,8 @@ function logQueryExecution({
 }: LogQueryParams) {
   // Get timing emoji
   const getTimingEmoji = (duration: number) => {
-    if (duration < 10) return '🟢'
-    if (duration < 100) return '🟡'
+    if (duration < 150) return '🟢'
+    if (duration < 400) return '🟡'
     return '🔴'
   }
 
@@ -325,7 +325,7 @@ function logDetailedQueryExecution({
   error,
 }: Omit<LogQueryParams, 'args'>) {
   const getTimingEmoji = (duration: number) => {
-    if (duration < 20) return '🟢'
+    if (duration < 30) return '🟢'
     if (duration < 150) return '🟡'
     if (duration < 600) return '🟠'
     return '🔴'
