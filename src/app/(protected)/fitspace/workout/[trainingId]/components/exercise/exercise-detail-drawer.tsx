@@ -1,3 +1,5 @@
+'use client'
+
 import { Lightbulb, VideoIcon, XIcon } from 'lucide-react'
 import Image from 'next/image'
 
