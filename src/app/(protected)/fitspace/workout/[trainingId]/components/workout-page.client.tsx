@@ -97,7 +97,7 @@ const WorkoutDay = ({
     return dayData?.getWorkoutDay?.day?.id === dayId && dayData?.getWorkoutDay
   }, [dayData, dayId])
 
-  const { data: dayDataQuery, isRefetching } = useFitspaceGetWorkoutDayQuery(
+  const { data: dayDataQuery, isFetching } = useFitspaceGetWorkoutDayQuery(
     {
       dayId: dayId ?? '',
     },
@@ -105,8 +105,12 @@ const WorkoutDay = ({
       initialData: dayData ?? undefined,
       initialDataUpdatedAt: hasInitialDataForCurrentDay ? Date.now() : 0,
       enabled: !!dayId && !hasInitialDataForCurrentDay, // Disable if we have fresh initial data
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     },
   )
+
+  const isLoadingNewDay = isFetching && !hasInitialDataForCurrentDay
 
   return (
     <WorkoutProvider
@@ -117,7 +121,7 @@ const WorkoutDay = ({
       }
     >
       <div className="max-w-sm mx-auto pb-4">
-        {isRefetching ? (
+        {isLoadingNewDay ? (
           <SkeletonExercises />
         ) : (
           (dayDataQuery?.getWorkoutDay?.day ?? dayData?.getWorkoutDay?.day) && (

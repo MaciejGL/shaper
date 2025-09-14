@@ -38,12 +38,14 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
       },
       onSuccess: () => {
         invalidateQuery({
+          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
+        })
+      },
+      onError: () => {
+        invalidateQuery({
           queryKey: useFitspaceGetWorkoutDayQuery.getKey({
             dayId: dayId ?? '',
           }),
-        })
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
         })
       },
     })
