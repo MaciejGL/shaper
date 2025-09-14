@@ -13,7 +13,6 @@ import React, {
 } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { CountdownTimer } from '@/components/ui/countdown-timer'
 import { Input } from '@/components/ui/input'
 import { SwipeToReveal } from '@/components/ui/swipe-to-reveal'
 import { useUserPreferences } from '@/context/user-preferences-context'
@@ -49,11 +48,8 @@ export function ExerciseSet({
   onWeightChange,
   onDelete,
   isLastSet,
-  restDuration,
-  isTimerActive,
   onSetCompleted,
   onSetUncompleted,
-  onTimerComplete,
 }: ExerciseSetProps) {
   const [dayId] = useQueryState('day')
   const { preferences } = useUserPreferences()
@@ -440,32 +436,6 @@ export function ExerciseSet({
             </div>
           </div>
         </div>
-        <AnimatePresence>
-          {isAdvancedView && isTimerActive && restDuration && (
-            <motion.div
-              key={`timer-${set.id}`}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{
-                height: 44, // Fixed height: py-1 (8px) + h-7 (28px) + py-1 (8px) = 44px
-                opacity: 1,
-              }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-              style={{ overflow: 'hidden' }}
-            >
-              <div className="py-1 px-2">
-                <CountdownTimer
-                  restDuration={restDuration || 60}
-                  autoStart={isTimerActive}
-                  onComplete={onTimerComplete}
-                  onPause={onTimerComplete}
-                  size="xs"
-                  className="w-full"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </SwipeToReveal>
     </motion.div>
   )

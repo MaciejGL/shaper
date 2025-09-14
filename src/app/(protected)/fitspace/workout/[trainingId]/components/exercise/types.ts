@@ -41,11 +41,8 @@ export interface ExerciseSetProps {
   onWeightChange: (weight: string) => void
   onDelete: () => void
   isLastSet: boolean
-  restDuration?: number | null
-  isTimerActive: boolean
   onSetCompleted: (skipTimer?: boolean) => void
   onSetUncompleted: () => void
-  onTimerComplete: () => void
 }
 
 export interface ExerciseMetadataProps {
