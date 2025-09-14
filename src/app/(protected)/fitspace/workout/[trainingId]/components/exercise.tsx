@@ -1,3 +1,5 @@
+'use client'
+
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import React from 'react'

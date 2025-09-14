@@ -1,3 +1,5 @@
+'use client'
+
 import { CheckCheck } from 'lucide-react'
 import React from 'react'
 
