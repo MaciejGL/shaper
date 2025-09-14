@@ -349,6 +349,9 @@ model TrainingExercise {
   @@index([dayId, order])
   @@index([baseId, dayId])
   @@index([substitutedById])
+  @@index([name, completedAt])           // For name filtering + completed check
+  @@index([dayId, name, completedAt])    // Combined filter
+  @@index([name, dayId])                 // Alternative approach
 }
 
 model ExerciseSet {
