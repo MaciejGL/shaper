@@ -1544,6 +1544,7 @@ export type GQLNotificationPreferencesInput = {
 };
 
 export enum GQLNotificationType {
+  BodyProgressShared = 'BODY_PROGRESS_SHARED',
   CoachingCancelled = 'COACHING_CANCELLED',
   CoachingRequest = 'COACHING_REQUEST',
   CoachingRequestAccepted = 'COACHING_REQUEST_ACCEPTED',
@@ -3387,6 +3388,13 @@ export type GQLExercisesProgressByUserQueryVariables = Exact<{
 
 
 export type GQLExercisesProgressByUserQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', averageRpe?: number | undefined | null, totalSets?: number | undefined | null, lastPerformed?: string | undefined | null, baseExercise?: { __typename?: 'BaseExercise', id: string, name: string, muscleGroups: Array<{ __typename?: 'MuscleGroup', alias?: string | undefined | null, name: string, groupSlug: string, category: { __typename?: 'MuscleGroupCategory', name: string } }> } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }>, totalVolumeProgress: Array<{ __typename?: 'VolumeEntry', week: string, totalVolume: number, totalSets: number }> }> };
+
+export type GQLClientBodyProgressLogsQueryVariables = Exact<{
+  clientId: Scalars['String']['input'];
+}>;
+
+
+export type GQLClientBodyProgressLogsQuery = { __typename?: 'Query', clientBodyProgressLogs: Array<{ __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string, image1?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image2?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image3?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null }> };
 
 export type GQLGetClientMacroTargetsQueryVariables = Exact<{
   clientId: Scalars['ID']['input'];
@@ -7880,6 +7888,79 @@ useInfiniteExercisesProgressByUserQuery.getKey = (variables: GQLExercisesProgres
 
 
 useExercisesProgressByUserQuery.fetcher = (variables: GQLExercisesProgressByUserQueryVariables, options?: RequestInit['headers']) => fetchData<GQLExercisesProgressByUserQuery, GQLExercisesProgressByUserQueryVariables>(ExercisesProgressByUserDocument, variables, options);
+
+export const ClientBodyProgressLogsDocument = `
+    query ClientBodyProgressLogs($clientId: String!) {
+  clientBodyProgressLogs(clientId: $clientId) {
+    id
+    loggedAt
+    notes
+    image1 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image2 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image3 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    shareWithTrainer
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useClientBodyProgressLogsQuery = <
+      TData = GQLClientBodyProgressLogsQuery,
+      TError = unknown
+    >(
+      variables: GQLClientBodyProgressLogsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLClientBodyProgressLogsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLClientBodyProgressLogsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLClientBodyProgressLogsQuery, TError, TData>(
+      {
+    queryKey: ['ClientBodyProgressLogs', variables],
+    queryFn: fetchData<GQLClientBodyProgressLogsQuery, GQLClientBodyProgressLogsQueryVariables>(ClientBodyProgressLogsDocument, variables),
+    ...options
+  }
+    )};
+
+useClientBodyProgressLogsQuery.getKey = (variables: GQLClientBodyProgressLogsQueryVariables) => ['ClientBodyProgressLogs', variables];
+
+export const useInfiniteClientBodyProgressLogsQuery = <
+      TData = InfiniteData<GQLClientBodyProgressLogsQuery>,
+      TError = unknown
+    >(
+      variables: GQLClientBodyProgressLogsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLClientBodyProgressLogsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLClientBodyProgressLogsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLClientBodyProgressLogsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['ClientBodyProgressLogs.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLClientBodyProgressLogsQuery, GQLClientBodyProgressLogsQueryVariables>(ClientBodyProgressLogsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteClientBodyProgressLogsQuery.getKey = (variables: GQLClientBodyProgressLogsQueryVariables) => ['ClientBodyProgressLogs.infinite', variables];
+
+
+useClientBodyProgressLogsQuery.fetcher = (variables: GQLClientBodyProgressLogsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLClientBodyProgressLogsQuery, GQLClientBodyProgressLogsQueryVariables>(ClientBodyProgressLogsDocument, variables, options);
 
 export const GetClientMacroTargetsDocument = `
     query GetClientMacroTargets($clientId: ID!) {

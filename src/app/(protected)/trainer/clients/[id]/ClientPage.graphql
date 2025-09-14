@@ -130,3 +130,32 @@ query ExercisesProgressByUser($userId: ID!) {
     lastPerformed
   }
 }
+
+query ClientBodyProgressLogs($clientId: String!) {
+  clientBodyProgressLogs(clientId: $clientId) {
+    id
+    loggedAt
+    notes
+    image1 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image2 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    image3 {
+      thumbnail
+      medium
+      large
+      url
+    }
+    shareWithTrainer
+    createdAt
+    updatedAt
+  }
+}

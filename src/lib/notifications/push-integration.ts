@@ -25,6 +25,7 @@ import {
 } from './push-notification-service'
 // Legacy helper functions - use centralized service instead
 import {
+  notifyTrainerBodyProgressShared,
   notifyWorkoutReminder,
   sendBatchNotifications,
 } from './push-notification-service'
@@ -41,6 +42,7 @@ export async function sendPushForNotification(
     workoutType?: string
     noteText?: string
     clientName?: string
+    clientId?: string
     trainerName?: string
     packageDescription?: string
     offerToken?: string
@@ -137,6 +139,13 @@ export async function sendPushForNotification(
           userId,
           additionalData?.senderName || '',
           message,
+        )
+
+      case GQLNotificationType.BodyProgressShared:
+        return await notifyTrainerBodyProgressShared(
+          userId,
+          additionalData?.clientName || 'Client',
+          additionalData?.clientId || '',
         )
 
       case GQLNotificationType.System:

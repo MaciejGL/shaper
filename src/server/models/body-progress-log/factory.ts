@@ -1,8 +1,14 @@
-import { GQLMutationUpdateBodyProgressLogArgs } from '@/generated/graphql-server'
+import {
+  GQLMutationUpdateBodyProgressLogArgs,
+  GQLNotificationType,
+} from '@/generated/graphql-server'
 import { Prisma } from '@/generated/prisma/client'
 import { ensureTrainerClientAccess } from '@/lib/access-control'
 import { ImageHandler } from '@/lib/aws/image-handler'
 import { prisma } from '@/lib/db'
+import { sendPushForNotification } from '@/lib/notifications/push-integration'
+import { createNotification } from '@/server/models/notification/factory'
+import { GQLContext } from '@/types/gql-context'
 
 import BodyProgressLog from './model'
 
@@ -84,9 +90,21 @@ export async function createBodyProgressLogEntry(
     image3Url?: string | null
     shareWithTrainer?: boolean | null
   },
+  context: GQLContext,
 ): Promise<BodyProgressLog> {
   const userProfile = await prisma.userProfile.findUnique({
     where: { userId },
+    include: {
+      user: {
+        include: {
+          trainer: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+      },
+    },
   })
 
   if (!userProfile) {
@@ -120,6 +138,37 @@ export async function createBodyProgressLogEntry(
   const progressLog = await prisma.bodyProgressLog.create({
     data,
   })
+
+  // Send notification if shared with trainer on creation
+  if (input.shareWithTrainer && userProfile.user.trainer) {
+    const clientName =
+      userProfile.firstName && userProfile.lastName
+        ? `${userProfile.firstName} ${userProfile.lastName}`
+        : userProfile.user.name || 'Client'
+
+    createNotification(
+      {
+        userId: userProfile.user.trainer.id,
+        createdBy: userId,
+        type: GQLNotificationType.BodyProgressShared,
+        message: `${clientName} shared new body progress snapshots with you`,
+        link: `/trainer/clients/${userId}`,
+        relatedItemId: progressLog.id,
+      },
+      context,
+    )
+
+    sendPushForNotification(
+      userProfile.user.trainer.id,
+      GQLNotificationType.BodyProgressShared,
+      `${clientName} shared new body progress snapshots with you`,
+      `/trainer/clients/${userId}`,
+      {
+        clientName,
+        clientId: userId,
+      },
+    )
+  }
 
   return new BodyProgressLog(progressLog)
 }
@@ -242,9 +291,21 @@ export async function updateBodyProgressLogSharingStatus(
   userId: string,
   id: string,
   shareWithTrainer: boolean,
+  context: GQLContext,
 ): Promise<BodyProgressLog> {
   const userProfile = await prisma.userProfile.findUnique({
     where: { userId },
+    include: {
+      user: {
+        include: {
+          trainer: {
+            include: {
+              profile: true,
+            },
+          },
+        },
+      },
+    },
   })
 
   if (!userProfile) {
@@ -263,10 +324,42 @@ export async function updateBodyProgressLogSharingStatus(
     throw new Error('Progress log not found or does not belong to user')
   }
 
+  const wasSharedBefore = existingLog.shareWithTrainer
   const updatedLog = await prisma.bodyProgressLog.update({
     where: { id },
     data: { shareWithTrainer },
   })
+
+  // Send notification if newly shared with trainer
+  if (shareWithTrainer && !wasSharedBefore && userProfile.user.trainer) {
+    const clientName =
+      userProfile.firstName && userProfile.lastName
+        ? `${userProfile.firstName} ${userProfile.lastName}`
+        : userProfile.user.name || 'Client'
+
+    createNotification(
+      {
+        userId: userProfile.user.trainer.id,
+        createdBy: userId,
+        type: GQLNotificationType.BodyProgressShared,
+        message: `${clientName} shared new body progress snapshots with you`,
+        link: `/trainer/clients/${userId}`,
+        relatedItemId: id,
+      },
+      context,
+    )
+
+    sendPushForNotification(
+      userProfile.user.trainer.id,
+      GQLNotificationType.BodyProgressShared,
+      `${clientName} shared new body progress snapshots with you`,
+      `/trainer/clients/${userId}`,
+      {
+        clientName,
+        clientId: userId,
+      },
+    )
+  }
 
   return new BodyProgressLog(updatedLog)
 }

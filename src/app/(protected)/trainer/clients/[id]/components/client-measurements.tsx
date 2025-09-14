@@ -5,6 +5,7 @@ import { Scale } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { useClientBodyMeasuresQuery } from '@/generated/graphql-client'
 
+import { ClientBodyProgressLogs } from './client-measurements/client-body-progress-logs'
 import { ClientMeasurementsContent } from './client-measurements/client-measurements-content'
 import { ClientMeasurementsProvider } from './client-measurements/client-measurements-context'
 
@@ -66,11 +67,14 @@ export function ClientMeasurements({
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Body Measurements</h2>
+      <h2 className="text-2xl font-semibold">Measurements Logs</h2>
 
       <ClientMeasurementsProvider measurements={measurements}>
         <ClientMeasurementsContent />
       </ClientMeasurementsProvider>
+
+      {/* Body Progress Snapshots */}
+      <ClientBodyProgressLogs clientId={client.id} clientName={clientName} />
     </div>
   )
 }

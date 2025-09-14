@@ -1546,6 +1546,7 @@ export type GQLNotificationPreferencesInput = {
 };
 
 export enum GQLNotificationType {
+  BodyProgressShared = 'BODY_PROGRESS_SHARED',
   CoachingCancelled = 'COACHING_CANCELLED',
   CoachingRequest = 'COACHING_REQUEST',
   CoachingRequestAccepted = 'COACHING_REQUEST_ACCEPTED',

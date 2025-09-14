@@ -40,7 +40,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    return createBodyProgressLogEntry(userSession.user.id, input)
+    return createBodyProgressLogEntry(userSession.user.id, input, context)
   },
 
   updateBodyProgressLog: async (_parent, { id, input }, context) => {
@@ -66,6 +66,7 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       userSession.user.id,
       id,
       shareWithTrainer,
+      context,
     )
   },
 

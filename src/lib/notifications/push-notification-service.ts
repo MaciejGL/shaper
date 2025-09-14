@@ -274,6 +274,22 @@ export async function notifyClientTrainerNote(
   )
 }
 
+/**
+ * Send push notification when client shares body progress snapshots with trainer
+ */
+export async function notifyTrainerBodyProgressShared(
+  trainerId: string,
+  clientName: string,
+  clientId: string,
+) {
+  return await sendPushNotificationToUsers(
+    [trainerId],
+    '📸 New Progress Snapshot',
+    `${clientName} shared new body progress snapshots with you`,
+    `/trainer/clients/${clientId}?tab=body-progress-logs`,
+  )
+}
+
 // ================================
 // REMINDERS & MOTIVATION
 // ================================
