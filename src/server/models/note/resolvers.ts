@@ -260,7 +260,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    // Get notes created by the user's trainer that are shared with client (excluding replies)
+    // Get notes created by the user's trainer that are shared with client and related to this specific client
     const notes = await prisma.note.findMany({
       where: {
         createdBy: {
@@ -268,6 +268,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
             some: { id: user.user.id },
           },
         },
+        relatedToId: user.user.id, // Only notes specifically related to this client
         metadata: {
           path: ['shareWithClient'],
           equals: true,
