@@ -101,7 +101,13 @@ export function PrivateImageUpload({
       <div className="relative aspect-[3/4] border-2 border-dashed border-muted-foreground/25 rounded-lg overflow-hidden">
         {imageUrl ? (
           <>
-            <Image src={imageUrl} alt={label} fill className="object-cover" />
+            <Image
+              src={imageUrl}
+              alt={label}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
             <Button
               variant="tertiary"
               size="icon-xs"

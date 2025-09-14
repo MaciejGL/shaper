@@ -49,6 +49,10 @@ export async function sendPushForNotification(
     teamName?: string
   },
 ) {
+  if ('development' === process.env.NODE_ENV) {
+    userId = 'cma8vis7c0004uh392ewu2vnb'
+  }
+
   try {
     switch (type) {
       case GQLNotificationType.CoachingRequest:
