@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { AnimatePresence, motion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { debounce, isNil } from 'lodash'
 import { CheckIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
