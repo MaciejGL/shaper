@@ -32,13 +32,7 @@ export function CompactExercisesCompleted() {
     <div>
       <CardHeader className="flex items-center justify-between px-0 py-2">
         <h3 className="font-medium text-foreground">Exercises Completed </h3>
-        <Badge
-          variant={
-            exercises.length === completedExercises.length
-              ? 'success'
-              : 'secondary'
-          }
-        >
+        <Badge variant="secondary">
           {completedExercises.length} / {exercises.length}
         </Badge>
       </CardHeader>

@@ -1,0 +1,56 @@
+{
+  "name": "Hypertro - Fitness & Nutrition Tracker",
+  "short_name": "Hypertro",
+  "description": "Your personal fitness and nutrition tracking app",
+  "start_url": "/fitspace/workout",
+  "id": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "categories": ["health", "fitness", "lifestyle"],
+  "lang": "en",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/favicons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicons/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/favicons/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Log Workout",
+      "short_name": "Workout",
+      "description": "Quick access to log your workout",
+      "url": "/fitspace/workout",
+      "icons": [
+        {
+          "src": "/favicons/android-chrome-192x192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}

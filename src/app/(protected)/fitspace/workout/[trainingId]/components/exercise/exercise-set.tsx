@@ -25,7 +25,6 @@ import {
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
-import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 import { cn } from '@/lib/utils'
 
@@ -56,7 +55,6 @@ export function ExerciseSet({
   const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
   const hasUserEdited = useRef(false)
   const { toDisplayWeight } = useWeightConversion()
-  const invalidateQuery = useInvalidateQuery()
   const queryClient = useQueryClient()
   const [skipTimer, setSkipTimer] = useState(false)
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -110,11 +108,6 @@ export function ExerciseSet({
           context.previousWorkout,
         )
       }
-    },
-    onSettled: () => {
-      invalidateQuery({
-        queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
-      })
     },
   })
 
