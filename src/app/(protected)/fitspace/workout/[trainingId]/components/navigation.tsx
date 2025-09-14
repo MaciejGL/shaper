@@ -4,7 +4,7 @@ import { formatDate } from 'date-fns'
 import { BadgeCheckIcon, ChevronLeft } from 'lucide-react'
 import { ChevronRight } from 'lucide-react'
 import { useQueryState } from 'nuqs'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
 import { Button } from '@/components/ui/button'
@@ -191,8 +191,8 @@ function WeekSelector({ plan }: { plan: NavigationPlan }) {
   // Prefetch workout data with 10s delay for better performance
   useWorkoutPrefetch(plan, effectiveWeekId)
 
-  // Initialize defaults on first load
-  useMemo(() => {
+  // Initialize defaults on first load - USE useEffect instead of useMemo
+  useEffect(() => {
     if (!activeWeekId && defaultWeekId) {
       setActiveWeekId(defaultWeekId)
     }

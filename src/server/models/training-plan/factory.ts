@@ -1815,7 +1815,7 @@ export async function getWorkoutNavigation(
   }
 
   // Lightweight query optimized for navigation - only fetch weeks and days without exercises/sets
-  let plan = await prisma.trainingPlan.findUnique({
+  const plan = await prisma.trainingPlan.findUnique({
     where: {
       id: trainingId,
       active: true,
@@ -1846,65 +1846,65 @@ export async function getWorkoutNavigation(
     },
   })
 
-  if (!plan) {
-    // Fallback to default user plan
-    plan = await prisma.trainingPlan.findUnique({
-      where: {
-        id: trainingId,
-        active: true,
-        assignedToId: user.user.id,
-        createdById: user.user.id,
-      },
-      include: {
-        weeks: {
-          orderBy: {
-            weekNumber: 'asc',
-          },
-          include: {
-            days: {
-              orderBy: {
-                dayOfWeek: 'asc',
-              },
-              // Only include essential day data for navigation
-              select: {
-                id: true,
-                dayOfWeek: true,
-                isRestDay: true,
-                completedAt: true,
-                scheduledAt: true,
-                exercises: {
-                  select: {
-                    id: true,
-                    completedAt: true,
-                  },
+  if (plan) {
+    return {
+      plan: new TrainingPlan(plan, context),
+    }
+  }
+
+  // Fallback to default user plan
+  const defaultPlan = await prisma.trainingPlan.findUnique({
+    where: {
+      id: trainingId,
+      active: true,
+      assignedToId: user.user.id,
+      createdById: user.user.id,
+    },
+    include: {
+      weeks: {
+        orderBy: {
+          weekNumber: 'asc',
+        },
+        include: {
+          days: {
+            orderBy: {
+              dayOfWeek: 'asc',
+            },
+            // Only include essential day data for navigation
+            select: {
+              id: true,
+              dayOfWeek: true,
+              isRestDay: true,
+              completedAt: true,
+              scheduledAt: true,
+              exercises: {
+                select: {
+                  id: true,
+                  completedAt: true,
                 },
               },
             },
           },
         },
       },
-    })
-  }
+    },
+  })
 
-  if (!plan || plan.assignedToId !== user.user.id) {
+  if (!defaultPlan || defaultPlan.assignedToId !== user.user.id) {
     return null
   }
 
   // For self-created plans, allow access regardless of start date
-  if (plan.assignedToId === user.user.id && plan.createdById === user.user.id) {
+  if (
+    defaultPlan.assignedToId === user.user.id &&
+    defaultPlan.createdById === user.user.id
+  ) {
     return {
-      plan: new TrainingPlan(plan, context),
+      plan: new TrainingPlan(defaultPlan, context),
     }
   }
 
-  // For assigned plans, require a start date
-  if (!plan.startDate) {
-    return null
-  }
-
-  return {
-    plan: new TrainingPlan(plan, context),
-  }
+  return null
 }
 
 export async function getWorkoutDay(
