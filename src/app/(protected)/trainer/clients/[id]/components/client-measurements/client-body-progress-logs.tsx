@@ -1,11 +1,10 @@
 'use client'
 
 import { format } from 'date-fns'
-import { Camera, Share2 } from 'lucide-react'
+import { Camera } from 'lucide-react'
 
 import { Loader } from '@/components/loader'
 import { ProgressImageGallery } from '@/components/private-images/image-gallery'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useClientBodyProgressLogsQuery } from '@/generated/graphql-client'
 
@@ -66,14 +65,11 @@ export function ClientBodyProgressLogs({
   }
 
   return (
-    <Card borderless>
+    <div>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Camera className="h-5 w-5" />
           Body Progress Snapshots
-          <Badge variant="secondary" className="ml-auto">
-            {progressLogs.length}
-          </Badge>
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -85,14 +81,7 @@ export function ClientBodyProgressLogs({
                 <div className="text-sm self-end">
                   {format(new Date(log.loggedAt), 'd. MMM yyyy')}
                 </div>
-                <div className="flex items-end gap-2 ml-auto">
-                  <Badge variant="secondary" size="sm">
-                    <Share2 className="h-3 w-3 mr-1" />
-                    Shared by client
-                  </Badge>
-                </div>
               </div>
-
               {/* Image gallery */}
               <ProgressImageGallery
                 images={[
@@ -115,6 +104,6 @@ export function ClientBodyProgressLogs({
           ))}
         </div>
       </CardContent>
-    </Card>
+    </div>
   )
 }

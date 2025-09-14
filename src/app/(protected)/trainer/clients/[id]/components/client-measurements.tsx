@@ -66,22 +66,23 @@ export function ClientMeasurements({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 @container/client-measurements">
       <h2 className="text-2xl font-semibold">Measurements Logs</h2>
+      <div className="grid grid-cols-1 @[1000px]/client-measurements:grid-cols-2 gap-6">
+        <ClientMeasurementsProvider measurements={measurements}>
+          <ClientMeasurementsContent />
+        </ClientMeasurementsProvider>
 
-      <ClientMeasurementsProvider measurements={measurements}>
-        <ClientMeasurementsContent />
-      </ClientMeasurementsProvider>
-
-      {/* Body Progress Snapshots */}
-      <ClientBodyProgressLogs clientId={client.id} clientName={clientName} />
+        {/* Body Progress Snapshots */}
+        <ClientBodyProgressLogs clientId={client.id} clientName={clientName} />
+      </div>
     </div>
   )
 }
 
 function ClientMeasurementsEmptyState({ clientName }: { clientName: string }) {
   return (
-    <Card>
+    <Card borderless>
       <CardContent className="pt-6">
         <div className="text-center py-8">
           <Scale className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
