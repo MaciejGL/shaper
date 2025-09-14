@@ -13,13 +13,14 @@ import {
   GQLTrainingView,
   GQLWorkoutType,
 } from '@/generated/graphql-client'
+import { useTrackWorkoutSession } from '@/hooks/use-track-workout-session'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { QuickWorkout } from '../../quick-workout/quick-workout'
 
 import { Exercise } from './exercise'
 import { RestDay } from './rest-day'
-import { Summary } from './summary'
+import { WorkoutActions } from './workout-actions'
 
 interface ExercisesProps {
   day?: NonNullable<GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']>['day']
@@ -31,6 +32,18 @@ interface ExercisesProps {
 export function Exercises({ day, previousDayLogs }: ExercisesProps) {
   const { preferences, setTrainingView } = useUserPreferences()
 
+  const isActive = day?.exercises.some((ex) =>
+    ex.sets.some((set) => {
+      if (!set.log?.createdAt || (!set.log?.reps && !set.log?.weight)) {
+        return false
+      }
+      const logCreatedAt = new Date(set.log.createdAt)
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
+      return logCreatedAt >= fiveMinutesAgo
+    }),
+  )
+  const isCompleted = day?.completedAt ? true : false
+  useTrackWorkoutSession(day?.id, isActive, isCompleted)
   if (!day) return <div>No day data available</div>
 
   const completedExercises = day.exercises.filter(
@@ -94,7 +107,7 @@ export function Exercises({ day, previousDayLogs }: ExercisesProps) {
               previousDayLogs={previousDayLogs}
             />
           ))}
-          <Summary open={true} />
+          <WorkoutActions />
         </div>
       )}
     </div>

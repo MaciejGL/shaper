@@ -94,7 +94,7 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
 
   return (
     <Card borderless className="p-0 gap-2">
-      <div className="px-2 pt-2">
+      <div className="px-2 pt-2" id={exercise.id}>
         <ExerciseMetadata
           exercise={exercise}
           handleMarkAsCompleted={handleMarkAsCompleted}
