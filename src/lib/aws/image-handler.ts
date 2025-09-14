@@ -255,7 +255,10 @@ export class ImageHandler {
     try {
       // Determine image type from S3 key path
       let imageType: ImageType
-      if (s3Key.startsWith('progress-private/')) {
+      if (
+        s3Key.startsWith('progress-public/') ||
+        s3Key.startsWith('progress-private/')
+      ) {
         imageType = 'progress'
       } else if (s3Key.startsWith('avatars/')) {
         imageType = 'avatar'

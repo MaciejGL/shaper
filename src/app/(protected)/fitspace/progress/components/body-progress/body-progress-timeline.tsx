@@ -4,7 +4,7 @@ import { format } from 'date-fns'
 import { Calendar, MoreHorizontal, Share2 } from 'lucide-react'
 
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
-import { PrivateImageGallery } from '@/components/private-images/image-gallery'
+import { ProgressImageGallery } from '@/components/private-images/image-gallery'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -192,7 +192,7 @@ export function BodyProgressTimeline({ onEditLog }: BodyProgressTimelineProps) {
               </DropdownMenu>
             </div>
           </div>
-          <PrivateImageGallery
+          <ProgressImageGallery
             images={[
               log.image1 || null,
               log.image2 || null,

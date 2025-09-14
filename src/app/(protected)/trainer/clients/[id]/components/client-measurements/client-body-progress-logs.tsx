@@ -4,7 +4,7 @@ import { format } from 'date-fns'
 import { Camera, Share2 } from 'lucide-react'
 
 import { Loader } from '@/components/loader'
-import { PrivateImageGallery } from '@/components/private-images/image-gallery'
+import { ProgressImageGallery } from '@/components/private-images/image-gallery'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useClientBodyProgressLogsQuery } from '@/generated/graphql-client'
@@ -94,7 +94,7 @@ export function ClientBodyProgressLogs({
               </div>
 
               {/* Image gallery */}
-              <PrivateImageGallery
+              <ProgressImageGallery
                 images={[
                   log.image1 || null,
                   log.image2 || null,

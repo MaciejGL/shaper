@@ -36,13 +36,19 @@ export async function GET() {
     await requireAdminUser()
 
     // Get stats from different S3 folders
-    const [exerciseStats, tempStats, avatarStats, progressStats] =
-      await Promise.all([
-        getFolderStats('exercises/', ['exercises/temp/']), // Exclude temp from main exercises
-        getFolderStats('exercises/temp/'),
-        getFolderStats('avatars/'),
-        getFolderStats('progress-private/'),
-      ])
+    const [
+      exerciseStats,
+      tempStats,
+      avatarStats,
+      progressPrivateStats,
+      progressPublicStats,
+    ] = await Promise.all([
+      getFolderStats('exercises/', ['exercises/temp/']), // Exclude temp from main exercises
+      getFolderStats('exercises/temp/'),
+      getFolderStats('avatars/'),
+      getFolderStats('progress-private/'),
+      getFolderStats('progress-public/'),
+    ])
 
     // Get database stats
     const [exerciseImageCount, totalExerciseCount, tempThresholds] =
@@ -63,18 +69,28 @@ export async function GET() {
         exercises: exerciseStats,
         tempFolder: tempStats,
         avatars: avatarStats,
-        progressPhotos: progressStats,
+        progressPhotos: {
+          fileCount:
+            progressPrivateStats.fileCount + progressPublicStats.fileCount,
+          totalSizeBytes:
+            progressPrivateStats.totalSizeBytes +
+            progressPublicStats.totalSizeBytes,
+        },
+        progressPrivate: progressPrivateStats,
+        progressPublic: progressPublicStats,
         total: {
           fileCount:
             exerciseStats.fileCount +
             tempStats.fileCount +
             avatarStats.fileCount +
-            progressStats.fileCount,
+            progressPrivateStats.fileCount +
+            progressPublicStats.fileCount,
           totalSizeBytes:
             exerciseStats.totalSizeBytes +
             tempStats.totalSizeBytes +
             avatarStats.totalSizeBytes +
-            progressStats.totalSizeBytes,
+            progressPrivateStats.totalSizeBytes +
+            progressPublicStats.totalSizeBytes,
         },
       },
       database: {

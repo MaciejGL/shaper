@@ -18,7 +18,7 @@ import {
 } from '../ui/carousel'
 import { Dialog, DialogClose, DialogContent } from '../ui/dialog'
 
-interface PrivateImageGalleryProps {
+interface ProgressImageGalleryProps {
   /** Array of optimized images to display */
   images: (GQLOptimizedImage | null)[]
   /** Labels for each image position */
@@ -54,14 +54,14 @@ function getModalUrl(image: GQLOptimizedImage | null): string | null {
 }
 
 /**
- * Reusable gallery component for displaying private images
+ * Reusable gallery component for displaying progress images
  * Supports zoom functionality and handles empty states
  */
-export function PrivateImageGallery({
+export function ProgressImageGallery({
   images,
   imageLabels,
   className,
-}: PrivateImageGalleryProps) {
+}: ProgressImageGalleryProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null,
   )

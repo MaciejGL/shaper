@@ -1,6 +1,5 @@
 import { GQLBodyProgressLog } from '@/generated/graphql-server'
 import { BodyProgressLog as PrismaBodyProgressLog } from '@/generated/prisma/client'
-import { getOptimizedProgressImageUrl } from '@/lib/image-optimization'
 
 export default class BodyProgressLog implements GQLBodyProgressLog {
   constructor(protected data: PrismaBodyProgressLog) {}
@@ -16,53 +15,34 @@ export default class BodyProgressLog implements GQLBodyProgressLog {
   get notes() {
     return this.data.notes
   }
-  // Optimized image variants
+
+  // Simple image variants - just return the direct S3 URLs
   async image1() {
-    return this.getOptimizedImageVariants(this.data.image1Url)
+    return this.data.image1Url
+      ? this.createImageVariants(this.data.image1Url)
+      : null
   }
 
   async image2() {
-    return this.getOptimizedImageVariants(this.data.image2Url)
+    return this.data.image2Url
+      ? this.createImageVariants(this.data.image2Url)
+      : null
   }
 
   async image3() {
-    return this.getOptimizedImageVariants(this.data.image3Url)
+    return this.data.image3Url
+      ? this.createImageVariants(this.data.image3Url)
+      : null
   }
 
-  // Generate all optimized variants for an image
-  private async getOptimizedImageVariants(imageUrl: string | null) {
-    if (!imageUrl) return null
-
-    const s3Key = this.extractS3Key(imageUrl)
-
-    if (!s3Key || !s3Key.startsWith('progress-private/')) {
-      // For non-private images, return basic variants
-      return {
-        thumbnail: imageUrl,
-        medium: imageUrl,
-        large: imageUrl,
-        url: imageUrl,
-      }
-    }
-
-    // Generate optimized variants using the utility functions
+  // Create simple image variants that all point to the same public S3 URL
+  private createImageVariants(imageUrl: string) {
     return {
-      thumbnail: getOptimizedProgressImageUrl(s3Key, 'small'),
-      medium: getOptimizedProgressImageUrl(s3Key, 'medium'),
-      large: getOptimizedProgressImageUrl(s3Key, 'large'),
-      url: getOptimizedProgressImageUrl(s3Key, 'medium'), // Default to medium
+      thumbnail: imageUrl,
+      medium: imageUrl,
+      large: imageUrl,
+      url: imageUrl,
     }
-  }
-
-  // Helper method to extract S3 key from URL (backwards compatibility)
-  private extractS3Key(url: string): string {
-    // New format: already an S3 key
-    if (!url.startsWith('/api/images/private/')) {
-      return url
-    }
-
-    // Old format: extract key from API path
-    return url.replace('/api/images/private/', '')
   }
 
   get shareWithTrainer() {
