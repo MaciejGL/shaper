@@ -27,11 +27,6 @@ export const sendEmail = {
     const html = await render(<OtpEmail code={otp} userName={userName} />)
 
     try {
-      console.log('Send email to', {
-        from: FROM_EMAIL,
-        to,
-        subject: 'Your Hypro verification code',
-      })
       await resend.emails.send({
         from: FROM_EMAIL,
         to,
