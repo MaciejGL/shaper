@@ -1,7 +1,6 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import { Suspense, use, useMemo } from 'react'
 
@@ -10,7 +9,6 @@ import {
   GQLFitspaceGetWorkoutDayQuery,
   GQLFitspaceGetWorkoutNavigationQuery,
   useFitspaceGetWorkoutDayQuery,
-  useFitspaceGetWorkoutNavigationQuery,
 } from '@/generated/graphql-client'
 
 import { Exercises } from './exercises'
@@ -94,19 +92,13 @@ const WorkoutDay = ({
       }
   >
 }) => {
-  const { trainingId } = useParams<{ trainingId: string }>()
   const { data: dayData } = use(dayDataPromise)
-  // Check if we have initial data for the current dayId
-  const hasInitialDataForCurrentDay = useMemo(() => {
-    return dayData?.getWorkoutDay?.day?.id === dayId && dayData?.getWorkoutDay
-  }, [dayData, dayId])
-
   const queryClient = useQueryClient()
 
   const navigationData =
-    queryClient.getQueryData<GQLFitspaceGetWorkoutNavigationQuery>(
-      useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
-    )
+    queryClient.getQueryData<GQLFitspaceGetWorkoutNavigationQuery>([
+      'navigation',
+    ])
 
   // Check if current day is rest day
   const isRestDay = useMemo(() => {
@@ -117,6 +109,17 @@ const WorkoutDay = ({
     }
     return false
   }, [dayId, navigationData])
+
+  // Check if we have any data (initial or cached) for the current dayId
+  const hasDataForCurrentDay = useMemo(() => {
+    if (isRestDay) return true // Rest days are always available (hardcoded)
+    const hasInitialData =
+      dayData?.getWorkoutDay?.day?.id === dayId && dayData?.getWorkoutDay
+    const hasCachedData =
+      dayId &&
+      queryClient.getQueryData(useFitspaceGetWorkoutDayQuery.getKey({ dayId }))
+    return hasInitialData || !!hasCachedData
+  }, [dayData, dayId, queryClient, isRestDay])
 
   // Rest day data
   const restDayData = useMemo(() => {
@@ -155,15 +158,14 @@ const WorkoutDay = ({
     },
     {
       initialData: isRestDay ? restDayData : (dayData ?? undefined),
-      initialDataUpdatedAt:
-        hasInitialDataForCurrentDay || isRestDay ? Date.now() : 0,
-      enabled: !!dayId && !hasInitialDataForCurrentDay && !isRestDay, // Disable if rest day
+      initialDataUpdatedAt: hasDataForCurrentDay || isRestDay ? Date.now() : 0,
+      enabled: !!dayId && !hasDataForCurrentDay && !isRestDay, // Disable if rest day
       refetchOnMount: false,
       refetchOnWindowFocus: false,
     },
   )
 
-  const isLoadingNewDay = isFetching && !hasInitialDataForCurrentDay
+  const isLoadingNewDay = isFetching && !hasDataForCurrentDay && !isRestDay
 
   return (
     <WorkoutProvider
