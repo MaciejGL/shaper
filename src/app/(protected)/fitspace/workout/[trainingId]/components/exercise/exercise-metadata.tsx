@@ -8,7 +8,6 @@ import {
   InfoIcon,
   MoreHorizontalIcon,
   Replace,
-  TimerIcon,
   TrashIcon,
 } from 'lucide-react'
 import { useParams } from 'next/navigation'
@@ -17,13 +16,18 @@ import React, { useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { formatSecondsToMMSS } from '@/components/ui/countdown-timer'
+import { CountdownTimer } from '@/components/ui/countdown-timer'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import {
   GQLExerciseType,
   useFitspaceGetWorkoutDayQuery,
@@ -45,6 +49,8 @@ export function ExerciseMetadata({
   isCompleted,
   handleRemoveExercise,
   isRemoving,
+  activeTimerSetId,
+  onTimerComplete,
 }: ExerciseMetadataProps) {
   const [isSwapExerciseOpen, setIsSwapExerciseOpen] = useState(false)
   const [selectedSubstituteId, setSelectedSubstituteId] = useState<
@@ -144,27 +150,73 @@ export function ExerciseMetadata({
             Superset A/B
           </Badge>
         )}
-        {exercise.restSeconds && (
-          <Badge variant="secondary" size="md">
-            <TimerIcon className="text-amber-500" />
-            {formatSecondsToMMSS(exercise.restSeconds, {
-              hideEmptyMinutes: true,
-            })}{' '}
-            rest
-          </Badge>
-        )}
         {exercise.warmupSets && (
           <Badge variant="secondary" size="md">
             <FlameIcon className="text-amber-600" />
-            {exercise.warmupSets} warmup{exercise.warmupSets > 1 ? 's' : ''}
+            {exercise.warmupSets} warmup
+            {exercise.warmupSets > 1 ? 's' : ''}
           </Badge>
         )}
 
         {exercise.tempo && (
-          <Badge variant="secondary" size="md">
-            <GaugeIcon className="text-green-500" />
-            {exercise.tempo}
-          </Badge>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Badge
+                variant="secondary"
+                size="md"
+                className="cursor-pointer h-full"
+              >
+                <GaugeIcon className="text-green-500" />
+                Tempo {exercise.tempo}
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs">
+              <div className="space-y-2">
+                <p className="font-medium mb-1 text-sm">Exercise Tempo</p>
+                <div className="text-sm">
+                  <p className="mb-1">
+                    <strong>4-digit format:</strong> 3-1-2-1
+                  </p>
+                  <ul className="space-y-1 text-xs leading-relaxed list-disc list-outside pl-4">
+                    <li>3 sec down (eccentric)</li>
+                    <li>1 sec pause at bottom</li>
+                    <li>2 sec up (concentric)</li>
+                    <li>1 sec pause at top</li>
+                  </ul>
+                  <p className="mt-2 mb-1 text-sm">
+                    <strong>Examples:</strong>
+                  </p>
+                  <ul className="text-xs text-muted-foreground space-y-1 list-disc list-outside pl-4 leading-relaxed">
+                    <li>
+                      <strong>Squat:</strong> 3 sec down, 1 sec pause at bottom,
+                      2 sec stand up, 1 sec pause at top
+                    </li>
+                    <li>
+                      <strong>Bicep curl:</strong> 3 sec lower weight, 1 sec
+                      pause at bottom, 2 sec curl up, 1 sec pause at top
+                    </li>
+                    <li>
+                      <strong>Bench press:</strong> 3 sec lower to chest, 1 sec
+                      pause, 2 sec press up, 1 sec pause at top
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        )}
+        {exercise.restSeconds && (
+          <div className="ml-auto">
+            <CountdownTimer
+              key={activeTimerSetId}
+              restDuration={exercise.restSeconds}
+              autoStart={activeTimerSetId !== null}
+              onComplete={onTimerComplete}
+              onPause={onTimerComplete}
+              size="sm"
+              className="w-auto"
+            />
+          </div>
         )}
       </div>
 

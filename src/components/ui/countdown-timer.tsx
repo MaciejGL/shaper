@@ -61,7 +61,8 @@ export function CountdownTimer({
     if (state === 'idle') {
       startCountdown()
     } else if (state === 'running') {
-      // When pausing, call onPause to close the timer
+      // When pausing, reset the timer and call onPause to notify parent
+      resetCountdown()
       onPause?.()
     } else if (state === 'completed') {
       resetCountdown()
@@ -105,10 +106,10 @@ export function CountdownTimer({
 
   // Auto-start countdown if autoStart is enabled
   useEffect(() => {
-    if (autoStart && state === 'idle') {
+    if (autoStart) {
       startCountdown()
     }
-  }, [autoStart, state, startCountdown])
+  }, [autoStart, startCountdown])
 
   const getButtonContent = () => {
     switch (state) {

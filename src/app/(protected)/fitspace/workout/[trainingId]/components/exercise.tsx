@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
-import React from 'react'
+import React, { useState } from 'react'
 
 import { Card } from '@/components/ui/card'
 import {
@@ -25,6 +25,9 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
   const invalidateQuery = useInvalidateQuery()
   const { trainingId } = useParams<{ trainingId: string }>()
   const [dayId] = useQueryState('day')
+
+  // Timer state management - only one timer can be active at a time
+  const [activeTimerSetId, setActiveTimerSetId] = useState<string | null>(null)
 
   const { optimisticMutate: markExerciseAsCompletedOptimistic } =
     useOptimisticMutation<
@@ -84,6 +87,21 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
     })
   }
 
+  // Timer management functions
+  const handleSetCompleted = (setId: string, skipTimer: boolean = false) => {
+    if (!skipTimer) {
+      setActiveTimerSetId(setId)
+    }
+  }
+
+  const handleTimerComplete = () => {
+    setActiveTimerSetId(null)
+  }
+
+  const handleSetUncompleted = () => {
+    setActiveTimerSetId(null)
+  }
+
   // Get the completion state from the exercise data (cache will update optimistically)
   const currentExercise = exercise.substitutedBy || exercise
   const isExerciseCompleted = Boolean(currentExercise.completedAt)
@@ -101,11 +119,15 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
           isCompleted={isExerciseCompleted}
           handleRemoveExercise={handleRemoveExercise}
           isRemoving={isRemoving}
+          activeTimerSetId={activeTimerSetId}
+          onTimerComplete={handleTimerComplete}
         />
       </div>
       <ExerciseSets
         exercise={exercise}
         previousLogs={exercisePreviousLogs?.sets}
+        onSetCompleted={handleSetCompleted}
+        onSetUncompleted={handleSetUncompleted}
       />
     </Card>
   )

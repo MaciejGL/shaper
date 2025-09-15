@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { PlusIcon } from 'lucide-react'
 import { useParams } from 'next/navigation'
 import { useQueryState } from 'nuqs'
@@ -7,7 +7,6 @@ import React, { useEffect, useState } from 'react'
 
 import { useIsFirstRender } from '@/components/animated-grid'
 import { Button } from '@/components/ui/button'
-import { CountdownTimer } from '@/components/ui/countdown-timer'
 import { useUserPreferences } from '@/context/user-preferences-context'
 import {
   GQLFitspaceGetWorkoutDayQuery,
@@ -31,7 +30,12 @@ import {
 } from './shared-styles'
 import { ExerciseSetsProps } from './types'
 
-export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
+export function ExerciseSets({
+  exercise,
+  previousLogs,
+  onSetCompleted,
+  onSetUncompleted,
+}: ExerciseSetsProps) {
   const isFirstRender = useIsFirstRender()
   const { trainingId } = useParams<{ trainingId: string }>()
   const [dayId] = useQueryState('day')
@@ -52,9 +56,6 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
     })
     return initialState
   })
-
-  // Timer state management - only one timer can be active at a time
-  const [activeTimerSetId, setActiveTimerSetId] = useState<string | null>(null)
 
   // Keep setsLogs in sync with exercise sets (for when new sets are added/removed/updated)
   useEffect(() => {
@@ -194,17 +195,11 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
 
   // Timer management functions
   const handleSetCompleted = (setId: string, skipTimer: boolean = false) => {
-    if (!skipTimer) {
-      setActiveTimerSetId(setId)
-    }
-  }
-
-  const handleTimerComplete = () => {
-    setActiveTimerSetId(null)
+    onSetCompleted(setId, skipTimer)
   }
 
   const handleSetUncompleted = () => {
-    setActiveTimerSetId(null)
+    onSetUncompleted()
   }
 
   const getPreviousSetValue = (order: number, type: 'weight' | 'reps') => {
@@ -215,40 +210,8 @@ export function ExerciseSets({ exercise, previousLogs }: ExerciseSetsProps) {
 
   const isAdvancedView = preferences.trainingView === GQLTrainingView.Advanced
 
-  // Find the active timer set to get rest duration
-  const activeSet = (exercise.substitutedBy?.sets || exercise.sets).find(
-    (set) => set.id === activeTimerSetId,
-  )
-
   return (
     <div className="flex flex-col rounded-[0.45rem] ">
-      {/* Timer above sets */}
-      <AnimatePresence>
-        {activeTimerSetId && activeSet && exercise.restSeconds && (
-          <motion.div
-            key={`timer-${activeTimerSetId}`}
-            initial={{ height: 0, opacity: 0 }}
-            animate={{
-              height: 52, // Fixed height: py-2 (16px) + h-9 (36px) = 52px
-              opacity: 1,
-            }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            style={{ overflow: 'hidden' }}
-          >
-            <div className="py-2 px-2">
-              <CountdownTimer
-                restDuration={exercise.restSeconds}
-                autoStart={true}
-                onComplete={handleTimerComplete}
-                onPause={handleTimerComplete}
-                size="sm"
-                className="w-full"
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
       <div className="flex items-center gap-1">
         <div
           className={cn(

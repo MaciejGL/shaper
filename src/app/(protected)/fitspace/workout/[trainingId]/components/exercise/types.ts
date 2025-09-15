@@ -29,6 +29,8 @@ export interface ExerciseSelectorProps {
 export interface ExerciseSetsProps {
   exercise: WorkoutExercise
   previousLogs?: PreviousDayLogs[number]['sets'][number][] | null
+  onSetCompleted: (setId: string, skipTimer?: boolean) => void
+  onSetUncompleted: () => void
 }
 
 export interface ExerciseSetProps {
@@ -51,6 +53,8 @@ export interface ExerciseMetadataProps {
   isCompleted: boolean
   handleRemoveExercise: () => void
   isRemoving: boolean
+  activeTimerSetId: string | null
+  onTimerComplete: () => void
 }
 
 export interface ExerciseNotebookProps {
