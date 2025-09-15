@@ -16,9 +16,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useUserPreferences } from '@/context/user-preferences-context'
-import { useWorkoutPrefetch } from '@/hooks/use-workout-prefetch'
 import { formatWeekRange, sortDaysForDisplay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
+
+import { useWorkoutPrefetch } from '../hooks/use-workout-prefetch'
 
 import { NavigationDay, NavigationPlan } from './workout-page.client'
 
@@ -187,6 +188,8 @@ function WeekSelector({ plan }: { plan: NavigationPlan }) {
   // Set defaults if no values are present in URL
   const effectiveWeekId = activeWeekId || defaultWeekId
   const effectiveDayId = activeDayId || defaultDayId
+
+  // Prefetch navigation data with rest days for smooth week switching
 
   // Prefetch workout data with 10s delay for better performance
   useWorkoutPrefetch(plan, effectiveWeekId)

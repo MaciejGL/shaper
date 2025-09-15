@@ -10,7 +10,7 @@ import { WorkoutPageClientNew } from './components/workout-page.client'
 
 interface WorkoutPageProps {
   params: Promise<{ trainingId: string }>
-  searchParams: Promise<{ day: string }>
+  searchParams: Promise<{ day: string; week: string }>
 }
 
 export default async function WorkoutPage({
@@ -18,12 +18,12 @@ export default async function WorkoutPage({
   searchParams,
 }: WorkoutPageProps) {
   const { trainingId } = await params
-  const { day: dayId } = await searchParams
+  const { day: dayId, week: weekId } = await searchParams
 
   const navigationPromise =
     gqlServerFetch<GQLFitspaceGetWorkoutNavigationQuery>(
       FitspaceGetWorkoutNavigationDocument,
-      { trainingId },
+      { trainingId, weekId: weekId || undefined, allWeeks: false },
     )
   const dayPromise = gqlServerFetch<GQLFitspaceGetWorkoutDayQuery>(
     FitspaceGetWorkoutDayDocument,

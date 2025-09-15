@@ -1804,7 +1804,7 @@ export async function getWorkoutNavigation(
   args: GQLQueryGetWorkoutNavigationArgs,
   context: GQLContext,
 ) {
-  const { trainingId } = args
+  const { trainingId, weekId, allWeeks } = args
   const user = context.user
   if (!user) {
     throw new Error('User not found')
@@ -1829,6 +1829,10 @@ export async function getWorkoutNavigation(
         },
         include: {
           days: {
+            where: {
+              // If fetchRestDays is true, fetch rest days, not only default current week.
+              weekId: allWeeks ? undefined : (weekId ?? undefined),
+            },
             orderBy: {
               dayOfWeek: 'asc',
             },
