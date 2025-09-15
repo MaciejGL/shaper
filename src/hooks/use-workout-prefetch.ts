@@ -34,7 +34,7 @@ export function useWorkoutPrefetch(
   activeWeekId: string | null,
   options: UseWorkoutPrefetchOptions = {},
 ) {
-  const { delay = 10000, staleTime = 5 * 60 * 1000 } = options
+  const { delay = 5000, staleTime = 5 * 60 * 1000 } = options
   const queryClient = useQueryClient()
 
   const prefetchDays = useCallback(

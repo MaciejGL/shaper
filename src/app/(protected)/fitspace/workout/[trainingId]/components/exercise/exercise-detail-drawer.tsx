@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/drawer'
 import { SectionIcon } from '@/components/ui/section-icon'
 import { getYouTubeEmbedUrl } from '@/lib/get-youtube-embed-url'
+import { cn } from '@/lib/utils'
 
 import { WorkoutExercise } from '../workout-page.client'
 
@@ -82,7 +83,12 @@ export function ExerciseDetailDrawer({ exercise }: ExerciseDetailDrawerProps) {
             </div>
           )}
           <DrawerHeader className="py-4">
-            <div className="flex items-center justify-between gap-2">
+            <div
+              className={cn(
+                'flex items-center justify-between gap-2',
+                images.length === 0 && !videoUrl && ' pr-8',
+              )}
+            >
               <DrawerTitle className="text-xl font-semibold">
                 {exercise.name}
               </DrawerTitle>
