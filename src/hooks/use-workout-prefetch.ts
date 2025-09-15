@@ -5,7 +5,7 @@ import { useFitspaceGetWorkoutDayQuery } from '@/generated/graphql-client'
 
 interface NavigationWeek {
   id: string
-  days: { id: string }[]
+  days: { id: string; isRestDay: boolean }[]
 }
 
 interface NavigationPlan {
@@ -40,8 +40,28 @@ export function useWorkoutPrefetch(
   const prefetchDays = useCallback(
     (dayIds: string[]) => {
       dayIds.forEach((dayId) => {
+        const queryKey = useFitspaceGetWorkoutDayQuery.getKey({ dayId })
+
+        // Check if we already have fresh data for this day
+        const existingData = queryClient.getQueryData(queryKey)
+        const queryState = queryClient.getQueryState(queryKey)
+
+        // Skip prefetch if:
+        // 1. Data exists and is fresh (within staleTime)
+        // 2. Query is currently fetching
+        if (existingData && queryState?.dataUpdatedAt) {
+          const isDataFresh = Date.now() - queryState.dataUpdatedAt < staleTime
+          if (isDataFresh) {
+            return
+          }
+        }
+
+        if (queryState?.fetchStatus === 'fetching') {
+          return
+        }
+
         queryClient.prefetchQuery({
-          queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId }),
+          queryKey,
           queryFn: useFitspaceGetWorkoutDayQuery.fetcher({ dayId }),
           staleTime,
         })
@@ -58,7 +78,9 @@ export function useWorkoutPrefetch(
       const currentWeek = plan.weeks.find((w) => w.id === activeWeekId)
 
       if (currentWeek) {
-        const dayIds = currentWeek.days.map((day) => day.id)
+        const dayIds = currentWeek.days
+          .filter((day) => !day.isRestDay)
+          .map((day) => day.id)
         prefetchDays(dayIds)
       }
     }, delay)
