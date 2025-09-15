@@ -1,5 +1,5 @@
 /**
- * Bulletproof deep link utilities for Hypertro mobile app
+ * Bulletproof deep link utilities for Hypro mobile app
  * Handles URL generation and ensures consistent format across the entire web app
  */
 

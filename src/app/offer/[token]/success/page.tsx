@@ -55,7 +55,7 @@ export default async function OfferSuccessPage({
 
 export async function generateMetadata() {
   return {
-    title: 'Payment Successful - Hypertro',
+    title: 'Payment Successful - Hypro',
     description: 'Your training package has been purchased successfully.',
     robots: 'noindex, nofollow',
   }

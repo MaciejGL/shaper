@@ -27,7 +27,7 @@ const REP_FOCUS_OPTIONS = [
   },
   {
     value: 'hypertrophy' as RepFocus,
-    label: 'Hypertrophy',
+    label: 'Hyprophy',
     description: '8-12 reps - Muscle growth and size',
   },
   {

@@ -1,5 +1,5 @@
 /**
- * Complete Hypertro Mobile App with Push Notifications and Deep Linking
+ * Complete Hypro Mobile App with Push Notifications and Deep Linking
  * Enhanced for bulletproof user switching
  * This component integrates all the functionality together
  */
@@ -25,12 +25,12 @@ import {
   useWebViewNavigation,
 } from './webview-navigation-manager'
 
-interface HypertroAppProps {
+interface HyproAppProps {
   authToken?: string
 }
 
 // Inner component that has access to WebView navigation context
-function HypertroAppContent({ authToken }: HypertroAppProps) {
+function HyproAppContent({ authToken }: HyproAppProps) {
   const { webViewRef } = useWebViewNavigation()
   const { handleWebThemeChange, colors } = useThemeManager()
   const [currentAuthToken, setCurrentAuthToken] = useState(authToken)
@@ -150,10 +150,10 @@ function HypertroAppContent({ authToken }: HypertroAppProps) {
 }
 
 // Main app component with providers
-export function HypertroApp({ authToken }: HypertroAppProps) {
+export function HyproApp({ authToken }: HyproAppProps) {
   return (
     <WebViewNavigationProvider>
-      <HypertroAppContent authToken={authToken} />
+      <HyproAppContent authToken={authToken} />
     </WebViewNavigationProvider>
   )
 }
@@ -165,4 +165,4 @@ const styles = StyleSheet.create({
   },
 })
 
-export default HypertroApp
+export default HyproApp

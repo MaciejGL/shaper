@@ -1,4 +1,4 @@
-# Hypertro Mobile App
+# Hypro Mobile App
 
 A React Native app built with Expo for fitness tracking and personal training.
 
@@ -93,7 +93,7 @@ npm run build:prod
 
 1. **Login to App Store Connect**: https://appstoreconnect.apple.com
 2. **Create New App**:
-   - **Name**: Hypertro
+   - **Name**: Hypro
    - **Bundle ID**: `app.hypertro.mobile`
    - **SKU**: `hypertro-mobile-ios` (your choice)
    - **Platform**: iOS

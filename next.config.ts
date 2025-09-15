@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
             value:
               process.env.NODE_ENV === 'development'
                 ? '*'
-                : 'https://hypertro.app',
+                : 'https://hypro.app',
           },
           {
             key: 'Access-Control-Allow-Methods',

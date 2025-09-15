@@ -35,7 +35,7 @@ export async function createSupportChatForUser(userId: string): Promise<void> {
         data: {
           chatId: chat.id,
           senderId: SUPPORT_ACCOUNT_ID,
-          content: `Welcome to Hypertro Premium! 🎉
+          content: `Welcome to Hypro Premium!
 
 Thank you for subscribing! I'm here to help you get the most out of your premium experience.
 

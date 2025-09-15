@@ -40,10 +40,14 @@ export async function POST(req: Request) {
 
   // Only send email for non-demo accounts
   if (!isDemoAccount) {
-    await sendEmail.otp(email, {
-      otp,
-      userName: user.profile?.firstName || user.profile?.lastName,
-    })
+    try {
+      await sendEmail.otp(email, {
+        otp,
+        userName: user.profile?.firstName || user.profile?.lastName,
+      })
+    } catch (error) {
+      console.error('Failed to send email:', error)
+    }
   }
 
   return NextResponse.json({

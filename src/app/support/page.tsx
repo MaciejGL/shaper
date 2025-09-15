@@ -5,9 +5,8 @@ import Link from 'next/link'
 import { getCurrentUser } from '@/lib/getUser'
 
 export const metadata: Metadata = {
-  title: 'Support - Hypertro',
-  description:
-    'Get help and support for Hypertro - Personal Fitness Training App',
+  title: 'Support - Hypro',
+  description: 'Get help and support for Hypro - Personal Fitness Training App',
 }
 
 export default async function SupportPage() {
@@ -41,7 +40,7 @@ export default async function SupportPage() {
             <span className="text-sm font-medium">{backText}</span>
           </Link>
           <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold">Hypertro</span>
+            <span className="text-lg font-bold">Hypro</span>
           </div>
         </div>
       </div>
@@ -53,11 +52,11 @@ export default async function SupportPage() {
               {/* Header */}
               <div className="border-b pb-6 text-center">
                 <h1 className="text-4xl font-bold mb-4 text-foreground">
-                  Hypertro Support
+                  Hypro Support
                 </h1>
                 <p className="text-xl text-muted-foreground">
                   We're here to help you get the most out of your fitness
-                  journey with Hypertro.
+                  journey with Hypro.
                 </p>
               </div>
 
@@ -67,11 +66,11 @@ export default async function SupportPage() {
                   🚧 Early Stage Product Notice
                 </h2>
                 <p className="text-blue-800 dark:text-blue-200 text-sm">
-                  <strong>Please note:</strong> Hypertro is actively under
+                  <strong>Please note:</strong> Hypro is actively under
                   development. You may encounter bugs, changing features, or
                   temporary limitations. We appreciate your patience and
                   feedback as we continue to improve the platform. Report any
-                  issues to help us make Hypertro better!
+                  issues to help us make Hypro better!
                 </p>
               </div>
 
@@ -95,9 +94,9 @@ export default async function SupportPage() {
                     </p>
                     <Link
                       className="text-blue-900 dark:text-blue-100 font-semibold"
-                      href="mailto:support@hypertro.app"
+                      href="mailto:support@hypro.app"
                     >
-                      support@hypertro.app
+                      support@hypro.app
                     </Link>
                     <p className="text-blue-700 dark:text-blue-300 text-sm mt-2">
                       ⏱️ We typically respond within 1-3 business days
@@ -118,9 +117,9 @@ export default async function SupportPage() {
                     </p>
                     <Link
                       className="text-purple-900 dark:text-purple-100 font-semibold"
-                      href="mailto:support@hypertro.app"
+                      href="mailto:support@hypro.app"
                     >
-                      support@hypertro.app
+                      support@hypro.app
                     </Link>
                     <p className="text-purple-700 dark:text-purple-300 text-sm mt-2">
                       🛡️ For data protection and privacy concerns
@@ -147,23 +146,23 @@ export default async function SupportPage() {
                     {[
                       {
                         q: 'How do I create an account?',
-                        a: "Visit hypertro.app in your web browser or download our mobile app. Enter your email address and we'll send you a one-time password (OTP) to log in. No traditional password needed!",
+                        a: "Visit hypro.app in your web browser or download our mobile app. Enter your email address and we'll send you a one-time password (OTP) to log in. No traditional password needed!",
                       },
                       {
-                        q: 'Is Hypertro free to use?',
-                        a: 'Yes! Hypertro is completely free with all core features included: workout tracking, meal planning, progress photos, trainer teams, and more. Premium features may be added in the future.',
+                        q: 'Is Hypro free to use?',
+                        a: 'Yes! Hypro is completely free with all core features included: workout tracking, meal planning, progress photos, trainer teams, and more. Premium features may be added in the future.',
                       },
                       {
                         q: 'How does the trainer-client system work?',
                         a: "If you're a client, you can send coaching requests to trainers. Once connected, trainers can create custom workout and meal plans for you, track your progress, and leave notes.",
                       },
                       {
-                        q: 'Can I use Hypertro without a trainer?',
+                        q: 'Can I use Hypro without a trainer?',
                         a: 'Absolutely! You can create your own workout plans, track exercises, log meals, take progress photos, and monitor your fitness journey independently.',
                       },
                       {
-                        q: 'Is Hypertro still in development?',
-                        a: 'Yes! Hypertro is actively being developed. You may notice new features, improvements, or occasional changes as we enhance the platform based on user feedback.',
+                        q: 'Is Hypro still in development?',
+                        a: 'Yes! Hypro is actively being developed. You may notice new features, improvements, or occasional changes as we enhance the platform based on user feedback.',
                       },
                     ].map((faq, index) => (
                       <div
@@ -204,9 +203,9 @@ export default async function SupportPage() {
                         <li>Ensure you have a stable internet connection</li>
                       </ol>
                       <p className="text-orange-800 dark:text-orange-200 text-sm mt-3">
-                        If issues persist, please email us at
-                        support@hypertro.app with details about the problem,
-                        your device type, and operating system version.
+                        If issues persist, please email us at support@hypro.app
+                        with details about the problem, your device type, and
+                        operating system version.
                       </p>
                     </div>
 
@@ -217,7 +216,7 @@ export default async function SupportPage() {
                       },
                       {
                         q: "Push notifications aren't working on mobile",
-                        a: 'First, ensure notifications are enabled in your device settings for Hypertro. Then check the notification preferences in the mobile app settings. Note: Push notifications only work on mobile apps, not in web browsers.',
+                        a: 'First, ensure notifications are enabled in your device settings for Hypro. Then check the notification preferences in the mobile app settings. Note: Push notifications only work on mobile apps, not in web browsers.',
                       },
                       {
                         q: 'Can I export my workout data?',
@@ -225,11 +224,11 @@ export default async function SupportPage() {
                       },
                       {
                         q: 'How does OTP login work?',
-                        a: 'Instead of passwords, Hypertro uses one-time passwords (OTP). Enter your email, check your inbox for a 6-digit code, and enter it to log in. Codes expire after a few minutes for security.',
+                        a: 'Instead of passwords, Hypro uses one-time passwords (OTP). Enter your email, check your inbox for a 6-digit code, and enter it to log in. Codes expire after a few minutes for security.',
                       },
                       {
                         q: 'I found a bug or want to suggest a feature',
-                        a: "Great! Since we're actively developing Hypertro, your feedback is invaluable. Please email us at support@hypertro.app with details about bugs or feature suggestions.",
+                        a: "Great! Since we're actively developing Hypro, your feedback is invaluable. Please email us at support@hypro.app with details about bugs or feature suggestions.",
                       },
                     ].map((faq, index) => (
                       <div
@@ -263,7 +262,7 @@ export default async function SupportPage() {
                       },
                       {
                         q: 'How do I delete my account?',
-                        a: 'To delete your account, go to Settings → Account → Delete Account or email support@hypertro.app. This will permanently remove all your data including progress photos and workout history.',
+                        a: 'To delete your account, go to Settings → Account → Delete Account or email support@hypro.app. This will permanently remove all your data including progress photos and workout history.',
                       },
                       {
                         q: 'Where are my progress photos stored?',
@@ -314,7 +313,7 @@ export default async function SupportPage() {
                   {[
                     {
                       q: 'Where can I download the mobile app?',
-                      a: 'The Hypertro mobile app is available on the iOS App Store and Google Play Store. Search for "Hypertro" or visit the download links on our website.',
+                      a: 'The Hypro mobile app is available on the iOS App Store and Google Play Store. Search for "Hypro" or visit the download links on our website.',
                     },
                     {
                       q: 'Why do I need camera permissions?',
@@ -350,7 +349,7 @@ export default async function SupportPage() {
                   <span className="mr-3">🐛</span>Report a Bug
                 </h2>
                 <p className="text-red-800 dark:text-red-200 mb-4">
-                  Found a bug? Help us improve Hypertro by reporting it. Please
+                  Found a bug? Help us improve Hypro by reporting it. Please
                   include:
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -369,7 +368,7 @@ export default async function SupportPage() {
                   <p className="font-semibold text-red-900 dark:text-red-100">
                     Send bug reports to:{' '}
                     <span className="text-red-600 dark:text-red-400">
-                      support@hypertro.app
+                      support@hypro.app
                     </span>
                   </p>
                 </div>
@@ -385,7 +384,7 @@ export default async function SupportPage() {
                     Important Safety Notice
                   </h3>
                   <p className="text-amber-800 dark:text-amber-200 text-sm mb-3">
-                    Hypertro provides fitness guidance, but we are not medical
+                    Hypro provides fitness guidance, but we are not medical
                     professionals. Always consult with your healthcare provider
                     before starting any new exercise program.
                   </p>
@@ -497,7 +496,7 @@ export default async function SupportPage() {
                           Feature Requests
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          support@hypertro.app
+                          support@hypro.app
                         </div>
                       </div>
                     </div>
@@ -508,7 +507,7 @@ export default async function SupportPage() {
                           Partnership Inquiries
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          support@hypertro.app
+                          support@hypro.app
                         </div>
                         <div className="text-xs text-muted-foreground">
                           Mark subject as "Partnership"
@@ -524,7 +523,7 @@ export default async function SupportPage() {
                 <p className="text-muted-foreground font-medium">
                   Need immediate help? Check our FAQ section above or email{' '}
                   <span className="text-primary font-semibold">
-                    support@hypertro.app
+                    support@hypro.app
                   </span>
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">

@@ -35,7 +35,7 @@ export const TeamInvitationEmail = ({
     <EmailWrapper
       previewText={`${inviterName} has invited you to join the ${teamName} team`}
     >
-      <EmailHeader brandName="Hypertro" />
+      <EmailHeader brandName="Hypro" />
 
       <EmailContent>
         <EmailHeading size={2} marginBottom="12px">
@@ -48,8 +48,8 @@ export const TeamInvitationEmail = ({
 
         <EmailText marginBottom="28px">
           <strong>{inviterName}</strong> has invited you to join their team on
-          Hypertro. Join their team to collaborate, share training plans, and
-          work together towards your fitness goals.
+          Hypro. Join their team to collaborate, share training plans, and work
+          together towards your fitness goals.
         </EmailText>
 
         <EmailCard>
@@ -105,16 +105,16 @@ export const TeamInvitationEmail = ({
           Questions about this invitation? Contact {inviterName} directly or
           reach out to our support team at{' '}
           <a
-            href="mailto:support@hypertro.app"
+            href="mailto:support@hypro.app"
             style={{ color: '#0f172a', textDecoration: 'underline' }}
           >
-            support@hypertro.app
+            support@hypro.app
           </a>
         </EmailText>
       </EmailContent>
 
       <EmailFooter
-        companyName="Hypertro"
+        companyName="Hypro"
         address={`This email was sent on behalf of ${inviterName}. You're receiving this because ${inviterName} invited you to join the ${teamName} team.`}
       />
     </EmailWrapper>

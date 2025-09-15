@@ -1,3 +1,3 @@
-import HypertroApp from '../components/hypertro-app'
+import HyproApp from '../components/hypertro-app'
 
-export default HypertroApp
+export default HyproApp

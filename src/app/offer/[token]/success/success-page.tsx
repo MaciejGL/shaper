@@ -143,7 +143,7 @@ export function SuccessPage({
                 <div>
                   <p className="font-medium text-gray-900">Get Started</p>
                   <p className="text-gray-600 text-sm">
-                    Check your email and the Hypertro app for updates and next
+                    Check your email and the Hypro app for updates and next
                     steps.
                   </p>
                 </div>
@@ -193,7 +193,7 @@ export function SuccessPage({
 
           <div className="mb-6">
             <p className="text-gray-600 mb-4">
-              Redirecting you back to the Hypertro app in {countdown} seconds...
+              Redirecting you back to the Hypro app in {countdown} seconds...
             </p>
           </div>
 

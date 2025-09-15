@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { getCurrentUser } from '@/lib/getUser'
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy - Hypertro',
-  description: 'Privacy Policy for Hypertro - Personal Fitness Training App',
+  title: 'Privacy Policy - Hypro',
+  description: 'Privacy Policy for Hypro - Personal Fitness Training App',
 }
 
 export default async function PrivacyPolicyPage() {
@@ -40,7 +40,7 @@ export default async function PrivacyPolicyPage() {
             <span className="text-sm font-medium">{backText}</span>
           </Link>
           <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold">Hypertro</span>
+            <span className="text-lg font-bold">Hypro</span>
           </div>
         </div>
       </div>
@@ -52,7 +52,7 @@ export default async function PrivacyPolicyPage() {
               {/* Header */}
               <div className="border-b pb-6">
                 <h1 className="text-4xl font-bold mb-4 text-foreground">
-                  Privacy Policy for Hypertro
+                  Privacy Policy for Hypro
                 </h1>
 
                 <div className="text-sm text-muted-foreground border-l-4 border-primary pl-4 bg-muted/30 p-4 rounded-r-lg">
@@ -71,7 +71,7 @@ export default async function PrivacyPolicyPage() {
                   🚧 Early Stage Product Notice
                 </h2>
                 <p className="text-blue-800 dark:text-blue-200 text-sm">
-                  <strong>Important:</strong> Hypertro is currently in early
+                  <strong>Important:</strong> Hypro is currently in early
                   development. Features, functionality, and data handling
                   practices may change as we continue to develop and improve the
                   platform. We will notify users of any significant changes to
@@ -86,9 +86,9 @@ export default async function PrivacyPolicyPage() {
                   Introduction
                 </h2>
                 <p className="text-base leading-relaxed text-muted-foreground mb-6">
-                  Hypertro ("we," "our," or "us") is committed to protecting
-                  your privacy. This Privacy Policy explains how we collect,
-                  use, disclose, and safeguard your information when you use our
+                  Hypro ("we," "our," or "us") is committed to protecting your
+                  privacy. This Privacy Policy explains how we collect, use,
+                  disclose, and safeguard your information when you use our
                   mobile application and web services (collectively, the
                   "Service").
                 </p>
@@ -622,7 +622,7 @@ export default async function PrivacyPolicyPage() {
                       Privacy Questions
                     </div>
                     <div className="text-sm text-primary">
-                      support@hypertro.app
+                      support@hypro.app
                     </div>
                     <div className="text-xs text-muted-foreground mt-1">
                       Mark subject as "Privacy"
@@ -637,7 +637,7 @@ export default async function PrivacyPolicyPage() {
                       href="/support"
                       target="_blank"
                     >
-                      hypertro.app/support
+                      hypro.app/support
                     </a>
                     <div className="text-xs text-muted-foreground mt-1">
                       FAQ and help resources

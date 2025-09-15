@@ -14,8 +14,8 @@ import {
 import { TeamInvitationEmail } from './templates/team-invitation-email'
 import { TrainerOfferEmail } from './templates/trainer-offer-email'
 
-const NO_REPLY_EMAIL = 'noreply@hypertro.app'
-const NO_REPLY_NAME = 'Hypertro'
+const NO_REPLY_EMAIL = 'noreply@hypro.app'
+const NO_REPLY_NAME = 'Hypro'
 
 const FROM_EMAIL = `${NO_REPLY_NAME} <${NO_REPLY_EMAIL}>`
 
@@ -26,12 +26,21 @@ export const sendEmail = {
   ) => {
     const html = await render(<OtpEmail code={otp} userName={userName} />)
 
-    await resend.emails.send({
-      from: FROM_EMAIL,
-      to,
-      subject: 'Your Hypertro verification code',
-      html,
-    })
+    try {
+      console.log('Send email to', {
+        from: FROM_EMAIL,
+        to,
+        subject: 'Your Hypro verification code',
+      })
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to,
+        subject: 'Your Hypro verification code',
+        html,
+      })
+    } catch (error) {
+      console.error('Failed to send email:', error)
+    }
   },
 
   // Subscription-related emails

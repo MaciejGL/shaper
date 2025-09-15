@@ -67,7 +67,7 @@ export async function registerForPushNotifications(): Promise<string | null> {
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
-      name: 'Hypertro Notifications',
+      name: 'Hypro Notifications',
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#FF231F7C',
@@ -430,7 +430,7 @@ export async function disablePushNotifications(
 export async function sendTestNotification() {
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: 'Hypertro Test 🏋️',
+      title: 'Hypro Test 🏋️',
       body: 'This is a test notification from your mobile app!',
       data: { url: '/fitspace' },
     },

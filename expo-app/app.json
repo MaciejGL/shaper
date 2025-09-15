@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Hypertro",
-    "slug": "hypertro",
+    "name": "Hypro",
+    "slug": "hypro",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "hypertro",
+    "scheme": "hypro",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -18,7 +18,7 @@
       "supportsTablet": false,
       "bundleIdentifier": "app.hypertro.mobile",
       "googleServicesFile": "./GoogleService-Info.plist",
-      "associatedDomains": ["applinks:hypertro.app"],
+      "associatedDomains": ["applinks:hypro.app"],
       "useFrameworks": "static",
       "infoPlist": {
         "NSAppTransportSecurity": {
@@ -32,8 +32,8 @@
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleURLTypes": [
           {
-            "CFBundleURLName": "hypertro",
-            "CFBundleURLSchemes": ["hypertro"]
+            "CFBundleURLName": "hypro",
+            "CFBundleURLSchemes": ["hypro", "hypertro"]
           }
         ]
       }
@@ -83,12 +83,12 @@
           "data": [
             {
               "scheme": "https",
-              "host": "hypertro.app",
+              "host": "hypro.app",
               "pathPrefix": "/fitspace"
             },
             {
               "scheme": "https",
-              "host": "hypertro.app",
+              "host": "hypro.app",
               "pathPrefix": "/trainer"
             }
           ],
@@ -97,6 +97,9 @@
         {
           "action": "VIEW",
           "data": [
+            {
+              "scheme": "hypro"
+            },
             {
               "scheme": "hypertro"
             }
@@ -142,7 +145,7 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Hypertro to access your camera for progress photos"
+          "cameraPermission": "Allow Hypro to access your camera for progress photos"
         }
       ]
     ],

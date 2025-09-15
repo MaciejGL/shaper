@@ -136,7 +136,7 @@ export const Navbar = ({
             {isFitspace ? (
               <Link href={linkToDashboard} scroll className="flex items-center">
                 <SimpleLogo size={32} />
-                <h2 className="text-base font-medium">Hypertro</h2>
+                <h2 className="text-base font-medium">Hypro</h2>
               </Link>
             ) : null}
           </div>

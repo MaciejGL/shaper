@@ -11,7 +11,7 @@ export const EmailWrapper = ({ children, previewText }: EmailWrapperProps) => (
     <head>
       <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>Hypertro</title>
+      <title>Hypro</title>
       <style>
         {`
           @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -87,8 +87,8 @@ interface EmailHeaderProps {
 }
 
 export const EmailHeader = ({
-  logoAlt = 'Hypertro',
-  brandName = 'Hypertro',
+  logoAlt = 'Hypro',
+  brandName = 'Hypro',
   backgroundColor = '#0f172a',
 }: EmailHeaderProps) => (
   <tr>
@@ -108,7 +108,7 @@ export const EmailHeader = ({
         }}
       >
         <img
-          src={'https://hypertro.app/favicons/android-chrome-192x192.png'}
+          src={'https://hypro.app/favicons/android-chrome-192x192.png'}
           alt={logoAlt}
           style={{
             height: '32px',
@@ -172,7 +172,7 @@ interface EmailFooterProps {
 }
 
 export const EmailFooter = ({
-  companyName = 'Hypertro',
+  companyName = 'Hypro',
   address,
   unsubscribeUrl,
   socialLinks,

@@ -32,7 +32,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Hypertro',
+  title: 'Hypro',
   description: 'Your personal fitness coach.',
   icons: {
     icon: [
@@ -60,22 +60,22 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Hypertro',
+    title: 'Hypro',
     description: 'Your personal fitness coach',
     images: ['/favicons/android-chrome-192x192.png'],
   },
   openGraph: {
-    title: 'Hypertro',
+    title: 'Hypro',
     description: 'Your personal fitness coach',
     images: ['/favicons/android-chrome-192x192.png'],
   },
   alternates: {
-    canonical: 'https://hypertro.app',
+    canonical: 'https://hypro.app',
   },
-  metadataBase: new URL('https://hypertro.app'),
-  applicationName: 'Hypertro',
+  metadataBase: new URL('https://hypro.app'),
+  applicationName: 'Hypro',
   appleWebApp: {
-    title: 'Hypertro',
+    title: 'Hypro',
     statusBarStyle: 'black-translucent',
     capable: true,
     startupImage: ['/favicons/apple-touch-icon.png'],

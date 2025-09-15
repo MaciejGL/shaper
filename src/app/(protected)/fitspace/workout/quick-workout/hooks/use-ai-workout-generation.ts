@@ -64,7 +64,7 @@ export function useAiWorkoutGeneration() {
 
       const repFocusMap: Record<RepFocus, GQLRepFocus> = {
         strength: GQLRepFocus.Strength,
-        hypertrophy: GQLRepFocus.Hypertrophy,
+        hypertrophy: GQLRepFocus.Hyprophy,
         endurance: GQLRepFocus.Endurance,
       }
 

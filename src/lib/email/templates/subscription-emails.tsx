@@ -31,7 +31,7 @@ export function TrialEndingEmail({
     <EmailWrapper
       previewText={`Your ${packageName} trial ends in ${daysRemaining} ${dayText}`}
     >
-      <EmailHeader brandName="Hypertro" />
+      <EmailHeader brandName="Hypro" />
       <EmailContent>
         <EmailHeading size={2} marginBottom="12px">
           Your trial is ending soon
@@ -91,14 +91,14 @@ export function TrialEndingEmail({
         <EmailText size={5} color="muted" marginBottom="0">
           Questions about your subscription? Contact our team at{' '}
           <a
-            href="mailto:support@hypertro.app"
+            href="mailto:support@hypro.app"
             style={{ color: '#0f172a', textDecoration: 'underline' }}
           >
-            support@hypertro.app
+            support@hypro.app
           </a>
         </EmailText>
       </EmailContent>
-      <EmailFooter companyName="Hypertro" />
+      <EmailFooter companyName="Hypro" />
     </EmailWrapper>
   )
 }
@@ -121,7 +121,7 @@ export function PaymentFailedEmail({
     <EmailWrapper
       previewText={`Payment issue with your ${packageName} subscription`}
     >
-      <EmailHeader brandName="Hypertro" />
+      <EmailHeader brandName="Hypro" />
       <EmailContent>
         <EmailHeading size={2} marginBottom="12px">
           Payment unsuccessful
@@ -167,14 +167,14 @@ export function PaymentFailedEmail({
         <EmailText size={5} color="muted" marginBottom="0">
           Need assistance? Our support team is ready to help at{' '}
           <a
-            href="mailto:support@hypertro.app"
+            href="mailto:support@hypro.app"
             style={{ color: '#0f172a', textDecoration: 'underline' }}
           >
-            support@hypertro.app
+            support@hypro.app
           </a>
         </EmailText>
       </EmailContent>
-      <EmailFooter companyName="Hypertro" />
+      <EmailFooter companyName="Hypro" />
     </EmailWrapper>
   )
 }
@@ -197,7 +197,7 @@ export function SubscriptionCancelledEmail({
     <EmailWrapper
       previewText={`Your ${packageName} subscription has been cancelled`}
     >
-      <EmailHeader brandName="Hypertro" />
+      <EmailHeader brandName="Hypro" />
       <EmailContent>
         <EmailHeading size={2} marginBottom="12px">
           Subscription cancelled
@@ -238,14 +238,14 @@ export function SubscriptionCancelledEmail({
         <EmailText size={5} color="muted" marginBottom="0">
           Reply to this email or contact us at{' '}
           <a
-            href="mailto:support@hypertro.app"
+            href="mailto:support@hypro.app"
             style={{ color: '#0f172a', textDecoration: 'underline' }}
           >
-            support@hypertro.app
+            support@hypro.app
           </a>
         </EmailText>
       </EmailContent>
-      <EmailFooter companyName="Hypertro" />
+      <EmailFooter companyName="Hypro" />
     </EmailWrapper>
   )
 }
@@ -262,7 +262,7 @@ export function SubscriptionDeletedEmail({
 }: SubscriptionDeletedEmailProps) {
   return (
     <EmailWrapper previewText={`Your ${packageName} subscription has ended`}>
-      <EmailHeader brandName="Hypertro" />
+      <EmailHeader brandName="Hypro" />
       <EmailContent>
         <EmailHeading size={2} marginBottom="12px">
           Subscription ended
@@ -278,7 +278,7 @@ export function SubscriptionDeletedEmail({
         </EmailText>
 
         <EmailText marginBottom="24px">
-          You can still access your basic Hypertro account and create a new
+          You can still access your basic Hypro account and create a new
           subscription anytime to regain access to premium features.
         </EmailText>
 
@@ -292,14 +292,14 @@ export function SubscriptionDeletedEmail({
         <EmailText size={5} color="muted" marginBottom="0">
           Contact us anytime at{' '}
           <a
-            href="mailto:support@hypertro.app"
+            href="mailto:support@hypro.app"
             style={{ color: '#0f172a', textDecoration: 'underline' }}
           >
-            support@hypertro.app
+            support@hypro.app
           </a>
         </EmailText>
       </EmailContent>
-      <EmailFooter companyName="Hypertro" />
+      <EmailFooter companyName="Hypro" />
     </EmailWrapper>
   )
 }
@@ -331,7 +331,7 @@ export function WelcomeEmail({
           : `Welcome to ${packageName}!`
       }
     >
-      <EmailHeader brandName="Hypertro" />
+      <EmailHeader brandName="Hypro" />
       <EmailContent>
         <EmailHeading size={2} marginBottom="12px">
           {greeting}
@@ -385,14 +385,14 @@ export function WelcomeEmail({
         <EmailText size={5} color="muted" marginBottom="0">
           Need help getting started? Our support team is here for you at{' '}
           <a
-            href="mailto:support@hypertro.app"
+            href="mailto:support@hypro.app"
             style={{ color: '#0f172a', textDecoration: 'underline' }}
           >
-            support@hypertro.app
+            support@hypro.app
           </a>
         </EmailText>
       </EmailContent>
-      <EmailFooter companyName="Hypertro" />
+      <EmailFooter companyName="Hypro" />
     </EmailWrapper>
   )
 }
@@ -417,7 +417,7 @@ export function GracePeriodEndingEmail({
     <EmailWrapper
       previewText={`Final notice: ${packageName} subscription ending in ${daysRemaining} ${dayText}`}
     >
-      <EmailHeader brandName="Hypertro" />
+      <EmailHeader brandName="Hypro" />
       <EmailContent>
         <EmailHeading size={2} marginBottom="12px">
           Final notice: Action required
@@ -473,18 +473,18 @@ export function GracePeriodEndingEmail({
         <EmailText size={5} color="muted" marginBottom="0">
           Need immediate assistance? Contact our support team at{' '}
           <a
-            href="mailto:support@hypertro.app"
+            href="mailto:support@hypro.app"
             style={{
               color: '#dc2626',
               textDecoration: 'underline',
               fontWeight: '600',
             }}
           >
-            support@hypertro.app
+            support@hypro.app
           </a>
         </EmailText>
       </EmailContent>
-      <EmailFooter companyName="Hypertro" />
+      <EmailFooter companyName="Hypro" />
     </EmailWrapper>
   )
 }

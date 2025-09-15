@@ -27,11 +27,17 @@ function normalizeDeepLink(url: string): string {
 
   // 🛡️ BULLETPROOF: Handle all known malformed URL patterns
   normalized = normalized
-    .replace(/hypertro:\/{3,}/g, 'hypertro://') // hypertro:///+ -> hypertro://
-    .replace(/hypertro:\/{1}([^\/])/g, 'hypertro://$1') // hypertro:/path -> hypertro://path
-    .replace(/hypertro:\/{2}([^\/])/g, 'hypertro://$1') // hypertro://path -> hypertro://path (keep correct)
+    .replace(/hypro:\/{3,}/g, 'hypro://') // hypro:///+ -> hypro://
+    .replace(/hypertro:\/{3,}/g, 'hypertro://') // hypertro:///+ -> hypertro:// (legacy)
+    .replace(/hypro:\/{1}([^\/])/g, 'hypro://$1') // hypro:/path -> hypro://path
+    .replace(/hypro:\/{2}([^\/])/g, 'hypro://$1') // hypro://path -> hypro://path (keep correct)
+    .replace(/hypertro:\/{1}([^\/])/g, 'hypertro://$1') // hypertro:/path -> hypertro://path (legacy)
+    .replace(/hypertro:\/{2}([^\/])/g, 'hypertro://$1') // hypertro://path -> hypertro://path (legacy, keep correct)
 
   // Ensure double slash after scheme if missing
+  if (normalized.startsWith('hypro:') && !normalized.startsWith('hypro://')) {
+    normalized = normalized.replace('hypro:', 'hypro://')
+  }
   if (
     normalized.startsWith('hypertro:') &&
     !normalized.startsWith('hypertro://')
@@ -41,11 +47,18 @@ function normalizeDeepLink(url: string): string {
 
   // 🔍 EXTRA: Handle edge cases from URL encoding/system processing
   normalized = normalized
-    .replace(/hypertro:\/+/g, 'hypertro://') // Any number of slashes -> exactly 2
-    .replace(/hypertro:\s+/g, 'hypertro://') // Handle spaces after colon
-    .replace(/hypertro:$/g, 'hypertro://fitspace') // Handle bare scheme
+    .replace(/hypro:\/+/g, 'hypro://') // Any number of slashes -> exactly 2
+    .replace(/hypro:\s+/g, 'hypro://') // Handle spaces after colon
+    .replace(/hypro:$/g, 'hypro://fitspace') // Handle bare scheme
+    .replace(/hypertro:\/+/g, 'hypertro://') // Any number of slashes -> exactly 2 (legacy)
+    .replace(/hypertro:\s+/g, 'hypertro://') // Handle spaces after colon (legacy)
+    .replace(/hypertro:$/g, 'hypertro://fitspace') // Handle bare scheme (legacy)
 
   // Final validation - ensure valid format
+  if (normalized.startsWith('hypro:') && !normalized.includes('://')) {
+    const pathPart = normalized.replace(/^hypro:\/*/g, '')
+    normalized = `hypro://${pathPart || 'fitspace'}`
+  }
   if (normalized.startsWith('hypertro:') && !normalized.includes('://')) {
     const pathPart = normalized.replace(/^hypertro:\/*/g, '')
     normalized = `hypertro://${pathPart || 'fitspace'}`
@@ -100,10 +113,11 @@ export function PushNotificationManager({
 
         // Handle different URL schemes
         if (
-          normalizedUrl.includes('hypertro.app') ||
+          normalizedUrl.includes('hypro.app') ||
+          normalizedUrl.startsWith('hypro://') ||
           normalizedUrl.startsWith('hypertro://')
         ) {
-          // This is a Hypertro deep link
+          // This is a Hypro deep link
           let targetPath = parsed.path || '/'
 
           // Clean up the path
@@ -113,6 +127,7 @@ export function PushNotificationManager({
 
           // Check if this is a path we should handle (fitspace/ or trainer/ or custom scheme)
           const shouldHandle =
+            normalizedUrl.startsWith('hypro://') ||
             normalizedUrl.startsWith('hypertro://') ||
             targetPath.startsWith('fitspace/') ||
             targetPath.startsWith('trainer/')
@@ -148,10 +163,7 @@ export function PushNotificationManager({
             }, 1000)
           }
         } else {
-          console.info(
-            '❌ Deep link ignored (not Hypertro URL):',
-            normalizedUrl,
-          )
+          console.info('❌ Deep link ignored (not Hypro URL):', normalizedUrl)
         }
       } catch (error) {
         console.error(

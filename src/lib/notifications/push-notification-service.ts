@@ -404,7 +404,7 @@ export async function notifyAppUpdate(userIds: string[]) {
   return await sendPushNotificationToUsers(
     userIds,
     'App update available',
-    'A new version of Hypertro is available with new features and improvements.',
+    'A new version of Hypro is available with new features and improvements.',
     '/fitspace/workout',
   )
 }

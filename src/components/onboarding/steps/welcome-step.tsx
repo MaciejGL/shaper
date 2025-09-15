@@ -11,7 +11,7 @@ export function WelcomeStep({ onPathSelect, onQuickStart }: WelcomeStepProps) {
   return (
     <div className="text-center space-y-6 flex-center flex-col h-full">
       <div className="space-y-3 mb-10">
-        <h1 className="text-3xl font-bold">Welcome to Hypertro!</h1>
+        <h1 className="text-3xl font-bold">Welcome to Hypro!</h1>
         <p className="text-muted-foreground text-lg">
           Ready to start your fitness journey?
         </p>

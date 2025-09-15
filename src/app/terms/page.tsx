@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { getCurrentUser } from '@/lib/getUser'
 
 export const metadata: Metadata = {
-  title: 'Terms of Service - Hypertro',
-  description: 'Terms of Service for Hypertro - Personal Fitness Training App',
+  title: 'Terms of Service - Hypro',
+  description: 'Terms of Service for Hypro - Personal Fitness Training App',
 }
 
 export default async function TermsOfServicePage() {
@@ -40,7 +40,7 @@ export default async function TermsOfServicePage() {
             <span className="text-sm font-medium">{backText}</span>
           </Link>
           <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold">Hypertro</span>
+            <span className="text-lg font-bold">Hypro</span>
           </div>
         </div>
       </div>
@@ -52,7 +52,7 @@ export default async function TermsOfServicePage() {
               {/* Header */}
               <div className="border-b pb-6">
                 <h1 className="text-4xl font-bold mb-4 text-foreground">
-                  Terms of Service for Hypertro
+                  Terms of Service for Hypro
                 </h1>
 
                 <div className="text-sm text-muted-foreground border-l-4 border-primary pl-4 bg-muted/30 p-4 rounded-r-lg">
@@ -71,7 +71,7 @@ export default async function TermsOfServicePage() {
                   🚧 Early Stage Product Notice
                 </h2>
                 <p className="text-blue-800 dark:text-blue-200 text-sm">
-                  <strong>Important:</strong> Hypertro is currently in early
+                  <strong>Important:</strong> Hypro is currently in early
                   development. Features may be modified, added, or removed
                   during ongoing development. These Terms may be updated to
                   reflect new functionality. We will notify users of significant
@@ -86,7 +86,7 @@ export default async function TermsOfServicePage() {
                   1. Acceptance of Terms
                 </h2>
                 <p className="text-base leading-relaxed text-muted-foreground mb-6">
-                  By downloading, installing, or using the Hypertro mobile
+                  By downloading, installing, or using the Hypro mobile
                   application and web services ("Service"), you agree to be
                   bound by these Terms of Service ("Terms"). If you do not agree
                   to these Terms, do not use the Service.
@@ -99,8 +99,8 @@ export default async function TermsOfServicePage() {
                   2. Description of Service
                 </h2>
                 <p className="text-base leading-relaxed text-muted-foreground mb-4">
-                  Hypertro is a comprehensive fitness platform available as both
-                  a web application and mobile apps that provides:
+                  Hypro is a comprehensive fitness platform available as both a
+                  web application and mobile apps that provides:
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
@@ -128,10 +128,9 @@ export default async function TermsOfServicePage() {
                 </div>
                 <div className="mt-4 p-4 bg-amber-50 dark:bg-amber-950/30 rounded-lg border border-amber-200 dark:border-amber-800">
                   <p className="text-amber-800 dark:text-amber-200 text-sm">
-                    <strong>Current Status:</strong> Hypertro is currently free
-                    to use. Premium features may be introduced in the future,
-                    but core functionality will always remain available at no
-                    cost.
+                    <strong>Current Status:</strong> Hypro is currently free to
+                    use. Premium features may be introduced in the future, but
+                    core functionality will always remain available at no cost.
                   </p>
                 </div>
               </div>
@@ -166,7 +165,7 @@ export default async function TermsOfServicePage() {
                     </h3>
                     <ul className="space-y-2 text-muted-foreground text-sm">
                       <li>
-                        • Hypertro uses one-time password (OTP) authentication
+                        • Hypro uses one-time password (OTP) authentication
                       </li>
                       <li>• No traditional passwords are stored or required</li>
                       <li>
@@ -268,7 +267,7 @@ export default async function TermsOfServicePage() {
                     </h3>
                     <ul className="space-y-2 text-amber-700 dark:text-amber-300 text-sm">
                       <li>
-                        • Trainers are independent contractors, not Hypertro
+                        • Trainers are independent contractors, not Hypro
                         employees
                       </li>
                       <li>
@@ -452,9 +451,9 @@ export default async function TermsOfServicePage() {
                     </div>
                     <Link
                       className="text-sm text-blue-500 hover:underline"
-                      href="mailto:support@hypertro.app"
+                      href="mailto:support@hypro.app"
                     >
-                      support@hypertro.app
+                      support@hypro.app
                     </Link>
                     <div className="text-xs text-muted-foreground mt-1">
                       Mark subject as "Terms & Legal"
@@ -469,7 +468,7 @@ export default async function TermsOfServicePage() {
                       href="/support"
                       target="_blank"
                     >
-                      hypertro.app/support
+                      hypro.app/support
                     </Link>
                     <div className="text-xs text-muted-foreground mt-1">
                       FAQ and help resources
@@ -481,7 +480,7 @@ export default async function TermsOfServicePage() {
               {/* Footer */}
               <div className="border-t pt-6 text-center bg-muted/20 p-6 rounded-lg">
                 <p className="text-sm text-muted-foreground font-medium">
-                  By using Hypertro, you acknowledge that you have read,
+                  By using Hypro, you acknowledge that you have read,
                   understood, and agree to be bound by these Terms of Service.
                 </p>
                 <p className="text-xs text-muted-foreground mt-2">

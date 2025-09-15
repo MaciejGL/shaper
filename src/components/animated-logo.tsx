@@ -156,7 +156,7 @@ export function AnimatedLogoText({ className }: { className?: string }) {
       }}
       className={cn('text-md font-medium', className)}
     >
-      {'Hypertro'.split('').map((letter, index) => (
+      {'Hypro'.split('').map((letter, index) => (
         <motion.span
           key={index}
           variants={{

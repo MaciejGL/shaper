@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
           amount: 100, // $1.00 test amount
           currency: 'usd',
           destination: accountId,
-          description: 'Test transfer from Hypertro platform',
+          description: 'Test transfer from Hypro platform',
           metadata: {
             test: 'true',
             source: 'admin_dashboard',

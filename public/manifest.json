@@ -1,6 +1,6 @@
 {
-  "name": "Hypertro - Fitness & Nutrition Tracker",
-  "short_name": "Hypertro",
+  "name": "Hypro - Fitness & Nutrition Tracker",
+  "short_name": "Hypro",
   "description": "Your personal fitness and nutrition tracking app",
   "start_url": "/fitspace/workout",
   "id": "/",

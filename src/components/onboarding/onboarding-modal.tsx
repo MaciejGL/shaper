@@ -343,7 +343,7 @@ export function OnboardingModal({
     <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent
         fullScreen
-        dialogTitle="Welcome to Hypertro"
+        dialogTitle="Welcome to Hypro"
         className="p-0"
         withCloseButton={false}
       >

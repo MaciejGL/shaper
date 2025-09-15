@@ -50,7 +50,7 @@ export const TrainerOfferEmail = ({
     <EmailWrapper
       previewText={`${trainerName} has created a custom training package for you`}
     >
-      <EmailHeader brandName="Hypertro" />
+      <EmailHeader brandName="Hypro" />
 
       <EmailContent>
         <EmailHeading size={2} marginBottom="12px">
@@ -156,16 +156,16 @@ export const TrainerOfferEmail = ({
           Questions about this offer? Contact {trainerName} directly or reach
           out to our support team at{' '}
           <a
-            href="mailto:support@hypertro.app"
+            href="mailto:support@hypro.app"
             style={{ color: '#0f172a', textDecoration: 'underline' }}
           >
-            support@hypertro.app
+            support@hypro.app
           </a>
         </EmailText>
       </EmailContent>
 
       <EmailFooter
-        companyName="Hypertro"
+        companyName="Hypro"
         address={`This email was sent on behalf of ${trainerName}. You're receiving this because ${trainerName} created a training package offer for you.`}
       />
     </EmailWrapper>

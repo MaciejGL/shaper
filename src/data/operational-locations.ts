@@ -1,4 +1,4 @@
-// Operational locations where Hypertro operates
+// Operational locations where Hypro operates
 export const OPERATIONAL_LOCATIONS = [
   {
     id: 'oslo-no',

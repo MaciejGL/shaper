@@ -19,14 +19,14 @@ interface OtpEmailProps {
 
 export const OtpEmail = ({ code, userName }: OtpEmailProps) => (
   <EmailWrapper previewText={`Your verification code: ${code}`}>
-    <EmailHeader brandName="Hypertro" />
+    <EmailHeader brandName="Hypro" />
     <EmailContent>
       <EmailHeading size={2} marginBottom="12px">
         {userName ? `Welcome back, ${userName}` : 'Verify your identity'}
       </EmailHeading>
 
       <EmailText marginBottom="28px">
-        Use the verification code below to complete your sign-in to Hypertro.
+        Use the verification code below to complete your sign-in to Hypro.
       </EmailText>
 
       <EmailCard backgroundColor="#f8fafc" borderColor="#e2e8f0" padding="32px">
@@ -64,13 +64,13 @@ export const OtpEmail = ({ code, userName }: OtpEmailProps) => (
       <EmailText size={5} color="muted" marginBottom="0">
         Need help? Contact our support team at{' '}
         <a
-          href="mailto:support@hypertro.app"
+          href="mailto:support@hypro.app"
           style={{ color: '#0f172a', textDecoration: 'underline' }}
         >
-          support@hypertro.app
+          support@hypro.app
         </a>
       </EmailText>
     </EmailContent>
-    <EmailFooter companyName="Hypertro" />
+    <EmailFooter companyName="Hypro" />
   </EmailWrapper>
 )
