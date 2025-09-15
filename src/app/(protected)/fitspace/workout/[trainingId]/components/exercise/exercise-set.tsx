@@ -376,9 +376,7 @@ export function ExerciseSet({
               />
             ) : (
               <div className="text-center text-sm">
-                {set.log?.reps
-                  ? set.log.reps.toString()
-                  : repRange || (previousSetRepsLog?.toString() ?? '--')}
+                {repRange || (previousSetRepsLog?.toString() ?? '--')}
               </div>
             )}
             {isAdvancedView ? (
