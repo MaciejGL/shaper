@@ -35,8 +35,11 @@ import {
 import { prisma } from '@/lib/db'
 import { notifyTrainingPlanAssigned } from '@/lib/notifications/push-notification-service'
 import { getFromCache, setInCache } from '@/lib/redis'
-import { parseUTCDate } from '@/lib/server-date-utils'
-import { getWeekStartUTC } from '@/lib/server-date-utils'
+import {
+  getTodayUTC,
+  getWeekStartUTC,
+  parseUTCDate,
+} from '@/lib/server-date-utils'
 import { subscriptionValidator } from '@/lib/subscription/subscription-validator'
 import { GQLContext } from '@/types/gql-context'
 
@@ -1921,125 +1924,158 @@ export async function getWorkoutDay(
     throw new GraphQLError('User not found')
   }
 
-  let targetDayId = dayId
+  // Get the target day with all data in one efficient query
+  let day
 
-  // If no dayId provided, find today's scheduled day from active plan
-  if (!dayId) {
-    // Convert JavaScript day to training system format
-    // JavaScript: 0=Sunday, 1=Monday, ..., 6=Saturday
-    // Training system: 0=Monday, 1=Tuesday, ..., 6=Sunday
-    const jsDay = new Date().getDay()
-    const trainingDay = jsDay === 0 ? 6 : jsDay - 1
-
-    const activePlan = await prisma.trainingPlan.findFirst({
-      where: {
-        assignedToId: user.user.id,
-        active: true,
-      },
+  if (dayId) {
+    // Direct lookup by dayId
+    day = await prisma.trainingDay.findUnique({
+      where: { id: dayId },
       include: {
-        weeks: {
+        week: {
           include: {
-            days: {
-              where: {
-                dayOfWeek: trainingDay,
-                // Also ensure the day is scheduled (not a template)
-                scheduledAt: { not: null },
+            plan: {
+              select: {
+                id: true,
+                assignedToId: true,
+                createdById: true,
+                active: true,
+                weeks: {
+                  select: {
+                    weekNumber: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        exercises: {
+          orderBy: {
+            order: 'asc',
+          },
+          include: {
+            substitutedBy: {
+              include: {
+                base: {
+                  include: {
+                    muscleGroups: true,
+                  },
+                },
+                sets: {
+                  include: {
+                    log: true,
+                  },
+                  orderBy: {
+                    order: 'asc',
+                  },
+                },
+              },
+            },
+            substitutes: true,
+            base: {
+              include: {
+                images: true,
+                muscleGroups: true,
+                substitutes: {
+                  include: {
+                    substitute: true,
+                  },
+                },
+              },
+            },
+            logs: true,
+            sets: {
+              include: {
+                log: true,
+              },
+              orderBy: {
+                order: 'asc',
               },
             },
           },
         },
       },
     })
+  } else {
+    // Find today's scheduled day with all data
+    const todayUTC = getTodayUTC('UTC')
 
-    if (!activePlan?.weeks?.length) {
-      throw new GraphQLError('Active plan not found')
-    }
-
-    // Find today's day by dayOfWeek (should be current or upcoming days)
-    const todayDay = activePlan.weeks
-      .flatMap((week) => week.days)
-      .find((day) => day.dayOfWeek === trainingDay)
-
-    if (!todayDay) {
-      throw new GraphQLError("Today's day not found")
-    }
-
-    targetDayId = todayDay.id
-  }
-
-  if (!targetDayId) {
-    throw new GraphQLError('Target day not found')
-  }
-
-  // Fetch the day with all exercise data
-  const day = await prisma.trainingDay.findUnique({
-    where: { id: targetDayId },
-    include: {
-      week: {
-        include: {
+    day = await prisma.trainingDay.findFirst({
+      where: {
+        week: {
           plan: {
-            select: {
-              id: true,
-              assignedToId: true,
-              createdById: true,
-              active: true,
-              weeks: {
-                select: {
-                  weekNumber: true,
+            assignedToId: user.user.id,
+            active: true,
+          },
+        },
+        scheduledAt: todayUTC,
+      },
+      include: {
+        week: {
+          include: {
+            plan: {
+              select: {
+                id: true,
+                assignedToId: true,
+                createdById: true,
+                active: true,
+                weeks: {
+                  select: {
+                    weekNumber: true,
+                  },
                 },
+              },
+            },
+          },
+        },
+        exercises: {
+          orderBy: {
+            order: 'asc',
+          },
+          include: {
+            substitutedBy: {
+              include: {
+                base: {
+                  include: {
+                    muscleGroups: true,
+                  },
+                },
+                sets: {
+                  include: {
+                    log: true,
+                  },
+                  orderBy: {
+                    order: 'asc',
+                  },
+                },
+              },
+            },
+            substitutes: true,
+            base: {
+              include: {
+                images: true,
+                muscleGroups: true,
+                substitutes: {
+                  include: {
+                    substitute: true,
+                  },
+                },
+              },
+            },
+            logs: true,
+            sets: {
+              include: {
+                log: true,
+              },
+              orderBy: {
+                order: 'asc',
               },
             },
           },
         },
       },
-      // events: true,
-      exercises: {
-        orderBy: {
-          order: 'asc',
-        },
-        include: {
-          substitutedBy: {
-            include: {
-              base: {
-                include: {
-                  muscleGroups: true,
-                },
-              },
-              sets: {
-                include: {
-                  log: true,
-                },
-                orderBy: {
-                  order: 'asc',
-                },
-              },
-            },
-          },
-          substitutes: true,
-          base: {
-            include: {
-              images: true,
-              muscleGroups: true,
-              substitutes: {
-                include: {
-                  substitute: true,
-                },
-              },
-            },
-          },
-          logs: true,
-          sets: {
-            include: {
-              log: true,
-            },
-            orderBy: {
-              order: 'asc',
-            },
-          },
-        },
-      },
-    },
-  })
+    })
+  }
 
   if (!day) {
     throw new GraphQLError('Day not found')
@@ -2063,7 +2099,7 @@ export async function getWorkoutDay(
     .filter((name) => name !== undefined)
   const exerciseIds = day.exercises.map((ex) => ex.id)
 
-  const cacheKey = cache.keys.exercises.previousExercises(plan.id, targetDayId)
+  const cacheKey = cache.keys.exercises.previousExercises(plan.id, day.id)
 
   const cached = await cache.get<
     Prisma.TrainingExerciseGetPayload<{
