@@ -1,3 +1,21 @@
+type PersonalRecord {
+  exerciseName: String!
+  estimated1RM: Float!
+  weight: Float!
+  reps: Int!
+  improvement: Float!
+}
+
+type PersonalRecordHistory {
+  id: ID!
+  estimated1RM: Float!
+  weight: Float!
+  reps: Int!
+  achievedAt: String!
+  exerciseName: String!
+  dayId: ID!
+}
+
 type TrainingDay {
   id: ID!
   dayOfWeek: Int!
@@ -9,6 +27,7 @@ type TrainingDay {
   completedAt: String
   scheduledAt: String
   exercises: [TrainingExercise!]!
+  personalRecords: [PersonalRecord!]
 
   trainingWeekId: ID!
   createdAt: String!
@@ -54,6 +73,7 @@ enum WorkoutSessionEvent {
 
 type Query {
   getWorkoutInfo(dayId: ID!): TrainingDay!
+  getUserPRHistory(userId: ID!, exerciseId: ID): [PersonalRecordHistory!]!
 }
 
 input UpdateTrainingDayDataInput {

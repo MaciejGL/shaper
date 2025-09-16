@@ -76,6 +76,9 @@ model User {
   macroTargets     MacroTarget[] @relation("ClientMacroTargets")
   setMacroTargets  MacroTarget[] @relation("TrainerMacroTargets")
 
+  // Personal records
+  personalRecords PersonalRecord[]
+
   @@index([trainerId])
   @@index([stripeCustomerId])
   @@index([trainerId, role])  // For trainer-client relationship queries
@@ -309,6 +312,7 @@ model TrainingDay {
   week        TrainingWeek          @relation(fields: [weekId], references: [id], onDelete: Cascade)
   exercises   TrainingExercise[]
   events      WorkoutSessionEvent[]
+  personalRecords PersonalRecord[]
 
   @@index([completedAt])
   @@index([weekId])
@@ -402,6 +406,28 @@ model ExerciseSetLog {
   ExerciseSet ExerciseSet?
 }
 
+model PersonalRecord {
+  id            String       @id @default(uuid())
+  userId        String
+  baseExerciseId String
+  dayId         String       // Track which workout day generated this PR
+  estimated1RM  Float
+  weight        Float
+  reps          Int
+  achievedAt    DateTime     @default(now())
+  createdAt     DateTime     @default(now())
+  
+  user          User         @relation(fields: [userId], references: [id])
+  baseExercise  BaseExercise @relation(fields: [baseExerciseId], references: [id])
+  day           TrainingDay  @relation(fields: [dayId], references: [id])
+  
+  @@unique([userId, baseExerciseId, dayId]) // Prevent duplicate PRs per workout day
+  @@index([userId])
+  @@index([baseExerciseId])
+  @@index([userId, baseExerciseId])
+  @@index([userId, baseExerciseId, estimated1RM])
+}
+
 model BaseExercise {
   id                        String                     @id @default(uuid())
   name                      String
@@ -427,6 +453,7 @@ model BaseExercise {
   trainingExercises         TrainingExercise[]
   muscleGroups              MuscleGroup[]              @relation("ExerciseMuscleGroups")
   secondaryMuscleGroups     MuscleGroup[]              @relation("ExerciseSecondaryMuscleGroups")
+  personalRecords           PersonalRecord[]
 
   @@index([version])
   @@index([difficulty])

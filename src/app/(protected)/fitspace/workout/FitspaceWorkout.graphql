@@ -83,6 +83,13 @@ query FitspaceGetWorkoutInfo($dayId: ID!) {
   getWorkoutInfo(dayId: $dayId) {
     id
     duration
+    personalRecords {
+      exerciseName
+      estimated1RM
+      weight
+      reps
+      improvement
+    }
   }
 }
 

@@ -1609,6 +1609,26 @@ export type GQLPackageTemplate = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type GQLPersonalRecord = {
+  __typename?: 'PersonalRecord';
+  estimated1RM: Scalars['Float']['output'];
+  exerciseName: Scalars['String']['output'];
+  improvement: Scalars['Float']['output'];
+  reps: Scalars['Int']['output'];
+  weight: Scalars['Float']['output'];
+};
+
+export type GQLPersonalRecordHistory = {
+  __typename?: 'PersonalRecordHistory';
+  achievedAt: Scalars['String']['output'];
+  dayId: Scalars['ID']['output'];
+  estimated1RM: Scalars['Float']['output'];
+  exerciseName: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  reps: Scalars['Int']['output'];
+  weight: Scalars['Float']['output'];
+};
+
 export type GQLPreviousExerciseLog = {
   __typename?: 'PreviousExerciseLog';
   completedAt?: Maybe<Scalars['String']['output']>;
@@ -1692,6 +1712,7 @@ export type GQLQuery = {
   getTrainerTasks: Array<GQLServiceTask>;
   getTrainingExercise?: Maybe<GQLTrainingExercise>;
   getTrainingPlanById: GQLTrainingPlan;
+  getUserPRHistory: Array<GQLPersonalRecordHistory>;
   getWorkoutDay?: Maybe<GQLGetWorkoutDayPayload>;
   getWorkoutInfo: GQLTrainingDay;
   getWorkoutNavigation?: Maybe<GQLGetWorkoutNavigationPayload>;
@@ -1879,6 +1900,12 @@ export type GQLQueryGetTrainingExerciseArgs = {
 
 export type GQLQueryGetTrainingPlanByIdArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetUserPrHistoryArgs = {
+  exerciseId?: InputMaybe<Scalars['ID']['input']>;
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -2305,6 +2332,7 @@ export type GQLTrainingDay = {
   exercises: Array<GQLTrainingExercise>;
   id: Scalars['ID']['output'];
   isRestDay: Scalars['Boolean']['output'];
+  personalRecords?: Maybe<Array<GQLPersonalRecord>>;
   scheduledAt?: Maybe<Scalars['String']['output']>;
   startedAt?: Maybe<Scalars['String']['output']>;
   trainingWeekId: Scalars['ID']['output'];
@@ -3188,7 +3216,7 @@ export type GQLFitspaceGetWorkoutInfoQueryVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceGetWorkoutInfoQuery = { __typename?: 'Query', getWorkoutInfo: { __typename?: 'TrainingDay', id: string, duration?: number | undefined | null } };
+export type GQLFitspaceGetWorkoutInfoQuery = { __typename?: 'Query', getWorkoutInfo: { __typename?: 'TrainingDay', id: string, duration?: number | undefined | null, personalRecords?: Array<{ __typename?: 'PersonalRecord', exerciseName: string, estimated1RM: number, weight: number, reps: number, improvement: number }> | undefined | null } };
 
 export type GQLFitspaceGetWorkoutDayQueryVariables = Exact<{
   dayId?: InputMaybe<Scalars['ID']['input']>;
@@ -6473,6 +6501,13 @@ export const FitspaceGetWorkoutInfoDocument = `
   getWorkoutInfo(dayId: $dayId) {
     id
     duration
+    personalRecords {
+      exerciseName
+      estimated1RM
+      weight
+      reps
+      improvement
+    }
   }
 }
     `;

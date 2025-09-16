@@ -4,11 +4,14 @@ import { differenceInYears, secondsToMinutes } from 'date-fns'
 import { AnimatePresence, motion } from 'framer-motion'
 import { uniq } from 'lodash'
 import {
+  CheckCheck,
   CheckIcon,
   ClockIcon,
   DumbbellIcon,
   FlameIcon,
   LoaderIcon,
+  TrendingUp,
+  TrophyIcon,
   WeightIcon,
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -16,6 +19,7 @@ import { useQueryState } from 'nuqs'
 import { Fragment, useEffect, useMemo, useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
+import { BiggyIcon } from '@/components/biggy-icon'
 import { StatsItem } from '@/components/stats-item'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -206,6 +210,9 @@ export function WorkoutSummaryDrawer({
               totalWeight={totalWeight}
               completedExercises={completedExercises}
               exercises={exercises}
+              personalRecords={
+                data.getWorkoutInfo?.personalRecords || undefined
+              }
             />
           ) : null}
           {!isLoading && error ? <ErrorContent /> : null}
@@ -265,6 +272,7 @@ function Content({
   totalWeight,
   completedExercises,
   exercises,
+  personalRecords,
 }: {
   displayedDuration: number
   displayedCalories: { moderate: number; high: number }
@@ -275,11 +283,75 @@ function Content({
   totalWeight: number
   completedExercises: WorkoutExercise[]
   exercises: WorkoutExercise[]
+  personalRecords?: {
+    exerciseName: string
+    estimated1RM: number
+    weight: number
+    reps: number
+    improvement: number
+  }[]
 }) {
   const { toDisplayWeight } = useWeightConversion()
   return (
     <div className="space-y-6 pb-4">
-      <div className="space-y-8">
+      <div className="space-y-8 pt-4">
+        {/* Personal Records */}
+        {personalRecords && personalRecords.length > 0 && (
+          <div className="shadow-xl bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-500/50 dark:to-amber-700/30 rounded-lg py-4">
+            <div className="flex flex-col items-center justify-center gap-2 mb-3 p-4">
+              <BiggyIcon icon={TrophyIcon} variant="amber" size="sm" />
+              <h3 className="font-medium">
+                New Personal Record{personalRecords.length > 1 ? 's' : ''}!
+              </h3>
+            </div>
+            <div className="space-y-2">
+              {personalRecords.map((pr, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center text-sm pb-2 px-4 not-last:border-b border-border/40"
+                >
+                  <span className="font-medium">{pr.exerciseName}</span>
+                  <div className="text-right">
+                    <div className="font-semibold">
+                      {toDisplayWeight(pr.estimated1RM)?.toFixed(2)}{' '}
+                      {weightUnit}
+                    </div>
+                    <div className="text-xs font-medium text-green-600 dark:text-yellow-400 flex items-center justify-end gap-1">
+                      +{pr.improvement.toFixed(1)}%{' '}
+                      <TrendingUp className="size-3" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {/* Fun Weight Comparison */}
+        <AnimatePresence>
+          <motion.div
+            className="flex flex-col gap-4"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="shadow-md bg-gradient-to-r from-purple-300 to-blue-300 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4">
+              <div className="text-center">
+                <p className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-1">
+                  You lifted {toDisplayWeight(totalWeight) || 0} {weightUnit}!
+                </p>
+                <p
+                  className={cn(
+                    'text-md text-purple-600 dark:text-purple-400',
+                    !weightComparison && 'animate-pulse',
+                  )}
+                >
+                  {weightComparison || 'Calculating your weight comparison...'}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </AnimatePresence>
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-4">
             <StatsItem
@@ -309,46 +381,20 @@ function Content({
           </div>
         </div>
 
-        {/* Fun Weight Comparison */}
-        <AnimatePresence>
-          <motion.div
-            className="flex flex-col gap-4"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 10 }}
-            transition={{ duration: 0.2 }}
-          >
-            <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4">
-              <div className="text-center">
-                <p className="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-1">
-                  You lifted {toDisplayWeight(totalWeight) || 0} {weightUnit}!
-                </p>
-                <p
-                  className={cn(
-                    'text-md text-purple-600 dark:text-purple-400',
-                    !weightComparison && 'animate-pulse',
-                  )}
-                >
-                  {weightComparison || 'Calculating your weight comparison...'}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-
         {/* Exercises Completed */}
         {exercises && exercises.length > 0 && (
           <div className="flex flex-col gap-4">
             <div className="flex items-end justify-between">
-              <h2 className="text-base font-semibold">Exercises</h2>
+              <h2 className="text-base font-semibold">Exercises Overview</h2>
               <Badge
                 variant={
                   completedExercises.length === exercises.length
-                    ? 'success'
+                    ? 'secondary'
                     : 'secondary'
                 }
               >
-                {completedExercises.length} / {exercises.length}
+                {completedExercises.length} / {exercises.length}{' '}
+                <CheckCheck className=" text-green-600" />
               </Badge>
             </div>
             <div className="space-y-2 bg-card-on-card rounded-lg py-2 shadow-xs">

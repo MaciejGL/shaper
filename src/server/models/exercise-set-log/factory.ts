@@ -355,6 +355,127 @@ export const markExerciseAsCompleted = async (
   return true
 }
 
+const saveWorkoutPRs = async (dayId: string, userId: string) => {
+  // Get all completed sets from current workout with exercise info
+  const completedSets = await prisma.exerciseSet.findMany({
+    where: {
+      exercise: { dayId },
+      completedAt: { not: null },
+      log: {
+        weight: { not: null },
+        reps: { not: null },
+      },
+    },
+    include: {
+      log: true,
+      exercise: {
+        select: { baseId: true },
+      },
+    },
+  })
+
+  // Group by exercise and find best 1RM for each
+  const exercisePerformances = new Map<
+    string,
+    {
+      baseId: string
+      best1RM: number
+      bestWeight: number
+      bestReps: number
+    }
+  >()
+
+  for (const set of completedSets) {
+    if (!set.exercise.baseId || !set.log?.weight || !set.log?.reps) continue
+
+    // Use more accurate 1RM calculation based on rep range
+    const reps = set.log.reps
+    const weight = set.log.weight
+    const estimated1RM =
+      reps <= 10
+        ? weight / (1.0278 - 0.0278 * reps) // Brzycki (most accurate 1-10 reps)
+        : reps <= 15
+          ? weight * (1 + 0.025 * reps) // O'Conner (better for 11-15 reps)
+          : weight * 1.5 // Conservative estimate for 16+ reps
+    const key = set.exercise.baseId
+
+    const current = exercisePerformances.get(key)
+    if (!current || estimated1RM > current.best1RM) {
+      exercisePerformances.set(key, {
+        baseId: set.exercise.baseId,
+        best1RM: estimated1RM,
+        bestWeight: set.log.weight,
+        bestReps: set.log.reps,
+      })
+    }
+  }
+
+  // Check if PRs already exist for this workout day
+  const baseExerciseIds = Array.from(exercisePerformances.keys())
+  const existingDayPRs = await prisma.personalRecord.findMany({
+    where: {
+      userId,
+      dayId,
+      baseExerciseId: { in: baseExerciseIds },
+    },
+  })
+
+  const existingDayPRMap = new Map(
+    existingDayPRs.map((pr) => [pr.baseExerciseId, pr]),
+  )
+
+  // Get current best PRs for comparison (excluding today's workout)
+  const currentBestPRs = await prisma.$queryRaw<
+    { baseExerciseId: string; maxEstimated1RM: number }[]
+  >`
+    SELECT 
+      "baseExerciseId",
+      MAX("estimated1RM") as "maxEstimated1RM"
+    FROM "PersonalRecord" 
+    WHERE "userId" = ${userId}
+      AND "baseExerciseId" = ANY(${baseExerciseIds})
+      AND "dayId" != ${dayId}
+    GROUP BY "baseExerciseId"
+  `
+
+  const currentBestMap = new Map(
+    currentBestPRs.map((pr) => [pr.baseExerciseId, pr.maxEstimated1RM]),
+  )
+
+  for (const [baseId, current] of exercisePerformances) {
+    const currentBest = currentBestMap.get(baseId) || 0
+    const isNewPR = current.best1RM > currentBest * 1.01 // 1% improvement threshold
+    const existingDayPR = existingDayPRMap.get(baseId)
+
+    if (isNewPR) {
+      if (existingDayPR) {
+        // Update existing PR for this workout day
+        await prisma.personalRecord.update({
+          where: { id: existingDayPR.id },
+          data: {
+            estimated1RM: current.best1RM,
+            weight: current.bestWeight,
+            reps: current.bestReps,
+            achievedAt: new Date(),
+          },
+        })
+      } else {
+        // Create new PR record
+        await prisma.personalRecord.create({
+          data: {
+            userId,
+            baseExerciseId: baseId,
+            dayId,
+            estimated1RM: current.best1RM,
+            weight: current.bestWeight,
+            reps: current.bestReps,
+          },
+        })
+      }
+    }
+  }
+}
+
 export const markWorkoutAsCompleted = async (
   args: GQLMutationMarkWorkoutAsCompletedArgs,
 ) => {
@@ -406,6 +527,11 @@ export const markWorkoutAsCompleted = async (
     where: { id: dayId },
     data: { completedAt: now },
   })
+
+  // Save PRs for completed workout
+  if (dayWithInfo?.week?.plan?.assignedTo?.id) {
+    await saveWorkoutPRs(dayId, dayWithInfo.week.plan.assignedTo.id)
+  }
 
   await updateWorkoutSessionEvent(dayId, GQLWorkoutSessionEvent.Complete)
 
