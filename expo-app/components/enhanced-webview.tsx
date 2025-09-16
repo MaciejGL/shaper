@@ -2,12 +2,14 @@
  * Enhanced WebView with Push Notifications and Deep Linking
  * Replaces basic WebView with full functionality
  */
+import { useNetInfo } from '@react-native-community/netinfo'
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
-import { StyleSheet } from 'react-native'
+import { RefreshControl, ScrollView, StyleSheet } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import { APP_CONFIG } from '../config/app-config'
 
+import { OfflineScreen } from './offline-screen'
 import { WebViewLoading } from './webview-loading'
 
 /**
@@ -243,6 +245,53 @@ export const EnhancedWebView = forwardRef<
   ) => {
     const webViewRef = useRef<WebView>(null)
     const [loadingProgress, setLoadingProgress] = useState(0)
+    const [refreshing, setRefreshing] = useState(false)
+    const [showOfflineScreen, setShowOfflineScreen] = useState(false)
+
+    // Prevent infinite loops with debouncing and refs
+    const lastConnectionState = useRef<boolean | null>(null)
+    const retryTimeoutRef = useRef<number | null>(null)
+    const isRetryingRef = useRef(false)
+
+    // Network connectivity monitoring
+    const netInfo = useNetInfo()
+
+    // Check if we should show offline screen (with loop prevention)
+    React.useEffect(() => {
+      // Prevent rapid network state changes from causing loops
+      if (lastConnectionState.current === netInfo.isConnected) {
+        return // No change, prevent unnecessary updates
+      }
+
+      lastConnectionState.current = netInfo.isConnected
+
+      if (netInfo.isConnected === false) {
+        // Clear any pending retry when going offline
+        if (retryTimeoutRef.current) {
+          clearTimeout(retryTimeoutRef.current)
+          retryTimeoutRef.current = null
+        }
+        isRetryingRef.current = false
+        setShowOfflineScreen(true)
+      } else if (
+        netInfo.isConnected === true &&
+        showOfflineScreen &&
+        !isRetryingRef.current
+      ) {
+        // Connection restored - debounce the retry to prevent loops
+        isRetryingRef.current = true
+        setShowOfflineScreen(false)
+
+        // Debounced retry to prevent immediate reload loops
+        retryTimeoutRef.current = setTimeout(() => {
+          if (netInfo.isConnected && isRetryingRef.current) {
+            handleRetry()
+          }
+          isRetryingRef.current = false
+          retryTimeoutRef.current = null
+        }, 1000) // 1 second debounce
+      }
+    }, [netInfo.isConnected]) // ❌ Removed showOfflineScreen from deps to prevent loops
 
     // Expose methods to parent components
     useImperativeHandle(ref, () => ({
@@ -296,6 +345,42 @@ export const EnhancedWebView = forwardRef<
       },
     }))
 
+    // Pull-to-refresh handler with cleanup
+    const handleRefresh = React.useCallback(() => {
+      if (refreshing) return // Prevent multiple simultaneous refreshes
+
+      setRefreshing(true)
+      webViewRef.current?.reload()
+
+      // Clean up timeout properly
+      const timeoutId = setTimeout(() => {
+        setRefreshing(false)
+      }, 1000)
+
+      // Return cleanup function (though this won't be used in this case)
+      return () => clearTimeout(timeoutId)
+    }, [refreshing])
+
+    // Retry connection handler with loop prevention
+    const handleRetry = React.useCallback(() => {
+      if (isRetryingRef.current || !webViewRef.current) {
+        return // Prevent multiple retries or retry when ref is null
+      }
+
+      console.log('🔄 Retrying WebView connection...')
+      webViewRef.current.reload()
+    }, [])
+
+    // Cleanup timeouts on unmount
+    React.useEffect(() => {
+      return () => {
+        if (retryTimeoutRef.current) {
+          clearTimeout(retryTimeoutRef.current)
+        }
+        isRetryingRef.current = false
+      }
+    }, [])
+
     // Generate the injected JavaScript in a clean, readable way
     const injectedJavaScript = createWebViewScript()
 
@@ -341,84 +426,139 @@ export const EnhancedWebView = forwardRef<
       }
     }
 
-    return (
-      <WebView
-        ref={webViewRef}
-        source={{ uri: initialUrl || APP_CONFIG.WEB_URL }}
-        style={styles.webview}
-        javaScriptEnabled={true}
-        domStorageEnabled={true}
-        startInLoadingState={true}
-        renderLoading={() => <WebViewLoading progress={loadingProgress} />}
-        onLoadProgress={(event) => {
-          setLoadingProgress(event.nativeEvent.progress)
-        }}
-        userAgent={APP_CONFIG.USER_AGENT}
-        injectedJavaScript={injectedJavaScript}
-        onMessage={handleMessage}
-        onNavigationStateChange={onNavigationStateChange}
-        onLoad={onLoad}
-        onError={(syntheticEvent) => {
-          const { nativeEvent } = syntheticEvent
-          console.error('❌ WebView error:', nativeEvent)
+    // Enhanced error handler with loop prevention
+    const handleWebViewError = React.useCallback(
+      (syntheticEvent: any) => {
+        const { nativeEvent } = syntheticEvent
+        console.error('❌ WebView error:', nativeEvent)
 
-          // Handle specific connection errors
-          if (
+        // Only show offline screen if we're not already showing it (prevent loops)
+        if (!showOfflineScreen && netInfo.isConnected === false) {
+          const isNetworkError =
             nativeEvent.description?.includes(
               'Kunne ikke koble til tjeneren',
             ) ||
-            nativeEvent.description?.includes('Could not connect to the server')
-          ) {
-            console.warn(
-              '⚠️ WebView connection failed - development server may be down',
-            )
+            nativeEvent.description?.includes(
+              'Could not connect to the server',
+            ) ||
+            nativeEvent.description?.includes(
+              'net::ERR_INTERNET_DISCONNECTED',
+            ) ||
+            nativeEvent.description?.includes('net::ERR_NETWORK_CHANGED') ||
+            nativeEvent.description?.includes('net::ERR_NETWORK_IO_SUSPENDED')
+
+          if (isNetworkError) {
+            console.log('🌐 Network error detected, showing offline screen')
+            setShowOfflineScreen(true)
           }
-        }}
-        onHttpError={(syntheticEvent) => {
-          const { nativeEvent } = syntheticEvent
-          console.error(
-            '❌ WebView HTTP error:',
-            nativeEvent.statusCode,
-            nativeEvent.description,
+        }
+      },
+      [netInfo.isConnected, showOfflineScreen],
+    )
+
+    // Enhanced load end handler with loop prevention
+    const handleLoadEnd = React.useCallback(
+      (syntheticEvent: any) => {
+        const { nativeEvent } = syntheticEvent
+        setRefreshing(false) // Always stop refreshing when load completes
+        isRetryingRef.current = false // Reset retry flag when load completes
+
+        // Only show offline screen if not already showing (prevent loops)
+        if (
+          !showOfflineScreen &&
+          !nativeEvent.loading &&
+          nativeEvent.canGoBack === false &&
+          nativeEvent.canGoForward === false &&
+          nativeEvent.title === '' &&
+          netInfo.isConnected === false
+        ) {
+          console.warn(
+            '⚠️ WebView loaded but appears to have connection issues',
           )
-        }}
-        onLoadEnd={(syntheticEvent) => {
-          const { nativeEvent } = syntheticEvent
-          if (
-            !nativeEvent.loading &&
-            nativeEvent.canGoBack === false &&
-            nativeEvent.canGoForward === false &&
-            nativeEvent.title === ''
-          ) {
-            console.warn(
-              '⚠️ WebView loaded but appears to have connection issues',
+          setShowOfflineScreen(true)
+        }
+      },
+      [netInfo.isConnected, showOfflineScreen],
+    )
+
+    // Show offline screen when no connection
+    if (showOfflineScreen) {
+      return <OfflineScreen onRetry={handleRetry} />
+    }
+
+    return (
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#f59e0b"
+            colors={['#f59e0b']}
+            progressBackgroundColor="#000000"
+          />
+        }
+        scrollEnabled={false}
+      >
+        <WebView
+          ref={webViewRef}
+          source={{ uri: initialUrl || APP_CONFIG.WEB_URL }}
+          style={styles.webview}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+          startInLoadingState={true}
+          renderLoading={() => <WebViewLoading progress={loadingProgress} />}
+          onLoadProgress={(event) => {
+            setLoadingProgress(event.nativeEvent.progress)
+          }}
+          userAgent={APP_CONFIG.USER_AGENT}
+          injectedJavaScript={injectedJavaScript}
+          onMessage={handleMessage}
+          onNavigationStateChange={onNavigationStateChange}
+          onLoad={onLoad}
+          onError={handleWebViewError}
+          onHttpError={(syntheticEvent) => {
+            const { nativeEvent } = syntheticEvent
+            console.error(
+              '❌ WebView HTTP error:',
+              nativeEvent.statusCode,
+              nativeEvent.description,
             )
-          }
-        }}
-        // Security settings
-        allowsBackForwardNavigationGestures={true}
-        decelerationRate={0.998}
-        // Enable features needed for your web app
-        allowsInlineMediaPlayback={true}
-        mediaPlaybackRequiresUserAction={false}
-        // Cache and storage optimizations
-        cacheEnabled={true}
-        cacheMode="LOAD_CACHE_ELSE_NETWORK"
-        thirdPartyCookiesEnabled={true}
-        sharedCookiesEnabled={true}
-        // Performance optimizations
-        androidLayerType="hardware"
-        mixedContentMode="compatibility"
-        allowsFullscreenVideo={false}
-        allowsProtectedMedia={false}
-        showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
-      />
+          }}
+          onLoadEnd={handleLoadEnd}
+          // Security settings
+          allowsBackForwardNavigationGestures={true}
+          decelerationRate={0.998}
+          // Enable features needed for web app
+          allowsInlineMediaPlayback={true}
+          mediaPlaybackRequiresUserAction={false}
+          // Cache and storage optimizations
+          cacheEnabled={true}
+          cacheMode="LOAD_CACHE_ELSE_NETWORK"
+          thirdPartyCookiesEnabled={true}
+          sharedCookiesEnabled={true}
+          // Performance optimizations
+          androidLayerType="hardware"
+          mixedContentMode="compatibility"
+          allowsFullscreenVideo={false}
+          allowsProtectedMedia={false}
+          scrollEnabled={false}
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+        />
+      </ScrollView>
     )
   },
 )
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollContent: {
+    flex: 1,
+  },
   webview: {
     flex: 1,
   },
