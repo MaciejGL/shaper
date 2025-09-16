@@ -179,34 +179,8 @@ export function WebViewLoading({ progress = 0 }: WebViewLoadingProps) {
       {/* Loading text with dots */}
       <View style={styles.loadingContainer}>
         <Animated.Text style={[styles.loadingText, { opacity: pulseAnim }]}>
-          Loading workout
+          Loading workout...
         </Animated.Text>
-
-        {/* Loading dots aligned with text */}
-        <View style={styles.dotsContainer}>
-          {[0, 1, 2].map((index) => (
-            <Animated.View
-              key={index}
-              style={[
-                styles.dot,
-                {
-                  opacity: pulseAnim.interpolate({
-                    inputRange: [0.7, 1],
-                    outputRange: [0.3, 1],
-                  }),
-                  transform: [
-                    {
-                      scale: pulseAnim.interpolate({
-                        inputRange: [0.7, 1],
-                        outputRange: [0.8, 1],
-                      }),
-                    },
-                  ],
-                },
-              ]}
-            />
-          ))}
-        </View>
       </View>
 
       {/* Progress container */}
