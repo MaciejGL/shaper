@@ -13,8 +13,6 @@ interface WorkoutPageProps {
   searchParams: Promise<{ day: string; week: string }>
 }
 
-export const revalidate = 300
-
 export default async function WorkoutPage({
   params,
   searchParams,
@@ -26,19 +24,10 @@ export default async function WorkoutPage({
     gqlServerFetch<GQLFitspaceGetWorkoutNavigationQuery>(
       FitspaceGetWorkoutNavigationDocument,
       { trainingId, weekId: weekId || undefined, allWeeks: false },
-      {
-        cache: 'force-cache',
-        next: { revalidate: 5 * 60 },
-      },
-      // 5 minutes}}
     )
   const dayPromise = gqlServerFetch<GQLFitspaceGetWorkoutDayQuery>(
     FitspaceGetWorkoutDayDocument,
     { dayId: dayId || undefined },
-    {
-      cache: 'force-cache',
-      next: { revalidate: 5 * 60 },
-    },
   )
 
   return (
