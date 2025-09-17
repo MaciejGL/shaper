@@ -4,7 +4,7 @@
  */
 import { useNetInfo } from '@react-native-community/netinfo'
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
-import { RefreshControl, ScrollView, StyleSheet } from 'react-native'
+import { ScrollView, StyleSheet } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import { APP_CONFIG } from '../config/app-config'
@@ -22,7 +22,6 @@ function createWebViewScript(): string {
     ${setupNavigationMonitoring()}
     ${setupThemeDetection()}
     ${setupHistoryOverrides()}
-    ${setupScrollPositionMonitoring()}
     
     console.log('✅ ${APP_CONFIG.APP_NAME} Enhanced WebView loaded!');
     true; // Required return statement
@@ -209,50 +208,6 @@ function setupHistoryOverrides(): string {
   `
 }
 
-/**
- * Setup scroll position monitoring for pull-to-refresh
- */
-function setupScrollPositionMonitoring(): string {
-  return `
-    // Monitor scroll position for pull-to-refresh control
-    let lastScrollY = 0;
-    let scrollCheckTimeout = null;
-    
-    const checkScrollPosition = () => {
-      const currentScrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
-      
-      // Only send message if scroll position actually changed to avoid spam
-      if (Math.abs(currentScrollY - lastScrollY) > 5) {
-        lastScrollY = currentScrollY;
-        
-        // Send scroll position to native app
-        const isAtTop = currentScrollY <= 10; // Allow small tolerance for better UX
-        window.ReactNativeWebView?.postMessage(JSON.stringify({
-          type: 'scroll_position',
-          isAtTop: isAtTop,
-          scrollY: currentScrollY
-        }));
-      }
-    };
-    
-    // Throttled scroll listener for better performance
-    const throttledScrollCheck = () => {
-      if (scrollCheckTimeout) return;
-      scrollCheckTimeout = setTimeout(() => {
-        checkScrollPosition();
-        scrollCheckTimeout = null;
-      }, 200); // Check every 200ms max
-    };
-    
-    // Listen for scroll events
-    window.addEventListener('scroll', throttledScrollCheck, { passive: true });
-    window.addEventListener('touchmove', throttledScrollCheck, { passive: true });
-    
-    // Initial check
-    setTimeout(checkScrollPosition, 500);
-  `
-}
-
 export interface EnhancedWebViewRef {
   navigateToPath: (path: string) => void
   reload: () => void
@@ -290,9 +245,7 @@ export const EnhancedWebView = forwardRef<
   ) => {
     const webViewRef = useRef<WebView>(null)
     const [loadingProgress, setLoadingProgress] = useState(0)
-    const [refreshing, setRefreshing] = useState(false)
     const [showOfflineScreen, setShowOfflineScreen] = useState(false)
-    const [canPullToRefresh, setCanPullToRefresh] = useState(true)
 
     // Prevent infinite loops with debouncing and refs
     const lastConnectionState = useRef<boolean | null>(null)
@@ -391,29 +344,6 @@ export const EnhancedWebView = forwardRef<
       },
     }))
 
-    // Pull-to-refresh handler with cleanup and scroll position check
-    const handleRefresh = React.useCallback(() => {
-      // Only allow refresh if user is at top of page and not already refreshing
-      if (!canPullToRefresh || refreshing) {
-        console.log(
-          '🚫 Pull-to-refresh blocked: not at top of page or already refreshing',
-        )
-        return
-      }
-
-      console.log('🔄 Pull-to-refresh triggered from top of page')
-      setRefreshing(true)
-      webViewRef.current?.reload()
-
-      // Clean up timeout properly
-      const timeoutId = setTimeout(() => {
-        setRefreshing(false)
-      }, 1000)
-
-      // Return cleanup function (though this won't be used in this case)
-      return () => clearTimeout(timeoutId)
-    }, [canPullToRefresh, refreshing])
-
     // Retry connection handler with loop prevention
     const handleRetry = React.useCallback(() => {
       if (isRetryingRef.current || !webViewRef.current) {
@@ -470,11 +400,6 @@ export const EnhancedWebView = forwardRef<
             onAuthToken?.(message.token)
             break
 
-          case 'scroll_position':
-            // Update pull-to-refresh availability based on scroll position
-            setCanPullToRefresh(message.isAtTop)
-            break
-
           default:
             // Unknown message from web app
             break
@@ -518,7 +443,6 @@ export const EnhancedWebView = forwardRef<
     const handleLoadEnd = React.useCallback(
       (syntheticEvent: any) => {
         const { nativeEvent } = syntheticEvent
-        setRefreshing(false) // Always stop refreshing when load completes
         isRetryingRef.current = false // Reset retry flag when load completes
 
         // Only show offline screen if not already showing (prevent loops)
@@ -548,16 +472,6 @@ export const EnhancedWebView = forwardRef<
       <ScrollView
         style={styles.container}
         contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            enabled={canPullToRefresh} // Only enable when at top of webpage
-            tintColor="#f59e0b"
-            colors={['#f59e0b']}
-            progressBackgroundColor="#000000"
-          />
-        }
         scrollEnabled={false}
       >
         <WebView
