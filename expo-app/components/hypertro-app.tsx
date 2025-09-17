@@ -3,11 +3,11 @@
  * Enhanced for bulletproof user switching
  * This component integrates all the functionality together
  */
-import Constants from 'expo-constants'
 import * as Linking from 'expo-linking'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import { AppState, SafeAreaView, StyleSheet } from 'react-native'
+import { AppState, StyleSheet } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useThemeManager } from '../hooks/use-theme-manager'
 import {
@@ -161,7 +161,6 @@ export function HyproApp({ authToken }: HyproAppProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Constants.statusBarHeight,
   },
 })
 

@@ -19,7 +19,6 @@
       "bundleIdentifier": "app.hypertro.mobile",
       "googleServicesFile": "./GoogleService-Info.plist",
       "associatedDomains": ["applinks:hypro.app"],
-      "useFrameworks": "static",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": true,
@@ -58,24 +57,6 @@
         "android.permission.SYSTEM_ALERT_WINDOW",
         "android.permission.VIBRATE"
       ],
-
-      "usesCleartextTraffic": false,
-      "androidManifest": {
-        "application": {
-          "android:name": ".MainApplication"
-        },
-        "queries": [
-          {
-            "intent": {
-              "action": "android.intent.action.VIEW",
-              "category": "android.intent.category.BROWSABLE",
-              "data": {
-                "scheme": "https"
-              }
-            }
-          }
-        ]
-      },
       "intentFilters": [
         {
           "action": "VIEW",
@@ -147,7 +128,8 @@
         {
           "cameraPermission": "Allow Hypro to access your camera for progress photos"
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

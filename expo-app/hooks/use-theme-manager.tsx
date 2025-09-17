@@ -51,13 +51,21 @@ export function useThemeManager() {
       // Update Android navigation bar
       if (Platform.OS === 'android') {
         try {
-          await NavigationBar.setBackgroundColorAsync(
-            colors.navigationBarBackground,
-          )
-
-          // Set navigation bar button style
+          // Set navigation bar button style (this works with edge-to-edge)
           const buttonStyle = theme === 'dark' ? 'light' : 'dark'
           await NavigationBar.setButtonStyleAsync(buttonStyle)
+
+          // Try to set background color, but don't warn if it fails due to edge-to-edge
+          try {
+            await NavigationBar.setBackgroundColorAsync(
+              colors.navigationBarBackground,
+            )
+          } catch (bgError) {
+            // Silently ignore background color errors in edge-to-edge mode
+            console.log(
+              '📱 Navigation bar background not set (edge-to-edge mode)',
+            )
+          }
         } catch (error) {
           console.warn('⚠️ Failed to update Android navigation bar:', error)
         }
