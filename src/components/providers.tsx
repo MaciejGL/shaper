@@ -1,6 +1,6 @@
 'use client'
 
-// import { ProgressProvider } from '@bprogress/next/app'
+import { ProgressProvider } from '@bprogress/next/app'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { SessionProvider } from 'next-auth/react'
@@ -19,7 +19,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* <ProgressProvider
+      <ProgressProvider
         height="1px"
         color="var(--color-amber-500)"
         options={{
@@ -28,17 +28,17 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         }}
         startOnLoad
         shallowRouting
-      > */}
-      <SessionProvider>
-        <NuqsAdapter>
-          <NavigationProvider>
-            <ConfirmationModalProvider>
-              <SidebarProvider>{children}</SidebarProvider>
-            </ConfirmationModalProvider>
-          </NavigationProvider>
-        </NuqsAdapter>
-      </SessionProvider>
-      {/* </ProgressProvider> */}
+      >
+        <SessionProvider>
+          <NuqsAdapter>
+            <NavigationProvider>
+              <ConfirmationModalProvider>
+                <SidebarProvider>{children}</SidebarProvider>
+              </ConfirmationModalProvider>
+            </NavigationProvider>
+          </NuqsAdapter>
+        </SessionProvider>
+      </ProgressProvider>
       {process.env.NEXT_PUBLIC_DEVTOOLS === 'true' && <ReactQueryDevtools />}
       <Toaster />
     </QueryClientProvider>

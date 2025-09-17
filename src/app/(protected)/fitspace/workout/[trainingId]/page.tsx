@@ -13,8 +13,6 @@ interface WorkoutPageProps {
   searchParams: Promise<{ day: string; week: string }>
 }
 
-export const revalidate = 300
-
 export default async function WorkoutPage({
   params,
   searchParams,
