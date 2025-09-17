@@ -159,7 +159,7 @@ export function ExerciseSet({
             loggedWeight: weightValue ? +weightValue : null,
           },
         })
-      }, 500),
+      }, 1500),
     [set.id, updateSetLog],
   )
 
