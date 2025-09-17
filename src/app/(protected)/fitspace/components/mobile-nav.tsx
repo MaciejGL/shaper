@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import {
   Dumbbell,
   LayoutList,
@@ -13,9 +14,12 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
+import { GQLFitspaceGetWorkoutNavigationQuery } from '@/generated/graphql-client'
 import { useKeyboardVisible } from '@/hooks/use-keyboard-visible'
 import { tryOpenAppDeepLink } from '@/lib/deep-links'
 import { cn } from '@/lib/utils'
+
+import { getDefaultSelection } from '../workout/[trainingId]/components/navigation'
 
 export function MobileNav() {
   const pathname = usePathname()
@@ -26,6 +30,17 @@ export function MobileNav() {
     null,
   )
 
+  const queryClient = useQueryClient()
+
+  const workoutNavigationQuery =
+    queryClient.getQueryData<GQLFitspaceGetWorkoutNavigationQuery>([
+      'navigation',
+    ])
+
+  const trainingId = workoutNavigationQuery?.getWorkoutNavigation?.plan?.id
+  const { weekId, dayId } = getDefaultSelection(
+    workoutNavigationQuery?.getWorkoutNavigation?.plan,
+  )
   useEffect(() => {
     setClickedItem(null)
     setPendingNavigation(null)
@@ -35,7 +50,7 @@ export function MobileNav() {
     () => [
       {
         id: 'workout',
-        href: '/fitspace/workout',
+        href: `/fitspace/workout/${trainingId}?weekId=${weekId}&dayId=${dayId}`,
         icon: Dumbbell,
         label: 'Workout',
         prefetch: true,
@@ -76,7 +91,7 @@ export function MobileNav() {
         prefetch: true,
       },
     ],
-    [],
+    [trainingId, weekId, dayId],
   )
 
   // Hide navigation when keyboard is visible

@@ -133,7 +133,8 @@ function DaySelector({ plan }: { plan: NavigationPlan }) {
 }
 
 // Helper function to determine default week and day selection
-function getDefaultSelection(plan: NavigationPlan) {
+export function getDefaultSelection(plan?: NavigationPlan) {
+  if (!plan) return { weekId: null, dayId: null }
   if (!plan.weeks.length) return { weekId: null, dayId: null }
 
   // Try to find the current week based on start date and schedule
