@@ -36,7 +36,6 @@ function Drawer({
   return (
     <DrawerPrimitive.Root
       data-slot="drawer"
-      disablePreventScroll
       onOpenChange={handleOpenChange}
       {...props}
     />
