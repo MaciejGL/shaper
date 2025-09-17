@@ -3,7 +3,6 @@
 import * as React from 'react'
 import { Drawer as DrawerPrimitive } from 'vaul'
 
-import { useDrawerRefresh } from '@/hooks/use-drawer-refresh'
 import { cn } from '@/lib/utils'
 
 function Drawer({
@@ -12,12 +11,25 @@ function Drawer({
 }: React.ComponentProps<typeof DrawerPrimitive.Root> & {
   onClose?: () => void
 }) {
-  const [isOpen, setIsOpen] = React.useState(false)
-
-  useDrawerRefresh(isOpen)
-
   const handleOpenChange = (open: boolean) => {
-    setIsOpen(open)
+    if (typeof window === 'undefined') {
+      onOpenChange?.(open)
+      return
+    }
+
+    if (open) {
+      // Drawer opening - check if at top and adjust scroll to disable pull-to-refresh
+      const currentScrollY =
+        window.scrollY ||
+        window.pageYOffset ||
+        document.documentElement.scrollTop
+
+      if (currentScrollY === 0) {
+        window.scrollTo({ top: 1, behavior: 'instant' })
+      }
+    }
+    // No need to restore scroll position - it naturally returns to 0 when drawer closes
+
     onOpenChange?.(open)
   }
 

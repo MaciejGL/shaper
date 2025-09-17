@@ -15,7 +15,7 @@ export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <Drawer open={isOpen} onOpenChange={setIsOpen} disablePreventScroll fixed>
+    <Drawer open={isOpen} onOpenChange={setIsOpen} disablePreventScroll>
       <DrawerTrigger asChild>
         <div className="flex items-center gap-1 relative">
           <Button

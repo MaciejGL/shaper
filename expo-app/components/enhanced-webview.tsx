@@ -99,14 +99,6 @@ function setupNativeAppAPI(): string {
           type: 'auth_token',
           token: token
         }));
-      },
-      
-      // Pull-to-refresh control
-      setAllowRefresh: function(allow) {
-        window.ReactNativeWebView?.postMessage(JSON.stringify({
-          type: 'set_allow_refresh',
-          allow: allow
-        }));
       }
     };
   `
@@ -476,11 +468,6 @@ export const EnhancedWebView = forwardRef<
 
           case 'auth_token':
             onAuthToken?.(message.token)
-            break
-
-          case 'set_allow_refresh':
-            // Direct control of pull-to-refresh from drawer state
-            setCanPullToRefresh(message.allow)
             break
 
           case 'scroll_position':
