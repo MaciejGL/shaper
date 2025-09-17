@@ -12,6 +12,7 @@ import { ExerciseNotebookProps } from './types'
 
 export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
   const notesCount = useExerciseNotesCount(exercise)
+
   const [isOpen, setIsOpen] = useState(false)
 
   return (
