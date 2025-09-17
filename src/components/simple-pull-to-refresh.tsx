@@ -94,13 +94,24 @@ export function SimplePullToRefresh() {
 
     // Handle scroll position changes
     const handleScroll = () => {
+      // Don't start pull-to-refresh if drawer is open
+      if (document.body.hasAttribute('data-drawer-open')) {
+        // Cancel any pending timer and disable pull-to-refresh
+        if (isAtTopTimer) {
+          clearTimeout(isAtTopTimer)
+          isAtTopTimer = null
+        }
+        isPullToRefreshEnabled = false
+        return
+      }
+
       if (window.scrollY === 0) {
         // User reached the top, start timer to enable pull-to-refresh
         if (!isAtTopTimer && !isPullToRefreshEnabled) {
           isAtTopTimer = setTimeout(() => {
             isPullToRefreshEnabled = true
             isAtTopTimer = null
-          }, 1000) // 1000ms delay before enabling pull-to-refresh
+          }, 500) // 500ms delay before enabling pull-to-refresh
         }
       } else {
         // User scrolled away from top, disable pull-to-refresh and cancel timer
@@ -113,7 +124,10 @@ export function SimplePullToRefresh() {
     }
 
     // Initialize pull-to-refresh state based on current scroll position
-    if (window.scrollY === 0) {
+    if (
+      window.scrollY === 0 &&
+      !document.body.hasAttribute('data-drawer-open')
+    ) {
       isPullToRefreshEnabled = true // If already at top on mount, enable immediately
     }
 

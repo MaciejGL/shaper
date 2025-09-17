@@ -62,7 +62,7 @@ export function DetailedMeasurements() {
                     onUpdate={onMeasurementAdded}
                     focusField={field.key}
                   >
-                    <button className="text-left">
+                    <button className="text-left w-full">
                       <StatCard
                         label={field.label}
                         value={

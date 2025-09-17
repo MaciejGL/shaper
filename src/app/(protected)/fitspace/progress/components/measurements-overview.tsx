@@ -42,7 +42,7 @@ export function MeasurementsOverview() {
           onUpdate={onMeasurementAdded}
           focusField={'weight'}
         >
-          <button className="text-left">
+          <button className="text-left w-full">
             <StatCard
               label="Weight"
               value={
@@ -62,7 +62,7 @@ export function MeasurementsOverview() {
           onUpdate={onMeasurementAdded}
           focusField={'bodyFat'}
         >
-          <button className="text-left h-full">
+          <button className="text-left h-full w-full">
             <StatCard
               label={bodyFatLabel}
               value={displayBodyFat}

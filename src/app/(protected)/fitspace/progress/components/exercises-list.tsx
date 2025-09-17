@@ -19,9 +19,7 @@ import { ExerciseDrawer } from './exercise-drawer'
 
 export function ExercisesList() {
   const { user } = useUser()
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string | null>(
-    null,
-  )
+
   const [searchTerm, setSearchTerm] = useState('')
   const [favoriteExercises, setFavoriteExercises] = useLocalStorage(
     LocalStorageKey.FAVORITE_EXERCISES,
@@ -134,86 +132,81 @@ export function ExercisesList() {
           const isFavorite = favoriteExercisesSet.has(exerciseId)
 
           return (
-            <Card
-              borderless
-              key={exerciseId}
-              className="hover:shadow-sm transition-all cursor-pointer py-0 relative"
-              onClick={() => setSelectedExerciseId(exerciseId)}
-            >
-              <CardContent className="p-4">
-                <div className="gap-2 flex flex-col">
-                  <div className="flex items-start justify-between gap-1">
-                    <h3 className="font-medium whitespace-pre-wrap">
-                      {exerciseName}
-                    </h3>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toggleFavorite(exerciseId)
-                      }}
-                      iconOnly={
-                        <Star
-                          className={cn(
-                            isFavorite
-                              ? 'fill-yellow-500 text-yellow-500'
-                              : 'text-muted-foreground',
-                          )}
-                        />
-                      }
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    {image1 && (
-                      <div className="size-20 shrink-0 rounded-sm aspect-square overflow-hidden">
-                        <Image
-                          src={image1}
-                          alt={exerciseName}
-                          width={100}
-                          height={100}
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-                    {image2 && (
-                      <div className="size-20 shrink-0 rounded-sm aspect-square overflow-hidden">
-                        <Image
-                          src={image2}
-                          alt={exerciseName}
-                          width={100}
-                          height={100}
-                          className="object-cover"
-                        />
-                      </div>
-                    )}
-                    {latest1RM > 0 && (
-                      <div className="text-right ml-auto self-end">
-                        <div className="text-xs text-muted-foreground">
-                          Latest PR
+            <ExerciseDrawer exerciseId={exerciseId} key={exerciseId}>
+              <Card
+                borderless
+                key={exerciseId}
+                className="hover:shadow-sm transition-all cursor-pointer py-0 relative"
+              >
+                <CardContent className="p-4">
+                  <div className="gap-2 flex flex-col">
+                    <div className="flex items-start justify-between gap-1">
+                      <h3 className="font-medium whitespace-pre-wrap">
+                        {exerciseName}
+                      </h3>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toggleFavorite(exerciseId)
+                        }}
+                        iconOnly={
+                          <Star
+                            className={cn(
+                              isFavorite
+                                ? 'fill-yellow-500 text-yellow-500'
+                                : 'text-muted-foreground',
+                            )}
+                          />
+                        }
+                      />
+                    </div>
+                    <div className="flex gap-2">
+                      {image1 && (
+                        <div className="size-20 shrink-0 rounded-sm aspect-square overflow-hidden">
+                          <Image
+                            src={image1}
+                            alt={exerciseName}
+                            width={100}
+                            height={100}
+                            className="object-cover"
+                          />
                         </div>
-                        <Badge variant="premium" size="lg">
-                          <Trophy className="mr-1" />
-                          <span className="font-semibold">
-                            {toDisplayWeight(latest1RM)?.toFixed(1)}{' '}
-                            {weightUnit}
-                          </span>
-                        </Badge>
-                      </div>
-                    )}
+                      )}
+                      {image2 && (
+                        <div className="size-20 shrink-0 rounded-sm aspect-square overflow-hidden">
+                          <Image
+                            src={image2}
+                            alt={exerciseName}
+                            width={100}
+                            height={100}
+                            className="object-cover"
+                          />
+                        </div>
+                      )}
+                      {latest1RM > 0 && (
+                        <div className="text-right ml-auto self-end">
+                          <div className="text-xs text-muted-foreground">
+                            Latest PR
+                          </div>
+                          <Badge variant="premium" size="lg">
+                            <Trophy className="mr-1" />
+                            <span className="font-semibold">
+                              {toDisplayWeight(latest1RM)?.toFixed(1)}{' '}
+                              {weightUnit}
+                            </span>
+                          </Badge>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </ExerciseDrawer>
           )
         })}
       </div>
-
-      <ExerciseDrawer
-        exerciseId={selectedExerciseId}
-        isOpen={!!selectedExerciseId}
-        onClose={() => setSelectedExerciseId(null)}
-      />
     </div>
   )
 }

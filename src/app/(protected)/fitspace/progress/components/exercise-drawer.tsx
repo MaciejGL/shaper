@@ -2,6 +2,7 @@
 
 import { formatDistanceToNow } from 'date-fns'
 import { Trophy } from 'lucide-react'
+import { useState } from 'react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import {
@@ -15,6 +16,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
+  DrawerTrigger,
 } from '@/components/ui/drawer'
 import { useUser } from '@/context/user-context'
 import {
@@ -29,17 +31,13 @@ import { ExerciseProgressChart } from './exercise-progress-chart'
 
 interface ExerciseDrawerProps {
   exerciseId: string | null
-  isOpen: boolean
-  onClose: () => void
+  children: React.ReactNode
 }
 
-export function ExerciseDrawer({
-  exerciseId,
-  isOpen,
-  onClose,
-}: ExerciseDrawerProps) {
+export function ExerciseDrawer({ exerciseId, children }: ExerciseDrawerProps) {
   const { user } = useUser()
   const { toDisplayWeight, weightUnit } = useWeightConversion()
+  const [isOpen, setIsOpen] = useState(false)
 
   const { data: progressData, isLoading: isLoadingProgress } =
     useExercisesProgressByUserQuery(
@@ -64,7 +62,8 @@ export function ExerciseDrawer({
   const prs = prHistory?.getUserPRHistory || []
 
   return (
-    <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Drawer open={isOpen} onOpenChange={setIsOpen}>
+      <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent dialogTitle="Exercise Details" className="max-h-[90vh]">
         <DrawerHeader>
           <DrawerTitle>{exercise?.baseExercise?.name}</DrawerTitle>

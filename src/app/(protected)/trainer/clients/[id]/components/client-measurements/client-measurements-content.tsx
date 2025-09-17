@@ -47,7 +47,7 @@ export function ClientMeasurementsContent() {
             focusField={'weight'}
             drawerDirection="right"
           >
-            <button className="text-left">
+            <button className="text-left w-full">
               <StatCard
                 label="Weight"
                 value={
@@ -65,7 +65,7 @@ export function ClientMeasurementsContent() {
             focusField={'bodyFat'}
             drawerDirection="right"
           >
-            <button className="text-left">
+            <button className="text-left w-full">
               <StatCard
                 label="Body Fat"
                 value={getLatestMeasurement('bodyFat')}
@@ -126,7 +126,7 @@ export function ClientMeasurementsContent() {
                       focusField={field.key}
                       drawerDirection="right"
                     >
-                      <button className="text-left">
+                      <button className="text-left w-full">
                         <StatCard
                           key={field.key}
                           label={field.label}

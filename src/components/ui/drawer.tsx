@@ -20,6 +20,7 @@ function Drawer({
     setIsOpen(open)
 
     // Handle pull-to-refresh flag
+    console.log('open', open)
     if (open) {
       document.body.setAttribute('data-drawer-open', 'true')
     } else {
