@@ -30,7 +30,6 @@ export function useProfile() {
     useUpdateProfileMutation({
       onSuccess: () => {
         setEditingSections(new Set()) // Clear all editing states
-        toast.success('Profile updated successfully')
         invalidateQueries({ queryKey: useProfileQuery.getKey({}) })
       },
     })

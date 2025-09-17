@@ -1,6 +1,5 @@
 'use client'
 
-import { ArrowUp, ListCheckIcon, MoreVertical, X } from 'lucide-react'
 import { useState } from 'react'
 import {
   Bar,
@@ -12,30 +11,17 @@ import {
   YAxis,
 } from 'recharts'
 
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from '@/components/ui/chart'
-import {
-  Drawer,
-  DrawerTrigger,
-  SimpleDrawerContent,
-} from '@/components/ui/drawer'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
 import { ExerciseChartControls } from './exercise-chart-controls'
-import { ExerciseLogsContent } from './exercise-logs-drawer-content'
 import {
   ChartType,
   ExerciseProgress,
@@ -48,16 +34,10 @@ import { useChartData, useExerciseImprovement } from './use-exercise-progress'
 
 interface ExerciseProgressChartProps {
   exercise?: ExerciseProgress
-  onRemoveExercise?: (exerciseId: string) => void
-  onMoveToTop?: (exerciseId: string) => void
-  canMoveToTop?: boolean
 }
 
 export function ExerciseProgressChart({
   exercise,
-  onRemoveExercise,
-  onMoveToTop,
-  canMoveToTop,
 }: ExerciseProgressChartProps) {
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('1month')
   const [activeChart, setActiveChart] = useState<ChartType>('oneRM')
@@ -69,10 +49,8 @@ export function ExerciseProgressChart({
     return null
   }
 
-  const exerciseName = exercise.baseExercise?.name || 'Unknown Exercise'
   const latestOneRM =
     chartData.length > 0 ? chartData[chartData.length - 1].oneRM : 0
-  const exerciseId = exercise.baseExercise?.id
 
   // Helper functions for Y-axis range calculation
   const getValidChartValues = (chartType: ChartType) => {
@@ -197,45 +175,6 @@ export function ExerciseProgressChart({
     <Card borderless variant="secondary" className="p-0">
       <CardHeader className="p-0 pl-4 pr-1">
         <div className="flex flex-col gap-2 items-start">
-          <div className="flex items-start justify-between w-full">
-            <CardTitle className="text-lg pt-3">{exerciseName}</CardTitle>
-            <div className="flex items-center gap-2 mt-2">
-              <Drawer>
-                <DrawerTrigger asChild>
-                  <Button variant="ghost" iconOnly={<ListCheckIcon />} />
-                </DrawerTrigger>
-                <SimpleDrawerContent title={`${exerciseName} - Logs`}>
-                  <ExerciseLogsContent exercise={exercise} />
-                </SimpleDrawerContent>
-              </Drawer>
-              {onRemoveExercise && onMoveToTop && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" iconOnly={<MoreVertical />} />
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    {canMoveToTop && (
-                      <DropdownMenuItem
-                        onClick={() => exerciseId && onMoveToTop(exerciseId)}
-                        className="gap-2"
-                      >
-                        <ArrowUp className="size-4" />
-                        Move to Top
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuItem
-                      onClick={() => exerciseId && onRemoveExercise(exerciseId)}
-                      className="gap-2"
-                    >
-                      <X className="size-4" />
-                      Remove
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          </div>
-
           <ExerciseProgressStats
             currentOneRM={latestOneRM}
             improvement={improvement}

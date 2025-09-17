@@ -1,31 +1,4 @@
-# Add to user-profile schema
-type Query {
-  bodyMeasures: [UserBodyMeasure!]!
-  goalProgress: GoalProgressSummary!
-}
-
-type Mutation {
-  addBodyMeasurement(input: AddBodyMeasurementInput!): UserBodyMeasurement!
-}
-
-input AddBodyMeasurementInput {
-  weight: Float
-  bodyFat: Float
-  chest: Float
-  waist: Float
-  hips: Float
-  neck: Float
-  bicepsLeft: Float
-  bicepsRight: Float
-  thighLeft: Float
-  thighRight: Float
-  calfLeft: Float
-  calfRight: Float
-  notes: String
-}
-
-# Query for getting exercises the user has progress data for
-query AvailableExercisesForProgress($userId: ID!) {
+query ProgressPageExercises($userId: ID!) {
   exercisesProgressByUser(userId: $userId) {
     baseExercise {
       id
@@ -35,23 +8,8 @@ query AvailableExercisesForProgress($userId: ID!) {
         name
       }
       equipment
-    }
-  }
-}
-
-# Query for getting progress data for selected exercises only
-query SelectedExercisesProgress($userId: ID!, $exerciseIds: [ID!]!) {
-  exercisesProgressByUser(userId: $userId) {
-    baseExercise {
-      id
-      name
-      muscleGroups {
-        alias
-        name
-        groupSlug
-        category {
-          name
-        }
+      images {
+        thumbnail
       }
     }
     estimated1RMProgress {
@@ -71,5 +29,51 @@ query SelectedExercisesProgress($userId: ID!, $exerciseIds: [ID!]!) {
     averageRpe
     totalSets
     lastPerformed
+  }
+}
+
+query ProgressPageExercises($userId: ID!) {
+  exercisesProgressByUser(userId: $userId) {
+    baseExercise {
+      id
+      name
+      muscleGroups {
+        alias
+        name
+      }
+      images {
+        thumbnail
+      }
+      equipment
+    }
+    estimated1RMProgress {
+      date
+      average1RM
+      detailedLogs {
+        estimated1RM
+        weight
+        reps
+      }
+    }
+    totalVolumeProgress {
+      week
+      totalVolume
+      totalSets
+    }
+    averageRpe
+    totalSets
+    lastPerformed
+  }
+}
+
+query GetUserPrHistory($userId: ID!, $exerciseId: ID) {
+  getUserPRHistory(userId: $userId, exerciseId: $exerciseId) {
+    id
+    estimated1RM
+    weight
+    reps
+    achievedAt
+    exerciseName
+    dayId
   }
 }

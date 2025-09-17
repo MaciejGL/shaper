@@ -208,14 +208,39 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       baseExercises.map((ex) => [ex.id, new BaseExercise(ex, context)]),
     )
 
-    // 4️⃣ Process each group into ExerciseProgress
+    // 4️⃣ Fetch latest PR for each exercise
+    const latestPRs = await prisma.$queryRaw<
+      { baseExerciseId: string; maxEstimated1RM: number }[]
+    >`
+      SELECT 
+        "baseExerciseId",
+        MAX("estimated1RM") as "maxEstimated1RM"
+      FROM "PersonalRecord" 
+      WHERE "userId" = ${targetUserId}
+        AND "baseExerciseId" = ANY(${baseExerciseIds})
+      GROUP BY "baseExerciseId"
+    `
+
+    const latestPRMap = new Map(
+      latestPRs.map((pr) => [pr.baseExerciseId, pr.maxEstimated1RM]),
+    )
+
+    // 5️⃣ Process each group into ExerciseProgress
     const results = baseExerciseIds.map((baseExerciseId) => {
       const logs = logsByExercise[baseExerciseId]
 
       const entries = logs.map((log) => {
         const reps = log.reps ?? 0
         const weight = log.weight ?? 0
-        const estimated1RM = weight * (1 + reps / 30)
+
+        // Calculate 1RM for each individual set using same formula as PR detection
+        const estimated1RM =
+          reps <= 10
+            ? weight / (1.0278 - 0.0278 * reps) // Brzycki (most accurate 1-10 reps)
+            : reps <= 15
+              ? weight * (1 + 0.025 * reps) // O'Conner (better for 11-15 reps)
+              : weight * 1.5 // Conservative estimate for 16+ reps
+
         return {
           date: log.createdAt,
           estimated1RM,
@@ -248,6 +273,19 @@ export const Query: GQLQueryResolvers<GQLContext> = {
           })),
         }),
       )
+
+      // Use the latest PR as the current best instead of calculated average
+      const latestPR = latestPRMap.get(baseExerciseId)
+      if (latestPR && estimated1RMProgress.length > 0) {
+        // Put the PR as the most recent entry (first in array)
+        estimated1RMProgress.sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+        )
+        estimated1RMProgress[0] = {
+          ...estimated1RMProgress[0],
+          average1RM: latestPR, // Use actual PR instead of calculated average
+        }
+      }
       // Weekly aggregation (total volume & total sets)
       const totalVolumeByWeek = new Map<
         string,

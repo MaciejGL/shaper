@@ -18,11 +18,11 @@ export function ExerciseLogsHistory({ items }: LogItemsProps) {
   }
 
   return (
-    <div className="px-2">
+    <div>
       <div className="space-y-6">
         {items.map(({ monthYear, logs }) => (
           <div key={monthYear}>
-            <h3 className="font-semibold text-lg mb-3">{monthYear}</h3>
+            <h3 className="text-sm mb-2">{monthYear}</h3>
             {logs.map((log) => (
               <ExerciseLogItem
                 key={log.date}
@@ -74,9 +74,11 @@ export function ExerciseLogItem({
             {sets.map((set, index) => (
               <div
                 key={index}
-                className="grid grid-cols-[auto_1fr_1fr_1fr] gap-2 py-1 px-1 bg-card-on-card dark:bg-card rounded text-sm font-medium"
+                className="grid grid-cols-[16px_1fr_1fr_1fr] gap-2 py-1 px-1 bg-card-on-card dark:bg-card rounded text-sm font-medium"
               >
-                <span className="text-muted-foreground">{index + 1}</span>
+                <span className="text-muted-foreground text-center">
+                  {index + 1}
+                </span>
                 <span className="text-center">{set.reps}</span>
                 <span className="text-center">
                   {formatNumber(toDisplayWeight(set.weight) || 0, 1)}

@@ -3134,20 +3134,20 @@ export type GQLMuscleGroupFrequencyQueryVariables = Exact<{
 
 export type GQLMuscleGroupFrequencyQuery = { __typename?: 'Query', muscleGroupFrequency: Array<{ __typename?: 'MuscleGroupFrequency', groupSlug: string, groupName: string, sessionsCount: number, totalSets: number, lastTrained?: string | undefined | null }> };
 
-export type GQLAvailableExercisesForProgressQueryVariables = Exact<{
+export type GQLProgressPageExercisesQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
 }>;
 
 
-export type GQLAvailableExercisesForProgressQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', baseExercise?: { __typename?: 'BaseExercise', id: string, name: string, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', alias?: string | undefined | null, name: string }> } | undefined | null }> };
+export type GQLProgressPageExercisesQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', averageRpe?: number | undefined | null, totalSets?: number | undefined | null, lastPerformed?: string | undefined | null, baseExercise?: { __typename?: 'BaseExercise', id: string, name: string, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', alias?: string | undefined | null, name: string }>, images: Array<{ __typename?: 'Image', thumbnail?: string | undefined | null }> } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }>, totalVolumeProgress: Array<{ __typename?: 'VolumeEntry', week: string, totalVolume: number, totalSets: number }> }> };
 
-export type GQLSelectedExercisesProgressQueryVariables = Exact<{
+export type GQLGetUserPrHistoryQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
-  exerciseIds: Array<Scalars['ID']['input']> | Scalars['ID']['input'];
+  exerciseId?: InputMaybe<Scalars['ID']['input']>;
 }>;
 
 
-export type GQLSelectedExercisesProgressQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', averageRpe?: number | undefined | null, totalSets?: number | undefined | null, lastPerformed?: string | undefined | null, baseExercise?: { __typename?: 'BaseExercise', id: string, name: string, muscleGroups: Array<{ __typename?: 'MuscleGroup', alias?: string | undefined | null, name: string, groupSlug: string, category: { __typename?: 'MuscleGroupCategory', name: string } }> } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }>, totalVolumeProgress: Array<{ __typename?: 'VolumeEntry', week: string, totalVolume: number, totalSets: number }> }> };
+export type GQLGetUserPrHistoryQuery = { __typename?: 'Query', getUserPRHistory: Array<{ __typename?: 'PersonalRecordHistory', id: string, estimated1RM: number, weight: number, reps: number, achievedAt: string, exerciseName: string, dayId: string }> };
 
 export type GQLGetUserBodyProgressLogsQueryVariables = Exact<{
   userProfileId: Scalars['String']['input'];
@@ -5877,8 +5877,8 @@ useInfiniteMuscleGroupFrequencyQuery.getKey = (variables: GQLMuscleGroupFrequenc
 
 useMuscleGroupFrequencyQuery.fetcher = (variables: GQLMuscleGroupFrequencyQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMuscleGroupFrequencyQuery, GQLMuscleGroupFrequencyQueryVariables>(MuscleGroupFrequencyDocument, variables, options);
 
-export const AvailableExercisesForProgressDocument = `
-    query AvailableExercisesForProgress($userId: ID!) {
+export const ProgressPageExercisesDocument = `
+    query ProgressPageExercises($userId: ID!) {
   exercisesProgressByUser(userId: $userId) {
     baseExercise {
       id
@@ -5888,66 +5888,8 @@ export const AvailableExercisesForProgressDocument = `
         name
       }
       equipment
-    }
-  }
-}
-    `;
-
-export const useAvailableExercisesForProgressQuery = <
-      TData = GQLAvailableExercisesForProgressQuery,
-      TError = unknown
-    >(
-      variables: GQLAvailableExercisesForProgressQueryVariables,
-      options?: Omit<UseQueryOptions<GQLAvailableExercisesForProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLAvailableExercisesForProgressQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useQuery<GQLAvailableExercisesForProgressQuery, TError, TData>(
-      {
-    queryKey: ['AvailableExercisesForProgress', variables],
-    queryFn: fetchData<GQLAvailableExercisesForProgressQuery, GQLAvailableExercisesForProgressQueryVariables>(AvailableExercisesForProgressDocument, variables),
-    ...options
-  }
-    )};
-
-useAvailableExercisesForProgressQuery.getKey = (variables: GQLAvailableExercisesForProgressQueryVariables) => ['AvailableExercisesForProgress', variables];
-
-export const useInfiniteAvailableExercisesForProgressQuery = <
-      TData = InfiniteData<GQLAvailableExercisesForProgressQuery>,
-      TError = unknown
-    >(
-      variables: GQLAvailableExercisesForProgressQueryVariables,
-      options: Omit<UseInfiniteQueryOptions<GQLAvailableExercisesForProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLAvailableExercisesForProgressQuery, TError, TData>['queryKey'] }
-    ) => {
-    
-    return useInfiniteQuery<GQLAvailableExercisesForProgressQuery, TError, TData>(
-      (() => {
-    const { queryKey: optionsQueryKey, ...restOptions } = options;
-    return {
-      queryKey: optionsQueryKey ?? ['AvailableExercisesForProgress.infinite', variables],
-      queryFn: (metaData) => fetchData<GQLAvailableExercisesForProgressQuery, GQLAvailableExercisesForProgressQueryVariables>(AvailableExercisesForProgressDocument, {...variables, ...(metaData.pageParam ?? {})})(),
-      ...restOptions
-    }
-  })()
-    )};
-
-useInfiniteAvailableExercisesForProgressQuery.getKey = (variables: GQLAvailableExercisesForProgressQueryVariables) => ['AvailableExercisesForProgress.infinite', variables];
-
-
-useAvailableExercisesForProgressQuery.fetcher = (variables: GQLAvailableExercisesForProgressQueryVariables, options?: RequestInit['headers']) => fetchData<GQLAvailableExercisesForProgressQuery, GQLAvailableExercisesForProgressQueryVariables>(AvailableExercisesForProgressDocument, variables, options);
-
-export const SelectedExercisesProgressDocument = `
-    query SelectedExercisesProgress($userId: ID!, $exerciseIds: [ID!]!) {
-  exercisesProgressByUser(userId: $userId) {
-    baseExercise {
-      id
-      name
-      muscleGroups {
-        alias
-        name
-        groupSlug
-        category {
-          name
-        }
+      images {
+        thumbnail
       }
     }
     estimated1RMProgress {
@@ -5971,47 +5913,103 @@ export const SelectedExercisesProgressDocument = `
 }
     `;
 
-export const useSelectedExercisesProgressQuery = <
-      TData = GQLSelectedExercisesProgressQuery,
+export const useProgressPageExercisesQuery = <
+      TData = GQLProgressPageExercisesQuery,
       TError = unknown
     >(
-      variables: GQLSelectedExercisesProgressQueryVariables,
-      options?: Omit<UseQueryOptions<GQLSelectedExercisesProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLSelectedExercisesProgressQuery, TError, TData>['queryKey'] }
+      variables: GQLProgressPageExercisesQueryVariables,
+      options?: Omit<UseQueryOptions<GQLProgressPageExercisesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLProgressPageExercisesQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useQuery<GQLSelectedExercisesProgressQuery, TError, TData>(
+    return useQuery<GQLProgressPageExercisesQuery, TError, TData>(
       {
-    queryKey: ['SelectedExercisesProgress', variables],
-    queryFn: fetchData<GQLSelectedExercisesProgressQuery, GQLSelectedExercisesProgressQueryVariables>(SelectedExercisesProgressDocument, variables),
+    queryKey: ['ProgressPageExercises', variables],
+    queryFn: fetchData<GQLProgressPageExercisesQuery, GQLProgressPageExercisesQueryVariables>(ProgressPageExercisesDocument, variables),
     ...options
   }
     )};
 
-useSelectedExercisesProgressQuery.getKey = (variables: GQLSelectedExercisesProgressQueryVariables) => ['SelectedExercisesProgress', variables];
+useProgressPageExercisesQuery.getKey = (variables: GQLProgressPageExercisesQueryVariables) => ['ProgressPageExercises', variables];
 
-export const useInfiniteSelectedExercisesProgressQuery = <
-      TData = InfiniteData<GQLSelectedExercisesProgressQuery>,
+export const useInfiniteProgressPageExercisesQuery = <
+      TData = InfiniteData<GQLProgressPageExercisesQuery>,
       TError = unknown
     >(
-      variables: GQLSelectedExercisesProgressQueryVariables,
-      options: Omit<UseInfiniteQueryOptions<GQLSelectedExercisesProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLSelectedExercisesProgressQuery, TError, TData>['queryKey'] }
+      variables: GQLProgressPageExercisesQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLProgressPageExercisesQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLProgressPageExercisesQuery, TError, TData>['queryKey'] }
     ) => {
     
-    return useInfiniteQuery<GQLSelectedExercisesProgressQuery, TError, TData>(
+    return useInfiniteQuery<GQLProgressPageExercisesQuery, TError, TData>(
       (() => {
     const { queryKey: optionsQueryKey, ...restOptions } = options;
     return {
-      queryKey: optionsQueryKey ?? ['SelectedExercisesProgress.infinite', variables],
-      queryFn: (metaData) => fetchData<GQLSelectedExercisesProgressQuery, GQLSelectedExercisesProgressQueryVariables>(SelectedExercisesProgressDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      queryKey: optionsQueryKey ?? ['ProgressPageExercises.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLProgressPageExercisesQuery, GQLProgressPageExercisesQueryVariables>(ProgressPageExercisesDocument, {...variables, ...(metaData.pageParam ?? {})})(),
       ...restOptions
     }
   })()
     )};
 
-useInfiniteSelectedExercisesProgressQuery.getKey = (variables: GQLSelectedExercisesProgressQueryVariables) => ['SelectedExercisesProgress.infinite', variables];
+useInfiniteProgressPageExercisesQuery.getKey = (variables: GQLProgressPageExercisesQueryVariables) => ['ProgressPageExercises.infinite', variables];
 
 
-useSelectedExercisesProgressQuery.fetcher = (variables: GQLSelectedExercisesProgressQueryVariables, options?: RequestInit['headers']) => fetchData<GQLSelectedExercisesProgressQuery, GQLSelectedExercisesProgressQueryVariables>(SelectedExercisesProgressDocument, variables, options);
+useProgressPageExercisesQuery.fetcher = (variables: GQLProgressPageExercisesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLProgressPageExercisesQuery, GQLProgressPageExercisesQueryVariables>(ProgressPageExercisesDocument, variables, options);
+
+export const GetUserPrHistoryDocument = `
+    query GetUserPRHistory($userId: ID!, $exerciseId: ID) {
+  getUserPRHistory(userId: $userId, exerciseId: $exerciseId) {
+    id
+    estimated1RM
+    weight
+    reps
+    achievedAt
+    exerciseName
+    dayId
+  }
+}
+    `;
+
+export const useGetUserPrHistoryQuery = <
+      TData = GQLGetUserPrHistoryQuery,
+      TError = unknown
+    >(
+      variables: GQLGetUserPrHistoryQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetUserPrHistoryQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetUserPrHistoryQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetUserPrHistoryQuery, TError, TData>(
+      {
+    queryKey: ['GetUserPRHistory', variables],
+    queryFn: fetchData<GQLGetUserPrHistoryQuery, GQLGetUserPrHistoryQueryVariables>(GetUserPrHistoryDocument, variables),
+    ...options
+  }
+    )};
+
+useGetUserPrHistoryQuery.getKey = (variables: GQLGetUserPrHistoryQueryVariables) => ['GetUserPRHistory', variables];
+
+export const useInfiniteGetUserPrHistoryQuery = <
+      TData = InfiniteData<GQLGetUserPrHistoryQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetUserPrHistoryQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetUserPrHistoryQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetUserPrHistoryQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetUserPrHistoryQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetUserPRHistory.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetUserPrHistoryQuery, GQLGetUserPrHistoryQueryVariables>(GetUserPrHistoryDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetUserPrHistoryQuery.getKey = (variables: GQLGetUserPrHistoryQueryVariables) => ['GetUserPRHistory.infinite', variables];
+
+
+useGetUserPrHistoryQuery.fetcher = (variables: GQLGetUserPrHistoryQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetUserPrHistoryQuery, GQLGetUserPrHistoryQueryVariables>(GetUserPrHistoryDocument, variables, options);
 
 export const GetUserBodyProgressLogsDocument = `
     query GetUserBodyProgressLogs($userProfileId: String!) {

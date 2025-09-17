@@ -179,7 +179,7 @@ export function WebViewLoading({ progress = 0 }: WebViewLoadingProps) {
       {/* Loading text with dots */}
       <View style={styles.loadingContainer}>
         <Animated.Text style={[styles.loadingText, { opacity: pulseAnim }]}>
-          Loading workout...
+          Loading workout
         </Animated.Text>
       </View>
 

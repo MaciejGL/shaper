@@ -11,9 +11,8 @@ import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { BodyMeasurements } from './components/body-measurements'
 import { BodyProgress } from './components/body-progress'
+import { ExercisesList } from './components/exercises-list'
 import { MuscleDistribution } from './components/muscle-distribution'
-
-// import { SelectedExercisesProgress } from './components/selected-exercises-progress'
 
 export default function ProgressPage() {
   const { hasPremium } = useUser()
@@ -44,7 +43,7 @@ export default function ProgressPage() {
       >
         <PrimaryTabList
           size="sm"
-          className="w-full grid grid-cols-3"
+          className="w-full grid grid-cols-4 md:grid-cols-4"
           options={[
             { label: 'Measures', value: 'body-measures' },
             {
@@ -59,12 +58,10 @@ export default function ProgressPage() {
               disabled: !hasPremium,
               disabledIcon: <PremiumBadge />,
             },
-            // {
-            //   label: 'Exercises',
-            //   value: 'exercises',
-            //   disabled: !hasPremium,
-            //   disabledIcon: <PremiumBadge />,
-            // },
+            {
+              label: 'Exercises',
+              value: 'exercises',
+            },
           ]}
           onClick={setActiveTab}
           active={activeTab}
@@ -82,9 +79,9 @@ export default function ProgressPage() {
           <MuscleDistribution />
         </TabsContent>
 
-        {/* <TabsContent value="exercises">
-          <SelectedExercisesProgress userId={user?.id || ''} />
-        </TabsContent> */}
+        <TabsContent value="exercises">
+          <ExercisesList />
+        </TabsContent>
       </Tabs>
     </div>
   )

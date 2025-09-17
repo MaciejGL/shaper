@@ -88,7 +88,6 @@ export function AddMeasurementModal({
   const { mutate: addMutation, isPending: isAdding } =
     useAddBodyMeasurementMutation({
       onSuccess: () => {
-        toast.success('Your body measurements have been logged successfully.')
         setOpen(false)
         onSuccess?.()
       },
@@ -97,7 +96,6 @@ export function AddMeasurementModal({
   const { mutate: updateMutation, isPending: isUpdating } =
     useUpdateBodyMeasurementMutation({
       onSuccess: () => {
-        toast.success('Measurement updated successfully.')
         setOpen(false)
         onSuccess?.()
       },
@@ -106,7 +104,6 @@ export function AddMeasurementModal({
   const { mutate: deleteMutation, isPending: isDeleting } =
     useDeleteBodyMeasurementMutation({
       onSuccess: () => {
-        toast.success('Measurement deleted successfully.')
         setOpen(false)
         onSuccess?.()
       },

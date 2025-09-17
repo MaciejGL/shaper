@@ -247,13 +247,6 @@ export function useBodyProgressLogs() {
       }
       toast.error('Failed to update sharing status. Please try again.')
     },
-    onSuccess: (_, variables) => {
-      toast.success(
-        variables.shareWithTrainer
-          ? 'Progress log shared with trainer!'
-          : 'Progress log unshared from trainer!',
-      )
-    },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey })
     },

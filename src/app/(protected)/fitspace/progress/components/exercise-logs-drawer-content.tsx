@@ -3,11 +3,11 @@ import { ExerciseProgress } from './exercise-progress-constants'
 
 // Component to handle exercise logs display
 export function ExerciseLogsContent({
-  exercise,
+  estimated1RMProgress,
 }: {
-  exercise: ExerciseProgress
+  estimated1RMProgress: ExerciseProgress['estimated1RMProgress']
 }) {
-  const exerciseLogs = exercise.estimated1RMProgress || []
+  const exerciseLogs = estimated1RMProgress || []
 
   // Transform the data into the format expected by LogItems
   const groupedLogs = exerciseLogs.reduce(
