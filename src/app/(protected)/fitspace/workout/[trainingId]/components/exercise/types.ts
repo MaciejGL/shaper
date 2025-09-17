@@ -31,6 +31,9 @@ export interface ExerciseSetsProps {
   previousLogs?: PreviousDayLogs[number]['sets'][number][] | null
   onSetCompleted: (setId: string, skipTimer?: boolean) => void
   onSetUncompleted: () => void
+  onSetsLogsChange?: (
+    setsLogs: Record<string, { weight: string; reps: string }>,
+  ) => void
 }
 
 export interface ExerciseSetProps {

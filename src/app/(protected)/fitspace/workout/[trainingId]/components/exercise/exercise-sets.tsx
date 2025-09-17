@@ -35,6 +35,7 @@ export function ExerciseSets({
   previousLogs,
   onSetCompleted,
   onSetUncompleted,
+  onSetsLogsChange,
 }: ExerciseSetsProps) {
   const isFirstRender = useIsFirstRender()
   const { trainingId } = useParams<{ trainingId: string }>()
@@ -98,6 +99,11 @@ export function ExerciseSets({
       return updated
     })
   }, [exercise.substitutedBy?.sets, exercise.sets])
+
+  // Notify parent when setsLogs changes
+  useEffect(() => {
+    onSetsLogsChange?.(setsLogs)
+  }, [setsLogs, onSetsLogsChange])
 
   // ✅ Add Set: Get real ID from server, mark exercise as incomplete
   const { mutateAsync: addSet, isPending: isAddingSet } =

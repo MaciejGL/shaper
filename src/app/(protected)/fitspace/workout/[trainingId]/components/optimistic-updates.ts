@@ -66,11 +66,16 @@ export const createOptimisticSetUpdate = (
 
 /**
  * Creates an optimistic update function for marking an exercise as completed/uncompleted
- * Also updates all sets to match the exercise completion state
+ * Also updates all sets to match the exercise completion state and saves their logs
  */
 export const createOptimisticExerciseUpdate = (
   exerciseId: string,
   completed: boolean,
+  setsLogs?: Record<string, { weight: string; reps: string }>,
+  previousLogs?: Record<
+    string,
+    { weight?: number | null; reps?: number | null }
+  >,
 ) => {
   return (oldData: GQLFitspaceGetWorkoutDayQuery) => {
     if (!oldData?.getWorkoutDay?.day) return oldData
@@ -94,7 +99,32 @@ export const createOptimisticExerciseUpdate = (
 
         // ✅ Update all sets to match exercise completion state
         setsToUpdate.forEach((set) => {
+          const wasCompleted = Boolean(set.completedAt)
           set.completedAt = completed ? new Date().toISOString() : null
+
+          // ✅ If completing exercise and set wasn't completed, save current values
+          if (completed && !wasCompleted) {
+            const orderKey = `order-${set.order}`
+            const currentInputs = setsLogs?.[orderKey]
+            const previousSet = previousLogs?.[orderKey]
+
+            // Get values from current inputs, fallback to previous logs, fallback to null
+            const repsValue = currentInputs?.reps
+              ? +currentInputs.reps
+              : previousSet?.reps || null
+            const weightValue = currentInputs?.weight
+              ? +currentInputs.weight
+              : previousSet?.weight || null
+
+            // Create/update the log
+            set.log = {
+              id: set.log?.id || 'temp-id',
+              reps: repsValue,
+              weight: weightValue,
+              rpe: set.log?.rpe || null,
+              createdAt: new Date().toISOString(),
+            }
+          }
         })
       }
     })

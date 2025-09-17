@@ -11,6 +11,7 @@ import {
   useFitspaceGetWorkoutDayQuery,
   useFitspaceGetWorkoutNavigationQuery,
   useFitspaceMarkExerciseAsCompletedMutation,
+  useFitspaceMarkSetAsCompletedMutation,
   useFitspaceRemoveExerciseFromWorkoutMutation,
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
@@ -29,6 +30,14 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
   // Timer state management - only one timer can be active at a time
   const [activeTimerSetId, setActiveTimerSetId] = useState<string | null>(null)
 
+  // Track current input values for sets
+  const [setsLogs, setSetsLogs] = useState<
+    Record<string, { weight: string; reps: string }>
+  >({})
+
+  const { mutateAsync: markSetAsCompleted } =
+    useFitspaceMarkSetAsCompletedMutation()
+
   const { optimisticMutate: markExerciseAsCompletedOptimistic } =
     useOptimisticMutation<
       GQLFitspaceGetWorkoutDayQuery,
@@ -38,7 +47,49 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
       queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
       mutationFn: useFitspaceMarkExerciseAsCompletedMutation().mutateAsync,
       updateFn: (oldData, { exerciseId, completed }) => {
-        const updateFn = createOptimisticExerciseUpdate(exerciseId, completed)
+        // Build previous logs map for fallback values
+        const exercisePreviousLogs = previousDayLogs?.find(
+          (log) => log.exerciseName === exercise.name,
+        )
+        const previousLogsMap: Record<
+          string,
+          { weight?: number | null; reps?: number | null }
+        > = {}
+
+        if (exercisePreviousLogs?.sets) {
+          exercisePreviousLogs.sets.forEach((setLog) => {
+            previousLogsMap[`order-${setLog.order}`] = {
+              weight: setLog.log?.weight,
+              reps: setLog.log?.reps,
+            }
+          })
+        }
+
+        // Map current sets to use order as key to match with previous logs
+        const setsToOrderMap: Record<string, string> = {}
+        const currentSets = exercise.substitutedBy?.sets || exercise.sets
+        currentSets.forEach((set) => {
+          setsToOrderMap[set.id] = `order-${set.order}`
+        })
+
+        // Convert setsLogs to use order-based keys for matching
+        const orderBasedSetsLogs: Record<
+          string,
+          { weight: string; reps: string }
+        > = {}
+        Object.entries(setsLogs).forEach(([setId, values]) => {
+          const orderKey = setsToOrderMap[setId]
+          if (orderKey) {
+            orderBasedSetsLogs[orderKey] = values
+          }
+        })
+
+        const updateFn = createOptimisticExerciseUpdate(
+          exerciseId,
+          completed,
+          orderBasedSetsLogs,
+          previousLogsMap,
+        )
         return updateFn(oldData)
       },
       onSuccess: () => {
@@ -71,10 +122,49 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
 
   const handleMarkAsCompleted = async (checked: boolean) => {
     try {
+      // ✅ First: Immediate optimistic update for instant UI feedback
       await markExerciseAsCompletedOptimistic({
         exerciseId: exercise.substitutedBy?.id || exercise.id,
         completed: checked,
       })
+
+      // ✅ Then: Save incomplete sets to database in background (if completing)
+      if (checked) {
+        const currentSets = exercise.substitutedBy?.sets || exercise.sets
+        const incompleteSets = currentSets.filter((set) => !set.completedAt)
+
+        // Complete all incomplete sets in parallel (background - don't await)
+        const setCompletionPromises = incompleteSets.map((set) => {
+          const currentInputs = setsLogs[set.id]
+          const exercisePreviousLogs = previousDayLogs?.find(
+            (log) => log.exerciseName === exercise.name,
+          )
+          const previousSetLog = exercisePreviousLogs?.sets?.find(
+            (logSet) => logSet.order === set.order,
+          )
+
+          // Get values from current inputs, fallback to previous logs
+          const repsValue = currentInputs?.reps
+            ? +currentInputs.reps
+            : previousSetLog?.log?.reps || null
+          const weightValue = currentInputs?.weight
+            ? +currentInputs.weight
+            : previousSetLog?.log?.weight || null
+
+          // Return the set completion promise
+          return markSetAsCompleted({
+            setId: set.id,
+            completed: true,
+            reps: repsValue,
+            weight: weightValue,
+          })
+        })
+
+        // Fire and forget - don't wait for database calls
+        Promise.all(setCompletionPromises).catch((error) => {
+          console.error('Failed to save set completions:', error)
+        })
+      }
     } catch (error) {
       console.error('Failed to toggle exercise completion:', error)
       // Error handling is done in useOptimisticMutation
@@ -110,6 +200,12 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
     (log) => log.exerciseName === exercise.name,
   )
 
+  const handleSetsLogsChange = (
+    newSetsLogs: Record<string, { weight: string; reps: string }>,
+  ) => {
+    setSetsLogs(newSetsLogs)
+  }
+
   return (
     <Card borderless className="p-0 gap-2">
       <div className="px-2 pt-2" id={exercise.id}>
@@ -128,6 +224,7 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
         previousLogs={exercisePreviousLogs?.sets}
         onSetCompleted={handleSetCompleted}
         onSetUncompleted={handleSetUncompleted}
+        onSetsLogsChange={handleSetsLogsChange}
       />
     </Card>
   )
