@@ -13,12 +13,14 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
+import { useKeyboardVisible } from '@/hooks/use-keyboard-visible'
 import { tryOpenAppDeepLink } from '@/lib/deep-links'
 import { cn } from '@/lib/utils'
 
 export function MobileNav() {
   const pathname = usePathname()
   const { isNativeApp } = useMobileApp()
+  const isKeyboardVisible = useKeyboardVisible()
   const [clickedItem, setClickedItem] = useState<string | null>(null)
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
     null,
@@ -76,6 +78,11 @@ export function MobileNav() {
     ],
     [],
   )
+
+  // Hide navigation when keyboard is visible
+  if (isKeyboardVisible) {
+    return null
+  }
 
   return (
     <>

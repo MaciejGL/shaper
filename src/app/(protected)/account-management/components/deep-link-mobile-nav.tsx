@@ -12,12 +12,14 @@ import { usePathname } from 'next/navigation'
 import { useMemo } from 'react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
+import { useKeyboardVisible } from '@/hooks/use-keyboard-visible'
 import { navigateToPath as navigateToDeepLink } from '@/lib/deep-links'
 import { cn } from '@/lib/utils'
 
 export function DeepLinkMobileNav() {
   const pathname = usePathname()
   const { isNativeApp, navigateToPath } = useMobileApp()
+  const isKeyboardVisible = useKeyboardVisible()
 
   const navItems = useMemo(
     () => [
@@ -75,6 +77,11 @@ export function DeepLinkMobileNav() {
       // ✅ Use bulletproof deep link utility
       navigateToDeepLink(href)
     }
+  }
+
+  // Hide navigation when keyboard is visible
+  if (isKeyboardVisible) {
+    return null
   }
 
   return (
