@@ -7,40 +7,6 @@ query ProgressPageExercises($userId: ID!) {
         alias
         name
       }
-      equipment
-      images {
-        thumbnail
-      }
-    }
-    estimated1RMProgress {
-      date
-      average1RM
-      detailedLogs {
-        estimated1RM
-        weight
-        reps
-      }
-    }
-    totalVolumeProgress {
-      week
-      totalVolume
-      totalSets
-    }
-    averageRpe
-    totalSets
-    lastPerformed
-  }
-}
-
-query ProgressPageExercises($userId: ID!) {
-  exercisesProgressByUser(userId: $userId) {
-    baseExercise {
-      id
-      name
-      muscleGroups {
-        alias
-        name
-      }
       images {
         thumbnail
       }

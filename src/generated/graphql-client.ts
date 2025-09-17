@@ -5887,10 +5887,10 @@ export const ProgressPageExercisesDocument = `
         alias
         name
       }
-      equipment
       images {
         thumbnail
       }
+      equipment
     }
     estimated1RMProgress {
       date
@@ -5956,7 +5956,7 @@ useInfiniteProgressPageExercisesQuery.getKey = (variables: GQLProgressPageExerci
 useProgressPageExercisesQuery.fetcher = (variables: GQLProgressPageExercisesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLProgressPageExercisesQuery, GQLProgressPageExercisesQueryVariables>(ProgressPageExercisesDocument, variables, options);
 
 export const GetUserPrHistoryDocument = `
-    query GetUserPRHistory($userId: ID!, $exerciseId: ID) {
+    query GetUserPrHistory($userId: ID!, $exerciseId: ID) {
   getUserPRHistory(userId: $userId, exerciseId: $exerciseId) {
     id
     estimated1RM
@@ -5979,13 +5979,13 @@ export const useGetUserPrHistoryQuery = <
     
     return useQuery<GQLGetUserPrHistoryQuery, TError, TData>(
       {
-    queryKey: ['GetUserPRHistory', variables],
+    queryKey: ['GetUserPrHistory', variables],
     queryFn: fetchData<GQLGetUserPrHistoryQuery, GQLGetUserPrHistoryQueryVariables>(GetUserPrHistoryDocument, variables),
     ...options
   }
     )};
 
-useGetUserPrHistoryQuery.getKey = (variables: GQLGetUserPrHistoryQueryVariables) => ['GetUserPRHistory', variables];
+useGetUserPrHistoryQuery.getKey = (variables: GQLGetUserPrHistoryQueryVariables) => ['GetUserPrHistory', variables];
 
 export const useInfiniteGetUserPrHistoryQuery = <
       TData = InfiniteData<GQLGetUserPrHistoryQuery>,
@@ -5999,14 +5999,14 @@ export const useInfiniteGetUserPrHistoryQuery = <
       (() => {
     const { queryKey: optionsQueryKey, ...restOptions } = options;
     return {
-      queryKey: optionsQueryKey ?? ['GetUserPRHistory.infinite', variables],
+      queryKey: optionsQueryKey ?? ['GetUserPrHistory.infinite', variables],
       queryFn: (metaData) => fetchData<GQLGetUserPrHistoryQuery, GQLGetUserPrHistoryQueryVariables>(GetUserPrHistoryDocument, {...variables, ...(metaData.pageParam ?? {})})(),
       ...restOptions
     }
   })()
     )};
 
-useInfiniteGetUserPrHistoryQuery.getKey = (variables: GQLGetUserPrHistoryQueryVariables) => ['GetUserPRHistory.infinite', variables];
+useInfiniteGetUserPrHistoryQuery.getKey = (variables: GQLGetUserPrHistoryQueryVariables) => ['GetUserPrHistory.infinite', variables];
 
 
 useGetUserPrHistoryQuery.fetcher = (variables: GQLGetUserPrHistoryQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetUserPrHistoryQuery, GQLGetUserPrHistoryQueryVariables>(GetUserPrHistoryDocument, variables, options);

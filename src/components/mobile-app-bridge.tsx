@@ -37,6 +37,7 @@ interface NativeAppAPI {
   disableNotificationPermissions: () => void
   updateTheme: (theme: 'light' | 'dark') => void
   setAuthToken: (token: string) => void
+  setAllowRefresh: (allow: boolean) => void
 }
 
 declare global {
@@ -158,6 +159,15 @@ export function useMobileApp() {
   }
 
   /**
+   * Control pull-to-refresh behavior
+   */
+  const setAllowRefresh = (allow: boolean) => {
+    if (isNativeApp && window.nativeApp?.setAllowRefresh) {
+      window.nativeApp.setAllowRefresh(allow)
+    }
+  }
+
+  /**
    * Get available capabilities in the mobile app
    */
   const getCapabilities = () => {
@@ -169,6 +179,7 @@ export function useMobileApp() {
       canNavigate: !!nativeAPI?.onNavigate,
       canUpdateTheme: !!nativeAPI?.updateTheme,
       canSetAuthToken: !!nativeAPI?.setAuthToken,
+      canSetAllowRefresh: !!nativeAPI?.setAllowRefresh,
     }
   }
 
@@ -185,6 +196,7 @@ export function useMobileApp() {
     navigateToPath,
     updateTheme,
     setAuthToken,
+    setAllowRefresh,
 
     // Convenience functions
     isIOS: platform === 'ios',

@@ -3,15 +3,31 @@
 import * as React from 'react'
 import { Drawer as DrawerPrimitive } from 'vaul'
 
+import { useDrawerRefresh } from '@/hooks/use-drawer-refresh'
 import { cn } from '@/lib/utils'
 
 function Drawer({
+  onOpenChange,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root> & {
   onClose?: () => void
 }) {
+  const [isOpen, setIsOpen] = React.useState(false)
+
+  useDrawerRefresh(isOpen)
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open)
+    onOpenChange?.(open)
+  }
+
   return (
-    <DrawerPrimitive.Root data-slot="drawer" disablePreventScroll {...props} />
+    <DrawerPrimitive.Root
+      data-slot="drawer"
+      disablePreventScroll
+      onOpenChange={handleOpenChange}
+      {...props}
+    />
   )
 }
 
