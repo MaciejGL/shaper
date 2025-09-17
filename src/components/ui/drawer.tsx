@@ -24,9 +24,9 @@ function Drawer({
         window.pageYOffset ||
         document.documentElement.scrollTop
 
-      if (currentScrollY === 0) {
-        window.scrollTo({ top: 1, behavior: 'instant' })
-      }
+      setTimeout(() => {
+        window.scrollTo({ top: currentScrollY + 2, behavior: 'instant' })
+      }, 1)
     }
     // No need to restore scroll position - it naturally returns to 0 when drawer closes
 
