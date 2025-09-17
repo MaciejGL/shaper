@@ -1,7 +1,7 @@
 'use client'
 
 import { Edit3, Plus, Reply, Send, Share, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { AnimateHeightItem } from '@/components/animations/animated-container'
 import { Button } from '@/components/ui/button'
@@ -36,6 +36,7 @@ interface ExerciseNotesProps {
   exercise: NonNullable<
     GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
   >['day']['exercises'][number]
+  resetKey?: number // Add reset prop
 }
 
 interface Note {
@@ -65,7 +66,7 @@ export function useExerciseNotesCount(
   return notesCountForExercise(exerciseName)
 }
 
-export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
+export function ExerciseNotes({ exercise, resetKey }: ExerciseNotesProps) {
   // State management
   const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
   const [editingText, setEditingText] = useState('')
@@ -73,6 +74,18 @@ export function ExerciseNotes({ exercise }: ExerciseNotesProps) {
   const [isCreating, setIsCreating] = useState(false)
   const [newNoteText, setNewNoteText] = useState('')
   const [newNoteShareWithTrainer, setNewNoteShareWithTrainer] = useState(false)
+
+  // Reset state when resetKey changes (when drawer closes)
+  useEffect(() => {
+    if (resetKey !== undefined) {
+      setEditingNoteId(null)
+      setEditingText('')
+      setEditingShareWithTrainer(false)
+      setIsCreating(false)
+      setNewNoteText('')
+      setNewNoteShareWithTrainer(false)
+    }
+  }, [resetKey])
 
   // Exercise data
   const exerciseName = exercise.substitutedBy?.name || exercise.name

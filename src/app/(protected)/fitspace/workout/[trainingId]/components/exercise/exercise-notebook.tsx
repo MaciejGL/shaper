@@ -14,9 +14,18 @@ export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
   const notesCount = useExerciseNotesCount(exercise)
 
   const [isOpen, setIsOpen] = useState(false)
+  const [resetKey, setResetKey] = useState(0)
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open)
+    // When drawer closes, increment resetKey to reset internal state
+    if (!open) {
+      setResetKey((prev) => prev + 1)
+    }
+  }
 
   return (
-    <Drawer open={isOpen} onOpenChange={setIsOpen}>
+    <Drawer open={isOpen} onOpenChange={handleOpenChange}>
       <DrawerTrigger asChild>
         <div className="flex items-center gap-1 relative">
           <Button
@@ -32,7 +41,7 @@ export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
         </div>
       </DrawerTrigger>
 
-      {isOpen && <ExerciseNotes exercise={exercise} />}
+      <ExerciseNotes exercise={exercise} resetKey={resetKey} />
     </Drawer>
   )
 }
