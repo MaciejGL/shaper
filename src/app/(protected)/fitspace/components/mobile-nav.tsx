@@ -46,11 +46,11 @@ export function MobileNav() {
     setPendingNavigation(null)
   }, [pathname])
 
-  const navItems = useMemo(
-    () => [
+  const navItems = useMemo(() => {
+    return [
       {
         id: 'workout',
-        href: `/fitspace/workout/${trainingId}?weekId=${weekId}&dayId=${dayId}`,
+        href: `/fitspace/workout/${trainingId || ''}?weekId=${weekId || ''}&dayId=${dayId || ''}`,
         icon: Dumbbell,
         label: 'Workout',
         prefetch: true,
@@ -90,9 +90,8 @@ export function MobileNav() {
         label: 'Discover',
         prefetch: true,
       },
-    ],
-    [trainingId, weekId, dayId],
-  )
+    ]
+  }, [trainingId, weekId, dayId])
 
   // Hide navigation when keyboard is visible
   if (isKeyboardVisible) {
