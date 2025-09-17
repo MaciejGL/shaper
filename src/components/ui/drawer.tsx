@@ -18,17 +18,80 @@ function Drawer({
     }
 
     if (open) {
-      // Drawer opening - check if at top and adjust scroll to disable pull-to-refresh
-      const currentScrollY =
-        window.scrollY ||
-        window.pageYOffset ||
-        document.documentElement.scrollTop
+      // Bulletproof solution: disable all touch interactions and scrolling
+      const body = document.body
+      const html = document.documentElement
 
-      setTimeout(() => {
-        window.scrollTo({ top: currentScrollY + 2, behavior: 'instant' })
-      }, 1)
+      // Store original styles to restore later
+      const originalBodyStyle = {
+        touchAction: body.style.touchAction,
+        overflow: body.style.overflow,
+        overscrollBehavior: body.style.overscrollBehavior,
+        position: body.style.position,
+        height: body.style.height,
+      }
+
+      const originalHtmlStyle = {
+        touchAction: html.style.touchAction,
+        overflow: html.style.overflow,
+        overscrollBehavior: html.style.overscrollBehavior,
+      }
+
+      // Apply styles to prevent pull-to-refresh and scrolling
+      body.style.touchAction = 'none'
+      body.style.overflow = 'hidden'
+      body.style.overscrollBehavior = 'none'
+      body.style.position = 'fixed'
+      body.style.height = '100%'
+
+      html.style.touchAction = 'none'
+      html.style.overflow = 'hidden'
+      html.style.overscrollBehavior = 'none'
+
+      // Store styles for cleanup
+      body.dataset.drawerOriginalStyles = JSON.stringify({
+        body: originalBodyStyle,
+        html: originalHtmlStyle,
+      })
+    } else {
+      // Restore original styles when drawer closes
+      const body = document.body
+      const html = document.documentElement
+
+      if (body.dataset.drawerOriginalStyles) {
+        try {
+          const { body: bodyStyles, html: htmlStyles } = JSON.parse(
+            body.dataset.drawerOriginalStyles,
+          )
+
+          // Restore body styles
+          body.style.touchAction = bodyStyles.touchAction || ''
+          body.style.overflow = bodyStyles.overflow || ''
+          body.style.overscrollBehavior = bodyStyles.overscrollBehavior || ''
+          body.style.position = bodyStyles.position || ''
+          body.style.height = bodyStyles.height || ''
+
+          // Restore html styles
+          html.style.touchAction = htmlStyles.touchAction || ''
+          html.style.overflow = htmlStyles.overflow || ''
+          html.style.overscrollBehavior = htmlStyles.overscrollBehavior || ''
+
+          // Clean up
+          delete body.dataset.drawerOriginalStyles
+        } catch (error) {
+          // Fallback: reset to safe defaults
+          body.style.touchAction = ''
+          body.style.overflow = ''
+          body.style.overscrollBehavior = ''
+          body.style.position = ''
+          body.style.height = ''
+
+          html.style.touchAction = ''
+          html.style.overflow = ''
+          html.style.overscrollBehavior = ''
+        }
+      }
     }
-    // No need to restore scroll position - it naturally returns to 0 when drawer closes
 
     onOpenChange?.(open)
   }
