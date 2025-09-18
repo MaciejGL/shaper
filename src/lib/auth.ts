@@ -6,6 +6,15 @@ import { prisma } from '@/lib/db'
 import { UserWithSession } from '@/types/UserWithSession'
 
 import { invalidateUserCache } from './getUser'
+import {
+  type GoogleAccount,
+  type GoogleProfile,
+  getHighResGoogleProfilePicture,
+  mapGoogleAccountForLinking,
+  mapGoogleProfileToUser,
+  sanitizeGoogleProfile,
+  validateGoogleProfile,
+} from './google-profile-mapper'
 import { createUserLoaders } from './loaders/user.loader'
 
 export const authOptions = {
@@ -83,6 +92,73 @@ export const authOptions = {
   },
 
   callbacks: {
+    async signIn({ account, profile }) {
+      // Handle Google OAuth sign-in
+      if (account?.provider === 'google' && profile) {
+        try {
+          const googleProfile = profile as GoogleProfile
+          const googleAccount = account as GoogleAccount
+
+          // Validate and sanitize Google profile data
+          if (!validateGoogleProfile(googleProfile)) {
+            console.error('Invalid Google profile data:', googleProfile)
+            return false
+          }
+
+          const sanitizedProfile = sanitizeGoogleProfile(googleProfile)
+
+          // Check if user already exists by email
+          const existingUser = await prisma.user.findUnique({
+            where: { email: sanitizedProfile.email },
+          })
+
+          if (existingUser) {
+            // Link Google account to existing user WITHOUT overwriting profile data
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: mapGoogleAccountForLinking(sanitizedProfile, googleAccount),
+            })
+
+            // Invalidate user cache to ensure fresh data
+            await invalidateUserCache(existingUser.email)
+
+            console.info(
+              `Linked Google account to existing user: ${existingUser.email}`,
+            )
+            return true
+          } else {
+            // Create new user with full Google profile data
+            const newUserData = mapGoogleProfileToUser(
+              sanitizedProfile,
+              googleAccount,
+            )
+
+            // Enhance profile picture with high resolution version
+            if (newUserData.image) {
+              newUserData.image = getHighResGoogleProfilePicture(
+                newUserData.image,
+              )
+            }
+
+            const newUser = await prisma.user.create({
+              data: {
+                ...newUserData,
+                role: 'CLIENT', // Default role for new users
+              },
+            })
+
+            console.info(`Created new user from Google OAuth: ${newUser.email}`)
+            return true
+          }
+        } catch (error) {
+          console.error('Google OAuth sign-in error:', error)
+          return false
+        }
+      }
+
+      // For non-Google providers, continue with default behavior
+      return true
+    },
     async jwt({ token, user }) {
       // Persist user data in the token
       if (user) {
