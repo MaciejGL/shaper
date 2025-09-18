@@ -53,7 +53,7 @@ function PullToRefreshIndicator({ state }: { state: PullState }) {
               : `rotate(${state.rotation}deg)`,
             transition: state.isRefreshing
               ? undefined
-              : 'transform 0.05s linear, opacity 0.2s ease',
+              : 'transform 0.05s linear, opacity 0.2s linear',
           }}
         />
       </div>
@@ -62,6 +62,7 @@ function PullToRefreshIndicator({ state }: { state: PullState }) {
 }
 
 export function SimplePullToRefresh() {
+  const [mounted, setMounted] = useState(false)
   const [state, setState] = useState<PullState>({
     isVisible: false,
     progress: 0,
@@ -69,6 +70,10 @@ export function SimplePullToRefresh() {
     scale: 0.8,
     rotation: 0,
   })
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     let touchstartY = 0
@@ -292,8 +297,8 @@ export function SimplePullToRefresh() {
     }
   }, [])
 
-  // Render the component using portal for proper positioning
-  if (typeof window === 'undefined') return null
+  // Only render after component is mounted to prevent hydration mismatch
+  if (!mounted) return null
 
   return createPortal(<PullToRefreshIndicator state={state} />, document.body)
 }
