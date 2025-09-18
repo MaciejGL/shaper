@@ -275,6 +275,7 @@ function WeekSelector({ plan }: { plan: NavigationPlan }) {
         value={effectiveWeekId ?? undefined}
       >
         <SelectTrigger
+          suppressHydrationWarning
           size="sm"
           variant="tertiary"
           className="[&_svg]:data-[icon=mark]:size-3.5 truncate text-sm font-medium flex items-center gap-2 w-full"

@@ -155,6 +155,7 @@ function SkeletonWeekSelector() {
       />
       <Select disabled>
         <SelectTrigger
+          suppressHydrationWarning
           size="sm"
           variant="tertiary"
           className={cn(

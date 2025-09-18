@@ -26,7 +26,7 @@ export function ExerciseNotebook({ exercise }: ExerciseNotebookProps) {
 
   return (
     <Drawer open={isOpen} onOpenChange={handleOpenChange}>
-      <DrawerTrigger asChild>
+      <DrawerTrigger asChild suppressHydrationWarning>
         <div className="flex items-center gap-1 relative">
           <Button
             variant="tertiary"
