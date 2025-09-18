@@ -227,7 +227,8 @@ export default async function PrivacyPolicyPage() {
                           Authentication Data:
                         </strong>{' '}
                         Session tokens, one-time passwords (OTP) for login
-                        verification
+                        verification, Google OAuth access and refresh tokens
+                        (when using Google sign-in)
                       </li>
                       <li>
                         <strong className="text-foreground">
@@ -244,6 +245,17 @@ export default async function PrivacyPolicyPage() {
                       Third-Party Data Sources
                     </h3>
                     <ul className="space-y-2 text-muted-foreground">
+                      <li>
+                        <strong className="text-foreground">
+                          Google OAuth:
+                        </strong>{' '}
+                        When you choose to sign in with Google, we receive your
+                        basic profile information (name, email, profile
+                        picture), locale preferences, and unique Google
+                        identifier. This data is used to create or link your
+                        account and pre-populate your profile to reduce
+                        onboarding steps.
+                      </li>
                       <li>
                         <strong className="text-foreground">
                           Email Services:
@@ -359,6 +371,13 @@ export default async function PrivacyPolicyPage() {
                       <li>
                         <strong>Resend Email Service:</strong> Receives your
                         email address and OTP codes for authentication emails
+                      </li>
+                      <li>
+                        <strong>Google OAuth:</strong> When you sign in with
+                        Google, we receive profile data directly from Google's
+                        servers. We do not share your Hypro data back to Google
+                        - this is a one-way data flow for authentication and
+                        profile setup only
                       </li>
                       <li>
                         <strong>Legal Requirements:</strong> When required by
@@ -602,6 +621,25 @@ export default async function PrivacyPolicyPage() {
                         teams)
                       </li>
                       <li>• Opt out of all non-essential communications</li>
+                    </ul>
+                  </div>
+                  <div className="bg-muted/30 p-6 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-3 text-foreground">
+                      Google Account Management
+                    </h3>
+                    <ul className="space-y-2 text-muted-foreground text-sm">
+                      <li>
+                        • Revoke Hypro's access to your Google account directly
+                        from your Google Account settings
+                      </li>
+                      <li>
+                        • View and manage what data Google shares with Hypro
+                        through Google's privacy controls
+                      </li>
+                      <li>
+                        • Your Hypro account will remain active even if you
+                        disconnect Google - you can still log in with email/OTP
+                      </li>
                     </ul>
                   </div>
                 </div>

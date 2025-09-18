@@ -1,10 +1,10 @@
+import { authOptions } from '@lib/auth/config'
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
 
 import { GQLUserRole } from '@/generated/graphql-server'
 import { UserWithSession } from '@/types/UserWithSession'
 
-import { authOptions } from './auth'
 import { createUserLoaders } from './loaders/user.loader'
 import { deleteFromCache, getFromCache, setInCache } from './redis'
 

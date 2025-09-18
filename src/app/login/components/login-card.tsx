@@ -12,8 +12,10 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Card } from '@/components/ui/card'
+import { Separator } from '@/components/ui/separator'
 
 import { EmailForm } from './email-form'
+import { GoogleLoginButton } from './google-login-button'
 import { OtpForm } from './otp-form'
 import { useLoginForm } from './use-login-form.hook'
 
@@ -40,11 +42,33 @@ export const LoginCard = () => {
         <CardTitle>Login</CardTitle>
         <CardDescription>
           {!showOtp
-            ? 'Enter your email to receive a one-time password to login.'
+            ? 'Sign in with Google for quick access, or enter your email to receive a one-time password.'
             : 'Enter the 4-digit code sent to your email to login.'}
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {!showOtp && (
+          <>
+            {/* Google Login Button - Prominently positioned at top */}
+            <div className="mb-6">
+              <GoogleLoginButton
+                className="w-full"
+                disabled={isLoading || isResending}
+              />
+            </div>
+
+            {/* Divider with "or" text */}
+            <div className="relative mb-6">
+              <Separator />
+              <div className="absolute inset-0 flex justify-center">
+                <span className="bg-card px-2 text-sm text-muted-foreground">
+                  or
+                </span>
+              </div>
+            </div>
+          </>
+        )}
+
         {!showOtp ? (
           <EmailForm
             email={email}

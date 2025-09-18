@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import React from 'react'
 
 import { AnimatedLogo, AnimatedLogoText } from '@/components/animated-logo'
-import { authOptions } from '@/lib/auth'
+import { authOptions } from '@/lib/auth/config'
 
 import { LoginCard } from './components/login-card'
 
