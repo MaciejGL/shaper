@@ -45,6 +45,13 @@ model User {
   stripeCustomerId String? @unique
   stripeConnectedAccountId String? @unique  // For trainer revenue sharing
 
+  // Google OAuth integration
+  googleId          String? @unique
+  googleAccessToken String?
+  googleRefreshToken String?
+  locale            String?
+  timezone          String?
+
   // Subscription relations
   subscriptions       UserSubscription[] @relation("UserSubscriptions")
   trainerPackages     PackageTemplate[]  @relation("TrainerPackages")
@@ -82,6 +89,7 @@ model User {
   @@index([trainerId])
   @@index([stripeCustomerId])
   @@index([trainerId, role])  // For trainer-client relationship queries
+  @@index([googleId])
 }
 
 model UserSession {
