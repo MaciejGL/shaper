@@ -18,9 +18,16 @@ export const authOptions = {
       authorization: {
         params: {
           scope: 'openid email profile',
+          // Options for prompt:
+          // 'none' - Silent auth (only works if user already consented)
+          // 'select_account' - Show account picker (best for most cases)
+          // 'login' - Force re-authentication
+          // 'consent' - Force consent screen (avoid this)
           prompt: 'select_account',
           access_type: 'offline',
           response_type: 'code',
+          include_granted_scopes: 'true',
+          enable_granular_consent: 'true',
         },
       },
     }),
@@ -87,6 +94,12 @@ export const authOptions = {
 
   callbacks: {
     async signIn({ account, profile }) {
+      console.info('SignIn callback triggered:', {
+        provider: account?.provider,
+        hasProfile: !!profile,
+        profileEmail: profile?.email,
+      })
+
       // Handle Google OAuth sign-in
       if (account?.provider === 'google' && profile) {
         const email = profile?.email
@@ -96,21 +109,26 @@ export const authOptions = {
           timestamp: new Date().toISOString(),
         })
 
-        const result = await handleGoogleSignIn(account, profile)
+        try {
+          const result = await handleGoogleSignIn(account, profile)
 
-        if (result) {
-          console.info('Google OAuth sign-in successful:', {
-            email,
-            timestamp: new Date().toISOString(),
-          })
-        } else {
-          console.warn('Google OAuth sign-in failed:', {
-            email,
-            timestamp: new Date().toISOString(),
-          })
+          if (result) {
+            console.info('Google OAuth sign-in successful:', {
+              email,
+              timestamp: new Date().toISOString(),
+            })
+          } else {
+            console.warn('Google OAuth sign-in failed:', {
+              email,
+              timestamp: new Date().toISOString(),
+            })
+          }
+
+          return result
+        } catch (error) {
+          console.error('Error in handleGoogleSignIn:', error)
+          return false
         }
-
-        return result
       }
 
       // For non-Google providers, continue with default behavior

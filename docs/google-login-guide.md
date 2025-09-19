@@ -27,15 +27,17 @@ Google Login provides a fast, secure, and convenient way to access your Hypro ac
 ### First Time Login
 
 1. Click "Login with Google" on the Hypro login page
-2. Choose your Google account (or sign in if needed)
-3. Grant permissions for Hypro to access your basic profile (one-time consent)
-4. You're automatically logged in with a pre-filled profile!
+2. You'll be redirected to Google's secure login page
+3. Choose your Google account (or sign in if needed)
+4. Grant permissions for Hypro to access your basic profile (one-time consent)
+5. You're automatically redirected back and logged in with a pre-filled profile!
 
 ### Returning Users
 
 1. Click "Login with Google"
-2. Select your Google account (if you have multiple)
-3. Instant access - no consent screen needed!
+2. You'll be briefly redirected to Google
+3. Select your Google account (if you have multiple)
+4. Instant redirect back - no consent screen needed!
 
 ### Existing Hypro Users
 
@@ -111,6 +113,10 @@ A: This shouldn't happen for returning users. If you're seeing the consent scree
 - Ensuring you're selecting the same Google account each time
 - Checking that you haven't revoked Hypro's access in your Google Account settings
 - Contact support if the issue persists
+
+### **Q: Why am I redirected to Google's website?**
+
+A: This is the standard and most secure OAuth flow. You're briefly taken to Google's secure servers for authentication, then redirected back to Hypro. This ensures your Google credentials are never shared with third parties.
 
 ## Troubleshooting
 
