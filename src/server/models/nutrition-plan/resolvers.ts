@@ -4,6 +4,7 @@ import {
   GQLUserRole,
 } from '@/generated/graphql-server'
 import { requireAuth } from '@/lib/getUser'
+import { notifyNutritionPlanShared } from '@/lib/meal-plan-notifications'
 import { GQLContext } from '@/types/gql-context'
 
 import {
@@ -126,8 +127,8 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     const nutritionPlan = await shareNutritionPlanWithClient(id, user.user.id)
 
-    // TODO: Trigger notification to client
-    // await notifyNutritionPlanShared(nutritionPlan)
+    // Send notifications to client
+    await notifyNutritionPlanShared(id, user.user.id, context)
 
     return new NutritionPlan(nutritionPlan, context)
   },
