@@ -1,3 +1,9 @@
+import { GraphQLError } from 'graphql'
+
+import {
+  GQLCreateMealInput,
+  GQLUpdateMealInput,
+} from '@/generated/graphql-server'
 import {
   Prisma,
   Ingredient as PrismaIngredient,
@@ -9,6 +15,18 @@ import {
 import { prisma } from '@/lib/db'
 
 import { TeamMealLibraryService } from './team-meal-library-service'
+
+export interface ValidationResult {
+  isValid: boolean
+  errors: string[]
+}
+
+export interface MacroTotals {
+  protein: number
+  carbs: number
+  fat: number
+  calories: number
+}
 
 export interface CreateMealFactoryOptions {
   name?: string
@@ -44,7 +62,7 @@ export class MealFactory {
     }
   > {
     if (!options.name) {
-      throw new Error('Meal name is required')
+      throw new GraphQLError('Meal name is required')
     }
 
     const mealData = {
@@ -216,24 +234,146 @@ export class MealFactory {
 }
 
 /**
- * Get trainer's team ID
+ * Calculate macro totals for a meal
  */
-export async function getTrainerTeamId(trainerId: string): Promise<string> {
-  const teamMember = await prisma.teamMember.findFirst({
-    where: {
-      userId: trainerId,
-    },
-  })
+export function calculateMealMacros(
+  meal: PrismaMeal & {
+    ingredients: (PrismaMealIngredient & {
+      ingredient: PrismaIngredient
+    })[]
+  },
+): MacroTotals {
+  let totalProtein = 0
+  let totalCarbs = 0
+  let totalFat = 0
+  let totalCalories = 0
 
-  if (!teamMember) {
-    throw new Error('You must be part of a team to access team meals')
+  for (const mealIngredient of meal.ingredients) {
+    const { ingredient, grams } = mealIngredient
+    const multiplier = grams / 100 // Convert per 100g to actual grams
+
+    totalProtein += ingredient.proteinPer100g * multiplier
+    totalCarbs += ingredient.carbsPer100g * multiplier
+    totalFat += ingredient.fatPer100g * multiplier
+    totalCalories += ingredient.caloriesPer100g * multiplier
   }
 
-  return teamMember.teamId
+  return {
+    protein: Math.round(totalProtein * 10) / 10, // Round to 1 decimal
+    carbs: Math.round(totalCarbs * 10) / 10,
+    fat: Math.round(totalFat * 10) / 10,
+    calories: Math.round(totalCalories),
+  }
 }
 
 /**
- * Search team meals with optional query
+ * Validate meal input data
+ */
+export function validateMeal(input: GQLCreateMealInput): ValidationResult {
+  const errors: string[] = []
+
+  // Validate name
+  if (!input.name || input.name.trim().length === 0) {
+    errors.push('Meal name is required')
+  } else if (input.name.trim().length > 100) {
+    errors.push('Meal name must be 100 characters or less')
+  }
+
+  // Validate optional fields
+  if (input.description && input.description.length > 500) {
+    errors.push('Meal description must be 500 characters or less')
+  }
+
+  if (
+    input.preparationTime !== undefined &&
+    input.preparationTime !== null &&
+    input.preparationTime < 0
+  ) {
+    errors.push('Preparation time must be non-negative')
+  }
+
+  if (
+    input.cookingTime !== undefined &&
+    input.cookingTime !== null &&
+    input.cookingTime < 0
+  ) {
+    errors.push('Cooking time must be non-negative')
+  }
+
+  if (
+    input.servings !== undefined &&
+    input.servings !== null &&
+    input.servings <= 0
+  ) {
+    errors.push('Servings must be greater than 0')
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  }
+}
+
+/**
+ * Validate meal ingredient grams
+ */
+export function validateMealIngredient(grams: number): ValidationResult {
+  const errors: string[] = []
+
+  if (grams <= 0) {
+    errors.push('Ingredient grams must be greater than 0')
+  }
+
+  if (grams > 10000) {
+    // 10kg limit seems reasonable
+    errors.push('Ingredient grams cannot exceed 10,000g (10kg)')
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+  }
+}
+
+/**
+ * Get trainer's team ID
+ */
+export async function getTrainerTeamId(trainerId: string): Promise<string> {
+  return await TeamMealLibraryService.validateTeamAccess(trainerId)
+}
+
+/**
+ * Get trainer's team
+ */
+export async function getTrainerTeam(
+  trainerId: string,
+): Promise<PrismaTeam | null> {
+  return await TeamMealLibraryService.getTrainerTeam(trainerId)
+}
+
+/**
+ * Get team meals with optional search query
+ */
+export async function getTeamMeals(
+  trainerId: string,
+  searchQuery?: string,
+): Promise<
+  (PrismaMeal & {
+    createdBy: PrismaUser
+    team: PrismaTeam | null
+    ingredients: (PrismaMealIngredient & {
+      ingredient: PrismaIngredient & {
+        createdBy: PrismaUser
+      }
+    })[]
+  })[]
+> {
+  const teamId = await getTrainerTeamId(trainerId)
+  return await TeamMealLibraryService.getTeamMeals(teamId, searchQuery)
+}
+
+/**
+ * Search team meals with optional query (legacy function)
  */
 export async function searchTeamMeals(
   teamId: string,
@@ -298,26 +438,28 @@ export async function getMealById(
   })
 
   if (!meal) {
-    throw new Error('Meal not found')
+    throw new GraphQLError('Meal not found')
   }
 
-  // Check if user can access this meal (must be in the same team)
-  if (meal.teamId) {
-    const teamMember = await prisma.teamMember.findFirst({
-      where: {
-        userId: trainerId,
-        teamId: meal.teamId,
-      },
-    })
-
-    if (!teamMember) {
-      throw new Error(
-        'Access denied: You must be part of the same team to view this meal',
-      )
-    }
+  // Check if user can access this meal
+  const hasAccess = await canAccessMeal(mealId, trainerId)
+  if (!hasAccess) {
+    throw new GraphQLError(
+      'Access denied: You must be part of the same team to view this meal',
+    )
   }
 
   return meal
+}
+
+/**
+ * Check if user can access a meal
+ */
+export async function canAccessMeal(
+  mealId: string,
+  trainerId: string,
+): Promise<boolean> {
+  return await TeamMealLibraryService.canAccessMeal(mealId, trainerId)
 }
 
 /**
@@ -333,15 +475,8 @@ export async function canModifyMeal(
 /**
  * Create meal with validation
  */
-export async function createMealWithValidation(
-  input: {
-    name: string
-    description?: string | null
-    instructions?: string[] | null
-    preparationTime?: number | null
-    cookingTime?: number | null
-    servings?: number | null
-  },
+export async function createMeal(
+  input: GQLCreateMealInput,
   trainerId: string,
 ): Promise<
   PrismaMeal & {
@@ -354,6 +489,12 @@ export async function createMealWithValidation(
     })[]
   }
 > {
+  // Validate input data
+  const validation = validateMeal(input)
+  if (!validation.isValid) {
+    throw new GraphQLError(`Invalid meal data: ${validation.errors.join(', ')}`)
+  }
+
   const teamId = await getTrainerTeamId(trainerId)
 
   // Check for duplicate meal name within team
@@ -365,7 +506,7 @@ export async function createMealWithValidation(
   })
 
   if (existingMeal) {
-    throw new Error('A meal with this name already exists in your team')
+    throw new GraphQLError('A meal with this name already exists in your team')
   }
 
   return await MealFactory.create({
@@ -383,16 +524,9 @@ export async function createMealWithValidation(
 /**
  * Update meal with validation
  */
-export async function updateMealWithValidation(
+export async function updateMeal(
   mealId: string,
-  input: {
-    name?: string | null
-    description?: string | null
-    instructions?: string[] | null
-    preparationTime?: number | null
-    cookingTime?: number | null
-    servings?: number | null
-  },
+  input: GQLUpdateMealInput,
   trainerId: string,
 ): Promise<
   PrismaMeal & {
@@ -415,12 +549,12 @@ export async function updateMealWithValidation(
   })
 
   if (!existingMeal) {
-    throw new Error('Meal not found')
+    throw new GraphQLError('Meal not found')
   }
 
   const canModify = await canModifyMeal(mealId, trainerId)
   if (!canModify) {
-    throw new Error(
+    throw new GraphQLError(
       'Access denied: You can only modify meals you created or if you are a team admin',
     )
   }
@@ -436,7 +570,9 @@ export async function updateMealWithValidation(
     })
 
     if (duplicateMeal) {
-      throw new Error('A meal with this name already exists in your team')
+      throw new GraphQLError(
+        'A meal with this name already exists in your team',
+      )
     }
   }
 
@@ -494,13 +630,13 @@ export async function updateMealWithValidation(
 /**
  * Delete meal with validation
  */
-export async function deleteMealWithValidation(
+export async function deleteMeal(
   mealId: string,
   trainerId: string,
 ): Promise<boolean> {
   const canModify = await canModifyMeal(mealId, trainerId)
   if (!canModify) {
-    throw new Error(
+    throw new GraphQLError(
       'Access denied: You can only delete meals you created or if you are a team admin',
     )
   }
@@ -515,61 +651,8 @@ export async function deleteMealWithValidation(
 /**
  * Add ingredient to meal with validation
  */
-export async function addIngredientToMealWithValidation(
-  input: {
-    mealId: string
-    ingredientId: string
-    grams: number
-  },
-  trainerId: string,
-): Promise<
-  PrismaMealIngredient & {
-    ingredient: PrismaIngredient & {
-      createdBy: PrismaUser
-    }
-  }
-> {
-  const canModify = await canModifyMeal(input.mealId, trainerId)
-  if (!canModify) {
-    throw new Error(
-      'Access denied: You can only modify meals you created or if you are a team admin',
-    )
-  }
-
-  // Check if ingredient exists
-  const ingredient = await prisma.ingredient.findUnique({
-    where: { id: input.ingredientId },
-  })
-
-  if (!ingredient) {
-    throw new Error('Ingredient not found')
-  }
-
-  // Check if ingredient is already in the meal
-  const existingMealIngredient = await prisma.mealIngredient.findUnique({
-    where: {
-      mealId_ingredientId: {
-        mealId: input.mealId,
-        ingredientId: input.ingredientId,
-      },
-    },
-  })
-
-  if (existingMealIngredient) {
-    throw new Error('This ingredient is already in the meal')
-  }
-
-  return await MealFactory.createMealIngredient({
-    mealId: input.mealId,
-    ingredientId: input.ingredientId,
-    grams: input.grams,
-  })
-}
-
-/**
- * Update meal ingredient with validation
- */
-export async function updateMealIngredientWithValidation(
+export async function addIngredientToMeal(
+  mealId: string,
   ingredientId: string,
   grams: number,
   trainerId: string,
@@ -580,6 +663,73 @@ export async function updateMealIngredientWithValidation(
     }
   }
 > {
+  // Validate grams
+  const validation = validateMealIngredient(grams)
+  if (!validation.isValid) {
+    throw new GraphQLError(
+      `Invalid ingredient data: ${validation.errors.join(', ')}`,
+    )
+  }
+
+  const canModify = await canModifyMeal(mealId, trainerId)
+  if (!canModify) {
+    throw new GraphQLError(
+      'Access denied: You can only modify meals you created or if you are a team admin',
+    )
+  }
+
+  // Check if ingredient exists
+  const ingredient = await prisma.ingredient.findUnique({
+    where: { id: ingredientId },
+  })
+
+  if (!ingredient) {
+    throw new GraphQLError('Ingredient not found')
+  }
+
+  // Check if ingredient is already in the meal
+  const existingMealIngredient = await prisma.mealIngredient.findUnique({
+    where: {
+      mealId_ingredientId: {
+        mealId,
+        ingredientId,
+      },
+    },
+  })
+
+  if (existingMealIngredient) {
+    throw new GraphQLError('This ingredient is already in the meal')
+  }
+
+  return await MealFactory.createMealIngredient({
+    mealId,
+    ingredientId,
+    grams,
+  })
+}
+
+/**
+ * Update meal ingredient with validation
+ */
+export async function updateMealIngredient(
+  ingredientId: string,
+  grams: number,
+  trainerId: string,
+): Promise<
+  PrismaMealIngredient & {
+    ingredient: PrismaIngredient & {
+      createdBy: PrismaUser
+    }
+  }
+> {
+  // Validate grams
+  const validation = validateMealIngredient(grams)
+  if (!validation.isValid) {
+    throw new GraphQLError(
+      `Invalid ingredient data: ${validation.errors.join(', ')}`,
+    )
+  }
+
   const mealIngredient = await prisma.mealIngredient.findUnique({
     where: { id: ingredientId },
     include: {
@@ -592,12 +742,12 @@ export async function updateMealIngredientWithValidation(
   })
 
   if (!mealIngredient) {
-    throw new Error('Meal ingredient not found')
+    throw new GraphQLError('Meal ingredient not found')
   }
 
   const canModify = await canModifyMeal(mealIngredient.meal.id, trainerId)
   if (!canModify) {
-    throw new Error(
+    throw new GraphQLError(
       'Access denied: You can only modify meals you created or if you are a team admin',
     )
   }
@@ -624,7 +774,7 @@ export async function updateMealIngredientWithValidation(
 /**
  * Remove ingredient from meal with validation
  */
-export async function removeIngredientFromMealWithValidation(
+export async function removeIngredientFromMeal(
   ingredientId: string,
   trainerId: string,
 ): Promise<boolean> {
@@ -640,12 +790,12 @@ export async function removeIngredientFromMealWithValidation(
   })
 
   if (!mealIngredient) {
-    throw new Error('Meal ingredient not found')
+    throw new GraphQLError('Meal ingredient not found')
   }
 
   const canModify = await canModifyMeal(mealIngredient.meal.id, trainerId)
   if (!canModify) {
-    throw new Error(
+    throw new GraphQLError(
       'Access denied: You can only modify meals you created or if you are a team admin',
     )
   }
@@ -660,7 +810,7 @@ export async function removeIngredientFromMealWithValidation(
 /**
  * Reorder meal ingredients with validation
  */
-export async function reorderMealIngredientsWithValidation(
+export async function reorderMealIngredients(
   mealId: string,
   ingredientIds: string[],
   trainerId: string,
@@ -673,7 +823,7 @@ export async function reorderMealIngredientsWithValidation(
 > {
   const canModify = await canModifyMeal(mealId, trainerId)
   if (!canModify) {
-    throw new Error(
+    throw new GraphQLError(
       'Access denied: You can only modify meals you created or if you are a team admin',
     )
   }

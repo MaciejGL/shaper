@@ -49,10 +49,12 @@ export class MealIngredient implements GQLMealIngredient {
     const multiplier = this.data.grams / 100
 
     return {
-      protein: this.data.ingredient.proteinPer100g * multiplier,
-      carbs: this.data.ingredient.carbsPer100g * multiplier,
-      fat: this.data.ingredient.fatPer100g * multiplier,
-      calories: this.data.ingredient.caloriesPer100g * multiplier,
+      protein:
+        Math.round(this.data.ingredient.proteinPer100g * multiplier * 10) / 10,
+      carbs:
+        Math.round(this.data.ingredient.carbsPer100g * multiplier * 10) / 10,
+      fat: Math.round(this.data.ingredient.fatPer100g * multiplier * 10) / 10,
+      calories: Math.round(this.data.ingredient.caloriesPer100g * multiplier),
     }
   }
 }
@@ -137,7 +139,7 @@ export default class Meal implements GQLMeal {
   get totalMacros(): MacroTotals {
     const ingredients = this.ingredients
 
-    return ingredients.reduce(
+    const totals = ingredients.reduce(
       (totals, ingredient) => {
         const ingredientMacros = ingredient.macros
         return {
@@ -149,6 +151,14 @@ export default class Meal implements GQLMeal {
       },
       { protein: 0, carbs: 0, fat: 0, calories: 0 },
     )
+
+    // Round values for consistency
+    return {
+      protein: Math.round(totals.protein * 10) / 10,
+      carbs: Math.round(totals.carbs * 10) / 10,
+      fat: Math.round(totals.fat * 10) / 10,
+      calories: Math.round(totals.calories),
+    }
   }
 
   /**
@@ -158,10 +168,10 @@ export default class Meal implements GQLMeal {
     const baseMacros = this.totalMacros
 
     return {
-      protein: baseMacros.protein * portionMultiplier,
-      carbs: baseMacros.carbs * portionMultiplier,
-      fat: baseMacros.fat * portionMultiplier,
-      calories: baseMacros.calories * portionMultiplier,
+      protein: Math.round(baseMacros.protein * portionMultiplier * 10) / 10,
+      carbs: Math.round(baseMacros.carbs * portionMultiplier * 10) / 10,
+      fat: Math.round(baseMacros.fat * portionMultiplier * 10) / 10,
+      calories: Math.round(baseMacros.calories * portionMultiplier),
     }
   }
 }
