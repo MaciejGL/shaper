@@ -5,6 +5,7 @@ import {
 } from '@/generated/graphql-server'
 import { requireAuth } from '@/lib/getUser'
 import { notifyNutritionPlanShared } from '@/lib/meal-plan-notifications'
+import { MealPlanTaskService } from '@/lib/service-task-completion'
 import { GQLContext } from '@/types/gql-context'
 
 import {
@@ -126,6 +127,19 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     const user = requireAuth(GQLUserRole.Trainer, context.user)
 
     const nutritionPlan = await shareNutritionPlanWithClient(id, user.user.id)
+
+    // Complete any pending meal plan delivery tasks for this trainer-client relationship
+    try {
+      await MealPlanTaskService.completeTasks(
+        user.user.id,
+        nutritionPlan.clientId,
+        id,
+        context,
+      )
+    } catch (error) {
+      console.error('❌ Error completing meal plan tasks:', error)
+      // Don't throw error to avoid breaking the sharing flow
+    }
 
     // Send notifications to client
     await notifyNutritionPlanShared(id, user.user.id, context)
