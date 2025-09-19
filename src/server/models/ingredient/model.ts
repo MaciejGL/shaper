@@ -5,6 +5,8 @@ import {
 } from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
+import UserPublic from '../user-public/model'
+
 export interface MacroTotals {
   protein: number
   carbs: number
@@ -55,8 +57,6 @@ export default class Ingredient implements GQLIngredient {
   async createdBy() {
     const createdBy = this.data.createdBy
     if (createdBy) {
-      // Import UserPublic to avoid circular dependencies
-      const { default: UserPublic } = await import('../user-public/model')
       return new UserPublic(createdBy, this.context)
     }
     return null

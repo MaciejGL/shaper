@@ -1,0 +1,88 @@
+type Meal {
+  id: ID!
+  name: String!
+  description: String
+  instructions: [String!]!
+  preparationTime: Int
+  cookingTime: Int
+  servings: Int
+  ingredients: [MealIngredient!]!
+  totalMacros: MacroTotals!
+  createdBy: UserPublic
+  team: Team
+  createdAt: String!
+  updatedAt: String!
+}
+
+type MealIngredient {
+  id: ID!
+  ingredient: Ingredient!
+  grams: Float!
+  order: Int!
+  macros: MacroTotals!
+  createdAt: String!
+}
+
+type MacroTotals {
+  protein: Float!
+  carbs: Float!
+  fat: Float!
+  calories: Float!
+}
+
+input CreateMealInput {
+  name: String!
+  description: String
+  instructions: [String!]
+  preparationTime: Int
+  cookingTime: Int
+  servings: Int
+}
+
+input UpdateMealInput {
+  name: String
+  description: String
+  instructions: [String!]
+  preparationTime: Int
+  cookingTime: Int
+  servings: Int
+}
+
+input AddIngredientToMealInput {
+  mealId: ID!
+  ingredientId: ID!
+  grams: Float!
+}
+
+input UpdateMealIngredientInput {
+  id: ID!
+  grams: Float!
+}
+
+input ReorderMealIngredientsInput {
+  mealId: ID!
+  ingredientIds: [ID!]!
+}
+
+extend type Query {
+  # Get meals for the trainer's team
+  teamMeals(searchQuery: String): [Meal!]!
+
+  # Get a specific meal by ID (with team access control)
+  meal(id: ID!): Meal
+}
+
+extend type Mutation {
+  # Meal management
+  createMeal(input: CreateMealInput!): Meal!
+  updateMeal(id: ID!, input: UpdateMealInput!): Meal!
+  deleteMeal(id: ID!): Boolean!
+
+  # Ingredient management within meals
+  addIngredientToMeal(input: AddIngredientToMealInput!): MealIngredient!
+  updateMealIngredient(input: UpdateMealIngredientInput!): MealIngredient!
+  removeIngredientFromMeal(id: ID!): Boolean!
+  reorderMealIngredients(
+    input: ReorderMealIngredientsInput!
+  ): [MealIngredient!]!
+}
