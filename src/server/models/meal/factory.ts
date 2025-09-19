@@ -8,6 +8,8 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 
+import { TeamMealLibraryService } from './team-meal-library-service'
+
 export interface CreateMealFactoryOptions {
   name?: string
   description?: string
@@ -247,63 +249,7 @@ export async function searchTeamMeals(
     })[]
   })[]
 > {
-  const whereClause: Prisma.MealWhereInput = {
-    teamId,
-  }
-
-  // Add search functionality if query provided
-  if (searchQuery && searchQuery.trim()) {
-    whereClause.OR = [
-      {
-        name: {
-          contains: searchQuery.trim(),
-          mode: 'insensitive',
-        },
-      },
-      {
-        description: {
-          contains: searchQuery.trim(),
-          mode: 'insensitive',
-        },
-      },
-    ]
-  }
-
-  return await prisma.meal.findMany({
-    where: whereClause,
-    include: {
-      createdBy: {
-        include: {
-          profile: true,
-        },
-      },
-      team: true,
-      ingredients: {
-        include: {
-          ingredient: {
-            include: {
-              createdBy: {
-                include: {
-                  profile: true,
-                },
-              },
-            },
-          },
-        },
-        orderBy: {
-          orderIndex: 'asc',
-        },
-      },
-    },
-    orderBy: [
-      {
-        createdAt: 'desc',
-      },
-      {
-        name: 'asc',
-      },
-    ],
-  })
+  return await TeamMealLibraryService.getTeamMeals(teamId, searchQuery)
 }
 
 /**
@@ -381,36 +327,7 @@ export async function canModifyMeal(
   mealId: string,
   trainerId: string,
 ): Promise<boolean> {
-  const meal = await prisma.meal.findUnique({
-    where: { id: mealId },
-    select: {
-      createdById: true,
-      teamId: true,
-    },
-  })
-
-  if (!meal) {
-    return false
-  }
-
-  // Creator can always modify
-  if (meal.createdById === trainerId) {
-    return true
-  }
-
-  // Team admin can modify any meal in their team
-  if (meal.teamId) {
-    const teamMember = await prisma.teamMember.findFirst({
-      where: {
-        userId: trainerId,
-        teamId: meal.teamId,
-        role: 'ADMIN',
-      },
-    })
-    return !!teamMember
-  }
-
-  return false
+  return await TeamMealLibraryService.canModifyMeal(mealId, trainerId)
 }
 
 /**
