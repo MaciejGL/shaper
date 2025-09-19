@@ -46,3 +46,5 @@ next-env.d.ts
 expo-app/node_modules
 expo-app/hypertro-579ddbded873.json
 expo-app/hypertro-mobile-firebase-*
+
+.kiro/specs
