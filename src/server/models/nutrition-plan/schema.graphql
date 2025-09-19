@@ -1,0 +1,179 @@
+# Nutrition Plan Types
+
+type NutritionPlan {
+  id: ID!
+  name: String!
+  description: String
+  isSharedWithClient: Boolean!
+  sharedAt: String
+  createdAt: String!
+  updatedAt: String!
+
+  # Relations
+  trainer: UserPublic
+  client: UserPublic
+  days: [NutritionPlanDay!]!
+
+  # Computed fields
+  canUnshare: Boolean!
+  hoursUntilUnshareExpiry: Int
+  averageDailyMacros: MacroTotals!
+  dayCount: Int!
+  totalMealCount: Int!
+  planDurationRange: PlanDurationRange
+  hasConsecutiveDays: Boolean!
+  completenessScore: Float!
+  macroDistribution: MacroDistribution!
+}
+
+type NutritionPlanDay {
+  id: ID!
+  dayNumber: Int!
+  name: String!
+  createdAt: String!
+
+  # Relations
+  meals: [NutritionPlanMeal!]!
+
+  # Computed fields
+  dailyMacros: MacroTotals!
+  mealCount: Int!
+}
+
+type NutritionPlanMeal {
+  id: ID!
+  orderIndex: Int!
+  portionMultiplier: Float!
+  createdAt: String!
+
+  # Relations
+  meal: Meal!
+
+  # Computed fields
+  adjustedMacros: MacroTotals!
+}
+
+type PlanDurationRange {
+  minDay: Int!
+  maxDay: Int!
+}
+
+type MacroDistribution {
+  proteinPercentage: Int!
+  carbsPercentage: Int!
+  fatPercentage: Int!
+}
+
+# Input Types
+
+input CreateNutritionPlanInput {
+  name: String!
+  description: String
+  clientId: ID!
+}
+
+input UpdateNutritionPlanInput {
+  name: String
+  description: String
+}
+
+input AddNutritionPlanDayInput {
+  nutritionPlanId: ID!
+  dayNumber: Int!
+  name: String!
+}
+
+input AddMealToDayInput {
+  dayId: ID!
+  mealId: ID!
+  portionMultiplier: Float! = 1.0
+}
+
+input UpdateMealPortionInput {
+  planMealId: ID!
+  portionMultiplier: Float!
+}
+
+input ReorderDayMealsInput {
+  dayId: ID!
+  mealIds: [ID!]!
+}
+
+input CopyNutritionPlanInput {
+  sourceNutritionPlanId: ID!
+  targetClientId: ID!
+  name: String
+  description: String
+  portionAdjustments: [PortionAdjustmentInput!]
+}
+
+input PortionAdjustmentInput {
+  mealId: ID!
+  portionMultiplier: Float!
+}
+
+# Response Types
+
+type CreateNutritionPlanPayload {
+  nutritionPlan: NutritionPlan!
+  success: Boolean!
+}
+
+type CopyNutritionPlanPayload {
+  nutritionPlan: NutritionPlan!
+  success: Boolean!
+}
+
+# Queries
+
+extend type Query {
+  # Get nutrition plan by ID (with access control)
+  nutritionPlan(id: ID!): NutritionPlan
+
+  # Get trainer's nutrition plans
+  trainerNutritionPlans(clientId: ID, sharedOnly: Boolean): [NutritionPlan!]!
+
+  # Get client's nutrition plans (only shared ones)
+  clientNutritionPlans: [NutritionPlan!]!
+
+  # Get specific client's nutrition plans (for trainers)
+  getClientNutritionPlans(clientId: ID!): [NutritionPlan!]!
+}
+
+# Mutations
+
+extend type Mutation {
+  # Nutrition plan management
+  createNutritionPlan(
+    input: CreateNutritionPlanInput!
+  ): CreateNutritionPlanPayload!
+
+  updateNutritionPlan(id: ID!, input: UpdateNutritionPlanInput!): NutritionPlan!
+
+  deleteNutritionPlan(id: ID!): Boolean!
+
+  # Sharing management
+  shareNutritionPlanWithClient(id: ID!): NutritionPlan!
+  unshareNutritionPlanFromClient(id: ID!): NutritionPlan!
+
+  # Plan copying
+  copyNutritionPlan(input: CopyNutritionPlanInput!): CopyNutritionPlanPayload!
+
+  # Day management
+  addNutritionPlanDay(input: AddNutritionPlanDayInput!): NutritionPlanDay!
+
+  removeNutritionPlanDay(dayId: ID!): Boolean!
+
+  # Meal management within days
+  addMealToNutritionPlanDay(input: AddMealToDayInput!): NutritionPlanMeal!
+
+  updateNutritionPlanMealPortion(
+    input: UpdateMealPortionInput!
+  ): NutritionPlanMeal!
+
+  removeMealFromNutritionPlanDay(planMealId: ID!): Boolean!
+
+  reorderNutritionPlanDayMeals(
+    input: ReorderDayMealsInput!
+  ): [NutritionPlanMeal!]!
+}

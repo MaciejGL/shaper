@@ -74,6 +74,18 @@ export type GQLAddIngredientToMealInput = {
   mealId: Scalars['ID']['input'];
 };
 
+export type GQLAddMealToDayInput = {
+  dayId: Scalars['ID']['input'];
+  mealId: Scalars['ID']['input'];
+  portionMultiplier?: Scalars['Float']['input'];
+};
+
+export type GQLAddNutritionPlanDayInput = {
+  dayNumber: Scalars['Int']['input'];
+  name: Scalars['String']['input'];
+  nutritionPlanId: Scalars['ID']['input'];
+};
+
 export type GQLAddSetExerciseFormInput = {
   exerciseId: Scalars['ID']['input'];
   set: GQLAddSetExerciseFormSetInput;
@@ -304,6 +316,20 @@ export type GQLCopyExercisesFromDayInput = {
   targetDayId: Scalars['ID']['input'];
 };
 
+export type GQLCopyNutritionPlanInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  portionAdjustments?: InputMaybe<Array<GQLPortionAdjustmentInput>>;
+  sourceNutritionPlanId: Scalars['ID']['input'];
+  targetClientId: Scalars['ID']['input'];
+};
+
+export type GQLCopyNutritionPlanPayload = {
+  __typename?: 'CopyNutritionPlanPayload';
+  nutritionPlan: GQLNutritionPlan;
+  success: Scalars['Boolean']['output'];
+};
+
 export type GQLCreateBodyProgressLogInput = {
   image1Url?: InputMaybe<Scalars['String']['input']>;
   image2Url?: InputMaybe<Scalars['String']['input']>;
@@ -404,6 +430,18 @@ export type GQLCreateNotificationInput = {
   relatedItemId?: InputMaybe<Scalars['String']['input']>;
   type: GQLNotificationType;
   userId: Scalars['ID']['input'];
+};
+
+export type GQLCreateNutritionPlanInput = {
+  clientId: Scalars['ID']['input'];
+  description?: InputMaybe<Scalars['String']['input']>;
+  name: Scalars['String']['input'];
+};
+
+export type GQLCreateNutritionPlanPayload = {
+  __typename?: 'CreateNutritionPlanPayload';
+  nutritionPlan: GQLNutritionPlan;
+  success: Scalars['Boolean']['output'];
 };
 
 export type GQLCreatePushSubscriptionInput = {
@@ -740,6 +778,13 @@ export type GQLLogSetInput = {
   setId: Scalars['ID']['input'];
 };
 
+export type GQLMacroDistribution = {
+  __typename?: 'MacroDistribution';
+  carbsPercentage: Scalars['Int']['output'];
+  fatPercentage: Scalars['Int']['output'];
+  proteinPercentage: Scalars['Int']['output'];
+};
+
 export type GQLMacroTarget = {
   __typename?: 'MacroTarget';
   calories?: Maybe<Scalars['Int']['output']>;
@@ -879,6 +924,8 @@ export type GQLMutation = {
   addExercisesToQuickWorkout: GQLTrainingPlan;
   addExercisesToWorkout: Array<GQLTrainingExercise>;
   addIngredientToMeal: GQLMealIngredient;
+  addMealToNutritionPlanDay: GQLNutritionPlanMeal;
+  addNutritionPlanDay: GQLNutritionPlanDay;
   addSet: GQLExerciseSet;
   addSetExerciseForm: GQLExerciseSet;
   addSetToExercise: Scalars['ID']['output'];
@@ -894,6 +941,7 @@ export type GQLMutation = {
   clearUserSessions: Scalars['Boolean']['output'];
   closePlan: Scalars['Boolean']['output'];
   copyExercisesFromDay: Scalars['Boolean']['output'];
+  copyNutritionPlan: GQLCopyNutritionPlanPayload;
   createBodyProgressLog: GQLBodyProgressLog;
   createCoachingRequest: GQLCoachingRequest;
   createDraftTemplate: GQLTrainingPlan;
@@ -905,6 +953,7 @@ export type GQLMutation = {
   createNote: GQLNote;
   createNoteReply: GQLNote;
   createNotification: GQLNotification;
+  createNutritionPlan: GQLCreateNutritionPlanPayload;
   createPushSubscription: GQLPushSubscription;
   createQuickWorkout: GQLTrainingPlan;
   createReview: Scalars['Boolean']['output'];
@@ -920,6 +969,7 @@ export type GQLMutation = {
   deleteMessage: Scalars['Boolean']['output'];
   deleteNote: Scalars['Boolean']['output'];
   deleteNotification: Scalars['Boolean']['output'];
+  deleteNutritionPlan: Scalars['Boolean']['output'];
   deletePlan: Scalars['Boolean']['output'];
   deletePushSubscription: Scalars['Boolean']['output'];
   deleteReview: Scalars['Boolean']['output'];
@@ -949,6 +999,8 @@ export type GQLMutation = {
   removeExerciseFromDay: Scalars['Boolean']['output'];
   removeExerciseFromWorkout: Scalars['Boolean']['output'];
   removeIngredientFromMeal: Scalars['Boolean']['output'];
+  removeMealFromNutritionPlanDay: Scalars['Boolean']['output'];
+  removeNutritionPlanDay: Scalars['Boolean']['output'];
   removeSet: Scalars['Boolean']['output'];
   removeSetExerciseForm: Scalars['Boolean']['output'];
   removeSetFromExercise: Scalars['Boolean']['output'];
@@ -961,12 +1013,15 @@ export type GQLMutation = {
   removeUserSubscription: Scalars['Boolean']['output'];
   removeWeek: Scalars['Boolean']['output'];
   reorderMealIngredients: Array<GQLMealIngredient>;
+  reorderNutritionPlanDayMeals: Array<GQLNutritionPlanMeal>;
   resetUserLogs: Scalars['Boolean']['output'];
   respondToTeamInvitation: GQLTeamInvitation;
   sendMessage: GQLMessage;
   setMacroTargets: GQLMacroTarget;
+  shareNutritionPlanWithClient: GQLNutritionPlan;
   startWorkoutFromFavourite: Scalars['ID']['output'];
   swapExercise: GQLSubstitute;
+  unshareNutritionPlanFromClient: GQLNutritionPlan;
   updateBodyMeasurement: GQLUserBodyMeasure;
   updateBodyProgressLog: GQLBodyProgressLog;
   updateBodyProgressLogSharingStatus: GQLBodyProgressLog;
@@ -979,6 +1034,8 @@ export type GQLMutation = {
   updateMealIngredient: GQLMealIngredient;
   updateNote: GQLNote;
   updateNotification: GQLNotification;
+  updateNutritionPlan: GQLNutritionPlan;
+  updateNutritionPlanMealPortion: GQLNutritionPlanMeal;
   updateProfile?: Maybe<GQLUserProfile>;
   updatePushSubscription: GQLPushSubscription;
   updateReview: Scalars['Boolean']['output'];
@@ -1042,6 +1099,16 @@ export type GQLMutationAddExercisesToWorkoutArgs = {
 
 export type GQLMutationAddIngredientToMealArgs = {
   input: GQLAddIngredientToMealInput;
+};
+
+
+export type GQLMutationAddMealToNutritionPlanDayArgs = {
+  input: GQLAddMealToDayInput;
+};
+
+
+export type GQLMutationAddNutritionPlanDayArgs = {
+  input: GQLAddNutritionPlanDayInput;
 };
 
 
@@ -1110,6 +1177,11 @@ export type GQLMutationCopyExercisesFromDayArgs = {
 };
 
 
+export type GQLMutationCopyNutritionPlanArgs = {
+  input: GQLCopyNutritionPlanInput;
+};
+
+
 export type GQLMutationCreateBodyProgressLogArgs = {
   input: GQLCreateBodyProgressLogInput;
 };
@@ -1158,6 +1230,11 @@ export type GQLMutationCreateNoteReplyArgs = {
 
 export type GQLMutationCreateNotificationArgs = {
   input: GQLCreateNotificationInput;
+};
+
+
+export type GQLMutationCreateNutritionPlanArgs = {
+  input: GQLCreateNutritionPlanInput;
 };
 
 
@@ -1232,6 +1309,11 @@ export type GQLMutationDeleteNoteArgs = {
 
 
 export type GQLMutationDeleteNotificationArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDeleteNutritionPlanArgs = {
   id: Scalars['ID']['input'];
 };
 
@@ -1383,6 +1465,16 @@ export type GQLMutationRemoveIngredientFromMealArgs = {
 };
 
 
+export type GQLMutationRemoveMealFromNutritionPlanDayArgs = {
+  planMealId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveNutritionPlanDayArgs = {
+  dayId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationRemoveSetArgs = {
   setId: Scalars['ID']['input'];
 };
@@ -1445,6 +1537,11 @@ export type GQLMutationReorderMealIngredientsArgs = {
 };
 
 
+export type GQLMutationReorderNutritionPlanDayMealsArgs = {
+  input: GQLReorderDayMealsInput;
+};
+
+
 export type GQLMutationRespondToTeamInvitationArgs = {
   input: GQLRespondToTeamInvitationInput;
 };
@@ -1460,6 +1557,11 @@ export type GQLMutationSetMacroTargetsArgs = {
 };
 
 
+export type GQLMutationShareNutritionPlanWithClientArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationStartWorkoutFromFavouriteArgs = {
   input: GQLStartWorkoutFromFavouriteInput;
 };
@@ -1468,6 +1570,11 @@ export type GQLMutationStartWorkoutFromFavouriteArgs = {
 export type GQLMutationSwapExerciseArgs = {
   exerciseId: Scalars['ID']['input'];
   substituteId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationUnshareNutritionPlanFromClientArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1533,6 +1640,17 @@ export type GQLMutationUpdateNoteArgs = {
 
 export type GQLMutationUpdateNotificationArgs = {
   input: GQLUpdateNotificationInput;
+};
+
+
+export type GQLMutationUpdateNutritionPlanArgs = {
+  id: Scalars['ID']['input'];
+  input: GQLUpdateNutritionPlanInput;
+};
+
+
+export type GQLMutationUpdateNutritionPlanMealPortionArgs = {
+  input: GQLUpdateMealPortionInput;
 };
 
 
@@ -1691,6 +1809,50 @@ export enum GQLNotificationType {
   WorkoutCompleted = 'WORKOUT_COMPLETED'
 }
 
+export type GQLNutritionPlan = {
+  __typename?: 'NutritionPlan';
+  averageDailyMacros: GQLMacroTotals;
+  canUnshare: Scalars['Boolean']['output'];
+  client?: Maybe<GQLUserPublic>;
+  completenessScore: Scalars['Float']['output'];
+  createdAt: Scalars['String']['output'];
+  dayCount: Scalars['Int']['output'];
+  days: Array<GQLNutritionPlanDay>;
+  description?: Maybe<Scalars['String']['output']>;
+  hasConsecutiveDays: Scalars['Boolean']['output'];
+  hoursUntilUnshareExpiry?: Maybe<Scalars['Int']['output']>;
+  id: Scalars['ID']['output'];
+  isSharedWithClient: Scalars['Boolean']['output'];
+  macroDistribution: GQLMacroDistribution;
+  name: Scalars['String']['output'];
+  planDurationRange?: Maybe<GQLPlanDurationRange>;
+  sharedAt?: Maybe<Scalars['String']['output']>;
+  totalMealCount: Scalars['Int']['output'];
+  trainer?: Maybe<GQLUserPublic>;
+  updatedAt: Scalars['String']['output'];
+};
+
+export type GQLNutritionPlanDay = {
+  __typename?: 'NutritionPlanDay';
+  createdAt: Scalars['String']['output'];
+  dailyMacros: GQLMacroTotals;
+  dayNumber: Scalars['Int']['output'];
+  id: Scalars['ID']['output'];
+  mealCount: Scalars['Int']['output'];
+  meals: Array<GQLNutritionPlanMeal>;
+  name: Scalars['String']['output'];
+};
+
+export type GQLNutritionPlanMeal = {
+  __typename?: 'NutritionPlanMeal';
+  adjustedMacros: GQLMacroTotals;
+  createdAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  meal: GQLMeal;
+  orderIndex: Scalars['Int']['output'];
+  portionMultiplier: Scalars['Float']['output'];
+};
+
 export type GQLOneRmEntry = {
   __typename?: 'OneRmEntry';
   average1RM: Scalars['Float']['output'];
@@ -1756,6 +1918,17 @@ export type GQLPersonalRecordHistory = {
   weight: Scalars['Float']['output'];
 };
 
+export type GQLPlanDurationRange = {
+  __typename?: 'PlanDurationRange';
+  maxDay: Scalars['Int']['output'];
+  minDay: Scalars['Int']['output'];
+};
+
+export type GQLPortionAdjustmentInput = {
+  mealId: Scalars['ID']['input'];
+  portionMultiplier: Scalars['Float']['input'];
+};
+
 export type GQLPreviousExerciseLog = {
   __typename?: 'PreviousExerciseLog';
   completedAt?: Maybe<Scalars['String']['output']>;
@@ -1799,6 +1972,7 @@ export type GQLQuery = {
   checkPremiumAccess: Scalars['Boolean']['output'];
   clientBodyMeasures: Array<GQLUserBodyMeasure>;
   clientBodyProgressLogs: Array<GQLBodyProgressLog>;
+  clientNutritionPlans: Array<GQLNutritionPlan>;
   clientSharedNotes: Array<GQLNote>;
   coachingRequest?: Maybe<GQLCoachingRequest>;
   coachingRequests: Array<GQLCoachingRequest>;
@@ -1811,6 +1985,7 @@ export type GQLQuery = {
   getChatMessages: Array<GQLMessage>;
   getClientActivePlan?: Maybe<GQLTrainingPlan>;
   getClientMacroTargets?: Maybe<GQLMacroTarget>;
+  getClientNutritionPlans: Array<GQLNutritionPlan>;
   getClientTrainerOffers: Array<GQLTrainerOffer>;
   getClientTrainingPlans: Array<GQLTrainingPlan>;
   getExercises: GQLGetExercisesResponse;
@@ -1858,6 +2033,7 @@ export type GQLQuery = {
   notes: Array<GQLNote>;
   notification?: Maybe<GQLNotification>;
   notifications: Array<GQLNotification>;
+  nutritionPlan?: Maybe<GQLNutritionPlan>;
   popularIngredients: Array<GQLIngredient>;
   profile?: Maybe<GQLUserProfile>;
   publicExercises: Array<GQLBaseExercise>;
@@ -1869,6 +2045,7 @@ export type GQLQuery = {
   team?: Maybe<GQLTeam>;
   teamInvitations: Array<GQLTeamInvitation>;
   teamMeals: Array<GQLMeal>;
+  trainerNutritionPlans: Array<GQLNutritionPlan>;
   trainerSharedNotes: Array<GQLNote>;
   user?: Maybe<GQLUser>;
   userBasic?: Maybe<GQLUser>;
@@ -1951,6 +2128,11 @@ export type GQLQueryGetClientActivePlanArgs = {
 
 
 export type GQLQueryGetClientMacroTargetsArgs = {
+  clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetClientNutritionPlansArgs = {
   clientId: Scalars['ID']['input'];
 };
 
@@ -2123,6 +2305,11 @@ export type GQLQueryNotificationsArgs = {
 };
 
 
+export type GQLQueryNutritionPlanArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type GQLQueryPopularIngredientsArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
 };
@@ -2156,6 +2343,12 @@ export type GQLQueryTeamArgs = {
 
 export type GQLQueryTeamMealsArgs = {
   searchQuery?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type GQLQueryTrainerNutritionPlansArgs = {
+  clientId?: InputMaybe<Scalars['ID']['input']>;
+  sharedOnly?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
 
@@ -2216,6 +2409,11 @@ export type GQLRemoveTeamLocationInput = {
 export type GQLRemoveTeamMemberInput = {
   memberId: Scalars['ID']['input'];
   teamId: Scalars['ID']['input'];
+};
+
+export type GQLReorderDayMealsInput = {
+  dayId: Scalars['ID']['input'];
+  mealIds: Array<Scalars['ID']['input']>;
 };
 
 export type GQLReorderMealIngredientsInput = {
@@ -2731,6 +2929,11 @@ export type GQLUpdateMealInput = {
   servings?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type GQLUpdateMealPortionInput = {
+  planMealId: Scalars['ID']['input'];
+  portionMultiplier: Scalars['Float']['input'];
+};
+
 export type GQLUpdateNoteInput = {
   id: Scalars['ID']['input'];
   note: Scalars['String']['input'];
@@ -2744,6 +2947,11 @@ export type GQLUpdateNotificationInput = {
   message?: InputMaybe<Scalars['String']['input']>;
   read?: InputMaybe<Scalars['Boolean']['input']>;
   type?: InputMaybe<GQLNotificationType>;
+};
+
+export type GQLUpdateNutritionPlanInput = {
+  description?: InputMaybe<Scalars['String']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GQLUpdateProfileInput = {
