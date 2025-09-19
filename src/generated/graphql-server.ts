@@ -364,6 +364,14 @@ export type GQLCreateFavouriteWorkoutSetInput = {
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type GQLCreateIngredientInput = {
+  caloriesPer100g: Scalars['Float']['input'];
+  carbsPer100g: Scalars['Float']['input'];
+  fatPer100g: Scalars['Float']['input'];
+  name: Scalars['String']['input'];
+  proteinPer100g: Scalars['Float']['input'];
+};
+
 export type GQLCreateNoteInput = {
   note: Scalars['String']['input'];
   relatedTo?: InputMaybe<Scalars['ID']['input']>;
@@ -681,6 +689,19 @@ export type GQLImage = {
   url: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
+export type GQLIngredient = {
+  __typename?: 'Ingredient';
+  caloriesPer100g: EntireFieldWrapper<Scalars['Float']['output']>;
+  carbsPer100g: EntireFieldWrapper<Scalars['Float']['output']>;
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  createdBy?: EntireFieldWrapper<Maybe<GQLUserPublic>>;
+  fatPer100g: EntireFieldWrapper<Scalars['Float']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  name: EntireFieldWrapper<Scalars['String']['output']>;
+  proteinPer100g: EntireFieldWrapper<Scalars['Float']['output']>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
 export enum GQLInvitationStatus {
   Accepted = 'ACCEPTED',
   Pending = 'PENDING',
@@ -830,6 +851,7 @@ export type GQLMutation = {
   createExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   createExerciseNote: EntireFieldWrapper<GQLNote>;
   createFavouriteWorkout: EntireFieldWrapper<GQLFavouriteWorkout>;
+  createIngredient: EntireFieldWrapper<GQLIngredient>;
   createNote: EntireFieldWrapper<GQLNote>;
   createNoteReply: EntireFieldWrapper<GQLNote>;
   createNotification: EntireFieldWrapper<GQLNotification>;
@@ -899,6 +921,7 @@ export type GQLMutation = {
   updateExerciseForm: EntireFieldWrapper<GQLTrainingExercise>;
   updateExerciseSet: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateFavouriteWorkout: EntireFieldWrapper<GQLFavouriteWorkout>;
+  updateIngredient: EntireFieldWrapper<GQLIngredient>;
   updateNote: EntireFieldWrapper<GQLNote>;
   updateNotification: EntireFieldWrapper<GQLNotification>;
   updateProfile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
@@ -1050,6 +1073,11 @@ export type GQLMutationCreateExerciseNoteArgs = {
 
 export type GQLMutationCreateFavouriteWorkoutArgs = {
   input: GQLCreateFavouriteWorkoutInput;
+};
+
+
+export type GQLMutationCreateIngredientArgs = {
+  input: GQLCreateIngredientInput;
 };
 
 
@@ -1401,6 +1429,12 @@ export type GQLMutationUpdateFavouriteWorkoutArgs = {
 };
 
 
+export type GQLMutationUpdateIngredientArgs = {
+  id: Scalars['ID']['input'];
+  input: GQLUpdateIngredientInput;
+};
+
+
 export type GQLMutationUpdateNoteArgs = {
   input: GQLUpdateNoteInput;
 };
@@ -1718,6 +1752,7 @@ export type GQLQuery = {
   getWorkoutDay?: EntireFieldWrapper<Maybe<GQLGetWorkoutDayPayload>>;
   getWorkoutInfo: EntireFieldWrapper<GQLTrainingDay>;
   getWorkoutNavigation?: EntireFieldWrapper<Maybe<GQLGetWorkoutNavigationPayload>>;
+  ingredient?: EntireFieldWrapper<Maybe<GQLIngredient>>;
   locations: EntireFieldWrapper<Array<GQLLocation>>;
   muscleGroupCategories: EntireFieldWrapper<Array<GQLMuscleGroupCategory>>;
   muscleGroupCategory: EntireFieldWrapper<GQLMuscleGroupCategory>;
@@ -1731,10 +1766,13 @@ export type GQLQuery = {
   notes: EntireFieldWrapper<Array<GQLNote>>;
   notification?: EntireFieldWrapper<Maybe<GQLNotification>>;
   notifications: EntireFieldWrapper<Array<GQLNotification>>;
+  popularIngredients: EntireFieldWrapper<Array<GQLIngredient>>;
   profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
   publicExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
   pushSubscription?: EntireFieldWrapper<Maybe<GQLPushSubscription>>;
   pushSubscriptions: EntireFieldWrapper<Array<GQLPushSubscription>>;
+  recentIngredients: EntireFieldWrapper<Array<GQLIngredient>>;
+  searchIngredients: EntireFieldWrapper<Array<GQLIngredient>>;
   sentTeamInvitations: EntireFieldWrapper<Array<GQLTeamInvitation>>;
   team?: EntireFieldWrapper<Maybe<GQLTeam>>;
   teamInvitations: EntireFieldWrapper<Array<GQLTeamInvitation>>;
@@ -1928,6 +1966,11 @@ export type GQLQueryGetWorkoutNavigationArgs = {
 };
 
 
+export type GQLQueryIngredientArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type GQLQueryMuscleGroupCategoryArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1982,6 +2025,11 @@ export type GQLQueryNotificationsArgs = {
 };
 
 
+export type GQLQueryPopularIngredientsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type GQLQueryPublicExercisesArgs = {
   where?: InputMaybe<GQLExerciseWhereInput>;
 };
@@ -1989,6 +2037,17 @@ export type GQLQueryPublicExercisesArgs = {
 
 export type GQLQueryPushSubscriptionArgs = {
   endpoint: Scalars['String']['input'];
+};
+
+
+export type GQLQueryRecentIngredientsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQuerySearchIngredientsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  query: Scalars['String']['input'];
 };
 
 
@@ -2542,6 +2601,14 @@ export type GQLUpdateFavouriteWorkoutSetInput = {
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type GQLUpdateIngredientInput = {
+  caloriesPer100g?: InputMaybe<Scalars['Float']['input']>;
+  carbsPer100g?: InputMaybe<Scalars['Float']['input']>;
+  fatPer100g?: InputMaybe<Scalars['Float']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  proteinPer100g?: InputMaybe<Scalars['Float']['input']>;
+};
+
 export type GQLUpdateNoteInput = {
   id: Scalars['ID']['input'];
   note: Scalars['String']['input'];
@@ -3017,6 +3084,7 @@ export type GQLResolversTypes = {
   CreateFavouriteWorkoutExerciseInput: GQLCreateFavouriteWorkoutExerciseInput;
   CreateFavouriteWorkoutInput: GQLCreateFavouriteWorkoutInput;
   CreateFavouriteWorkoutSetInput: GQLCreateFavouriteWorkoutSetInput;
+  CreateIngredientInput: GQLCreateIngredientInput;
   CreateNoteInput: GQLCreateNoteInput;
   CreateNoteReplyInput: GQLCreateNoteReplyInput;
   CreateNotificationInput: GQLCreateNotificationInput;
@@ -3056,6 +3124,7 @@ export type GQLResolversTypes = {
   HeightUnit: GQLHeightUnit;
   ID: ResolverTypeWrapper<Scalars['ID']['output']>;
   Image: ResolverTypeWrapper<GQLImage>;
+  Ingredient: ResolverTypeWrapper<GQLIngredient>;
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   InvitationStatus: GQLInvitationStatus;
   InviteTeamMemberInput: GQLInviteTeamMemberInput;
@@ -3138,6 +3207,7 @@ export type GQLResolversTypes = {
   UpdateFavouriteWorkoutExerciseInput: GQLUpdateFavouriteWorkoutExerciseInput;
   UpdateFavouriteWorkoutInput: GQLUpdateFavouriteWorkoutInput;
   UpdateFavouriteWorkoutSetInput: GQLUpdateFavouriteWorkoutSetInput;
+  UpdateIngredientInput: GQLUpdateIngredientInput;
   UpdateNoteInput: GQLUpdateNoteInput;
   UpdateNotificationInput: GQLUpdateNotificationInput;
   UpdateProfileInput: GQLUpdateProfileInput;
@@ -3210,6 +3280,7 @@ export type GQLResolversParentTypes = {
   CreateFavouriteWorkoutExerciseInput: GQLCreateFavouriteWorkoutExerciseInput;
   CreateFavouriteWorkoutInput: GQLCreateFavouriteWorkoutInput;
   CreateFavouriteWorkoutSetInput: GQLCreateFavouriteWorkoutSetInput;
+  CreateIngredientInput: GQLCreateIngredientInput;
   CreateNoteInput: GQLCreateNoteInput;
   CreateNoteReplyInput: GQLCreateNoteReplyInput;
   CreateNotificationInput: GQLCreateNotificationInput;
@@ -3241,6 +3312,7 @@ export type GQLResolversParentTypes = {
   GetWorkoutNavigationPayload: GQLGetWorkoutNavigationPayload;
   ID: Scalars['ID']['output'];
   Image: GQLImage;
+  Ingredient: GQLIngredient;
   Int: Scalars['Int']['output'];
   InviteTeamMemberInput: GQLInviteTeamMemberInput;
   Location: GQLLocation;
@@ -3308,6 +3380,7 @@ export type GQLResolversParentTypes = {
   UpdateFavouriteWorkoutExerciseInput: GQLUpdateFavouriteWorkoutExerciseInput;
   UpdateFavouriteWorkoutInput: GQLUpdateFavouriteWorkoutInput;
   UpdateFavouriteWorkoutSetInput: GQLUpdateFavouriteWorkoutSetInput;
+  UpdateIngredientInput: GQLUpdateIngredientInput;
   UpdateNoteInput: GQLUpdateNoteInput;
   UpdateNotificationInput: GQLUpdateNotificationInput;
   UpdateProfileInput: GQLUpdateProfileInput;
@@ -3614,6 +3687,19 @@ export type GQLImageResolvers<ContextType = GQLContext, ParentType extends GQLRe
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLIngredientResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Ingredient'] = GQLResolversParentTypes['Ingredient']> = {
+  caloriesPer100g?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  carbsPer100g?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  createdBy?: Resolver<Maybe<GQLResolversTypes['UserPublic']>, ParentType, ContextType>;
+  fatPer100g?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  proteinPer100g?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLLocationResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Location'] = GQLResolversParentTypes['Location']> = {
   city?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   country?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -3727,6 +3813,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   createExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCreateExerciseArgs, 'input'>>;
   createExerciseNote?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationCreateExerciseNoteArgs, 'input'>>;
   createFavouriteWorkout?: Resolver<GQLResolversTypes['FavouriteWorkout'], ParentType, ContextType, RequireFields<GQLMutationCreateFavouriteWorkoutArgs, 'input'>>;
+  createIngredient?: Resolver<GQLResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<GQLMutationCreateIngredientArgs, 'input'>>;
   createNote?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationCreateNoteArgs, 'input'>>;
   createNoteReply?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationCreateNoteReplyArgs, 'input'>>;
   createNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationCreateNotificationArgs, 'input'>>;
@@ -3796,6 +3883,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateExerciseForm?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseFormArgs, 'input'>>;
   updateExerciseSet?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseSetArgs, 'input'>>;
   updateFavouriteWorkout?: Resolver<GQLResolversTypes['FavouriteWorkout'], ParentType, ContextType, RequireFields<GQLMutationUpdateFavouriteWorkoutArgs, 'input'>>;
+  updateIngredient?: Resolver<GQLResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<GQLMutationUpdateIngredientArgs, 'id' | 'input'>>;
   updateNote?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationUpdateNoteArgs, 'input'>>;
   updateNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationUpdateNotificationArgs, 'input'>>;
   updateProfile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType, RequireFields<GQLMutationUpdateProfileArgs, 'input'>>;
@@ -4011,6 +4099,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getWorkoutDay?: Resolver<Maybe<GQLResolversTypes['GetWorkoutDayPayload']>, ParentType, ContextType, Partial<GQLQueryGetWorkoutDayArgs>>;
   getWorkoutInfo?: Resolver<GQLResolversTypes['TrainingDay'], ParentType, ContextType, RequireFields<GQLQueryGetWorkoutInfoArgs, 'dayId'>>;
   getWorkoutNavigation?: Resolver<Maybe<GQLResolversTypes['GetWorkoutNavigationPayload']>, ParentType, ContextType, Partial<GQLQueryGetWorkoutNavigationArgs>>;
+  ingredient?: Resolver<Maybe<GQLResolversTypes['Ingredient']>, ParentType, ContextType, RequireFields<GQLQueryIngredientArgs, 'id'>>;
   locations?: Resolver<Array<GQLResolversTypes['Location']>, ParentType, ContextType>;
   muscleGroupCategories?: Resolver<Array<GQLResolversTypes['MuscleGroupCategory']>, ParentType, ContextType>;
   muscleGroupCategory?: Resolver<GQLResolversTypes['MuscleGroupCategory'], ParentType, ContextType, RequireFields<GQLQueryMuscleGroupCategoryArgs, 'id'>>;
@@ -4024,10 +4113,13 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   notes?: Resolver<Array<GQLResolversTypes['Note']>, ParentType, ContextType, Partial<GQLQueryNotesArgs>>;
   notification?: Resolver<Maybe<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLQueryNotificationArgs, 'id'>>;
   notifications?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLQueryNotificationsArgs, 'userId'>>;
+  popularIngredients?: Resolver<Array<GQLResolversTypes['Ingredient']>, ParentType, ContextType, Partial<GQLQueryPopularIngredientsArgs>>;
   profile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType>;
   publicExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType, Partial<GQLQueryPublicExercisesArgs>>;
   pushSubscription?: Resolver<Maybe<GQLResolversTypes['PushSubscription']>, ParentType, ContextType, RequireFields<GQLQueryPushSubscriptionArgs, 'endpoint'>>;
   pushSubscriptions?: Resolver<Array<GQLResolversTypes['PushSubscription']>, ParentType, ContextType>;
+  recentIngredients?: Resolver<Array<GQLResolversTypes['Ingredient']>, ParentType, ContextType, Partial<GQLQueryRecentIngredientsArgs>>;
+  searchIngredients?: Resolver<Array<GQLResolversTypes['Ingredient']>, ParentType, ContextType, RequireFields<GQLQuerySearchIngredientsArgs, 'query'>>;
   sentTeamInvitations?: Resolver<Array<GQLResolversTypes['TeamInvitation']>, ParentType, ContextType>;
   team?: Resolver<Maybe<GQLResolversTypes['Team']>, ParentType, ContextType, RequireFields<GQLQueryTeamArgs, 'id'>>;
   teamInvitations?: Resolver<Array<GQLResolversTypes['TeamInvitation']>, ParentType, ContextType>;
@@ -4477,6 +4569,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   GetWorkoutDayPayload?: GQLGetWorkoutDayPayloadResolvers<ContextType>;
   GetWorkoutNavigationPayload?: GQLGetWorkoutNavigationPayloadResolvers<ContextType>;
   Image?: GQLImageResolvers<ContextType>;
+  Ingredient?: GQLIngredientResolvers<ContextType>;
   Location?: GQLLocationResolvers<ContextType>;
   MacroTarget?: GQLMacroTargetResolvers<ContextType>;
   Message?: GQLMessageResolvers<ContextType>;

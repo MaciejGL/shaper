@@ -1,0 +1,49 @@
+type Ingredient {
+  id: ID!
+  name: String!
+  proteinPer100g: Float!
+  carbsPer100g: Float!
+  fatPer100g: Float!
+  caloriesPer100g: Float!
+  createdBy: UserPublic
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateIngredientInput {
+  name: String!
+  proteinPer100g: Float!
+  carbsPer100g: Float!
+  fatPer100g: Float!
+  caloriesPer100g: Float!
+}
+
+input UpdateIngredientInput {
+  name: String
+  proteinPer100g: Float
+  carbsPer100g: Float
+  fatPer100g: Float
+  caloriesPer100g: Float
+}
+
+type Query {
+  # Search ingredients globally with full-text search
+  searchIngredients(query: String!, limit: Int): [Ingredient!]!
+
+  # Get ingredient by ID
+  ingredient(id: ID!): Ingredient
+
+  # Get recently created ingredients (for quick access)
+  recentIngredients(limit: Int): [Ingredient!]!
+
+  # Get popular ingredients (most used in meals)
+  popularIngredients(limit: Int): [Ingredient!]!
+}
+
+type Mutation {
+  # Create a new global ingredient
+  createIngredient(input: CreateIngredientInput!): Ingredient!
+
+  # Update an existing ingredient (only by creator)
+  updateIngredient(id: ID!, input: UpdateIngredientInput!): Ingredient!
+}

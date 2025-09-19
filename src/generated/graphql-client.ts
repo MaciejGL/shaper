@@ -362,6 +362,14 @@ export type GQLCreateFavouriteWorkoutSetInput = {
   weight?: InputMaybe<Scalars['Float']['input']>;
 };
 
+export type GQLCreateIngredientInput = {
+  caloriesPer100g: Scalars['Float']['input'];
+  carbsPer100g: Scalars['Float']['input'];
+  fatPer100g: Scalars['Float']['input'];
+  name: Scalars['String']['input'];
+  proteinPer100g: Scalars['Float']['input'];
+};
+
 export type GQLCreateNoteInput = {
   note: Scalars['String']['input'];
   relatedTo?: InputMaybe<Scalars['ID']['input']>;
@@ -679,6 +687,19 @@ export type GQLImage = {
   url: Scalars['String']['output'];
 };
 
+export type GQLIngredient = {
+  __typename?: 'Ingredient';
+  caloriesPer100g: Scalars['Float']['output'];
+  carbsPer100g: Scalars['Float']['output'];
+  createdAt: Scalars['String']['output'];
+  createdBy?: Maybe<GQLUserPublic>;
+  fatPer100g: Scalars['Float']['output'];
+  id: Scalars['ID']['output'];
+  name: Scalars['String']['output'];
+  proteinPer100g: Scalars['Float']['output'];
+  updatedAt: Scalars['String']['output'];
+};
+
 export enum GQLInvitationStatus {
   Accepted = 'ACCEPTED',
   Pending = 'PENDING',
@@ -828,6 +849,7 @@ export type GQLMutation = {
   createExercise: Scalars['Boolean']['output'];
   createExerciseNote: GQLNote;
   createFavouriteWorkout: GQLFavouriteWorkout;
+  createIngredient: GQLIngredient;
   createNote: GQLNote;
   createNoteReply: GQLNote;
   createNotification: GQLNotification;
@@ -897,6 +919,7 @@ export type GQLMutation = {
   updateExerciseForm: GQLTrainingExercise;
   updateExerciseSet: Scalars['Boolean']['output'];
   updateFavouriteWorkout: GQLFavouriteWorkout;
+  updateIngredient: GQLIngredient;
   updateNote: GQLNote;
   updateNotification: GQLNotification;
   updateProfile?: Maybe<GQLUserProfile>;
@@ -1048,6 +1071,11 @@ export type GQLMutationCreateExerciseNoteArgs = {
 
 export type GQLMutationCreateFavouriteWorkoutArgs = {
   input: GQLCreateFavouriteWorkoutInput;
+};
+
+
+export type GQLMutationCreateIngredientArgs = {
+  input: GQLCreateIngredientInput;
 };
 
 
@@ -1399,6 +1427,12 @@ export type GQLMutationUpdateFavouriteWorkoutArgs = {
 };
 
 
+export type GQLMutationUpdateIngredientArgs = {
+  id: Scalars['ID']['input'];
+  input: GQLUpdateIngredientInput;
+};
+
+
 export type GQLMutationUpdateNoteArgs = {
   input: GQLUpdateNoteInput;
 };
@@ -1716,6 +1750,7 @@ export type GQLQuery = {
   getWorkoutDay?: Maybe<GQLGetWorkoutDayPayload>;
   getWorkoutInfo: GQLTrainingDay;
   getWorkoutNavigation?: Maybe<GQLGetWorkoutNavigationPayload>;
+  ingredient?: Maybe<GQLIngredient>;
   locations: Array<GQLLocation>;
   muscleGroupCategories: Array<GQLMuscleGroupCategory>;
   muscleGroupCategory: GQLMuscleGroupCategory;
@@ -1729,10 +1764,13 @@ export type GQLQuery = {
   notes: Array<GQLNote>;
   notification?: Maybe<GQLNotification>;
   notifications: Array<GQLNotification>;
+  popularIngredients: Array<GQLIngredient>;
   profile?: Maybe<GQLUserProfile>;
   publicExercises: Array<GQLBaseExercise>;
   pushSubscription?: Maybe<GQLPushSubscription>;
   pushSubscriptions: Array<GQLPushSubscription>;
+  recentIngredients: Array<GQLIngredient>;
+  searchIngredients: Array<GQLIngredient>;
   sentTeamInvitations: Array<GQLTeamInvitation>;
   team?: Maybe<GQLTeam>;
   teamInvitations: Array<GQLTeamInvitation>;
@@ -1926,6 +1964,11 @@ export type GQLQueryGetWorkoutNavigationArgs = {
 };
 
 
+export type GQLQueryIngredientArgs = {
+  id: Scalars['ID']['input'];
+};
+
+
 export type GQLQueryMuscleGroupCategoryArgs = {
   id: Scalars['ID']['input'];
 };
@@ -1980,6 +2023,11 @@ export type GQLQueryNotificationsArgs = {
 };
 
 
+export type GQLQueryPopularIngredientsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
 export type GQLQueryPublicExercisesArgs = {
   where?: InputMaybe<GQLExerciseWhereInput>;
 };
@@ -1987,6 +2035,17 @@ export type GQLQueryPublicExercisesArgs = {
 
 export type GQLQueryPushSubscriptionArgs = {
   endpoint: Scalars['String']['input'];
+};
+
+
+export type GQLQueryRecentIngredientsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQuerySearchIngredientsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  query: Scalars['String']['input'];
 };
 
 
@@ -2538,6 +2597,14 @@ export type GQLUpdateFavouriteWorkoutSetInput = {
   reps?: InputMaybe<Scalars['Int']['input']>;
   rpe?: InputMaybe<Scalars['Int']['input']>;
   weight?: InputMaybe<Scalars['Float']['input']>;
+};
+
+export type GQLUpdateIngredientInput = {
+  caloriesPer100g?: InputMaybe<Scalars['Float']['input']>;
+  carbsPer100g?: InputMaybe<Scalars['Float']['input']>;
+  fatPer100g?: InputMaybe<Scalars['Float']['input']>;
+  name?: InputMaybe<Scalars['String']['input']>;
+  proteinPer100g?: InputMaybe<Scalars['Float']['input']>;
 };
 
 export type GQLUpdateNoteInput = {
