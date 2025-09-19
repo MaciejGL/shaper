@@ -24,7 +24,6 @@ export function EmailForm({
         value={email}
         variant="secondary"
         onChange={onEmailChange}
-        autoFocus
         placeholder="name@example.com"
         iconStart={<MailIcon />}
         label="Email"
