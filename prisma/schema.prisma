@@ -86,6 +86,12 @@ model User {
   // Personal records
   personalRecords PersonalRecord[]
 
+  // Meal planning relations
+  createdNutritionPlans  NutritionPlan[] @relation("TrainerNutritionPlans")
+  assignedNutritionPlans NutritionPlan[] @relation("ClientNutritionPlans")
+  createdMeals           Meal[]          @relation("CreatedMeals")
+  createdIngredients     Ingredient[]    @relation("CreatedIngredients")
+
   @@index([trainerId])
   @@index([stripeCustomerId])
   @@index([trainerId, role])  // For trainer-client relationship queries
@@ -865,6 +871,9 @@ model Team {
   locations   TeamLocation[]
   members     TeamMember[]
   invitations TeamInvitation[]
+  
+  // Meal planning relations
+  meals Meal[]
 }
 
 // Team membership
@@ -1010,4 +1019,118 @@ model MacroTarget {
   
   @@index([clientId])
   @@index([trainerId])
+}
+
+// Meal Planning System Models
+
+model NutritionPlan {
+  id                  String               @id @default(uuid())
+  name                String
+  description         String?
+  trainerId           String
+  clientId            String
+  isSharedWithClient  Boolean              @default(false)
+  sharedAt            DateTime?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  trainer             User                 @relation("TrainerNutritionPlans", fields: [trainerId], references: [id], onDelete: Cascade)
+  client              User                 @relation("ClientNutritionPlans", fields: [clientId], references: [id], onDelete: Cascade)
+  days                NutritionPlanDay[]
+
+  @@index([trainerId, clientId])
+  @@index([trainerId, isSharedWithClient])
+  @@index([clientId, isSharedWithClient])
+  @@index([trainerId, clientId, isSharedWithClient])
+  @@index([sharedAt])
+  @@index([updatedAt])
+}
+
+model NutritionPlanDay {
+  id               String               @id @default(uuid())
+  nutritionPlanId  String
+  dayNumber        Int
+  name             String
+  createdAt        DateTime             @default(now())
+
+  nutritionPlan    NutritionPlan        @relation(fields: [nutritionPlanId], references: [id], onDelete: Cascade)
+  meals            NutritionPlanMeal[]
+
+  @@unique([nutritionPlanId, dayNumber])
+  @@index([nutritionPlanId, dayNumber])
+}
+
+model Meal {
+  id              String               @id @default(uuid())
+  name            String
+  description     String?
+  instructions    String[]             @default([])
+  preparationTime Int?                 // minutes
+  cookingTime     Int?                 // minutes
+  servings        Int?
+  createdById     String
+  teamId          String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  createdBy       User                 @relation("CreatedMeals", fields: [createdById], references: [id])
+  team            Team?                @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  ingredients     MealIngredient[]
+  planMeals       NutritionPlanMeal[]
+
+  @@index([teamId, createdAt])
+  @@index([teamId, name])
+  @@index([createdById, createdAt])
+  @@index([teamId, name, createdAt])
+}
+
+model Ingredient {
+  id              String           @id @default(uuid())
+  name            String
+  proteinPer100g  Float            @default(0)
+  carbsPer100g    Float            @default(0)
+  fatPer100g      Float            @default(0)
+  caloriesPer100g Float            @default(0)
+  createdById     String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  createdBy       User             @relation("CreatedIngredients", fields: [createdById], references: [id])
+  mealIngredients MealIngredient[]
+
+  @@index([createdById, createdAt])
+  @@index([name])
+}
+
+model MealIngredient {
+  id           String     @id @default(uuid())
+  mealId       String
+  ingredientId String
+  grams        Float
+  orderIndex   Int        @default(0)
+  createdAt    DateTime   @default(now())
+
+  meal         Meal       @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@unique([mealId, ingredientId])
+  @@index([mealId, orderIndex])
+  @@index([ingredientId])
+  @@index([mealId])
+}
+
+model NutritionPlanMeal {
+  id                   String           @id @default(uuid())
+  nutritionPlanDayId   String
+  mealId               String
+  orderIndex           Int              @default(0)
+  portionMultiplier    Float            @default(1.0)
+  createdAt            DateTime         @default(now())
+
+  nutritionPlanDay     NutritionPlanDay @relation(fields: [nutritionPlanDayId], references: [id], onDelete: Cascade)
+  meal                 Meal             @relation(fields: [mealId], references: [id], onDelete: Cascade)
+
+  @@index([nutritionPlanDayId, orderIndex])
+  @@index([mealId])
+  @@index([nutritionPlanDayId])
 }
