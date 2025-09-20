@@ -8,6 +8,8 @@ import { ProgressImageGallery } from '@/components/private-images/image-gallery'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useClientBodyProgressLogsQuery } from '@/generated/graphql-client'
 
+import { ClientHeader } from '../header'
+
 interface ClientBodyProgressLogsProps {
   clientId: string
   clientName: string
@@ -25,54 +27,56 @@ export function ClientBodyProgressLogs({
 
   if (isLoading) {
     return (
-      <Card borderless>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Camera className="h-5 w-5" />
-            Body Progress Snapshots
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex justify-center py-8">
-            <Loader />
-          </div>
-        </CardContent>
-      </Card>
+      <div>
+        <ClientHeader title="Body Progress Snapshots" />
+        <Card borderless>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5" />
+              Body Progress Snapshots
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex justify-center py-8">
+              <Loader />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
   if (progressLogs.length === 0) {
     return (
-      <Card borderless>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Camera className="h-5 w-5" />
-            Body Progress Snapshots
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <Camera className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="font-semibold mb-2">No Shared Snapshots Yet</h3>
-            <p className="text-muted-foreground text-sm">
-              {clientName} hasn't shared any body progress snapshots with you
-              yet.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <div>
+        <ClientHeader title="Body Progress Snapshots" />
+        <Card borderless>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5" />
+              Body Progress Snapshots
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <Camera className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <h3 className="font-semibold mb-2">No Shared Snapshots Yet</h3>
+              <p className="text-muted-foreground text-sm">
+                {clientName} hasn't shared any body progress snapshots with you
+                yet.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
   return (
     <div>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Camera className="h-5 w-5" />
-          Body Progress Snapshots
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+      <ClientHeader title="Body Progress Snapshots" />
+
+      <div>
         <div className="space-y-6">
           {progressLogs.map((log) => (
             <div key={log.id} className="space-y-2">
@@ -103,7 +107,7 @@ export function ClientBodyProgressLogs({
             </div>
           ))}
         </div>
-      </CardContent>
+      </div>
     </div>
   )
 }

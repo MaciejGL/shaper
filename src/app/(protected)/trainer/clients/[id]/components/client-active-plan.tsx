@@ -4,6 +4,7 @@ import { ButtonLink } from '@/components/ui/button-link'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { GQLGetClientByIdQuery } from '@/generated/graphql-client'
 
+import { ClientHeader } from './header'
 import { ExerciseLogs } from './plan-assignment/exercise-logs'
 import { NoPlanCard } from './plan-assignment/no-plan-card'
 import { PlanDetails } from './plan-assignment/plan-details'
@@ -23,19 +24,20 @@ export function ClientActivePlan({
 }) {
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-semibold">Active Plan</h2>
-        {activePlan && (
-          <ButtonLink
-            href={`/trainer/trainings/creator/${activePlan.id}`}
-            variant="secondary"
-            size="sm"
-            iconStart={<Edit className="h-4 w-4" />}
-          >
-            Edit Plan
-          </ButtonLink>
-        )}
-      </div>
+      <ClientHeader
+        title="Active Plan"
+        action={
+          activePlan && (
+            <ButtonLink
+              href={`/trainer/trainings/creator/${activePlan.id}`}
+              size="sm"
+              iconStart={<Edit />}
+            >
+              Edit Plan
+            </ButtonLink>
+          )
+        }
+      />
 
       {activePlan ? (
         <Tabs defaultValue="active-plan">

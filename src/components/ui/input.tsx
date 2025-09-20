@@ -16,9 +16,9 @@ type InputProps = Omit<React.ComponentProps<'input'>, 'size'> & {
 const inputVariants = cva(
   cn(
     'file:text-foreground placeholder:text-muted-foreground/80 flex h-9 w-full min-w-0 rounded-md px-3 py-1 text-base transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:text-sm file:font-medium disabled:pointer-events-none disabled:opacity-50 md:text-sm',
-    'focus-visible:ring-primary focus-visible:inset-ring-[1px] focus-visible:-ring-offset-0',
-    'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
-    'data-[error]:border data-[error]:border-destructive data-[error]:ring-destructive/20 dark:data-[error]:ring-destructive/40 data-[error]:focus-visible:ring-destructive/20 dark:data-[error]:focus-visible:ring-destructive/40',
+    'focus-visible:ring-ring focus-visible:ring-[1px] data-[error]:focus-visible:ring-destructive/20 dark:data-[error]:focus-visible:ring-destructive/40 leading-relaxed',
+    'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40',
+    'data-[error]:border data-[error]:border-destructive data-[error]:ring-destructive/20 dark:data-[error]:ring-destructive/40 dark:data-[error]:focus-visible:ring-destructive/40',
   ),
   {
     variants: {

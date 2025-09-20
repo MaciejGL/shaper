@@ -35,6 +35,7 @@ import {
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 
+import { ClientHeader } from './header'
 import { AssignPlanDialog } from './plan-assignment/assignment-dialog'
 
 type SharedPlansWithClientProps = {
@@ -52,46 +53,46 @@ export function SharedPlansWithClient({
 }: SharedPlansWithClientProps) {
   return (
     <div className="@container/shared-plans">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-semibold">Assigned Plans</h2>
-        <div className="flex gap-2">
-          <AssignPlanDialog
-            clientName={clientName}
-            clientId={clientId}
-            activePlan={activePlan}
-            trigger={
-              <Button
-                variant="outline"
-                size="icon-sm"
-                iconOnly={<LucideFilePlus2 />}
-              />
-            }
-          />
-          {plans.length > 3 && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="icon-sm"
-                  iconOnly={<LucideList />}
-                />
-              </DialogTrigger>
-              <DialogContent dialogTitle="Assigned Plans">
-                <DialogTitle>Assigned Plans</DialogTitle>
-                <DialogDescription className="grid gap-6">
-                  {plans.map((plan) => (
-                    <TrainingCard
-                      key={plan.id}
-                      plan={plan}
-                      clientName={clientName}
-                    />
-                  ))}
-                </DialogDescription>
-              </DialogContent>
-            </Dialog>
-          )}
-        </div>
-      </div>
+      <ClientHeader
+        title="Assigned Plans"
+        action={
+          <div className="flex gap-2">
+            <AssignPlanDialog
+              clientName={clientName}
+              clientId={clientId}
+              activePlan={activePlan}
+              trigger={
+                <Button size="sm" iconStart={<LucideFilePlus2 />}>
+                  Assign Plan
+                </Button>
+              }
+            />
+            {plans.length > 3 && (
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    iconOnly={<LucideList />}
+                  />
+                </DialogTrigger>
+                <DialogContent dialogTitle="Assigned Plans">
+                  <DialogTitle>Assigned Plans</DialogTitle>
+                  <DialogDescription className="grid gap-6">
+                    {plans.map((plan) => (
+                      <TrainingCard
+                        key={plan.id}
+                        plan={plan}
+                        clientName={clientName}
+                      />
+                    ))}
+                  </DialogDescription>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
+        }
+      />
       <CardContent className="p-0">
         {plans.length > 0 ? (
           <div className="grid gap-6 @3xl/shared-plans:grid-cols-2">
@@ -144,7 +145,7 @@ export function TrainingCard({
   }
 
   return (
-    <Card>
+    <Card borderless>
       <CardHeader>
         <div className="flex justify-between items-start">
           <CardTitle>{plan.title}</CardTitle>

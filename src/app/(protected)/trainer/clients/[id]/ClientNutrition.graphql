@@ -1,0 +1,84 @@
+query GetClientMacroTargets($clientId: ID!) {
+  getClientMacroTargets(clientId: $clientId) {
+    id
+    clientId
+    trainerId
+    calories
+    protein
+    carbs
+    fat
+    notes
+    createdAt
+    updatedAt
+  }
+}
+
+mutation SetMacroTargets($input: SetMacroTargetsInput!) {
+  setMacroTargets(input: $input) {
+    id
+    clientId
+    trainerId
+    calories
+    protein
+    carbs
+    fat
+    notes
+    createdAt
+    updatedAt
+  }
+}
+
+query GetClientNutritionPlans($clientId: ID!) {
+  getClientNutritionPlans(clientId: $clientId) {
+    id
+    name
+    description
+    isSharedWithClient
+    createdAt
+    dayCount
+    totalMealCount
+  }
+}
+
+mutation CreateNutritionPlan($input: CreateNutritionPlanInput!) {
+  createNutritionPlan(input: $input) {
+    nutritionPlan {
+      id
+      name
+      description
+      isSharedWithClient
+      createdAt
+      dayCount
+      totalMealCount
+    }
+    success
+  }
+}
+
+mutation ShareNutritionPlanWithClient($id: ID!) {
+  shareNutritionPlanWithClient(id: $id) {
+    id
+    name
+    description
+    isSharedWithClient
+    createdAt
+    dayCount
+    totalMealCount
+  }
+}
+
+mutation UnshareNutritionPlanFromClient($id: ID!) {
+  unshareNutritionPlanFromClient(id: $id) {
+    id
+    name
+    description
+    isSharedWithClient
+    createdAt
+    dayCount
+    totalMealCount
+  }
+}
+
+mutation DeleteNutritionPlan($id: ID!) {
+  deleteNutritionPlan(id: $id)
+}

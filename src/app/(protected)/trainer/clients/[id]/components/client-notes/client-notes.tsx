@@ -4,7 +4,6 @@ import { Plus } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   GQLGetNotesQuery,
   GQLUserRole,
@@ -14,6 +13,8 @@ import {
   useUpdateNoteMutation,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
+
+import { ClientHeader } from '../header'
 
 import { CreateNoteForm } from './create-note-form'
 import { Note } from './note'
@@ -124,42 +125,45 @@ export function ClientNotes({ clientId }: { clientId: string }) {
   }
 
   return (
-    <Card borderless>
-      <CardHeader>
-        <div className="flex justify-between">
-          <CardTitle>Notes</CardTitle>
-          <Button
-            variant="outline"
-            size="icon-xs"
-            onClick={handleOpenCreateNote}
-            iconOnly={
-              <Plus
-                className={cn(
-                  'transition-transform duration-200',
-                  isCreating && 'rotate-45',
-                )}
-              />
-            }
-          />
-        </div>
-        <CreateNoteForm
-          isCreating={isCreating}
-          newNoteText={newNoteText}
-          newNoteShareWithClient={newNoteShareWithClient}
-          isCreatingNote={isCreatingNote}
-          onNewNoteTextChange={setNewNoteText}
-          onNewNoteShareWithClientChange={setNewNoteShareWithClient}
-          onCreateNote={handleCreateNote}
-          onCancelCreate={handleCancelCreate}
-        />
-      </CardHeader>
-      <CardContent>
+    <div>
+      <ClientHeader
+        title="Notes"
+        action={
+          <>
+            <Button
+              variant="outline"
+              size="icon-xs"
+              onClick={handleOpenCreateNote}
+              iconOnly={
+                <Plus
+                  className={cn(
+                    'transition-transform duration-200',
+                    isCreating && 'rotate-45',
+                  )}
+                />
+              }
+            />
+          </>
+        }
+      />
+
+      <div>
         {notes.length === 0 ? (
           <div className="text-sm text-muted-foreground">
             You haven't added any notes yet.
           </div>
         ) : (
           <div className="space-y-3">
+            <CreateNoteForm
+              isCreating={isCreating}
+              newNoteText={newNoteText}
+              newNoteShareWithClient={newNoteShareWithClient}
+              isCreatingNote={isCreatingNote}
+              onNewNoteTextChange={setNewNoteText}
+              onNewNoteShareWithClientChange={setNewNoteShareWithClient}
+              onCreateNote={handleCreateNote}
+              onCancelCreate={handleCancelCreate}
+            />
             {notes.map((note) => (
               <Note
                 loading={isLoading || isPlaceholderData}
@@ -180,8 +184,8 @@ export function ClientNotes({ clientId }: { clientId: string }) {
             ))}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
 

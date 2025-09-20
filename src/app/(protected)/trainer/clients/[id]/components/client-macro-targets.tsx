@@ -7,7 +7,6 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -17,11 +16,12 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
 import {
   useGetClientMacroTargetsQuery,
   useSetMacroTargetsMutation,
 } from '@/generated/graphql-client'
+
+import { ClientHeader } from './header'
 
 const macroTargetsSchema = z.object({
   calories: z.number().min(0).max(10000).optional(),
@@ -35,13 +35,9 @@ type MacroTargetsForm = z.infer<typeof macroTargetsSchema>
 
 interface ClientMacroTargetsProps {
   clientId: string
-  clientName: string
 }
 
-export function ClientMacroTargets({
-  clientId,
-  clientName,
-}: ClientMacroTargetsProps) {
+export function ClientMacroTargets({ clientId }: ClientMacroTargetsProps) {
   const queryClient = useQueryClient()
   const { data } = useGetClientMacroTargetsQuery({ clientId })
   const queryKey = useGetClientMacroTargetsQuery.getKey({ clientId })
@@ -113,137 +109,120 @@ export function ClientMacroTargets({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Daily Macro Targets for {clientName}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="calories"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Calories</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="calories"
-                        type="number"
-                        placeholder="2000"
-                        {...field}
-                        value={field.value || ''}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? Number(e.target.value) : undefined,
-                          )
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="protein"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Protein (g)</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="protein"
-                        type="number"
-                        placeholder="150"
-                        step="0.1"
-                        {...field}
-                        value={field.value || ''}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? Number(e.target.value) : undefined,
-                          )
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="carbs"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Carbs (g)</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="carbs"
-                        type="number"
-                        placeholder="200"
-                        step="0.1"
-                        {...field}
-                        value={field.value || ''}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? Number(e.target.value) : undefined,
-                          )
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="fat"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fat (g)</FormLabel>
-                    <FormControl>
-                      <Input
-                        id="fat"
-                        type="number"
-                        placeholder="80"
-                        step="0.1"
-                        {...field}
-                        value={field.value || ''}
-                        onChange={(e) =>
-                          field.onChange(
-                            e.target.value ? Number(e.target.value) : undefined,
-                          )
-                        }
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+    <div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <ClientHeader
+            title="Daily Macro Targets"
+            action={
+              <Button size="sm" type="submit" loading={mutation.isPending}>
+                Save Macro Targets
+              </Button>
+            }
+          />
+          <div className="grid grid-cols-4 gap-4">
             <FormField
               control={form.control}
-              name="notes"
+              name="calories"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Notes</FormLabel>
+                  <FormLabel>Calories</FormLabel>
                   <FormControl>
-                    <Textarea
-                      id="notes"
-                      placeholder="Additional nutrition guidance..."
+                    <Input
+                      id="calories"
+                      type="number"
+                      placeholder="2000"
                       {...field}
+                      value={field.value || ''}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : undefined,
+                        )
+                      }
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit" loading={mutation.isPending}>
-              Save Macro Targets
-            </Button>
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+            <FormField
+              control={form.control}
+              name="protein"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Protein (g)</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="protein"
+                      type="number"
+                      placeholder="150"
+                      step="0.1"
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : undefined,
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="carbs"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Carbs (g)</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="carbs"
+                      type="number"
+                      placeholder="200"
+                      step="0.1"
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : undefined,
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="fat"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fat (g)</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="fat"
+                      type="number"
+                      placeholder="80"
+                      step="0.1"
+                      {...field}
+                      value={field.value || ''}
+                      onChange={(e) =>
+                        field.onChange(
+                          e.target.value ? Number(e.target.value) : undefined,
+                        )
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </form>
+      </Form>
+    </div>
   )
 }
