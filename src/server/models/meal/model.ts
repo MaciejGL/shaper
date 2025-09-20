@@ -49,12 +49,10 @@ export class MealIngredient implements GQLMealIngredient {
     const multiplier = this.data.grams / 100
 
     return {
-      protein:
-        Math.round(this.data.ingredient.proteinPer100g * multiplier * 10) / 10,
-      carbs:
-        Math.round(this.data.ingredient.carbsPer100g * multiplier * 10) / 10,
-      fat: Math.round(this.data.ingredient.fatPer100g * multiplier * 10) / 10,
-      calories: Math.round(this.data.ingredient.caloriesPer100g * multiplier),
+      protein: this.data.ingredient.proteinPer100g * multiplier,
+      carbs: this.data.ingredient.carbsPer100g * multiplier,
+      fat: this.data.ingredient.fatPer100g * multiplier,
+      calories: this.data.ingredient.caloriesPer100g * multiplier,
     }
   }
 }
