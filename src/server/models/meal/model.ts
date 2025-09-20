@@ -152,10 +152,10 @@ export default class Meal implements GQLMeal {
 
     // Round values for consistency
     return {
-      protein: Math.round(totals.protein * 10) / 10,
-      carbs: Math.round(totals.carbs * 10) / 10,
-      fat: Math.round(totals.fat * 10) / 10,
-      calories: Math.round(totals.calories),
+      protein: (totals.protein * 10) / 10,
+      carbs: (totals.carbs * 10) / 10,
+      fat: (totals.fat * 10) / 10,
+      calories: totals.calories,
     }
   }
 
@@ -166,10 +166,10 @@ export default class Meal implements GQLMeal {
     const baseMacros = this.totalMacros
 
     return {
-      protein: Math.round(baseMacros.protein * portionMultiplier * 10) / 10,
-      carbs: Math.round(baseMacros.carbs * portionMultiplier * 10) / 10,
-      fat: Math.round(baseMacros.fat * portionMultiplier * 10) / 10,
-      calories: Math.round(baseMacros.calories * portionMultiplier),
+      protein: (baseMacros.protein * portionMultiplier * 10) / 10,
+      carbs: (baseMacros.carbs * portionMultiplier * 10) / 10,
+      fat: (baseMacros.fat * portionMultiplier * 10) / 10,
+      calories: baseMacros.calories * portionMultiplier,
     }
   }
 }
