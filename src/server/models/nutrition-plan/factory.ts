@@ -580,7 +580,12 @@ export async function copyNutritionPlan(
     client: PrismaUser
     days: (PrismaNutritionPlanDay & {
       meals: (PrismaNutritionPlanMeal & {
-        meal: PrismaMeal
+        meal: PrismaMeal & {
+          ingredients: (PrismaMealIngredient & {
+            ingredient: PrismaIngredient
+          })[]
+          createdBy?: PrismaUser
+        }
       })[]
     })[]
   }
@@ -647,7 +652,23 @@ export async function copyNutritionPlan(
               orderIndex: 'asc',
             },
             include: {
-              meal: true,
+              meal: {
+                include: {
+                  ingredients: {
+                    orderBy: {
+                      orderIndex: 'asc',
+                    },
+                    include: {
+                      ingredient: true,
+                    },
+                  },
+                  createdBy: {
+                    include: {
+                      profile: true,
+                    },
+                  },
+                },
+              },
             },
           },
         },

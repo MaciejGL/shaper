@@ -104,7 +104,7 @@ export class NutritionPlanDay implements GQLNutritionPlanDay {
     protected data: PrismaNutritionPlanDay & {
       meals?: (PrismaNutritionPlanMeal & {
         meal: PrismaMeal & {
-          ingredients: (PrismaMealIngredient & {
+          ingredients?: (PrismaMealIngredient & {
             ingredient: PrismaIngredient
           })[]
           createdBy?: PrismaUser
