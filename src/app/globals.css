@@ -283,6 +283,17 @@
   animation: collapsible-slide-up 0.3s ease-out;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Fix for recharts mobile touch events */
 .recharts-wrapper {
   touch-action: manipulation;

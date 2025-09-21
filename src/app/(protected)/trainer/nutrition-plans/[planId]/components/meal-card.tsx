@@ -182,14 +182,14 @@ export function MealCard({
       <div className="flex gap-2 items-start">
         {isDraggable && dragControls && (
           <div
-            className="flex-shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-manipulation select-none pt-4"
+            className="flex-shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-manipulation select-none pt-[22px]"
             onPointerDown={handleDragStart}
             style={{
               touchAction: 'none', // Completely disable touch actions on drag handle
               userSelect: 'none', // Prevent text selection
             }}
           >
-            <Grip className="h-4 w-4" />
+            <Grip className="size-4" />
           </div>
         )}
         <Accordion type="single" collapsible className="flex-1">
