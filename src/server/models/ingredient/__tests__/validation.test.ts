@@ -55,12 +55,12 @@ function validateIngredientMacros(data: {
     data.proteinPer100g * 4 + data.carbsPer100g * 4 + data.fatPer100g * 9
 
   const calorieDifference = Math.abs(data.caloriesPer100g - calculatedCalories)
-  const tolerancePercentage = 0.15 // 15% tolerance
+  const tolerancePercentage = 0.4 // 40% tolerance
 
   if (calorieDifference > calculatedCalories * tolerancePercentage) {
     errors.push(
       `Calories (${data.caloriesPer100g}) don't match macro calculation (${calculatedCalories.toFixed(1)}). ` +
-        `Expected within 15% tolerance.`,
+        `Expected within 40% tolerance.`,
     )
   }
 

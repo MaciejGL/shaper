@@ -2,7 +2,7 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -80,7 +80,11 @@ export function CreateCustomMealDrawer({
     },
   })
 
-  const { append: appendIngredient, remove: removeIngredient } = useFieldArray({
+  const {
+    fields: ingredientFields,
+    append: appendIngredient,
+    remove: removeIngredient,
+  } = useFieldArray({
     control: form.control,
     name: 'ingredients',
   })
@@ -152,6 +156,21 @@ export function CreateCustomMealDrawer({
     onOpenChange(false)
   }
 
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        name: '',
+        description: '',
+        instructions: [''],
+        preparationTime: 15,
+        cookingTime: 30,
+        servings: 1,
+        ingredients: [],
+      })
+    }
+  }, [open, form])
+
   const handleIngredientAdded = (
     ingredient: GQLIngredient,
     grams: number = 100,
@@ -163,17 +182,13 @@ export function CreateCustomMealDrawer({
     )
 
     if (existingIndex >= 0) {
-      // Update existing ingredient
       form.setValue(`ingredients.${existingIndex}.grams`, grams)
-      toast.info('Ingredient amount updated')
     } else {
-      // Add new ingredient
       appendIngredient({
         id: ingredient.id,
         name: ingredient.name,
         grams,
       })
-      toast.success('Ingredient added')
     }
   }
 
@@ -198,6 +213,7 @@ export function CreateCustomMealDrawer({
 
               <IngredientsSection
                 control={form.control}
+                ingredientFields={ingredientFields}
                 onIngredientAdded={handleIngredientAdded}
                 onIngredientRemoved={handleIngredientRemoved}
               />

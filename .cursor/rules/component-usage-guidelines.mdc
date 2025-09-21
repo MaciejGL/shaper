@@ -1,0 +1,324 @@
+# Component Usage Guidelines
+
+## 🎯 Core Principles
+
+1. **MINIMUM CODE**: Write the least amount of code possible
+2. **Use Built-in Props**: Don't recreate what components already provide
+3. **Keep Components Short**: < 200 lines per component
+4. **Extract Logic**: Move reusable logic to hooks/utils
+
+---
+
+## 🔘 Button Component
+
+### ✅ CORRECT Usage
+
+```typescript
+// Icon buttons - use iconOnly prop
+<Button variant="ghost" size="icon-sm" iconOnly={<TrashIcon />} />
+<Button size="icon-md" iconOnly={<EditIcon />} />
+
+// Buttons with icons - use iconStart/iconEnd props
+<Button iconStart={<Plus />}>Create Exercise</Button>
+<Button iconEnd={<ArrowRight />}>Continue</Button>
+<Button iconStart={<Save />} iconEnd={<ArrowRight />}>Save & Continue</Button>
+
+// Loading states - use loading prop
+<Button loading={isLoading} disabled={isLoading}>Save</Button>
+
+// Proper variants and sizes
+<Button variant="destructive" size="sm">Delete</Button>
+<Button variant="outline">Cancel</Button>
+<Button variant="tertiary">Secondary Action</Button>
+```
+
+### ❌ WRONG Usage
+
+```typescript
+// ❌ DON'T: Icons as children with manual spacing
+<Button>
+  <TrashIcon className="h-4 w-4 mr-2" />
+  Delete
+</Button>
+
+// ❌ DON'T: Manual flexbox classes when button handles it
+<Button className="flex items-center gap-2">
+  <Plus />
+  Create
+</Button>
+
+// ❌ DON'T: Manual icon sizing (button handles this)
+<Button>
+  <Save className="h-4 w-4" />
+  Save
+</Button>
+
+// ❌ DON'T: Custom loading states
+<Button disabled={isLoading}>
+  {isLoading ? <Spinner /> : 'Save'}
+</Button>
+```
+
+### Button Props Reference
+
+- `iconStart`: Icon before text
+- `iconEnd`: Icon after text
+- `iconOnly`: Icon-only button (adds sr-only text for accessibility)
+- `loading`: Shows spinner and disables button
+- `variant`: default | destructive | outline | secondary | tertiary | gradient | ghost | link | variantless
+- `size`: xs | sm | md | lg | xl | icon-xs | icon-sm | icon-md | icon-lg | icon-xl
+
+---
+
+## 🃏 Card Component
+
+### ✅ CORRECT Usage
+
+```typescript
+// Use for actual content containers
+<Card>
+  <CardHeader>
+    <CardTitle>Exercise Details</CardTitle>
+    <CardDescription>Manage exercise information</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <p>Content goes here</p>
+  </CardContent>
+</Card>
+
+// Use borderless for subtle containers
+<Card borderless>
+  <CardContent>Content without visual card styling</CardContent>
+</Card>
+
+// Use variants for different contexts
+<Card variant="premium">Premium content</Card>
+<Card variant="gradient">Special highlighting</Card>
+```
+
+### ❌ WRONG Usage
+
+```typescript
+// ❌ DON'T: Use cards for simple containers
+<Card>
+  <div className="p-4">
+    <Button>Simple action</Button>
+  </div>
+</Card>
+
+// ❌ DON'T: Cards for layout only (use div instead)
+<Card borderless>
+  <div className="grid grid-cols-2 gap-4">...</div>
+</Card>
+
+// ❌ DON'T: Nested cards without purpose
+<Card>
+  <Card>
+    <CardContent>Unnecessary nesting</CardContent>
+  </Card>
+</Card>
+```
+
+### When to Use Cards vs Simple Containers
+
+**Use Card when:**
+
+- Content needs visual separation/elevation
+- Contains multiple related pieces of information
+- Needs interactive states (hover, click)
+- Part of a collection (list of items)
+
+**Use simple `div` when:**
+
+- Just need layout/spacing
+- Content is part of larger context
+- No visual separation needed
+- Purely functional container
+
+---
+
+## 📏 Component Length Guidelines
+
+### Keep Components Under 200 Lines
+
+**✅ GOOD Structure:**
+
+```typescript
+// components/exercise-card/exercise-card.tsx
+interface ExerciseCardProps {
+  exercise: GQLExercise
+  onEdit: (id: string) => void
+}
+
+export function ExerciseCard({ exercise, onEdit }: ExerciseCardProps) {
+  const { handleDelete, isDeleting } = useExerciseActions(exercise.id)
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{exercise.name}</CardTitle>
+        <CardAction>
+          <Button iconOnly={<EditIcon />} onClick={() => onEdit(exercise.id)} />
+        </CardAction>
+      </CardHeader>
+      <CardContent>
+        <ExerciseMetadata exercise={exercise} />
+      </CardContent>
+    </Card>
+  )
+}
+
+// components/exercise-card/use-exercise-actions.ts
+export function useExerciseActions(exerciseId: string) {
+  // Hook logic here
+}
+
+// components/exercise-card/types.ts
+export interface ExerciseCardProps {
+  // Types here
+}
+```
+
+**❌ BAD Structure:**
+
+```typescript
+// One massive 500-line component with everything inline
+export function ExerciseCard() {
+  // 200 lines of state management
+  // 100 lines of handlers
+  // 200 lines of JSX
+}
+```
+
+### File Organization Pattern
+
+```
+components/
+  feature-name/
+    feature-name.tsx          # Main component
+    use-feature-name.ts       # Hooks/logic
+    types.ts                  # TypeScript interfaces
+    utils.ts                  # Helper functions
+    feature-name.stories.tsx  # Storybook (if needed)
+```
+
+---
+
+## 🎨 Styling Guidelines
+
+### Use Design System Tokens
+
+```typescript
+// ✅ CORRECT: Use theme tokens
+<div className="bg-background text-foreground border-border">
+  <Button variant="secondary">Action</Button>
+</div>
+
+// ❌ WRONG: Hardcoded colors
+<div className="bg-white text-black border-gray-200">
+  <Button className="bg-blue-500 text-white">Action</Button>
+</div>
+```
+
+### Use Existing Utilities
+
+```typescript
+// ✅ CORRECT: Use existing utilities
+<div className="flex-center gap-4">
+  <div className="size-8">Icon</div>
+</div>
+
+// ❌ WRONG: Manual classes
+<div className="flex items-center justify-center gap-4">
+  <div className="w-8 h-8">Icon</div>
+</div>
+```
+
+---
+
+## 🔧 Common Anti-Patterns to Avoid
+
+### 1. Manual Icon Spacing
+
+```typescript
+// ❌ DON'T
+<Button className="flex items-center gap-2">
+  <PlusIcon className="h-4 w-4" />
+  Add Item
+</Button>
+
+// ✅ DO
+<Button iconStart={<PlusIcon />}>Add Item</Button>
+```
+
+### 2. Custom Loading States
+
+```typescript
+// ❌ DON'T
+<Button disabled={isLoading}>
+  {isLoading ? <Spinner className="h-4 w-4" /> : 'Save'}
+</Button>
+
+// ✅ DO
+<Button loading={isLoading} disabled={isLoading}>Save</Button>
+```
+
+### 3. Overusing Cards
+
+```typescript
+// ❌ DON'T: Card just for padding
+<Card>
+  <div className="p-4">
+    <p>Simple text</p>
+  </div>
+</Card>
+
+// ✅ DO: Simple container
+<div className="p-4">
+  <p>Simple text</p>
+</div>
+```
+
+### 4. Recreating Component Logic
+
+```typescript
+// ❌ DON'T: Manual state for things components handle
+const [isHovered, setIsHovered] = useState(false)
+
+<Button
+  onMouseEnter={() => setIsHovered(true)}
+  onMouseLeave={() => setIsHovered(false)}
+  className={isHovered ? 'bg-primary/90' : 'bg-primary'}
+>
+  Action
+</Button>
+
+// ✅ DO: Use component's built-in hover state
+<Button>Action</Button>
+```
+
+---
+
+## 📋 Quick Checklist
+
+Before submitting a component:
+
+- [ ] ✅ Uses proper icon props instead of children
+- [ ] ✅ Under 200 lines
+- [ ] ✅ Uses design system tokens
+- [ ] ✅ No manual recreating of component features
+- [ ] ✅ Cards only when visual separation needed
+- [ ] ✅ Extracted reusable logic to hooks
+- [ ] ✅ TypeScript interfaces in types.ts
+- [ ] ✅ Optimistic updates for mutations
+
+---
+
+## 🔍 Migration Priorities
+
+When refactoring existing code:
+
+1. **High Impact**: Fix Button icon usage (search for `<.*Icon.*>` inside Button children)
+2. **Medium Impact**: Replace unnecessary Cards with simple containers
+3. **Low Impact**: Extract long components into smaller pieces
+4. **Ongoing**: Use design system tokens consistently

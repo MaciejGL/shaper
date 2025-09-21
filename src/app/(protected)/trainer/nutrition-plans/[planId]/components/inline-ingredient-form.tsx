@@ -1,6 +1,8 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { AlertCircle, Calculator, CheckCircle } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -19,6 +21,7 @@ import {
   type GQLIngredient,
   useCreateIngredientMutation,
 } from '@/generated/graphql-client'
+import { formatDecimalInput, formatNumberSmart } from '@/lib/format-tempo'
 
 const createIngredientSchema = z.object({
   name: z
@@ -32,6 +35,38 @@ const createIngredientSchema = z.object({
 })
 
 type CreateIngredientForm = z.infer<typeof createIngredientSchema>
+
+// Calculate expected calories from macros
+function calculateExpectedCalories(
+  protein: number,
+  carbs: number,
+  fat: number,
+): number {
+  return Math.round((protein * 4 + carbs * 4 + fat * 9) * 10) / 10
+}
+
+// Check if calories are within acceptable range (40% tolerance)
+function isCaloriesValid(entered: number, calculated: number): boolean {
+  if (calculated === 0) return entered >= 0
+  const tolerance = 0.4 // 40% - accounts for fiber and other factors not in calculation
+  const diff = Math.abs(entered - calculated) / calculated
+  return diff <= tolerance
+}
+
+// Extract meaningful error message from GraphQL error
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractErrorMessage(error: any): string {
+  if (error?.message) {
+    return error.message
+  }
+  if (error?.graphQLErrors?.[0]?.message) {
+    return error.graphQLErrors[0].message
+  }
+  if (typeof error === 'string') {
+    return error
+  }
+  return 'An unexpected error occurred'
+}
 
 interface InlineIngredientFormProps {
   show: boolean
@@ -51,13 +86,134 @@ export function InlineIngredientForm({
   const form = useForm<CreateIngredientForm>({
     resolver: zodResolver(createIngredientSchema),
     defaultValues: {
-      name: defaultName || '',
+      name: '',
       proteinPer100g: 0,
       carbsPer100g: 0,
       fatPer100g: 0,
       caloriesPer100g: 0,
     },
   })
+
+  // Local state for text-based inputs (following weight input pattern)
+  const [inputValues, setInputValues] = useState({
+    calories: '',
+    protein: '',
+    carbs: '',
+    fat: '',
+  })
+  const [focusedFields, setFocusedFields] = useState({
+    calories: false,
+    protein: false,
+    carbs: false,
+    fat: false,
+  })
+
+  // Update name field when defaultName changes
+  useEffect(() => {
+    if (defaultName) {
+      form.setValue('name', defaultName)
+    }
+  }, [defaultName, form])
+
+  // Watch macro values for real-time calorie calculation
+  const watchedValues = form.watch([
+    'proteinPer100g',
+    'carbsPer100g',
+    'fatPer100g',
+    'caloriesPer100g',
+  ])
+  const [protein, carbs, fat, enteredCalories] = watchedValues
+
+  // Sync input values with form values (only when not focused)
+  useEffect(() => {
+    if (!focusedFields.protein) {
+      setInputValues((prev) => ({
+        ...prev,
+        protein: formatNumberSmart(protein, 1),
+      }))
+    }
+  }, [protein, focusedFields.protein])
+
+  useEffect(() => {
+    if (!focusedFields.carbs) {
+      setInputValues((prev) => ({
+        ...prev,
+        carbs: formatNumberSmart(carbs, 1),
+      }))
+    }
+  }, [carbs, focusedFields.carbs])
+
+  useEffect(() => {
+    if (!focusedFields.fat) {
+      setInputValues((prev) => ({
+        ...prev,
+        fat: formatNumberSmart(fat, 1),
+      }))
+    }
+  }, [fat, focusedFields.fat])
+
+  useEffect(() => {
+    if (!focusedFields.calories) {
+      setInputValues((prev) => ({
+        ...prev,
+        calories: formatNumberSmart(enteredCalories, 1),
+      }))
+    }
+  }, [enteredCalories, focusedFields.calories])
+
+  // Helper functions for input handling
+  const handleInputChange = (
+    field: keyof typeof inputValues,
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const sanitizedValue = formatDecimalInput(e)
+    setInputValues((prev) => ({ ...prev, [field]: sanitizedValue }))
+
+    if (sanitizedValue === '' || sanitizedValue === null) {
+      form.setValue(
+        `${field === 'calories' ? 'caloriesPer100g' : `${field}Per100g`}` as keyof CreateIngredientForm,
+        0,
+      )
+      return
+    }
+
+    const numericValue = parseFloat(sanitizedValue)
+    if (isNaN(numericValue)) {
+      return // Invalid input, don't update form
+    }
+
+    const fieldName =
+      field === 'calories' ? 'caloriesPer100g' : `${field}Per100g`
+    form.setValue(fieldName as keyof CreateIngredientForm, numericValue)
+  }
+
+  const handleFocus = (field: keyof typeof focusedFields) => {
+    setFocusedFields((prev) => ({ ...prev, [field]: true }))
+  }
+
+  const handleBlur = (field: keyof typeof focusedFields) => {
+    setFocusedFields((prev) => ({ ...prev, [field]: false }))
+    // Format the value when focus is lost
+    const value = inputValues[field]
+    const numericValue = parseFloat(value)
+    if (!isNaN(numericValue)) {
+      setInputValues((prev) => ({
+        ...prev,
+        [field]: formatNumberSmart(numericValue, 1),
+      }))
+    }
+  }
+
+  // Calculate expected calories from macros
+  const expectedCalories = useMemo(() => {
+    return calculateExpectedCalories(protein || 0, carbs || 0, fat || 0)
+  }, [protein, carbs, fat])
+
+  // Check if entered calories are valid
+  const isCaloriesValidForForm = useMemo(() => {
+    if (!enteredCalories || enteredCalories === 0) return true // Allow empty/zero during input
+    return isCaloriesValid(enteredCalories, expectedCalories)
+  }, [enteredCalories, expectedCalories])
 
   const handleSaveIngredient = async (values: CreateIngredientForm) => {
     try {
@@ -66,15 +222,44 @@ export function InlineIngredientForm({
       })
 
       onIngredientCreated(result.createIngredient as GQLIngredient)
-      form.reset()
+      form.reset({
+        name: '',
+        proteinPer100g: 0,
+        carbsPer100g: 0,
+        fatPer100g: 0,
+        caloriesPer100g: 0,
+      })
+      setInputValues({
+        calories: '',
+        protein: '',
+        carbs: '',
+        fat: '',
+      })
       toast.success('Ingredient created and added!')
     } catch (error) {
-      toast.error('Failed to create ingredient: ' + (error as Error).message)
+      console.error('Error creating ingredient:', error)
+      const errorMessage = extractErrorMessage(error)
+      toast.error(errorMessage, {
+        duration: 5000,
+        description: 'Please check your ingredient data and try again',
+      })
     }
   }
 
   const handleCancel = () => {
-    form.reset()
+    form.reset({
+      name: '',
+      proteinPer100g: 0,
+      carbsPer100g: 0,
+      fatPer100g: 0,
+      caloriesPer100g: 0,
+    })
+    setInputValues({
+      calories: '',
+      protein: '',
+      carbs: '',
+      fat: '',
+    })
     onCancel()
   }
 
@@ -87,10 +272,7 @@ export function InlineIngredientForm({
       </div>
 
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSaveIngredient)}
-          className="space-y-4"
-        >
+        <div className="space-y-4">
           <FormField
             control={form.control}
             name="name"
@@ -113,21 +295,73 @@ export function InlineIngredientForm({
             <FormField
               control={form.control}
               name="caloriesPer100g"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
-                  <FormLabel>Calories/100g</FormLabel>
+                  <div className="flex items-center gap-2">
+                    <FormLabel>Calories/100g</FormLabel>
+                    {expectedCalories > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Calculator className="h-3 w-3" />
+                        <span>Expected: {expectedCalories}</span>
+                        {enteredCalories > 0 && (
+                          <>
+                            {isCaloriesValidForForm ? (
+                              <CheckCircle className="h-3 w-3 text-green-500" />
+                            ) : (
+                              <AlertCircle className="h-3 w-3 text-amber-500" />
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
+                  </div>
                   <FormControl>
-                    <Input
-                      id="ingredient-calories"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(Number(e.target.value) || 0)
-                      }
-                    />
+                    <div className="flex gap-1">
+                      <Input
+                        id="ingredient-calories"
+                        type="text"
+                        placeholder="e.g., 165"
+                        value={inputValues.calories}
+                        onFocus={() => handleFocus('calories')}
+                        onBlur={() => handleBlur('calories')}
+                        onChange={(e) => handleInputChange('calories', e)}
+                        className={
+                          enteredCalories > 0 && !isCaloriesValidForForm
+                            ? 'border-amber-300 focus:border-amber-500'
+                            : ''
+                        }
+                      />
+                      {expectedCalories > 0 && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="px-2 text-xs"
+                          onClick={() => {
+                            form.setValue('caloriesPer100g', expectedCalories)
+                          }}
+                          title={`Use calculated calories (${expectedCalories})`}
+                        >
+                          <Calculator className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
                   </FormControl>
+                  {!isCaloriesValidForForm && enteredCalories > 0 && (
+                    <div className="text-xs text-amber-600 mt-1 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      <span>
+                        Calories should be within 40% of calculated value (
+                        {expectedCalories}). Current difference:{' '}
+                        {Math.abs(
+                          ((enteredCalories - expectedCalories) /
+                            expectedCalories) *
+                            100,
+                        ).toFixed(1)}
+                        %
+                      </span>
+                    </div>
+                  )}
                   <FormMessage />
                 </FormItem>
               )}
@@ -136,19 +370,18 @@ export function InlineIngredientForm({
             <FormField
               control={form.control}
               name="proteinPer100g"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Protein/100g</FormLabel>
                   <FormControl>
                     <Input
                       id="ingredient-protein"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(Number(e.target.value) || 0)
-                      }
+                      type="text"
+                      placeholder="e.g., 31"
+                      value={inputValues.protein}
+                      onFocus={() => handleFocus('protein')}
+                      onBlur={() => handleBlur('protein')}
+                      onChange={(e) => handleInputChange('protein', e)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -159,19 +392,18 @@ export function InlineIngredientForm({
             <FormField
               control={form.control}
               name="carbsPer100g"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Carbs/100g</FormLabel>
                   <FormControl>
                     <Input
                       id="ingredient-carbs"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(Number(e.target.value) || 0)
-                      }
+                      type="text"
+                      placeholder="e.g., 0"
+                      value={inputValues.carbs}
+                      onFocus={() => handleFocus('carbs')}
+                      onBlur={() => handleBlur('carbs')}
+                      onChange={(e) => handleInputChange('carbs', e)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -182,19 +414,18 @@ export function InlineIngredientForm({
             <FormField
               control={form.control}
               name="fatPer100g"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Fat/100g</FormLabel>
                   <FormControl>
                     <Input
                       id="ingredient-fat"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(Number(e.target.value) || 0)
-                      }
+                      type="text"
+                      placeholder="e.g., 3.6"
+                      value={inputValues.fat}
+                      onFocus={() => handleFocus('fat')}
+                      onBlur={() => handleBlur('fat')}
+                      onChange={(e) => handleInputChange('fat', e)}
                     />
                   </FormControl>
                   <FormMessage />
@@ -213,14 +444,18 @@ export function InlineIngredientForm({
               Cancel
             </Button>
             <Button
-              type="submit"
+              type="button"
               size="sm"
               disabled={createIngredientMutation.isPending}
+              onClick={async () => {
+                const values = form.getValues()
+                await handleSaveIngredient(values)
+              }}
             >
               {createIngredientMutation.isPending ? 'Creating...' : 'Save'}
             </Button>
           </div>
-        </form>
+        </div>
       </Form>
     </div>
   )
