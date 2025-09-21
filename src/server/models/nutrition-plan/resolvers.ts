@@ -23,6 +23,7 @@ import {
   shareNutritionPlanWithClient,
   unshareNutritionPlanFromClient,
   updateNutritionPlan,
+  updateNutritionPlanDay,
   updateNutritionPlanMealPortion,
 } from './factory'
 import NutritionPlan, { NutritionPlanDay, NutritionPlanMeal } from './model'
@@ -193,6 +194,14 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       input.name,
       user.user.id,
     )
+
+    return new NutritionPlanDay(day, context)
+  },
+
+  updateNutritionPlanDay: async (_, { dayId, input }, context) => {
+    const user = requireAuth(GQLUserRole.Trainer, context.user)
+
+    const day = await updateNutritionPlanDay(dayId, input, user.user.id)
 
     return new NutritionPlanDay(day, context)
   },

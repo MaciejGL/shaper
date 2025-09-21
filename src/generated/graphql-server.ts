@@ -1037,6 +1037,7 @@ export type GQLMutation = {
   updateNote: EntireFieldWrapper<GQLNote>;
   updateNotification: EntireFieldWrapper<GQLNotification>;
   updateNutritionPlan: EntireFieldWrapper<GQLNutritionPlan>;
+  updateNutritionPlanDay: EntireFieldWrapper<GQLNutritionPlanDay>;
   updateNutritionPlanMealPortion: EntireFieldWrapper<GQLNutritionPlanMeal>;
   updateProfile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
   updatePushSubscription: EntireFieldWrapper<GQLPushSubscription>;
@@ -1648,6 +1649,12 @@ export type GQLMutationUpdateNotificationArgs = {
 export type GQLMutationUpdateNutritionPlanArgs = {
   id: Scalars['ID']['input'];
   input: GQLUpdateNutritionPlanInput;
+};
+
+
+export type GQLMutationUpdateNutritionPlanDayArgs = {
+  dayId: Scalars['ID']['input'];
+  input: GQLUpdateNutritionPlanDayInput;
 };
 
 
@@ -2951,6 +2958,10 @@ export type GQLUpdateNotificationInput = {
   type?: InputMaybe<GQLNotificationType>;
 };
 
+export type GQLUpdateNutritionPlanDayInput = {
+  name: Scalars['String']['input'];
+};
+
 export type GQLUpdateNutritionPlanInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
@@ -3564,6 +3575,7 @@ export type GQLResolversTypes = {
   UpdateMealPortionInput: GQLUpdateMealPortionInput;
   UpdateNoteInput: GQLUpdateNoteInput;
   UpdateNotificationInput: GQLUpdateNotificationInput;
+  UpdateNutritionPlanDayInput: GQLUpdateNutritionPlanDayInput;
   UpdateNutritionPlanInput: GQLUpdateNutritionPlanInput;
   UpdateProfileInput: GQLUpdateProfileInput;
   UpdatePushSubscriptionInput: GQLUpdatePushSubscriptionInput;
@@ -3760,6 +3772,7 @@ export type GQLResolversParentTypes = {
   UpdateMealPortionInput: GQLUpdateMealPortionInput;
   UpdateNoteInput: GQLUpdateNoteInput;
   UpdateNotificationInput: GQLUpdateNotificationInput;
+  UpdateNutritionPlanDayInput: GQLUpdateNutritionPlanDayInput;
   UpdateNutritionPlanInput: GQLUpdateNutritionPlanInput;
   UpdateProfileInput: GQLUpdateProfileInput;
   UpdatePushSubscriptionInput: GQLUpdatePushSubscriptionInput;
@@ -4336,6 +4349,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateNote?: Resolver<GQLResolversTypes['Note'], ParentType, ContextType, RequireFields<GQLMutationUpdateNoteArgs, 'input'>>;
   updateNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationUpdateNotificationArgs, 'input'>>;
   updateNutritionPlan?: Resolver<GQLResolversTypes['NutritionPlan'], ParentType, ContextType, RequireFields<GQLMutationUpdateNutritionPlanArgs, 'id' | 'input'>>;
+  updateNutritionPlanDay?: Resolver<GQLResolversTypes['NutritionPlanDay'], ParentType, ContextType, RequireFields<GQLMutationUpdateNutritionPlanDayArgs, 'dayId' | 'input'>>;
   updateNutritionPlanMealPortion?: Resolver<GQLResolversTypes['NutritionPlanMeal'], ParentType, ContextType, RequireFields<GQLMutationUpdateNutritionPlanMealPortionArgs, 'input'>>;
   updateProfile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType, RequireFields<GQLMutationUpdateProfileArgs, 'input'>>;
   updatePushSubscription?: Resolver<GQLResolversTypes['PushSubscription'], ParentType, ContextType, RequireFields<GQLMutationUpdatePushSubscriptionArgs, 'input'>>;

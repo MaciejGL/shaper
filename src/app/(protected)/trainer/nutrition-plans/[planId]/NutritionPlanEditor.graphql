@@ -1,0 +1,267 @@
+query GetNutritionPlan($id: ID!) {
+  nutritionPlan(id: $id) {
+    id
+    name
+    description
+    isSharedWithClient
+    days {
+      id
+      dayNumber
+      name
+      dailyMacros {
+        calories
+        protein
+        carbs
+        fat
+      }
+      meals {
+        id
+        orderIndex
+        portionMultiplier
+        adjustedMacros {
+          calories
+          protein
+          carbs
+          fat
+        }
+        meal {
+          id
+          name
+          description
+          instructions
+          preparationTime
+          cookingTime
+          servings
+          ingredients {
+            id
+            grams
+            order
+            ingredient {
+              id
+              name
+              proteinPer100g
+              carbsPer100g
+              fatPer100g
+              caloriesPer100g
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query SearchIngredients($query: String!, $limit: Int) {
+  searchIngredients(query: $query, limit: $limit) {
+    id
+    name
+    proteinPer100g
+    carbsPer100g
+    fatPer100g
+    caloriesPer100g
+  }
+}
+
+query RecentIngredients($limit: Int) {
+  recentIngredients(limit: $limit) {
+    id
+    name
+    proteinPer100g
+    carbsPer100g
+    fatPer100g
+    caloriesPer100g
+  }
+}
+
+mutation CreateIngredient($input: CreateIngredientInput!) {
+  createIngredient(input: $input) {
+    id
+    name
+    proteinPer100g
+    carbsPer100g
+    fatPer100g
+    caloriesPer100g
+  }
+}
+
+mutation AddIngredientToMeal($input: AddIngredientToMealInput!) {
+  addIngredientToMeal(input: $input) {
+    id
+    grams
+    order
+    ingredient {
+      id
+      name
+      proteinPer100g
+      carbsPer100g
+      fatPer100g
+      caloriesPer100g
+    }
+  }
+}
+
+query TeamMeals($searchQuery: String) {
+  teamMeals(searchQuery: $searchQuery) {
+    id
+    name
+    totalMacros {
+      calories
+      protein
+      carbs
+      fat
+    }
+  }
+}
+
+mutation AddMealToNutritionPlanDay($input: AddMealToDayInput!) {
+  addMealToNutritionPlanDay(input: $input) {
+    id
+    orderIndex
+    portionMultiplier
+    adjustedMacros {
+      calories
+      protein
+      carbs
+      fat
+    }
+    meal {
+      id
+      name
+      description
+      instructions
+      preparationTime
+      cookingTime
+      servings
+      ingredients {
+        id
+        grams
+        order
+        ingredient {
+          id
+          name
+          proteinPer100g
+          carbsPer100g
+          fatPer100g
+          caloriesPer100g
+        }
+      }
+    }
+  }
+}
+
+mutation CreateMeal($input: CreateMealInput!) {
+  createMeal(input: $input) {
+    id
+    name
+    description
+    instructions
+    preparationTime
+    cookingTime
+    servings
+    totalMacros {
+      calories
+      protein
+      carbs
+      fat
+    }
+    ingredients {
+      id
+      grams
+      order
+      ingredient {
+        id
+        name
+        proteinPer100g
+        carbsPer100g
+        fatPer100g
+        caloriesPer100g
+      }
+    }
+  }
+}
+
+mutation UpdateMeal($id: ID!, $input: UpdateMealInput!) {
+  updateMeal(id: $id, input: $input) {
+    id
+    name
+    description
+    instructions
+    preparationTime
+    cookingTime
+    servings
+    totalMacros {
+      calories
+      protein
+      carbs
+      fat
+    }
+  }
+}
+
+mutation UpdateNutritionPlanDay(
+  $dayId: ID!
+  $input: UpdateNutritionPlanDayInput!
+) {
+  updateNutritionPlanDay(dayId: $dayId, input: $input) {
+    id
+    dayNumber
+    name
+    dailyMacros {
+      calories
+      protein
+      carbs
+      fat
+    }
+  }
+}
+
+mutation AddNutritionPlanDay($input: AddNutritionPlanDayInput!) {
+  addNutritionPlanDay(input: $input) {
+    id
+    dayNumber
+    name
+    dailyMacros {
+      calories
+      protein
+      carbs
+      fat
+    }
+    meals {
+      id
+      orderIndex
+      portionMultiplier
+      adjustedMacros {
+        calories
+        protein
+        carbs
+        fat
+      }
+      meal {
+        id
+        name
+        description
+        instructions
+        preparationTime
+        cookingTime
+        servings
+        ingredients {
+          id
+          grams
+          order
+          ingredient {
+            id
+            name
+            proteinPer100g
+            carbsPer100g
+            fatPer100g
+            caloriesPer100g
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation RemoveNutritionPlanDay($dayId: ID!) {
+  removeNutritionPlanDay(dayId: $dayId)
+}

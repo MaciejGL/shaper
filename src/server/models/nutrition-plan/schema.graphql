@@ -83,6 +83,10 @@ input AddNutritionPlanDayInput {
   name: String!
 }
 
+input UpdateNutritionPlanDayInput {
+  name: String!
+}
+
 input AddMealToDayInput {
   dayId: ID!
   mealId: ID!
@@ -161,6 +165,11 @@ extend type Mutation {
 
   # Day management
   addNutritionPlanDay(input: AddNutritionPlanDayInput!): NutritionPlanDay!
+
+  updateNutritionPlanDay(
+    dayId: ID!
+    input: UpdateNutritionPlanDayInput!
+  ): NutritionPlanDay!
 
   removeNutritionPlanDay(dayId: ID!): Boolean!
 

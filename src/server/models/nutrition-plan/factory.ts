@@ -328,12 +328,19 @@ export async function createNutritionPlan(
   // Verify trainer-client relationship
   await ensureTrainerClientAccess(trainerId, input.clientId)
 
-  return await prisma.nutritionPlan.create({
+  const nutritionPlan = await prisma.nutritionPlan.create({
     data: {
       name: input.name.trim(),
       description: input.description?.trim(),
       trainerId,
       clientId: input.clientId,
+      // Create first day by default
+      days: {
+        create: {
+          dayNumber: 1,
+          name: 'Day 1',
+        },
+      },
     },
     include: {
       trainer: {
@@ -353,6 +360,8 @@ export async function createNutritionPlan(
       },
     },
   })
+
+  return nutritionPlan
 }
 
 /**
@@ -731,6 +740,76 @@ export async function addDayToNutritionPlan(
       nutritionPlanId,
       dayNumber,
       name: name.trim(),
+    },
+    include: {
+      meals: {
+        orderBy: {
+          orderIndex: 'asc',
+        },
+        include: {
+          meal: {
+            include: {
+              ingredients: {
+                orderBy: {
+                  orderIndex: 'asc',
+                },
+                include: {
+                  ingredient: true,
+                },
+              },
+              createdBy: {
+                include: {
+                  profile: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+/**
+ * Update nutrition plan day
+ */
+export async function updateNutritionPlanDay(
+  dayId: string,
+  input: { name: string },
+  trainerId: string,
+): Promise<
+  PrismaNutritionPlanDay & {
+    meals: (PrismaNutritionPlanMeal & {
+      meal: PrismaMeal
+    })[]
+  }
+> {
+  // Validate day name
+  const validation = validateNutritionPlanDay(1, input.name) // dayNumber not relevant for update
+  if (!validation.isValid) {
+    throw new GraphQLError(`Invalid day data: ${validation.errors.join(', ')}`)
+  }
+
+  // Check access through plan
+  const day = await prisma.nutritionPlanDay.findUnique({
+    where: { id: dayId },
+    include: {
+      nutritionPlan: {
+        select: { trainerId: true },
+      },
+    },
+  })
+
+  if (!day || day.nutritionPlan.trainerId !== trainerId) {
+    throw new GraphQLError(
+      'Access denied: You can only modify nutrition plans you created',
+    )
+  }
+
+  return await prisma.nutritionPlanDay.update({
+    where: { id: dayId },
+    data: {
+      name: input.name.trim(),
     },
     include: {
       meals: {
