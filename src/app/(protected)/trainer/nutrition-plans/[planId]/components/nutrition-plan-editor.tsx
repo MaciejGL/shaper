@@ -2,11 +2,11 @@
 
 import { useState } from 'react'
 
-import { DashboardHeader } from '@/app/(protected)/trainer/components/dashboard-header'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { GQLGetNutritionPlanQuery } from '@/generated/graphql-client'
 
 import { AddDayButton } from './add-day-button'
+import { EditablePlanName } from './editable-plan-name'
 import { NutritionPlanDayContent } from './nutrition-plan-day-content'
 
 type GQLNutritionPlanDay = NonNullable<
@@ -66,10 +66,15 @@ export function NutritionPlanEditor({
 
   return (
     <div className="space-y-6">
-      <DashboardHeader
-        title={nutritionPlan.name}
-        description={nutritionPlan.description || undefined}
-      />
+      <div className="space-y-2">
+        <EditablePlanName
+          planId={nutritionPlan.id}
+          planName={nutritionPlan.name}
+        />
+        {nutritionPlan.description && (
+          <p className="text-muted-foreground">{nutritionPlan.description}</p>
+        )}
+      </div>
 
       <Tabs value={activeDay} onValueChange={setActiveDay}>
         <div className="flex items-center justify-between">

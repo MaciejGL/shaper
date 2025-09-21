@@ -347,3 +347,11 @@ mutation ReorderNutritionPlanDayMeals($input: ReorderDayMealsInput!) {
     }
   }
 }
+
+mutation UpdateNutritionPlan($id: ID!, $input: UpdateNutritionPlanInput!) {
+  updateNutritionPlan(id: $id, input: $input) {
+    id
+    name
+    description
+  }
+}
