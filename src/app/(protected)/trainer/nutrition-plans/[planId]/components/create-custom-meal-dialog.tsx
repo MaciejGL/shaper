@@ -254,7 +254,10 @@ export function CreateCustomMealDrawer({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <BasicMealInfoSection control={form.control} />
 
-              <InstructionsSection control={form.control} />
+              <InstructionsSection
+                control={form.control}
+                setValue={form.setValue}
+              />
 
               <TotalMacrosDisplay ingredientFields={ingredientFields} />
 

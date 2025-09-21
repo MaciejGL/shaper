@@ -21,6 +21,7 @@ const sectionIconVariants = cva(
         sky: 'bg-gradient-to-br from-sky-500 to-sky-600',
       },
       size: {
+        xs: 'w-6 h-6 [&>svg]:w-4 [&>svg]:h-4 rounded-lg',
         sm: 'w-8 h-8 [&>svg]:w-4 [&>svg]:h-4',
         md: 'w-10 h-10 [&>svg]:w-5 [&>svg]:h-5',
         lg: 'w-12 h-12 [&>svg]:w-6 [&>svg]:h-6',

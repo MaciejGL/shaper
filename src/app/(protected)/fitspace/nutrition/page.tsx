@@ -1,15 +1,15 @@
 'use client'
 
-import { Salad } from 'lucide-react'
+import { Salad, TargetIcon } from 'lucide-react'
 import { useState } from 'react'
 
 import { EmptyStateCard } from '@/components/empty-state-card'
+import { SectionIcon } from '@/components/ui/section-icon'
 import { useUser } from '@/context/user-context'
 import { useGetMyMacroTargetsQuery } from '@/generated/graphql-client'
 
-import { DashboardHeader } from '../../trainer/components/dashboard-header'
-
 import { NutritionPlanSelector } from './components/nutrition-plan-selector'
+import { NutritionPlanViewer } from './components/nutrition-plan-viewer'
 
 export default function NutritionPage() {
   const { user } = useUser()
@@ -24,7 +24,6 @@ export default function NutritionPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto">
-        <DashboardHeader title="Nutrition" icon={Salad} variant="green" />
         <div className="animate-pulse">
           <div className="h-32 bg-muted rounded-lg"></div>
         </div>
@@ -35,7 +34,6 @@ export default function NutritionPage() {
   if (!macroTargets) {
     return (
       <div className="container mx-auto">
-        <DashboardHeader title="Nutrition" icon={Salad} variant="green" />
         <EmptyStateCard
           title="Macro targets not set"
           description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}
@@ -46,11 +44,13 @@ export default function NutritionPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      {/* <DashboardHeader title="Nutrition" icon={Salad} variant="green" /> */}
-      <div className="space-y-4">
+    <div className="container mx-auto pb-8 pt-4">
+      <div className="space-y-8">
         <div>
-          <h2 className="text-base font-medium mb-2">Daily Macro Targets</h2>
+          <div className="flex items-center gap-2 mb-2">
+            <SectionIcon icon={TargetIcon} size="sm" variant="default" />
+            <h2 className="text-base font-medium">Daily Macro Targets</h2>
+          </div>
           <div className="grid grid-cols-4 gap-2">
             {macroTargets.calories && (
               <div className="text-center p-4 bg-card rounded-lg">
@@ -98,10 +98,15 @@ export default function NutritionPage() {
           )}
         </div>
         {/* Nutrition Plan Selector */}
-        <NutritionPlanSelector
-          onPlanSelect={handlePlanSelect}
-          selectedPlanId={selectedPlanId}
-        />
+        <div className="space-y-4">
+          <NutritionPlanSelector
+            onPlanSelect={handlePlanSelect}
+            selectedPlanId={selectedPlanId}
+          />
+
+          {/* Nutrition Plan Content */}
+          {selectedPlanId && <NutritionPlanViewer planId={selectedPlanId} />}
+        </div>
       </div>
     </div>
   )

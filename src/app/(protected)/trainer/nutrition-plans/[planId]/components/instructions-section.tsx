@@ -1,7 +1,7 @@
 'use client'
 
 import { Plus, Trash2 } from 'lucide-react'
-import { Control, useFieldArray, FieldArrayWithId } from 'react-hook-form'
+import { Control, UseFormSetValue, useWatch } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -17,25 +17,27 @@ import { CreateCustomMealForm } from './create-custom-meal-dialog'
 
 interface InstructionsSectionProps {
   control: Control<CreateCustomMealForm>
+  setValue: UseFormSetValue<CreateCustomMealForm>
 }
 
-export function InstructionsSection({ control }: InstructionsSectionProps) {
-  const {
-    fields: instructionFields,
-    append: appendInstruction,
-    remove: removeInstruction,
-  } = useFieldArray({
-    control: control as Control<any>,
+export function InstructionsSection({
+  control,
+  setValue,
+}: InstructionsSectionProps) {
+  const instructions = useWatch({
+    control,
     name: 'instructions',
+    defaultValue: [''],
   })
 
   const addInstruction = () => {
-    appendInstruction('')
+    setValue('instructions', [...instructions, ''])
   }
 
   const removeInstructionStep = (index: number) => {
-    if (instructionFields.length > 1) {
-      removeInstruction(index)
+    if (instructions.length > 1) {
+      const newInstructions = instructions.filter((_, i) => i !== index)
+      setValue('instructions', newInstructions)
     }
   }
 
@@ -46,8 +48,8 @@ export function InstructionsSection({ control }: InstructionsSectionProps) {
       </div>
 
       <div className="space-y-2">
-        {instructionFields.map((field, index: number) => (
-          <div key={field.id} className="flex items-start gap-2">
+        {instructions.map((instruction: string, index: number) => (
+          <div key={index} className="flex items-start gap-2">
             <span className="text-sm text-muted-foreground w-8">
               {index + 1}.
             </span>
@@ -67,7 +69,7 @@ export function InstructionsSection({ control }: InstructionsSectionProps) {
                 </FormItem>
               )}
             />
-            {instructionFields.length > 1 && (
+            {instructions.length > 1 && (
               <Button
                 type="button"
                 variant="ghost"

@@ -1,7 +1,9 @@
 'use client'
 
+import { SaladIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import { SectionIcon } from '@/components/ui/section-icon'
 import {
   Select,
   SelectContent,
@@ -65,9 +67,10 @@ export function NutritionPlanSelector({
   if (isLoading) {
     return (
       <div className="space-y-2">
-        <label className="text-base font-medium mb-2 block">
-          Nutrition Plan
-        </label>
+        <div className="flex items-center gap-2 mb-2">
+          <SectionIcon icon={SaladIcon} size="sm" variant="green" />
+          <h2 className="text-base font-medium">Nutrition Plan</h2>
+        </div>
         <div className="h-10 bg-muted animate-pulse rounded-md" />
       </div>
     )
@@ -76,9 +79,10 @@ export function NutritionPlanSelector({
   if (sortedPlans.length === 0) {
     return (
       <div className="space-y-2">
-        <label className="text-base font-medium mb-2 block">
-          Nutrition Plan
-        </label>
+        <div className="flex items-center gap-2 mb-2">
+          <SectionIcon icon={SaladIcon} size="sm" variant="green" />
+          <h2 className="text-base font-medium">Nutrition Plan</h2>
+        </div>
         <div className="h-10 bg-muted/30 rounded-md flex items-center px-3">
           <span className="text-sm text-muted-foreground">
             Your trainer has not shared any nutrition plans with you yet
@@ -92,7 +96,10 @@ export function NutritionPlanSelector({
 
   return (
     <div className="space-y-2">
-      <label className="text-base font-medium mb-2 block">Nutrition Plan</label>
+      <div className="flex items-center gap-2 mb-2">
+        <SectionIcon icon={SaladIcon} size="sm" variant="green" />
+        <h2 className="text-base font-medium">Nutrition Plan</h2>
+      </div>
       <Select
         value={effectiveSelectedPlan || ''}
         onValueChange={handlePlanChange}
