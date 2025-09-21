@@ -15,14 +15,18 @@ import {
 import { useTeamMealsQuery } from '@/generated/graphql-client'
 import { useDebounce } from '@/hooks/use-debounce'
 
-import { CreateCustomMealDialog } from './create-custom-meal-dialog'
+import { CreateCustomMealDrawer } from './create-custom-meal-dialog'
 import { MealSearchResults } from './meal-search-results'
 
 interface MealSearchSectionProps {
   dayId: string
+  nutritionPlanId: string
 }
 
-export function MealSearchSection({ dayId }: MealSearchSectionProps) {
+export function MealSearchSection({
+  dayId,
+  nutritionPlanId,
+}: MealSearchSectionProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
@@ -54,8 +58,7 @@ export function MealSearchSection({ dayId }: MealSearchSectionProps) {
   }
 
   const handleCustomMealCreated = () => {
-    // Refresh the day content after meal is created
-    // TODO: Invalidate queries to refresh meal data
+    // Query invalidation is now handled in the CreateCustomMealDialog component
     console.info('Custom meal created for day:', dayId)
   }
 
@@ -117,6 +120,7 @@ export function MealSearchSection({ dayId }: MealSearchSectionProps) {
                 <MealSearchResults
                   meals={data?.teamMeals || []}
                   dayId={dayId}
+                  nutritionPlanId={nutritionPlanId}
                   isLoading={isLoading}
                   searchQuery={debouncedSearchQuery}
                   onMealAdded={handleMealAdded}
@@ -157,10 +161,11 @@ export function MealSearchSection({ dayId }: MealSearchSectionProps) {
         </Card>
       </div>
 
-      <CreateCustomMealDialog
+      <CreateCustomMealDrawer
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         dayId={dayId}
+        nutritionPlanId={nutritionPlanId}
         onMealCreated={handleCustomMealCreated}
       />
     </div>

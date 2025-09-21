@@ -4078,6 +4078,13 @@ export type GQLRemoveNutritionPlanDayMutationVariables = Exact<{
 
 export type GQLRemoveNutritionPlanDayMutation = { __typename?: 'Mutation', removeNutritionPlanDay: boolean };
 
+export type GQLRemoveMealFromNutritionPlanDayMutationVariables = Exact<{
+  planMealId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveMealFromNutritionPlanDayMutation = { __typename?: 'Mutation', removeMealFromNutritionPlanDay: boolean };
+
 export type GQLUpdateTrainerCapacityMutationVariables = Exact<{
   input: GQLUpdateTrainerCapacityInput;
 }>;
@@ -10166,6 +10173,30 @@ useRemoveNutritionPlanDayMutation.getKey = () => ['RemoveNutritionPlanDay'];
 
 
 useRemoveNutritionPlanDayMutation.fetcher = (variables: GQLRemoveNutritionPlanDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveNutritionPlanDayMutation, GQLRemoveNutritionPlanDayMutationVariables>(RemoveNutritionPlanDayDocument, variables, options);
+
+export const RemoveMealFromNutritionPlanDayDocument = `
+    mutation RemoveMealFromNutritionPlanDay($planMealId: ID!) {
+  removeMealFromNutritionPlanDay(planMealId: $planMealId)
+}
+    `;
+
+export const useRemoveMealFromNutritionPlanDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveMealFromNutritionPlanDayMutation, TError, GQLRemoveMealFromNutritionPlanDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveMealFromNutritionPlanDayMutation, TError, GQLRemoveMealFromNutritionPlanDayMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveMealFromNutritionPlanDay'],
+    mutationFn: (variables?: GQLRemoveMealFromNutritionPlanDayMutationVariables) => fetchData<GQLRemoveMealFromNutritionPlanDayMutation, GQLRemoveMealFromNutritionPlanDayMutationVariables>(RemoveMealFromNutritionPlanDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveMealFromNutritionPlanDayMutation.getKey = () => ['RemoveMealFromNutritionPlanDay'];
+
+
+useRemoveMealFromNutritionPlanDayMutation.fetcher = (variables: GQLRemoveMealFromNutritionPlanDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveMealFromNutritionPlanDayMutation, GQLRemoveMealFromNutritionPlanDayMutationVariables>(RemoveMealFromNutritionPlanDayDocument, variables, options);
 
 export const UpdateTrainerCapacityDocument = `
     mutation UpdateTrainerCapacity($input: UpdateTrainerCapacityInput!) {

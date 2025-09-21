@@ -265,3 +265,7 @@ mutation AddNutritionPlanDay($input: AddNutritionPlanDayInput!) {
 mutation RemoveNutritionPlanDay($dayId: ID!) {
   removeNutritionPlanDay(dayId: $dayId)
 }
+
+mutation RemoveMealFromNutritionPlanDay($planMealId: ID!) {
+  removeMealFromNutritionPlanDay(planMealId: $planMealId)
+}

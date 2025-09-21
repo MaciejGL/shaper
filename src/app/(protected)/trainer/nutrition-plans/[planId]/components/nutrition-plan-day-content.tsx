@@ -58,7 +58,7 @@ export function NutritionPlanDayContent({
           <Plus className="h-5 w-5 text-primary" />
           <h3 className="font-semibold">Add Recipes to Menu</h3>
         </div>
-        <MealSearchSection dayId={day.id} />
+        <MealSearchSection dayId={day.id} nutritionPlanId={nutritionPlanId} />
       </div>
 
       {/* Restaurant Menu Style Layout */}
@@ -76,7 +76,11 @@ export function NutritionPlanDayContent({
         {meals.map((planMeal, index) => (
           <div key={planMeal.id}>
             {index > 0 && <Separator className="my-6" />}
-            <MealCard planMeal={planMeal} />
+            <MealCard
+              planMeal={planMeal}
+              nutritionPlanId={nutritionPlanId}
+              dayId={day.id}
+            />
           </div>
         ))}
 

@@ -1,7 +1,9 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { ChefHat, Clock, Edit, Eye, EyeOff, Trash2, Users } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -11,8 +13,20 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
-import type { GQLGetNutritionPlanQuery } from '@/generated/graphql-client'
+import {
+  type GQLGetNutritionPlanQuery,
+  useGetNutritionPlanQuery,
+  useRemoveMealFromNutritionPlanDayMutation,
+} from '@/generated/graphql-client'
 
 import { IngredientList } from './ingredient-list'
 
@@ -20,12 +34,66 @@ interface MealCardProps {
   planMeal: NonNullable<
     GQLGetNutritionPlanQuery['nutritionPlan']
   >['days'][number]['meals'][number]
+  nutritionPlanId: string
+  dayId: string
 }
 
-export function MealCard({ planMeal }: MealCardProps) {
+export function MealCard({ planMeal, nutritionPlanId, dayId }: MealCardProps) {
   const [isExpanded, setIsExpanded] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const queryClient = useQueryClient()
   const meal = planMeal.meal
   const macros = planMeal.adjustedMacros
+
+  const deleteMealMutation = useRemoveMealFromNutritionPlanDayMutation({
+    onMutate: async () => {
+      // Cancel outgoing refetches
+      const queryKey = useGetNutritionPlanQuery.getKey({ id: nutritionPlanId })
+      await queryClient.cancelQueries({ queryKey })
+
+      // Snapshot previous value
+      const previousData = queryClient.getQueryData(queryKey)
+
+      // Optimistically update UI by removing the meal
+      queryClient.setQueryData(
+        queryKey,
+        (old: GQLGetNutritionPlanQuery | undefined) => {
+          if (!old?.nutritionPlan?.days) return old
+          return {
+            ...old,
+            nutritionPlan: {
+              ...old.nutritionPlan,
+              days: old.nutritionPlan.days.map((day) => {
+                if (day.id === dayId) {
+                  return {
+                    ...day,
+                    meals:
+                      day.meals?.filter((meal) => meal.id !== planMeal.id) ||
+                      [],
+                  }
+                }
+                return day
+              }),
+            },
+          }
+        },
+      )
+
+      return { previousData, queryKey }
+    },
+    onError: (err, variables, context) => {
+      toast.error('Failed to delete meal: ' + (err as Error).message)
+      // Rollback on error
+      if (context?.previousData && context?.queryKey) {
+        queryClient.setQueryData(context.queryKey, context.previousData)
+      }
+    },
+    onSettled: () => {
+      // Always refetch after mutation
+      const queryKey = useGetNutritionPlanQuery.getKey({ id: nutritionPlanId })
+      queryClient.invalidateQueries({ queryKey })
+    },
+  })
 
   const handleEdit = () => {
     // TODO: Implement meal editing
@@ -33,8 +101,13 @@ export function MealCard({ planMeal }: MealCardProps) {
   }
 
   const handleDelete = () => {
-    // TODO: Implement meal deletion
-    console.info('Delete meal from plan:', planMeal.id)
+    setShowDeleteDialog(true)
+  }
+
+  const confirmDelete = () => {
+    deleteMealMutation.mutate({ planMealId: planMeal.id })
+    setShowDeleteDialog(false)
+    toast.success('Meal removed from day')
   }
 
   const formatTime = (minutes?: number | null) => {
@@ -71,7 +144,12 @@ export function MealCard({ planMeal }: MealCardProps) {
               <Button size="sm" variant="ghost" onClick={handleEdit}>
                 <Edit className="h-4 w-4" />
               </Button>
-              <Button size="sm" variant="ghost" onClick={handleDelete}>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleDelete}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
                 <Trash2 className="h-4 w-4" />
               </Button>
               <CollapsibleTrigger asChild>
@@ -203,6 +281,34 @@ export function MealCard({ planMeal }: MealCardProps) {
           </CardContent>
         </CollapsibleContent>
       </Collapsible>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <DialogContent dialogTitle="Delete Meal">
+          <DialogHeader>
+            <DialogTitle>Delete Meal</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to remove "{meal.name}" from this day? This
+              action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowDeleteDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={deleteMealMutation.isPending}
+            >
+              {deleteMealMutation.isPending ? 'Deleting...' : 'Delete Meal'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   )
 }

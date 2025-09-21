@@ -16,7 +16,6 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import {
-  type GQLIngredient,
   useAddIngredientToMealMutation,
   useAddMealToNutritionPlanDayMutation,
   useCreateMealMutation,
@@ -152,13 +151,9 @@ export function CreateCustomMealDrawer({
     onOpenChange(false)
   }
 
-  const handleIngredientAdded = (
-    ingredient: GQLIngredient,
-    grams: number = 100,
-  ) => {
+  const handleIngredientAdded = (ingredient: any, grams: number = 100) => {
     const existingIngredients = form.getValues('ingredients') || []
     const existingIndex = existingIngredients.findIndex(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (field: any) => field.id === ingredient.id,
     )
 

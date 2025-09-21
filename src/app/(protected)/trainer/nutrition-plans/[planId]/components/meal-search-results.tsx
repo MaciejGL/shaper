@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -7,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import {
   type GQLTeamMealsQuery,
   useAddMealToNutritionPlanDayMutation,
+  useGetNutritionPlanQuery,
 } from '@/generated/graphql-client'
 
 type LightMeal = NonNullable<GQLTeamMealsQuery['teamMeals']>[number]
@@ -14,6 +16,7 @@ type LightMeal = NonNullable<GQLTeamMealsQuery['teamMeals']>[number]
 interface MealSearchResultsProps {
   meals: LightMeal[]
   dayId: string
+  nutritionPlanId: string
   isLoading: boolean
   searchQuery: string
   onMealAdded?: () => void
@@ -22,14 +25,19 @@ interface MealSearchResultsProps {
 export function MealSearchResults({
   meals,
   dayId,
+  nutritionPlanId,
   isLoading,
   searchQuery,
   onMealAdded,
 }: MealSearchResultsProps) {
+  const queryClient = useQueryClient()
   const addMealMutation = useAddMealToNutritionPlanDayMutation({
     onSuccess: () => {
       toast.success('Meal added to day!')
       onMealAdded?.()
+      // Invalidate the nutrition plan query to refresh the UI
+      const queryKey = useGetNutritionPlanQuery.getKey({ id: nutritionPlanId })
+      queryClient.invalidateQueries({ queryKey })
     },
     onError: (error) => {
       toast.error('Failed to add meal: ' + (error as Error).message)

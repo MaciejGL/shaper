@@ -48,6 +48,191 @@ const createIngredientSchema = z.object({
 
 type CreateIngredientForm = z.infer<typeof createIngredientSchema>
 
+interface CreateIngredientFormProps {
+  onIngredientCreated: (ingredient: GQLIngredient) => void
+  onCancel: () => void
+  defaultName?: string
+}
+
+export function CreateIngredientForm({
+  onIngredientCreated,
+  onCancel,
+  defaultName,
+}: CreateIngredientFormProps) {
+  const createIngredientMutation = useCreateIngredientMutation()
+
+  const form = useForm<CreateIngredientForm>({
+    resolver: zodResolver(createIngredientSchema),
+    defaultValues: {
+      name: defaultName || '',
+      proteinPer100g: 0,
+      carbsPer100g: 0,
+      fatPer100g: 0,
+      caloriesPer100g: 0,
+    },
+  })
+
+  // Update form when defaultName changes
+  React.useEffect(() => {
+    if (defaultName) {
+      form.setValue('name', defaultName)
+    }
+  }, [defaultName, form])
+
+  const onSubmit = async (values: CreateIngredientForm) => {
+    try {
+      const result = await createIngredientMutation.mutateAsync({
+        input: values,
+      })
+
+      form.reset()
+      onIngredientCreated(result.createIngredient as GQLIngredient)
+    } catch (error) {
+      console.error('Failed to create ingredient:', error)
+    }
+  }
+
+  const handleCancel = () => {
+    form.reset()
+    onCancel()
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="border-b pb-4">
+        <h3 className="text-lg font-semibold">Create New Ingredient</h3>
+        <p className="text-sm text-muted-foreground">
+          Add nutritional information for "{defaultName || 'new ingredient'}"
+        </p>
+      </div>
+
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Ingredient Name</FormLabel>
+                <FormControl>
+                  <Input
+                    id="ingredient-name"
+                    placeholder="e.g., Chicken Breast"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="caloriesPer100g"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Calories (per 100g)</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="calories-per-100g"
+                      type="number"
+                      step="0.1"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(Number(e.target.value) || 0)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="proteinPer100g"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Protein (g)</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="protein-per-100g"
+                      type="number"
+                      step="0.1"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(Number(e.target.value) || 0)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="carbsPer100g"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Carbs (g)</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="carbs-per-100g"
+                      type="number"
+                      step="0.1"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(Number(e.target.value) || 0)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="fatPer100g"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fat (g)</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="fat-per-100g"
+                      type="number"
+                      step="0.1"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(Number(e.target.value) || 0)
+                      }
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={createIngredientMutation.isPending}>
+              {createIngredientMutation.isPending
+                ? 'Creating...'
+                : 'Create Ingredient'}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  )
+}
+
+// Sheet version for standalone use (e.g., in meal editing)
 interface CreateIngredientSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -116,7 +301,7 @@ export function CreateIngredientSheet({
                   <FormLabel>Ingredient Name</FormLabel>
                   <FormControl>
                     <Input
-                      id="ingredient-name"
+                      id="ingredient-name-sheet"
                       placeholder="e.g., Chicken Breast"
                       {...field}
                     />
@@ -135,7 +320,7 @@ export function CreateIngredientSheet({
                     <FormLabel>Calories (per 100g)</FormLabel>
                     <FormControl>
                       <Input
-                        id="calories-per-100g"
+                        id="calories-per-100g-sheet"
                         type="number"
                         step="0.1"
                         {...field}
@@ -157,7 +342,7 @@ export function CreateIngredientSheet({
                     <FormLabel>Protein (g)</FormLabel>
                     <FormControl>
                       <Input
-                        id="protein-per-100g"
+                        id="protein-per-100g-sheet"
                         type="number"
                         step="0.1"
                         {...field}
@@ -179,7 +364,7 @@ export function CreateIngredientSheet({
                     <FormLabel>Carbs (g)</FormLabel>
                     <FormControl>
                       <Input
-                        id="carbs-per-100g"
+                        id="carbs-per-100g-sheet"
                         type="number"
                         step="0.1"
                         {...field}
@@ -201,7 +386,7 @@ export function CreateIngredientSheet({
                     <FormLabel>Fat (g)</FormLabel>
                     <FormControl>
                       <Input
-                        id="fat-per-100g"
+                        id="fat-per-100g-sheet"
                         type="number"
                         step="0.1"
                         {...field}

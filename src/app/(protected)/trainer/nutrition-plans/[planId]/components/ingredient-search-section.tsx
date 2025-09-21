@@ -12,7 +12,7 @@ import {
   useSearchIngredientsQuery,
 } from '@/generated/graphql-client'
 
-import { CreateIngredientDialog } from './create-ingredient-dialog'
+import { CreateIngredientSheet } from './create-ingredient-components'
 import { IngredientSearchResults } from './ingredient-search-results'
 
 interface IngredientSearchSectionProps {
@@ -106,7 +106,7 @@ export function IngredientSearchSection({
           />
         </div>
 
-        <CreateIngredientDialog
+        <CreateIngredientSheet
           open={showCreateDialog}
           onOpenChange={setShowCreateDialog}
           onIngredientCreated={(ingredient) => {
