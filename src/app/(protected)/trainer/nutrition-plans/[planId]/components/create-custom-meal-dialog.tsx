@@ -27,10 +27,62 @@ import { BasicMealInfoSection } from './basic-meal-info-section'
 import { IngredientsSection } from './ingredients-section'
 import { InstructionsSection } from './instructions-section'
 
+// Simple Total Macros Display Component
+function TotalMacrosDisplay({
+  ingredientFields,
+}: {
+  ingredientFields: {
+    id: string
+    name: string
+    grams: number
+    caloriesPer100g: number
+    proteinPer100g: number
+    carbsPer100g: number
+    fatPer100g: number
+  }[]
+}) {
+  if (ingredientFields.length === 0) return null
+
+  const totals = ingredientFields.reduce(
+    (acc, ingredient) => {
+      const multiplier = ingredient.grams / 100
+      return {
+        calories: acc.calories + ingredient.caloriesPer100g * multiplier,
+        protein: acc.protein + ingredient.proteinPer100g * multiplier,
+        carbs: acc.carbs + ingredient.carbsPer100g * multiplier,
+        fat: acc.fat + ingredient.fatPer100g * multiplier,
+      }
+    },
+    { calories: 0, protein: 0, carbs: 0, fat: 0 },
+  )
+
+  return (
+    <div className="flex gap-2 mb-4">
+      <div className="text-sm font-medium text-foreground mr-2">Total:</div>
+      <div className="px-2 py-1 bg-orange-100 text-orange-800 rounded text-sm font-medium">
+        {Math.round(totals.calories)} kcal
+      </div>
+      <div className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
+        {Math.round(totals.protein * 10) / 10}g protein
+      </div>
+      <div className="px-2 py-1 bg-green-100 text-green-800 rounded text-sm font-medium">
+        {Math.round(totals.carbs * 10) / 10}g carbs
+      </div>
+      <div className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-sm font-medium">
+        {Math.round(totals.fat * 10) / 10}g fat
+      </div>
+    </div>
+  )
+}
+
 const ingredientSchema = z.object({
   id: z.string(),
   name: z.string(),
   grams: z.number().min(1, 'Amount must be at least 1g'),
+  caloriesPer100g: z.number(),
+  proteinPer100g: z.number(),
+  carbsPer100g: z.number(),
+  fatPer100g: z.number(),
 })
 
 const createCustomMealSchema = z.object({
@@ -177,6 +229,10 @@ export function CreateCustomMealDrawer({
         id: ingredient.id,
         name: ingredient.name,
         grams,
+        caloriesPer100g: ingredient.caloriesPer100g,
+        proteinPer100g: ingredient.proteinPer100g,
+        carbsPer100g: ingredient.carbsPer100g,
+        fatPer100g: ingredient.fatPer100g,
       })
     }
   }
@@ -199,6 +255,8 @@ export function CreateCustomMealDrawer({
               <BasicMealInfoSection control={form.control} />
 
               <InstructionsSection control={form.control} />
+
+              <TotalMacrosDisplay ingredientFields={ingredientFields} />
 
               <IngredientsSection
                 control={form.control}

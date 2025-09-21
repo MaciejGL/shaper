@@ -1,7 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
-import { AlertCircle, Calculator, CheckCircle } from 'lucide-react'
+import { AlertCircle, Calculator, CheckCircle, Sparkles } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -99,6 +99,7 @@ export function InlineIngredientForm({
   onCancel,
 }: InlineIngredientFormProps) {
   const createIngredientMutation = useCreateIngredientMutation()
+  const [isLoadingAI, setIsLoadingAI] = useState(false)
 
   const form = useForm<CreateIngredientForm>({
     resolver: zodResolver(createIngredientSchema),
@@ -249,6 +250,64 @@ export function InlineIngredientForm({
     }
   }
 
+  const handleGetMacrosFromAI = async () => {
+    const ingredientName = form.getValues('name')
+    if (!ingredientName.trim()) {
+      toast.error('Please enter an ingredient name first')
+      return
+    }
+
+    setIsLoadingAI(true)
+    try {
+      const response = await fetch('/api/ai/get-macros', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ingredientName }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to get AI response')
+      }
+
+      const result = await response.json()
+      if (result.success && result.data) {
+        const {
+          caloriesPer100g,
+          proteinPer100g,
+          carbsPer100g,
+          fatPer100g,
+          confidence,
+          notes,
+        } = result.data
+
+        // Update form values
+        form.setValue('caloriesPer100g', caloriesPer100g)
+        form.setValue('proteinPer100g', proteinPer100g)
+        form.setValue('carbsPer100g', carbsPer100g)
+        form.setValue('fatPer100g', fatPer100g)
+
+        // Show success message with confidence level
+        const confidenceEmoji =
+          confidence === 'high' ? '✅' : confidence === 'medium' ? '⚠️' : '❓'
+        toast.success(
+          `Macros generated ${confidenceEmoji} (${confidence} confidence)`,
+          {
+            description: notes || 'AI-generated nutritional data populated',
+          },
+        )
+      } else {
+        throw new Error(result.error || 'Invalid response from AI')
+      }
+    } catch (error) {
+      console.error('AI macro generation error:', error)
+      toast.error('Failed to generate macros from AI', {
+        description: 'Please try again or enter values manually',
+      })
+    } finally {
+      setIsLoadingAI(false)
+    }
+  }
+
   const handleCancel = () => {
     form.reset({
       name: '',
@@ -281,7 +340,26 @@ export function InlineIngredientForm({
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Ingredient Name</FormLabel>
+                <div className="flex items-center justify-between">
+                  <FormLabel>Ingredient Name</FormLabel>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGetMacrosFromAI}
+                    disabled={isLoadingAI || !field.value?.trim()}
+                    className="text-xs"
+                  >
+                    {isLoadingAI ? (
+                      'Getting AI macros...'
+                    ) : (
+                      <>
+                        <Sparkles className="h-3 w-3 mr-1" />
+                        Get Macros from AI
+                      </>
+                    )}
+                  </Button>
+                </div>
                 <FormControl>
                   <Input
                     id="ingredient-name"

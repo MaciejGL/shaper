@@ -86,7 +86,11 @@ export function IngredientsSection({
     : recentData?.recentIngredients || []
 
   const hasResults = availableIngredients.length > 0
-  const showNoResults = ingredientSearchQuery.length > 0 && !hasResults
+  const isExactResult = availableIngredients.find(
+    (ingredient) =>
+      ingredient.name.toLowerCase() === ingredientSearchQuery.toLowerCase(),
+  )
+  const showNoResults = ingredientSearchQuery.length > 0 && !isExactResult
 
   const handleCreateIngredient = () => {
     setShowCreateIngredientForm(true)
@@ -237,8 +241,8 @@ export function IngredientsSection({
                       e.stopPropagation()
                       handleCreateIngredient()
                     }}
+                    iconStart={<Plus />}
                   >
-                    <Plus className="h-4 w-4 mr-2" />
                     Add new ingredient "{ingredientSearchQuery}"
                   </Button>
                 </div>
@@ -350,12 +354,14 @@ export function IngredientsSection({
       )}
 
       {/* Inline Ingredient Creation Form */}
-      <InlineIngredientForm
-        show={showCreateIngredientForm}
-        defaultName={ingredientSearchQuery}
-        onIngredientCreated={handleIngredientCreated}
-        onCancel={handleCancelIngredientCreation}
-      />
+      {showCreateIngredientForm && (
+        <InlineIngredientForm
+          show={showCreateIngredientForm}
+          defaultName={ingredientSearchQuery}
+          onIngredientCreated={handleIngredientCreated}
+          onCancel={handleCancelIngredientCreation}
+        />
+      )}
     </div>
   )
 }

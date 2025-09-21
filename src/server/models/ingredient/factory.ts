@@ -6,6 +6,8 @@ import { Ingredient as PrismaIngredient } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { getCurrentUserOrThrow } from '@/lib/getUser'
 
+import { formatIngredientName } from './utils'
+
 export interface ValidationResult {
   isValid: boolean
   errors: string[]
@@ -63,29 +65,36 @@ export async function createGlobalIngredient(
 ): Promise<PrismaIngredient> {
   const user = await getCurrentUserOrThrow()
 
-  // Validate input data
-  const validation = validateIngredientMacros(input)
+  // Format the ingredient name
+  const formattedName = formatIngredientName(input.name)
+
+  // Validate input data with formatted name
+  const validationData = {
+    ...input,
+    name: formattedName,
+  }
+  const validation = validateIngredientMacros(validationData)
   if (!validation.isValid) {
     throw new Error(`Invalid ingredient data: ${validation.errors.join(', ')}`)
   }
 
-  // Check for duplicate names (case-insensitive)
+  // Check for duplicate names (case-insensitive) using formatted name
   const existingIngredient = await prisma.ingredient.findFirst({
     where: {
       name: {
-        equals: input.name,
+        equals: formattedName,
         mode: 'insensitive',
       },
     },
   })
 
   if (existingIngredient) {
-    throw new Error(`Ingredient with name "${input.name}" already exists`)
+    throw new Error(`Ingredient with name "${formattedName}" already exists`)
   }
 
   const ingredient = await prisma.ingredient.create({
     data: {
-      name: input.name,
+      name: formattedName,
       proteinPer100g: input.proteinPer100g,
       carbsPer100g: input.carbsPer100g,
       fatPer100g: input.fatPer100g,
@@ -115,6 +124,9 @@ export async function updateIngredient(
 ): Promise<PrismaIngredient> {
   const user = await getCurrentUserOrThrow()
 
+  // Format the ingredient name if it's being updated
+  let formattedName: string | undefined
+
   // Check if ingredient exists and user has permission to update
   const existingIngredient = await prisma.ingredient.findUnique({
     where: { id: ingredientId },
@@ -137,7 +149,7 @@ export async function updateIngredient(
     (input.caloriesPer100g !== undefined && input.caloriesPer100g !== null)
   ) {
     const validationData = {
-      name: input.name || existingIngredient.name,
+      name: formattedName || existingIngredient.name,
       proteinPer100g:
         input.proteinPer100g !== undefined && input.proteinPer100g !== null
           ? input.proteinPer100g
@@ -166,10 +178,12 @@ export async function updateIngredient(
 
   // Check for duplicate names if name is being updated
   if (input.name && input.name !== existingIngredient.name) {
+    formattedName = formatIngredientName(input.name)
+
     const duplicateIngredient = await prisma.ingredient.findFirst({
       where: {
         name: {
-          equals: input.name,
+          equals: formattedName,
           mode: 'insensitive',
         },
         id: {
@@ -179,7 +193,7 @@ export async function updateIngredient(
     })
 
     if (duplicateIngredient) {
-      throw new Error(`Ingredient with name "${input.name}" already exists`)
+      throw new Error(`Ingredient with name "${formattedName}" already exists`)
     }
   }
 
@@ -192,8 +206,8 @@ export async function updateIngredient(
     caloriesPer100g?: number
   } = {}
 
-  if (input.name) {
-    updateData.name = input.name
+  if (formattedName) {
+    updateData.name = formattedName
   }
   if (input.proteinPer100g !== undefined && input.proteinPer100g !== null) {
     updateData.proteinPer100g = input.proteinPer100g
