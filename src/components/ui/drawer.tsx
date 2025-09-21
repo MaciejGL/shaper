@@ -12,21 +12,10 @@ function Drawer({
 }: React.ComponentProps<typeof DrawerPrimitive.Root> & {
   onClose?: () => void
 }) {
-  // Track internal open state for RemoveScroll - works for both controlled and uncontrolled
   const [isOpen, setIsOpen] = React.useState(false)
 
   const handleOpenChange = (open: boolean) => {
-    // Update internal state for RemoveScroll
     setIsOpen(open)
-
-    // Handle pull-to-refresh flag
-    if (open) {
-      document.body.setAttribute('data-drawer-open', 'true')
-    } else {
-      document.body.removeAttribute('data-drawer-open')
-    }
-
-    // Call user's onOpenChange if provided
     onOpenChange?.(open)
   }
 

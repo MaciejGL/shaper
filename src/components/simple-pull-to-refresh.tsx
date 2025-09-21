@@ -84,6 +84,16 @@ export function SimplePullToRefresh() {
     let isAtTopTimer: NodeJS.Timeout | null = null
     let isPullToRefreshEnabled = false
 
+    // Check if any modal/drawer is currently open
+    const isAnyModalOpen = (): boolean => {
+      return (
+        // Radix dialogs, sheets, popovers, alert dialogs
+        document.querySelector('[data-state="open"]') !== null ||
+        // General accessibility check
+        document.querySelector('[role="dialog"]') !== null
+      )
+    }
+
     // Disable scroll during pull gesture
     const disableScroll = () => {
       if (document.body.style.overflow !== 'hidden') {
@@ -99,8 +109,8 @@ export function SimplePullToRefresh() {
 
     // Handle scroll position changes
     const handleScroll = () => {
-      // Don't start pull-to-refresh if drawer is open
-      if (document.body.hasAttribute('data-drawer-open')) {
+      // Don't start pull-to-refresh if any modal/drawer is open
+      if (isAnyModalOpen()) {
         // Cancel any pending timer and disable pull-to-refresh
         if (isAtTopTimer) {
           clearTimeout(isAtTopTimer)
@@ -129,10 +139,7 @@ export function SimplePullToRefresh() {
     }
 
     // Initialize pull-to-refresh state based on current scroll position
-    if (
-      window.scrollY === 0 &&
-      !document.body.hasAttribute('data-drawer-open')
-    ) {
+    if (window.scrollY === 0 && !isAnyModalOpen()) {
       isPullToRefreshEnabled = true // If already at top on mount, enable immediately
     }
 
@@ -187,8 +194,8 @@ export function SimplePullToRefresh() {
 
     // Touch start
     const handleTouchStart = (e: TouchEvent) => {
-      // Don't start if drawer is open
-      if (document.body.hasAttribute('data-drawer-open')) return
+      // Don't start if any modal/drawer is open
+      if (isAnyModalOpen()) return
 
       touchstartY = e.touches[0].clientY
       isPulling = false
@@ -198,8 +205,8 @@ export function SimplePullToRefresh() {
 
     // Touch move
     const handleTouchMove = (e: TouchEvent) => {
-      // Don't continue if drawer is open
-      if (document.body.hasAttribute('data-drawer-open')) return
+      // Don't continue if any modal/drawer is open
+      if (isAnyModalOpen()) return
 
       const touchY = e.touches[0].clientY
       const touchDiff = touchY - touchstartY
@@ -242,8 +249,8 @@ export function SimplePullToRefresh() {
         enableScroll()
       }
 
-      // Don't refresh if drawer is open
-      if (document.body.hasAttribute('data-drawer-open')) {
+      // Don't refresh if any modal/drawer is open
+      if (isAnyModalOpen()) {
         isPulling = false
         currentPullDistance = 0
         resetState()
@@ -290,8 +297,6 @@ export function SimplePullToRefresh() {
       if (isAtTopTimer) {
         clearTimeout(isAtTopTimer)
       }
-      // Clean up drawer flag just in case
-      document.body.removeAttribute('data-drawer-open')
       // Re-enable scroll on cleanup
       enableScroll()
     }
