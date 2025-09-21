@@ -4,6 +4,11 @@ query GetNutritionPlan($id: ID!) {
     name
     description
     isSharedWithClient
+    client {
+      id
+      firstName
+      lastName
+    }
     days {
       id
       dayNumber

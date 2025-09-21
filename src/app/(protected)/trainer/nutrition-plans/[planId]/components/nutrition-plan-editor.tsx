@@ -1,9 +1,12 @@
 'use client'
 
+import { ChefHat } from 'lucide-react'
 import { useState } from 'react'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { GQLGetNutritionPlanQuery } from '@/generated/graphql-client'
+
+import { DashboardHeader } from '../../../components/dashboard-header'
 
 import { AddDayButton } from './add-day-button'
 import { EditablePlanName } from './editable-plan-name'
@@ -23,6 +26,27 @@ export function NutritionPlanEditor({
   const [activeDay, setActiveDay] = useState(
     nutritionPlan.days?.[0]?.dayNumber?.toString() || '1',
   )
+
+  // Helper function to format client name
+  const getClientName = () => {
+    const client = nutritionPlan.client
+    if (!client) return 'Unknown Client'
+
+    const firstName = client.firstName || ''
+    const lastName = client.lastName || ''
+
+    if (firstName && lastName) {
+      return `${firstName} ${lastName}`
+    }
+
+    return firstName || lastName || 'Unknown Client'
+  }
+
+  // Get navigation back to client profile
+  const getClientBackUrl = () => {
+    if (!nutritionPlan.client?.id) return '/trainer/clients'
+    return `/trainer/clients/${nutritionPlan.client.id}?tab=nutrition`
+  }
 
   const handleDayAdded = (newDay: GQLNutritionPlanDay) => {
     // Switch to the newly added day
@@ -65,54 +89,66 @@ export function NutritionPlanEditor({
   const days = nutritionPlan.days || []
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <EditablePlanName
-          planId={nutritionPlan.id}
-          planName={nutritionPlan.name}
-        />
-        {nutritionPlan.description && (
-          <p className="text-muted-foreground">{nutritionPlan.description}</p>
-        )}
-      </div>
+    <div className="container @container/nutrition-editor mx-auto">
+      <DashboardHeader
+        title="Nutrition Plan Editor"
+        icon={ChefHat}
+        className="mt-0"
+        prevSegment={{
+          label: getClientName(),
+          href: getClientBackUrl(),
+        }}
+      />
 
-      <Tabs value={activeDay} onValueChange={setActiveDay}>
-        <div className="flex items-center justify-between">
-          <TabsList className="grid w-auto grid-flow-col">
-            {days.map((day) => (
-              <TabsTrigger key={day.id} value={day.dayNumber.toString()}>
-                Day {day.dayNumber}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-
-          <AddDayButton
-            nutritionPlanId={nutritionPlan.id}
-            nextDayNumber={(nutritionPlan.days?.length || 0) + 1}
-            onDayAdded={handleDayAdded}
+      <div className="space-y-6">
+        <div className="space-y-2">
+          <EditablePlanName
+            planId={nutritionPlan.id}
+            planName={nutritionPlan.name}
           />
+          {nutritionPlan.description && (
+            <p className="text-muted-foreground">{nutritionPlan.description}</p>
+          )}
         </div>
 
-        {days.map((day) => (
-          <TabsContent key={day.id} value={day.dayNumber.toString()}>
-            <NutritionPlanDayContent
-              day={day}
-              nutritionPlanId={nutritionPlan.id}
-              onDayDeleted={handleDayDeleted}
-            />
-          </TabsContent>
-        ))}
+        <Tabs value={activeDay} onValueChange={setActiveDay}>
+          <div className="flex items-center justify-between">
+            <TabsList className="grid w-auto grid-flow-col">
+              {days.map((day) => (
+                <TabsTrigger key={day.id} value={day.dayNumber.toString()}>
+                  Day {day.dayNumber}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-        {/* Show content for new day if no days exist */}
-        {days.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">No days added yet</p>
-            <p className="text-sm text-muted-foreground">
-              Click "Add Day" to start building your nutrition plan
-            </p>
+            <AddDayButton
+              nutritionPlanId={nutritionPlan.id}
+              nextDayNumber={(nutritionPlan.days?.length || 0) + 1}
+              onDayAdded={handleDayAdded}
+            />
           </div>
-        )}
-      </Tabs>
+
+          {days.map((day) => (
+            <TabsContent key={day.id} value={day.dayNumber.toString()}>
+              <NutritionPlanDayContent
+                day={day}
+                nutritionPlanId={nutritionPlan.id}
+                onDayDeleted={handleDayDeleted}
+              />
+            </TabsContent>
+          ))}
+
+          {/* Show content for new day if no days exist */}
+          {days.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground mb-4">No days added yet</p>
+              <p className="text-sm text-muted-foreground">
+                Click "Add Day" to start building your nutrition plan
+              </p>
+            </div>
+          )}
+        </Tabs>
+      </div>
     </div>
   )
 }
