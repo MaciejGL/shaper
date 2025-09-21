@@ -25,6 +25,7 @@ import {
   useFitspaceUpdateSetLogMutation,
 } from '@/generated/graphql-client'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
+import { formatDecimalInput } from '@/lib/format-tempo'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 import { cn } from '@/lib/utils'
 
@@ -189,10 +190,10 @@ export function ExerciseSet({
     e: React.ChangeEvent<HTMLInputElement>,
     key: 'reps' | 'weight',
   ) => {
-    const sanitizedValue = e.target.value
-      .replace(',', '.') // Replace comma with dot
-      .replace(/[^0-9.]/g, '') // Remove anything not digit or dot
-      .replace(/(\..*)\./g, '$1') // Prevent more than one dot
+    const sanitizedValue =
+      key === 'weight'
+        ? formatDecimalInput(e) // For weight, use the standard function that supports comma/period
+        : e.target.value.replace(/[^0-9]/g, '') // For reps, only allow digits
 
     hasUserEdited.current = true
 
