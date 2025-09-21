@@ -10,7 +10,10 @@ export function formatIngredientName(name: string): string {
     .trim() // Remove leading/trailing whitespace
     .replace(/\s+/g, ' ') // Replace multiple spaces with single space
     .toLowerCase() // Convert to lowercase first
-    .replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize first letter of each word
+    .replace(
+      /(^|[\s\-_.])(\w)/g,
+      (match, separator, char) => separator + char.toUpperCase(),
+    ) // Capitalize first letter of each word
     .replace(/\bW\//g, 'With') // Replace "w/" with "With"
     .replace(/\bAnd\b/g, 'and') // Lowercase common conjunctions
     .replace(/\bOr\b/g, 'or')
