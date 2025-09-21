@@ -56,7 +56,7 @@ export function MealSearchResults({
 
   if (isLoading) {
     return (
-      <div className="py-3 text-center text-xs text-muted-foreground">
+      <div className="py-3 text-center text-xs text-muted-foreground min-w-[300px]">
         Searching...
       </div>
     )
@@ -64,7 +64,7 @@ export function MealSearchResults({
 
   if (meals.length === 0 && searchQuery) {
     return (
-      <div className="py-3 text-center text-xs text-muted-foreground">
+      <div className="py-3 text-center text-xs text-muted-foreground min-w-[300px]">
         No meals found
       </div>
     )
@@ -72,14 +72,14 @@ export function MealSearchResults({
 
   if (meals.length === 0) {
     return (
-      <div className="py-3 text-center text-xs text-muted-foreground">
+      <div className="py-3 text-center text-xs text-muted-foreground min-w-[300px]">
         Type to search meals
       </div>
     )
   }
 
   return (
-    <div className="space-y-1 max-h-64 overflow-y-auto">
+    <div className="space-y-1 max-h-64 overflow-y-auto min-w-[300px]">
       <div className="text-xs font-medium text-muted-foreground px-1 py-1">
         {meals.length} meal{meals.length !== 1 ? 's' : ''}
       </div>
@@ -92,18 +92,20 @@ export function MealSearchResults({
           <div className="flex-1 min-w-0">
             <div className="font-medium text-sm truncate">{meal.name}</div>
             <div className="text-xs text-muted-foreground">
-              {meal.totalMacros.calories} kcal | P: {meal.totalMacros.protein}g
-              | C: {meal.totalMacros.carbs}g | F: {meal.totalMacros.fat}g
+              {meal.totalMacros.calories.toFixed(0)} kcal | P:{' '}
+              {meal.totalMacros.protein.toFixed(0)}g | C:{' '}
+              {meal.totalMacros.carbs.toFixed(0)}g | F:{' '}
+              {meal.totalMacros.fat.toFixed(0)}g
             </div>
           </div>
 
           <Button
-            size="sm"
+            size="icon-sm"
             disabled={addMealMutation.isPending}
             onClick={() => handleAddMeal(meal.id)}
-            className="ml-2 shrink-0"
+            iconOnly={<Plus />}
           >
-            <Plus className="h-4 w-4" />
+            Add
           </Button>
         </div>
       ))}

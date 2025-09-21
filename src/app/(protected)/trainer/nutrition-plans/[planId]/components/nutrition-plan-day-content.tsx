@@ -1,8 +1,9 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
-import { ChefHat, Plus, Trash } from 'lucide-react'
-import { useState } from 'react'
+import { Reorder, useDragControls } from 'framer-motion'
+import { ChefHat, Trash } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -15,12 +16,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Separator } from '@/components/ui/separator'
 import {
   GQLGetNutritionPlanQuery,
   useGetNutritionPlanQuery,
   useRemoveNutritionPlanDayMutation,
+  useReorderNutritionPlanDayMealsMutation,
 } from '@/generated/graphql-client'
+import { useDebounce } from '@/hooks/use-debounce'
 import { cn } from '@/lib/utils'
 
 import { EditableDayName } from './editable-day-name'
@@ -42,7 +44,112 @@ export function NutritionPlanDayContent({
   nutritionPlanId,
   onDayDeleted,
 }: NutritionPlanDayContentProps) {
-  const meals = day.meals || []
+  const queryClient = useQueryClient()
+
+  // Sort meals by orderIndex for consistent ordering
+  const sortedMeals = (day.meals || []).sort(
+    (a, b) => a.orderIndex - b.orderIndex,
+  )
+
+  // Local state for optimistic reordering
+  const [meals, setMeals] = useState(sortedMeals)
+
+  // Memoized meal IDs to avoid complex expression in dependency array
+  const mealSignature = useMemo(
+    () => sortedMeals.map((m) => `${m.id}-${m.orderIndex}`).join(','),
+    [sortedMeals],
+  )
+
+  // Update local state when server data changes
+  useEffect(() => {
+    setMeals(sortedMeals)
+  }, [mealSignature, sortedMeals])
+
+  // Debounce the meal order for mutations (3 seconds as requested)
+  const debouncedMeals = useDebounce(meals, 3000)
+
+  // Track the last sent order to prevent duplicate mutations
+  const lastSentOrderRef = useRef<string[]>(sortedMeals.map((m) => m.id))
+
+  // Reorder mutation with optimistic updates
+  const reorderMutation = useReorderNutritionPlanDayMealsMutation({
+    onMutate: async (variables) => {
+      // Cancel outgoing refetches
+      const queryKey = useGetNutritionPlanQuery.getKey({ id: nutritionPlanId })
+      await queryClient.cancelQueries({ queryKey })
+
+      // Snapshot previous value
+      const previousData = queryClient.getQueryData(queryKey)
+
+      // Optimistically update UI by reordering meals
+      queryClient.setQueryData(
+        queryKey,
+        (old: GQLGetNutritionPlanQuery | undefined) => {
+          if (!old?.nutritionPlan?.days) return old
+          return {
+            ...old,
+            nutritionPlan: {
+              ...old.nutritionPlan,
+              days: old.nutritionPlan.days.map((d) => {
+                if (d.id === day.id) {
+                  const reorderedMeals = variables.input.mealIds
+                    .map((mealId, index) => {
+                      const meal = d.meals?.find((m) => m.id === mealId)
+                      return meal ? { ...meal, orderIndex: index } : null
+                    })
+                    .filter(Boolean) as typeof d.meals
+
+                  return {
+                    ...d,
+                    meals: reorderedMeals,
+                  }
+                }
+                return d
+              }),
+            },
+          }
+        },
+      )
+
+      return { previousData, queryKey }
+    },
+    onError: (err, variables, context) => {
+      // Rollback on error
+      if (context?.previousData && context?.queryKey) {
+        queryClient.setQueryData(context.queryKey, context.previousData)
+      }
+      // Reset local state to match server
+      setMeals(sortedMeals)
+      lastSentOrderRef.current = sortedMeals.map((meal) => meal.id)
+    },
+    onSettled: () => {
+      // Always refetch after mutation
+      const queryKey = useGetNutritionPlanQuery.getKey({ id: nutritionPlanId })
+      queryClient.invalidateQueries({ queryKey })
+    },
+  })
+
+  // Trigger debounced mutation when debouncedMeals changes
+  useEffect(() => {
+    const currentOrder = debouncedMeals.map((m) => m.id)
+    const orderChanged =
+      JSON.stringify(currentOrder) !== JSON.stringify(lastSentOrderRef.current)
+
+    if (orderChanged && debouncedMeals.length > 0) {
+      lastSentOrderRef.current = [...currentOrder]
+      reorderMutation.mutate({
+        input: {
+          dayId: day.id,
+          mealIds: currentOrder,
+        },
+      })
+    }
+  }, [debouncedMeals, day.id, reorderMutation])
+
+  // Handle reorder from framer motion
+  const handleReorder = useCallback((newMeals: typeof meals) => {
+    setMeals(newMeals)
+  }, [])
 
   return (
     <div className="space-y-8">
@@ -52,17 +159,10 @@ export function NutritionPlanDayContent({
         onDayDeleted={onDayDeleted}
       />
 
-      {/* Recipe Creation Section */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Plus className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold">Add Recipes to Menu</h3>
-        </div>
-        <MealSearchSection dayId={day.id} nutritionPlanId={nutritionPlanId} />
-      </div>
+      <MealSearchSection dayId={day.id} nutritionPlanId={nutritionPlanId} />
 
       {/* Restaurant Menu Style Layout */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         {meals.length > 0 && (
           <div className="flex items-center gap-2 mb-4">
             <ChefHat className="h-5 w-5 text-primary" />
@@ -73,16 +173,23 @@ export function NutritionPlanDayContent({
           </div>
         )}
 
-        {meals.map((planMeal, index) => (
-          <div key={planMeal.id}>
-            {index > 0 && <Separator className="my-6" />}
-            <MealCard
-              planMeal={planMeal}
-              nutritionPlanId={nutritionPlanId}
-              dayId={day.id}
-            />
-          </div>
-        ))}
+        {meals.length > 0 && (
+          <Reorder.Group
+            axis="y"
+            values={meals}
+            onReorder={handleReorder}
+            className="space-y-4 touch-manipulation"
+          >
+            {meals.map((planMeal) => (
+              <DraggableMealCard
+                key={planMeal.id}
+                planMeal={planMeal}
+                nutritionPlanId={nutritionPlanId}
+                dayId={day.id}
+              />
+            ))}
+          </Reorder.Group>
+        )}
 
         {meals.length === 0 && (
           <Card className="border-dashed">
@@ -102,6 +209,39 @@ export function NutritionPlanDayContent({
         )}
       </div>
     </div>
+  )
+}
+
+interface DraggableMealCardProps {
+  planMeal: NonNullable<
+    GQLGetNutritionPlanQuery['nutritionPlan']
+  >['days'][number]['meals'][number]
+  nutritionPlanId: string
+  dayId: string
+}
+
+function DraggableMealCard({
+  planMeal,
+  nutritionPlanId,
+  dayId,
+}: DraggableMealCardProps) {
+  const dragControls = useDragControls()
+
+  return (
+    <Reorder.Item
+      value={planMeal}
+      dragControls={dragControls}
+      dragElastic={0.1}
+      dragListener={false}
+    >
+      <MealCard
+        planMeal={planMeal}
+        nutritionPlanId={nutritionPlanId}
+        dayId={dayId}
+        isDraggable
+        dragControls={dragControls}
+      />
+    </Reorder.Item>
   )
 }
 

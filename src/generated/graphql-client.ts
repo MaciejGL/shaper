@@ -4085,6 +4085,20 @@ export type GQLRemoveMealFromNutritionPlanDayMutationVariables = Exact<{
 
 export type GQLRemoveMealFromNutritionPlanDayMutation = { __typename?: 'Mutation', removeMealFromNutritionPlanDay: boolean };
 
+export type GQLUpdateNutritionPlanMealPortionMutationVariables = Exact<{
+  input: GQLUpdateMealPortionInput;
+}>;
+
+
+export type GQLUpdateNutritionPlanMealPortionMutation = { __typename?: 'Mutation', updateNutritionPlanMealPortion: { __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, portionMultiplier: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, totalMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } } };
+
+export type GQLReorderNutritionPlanDayMealsMutationVariables = Exact<{
+  input: GQLReorderDayMealsInput;
+}>;
+
+
+export type GQLReorderNutritionPlanDayMealsMutation = { __typename?: 'Mutation', reorderNutritionPlanDayMeals: Array<{ __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, portionMultiplier: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } }> };
+
 export type GQLUpdateTrainerCapacityMutationVariables = Exact<{
   input: GQLUpdateTrainerCapacityInput;
 }>;
@@ -10197,6 +10211,124 @@ useRemoveMealFromNutritionPlanDayMutation.getKey = () => ['RemoveMealFromNutriti
 
 
 useRemoveMealFromNutritionPlanDayMutation.fetcher = (variables: GQLRemoveMealFromNutritionPlanDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveMealFromNutritionPlanDayMutation, GQLRemoveMealFromNutritionPlanDayMutationVariables>(RemoveMealFromNutritionPlanDayDocument, variables, options);
+
+export const UpdateNutritionPlanMealPortionDocument = `
+    mutation UpdateNutritionPlanMealPortion($input: UpdateMealPortionInput!) {
+  updateNutritionPlanMealPortion(input: $input) {
+    id
+    orderIndex
+    portionMultiplier
+    adjustedMacros {
+      calories
+      protein
+      carbs
+      fat
+    }
+    meal {
+      id
+      name
+      description
+      instructions
+      preparationTime
+      cookingTime
+      servings
+      totalMacros {
+        calories
+        protein
+        carbs
+        fat
+      }
+      ingredients {
+        id
+        grams
+        order
+        ingredient {
+          id
+          name
+          proteinPer100g
+          carbsPer100g
+          fatPer100g
+          caloriesPer100g
+        }
+      }
+    }
+  }
+}
+    `;
+
+export const useUpdateNutritionPlanMealPortionMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateNutritionPlanMealPortionMutation, TError, GQLUpdateNutritionPlanMealPortionMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateNutritionPlanMealPortionMutation, TError, GQLUpdateNutritionPlanMealPortionMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateNutritionPlanMealPortion'],
+    mutationFn: (variables?: GQLUpdateNutritionPlanMealPortionMutationVariables) => fetchData<GQLUpdateNutritionPlanMealPortionMutation, GQLUpdateNutritionPlanMealPortionMutationVariables>(UpdateNutritionPlanMealPortionDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateNutritionPlanMealPortionMutation.getKey = () => ['UpdateNutritionPlanMealPortion'];
+
+
+useUpdateNutritionPlanMealPortionMutation.fetcher = (variables: GQLUpdateNutritionPlanMealPortionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateNutritionPlanMealPortionMutation, GQLUpdateNutritionPlanMealPortionMutationVariables>(UpdateNutritionPlanMealPortionDocument, variables, options);
+
+export const ReorderNutritionPlanDayMealsDocument = `
+    mutation ReorderNutritionPlanDayMeals($input: ReorderDayMealsInput!) {
+  reorderNutritionPlanDayMeals(input: $input) {
+    id
+    orderIndex
+    portionMultiplier
+    adjustedMacros {
+      calories
+      protein
+      carbs
+      fat
+    }
+    meal {
+      id
+      name
+      description
+      instructions
+      preparationTime
+      cookingTime
+      servings
+      ingredients {
+        id
+        grams
+        order
+        ingredient {
+          id
+          name
+          proteinPer100g
+          carbsPer100g
+          fatPer100g
+          caloriesPer100g
+        }
+      }
+    }
+  }
+}
+    `;
+
+export const useReorderNutritionPlanDayMealsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLReorderNutritionPlanDayMealsMutation, TError, GQLReorderNutritionPlanDayMealsMutationVariables, TContext>) => {
+    
+    return useMutation<GQLReorderNutritionPlanDayMealsMutation, TError, GQLReorderNutritionPlanDayMealsMutationVariables, TContext>(
+      {
+    mutationKey: ['ReorderNutritionPlanDayMeals'],
+    mutationFn: (variables?: GQLReorderNutritionPlanDayMealsMutationVariables) => fetchData<GQLReorderNutritionPlanDayMealsMutation, GQLReorderNutritionPlanDayMealsMutationVariables>(ReorderNutritionPlanDayMealsDocument, variables)(),
+    ...options
+  }
+    )};
+
+useReorderNutritionPlanDayMealsMutation.getKey = () => ['ReorderNutritionPlanDayMeals'];
+
+
+useReorderNutritionPlanDayMealsMutation.fetcher = (variables: GQLReorderNutritionPlanDayMealsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLReorderNutritionPlanDayMealsMutation, GQLReorderNutritionPlanDayMealsMutationVariables>(ReorderNutritionPlanDayMealsDocument, variables, options);
 
 export const UpdateTrainerCapacityDocument = `
     mutation UpdateTrainerCapacity($input: UpdateTrainerCapacityInput!) {

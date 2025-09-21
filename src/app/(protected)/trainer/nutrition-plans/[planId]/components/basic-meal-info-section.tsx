@@ -59,47 +59,7 @@ export function BasicMealInfoSection({ control }: BasicMealInfoSectionProps) {
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <FormField
-          control={control}
-          name="preparationTime"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Prep Time (min)</FormLabel>
-              <FormControl>
-                <Input
-                  id="prep-time"
-                  type="number"
-                  min="0"
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={control}
-          name="cookingTime"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Cook Time (min)</FormLabel>
-              <FormControl>
-                <Input
-                  id="cook-time"
-                  type="number"
-                  min="0"
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value) || 0)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
+      <div className="grid grid-cols-1 gap-4 max-w-xs">
         <FormField
           control={control}
           name="servings"

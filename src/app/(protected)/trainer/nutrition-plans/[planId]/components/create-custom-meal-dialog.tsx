@@ -37,9 +37,7 @@ const createCustomMealSchema = z.object({
   name: z.string().min(1, 'Meal name is required').max(100, 'Name too long'),
   description: z.string().optional(),
   instructions: z.array(z.string()),
-  preparationTime: z.number().min(0).optional(),
-  cookingTime: z.number().min(0).optional(),
-  servings: z.number().min(1).optional(),
+  servings: z.number().min(0).optional(),
   ingredients: z.array(ingredientSchema).optional(),
 })
 
@@ -73,8 +71,6 @@ export function CreateCustomMealDrawer({
       name: '',
       description: '',
       instructions: [''],
-      preparationTime: 15,
-      cookingTime: 30,
       servings: 1,
       ingredients: [],
     },
@@ -100,8 +96,6 @@ export function CreateCustomMealDrawer({
           instructions: values.instructions.filter(
             (inst: string) => inst.trim() !== '',
           ),
-          preparationTime: values.preparationTime,
-          cookingTime: values.cookingTime,
           servings: values.servings,
         },
       })
@@ -148,8 +142,6 @@ export function CreateCustomMealDrawer({
       name: '',
       description: '',
       instructions: [''],
-      preparationTime: 15,
-      cookingTime: 30,
       servings: 1,
       ingredients: [],
     })
@@ -163,8 +155,6 @@ export function CreateCustomMealDrawer({
         name: '',
         description: '',
         instructions: [''],
-        preparationTime: 15,
-        cookingTime: 30,
         servings: 1,
         ingredients: [],
       })

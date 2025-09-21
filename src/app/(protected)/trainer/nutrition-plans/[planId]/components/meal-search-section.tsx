@@ -1,11 +1,9 @@
 'use client'
 
-import { ChefHat, Plus, Search } from 'lucide-react'
+import { Plus, Search } from 'lucide-react'
 import React, { useState } from 'react'
 
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
   Popover,
@@ -81,84 +79,45 @@ export function MealSearchSection({
   return (
     <div className="space-y-4">
       {/* Recipe Builder Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Search Existing Recipes */}
-        <Card className="border-dashed hover:border-solid transition-colors">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Search className="h-4 w-4 text-primary" />
-              <h4 className="font-medium">Browse Recipe Library</h4>
-              <Badge variant="secondary" className="ml-auto text-xs">
-                Quick Add
-              </Badge>
+      <div className="grid grid-cols-[1fr_auto] gap-4">
+        <Popover
+          open={isPopoverOpen}
+          onOpenChange={(open) => {
+            // Only allow closing, don't auto-open
+            if (!open) setIsPopoverOpen(false)
+          }}
+        >
+          <PopoverTrigger asChild>
+            <div>
+              <Input
+                id="search-meals"
+                placeholder="Search recipes by name, ingredient, or cuisine..."
+                value={searchQuery}
+                onChange={handleInputChange}
+                iconStart={<Search />}
+              />
             </div>
+          </PopoverTrigger>
+          <PopoverContent align="start" side="bottom">
+            <MealSearchResults
+              meals={data?.teamMeals || []}
+              dayId={dayId}
+              nutritionPlanId={nutritionPlanId}
+              isLoading={isLoading}
+              searchQuery={debouncedSearchQuery}
+              onMealAdded={handleMealAdded}
+            />
+          </PopoverContent>
+        </Popover>
 
-            <Popover
-              open={isPopoverOpen}
-              onOpenChange={(open) => {
-                // Only allow closing, don't auto-open
-                if (!open) setIsPopoverOpen(false)
-              }}
-            >
-              <PopoverTrigger asChild>
-                <div>
-                  <Input
-                    id="search-meals"
-                    placeholder="Search recipes by name, ingredient, or cuisine..."
-                    value={searchQuery}
-                    onChange={handleInputChange}
-                    iconStart={<Search />}
-                  />
-                </div>
-              </PopoverTrigger>
-              <PopoverContent
-                className="w-[var(--radix-popover-trigger-width)] p-2"
-                align="start"
-                side="bottom"
-                sideOffset={4}
-              >
-                <MealSearchResults
-                  meals={data?.teamMeals || []}
-                  dayId={dayId}
-                  nutritionPlanId={nutritionPlanId}
-                  isLoading={isLoading}
-                  searchQuery={debouncedSearchQuery}
-                  onMealAdded={handleMealAdded}
-                />
-              </PopoverContent>
-            </Popover>
-
-            <p className="text-xs text-muted-foreground mt-2">
-              Search your recipe collection and add to today's menu
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Create New Recipe */}
-        <Card className="border-dashed hover:border-solid transition-colors">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <ChefHat className="h-4 w-4 text-primary" />
-              <h4 className="font-medium">Create New Recipe</h4>
-              <Badge variant="outline" className="ml-auto text-xs">
-                Custom
-              </Badge>
-            </div>
-
-            <Button
-              onClick={handleCreateCustomMeal}
-              className="w-full justify-start"
-              variant="outline"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Build Custom Recipe
-            </Button>
-
-            <p className="text-xs text-muted-foreground mt-2">
-              Create a new recipe with instructions and ingredients
-            </p>
-          </CardContent>
-        </Card>
+        <Button
+          onClick={handleCreateCustomMeal}
+          className="w-full justify-start"
+          variant="secondary"
+          iconStart={<Plus />}
+        >
+          Create New Recipe
+        </Button>
       </div>
 
       <CreateCustomMealDrawer
