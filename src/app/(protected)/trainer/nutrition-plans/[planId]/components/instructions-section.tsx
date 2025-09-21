@@ -1,7 +1,7 @@
 'use client'
 
 import { Plus, Trash2 } from 'lucide-react'
-import { Control, useFieldArray } from 'react-hook-form'
+import { Control, useFieldArray, FieldArrayWithId } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -13,9 +13,10 @@ import {
 } from '@/components/ui/form'
 import { Textarea } from '@/components/ui/textarea'
 
+import { CreateCustomMealForm } from './create-custom-meal-dialog'
+
 interface InstructionsSectionProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: Control<any>
+  control: Control<CreateCustomMealForm>
 }
 
 export function InstructionsSection({ control }: InstructionsSectionProps) {
@@ -24,7 +25,7 @@ export function InstructionsSection({ control }: InstructionsSectionProps) {
     append: appendInstruction,
     remove: removeInstruction,
   } = useFieldArray({
-    control,
+    control: control as Control<any>,
     name: 'instructions',
   })
 

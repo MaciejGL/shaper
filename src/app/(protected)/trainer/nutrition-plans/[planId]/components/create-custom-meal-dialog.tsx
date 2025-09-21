@@ -43,7 +43,7 @@ const createCustomMealSchema = z.object({
   ingredients: z.array(ingredientSchema).optional(),
 })
 
-type CreateCustomMealForm = z.infer<typeof createCustomMealSchema>
+export type CreateCustomMealForm = z.infer<typeof createCustomMealSchema>
 
 interface CreateCustomMealDrawerProps {
   open: boolean
@@ -177,8 +177,7 @@ export function CreateCustomMealDrawer({
   ) => {
     const existingIngredients = form.getValues('ingredients') || []
     const existingIndex = existingIngredients.findIndex(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (field: any) => field.id === ingredient.id,
+      (field) => field.id === ingredient.id,
     )
 
     if (existingIndex >= 0) {

@@ -2,7 +2,7 @@
 
 import { Plus, Search, Trash2 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Control } from 'react-hook-form'
+import { Control, FieldArrayWithId } from 'react-hook-form'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -19,15 +19,19 @@ import {
   useSearchIngredientsQuery,
 } from '@/generated/graphql-client'
 
+import { CreateCustomMealForm } from './create-custom-meal-dialog'
 import { InlineIngredientForm } from './inline-ingredient-form'
 
+type IngredientField = FieldArrayWithId<
+  CreateCustomMealForm,
+  'ingredients',
+  'id'
+>
+
 interface IngredientsSectionProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: Control<any>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ingredientFields: any[]
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onIngredientAdded: (ingredient: any, grams?: number) => void
+  control: Control<CreateCustomMealForm>
+  ingredientFields: IngredientField[]
+  onIngredientAdded: (ingredient: GQLIngredient, grams?: number) => void
   onIngredientRemoved: (index: number) => void
 }
 
@@ -109,15 +113,12 @@ export function IngredientsSection({
   }
 
   const handleAddIngredient = useCallback(
-    (ingredient: any) => {
+    (ingredient: GQLIngredient) => {
       try {
         onIngredientAdded(ingredient, 100)
-        // Set flag to prevent immediate reopening
         setJustSelected(true)
-        // Close popover and clear search immediately
         setIsPopoverOpen(false)
         setIngredientSearchQuery('')
-        // Refocus the input after selection and clear the flag
         setTimeout(() => {
           setJustSelected(false)
           inputRef.current?.focus()
@@ -194,7 +195,7 @@ export function IngredientsSection({
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        handleAddIngredient(ingredient)
+                        handleAddIngredient(ingredient as GQLIngredient)
                       }}
                     >
                       <div className="flex-1">
@@ -213,7 +214,7 @@ export function IngredientsSection({
                         onClick={(e) => {
                           e.preventDefault()
                           e.stopPropagation()
-                          handleAddIngredient(ingredient)
+                          handleAddIngredient(ingredient as GQLIngredient)
                         }}
                       >
                         <Plus className="h-4 w-4" />
@@ -257,7 +258,7 @@ export function IngredientsSection({
                       onClick={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        handleAddIngredient(ingredient)
+                        handleAddIngredient(ingredient as GQLIngredient)
                       }}
                     >
                       <div className="flex-1">
@@ -276,7 +277,7 @@ export function IngredientsSection({
                         onClick={(e) => {
                           e.preventDefault()
                           e.stopPropagation()
-                          handleAddIngredient(ingredient)
+                          handleAddIngredient(ingredient as GQLIngredient)
                         }}
                       >
                         <Plus className="h-4 w-4" />
@@ -305,8 +306,7 @@ export function IngredientsSection({
               className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg"
             >
               <div className="flex-1">
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <div className="font-medium text-sm">{(field as any).name}</div>
+                <div className="font-medium text-sm">{field.name}</div>
               </div>
               <div className="flex items-center gap-2">
                 <FormField

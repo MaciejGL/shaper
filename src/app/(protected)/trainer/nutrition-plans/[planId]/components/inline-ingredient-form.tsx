@@ -36,7 +36,17 @@ const createIngredientSchema = z.object({
 
 type CreateIngredientForm = z.infer<typeof createIngredientSchema>
 
-// Calculate expected calories from macros
+interface GraphQLError {
+  message: string
+  locations?: { line: number; column: number }[]
+  path?: string[]
+}
+
+interface GraphQLErrorResponse {
+  message?: string
+  graphQLErrors?: GraphQLError[]
+}
+
 function calculateExpectedCalories(
   protein: number,
   carbs: number,
@@ -45,26 +55,33 @@ function calculateExpectedCalories(
   return Math.round((protein * 4 + carbs * 4 + fat * 9) * 10) / 10
 }
 
-// Check if calories are within acceptable range (40% tolerance)
 function isCaloriesValid(entered: number, calculated: number): boolean {
   if (calculated === 0) return entered >= 0
-  const tolerance = 0.4 // 40% - accounts for fiber and other factors not in calculation
+  const tolerance = 0.4
   const diff = Math.abs(entered - calculated) / calculated
   return diff <= tolerance
 }
 
-// Extract meaningful error message from GraphQL error
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function extractErrorMessage(error: any): string {
-  if (error?.message) {
-    return error.message
-  }
-  if (error?.graphQLErrors?.[0]?.message) {
-    return error.graphQLErrors[0].message
-  }
+function extractErrorMessage(
+  error: GraphQLErrorResponse | Error | string | unknown,
+): string {
   if (typeof error === 'string') {
     return error
   }
+
+  if (error instanceof Error) {
+    return error.message
+  }
+
+  const graphqlError = error as GraphQLErrorResponse
+  if (graphqlError?.message) {
+    return graphqlError.message
+  }
+
+  if (graphqlError?.graphQLErrors?.[0]?.message) {
+    return graphqlError.graphQLErrors[0].message
+  }
+
   return 'An unexpected error occurred'
 }
 
@@ -94,13 +111,13 @@ export function InlineIngredientForm({
     },
   })
 
-  // Local state for text-based inputs (following weight input pattern)
   const [inputValues, setInputValues] = useState({
     calories: '',
     protein: '',
     carbs: '',
     fat: '',
   })
+
   const [focusedFields, setFocusedFields] = useState({
     calories: false,
     protein: false,
@@ -108,14 +125,6 @@ export function InlineIngredientForm({
     fat: false,
   })
 
-  // Update name field when defaultName changes
-  useEffect(() => {
-    if (defaultName) {
-      form.setValue('name', defaultName)
-    }
-  }, [defaultName, form])
-
-  // Watch macro values for real-time calorie calculation
   const watchedValues = form.watch([
     'proteinPer100g',
     'carbsPer100g',
@@ -124,7 +133,20 @@ export function InlineIngredientForm({
   ])
   const [protein, carbs, fat, enteredCalories] = watchedValues
 
-  // Sync input values with form values (only when not focused)
+  const expectedCalories = useMemo(() => {
+    return calculateExpectedCalories(protein || 0, carbs || 0, fat || 0)
+  }, [protein, carbs, fat])
+
+  const isCaloriesValidForForm = useMemo(() => {
+    if (!enteredCalories || enteredCalories === 0) return true
+    return isCaloriesValid(enteredCalories, expectedCalories)
+  }, [enteredCalories, expectedCalories])
+
+  useEffect(() => {
+    if (defaultName) {
+      form.setValue('name', defaultName)
+    }
+  }, [defaultName, form])
   useEffect(() => {
     if (!focusedFields.protein) {
       setInputValues((prev) => ({
@@ -145,10 +167,7 @@ export function InlineIngredientForm({
 
   useEffect(() => {
     if (!focusedFields.fat) {
-      setInputValues((prev) => ({
-        ...prev,
-        fat: formatNumberSmart(fat, 1),
-      }))
+      setInputValues((prev) => ({ ...prev, fat: formatNumberSmart(fat, 1) }))
     }
   }, [fat, focusedFields.fat])
 
@@ -161,7 +180,6 @@ export function InlineIngredientForm({
     }
   }, [enteredCalories, focusedFields.calories])
 
-  // Helper functions for input handling
   const handleInputChange = (
     field: keyof typeof inputValues,
     e: React.ChangeEvent<HTMLInputElement>,
@@ -170,21 +188,18 @@ export function InlineIngredientForm({
     setInputValues((prev) => ({ ...prev, [field]: sanitizedValue }))
 
     if (sanitizedValue === '' || sanitizedValue === null) {
-      form.setValue(
-        `${field === 'calories' ? 'caloriesPer100g' : `${field}Per100g`}` as keyof CreateIngredientForm,
-        0,
-      )
+      const fieldName =
+        field === 'calories' ? 'caloriesPer100g' : `${field}Per100g`
+      form.setValue(fieldName as keyof CreateIngredientForm, 0)
       return
     }
 
     const numericValue = parseFloat(sanitizedValue)
-    if (isNaN(numericValue)) {
-      return // Invalid input, don't update form
+    if (!isNaN(numericValue)) {
+      const fieldName =
+        field === 'calories' ? 'caloriesPer100g' : `${field}Per100g`
+      form.setValue(fieldName as keyof CreateIngredientForm, numericValue)
     }
-
-    const fieldName =
-      field === 'calories' ? 'caloriesPer100g' : `${field}Per100g`
-    form.setValue(fieldName as keyof CreateIngredientForm, numericValue)
   }
 
   const handleFocus = (field: keyof typeof focusedFields) => {
@@ -193,7 +208,6 @@ export function InlineIngredientForm({
 
   const handleBlur = (field: keyof typeof focusedFields) => {
     setFocusedFields((prev) => ({ ...prev, [field]: false }))
-    // Format the value when focus is lost
     const value = inputValues[field]
     const numericValue = parseFloat(value)
     if (!isNaN(numericValue)) {
@@ -203,17 +217,6 @@ export function InlineIngredientForm({
       }))
     }
   }
-
-  // Calculate expected calories from macros
-  const expectedCalories = useMemo(() => {
-    return calculateExpectedCalories(protein || 0, carbs || 0, fat || 0)
-  }, [protein, carbs, fat])
-
-  // Check if entered calories are valid
-  const isCaloriesValidForForm = useMemo(() => {
-    if (!enteredCalories || enteredCalories === 0) return true // Allow empty/zero during input
-    return isCaloriesValid(enteredCalories, expectedCalories)
-  }, [enteredCalories, expectedCalories])
 
   const handleSaveIngredient = async (values: CreateIngredientForm) => {
     try {

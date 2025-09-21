@@ -12,15 +12,15 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
+import { CreateCustomMealForm } from './create-custom-meal-dialog'
+
 interface BasicMealInfoSectionProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control: Control<any>
+  control: Control<CreateCustomMealForm>
 }
 
 export function BasicMealInfoSection({ control }: BasicMealInfoSectionProps) {
   return (
     <>
-      {/* Basic Info */}
       <div className="grid grid-cols-1 gap-4">
         <FormField
           control={control}
@@ -59,7 +59,6 @@ export function BasicMealInfoSection({ control }: BasicMealInfoSectionProps) {
         />
       </div>
 
-      {/* Timing and Servings */}
       <div className="grid grid-cols-3 gap-4">
         <FormField
           control={control}
