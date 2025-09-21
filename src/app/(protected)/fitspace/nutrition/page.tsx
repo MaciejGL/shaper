@@ -1,10 +1,9 @@
 'use client'
 
-import { Salad, TargetIcon } from 'lucide-react'
+import { Salad } from 'lucide-react'
 import { useState } from 'react'
 
 import { EmptyStateCard } from '@/components/empty-state-card'
-import { SectionIcon } from '@/components/ui/section-icon'
 import { useUser } from '@/context/user-context'
 import { useGetMyMacroTargetsQuery } from '@/generated/graphql-client'
 
@@ -44,12 +43,11 @@ export default function NutritionPage() {
   }
 
   return (
-    <div className="container mx-auto pb-8 pt-4">
+    <div className="container mx-auto py-8">
       <div className="space-y-8">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <SectionIcon icon={TargetIcon} size="sm" variant="default" />
-            <h2 className="text-base font-medium">Daily Macro Targets</h2>
+            <h2 className="text-sm font-medium">Daily Macro Targets</h2>
           </div>
           <div className="grid grid-cols-4 gap-2">
             {macroTargets.calories && (

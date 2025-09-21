@@ -1,9 +1,7 @@
 'use client'
 
-import { SaladIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import { SectionIcon } from '@/components/ui/section-icon'
 import {
   Select,
   SelectContent,
@@ -68,8 +66,7 @@ export function NutritionPlanSelector({
     return (
       <div className="space-y-2">
         <div className="flex items-center gap-2 mb-2">
-          <SectionIcon icon={SaladIcon} size="sm" variant="green" />
-          <h2 className="text-base font-medium">Nutrition Plan</h2>
+          <h2 className="text-sm font-medium">Nutrition Plan</h2>
         </div>
         <div className="h-10 bg-muted animate-pulse rounded-md" />
       </div>
@@ -80,8 +77,7 @@ export function NutritionPlanSelector({
     return (
       <div className="space-y-2">
         <div className="flex items-center gap-2 mb-2">
-          <SectionIcon icon={SaladIcon} size="sm" variant="green" />
-          <h2 className="text-base font-medium">Nutrition Plan</h2>
+          <h2 className="text-sm font-medium">Nutrition Plan</h2>
         </div>
         <div className="h-10 bg-muted/30 rounded-md flex items-center px-3">
           <span className="text-sm text-muted-foreground">
@@ -97,8 +93,7 @@ export function NutritionPlanSelector({
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2 mb-2">
-        <SectionIcon icon={SaladIcon} size="sm" variant="green" />
-        <h2 className="text-base font-medium">Nutrition Plan</h2>
+        <h2 className="text-sm font-medium">Nutrition Plan</h2>
       </div>
       <Select
         value={effectiveSelectedPlan || ''}
