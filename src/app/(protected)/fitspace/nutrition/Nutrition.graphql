@@ -12,3 +12,14 @@ query GetMyMacroTargets {
     updatedAt
   }
 }
+
+query GetMyNutritionPlans {
+  clientNutritionPlans {
+    id
+    name
+    createdAt
+    updatedAt
+    isSharedWithClient
+    sharedAt
+  }
+}

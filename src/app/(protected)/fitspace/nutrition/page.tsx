@@ -1,6 +1,7 @@
 'use client'
 
 import { Salad } from 'lucide-react'
+import { useState } from 'react'
 
 import { EmptyStateCard } from '@/components/empty-state-card'
 import { useUser } from '@/context/user-context'
@@ -8,10 +9,17 @@ import { useGetMyMacroTargetsQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
+import { NutritionPlanSelector } from './components/nutrition-plan-selector'
+
 export default function NutritionPage() {
   const { user } = useUser()
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
   const { data, isLoading } = useGetMyMacroTargetsQuery()
   const macroTargets = data?.getMyMacroTargets
+
+  const handlePlanSelect = (planId: string | null) => {
+    setSelectedPlanId(planId)
+  }
 
   if (isLoading) {
     return (
@@ -38,16 +46,14 @@ export default function NutritionPage() {
   }
 
   return (
-    <div className="container mx-auto">
-      <DashboardHeader title="Nutrition" icon={Salad} variant="green" />
-      <div className="space-y-6">
+    <div className="container mx-auto py-8">
+      {/* <DashboardHeader title="Nutrition" icon={Salad} variant="green" /> */}
+      <div className="space-y-4">
         <div>
-          <div className="grid grid-cols-4 bg-card rounded-lg pb-4 pt-4">
-            <h2 className="text-base font-medium col-span-4 px-4 pb-2 mb-4">
-              Macro Targets
-            </h2>
+          <h2 className="text-base font-medium mb-2">Daily Macro Targets</h2>
+          <div className="grid grid-cols-4 gap-2">
             {macroTargets.calories && (
-              <div className="text-center px-4  border-r border-border">
+              <div className="text-center p-4 bg-card rounded-lg">
                 <div className="text-base font-medium text-primary">
                   {macroTargets.calories}
                 </div>
@@ -56,7 +62,7 @@ export default function NutritionPage() {
             )}
 
             {macroTargets.protein && (
-              <div className="text-center px-4 border-r border-border">
+              <div className="text-center p-4 bg-card rounded-lg">
                 <div className="text-base font-medium text-blue-600">
                   {macroTargets.protein}g
                 </div>
@@ -65,7 +71,7 @@ export default function NutritionPage() {
             )}
 
             {macroTargets.carbs && (
-              <div className="text-center px-4 border-r border-border">
+              <div className="text-center p-4 bg-card rounded-lg">
                 <div className="text-base font-medium text-green-600">
                   {macroTargets.carbs}g
                 </div>
@@ -74,7 +80,7 @@ export default function NutritionPage() {
             )}
 
             {macroTargets.fat && (
-              <div className="text-center px-4">
+              <div className="text-center p-4 bg-card rounded-lg">
                 <div className="text-base font-medium text-yellow-600">
                   {macroTargets.fat}g
                 </div>
@@ -91,6 +97,11 @@ export default function NutritionPage() {
             </div>
           )}
         </div>
+        {/* Nutrition Plan Selector */}
+        <NutritionPlanSelector
+          onPlanSelect={handlePlanSelect}
+          selectedPlanId={selectedPlanId}
+        />
       </div>
     </div>
   )

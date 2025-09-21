@@ -3488,6 +3488,11 @@ export type GQLGetMyMacroTargetsQueryVariables = Exact<{ [key: string]: never; }
 
 export type GQLGetMyMacroTargetsQuery = { __typename?: 'Query', getMyMacroTargets?: { __typename?: 'MacroTarget', id: string, clientId: string, trainerId: string, calories?: number | undefined | null, protein?: number | undefined | null, carbs?: number | undefined | null, fat?: number | undefined | null, notes?: string | undefined | null, createdAt: string, updatedAt: string } | undefined | null };
 
+export type GQLGetMyNutritionPlansQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetMyNutritionPlansQuery = { __typename?: 'Query', clientNutritionPlans: Array<{ __typename?: 'NutritionPlan', id: string, name: string, createdAt: string, updatedAt: string, isSharedWithClient: boolean, sharedAt?: string | undefined | null }> };
+
 export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, hasCompletedOnboarding: boolean, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } };
 
 export type GQLProfileQueryVariables = Exact<{ [key: string]: never; }>;
@@ -6080,6 +6085,61 @@ useInfiniteGetMyMacroTargetsQuery.getKey = (variables?: GQLGetMyMacroTargetsQuer
 
 
 useGetMyMacroTargetsQuery.fetcher = (variables?: GQLGetMyMacroTargetsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMyMacroTargetsQuery, GQLGetMyMacroTargetsQueryVariables>(GetMyMacroTargetsDocument, variables, options);
+
+export const GetMyNutritionPlansDocument = `
+    query GetMyNutritionPlans {
+  clientNutritionPlans {
+    id
+    name
+    createdAt
+    updatedAt
+    isSharedWithClient
+    sharedAt
+  }
+}
+    `;
+
+export const useGetMyNutritionPlansQuery = <
+      TData = GQLGetMyNutritionPlansQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetMyNutritionPlansQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetMyNutritionPlansQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetMyNutritionPlansQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetMyNutritionPlansQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetMyNutritionPlans'] : ['GetMyNutritionPlans', variables],
+    queryFn: fetchData<GQLGetMyNutritionPlansQuery, GQLGetMyNutritionPlansQueryVariables>(GetMyNutritionPlansDocument, variables),
+    ...options
+  }
+    )};
+
+useGetMyNutritionPlansQuery.getKey = (variables?: GQLGetMyNutritionPlansQueryVariables) => variables === undefined ? ['GetMyNutritionPlans'] : ['GetMyNutritionPlans', variables];
+
+export const useInfiniteGetMyNutritionPlansQuery = <
+      TData = InfiniteData<GQLGetMyNutritionPlansQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetMyNutritionPlansQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetMyNutritionPlansQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetMyNutritionPlansQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetMyNutritionPlansQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetMyNutritionPlans.infinite'] : ['GetMyNutritionPlans.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetMyNutritionPlansQuery, GQLGetMyNutritionPlansQueryVariables>(GetMyNutritionPlansDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetMyNutritionPlansQuery.getKey = (variables?: GQLGetMyNutritionPlansQueryVariables) => variables === undefined ? ['GetMyNutritionPlans.infinite'] : ['GetMyNutritionPlans.infinite', variables];
+
+
+useGetMyNutritionPlansQuery.fetcher = (variables?: GQLGetMyNutritionPlansQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMyNutritionPlansQuery, GQLGetMyNutritionPlansQueryVariables>(GetMyNutritionPlansDocument, variables, options);
 
 export const ProfileDocument = `
     query Profile {
