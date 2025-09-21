@@ -126,7 +126,7 @@ export function SimplePullToRefresh() {
           isAtTopTimer = setTimeout(() => {
             isPullToRefreshEnabled = true
             isAtTopTimer = null
-          }, 500) // 500ms delay before enabling pull-to-refresh
+          }, 1000) // 500ms delay before enabling pull-to-refresh
         }
       } else {
         // User scrolled away from top, disable pull-to-refresh and cancel timer
