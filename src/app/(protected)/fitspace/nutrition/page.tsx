@@ -22,7 +22,7 @@ export default function NutritionPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto">
+      <div className="container mx-auto py-8">
         <div className="animate-pulse">
           <div className="h-32 bg-muted rounded-lg"></div>
         </div>
@@ -32,7 +32,7 @@ export default function NutritionPage() {
 
   if (!macroTargets) {
     return (
-      <div className="container mx-auto">
+      <div className="container mx-auto py-8">
         <EmptyStateCard
           title="Macro targets not set"
           description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}

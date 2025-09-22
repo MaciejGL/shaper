@@ -53,16 +53,20 @@ export const formatNumberInput = (
  * Format number input allowing decimal points
  * Useful for weight, measurements, etc.
  * Accepts both comma and period as decimal separators, converts comma to period
+ * Enhanced to handle mobile keyboard edge cases
  */
 export const formatDecimalInput = (
   e: React.ChangeEvent<HTMLInputElement>,
 ): string => {
   const rawValue = e.target.value
+
   // Allow digits, dots, and commas, then normalize comma to dot
-  return rawValue
+  const processedValue = rawValue
     .replace(/[^\d.,]/g, '') // Allow only digits, dots, and commas
     .replace(/,/g, '.') // Convert all commas to dots
     .replace(/(\..*)\./g, '$1') // Prevent multiple decimal points
+
+  return processedValue
 }
 
 /**

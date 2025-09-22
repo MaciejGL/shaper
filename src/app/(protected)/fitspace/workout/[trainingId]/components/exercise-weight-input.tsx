@@ -58,6 +58,19 @@ export function ExerciseWeightInput({
     onWeightChange(weightInKg)
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Explicitly allow comma input as decimal separator
+    if (
+      e.key === ',' &&
+      !inputValue.includes('.') &&
+      !inputValue.includes(',')
+    ) {
+      e.preventDefault()
+      const newValue = inputValue + '.'
+      setInputValue(newValue)
+    }
+  }
+
   const handleFocus = () => {
     setIsFocused(true)
   }
@@ -80,6 +93,7 @@ export function ExerciseWeightInput({
         id={`set-${setId}-weight`}
         value={inputValue}
         onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
         onFocus={handleFocus}
         onBlur={handleBlur}
         placeholder={placeholder}

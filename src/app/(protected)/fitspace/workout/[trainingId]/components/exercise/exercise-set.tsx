@@ -206,7 +206,7 @@ export function ExerciseSet({
 
   // Get data from previous workout for the "PREVIOUS" column (same set order from most recent workout with data)
   const getPreviousSetForColumn = () => {
-    if (!previousSetRepsLog || !previousSetWeightLog) return null
+    if (!previousSetRepsLog && !previousSetWeightLog) return null
     return {
       reps: previousSetRepsLog,
       weight: previousSetWeightLog,

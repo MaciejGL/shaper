@@ -69,6 +69,19 @@ export const WeightInput = forwardRef<HTMLInputElement, WeightInputProps>(
       onWeightChange?.(weightInKg)
     }
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+      // Explicitly allow comma input as decimal separator
+      if (
+        e.key === ',' &&
+        !inputValue.includes('.') &&
+        !inputValue.includes(',')
+      ) {
+        e.preventDefault()
+        const newValue = inputValue + '.'
+        setInputValue(newValue)
+      }
+    }
+
     const handleFocus = () => {
       setIsFocused(true)
     }
@@ -97,6 +110,7 @@ export const WeightInput = forwardRef<HTMLInputElement, WeightInputProps>(
           value={inputValue}
           label={showLabel ? finalLabel : undefined}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           onFocus={handleFocus}
           onBlur={handleBlur}
           disabled={disabled}
