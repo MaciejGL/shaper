@@ -34,27 +34,46 @@ export const useLoginForm = () => {
   }, [leftTime])
 
   const handleSendOtp = async () => {
-    if (!emailValidation(email)) return
+    if (!emailValidation(email)) {
+      setErrorMessage('Please enter a valid email address.')
+      return
+    }
 
     setIsResending(true)
-    setOtp('')
+    setErrorMessage('') // Clear any previous errors
+    setOtp('') // Clear any previous OTP
+
     try {
-      await fetch('/api/auth/request-otp', {
+      const response = await fetch('/api/auth/request-otp', {
         method: 'POST',
         body: JSON.stringify({ email }),
         headers: { 'Content-Type': 'application/json' },
       })
+
+      if (!response.ok) {
+        throw new Error(`Failed to send OTP: ${response.status}`)
+      }
+
       setLeftTime(30)
-      setShowOtp(true)
+      setShowOtp(true) // Only switch to OTP view on success
     } catch (error) {
-      setErrorMessage('Failed to send OTP')
+      setErrorMessage('Failed to send code. Please try again.')
       console.error(error)
+      // Stay in email view if sending fails
     } finally {
       setIsResending(false)
     }
   }
 
   const handleLogin = useCallback(async () => {
+    if (!otp || otp.length !== 4) {
+      setErrorMessage('Please enter a valid 4-digit code.')
+      return
+    }
+
+    setIsLoading(true)
+    setErrorMessage('') // Clear any previous errors
+
     try {
       const result = await signIn('otp', {
         email,
@@ -65,28 +84,33 @@ export const useLoginForm = () => {
 
       if (result?.error) {
         setErrorMessage('Invalid OTP. Please try again.')
-        setOtp('')
+        setOtp('') // Clear OTP but stay in OTP view
+        // Don't switch back to email view on error
       } else if (result?.url) {
         localStorage.setItem('last-email', email)
         window.location.href = result.url
       }
     } catch (error) {
       setErrorMessage('Something went wrong. Please try again.')
-      setOtp('')
+      setOtp('') // Clear OTP but stay in OTP view
       console.error(error)
-      localStorage.removeItem('last-email')
+      // Don't remove email from localStorage or switch views on network error
     } finally {
       setIsLoading(false)
     }
   }, [email, otp])
 
-  // Automatic login when OTP is entered
+  // Automatic login when OTP is entered (debounced to prevent multiple calls)
   useEffect(() => {
-    if (otp.length === 4) {
-      setIsLoading(true)
-      handleLogin()
+    if (otp.length === 4 && !isLoading && showOtp) {
+      // Small delay to prevent rapid-fire submissions
+      const timer = setTimeout(() => {
+        handleLogin()
+      }, 100)
+
+      return () => clearTimeout(timer)
     }
-  }, [otp, handleLogin])
+  }, [otp, handleLogin, isLoading, showOtp])
 
   return {
     email,
@@ -104,6 +128,9 @@ export const useLoginForm = () => {
     handleBack: () => {
       setShowOtp(false)
       setOtp('')
+      setErrorMessage('') // Clear any error messages
+      setIsLoading(false) // Reset loading state
+      setLeftTime(30) // Reset timer
     },
     handleResendOtp: handleSendOtp,
   }
