@@ -99,20 +99,8 @@ export const authOptions = {
   session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
 
-  // Fix for Apple Sign In PKCE issues
+  // Essential cookie configuration for Apple Sign In state/PKCE cookies
   useSecureCookies: process.env.NODE_ENV === 'production',
-  cookies: {
-    pkceCodeVerifier: {
-      name: 'next-auth.pkce.code_verifier',
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 60 * 15, // 15 minutes
-      },
-    },
-  },
 
   pages: {
     signIn: '/login',
@@ -121,6 +109,20 @@ export const authOptions = {
   },
 
   debug: process.env.NODE_ENV === 'development',
+
+  logger: {
+    error(code, metadata) {
+      console.error('NextAuth Error:', code, metadata)
+    },
+    warn(code) {
+      console.warn('NextAuth Warning:', code)
+    },
+    debug(code, metadata) {
+      if (process.env.NODE_ENV === 'development') {
+        console.debug('NextAuth Debug:', code, metadata)
+      }
+    },
+  },
 
   callbacks: {
     async signIn({ account, profile }) {
@@ -160,6 +162,17 @@ export const authOptions = {
           return false
         }
       }
+      // Debug environment variables in production
+      if (process.env.NODE_ENV === 'production') {
+        console.warn('🔍 Production Environment Check:', {
+          NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+          NODE_ENV: process.env.NODE_ENV,
+          hasAppleId: !!process.env.APPLE_ID,
+          hasAppleSecret: !!process.env.APPLE_SECRET,
+          timestamp: new Date().toISOString(),
+        })
+      }
+
       console.warn('BEFORE Apple OAuth sign-in attempt:', {
         email: profile?.email,
         provider: account?.provider,
