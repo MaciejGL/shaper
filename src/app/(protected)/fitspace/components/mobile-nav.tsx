@@ -47,10 +47,15 @@ export function MobileNav() {
   }, [pathname])
 
   const navItems = useMemo(() => {
+    // Use stable workout URL during hydration to prevent hydration mismatch
+    const workoutHref = trainingId
+      ? `/fitspace/workout/${trainingId}?weekId=${weekId || ''}&dayId=${dayId || ''}`
+      : '/fitspace/workout' // Fallback to plans page when no training data available
+
     return [
       {
         id: 'workout',
-        href: `/fitspace/workout/${trainingId || ''}?weekId=${weekId || ''}&dayId=${dayId || ''}`,
+        href: workoutHref,
         icon: Dumbbell,
         label: 'Workout',
         prefetch: true,
