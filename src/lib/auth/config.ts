@@ -30,7 +30,8 @@ export const authOptions = {
     }),
     AppleProvider({
       clientId: process.env.APPLE_ID!,
-      clientSecret: process.env.APPLE_SECRET!,
+      // Properly handle Apple secret with potential newline formatting
+      clientSecret: process.env.APPLE_SECRET!.replace(/\\n/g, '\n'),
       authorization: {
         params: {
           scope: 'name email',
@@ -38,6 +39,10 @@ export const authOptions = {
         },
       },
       checks: ['pkce', 'state'],
+      // Ensure proper cookie handling for Apple OAuth
+      httpOptions: {
+        timeout: 10000,
+      },
     }),
     CredentialsProvider({
       id: 'otp',
@@ -96,6 +101,65 @@ export const authOptions = {
 
   // Essential cookie configuration for Apple Sign In state/PKCE cookies
   useSecureCookies: process.env.NODE_ENV === 'production',
+
+  cookies: {
+    sessionToken: {
+      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+    callbackUrl: {
+      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.callback-url`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+    csrfToken: {
+      name: `${process.env.NODE_ENV === 'production' ? '__Host-' : ''}next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+    pkceCodeVerifier: {
+      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.pkce.code_verifier`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 15, // 15 minutes
+      },
+    },
+    state: {
+      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.state`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 15, // 15 minutes
+      },
+    },
+    nonce: {
+      name: `${process.env.NODE_ENV === 'production' ? '__Secure-' : ''}next-auth.nonce`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
+  },
 
   pages: {
     signIn: '/login',
