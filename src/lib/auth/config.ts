@@ -42,6 +42,7 @@ export const authOptions = {
           response_mode: 'form_post',
         },
       },
+      checks: ['pkce', 'state'],
     }),
     CredentialsProvider({
       id: 'otp',
@@ -98,11 +99,28 @@ export const authOptions = {
   session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
 
+  // Fix for Apple Sign In PKCE issues
+  useSecureCookies: process.env.NODE_ENV === 'production',
+  cookies: {
+    pkceCodeVerifier: {
+      name: 'next-auth.pkce.code_verifier',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 60 * 15, // 15 minutes
+      },
+    },
+  },
+
   pages: {
     signIn: '/login',
     signOut: '/login',
     error: '/auth/error',
   },
+
+  debug: process.env.NODE_ENV === 'development',
 
   callbacks: {
     async signIn({ account, profile }) {
