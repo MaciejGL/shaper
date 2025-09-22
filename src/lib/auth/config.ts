@@ -160,14 +160,23 @@ export const authOptions = {
           return false
         }
       }
-
+      console.warn('BEFORE Apple OAuth sign-in attempt:', {
+        email: profile?.email,
+        provider: account?.provider,
+        timestamp: new Date().toISOString(),
+      })
       // Handle Apple OAuth sign-in
       if (account?.provider === 'apple' && profile) {
         const email = profile?.email
+        console.warn('Apple OAuth sign-in attempt:', {
+          email,
+          provider: account.provider,
+          timestamp: new Date().toISOString(),
+        })
 
         try {
           const result = await handleAppleSignIn(account, profile)
-
+          console.warn('Apple OAuth sign-in result:', result)
           if (!result) {
             console.warn('Apple OAuth sign-in failed:', {
               email,
