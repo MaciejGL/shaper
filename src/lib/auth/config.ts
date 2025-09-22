@@ -12,9 +12,6 @@ import { createUserLoaders } from '../loaders/user.loader'
 import { handleAppleSignIn } from './apple-signin'
 import { handleGoogleSignIn } from './google-signin'
 
-const useSecureCookies = process.env.NODE_ENV === 'production'
-const cookieDomain = useSecureCookies ? 'hypro.app' : undefined
-
 export const authOptions = {
   providers: [
     GoogleProvider({
@@ -94,28 +91,6 @@ export const authOptions = {
       },
     }),
   ],
-  cookies: {
-    state: {
-      name: `${useSecureCookies ? '__Secure-' : ''}next-auth.state`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: useSecureCookies,
-        domain: cookieDomain,
-      },
-    },
-    pkceCodeVerifier: {
-      name: `${useSecureCookies ? '__Secure-' : ''}next-auth.pkce.code_verifier`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: useSecureCookies,
-        domain: cookieDomain,
-      },
-    },
-  },
   session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
 
@@ -127,12 +102,6 @@ export const authOptions = {
 
   callbacks: {
     async signIn({ account, profile }) {
-      console.info('SignIn callback triggered:', {
-        provider: account?.provider,
-        hasProfile: !!profile,
-        profileEmail: profile?.email,
-      })
-
       // Handle Google OAuth sign-in
       if (account?.provider === 'google' && profile) {
         const email = profile?.email
