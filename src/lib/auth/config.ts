@@ -1,4 +1,5 @@
 import { NextAuthOptions } from 'next-auth'
+import AppleProvider from 'next-auth/providers/apple'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 
@@ -8,6 +9,7 @@ import { UserWithSession } from '@/types/UserWithSession'
 import { invalidateUserCache } from '../getUser'
 import { createUserLoaders } from '../loaders/user.loader'
 
+import { handleAppleSignIn } from './apple-signin'
 import { handleGoogleSignIn } from './google-signin'
 
 export const authOptions = {
@@ -28,6 +30,16 @@ export const authOptions = {
           response_type: 'code',
           include_granted_scopes: 'true',
           enable_granular_consent: 'true',
+        },
+      },
+    }),
+    AppleProvider({
+      clientId: process.env.APPLE_ID!,
+      clientSecret: process.env.APPLE_SECRET!,
+      authorization: {
+        params: {
+          scope: 'name email',
+          response_mode: 'form_post',
         },
       },
     }),
@@ -131,7 +143,28 @@ export const authOptions = {
         }
       }
 
-      // For non-Google providers, continue with default behavior
+      // Handle Apple OAuth sign-in
+      if (account?.provider === 'apple' && profile) {
+        const email = profile?.email
+
+        try {
+          const result = await handleAppleSignIn(account, profile)
+
+          if (!result) {
+            console.warn('Apple OAuth sign-in failed:', {
+              email,
+              timestamp: new Date().toISOString(),
+            })
+          }
+
+          return result
+        } catch (error) {
+          console.error('Error in handleAppleSignIn:', error)
+          return false
+        }
+      }
+
+      // For other providers, continue with default behavior
       return true
     },
     async jwt({ token, user }) {

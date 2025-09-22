@@ -14,6 +14,7 @@ import {
 import { Card } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 
+import { AppleLoginButton } from './apple-login-button'
 import { EmailForm } from './email-form'
 import { GoogleLoginButton } from './google-login-button'
 import { OtpForm } from './otp-form'
@@ -40,18 +41,22 @@ export const LoginCard = () => {
     <Card borderless className="dark flex flex-col gap-8 w-full max-w-md">
       <CardHeader className="space-y-1">
         <CardTitle>Login</CardTitle>
-        <CardDescription>
-          {!showOtp
-            ? 'Sign in with Google for quick access, or enter your email to receive a one-time password.'
-            : 'Enter the 4-digit code sent to your email to login.'}
-        </CardDescription>
+        {showOtp ? (
+          <CardDescription>
+            Enter the 4-digit code sent to your email to login.
+          </CardDescription>
+        ) : null}
       </CardHeader>
       <CardContent>
         {!showOtp && (
           <>
-            {/* Google Login Button - Prominently positioned at top */}
-            <div className="mb-6">
+            {/* OAuth Login Buttons - Equal prominence as required by Apple */}
+            <div className="mb-6 space-y-3">
               <GoogleLoginButton
+                className="w-full"
+                disabled={isLoading || isResending}
+              />
+              <AppleLoginButton
                 className="w-full"
                 disabled={isLoading || isResending}
               />
@@ -60,7 +65,7 @@ export const LoginCard = () => {
             {/* Divider with "or" text */}
             <div className="relative mb-6">
               <Separator />
-              <div className="absolute inset-0 flex justify-center">
+              <div className="absolute inset-0 -top-2.5 flex justify-center">
                 <span className="bg-card px-2 text-sm text-muted-foreground">
                   or
                 </span>

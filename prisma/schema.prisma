@@ -49,6 +49,10 @@ model User {
   googleId          String? @unique
   googleAccessToken String?
   googleRefreshToken String?
+  
+  // Apple OAuth integration
+  appleId           String? @unique
+  
   locale            String?
   timezone          String?
 
@@ -96,6 +100,7 @@ model User {
   @@index([stripeCustomerId])
   @@index([trainerId, role])  // For trainer-client relationship queries
   @@index([googleId])
+  @@index([appleId])
 }
 
 model UserSession {
