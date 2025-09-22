@@ -12,6 +12,8 @@ import { createUserLoaders } from '../loaders/user.loader'
 import { handleAppleSignIn } from './apple-signin'
 import { handleGoogleSignIn } from './google-signin'
 
+const useSecureCookies = process.env.NODE_ENV === 'production'
+
 export const authOptions = {
   providers: [
     GoogleProvider({
@@ -91,6 +93,26 @@ export const authOptions = {
       },
     }),
   ],
+  cookies: {
+    state: {
+      name: `${useSecureCookies ? '__Secure-' : ''}next-auth.state`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: useSecureCookies,
+      },
+    },
+    pkceCodeVerifier: {
+      name: `${useSecureCookies ? '__Secure-' : ''}next-auth.pkce.code_verifier`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: useSecureCookies,
+      },
+    },
+  },
   session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
 
