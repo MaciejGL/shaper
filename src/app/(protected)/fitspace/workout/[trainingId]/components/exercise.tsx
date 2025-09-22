@@ -49,7 +49,7 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
       updateFn: (oldData, { exerciseId, completed }) => {
         // Build previous logs map for fallback values
         const exercisePreviousLogs = previousDayLogs?.find(
-          (log) => log.exerciseName === exercise.name,
+          (log) => log.baseId === exercise.baseId,
         )
         const previousLogsMap: Record<
           string,
@@ -197,7 +197,7 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
   const isExerciseCompleted = Boolean(currentExercise.completedAt)
 
   const exercisePreviousLogs = previousDayLogs?.find(
-    (log) => log.exerciseName === exercise.name,
+    (log) => log.baseId === exercise.baseId,
   )
 
   const handleSetsLogsChange = (

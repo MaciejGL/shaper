@@ -1940,6 +1940,7 @@ export type GQLPortionAdjustmentInput = {
 
 export type GQLPreviousExerciseLog = {
   __typename?: 'PreviousExerciseLog';
+  baseId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   completedAt?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   exerciseName: EntireFieldWrapper<Scalars['String']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -4529,6 +4530,7 @@ export type GQLPlanDurationRangeResolvers<ContextType = GQLContext, ParentType e
 };
 
 export type GQLPreviousExerciseLogResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['PreviousExerciseLog'] = GQLResolversParentTypes['PreviousExerciseLog']> = {
+  baseId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   completedAt?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;

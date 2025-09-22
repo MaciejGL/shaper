@@ -108,6 +108,7 @@ query FitspaceGetWorkoutDay($dayId: ID) {
       exercises {
         id
         name
+        baseId
         restSeconds
         tempo
         warmupSets
@@ -190,6 +191,7 @@ query FitspaceGetWorkoutDay($dayId: ID) {
     previousDayLogs {
       id
       exerciseName
+      baseId
       sets {
         id
         order

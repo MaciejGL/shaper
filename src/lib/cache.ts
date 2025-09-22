@@ -33,7 +33,7 @@ const keys = {
     publicFiltered: (hash: string) => `exercises:public:${hash}`,
     single: (id: string) => `exercise:${id}`,
     previousExercises: (planId: string, dayId: string) =>
-      `previous-exercises-v5:${planId}:${dayId}`,
+      `previous-exercises-v6:${planId}:${dayId}`,
   },
   packages: {
     active: () => 'packages:active',

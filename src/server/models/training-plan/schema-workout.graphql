@@ -5,6 +5,7 @@ type GetWorkoutNavigationPayload {
 type PreviousExerciseLog {
   id: ID!
   exerciseName: String!
+  baseId: String
   completedAt: String
   sets: [ExerciseSet!]!
 }

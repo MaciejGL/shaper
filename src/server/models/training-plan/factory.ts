@@ -2094,9 +2094,12 @@ export async function getWorkoutDay(
 
   // Fetch previous exercise logs for all exercises in this day
   const currentWeekNumber = day.week.weekNumber
-  const exerciseNames = day.exercises
-    .map((ex) => ex.name)
-    .filter((name) => name !== undefined)
+  const currentDayOfWeek = day.dayOfWeek
+
+  // Extract baseIds (not names) for better matching
+  const exerciseBaseIds = day.exercises
+    .map((ex) => ex.baseId)
+    .filter((baseId) => baseId !== null)
   const exerciseIds = day.exercises.map((ex) => ex.id)
 
   const cacheKey = cache.keys.exercises.previousExercises(plan.id, day.id)
@@ -2106,10 +2109,21 @@ export async function getWorkoutDay(
       select: {
         id: true
         name: true
+        baseId: true
         completedAt: true
         sets: {
           include: {
             log: true
+          }
+        }
+        day: {
+          select: {
+            week: {
+              select: {
+                weekNumber: true
+              }
+            }
+            dayOfWeek: true
           }
         }
       }
@@ -2123,26 +2137,40 @@ export async function getWorkoutDay(
     }
   }
 
-  // Find all previous exercises with matching names (single query)
+  // Find all previous exercises with matching baseIds (single query)
   const allPreviousExercises = await prisma.trainingExercise.findMany({
     where: {
-      name: { in: exerciseNames },
+      baseId: { in: exerciseBaseIds },
       id: { notIn: exerciseIds }, // Exclude current day's exercises
       completedAt: { not: null }, // Only completed exercises with logs
       day: {
-        week: {
-          planId: plan.id,
-          weekNumber: { lt: currentWeekNumber }, // Only from previous weeks
-        },
+        OR: [
+          // Previous weeks
+          {
+            week: {
+              planId: plan.id,
+              weekNumber: { lt: currentWeekNumber },
+            },
+          },
+          // Same week but earlier days
+          {
+            week: {
+              planId: plan.id,
+              weekNumber: currentWeekNumber,
+            },
+            dayOfWeek: { lt: currentDayOfWeek },
+          },
+        ],
       },
     },
     select: {
       id: true,
       name: true,
+      baseId: true,
       completedAt: true,
       sets: {
         where: {
-          log: { isNot: null }, // Only sets with actual logs
+          log: { isNot: null },
         },
         include: {
           log: true,
@@ -2158,22 +2186,19 @@ export async function getWorkoutDay(
               weekNumber: true,
             },
           },
+          dayOfWeek: true,
         },
       },
     },
-    orderBy: [
-      { day: { week: { weekNumber: 'desc' } } }, // Most recent first
-      { day: { dayOfWeek: 'desc' } },
-    ],
+    orderBy: [{ completedAt: 'desc' }],
   })
 
-  // Keep only the most recent exercise for each name
-  const seenExerciseNames = new Set<string>()
+  const seenBaseIds = new Set<string>()
   const previousExercises = allPreviousExercises.filter((exercise) => {
-    if (seenExerciseNames.has(exercise.name)) {
+    if (!exercise.baseId || seenBaseIds.has(exercise.baseId)) {
       return false
     }
-    seenExerciseNames.add(exercise.name)
+    seenBaseIds.add(exercise.baseId)
     return true
   })
 
@@ -2192,6 +2217,7 @@ const getPreviousLogsByExerciseName = async (
     select: {
       id: true
       name: true
+      baseId: true
       completedAt: true
       sets: {
         include: {
@@ -2206,6 +2232,7 @@ const getPreviousLogsByExerciseName = async (
     .map((exercise) => ({
       id: exercise.id,
       exerciseName: exercise.name,
+      baseId: exercise.baseId,
       completedAt: exercise.completedAt
         ? new Date(exercise.completedAt).toISOString()
         : null,
