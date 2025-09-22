@@ -102,6 +102,12 @@ export const authOptions = {
 
   callbacks: {
     async signIn({ account, profile }) {
+      console.info('SignIn callback triggered:', {
+        provider: account?.provider,
+        hasProfile: !!profile,
+        profileEmail: profile?.email,
+      })
+
       // Handle Google OAuth sign-in
       if (account?.provider === 'google' && profile) {
         const email = profile?.email
