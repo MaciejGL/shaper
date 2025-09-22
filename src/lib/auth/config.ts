@@ -13,7 +13,7 @@ import { handleAppleSignIn } from './apple-signin'
 import { handleGoogleSignIn } from './google-signin'
 
 const useSecureCookies = process.env.NODE_ENV === 'production'
-const cookieDomain = useSecureCookies ? '.hypro.app' : undefined
+const cookieDomain = useSecureCookies ? 'hypro.app' : undefined
 
 export const authOptions = {
   providers: [
