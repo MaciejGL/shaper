@@ -20,7 +20,7 @@ export const AppleLoginButton = ({
     try {
       setIsLoading(true)
       await signIn('apple', {
-        callbackUrl: `${window.location.origin}/fitspace/workout`,
+        // callbackUrl: `${window.location.origin}/fitspace/workout`,
         redirect: true,
       })
     } catch (error) {

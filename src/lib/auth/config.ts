@@ -20,11 +20,6 @@ export const authOptions = {
       authorization: {
         params: {
           scope: 'openid email profile',
-          // Options for prompt:
-          // 'none' - Silent auth (only works if user already consented)
-          // 'select_account' - Show account picker (best for most cases)
-          // 'login' - Force re-authentication
-          // 'consent' - Force consent screen (avoid this)
           prompt: 'select_account',
           access_type: 'offline',
           response_type: 'code',
@@ -108,22 +103,6 @@ export const authOptions = {
     error: '/auth/error',
   },
 
-  debug: process.env.NODE_ENV === 'development',
-
-  logger: {
-    error(code, metadata) {
-      console.error('NextAuth Error:', code, metadata)
-    },
-    warn(code) {
-      console.warn('NextAuth Warning:', code)
-    },
-    debug(code, metadata) {
-      if (process.env.NODE_ENV === 'development') {
-        console.debug('NextAuth Debug:', code, metadata)
-      }
-    },
-  },
-
   callbacks: {
     async signIn({ account, profile }) {
       console.info('SignIn callback triggered:', {
@@ -162,40 +141,11 @@ export const authOptions = {
           return false
         }
       }
-      // Debug environment variables in production
-      if (process.env.NODE_ENV === 'production') {
-        console.warn('🔍 Production Environment Check:', {
-          NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-          NODE_ENV: process.env.NODE_ENV,
-          hasAppleId: !!process.env.APPLE_ID,
-          hasAppleSecret: !!process.env.APPLE_SECRET,
-          timestamp: new Date().toISOString(),
-        })
-      }
 
-      console.warn('BEFORE Apple OAuth sign-in attempt:', {
-        email: profile?.email,
-        provider: account?.provider,
-        timestamp: new Date().toISOString(),
-      })
       // Handle Apple OAuth sign-in
       if (account?.provider === 'apple' && profile) {
-        const email = profile?.email
-        console.warn('Apple OAuth sign-in attempt:', {
-          email,
-          provider: account.provider,
-          timestamp: new Date().toISOString(),
-        })
-
         try {
           const result = await handleAppleSignIn(account, profile)
-          console.warn('Apple OAuth sign-in result:', result)
-          if (!result) {
-            console.warn('Apple OAuth sign-in failed:', {
-              email,
-              timestamp: new Date().toISOString(),
-            })
-          }
 
           return result
         } catch (error) {
