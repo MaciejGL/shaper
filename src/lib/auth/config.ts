@@ -1,7 +1,7 @@
 import { NextAuthOptions } from 'next-auth'
 import AppleProvider from 'next-auth/providers/apple'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import GoogleProvider from 'next-auth/providers/google'
+import GoogleProvider, { GoogleProfile } from 'next-auth/providers/google'
 
 import { prisma } from '@/lib/db'
 import { UserWithSession } from '@/types/UserWithSession'
@@ -14,7 +14,7 @@ import { handleGoogleSignIn } from './google-signin'
 
 export const authOptions = {
   providers: [
-    GoogleProvider({
+    GoogleProvider<GoogleProfile>({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
