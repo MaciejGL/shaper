@@ -64,56 +64,65 @@ export const GoogleOneTap = ({
 }: GoogleOneTapProps) => {
   const initializedRef = useRef(false)
   const [detectedUser, setDetectedUser] = useState<DetectedUser | null>(null)
+  const [currentCredential, setCurrentCredential] = useState<string | null>(
+    null,
+  )
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleDirectLogin = async () => {
-    if (!detectedUser) {
-      console.error('No user data available for direct login')
+  const handleDirectLogin = useCallback(async () => {
+    if (!currentCredential || !detectedUser) {
+      console.error('No credential or user data available for direct login')
       return
     }
 
     try {
       setIsLoading(true)
+      console.info('🚀 Using One Tap credential for direct authentication')
 
-      // Use regular Google OAuth but with login hint to skip account picker
-
-      // Try to sign in silently first
-      const result = await signIn('google', {
-        callbackUrl: `${window.location.origin}/fitspace/workout`,
-        redirect: false,
-        login_hint: detectedUser.email,
-        prompt: 'none',
+      // Use the One Tap credential directly for authentication
+      const authResponse = await fetch('/api/auth/callback/google', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          credential: currentCredential,
+          callbackUrl: `${window.location.origin}/fitspace/workout`,
+        }),
       })
 
-      if (result?.url) {
-        window.location.href = result.url
-      } else if (result?.error) {
-        console.error('Silent sign-in failed:', result.error)
-        // Fallback to regular OAuth
-        await signIn('google', {
-          callbackUrl: `${window.location.origin}/fitspace/workout`,
-          redirect: true,
-          login_hint: detectedUser.email,
-        })
+      if (authResponse.ok) {
+        // Authentication successful - redirect immediately
+        console.info('✅ One Tap authentication successful')
+        window.location.href = `${window.location.origin}/fitspace/workout`
+      } else {
+        throw new Error(`Authentication failed: ${authResponse.status}`)
       }
     } catch (error) {
-      console.error('Direct login error:', error)
+      console.error('One Tap authentication failed:', error)
       setIsLoading(false)
-      // Final fallback to regular Google OAuth
+
+      // Fallback to regular Google OAuth with login hint
+      console.info('🔄 Falling back to regular Google OAuth')
       await signIn('google', {
         callbackUrl: `${window.location.origin}/fitspace/workout`,
         redirect: true,
         login_hint: detectedUser.email,
       })
     }
-  }
+  }, [currentCredential, detectedUser])
 
   const handleCredentialResponse = useCallback(
     async (response: GoogleCredentialResponse) => {
       try {
-        console.info('Google One Tap credential received - auto-logging in')
+        console.info(
+          '🎯 Google One Tap credential received - processing directly',
+        )
 
-        // Validate the credential and get user info
+        // Store the credential for immediate use
+        setCurrentCredential(response.credential)
+
+        // Decode user info for display
         const result = await fetch('/api/auth/google-one-tap', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -123,35 +132,18 @@ export const GoogleOneTap = ({
         const data = await result.json()
 
         if (data.success && data.user) {
-          // Show the user briefly for confirmation
+          // Show user info
           setDetectedUser(data.user)
           onAccountDetected?.(data.user)
 
-          // Auto-login after showing user for 2 seconds
+          // Auto-trigger login much faster (500ms instead of 2000ms)
           setTimeout(async () => {
-            setIsLoading(true)
-            console.info('Auto-logging in user:', data.user.email)
-
-            // Try silent login first
-            try {
-              const result = await signIn('google', {
-                callbackUrl: `${window.location.origin}/fitspace/workout`,
-                redirect: false,
-                login_hint: data.user.email,
-                prompt: 'none',
-              })
-
-              if (result?.url) {
-                window.location.href = result.url
-              } else {
-                // If silent fails, redirect with login hint to minimize account picker
-                window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(`${window.location.origin}/fitspace/workout`)}&login_hint=${encodeURIComponent(data.user.email)}`
-              }
-            } catch (error) {
-              console.error('Silent login failed, using redirect:', error)
-              window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(`${window.location.origin}/fitspace/workout`)}&login_hint=${encodeURIComponent(data.user.email)}`
-            }
-          }, 2000)
+            console.info(
+              '⚡ Auto-triggering One Tap authentication for:',
+              data.user.email,
+            )
+            await handleDirectLogin()
+          }, 500)
         } else {
           // Fallback to regular Google login
           await signIn('google', {
@@ -168,7 +160,7 @@ export const GoogleOneTap = ({
         })
       }
     },
-    [onAccountDetected],
+    [onAccountDetected, handleDirectLogin],
   )
 
   useEffect(() => {
