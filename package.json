@@ -90,6 +90,7 @@
     "graphql-yoga": "5.15.1",
     "input-otp": "1.4.2",
     "ioredis": "5.7.0",
+    "jsonwebtoken": "^9.0.2",
     "lodash": "4.17.21",
     "lucide-react": "0.537.0",
     "next": "15.5.2",

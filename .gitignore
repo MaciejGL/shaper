@@ -48,3 +48,4 @@ expo-app/hypertro-579ddbded873.json
 expo-app/hypertro-mobile-firebase-*
 
 .kiro/specs
+scripts/generate-apple-jwt.js
