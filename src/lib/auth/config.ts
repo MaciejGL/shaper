@@ -37,7 +37,6 @@ export const authOptions = {
           response_mode: 'form_post',
         },
       },
-      checks: ['pkce', 'state'],
     }),
     CredentialsProvider({
       id: 'otp',
@@ -93,6 +92,29 @@ export const authOptions = {
   ],
   session: { strategy: 'jwt' },
   secret: process.env.NEXTAUTH_SECRET,
+
+  cookies: {
+    state: {
+      name: 'next-auth.state',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV !== 'development',
+        maxAge: 900, // 15 minutes
+      },
+    },
+    pkceCodeVerifier: {
+      name: 'next-auth.pkce.code_verifier',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV !== 'development',
+        maxAge: 900, // 15 minutes
+      },
+    },
+  },
 
   pages: {
     signIn: '/login',

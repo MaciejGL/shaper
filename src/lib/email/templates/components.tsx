@@ -108,7 +108,7 @@ export const EmailHeader = ({
         }}
       >
         <img
-          src={'https://hypro.app/favicons/android-chrome-192x192.png'}
+          src={'https://www.hypro.app/favicons/android-chrome-192x192.png'}
           alt={logoAlt}
           style={{
             height: '32px',

@@ -3,10 +3,10 @@ const home = '192.168.0.25'
 // Simple, reliable configuration for Hypro mobile app
 export const APP_CONFIG = {
   // Web app URLs - use local dev server when in development
-  WEB_URL: __DEV__ ? `http://${home}:4000` : 'https://hypro.app',
+  WEB_URL: __DEV__ ? `http://${home}:4000` : 'https://www.hypro.app',
 
   // API URLs (if needed for direct API calls)
-  API_URL: __DEV__ ? `http://${home}:4000/api` : 'https://hypro.app/api',
+  API_URL: __DEV__ ? `http://${home}:4000/api` : 'https://www.hypro.app/api',
 
   // Environment info
   ENVIRONMENT: __DEV__ ? 'development' : 'production',
