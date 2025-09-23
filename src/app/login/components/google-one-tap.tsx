@@ -1,6 +1,7 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
+import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -65,25 +66,54 @@ export const GoogleOneTap = ({
   const [detectedUser, setDetectedUser] = useState<DetectedUser | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleGoogleLogin = async () => {
+  const handleDirectLogin = async () => {
+    if (!detectedUser) {
+      console.error('No user data available for direct login')
+      return
+    }
+
     try {
       setIsLoading(true)
+
+      // Use regular Google OAuth but with login hint to skip account picker
+
+      // Try to sign in silently first
+      const result = await signIn('google', {
+        callbackUrl: `${window.location.origin}/fitspace/workout`,
+        redirect: false,
+        login_hint: detectedUser.email,
+        prompt: 'none',
+      })
+
+      if (result?.url) {
+        window.location.href = result.url
+      } else if (result?.error) {
+        console.error('Silent sign-in failed:', result.error)
+        // Fallback to regular OAuth
+        await signIn('google', {
+          callbackUrl: `${window.location.origin}/fitspace/workout`,
+          redirect: true,
+          login_hint: detectedUser.email,
+        })
+      }
+    } catch (error) {
+      console.error('Direct login error:', error)
+      setIsLoading(false)
+      // Final fallback to regular Google OAuth
       await signIn('google', {
         callbackUrl: `${window.location.origin}/fitspace/workout`,
         redirect: true,
+        login_hint: detectedUser.email,
       })
-    } catch (error) {
-      console.error('Google login error:', error)
-      setIsLoading(false)
     }
   }
 
   const handleCredentialResponse = useCallback(
     async (response: GoogleCredentialResponse) => {
       try {
-        console.info('Google One Tap credential received')
+        console.info('Google One Tap credential received - auto-logging in')
 
-        // Send credential to our API to decode user info
+        // Validate the credential and get user info
         const result = await fetch('/api/auth/google-one-tap', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -93,16 +123,49 @@ export const GoogleOneTap = ({
         const data = await result.json()
 
         if (data.success && data.user) {
+          // Show the user briefly for confirmation
           setDetectedUser(data.user)
           onAccountDetected?.(data.user)
+
+          // Auto-login after showing user for 2 seconds
+          setTimeout(async () => {
+            setIsLoading(true)
+            console.info('Auto-logging in user:', data.user.email)
+
+            // Try silent login first
+            try {
+              const result = await signIn('google', {
+                callbackUrl: `${window.location.origin}/fitspace/workout`,
+                redirect: false,
+                login_hint: data.user.email,
+                prompt: 'none',
+              })
+
+              if (result?.url) {
+                window.location.href = result.url
+              } else {
+                // If silent fails, redirect with login hint to minimize account picker
+                window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(`${window.location.origin}/fitspace/workout`)}&login_hint=${encodeURIComponent(data.user.email)}`
+              }
+            } catch (error) {
+              console.error('Silent login failed, using redirect:', error)
+              window.location.href = `/api/auth/signin/google?callbackUrl=${encodeURIComponent(`${window.location.origin}/fitspace/workout`)}&login_hint=${encodeURIComponent(data.user.email)}`
+            }
+          }, 2000)
         } else {
           // Fallback to regular Google login
-          await handleGoogleLogin()
+          await signIn('google', {
+            callbackUrl: `${window.location.origin}/fitspace/workout`,
+            redirect: true,
+          })
         }
       } catch (error) {
         console.error('Google One Tap error:', error)
         // Fallback to regular Google login
-        await handleGoogleLogin()
+        await signIn('google', {
+          callbackUrl: `${window.location.origin}/fitspace/workout`,
+          redirect: true,
+        })
       }
     },
     [onAccountDetected],
@@ -184,39 +247,38 @@ export const GoogleOneTap = ({
   // Show detected user card
   if (detectedUser) {
     return (
-      <Card className="mb-4 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950/20">
+      <Card borderless className="mb-4 bg-card-on-card">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            <img
-              src={detectedUser.picture}
-              alt={detectedUser.name}
-              className="size-10 rounded-full"
-            />
+            {detectedUser.picture && (
+              <Image
+                src={detectedUser.picture}
+                alt={detectedUser.name}
+                className="size-10 rounded-full"
+                width={40}
+                height={40}
+              />
+            )}
             <div className="flex-1">
-              <p className="font-medium text-blue-900 dark:text-blue-100">
+              <p className="font-medium text-blue-900 dark:text-amber-100">
                 {detectedUser.name}
               </p>
-              <p className="text-sm text-blue-700 dark:text-blue-300">
+              <p className="text-sm text-blue-700 dark:text-amber-300">
                 {detectedUser.email}
               </p>
             </div>
           </div>
+
           <div className="mt-3 flex gap-2">
             <Button
               size="sm"
-              onClick={handleGoogleLogin}
-              loading={isLoading}
-              disabled={isLoading}
+              onClick={handleDirectLogin}
               className="flex-1"
+              loading={isLoading}
             >
               Continue as {detectedUser.given_name || detectedUser.name}
             </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleDismiss}
-              disabled={isLoading}
-            >
+            <Button size="sm" variant="ghost" onClick={handleDismiss}>
               Not you?
             </Button>
           </div>
