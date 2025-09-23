@@ -1,3 +1,5 @@
+import { CheckSquareIcon, SquareIcon } from 'lucide-react'
+
 import { RadioButtons } from '@/components/radio-buttons'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -95,7 +97,7 @@ export function FitnessProfileStep({
               (select all that apply)
             </span>
           </Label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-1">
             {GOALS.map((goal) => (
               <Button
                 key={goal.value}
@@ -103,7 +105,14 @@ export function FitnessProfileStep({
                   data.goals.includes(goal.value) ? 'default' : 'tertiary'
                 }
                 onClick={() => toggleGoal(goal.value)}
-                className={cn('h-auto p-3 justify-start ')}
+                className={cn('h-auto p-3 justify-start gap-2')}
+                iconStart={
+                  data.goals.includes(goal.value) ? (
+                    <CheckSquareIcon />
+                  ) : (
+                    <SquareIcon className="text-muted-foreground" />
+                  )
+                }
               >
                 {goal.label}
               </Button>

@@ -56,7 +56,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
               label="First Name"
               id="firstName"
               className="w-full"
-              variant="ghost"
+              variant="secondary"
               value={data.firstName}
               onChange={(e) => onChange({ firstName: e.target.value })}
               placeholder="Enter your first name"
@@ -67,7 +67,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
               label="Last Name"
               id="lastName"
               className="w-full"
-              variant="ghost"
+              variant="secondary"
               value={data.lastName}
               onChange={(e) => onChange({ lastName: e.target.value })}
               placeholder="Enter your last name"
@@ -84,7 +84,7 @@ export function BasicInfoStep({ data, onChange }: BasicInfoStepProps) {
               date && onChange({ birthday: date.toISOString() })
             }
             buttonProps={{
-              variant: 'secondary',
+              variant: 'tertiary',
             }}
           />
         </div>

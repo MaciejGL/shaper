@@ -22,7 +22,7 @@ export function TrainingViewPreview({
   }
 
   return (
-    <div className="flex justify-center min-h-[364px]">
+    <div className="flex justify-center min-h-[364px] shadow-lg rounded-md border border-border  dark:shadow-none dark:border-none">
       <AnimatePresence mode="wait">
         {trainingView === GQLTrainingView.Advanced ? (
           <motion.div

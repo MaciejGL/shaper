@@ -29,7 +29,7 @@ export function WelcomeStep({ onPathSelect, onQuickStart }: WelcomeStepProps) {
 
         <Button
           onClick={() => onPathSelect('setup')}
-          variant="tertiary"
+          variant="default"
           size="xl"
           className="w-full"
         >

@@ -24,7 +24,7 @@ const inputVariants = cva(
     variants: {
       variant: {
         ghost: 'bg-secondary shadow-none',
-        secondary: 'shadow-none bg-primary/5',
+        secondary: 'shadow-none bg-primary/7 dark:bg-primary/8',
         outline: 'border-input shadow-none bg-secondary',
       },
       size: {
