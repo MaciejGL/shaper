@@ -2,6 +2,7 @@
 import { render } from '@react-email/render'
 
 import { resend } from './resend'
+import { EmailChangeOtp } from './templates/email-change-otp'
 import { OtpEmail } from './templates/otp-email'
 import {
   GracePeriodEndingEmail,
@@ -22,15 +23,43 @@ const FROM_EMAIL = `${NO_REPLY_NAME} <${NO_REPLY_EMAIL}>`
 export const sendEmail = {
   otp: async (
     to: string,
-    { otp, userName }: { otp: string; userName?: string | null },
+    {
+      otp,
+      userName,
+      isEmailChange,
+      currentEmail,
+      newEmail,
+    }: {
+      otp: string
+      userName?: string | null
+      isEmailChange?: boolean
+      currentEmail?: string
+      newEmail?: string
+    },
   ) => {
-    const html = await render(<OtpEmail code={otp} userName={userName} />)
+    let html: string
+    let subject: string
+
+    if (isEmailChange && currentEmail && newEmail) {
+      html = await render(
+        <EmailChangeOtp
+          code={otp}
+          userName={userName}
+          currentEmail={currentEmail}
+          newEmail={newEmail}
+        />,
+      )
+      subject = 'Verify your new email address'
+    } else {
+      html = await render(<OtpEmail code={otp} userName={userName} />)
+      subject = 'Your Hypro verification code'
+    }
 
     try {
       await resend.emails.send({
         from: FROM_EMAIL,
         to,
-        subject: 'Your Hypro verification code',
+        subject,
         html,
       })
     } catch (error) {

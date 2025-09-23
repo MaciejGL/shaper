@@ -1,5 +1,7 @@
 import { UserIcon } from 'lucide-react'
+import { useState } from 'react'
 
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,8 +14,10 @@ import {
 } from '@/components/ui/select'
 
 import { DatePicker } from '../date-picker'
+import { Drawer, DrawerContent, DrawerTrigger } from '../ui/drawer'
 import { SectionIcon } from '../ui/section-icon'
 
+import { EmailChangeFlow } from './email-change-flow'
 import { Profile } from './types'
 
 type PersonalInfoProps = {
@@ -27,6 +31,8 @@ type PersonalInfoProps = {
   ) => void
 }
 export function PersonalInfo({ profile, handleChange }: PersonalInfoProps) {
+  const [showEmailChange, setShowEmailChange] = useState(false)
+
   return (
     <Card className="mb-6" borderless>
       <CardHeader>
@@ -58,16 +64,37 @@ export function PersonalInfo({ profile, handleChange }: PersonalInfoProps) {
             />
           </div>
 
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="email">Email</Label>
-
-            <Input
-              variant="secondary"
-              id="email"
-              type="email"
-              value={profile?.email ?? ''}
-              onChange={(e) => handleChange('email', e.target.value)}
-            />
+            <div className="grid grid-cols-[1fr_auto] gap-2 mt-2">
+              <Input
+                variant="secondary"
+                id="email"
+                type="email"
+                value={profile?.email ?? ''}
+                disabled
+                className="grow"
+              />
+              <Drawer open={showEmailChange} onOpenChange={setShowEmailChange}>
+                <DrawerTrigger asChild>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setShowEmailChange(true)}
+                  >
+                    Change
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent dialogTitle="Change Email">
+                  <EmailChangeFlow
+                    currentEmail={profile?.email ?? ''}
+                    onCancel={() => setShowEmailChange(false)}
+                    onSuccess={() => {
+                      setShowEmailChange(false)
+                    }}
+                  />
+                </DrawerContent>
+              </Drawer>
+            </div>
           </div>
 
           <div className="space-y-2">

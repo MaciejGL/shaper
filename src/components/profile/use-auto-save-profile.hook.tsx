@@ -86,6 +86,12 @@ export function useAutoSaveProfile() {
     (field: keyof Profile, value: string | string[] | number | null) => {
       if (!localProfile) return
 
+      // Email changes are handled by a special verification flow
+      if (field === 'email') {
+        console.warn('Email changes should use the EmailChangeFlow component')
+        return
+      }
+
       // Update local state immediately for UI responsiveness
       setLocalProfile((prev) => {
         if (!prev) return prev

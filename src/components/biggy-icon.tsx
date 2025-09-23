@@ -3,7 +3,7 @@ import { VariantProps, cva } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const byggyIconVariants = cva(
-  'bg-muted rounded-full flex items-center justify-center',
+  'bg-muted rounded-full flex items-center justify-center shrink-0',
   {
     variants: {
       variant: {
