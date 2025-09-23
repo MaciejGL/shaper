@@ -104,7 +104,7 @@ export const GoogleOneTap = ({
 
         if (authResult?.ok) {
           console.info('✅ Google One Tap authentication successful')
-          // Redirect manually after successful auth
+          // Option 1: Manual redirect (current - reliable)
           window.location.href = `${window.location.origin}/fitspace/workout`
         } else {
           console.error(
@@ -224,12 +224,12 @@ export const GoogleOneTap = ({
   }
 
   // Show detected user card (optional feedback before auto-login)
-  if (detectedUser && !isLoading) {
+  if (detectedUser || isLoading) {
     return (
       <Card borderless className="mb-4 bg-card-on-card">
         <CardContent className="p-4">
           <div className="flex items-center gap-3">
-            {detectedUser.picture && (
+            {detectedUser?.picture && (
               <Image
                 src={detectedUser.picture}
                 alt={detectedUser.name}
@@ -239,50 +239,44 @@ export const GoogleOneTap = ({
               />
             )}
             <div className="flex-1">
-              <p className="font-medium text-blue-900 dark:text-amber-100">
-                {detectedUser.name}
-              </p>
+              {detectedUser && (
+                <p className="font-medium text-blue-900 dark:text-amber-100">
+                  {detectedUser?.name}
+                </p>
+              )}
+              {detectedUser && (
+                <p className="text-sm text-blue-700 dark:text-amber-300">
+                  {detectedUser?.email}
+                </p>
+              )}
               <p className="text-sm text-blue-700 dark:text-amber-300">
-                {detectedUser.email}
+                {detectedUser?.email}
               </p>
             </div>
           </div>
 
-          <div className="mt-3 flex gap-2">
-            <Button
-              size="sm"
-              onClick={handleManualClick}
-              className="flex-1"
-              loading={isLoading}
-            >
-              Continue as {detectedUser.given_name || detectedUser.name}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={handleDismiss}>
-              Not you?
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
-  // Show loading state if processing
-  if (isLoading) {
-    return (
-      <Card borderless className="mb-4 bg-card-on-card">
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="size-10 animate-pulse rounded-full bg-muted" />
-            <div className="flex-1">
-              <div className="h-4 w-32 animate-pulse rounded bg-muted" />
-              <div className="mt-1 h-3 w-48 animate-pulse rounded bg-muted" />
+          {detectedUser && (
+            <div className="mt-3 flex gap-2">
+              <Button
+                size="sm"
+                onClick={handleManualClick}
+                className="flex-1"
+                loading={isLoading}
+              >
+                Continue as {detectedUser?.given_name || detectedUser?.name}
+              </Button>
+              <Button size="sm" variant="ghost" onClick={handleDismiss}>
+                Not you?
+              </Button>
             </div>
-          </div>
-          <div className="mt-3">
-            <Button size="sm" className="w-full" loading={true}>
-              Signing you in...
-            </Button>
-          </div>
+          )}
+          {isLoading && (
+            <div className="mt-3 flex gap-2">
+              <Button size="sm" loading={isLoading}>
+                Signing you in...
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     )
