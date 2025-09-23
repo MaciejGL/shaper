@@ -66,41 +66,14 @@ export const GoogleOneTap = ({
   const [detectedUser, setDetectedUser] = useState<DetectedUser | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const handleDirectLogin = useCallback(
-    async (userEmail?: string) => {
-      const email = userEmail || detectedUser?.email
-      if (!email) {
-        console.error('No user email available for direct login')
-        return
-      }
-
-      try {
-        setIsLoading(true)
-        console.info('🚀 Immediately logging in detected account:', email)
-
-        // Use Google OAuth with login_hint and prompt=none to skip account picker
-        await signIn('google', {
-          callbackUrl: `${window.location.origin}/fitspace/workout`,
-          redirect: true,
-          login_hint: email,
-          prompt: 'none', // Try to skip account selection entirely
-        })
-      } catch (error) {
-        console.error('Auto-login failed:', error)
-        setIsLoading(false)
-      }
-    },
-    [detectedUser],
-  )
-
   const handleCredentialResponse = useCallback(
     async (response: GoogleCredentialResponse) => {
       try {
         console.info(
-          '🎯 Google One Tap credential received - processing directly',
+          '🎯 Google One Tap credential received - processing with NextAuth',
         )
 
-        // Decode user info for display
+        // Decode user info for display (optional, for UX feedback)
         const result = await fetch('/api/auth/google-one-tap', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -110,17 +83,35 @@ export const GoogleOneTap = ({
         const data = await result.json()
 
         if (data.success && data.user) {
-          // Show user info
           setDetectedUser(data.user)
           onAccountDetected?.(data.user)
-
-          // Auto-trigger login IMMEDIATELY with user email (no state dependency)
           console.info(
-            '⚡ IMMEDIATELY logging in One Tap user:',
+            '👆 One Tap detected user:',
             data.user.email,
+            '- showing confirmation',
           )
-          await handleDirectLogin(data.user.email)
+        }
+
+        // IMMEDIATELY process the credential through our custom NextAuth provider
+        setIsLoading(true)
+        console.info('🚀 Processing One Tap credential through NextAuth...')
+
+        const authResult = await signIn('googleonetap', {
+          credential: response.credential,
+          callbackUrl: `${window.location.origin}/fitspace/workout`,
+          redirect: false, // Handle redirect manually
+        })
+
+        if (authResult?.ok) {
+          console.info('✅ Google One Tap authentication successful')
+          // Redirect manually after successful auth
+          window.location.href = `${window.location.origin}/fitspace/workout`
         } else {
+          console.error(
+            '❌ Google One Tap authentication failed:',
+            authResult?.error,
+          )
+          setIsLoading(false)
           // Fallback to regular Google login
           await signIn('google', {
             callbackUrl: `${window.location.origin}/fitspace/workout`,
@@ -129,6 +120,7 @@ export const GoogleOneTap = ({
         }
       } catch (error) {
         console.error('Google One Tap error:', error)
+        setIsLoading(false)
         // Fallback to regular Google login
         await signIn('google', {
           callbackUrl: `${window.location.origin}/fitspace/workout`,
@@ -136,8 +128,23 @@ export const GoogleOneTap = ({
         })
       }
     },
-    [onAccountDetected, handleDirectLogin],
+    [onAccountDetected],
   )
+
+  const handleManualClick = async () => {
+    if (!detectedUser) return
+
+    setIsLoading(true)
+    console.info('🖱️ Manual login triggered for:', detectedUser.email)
+
+    // For manual clicks, we can still try the custom provider if we have the credential
+    // Otherwise fall back to regular Google OAuth
+    await signIn('google', {
+      callbackUrl: `${window.location.origin}/fitspace/workout`,
+      redirect: true,
+      login_hint: detectedUser.email,
+    })
+  }
 
   useEffect(() => {
     if (disabled || initializedRef.current) return
@@ -152,6 +159,8 @@ export const GoogleOneTap = ({
         return
       }
 
+      console.info('🎯 Initializing Google One Tap...')
+
       window.google.accounts.id.initialize({
         client_id: clientId,
         callback: handleCredentialResponse,
@@ -162,7 +171,7 @@ export const GoogleOneTap = ({
         use_fedcm_for_prompt: true,
       })
 
-      // Show One Tap prompt after a short delay
+      // Show One Tap prompt
       setTimeout(() => {
         window.google?.accounts.id.prompt((notification) => {
           if (notification.isNotDisplayed()) {
@@ -177,6 +186,8 @@ export const GoogleOneTap = ({
               'One Tap dismissed:',
               notification.getDismissedReason(),
             )
+          } else {
+            console.info('✅ Google One Tap displayed successfully')
           }
         })
       }, 1000)
@@ -212,14 +223,8 @@ export const GoogleOneTap = ({
     setDetectedUser(null)
   }
 
-  const handleManualClick = () => {
-    if (detectedUser) {
-      handleDirectLogin(detectedUser.email)
-    }
-  }
-
-  // Show detected user card
-  if (detectedUser) {
+  // Show detected user card (optional feedback before auto-login)
+  if (detectedUser && !isLoading) {
     return (
       <Card borderless className="mb-4 bg-card-on-card">
         <CardContent className="p-4">
@@ -261,6 +266,28 @@ export const GoogleOneTap = ({
     )
   }
 
-  // This component doesn't render anything when no user is detected
+  // Show loading state if processing
+  if (isLoading) {
+    return (
+      <Card borderless className="mb-4 bg-card-on-card">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
+            <div className="size-10 animate-pulse rounded-full bg-muted" />
+            <div className="flex-1">
+              <div className="h-4 w-32 animate-pulse rounded bg-muted" />
+              <div className="mt-1 h-3 w-48 animate-pulse rounded bg-muted" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <Button size="sm" className="w-full" loading={true}>
+              Signing you in...
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // This component doesn't render anything when no user is detected and not loading
   return null
 }
