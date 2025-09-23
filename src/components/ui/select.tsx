@@ -31,6 +31,7 @@ const selectTriggerVariants = cva(
     variants: {
       variant: {
         default: cn('border border-input'),
+        secondary: cn('border-none bg-card-on-card'),
         ghost: cn('border-none bg-card'),
         tertiary: cn('border-none bg-card-on-card'),
       },
@@ -69,7 +70,7 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <ChevronDownIcon className="size-4 opacity-50" />
+        <ChevronDownIcon className="size-4 opacity-90" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )

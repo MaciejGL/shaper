@@ -6,59 +6,29 @@ import { GoalsAndHealth } from '@/components/profile/goals-and-health'
 import { Header } from '@/components/profile/header'
 import { PersonalInfo } from '@/components/profile/personal-info'
 import { PhysicalStats } from '@/components/profile/physical-stats'
+import { useAutoSaveProfile } from '@/components/profile/use-auto-save-profile.hook'
 import { useProfile } from '@/components/profile/use-profile.hook'
 
 export default function ProfilePage() {
-  const {
-    profile,
-    handleChange,
-    handleAvatarChange,
-    handleSectionSave,
-    toggleSectionEdit,
-    isSectionEditing,
-    isSaving,
-  } = useProfile()
+  const { profile, handleAutoSave } = useAutoSaveProfile()
+  const { handleAvatarChange } = useProfile()
+
+  if (!profile) {
+    return <div>Loading...</div>
+  }
 
   return (
     <AnimatedPageTransition id="profile">
       <div className="container-hypertro mx-auto pt-8">
         <Header profile={profile} onAvatarChange={handleAvatarChange} />
 
-        <PersonalInfo
-          profile={profile}
-          handleChange={handleChange}
-          isSectionEditing={isSectionEditing('personalInfo')}
-          onToggleEdit={() => toggleSectionEdit('personalInfo')}
-          onSave={() => handleSectionSave('personalInfo')}
-          isSaving={isSaving}
-        />
+        <PersonalInfo profile={profile} handleChange={handleAutoSave} />
 
-        <PhysicalStats
-          profile={profile}
-          handleChange={handleChange}
-          isSectionEditing={isSectionEditing('physicalStats')}
-          onToggleEdit={() => toggleSectionEdit('physicalStats')}
-          onSave={() => handleSectionSave('physicalStats')}
-          isSaving={isSaving}
-        />
+        <PhysicalStats profile={profile} handleChange={handleAutoSave} />
 
-        <GoalsAndHealth
-          profile={profile}
-          handleChange={handleChange}
-          isSectionEditing={isSectionEditing('goalsAndHealth')}
-          onToggleEdit={() => toggleSectionEdit('goalsAndHealth')}
-          onSave={() => handleSectionSave('goalsAndHealth')}
-          isSaving={isSaving}
-        />
+        <GoalsAndHealth profile={profile} handleChange={handleAutoSave} />
 
-        <Bio
-          profile={profile}
-          handleChange={handleChange}
-          isSectionEditing={isSectionEditing('bio')}
-          onToggleEdit={() => toggleSectionEdit('bio')}
-          onSave={() => handleSectionSave('bio')}
-          isSaving={isSaving}
-        />
+        <Bio profile={profile} handleChange={handleAutoSave} />
       </div>
     </AnimatedPageTransition>
   )
