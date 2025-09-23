@@ -64,6 +64,7 @@ export function DatePicker({
             <Calendar
               mode="single"
               selected={date}
+              defaultMonth={date}
               captionLayout="dropdown"
               weekStartsOn={preferences.weekStartsOn}
               onSelect={(date) => {
