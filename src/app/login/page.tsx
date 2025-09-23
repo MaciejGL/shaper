@@ -1,4 +1,3 @@
-import { AnimatePresence } from 'framer-motion'
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
@@ -34,9 +33,7 @@ export default async function RequestOtpPage() {
       </Link>
       <div className="flex flex-col gap-4 w-full max-w-md">
         <Suspense fallback={null}>
-          <AnimatePresence>
-            <EmailChangeSuccess />
-          </AnimatePresence>
+          <EmailChangeSuccess />
         </Suspense>
         <LoginCard />
       </div>

@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { CheckSquare } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -20,30 +20,32 @@ export function EmailChangeSuccess() {
     }
   }, [searchParams])
 
-  if (!showMessage) return null
-
   return (
-    <motion.div
-      key="email-change-success"
-      initial={{ opacity: 0, height: 0 }}
-      animate={{ opacity: 1, height: 'auto' }}
-      exit={{ opacity: 0, height: 0 }}
-      transition={{ duration: 0.2 }}
-    >
-      <Card borderless className="dark mb-2">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <BiggyIcon size="sm" icon={CheckSquare} variant="success" />{' '}
-            <p className="text-sm">Email Address Updated Successfully</p>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Your email address has been updated successfully. Please sign in
-            with your new email address.
-          </p>
-        </CardContent>
-      </Card>
-    </motion.div>
+    <AnimatePresence>
+      {showMessage && (
+        <motion.div
+          key="email-change-success"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <Card borderless className="dark mb-2">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <BiggyIcon size="sm" icon={CheckSquare} variant="success" />{' '}
+                <p className="text-sm">Email Address Updated Successfully</p>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground">
+                Your email address has been updated successfully. Please sign in
+                with your new email address.
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
