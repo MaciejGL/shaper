@@ -17,6 +17,7 @@ import { Separator } from '@/components/ui/separator'
 import { AppleLoginButton } from './apple-login-button'
 import { EmailForm } from './email-form'
 import { GoogleLoginButton } from './google-login-button'
+import { GoogleOneTap } from './google-one-tap'
 import { OtpForm } from './otp-form'
 import { useLoginForm } from './use-login-form.hook'
 
@@ -50,6 +51,9 @@ export const LoginCard = () => {
       <CardContent>
         {!showOtp && (
           <>
+            {/* Google One Tap - Shows account picker for new users */}
+            <GoogleOneTap disabled={isLoading || isResending} />
+
             {/* OAuth Login Buttons - Equal prominence as required by Apple */}
             <div className="mb-6 space-y-3">
               <GoogleLoginButton
@@ -67,7 +71,7 @@ export const LoginCard = () => {
               <Separator />
               <div className="absolute inset-0 -top-2.5 flex justify-center">
                 <span className="bg-card px-2 text-sm text-muted-foreground">
-                  or
+                  or continue with email
                 </span>
               </div>
             </div>
