@@ -423,7 +423,10 @@ export function ExerciseSet({
                 }
                 onClick={handleClick}
                 onDoubleClick={handleDoubleClick}
-                className="self-center"
+                className={cn(
+                  'self-center',
+                  set.completedAt && 'bg-green-500/20 dark:bg-green-500/20',
+                )}
               />
             </div>
           </div>

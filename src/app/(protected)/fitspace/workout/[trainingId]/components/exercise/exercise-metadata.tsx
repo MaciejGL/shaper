@@ -138,7 +138,10 @@ export function ExerciseMetadata({
               <CheckIcon className={cn(isCompleted && 'text-green-600')} />
             }
             onClick={() => handleMarkAsCompleted(!isCompleted)}
-            className="self-start"
+            className={cn(
+              'self-start',
+              isCompleted && 'bg-green-500/20 dark:bg-green-500/20',
+            )}
           />
         </div>
       </div>
