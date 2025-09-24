@@ -140,7 +140,8 @@ export function ExerciseMetadata({
             onClick={() => handleMarkAsCompleted(!isCompleted)}
             className={cn(
               'self-start',
-              isCompleted && 'bg-green-500/20 dark:bg-green-500/20',
+              isCompleted &&
+                'bg-green-500/20 dark:bg-green-500/20 hover:bg-green-500/20 dark:hover:bg-green-500/20',
             )}
           />
         </div>
