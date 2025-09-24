@@ -7,15 +7,16 @@ import {
   CheckCircle,
   FlameIcon,
   Mail,
-  MessageSquare,
   Sparkles,
 } from 'lucide-react'
 import { useState } from 'react'
 
+import { CoachingInfoModal } from '@/components/coaching-info-modal/coaching-info-modal'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent } from '@/components/ui/drawer'
+import { useUser } from '@/context/user-context'
 
 import { SectionIcon } from '../ui/section-icon'
 
@@ -40,6 +41,8 @@ export function TrainerDetailsDrawer({
 }: TrainerDetailsDrawerProps) {
   const [isRequestingCoaching, setIsRequestingCoaching] = useState(false)
   const [requestSent, setRequestSent] = useState(false)
+  const [showCoachingInfo, setShowCoachingInfo] = useState(false)
+  const { user } = useUser()
 
   const handleRequestCoaching = async () => {
     if (!trainer || !onRequestCoaching) return
@@ -72,6 +75,8 @@ export function TrainerDetailsDrawer({
   const initials =
     (trainer.profile?.firstName?.charAt(0) || '') +
     (trainer.profile?.lastName?.charAt(0) || '')
+
+  const hasRequestedTrainer = Boolean(user?.trainerId)
 
   return (
     <Drawer
@@ -206,50 +211,69 @@ export function TrainerDetailsDrawer({
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <h3 className="font-semibold">Request Coaching</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {trainer.isAtCapacity ? (
-                      <>
-                        {trainerName} is currently at full capacity and not
-                        accepting new clients.
-                      </>
-                    ) : (
-                      <>
-                        Send a coaching request to {trainerName}. They will
-                        contact you to discuss your goals and coaching options.
-                      </>
-                    )}
-                  </p>
+                  {!hasRequestedTrainer && (
+                    <h3 className="font-semibold">Request Coaching</h3>
+                  )}
+                  {!hasRequestedTrainer && (
+                    <p className="text-sm text-muted-foreground">
+                      {trainer.isAtCapacity ? (
+                        <>
+                          {trainerName} is currently at full capacity and not
+                          accepting new clients.
+                        </>
+                      ) : (
+                        <>
+                          Send a coaching request to {trainerName}. They will
+                          contact you to discuss your goals and coaching
+                          options.
+                        </>
+                      )}
+                    </p>
+                  )}
 
-                  <Button
-                    onClick={handleRequestCoaching}
-                    disabled={isRequestingCoaching || !!trainer.isAtCapacity}
-                    className="w-full"
-                    size="lg"
-                  >
-                    {isRequestingCoaching ? (
-                      <>
-                        <MessageSquare className="h-4 w-4 mr-2 animate-pulse" />
-                        Sending Request...
-                      </>
-                    ) : trainer.isAtCapacity ? (
-                      <>
-                        <FlameIcon className="h-4 w-4 mr-2" />
-                        Trainer at Capacity
-                      </>
-                    ) : (
-                      <>
-                        <Mail className="h-4 w-4 mr-2" />
-                        Request Coaching
-                      </>
+                  <div className="space-y-3">
+                    <Button
+                      onClick={() => setShowCoachingInfo(true)}
+                      variant="tertiary"
+                      className="w-full"
+                      size="lg"
+                      iconStart={<BookOpenCheck />}
+                    >
+                      Learn How Coaching Works
+                    </Button>
+
+                    {!hasRequestedTrainer && (
+                      <Button
+                        onClick={handleRequestCoaching}
+                        disabled={
+                          isRequestingCoaching ||
+                          !!trainer.isAtCapacity ||
+                          hasRequestedTrainer
+                        }
+                        className="w-full"
+                        size="lg"
+                        loading={isRequestingCoaching}
+                        iconStart={
+                          trainer.isAtCapacity ? <FlameIcon /> : <Mail />
+                        }
+                      >
+                        {trainer.isAtCapacity
+                          ? 'Trainer at Capacity'
+                          : 'Request Coaching'}
+                      </Button>
                     )}
-                  </Button>
+                  </div>
                 </div>
               )}
             </>
           )}
         </div>
       </DrawerContent>
+
+      <CoachingInfoModal
+        open={showCoachingInfo}
+        onOpenChange={setShowCoachingInfo}
+      />
     </Drawer>
   )
 }

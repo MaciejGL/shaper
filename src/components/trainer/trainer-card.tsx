@@ -4,6 +4,7 @@ import { ChevronRight } from 'lucide-react'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card, CardContent, CardProps } from '@/components/ui/card'
+import { cn } from '@/lib/utils'
 
 import { Badge } from '../ui/badge'
 
@@ -69,7 +70,13 @@ export function TrainerCard({
 
   return (
     <Card
-      className={`${onClick ? 'cursor-pointer hover:border-primary/50 transition-colors' : ''} ${className}`}
+      className={cn(
+        'p-0',
+        onClick
+          ? 'cursor-pointer hover:border-primary/50 transition-colors'
+          : '',
+        className,
+      )}
       variant={variant}
       onClick={onClick}
       borderless
@@ -89,7 +96,7 @@ export function TrainerCard({
             <div className="flex items-start justify-between">
               <div className="space-y-1.5">
                 <h3 className="font-semibold text-lg">{trainerName}</h3>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center flex-wrap gap-1.5">
                   {showExperience && trainer.profile?.trainerSince && (
                     <Badge variant="premium" size="sm">
                       {getExperienceText()} of experience
