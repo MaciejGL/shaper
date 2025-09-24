@@ -58,23 +58,23 @@ export function TrainingPlanFilters({
   return (
     <div className="space-y-4">
       {/* Main Filter Buttons */}
-      <div className="flex items-center gap-2 flex-wrap border border-border/50 rounded-lg p-1">
+      <div className="flex items-center gap-2 flex-wrap">
         <Button
-          variant={activeFilter === 'all' ? 'tertiary' : 'ghost'}
+          variant={activeFilter === 'all' ? 'default' : 'tertiary'}
           size="sm"
           onClick={() => onFilterChange('all')}
         >
           All Plans
         </Button>
         <Button
-          variant={activeFilter === 'free' ? 'tertiary' : 'ghost'}
+          variant={activeFilter === 'free' ? 'default' : 'tertiary'}
           size="sm"
           onClick={() => onFilterChange('free')}
         >
           Free
         </Button>
         <Button
-          variant={activeFilter === 'premium' ? 'tertiary' : 'ghost'}
+          variant={activeFilter === 'premium' ? 'default' : 'tertiary'}
           size="sm"
           onClick={() => onFilterChange('premium')}
           iconStart={

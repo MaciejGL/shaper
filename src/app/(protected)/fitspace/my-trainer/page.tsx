@@ -193,10 +193,10 @@ function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
         <Button
           className="w-full"
           size="lg"
-          variant="outline"
+          variant="tertiary"
           onClick={handleCancelCoaching}
         >
-          End Coaching
+          Cancel Coaching
         </Button>
 
         <Button

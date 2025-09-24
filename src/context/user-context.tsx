@@ -18,6 +18,7 @@ interface UserContextType {
     | GQLGetMySubscriptionStatusQuery['getMySubscriptionStatus']
     | undefined
   hasPremium: boolean
+  isLoading: boolean
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -31,7 +32,7 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const session = useSession()
   const queryClient = useQueryClient()
 
-  const { data } = useUserBasicQuery(
+  const { data, isLoading: isLoadingUserBasic } = useUserBasicQuery(
     {},
     {
       initialData,
@@ -42,15 +43,16 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     },
   )
 
-  const { data: subscriptionData } = useGetMySubscriptionStatusQuery(
-    {},
-    {
-      enabled:
-        session.status === 'authenticated' &&
-        Boolean(session.data?.user?.email),
-      staleTime: 10 * 60 * 1000, // 10 minutes - refresh more frequently for premium status
-    },
-  )
+  const { data: subscriptionData, isLoading: isLoadingSubscription } =
+    useGetMySubscriptionStatusQuery(
+      {},
+      {
+        enabled:
+          session.status === 'authenticated' &&
+          Boolean(session.data?.user?.email),
+        staleTime: 10 * 60 * 1000, // 10 minutes - refresh more frequently for premium status
+      },
+    )
 
   // Clear user query cache when user logs out
   useEffect(() => {
@@ -94,6 +96,10 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     user: session.status === 'authenticated' ? data?.userBasic : undefined,
     subscription: session.status === 'authenticated' ? subscription : undefined,
     hasPremium: session.status === 'authenticated' ? hasPremium : false,
+    isLoading:
+      session.status === 'loading' ||
+      isLoadingUserBasic ||
+      isLoadingSubscription,
   }
 
   return (

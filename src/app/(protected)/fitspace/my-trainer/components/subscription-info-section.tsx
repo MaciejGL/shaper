@@ -1,6 +1,6 @@
 'use client'
 
-import { CreditCard, ExternalLink, SparklesIcon } from 'lucide-react'
+import { CreditCard, SparklesIcon } from 'lucide-react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { useMobileApp } from '@/components/mobile-app-bridge'
@@ -187,15 +187,14 @@ export function SubscriptionInfoSection() {
             variant={
               subscriptionData?.status === 'CANCELLED_ACTIVE'
                 ? 'default'
-                : 'secondary'
+                : 'tertiary'
             }
             className="w-full"
+            iconStart={<CreditCard />}
           >
-            <CreditCard className="h-4 w-4 mr-2" />
             {subscriptionData?.status === 'CANCELLED_ACTIVE'
               ? 'Reactivate or Manage Subscription'
               : 'Manage Account & Subscription'}
-            <ExternalLink className="h-4 w-4 ml-2" />
           </Button>
         )}
       </CardContent>

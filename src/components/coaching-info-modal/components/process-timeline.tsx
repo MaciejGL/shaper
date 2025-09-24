@@ -87,7 +87,7 @@ export function ProcessTimeline() {
                   </div>
                 </div>
 
-                <p className="text-sm text-muted-foreground leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-snug">
                   {step.description}
                 </p>
                 <Badge variant="secondary" className="text-xs px-2 py-0 mt-2">

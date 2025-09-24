@@ -96,9 +96,9 @@ export function OffersSection() {
 
   const cardVariant = (offer: ServiceOffer) => {
     if (offer.badge === 'Most Popular')
-      return cn('border border-primary shadow-lg')
+      return cn('outline outline-primary dark:outline-primary shadow-lg')
     if (offer.badge === 'Best Value')
-      return cn('border border-amber-500 shadow-lg')
+      return cn('outline outline-amber-500 dark:outline-amber-500 shadow-lg')
     return ''
   }
 
@@ -113,7 +113,7 @@ export function OffersSection() {
 
       <div className="grid gap-4">
         {serviceOffers.map((offer) => (
-          <Card key={offer.id} className={cn(cardVariant(offer))}>
+          <Card borderless key={offer.id} className={cn(cardVariant(offer))}>
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -124,7 +124,7 @@ export function OffersSection() {
                   />
                   <div>
                     <CardTitle className="text-base">{offer.title}</CardTitle>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-baseline gap-2 mt-1">
                       <span
                         className={cn(
                           'text-sm font-medium',
@@ -133,6 +133,7 @@ export function OffersSection() {
                       >
                         {isLoading ? 'Loading...' : prices[offer.id] || ''}
                       </span>
+
                       <span className="text-xs text-muted-foreground">
                         {offer.duration}
                       </span>

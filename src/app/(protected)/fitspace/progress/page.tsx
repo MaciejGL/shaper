@@ -4,7 +4,7 @@ import { Crown, TrendingUp } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 
 import { Badge } from '@/components/ui/badge'
-import { PrimaryTabList, Tabs, TabsContent } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
@@ -15,7 +15,7 @@ import { ExercisesList } from './components/exercises-list'
 import { MuscleDistribution } from './components/muscle-distribution'
 
 export default function ProgressPage() {
-  const { hasPremium } = useUser()
+  const { hasPremium, isLoading } = useUser()
 
   // Use nuqs for tab persistence
   const [activeTab, setActiveTab] = useQueryState(
@@ -41,31 +41,45 @@ export default function ProgressPage() {
         onValueChange={(value) => setActiveTab(value as typeof activeTab)}
         className="space-y-6"
       >
-        <PrimaryTabList
-          size="sm"
-          className="w-full grid grid-cols-4 md:grid-cols-4"
-          options={[
-            { label: 'Measures', value: 'body-measures' },
-            {
-              label: 'Snapshots',
-              value: 'body-progress',
-              disabled: !hasPremium,
-              disabledIcon: <PremiumBadge />,
-            },
-            {
-              label: 'Muscles',
-              value: 'muscle-distribution',
-              disabled: !hasPremium,
-              disabledIcon: <PremiumBadge />,
-            },
-            {
-              label: 'Exercises',
-              value: 'exercises',
-            },
-          ]}
-          onClick={setActiveTab}
-          active={activeTab}
-        />
+        <TabsList className="w-full grid grid-cols-4">
+          <TabsTrigger value="body-measures">Measures </TabsTrigger>
+          <TabsTrigger
+            value="body-progress"
+            className="relative"
+            disabled={!hasPremium || isLoading}
+          >
+            Snapshots{' '}
+            {!hasPremium && !isLoading && (
+              <div className="absolute top-1/2 right-0 -translate-y-1/2">
+                <PremiumBadge />
+              </div>
+            )}
+          </TabsTrigger>
+          <TabsTrigger
+            value="muscle-distribution"
+            className="relative"
+            disabled={!hasPremium || isLoading}
+          >
+            Muscles{' '}
+            {!hasPremium && !isLoading && (
+              <div className="absolute top-1/2 right-0 -translate-y-1/2">
+                <PremiumBadge />
+              </div>
+            )}
+          </TabsTrigger>
+          <TabsTrigger
+            value="exercises"
+            className="relative"
+            disabled={!hasPremium || isLoading}
+          >
+            Exercises{' '}
+            {!hasPremium && !isLoading && (
+              <div className="absolute top-1/2 right-0 -translate-y-1/2">
+                <PremiumBadge />
+              </div>
+            )}
+          </TabsTrigger>
+        </TabsList>
 
         <TabsContent value="body-measures">
           <BodyMeasurements />
@@ -89,8 +103,8 @@ export default function ProgressPage() {
 
 function PremiumBadge() {
   return (
-    <Badge variant="premium" className="p-1 rounded-md opacity-75" size="2xs">
-      <Crown />
+    <Badge variant="premium" className="p-1 rounded-md" size="2xs">
+      <Crown className="!size-3" />
     </Badge>
   )
 }
