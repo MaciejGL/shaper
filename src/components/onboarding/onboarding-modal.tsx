@@ -18,6 +18,7 @@ import {
   GQLUpdateProfileInput,
   GQLUserBasicQuery,
   GQLWeightUnit,
+  useAddBodyMeasurementMutation,
   useUpdateProfileMutation,
   useUserBasicQuery,
 } from '@/generated/graphql-client'
@@ -102,6 +103,13 @@ export function OnboardingModal({
     },
   })
 
+  const addBodyMeasurement = useAddBodyMeasurementMutation({
+    onError: (error) => {
+      console.error('Failed to create initial measurement log:', error)
+      // Don't show error toast for measurement log as it's secondary to onboarding
+    },
+  })
+
   const steps = useMemo(
     () =>
       path === 'setup'
@@ -163,6 +171,18 @@ export function OnboardingModal({
       setCurrentStep('quick-workout-choice')
     }
   }, [])
+
+  // Helper function to create initial measurement log if weight is provided
+  const createInitialMeasurementLog = useCallback(() => {
+    if (data.weight) {
+      addBodyMeasurement.mutate({
+        input: {
+          weight: data.weight,
+          measuredAt: new Date().toISOString(),
+        },
+      })
+    }
+  }, [data.weight, addBodyMeasurement])
 
   const handleTrainingChoice = useCallback(
     (choice: 'custom' | 'plans' | 'trainer') => {
@@ -254,8 +274,18 @@ export function OnboardingModal({
       updateProfile.mutate({
         input: updateInput,
       })
+
+      // Create initial measurement log if weight is provided
+      createInitialMeasurementLog()
     },
-    [markOnboardingCompleted, router, queryClient, data, updateProfile],
+    [
+      markOnboardingCompleted,
+      router,
+      queryClient,
+      data,
+      updateProfile,
+      createInitialMeasurementLog,
+    ],
   )
 
   const handleQuickStart = useCallback(() => {
@@ -335,8 +365,18 @@ export function OnboardingModal({
       updateProfile.mutate({
         input: updateInput,
       })
+
+      // Create initial measurement log if weight is provided
+      createInitialMeasurementLog()
     },
-    [markOnboardingCompleted, router, queryClient, data, updateProfile],
+    [
+      markOnboardingCompleted,
+      router,
+      queryClient,
+      data,
+      updateProfile,
+      createInitialMeasurementLog,
+    ],
   )
 
   return (
