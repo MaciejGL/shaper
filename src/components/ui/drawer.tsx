@@ -8,23 +8,29 @@ import { cn } from '@/lib/utils'
 
 function Drawer({
   onOpenChange,
+  open,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root> & {
   onClose?: () => void
 }) {
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [internalOpen, setInternalOpen] = React.useState(false)
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open)
-    onOpenChange?.(open)
+  const handleOpenChange = (newOpen: boolean) => {
+    setInternalOpen(newOpen)
+    onOpenChange?.(newOpen)
   }
 
+  // Use external open prop if provided (controlled), otherwise use internal state
+  const isControlled = open !== undefined
+  const currentOpen = isControlled ? open : internalOpen
+
   return (
-    <RemoveScroll enabled={isOpen}>
+    <RemoveScroll enabled={currentOpen}>
       <DrawerPrimitive.Root
         repositionInputs={false}
         data-slot="drawer"
         modal={true}
+        open={open}
         onOpenChange={handleOpenChange}
         {...props}
       />

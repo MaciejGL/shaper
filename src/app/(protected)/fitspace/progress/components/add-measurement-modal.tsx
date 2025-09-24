@@ -243,7 +243,7 @@ export function AddMeasurementModal({
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen} direction="bottom" modal>
+    <Drawer open={open} onOpenChange={setOpen} direction="bottom">
       <DrawerTrigger asChild>
         {children ? (
           children
