@@ -2198,6 +2198,16 @@ export async function getWorkoutDay(
     if (!exercise.baseId || seenBaseIds.has(exercise.baseId)) {
       return false
     }
+    if (exercise.sets.length === 0) {
+      return false
+    }
+    if (
+      exercise.sets.every(
+        (set) => set.log?.reps === null && set.log?.weight === null,
+      )
+    ) {
+      return false
+    }
     seenBaseIds.add(exercise.baseId)
     return true
   })
