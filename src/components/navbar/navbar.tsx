@@ -29,6 +29,7 @@ import { UserWithSession } from '@/types/UserWithSession'
 
 import { MessengerModal } from '../messenger-modal/messenger-modal'
 import { useMobileApp } from '../mobile-app-bridge'
+import { ModeToggle } from '../mode-toggle'
 import { SimpleLogo } from '../simple-logo'
 import { Button } from '../ui/button'
 import { ButtonLink } from '../ui/button-link'
@@ -290,11 +291,13 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
                 label="Logout"
               />
             </div>
-            {!isProduction && (
-              <DrawerFooter>
-                <SwapAccountButton />
-              </DrawerFooter>
-            )}
+
+            <DrawerFooter>
+              <div className="flex flex-col gap-2 p-4">
+                <ModeToggle />
+              </div>
+              {!isProduction && <SwapAccountButton />}
+            </DrawerFooter>
           </DrawerContent>
         </Drawer>
       </div>

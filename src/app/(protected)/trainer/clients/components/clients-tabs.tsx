@@ -156,6 +156,9 @@ export function ClientsTabs() {
         {/* My Clients Tab */}
         <TabsContent value="my-clients" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-4">
+            {isLoadingTeamMemberClients && (
+              <LoadingSkeleton count={4} variant="lg" />
+            )}
             {filteredClients.map((client) => (
               <ClientCard
                 key={client.id}
@@ -163,7 +166,7 @@ export function ClientsTabs() {
                 tasks={tasksByClient[client.id] || []}
               />
             ))}
-            {filteredClients.length === 0 && (
+            {!isLoadingTeamMemberClients && filteredClients.length === 0 && (
               <div className="bg-foreground/20 p-4 rounded-md col-span-full text-center text-sm">
                 No clients found
               </div>

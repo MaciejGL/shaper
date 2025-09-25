@@ -16,16 +16,13 @@ import { parseAsStringEnum, useQueryState } from 'nuqs'
 import React, { useState } from 'react'
 
 import { DashboardHeader } from '@/app/(protected)/trainer/components/dashboard-header'
-import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
-import { Switch } from '@/components/ui/switch'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useTrainingPlan } from '@/context/training-plan-context/training-plan-context'
 import { useTrainerExercisesQuery } from '@/generated/graphql-client'
 import { GQLAddExerciseToDayInput } from '@/generated/graphql-server'
 
 import { TrainingDay } from '../../../types'
-import { useCreatorContext } from '../hooks/use-creator-context'
 
 import { DayGrid } from './day-grid'
 import { DragOverlay as CustomDragOverlay } from './drag-overlay'
@@ -52,7 +49,6 @@ export default function WorkoutPlanner() {
     handleDelete,
     handleDuplicate,
   } = useTrainingPlan()
-  const { viewMode, setViewMode } = useCreatorContext()
 
   const [tab, setTab] = useQueryState(
     'tab',
@@ -229,15 +225,6 @@ export default function WorkoutPlanner() {
             </TabsTrigger>
           </TabsList>
           <div className="relative flex items-center gap-2">
-            <Label className="flex items-center justify-center gap-2  whitespace-nowrap rounded-md p-1.5 bg-secondary dark:bg-muted-foreground/10 w-full">
-              <Switch
-                checked={viewMode === 'compact'}
-                onCheckedChange={() =>
-                  setViewMode(viewMode === 'compact' ? 'full' : 'compact')
-                }
-              />
-              Compact View
-            </Label>
             <FormActions
               trainingId={trainingId}
               isDuplicating={isDuplicatingTrainingPlan}
