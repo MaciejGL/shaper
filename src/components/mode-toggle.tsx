@@ -22,11 +22,18 @@ export function ModeToggle() {
   if (!mounted) {
     return (
       <div className="flex items-center gap-2">
-        <div className="relative">
-          <Switch id="mode" checked={false} size="lg" className="relative" />
-          <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-1">
-            <Sun className="h-3 w-3 -mt-[3px] ml-[1px] transition-opacity duration-200 opacity-100" />
-            <Moon className="h-3 w-3 -mt-[4px] mr-[1px] transition-opacity duration-200 opacity-0" />
+        <div className="relative flex items-center">
+          <Switch
+            id="mode"
+            checked={false}
+            onCheckedChange={() => {}}
+            size="lg"
+            className="relative"
+          />
+          {/* Icons positioned over the switch */}
+          <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-1 overflow-hidden">
+            <Sun className="h-3 w-3 ml-[1px] transition-opacity duration-200 opacity-100 dark:opacity-0" />
+            <Moon className="h-3 w-3 mr-[1px] transition-opacity duration-200 opacity-0 dark:opacity-100" />
           </div>
         </div>
         <label className="text-sm cursor-pointer" htmlFor="mode">
@@ -45,7 +52,7 @@ export function ModeToggle() {
 
   return (
     <div className="flex items-center gap-2">
-      <div className="relative">
+      <div className="relative flex items-center">
         <Switch
           id="mode"
           checked={isDark}
@@ -54,9 +61,9 @@ export function ModeToggle() {
           className="relative"
         />
         {/* Icons positioned over the switch */}
-        <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-1">
-          <Sun className="h-3 w-3 -mt-[3px] ml-[1px] transition-opacity duration-200 opacity-100 dark:opacity-0" />
-          <Moon className="h-3 w-3 -mt-[4px] mr-[1px] transition-opacity duration-200 opacity-0 dark:opacity-100" />
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-between px-1 overflow-hidden">
+          <Sun className="h-3 w-3 ml-[1px] transition-opacity duration-200 opacity-100 dark:opacity-0" />
+          <Moon className="h-3 w-3 mr-[1px] transition-opacity duration-200 opacity-0 dark:opacity-100" />
         </div>
       </div>
       <label className="text-sm cursor-pointer" htmlFor="mode">
