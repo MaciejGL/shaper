@@ -102,13 +102,23 @@ export function PlanDetailsDrawer({
         }
       >
         <div className="space-y-6">
-          <ButtonLink
-            href={`/fitspace/workout/${plan.id}`}
-            className="w-full"
-            iconEnd={<ArrowRightIcon />}
-          >
-            Go to Plan
-          </ButtonLink>
+          {plan.startDate && plan.endDate ? (
+            <ButtonLink
+              href={`/fitspace/workout/${plan.id}`}
+              className="w-full"
+              iconEnd={<ArrowRightIcon />}
+            >
+              Go to Plan
+            </ButtonLink>
+          ) : (
+            <Button
+              onClick={() => onAction('activate', plan)}
+              disabled={isButtonLoading}
+              className="flex items-center gap-2"
+            >
+              Activate
+            </Button>
+          )}
           {plan.startDate && plan.endDate && (
             <div className="space-y-2">
               {/* Progress Overview */}
