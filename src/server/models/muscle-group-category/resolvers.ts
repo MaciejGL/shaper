@@ -5,16 +5,17 @@ import {
 import { prisma } from '@/lib/db'
 
 import MuscleGroupCategory from './model'
+import { MUSCLE_GROUP_CATEGORIES } from './muscle-group-categories-cache'
 
 export const Query: GQLQueryResolvers = {
   muscleGroupCategories: async (_, __, context) => {
     // Preload all muscles to prevent N+1 queries
-    const categories = await prisma.muscleGroupCategory.findMany({
-      include: {
-        muscles: true,
-      },
-    })
-    return categories.map(
+    // const categories = await prisma.muscleGroupCategory.findMany({
+    //   include: {
+    //     muscles: true,
+    //   },
+    // })
+    return MUSCLE_GROUP_CATEGORIES.map(
       (category) => new MuscleGroupCategory(category, context),
     )
   },

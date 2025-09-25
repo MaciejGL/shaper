@@ -36,7 +36,7 @@ export function WeekTabs() {
   return (
     <div
       className={cn(
-        'mb-6 bg-card dark:bg-card-on-card shadow-xs p-2 rounded-lg w-max min-w-full flex items-center gap-2 justify-start',
+        'mb-4 bg-card dark:bg-card-on-card shadow-xs p-1 rounded-lg w-max min-w-full flex items-center gap-2 justify-start',
         isLoadingInitialData && 'masked-placeholder-text',
       )}
     >
@@ -46,6 +46,7 @@ export function WeekTabs() {
         items={weekItems}
         onValueChange={handleWeekChange}
         value={activeWeek.toString()}
+        classNameItem="px-2 py-0.5"
       />
       <Button
         variant="outline"

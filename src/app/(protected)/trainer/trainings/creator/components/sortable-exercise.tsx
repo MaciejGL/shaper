@@ -66,6 +66,8 @@ import { formatTempoInput, handleTempoKeyDown } from '@/lib/format-tempo'
 import { isTemporaryId } from '@/lib/optimistic-mutations'
 import { cn } from '@/lib/utils'
 
+import { useCreatorContext } from '../hooks/use-creator-context'
+
 import { EXERCISE_TYPES } from './utils'
 
 interface SortableExerciseProps {
@@ -82,6 +84,7 @@ export const SortableExercise = React.memo(
   }: SortableExerciseProps) {
     const { formData, activeWeek, removeExercise } = useTrainingPlan()
     const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false)
+    const { viewMode } = useCreatorContext()
 
     // Revert to original stable key
     const stableKey = `${activeWeek}-${dayOfWeek}-${exerciseIndex}-${exerciseId}`
@@ -170,7 +173,7 @@ export const SortableExercise = React.memo(
           {...(!isDisabled ? attributes : {})}
           {...(!isDisabled ? listeners : {})}
           className={cn(
-            'p-0 transition-all duration-200 ease-out min-h-[120px] select-none',
+            'p-0 transition-all duration-200 ease-out min-h-[80px] select-none',
             !isDisabled
               ? 'cursor-grab active:cursor-grabbing'
               : 'cursor-default',
@@ -178,6 +181,7 @@ export const SortableExercise = React.memo(
             isDragging && 'border-none !bg-primary/10 mx-2 !scale-100',
             isDisabled && 'opacity-50',
             isTemporary && 'opacity-50',
+            viewMode === 'compact' && 'min-h-[48px]',
           )}
           variant="secondary"
         >
@@ -191,41 +195,45 @@ export const SortableExercise = React.memo(
                 }
               }}
             >
-              {exercise.type && (
+              {exercise.type && viewMode === 'full' && (
                 <Badge variant="secondary">
                   {EXERCISE_TYPES[exercise.type]}
                 </Badge>
               )}
               <p className="text-md font-medium pr-4">{exercise.name}</p>
-              <p className="text-sm text-muted-foreground">
-                {exercise.additionalInstructions}
-              </p>
+              {viewMode === 'full' && (
+                <p className="text-sm text-muted-foreground">
+                  {exercise.additionalInstructions}
+                </p>
+              )}
 
-              <div className="flex items-center gap-2 flex-wrap mt-8">
-                {exercise.sets.length > 0 && (
-                  <Badge variant="outline">
-                    <FlameIcon /> {exercise.sets.length} set
-                    {exercise.sets.length === 1 ? '' : 's'}
-                  </Badge>
-                )}
-                {exercise.warmupSets ? (
-                  <Badge variant="outline">
-                    <FlameIcon />
-                    {exercise.warmupSets} warmup
-                    {exercise.warmupSets === 1 ? '' : 's'}
-                  </Badge>
-                ) : null}
-                {exercise.restSeconds ? (
-                  <Badge variant="outline">
-                    <TimerIcon /> {exercise.restSeconds} rest
-                  </Badge>
-                ) : null}
-                {exercise.tempo ? (
-                  <Badge variant="outline">
-                    <GaugeIcon /> {exercise.tempo}
-                  </Badge>
-                ) : null}
-              </div>
+              {viewMode === 'full' && (
+                <div className="flex items-center gap-2 flex-wrap ">
+                  {exercise.sets.length > 0 && (
+                    <Badge variant="tertiary">
+                      <FlameIcon /> {exercise.sets.length} set
+                      {exercise.sets.length === 1 ? '' : 's'}
+                    </Badge>
+                  )}
+                  {exercise.warmupSets ? (
+                    <Badge variant="tertiary">
+                      <FlameIcon />
+                      {exercise.warmupSets} warmup
+                      {exercise.warmupSets === 1 ? '' : 's'}
+                    </Badge>
+                  ) : null}
+                  {exercise.restSeconds ? (
+                    <Badge variant="tertiary">
+                      <TimerIcon /> {exercise.restSeconds} rest
+                    </Badge>
+                  ) : null}
+                  {exercise.tempo ? (
+                    <Badge variant="tertiary">
+                      <GaugeIcon /> {exercise.tempo}
+                    </Badge>
+                  ) : null}
+                </div>
+              )}
             </CardContent>
           )}
         </Card>

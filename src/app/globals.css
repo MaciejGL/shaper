@@ -208,6 +208,34 @@
   }
 }
 
+@utility compact-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.552 0.016 285.938 / 0.5) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: oklch(0.552 0.016 285.938 / 0.5);
+    border-radius: 3px;
+    border: none;
+
+    &:hover {
+      background-color: oklch(0.552 0.016 285.938 / 0.7);
+    }
+  }
+
+  &::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
 @utility container {
   width: 100%;
   max-width: 80rem;

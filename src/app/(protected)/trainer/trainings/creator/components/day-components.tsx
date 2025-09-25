@@ -39,7 +39,7 @@ export const DayHeader = React.memo(({ dayIndex }: { dayIndex: number }) => {
   const isDisabled = Boolean(day?.completedAt)
 
   return (
-    <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
+    <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
         <Checkbox
           checked={!isRestDay}

@@ -64,17 +64,17 @@ export function ExerciseCard({
           <div className="font-medium text-sm space-y-1">
             <div className="flex items-start justify-between">
               <p>{exercise.name}</p>
-              <Button
-                className="group-hover/exercise-card:opacity-100 opacity-0 transition-opacity"
-                variant="ghost"
-                iconOnly={<PencilIcon />}
-                onClick={() => setIsCreateDialogOpen(true)}
-                disabled={!canEdit}
-              />
+              {!exercise.isPublic && (
+                <Button
+                  className="group-hover/exercise-card:opacity-100 opacity-0 transition-opacity"
+                  variant="ghost"
+                  iconOnly={<PencilIcon />}
+                  onClick={() => setIsCreateDialogOpen(true)}
+                  disabled={!canEdit}
+                />
+              )}
             </div>
-            <Badge variant="secondary">
-              {exercise.isPublic ? 'Public' : 'Private'}
-            </Badge>
+            {!exercise.isPublic && <Badge variant="secondary">Custom</Badge>}
           </div>
         </CardContent>
       </Card>

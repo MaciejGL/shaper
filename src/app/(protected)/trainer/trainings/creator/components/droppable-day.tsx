@@ -58,12 +58,12 @@ export const DroppableDay = React.memo(({ dayIndex }: DroppableDayProps) => {
       transition={{
         duration: 0.15,
       }}
-      className={cn(
-        'bg-neutral-50 dark:bg-neutral-950/30 px-3 py-2 rounded-lg grow',
-      )}
+      className={cn('bg-neutral-50 dark:bg-neutral-950/30 rounded-lg grow')}
     >
-      <DayHeader dayIndex={dayIndex} />
-      <div className={cn('flex grow', day.isRestDay && 'opacity-50')}>
+      <div className="sticky top-0 z-10 backdrop-blur-sm px-3 pt-2 bg-neutral-50 dark:bg-neutral-950/30 rounded-t-lg border-b border-border pb-2 mb-3">
+        <DayHeader dayIndex={dayIndex} />
+      </div>
+      <div className={cn('flex grow px-3 pb-2', day.isRestDay && 'opacity-50')}>
         {day.isRestDay ? (
           <RestDayContent />
         ) : (

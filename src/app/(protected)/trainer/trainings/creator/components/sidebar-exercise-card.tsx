@@ -70,10 +70,8 @@ export const SidebarExercsesCard = React.memo(function SidebarExercsesCard({
       variant="secondary"
     >
       <CardContent className="p-3">
-        <p className="text-sm font-medium pr-6">{exercise.name}</p>
-        <Badge variant="outline">
-          {exercise.isPublic ? 'Public' : 'Private'}
-        </Badge>
+        <p className="text-sm font-medium">{exercise.name}</p>
+        {!exercise.isPublic && <Badge variant="outline">Custom</Badge>}
       </CardContent>
     </Card>
   )
