@@ -21,6 +21,7 @@ import {
   useUpdateProfileMutation,
 } from '@/generated/graphql-client'
 import { DEFAULT_WEEK_START, WeekStartDay } from '@/lib/date-utils'
+import { switchThemeWithTransition } from '@/lib/theme-transition'
 
 export type WeightUnit = GQLWeightUnit
 export type HeightUnit = GQLHeightUnit
@@ -273,9 +274,9 @@ export function UserPreferencesProvider({
     (theme: ThemePreference) => {
       // Update database preferences
       updatePreferences({ theme })
-      // Immediately sync with next-themes for instant visual update
+      // Use view transitions for smooth theme switching
       if (themeSetterRef.current) {
-        themeSetterRef.current(theme)
+        switchThemeWithTransition(themeSetterRef.current, theme)
       }
     },
     [updatePreferences],

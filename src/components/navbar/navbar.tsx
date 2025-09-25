@@ -423,14 +423,11 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
               label="Logout"
             />
           </DropdownMenuItem>
-          {!isProduction && (
-            <>
-              <DropdownMenuSeparator />
-              <div className="flex flex-col gap-2 px-4 py-4">
-                <SwapAccountButton />
-              </div>
-            </>
-          )}
+          <DropdownMenuSeparator />
+          <div className="flex flex-col gap-2 px-4 py-4">
+            <ModeToggle />
+            {!isProduction && <SwapAccountButton />}
+          </div>
         </DropdownProvider>
       </DropdownMenuContent>
     </DropdownMenu>
