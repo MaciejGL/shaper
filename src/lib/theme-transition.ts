@@ -22,6 +22,7 @@ type ThemeSwitcher = (theme: string) => void
 /**
  * Switches theme with smooth transition using View Transitions API
  * Falls back to immediate switch if View Transitions API is not supported
+ * Includes mobile performance optimizations
  */
 export function switchThemeWithTransition(
   themeSetter: ThemeSwitcher,
@@ -38,6 +39,25 @@ export function switchThemeWithTransition(
     return
   }
 
-  // Use View Transitions API for smooth animation
-  doc.startViewTransition(switchTheme)
+  // For very low-end mobile devices, skip animation if performance is critical
+  const isNative = typeof window !== 'undefined' && window.isNativeApp === true
+  const shouldSkipAnimation =
+    isNative &&
+    navigator.hardwareConcurrency &&
+    navigator.hardwareConcurrency <= 2
+
+  if (shouldSkipAnimation) {
+    switchTheme()
+    return
+  }
+
+  // Add a small delay on mobile to ensure proper state sync
+  if (isNative) {
+    requestAnimationFrame(() => {
+      doc.startViewTransition(switchTheme)
+    })
+  } else {
+    // Use View Transitions API for smooth animation
+    doc.startViewTransition(switchTheme)
+  }
 }

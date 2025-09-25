@@ -334,41 +334,109 @@
 /* View Transitions API - Theme Toggle Animation */
 :root {
   --expo-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --expo-out-mobile: cubic-bezier(
+    0.25,
+    0.46,
+    0.45,
+    0.94
+  ); /* Faster easing for mobile */
 }
 
+/* Performance optimizations for smooth animations */
 ::view-transition-group(root) {
   animation-duration: 0.7s;
   animation-timing-function: var(--expo-out);
+  /* GPU acceleration hints */
+  will-change: transform, clip-path;
+  transform: translateZ(0); /* Force hardware acceleration */
+  backface-visibility: hidden; /* Prevent flickering */
+}
+
+/* Mobile optimizations - shorter duration and simpler easing */
+@media (max-width: 768px) {
+  ::view-transition-group(root) {
+    animation-duration: 0.4s;
+    animation-timing-function: var(--expo-out-mobile);
+  }
+}
+
+/* Touch device optimizations - for any touch-capable device */
+@media (pointer: coarse) {
+  ::view-transition-group(root) {
+    animation-duration: 0.4s;
+    animation-timing-function: var(--expo-out-mobile);
+  }
 }
 
 ::view-transition-new(root) {
   animation-name: reveal-light;
+  /* Performance optimizations */
+  will-change: clip-path;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 ::view-transition-old(root),
 .dark::view-transition-old(root) {
   animation: none;
   z-index: -1;
+  /* Ensure old view doesn't interfere */
+  will-change: auto;
 }
 
 .dark::view-transition-new(root) {
   animation-name: reveal-dark;
+  /* Performance optimizations */
+  will-change: clip-path;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
+/* Optimized keyframes with better performance hints */
 @keyframes reveal-dark {
   from {
     clip-path: polygon(50% -71%, -50% 71%, -50% 71%, 50% -71%);
+    transform: translateZ(0); /* Maintain GPU layer */
   }
   to {
     clip-path: polygon(50% -71%, -50% 71%, 50% 171%, 171% 50%);
+    transform: translateZ(0); /* Maintain GPU layer */
   }
 }
 
 @keyframes reveal-light {
   from {
     clip-path: polygon(171% 50%, 50% 171%, 50% 171%, 171% 50%);
+    transform: translateZ(0); /* Maintain GPU layer */
   }
   to {
     clip-path: polygon(171% 50%, 50% 171%, -50% 71%, 50% -71%);
+    transform: translateZ(0); /* Maintain GPU layer */
+  }
+}
+
+/* Reduced motion preference support */
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root) {
+    animation-duration: 0.2s;
+    animation-timing-function: ease-out;
+  }
+
+  @keyframes reveal-dark {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes reveal-light {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 }
