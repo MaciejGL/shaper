@@ -113,7 +113,7 @@ export function OffersSection() {
 
       <div className="grid gap-4">
         {serviceOffers.map((offer) => (
-          <Card borderless key={offer.id} className={cn(cardVariant(offer))}>
+          <Card key={offer.id} className={cn(cardVariant(offer))}>
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
