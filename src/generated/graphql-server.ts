@@ -79,7 +79,6 @@ export type GQLAddIngredientToMealInput = {
 export type GQLAddMealToDayInput = {
   dayId: Scalars['ID']['input'];
   mealId: Scalars['ID']['input'];
-  portionMultiplier?: Scalars['Float']['input'];
 };
 
 export type GQLAddNutritionPlanDayInput = {
@@ -321,7 +320,6 @@ export type GQLCopyExercisesFromDayInput = {
 export type GQLCopyNutritionPlanInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
-  portionAdjustments?: InputMaybe<Array<GQLPortionAdjustmentInput>>;
   sourceNutritionPlanId: Scalars['ID']['input'];
   targetClientId: Scalars['ID']['input'];
 };
@@ -1038,7 +1036,7 @@ export type GQLMutation = {
   updateNotification: EntireFieldWrapper<GQLNotification>;
   updateNutritionPlan: EntireFieldWrapper<GQLNutritionPlan>;
   updateNutritionPlanDay: EntireFieldWrapper<GQLNutritionPlanDay>;
-  updateNutritionPlanMealPortion: EntireFieldWrapper<GQLNutritionPlanMeal>;
+  updateNutritionPlanMealIngredient: EntireFieldWrapper<GQLNutritionPlanMealIngredient>;
   updateProfile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
   updatePushSubscription: EntireFieldWrapper<GQLPushSubscription>;
   updateReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1658,8 +1656,8 @@ export type GQLMutationUpdateNutritionPlanDayArgs = {
 };
 
 
-export type GQLMutationUpdateNutritionPlanMealPortionArgs = {
-  input: GQLUpdateMealPortionInput;
+export type GQLMutationUpdateNutritionPlanMealIngredientArgs = {
+  input: GQLUpdateNutritionPlanMealIngredientInput;
 };
 
 
@@ -1857,9 +1855,17 @@ export type GQLNutritionPlanMeal = {
   adjustedMacros: EntireFieldWrapper<GQLMacroTotals>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
+  ingredientOverrides: EntireFieldWrapper<Array<GQLNutritionPlanMealIngredient>>;
   meal: EntireFieldWrapper<GQLMeal>;
   orderIndex: EntireFieldWrapper<Scalars['Int']['output']>;
-  portionMultiplier: EntireFieldWrapper<Scalars['Float']['output']>;
+};
+
+export type GQLNutritionPlanMealIngredient = {
+  __typename?: 'NutritionPlanMealIngredient';
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  grams: EntireFieldWrapper<Scalars['Float']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  mealIngredient: EntireFieldWrapper<GQLMealIngredient>;
 };
 
 export type GQLOneRmEntry = {
@@ -1931,11 +1937,6 @@ export type GQLPlanDurationRange = {
   __typename?: 'PlanDurationRange';
   maxDay: EntireFieldWrapper<Scalars['Int']['output']>;
   minDay: EntireFieldWrapper<Scalars['Int']['output']>;
-};
-
-export type GQLPortionAdjustmentInput = {
-  mealId: Scalars['ID']['input'];
-  portionMultiplier: Scalars['Float']['input'];
 };
 
 export type GQLPreviousExerciseLog = {
@@ -2939,11 +2940,6 @@ export type GQLUpdateMealInput = {
   servings?: InputMaybe<Scalars['Int']['input']>;
 };
 
-export type GQLUpdateMealPortionInput = {
-  planMealId: Scalars['ID']['input'];
-  portionMultiplier: Scalars['Float']['input'];
-};
-
 export type GQLUpdateNoteInput = {
   id: Scalars['ID']['input'];
   note: Scalars['String']['input'];
@@ -2966,6 +2962,12 @@ export type GQLUpdateNutritionPlanDayInput = {
 export type GQLUpdateNutritionPlanInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GQLUpdateNutritionPlanMealIngredientInput = {
+  grams: Scalars['Float']['input'];
+  mealIngredientId: Scalars['ID']['input'];
+  planMealId: Scalars['ID']['input'];
 };
 
 export type GQLUpdateProfileInput = {
@@ -3506,6 +3508,7 @@ export type GQLResolversTypes = {
   NutritionPlan: ResolverTypeWrapper<GQLNutritionPlan>;
   NutritionPlanDay: ResolverTypeWrapper<GQLNutritionPlanDay>;
   NutritionPlanMeal: ResolverTypeWrapper<GQLNutritionPlanMeal>;
+  NutritionPlanMealIngredient: ResolverTypeWrapper<GQLNutritionPlanMealIngredient>;
   OneRmEntry: ResolverTypeWrapper<GQLOneRmEntry>;
   OneRmLog: ResolverTypeWrapper<GQLOneRmLog>;
   OptimizedImage: ResolverTypeWrapper<GQLOptimizedImage>;
@@ -3514,7 +3517,6 @@ export type GQLResolversTypes = {
   PersonalRecord: ResolverTypeWrapper<GQLPersonalRecord>;
   PersonalRecordHistory: ResolverTypeWrapper<GQLPersonalRecordHistory>;
   PlanDurationRange: ResolverTypeWrapper<GQLPlanDurationRange>;
-  PortionAdjustmentInput: GQLPortionAdjustmentInput;
   PreviousExerciseLog: ResolverTypeWrapper<GQLPreviousExerciseLog>;
   PublicTrainer: ResolverTypeWrapper<GQLPublicTrainer>;
   PushSubscription: ResolverTypeWrapper<GQLPushSubscription>;
@@ -3573,11 +3575,11 @@ export type GQLResolversTypes = {
   UpdateIngredientInput: GQLUpdateIngredientInput;
   UpdateMealIngredientInput: GQLUpdateMealIngredientInput;
   UpdateMealInput: GQLUpdateMealInput;
-  UpdateMealPortionInput: GQLUpdateMealPortionInput;
   UpdateNoteInput: GQLUpdateNoteInput;
   UpdateNotificationInput: GQLUpdateNotificationInput;
   UpdateNutritionPlanDayInput: GQLUpdateNutritionPlanDayInput;
   UpdateNutritionPlanInput: GQLUpdateNutritionPlanInput;
+  UpdateNutritionPlanMealIngredientInput: GQLUpdateNutritionPlanMealIngredientInput;
   UpdateProfileInput: GQLUpdateProfileInput;
   UpdatePushSubscriptionInput: GQLUpdatePushSubscriptionInput;
   UpdateReviewInput: GQLUpdateReviewInput;
@@ -3716,6 +3718,7 @@ export type GQLResolversParentTypes = {
   NutritionPlan: GQLNutritionPlan;
   NutritionPlanDay: GQLNutritionPlanDay;
   NutritionPlanMeal: GQLNutritionPlanMeal;
+  NutritionPlanMealIngredient: GQLNutritionPlanMealIngredient;
   OneRmEntry: GQLOneRmEntry;
   OneRmLog: GQLOneRmLog;
   OptimizedImage: GQLOptimizedImage;
@@ -3724,7 +3727,6 @@ export type GQLResolversParentTypes = {
   PersonalRecord: GQLPersonalRecord;
   PersonalRecordHistory: GQLPersonalRecordHistory;
   PlanDurationRange: GQLPlanDurationRange;
-  PortionAdjustmentInput: GQLPortionAdjustmentInput;
   PreviousExerciseLog: GQLPreviousExerciseLog;
   PublicTrainer: GQLPublicTrainer;
   PushSubscription: GQLPushSubscription;
@@ -3770,11 +3772,11 @@ export type GQLResolversParentTypes = {
   UpdateIngredientInput: GQLUpdateIngredientInput;
   UpdateMealIngredientInput: GQLUpdateMealIngredientInput;
   UpdateMealInput: GQLUpdateMealInput;
-  UpdateMealPortionInput: GQLUpdateMealPortionInput;
   UpdateNoteInput: GQLUpdateNoteInput;
   UpdateNotificationInput: GQLUpdateNotificationInput;
   UpdateNutritionPlanDayInput: GQLUpdateNutritionPlanDayInput;
   UpdateNutritionPlanInput: GQLUpdateNutritionPlanInput;
+  UpdateNutritionPlanMealIngredientInput: GQLUpdateNutritionPlanMealIngredientInput;
   UpdateProfileInput: GQLUpdateProfileInput;
   UpdatePushSubscriptionInput: GQLUpdatePushSubscriptionInput;
   UpdateReviewInput: GQLUpdateReviewInput;
@@ -4351,7 +4353,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateNotification?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationUpdateNotificationArgs, 'input'>>;
   updateNutritionPlan?: Resolver<GQLResolversTypes['NutritionPlan'], ParentType, ContextType, RequireFields<GQLMutationUpdateNutritionPlanArgs, 'id' | 'input'>>;
   updateNutritionPlanDay?: Resolver<GQLResolversTypes['NutritionPlanDay'], ParentType, ContextType, RequireFields<GQLMutationUpdateNutritionPlanDayArgs, 'dayId' | 'input'>>;
-  updateNutritionPlanMealPortion?: Resolver<GQLResolversTypes['NutritionPlanMeal'], ParentType, ContextType, RequireFields<GQLMutationUpdateNutritionPlanMealPortionArgs, 'input'>>;
+  updateNutritionPlanMealIngredient?: Resolver<GQLResolversTypes['NutritionPlanMealIngredient'], ParentType, ContextType, RequireFields<GQLMutationUpdateNutritionPlanMealIngredientArgs, 'input'>>;
   updateProfile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType, RequireFields<GQLMutationUpdateProfileArgs, 'input'>>;
   updatePushSubscription?: Resolver<GQLResolversTypes['PushSubscription'], ParentType, ContextType, RequireFields<GQLMutationUpdatePushSubscriptionArgs, 'input'>>;
   updateReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateReviewArgs, 'input'>>;
@@ -4452,9 +4454,17 @@ export type GQLNutritionPlanMealResolvers<ContextType = GQLContext, ParentType e
   adjustedMacros?: Resolver<GQLResolversTypes['MacroTotals'], ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  ingredientOverrides?: Resolver<Array<GQLResolversTypes['NutritionPlanMealIngredient']>, ParentType, ContextType>;
   meal?: Resolver<GQLResolversTypes['Meal'], ParentType, ContextType>;
   orderIndex?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
-  portionMultiplier?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLNutritionPlanMealIngredientResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['NutritionPlanMealIngredient'] = GQLResolversParentTypes['NutritionPlanMealIngredient']> = {
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  grams?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  mealIngredient?: Resolver<GQLResolversTypes['MealIngredient'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -5115,6 +5125,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   NutritionPlan?: GQLNutritionPlanResolvers<ContextType>;
   NutritionPlanDay?: GQLNutritionPlanDayResolvers<ContextType>;
   NutritionPlanMeal?: GQLNutritionPlanMealResolvers<ContextType>;
+  NutritionPlanMealIngredient?: GQLNutritionPlanMealIngredientResolvers<ContextType>;
   OneRmEntry?: GQLOneRmEntryResolvers<ContextType>;
   OneRmLog?: GQLOneRmLogResolvers<ContextType>;
   OptimizedImage?: GQLOptimizedImageResolvers<ContextType>;

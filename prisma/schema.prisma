@@ -1117,6 +1117,7 @@ model MealIngredient {
 
   meal         Meal       @relation(fields: [mealId], references: [id], onDelete: Cascade)
   ingredient   Ingredient @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  planOverrides NutritionPlanMealIngredient[]
 
   @@unique([mealId, ingredientId])
   @@index([mealId, orderIndex])
@@ -1129,13 +1130,28 @@ model NutritionPlanMeal {
   nutritionPlanDayId   String
   mealId               String
   orderIndex           Int              @default(0)
-  portionMultiplier    Float            @default(1.0)
   createdAt            DateTime         @default(now())
 
   nutritionPlanDay     NutritionPlanDay @relation(fields: [nutritionPlanDayId], references: [id], onDelete: Cascade)
   meal                 Meal             @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  ingredientOverrides  NutritionPlanMealIngredient[]
 
   @@index([nutritionPlanDayId, orderIndex])
   @@index([mealId])
   @@index([nutritionPlanDayId])
+}
+
+model NutritionPlanMealIngredient {
+  id                   String           @id @default(uuid())
+  nutritionPlanMealId  String
+  mealIngredientId     String
+  grams                Float
+  createdAt            DateTime         @default(now())
+
+  nutritionPlanMeal    NutritionPlanMeal @relation(fields: [nutritionPlanMealId], references: [id], onDelete: Cascade)
+  mealIngredient       MealIngredient   @relation(fields: [mealIngredientId], references: [id], onDelete: Cascade)
+
+  @@unique([nutritionPlanMealId, mealIngredientId])
+  @@index([nutritionPlanMealId])
+  @@index([mealIngredientId])
 }

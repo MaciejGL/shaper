@@ -23,15 +23,10 @@ export function MealSearchSection({
     setShowCreateDialog(true)
   }
 
-  const handleCustomMealCreated = () => {
-    // Query invalidation is now handled in the CreateCustomMealDialog component
-    console.info('Custom meal created for day:', dayId)
-  }
-
   return (
     <div className="space-y-4">
       {/* Recipe Search & Actions */}
-      <div className="grid grid-cols-[1fr_auto] gap-4">
+      <div className="grid grid-cols-[1fr_auto] gap-4 items-center bg-card p-2 rounded-lg">
         <MealSearchCombobox
           dayId={dayId}
           nutritionPlanId={nutritionPlanId}
@@ -41,8 +36,8 @@ export function MealSearchSection({
         <Button
           onClick={handleCreateCustomMeal}
           className="w-full justify-start"
-          variant="secondary"
           iconStart={<Plus />}
+          variant="tertiary"
         >
           Create New Recipe
         </Button>
@@ -53,7 +48,6 @@ export function MealSearchSection({
         onOpenChange={setShowCreateDialog}
         dayId={dayId}
         nutritionPlanId={nutritionPlanId}
-        onMealCreated={handleCustomMealCreated}
       />
     </div>
   )

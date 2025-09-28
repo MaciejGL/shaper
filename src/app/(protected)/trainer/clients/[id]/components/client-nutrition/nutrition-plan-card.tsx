@@ -36,7 +36,7 @@ export function NutritionPlanCard({
       borderless
       className={cn(
         'overflow-hidden transition-colors py-0',
-        isPending ? 'bg-muted/30' : 'hover:bg-muted/50',
+        isPending ? 'bg-muted/30' : '',
       )}
     >
       <div className="p-4">
@@ -97,7 +97,7 @@ export function NutritionPlanCard({
         <div className="flex items-center gap-2">
           <Button
             size="sm"
-            variant={plan.isSharedWithClient ? 'secondary' : 'default'}
+            variant={plan.isSharedWithClient ? 'tertiary' : 'default'}
             disabled={isPending}
             onClick={() => onToggleSharing(plan.id, plan.isSharedWithClient)}
             iconStart={
@@ -112,7 +112,7 @@ export function NutritionPlanCard({
           <ButtonLink
             href={isPending ? '#' : `/trainer/nutrition-plans/${plan.id}`}
             size="sm"
-            variant="secondary"
+            variant="tertiary"
             disabled={isPending}
             iconStart={<EditIcon />}
           >

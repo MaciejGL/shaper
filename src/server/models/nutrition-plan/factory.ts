@@ -13,6 +13,7 @@ import {
   NutritionPlan as PrismaNutritionPlan,
   NutritionPlanDay as PrismaNutritionPlanDay,
   NutritionPlanMeal as PrismaNutritionPlanMeal,
+  NutritionPlanMealIngredient as PrismaNutritionPlanMealIngredient,
   User as PrismaUser,
 } from '@/generated/prisma/client'
 import { ensureTrainerClientAccess } from '@/lib/access-control'
@@ -49,7 +50,6 @@ export interface CopyNutritionPlanFactoryOptions {
   trainerId: string
   name?: string
   description?: string
-  portionAdjustments?: Record<string, number>
 }
 
 /**
@@ -625,17 +625,10 @@ export async function copyNutritionPlan(
           dayNumber: day.dayNumber,
           name: day.name,
           meals: {
-            create: day.meals.map((planMeal) => {
-              const adjustedMultiplier =
-                options.portionAdjustments?.[planMeal.mealId] ||
-                planMeal.portionMultiplier
-
-              return {
-                mealId: planMeal.mealId,
-                orderIndex: planMeal.orderIndex,
-                portionMultiplier: adjustedMultiplier,
-              }
-            }),
+            create: day.meals.map((planMeal) => ({
+              mealId: planMeal.mealId,
+              orderIndex: planMeal.orderIndex,
+            })),
           },
         })),
       },
@@ -876,7 +869,6 @@ export async function removeDayFromNutritionPlan(
 export async function addMealToNutritionPlanDay(
   dayId: string,
   mealId: string,
-  portionMultiplier: number = 1.0,
   trainerId: string,
 ): Promise<
   PrismaNutritionPlanMeal & {
@@ -887,14 +879,6 @@ export async function addMealToNutritionPlanDay(
     }
   }
 > {
-  // Validate portion multiplier
-  const validation = validatePortionMultiplier(portionMultiplier)
-  if (!validation.isValid) {
-    throw new GraphQLError(
-      `Invalid portion multiplier: ${validation.errors.join(', ')}`,
-    )
-  }
-
   // Check access through plan
   const day = await prisma.nutritionPlanDay.findUnique({
     where: { id: dayId },
@@ -930,9 +914,17 @@ export async function addMealToNutritionPlanDay(
       nutritionPlanDayId: dayId,
       mealId,
       orderIndex: nextOrderIndex,
-      portionMultiplier,
     },
     include: {
+      ingredientOverrides: {
+        include: {
+          mealIngredient: {
+            include: {
+              ingredient: true,
+            },
+          },
+        },
+      },
       meal: {
         include: {
           ingredients: {
@@ -955,23 +947,23 @@ export async function addMealToNutritionPlanDay(
 }
 
 /**
- * Update nutrition plan meal portion
+ * Update nutrition plan meal ingredient grams
  */
-export async function updateNutritionPlanMealPortion(
+export async function updateNutritionPlanMealIngredient(
   planMealId: string,
-  portionMultiplier: number,
+  mealIngredientId: string,
+  grams: number,
   trainerId: string,
 ): Promise<
-  PrismaNutritionPlanMeal & {
-    meal: PrismaMeal
+  PrismaNutritionPlanMealIngredient & {
+    mealIngredient: PrismaMealIngredient & {
+      ingredient: PrismaIngredient
+    }
   }
 > {
-  // Validate portion multiplier
-  const validation = validatePortionMultiplier(portionMultiplier)
-  if (!validation.isValid) {
-    throw new GraphQLError(
-      `Invalid portion multiplier: ${validation.errors.join(', ')}`,
-    )
+  // Validate grams
+  if (grams <= 0) {
+    throw new GraphQLError('Grams must be greater than 0')
   }
 
   // Check access through plan
@@ -982,6 +974,13 @@ export async function updateNutritionPlanMealPortion(
         include: {
           nutritionPlan: {
             select: { trainerId: true },
+          },
+        },
+      },
+      meal: {
+        include: {
+          ingredients: {
+            where: { id: mealIngredientId },
           },
         },
       },
@@ -997,25 +996,31 @@ export async function updateNutritionPlanMealPortion(
     )
   }
 
-  return await prisma.nutritionPlanMeal.update({
-    where: { id: planMealId },
-    data: { portionMultiplier },
+  // Verify the meal ingredient exists
+  if (!planMeal.meal.ingredients.length) {
+    throw new GraphQLError('Meal ingredient not found in this meal')
+  }
+
+  // Upsert the ingredient override
+  return await prisma.nutritionPlanMealIngredient.upsert({
+    where: {
+      nutritionPlanMealId_mealIngredientId: {
+        nutritionPlanMealId: planMealId,
+        mealIngredientId: mealIngredientId,
+      },
+    },
+    update: {
+      grams,
+    },
+    create: {
+      nutritionPlanMealId: planMealId,
+      mealIngredientId: mealIngredientId,
+      grams,
+    },
     include: {
-      meal: {
+      mealIngredient: {
         include: {
-          ingredients: {
-            orderBy: {
-              orderIndex: 'asc',
-            },
-            include: {
-              ingredient: true,
-            },
-          },
-          createdBy: {
-            include: {
-              profile: true,
-            },
-          },
+          ingredient: true,
         },
       },
     },

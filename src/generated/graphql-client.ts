@@ -77,7 +77,6 @@ export type GQLAddIngredientToMealInput = {
 export type GQLAddMealToDayInput = {
   dayId: Scalars['ID']['input'];
   mealId: Scalars['ID']['input'];
-  portionMultiplier?: Scalars['Float']['input'];
 };
 
 export type GQLAddNutritionPlanDayInput = {
@@ -319,7 +318,6 @@ export type GQLCopyExercisesFromDayInput = {
 export type GQLCopyNutritionPlanInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
-  portionAdjustments?: InputMaybe<Array<GQLPortionAdjustmentInput>>;
   sourceNutritionPlanId: Scalars['ID']['input'];
   targetClientId: Scalars['ID']['input'];
 };
@@ -1036,7 +1034,7 @@ export type GQLMutation = {
   updateNotification: GQLNotification;
   updateNutritionPlan: GQLNutritionPlan;
   updateNutritionPlanDay: GQLNutritionPlanDay;
-  updateNutritionPlanMealPortion: GQLNutritionPlanMeal;
+  updateNutritionPlanMealIngredient: GQLNutritionPlanMealIngredient;
   updateProfile?: Maybe<GQLUserProfile>;
   updatePushSubscription: GQLPushSubscription;
   updateReview: Scalars['Boolean']['output'];
@@ -1656,8 +1654,8 @@ export type GQLMutationUpdateNutritionPlanDayArgs = {
 };
 
 
-export type GQLMutationUpdateNutritionPlanMealPortionArgs = {
-  input: GQLUpdateMealPortionInput;
+export type GQLMutationUpdateNutritionPlanMealIngredientArgs = {
+  input: GQLUpdateNutritionPlanMealIngredientInput;
 };
 
 
@@ -1855,9 +1853,17 @@ export type GQLNutritionPlanMeal = {
   adjustedMacros: GQLMacroTotals;
   createdAt: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  ingredientOverrides: Array<GQLNutritionPlanMealIngredient>;
   meal: GQLMeal;
   orderIndex: Scalars['Int']['output'];
-  portionMultiplier: Scalars['Float']['output'];
+};
+
+export type GQLNutritionPlanMealIngredient = {
+  __typename?: 'NutritionPlanMealIngredient';
+  createdAt: Scalars['String']['output'];
+  grams: Scalars['Float']['output'];
+  id: Scalars['ID']['output'];
+  mealIngredient: GQLMealIngredient;
 };
 
 export type GQLOneRmEntry = {
@@ -1929,11 +1935,6 @@ export type GQLPlanDurationRange = {
   __typename?: 'PlanDurationRange';
   maxDay: Scalars['Int']['output'];
   minDay: Scalars['Int']['output'];
-};
-
-export type GQLPortionAdjustmentInput = {
-  mealId: Scalars['ID']['input'];
-  portionMultiplier: Scalars['Float']['input'];
 };
 
 export type GQLPreviousExerciseLog = {
@@ -2937,11 +2938,6 @@ export type GQLUpdateMealInput = {
   servings?: InputMaybe<Scalars['Int']['input']>;
 };
 
-export type GQLUpdateMealPortionInput = {
-  planMealId: Scalars['ID']['input'];
-  portionMultiplier: Scalars['Float']['input'];
-};
-
 export type GQLUpdateNoteInput = {
   id: Scalars['ID']['input'];
   note: Scalars['String']['input'];
@@ -2964,6 +2960,12 @@ export type GQLUpdateNutritionPlanDayInput = {
 export type GQLUpdateNutritionPlanInput = {
   description?: InputMaybe<Scalars['String']['input']>;
   name?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type GQLUpdateNutritionPlanMealIngredientInput = {
+  grams: Scalars['Float']['input'];
+  mealIngredientId: Scalars['ID']['input'];
+  planMealId: Scalars['ID']['input'];
 };
 
 export type GQLUpdateProfileInput = {
@@ -3499,7 +3501,7 @@ export type GQLGetMyNutritionPlanQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetMyNutritionPlanQuery = { __typename?: 'Query', nutritionPlan?: { __typename?: 'NutritionPlan', id: string, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'NutritionPlanDay', id: string, dayNumber: number, name: string, dailyMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meals: Array<{ __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, portionMultiplier: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, totalMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, macros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } }> }> } | undefined | null };
+export type GQLGetMyNutritionPlanQuery = { __typename?: 'Query', nutritionPlan?: { __typename?: 'NutritionPlan', id: string, name: string, description?: string | undefined | null, days: Array<{ __typename?: 'NutritionPlanDay', id: string, dayNumber: number, name: string, dailyMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meals: Array<{ __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredientOverrides: Array<{ __typename?: 'NutritionPlanMealIngredient', id: string, grams: number, createdAt: string, mealIngredient: { __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } } }>, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, totalMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, macros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } }> }> } | undefined | null };
 
 export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, hasCompletedOnboarding: boolean, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } };
 
@@ -4009,7 +4011,7 @@ export type GQLGetNutritionPlanQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetNutritionPlanQuery = { __typename?: 'Query', nutritionPlan?: { __typename?: 'NutritionPlan', id: string, name: string, description?: string | undefined | null, isSharedWithClient: boolean, client?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null, days: Array<{ __typename?: 'NutritionPlanDay', id: string, dayNumber: number, name: string, dailyMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meals: Array<{ __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, portionMultiplier: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } }> }> } | undefined | null };
+export type GQLGetNutritionPlanQuery = { __typename?: 'Query', nutritionPlan?: { __typename?: 'NutritionPlan', id: string, name: string, description?: string | undefined | null, isSharedWithClient: boolean, client?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null } | undefined | null, days: Array<{ __typename?: 'NutritionPlanDay', id: string, dayNumber: number, name: string, dailyMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meals: Array<{ __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredientOverrides: Array<{ __typename?: 'NutritionPlanMealIngredient', id: string, grams: number, createdAt: string, mealIngredient: { __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } } }>, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } }> }> } | undefined | null };
 
 export type GQLSearchIngredientsQueryVariables = Exact<{
   query: Scalars['String']['input'];
@@ -4052,7 +4054,7 @@ export type GQLAddMealToNutritionPlanDayMutationVariables = Exact<{
 }>;
 
 
-export type GQLAddMealToNutritionPlanDayMutation = { __typename?: 'Mutation', addMealToNutritionPlanDay: { __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, portionMultiplier: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } } };
+export type GQLAddMealToNutritionPlanDayMutation = { __typename?: 'Mutation', addMealToNutritionPlanDay: { __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredientOverrides: Array<{ __typename?: 'NutritionPlanMealIngredient', id: string, grams: number, createdAt: string, mealIngredient: { __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } } }>, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } } };
 
 export type GQLCreateMealMutationVariables = Exact<{
   input: GQLCreateMealInput;
@@ -4082,7 +4084,7 @@ export type GQLAddNutritionPlanDayMutationVariables = Exact<{
 }>;
 
 
-export type GQLAddNutritionPlanDayMutation = { __typename?: 'Mutation', addNutritionPlanDay: { __typename?: 'NutritionPlanDay', id: string, dayNumber: number, name: string, dailyMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meals: Array<{ __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, portionMultiplier: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } }> } };
+export type GQLAddNutritionPlanDayMutation = { __typename?: 'Mutation', addNutritionPlanDay: { __typename?: 'NutritionPlanDay', id: string, dayNumber: number, name: string, dailyMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meals: Array<{ __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredientOverrides: Array<{ __typename?: 'NutritionPlanMealIngredient', id: string, grams: number, createdAt: string, mealIngredient: { __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } } }>, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } }> } };
 
 export type GQLRemoveNutritionPlanDayMutationVariables = Exact<{
   dayId: Scalars['ID']['input'];
@@ -4098,19 +4100,19 @@ export type GQLRemoveMealFromNutritionPlanDayMutationVariables = Exact<{
 
 export type GQLRemoveMealFromNutritionPlanDayMutation = { __typename?: 'Mutation', removeMealFromNutritionPlanDay: boolean };
 
-export type GQLUpdateNutritionPlanMealPortionMutationVariables = Exact<{
-  input: GQLUpdateMealPortionInput;
+export type GQLUpdateNutritionPlanMealIngredientMutationVariables = Exact<{
+  input: GQLUpdateNutritionPlanMealIngredientInput;
 }>;
 
 
-export type GQLUpdateNutritionPlanMealPortionMutation = { __typename?: 'Mutation', updateNutritionPlanMealPortion: { __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, portionMultiplier: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, totalMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } } };
+export type GQLUpdateNutritionPlanMealIngredientMutation = { __typename?: 'Mutation', updateNutritionPlanMealIngredient: { __typename?: 'NutritionPlanMealIngredient', id: string, grams: number, createdAt: string, mealIngredient: { __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } } } };
 
 export type GQLReorderNutritionPlanDayMealsMutationVariables = Exact<{
   input: GQLReorderDayMealsInput;
 }>;
 
 
-export type GQLReorderNutritionPlanDayMealsMutation = { __typename?: 'Mutation', reorderNutritionPlanDayMeals: Array<{ __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, portionMultiplier: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } }> };
+export type GQLReorderNutritionPlanDayMealsMutation = { __typename?: 'Mutation', reorderNutritionPlanDayMeals: Array<{ __typename?: 'NutritionPlanMeal', id: string, orderIndex: number, adjustedMacros: { __typename?: 'MacroTotals', calories: number, protein: number, carbs: number, fat: number }, ingredientOverrides: Array<{ __typename?: 'NutritionPlanMealIngredient', id: string, grams: number, createdAt: string, mealIngredient: { __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } } }>, meal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }> } }> };
 
 export type GQLUpdateNutritionPlanMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6168,12 +6170,29 @@ export const GetMyNutritionPlanDocument = `
       meals {
         id
         orderIndex
-        portionMultiplier
         adjustedMacros {
           calories
           protein
           carbs
           fat
+        }
+        ingredientOverrides {
+          id
+          grams
+          createdAt
+          mealIngredient {
+            id
+            grams
+            order
+            ingredient {
+              id
+              name
+              proteinPer100g
+              carbsPer100g
+              fatPer100g
+              caloriesPer100g
+            }
+          }
         }
         meal {
           id
@@ -9798,12 +9817,29 @@ export const GetNutritionPlanDocument = `
       meals {
         id
         orderIndex
-        portionMultiplier
         adjustedMacros {
           calories
           protein
           carbs
           fat
+        }
+        ingredientOverrides {
+          id
+          grams
+          createdAt
+          mealIngredient {
+            id
+            grams
+            order
+            ingredient {
+              id
+              name
+              proteinPer100g
+              carbsPer100g
+              fatPer100g
+              caloriesPer100g
+            }
+          }
         }
         meal {
           id
@@ -10114,12 +10150,29 @@ export const AddMealToNutritionPlanDayDocument = `
   addMealToNutritionPlanDay(input: $input) {
     id
     orderIndex
-    portionMultiplier
     adjustedMacros {
       calories
       protein
       carbs
       fat
+    }
+    ingredientOverrides {
+      id
+      grams
+      createdAt
+      mealIngredient {
+        id
+        grams
+        order
+        ingredient {
+          id
+          name
+          proteinPer100g
+          carbsPer100g
+          fatPer100g
+          caloriesPer100g
+        }
+      }
     }
     meal {
       id
@@ -10303,12 +10356,29 @@ export const AddNutritionPlanDayDocument = `
     meals {
       id
       orderIndex
-      portionMultiplier
       adjustedMacros {
         calories
         protein
         carbs
         fat
+      }
+      ingredientOverrides {
+        id
+        grams
+        createdAt
+        mealIngredient {
+          id
+          grams
+          order
+          ingredient {
+            id
+            name
+            proteinPer100g
+            carbsPer100g
+            fatPer100g
+            caloriesPer100g
+          }
+        }
       }
       meal {
         id
@@ -10403,33 +10473,63 @@ useRemoveMealFromNutritionPlanDayMutation.getKey = () => ['RemoveMealFromNutriti
 
 useRemoveMealFromNutritionPlanDayMutation.fetcher = (variables: GQLRemoveMealFromNutritionPlanDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveMealFromNutritionPlanDayMutation, GQLRemoveMealFromNutritionPlanDayMutationVariables>(RemoveMealFromNutritionPlanDayDocument, variables, options);
 
-export const UpdateNutritionPlanMealPortionDocument = `
-    mutation UpdateNutritionPlanMealPortion($input: UpdateMealPortionInput!) {
-  updateNutritionPlanMealPortion(input: $input) {
+export const UpdateNutritionPlanMealIngredientDocument = `
+    mutation UpdateNutritionPlanMealIngredient($input: UpdateNutritionPlanMealIngredientInput!) {
+  updateNutritionPlanMealIngredient(input: $input) {
+    id
+    grams
+    createdAt
+    mealIngredient {
+      id
+      grams
+      order
+      ingredient {
+        id
+        name
+        proteinPer100g
+        carbsPer100g
+        fatPer100g
+        caloriesPer100g
+      }
+    }
+  }
+}
+    `;
+
+export const useUpdateNutritionPlanMealIngredientMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateNutritionPlanMealIngredientMutation, TError, GQLUpdateNutritionPlanMealIngredientMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateNutritionPlanMealIngredientMutation, TError, GQLUpdateNutritionPlanMealIngredientMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateNutritionPlanMealIngredient'],
+    mutationFn: (variables?: GQLUpdateNutritionPlanMealIngredientMutationVariables) => fetchData<GQLUpdateNutritionPlanMealIngredientMutation, GQLUpdateNutritionPlanMealIngredientMutationVariables>(UpdateNutritionPlanMealIngredientDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateNutritionPlanMealIngredientMutation.getKey = () => ['UpdateNutritionPlanMealIngredient'];
+
+
+useUpdateNutritionPlanMealIngredientMutation.fetcher = (variables: GQLUpdateNutritionPlanMealIngredientMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateNutritionPlanMealIngredientMutation, GQLUpdateNutritionPlanMealIngredientMutationVariables>(UpdateNutritionPlanMealIngredientDocument, variables, options);
+
+export const ReorderNutritionPlanDayMealsDocument = `
+    mutation ReorderNutritionPlanDayMeals($input: ReorderDayMealsInput!) {
+  reorderNutritionPlanDayMeals(input: $input) {
     id
     orderIndex
-    portionMultiplier
     adjustedMacros {
       calories
       protein
       carbs
       fat
     }
-    meal {
+    ingredientOverrides {
       id
-      name
-      description
-      instructions
-      preparationTime
-      cookingTime
-      servings
-      totalMacros {
-        calories
-        protein
-        carbs
-        fat
-      }
-      ingredients {
+      grams
+      createdAt
+      mealIngredient {
         id
         grams
         order
@@ -10442,40 +10542,6 @@ export const UpdateNutritionPlanMealPortionDocument = `
           caloriesPer100g
         }
       }
-    }
-  }
-}
-    `;
-
-export const useUpdateNutritionPlanMealPortionMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLUpdateNutritionPlanMealPortionMutation, TError, GQLUpdateNutritionPlanMealPortionMutationVariables, TContext>) => {
-    
-    return useMutation<GQLUpdateNutritionPlanMealPortionMutation, TError, GQLUpdateNutritionPlanMealPortionMutationVariables, TContext>(
-      {
-    mutationKey: ['UpdateNutritionPlanMealPortion'],
-    mutationFn: (variables?: GQLUpdateNutritionPlanMealPortionMutationVariables) => fetchData<GQLUpdateNutritionPlanMealPortionMutation, GQLUpdateNutritionPlanMealPortionMutationVariables>(UpdateNutritionPlanMealPortionDocument, variables)(),
-    ...options
-  }
-    )};
-
-useUpdateNutritionPlanMealPortionMutation.getKey = () => ['UpdateNutritionPlanMealPortion'];
-
-
-useUpdateNutritionPlanMealPortionMutation.fetcher = (variables: GQLUpdateNutritionPlanMealPortionMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateNutritionPlanMealPortionMutation, GQLUpdateNutritionPlanMealPortionMutationVariables>(UpdateNutritionPlanMealPortionDocument, variables, options);
-
-export const ReorderNutritionPlanDayMealsDocument = `
-    mutation ReorderNutritionPlanDayMeals($input: ReorderDayMealsInput!) {
-  reorderNutritionPlanDayMeals(input: $input) {
-    id
-    orderIndex
-    portionMultiplier
-    adjustedMacros {
-      calories
-      protein
-      carbs
-      fat
     }
     meal {
       id

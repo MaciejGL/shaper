@@ -119,13 +119,12 @@ export function NutritionPlanEditor({
                   Day {day.dayNumber}
                 </TabsTrigger>
               ))}
+              <AddDayButton
+                nutritionPlanId={nutritionPlan.id}
+                nextDayNumber={(nutritionPlan.days?.length || 0) + 1}
+                onDayAdded={handleDayAdded}
+              />
             </TabsList>
-
-            <AddDayButton
-              nutritionPlanId={nutritionPlan.id}
-              nextDayNumber={(nutritionPlan.days?.length || 0) + 1}
-              onDayAdded={handleDayAdded}
-            />
           </div>
 
           {days.map((day) => (

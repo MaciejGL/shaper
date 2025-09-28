@@ -24,9 +24,13 @@ import {
   unshareNutritionPlanFromClient,
   updateNutritionPlan,
   updateNutritionPlanDay,
-  updateNutritionPlanMealPortion,
+  updateNutritionPlanMealIngredient,
 } from './factory'
-import NutritionPlan, { NutritionPlanDay, NutritionPlanMeal } from './model'
+import NutritionPlan, {
+  NutritionPlanDay,
+  NutritionPlanMeal,
+  NutritionPlanMealIngredient,
+} from './model'
 
 export const Query: GQLQueryResolvers<GQLContext> = {
   nutritionPlan: async (_, { id }, context) => {
@@ -159,24 +163,12 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   copyNutritionPlan: async (_, { input }, context) => {
     const user = requireAuth(GQLUserRole.Trainer, context.user)
 
-    // Convert input to factory options format
-    const portionAdjustments: Record<string, number> = {}
-    if (input.portionAdjustments) {
-      input.portionAdjustments.forEach((adjustment) => {
-        portionAdjustments[adjustment.mealId] = adjustment.portionMultiplier
-      })
-    }
-
     const nutritionPlan = await copyNutritionPlan({
       sourceNutritionPlanId: input.sourceNutritionPlanId,
       targetClientId: input.targetClientId,
       trainerId: user.user.id,
       name: input.name || undefined,
       description: input.description || undefined,
-      portionAdjustments:
-        Object.keys(portionAdjustments).length > 0
-          ? portionAdjustments
-          : undefined,
     })
 
     return {
@@ -218,23 +210,23 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     const planMeal = await addMealToNutritionPlanDay(
       input.dayId,
       input.mealId,
-      input.portionMultiplier,
       user.user.id,
     )
 
     return new NutritionPlanMeal(planMeal, context)
   },
 
-  updateNutritionPlanMealPortion: async (_, { input }, context) => {
+  updateNutritionPlanMealIngredient: async (_, { input }, context) => {
     const user = requireAuth(GQLUserRole.Trainer, context.user)
 
-    const planMeal = await updateNutritionPlanMealPortion(
+    const override = await updateNutritionPlanMealIngredient(
       input.planMealId,
-      input.portionMultiplier,
+      input.mealIngredientId,
+      input.grams,
       user.user.id,
     )
 
-    return new NutritionPlanMeal(planMeal, context)
+    return new NutritionPlanMealIngredient(override, context)
   },
 
   removeMealFromNutritionPlanDay: async (_, { planMealId }, context) => {

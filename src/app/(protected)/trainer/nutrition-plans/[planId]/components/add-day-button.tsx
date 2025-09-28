@@ -110,7 +110,7 @@ export function AddDayButton({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="tertiary" iconStart={<Plus />}>
+        <Button size="sm" variant="tertiary" iconOnly={<Plus />}>
           Add Day
         </Button>
       </DialogTrigger>

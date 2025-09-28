@@ -43,7 +43,6 @@ type NutritionPlanDay {
 type NutritionPlanMeal {
   id: ID!
   orderIndex: Int!
-  portionMultiplier: Float!
   createdAt: String!
 
   # Relations
@@ -51,6 +50,16 @@ type NutritionPlanMeal {
 
   # Computed fields
   adjustedMacros: MacroTotals!
+  ingredientOverrides: [NutritionPlanMealIngredient!]!
+}
+
+type NutritionPlanMealIngredient {
+  id: ID!
+  grams: Float!
+  createdAt: String!
+
+  # Relations
+  mealIngredient: MealIngredient!
 }
 
 type PlanDurationRange {
@@ -90,12 +99,12 @@ input UpdateNutritionPlanDayInput {
 input AddMealToDayInput {
   dayId: ID!
   mealId: ID!
-  portionMultiplier: Float! = 1.0
 }
 
-input UpdateMealPortionInput {
+input UpdateNutritionPlanMealIngredientInput {
   planMealId: ID!
-  portionMultiplier: Float!
+  mealIngredientId: ID!
+  grams: Float!
 }
 
 input ReorderDayMealsInput {
@@ -108,12 +117,6 @@ input CopyNutritionPlanInput {
   targetClientId: ID!
   name: String
   description: String
-  portionAdjustments: [PortionAdjustmentInput!]
-}
-
-input PortionAdjustmentInput {
-  mealId: ID!
-  portionMultiplier: Float!
 }
 
 # Response Types
@@ -176,9 +179,9 @@ extend type Mutation {
   # Meal management within days
   addMealToNutritionPlanDay(input: AddMealToDayInput!): NutritionPlanMeal!
 
-  updateNutritionPlanMealPortion(
-    input: UpdateMealPortionInput!
-  ): NutritionPlanMeal!
+  updateNutritionPlanMealIngredient(
+    input: UpdateNutritionPlanMealIngredientInput!
+  ): NutritionPlanMealIngredient!
 
   removeMealFromNutritionPlanDay(planMealId: ID!): Boolean!
 

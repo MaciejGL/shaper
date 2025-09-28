@@ -100,7 +100,6 @@ interface CreateCustomMealDrawerProps {
   onOpenChange: (open: boolean) => void
   dayId: string
   nutritionPlanId: string
-  onMealCreated?: () => void
 }
 
 export function CreateCustomMealDrawer({
@@ -108,7 +107,6 @@ export function CreateCustomMealDrawer({
   onOpenChange,
   dayId,
   nutritionPlanId,
-  onMealCreated,
 }: CreateCustomMealDrawerProps) {
   const [isCreating, setIsCreating] = useState(false)
   const queryClient = useQueryClient()
@@ -180,7 +178,6 @@ export function CreateCustomMealDrawer({
 
       toast.success('Custom meal created and added to day!')
       form.reset()
-      onMealCreated?.()
       onOpenChange(false)
     } catch (error) {
       toast.error('Failed to create meal: ' + (error as Error).message)

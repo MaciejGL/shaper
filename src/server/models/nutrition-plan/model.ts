@@ -4,6 +4,7 @@ import {
   GQLNutritionPlan,
   GQLNutritionPlanDay,
   GQLNutritionPlanMeal,
+  GQLNutritionPlanMealIngredient,
 } from '@/generated/graphql-server'
 import {
   Ingredient as PrismaIngredient,
@@ -12,13 +13,43 @@ import {
   NutritionPlan as PrismaNutritionPlan,
   NutritionPlanDay as PrismaNutritionPlanDay,
   NutritionPlanMeal as PrismaNutritionPlanMeal,
+  NutritionPlanMealIngredient as PrismaNutritionPlanMealIngredient,
   User as PrismaUser,
 } from '@/generated/prisma/client'
 import { GQLContext } from '@/types/gql-context'
 
 import { MacroTotals } from '../ingredient/model'
-import Meal from '../meal/model'
+import Meal, { MealIngredient } from '../meal/model'
 import UserPublic from '../user-public/model'
+
+export class NutritionPlanMealIngredient
+  implements GQLNutritionPlanMealIngredient
+{
+  constructor(
+    protected data: PrismaNutritionPlanMealIngredient & {
+      mealIngredient: PrismaMealIngredient & {
+        ingredient: PrismaIngredient
+      }
+    },
+    protected context: GQLContext,
+  ) {}
+
+  get id() {
+    return this.data.id
+  }
+
+  get grams() {
+    return this.data.grams
+  }
+
+  get createdAt() {
+    return this.data.createdAt.toISOString()
+  }
+
+  get mealIngredient() {
+    return new MealIngredient(this.data.mealIngredient, this.context)
+  }
+}
 
 export class NutritionPlanMeal implements GQLNutritionPlanMeal {
   constructor(
@@ -29,6 +60,11 @@ export class NutritionPlanMeal implements GQLNutritionPlanMeal {
         })[]
         createdBy?: PrismaUser
       }
+      ingredientOverrides?: (PrismaNutritionPlanMealIngredient & {
+        mealIngredient: PrismaMealIngredient & {
+          ingredient: PrismaIngredient
+        }
+      })[]
     },
     protected context: GQLContext,
   ) {}
@@ -41,10 +77,6 @@ export class NutritionPlanMeal implements GQLNutritionPlanMeal {
     return this.data.orderIndex
   }
 
-  get portionMultiplier() {
-    return this.data.portionMultiplier
-  }
-
   get createdAt() {
     return this.data.createdAt.toISOString()
   }
@@ -53,34 +85,42 @@ export class NutritionPlanMeal implements GQLNutritionPlanMeal {
     return new Meal(this.data.meal, this.context)
   }
 
-  /**
-   * Calculate adjusted macros for this meal based on portion multiplier
-   */
-  get adjustedMacros(): MacroTotals {
-    const baseMacros = this.calculateMealMacros(this.data.meal)
-    const multiplier = this.data.portionMultiplier
-
-    return {
-      protein: Math.round(baseMacros.protein * multiplier * 10) / 10,
-      carbs: Math.round(baseMacros.carbs * multiplier * 10) / 10,
-      fat: Math.round(baseMacros.fat * multiplier * 10) / 10,
-      calories: Math.round(baseMacros.calories * multiplier),
-    }
+  get ingredientOverrides() {
+    return (this.data.ingredientOverrides || []).map(
+      (override) => new NutritionPlanMealIngredient(override, this.context),
+    )
   }
 
   /**
-   * Calculate base macros for a meal from its ingredients
+   * Calculate adjusted macros for this meal based on ingredient overrides
    */
-  private calculateMealMacros(
+  get adjustedMacros(): MacroTotals {
+    return this.calculateMealMacrosWithOverrides(
+      this.data.meal,
+      this.data.ingredientOverrides || [],
+    )
+  }
+
+  /**
+   * Calculate macros for a meal with ingredient overrides applied
+   */
+  private calculateMealMacrosWithOverrides(
     meal: PrismaMeal & {
       ingredients?: (PrismaMealIngredient & {
         ingredient: PrismaIngredient
       })[]
     },
+    overrides: PrismaNutritionPlanMealIngredient[],
   ): MacroTotals {
+    const overrideMap = new Map(
+      overrides.map((override) => [override.mealIngredientId, override.grams]),
+    )
+
     return (meal.ingredients || []).reduce(
       (totals, mealIngredient) => {
-        const multiplier = mealIngredient.grams / 100
+        // Use override grams if available, otherwise use blueprint grams
+        const grams = overrideMap.get(mealIngredient.id) ?? mealIngredient.grams
+        const multiplier = grams / 100
 
         return {
           protein:
