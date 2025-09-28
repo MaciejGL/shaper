@@ -71,14 +71,12 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
         {days.map((day) => (
           <TabsContent key={day.id} value={day.dayNumber.toString()}>
-            {
-              <div className="space-y-6">
-                {/* Meals Accordion */}
-                <DayMealsAccordion day={day} />
-                {/* Shopping List */}
-                <ShoppingList day={day} planId={planId} />
-              </div>
-            }
+            <div className="space-y-6">
+              {/* Meals Accordion */}
+              <DayMealsAccordion day={day} />
+              {/* Shopping List */}
+              <ShoppingList day={day} planId={planId} />
+            </div>
           </TabsContent>
         ))}
       </Tabs>

@@ -68,13 +68,14 @@ export async function POST(request: NextRequest) {
       // If we can't parse, continue with 'Unknown'
     }
 
+    console.info(`[GraphQL-POST-START] ${operationName}`)
     const response = await yoga.handleRequest(request, {
       req: request,
     })
 
     // Track successful query with operation name
     const executionTime = Date.now() - startTime
-    dbMonitor.trackQuery(executionTime, `GraphQL-POST-${operationName}`)
+    dbMonitor.trackQuery(executionTime, `GraphQL-POST-${operationName}-END`)
 
     // Log slow GraphQL operations specifically
     if (executionTime > 1000) {

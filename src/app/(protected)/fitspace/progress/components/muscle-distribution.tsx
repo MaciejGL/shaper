@@ -84,40 +84,9 @@ export function MuscleDistribution() {
 
           {/* Radar Chart */}
           <MuscleGroupRadarChart data={distribution} />
-          {/* Summary Stats */}
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <StatsItem
-              value={totalSets}
-              label="Total Sets"
-              loading={isLoading}
-            />
-            <StatsItem
-              value={
-                Object.values(distribution).filter((sets) => sets > 0).length
-              }
-              label="Muscle Groups Trained"
-              loading={isLoading}
-            />
-            <StatsItem
-              value={
-                totalSets > 0
-                  ? Math.round(
-                      totalSets /
-                        Object.values(distribution).filter((sets) => sets > 0)
-                          .length,
-                    )
-                  : 0
-              }
-              label="Avg Sets per Group"
-              loading={isLoading}
-            />
-          </div>
 
           {/* Detailed Breakdown */}
-          <Section
-            title={`Sets per Muscle Group (${selectedPeriod} days)`}
-            size="sm"
-          >
+          <Section title={`Sets per Muscle Group`} size="sm">
             <div className="grid grid-cols-2 gap-2 text-sm">
               {Object.entries(distribution).map(([muscle, sets]) => (
                 <StatsItem
