@@ -11,17 +11,16 @@ import {
 import { SectionIcon } from '@/components/ui/section-icon'
 import type { GQLGetMyNutritionPlanQuery } from '@/generated/graphql-client'
 import { useCookingUnits } from '@/lib/cooking-units'
-
-type PlanMeal = NonNullable<
-  GQLGetMyNutritionPlanQuery['nutritionPlan']
->['days'][number]['meals'][number]
+import { cn } from '@/lib/utils'
 
 interface DayMealsAccordionProps {
-  meals: PlanMeal[]
+  day: NonNullable<GQLGetMyNutritionPlanQuery['nutritionPlan']>['days'][number]
 }
 
-export function DayMealsAccordion({ meals }: DayMealsAccordionProps) {
+export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
   const { formatIngredient } = useCookingUnits()
+
+  const meals = day.meals || []
 
   if (meals.length === 0) {
     return (
@@ -31,27 +30,16 @@ export function DayMealsAccordion({ meals }: DayMealsAccordionProps) {
     )
   }
 
-  //   const formatTime = (minutes?: number | null) => {
-  //     if (!minutes) return null
-  //     return minutes < 60
-  //       ? `${minutes}m`
-  //       : `${Math.floor(minutes / 60)}h ${minutes % 60}m`
-  //   }
-
   return (
     <div className="mt-4">
-      <div className="flex items-center gap-2 mb-2">
-        <SectionIcon icon={ChefHat} size="xs" variant="amber" />
-        Menu
-      </div>
+      <DayMealsHeader day={day} />
+
       <Accordion type="single" collapsible className="space-y-2">
         {meals
           .sort((a, b) => a.orderIndex - b.orderIndex)
           .map((planMeal) => {
             const meal = planMeal.meal
             const macros = planMeal.adjustedMacros
-            //   const totalTime =
-            //     (meal.preparationTime || 0) + (meal.cookingTime || 0)
 
             return (
               <AccordionItem
@@ -77,41 +65,6 @@ export function DayMealsAccordion({ meals }: DayMealsAccordionProps) {
                         </p>
                       </div>
                     )}
-
-                    {/* Meal Meta Info */}
-                    {/* <div className="flex items-center gap-6 text-sm">
-                    <div className="flex items-center gap-4">
-                      {meal.preparationTime && (
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>Prep {formatTime(meal.preparationTime)}</span>
-                        </div>
-                      )}
-                      {meal.cookingTime && (
-                        <div className="flex items-center gap-1 text-muted-foreground">
-                          <Clock className="h-4 w-4" />
-                          <span>Cook {formatTime(meal.cookingTime)}</span>
-                        </div>
-                      )}
-                      {totalTime > 0 && (
-                        <Badge variant="secondary" className="text-xs">
-                          Total {formatTime(totalTime)}
-                        </Badge>
-                      )}
-                    </div>
-
-                    {meal.servings && (
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Users className="h-4 w-4" />
-                        <span>
-                          {meal.servings} serving
-                          {meal.servings !== 1 ? 's' : ''}
-                        </span>
-                      </div>
-                    )}
-                  </div> */}
-
-                    {/* <Separator /> */}
 
                     {/* Nutrition Information */}
                     <div>
@@ -162,9 +115,14 @@ export function DayMealsAccordion({ meals }: DayMealsAccordionProps) {
                           {meal.ingredients
                             .sort((a, b) => a.order - b.order)
                             .map((ingredientItem, index) => {
+                              // Use override grams if available, otherwise use blueprint grams
+                              const override =
+                                planMeal.ingredientOverrides?.find(
+                                  (o) =>
+                                    o.mealIngredient.id === ingredientItem.id,
+                                )
                               const adjustedGrams =
-                                ingredientItem.grams *
-                                planMeal.portionMultiplier
+                                override?.grams ?? ingredientItem.grams
                               return (
                                 <div
                                   key={ingredientItem.id}
@@ -219,6 +177,56 @@ export function DayMealsAccordion({ meals }: DayMealsAccordionProps) {
             )
           })}
       </Accordion>
+    </div>
+  )
+}
+
+export function DayMealsHeader({
+  day,
+  loading,
+}: {
+  day?: NonNullable<GQLGetMyNutritionPlanQuery['nutritionPlan']>['days'][number]
+  loading?: boolean
+}) {
+  return (
+    <div className="flex items-center gap-2 mb-2">
+      <SectionIcon icon={ChefHat} size="xs" variant="amber" />
+      <p>Menu</p>
+      <div className="grid grid-cols-[auto_auto_auto_auto] gap-2 w-max ml-auto">
+        <div
+          className={cn(
+            'text-center text-sm font-medium px-1 p-0.5 bg-card rounded-lg',
+            loading && 'masked-placeholder-text',
+          )}
+        >
+          {Math.round(day?.dailyMacros?.calories || 0)} cal
+        </div>
+        <div
+          className={cn(
+            'text-center text-sm font-medium px-1 p-0.5 bg-card rounded-lg text-blue-600',
+            loading && 'masked-placeholder-text',
+          )}
+        >
+          {Math.round(day?.dailyMacros?.protein || 0)}P
+        </div>
+
+        <div
+          className={cn(
+            'text-center text-sm font-medium px-1 p-0.5 bg-card rounded-lg text-green-600',
+            loading && 'masked-placeholder-text',
+          )}
+        >
+          {Math.round(day?.dailyMacros?.carbs || 0)}C
+        </div>
+        <div
+          className={cn(
+            'text-center text-sm font-medium px-1 p-0.5 bg-card rounded-lg text-yellow-600',
+            loading && 'masked-placeholder-text',
+          )}
+        >
+          {Math.round(day?.dailyMacros?.fat || 0)}F
+        </div>
+      </div>
     </div>
   )
 }

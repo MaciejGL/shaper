@@ -71,8 +71,12 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
     // Process all meals and their ingredients
     day.meals?.forEach((planMeal) => {
       planMeal.meal.ingredients?.forEach((ingredientItem) => {
-        const adjustedGrams =
-          ingredientItem.grams * planMeal.portionMultiplier * portionMultiplier
+        // Use override grams if available, otherwise use blueprint grams
+        const override = planMeal.ingredientOverrides?.find(
+          (o) => o.mealIngredient.id === ingredientItem.id,
+        )
+        const baseGrams = override?.grams ?? ingredientItem.grams
+        const adjustedGrams = baseGrams * portionMultiplier
         const ingredientName = ingredientItem.ingredient.name
 
         if (ingredientMap.has(ingredientName)) {
@@ -132,9 +136,12 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
         <SectionIcon icon={ShoppingCart} size="xs" variant="sky" />
         Shopping List for {day.name}
       </div>
-      <Card borderless className="border-dashed border-border overflow-hidden">
+      <Card
+        borderless
+        className="border-dashed border-border overflow-hidden py-0"
+      >
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-          <CollapsibleTrigger className="cursor-pointer hover:bg-muted/30 transition-colors w-full px-4">
+          <CollapsibleTrigger className="cursor-pointer hover:bg-muted/30 transition-colors w-full p-4">
             <CardTitle className="flex items-center justify-between text-base">
               <div className="text-sm font-normal text-muted-foreground">
                 {checkedCount}/{aggregatedIngredients.length} items

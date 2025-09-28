@@ -35,14 +35,14 @@ const WEIGHT_CONVERSIONS = {
   lb: 453.59,
 }
 
-const VOLUME_CONVERSIONS = {
-  ml: 1,
-  l: 1000,
-  cup: 240, // US cup
-  'fl-oz': 29.57, // US fluid ounce
-  tbsp: 14.79, // US tablespoon
-  tsp: 4.93, // US teaspoon
-}
+// const VOLUME_CONVERSIONS = {
+//   ml: 1,
+//   l: 1000,
+//   cup: 240, // US cup
+//   'fl-oz': 29.57, // US fluid ounce
+//   tbsp: 14.79, // US tablespoon
+//   tsp: 4.93, // US teaspoon
+// }
 
 // Ingredient categories for smart unit selection
 const INGREDIENT_CATEGORIES = {
@@ -175,68 +175,68 @@ export function formatIngredientAmount(
   }
 
   // Handle liquids (use volume)
-  if (category === 'liquids') {
-    // Assume 1g = 1ml for most liquids (close enough for cooking)
-    const ml = grams
+  // if (category === 'liquids') {
+  //   // Assume 1g = 1ml for most liquids (close enough for cooking)
+  //   const ml = grams
 
-    if (preferMetric) {
-      if (ml >= 1000) {
-        const liters = ml / 1000
-        return {
-          amount: Math.round(liters * 10) / 10,
-          unit: 'l',
-          display: `${Math.round(liters * 10) / 10}L`,
-        }
-      } else if (ml >= 100) {
-        return {
-          amount: Math.round(ml),
-          unit: 'ml',
-          display: `${Math.round(ml)}ml`,
-        }
-      } else {
-        // Use tablespoons for smaller amounts
-        const tbsp = ml / VOLUME_CONVERSIONS.tbsp
-        if (tbsp >= 1) {
-          return {
-            amount: Math.round(tbsp * 2) / 2,
-            unit: 'tbsp',
-            display: formatAmount(Math.round(tbsp * 2) / 2, 'tbsp'),
-          }
-        } else {
-          const tsp = ml / VOLUME_CONVERSIONS.tsp
-          return {
-            amount: Math.round(tsp * 4) / 4,
-            unit: 'tsp',
-            display: formatAmount(Math.round(tsp * 4) / 4, 'tsp'),
-          }
-        }
-      }
-    } else {
-      // Imperial volume units
-      if (ml >= 240) {
-        const cups = ml / VOLUME_CONVERSIONS.cup
-        return {
-          amount: Math.round(cups * 4) / 4,
-          unit: 'cup',
-          display: formatAmount(Math.round(cups * 4) / 4, 'cup'),
-        }
-      } else if (ml >= 15) {
-        const tbsp = ml / VOLUME_CONVERSIONS.tbsp
-        return {
-          amount: Math.round(tbsp * 2) / 2,
-          unit: 'tbsp',
-          display: formatAmount(Math.round(tbsp * 2) / 2, 'tbsp'),
-        }
-      } else {
-        const tsp = ml / VOLUME_CONVERSIONS.tsp
-        return {
-          amount: Math.round(tsp * 4) / 4,
-          unit: 'tsp',
-          display: formatAmount(Math.round(tsp * 4) / 4, 'tsp'),
-        }
-      }
-    }
-  }
+  //   if (preferMetric) {
+  //     if (ml >= 1000) {
+  //       const liters = ml / 1000
+  //       return {
+  //         amount: Math.round(liters * 10) / 10,
+  //         unit: 'l',
+  //         display: `${Math.round(liters * 10) / 10}L`,
+  //       }
+  //     } else if (ml >= 100) {
+  //       return {
+  //         amount: Math.round(ml),
+  //         unit: 'ml',
+  //         display: `${Math.round(ml)}ml`,
+  //       }
+  //     } else {
+  //       // Use tablespoons for smaller amounts
+  //       const tbsp = ml / VOLUME_CONVERSIONS.tbsp
+  //       if (tbsp >= 1) {
+  //         return {
+  //           amount: Math.round(tbsp * 2) / 2,
+  //           unit: 'tbsp',
+  //           display: formatAmount(Math.round(tbsp * 2) / 2, 'tbsp'),
+  //         }
+  //       } else {
+  //         const tsp = ml / VOLUME_CONVERSIONS.tsp
+  //         return {
+  //           amount: Math.round(tsp * 4) / 4,
+  //           unit: 'tsp',
+  //           display: formatAmount(Math.round(tsp * 4) / 4, 'tsp'),
+  //         }
+  //       }
+  //     }
+  //   } else {
+  //     // Imperial volume units
+  //     if (ml >= 240) {
+  //       const cups = ml / VOLUME_CONVERSIONS.cup
+  //       return {
+  //         amount: Math.round(cups * 4) / 4,
+  //         unit: 'cup',
+  //         display: formatAmount(Math.round(cups * 4) / 4, 'cup'),
+  //       }
+  //     } else if (ml >= 15) {
+  //       const tbsp = ml / VOLUME_CONVERSIONS.tbsp
+  //       return {
+  //         amount: Math.round(tbsp * 2) / 2,
+  //         unit: 'tbsp',
+  //         display: formatAmount(Math.round(tbsp * 2) / 2, 'tbsp'),
+  //       }
+  //     } else {
+  //       const tsp = ml / VOLUME_CONVERSIONS.tsp
+  //       return {
+  //         amount: Math.round(tsp * 4) / 4,
+  //         unit: 'tsp',
+  //         display: formatAmount(Math.round(tsp * 4) / 4, 'tsp'),
+  //       }
+  //     }
+  //   }
+  // }
 
   // Handle everything else with weight units
   if (preferMetric) {

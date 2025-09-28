@@ -4,11 +4,16 @@ import { Salad } from 'lucide-react'
 import { useState } from 'react'
 
 import { EmptyStateCard } from '@/components/empty-state-card'
+import { MacroCard } from '@/components/macro-card/macro-card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 import { useGetMyMacroTargetsQuery } from '@/generated/graphql-client'
 
 import { NutritionPlanSelector } from './components/nutrition-plan-selector'
-import { NutritionPlanViewer } from './components/nutrition-plan-viewer'
+import {
+  NutritionPlanViewer,
+  NutritionPlanViewerLoading,
+} from './components/nutrition-plan-viewer'
 
 export default function NutritionPage() {
   const { user } = useUser()
@@ -20,17 +25,8 @@ export default function NutritionPage() {
     setSelectedPlanId(planId)
   }
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto py-8">
-        <div className="animate-pulse">
-          <div className="h-32 bg-muted rounded-lg"></div>
-        </div>
-      </div>
-    )
-  }
-
-  if (!macroTargets) {
+  // Show empty state only when not loading and no data
+  if (!macroTargets && !isLoading) {
     return (
       <div className="container mx-auto py-8">
         <EmptyStateCard
@@ -50,49 +46,57 @@ export default function NutritionPage() {
             <h2 className="text-sm font-medium">Daily Macro Targets</h2>
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {macroTargets.calories && (
-              <div className="text-center p-4 bg-card rounded-lg">
-                <div className="text-base font-medium text-primary">
-                  {macroTargets.calories}
-                </div>
-                <div className="text-xs text-muted-foreground">Calories</div>
-              </div>
+            {/* Show cards during loading or when data exists */}
+            {(isLoading || macroTargets?.calories) && (
+              <MacroCard
+                label="Calories"
+                value={macroTargets?.calories || '0000'}
+                color="text-primary"
+                isLoading={isLoading}
+              />
             )}
 
-            {macroTargets.protein && (
-              <div className="text-center p-4 bg-card rounded-lg">
-                <div className="text-base font-medium text-blue-600">
-                  {macroTargets.protein}g
-                </div>
-                <div className="text-xs text-muted-foreground">Protein</div>
-              </div>
+            {(isLoading || macroTargets?.protein) && (
+              <MacroCard
+                label="Protein"
+                value={macroTargets?.protein || '000'}
+                unit="g"
+                color="text-blue-500"
+                isLoading={isLoading}
+              />
             )}
 
-            {macroTargets.carbs && (
-              <div className="text-center p-4 bg-card rounded-lg">
-                <div className="text-base font-medium text-green-600">
-                  {macroTargets.carbs}g
-                </div>
-                <div className="text-xs text-muted-foreground">Carbs</div>
-              </div>
+            {(isLoading || macroTargets?.carbs) && (
+              <MacroCard
+                label="Carbs"
+                value={macroTargets?.carbs || '000'}
+                unit="g"
+                color="text-green-500"
+                isLoading={isLoading}
+              />
             )}
 
-            {macroTargets.fat && (
-              <div className="text-center p-4 bg-card rounded-lg">
-                <div className="text-base font-medium text-yellow-600">
-                  {macroTargets.fat}g
-                </div>
-                <div className="text-xs text-muted-foreground">Fat</div>
-              </div>
+            {(isLoading || macroTargets?.fat) && (
+              <MacroCard
+                label="Fat"
+                value={macroTargets?.fat || '000'}
+                unit="g"
+                color="text-yellow-500"
+                isLoading={isLoading}
+              />
             )}
           </div>
-          {macroTargets.notes && (
-            <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-              <h4 className="font-medium mb-2">Notes from your trainer:</h4>
-              <p className="text-sm text-muted-foreground">
-                {macroTargets.notes}
-              </p>
-            </div>
+          {macroTargets?.notes && (
+            <Card borderless className="p-4 mt-4">
+              <CardHeader>
+                <CardTitle>Notes from your trainer:</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  {macroTargets.notes}
+                </p>
+              </CardContent>
+            </Card>
           )}
         </div>
         {/* Nutrition Plan Selector */}
@@ -103,7 +107,11 @@ export default function NutritionPage() {
           />
 
           {/* Nutrition Plan Content */}
-          {selectedPlanId && <NutritionPlanViewer planId={selectedPlanId} />}
+          {isLoading ? (
+            <NutritionPlanViewerLoading />
+          ) : (
+            selectedPlanId && <NutritionPlanViewer planId={selectedPlanId} />
+          )}
         </div>
       </div>
     </div>

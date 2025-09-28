@@ -68,7 +68,7 @@ export function NutritionPlanSelector({
         <div className="flex items-center gap-2 mb-2">
           <h2 className="text-sm font-medium">Nutrition Plan</h2>
         </div>
-        <div className="h-10 bg-muted animate-pulse rounded-md" />
+        <div className="h-12 bg-card animate-pulse rounded-md" />
       </div>
     )
   }
