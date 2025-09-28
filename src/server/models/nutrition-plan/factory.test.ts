@@ -1,20 +1,23 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { prisma } from '@/lib/db'
 
 import { updateNutritionPlanMealIngredient } from './factory'
 
 // Mock Prisma
-const mockPrisma = {
-  nutritionPlanMeal: {
-    findUnique: vi.fn(),
-  },
-  nutritionPlanMealIngredient: {
-    upsert: vi.fn(),
-  },
-}
-
 vi.mock('@/lib/db', () => ({
-  prisma: mockPrisma,
+  prisma: {
+    nutritionPlanMeal: {
+      findUnique: vi.fn(),
+    },
+    nutritionPlanMealIngredient: {
+      upsert: vi.fn(),
+    },
+  },
 }))
+
+const mockPrisma = prisma as any
 
 describe('updateNutritionPlanMealIngredient', () => {
   beforeEach(() => {
