@@ -83,7 +83,6 @@ export function MealSearchCombobox({
                     {
                       id: `temp-${Date.now()}`,
                       meal,
-                      portionMultiplier: variables.input.portionMultiplier,
                     },
                   ],
                 }
@@ -132,7 +131,6 @@ export function MealSearchCombobox({
       input: {
         dayId,
         mealId: meal.id,
-        portionMultiplier: 1.0,
       },
     })
   }

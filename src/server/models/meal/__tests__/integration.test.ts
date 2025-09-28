@@ -38,6 +38,7 @@ describe('Meal Integration Tests', () => {
       googleRefreshToken: null,
       locale: null,
       timezone: null,
+      appleId: null,
     }
 
     mockTeam = {

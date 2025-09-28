@@ -168,7 +168,6 @@ export function CreateCustomMealDrawer({
         input: {
           dayId,
           mealId: mealResult.createMeal.id,
-          portionMultiplier: 1.0,
         },
       })
 

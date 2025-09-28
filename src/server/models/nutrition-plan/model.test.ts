@@ -8,25 +8,54 @@ describe('NutritionPlanMeal.adjustedMacros', () => {
   const mockContext = {} as GQLContext
 
   const mockMeal = {
+    id: 'meal1',
+    name: 'Test Meal',
+    description: 'A test meal',
+    instructions: ['Mix ingredients'],
+    preparationTime: 10,
+    cookingTime: 15,
+    servings: 2,
+    createdById: 'user1',
+    teamId: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
     ingredients: [
       {
         id: 'ingredient1',
+        mealId: 'meal1',
+        ingredientId: 'ing1',
         grams: 100,
+        orderIndex: 0,
+        createdAt: new Date(),
         ingredient: {
+          id: 'ing1',
+          name: 'Test Ingredient 1',
+          createdById: 'user1',
           caloriesPer100g: 200,
           proteinPer100g: 20,
           carbsPer100g: 30,
           fatPer100g: 5,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       },
       {
         id: 'ingredient2',
+        mealId: 'meal1',
+        ingredientId: 'ing2',
         grams: 50,
+        orderIndex: 1,
+        createdAt: new Date(),
         ingredient: {
+          id: 'ing2',
+          name: 'Test Ingredient 2',
+          createdById: 'user1',
           caloriesPer100g: 400,
           proteinPer100g: 10,
           carbsPer100g: 60,
           fatPer100g: 15,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         },
       },
     ],
@@ -35,7 +64,9 @@ describe('NutritionPlanMeal.adjustedMacros', () => {
   it('should calculate macros with no overrides (uses blueprint grams)', () => {
     const planMeal = new NutritionPlanMeal(
       {
-        id: 'meal1',
+        id: 'plan-meal1',
+        nutritionPlanDayId: 'day1',
+        mealId: 'meal1',
         orderIndex: 0,
         createdAt: new Date(),
         meal: mockMeal,
@@ -59,16 +90,20 @@ describe('NutritionPlanMeal.adjustedMacros', () => {
   it('should calculate macros with ingredient overrides', () => {
     const planMeal = new NutritionPlanMeal(
       {
-        id: 'meal1',
+        id: 'plan-meal1',
+        nutritionPlanDayId: 'day1',
+        mealId: 'meal1',
         orderIndex: 0,
         createdAt: new Date(),
         meal: mockMeal,
         ingredientOverrides: [
           {
             id: 'override1',
+            nutritionPlanMealId: 'plan-meal1',
             mealIngredientId: 'ingredient1',
             grams: 150, // Override: 150g instead of 100g
             createdAt: new Date(),
+            mealIngredient: mockMeal.ingredients[0],
           },
         ],
       },
@@ -90,16 +125,20 @@ describe('NutritionPlanMeal.adjustedMacros', () => {
   it('should handle partial overrides (some ingredients overridden, some not)', () => {
     const planMeal = new NutritionPlanMeal(
       {
-        id: 'meal1',
+        id: 'plan-meal1',
+        nutritionPlanDayId: 'day1',
+        mealId: 'meal1',
         orderIndex: 0,
         createdAt: new Date(),
         meal: mockMeal,
         ingredientOverrides: [
           {
             id: 'override1',
+            nutritionPlanMealId: 'plan-meal1',
             mealIngredientId: 'ingredient2',
             grams: 25, // Override ingredient2: 25g instead of 50g
             createdAt: new Date(),
+            mealIngredient: mockMeal.ingredients[1],
           },
         ],
       },
@@ -119,12 +158,19 @@ describe('NutritionPlanMeal.adjustedMacros', () => {
   })
 
   it('should handle empty ingredients array', () => {
+    const emptyMeal = {
+      ...mockMeal,
+      ingredients: [],
+    }
+
     const planMeal = new NutritionPlanMeal(
       {
-        id: 'meal1',
+        id: 'plan-meal1',
+        nutritionPlanDayId: 'day1',
+        mealId: 'meal1',
         orderIndex: 0,
         createdAt: new Date(),
-        meal: { ingredients: [] },
+        meal: emptyMeal,
         ingredientOverrides: [],
       },
       mockContext,
@@ -143,16 +189,38 @@ describe('NutritionPlanMeal.adjustedMacros', () => {
   it('should ignore overrides for non-existent ingredients', () => {
     const planMeal = new NutritionPlanMeal(
       {
-        id: 'meal1',
+        id: 'plan-meal1',
+        nutritionPlanDayId: 'day1',
+        mealId: 'meal1',
         orderIndex: 0,
         createdAt: new Date(),
         meal: mockMeal,
         ingredientOverrides: [
           {
             id: 'override1',
+            nutritionPlanMealId: 'plan-meal1',
             mealIngredientId: 'non-existent',
             grams: 200,
             createdAt: new Date(),
+            mealIngredient: {
+              id: 'non-existent',
+              mealId: 'meal1',
+              ingredientId: 'fake-ingredient',
+              grams: 0,
+              orderIndex: 0,
+              createdAt: new Date(),
+              ingredient: {
+                id: 'fake-ingredient',
+                name: 'Fake Ingredient',
+                createdById: 'user1',
+                caloriesPer100g: 0,
+                proteinPer100g: 0,
+                carbsPer100g: 0,
+                fatPer100g: 0,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            },
           },
         ],
       },
