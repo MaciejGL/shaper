@@ -195,7 +195,7 @@ export function DayMealsHeader({
       <div className="grid grid-cols-[auto_auto_auto_auto] gap-2 w-max ml-auto">
         <div
           className={cn(
-            'text-center text-sm font-medium px-1 p-0.5 bg-card rounded-lg',
+            'text-center text-sm font-medium px-1 py-0.5 bg-card rounded-lg',
             loading && 'masked-placeholder-text',
           )}
         >
@@ -203,7 +203,7 @@ export function DayMealsHeader({
         </div>
         <div
           className={cn(
-            'text-center text-sm font-medium px-1 p-0.5 bg-card rounded-lg text-blue-600',
+            'text-center text-sm font-medium px-1 py-0.5 bg-card rounded-lg text-blue-600',
             loading && 'masked-placeholder-text',
           )}
         >
@@ -212,7 +212,7 @@ export function DayMealsHeader({
 
         <div
           className={cn(
-            'text-center text-sm font-medium px-1 p-0.5 bg-card rounded-lg text-green-600',
+            'text-center text-sm font-medium px-1 py-0.5 bg-card rounded-lg text-green-600',
             loading && 'masked-placeholder-text',
           )}
         >
@@ -220,7 +220,7 @@ export function DayMealsHeader({
         </div>
         <div
           className={cn(
-            'text-center text-sm font-medium px-1 p-0.5 bg-card rounded-lg text-yellow-600',
+            'text-center text-sm font-medium px-1 py-0.5 bg-card rounded-lg text-yellow-600',
             loading && 'masked-placeholder-text',
           )}
         >
