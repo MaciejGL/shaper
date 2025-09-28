@@ -465,40 +465,98 @@ export function ExerciseSet({
         </div>
 
         {/* PR Celebration Overlay */}
-        <AnimatePresence mode="wait">
-          {!prData?.show && (
-            <motion.div
-              key="pr-overlay"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
-              transition={{
-                duration: 0.2,
-                type: 'spring',
-                stiffness: 400,
-                damping: 25,
-              }}
-              onClick={() => setPRData(null)}
-              className="absolute inset-0 bg-gradient-to-r from-amber-200/75 to-yellow-500/75 dark:from-amber-500/75 dark:to-orange-500/75 backdrop-blur-[4px] rounded-lg z-10"
-            >
-              <div className="flex items-center size-full px-4 justify-between gap-8">
-                <div className="flex items-center justify-center gap-2 animate-pulse">
-                  <TrophyIcon className="size-4 text-yellow-600 dark:text-yellow-200 " />
-                  <span className="text-base font-medium">New PR!</span>
-                </div>
-                <div className="flex items-baseline justify-center gap-4">
-                  <div className="text-lg font-semibold">
-                    {toDisplayWeight(prData?.estimated1RM || 10)?.toFixed(1)}{' '}
-                    {preferences.weightUnit}
+        {isAdvancedView && (
+          <AnimatePresence mode="wait">
+            {prData?.show && (
+              <motion.div
+                key="pr-overlay"
+                initial={{ width: 0 }}
+                animate={{ width: '100%' }}
+                exit={{ width: 0 }}
+                transition={{
+                  duration: 1,
+                  type: 'spring',
+                  stiffness: 400,
+                  damping: 25,
+                }}
+                onClick={() => setPRData(null)}
+                className={cn(
+                  sharedLayoutAdvancedStyles,
+                  'absolute left-0 top-0 bottom-0 z-10 h-full px-0',
+                )}
+              >
+                <motion.div
+                  key="pr-overlay-content"
+                  initial={{ width: 0 }}
+                  animate={{ width: '100%' }}
+                  exit={{ width: 0 }}
+                  className={cn(
+                    'bg-gradient-to-r from-yellow-200/10 to-yellow-300/80 dark:from-amber-400/2 dark:to-amber-600/60 backdrop-blur-[5px] rounded-r-lg h-full overflow-hidden',
+                    'col-span-3',
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'flex items-center justify-between h-full',
+                      'px-4 gap-4',
+                    )}
+                  >
+                    <div className="flex items-center flex-col justify-center animate-pulse">
+                      <TrophyIcon
+                        className={cn(
+                          'text-yellow-500 dark:text-amber-400 shrink-0',
+                          'size-4',
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          'text-[10px] font-medium whitespace-nowrap',
+                          'text-[10px]',
+                        )}
+                      >
+                        New PR!
+                      </span>
+                    </div>
+                    <motion.div
+                      key="pr-overlay-content-inner"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{
+                        duration: 0.2,
+                        delay: 0.2,
+                        type: 'spring',
+                        stiffness: 200,
+                        damping: 25,
+                      }}
+                      className="flex items-baseline justify-center gap-4 overflow-hidden"
+                    >
+                      <div
+                        className={cn(
+                          'text-lg font-semibold whitespace-nowrap',
+                          'text-lg',
+                        )}
+                      >
+                        {toDisplayWeight(prData?.estimated1RM || 10)?.toFixed(
+                          1,
+                        )}{' '}
+                        {preferences.weightUnit}
+                      </div>
+                      <div
+                        className={cn(
+                          'text-base font-medium flex items-center gap-1 text-green-600 dark:text-amber-300 whitespace-nowrap',
+                          'text-base',
+                        )}
+                      >
+                        +{prData?.improvement.toFixed(1) || 3}%{' '}
+                      </div>
+                    </motion.div>
                   </div>
-                  <div className="text-base font-semibold flex items-center gap-1 text-emerald-600 dark:text-yellow-300">
-                    +{prData?.improvement.toFixed(1) || 3}%{' '}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </SwipeToReveal>
     </motion.div>
   )
