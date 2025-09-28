@@ -10,10 +10,7 @@ import { useUser } from '@/context/user-context'
 import { useGetMyMacroTargetsQuery } from '@/generated/graphql-client'
 
 import { NutritionPlanSelector } from './components/nutrition-plan-selector'
-import {
-  NutritionPlanViewer,
-  NutritionPlanViewerLoading,
-} from './components/nutrition-plan-viewer'
+import { NutritionPlanViewer } from './components/nutrition-plan-viewer'
 
 export default function NutritionPage() {
   const { user } = useUser()
@@ -107,11 +104,7 @@ export default function NutritionPage() {
           />
 
           {/* Nutrition Plan Content */}
-          {isLoading ? (
-            <NutritionPlanViewerLoading />
-          ) : (
-            selectedPlanId && <NutritionPlanViewer planId={selectedPlanId} />
-          )}
+          {selectedPlanId && <NutritionPlanViewer planId={selectedPlanId} />}
         </div>
       </div>
     </div>

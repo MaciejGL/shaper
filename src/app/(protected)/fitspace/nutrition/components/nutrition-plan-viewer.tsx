@@ -32,11 +32,11 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
     }
   }, [days, activeDay])
 
-  if (isLoading) {
+  if (isLoading || (days.length > 0 && !activeDay)) {
     return <NutritionPlanViewerLoading />
   }
 
-  if ((!nutritionPlan || days.length === 0) && !isLoading) {
+  if (!nutritionPlan || days.length === 0) {
     return (
       <div className="text-center py-8">
         <p className="text-muted-foreground">
