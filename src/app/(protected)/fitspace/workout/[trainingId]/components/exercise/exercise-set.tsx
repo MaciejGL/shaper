@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { debounce, isNil } from 'lodash'
-import { CheckIcon } from 'lucide-react'
+import { CheckIcon, TrophyIcon } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import React, {
   startTransition,
@@ -28,6 +28,7 @@ import { useWeightConversion } from '@/hooks/use-weight-conversion'
 import { formatDecimalInput } from '@/lib/format-tempo'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 import { cn } from '@/lib/utils'
+import { calculateEstimated1RM } from '@/utils/one-rm-calculator'
 
 import { ExerciseWeightInput } from '../exercise-weight-input'
 import { createOptimisticSetUpdate } from '../optimistic-updates'
@@ -59,6 +60,11 @@ export function ExerciseSet({
   const queryClient = useQueryClient()
   const [skipTimer, setSkipTimer] = useState(false)
   const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const [prData, setPRData] = useState<{
+    show: boolean
+    improvement: number
+    estimated1RM: number
+  } | null>(null)
 
   const { mutateAsync: updateSetLog } = useFitspaceUpdateSetLogMutation({
     onMutate: async (newLog) => {
@@ -134,6 +140,30 @@ export function ExerciseSet({
         return updateFn(oldData)
       },
       onSuccess: (data, variables) => {
+        // Check if it's a PR and trigger overlay
+        if (data?.markSetAsCompleted?.isPersonalRecord && variables.completed) {
+          const improvement = data.markSetAsCompleted.improvement || 0
+
+          // Calculate estimated 1RM for display
+          const currentWeight = variables.weight || 0
+          const currentReps = variables.reps || 0
+          const estimated1RM = calculateEstimated1RM(currentWeight, currentReps)
+
+          // Show PR overlay
+          setPRData({
+            show: true,
+            improvement,
+            estimated1RM,
+          })
+
+          // Auto-hide after 4 seconds
+          setTimeout(() => setPRData(null), 5000)
+
+          console.info(
+            `🏆 Personal Record! +${improvement.toFixed(1)}% improvement`,
+          )
+        }
+
         // Timer logic
         if (variables.completed && !skipTimer) {
           onSetCompleted(false)
@@ -293,6 +323,7 @@ export function ExerciseSet({
       animate={{ height: 'auto' }}
       exit={{ height: 0 }}
       transition={{ duration: 0.15, ease: 'linear' }}
+      className="relative"
     >
       <SwipeToReveal
         actions={[
@@ -432,6 +463,42 @@ export function ExerciseSet({
             </div>
           </div>
         </div>
+
+        {/* PR Celebration Overlay */}
+        <AnimatePresence mode="wait">
+          {!prData?.show && (
+            <motion.div
+              key="pr-overlay"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{
+                duration: 0.2,
+                type: 'spring',
+                stiffness: 400,
+                damping: 25,
+              }}
+              onClick={() => setPRData(null)}
+              className="absolute inset-0 bg-gradient-to-r from-amber-200/75 to-yellow-500/75 dark:from-amber-500/75 dark:to-orange-500/75 backdrop-blur-[4px] rounded-lg z-10"
+            >
+              <div className="flex items-center size-full px-4 justify-between gap-8">
+                <div className="flex items-center justify-center gap-2 animate-pulse">
+                  <TrophyIcon className="size-4 text-yellow-600 dark:text-yellow-200 " />
+                  <span className="text-base font-medium">New PR!</span>
+                </div>
+                <div className="flex items-baseline justify-center gap-4">
+                  <div className="text-lg font-semibold">
+                    {toDisplayWeight(prData?.estimated1RM || 10)?.toFixed(1)}{' '}
+                    {preferences.weightUnit}
+                  </div>
+                  <div className="text-base font-semibold flex items-center gap-1 text-emerald-600 dark:text-yellow-300">
+                    +{prData?.improvement.toFixed(1) || 3}%{' '}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </SwipeToReveal>
     </motion.div>
   )

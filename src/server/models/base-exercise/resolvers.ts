@@ -19,6 +19,7 @@ import {
   processExerciseImageToOptimized,
 } from '@/lib/image-optimization'
 import { GQLContext } from '@/types/gql-context'
+import { calculateEstimated1RM } from '@/utils/one-rm-calculator'
 
 import BaseExercise from './model'
 
@@ -233,13 +234,8 @@ export const Query: GQLQueryResolvers<GQLContext> = {
         const reps = log.reps ?? 0
         const weight = log.weight ?? 0
 
-        // Calculate 1RM for each individual set using same formula as PR detection
-        const estimated1RM =
-          reps <= 10
-            ? weight / (1.0278 - 0.0278 * reps) // Brzycki (most accurate 1-10 reps)
-            : reps <= 15
-              ? weight * (1 + 0.025 * reps) // O'Conner (better for 11-15 reps)
-              : weight * 1.5 // Conservative estimate for 16+ reps
+        // Calculate 1RM for each individual set using shared utility
+        const estimated1RM = calculateEstimated1RM(weight, reps)
 
         return {
           date: log.createdAt,

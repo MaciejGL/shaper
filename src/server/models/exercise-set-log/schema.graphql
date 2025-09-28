@@ -8,6 +8,12 @@ type ExerciseSetLog {
   updatedAt: String!
 }
 
+type SetCompletionResult {
+  success: Boolean!
+  isPersonalRecord: Boolean!
+  improvement: Float # Percentage improvement if PR, null otherwise
+}
+
 input LogSetInput {
   setId: ID!
   loggedWeight: Float
@@ -20,7 +26,7 @@ type Mutation {
     completed: Boolean!
     reps: Int
     weight: Float
-  ): Boolean
+  ): SetCompletionResult!
   markExerciseAsCompleted(exerciseId: ID!, completed: Boolean!): Boolean
   markWorkoutAsCompleted(dayId: ID!): Boolean
   updateSetLog(input: LogSetInput!): ExerciseSetLog

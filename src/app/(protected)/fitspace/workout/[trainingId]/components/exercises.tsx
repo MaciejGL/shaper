@@ -62,10 +62,10 @@ export function Exercises({ day, previousDayLogs }: ExercisesProps) {
   const exercises = day.exercises
 
   return (
-    <div>
+    <div className="relative">
       {!day.isRestDay && (
         <div className="flex flex-col py-3 space-y-2 w-full">
-          <div className="grid grid-flow-col gap-2">
+          <div className="grid grid-flow-col gap-2 sticky top-0 bg-background z-10">
             {day.workoutType && day.workoutType !== GQLWorkoutType.Custom && (
               <p className="text-lg">{formatWorkoutType(day.workoutType)}</p>
             )}

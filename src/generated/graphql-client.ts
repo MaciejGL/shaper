@@ -987,7 +987,7 @@ export type GQLMutation = {
   markExerciseAsCompleted?: Maybe<Scalars['Boolean']['output']>;
   markMessagesAsRead: Scalars['Boolean']['output'];
   markNotificationRead: GQLNotification;
-  markSetAsCompleted?: Maybe<Scalars['Boolean']['output']>;
+  markSetAsCompleted: GQLSetCompletionResult;
   markWorkoutAsCompleted?: Maybe<Scalars['Boolean']['output']>;
   moderateReview: Scalars['Boolean']['output'];
   moveExercise: Scalars['Boolean']['output'];
@@ -2517,6 +2517,13 @@ export enum GQLServiceType {
   WorkoutPlan = 'workout_plan'
 }
 
+export type GQLSetCompletionResult = {
+  __typename?: 'SetCompletionResult';
+  improvement?: Maybe<Scalars['Float']['output']>;
+  isPersonalRecord: Scalars['Boolean']['output'];
+  success: Scalars['Boolean']['output'];
+};
+
 export type GQLSetMacroTargetsInput = {
   calories?: InputMaybe<Scalars['Int']['input']>;
   carbs?: InputMaybe<Scalars['Float']['input']>;
@@ -3681,7 +3688,7 @@ export type GQLFitspaceMarkSetAsCompletedMutationVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceMarkSetAsCompletedMutation = { __typename?: 'Mutation', markSetAsCompleted?: boolean | undefined | null };
+export type GQLFitspaceMarkSetAsCompletedMutation = { __typename?: 'Mutation', markSetAsCompleted: { __typename?: 'SetCompletionResult', success: boolean, isPersonalRecord: boolean, improvement?: number | undefined | null } };
 
 export type GQLFitspaceMarkExerciseAsCompletedMutationVariables = Exact<{
   exerciseId: Scalars['ID']['input'];
@@ -7617,7 +7624,11 @@ export const FitspaceMarkSetAsCompletedDocument = `
     completed: $completed
     reps: $reps
     weight: $weight
-  )
+  ) {
+    success
+    isPersonalRecord
+    improvement
+  }
 }
     `;
 

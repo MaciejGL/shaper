@@ -11,8 +11,52 @@ import {
   notifyTrainerWorkoutCompleted,
   notifyWorkoutCompleted,
 } from '@/lib/notifications/push-notification-service'
+import { getHistoricalBest1RM } from '@/lib/queries/historical-best-1rm'
+import { GQLContext } from '@/types/gql-context'
+import {
+  calculateEstimated1RM,
+  calculateImprovementPercentage,
+  isPersonalRecord,
+} from '@/utils/one-rm-calculator'
 
 import ExerciseSetLog from './model'
+
+// Lightweight PR detection for individual sets
+const checkIfPersonalRecord = async (
+  setId: string,
+  weight: number,
+  reps: number,
+  userId: string,
+): Promise<{ isPersonalRecord: boolean; improvement: number }> => {
+  // Get baseId for this set
+  const setInfo = await prisma.exerciseSet.findUnique({
+    where: { id: setId },
+    select: {
+      exercise: {
+        select: { baseId: true },
+      },
+    },
+  })
+
+  if (!setInfo?.exercise.baseId) {
+    return { isPersonalRecord: false, improvement: 0 }
+  }
+
+  // Get current best 1RM (including completed sets from current workout)
+  const prevBest = await getHistoricalBest1RM({
+    baseExerciseId: setInfo.exercise.baseId,
+    userId,
+    excludeSetId: setId,
+    includingCurrentWorkout: true,
+  })
+  const isNewPR = isPersonalRecord(weight, reps, prevBest)
+  const improvement = calculateImprovementPercentage(weight, reps, prevBest)
+
+  return {
+    isPersonalRecord: isNewPR,
+    improvement: isNewPR ? improvement : 0,
+  }
+}
 
 const markSetAsCompletedRelatedData = async (
   setId: string,
@@ -179,18 +223,39 @@ const unmarkSetCompletedRelatedData = async (setId: string) => {
 
 export const markSetAsCompleted = async (
   args: GQLMutationMarkSetAsCompletedArgs,
+  context: GQLContext,
 ) => {
   const { setId, completed, reps, weight } = args
+  const userId = context.user?.user?.id
 
   // 1. Mark set as incomplete with all the related data
   if (!completed) {
     await unmarkSetCompletedRelatedData(setId)
-    return true
+    return {
+      success: true,
+      isPersonalRecord: false,
+      improvement: null,
+    }
   }
 
   await markSetAsCompletedRelatedData(setId, reps, weight)
 
-  return true
+  // 2. Check if this is a personal record (only if we have weight and reps)
+  let prInfo = { isPersonalRecord: false, improvement: 0 }
+  if (reps && weight && userId) {
+    try {
+      prInfo = await checkIfPersonalRecord(setId, weight, reps, userId)
+    } catch (error) {
+      console.error('Error checking PR status:', error)
+      // Continue without PR info rather than failing the mutation
+    }
+  }
+
+  return {
+    success: true,
+    isPersonalRecord: prInfo.isPersonalRecord,
+    improvement: prInfo.isPersonalRecord ? prInfo.improvement : null,
+  }
 }
 
 export const updateSetLog = async (args: GQLMutationUpdateSetLogArgs) => {
@@ -388,15 +453,10 @@ const saveWorkoutPRs = async (dayId: string, userId: string) => {
   for (const set of completedSets) {
     if (!set.exercise.baseId || !set.log?.weight || !set.log?.reps) continue
 
-    // Use more accurate 1RM calculation based on rep range
+    // Use shared 1RM calculation utility
     const reps = set.log.reps
     const weight = set.log.weight
-    const estimated1RM =
-      reps <= 10
-        ? weight / (1.0278 - 0.0278 * reps) // Brzycki (most accurate 1-10 reps)
-        : reps <= 15
-          ? weight * (1 + 0.025 * reps) // O'Conner (better for 11-15 reps)
-          : weight * 1.5 // Conservative estimate for 16+ reps
+    const estimated1RM = calculateEstimated1RM(weight, reps)
     const key = set.exercise.baseId
 
     const current = exercisePerformances.get(key)
@@ -444,10 +504,24 @@ const saveWorkoutPRs = async (dayId: string, userId: string) => {
 
   for (const [baseId, current] of exercisePerformances) {
     const currentBest = currentBestMap.get(baseId) || 0
-    const isNewPR = current.best1RM > currentBest * 1.01 // 1% improvement threshold
     const existingDayPR = existingDayPRMap.get(baseId)
 
-    if (isNewPR) {
+    // Skip if no previous best (first time logging)
+    if (currentBest <= 0) {
+      continue
+    }
+
+    // Check for meaningful improvement
+    const isAboveThreshold = current.best1RM > currentBest * 1.01
+    if (!isAboveThreshold) {
+      continue
+    }
+
+    // Check if improvement is realistic (<= 50%)
+    const improvement = ((current.best1RM - currentBest) / currentBest) * 100
+    const isRealisticPR = improvement <= 50
+
+    if (isRealisticPR) {
       if (existingDayPR) {
         // Update existing PR for this workout day
         await prisma.personalRecord.update({

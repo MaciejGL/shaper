@@ -989,7 +989,7 @@ export type GQLMutation = {
   markExerciseAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   markMessagesAsRead: EntireFieldWrapper<Scalars['Boolean']['output']>;
   markNotificationRead: EntireFieldWrapper<GQLNotification>;
-  markSetAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
+  markSetAsCompleted: EntireFieldWrapper<GQLSetCompletionResult>;
   markWorkoutAsCompleted?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   moderateReview: EntireFieldWrapper<Scalars['Boolean']['output']>;
   moveExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -2519,6 +2519,13 @@ export enum GQLServiceType {
   WorkoutPlan = 'workout_plan'
 }
 
+export type GQLSetCompletionResult = {
+  __typename?: 'SetCompletionResult';
+  improvement?: EntireFieldWrapper<Maybe<Scalars['Float']['output']>>;
+  isPersonalRecord: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  success: EntireFieldWrapper<Scalars['Boolean']['output']>;
+};
+
 export type GQLSetMacroTargetsInput = {
   calories?: InputMaybe<Scalars['Int']['input']>;
   carbs?: InputMaybe<Scalars['Float']['input']>;
@@ -3537,6 +3544,7 @@ export type GQLResolversTypes = {
   ServiceDelivery: ResolverTypeWrapper<GQLServiceDelivery>;
   ServiceTask: ResolverTypeWrapper<GQLServiceTask>;
   ServiceType: GQLServiceType;
+  SetCompletionResult: ResolverTypeWrapper<GQLSetCompletionResult>;
   SetMacroTargetsInput: GQLSetMacroTargetsInput;
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
   String: ResolverTypeWrapper<Scalars['String']['output']>;
@@ -3744,6 +3752,7 @@ export type GQLResolversParentTypes = {
   SendMessageInput: GQLSendMessageInput;
   ServiceDelivery: GQLServiceDelivery;
   ServiceTask: GQLServiceTask;
+  SetCompletionResult: GQLSetCompletionResult;
   SetMacroTargetsInput: GQLSetMacroTargetsInput;
   StartWorkoutFromFavouriteInput: GQLStartWorkoutFromFavouriteInput;
   String: Scalars['String']['output'];
@@ -4306,7 +4315,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   markExerciseAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkExerciseAsCompletedArgs, 'completed' | 'exerciseId'>>;
   markMessagesAsRead?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationMarkMessagesAsReadArgs, 'input'>>;
   markNotificationRead?: Resolver<GQLResolversTypes['Notification'], ParentType, ContextType, RequireFields<GQLMutationMarkNotificationReadArgs, 'id'>>;
-  markSetAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkSetAsCompletedArgs, 'completed' | 'setId'>>;
+  markSetAsCompleted?: Resolver<GQLResolversTypes['SetCompletionResult'], ParentType, ContextType, RequireFields<GQLMutationMarkSetAsCompletedArgs, 'completed' | 'setId'>>;
   markWorkoutAsCompleted?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType, RequireFields<GQLMutationMarkWorkoutAsCompletedArgs, 'dayId'>>;
   moderateReview?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationModerateReviewArgs, 'input'>>;
   moveExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationMoveExerciseArgs, 'input'>>;
@@ -4718,6 +4727,13 @@ export type GQLServiceTaskResolvers<ContextType = GQLContext, ParentType extends
   templateId?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   title?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLSetCompletionResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SetCompletionResult'] = GQLResolversParentTypes['SetCompletionResult']> = {
+  improvement?: Resolver<Maybe<GQLResolversTypes['Float']>, ParentType, ContextType>;
+  isPersonalRecord?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  success?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -5141,6 +5157,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   Review?: GQLReviewResolvers<ContextType>;
   ServiceDelivery?: GQLServiceDeliveryResolvers<ContextType>;
   ServiceTask?: GQLServiceTaskResolvers<ContextType>;
+  SetCompletionResult?: GQLSetCompletionResultResolvers<ContextType>;
   SubscriptionStats?: GQLSubscriptionStatsResolvers<ContextType>;
   Substitute?: GQLSubstituteResolvers<ContextType>;
   SuggestedSets?: GQLSuggestedSetsResolvers<ContextType>;

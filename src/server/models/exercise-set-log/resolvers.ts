@@ -16,8 +16,8 @@ export const Mutation: GQLMutationResolvers = {
   updateSetLog: async (_, input) => {
     return updateSetLog(input)
   },
-  markSetAsCompleted: async (_, args) => {
-    return markSetAsCompleted(args)
+  markSetAsCompleted: async (_, args, context) => {
+    return markSetAsCompleted(args, context)
   },
   markExerciseAsCompleted: async (_, args) => {
     return markExerciseAsCompleted(args)

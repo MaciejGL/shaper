@@ -283,7 +283,11 @@ mutation FitspaceMarkSetAsCompleted(
     completed: $completed
     reps: $reps
     weight: $weight
-  )
+  ) {
+    success
+    isPersonalRecord
+    improvement
+  }
 }
 mutation FitspaceMarkExerciseAsCompleted(
   $exerciseId: ID!
