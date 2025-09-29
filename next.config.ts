@@ -71,6 +71,26 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        // Cache static assets aggressively
+        source: '/favicons/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        // Cache API routes with short TTL for dynamic content
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, s-maxage=60, stale-while-revalidate=300',
+          },
+        ],
+      },
     ]
   },
   turbopack: {
@@ -86,6 +106,11 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '10mb',
     },
     scrollRestoration: false,
+    optimizePackageImports: [
+      '@radix-ui/react-icons',
+      'lucide-react',
+      'framer-motion',
+    ],
   },
   devIndicators:
     process.env.NEXT_PUBLIC_DEVTOOLS === 'true'

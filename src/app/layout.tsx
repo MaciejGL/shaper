@@ -101,6 +101,25 @@ export default function RootLayout({
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
+
+        {/* Preload critical resources */}
+        <link
+          rel="preload"
+          href="/favicons/logo.svg"
+          as="image"
+          type="image/svg+xml"
+        />
+        <link
+          rel="preconnect"
+          href="https://d1ahv5z4h61wkv.cloudfront.net"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="dns-prefetch"
+          href="https://fitspace-prod.s3.eu-north-1.amazonaws.com"
+        />
+        <link rel="dns-prefetch" href="https://accounts.google.com" />
+
         {/* Google Identity Services for One Tap */}
         <script src="https://accounts.google.com/gsi/client" async defer />
       </head>
@@ -113,7 +132,6 @@ export default function RootLayout({
 
         <Providers>{children}</Providers>
 
-        {/* Service Worker Registration - LogRocket best practice */}
         <ServiceWorkerRegistration />
         <SpeedInsights />
       </body>
