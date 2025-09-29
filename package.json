@@ -74,6 +74,7 @@
     "@types/google-one-tap": "^1.2.6",
     "@types/pg": "^8.15.5",
     "@vercel/functions": "^2.2.13",
+    "@vercel/speed-insights": "^1.2.0",
     "@yudiel/react-qr-scanner": "2.3.1",
     "browser-image-compression": "2.0.2",
     "class-variance-authority": "0.7.1",

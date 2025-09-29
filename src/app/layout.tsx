@@ -1,3 +1,4 @@
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import type { Metadata, Viewport } from 'next'
 import { Inter, Roboto_Mono } from 'next/font/google'
 
@@ -114,6 +115,7 @@ export default function RootLayout({
 
         {/* Service Worker Registration - LogRocket best practice */}
         <ServiceWorkerRegistration />
+        <SpeedInsights />
       </body>
     </html>
   )
