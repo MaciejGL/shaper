@@ -1,14 +1,16 @@
 'use client'
 
-import { BarChart3, SearchIcon, Star, Trophy } from 'lucide-react'
+import { SearchIcon, Star, StarIcon, Trophy } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 
+import { EmptyStateCard } from '@/components/empty-state-card'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 import { useProgressPageExercisesQuery } from '@/generated/graphql-client'
 import { LocalStorageKey, useLocalStorage } from '@/hooks/use-local-storage'
@@ -21,6 +23,8 @@ export function ExercisesList() {
   const { user } = useUser()
 
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedTab, setSelectedTab] = useState('all')
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const [favoriteExercises, setFavoriteExercises] = useLocalStorage(
     LocalStorageKey.FAVORITE_EXERCISES,
     [],
@@ -47,13 +51,76 @@ export function ExercisesList() {
 
   const allExercises = data?.exercisesProgressByUser || []
 
-  // Filter and sort exercises - favorites first, then by search term
+  // Get date thresholds for filtering
+  const now = new Date()
+  const lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+  const lastMonth = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+
+  // Calculate counts for each tab (before search filtering)
+  const getExerciseCountForPeriod = (
+    period: 'last-week' | 'last-month' | 'all',
+  ) => {
+    return allExercises.filter((exercise) => {
+      if (period === 'all') return true
+
+      const latestSession = exercise.estimated1RMProgress?.[0]
+      if (!latestSession?.date) return false
+
+      const sessionDate = new Date(latestSession.date)
+
+      if (period === 'last-week') {
+        return sessionDate >= lastWeek
+      }
+
+      if (period === 'last-month') {
+        return sessionDate >= lastMonth
+      }
+
+      return true
+    }).length
+  }
+
+  const lastWeekCount = getExerciseCountForPeriod('last-week')
+  const lastMonthCount = getExerciseCountForPeriod('last-month')
+  const allCount = getExerciseCountForPeriod('all')
+
+  // Filter and sort exercises - favorites first, then by search term and date
   const exercises = allExercises
-    .filter((exercise) =>
-      exercise.baseExercise?.name
+    .filter((exercise) => {
+      // Filter by search term
+      const matchesSearch = exercise.baseExercise?.name
         .toLowerCase()
-        .includes(searchTerm.toLowerCase()),
-    )
+        .includes(searchTerm.toLowerCase())
+
+      if (!matchesSearch) return false
+
+      // Filter by favorites if enabled
+      if (showFavoritesOnly) {
+        const isFavorite = favoriteExercisesSet.has(
+          exercise.baseExercise?.id || '',
+        )
+        if (!isFavorite) return false
+      }
+
+      // Filter by date tab
+      if (selectedTab === 'all') return true
+
+      // Get the latest session date from the exercise
+      const latestSession = exercise.estimated1RMProgress?.[0]
+      if (!latestSession?.date) return false
+
+      const sessionDate = new Date(latestSession.date)
+
+      if (selectedTab === 'last-week') {
+        return sessionDate >= lastWeek
+      }
+
+      if (selectedTab === 'last-month') {
+        return sessionDate >= lastMonth
+      }
+
+      return true
+    })
     .sort((a, b) => {
       const aIsFavorite = favoriteExercisesSet.has(a.baseExercise?.id || '')
       const bIsFavorite = favoriteExercisesSet.has(b.baseExercise?.id || '')
@@ -76,29 +143,6 @@ export function ExercisesList() {
     )
   }
 
-  if (exercises.length === 0 && searchTerm) {
-    return (
-      <div>
-        <Input
-          id="search-exercises"
-          variant="secondary"
-          iconStart={<SearchIcon />}
-          placeholder="Search exercises"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="mb-4"
-        />
-        <div className="text-center py-12">
-          <SearchIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
-          <h3 className="text-lg font-medium mb-2">No exercises found</h3>
-          <p className="text-sm text-muted-foreground">
-            Try adjusting your search term
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   const image1 = exercises[0]?.baseExercise?.images[0]?.thumbnail
   const image2 = exercises[0]?.baseExercise?.images[1]?.thumbnail
 
@@ -113,16 +157,50 @@ export function ExercisesList() {
         onChange={(e) => setSearchTerm(e.target.value)}
         className="mb-4"
       />
-      <div className="grid gap-3">
-        {allExercises.length === 0 && !isLoading && (
-          <div className="text-center py-12">
-            <BarChart3 className="h-12 w-12 mx-auto mb-4 text-muted-foreground/30" />
-            <h3 className="text-lg font-medium mb-2">No exercises yet</h3>
-            <p className="text-sm text-muted-foreground">
-              Complete some workouts to see your exercises here!
-            </p>
-          </div>
-        )}
+      <div className="flex items-center gap-2 mb-4 w-full">
+        <Tabs value={selectedTab} onValueChange={setSelectedTab}>
+          <TabsList>
+            <TabsTrigger value="last-week">
+              Last Week <CountBadge count={lastWeekCount} />
+            </TabsTrigger>
+            <TabsTrigger value="last-month">
+              Last Month <CountBadge count={lastMonthCount} />
+            </TabsTrigger>
+            <TabsTrigger value="all">
+              All <CountBadge count={allCount} />
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        <Button
+          variant="secondary"
+          size="icon-md"
+          onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+          iconOnly={
+            <StarIcon
+              className={cn(
+                showFavoritesOnly
+                  ? 'fill-yellow-500 text-yellow-500'
+                  : 'text-muted-foreground',
+              )}
+            />
+          }
+          className="ml-auto"
+        />
+      </div>
+      <div className="grid gap-2">
+        {showFavoritesOnly && exercises.length === 0 ? (
+          <EmptyStateCard
+            title="No favorite exercises found"
+            description="Try adding some exercises to favorites or adjusting your filters"
+            icon={Star}
+          />
+        ) : exercises.length === 0 ? (
+          <EmptyStateCard
+            title="No exercises found"
+            description="Try adjusting your search term"
+            icon={SearchIcon}
+          />
+        ) : null}
         {exercises.map((exercise) => {
           if (!exercise.baseExercise) return null
 
@@ -136,14 +214,15 @@ export function ExercisesList() {
               <Card
                 borderless
                 key={exerciseId}
-                className="hover:shadow-sm transition-all cursor-pointer py-0 relative"
+                className="hover:shadow-sm transition-all cursor-pointer py-0 relative bg-card/70"
               >
                 <CardContent className="p-4">
                   <div className="gap-2 flex flex-col">
                     <div className="flex items-start justify-between gap-1">
-                      <h3 className="font-medium whitespace-pre-wrap">
+                      <h3 className="text-sm max-w-[20ch] whitespace-pre-wrap">
                         {exerciseName}
                       </h3>
+
                       <Button
                         variant="ghost"
                         size="icon-xs"
@@ -186,12 +265,9 @@ export function ExercisesList() {
                         </div>
                       )}
                       {latest1RM > 0 && (
-                        <div className="text-right ml-auto self-end">
-                          <div className="text-xs text-muted-foreground">
-                            Latest PR
-                          </div>
-                          <Badge variant="premium" size="lg">
-                            <Trophy className="mr-1" />
+                        <div className="text-right ml-auto self-start">
+                          <Badge variant="secondary" size="md">
+                            <Trophy className="h-3 w-3 mr-1" />
                             <span className="font-semibold">
                               {toDisplayWeight(latest1RM)?.toFixed(1)}{' '}
                               {weightUnit}
@@ -209,4 +285,8 @@ export function ExercisesList() {
       </div>
     </div>
   )
+}
+
+const CountBadge = ({ count }: { count: number }) => {
+  return <div className="rounded-full text-muted-foreground">{count}</div>
 }
