@@ -22,6 +22,7 @@ interface MeasurementCategoryDrawerProps {
   children: React.ReactNode
   focusField?: MeasurementField
   drawerDirection?: 'bottom' | 'right'
+  className?: string
 }
 
 export function MeasurementCategoryDrawer({
@@ -31,6 +32,7 @@ export function MeasurementCategoryDrawer({
   children,
   focusField,
   drawerDirection = 'bottom',
+  className,
 }: MeasurementCategoryDrawerProps) {
   // Filter measurements to only include those with data for the focused field
   const filteredMeasurements = focusField
@@ -60,7 +62,10 @@ export function MeasurementCategoryDrawer({
   return (
     <Drawer direction={drawerDirection}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <SimpleDrawerContent title={drawerTitle}>
+      <SimpleDrawerContent
+        title={drawerTitle}
+        classNameDrawerContent={className}
+      >
         <div className="space-y-6 pb-6">
           {/* Current Stats */}
           <div

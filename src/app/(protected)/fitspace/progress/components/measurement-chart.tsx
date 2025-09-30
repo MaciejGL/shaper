@@ -116,8 +116,8 @@ export function MeasurementChart({
           tick={{ fontSize: 9 }}
           axisLine={false}
           tickLine={false}
-          width={38}
-          tickFormatter={(value) => `${formatNumber(value, 1)}${unit}`}
+          width={24}
+          tickFormatter={(value) => `${formatNumber(value)}`}
           domain={[yAxisMin, yAxisMax]}
         />
         <ChartTooltip content={<ChartTooltipContent />} />

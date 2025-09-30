@@ -1,26 +1,41 @@
 'use client'
 
-import { BarChart3, ChevronRight, Plus } from 'lucide-react'
+import { ChevronRight, Plus, Weight } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
+import { GQLWeightUnit } from '@/generated/graphql-client'
+import { useWeightConversion } from '@/hooks/use-weight-conversion'
+
+import { AddMeasurementModal } from '../add-measurement-modal'
+import { useBodyMeasurementsContext } from '../body-measurements-context'
+import { MeasurementCategoryDrawer } from '../measurement-category-drawer'
+import { MeasurementChart } from '../measurement-chart'
+import { measurementCategories } from '../measurement-constants'
+import { StatCard } from '../stat-card'
 
 import { MuscleLogsDrawer } from './muscle-logs-drawer'
 
 export function LogsSection() {
   const { user } = useUser()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-
-  // Placeholder data - will be replaced with real data in Phase 3
-  // const weightProgress = [
-  //   { date: '2024-01-01', weight: 75 },
-  //   { date: '2024-01-08', weight: 76 },
-  //   { date: '2024-01-15', weight: 75.5 },
-  //   { date: '2024-01-22', weight: 77 },
-  //   { date: '2024-01-29', weight: 76.5 },
-  // ]
+  const {
+    bodyMeasures,
+    getLatestMeasurement,
+    getTrend,
+    getEstimatedBodyFat,
+    isLoading,
+    onMeasurementAdded,
+  } = useBodyMeasurementsContext()
+  const { toDisplayWeight, weightUnit } = useWeightConversion()
 
   if (!user) {
     return null
@@ -28,58 +43,96 @@ export function LogsSection() {
 
   return (
     <>
-      <Card>
+      <Card borderless>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="h-5 w-5 text-blue-500" />
-            Progress Logs
+            <Weight className="h-5 w-5 text-blue-500" />
+            Body Measurements
           </CardTitle>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              iconStart={<Plus className="h-4 w-4" />}
-            >
-              Add Log
-            </Button>
+        </CardHeader>
+
+        <MeasurementChart
+          measurements={bodyMeasures}
+          field="weight"
+          label="Weight"
+          unit={weightUnit || GQLWeightUnit.Kg}
+          className="bg-black dark:bg-black/20 p-2 w-full rounded-none"
+        />
+        <CardContent>
+          <div className="space-y-4">
+            {/* Weight Progress Chart Placeholder */}
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <MeasurementCategoryDrawer
+                key={'weight'}
+                category={measurementCategories[0]}
+                measurements={bodyMeasures}
+                onUpdate={onMeasurementAdded}
+                focusField={'weight'}
+              >
+                <button className="text-left w-full">
+                  <StatCard
+                    label="Current Weight"
+                    value={
+                      toDisplayWeight(getLatestMeasurement('weight')) ||
+                      undefined
+                    }
+                    unit={weightUnit}
+                    trend={getTrend('weight')}
+                    size="sm"
+                    isLoading={isLoading}
+                    isOnCard
+                  />
+                </button>
+              </MeasurementCategoryDrawer>
+
+              <MeasurementCategoryDrawer
+                key={'bodyFat'}
+                category={measurementCategories[0]}
+                measurements={bodyMeasures}
+                onUpdate={onMeasurementAdded}
+                focusField={'bodyFat'}
+              >
+                <button className="text-left h-full w-full">
+                  <StatCard
+                    label="Body Fat"
+                    value={
+                      getLatestMeasurement('bodyFat') ||
+                      getEstimatedBodyFat()?.percentage
+                    }
+                    unit="%"
+                    size="sm"
+                    isLoading={isLoading}
+                    isOnCard
+                  />
+                </button>
+              </MeasurementCategoryDrawer>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <div className="grid grid-cols-2 gap-2 w-full">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setIsDrawerOpen(true)}
               iconEnd={<ChevronRight className="h-4 w-4" />}
+              className="w-full"
             >
-              View More
+              View Detailed Logs
             </Button>
+            <AddMeasurementModal onSuccess={onMeasurementAdded}>
+              <Button
+                variant="secondary"
+                size="sm"
+                iconStart={<Plus className="h-4 w-4" />}
+                className="w-full"
+              >
+                Add Logs
+              </Button>
+            </AddMeasurementModal>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Weight Progress Chart Placeholder */}
-            <div className="h-32 bg-muted/20 rounded-lg flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <BarChart3 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Weight Progress Chart</p>
-                <p className="text-xs">Last 30 days</p>
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="text-center p-3 bg-card-on-card rounded-lg">
-                <div className="text-lg font-semibold">77.0 kg</div>
-                <div className="text-xs text-muted-foreground">
-                  Current Weight
-                </div>
-              </div>
-              <div className="text-center p-3 bg-card-on-card rounded-lg">
-                <div className="text-lg font-semibold text-green-600">
-                  +2.0 kg
-                </div>
-                <div className="text-xs text-muted-foreground">This Month</div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
+        </CardFooter>
       </Card>
 
       <MuscleLogsDrawer

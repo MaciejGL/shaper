@@ -7,7 +7,7 @@ import { MeasurementCategoryDrawer } from './measurement-category-drawer'
 import { measurementCategories } from './measurement-constants'
 import { StatCard } from './stat-card'
 
-export function DetailedMeasurements() {
+export function DetailedMeasurements({ className }: { className?: string }) {
   const {
     bodyMeasures,
     getLatestMeasurement,
@@ -61,6 +61,7 @@ export function DetailedMeasurements() {
                     measurements={fieldMeasurements}
                     onUpdate={onMeasurementAdded}
                     focusField={field.key}
+                    className={className}
                   >
                     <button className="text-left w-full">
                       <StatCard
@@ -85,6 +86,8 @@ export function DetailedMeasurements() {
                         }
                         trend={getTrend(field.key)}
                         isLoading={isLoading}
+                        isOnCard
+                        size="sm"
                       />
                     </button>
                   </MeasurementCategoryDrawer>
@@ -100,6 +103,8 @@ export function DetailedMeasurements() {
                   unit={resolveUnit(field.key, field.unit)}
                   trend={getTrend(field.key)}
                   isLoading={isLoading}
+                  isOnCard
+                  size="sm"
                 />
               )
             })}

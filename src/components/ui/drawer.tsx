@@ -175,6 +175,7 @@ type SimpleDrawerProps = {
   children: React.ReactNode
   footer?: React.ReactNode
   className?: string
+  classNameDrawerContent?: string
 }
 
 export function SimpleDrawerContent({
@@ -184,10 +185,11 @@ export function SimpleDrawerContent({
   children,
   footer,
   className,
+  classNameDrawerContent,
 }: SimpleDrawerProps) {
   const Icon = headerIcon
   return (
-    <DrawerContent dialogTitle={title}>
+    <DrawerContent dialogTitle={title} className={classNameDrawerContent}>
       <div className="flex flex-col h-full">
         <DrawerHeader className="border-b flex-none">
           {header ? (

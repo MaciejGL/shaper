@@ -7,7 +7,7 @@ import { measurementCategories } from './measurement-constants'
 import { Section } from './section'
 import { StatCard } from './stat-card'
 
-export function MeasurementsOverview() {
+export function MeasurementsOverview({ className }: { className?: string }) {
   const {
     bodyMeasures,
     getLatestMeasurement,
@@ -31,16 +31,17 @@ export function MeasurementsOverview() {
 
   return (
     <Section
-      title="Body Measurements Overview"
+      title="Body Measurements"
       action={<AddMeasurementModal onSuccess={onMeasurementAdded} />}
     >
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
         <MeasurementCategoryDrawer
           key={'weight'}
           category={measurementCategories[0]}
           measurements={bodyMeasures}
           onUpdate={onMeasurementAdded}
           focusField={'weight'}
+          className={className}
         >
           <button className="text-left w-full">
             <StatCard
@@ -51,6 +52,8 @@ export function MeasurementsOverview() {
               unit={weightUnit}
               trend={getTrend('weight')}
               isLoading={isLoading}
+              isOnCard
+              size="sm"
             />
           </button>
         </MeasurementCategoryDrawer>
@@ -68,6 +71,8 @@ export function MeasurementsOverview() {
               value={displayBodyFat}
               unit="%"
               isLoading={isLoading}
+              isOnCard
+              size="sm"
             />
           </button>
         </MeasurementCategoryDrawer>

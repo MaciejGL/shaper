@@ -1,5 +1,3 @@
-import { TrendingDown, TrendingUp } from 'lucide-react'
-
 import { cn, formatNumber } from '@/lib/utils'
 
 interface StatCardProps {
@@ -26,7 +24,6 @@ export function StatCard({
   const formatTrend = (trend: number) => {
     const isPositive = trend > 0
     const isNegative = trend < 0
-    const TrendIcon = isPositive ? TrendingUp : TrendingDown
 
     return (
       <span
@@ -38,7 +35,7 @@ export function StatCard({
               : 'text-muted-foreground'
         }`}
       >
-        <TrendIcon className="h-3 w-3" />
+        {/* <TrendIcon className="h-3 w-3" /> */}
         <span>
           {isPositive ? '+' : ''}
           {formatNumber(trend, 1)} {unit}
@@ -51,7 +48,7 @@ export function StatCard({
     <div
       className={cn(
         'rounded-lg bg-card dark:bg-card h-full',
-        size === 'sm' ? 'p-2' : 'p-3',
+        size === 'sm' ? 'p-3' : 'p-3',
         isOnCard && 'bg-card-on-card dark:bg-card-on-card',
       )}
     >
@@ -68,25 +65,25 @@ export function StatCard({
       <div className="mt-2">
         <div
           className={cn(
-            'font-bold',
+            'font-medium flex items-end gap-2',
             size === 'sm' ? 'text-lg' : 'text-2xl',
             value === undefined && 'text-muted-foreground',
             isLoading && 'masked-placeholder-text max-w-max',
           )}
         >
           {value ? `${formatNumber(value, 1)} ${unit}` : '—'}
+          <p
+            className={cn(
+              'mt-0.5',
+              isLoading && 'masked-placeholder-text max-w-max',
+            )}
+          >
+            {trend !== null && trend !== undefined && formatTrend(trend)}
+          </p>
         </div>
         {subtitle && (
           <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
         )}
-        <p
-          className={cn(
-            'mt-0.5',
-            isLoading && 'masked-placeholder-text max-w-max',
-          )}
-        >
-          {trend !== null && trend !== undefined && formatTrend(trend)}
-        </p>
       </div>
     </div>
   )

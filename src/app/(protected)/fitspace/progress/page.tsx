@@ -4,6 +4,7 @@ import { TrendingUp } from 'lucide-react'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
+import { BodyMeasurementsProvider } from './components/body-measurements-context'
 import { LatestPRs } from './components/latest-prs/latest-prs'
 import { LogsSection } from './components/logs-section/logs-section'
 import { MuscleHeatmapSection } from './components/muscle-heatmap/muscle-heatmap-section'
@@ -24,10 +25,12 @@ export default function ProgressPage() {
         <LatestPRs />
 
         {/* Logs Section */}
-        {/* <LogsSection /> */}
+        <BodyMeasurementsProvider>
+          <LogsSection />
+        </BodyMeasurementsProvider>
 
         {/* Snapshots Section */}
-        {/* <SnapshotsSection /> */}
+        <SnapshotsSection />
 
         {/* Muscle Heatmap Section */}
         {/* <MuscleHeatmapSection /> */}
