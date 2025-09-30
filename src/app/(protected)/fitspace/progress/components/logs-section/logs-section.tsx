@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronRight, Plus, Weight } from 'lucide-react'
+import { List, Plus, Weight } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -116,16 +116,16 @@ export function LogsSection() {
               variant="ghost"
               size="sm"
               onClick={() => setIsDrawerOpen(true)}
-              iconEnd={<ChevronRight className="h-4 w-4" />}
+              iconStart={<List />}
               className="w-full"
             >
-              View Detailed Logs
+              Detailed Logs
             </Button>
             <AddMeasurementModal onSuccess={onMeasurementAdded}>
               <Button
                 variant="secondary"
                 size="sm"
-                iconStart={<Plus className="h-4 w-4" />}
+                iconStart={<Plus />}
                 className="w-full"
               >
                 Add Logs
