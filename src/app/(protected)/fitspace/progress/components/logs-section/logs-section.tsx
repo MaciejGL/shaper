@@ -56,7 +56,7 @@ export function LogsSection() {
           field="weight"
           label="Weight"
           unit={weightUnit || GQLWeightUnit.Kg}
-          className="bg-black dark:bg-black/20 p-2 w-full rounded-none"
+          className="bg-black/90 dark:bg-black/20 p-2 w-full rounded-lg"
         />
         <CardContent>
           <div className="space-y-4">
@@ -113,7 +113,7 @@ export function LogsSection() {
         <CardFooter>
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button
-              variant="ghost"
+              variant="tertiary"
               size="sm"
               onClick={() => setIsDrawerOpen(true)}
               iconStart={<List />}
@@ -123,7 +123,7 @@ export function LogsSection() {
             </Button>
             <AddMeasurementModal onSuccess={onMeasurementAdded}>
               <Button
-                variant="secondary"
+                variant="default"
                 size="sm"
                 iconStart={<Plus />}
                 className="w-full"

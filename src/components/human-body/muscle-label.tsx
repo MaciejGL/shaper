@@ -52,10 +52,7 @@ export function MuscleLabel({
         handleRegionClick(value.aliases)
       }}
       disabled={isDisabled}
-      className={cn(
-        isDisabled && 'pointer-events-none opacity-40',
-        'absolute z-10 -translate-y-1/2 animate-in',
-      )}
+      className={cn('absolute z-10 -translate-y-1/2 animate-in')}
     >
       {label}
     </Button>

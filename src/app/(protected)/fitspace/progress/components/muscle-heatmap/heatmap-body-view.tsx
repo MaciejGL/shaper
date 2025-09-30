@@ -1,5 +1,7 @@
 'use client'
 
+import { ArrowLeftRight } from 'lucide-react'
+
 import { BackBodyView } from '@/components/human-body/body-back/body-back'
 import { FrontBodyView } from '@/components/human-body/body-front/body-front'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -208,8 +210,11 @@ export function HeatmapBodyView({
   return (
     <div className="relative">
       <Tabs defaultValue="front">
-        <TabsList className="mx-auto mb-4">
+        <TabsList className="mx-auto mb-4 border grid grid-cols-[1fr_auto_1fr]">
           <TabsTrigger value="front">Front</TabsTrigger>
+          <TabsTrigger value="swap" disabled>
+            <ArrowLeftRight className="size-3" />
+          </TabsTrigger>
           <TabsTrigger value="back">Back</TabsTrigger>
         </TabsList>
 
@@ -231,7 +236,6 @@ export function HeatmapBodyView({
           />
         </TabsContent>
       </Tabs>
-
       {/* Intensity Legend */}
       <div className="space-y-1">
         <div className="text-xs font-medium text-muted-foreground">

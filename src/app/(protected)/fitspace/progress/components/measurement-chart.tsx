@@ -94,7 +94,7 @@ export function MeasurementChart({
     <ChartContainer
       config={chartConfig}
       className={cn(
-        'h-[200px] w-full bg-card-on-card dark:bg-black/20 rounded-lg p-2',
+        'h-[200px] w-full bg-black/90 dark:bg-black/20 rounded-lg p-2',
         className,
       )}
     >
@@ -125,17 +125,21 @@ export function MeasurementChart({
           dataKey={field}
           type="monotone"
           stroke={`var(--color-${field})`}
-          strokeWidth={2.5}
-          dot={{ r: 2.5 }}
-          activeDot={{ r: 4 }}
+          strokeWidth={1.5}
+          dot={{ r: 2.5, fill: `var(--color-${field})` }}
+          activeDot={{
+            r: 6,
+            strokeWidth: 2,
+            stroke: `var(--color-${field})`,
+            fill: 'transparent',
+          }}
         />
         <Line
           dataKey={`${field}Average`}
           type="monotone"
           stroke={`var(--color-${field}Average)`}
-          strokeWidth={2}
-          dot={{ r: 2 }}
-          activeDot={{ r: 3 }}
+          strokeWidth={1}
+          dot={false}
           connectNulls={false}
         />
         <Legend

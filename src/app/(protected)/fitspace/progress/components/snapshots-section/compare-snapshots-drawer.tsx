@@ -180,26 +180,31 @@ export function CompareSnapshotsDrawer({
               }
               /2
             </div>
+            <div className="flex items-center gap-2">
+              <Button variant="tertiary" onClick={() => onOpenChange(false)}>
+                Close
+              </Button>
 
-            {step === 1 ? (
-              <Button
-                onClick={() => setStep(2)}
-                disabled={
-                  !selectedSnapshots.snapshot1 || !selectedSnapshots.snapshot2
-                }
-                iconEnd={<ChevronRight />}
-              >
-                Compare
-              </Button>
-            ) : (
-              <Button
-                onClick={() => setStep(1)}
-                variant="tertiary"
-                iconStart={<ChevronLeft />}
-              >
-                Back
-              </Button>
-            )}
+              {step === 1 ? (
+                <Button
+                  onClick={() => setStep(2)}
+                  disabled={
+                    !selectedSnapshots.snapshot1 || !selectedSnapshots.snapshot2
+                  }
+                  iconEnd={<ChevronRight />}
+                >
+                  Compare
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => setStep(1)}
+                  variant="tertiary"
+                  iconStart={<ChevronLeft />}
+                >
+                  Back
+                </Button>
+              )}
+            </div>
           </div>
         </DrawerFooter>
       </DrawerContent>
@@ -405,19 +410,74 @@ function ImageComparisonRow({
 }: ImageComparisonRowProps) {
   const [sliderPosition, setSliderPosition] = useState(50)
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const percentage = (x / rect.width) * 100
-    setSliderPosition(Math.max(0, Math.min(100, percentage)))
+  const [isDragging, setIsDragging] = useState(false)
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true)
+    e.preventDefault()
   }
 
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const x = e.touches[0].clientX - rect.left
-    const percentage = (x / rect.width) * 100
-    setSliderPosition(Math.max(0, Math.min(100, percentage)))
+  const handleMouseMove = React.useCallback(
+    (e: MouseEvent) => {
+      if (!isDragging || !containerRef.current) return
+
+      const rect = containerRef.current.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const percentage = (x / rect.width) * 100
+      setSliderPosition(Math.max(0, Math.min(100, percentage)))
+    },
+    [isDragging],
+  )
+
+  const handleMouseUp = React.useCallback(() => {
+    setIsDragging(false)
+  }, [])
+
+  const handleTouchStart = () => {
+    setIsDragging(true)
   }
+
+  const handleTouchMove = React.useCallback(
+    (e: TouchEvent) => {
+      if (!isDragging || !containerRef.current) return
+
+      const rect = containerRef.current.getBoundingClientRect()
+      const x = e.touches[0].clientX - rect.left
+      const percentage = (x / rect.width) * 100
+      setSliderPosition(Math.max(0, Math.min(100, percentage)))
+    },
+    [isDragging],
+  )
+
+  const handleTouchEnd = React.useCallback(() => {
+    setIsDragging(false)
+  }, [])
+
+  // Add global event listeners for dragging
+  React.useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove)
+      document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('touchmove', handleTouchMove, {
+        passive: false,
+      })
+      document.addEventListener('touchend', handleTouchEnd)
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+    }
+  }, [
+    isDragging,
+    handleMouseMove,
+    handleMouseUp,
+    handleTouchMove,
+    handleTouchEnd,
+  ])
 
   if (!image1Url && !image2Url) {
     return (
@@ -440,11 +500,9 @@ function ImageComparisonRow({
       >
         {label}
       </motion.h3>
-      <div className="relative">
+      <div className="relative" ref={containerRef}>
         <motion.div
-          className="aspect-[3/4] relative overflow-hidden rounded-lg cursor-col-resize"
-          onMouseMove={handleMouseMove}
-          onTouchMove={handleTouchMove}
+          className="aspect-[3/4] relative overflow-hidden rounded-lg"
           whileHover={{ scale: 1.01 }}
           transition={{ duration: 0.1 }}
         >
@@ -473,13 +531,22 @@ function ImageComparisonRow({
             </div>
           )}
 
-          {/* Slider line */}
+          {/* Slider line with larger touch target */}
           <motion.div
-            className="absolute top-0 bottom-0 w-0.5 bg-white shadow-lg z-10"
+            className="absolute top-0 bottom-0 w-12 -ml-6 cursor-col-resize z-10"
             style={{ left: `${sliderPosition}%` }}
+            onMouseDown={handleMouseDown}
+            onTouchStart={handleTouchStart}
           >
+            {/* Invisible touch target */}
+            <div className="absolute inset-0" />
+
+            {/* Visible slider line */}
+            <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white shadow-lg transform -translate-x-1/2" />
+
+            {/* Handle */}
             <motion.div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center"
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center cursor-grab active:cursor-grabbing"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               transition={{ duration: 0.1 }}

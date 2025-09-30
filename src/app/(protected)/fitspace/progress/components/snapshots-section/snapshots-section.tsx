@@ -198,6 +198,7 @@ export function SnapshotsSection() {
             <Button
               className="w-full"
               variant="tertiary"
+              size="sm"
               onClick={() => {
                 setPreselectedSnapshot(null)
                 setIsCompareDrawerOpen(true)
@@ -205,20 +206,20 @@ export function SnapshotsSection() {
               disabled={!latestSnapshot && !previousSnapshot}
               iconStart={<Images />}
             >
-              Compare Mode
+              Compare Snapshots
             </Button>
           </div>
         </CardContent>
         <CardFooter>
           <div className="grid grid-cols-2 gap-2 w-full">
             <Button
-              variant="ghost"
+              variant="tertiary"
               size="sm"
               onClick={() => setIsDrawerOpen(true)}
               iconStart={<Pen />}
               className="w-full"
             >
-              View/Edit Timeline
+              Edit
             </Button>
 
             <Button
@@ -228,7 +229,7 @@ export function SnapshotsSection() {
               className="w-full"
               onClick={() => setIsCreateDialogOpen(true)}
             >
-              Add Photos
+              Add Snapshot
             </Button>
             <CreateProgressLogDialog
               open={isCreateDialogOpen}
