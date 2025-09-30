@@ -133,6 +133,7 @@ export const Query: GQLQueryResolvers = {
       achievedAt: pr.achievedAt.toISOString(),
       exerciseName: pr.baseExercise.name,
       dayId: pr.dayId,
+      exerciseId: pr.baseExerciseId,
     }))
   },
 }

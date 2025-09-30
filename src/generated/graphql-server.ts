@@ -1927,6 +1927,7 @@ export type GQLPersonalRecordHistory = {
   achievedAt: EntireFieldWrapper<Scalars['String']['output']>;
   dayId: EntireFieldWrapper<Scalars['ID']['output']>;
   estimated1RM: EntireFieldWrapper<Scalars['Float']['output']>;
+  exerciseId: EntireFieldWrapper<Scalars['ID']['output']>;
   exerciseName: EntireFieldWrapper<Scalars['String']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   reps: EntireFieldWrapper<Scalars['Int']['output']>;
@@ -2110,6 +2111,7 @@ export type GQLQueryExerciseNotesArgs = {
 
 
 export type GQLQueryExercisesProgressByUserArgs = {
+  exerciseId?: InputMaybe<Scalars['ID']['input']>;
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -4535,6 +4537,7 @@ export type GQLPersonalRecordHistoryResolvers<ContextType = GQLContext, ParentTy
   achievedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   dayId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   estimated1RM?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
+  exerciseId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   exerciseName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   reps?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;

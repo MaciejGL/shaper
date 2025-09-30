@@ -152,7 +152,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     return exercise ? new BaseExercise(exercise, context) : null
   },
-  exercisesProgressByUser: async (_, { userId }, context) => {
+  exercisesProgressByUser: async (_, { userId, exerciseId }, context) => {
     const targetUserId = userId
     if (!targetUserId) throw new Error('User not found')
 
@@ -161,7 +161,7 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       where: {
         ExerciseSet: {
           exercise: {
-            baseId: { not: null },
+            baseId: exerciseId || { not: null },
             day: { week: { plan: { assignedToId: targetUserId } } },
           },
         },

@@ -73,7 +73,7 @@ type Query {
   userExercises(where: ExerciseWhereInput): [BaseExercise!]!
   publicExercises(where: ExerciseWhereInput): [BaseExercise!]!
   exercise(id: ID!): BaseExercise
-  exercisesProgressByUser(userId: ID): [ExerciseProgress!]!
+  exercisesProgressByUser(userId: ID, exerciseId: ID): [ExerciseProgress!]!
   getExercises: GetExercisesResponse!
 }
 

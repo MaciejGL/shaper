@@ -1,6 +1,7 @@
 import {
   addDays,
   addWeeks,
+  differenceInDays,
   endOfWeek,
   format,
   formatDistanceToNow,
@@ -24,6 +25,26 @@ export const DEFAULT_WEEK_START: WeekStartDay = 1 // Monday
 export function formatRelativeTime(date: string | Date): string {
   const dateObj = typeof date === 'string' ? parseISO(date) : date
   return formatDistanceToNow(dateObj, { addSuffix: true })
+}
+
+/**
+ * Format a date with conditional logic: relative time for recent dates, weekday for older dates
+ * @param date - Date string or Date object
+ * @param recentDaysThreshold - Number of days to consider "recent" (default: 3)
+ * @returns Formatted date string - relative time if recent, weekday format if older
+ */
+export function formatConditionalDate(
+  date: string | Date,
+  recentDaysThreshold: number = 2,
+): string {
+  const dateObj = typeof date === 'string' ? parseISO(date) : date
+  const daysDiff = differenceInDays(new Date(), dateObj)
+
+  if (daysDiff <= recentDaysThreshold) {
+    return formatDistanceToNow(dateObj, { addSuffix: true })
+  }
+
+  return format(dateObj, 'EEE, d MMM')
 }
 
 /**

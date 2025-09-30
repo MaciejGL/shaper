@@ -41,5 +41,24 @@ query GetUserPrHistory($userId: ID!, $exerciseId: ID) {
     achievedAt
     exerciseName
     dayId
+    exerciseId
+  }
+}
+
+query GetExerciseProgress($userId: ID!, $exerciseId: ID!) {
+  exercisesProgressByUser(userId: $userId, exerciseId: $exerciseId) {
+    baseExercise {
+      id
+      name
+    }
+    estimated1RMProgress {
+      date
+      average1RM
+      detailedLogs {
+        estimated1RM
+        weight
+        reps
+      }
+    }
   }
 }

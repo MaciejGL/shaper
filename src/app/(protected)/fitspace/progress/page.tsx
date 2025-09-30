@@ -1,32 +1,15 @@
 'use client'
 
-import { Crown, TrendingUp } from 'lucide-react'
-import { parseAsStringEnum, useQueryState } from 'nuqs'
-
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useUser } from '@/context/user-context'
+import { TrendingUp } from 'lucide-react'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
-import { BodyMeasurements } from './components/body-measurements'
-import { BodyProgress } from './components/body-progress'
-import { ExercisesList } from './components/exercises-list'
-import { MuscleDistribution } from './components/muscle-distribution'
+import { LatestPRs } from './components/latest-prs/latest-prs'
+import { LogsSection } from './components/logs-section/logs-section'
+import { MuscleHeatmapSection } from './components/muscle-heatmap/muscle-heatmap-section'
+import { SnapshotsSection } from './components/snapshots-section/snapshots-section'
 
 export default function ProgressPage() {
-  const { hasPremium, isLoading } = useUser()
-
-  // Use nuqs for tab persistence
-  const [activeTab, setActiveTab] = useQueryState(
-    'tab',
-    parseAsStringEnum<
-      'body-measures' | 'body-progress' | 'muscle-distribution' | 'exercises'
-    >(['body-measures', 'body-progress', 'muscle-distribution', 'exercises'])
-      .withDefault('body-measures')
-      .withOptions({ clearOnDefault: true }),
-  )
-
   return (
     <div className="container-hypertro mx-auto">
       <DashboardHeader
@@ -36,75 +19,19 @@ export default function ProgressPage() {
         variant="green"
       />
 
-      <Tabs
-        value={activeTab}
-        onValueChange={(value) => setActiveTab(value as typeof activeTab)}
-        className="space-y-6"
-      >
-        <TabsList className="w-full grid grid-cols-4">
-          <TabsTrigger value="body-measures">Measures </TabsTrigger>
-          <TabsTrigger
-            value="body-progress"
-            className="relative"
-            disabled={!hasPremium || isLoading}
-          >
-            Snapshots{' '}
-            {!hasPremium && !isLoading && (
-              <div className="absolute top-1/2 right-0 -translate-y-1/2">
-                <PremiumBadge />
-              </div>
-            )}
-          </TabsTrigger>
-          <TabsTrigger
-            value="muscle-distribution"
-            className="relative"
-            disabled={!hasPremium || isLoading}
-          >
-            Muscles{' '}
-            {!hasPremium && !isLoading && (
-              <div className="absolute top-1/2 right-0 -translate-y-1/2">
-                <PremiumBadge />
-              </div>
-            )}
-          </TabsTrigger>
-          <TabsTrigger
-            value="exercises"
-            className="relative"
-            disabled={!hasPremium || isLoading}
-          >
-            Exercises{' '}
-            {!hasPremium && !isLoading && (
-              <div className="absolute top-1/2 right-0 -translate-y-1/2">
-                <PremiumBadge />
-              </div>
-            )}
-          </TabsTrigger>
-        </TabsList>
+      <div className="space-y-6">
+        {/* Latest PRs Section */}
+        <LatestPRs />
 
-        <TabsContent value="body-measures">
-          <BodyMeasurements />
-        </TabsContent>
+        {/* Logs Section */}
+        {/* <LogsSection /> */}
 
-        <TabsContent value="body-progress">
-          <BodyProgress />
-        </TabsContent>
+        {/* Snapshots Section */}
+        {/* <SnapshotsSection /> */}
 
-        <TabsContent value="muscle-distribution">
-          <MuscleDistribution />
-        </TabsContent>
-
-        <TabsContent value="exercises">
-          <ExercisesList />
-        </TabsContent>
-      </Tabs>
+        {/* Muscle Heatmap Section */}
+        {/* <MuscleHeatmapSection /> */}
+      </div>
     </div>
-  )
-}
-
-function PremiumBadge() {
-  return (
-    <Badge variant="premium" className="p-1 rounded-md" size="2xs">
-      <Crown className="!size-3" />
-    </Badge>
   )
 }

@@ -12,7 +12,7 @@ const cardVariants = cva(
       variant: {
         secondary:
           'bg-card border-0 dark:shadow-none shadow-xs border-border dark:border-border/50 border',
-        tertiary: 'border-0 shadow-xs bg-zinc-300 dark:bg-gray-600/50',
+        tertiary: 'border-0 shadow-xs bg-card-on-card',
         gradient:
           'border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-white via-white to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800',
         premium: cn(

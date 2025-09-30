@@ -1925,6 +1925,7 @@ export type GQLPersonalRecordHistory = {
   achievedAt: Scalars['String']['output'];
   dayId: Scalars['ID']['output'];
   estimated1RM: Scalars['Float']['output'];
+  exerciseId: Scalars['ID']['output'];
   exerciseName: Scalars['String']['output'];
   id: Scalars['ID']['output'];
   reps: Scalars['Int']['output'];
@@ -2108,6 +2109,7 @@ export type GQLQueryExerciseNotesArgs = {
 
 
 export type GQLQueryExercisesProgressByUserArgs = {
+  exerciseId?: InputMaybe<Scalars['ID']['input']>;
   userId?: InputMaybe<Scalars['ID']['input']>;
 };
 
@@ -3579,7 +3581,15 @@ export type GQLGetUserPrHistoryQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetUserPrHistoryQuery = { __typename?: 'Query', getUserPRHistory: Array<{ __typename?: 'PersonalRecordHistory', id: string, estimated1RM: number, weight: number, reps: number, achievedAt: string, exerciseName: string, dayId: string }> };
+export type GQLGetUserPrHistoryQuery = { __typename?: 'Query', getUserPRHistory: Array<{ __typename?: 'PersonalRecordHistory', id: string, estimated1RM: number, weight: number, reps: number, achievedAt: string, exerciseName: string, dayId: string, exerciseId: string }> };
+
+export type GQLGetExerciseProgressQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+  exerciseId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetExerciseProgressQuery = { __typename?: 'Query', exercisesProgressByUser: Array<{ __typename?: 'ExerciseProgress', baseExercise?: { __typename?: 'BaseExercise', id: string, name: string } | undefined | null, estimated1RMProgress: Array<{ __typename?: 'OneRmEntry', date: string, average1RM: number, detailedLogs: Array<{ __typename?: 'OneRmLog', estimated1RM: number, weight?: number | undefined | null, reps?: number | undefined | null }> }> }> };
 
 export type GQLGetUserBodyProgressLogsQueryVariables = Exact<{
   userProfileId: Scalars['String']['input'];
@@ -6728,6 +6738,7 @@ export const GetUserPrHistoryDocument = `
     achievedAt
     exerciseName
     dayId
+    exerciseId
   }
 }
     `;
@@ -6773,6 +6784,68 @@ useInfiniteGetUserPrHistoryQuery.getKey = (variables: GQLGetUserPrHistoryQueryVa
 
 
 useGetUserPrHistoryQuery.fetcher = (variables: GQLGetUserPrHistoryQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetUserPrHistoryQuery, GQLGetUserPrHistoryQueryVariables>(GetUserPrHistoryDocument, variables, options);
+
+export const GetExerciseProgressDocument = `
+    query GetExerciseProgress($userId: ID!, $exerciseId: ID!) {
+  exercisesProgressByUser(userId: $userId, exerciseId: $exerciseId) {
+    baseExercise {
+      id
+      name
+    }
+    estimated1RMProgress {
+      date
+      average1RM
+      detailedLogs {
+        estimated1RM
+        weight
+        reps
+      }
+    }
+  }
+}
+    `;
+
+export const useGetExerciseProgressQuery = <
+      TData = GQLGetExerciseProgressQuery,
+      TError = unknown
+    >(
+      variables: GQLGetExerciseProgressQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetExerciseProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetExerciseProgressQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetExerciseProgressQuery, TError, TData>(
+      {
+    queryKey: ['GetExerciseProgress', variables],
+    queryFn: fetchData<GQLGetExerciseProgressQuery, GQLGetExerciseProgressQueryVariables>(GetExerciseProgressDocument, variables),
+    ...options
+  }
+    )};
+
+useGetExerciseProgressQuery.getKey = (variables: GQLGetExerciseProgressQueryVariables) => ['GetExerciseProgress', variables];
+
+export const useInfiniteGetExerciseProgressQuery = <
+      TData = InfiniteData<GQLGetExerciseProgressQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetExerciseProgressQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetExerciseProgressQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetExerciseProgressQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetExerciseProgressQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetExerciseProgress.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetExerciseProgressQuery, GQLGetExerciseProgressQueryVariables>(GetExerciseProgressDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetExerciseProgressQuery.getKey = (variables: GQLGetExerciseProgressQueryVariables) => ['GetExerciseProgress.infinite', variables];
+
+
+useGetExerciseProgressQuery.fetcher = (variables: GQLGetExerciseProgressQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetExerciseProgressQuery, GQLGetExerciseProgressQueryVariables>(GetExerciseProgressDocument, variables, options);
 
 export const GetUserBodyProgressLogsDocument = `
     query GetUserBodyProgressLogs($userProfileId: String!) {
