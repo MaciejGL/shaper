@@ -22,14 +22,15 @@ export function MuscleLabel({
   }
   isRegionSelected: (aliases: string[]) => boolean
   handleRegionClick: (aliases: string[]) => void
-  hasMuscleData: (aliases: string[]) => boolean
+  hasMuscleData?: (aliases: string[]) => boolean
 }) {
   const [elementWidth, setElementWidth] = useState(0)
   const ref = useRef<HTMLButtonElement>(null)
   useEffect(() => {
     setElementWidth(ref.current?.offsetWidth ?? 0)
   }, [ref])
-  const isDisabled = !hasMuscleData(value.aliases)
+  const isDisabled =
+    typeof hasMuscleData === 'function' ? !hasMuscleData(value.aliases) : false
   return (
     <Button
       ref={ref}

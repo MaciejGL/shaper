@@ -6,7 +6,7 @@ export interface BodyViewProps {
   }
   isRegionSelected: (aliases: string[]) => boolean
   handleRegionClick: (aliases: string[]) => void
-  hasMuscleData: (aliases: string[]) => boolean
+  hasMuscleData?: (aliases: string[]) => boolean
 }
 
 export type MuscleGroupProps = {
