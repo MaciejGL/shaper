@@ -873,6 +873,18 @@ export type GQLMoveExerciseInput = {
   targetDayId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export type GQLMuscleFrequency = {
+  __typename?: 'MuscleFrequency';
+  groupName: EntireFieldWrapper<Scalars['String']['output']>;
+  groupSlug: EntireFieldWrapper<Scalars['String']['output']>;
+  lastTrained?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  muscleAlias: EntireFieldWrapper<Scalars['String']['output']>;
+  muscleId: EntireFieldWrapper<Scalars['String']['output']>;
+  muscleName: EntireFieldWrapper<Scalars['String']['output']>;
+  sessionsCount: EntireFieldWrapper<Scalars['Int']['output']>;
+  totalSets: EntireFieldWrapper<Scalars['Int']['output']>;
+};
+
 export type GQLMuscleGroup = {
   __typename?: 'MuscleGroup';
   alias?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -2033,6 +2045,7 @@ export type GQLQuery = {
   ingredient?: EntireFieldWrapper<Maybe<GQLIngredient>>;
   locations: EntireFieldWrapper<Array<GQLLocation>>;
   meal?: EntireFieldWrapper<Maybe<GQLMeal>>;
+  muscleFrequency: EntireFieldWrapper<Array<GQLMuscleFrequency>>;
   muscleGroupCategories: EntireFieldWrapper<Array<GQLMuscleGroupCategory>>;
   muscleGroupCategory: EntireFieldWrapper<GQLMuscleGroupCategory>;
   muscleGroupDistribution: EntireFieldWrapper<GQLMuscleGroupDistribution>;
@@ -2261,6 +2274,12 @@ export type GQLQueryIngredientArgs = {
 
 export type GQLQueryMealArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryMuscleFrequencyArgs = {
+  days?: InputMaybe<Scalars['Int']['input']>;
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -3503,6 +3522,7 @@ export type GQLResolversTypes = {
   MessengerInitialData: ResolverTypeWrapper<GQLMessengerInitialData>;
   ModerateReviewInput: GQLModerateReviewInput;
   MoveExerciseInput: GQLMoveExerciseInput;
+  MuscleFrequency: ResolverTypeWrapper<GQLMuscleFrequency>;
   MuscleGroup: ResolverTypeWrapper<GQLMuscleGroup>;
   MuscleGroupCategory: ResolverTypeWrapper<GQLMuscleGroupCategory>;
   MuscleGroupDistribution: ResolverTypeWrapper<GQLMuscleGroupDistribution>;
@@ -3715,6 +3735,7 @@ export type GQLResolversParentTypes = {
   MessengerInitialData: GQLMessengerInitialData;
   ModerateReviewInput: GQLModerateReviewInput;
   MoveExerciseInput: GQLMoveExerciseInput;
+  MuscleFrequency: GQLMuscleFrequency;
   MuscleGroup: GQLMuscleGroup;
   MuscleGroupCategory: GQLMuscleGroupCategory;
   MuscleGroupDistribution: GQLMuscleGroupDistribution;
@@ -4202,6 +4223,18 @@ export type GQLMessengerInitialDataResolvers<ContextType = GQLContext, ParentTyp
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLMuscleFrequencyResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MuscleFrequency'] = GQLResolversParentTypes['MuscleFrequency']> = {
+  groupName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  groupSlug?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  lastTrained?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  muscleAlias?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  muscleId?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  muscleName?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  sessionsCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  totalSets?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLMuscleGroupResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MuscleGroup'] = GQLResolversParentTypes['MuscleGroup']> = {
   alias?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   category?: Resolver<GQLResolversTypes['MuscleGroupCategory'], ParentType, ContextType>;
@@ -4643,6 +4676,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   ingredient?: Resolver<Maybe<GQLResolversTypes['Ingredient']>, ParentType, ContextType, RequireFields<GQLQueryIngredientArgs, 'id'>>;
   locations?: Resolver<Array<GQLResolversTypes['Location']>, ParentType, ContextType>;
   meal?: Resolver<Maybe<GQLResolversTypes['Meal']>, ParentType, ContextType, RequireFields<GQLQueryMealArgs, 'id'>>;
+  muscleFrequency?: Resolver<Array<GQLResolversTypes['MuscleFrequency']>, ParentType, ContextType, RequireFields<GQLQueryMuscleFrequencyArgs, 'days' | 'userId'>>;
   muscleGroupCategories?: Resolver<Array<GQLResolversTypes['MuscleGroupCategory']>, ParentType, ContextType>;
   muscleGroupCategory?: Resolver<GQLResolversTypes['MuscleGroupCategory'], ParentType, ContextType, RequireFields<GQLQueryMuscleGroupCategoryArgs, 'id'>>;
   muscleGroupDistribution?: Resolver<GQLResolversTypes['MuscleGroupDistribution'], ParentType, ContextType, RequireFields<GQLQueryMuscleGroupDistributionArgs, 'days' | 'userId'>>;
@@ -5132,6 +5166,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   MealIngredient?: GQLMealIngredientResolvers<ContextType>;
   Message?: GQLMessageResolvers<ContextType>;
   MessengerInitialData?: GQLMessengerInitialDataResolvers<ContextType>;
+  MuscleFrequency?: GQLMuscleFrequencyResolvers<ContextType>;
   MuscleGroup?: GQLMuscleGroupResolvers<ContextType>;
   MuscleGroupCategory?: GQLMuscleGroupCategoryResolvers<ContextType>;
   MuscleGroupDistribution?: GQLMuscleGroupDistributionResolvers<ContextType>;

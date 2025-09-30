@@ -21,6 +21,7 @@ export function FrontBodyView({
   getPathProps,
   isRegionSelected,
   handleRegionClick,
+  hasMuscleData,
 }: BodyViewProps) {
   const Y_OFFSET = 20
   const LEFT_LABEL_OFFSET = 15
@@ -179,6 +180,7 @@ export function FrontBodyView({
           value={value}
           isRegionSelected={isRegionSelected}
           handleRegionClick={handleRegionClick}
+          hasMuscleData={hasMuscleData}
         />
       ))}
     </div>

@@ -7,7 +7,7 @@ import { DashboardHeader } from '../../trainer/components/dashboard-header'
 import { BodyMeasurementsProvider } from './components/body-measurements-context'
 import { LatestPRs } from './components/latest-prs/latest-prs'
 import { LogsSection } from './components/logs-section/logs-section'
-// import { MuscleHeatmapSection } from './components/muscle-heatmap/muscle-heatmap-section'
+import { MuscleHeatmapSection } from './components/muscle-heatmap/muscle-heatmap-section'
 import { SnapshotsSection } from './components/snapshots-section/snapshots-section'
 
 export default function ProgressPage() {
@@ -33,7 +33,7 @@ export default function ProgressPage() {
         </BodyMeasurementsProvider>
 
         {/* Muscle Heatmap Section */}
-        {/* <MuscleHeatmapSection /> */}
+        <MuscleHeatmapSection />
       </div>
     </div>
   )

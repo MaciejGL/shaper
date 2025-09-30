@@ -7,6 +7,18 @@ type MuscleGroupFrequency {
   lastTrained: String
 }
 
+# Individual Muscle Training Frequency Schema
+type MuscleFrequency {
+  muscleId: String!
+  muscleName: String!
+  muscleAlias: String!
+  groupSlug: String!
+  groupName: String!
+  sessionsCount: Int!
+  totalSets: Int!
+  lastTrained: String
+}
+
 type MuscleGroupDistribution {
   chest: Int!
   back: Int!
@@ -18,6 +30,7 @@ type MuscleGroupDistribution {
 
 extend type Query {
   muscleGroupFrequency(userId: ID!, days: Int = 30): [MuscleGroupFrequency!]!
+  muscleFrequency(userId: ID!, days: Int = 30): [MuscleFrequency!]!
 
   muscleGroupDistribution(userId: ID!, days: Int = 30): MuscleGroupDistribution!
 }

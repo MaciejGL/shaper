@@ -126,6 +126,90 @@ export const Query: GQLQueryResolvers<GQLContext> = {
     }))
   },
 
+  muscleFrequency: async (_parent, { userId, days = 30 }) => {
+    const startDate = subDays(new Date(), days)
+
+    // Get completed exercises with muscle groups for the user in the time period
+    const completedExercises = await prisma.trainingExercise.findMany({
+      where: {
+        completedAt: {
+          gte: startDate,
+        },
+        day: {
+          week: {
+            plan: {
+              assignedToId: userId,
+            },
+          },
+        },
+      },
+      include: {
+        base: {
+          include: {
+            muscleGroups: true,
+          },
+        },
+        sets: {
+          where: {
+            completedAt: {
+              not: null,
+            },
+          },
+        },
+      },
+    })
+
+    // Group by individual muscles and calculate stats
+    const muscleStats = new Map<
+      string,
+      {
+        muscleId: string
+        muscleName: string
+        muscleAlias: string
+        groupSlug: string
+        groupName: string
+        sessionsCount: number
+        totalSets: number
+        lastTrained: Date | null
+      }
+    >()
+
+    completedExercises.forEach((exercise) => {
+      if (!exercise.base?.muscleGroups) return
+
+      exercise.base.muscleGroups.forEach((muscleGroup) => {
+        const key = muscleGroup.id // Use individual muscle ID as key
+        const existing = muscleStats.get(key) || {
+          muscleId: muscleGroup.id,
+          muscleName: muscleGroup.name,
+          muscleAlias: muscleGroup.alias || muscleGroup.name,
+          groupSlug: muscleGroup.groupSlug,
+          groupName: muscleGroup.alias || muscleGroup.name, // This will be the group name
+          sessionsCount: 0,
+          totalSets: 0,
+          lastTrained: null,
+        }
+
+        existing.sessionsCount += 1
+        existing.totalSets += exercise.sets.length
+
+        if (
+          !existing.lastTrained ||
+          (exercise.completedAt && exercise.completedAt > existing.lastTrained)
+        ) {
+          existing.lastTrained = exercise.completedAt
+        }
+
+        muscleStats.set(key, existing)
+      })
+    })
+
+    return Array.from(muscleStats.values()).map((stat) => ({
+      ...stat,
+      lastTrained: stat.lastTrained?.toISOString() || null,
+    }))
+  },
+
   muscleGroupDistribution: async (_parent, { userId, days = 30 }) => {
     const startDate = subDays(new Date(), days)
 

@@ -18,3 +18,16 @@ query MuscleGroupFrequency($userId: ID!, $days: Int = 30) {
     lastTrained
   }
 }
+
+query MuscleFrequency($userId: ID!, $days: Int = 30) {
+  muscleFrequency(userId: $userId, days: $days) {
+    muscleId
+    muscleName
+    muscleAlias
+    groupSlug
+    groupName
+    sessionsCount
+    totalSets
+    lastTrained
+  }
+}

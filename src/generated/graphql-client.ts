@@ -871,6 +871,18 @@ export type GQLMoveExerciseInput = {
   targetDayId?: InputMaybe<Scalars['ID']['input']>;
 };
 
+export type GQLMuscleFrequency = {
+  __typename?: 'MuscleFrequency';
+  groupName: Scalars['String']['output'];
+  groupSlug: Scalars['String']['output'];
+  lastTrained?: Maybe<Scalars['String']['output']>;
+  muscleAlias: Scalars['String']['output'];
+  muscleId: Scalars['String']['output'];
+  muscleName: Scalars['String']['output'];
+  sessionsCount: Scalars['Int']['output'];
+  totalSets: Scalars['Int']['output'];
+};
+
 export type GQLMuscleGroup = {
   __typename?: 'MuscleGroup';
   alias?: Maybe<Scalars['String']['output']>;
@@ -2031,6 +2043,7 @@ export type GQLQuery = {
   ingredient?: Maybe<GQLIngredient>;
   locations: Array<GQLLocation>;
   meal?: Maybe<GQLMeal>;
+  muscleFrequency: Array<GQLMuscleFrequency>;
   muscleGroupCategories: Array<GQLMuscleGroupCategory>;
   muscleGroupCategory: GQLMuscleGroupCategory;
   muscleGroupDistribution: GQLMuscleGroupDistribution;
@@ -2259,6 +2272,12 @@ export type GQLQueryIngredientArgs = {
 
 export type GQLQueryMealArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryMuscleFrequencyArgs = {
+  days?: InputMaybe<Scalars['Int']['input']>;
+  userId: Scalars['ID']['input'];
 };
 
 
@@ -3567,6 +3586,14 @@ export type GQLMuscleGroupFrequencyQueryVariables = Exact<{
 
 
 export type GQLMuscleGroupFrequencyQuery = { __typename?: 'Query', muscleGroupFrequency: Array<{ __typename?: 'MuscleGroupFrequency', groupSlug: string, groupName: string, sessionsCount: number, totalSets: number, lastTrained?: string | undefined | null }> };
+
+export type GQLMuscleFrequencyQueryVariables = Exact<{
+  userId: Scalars['ID']['input'];
+  days?: InputMaybe<Scalars['Int']['input']>;
+}>;
+
+
+export type GQLMuscleFrequencyQuery = { __typename?: 'Query', muscleFrequency: Array<{ __typename?: 'MuscleFrequency', muscleId: string, muscleName: string, muscleAlias: string, groupSlug: string, groupName: string, sessionsCount: number, totalSets: number, lastTrained?: string | undefined | null }> };
 
 export type GQLProgressPageExercisesQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -6649,6 +6676,63 @@ useInfiniteMuscleGroupFrequencyQuery.getKey = (variables: GQLMuscleGroupFrequenc
 
 
 useMuscleGroupFrequencyQuery.fetcher = (variables: GQLMuscleGroupFrequencyQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMuscleGroupFrequencyQuery, GQLMuscleGroupFrequencyQueryVariables>(MuscleGroupFrequencyDocument, variables, options);
+
+export const MuscleFrequencyDocument = `
+    query MuscleFrequency($userId: ID!, $days: Int = 30) {
+  muscleFrequency(userId: $userId, days: $days) {
+    muscleId
+    muscleName
+    muscleAlias
+    groupSlug
+    groupName
+    sessionsCount
+    totalSets
+    lastTrained
+  }
+}
+    `;
+
+export const useMuscleFrequencyQuery = <
+      TData = GQLMuscleFrequencyQuery,
+      TError = unknown
+    >(
+      variables: GQLMuscleFrequencyQueryVariables,
+      options?: Omit<UseQueryOptions<GQLMuscleFrequencyQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLMuscleFrequencyQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLMuscleFrequencyQuery, TError, TData>(
+      {
+    queryKey: ['MuscleFrequency', variables],
+    queryFn: fetchData<GQLMuscleFrequencyQuery, GQLMuscleFrequencyQueryVariables>(MuscleFrequencyDocument, variables),
+    ...options
+  }
+    )};
+
+useMuscleFrequencyQuery.getKey = (variables: GQLMuscleFrequencyQueryVariables) => ['MuscleFrequency', variables];
+
+export const useInfiniteMuscleFrequencyQuery = <
+      TData = InfiniteData<GQLMuscleFrequencyQuery>,
+      TError = unknown
+    >(
+      variables: GQLMuscleFrequencyQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLMuscleFrequencyQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLMuscleFrequencyQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLMuscleFrequencyQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['MuscleFrequency.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLMuscleFrequencyQuery, GQLMuscleFrequencyQueryVariables>(MuscleFrequencyDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteMuscleFrequencyQuery.getKey = (variables: GQLMuscleFrequencyQueryVariables) => ['MuscleFrequency.infinite', variables];
+
+
+useMuscleFrequencyQuery.fetcher = (variables: GQLMuscleFrequencyQueryVariables, options?: RequestInit['headers']) => fetchData<GQLMuscleFrequencyQuery, GQLMuscleFrequencyQueryVariables>(MuscleFrequencyDocument, variables, options);
 
 export const ProgressPageExercisesDocument = `
     query ProgressPageExercises($userId: ID!) {
