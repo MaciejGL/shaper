@@ -152,7 +152,7 @@ export function BodyProgressTimeline({ onEditLog }: BodyProgressTimelineProps) {
 
   return (
     <div className="space-y-4">
-      {[...progressLogs, ...progressLogs, ...progressLogs].map((log) => (
+      {progressLogs.map((log) => (
         <div className="space-y-2" key={log.id}>
           <div className="flex gap-2 items-center">
             <div className="text-sm self-end">
