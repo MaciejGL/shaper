@@ -173,7 +173,7 @@ export function SnapshotsSection() {
                       Previous
                     </div>
                     <div
-                      className="aspect-[3/4] bg-muted/20 rounded-md flex items-center justify-center relative overflow-hidden cursor-pointer hover:bg-muted/30 transition-colors"
+                      className="aspect-[3/4] bg-card-on-card rounded-md flex items-center justify-center relative overflow-hidden cursor-pointer hover:bg-muted/30 transition-colors"
                       onClick={() =>
                         previousSnapshot &&
                         handleSnapshotClick(previousSnapshot)
@@ -202,7 +202,7 @@ export function SnapshotsSection() {
                     <div className="text-xs text-center text-muted-foreground">
                       {previousSnapshot
                         ? formatConditionalDate(new Date(previousSnapshot.date))
-                        : 'No data'}
+                        : ''}
                     </div>
                   </div>
                 </div>

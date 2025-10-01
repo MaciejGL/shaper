@@ -191,7 +191,12 @@ export function ProgressPhotoForm({
       {showSubmitButton && (
         <Button
           type="submit"
-          disabled={isLoading}
+          disabled={
+            isLoading ||
+            [formData.image1Url, formData.image2Url, formData.image3Url].every(
+              (url) => !url,
+            )
+          }
           loading={isLoading}
           className="w-full"
         >

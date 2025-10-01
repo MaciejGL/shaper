@@ -1,0 +1,15 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.hypertro.mobile",
+      "sha256_cert_fingerprints": [
+        "6F:FC:2B:26:BA:0F:77:CD:2C:82:DA:99:1A:E0:0E:05:A0:D5:60:70:A3:42:FC:20:41:09:17:AD:A9:63:84:A7"
+      ]
+    }
+  }
+]

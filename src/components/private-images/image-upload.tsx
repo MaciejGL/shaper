@@ -1,11 +1,12 @@
 'use client'
 
-import { ImageIcon, Upload, X } from 'lucide-react'
+import { Camera, ImageIcon, Upload, X } from 'lucide-react'
 import Image from 'next/image'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { cn } from '../../lib/utils'
+import { useMobileApp } from '../mobile-app-bridge'
 import { Button } from '../ui/button'
 
 interface PrivateImageUploadProps {
@@ -36,6 +37,8 @@ export function PrivateImageUpload({
   disabled = false,
 }: PrivateImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
+  const { isNativeApp } = useMobileApp()
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -93,6 +96,10 @@ export function PrivateImageUpload({
     onImageChange(undefined)
   }
 
+  const handleCameraCapture = () => {
+    cameraInputRef.current?.click()
+  }
+
   return (
     <div className={cn('space-y-2', className)}>
       <div className="text-xs text-center text-muted-foreground font-medium">
@@ -145,6 +152,34 @@ export function PrivateImageUpload({
           </label>
         )}
       </div>
+
+      {/* Camera button - only show on mobile */}
+      {isNativeApp && (
+        <Button
+          type="button"
+          variant="tertiary"
+          size="sm"
+          className="w-full"
+          onClick={handleCameraCapture}
+          disabled={isUploading || disabled}
+          iconOnly={<Camera />}
+        >
+          Take Photo
+        </Button>
+      )}
+
+      {/* Hidden camera input */}
+      {isNativeApp && (
+        <input
+          ref={cameraInputRef}
+          type="file"
+          className="hidden"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileSelect}
+          disabled={isUploading || disabled}
+        />
+      )}
     </div>
   )
 }

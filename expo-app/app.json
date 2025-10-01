@@ -129,6 +129,7 @@
           "cameraPermission": "Allow Hypro to access your camera for progress photos"
         }
       ],
+      "expo-apple-authentication",
       "expo-web-browser"
     ],
     "experiments": {

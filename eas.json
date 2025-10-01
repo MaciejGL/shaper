@@ -12,7 +12,12 @@
       "distribution": "internal"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "ios": {
+        "entitlements": {
+          "com.apple.developer.applesignin": ["Default"]
+        }
+      }
     }
   },
   "submit": {
