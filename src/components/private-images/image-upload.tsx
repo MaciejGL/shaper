@@ -1,12 +1,12 @@
 'use client'
 
-import { Camera, ImageIcon, Upload, X } from 'lucide-react'
+import { ImageIcon, Upload, X } from 'lucide-react'
 import Image from 'next/image'
 import React, { useState } from 'react'
 import { toast } from 'sonner'
 
 import { cn } from '../../lib/utils'
-import { useMobileApp } from '../mobile-app-bridge'
+// import { useMobileApp } from '../mobile-app-bridge'
 import { Button } from '../ui/button'
 
 interface PrivateImageUploadProps {
@@ -37,7 +37,7 @@ export function PrivateImageUpload({
   disabled = false,
 }: PrivateImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
-  const { isNativeApp } = useMobileApp()
+  // const { isNativeApp } = useMobileApp()
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -149,7 +149,7 @@ export function PrivateImageUpload({
       </div>
 
       {/* Camera button - only show on mobile */}
-      {isNativeApp && (
+      {/* {isNativeApp && (
         <label className="w-full">
           <Button
             type="button"
@@ -170,7 +170,7 @@ export function PrivateImageUpload({
             disabled={isUploading || disabled}
           />
         </label>
-      )}
+      )} */}
     </div>
   )
 }
