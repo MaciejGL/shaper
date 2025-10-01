@@ -103,3 +103,89 @@ export function calculateMuscleGroupIntensity(
 
   return muscleIntensity
 }
+
+export interface MuscleGroupCategorization {
+  overfocused: string[]
+  balanced: string[]
+  underfocused: string[]
+}
+
+/**
+ * Categorizes muscle groups based on training volume share and recency
+ * Uses IQR-based thresholds for adaptive categorization
+ * @param groupedMuscleData - Aggregated muscle group data
+ * @param now - Current date for recency calculation
+ * @returns Categorized muscle groups
+ */
+export function categorizeMuscleGroups(
+  groupedMuscleData: Record<string, GroupedMuscleData>,
+  now: Date = new Date(),
+): MuscleGroupCategorization {
+  const entries = Object.entries(groupedMuscleData)
+  const totalSets = entries.reduce((sum, [, group]) => sum + group.totalSets, 0)
+
+  // If no training data, all groups are underfocused
+  if (totalSets === 0) {
+    return {
+      overfocused: [],
+      balanced: [],
+      underfocused: entries.map(([groupName]) => groupName),
+    }
+  }
+
+  // Calculate share of total sets and days since last training for each group
+  const groupStats = entries.map(([groupName, group]) => {
+    const share = group.totalSets / totalSets
+    const daysSinceLast = group.lastTrained
+      ? (now.getTime() - new Date(group.lastTrained).getTime()) /
+        (1000 * 60 * 60 * 24)
+      : Infinity
+
+    return {
+      groupName,
+      sets: group.totalSets,
+      share,
+      daysSinceLast,
+    }
+  })
+
+  // Calculate IQR thresholds on shares
+  const shares = groupStats.map((g) => g.share).sort((a, b) => a - b)
+  const q1Index = Math.floor(0.25 * (shares.length - 1))
+  const q3Index = Math.floor(0.75 * (shares.length - 1))
+  const q1 = shares[q1Index] || 0
+  const q3 = shares[q3Index] || 0
+  const iqr = Math.max(1e-6, q3 - q1)
+
+  const overfocusedThreshold = q3 + 1.5 * iqr
+  const underfocusedThreshold = Math.max(0, q1 - 1.5 * iqr)
+
+  const overfocused: string[] = []
+  const balanced: string[] = []
+  const underfocused: string[] = []
+
+  groupStats.forEach(({ groupName, sets, share, daysSinceLast }) => {
+    // Overfocused: High share OR (has sets AND share >= 60%)
+    if (share >= overfocusedThreshold || (sets >= 1 && share >= 0.6)) {
+      overfocused.push(groupName)
+    }
+    // Underfocused: Low share OR no sets OR not trained in 14+ days
+    else if (
+      share <= underfocusedThreshold ||
+      sets === 0 ||
+      daysSinceLast > 14
+    ) {
+      underfocused.push(groupName)
+    }
+    // Balanced: Everything else
+    else {
+      balanced.push(groupName)
+    }
+  })
+
+  return {
+    overfocused,
+    balanced,
+    underfocused,
+  }
+}

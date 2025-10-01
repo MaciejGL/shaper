@@ -436,7 +436,7 @@ export default function PublicProfilePage() {
               <br />
               Desk worker: shoulder pain → pain-free press in 8 weeks
               <br />
-              Hyprophy: arm +3.2 cm in 10 weeks
+              Hypertrophy: arm +3.2 cm in 10 weeks
               <br />
               Endurance: 10K 50:00 → 44:30 in 12 weeks
               <br />

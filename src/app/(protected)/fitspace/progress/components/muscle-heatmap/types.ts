@@ -1,6 +1,9 @@
 import type { GQLMuscleFrequency } from '@/generated/graphql-client'
 
-import type { GroupedMuscleData } from '../../utils/muscle-aggregation'
+import type {
+  GroupedMuscleData,
+  MuscleGroupCategorization,
+} from '../../utils/muscle-aggregation'
 
 export interface MuscleHeatmapData {
   muscleIntensity: Record<string, number>
@@ -21,4 +24,5 @@ export interface SelectedMuscleDetailsProps {
 
 export interface QuickStatsProps {
   muscleIntensity: Record<string, number> // Now contains muscle group names as keys
+  muscleCategorization: MuscleGroupCategorization // Categorized muscle groups
 }

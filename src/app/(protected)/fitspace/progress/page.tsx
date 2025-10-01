@@ -21,18 +21,14 @@ export default function ProgressPage() {
       />
 
       <div className="space-y-6">
-        {/* Latest PRs Section */}
-        <LatestPRs />
-
-        {/* Logs Section */}
         <BodyMeasurementsProvider>
-          <LogsSection />
-
-          {/* Snapshots Section */}
           <SnapshotsSection />
+
+          <LogsSection />
         </BodyMeasurementsProvider>
 
-        {/* Muscle Heatmap Section */}
+        <LatestPRs />
+
         <MuscleHeatmapSection />
       </div>
     </div>

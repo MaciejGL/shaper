@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { CardSkeleton } from '@/components/card-skeleton'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { useUser } from '@/context/user-context'
 import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
 import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 
@@ -39,6 +40,7 @@ export function FavouriteWorkoutsList({
   workoutStatus,
   isStarting,
 }: FavouriteWorkoutsListProps) {
+  const { hasPremium } = useUser()
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   if (loading) {
@@ -57,11 +59,17 @@ export function FavouriteWorkoutsList({
     )
   }
 
+  const hasReachedLimit = favouriteWorkouts.length >= (hasPremium ? -1 : 3)
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Custom Templates</h3>
-        <Button onClick={() => setIsCreateModalOpen(true)} iconOnly={<Plus />}>
+        <Button
+          onClick={() => setIsCreateModalOpen(true)}
+          iconOnly={<Plus />}
+          disabled={hasReachedLimit}
+        >
           Create
         </Button>
       </div>
@@ -108,22 +116,24 @@ function EmptyFavouritesState({
 }) {
   const canStartMessage =
     workoutStatus.status === 'active-plan-workout'
-      ? 'You have a workout scheduled in your training plan today.'
+      ? 'You have already a workout scheduled in your training plan for today.'
       : workoutStatus.message
 
   return (
-    <Card>
+    <Card borderless>
       <CardContent className="flex flex-col items-center justify-center text-center py-6">
         <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
           <Dumbbell className="w-6 h-6 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-semibold mb-2">No Custom Templates Yet</h3>
+        <h3 className="text-lg font-semibold mb-2">
+          Create first custom template
+        </h3>
         <p className="text-muted-foreground mb-4 max-w-sm mx-auto">
           Create your first custom template to quickly start your preferred
           exercise routines.
         </p>
         {workoutStatus.status === 'active-plan-workout' && (
-          <p className="text-sm text-muted-foreground mb-4 max-w-sm mx-auto">
+          <p className="text-sm text-muted-foreground my-4 max-w-sm mx-auto">
             {canStartMessage}
           </p>
         )}

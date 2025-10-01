@@ -1,10 +1,11 @@
 'use client'
 
-import { Salad } from 'lucide-react'
+import { ArrowRight, Salad } from 'lucide-react'
 import { useState } from 'react'
 
 import { EmptyStateCard } from '@/components/empty-state-card'
 import { MacroCard } from '@/components/macro-card/macro-card'
+import { ButtonLink } from '@/components/ui/button-link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 import { useGetMyMacroTargetsQuery } from '@/generated/graphql-client'
@@ -30,6 +31,16 @@ export default function NutritionPage() {
           title="Macro targets not set"
           description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}
           icon={Salad}
+          cta={
+            user?.trainerId && (
+              <ButtonLink
+                href="/fitspace/explore?tab=trainers"
+                iconEnd={<ArrowRight />}
+              >
+                Find a Trainer
+              </ButtonLink>
+            )
+          }
         />
       </div>
     )

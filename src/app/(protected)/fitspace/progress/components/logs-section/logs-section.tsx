@@ -3,6 +3,7 @@
 import { List, Plus, Weight } from 'lucide-react'
 import { useState } from 'react'
 
+import { PremiumGate } from '@/components/premium-gate'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -25,7 +26,7 @@ import { StatCard } from '../stat-card'
 import { MuscleLogsDrawer } from './muscle-logs-drawer'
 
 export function LogsSection() {
-  const { user } = useUser()
+  const { user, hasPremium } = useUser()
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const {
     bodyMeasures,
@@ -45,94 +46,95 @@ export function LogsSection() {
     <>
       <Card borderless>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 whitespace-nowrap">
             <Weight className="h-5 w-5 text-blue-500" />
             Body Measurements
           </CardTitle>
-        </CardHeader>
-
-        <MeasurementChart
-          measurements={bodyMeasures}
-          field="weight"
-          label="Weight"
-          unit={weightUnit || GQLWeightUnit.Kg}
-          className="bg-black/90 dark:bg-black/20 p-2 w-full rounded-lg"
-        />
-        <CardContent>
-          <div className="space-y-4">
-            {/* Weight Progress Chart Placeholder */}
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <MeasurementCategoryDrawer
-                key={'weight'}
-                category={measurementCategories[0]}
-                measurements={bodyMeasures}
-                onUpdate={onMeasurementAdded}
-                focusField={'weight'}
-              >
-                <button className="text-left w-full">
-                  <StatCard
-                    label="Current Weight"
-                    value={
-                      toDisplayWeight(getLatestMeasurement('weight')) ||
-                      undefined
-                    }
-                    unit={weightUnit}
-                    trend={getTrend('weight')}
-                    size="sm"
-                    isLoading={isLoading}
-                    isOnCard
-                  />
-                </button>
-              </MeasurementCategoryDrawer>
-
-              <MeasurementCategoryDrawer
-                key={'bodyFat'}
-                category={measurementCategories[0]}
-                measurements={bodyMeasures}
-                onUpdate={onMeasurementAdded}
-                focusField={'bodyFat'}
-              >
-                <button className="text-left h-full w-full">
-                  <StatCard
-                    label="Body Fat"
-                    value={
-                      getLatestMeasurement('bodyFat') ||
-                      getEstimatedBodyFat()?.percentage
-                    }
-                    unit="%"
-                    size="sm"
-                    isLoading={isLoading}
-                    isOnCard
-                  />
-                </button>
-              </MeasurementCategoryDrawer>
-            </div>
-          </div>
-        </CardContent>
-        <CardFooter>
-          <div className="grid grid-cols-2 gap-2 w-full">
+          <AddMeasurementModal onSuccess={onMeasurementAdded}>
             <Button
-              variant="tertiary"
+              variant="default"
               size="sm"
-              onClick={() => setIsDrawerOpen(true)}
-              iconStart={<List />}
-              className="w-full"
+              iconStart={<Plus />}
+              disabled={!hasPremium}
             >
-              Detailed Logs
+              Add Logs
             </Button>
-            <AddMeasurementModal onSuccess={onMeasurementAdded}>
+          </AddMeasurementModal>
+        </CardHeader>
+        <PremiumGate feature="Progress Logs" compact>
+          <MeasurementChart
+            measurements={bodyMeasures}
+            field="weight"
+            label="Weight"
+            unit={weightUnit || GQLWeightUnit.Kg}
+            className="bg-black/90 dark:bg-black/20 p-2 w-full rounded-lg"
+          />
+          <CardContent>
+            <div className="space-y-4">
+              {/* Weight Progress Chart Placeholder */}
+              {/* Quick Stats */}
+              <div className="grid grid-cols-2 gap-4">
+                <MeasurementCategoryDrawer
+                  key={'weight'}
+                  category={measurementCategories[0]}
+                  measurements={bodyMeasures}
+                  onUpdate={onMeasurementAdded}
+                  focusField={'weight'}
+                >
+                  <button className="text-left w-full">
+                    <StatCard
+                      label="Current Weight"
+                      value={
+                        toDisplayWeight(getLatestMeasurement('weight')) ||
+                        undefined
+                      }
+                      unit={weightUnit}
+                      trend={getTrend('weight')}
+                      size="sm"
+                      isLoading={isLoading}
+                      isOnCard
+                    />
+                  </button>
+                </MeasurementCategoryDrawer>
+
+                <MeasurementCategoryDrawer
+                  key={'bodyFat'}
+                  category={measurementCategories[0]}
+                  measurements={bodyMeasures}
+                  onUpdate={onMeasurementAdded}
+                  focusField={'bodyFat'}
+                >
+                  <button className="text-left h-full w-full">
+                    <StatCard
+                      label="Body Fat"
+                      value={
+                        getLatestMeasurement('bodyFat') ||
+                        getEstimatedBodyFat()?.percentage
+                      }
+                      unit="%"
+                      size="sm"
+                      isLoading={isLoading}
+                      isOnCard
+                    />
+                  </button>
+                </MeasurementCategoryDrawer>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter>
+            <div className="grid grid-cols-1 w-full">
               <Button
-                variant="default"
+                variant="tertiary"
                 size="sm"
-                iconStart={<Plus />}
+                onClick={() => setIsDrawerOpen(true)}
+                iconStart={<List />}
                 className="w-full"
               >
-                Add Logs
+                Detailed Logs
               </Button>
-            </AddMeasurementModal>
-          </div>
-        </CardFooter>
+            </div>
+          </CardFooter>
+        </PremiumGate>
       </Card>
 
       <MuscleLogsDrawer

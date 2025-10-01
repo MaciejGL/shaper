@@ -1,51 +1,55 @@
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
-import { VOLUME_THRESHOLDS } from '../../constants/heatmap-colors'
+import { HEATMAP_COLORS } from '../../constants/heatmap-colors'
 
 import type { QuickStatsProps } from './types'
 
-export function QuickStats({ muscleIntensity }: QuickStatsProps) {
-  // Now muscleIntensity contains muscle group names as keys (e.g., "Shoulders", "Chest")
-  // We can use the keys directly as they are already the display names
-  const muscleEntries = Object.entries(muscleIntensity).map(
-    ([groupName, intensity]) => {
-      return [groupName, intensity] as [string, number]
-    },
-  )
+export function QuickStats({
+  muscleIntensity,
+  muscleCategorization,
+}: QuickStatsProps) {
+  // Helper function to get badge color based on intensity
+  const getBadgeColorClass = (intensity: number) => {
+    const colorLevel = HEATMAP_COLORS.getColorForIntensity(intensity)
+    return cn(
+      'border-0 text-white font-medium',
+      colorLevel.bgColor,
+      colorLevel.textColor,
+    )
+  }
 
-  // Use thresholds from constants
-  const highOverload = muscleEntries
-    .filter(([, intensity]) => intensity >= VOLUME_THRESHOLDS.HIGH)
-    .sort(([, a], [, b]) => b - a)
-
-  const mediumOverload = muscleEntries
-    .filter(
-      ([, intensity]) =>
-        intensity >= VOLUME_THRESHOLDS.MEDIUM_MIN &&
-        intensity < VOLUME_THRESHOLDS.MEDIUM_MAX,
+  // Use the new categorization logic based on training volume share and recency
+  const overfocused = muscleCategorization.overfocused
+    .map(
+      (groupName) =>
+        [groupName, muscleIntensity[groupName] || 0] as [string, number],
     )
     .sort(([, a], [, b]) => b - a)
 
-  const lowOverload = muscleEntries
-    .filter(
-      ([, intensity]) =>
-        intensity >= VOLUME_THRESHOLDS.LOW_MIN &&
-        intensity < VOLUME_THRESHOLDS.LOW_MAX,
+  const balanced = muscleCategorization.balanced
+    .map(
+      (groupName) =>
+        [groupName, muscleIntensity[groupName] || 0] as [string, number],
     )
     .sort(([, a], [, b]) => b - a)
 
-  // Debug: console.log(highOverload, mediumOverload, lowOverload)
+  const underfocused = muscleCategorization.underfocused
+    .map(
+      (groupName) =>
+        [groupName, muscleIntensity[groupName] || 0] as [string, number],
+    )
+    .sort(([, a], [, b]) => b - a)
 
   return (
     <div className="grid grid-cols-3 gap-2 text-center">
       <div className="space-y-2">
-        <div className="text-sm font-medium">High Volume</div>
+        <div className="text-sm font-medium">Overfocused</div>
         <div className="flex flex-col gap-1">
-          {highOverload.map(([muscleName]) => (
+          {overfocused.map(([muscleName, intensity]) => (
             <Badge
               key={muscleName}
-              variant="secondary"
-              className="w-full"
+              className={cn('w-full', getBadgeColorClass(intensity))}
               size="md"
             >
               {muscleName}
@@ -54,13 +58,12 @@ export function QuickStats({ muscleIntensity }: QuickStatsProps) {
         </div>
       </div>
       <div className="space-y-2">
-        <div className="text-sm font-medium">Medium Volume</div>
+        <div className="text-sm font-medium">Balanced</div>
         <div className="flex flex-col gap-1">
-          {mediumOverload.map(([muscleName]) => (
+          {balanced.map(([muscleName, intensity]) => (
             <Badge
               key={muscleName}
-              variant="secondary"
-              className="w-full"
+              className={cn('w-full', getBadgeColorClass(intensity))}
               size="md"
             >
               {muscleName}
@@ -69,13 +72,12 @@ export function QuickStats({ muscleIntensity }: QuickStatsProps) {
         </div>
       </div>
       <div className="space-y-2">
-        <div className="text-sm font-medium">Low Volume</div>
+        <div className="text-sm font-medium">Underfocused</div>
         <div className="flex flex-col gap-1">
-          {lowOverload.map(([muscleName]) => (
+          {underfocused.map(([muscleName, intensity]) => (
             <Badge
               key={muscleName}
-              variant="secondary"
-              className="w-full"
+              className={cn('w-full', getBadgeColorClass(intensity))}
               size="md"
             >
               {muscleName}

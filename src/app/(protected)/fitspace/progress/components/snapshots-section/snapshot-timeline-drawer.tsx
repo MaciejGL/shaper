@@ -18,7 +18,6 @@ import { CreateProgressLogDialog } from '../body-progress/create-progress-log-di
 interface SnapshotTimelineDrawerProps {
   isOpen: boolean
   onOpenChange: (open: boolean) => void
-  userId: string
 }
 
 export function SnapshotTimelineDrawer({

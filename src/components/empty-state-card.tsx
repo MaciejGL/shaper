@@ -5,10 +5,12 @@ export function EmptyStateCard({
   title,
   description,
   icon,
+  cta,
 }: {
   title: string
   description: string
   icon: React.ElementType
+  cta?: React.ReactNode
 }) {
   return (
     <Card
@@ -21,6 +23,7 @@ export function EmptyStateCard({
         <div className="text-muted-foreground text-center max-w-[35ch] text-sm">
           {description}
         </div>
+        {cta && <div className="mt-4">{cta}</div>}
       </div>
     </Card>
   )

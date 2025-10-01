@@ -6,6 +6,7 @@ import { useMuscleFrequencyQuery } from '@/generated/graphql-client'
 import {
   aggregateMuscleDataToGroups,
   calculateMuscleGroupIntensity,
+  categorizeMuscleGroups,
 } from '../../utils/muscle-aggregation'
 
 export function useMuscleHeatmap() {
@@ -53,9 +54,13 @@ export function useMuscleHeatmap() {
     // Calculate intensity for muscle groups using utility function
     const muscleIntensity = calculateMuscleGroupIntensity(groupedMuscleData)
 
+    // Categorize muscle groups based on training volume share and recency
+    const muscleCategorization = categorizeMuscleGroups(groupedMuscleData)
+
     return {
       muscleFocusData, // Grouped data for backward compatibility
       muscleIntensity, // Muscle group intensity
+      muscleCategorization, // Categorized muscle groups
       totalSets,
       individualMuscleData, // Individual muscle data
       groupedMuscleData, // Grouped muscle data

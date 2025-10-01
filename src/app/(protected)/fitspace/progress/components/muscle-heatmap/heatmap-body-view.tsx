@@ -11,7 +11,6 @@ import { cn } from '@/lib/utils'
 import {
   HEATMAP_COLORS,
   getIntensityColor,
-  getIntensityOpacity,
 } from '../../constants/heatmap-colors'
 import { LABEL_TO_GROUP_MAPPING } from '../../constants/muscle-groups'
 
@@ -62,9 +61,6 @@ export function HeatmapBodyView({
           muscleGroupName === selectedMuscle &&
           'ring-2 ring-blue-500',
       ),
-      style: {
-        fillOpacity: getIntensityOpacity(intensity),
-      },
       onClick: () => {
         if (muscleGroupName) {
           onMuscleClick(muscleGroupName)
@@ -113,7 +109,7 @@ export function HeatmapBodyView({
   return (
     <div className="relative">
       <Tabs defaultValue="front">
-        <TabsList className="mx-auto mb-4 border grid grid-cols-[1fr_auto_1fr]">
+        <TabsList className="mx-auto mb-4 border border-border grid grid-cols-[1fr_auto_1fr]">
           <TabsTrigger value="front">Front</TabsTrigger>
           <TabsTrigger value="swap" disabled>
             <ArrowLeftRight className="size-3" />

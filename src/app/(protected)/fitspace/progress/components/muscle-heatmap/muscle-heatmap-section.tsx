@@ -19,6 +19,7 @@ export function MuscleHeatmapSection() {
 
   const {
     muscleIntensity,
+    muscleCategorization,
     totalSets,
     individualMuscleData,
     groupedMuscleData,
@@ -88,7 +89,16 @@ export function MuscleHeatmapSection() {
 
           {/* Quick Stats */}
           <div className="pt-6">
-            <QuickStats muscleIntensity={muscleIntensity} />
+            <QuickStats
+              muscleIntensity={muscleIntensity}
+              muscleCategorization={
+                muscleCategorization || {
+                  overfocused: [],
+                  balanced: [],
+                  underfocused: [],
+                }
+              }
+            />
           </div>
         </div>
       </CardContent>

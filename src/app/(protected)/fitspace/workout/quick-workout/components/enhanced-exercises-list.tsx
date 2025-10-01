@@ -141,7 +141,7 @@ export function EnhancedExercisesList({
               return (
                 <div key={letter + index}>
                   {!isNumber && (
-                    <h3 className="text-2xl font-semibold bg-background/80 backdrop-blur-xs px-2 sticky top-0 z-10">
+                    <h3 className="text-2xl font-semibold bg-background/80 backdrop-blur-xs px-2 sticky -top-6 z-10">
                       {letter}
                     </h3>
                   )}

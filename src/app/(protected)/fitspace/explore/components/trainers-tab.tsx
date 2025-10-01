@@ -58,28 +58,13 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="text-center mb-6">
-          <h2 className="text-lg font-semibold">Featured Trainers</h2>
-          <p className="text-sm text-muted-foreground">
-            Connect with our expert trainers for personalized coaching
-          </p>
-        </div>
-        <div className="space-y-3">
-          <LoadingSkeleton count={3} variant="md" />
-        </div>
+      <div className="space-y-3">
+        <LoadingSkeleton count={3} variant="md" />
       </div>
     )
   }
   return (
-    <div className="space-y-4">
-      <div className="text-center mb-6">
-        <h2 className="text-lg font-semibold">Featured Trainers</h2>
-        <p className="text-sm text-muted-foreground">
-          Connect with our expert trainers for personalized coaching
-        </p>
-      </div>
-
+    <>
       <div className="space-y-3">
         {trainers.length === 0 ? (
           <Card>
@@ -109,6 +94,6 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
         showRequestCoaching={true}
         onRequestCoaching={handleRequestCoaching}
       />
-    </div>
+    </>
   )
 }

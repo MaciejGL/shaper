@@ -30,7 +30,7 @@ export function LatestPRs() {
             Latest Personal Records
           </CardTitle>
           <Button
-            variant="ghost"
+            variant="tertiary"
             size="sm"
             onClick={() => setIsDrawerOpen(true)}
             iconEnd={<ChevronRight className="h-4 w-4" />}

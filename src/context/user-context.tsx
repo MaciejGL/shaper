@@ -95,7 +95,7 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     session,
     user: session.status === 'authenticated' ? data?.userBasic : undefined,
     subscription: session.status === 'authenticated' ? subscription : undefined,
-    hasPremium: session.status === 'authenticated' ? hasPremium : false,
+    hasPremium: false, //session.status === 'authenticated' ? hasPremium : false,
     isLoading:
       session.status === 'loading' ||
       isLoadingUserBasic ||
