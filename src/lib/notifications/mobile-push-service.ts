@@ -69,7 +69,6 @@ export async function sendMobilePushNotifications({
         },
         ...(badge !== undefined && { badge }),
       }))
-    console.log('mobilePushTokens', messages)
 
     if (messages.length === 0) {
       console.warn('📱 No valid Expo push tokens found')
