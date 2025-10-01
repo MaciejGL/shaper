@@ -31,7 +31,7 @@ function shouldSendCheckinNotification(
   schedule: CheckinSchedule,
   lastValidCompletion: CheckinCompletion | undefined,
   userTimezone: string,
-  reminderHour: number = 21,
+  reminderHour: number = 8,
 ): boolean {
   // Check if it's the right time (8 AM in user's timezone)
   const currentHourInUserTz = parseInt(
