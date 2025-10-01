@@ -234,10 +234,7 @@ export function AddMeasurementModal({
   const hasValues = Object.values(form).some((value) => value !== '')
 
   const handleDelete = () => {
-    if (
-      measurement &&
-      confirm('Are you sure you want to delete this measurement?')
-    ) {
+    if (measurement) {
       deleteMutation({ id: measurement.id })
     }
   }

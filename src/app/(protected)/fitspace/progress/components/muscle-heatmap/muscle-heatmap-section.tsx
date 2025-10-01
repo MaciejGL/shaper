@@ -21,9 +21,7 @@ export function MuscleHeatmapSection() {
     muscleIntensity,
     muscleCategorization,
     totalSets,
-    individualMuscleData,
     groupedMuscleData,
-    rawMuscleData,
     isLoading,
     error,
   } = useMuscleHeatmap()
@@ -78,8 +76,6 @@ export function MuscleHeatmapSection() {
                   <SelectedMuscleDetails
                     selectedMuscle={selectedMuscle}
                     muscleIntensity={muscleIntensity}
-                    individualMuscleData={individualMuscleData}
-                    rawMuscleData={rawMuscleData}
                     groupedMuscleData={groupedMuscleData}
                   />
                 </div>

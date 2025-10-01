@@ -5,11 +5,8 @@ import type { SelectedMuscleDetailsProps } from './types'
 export function SelectedMuscleDetails({
   selectedMuscle,
   muscleIntensity,
-  individualMuscleData,
-  rawMuscleData,
   groupedMuscleData,
 }: SelectedMuscleDetailsProps) {
-  // selectedMuscle is now a muscle group name (e.g., "Shoulders")
   const groupData = groupedMuscleData?.[selectedMuscle]
   const intensity = muscleIntensity[selectedMuscle] || 0
   const sets = groupData?.totalSets || 0

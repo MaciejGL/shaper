@@ -128,6 +128,7 @@ export function MeasurementForm({
 
       onDataChange(processedData)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form, selectedDate]) // Remove onDataChange from dependencies to prevent infinite loops
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -17,8 +17,6 @@ export interface MuscleHeatmapData {
 export interface SelectedMuscleDetailsProps {
   selectedMuscle: string // Now contains muscle group name (e.g., "Shoulders")
   muscleIntensity: Record<string, number> // Now contains muscle group names as keys
-  individualMuscleData: Record<string, number>
-  rawMuscleData: GQLMuscleFrequency[] | undefined
   groupedMuscleData?: Record<string, GroupedMuscleData>
 }
 
