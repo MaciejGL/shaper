@@ -2,7 +2,7 @@
 
 import { Camera, ImageIcon, Upload, X } from 'lucide-react'
 import Image from 'next/image'
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { toast } from 'sonner'
 
 import { cn } from '../../lib/utils'
@@ -38,7 +38,6 @@ export function PrivateImageUpload({
 }: PrivateImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false)
   const { isNativeApp } = useMobileApp()
-  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -96,10 +95,6 @@ export function PrivateImageUpload({
     onImageChange(undefined)
   }
 
-  const handleCameraCapture = () => {
-    cameraInputRef.current?.click()
-  }
-
   return (
     <div className={cn('space-y-2', className)}>
       <div className="text-xs text-center text-muted-foreground font-medium">
@@ -155,30 +150,26 @@ export function PrivateImageUpload({
 
       {/* Camera button - only show on mobile */}
       {isNativeApp && (
-        <Button
-          type="button"
-          variant="tertiary"
-          size="sm"
-          className="w-full"
-          onClick={handleCameraCapture}
-          disabled={isUploading || disabled}
-          iconOnly={<Camera />}
-        >
-          Take Photo
-        </Button>
-      )}
-
-      {/* Hidden camera input */}
-      {isNativeApp && (
-        <input
-          ref={cameraInputRef}
-          type="file"
-          className="hidden"
-          accept="image/*"
-          capture="environment"
-          onChange={handleFileSelect}
-          disabled={isUploading || disabled}
-        />
+        <label className="w-full">
+          <Button
+            type="button"
+            variant="tertiary"
+            size="sm"
+            className="w-full"
+            disabled={isUploading || disabled}
+            iconOnly={<Camera />}
+          >
+            Take Photo
+          </Button>
+          <input
+            type="file"
+            className="hidden"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileSelect}
+            disabled={isUploading || disabled}
+          />
+        </label>
       )}
     </div>
   )

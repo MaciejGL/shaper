@@ -25,7 +25,7 @@ export function PremiumGate({
 }: PremiumGateProps) {
   const { hasPremium, isLoading } = useUser()
 
-  // // If user has premium access, show the content
+  // If user has premium access, show the content
   if (hasPremium || isLoading) {
     return children
   }
@@ -36,8 +36,10 @@ export function PremiumGate({
       {/* Show partial content if allowed */}
       {showPartialContent && (
         <div className="mb-6 opacity-50 pointer-events-none relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-10" />
-          <div className="w-full h-full">{children}</div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background z-10 rounded-xl" />
+          <div className="w-full max-h-[300px] rounded-xl overflow-hidden">
+            {children}
+          </div>
         </div>
       )}
 

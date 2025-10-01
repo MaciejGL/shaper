@@ -1,4 +1,4 @@
-import { differenceInDays, isPast, startOfDay } from 'date-fns'
+import { addDays, differenceInDays, getDay, isPast, startOfDay } from 'date-fns'
 
 import {
   GQLMutationResolvers,
@@ -14,6 +14,89 @@ import {
   getUserCheckinSchedule,
   updateCheckinSchedule,
 } from './factory'
+
+/**
+ * Calculate the first expected checkin date from schedule creation
+ * This should align with how calculateNextCheckinDate works for first-time schedules
+ */
+function calculateFirstCheckinDate(
+  frequency: string,
+  dayOfWeek: number | null,
+  dayOfMonth: number | null,
+  scheduleCreatedAt: Date,
+): Date {
+  const createdDate = startOfDay(scheduleCreatedAt)
+
+  switch (frequency) {
+    case 'WEEKLY': {
+      if (dayOfWeek === null || dayOfWeek === undefined) {
+        throw new Error('dayOfWeek is required for weekly frequency')
+      }
+
+      const createdDay = getDay(createdDate)
+      const daysUntilTarget = (dayOfWeek - createdDay + 7) % 7
+
+      // If target day is same as creation day, first checkin is next week
+      if (daysUntilTarget === 0) {
+        return addDays(createdDate, 7)
+      }
+
+      // If target day is later this week from creation, use it
+      if (daysUntilTarget > 0) {
+        return addDays(createdDate, daysUntilTarget)
+      }
+
+      // Fallback (shouldn't happen with modulo)
+      return addDays(createdDate, daysUntilTarget + 7)
+    }
+
+    case 'BIWEEKLY': {
+      if (dayOfWeek === null || dayOfWeek === undefined) {
+        throw new Error('dayOfWeek is required for biweekly frequency')
+      }
+
+      const createdDay = getDay(createdDate)
+      const daysUntilTarget = (dayOfWeek - createdDay + 7) % 7
+
+      // If target day is same as creation day, first checkin is in 2 weeks
+      if (daysUntilTarget === 0) {
+        return addDays(createdDate, 14)
+      }
+
+      // If target day is later this week from creation, use it
+      if (daysUntilTarget > 0) {
+        return addDays(createdDate, daysUntilTarget)
+      }
+
+      return addDays(createdDate, daysUntilTarget + 7)
+    }
+
+    case 'MONTHLY': {
+      if (dayOfMonth === null || dayOfMonth === undefined) {
+        throw new Error('dayOfMonth is required for monthly frequency')
+      }
+
+      // For monthly, first checkin is always next month on the specified day
+      const nextMonth = new Date(createdDate)
+      nextMonth.setMonth(nextMonth.getMonth() + 1)
+      nextMonth.setDate(
+        Math.min(
+          dayOfMonth,
+          new Date(
+            nextMonth.getFullYear(),
+            nextMonth.getMonth() + 1,
+            0,
+          ).getDate(),
+        ),
+      )
+
+      return nextMonth
+    }
+
+    default:
+      throw new Error(`Unsupported frequency: ${frequency}`)
+  }
+}
 
 export const Query: GQLQueryResolvers<GQLContext> = {
   checkinSchedule: async (_parent, _args, context) => {
@@ -59,7 +142,28 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       lastCompletionDate,
     )
 
-    const isCheckinDue = isPast(startOfDay(nextCheckinDate))
+    // Determine if checkin is due
+    let isCheckinDue = false
+
+    if (!lastValidCompletion) {
+      // No completions yet - calculate the first expected checkin date from schedule creation
+      const scheduleCreatedAt = new Date(schedule.createdAt)
+
+      // Calculate what the first checkin date should have been
+      const firstCheckinDate = calculateFirstCheckinDate(
+        schedule.frequency,
+        schedule.dayOfWeek,
+        schedule.dayOfMonth,
+        scheduleCreatedAt,
+      )
+
+      // If the first expected checkin date has passed, checkin is due
+      isCheckinDue = isPast(startOfDay(firstCheckinDate))
+    } else {
+      // Has completions - use the standard logic
+      isCheckinDue = isPast(startOfDay(nextCheckinDate))
+    }
+
     const daysSinceLastCheckin = lastCompletionDate
       ? differenceInDays(new Date(), lastCompletionDate)
       : null

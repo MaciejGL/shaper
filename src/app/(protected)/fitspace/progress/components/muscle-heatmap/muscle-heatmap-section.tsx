@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Activity } from 'lucide-react'
 import { useState } from 'react'
 
+import { PremiumGate } from '@/components/premium-gate'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 
@@ -47,56 +48,58 @@ export function MuscleHeatmapSection() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div>
-          {/* Body Heatmap View */}
-          <div className="flex justify-center">
-            <HeatmapBodyView
-              muscleIntensity={muscleIntensity}
-              selectedMuscle={selectedMuscle}
-              onMuscleClick={handleMuscleClick}
-              groupedMuscleData={groupedMuscleData}
-              disableEmptyLabels={true}
-            />
-          </div>
+        <PremiumGate feature="Muscle Focus Heatmap" compact showPartialContent>
+          <div>
+            {/* Body Heatmap View */}
+            <div className="flex justify-center">
+              <HeatmapBodyView
+                muscleIntensity={muscleIntensity}
+                selectedMuscle={selectedMuscle}
+                onMuscleClick={handleMuscleClick}
+                groupedMuscleData={groupedMuscleData}
+                disableEmptyLabels={true}
+              />
+            </div>
 
-          {/* Selected Muscle Details */}
-          <AnimatePresence>
-            {selectedMuscle && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{
-                  duration: 0.3,
-                  ease: [0.32, 0.72, 0, 1],
-                }}
-                className="overflow-hidden"
-              >
-                <div className="pt-6">
-                  <SelectedMuscleDetails
-                    selectedMuscle={selectedMuscle}
-                    muscleIntensity={muscleIntensity}
-                    groupedMuscleData={groupedMuscleData}
-                  />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+            {/* Selected Muscle Details */}
+            <AnimatePresence>
+              {selectedMuscle && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{
+                    duration: 0.3,
+                    ease: [0.32, 0.72, 0, 1],
+                  }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-6">
+                    <SelectedMuscleDetails
+                      selectedMuscle={selectedMuscle}
+                      muscleIntensity={muscleIntensity}
+                      groupedMuscleData={groupedMuscleData}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          {/* Quick Stats */}
-          <div className="pt-6">
-            <QuickStats
-              muscleIntensity={muscleIntensity}
-              muscleCategorization={
-                muscleCategorization || {
-                  overfocused: [],
-                  balanced: [],
-                  underfocused: [],
+            {/* Quick Stats */}
+            <div className="pt-6">
+              <QuickStats
+                muscleIntensity={muscleIntensity}
+                muscleCategorization={
+                  muscleCategorization || {
+                    overfocused: [],
+                    balanced: [],
+                    underfocused: [],
+                  }
                 }
-              }
-            />
+              />
+            </div>
           </div>
-        </div>
+        </PremiumGate>
       </CardContent>
     </Card>
   )

@@ -4,6 +4,7 @@ import { formatDistanceToNow, isToday } from 'date-fns'
 import { Calendar, Check, Clock, MoreVertical } from 'lucide-react'
 import { useState } from 'react'
 
+import { PremiumGate } from '@/components/premium-gate'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -19,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useUser } from '@/context/user-context'
 import { formatRelativeTime } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
@@ -33,6 +35,7 @@ import {
 } from './use-checkin-schedule'
 
 export function CheckinScheduleSection() {
+  const { hasPremium } = useUser()
   const { data, isLoading } = useCheckinStatus()
   const { deleteSchedule, isDeleting } = useCheckinScheduleOperations()
 
@@ -70,19 +73,21 @@ export function CheckinScheduleSection() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <CardDescription className="text-muted-foreground">
-              Set up regular reminders to track your progress with measurements
-              and photos.
-            </CardDescription>
-            <Button
-              onClick={() => setShowSetupModal(true)}
-              iconStart={<Calendar />}
-              className="w-full"
-              size="sm"
-              variant="tertiary"
-            >
-              Schedule Check-ins
-            </Button>
+            <PremiumGate feature="Schedule Check-ins" compact>
+              <CardDescription className="text-muted-foreground">
+                Set up regular reminders to track your progress with
+                measurements and photos.
+              </CardDescription>
+              <Button
+                onClick={() => setShowSetupModal(true)}
+                iconStart={<Calendar />}
+                className="w-full"
+                size="sm"
+                variant="tertiary"
+              >
+                Schedule Check-ins
+              </Button>
+            </PremiumGate>
           </CardContent>
         </Card>
 
@@ -119,7 +124,7 @@ export function CheckinScheduleSection() {
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon-sm">
+                <Button variant="ghost" size="icon-sm" disabled={!hasPremium}>
                   <MoreVertical className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -162,79 +167,85 @@ export function CheckinScheduleSection() {
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Schedule Info */}
-          <div className="flex items-center justify-between">
-            <div>
-              {nextDate && (
-                <p className="text-base text-muted-foreground flex items-center gap-2">
-                  <Clock
-                    className={cn(
-                      'size-4',
-                      isCheckinDue ? 'text-green-600' : 'text-amber-500',
+          <PremiumGate
+            feature="Schedule Check-ins"
+            description="Schedule check-ins to receive reminders and track your progress with measurements and photos."
+            compact
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                {nextDate && (
+                  <p className="text-base text-muted-foreground flex items-center gap-2">
+                    <Clock
+                      className={cn(
+                        'size-4',
+                        isCheckinDue ? 'text-green-600' : 'text-amber-500',
+                      )}
+                    />
+                    {isCheckinDue ? (
+                      <span className="font-medium text-foreground">
+                        Check-in ready!
+                      </span>
+                    ) : (
+                      <>Next check-in {formatRelativeTime(nextDate)}</>
                     )}
-                  />
-                  {isCheckinDue ? (
-                    <span className="font-medium text-foreground">
-                      Check-in ready!
-                    </span>
-                  ) : (
-                    <>Next check-in {formatRelativeTime(nextDate)}</>
-                  )}
-                </p>
-              )}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
 
-          {lastValidCompletion?.completedAt &&
-            isToday(lastValidCompletion.completedAt) && (
-              <div className="rounded-lg bg-card-on-card p-3 space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-sm font-medium flex items-center gap-1 text-primary">
-                    Check-in completed
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {formatDistanceToNow(
-                      new Date(lastValidCompletion.completedAt),
-                      {
-                        addSuffix: true,
-                      },
-                    )}
-                  </p>
-                </div>
+            {lastValidCompletion?.completedAt &&
+              isToday(lastValidCompletion.completedAt) && (
+                <div className="rounded-lg bg-card-on-card p-3 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-sm font-medium flex items-center gap-1 text-primary">
+                      Check-in completed
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {formatDistanceToNow(
+                        new Date(lastValidCompletion.completedAt),
+                        {
+                          addSuffix: true,
+                        },
+                      )}
+                    </p>
+                  </div>
 
-                <div className="text-sm text-muted-foreground">
-                  <p className="flex items-center gap-2">
-                    <Check
-                      className={cn(
-                        'size-3 ',
-                        lastValidCompletion.measurement && 'text-green-500',
-                      )}
-                    />{' '}
-                    Body measurements
-                  </p>
-                  <p className="flex items-center gap-2">
-                    <Check
-                      className={cn(
-                        'size-3 ',
-                        lastValidCompletion.progressLog && 'text-green-500',
-                      )}
-                    />{' '}
-                    Photos taken
-                  </p>
+                  <div className="text-sm text-muted-foreground">
+                    <p className="flex items-center gap-2">
+                      <Check
+                        className={cn(
+                          'size-3 ',
+                          lastValidCompletion.measurement && 'text-green-500',
+                        )}
+                      />{' '}
+                      Body measurements
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <Check
+                        className={cn(
+                          'size-3 ',
+                          lastValidCompletion.progressLog && 'text-green-500',
+                        )}
+                      />{' '}
+                      Photos taken
+                    </p>
+                  </div>
                 </div>
+              )}
+
+            {/* Action Buttons */}
+            {shouldShowCheckinButton && (
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShowCheckinDrawer(true)}
+                  className="w-full"
+                >
+                  Start Check-in
+                </Button>
               </div>
             )}
-
-          {/* Action Buttons */}
-          {shouldShowCheckinButton && (
-            <div className="flex gap-2">
-              <Button
-                onClick={() => setShowCheckinDrawer(true)}
-                className="w-full"
-              >
-                Start Check-in
-              </Button>
-            </div>
-          )}
+          </PremiumGate>
         </CardContent>
       </Card>
 
