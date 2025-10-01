@@ -4,6 +4,7 @@
  * This component integrates all the functionality together
  */
 import * as Linking from 'expo-linking'
+import * as Notifications from 'expo-notifications'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
 import { AppState, StyleSheet } from 'react-native'
@@ -115,15 +116,32 @@ function HyproAppContent({ authToken }: HyproAppProps) {
   )
 
   useEffect(() => {
-    // Handle initial deep link at cold start: hypertro://?url=...
-    Linking.getInitialURL().then((url) => {
+    const checkInitialNavigation = async () => {
+      // Check if app was opened from notification
+      const lastNotificationResponse =
+        await Notifications.getLastNotificationResponse()
+      if (lastNotificationResponse?.notification.request.content.data?.url) {
+        const notificationUrl = lastNotificationResponse.notification.request
+          .content.data.url as string
+        console.info(
+          '📱 App opened from notification, navigating to:',
+          notificationUrl,
+        )
+        setInitialWebUrl(notificationUrl)
+        return // Don't check deep links if we have notification URL
+      }
+
+      // Handle initial deep link at cold start: hypertro://?url=...
+      const url = await Linking.getInitialURL()
       if (!url) return
       try {
         const parsed = Linking.parse(url)
         const urlParam = (parsed.queryParams?.url as string) || undefined
         if (urlParam) setInitialWebUrl(urlParam)
       } catch {}
-    })
+    }
+
+    checkInitialNavigation()
   }, [])
 
   return (

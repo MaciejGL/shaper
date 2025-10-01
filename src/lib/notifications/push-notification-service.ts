@@ -159,34 +159,6 @@ export async function notifyWorkoutCompleted(
 }
 
 /**
- * Send push notification for workout streaks
- */
-export async function notifyWorkoutStreak(userId: string, streakDays: number) {
-  return await sendPushNotificationToUsers(
-    [userId],
-    `${streakDays}-day workout streak`,
-    `You have completed ${streakDays} consecutive days of training.`,
-    '/fitspace/progress',
-  )
-}
-
-/**
- * Send push notification when week is completed
- */
-export async function notifyWeekCompleted(
-  userId: string,
-  weekNumber: number,
-  planTitle: string,
-) {
-  return await sendPushNotificationToUsers(
-    [userId],
-    'Week completed',
-    `You have completed week ${weekNumber} of "${planTitle}".`,
-    '/fitspace/progress',
-  )
-}
-
-/**
  * Send push notification when entire plan is completed
  */
 export async function notifyPlanCompleted(userId: string, planTitle: string) {
@@ -324,18 +296,6 @@ export async function notifyWorkoutReminder(
     'Workout reminder',
     `Time for your ${workoutName} workout${timeDetail}.`,
     '/fitspace/workout',
-  )
-}
-
-/**
- * Send push notification for rest day reminders
- */
-export async function notifyRestDay(userId: string) {
-  return await sendPushNotificationToUsers(
-    [userId],
-    'Rest day',
-    'Today is your scheduled rest day. Consider light activity or stretching for recovery.',
-    '/fitspace/progress',
   )
 }
 

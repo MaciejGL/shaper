@@ -111,15 +111,19 @@ function setupNavigationMonitoring(): string {
     // Track navigation changes and notify native app
     let currentPath = window.location.pathname;
     
-    const checkForNavigation = () => {
+    // Event-based navigation monitoring (more efficient than polling)
+    const handleNavigationChange = () => {
       if (window.location.pathname !== currentPath) {
         currentPath = window.location.pathname;
         window.nativeApp?.onNavigate(currentPath);
       }
     };
     
-    // Poll for navigation changes every second
-    setInterval(checkForNavigation, 1000);
+    // Listen for browser navigation events
+    window.addEventListener('popstate', handleNavigationChange);
+    
+    // Fallback polling with reduced frequency (every 5 seconds instead of 3)
+    setInterval(handleNavigationChange, 5000);
   `
 }
 
@@ -168,10 +172,10 @@ function setupThemeDetection(): string {
     };
     
     // Initial theme detection (delayed to allow DOM to settle)
-    setTimeout(detectTheme, 500);
+    setTimeout(detectTheme, 1000);
     
-    // Periodic theme monitoring
-    setInterval(detectTheme, 2000);
+    // Periodic theme monitoring (reduced frequency for better performance)
+    setInterval(detectTheme, 10000);
     
     // Watch for DOM changes that might indicate theme changes
     const themeObserver = new MutationObserver(detectTheme);
@@ -251,6 +255,7 @@ export const EnhancedWebView = forwardRef<
     const lastConnectionState = useRef<boolean | null>(null)
     const retryTimeoutRef = useRef<number | null>(null)
     const isRetryingRef = useRef(false)
+    const retryAttemptsRef = useRef(0)
 
     // Network connectivity monitoring
     const netInfo = useNetInfo()
@@ -271,6 +276,7 @@ export const EnhancedWebView = forwardRef<
           retryTimeoutRef.current = null
         }
         isRetryingRef.current = false
+        retryAttemptsRef.current = 0 // Reset retry attempts when going offline
         setShowOfflineScreen(true)
       } else if (
         netInfo.isConnected === true &&
@@ -281,14 +287,19 @@ export const EnhancedWebView = forwardRef<
         isRetryingRef.current = true
         setShowOfflineScreen(false)
 
-        // Debounced retry to prevent immediate reload loops
+        // Exponential backoff retry to prevent immediate reload loops
+        const backoffDelay = Math.min(
+          1000 * Math.pow(2, retryAttemptsRef.current),
+          10000,
+        ) // Max 10 seconds
         retryTimeoutRef.current = setTimeout(() => {
           if (netInfo.isConnected && isRetryingRef.current) {
+            retryAttemptsRef.current += 1
             handleRetry()
           }
           isRetryingRef.current = false
           retryTimeoutRef.current = null
-        }, 1000) // 1 second debounce
+        }, backoffDelay)
       }
     }, [netInfo.isConnected]) // ❌ Removed showOfflineScreen from deps to prevent loops
 
@@ -350,7 +361,9 @@ export const EnhancedWebView = forwardRef<
         return // Prevent multiple retries or retry when ref is null
       }
 
-      console.log('🔄 Retrying WebView connection...')
+      console.log(
+        `🔄 Retrying WebView connection... (attempt ${retryAttemptsRef.current + 1})`,
+      )
       webViewRef.current.reload()
     }, [])
 
@@ -361,6 +374,7 @@ export const EnhancedWebView = forwardRef<
           clearTimeout(retryTimeoutRef.current)
         }
         isRetryingRef.current = false
+        retryAttemptsRef.current = 0 // Reset retry attempts on unmount
       }
     }, [])
 
