@@ -1,38 +1,47 @@
 import { Badge } from '@/components/ui/badge'
 
+import { VOLUME_THRESHOLDS } from '../../constants/heatmap-colors'
+
 import type { QuickStatsProps } from './types'
 
-export function QuickStats({
-  muscleIntensity,
-  rawMuscleData,
-}: QuickStatsProps) {
-  // Use the same individual muscle data as heatmap - no grouping
+export function QuickStats({ muscleIntensity }: QuickStatsProps) {
+  // Now muscleIntensity contains muscle group names as keys (e.g., "Shoulders", "Chest")
+  // We can use the keys directly as they are already the display names
   const muscleEntries = Object.entries(muscleIntensity).map(
-    ([muscleId, intensity]) => {
-      const muscle = rawMuscleData?.find((m) => m.muscleId === muscleId)
-      return [muscle?.muscleAlias || 'Unknown', intensity] as [string, number]
+    ([groupName, intensity]) => {
+      return [groupName, intensity] as [string, number]
     },
   )
 
-  // Use same thresholds as heatmap color levels
-  const highFocus = muscleEntries
-    .filter(([, intensity]) => intensity >= 0.8) // Excellent level
+  // Use thresholds from constants
+  const highOverload = muscleEntries
+    .filter(([, intensity]) => intensity >= VOLUME_THRESHOLDS.HIGH)
     .sort(([, a], [, b]) => b - a)
 
-  const mediumFocus = muscleEntries
-    .filter(([, intensity]) => intensity >= 0.4 && intensity < 0.8) // Good to Great levels
+  const mediumOverload = muscleEntries
+    .filter(
+      ([, intensity]) =>
+        intensity >= VOLUME_THRESHOLDS.MEDIUM_MIN &&
+        intensity < VOLUME_THRESHOLDS.MEDIUM_MAX,
+    )
     .sort(([, a], [, b]) => b - a)
 
-  const lowFocus = muscleEntries
-    .filter(([, intensity]) => intensity >= 0.05 && intensity < 0.4) // Light to Good levels
+  const lowOverload = muscleEntries
+    .filter(
+      ([, intensity]) =>
+        intensity >= VOLUME_THRESHOLDS.LOW_MIN &&
+        intensity < VOLUME_THRESHOLDS.LOW_MAX,
+    )
     .sort(([, a], [, b]) => b - a)
+
+  // Debug: console.log(highOverload, mediumOverload, lowOverload)
 
   return (
     <div className="grid grid-cols-3 gap-2 text-center">
       <div className="space-y-2">
-        <div className="text-sm font-medium">High Focus</div>
+        <div className="text-sm font-medium">High Volume</div>
         <div className="flex flex-col gap-1">
-          {highFocus.map(([muscleName]) => (
+          {highOverload.map(([muscleName]) => (
             <Badge
               key={muscleName}
               variant="secondary"
@@ -45,9 +54,9 @@ export function QuickStats({
         </div>
       </div>
       <div className="space-y-2">
-        <div className="text-sm font-medium">Medium Focus</div>
+        <div className="text-sm font-medium">Medium Volume</div>
         <div className="flex flex-col gap-1">
-          {mediumFocus.map(([muscleName]) => (
+          {mediumOverload.map(([muscleName]) => (
             <Badge
               key={muscleName}
               variant="secondary"
@@ -60,9 +69,9 @@ export function QuickStats({
         </div>
       </div>
       <div className="space-y-2">
-        <div className="text-sm font-medium">Low Focus</div>
+        <div className="text-sm font-medium">Low Volume</div>
         <div className="flex flex-col gap-1">
-          {lowFocus.map(([muscleName]) => (
+          {lowOverload.map(([muscleName]) => (
             <Badge
               key={muscleName}
               variant="secondary"

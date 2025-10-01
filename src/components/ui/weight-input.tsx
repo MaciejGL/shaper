@@ -117,6 +117,7 @@ export const WeightInput = forwardRef<HTMLInputElement, WeightInputProps>(
           className={className}
           placeholder={placeholder}
           variant="secondary"
+          inputMode="decimal"
           iconEnd={
             <div className="text-sm text-muted-foreground pointer-events-none">
               {weightUnit}

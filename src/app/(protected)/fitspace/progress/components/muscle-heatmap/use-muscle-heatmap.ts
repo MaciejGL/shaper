@@ -3,6 +3,11 @@ import { useMemo } from 'react'
 import { useUser } from '@/context/user-context'
 import { useMuscleFrequencyQuery } from '@/generated/graphql-client'
 
+import {
+  aggregateMuscleDataToGroups,
+  calculateMuscleGroupIntensity,
+} from '../../utils/muscle-aggregation'
+
 export function useMuscleHeatmap() {
   const { user } = useUser()
 
@@ -21,8 +26,12 @@ export function useMuscleHeatmap() {
         muscleIntensity: {},
         totalSets: 0,
         individualMuscleData: {},
+        groupedMuscleData: {},
       }
     }
+
+    // Aggregate raw muscle data into muscle groups
+    const groupedMuscleData = aggregateMuscleDataToGroups(data.muscleFrequency)
 
     // Convert frequency data to individual muscle structure
     const individualMuscleData: Record<string, number> = {}
@@ -41,35 +50,15 @@ export function useMuscleHeatmap() {
       muscleFocusData[muscle.groupSlug] = existingGroupSets + muscle.totalSets
     })
 
-    // Calculate intensity for individual muscles (0-1 scale with full spectrum)
-    const muscleIntensity: Record<string, number> = {}
-
-    if (totalSets > 0) {
-      const maxSets = Math.max(...Object.values(individualMuscleData))
-      const minSets = Math.min(...Object.values(individualMuscleData))
-
-      Object.entries(individualMuscleData).forEach(([muscleId, sets]) => {
-        // Normalize to 0-1 scale with better distribution
-        let normalizedIntensity = 0
-
-        if (maxSets > minSets) {
-          // Use min-max normalization for better distribution across the spectrum
-          normalizedIntensity = (sets - minSets) / (maxSets - minSets)
-        } else if (maxSets > 0) {
-          // If all muscles have the same sets, give them all high intensity
-          normalizedIntensity = 0.8
-        }
-
-        // Ensure minimum visibility but allow for full spectrum
-        muscleIntensity[muscleId] = Math.max(0.05, normalizedIntensity)
-      })
-    }
+    // Calculate intensity for muscle groups using utility function
+    const muscleIntensity = calculateMuscleGroupIntensity(groupedMuscleData)
 
     return {
       muscleFocusData, // Grouped data for backward compatibility
-      muscleIntensity, // Individual muscle intensity
+      muscleIntensity, // Muscle group intensity
       totalSets,
       individualMuscleData, // Individual muscle data
+      groupedMuscleData, // Grouped muscle data
       rawMuscleData: data.muscleFrequency, // Raw data for detailed views
     }
   }, [data])

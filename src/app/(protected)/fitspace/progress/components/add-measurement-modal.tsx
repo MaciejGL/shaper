@@ -327,12 +327,12 @@ export function AddMeasurementModal({
                     )
                   }
 
-                  // Regular input for all other measurement fields
                   return (
                     <Input
                       key={field.name}
                       id={field.name}
                       type="number"
+                      inputMode="decimal"
                       step={field.step}
                       iconEnd={field.unit}
                       label={field.label}

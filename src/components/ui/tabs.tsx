@@ -38,6 +38,7 @@ const tabsListVariants = cva(
         default: 'rounded-xl',
         lg: 'rounded-lg',
         full: 'rounded-full',
+        xl: 'rounded-xl',
       },
     },
   },
@@ -46,12 +47,12 @@ function TabsList({
   className,
   variant = 'default',
   size = 'default',
-  rounded = 'lg',
+  rounded = 'xl',
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List> & {
   variant?: 'default' | 'secondary'
   size?: 'default' | 'sm' | 'lg'
-  rounded?: 'default' | 'lg' | 'full'
+  rounded?: 'default' | 'lg' | 'xl' | 'full'
 }) {
   return (
     <TabsPrimitive.List
@@ -78,6 +79,7 @@ const tabsTriggerVariants = cva(
         default: 'rounded-xl',
         lg: 'rounded-lg',
         full: 'rounded-full px-4',
+        xl: cn('rounded-[10px]'),
       },
     },
   },
@@ -87,12 +89,12 @@ function TabsTrigger({
   className,
   variant = 'default',
   size = 'default',
-  rounded = 'lg',
+  rounded = 'xl',
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Trigger> & {
   variant?: 'default'
   size?: 'default' | 'sm' | 'lg'
-  rounded?: 'default' | 'lg' | 'full'
+  rounded?: 'default' | 'lg' | 'xl' | 'full'
 }) {
   return (
     <TabsPrimitive.Trigger
@@ -125,7 +127,7 @@ function PrimaryTabList<T extends string>({
   onClick,
   active,
   className,
-  size = 'lg',
+  size = 'xl',
 }: {
   options: {
     label: string
@@ -137,7 +139,7 @@ function PrimaryTabList<T extends string>({
   onClick: (value: T) => void
   active: T
   className?: string
-  size?: 'md' | 'sm' | 'lg'
+  size?: 'md' | 'sm' | 'lg' | 'xl'
 }) {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const [underlineStyle, setUnderlineStyle] = React.useState({

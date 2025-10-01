@@ -7,21 +7,25 @@ export function SelectedMuscleDetails({
   muscleIntensity,
   individualMuscleData,
   rawMuscleData,
+  groupedMuscleData,
 }: SelectedMuscleDetailsProps) {
-  const muscleData = rawMuscleData?.find((m) => m.muscleId === selectedMuscle)
-  const intensity =
-    (muscleIntensity as Record<string, number>)[selectedMuscle] || 0
-  const sets =
-    (individualMuscleData as Record<string, number>)[selectedMuscle] || 0
+  // selectedMuscle is now a muscle group name (e.g., "Shoulders")
+  const groupData = groupedMuscleData?.[selectedMuscle]
+  const intensity = muscleIntensity[selectedMuscle] || 0
+  const sets = groupData?.totalSets || 0
 
   return (
     <div className="space-y-3">
       <div className="text-center">
         <h3 className="font-medium">
-          {muscleData?.muscleAlias ||
-            muscleData?.muscleName ||
-            'Unknown Muscle'}
+          {selectedMuscle || 'Unknown Muscle Group'}
         </h3>
+        {groupData && groupData.muscles.length > 1 && (
+          <p className="text-sm text-muted-foreground">
+            {groupData.muscles.length} muscles:{' '}
+            {groupData.muscles.map((m) => m.muscleAlias).join(', ')}
+          </p>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">

@@ -8,106 +8,27 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { GQLMuscleFrequency } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
 
-// Mapping between muscle aliases and body view aliases
-// This allows for more granular muscle tracking using readable names
-const MUSCLE_ALIAS_MAPPING = {
-  // Chest muscles
-  Chest: ['chest', 'inner chest'], // Pectoralis Major
-  'Pec Minor': ['chest', 'inner chest'], // Pectoralis Minor
-  Serratus: ['chest', 'inner chest'], // Serratus Anterior
-
-  // Upper back muscles (individual mapping)
-  Lats: ['lats'], // Latissimus Dorsi
-  Traps: ['traps'], // Trapezius
-  Rhomboids: ['rhomboids'], // Rhomboids
-
-  // Lower back
-  'Lower Back': ['lower back'], // Erector Spinae
-
-  // Shoulder muscles (individual mapping)
-  'Front Delts': ['front delts'], // Deltoid Anterior
-  'Side Delts': ['side delts'], // Deltoid Lateral
-  'Rear Delts': ['rear delts'], // Deltoid Posterior
-
-  // Biceps (individual mapping)
-  Biceps: ['biceps'], // Biceps Brachii
-  Brachialis: ['biceps'], // Brachialis
-  Brachioradialis: ['biceps'], // Brachioradialis
-
-  // Triceps
-  Triceps: ['triceps'], // Triceps Brachii
-
-  // Forearms
-  Forearms: ['forearms'], // Forearm Flexors
-  'Forearm Extensors': ['forearms'], // Forearm Extensors
-
-  // Leg muscles
-  Quads: ['quads'], // Quadriceps
-  Hams: ['hams'], // Hamstrings
-  Glutes: ['glutes'], // Gluteus Maximus
-  'Glute Med': ['glutes'], // Gluteus Medius
-  'Glute Min': ['glutes'], // Gluteus Minimus
-  Calves: ['calves'], // Gastrocnemius
-  Soleus: ['calves'], // Soleus
-  'Inner Thigh': ['inner thighs'], // Hip Adductors
-
-  // Core muscles
-  Abs: ['abs'], // Rectus Abdominis
-  Obliques: ['obliques'], // Obliques
-  'Deep Core': ['abs'], // Transverse Abdominis
-
-  // Additional muscles
-  Neck: ['neck', 'anterior'], // Neck
-  'Rotator Cuff': ['stabilizers'], // Stabilizers
-}
-
-// Heatmap color configuration - Positive, friendly colors
-const HEATMAP_COLORS = {
-  levels: [
-    {
-      threshold: 0.8,
-      fillColor: 'fill-orange-600',
-      bgColor: 'bg-orange-600',
-      label: 'Excellent',
-    },
-    {
-      threshold: 0.6,
-      fillColor: 'fill-orange-400',
-      bgColor: 'bg-orange-400',
-      label: 'Great',
-    },
-    {
-      threshold: 0.4,
-      fillColor: 'fill-orange-300',
-      bgColor: 'bg-orange-300',
-      label: 'Good',
-    },
-    {
-      threshold: 0.2,
-      fillColor: 'fill-orange-200',
-      bgColor: 'bg-orange-200',
-      label: 'Light',
-    },
-    {
-      threshold: 0,
-      fillColor: 'fill-orange-100',
-      bgColor: 'bg-orange-100',
-      label: 'None',
-    },
-  ],
-  getColorForIntensity: (intensity: number) => {
-    const level = HEATMAP_COLORS.levels.find(
-      (level) => intensity >= level.threshold,
-    )
-    return level || HEATMAP_COLORS.levels[HEATMAP_COLORS.levels.length - 1]
-  },
-}
+import {
+  HEATMAP_COLORS,
+  getIntensityColor,
+  getIntensityOpacity,
+} from '../../constants/heatmap-colors'
+import { LABEL_TO_GROUP_MAPPING } from '../../constants/muscle-groups'
 
 interface HeatmapBodyViewProps {
   muscleIntensity: Record<string, number>
   selectedMuscle: string | null
   onMuscleClick: (muscle: string) => void
-  rawMuscleData?: GQLMuscleFrequency[]
+  groupedMuscleData?: Record<
+    string,
+    {
+      groupName: string
+      totalSets: number
+      sessionsCount: number
+      lastTrained: string
+      muscles: GQLMuscleFrequency[]
+    }
+  >
   disableEmptyLabels?: boolean
 }
 
@@ -115,48 +36,38 @@ export function HeatmapBodyView({
   muscleIntensity,
   selectedMuscle,
   onMuscleClick,
-  rawMuscleData,
+  groupedMuscleData,
   disableEmptyLabels = false,
 }: HeatmapBodyViewProps) {
   const getPathProps = (aliases: string[]) => {
-    // Find the individual muscle that matches these aliases
-    const muscleEntry = Object.entries(MUSCLE_ALIAS_MAPPING).find(
-      ([, muscleAliases]) =>
-        muscleAliases.some((alias) => aliases.includes(alias)),
-    )
-
-    // Find the muscle data by alias
-    const muscleData = muscleEntry
-      ? rawMuscleData?.find((m) => m.muscleAlias === muscleEntry[0])
-      : null
-
-    const intensity = muscleData ? muscleIntensity[muscleData.muscleId] || 0 : 0
-
-    // Convert intensity to color using configuration
-    const getIntensityColor = (intensity: number) => {
-      const colorLevel = HEATMAP_COLORS.getColorForIntensity(intensity)
-      return cn(colorLevel.fillColor)
+    // Find the muscle group for these aliases
+    let muscleGroupName: string | null = null
+    for (const alias of aliases) {
+      if (LABEL_TO_GROUP_MAPPING[alias]) {
+        muscleGroupName = LABEL_TO_GROUP_MAPPING[alias]
+        break
+      }
     }
 
-    const getIntensityOpacity = (intensity: number) => {
-      return Math.max(0.3, intensity) // Minimum 30% opacity
-    }
+    const intensity = muscleGroupName
+      ? muscleIntensity[muscleGroupName] || 0
+      : 0
 
     return {
       className: cn(
         'cursor-pointer transition-all duration-200',
         getIntensityColor(intensity),
         selectedMuscle &&
-          muscleEntry &&
-          muscleEntry[0] === selectedMuscle &&
+          muscleGroupName &&
+          muscleGroupName === selectedMuscle &&
           'ring-2 ring-blue-500',
       ),
       style: {
         fillOpacity: getIntensityOpacity(intensity),
       },
       onClick: () => {
-        if (muscleData) {
-          onMuscleClick(muscleData.muscleId)
+        if (muscleGroupName) {
+          onMuscleClick(muscleGroupName)
         }
       },
     }
@@ -165,46 +76,38 @@ export function HeatmapBodyView({
   const isRegionSelected = (aliases: string[]) => {
     if (!selectedMuscle) return false
 
-    const muscleEntry = Object.entries(MUSCLE_ALIAS_MAPPING).find(
-      ([, muscleAliases]) =>
-        muscleAliases.some((alias) => aliases.includes(alias)),
-    )
+    // Find the muscle group for these aliases
+    for (const alias of aliases) {
+      if (LABEL_TO_GROUP_MAPPING[alias] === selectedMuscle) {
+        return true
+      }
+    }
 
-    const muscleData = muscleEntry
-      ? rawMuscleData?.find((m) => m.muscleAlias === muscleEntry[0])
-      : null
-
-    return muscleData ? muscleData.muscleId === selectedMuscle : false
+    return false
   }
 
   const handleRegionClick = (aliases: string[]) => {
-    const muscleEntry = Object.entries(MUSCLE_ALIAS_MAPPING).find(
-      ([, muscleAliases]) =>
-        muscleAliases.some((alias) => aliases.includes(alias)),
-    )
-
-    const muscleData = muscleEntry
-      ? rawMuscleData?.find((m) => m.muscleAlias === muscleEntry[0])
-      : null
-
-    if (muscleData) {
-      onMuscleClick(muscleData.muscleId)
+    // Find the muscle group for these aliases
+    for (const alias of aliases) {
+      if (LABEL_TO_GROUP_MAPPING[alias]) {
+        onMuscleClick(LABEL_TO_GROUP_MAPPING[alias])
+        break
+      }
     }
   }
 
   const hasMuscleData = (aliases: string[]): boolean => {
     if (!disableEmptyLabels) return true
 
-    const muscleEntry = Object.entries(MUSCLE_ALIAS_MAPPING).find(
-      ([, muscleAliases]) =>
-        muscleAliases.some((alias) => aliases.includes(alias)),
-    )
+    // Find the muscle group for these aliases
+    for (const alias of aliases) {
+      if (LABEL_TO_GROUP_MAPPING[alias]) {
+        const groupData = groupedMuscleData?.[LABEL_TO_GROUP_MAPPING[alias]]
+        return Boolean(groupData && groupData.totalSets > 0)
+      }
+    }
 
-    const muscleData = muscleEntry
-      ? rawMuscleData?.find((m) => m.muscleAlias === muscleEntry[0])
-      : null
-
-    return Boolean(muscleData && muscleData.totalSets > 0)
+    return false
   }
 
   return (

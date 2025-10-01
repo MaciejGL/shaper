@@ -9,7 +9,6 @@ import { useUser } from '@/context/user-context'
 
 import { HeatmapBodyView } from './heatmap-body-view'
 import { MuscleHeatmapEmpty } from './muscle-heatmap-empty'
-import { MuscleHeatmapLoading } from './muscle-heatmap-loading'
 import { QuickStats } from './quick-stats'
 import { SelectedMuscleDetails } from './selected-muscle-details'
 import { useMuscleHeatmap } from './use-muscle-heatmap'
@@ -22,6 +21,7 @@ export function MuscleHeatmapSection() {
     muscleIntensity,
     totalSets,
     individualMuscleData,
+    groupedMuscleData,
     rawMuscleData,
     isLoading,
     error,
@@ -35,11 +35,7 @@ export function MuscleHeatmapSection() {
     return null
   }
 
-  if (isLoading) {
-    return <MuscleHeatmapLoading />
-  }
-
-  if (error || totalSets === 0) {
+  if ((error || totalSets === 0) && !isLoading) {
     return <MuscleHeatmapEmpty />
   }
 
@@ -59,7 +55,7 @@ export function MuscleHeatmapSection() {
               muscleIntensity={muscleIntensity}
               selectedMuscle={selectedMuscle}
               onMuscleClick={handleMuscleClick}
-              rawMuscleData={rawMuscleData}
+              groupedMuscleData={groupedMuscleData}
               disableEmptyLabels={true}
             />
           </div>
@@ -83,6 +79,7 @@ export function MuscleHeatmapSection() {
                     muscleIntensity={muscleIntensity}
                     individualMuscleData={individualMuscleData}
                     rawMuscleData={rawMuscleData}
+                    groupedMuscleData={groupedMuscleData}
                   />
                 </div>
               </motion.div>
@@ -91,10 +88,7 @@ export function MuscleHeatmapSection() {
 
           {/* Quick Stats */}
           <div className="pt-6">
-            <QuickStats
-              muscleIntensity={muscleIntensity}
-              rawMuscleData={rawMuscleData}
-            />
+            <QuickStats muscleIntensity={muscleIntensity} />
           </div>
         </div>
       </CardContent>

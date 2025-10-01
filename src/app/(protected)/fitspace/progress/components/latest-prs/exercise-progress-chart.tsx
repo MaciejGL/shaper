@@ -155,6 +155,7 @@ export function ExerciseProgressChart({
                 const { payload } = props
                 return (
                   <circle
+                    key={`dot-${props.index}`}
                     cx={props.cx}
                     cy={props.cy}
                     r={payload?.isPR ? 4 : 4}
