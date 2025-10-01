@@ -1,0 +1,80 @@
+query GetCheckinStatus {
+  checkinStatus {
+    hasSchedule
+    schedule {
+      id
+      frequency
+      dayOfWeek
+      dayOfMonth
+      isActive
+      nextCheckinDate
+      createdAt
+      updatedAt
+      completions {
+        id
+        completedAt
+        measurement {
+          id
+          weight
+          measuredAt
+        }
+        progressLog {
+          id
+          loggedAt
+          createdAt
+          updatedAt
+          shareWithTrainer
+        }
+      }
+    }
+    nextCheckinDate
+    isCheckinDue
+    daysSinceLastCheckin
+  }
+}
+
+mutation CreateCheckinSchedule($input: CreateCheckinScheduleInput!) {
+  createCheckinSchedule(input: $input) {
+    id
+    frequency
+    dayOfWeek
+    dayOfMonth
+    isActive
+    nextCheckinDate
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpdateCheckinSchedule($input: UpdateCheckinScheduleInput!) {
+  updateCheckinSchedule(input: $input) {
+    id
+    frequency
+    dayOfWeek
+    dayOfMonth
+    isActive
+    nextCheckinDate
+    createdAt
+    updatedAt
+  }
+}
+
+mutation DeleteCheckinSchedule {
+  deleteCheckinSchedule
+}
+
+mutation CompleteCheckin($input: CompleteCheckinInput!) {
+  completeCheckin(input: $input) {
+    id
+    completedAt
+    measurement {
+      id
+      weight
+      measuredAt
+    }
+    progressLog {
+      id
+      loggedAt
+    }
+  }
+}

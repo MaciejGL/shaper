@@ -290,6 +290,22 @@ export async function notifyTrainerBodyProgressShared(
   )
 }
 
+/**
+ * Send push notification when client completes check-in (to trainer)
+ */
+export async function notifyTrainerCheckinCompleted(
+  trainerId: string,
+  clientName: string,
+  clientId: string,
+) {
+  return await sendPushNotificationToUsers(
+    [trainerId],
+    'Check-in Completed',
+    `${clientName} has completed their scheduled check-in.`,
+    `/trainer/clients/${clientId}?tab=body-progress-logs`,
+  )
+}
+
 // ================================
 // REMINDERS & MOTIVATION
 // ================================

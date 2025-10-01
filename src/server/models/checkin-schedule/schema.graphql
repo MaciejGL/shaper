@@ -1,0 +1,62 @@
+enum CheckinFrequency {
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+type CheckinSchedule {
+  id: ID!
+  frequency: CheckinFrequency!
+  dayOfWeek: Int # 0-6 for weekly (0=Sunday)
+  dayOfMonth: Int # 1-31 for monthly
+  isActive: Boolean!
+  nextCheckinDate: String # Computed field
+  createdAt: String!
+  updatedAt: String!
+  completions: [CheckinCompletion!]!
+}
+
+type CheckinCompletion {
+  id: ID!
+  completedAt: String!
+  measurement: UserBodyMeasure
+  progressLog: BodyProgressLog
+}
+
+type CheckinStatus {
+  hasSchedule: Boolean!
+  schedule: CheckinSchedule
+  nextCheckinDate: String
+  isCheckinDue: Boolean!
+  daysSinceLastCheckin: Int
+}
+
+input CreateCheckinScheduleInput {
+  frequency: CheckinFrequency!
+  dayOfWeek: Int # Required for WEEKLY/BIWEEKLY
+  dayOfMonth: Int # Required for MONTHLY
+}
+
+input UpdateCheckinScheduleInput {
+  frequency: CheckinFrequency
+  dayOfWeek: Int
+  dayOfMonth: Int
+  isActive: Boolean
+}
+
+input CompleteCheckinInput {
+  measurementData: AddBodyMeasurementInput
+  progressLogData: CreateBodyProgressLogInput
+}
+
+extend type Query {
+  checkinSchedule: CheckinSchedule
+  checkinStatus: CheckinStatus!
+}
+
+extend type Mutation {
+  createCheckinSchedule(input: CreateCheckinScheduleInput!): CheckinSchedule!
+  updateCheckinSchedule(input: UpdateCheckinScheduleInput!): CheckinSchedule!
+  deleteCheckinSchedule: Boolean!
+  completeCheckin(input: CompleteCheckinInput!): CheckinCompletion!
+}

@@ -5,6 +5,7 @@ import { TrendingUp } from 'lucide-react'
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
 import { BodyMeasurementsProvider } from './components/body-measurements-context'
+import { CheckinScheduleSection } from './components/checkin-schedule/checkin-schedule-section'
 import { LatestPRs } from './components/latest-prs/latest-prs'
 import { LogsSection } from './components/logs-section/logs-section'
 import { MuscleHeatmapSection } from './components/muscle-heatmap/muscle-heatmap-section'
@@ -21,6 +22,8 @@ export default function ProgressPage() {
       />
 
       <div className="space-y-6">
+        <CheckinScheduleSection />
+
         <BodyMeasurementsProvider>
           <SnapshotsSection />
 

@@ -150,6 +150,7 @@ model UserProfile {
   trainerSince               DateTime?
   bodyMeasures               UserBodyMeasure[]
   bodyProgressLogs           BodyProgressLog[]
+  checkinSchedule            CheckinSchedule?
   user                       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -172,6 +173,7 @@ model UserBodyMeasure {
   thighLeft     Float?
   thighRight    Float?
   userProfile   UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  checkinCompletions CheckinCompletion[]
 
   @@index([userProfileId])
 }
@@ -189,9 +191,42 @@ model BodyProgressLog {
   updatedAt       DateTime    @updatedAt
   
   userProfile     UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  checkinCompletions CheckinCompletion[]
 
   @@index([userProfileId])
   @@index([userProfileId, loggedAt])
+}
+
+model CheckinSchedule {
+  id                String   @id @default(uuid())
+  userProfileId     String   @unique
+  frequency         String   // 'weekly', 'biweekly', 'monthly'
+  dayOfWeek         Int?     // 0-6 for weekly (0=Sunday)
+  dayOfMonth        Int?     // 1-31 for monthly
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  userProfile       UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  completions       CheckinCompletion[]
+
+  @@index([userProfileId])
+  @@index([isActive])
+}
+
+model CheckinCompletion {
+  id                String   @id @default(uuid())
+  scheduleId        String
+  completedAt       DateTime @default(now())
+  measurementId     String?  // Link to UserBodyMeasure
+  progressLogId     String?  // Link to BodyProgressLog
+  
+  schedule          CheckinSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  measurement       UserBodyMeasure? @relation(fields: [measurementId], references: [id], onDelete: SetNull)
+  progressLog       BodyProgressLog? @relation(fields: [progressLogId], references: [id], onDelete: SetNull)
+
+  @@index([scheduleId])
+  @@index([completedAt])
 }
 
 model CoachingRequest {

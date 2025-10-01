@@ -294,6 +294,42 @@ export type GQLChatWithMessages = {
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
 
+export type GQLCheckinCompletion = {
+  __typename?: 'CheckinCompletion';
+  completedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  measurement?: EntireFieldWrapper<Maybe<GQLUserBodyMeasure>>;
+  progressLog?: EntireFieldWrapper<Maybe<GQLBodyProgressLog>>;
+};
+
+export enum GQLCheckinFrequency {
+  Biweekly = 'BIWEEKLY',
+  Monthly = 'MONTHLY',
+  Weekly = 'WEEKLY'
+}
+
+export type GQLCheckinSchedule = {
+  __typename?: 'CheckinSchedule';
+  completions: EntireFieldWrapper<Array<GQLCheckinCompletion>>;
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  dayOfMonth?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  dayOfWeek?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  frequency: EntireFieldWrapper<GQLCheckinFrequency>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  isActive: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  nextCheckinDate?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+};
+
+export type GQLCheckinStatus = {
+  __typename?: 'CheckinStatus';
+  daysSinceLastCheckin?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  hasSchedule: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  isCheckinDue: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  nextCheckinDate?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  schedule?: EntireFieldWrapper<Maybe<GQLCheckinSchedule>>;
+};
+
 export type GQLCoachingRequest = {
   __typename?: 'CoachingRequest';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -311,6 +347,11 @@ export enum GQLCoachingRequestStatus {
   Pending = 'PENDING',
   Rejected = 'REJECTED'
 }
+
+export type GQLCompleteCheckinInput = {
+  measurementData?: InputMaybe<GQLAddBodyMeasurementInput>;
+  progressLogData?: InputMaybe<GQLCreateBodyProgressLogInput>;
+};
 
 export type GQLCopyExercisesFromDayInput = {
   sourceDayId: Scalars['ID']['input'];
@@ -337,6 +378,12 @@ export type GQLCreateBodyProgressLogInput = {
   loggedAt?: InputMaybe<Scalars['String']['input']>;
   notes?: InputMaybe<Scalars['String']['input']>;
   shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type GQLCreateCheckinScheduleInput = {
+  dayOfMonth?: InputMaybe<Scalars['Int']['input']>;
+  dayOfWeek?: InputMaybe<Scalars['Int']['input']>;
+  frequency: GQLCheckinFrequency;
 };
 
 export type GQLCreateExerciseInput = {
@@ -952,9 +999,11 @@ export type GQLMutation = {
   clearTodaysWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
   clearUserSessions: EntireFieldWrapper<Scalars['Boolean']['output']>;
   closePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  completeCheckin: EntireFieldWrapper<GQLCheckinCompletion>;
   copyExercisesFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   copyNutritionPlan: EntireFieldWrapper<GQLCopyNutritionPlanPayload>;
   createBodyProgressLog: EntireFieldWrapper<GQLBodyProgressLog>;
+  createCheckinSchedule: EntireFieldWrapper<GQLCheckinSchedule>;
   createCoachingRequest: EntireFieldWrapper<GQLCoachingRequest>;
   createDraftTemplate: EntireFieldWrapper<GQLTrainingPlan>;
   createExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -975,6 +1024,7 @@ export type GQLMutation = {
   deactivateUser: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteBodyMeasurement: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteBodyProgressLog: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  deleteCheckinSchedule: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteFavouriteWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
   deleteMeal: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1037,6 +1087,7 @@ export type GQLMutation = {
   updateBodyMeasurement: EntireFieldWrapper<GQLUserBodyMeasure>;
   updateBodyProgressLog: EntireFieldWrapper<GQLBodyProgressLog>;
   updateBodyProgressLogSharingStatus: EntireFieldWrapper<GQLBodyProgressLog>;
+  updateCheckinSchedule: EntireFieldWrapper<GQLCheckinSchedule>;
   updateExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateExerciseForm: EntireFieldWrapper<GQLTrainingExercise>;
   updateExerciseSet: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1185,6 +1236,11 @@ export type GQLMutationClosePlanArgs = {
 };
 
 
+export type GQLMutationCompleteCheckinArgs = {
+  input: GQLCompleteCheckinInput;
+};
+
+
 export type GQLMutationCopyExercisesFromDayArgs = {
   input: GQLCopyExercisesFromDayInput;
 };
@@ -1197,6 +1253,11 @@ export type GQLMutationCopyNutritionPlanArgs = {
 
 export type GQLMutationCreateBodyProgressLogArgs = {
   input: GQLCreateBodyProgressLogInput;
+};
+
+
+export type GQLMutationCreateCheckinScheduleArgs = {
+  input: GQLCreateCheckinScheduleInput;
 };
 
 
@@ -1608,6 +1669,11 @@ export type GQLMutationUpdateBodyProgressLogSharingStatusArgs = {
 };
 
 
+export type GQLMutationUpdateCheckinScheduleArgs = {
+  input: GQLUpdateCheckinScheduleInput;
+};
+
+
 export type GQLMutationUpdateExerciseArgs = {
   id: Scalars['ID']['input'];
   input: GQLUpdateExerciseInput;
@@ -1994,6 +2060,8 @@ export type GQLQuery = {
   adminUserStats: EntireFieldWrapper<GQLAdminUserStats>;
   bodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
   checkPremiumAccess: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  checkinSchedule?: EntireFieldWrapper<Maybe<GQLCheckinSchedule>>;
+  checkinStatus: EntireFieldWrapper<GQLCheckinStatus>;
   clientBodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
   clientBodyProgressLogs: EntireFieldWrapper<Array<GQLBodyProgressLog>>;
   clientNutritionPlans: EntireFieldWrapper<Array<GQLNutritionPlan>>;
@@ -2866,6 +2934,13 @@ export type GQLUpdateBodyProgressLogInput = {
   shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type GQLUpdateCheckinScheduleInput = {
+  dayOfMonth?: InputMaybe<Scalars['Int']['input']>;
+  dayOfWeek?: InputMaybe<Scalars['Int']['input']>;
+  frequency?: InputMaybe<GQLCheckinFrequency>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type GQLUpdateExerciseFormInput = {
   additionalInstructions?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
@@ -3451,12 +3526,18 @@ export type GQLResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
   Chat: ResolverTypeWrapper<GQLChat>;
   ChatWithMessages: ResolverTypeWrapper<GQLChatWithMessages>;
+  CheckinCompletion: ResolverTypeWrapper<GQLCheckinCompletion>;
+  CheckinFrequency: GQLCheckinFrequency;
+  CheckinSchedule: ResolverTypeWrapper<GQLCheckinSchedule>;
+  CheckinStatus: ResolverTypeWrapper<GQLCheckinStatus>;
   CoachingRequest: ResolverTypeWrapper<GQLCoachingRequest>;
   CoachingRequestStatus: GQLCoachingRequestStatus;
+  CompleteCheckinInput: GQLCompleteCheckinInput;
   CopyExercisesFromDayInput: GQLCopyExercisesFromDayInput;
   CopyNutritionPlanInput: GQLCopyNutritionPlanInput;
   CopyNutritionPlanPayload: ResolverTypeWrapper<GQLCopyNutritionPlanPayload>;
   CreateBodyProgressLogInput: GQLCreateBodyProgressLogInput;
+  CreateCheckinScheduleInput: GQLCreateCheckinScheduleInput;
   CreateExerciseInput: GQLCreateExerciseInput;
   CreateExerciseNoteInput: GQLCreateExerciseNoteInput;
   CreateExerciseSetInput: GQLCreateExerciseSetInput;
@@ -3595,6 +3676,7 @@ export type GQLResolversTypes = {
   TrainingWeek: ResolverTypeWrapper<GQLTrainingWeek>;
   UpdateBodyMeasurementInput: GQLUpdateBodyMeasurementInput;
   UpdateBodyProgressLogInput: GQLUpdateBodyProgressLogInput;
+  UpdateCheckinScheduleInput: GQLUpdateCheckinScheduleInput;
   UpdateExerciseFormInput: GQLUpdateExerciseFormInput;
   UpdateExerciseInput: GQLUpdateExerciseInput;
   UpdateExerciseSetFormInput: GQLUpdateExerciseSetFormInput;
@@ -3674,11 +3756,16 @@ export type GQLResolversParentTypes = {
   Boolean: Scalars['Boolean']['output'];
   Chat: GQLChat;
   ChatWithMessages: GQLChatWithMessages;
+  CheckinCompletion: GQLCheckinCompletion;
+  CheckinSchedule: GQLCheckinSchedule;
+  CheckinStatus: GQLCheckinStatus;
   CoachingRequest: GQLCoachingRequest;
+  CompleteCheckinInput: GQLCompleteCheckinInput;
   CopyExercisesFromDayInput: GQLCopyExercisesFromDayInput;
   CopyNutritionPlanInput: GQLCopyNutritionPlanInput;
   CopyNutritionPlanPayload: GQLCopyNutritionPlanPayload;
   CreateBodyProgressLogInput: GQLCreateBodyProgressLogInput;
+  CreateCheckinScheduleInput: GQLCreateCheckinScheduleInput;
   CreateExerciseInput: GQLCreateExerciseInput;
   CreateExerciseNoteInput: GQLCreateExerciseNoteInput;
   CreateExerciseSetInput: GQLCreateExerciseSetInput;
@@ -3794,6 +3881,7 @@ export type GQLResolversParentTypes = {
   TrainingWeek: GQLTrainingWeek;
   UpdateBodyMeasurementInput: GQLUpdateBodyMeasurementInput;
   UpdateBodyProgressLogInput: GQLUpdateBodyProgressLogInput;
+  UpdateCheckinScheduleInput: GQLUpdateCheckinScheduleInput;
   UpdateExerciseFormInput: GQLUpdateExerciseFormInput;
   UpdateExerciseInput: GQLUpdateExerciseInput;
   UpdateExerciseSetFormInput: GQLUpdateExerciseSetFormInput;
@@ -3975,6 +4063,36 @@ export type GQLChatWithMessagesResolvers<ContextType = GQLContext, ParentType ex
   trainerId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   unreadCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLCheckinCompletionResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CheckinCompletion'] = GQLResolversParentTypes['CheckinCompletion']> = {
+  completedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  measurement?: Resolver<Maybe<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
+  progressLog?: Resolver<Maybe<GQLResolversTypes['BodyProgressLog']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLCheckinScheduleResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CheckinSchedule'] = GQLResolversParentTypes['CheckinSchedule']> = {
+  completions?: Resolver<Array<GQLResolversTypes['CheckinCompletion']>, ParentType, ContextType>;
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  dayOfMonth?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  dayOfWeek?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  frequency?: Resolver<GQLResolversTypes['CheckinFrequency'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  isActive?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  nextCheckinDate?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLCheckinStatusResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CheckinStatus'] = GQLResolversParentTypes['CheckinStatus']> = {
+  daysSinceLastCheckin?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  hasSchedule?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  isCheckinDue?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  nextCheckinDate?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  schedule?: Resolver<Maybe<GQLResolversTypes['CheckinSchedule']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -4301,9 +4419,11 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   clearTodaysWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   clearUserSessions?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationClearUserSessionsArgs, 'userId'>>;
   closePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationClosePlanArgs, 'planId'>>;
+  completeCheckin?: Resolver<GQLResolversTypes['CheckinCompletion'], ParentType, ContextType, RequireFields<GQLMutationCompleteCheckinArgs, 'input'>>;
   copyExercisesFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCopyExercisesFromDayArgs, 'input'>>;
   copyNutritionPlan?: Resolver<GQLResolversTypes['CopyNutritionPlanPayload'], ParentType, ContextType, RequireFields<GQLMutationCopyNutritionPlanArgs, 'input'>>;
   createBodyProgressLog?: Resolver<GQLResolversTypes['BodyProgressLog'], ParentType, ContextType, RequireFields<GQLMutationCreateBodyProgressLogArgs, 'input'>>;
+  createCheckinSchedule?: Resolver<GQLResolversTypes['CheckinSchedule'], ParentType, ContextType, RequireFields<GQLMutationCreateCheckinScheduleArgs, 'input'>>;
   createCoachingRequest?: Resolver<GQLResolversTypes['CoachingRequest'], ParentType, ContextType, RequireFields<GQLMutationCreateCoachingRequestArgs, 'recipientEmail'>>;
   createDraftTemplate?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
   createExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationCreateExerciseArgs, 'input'>>;
@@ -4324,6 +4444,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   deactivateUser?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeactivateUserArgs, 'userId'>>;
   deleteBodyMeasurement?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteBodyMeasurementArgs, 'id'>>;
   deleteBodyProgressLog?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteBodyProgressLogArgs, 'id'>>;
+  deleteCheckinSchedule?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   deleteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteExerciseArgs, 'id'>>;
   deleteFavouriteWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteFavouriteWorkoutArgs, 'id'>>;
   deleteMeal?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationDeleteMealArgs, 'id'>>;
@@ -4386,6 +4507,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateBodyMeasurement?: Resolver<GQLResolversTypes['UserBodyMeasure'], ParentType, ContextType, RequireFields<GQLMutationUpdateBodyMeasurementArgs, 'input'>>;
   updateBodyProgressLog?: Resolver<GQLResolversTypes['BodyProgressLog'], ParentType, ContextType, RequireFields<GQLMutationUpdateBodyProgressLogArgs, 'id' | 'input'>>;
   updateBodyProgressLogSharingStatus?: Resolver<GQLResolversTypes['BodyProgressLog'], ParentType, ContextType, RequireFields<GQLMutationUpdateBodyProgressLogSharingStatusArgs, 'id' | 'shareWithTrainer'>>;
+  updateCheckinSchedule?: Resolver<GQLResolversTypes['CheckinSchedule'], ParentType, ContextType, RequireFields<GQLMutationUpdateCheckinScheduleArgs, 'input'>>;
   updateExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseArgs, 'id' | 'input'>>;
   updateExerciseForm?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseFormArgs, 'input'>>;
   updateExerciseSet?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseSetArgs, 'input'>>;
@@ -4625,6 +4747,8 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   adminUserStats?: Resolver<GQLResolversTypes['AdminUserStats'], ParentType, ContextType>;
   bodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
   checkPremiumAccess?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
+  checkinSchedule?: Resolver<Maybe<GQLResolversTypes['CheckinSchedule']>, ParentType, ContextType>;
+  checkinStatus?: Resolver<GQLResolversTypes['CheckinStatus'], ParentType, ContextType>;
   clientBodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType, RequireFields<GQLQueryClientBodyMeasuresArgs, 'clientId'>>;
   clientBodyProgressLogs?: Resolver<Array<GQLResolversTypes['BodyProgressLog']>, ParentType, ContextType, RequireFields<GQLQueryClientBodyProgressLogsArgs, 'clientId'>>;
   clientNutritionPlans?: Resolver<Array<GQLResolversTypes['NutritionPlan']>, ParentType, ContextType>;
@@ -5142,6 +5266,9 @@ export type GQLResolvers<ContextType = GQLContext> = {
   BodyProgressLog?: GQLBodyProgressLogResolvers<ContextType>;
   Chat?: GQLChatResolvers<ContextType>;
   ChatWithMessages?: GQLChatWithMessagesResolvers<ContextType>;
+  CheckinCompletion?: GQLCheckinCompletionResolvers<ContextType>;
+  CheckinSchedule?: GQLCheckinScheduleResolvers<ContextType>;
+  CheckinStatus?: GQLCheckinStatusResolvers<ContextType>;
   CoachingRequest?: GQLCoachingRequestResolvers<ContextType>;
   CopyNutritionPlanPayload?: GQLCopyNutritionPlanPayloadResolvers<ContextType>;
   CreateNutritionPlanPayload?: GQLCreateNutritionPlanPayloadResolvers<ContextType>;

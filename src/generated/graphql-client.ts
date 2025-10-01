@@ -292,6 +292,42 @@ export type GQLChatWithMessages = {
   updatedAt: Scalars['String']['output'];
 };
 
+export type GQLCheckinCompletion = {
+  __typename?: 'CheckinCompletion';
+  completedAt: Scalars['String']['output'];
+  id: Scalars['ID']['output'];
+  measurement?: Maybe<GQLUserBodyMeasure>;
+  progressLog?: Maybe<GQLBodyProgressLog>;
+};
+
+export enum GQLCheckinFrequency {
+  Biweekly = 'BIWEEKLY',
+  Monthly = 'MONTHLY',
+  Weekly = 'WEEKLY'
+}
+
+export type GQLCheckinSchedule = {
+  __typename?: 'CheckinSchedule';
+  completions: Array<GQLCheckinCompletion>;
+  createdAt: Scalars['String']['output'];
+  dayOfMonth?: Maybe<Scalars['Int']['output']>;
+  dayOfWeek?: Maybe<Scalars['Int']['output']>;
+  frequency: GQLCheckinFrequency;
+  id: Scalars['ID']['output'];
+  isActive: Scalars['Boolean']['output'];
+  nextCheckinDate?: Maybe<Scalars['String']['output']>;
+  updatedAt: Scalars['String']['output'];
+};
+
+export type GQLCheckinStatus = {
+  __typename?: 'CheckinStatus';
+  daysSinceLastCheckin?: Maybe<Scalars['Int']['output']>;
+  hasSchedule: Scalars['Boolean']['output'];
+  isCheckinDue: Scalars['Boolean']['output'];
+  nextCheckinDate?: Maybe<Scalars['String']['output']>;
+  schedule?: Maybe<GQLCheckinSchedule>;
+};
+
 export type GQLCoachingRequest = {
   __typename?: 'CoachingRequest';
   createdAt: Scalars['String']['output'];
@@ -309,6 +345,11 @@ export enum GQLCoachingRequestStatus {
   Pending = 'PENDING',
   Rejected = 'REJECTED'
 }
+
+export type GQLCompleteCheckinInput = {
+  measurementData?: InputMaybe<GQLAddBodyMeasurementInput>;
+  progressLogData?: InputMaybe<GQLCreateBodyProgressLogInput>;
+};
 
 export type GQLCopyExercisesFromDayInput = {
   sourceDayId: Scalars['ID']['input'];
@@ -335,6 +376,12 @@ export type GQLCreateBodyProgressLogInput = {
   loggedAt?: InputMaybe<Scalars['String']['input']>;
   notes?: InputMaybe<Scalars['String']['input']>;
   shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
+export type GQLCreateCheckinScheduleInput = {
+  dayOfMonth?: InputMaybe<Scalars['Int']['input']>;
+  dayOfWeek?: InputMaybe<Scalars['Int']['input']>;
+  frequency: GQLCheckinFrequency;
 };
 
 export type GQLCreateExerciseInput = {
@@ -950,9 +997,11 @@ export type GQLMutation = {
   clearTodaysWorkout: Scalars['Boolean']['output'];
   clearUserSessions: Scalars['Boolean']['output'];
   closePlan: Scalars['Boolean']['output'];
+  completeCheckin: GQLCheckinCompletion;
   copyExercisesFromDay: Scalars['Boolean']['output'];
   copyNutritionPlan: GQLCopyNutritionPlanPayload;
   createBodyProgressLog: GQLBodyProgressLog;
+  createCheckinSchedule: GQLCheckinSchedule;
   createCoachingRequest: GQLCoachingRequest;
   createDraftTemplate: GQLTrainingPlan;
   createExercise: Scalars['Boolean']['output'];
@@ -973,6 +1022,7 @@ export type GQLMutation = {
   deactivateUser: Scalars['Boolean']['output'];
   deleteBodyMeasurement: Scalars['Boolean']['output'];
   deleteBodyProgressLog: Scalars['Boolean']['output'];
+  deleteCheckinSchedule: Scalars['Boolean']['output'];
   deleteExercise: Scalars['Boolean']['output'];
   deleteFavouriteWorkout: Scalars['Boolean']['output'];
   deleteMeal: Scalars['Boolean']['output'];
@@ -1035,6 +1085,7 @@ export type GQLMutation = {
   updateBodyMeasurement: GQLUserBodyMeasure;
   updateBodyProgressLog: GQLBodyProgressLog;
   updateBodyProgressLogSharingStatus: GQLBodyProgressLog;
+  updateCheckinSchedule: GQLCheckinSchedule;
   updateExercise: Scalars['Boolean']['output'];
   updateExerciseForm: GQLTrainingExercise;
   updateExerciseSet: Scalars['Boolean']['output'];
@@ -1183,6 +1234,11 @@ export type GQLMutationClosePlanArgs = {
 };
 
 
+export type GQLMutationCompleteCheckinArgs = {
+  input: GQLCompleteCheckinInput;
+};
+
+
 export type GQLMutationCopyExercisesFromDayArgs = {
   input: GQLCopyExercisesFromDayInput;
 };
@@ -1195,6 +1251,11 @@ export type GQLMutationCopyNutritionPlanArgs = {
 
 export type GQLMutationCreateBodyProgressLogArgs = {
   input: GQLCreateBodyProgressLogInput;
+};
+
+
+export type GQLMutationCreateCheckinScheduleArgs = {
+  input: GQLCreateCheckinScheduleInput;
 };
 
 
@@ -1606,6 +1667,11 @@ export type GQLMutationUpdateBodyProgressLogSharingStatusArgs = {
 };
 
 
+export type GQLMutationUpdateCheckinScheduleArgs = {
+  input: GQLUpdateCheckinScheduleInput;
+};
+
+
 export type GQLMutationUpdateExerciseArgs = {
   id: Scalars['ID']['input'];
   input: GQLUpdateExerciseInput;
@@ -1992,6 +2058,8 @@ export type GQLQuery = {
   adminUserStats: GQLAdminUserStats;
   bodyMeasures: Array<GQLUserBodyMeasure>;
   checkPremiumAccess: Scalars['Boolean']['output'];
+  checkinSchedule?: Maybe<GQLCheckinSchedule>;
+  checkinStatus: GQLCheckinStatus;
   clientBodyMeasures: Array<GQLUserBodyMeasure>;
   clientBodyProgressLogs: Array<GQLBodyProgressLog>;
   clientNutritionPlans: Array<GQLNutritionPlan>;
@@ -2864,6 +2932,13 @@ export type GQLUpdateBodyProgressLogInput = {
   shareWithTrainer?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+export type GQLUpdateCheckinScheduleInput = {
+  dayOfMonth?: InputMaybe<Scalars['Int']['input']>;
+  dayOfWeek?: InputMaybe<Scalars['Int']['input']>;
+  frequency?: InputMaybe<GQLCheckinFrequency>;
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+};
+
 export type GQLUpdateExerciseFormInput = {
   additionalInstructions?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
@@ -3654,6 +3729,37 @@ export type GQLUpdateBodyProgressLogSharingStatusMutationVariables = Exact<{
 
 
 export type GQLUpdateBodyProgressLogSharingStatusMutation = { __typename?: 'Mutation', updateBodyProgressLogSharingStatus: { __typename?: 'BodyProgressLog', id: string, shareWithTrainer: boolean } };
+
+export type GQLGetCheckinStatusQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetCheckinStatusQuery = { __typename?: 'Query', checkinStatus: { __typename?: 'CheckinStatus', hasSchedule: boolean, nextCheckinDate?: string | undefined | null, isCheckinDue: boolean, daysSinceLastCheckin?: number | undefined | null, schedule?: { __typename?: 'CheckinSchedule', id: string, frequency: GQLCheckinFrequency, dayOfWeek?: number | undefined | null, dayOfMonth?: number | undefined | null, isActive: boolean, nextCheckinDate?: string | undefined | null, createdAt: string, updatedAt: string, completions: Array<{ __typename?: 'CheckinCompletion', id: string, completedAt: string, measurement?: { __typename?: 'UserBodyMeasure', id: string, weight?: number | undefined | null, measuredAt: string } | undefined | null, progressLog?: { __typename?: 'BodyProgressLog', id: string, loggedAt: string, createdAt: string, updatedAt: string, shareWithTrainer: boolean } | undefined | null }> } | undefined | null } };
+
+export type GQLCreateCheckinScheduleMutationVariables = Exact<{
+  input: GQLCreateCheckinScheduleInput;
+}>;
+
+
+export type GQLCreateCheckinScheduleMutation = { __typename?: 'Mutation', createCheckinSchedule: { __typename?: 'CheckinSchedule', id: string, frequency: GQLCheckinFrequency, dayOfWeek?: number | undefined | null, dayOfMonth?: number | undefined | null, isActive: boolean, nextCheckinDate?: string | undefined | null, createdAt: string, updatedAt: string } };
+
+export type GQLUpdateCheckinScheduleMutationVariables = Exact<{
+  input: GQLUpdateCheckinScheduleInput;
+}>;
+
+
+export type GQLUpdateCheckinScheduleMutation = { __typename?: 'Mutation', updateCheckinSchedule: { __typename?: 'CheckinSchedule', id: string, frequency: GQLCheckinFrequency, dayOfWeek?: number | undefined | null, dayOfMonth?: number | undefined | null, isActive: boolean, nextCheckinDate?: string | undefined | null, createdAt: string, updatedAt: string } };
+
+export type GQLDeleteCheckinScheduleMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLDeleteCheckinScheduleMutation = { __typename?: 'Mutation', deleteCheckinSchedule: boolean };
+
+export type GQLCompleteCheckinMutationVariables = Exact<{
+  input: GQLCompleteCheckinInput;
+}>;
+
+
+export type GQLCompleteCheckinMutation = { __typename?: 'Mutation', completeCheckin: { __typename?: 'CheckinCompletion', id: string, completedAt: string, measurement?: { __typename?: 'UserBodyMeasure', id: string, weight?: number | undefined | null, measuredAt: string } | undefined | null, progressLog?: { __typename?: 'BodyProgressLog', id: string, loggedAt: string } | undefined | null } };
 
 export type GQLResetUserLogsMutationVariables = Exact<{ [key: string]: never; }>;
 
@@ -7152,6 +7258,211 @@ useUpdateBodyProgressLogSharingStatusMutation.getKey = () => ['UpdateBodyProgres
 
 
 useUpdateBodyProgressLogSharingStatusMutation.fetcher = (variables: GQLUpdateBodyProgressLogSharingStatusMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateBodyProgressLogSharingStatusMutation, GQLUpdateBodyProgressLogSharingStatusMutationVariables>(UpdateBodyProgressLogSharingStatusDocument, variables, options);
+
+export const GetCheckinStatusDocument = `
+    query GetCheckinStatus {
+  checkinStatus {
+    hasSchedule
+    schedule {
+      id
+      frequency
+      dayOfWeek
+      dayOfMonth
+      isActive
+      nextCheckinDate
+      createdAt
+      updatedAt
+      completions {
+        id
+        completedAt
+        measurement {
+          id
+          weight
+          measuredAt
+        }
+        progressLog {
+          id
+          loggedAt
+          createdAt
+          updatedAt
+          shareWithTrainer
+        }
+      }
+    }
+    nextCheckinDate
+    isCheckinDue
+    daysSinceLastCheckin
+  }
+}
+    `;
+
+export const useGetCheckinStatusQuery = <
+      TData = GQLGetCheckinStatusQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetCheckinStatusQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetCheckinStatusQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetCheckinStatusQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetCheckinStatusQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetCheckinStatus'] : ['GetCheckinStatus', variables],
+    queryFn: fetchData<GQLGetCheckinStatusQuery, GQLGetCheckinStatusQueryVariables>(GetCheckinStatusDocument, variables),
+    ...options
+  }
+    )};
+
+useGetCheckinStatusQuery.getKey = (variables?: GQLGetCheckinStatusQueryVariables) => variables === undefined ? ['GetCheckinStatus'] : ['GetCheckinStatus', variables];
+
+export const useInfiniteGetCheckinStatusQuery = <
+      TData = InfiniteData<GQLGetCheckinStatusQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetCheckinStatusQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetCheckinStatusQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetCheckinStatusQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetCheckinStatusQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetCheckinStatus.infinite'] : ['GetCheckinStatus.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetCheckinStatusQuery, GQLGetCheckinStatusQueryVariables>(GetCheckinStatusDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetCheckinStatusQuery.getKey = (variables?: GQLGetCheckinStatusQueryVariables) => variables === undefined ? ['GetCheckinStatus.infinite'] : ['GetCheckinStatus.infinite', variables];
+
+
+useGetCheckinStatusQuery.fetcher = (variables?: GQLGetCheckinStatusQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetCheckinStatusQuery, GQLGetCheckinStatusQueryVariables>(GetCheckinStatusDocument, variables, options);
+
+export const CreateCheckinScheduleDocument = `
+    mutation CreateCheckinSchedule($input: CreateCheckinScheduleInput!) {
+  createCheckinSchedule(input: $input) {
+    id
+    frequency
+    dayOfWeek
+    dayOfMonth
+    isActive
+    nextCheckinDate
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useCreateCheckinScheduleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateCheckinScheduleMutation, TError, GQLCreateCheckinScheduleMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateCheckinScheduleMutation, TError, GQLCreateCheckinScheduleMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateCheckinSchedule'],
+    mutationFn: (variables?: GQLCreateCheckinScheduleMutationVariables) => fetchData<GQLCreateCheckinScheduleMutation, GQLCreateCheckinScheduleMutationVariables>(CreateCheckinScheduleDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateCheckinScheduleMutation.getKey = () => ['CreateCheckinSchedule'];
+
+
+useCreateCheckinScheduleMutation.fetcher = (variables: GQLCreateCheckinScheduleMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateCheckinScheduleMutation, GQLCreateCheckinScheduleMutationVariables>(CreateCheckinScheduleDocument, variables, options);
+
+export const UpdateCheckinScheduleDocument = `
+    mutation UpdateCheckinSchedule($input: UpdateCheckinScheduleInput!) {
+  updateCheckinSchedule(input: $input) {
+    id
+    frequency
+    dayOfWeek
+    dayOfMonth
+    isActive
+    nextCheckinDate
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useUpdateCheckinScheduleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateCheckinScheduleMutation, TError, GQLUpdateCheckinScheduleMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateCheckinScheduleMutation, TError, GQLUpdateCheckinScheduleMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateCheckinSchedule'],
+    mutationFn: (variables?: GQLUpdateCheckinScheduleMutationVariables) => fetchData<GQLUpdateCheckinScheduleMutation, GQLUpdateCheckinScheduleMutationVariables>(UpdateCheckinScheduleDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateCheckinScheduleMutation.getKey = () => ['UpdateCheckinSchedule'];
+
+
+useUpdateCheckinScheduleMutation.fetcher = (variables: GQLUpdateCheckinScheduleMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateCheckinScheduleMutation, GQLUpdateCheckinScheduleMutationVariables>(UpdateCheckinScheduleDocument, variables, options);
+
+export const DeleteCheckinScheduleDocument = `
+    mutation DeleteCheckinSchedule {
+  deleteCheckinSchedule
+}
+    `;
+
+export const useDeleteCheckinScheduleMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDeleteCheckinScheduleMutation, TError, GQLDeleteCheckinScheduleMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDeleteCheckinScheduleMutation, TError, GQLDeleteCheckinScheduleMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteCheckinSchedule'],
+    mutationFn: (variables?: GQLDeleteCheckinScheduleMutationVariables) => fetchData<GQLDeleteCheckinScheduleMutation, GQLDeleteCheckinScheduleMutationVariables>(DeleteCheckinScheduleDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDeleteCheckinScheduleMutation.getKey = () => ['DeleteCheckinSchedule'];
+
+
+useDeleteCheckinScheduleMutation.fetcher = (variables?: GQLDeleteCheckinScheduleMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteCheckinScheduleMutation, GQLDeleteCheckinScheduleMutationVariables>(DeleteCheckinScheduleDocument, variables, options);
+
+export const CompleteCheckinDocument = `
+    mutation CompleteCheckin($input: CompleteCheckinInput!) {
+  completeCheckin(input: $input) {
+    id
+    completedAt
+    measurement {
+      id
+      weight
+      measuredAt
+    }
+    progressLog {
+      id
+      loggedAt
+    }
+  }
+}
+    `;
+
+export const useCompleteCheckinMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCompleteCheckinMutation, TError, GQLCompleteCheckinMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCompleteCheckinMutation, TError, GQLCompleteCheckinMutationVariables, TContext>(
+      {
+    mutationKey: ['CompleteCheckin'],
+    mutationFn: (variables?: GQLCompleteCheckinMutationVariables) => fetchData<GQLCompleteCheckinMutation, GQLCompleteCheckinMutationVariables>(CompleteCheckinDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCompleteCheckinMutation.getKey = () => ['CompleteCheckin'];
+
+
+useCompleteCheckinMutation.fetcher = (variables: GQLCompleteCheckinMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCompleteCheckinMutation, GQLCompleteCheckinMutationVariables>(CompleteCheckinDocument, variables, options);
 
 export const ResetUserLogsDocument = `
     mutation ResetUserLogs {
