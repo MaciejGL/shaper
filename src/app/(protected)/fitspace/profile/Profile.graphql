@@ -41,6 +41,7 @@ fragment ProfileFragment on UserProfile {
 query Profile {
   profile {
     ...ProfileFragment
+    timezone
   }
   userBasic {
     id

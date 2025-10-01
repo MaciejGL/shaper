@@ -1856,6 +1856,7 @@ export type GQLNotification = {
 
 export type GQLNotificationPreferences = {
   __typename?: 'NotificationPreferences';
+  checkinReminders: Scalars['Boolean']['output'];
   emailNotifications: Scalars['Boolean']['output'];
   progressUpdates: Scalars['Boolean']['output'];
   pushNotifications: Scalars['Boolean']['output'];
@@ -1864,6 +1865,7 @@ export type GQLNotificationPreferences = {
 };
 
 export type GQLNotificationPreferencesInput = {
+  checkinReminders?: InputMaybe<Scalars['Boolean']['input']>;
   emailNotifications?: InputMaybe<Scalars['Boolean']['input']>;
   progressUpdates?: InputMaybe<Scalars['Boolean']['input']>;
   pushNotifications?: InputMaybe<Scalars['Boolean']['input']>;
@@ -3077,6 +3079,8 @@ export type GQLUpdateProfileInput = {
   avatarUrl?: InputMaybe<Scalars['String']['input']>;
   bio?: InputMaybe<Scalars['String']['input']>;
   birthday?: InputMaybe<Scalars['String']['input']>;
+  checkinReminderTime?: InputMaybe<Scalars['Int']['input']>;
+  checkinReminders?: InputMaybe<Scalars['Boolean']['input']>;
   credentials?: InputMaybe<Array<Scalars['String']['input']>>;
   email?: InputMaybe<Scalars['String']['input']>;
   firstName?: InputMaybe<Scalars['String']['input']>;
@@ -3096,6 +3100,7 @@ export type GQLUpdateProfileInput = {
   successStories?: InputMaybe<Array<Scalars['String']['input']>>;
   theme?: InputMaybe<GQLTheme>;
   timeFormat?: InputMaybe<GQLTimeFormat>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   trainerSince?: InputMaybe<Scalars['String']['input']>;
   trainingView?: InputMaybe<GQLTrainingView>;
   weekStartsOn?: InputMaybe<Scalars['Int']['input']>;
@@ -3264,6 +3269,7 @@ export type GQLUserProfile = {
   bio?: Maybe<Scalars['String']['output']>;
   birthday?: Maybe<Scalars['String']['output']>;
   bodyMeasures: Array<GQLUserBodyMeasure>;
+  checkinReminders?: Maybe<Scalars['Boolean']['output']>;
   createdAt: Scalars['String']['output'];
   credentials: Array<Scalars['String']['output']>;
   email?: Maybe<Scalars['String']['output']>;
@@ -3283,6 +3289,7 @@ export type GQLUserProfile = {
   successStories: Array<Scalars['String']['output']>;
   theme: GQLTheme;
   timeFormat: GQLTimeFormat;
+  timezone?: Maybe<Scalars['String']['output']>;
   trainerSince?: Maybe<Scalars['String']['output']>;
   trainingView: GQLTrainingView;
   updatedAt: Scalars['String']['output'];
@@ -3611,7 +3618,7 @@ export type GQLProfileFragmentFragment = { __typename?: 'UserProfile', id: strin
 export type GQLProfileQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLProfileQuery = { __typename?: 'Query', profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, hasCompletedOnboarding: boolean, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } } | undefined | null, userBasic?: { __typename?: 'User', id: string, capacity?: number | undefined | null } | undefined | null };
+export type GQLProfileQuery = { __typename?: 'Query', profile?: { __typename?: 'UserProfile', timezone?: string | undefined | null, id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, height?: number | undefined | null, weight?: number | undefined | null, fitnessLevel?: GQLFitnessLevel | undefined | null, allergies?: string | undefined | null, activityLevel?: GQLActivityLevel | undefined | null, goals: Array<GQLGoal>, bio?: string | undefined | null, specialization: Array<string>, credentials: Array<string>, successStories: Array<string>, trainerSince?: string | undefined | null, createdAt: string, updatedAt: string, email?: string | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, hasCompletedOnboarding: boolean, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } } | undefined | null, userBasic?: { __typename?: 'User', id: string, capacity?: number | undefined | null } | undefined | null };
 
 export type GQLUpdateProfileMutationVariables = Exact<{
   input: GQLUpdateProfileInput;
@@ -4742,7 +4749,7 @@ export type GQLAssignTemplateToSelfMutation = { __typename?: 'Mutation', assignT
 export type GQLUserBasicQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLUserBasicQuery = { __typename?: 'Query', userBasic?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, capacity?: number | undefined | null, trainerId?: string | undefined | null, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, hasCompletedOnboarding: boolean, height?: number | undefined | null, weight?: number | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean } } | undefined | null } | undefined | null };
+export type GQLUserBasicQuery = { __typename?: 'Query', userBasic?: { __typename?: 'User', id: string, email: string, name?: string | undefined | null, role: GQLUserRole, createdAt: string, updatedAt: string, capacity?: number | undefined | null, trainerId?: string | undefined | null, profile?: { __typename?: 'UserProfile', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, phone?: string | undefined | null, birthday?: string | undefined | null, sex?: string | undefined | null, avatarUrl?: string | undefined | null, hasCompletedOnboarding: boolean, height?: number | undefined | null, weight?: number | undefined | null, weekStartsOn?: number | undefined | null, weightUnit: GQLWeightUnit, heightUnit: GQLHeightUnit, theme: GQLTheme, timezone?: string | undefined | null, timeFormat: GQLTimeFormat, trainingView: GQLTrainingView, notificationPreferences: { __typename?: 'NotificationPreferences', workoutReminders: boolean, progressUpdates: boolean, systemNotifications: boolean, emailNotifications: boolean, pushNotifications: boolean, checkinReminders: boolean } } | undefined | null } | undefined | null };
 
 export type GQLNotificationsQueryVariables = Exact<{
   userId: Scalars['ID']['input'];
@@ -6430,6 +6437,7 @@ export const ProfileDocument = `
     query Profile {
   profile {
     ...ProfileFragment
+    timezone
   }
   userBasic {
     id
@@ -13849,6 +13857,7 @@ export const UserBasicDocument = `
       weightUnit
       heightUnit
       theme
+      timezone
       timeFormat
       trainingView
       hasCompletedOnboarding
@@ -13858,6 +13867,7 @@ export const UserBasicDocument = `
         systemNotifications
         emailNotifications
         pushNotifications
+        checkinReminders
       }
     }
     capacity

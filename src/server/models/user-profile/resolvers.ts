@@ -517,6 +517,15 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       updateData.pushNotifications =
         rest.notificationPreferences.pushNotifications
     }
+    if (rest.notificationPreferences?.checkinReminders !== undefined) {
+      updateData.checkinReminders =
+        rest.notificationPreferences.checkinReminders
+    }
+
+    // Check-in preferences
+    if (rest.timezone !== undefined) updateData.timezone = rest.timezone
+    if (rest.checkinReminders !== undefined)
+      updateData.checkinReminders = rest.checkinReminders
 
     const userProfile = await prisma.userProfile.update({
       where: { userId: userSession?.user?.id },

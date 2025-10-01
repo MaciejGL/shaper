@@ -35,6 +35,7 @@ export interface NotificationPreferences {
   systemNotifications?: boolean
   emailNotifications?: boolean
   pushNotifications?: boolean
+  checkinReminders?: boolean
 }
 
 interface UserPreferences {
@@ -43,6 +44,7 @@ interface UserPreferences {
   heightUnit: HeightUnit
   theme: ThemePreference
   timeFormat: TimeFormat
+  timezone?: string
   trainingView: TrainingView
   notifications: NotificationPreferences
 }
@@ -169,6 +171,8 @@ export function UserPreferencesProvider({
             profile.notificationPreferences?.emailNotifications ?? true,
           pushNotifications:
             profile.notificationPreferences?.pushNotifications ?? false,
+          checkinReminders:
+            profile.notificationPreferences?.checkinReminders ?? true,
         },
       }
 
@@ -228,6 +232,10 @@ export function UserPreferencesProvider({
         }
         if (updates.notifications !== undefined) {
           input.notificationPreferences = updates.notifications
+        }
+
+        if (updates.timezone !== undefined) {
+          input.timezone = updates.timezone
         }
 
         // Update in database via GraphQL

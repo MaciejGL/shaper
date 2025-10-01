@@ -10,6 +10,7 @@ import {
   useGetMySubscriptionStatusQuery,
   useUserBasicQuery,
 } from '@/generated/graphql-client'
+import { useSyncTimezone } from '@/hooks/use-sync-timezone'
 
 interface UserContextType {
   session: ReturnType<typeof useSession>
@@ -32,6 +33,8 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const session = useSession()
   const queryClient = useQueryClient()
 
+  // Automatically sync timezone when user logs in
+
   const { data, isLoading: isLoadingUserBasic } = useUserBasicQuery(
     {},
     {
@@ -42,6 +45,8 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
       staleTime: 20 * 60 * 1000, // 20 minutes
     },
   )
+
+  useSyncTimezone(data?.userBasic?.profile?.timezone ?? undefined)
 
   const { data: subscriptionData, isLoading: isLoadingSubscription } =
     useGetMySubscriptionStatusQuery(

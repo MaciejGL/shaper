@@ -221,10 +221,15 @@ export default class UserProfile implements GQLUserProfile {
       systemNotifications: this.data.systemNotifications ?? true,
       emailNotifications: this.data.emailNotifications ?? true,
       pushNotifications: this.data.pushNotifications ?? false,
+      checkinReminders: this.data.checkinReminders ?? true,
     }
   }
 
   get hasCompletedOnboarding() {
     return this.data.hasCompletedOnboarding ?? true
+  }
+
+  get timezone() {
+    return this.data.timezone
   }
 }

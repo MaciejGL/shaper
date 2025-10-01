@@ -138,6 +138,8 @@ model UserProfile {
   progressUpdates            Boolean?          @default(true)
   pushNotifications          Boolean?          @default(false)
   systemNotifications        Boolean?          @default(true)
+  checkinReminders           Boolean?          @default(true)
+  timezone                   String?           @default("UTC")
   theme                      String?           @default("system")
   timeFormat                 String?           @default("24h")
   weightUnit                 String?           @default("kg")

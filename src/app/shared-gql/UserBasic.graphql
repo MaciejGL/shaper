@@ -23,6 +23,7 @@ query UserBasic {
       weightUnit
       heightUnit
       theme
+      timezone
       timeFormat
       trainingView
       hasCompletedOnboarding
@@ -32,6 +33,7 @@ query UserBasic {
         systemNotifications
         emailNotifications
         pushNotifications
+        checkinReminders
       }
     }
     capacity

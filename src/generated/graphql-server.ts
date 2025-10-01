@@ -1858,6 +1858,7 @@ export type GQLNotification = {
 
 export type GQLNotificationPreferences = {
   __typename?: 'NotificationPreferences';
+  checkinReminders: EntireFieldWrapper<Scalars['Boolean']['output']>;
   emailNotifications: EntireFieldWrapper<Scalars['Boolean']['output']>;
   progressUpdates: EntireFieldWrapper<Scalars['Boolean']['output']>;
   pushNotifications: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1866,6 +1867,7 @@ export type GQLNotificationPreferences = {
 };
 
 export type GQLNotificationPreferencesInput = {
+  checkinReminders?: InputMaybe<Scalars['Boolean']['input']>;
   emailNotifications?: InputMaybe<Scalars['Boolean']['input']>;
   progressUpdates?: InputMaybe<Scalars['Boolean']['input']>;
   pushNotifications?: InputMaybe<Scalars['Boolean']['input']>;
@@ -3079,6 +3081,8 @@ export type GQLUpdateProfileInput = {
   avatarUrl?: InputMaybe<Scalars['String']['input']>;
   bio?: InputMaybe<Scalars['String']['input']>;
   birthday?: InputMaybe<Scalars['String']['input']>;
+  checkinReminderTime?: InputMaybe<Scalars['Int']['input']>;
+  checkinReminders?: InputMaybe<Scalars['Boolean']['input']>;
   credentials?: InputMaybe<Array<Scalars['String']['input']>>;
   email?: InputMaybe<Scalars['String']['input']>;
   firstName?: InputMaybe<Scalars['String']['input']>;
@@ -3098,6 +3102,7 @@ export type GQLUpdateProfileInput = {
   successStories?: InputMaybe<Array<Scalars['String']['input']>>;
   theme?: InputMaybe<GQLTheme>;
   timeFormat?: InputMaybe<GQLTimeFormat>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
   trainerSince?: InputMaybe<Scalars['String']['input']>;
   trainingView?: InputMaybe<GQLTrainingView>;
   weekStartsOn?: InputMaybe<Scalars['Int']['input']>;
@@ -3266,6 +3271,7 @@ export type GQLUserProfile = {
   bio?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   birthday?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   bodyMeasures: EntireFieldWrapper<Array<GQLUserBodyMeasure>>;
+  checkinReminders?: EntireFieldWrapper<Maybe<Scalars['Boolean']['output']>>;
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   credentials: EntireFieldWrapper<Array<Scalars['String']['output']>>;
   email?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
@@ -3285,6 +3291,7 @@ export type GQLUserProfile = {
   successStories: EntireFieldWrapper<Array<Scalars['String']['output']>>;
   theme: EntireFieldWrapper<GQLTheme>;
   timeFormat: EntireFieldWrapper<GQLTimeFormat>;
+  timezone?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainerSince?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainingView: EntireFieldWrapper<GQLTrainingView>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
@@ -4574,6 +4581,7 @@ export type GQLNotificationResolvers<ContextType = GQLContext, ParentType extend
 };
 
 export type GQLNotificationPreferencesResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['NotificationPreferences'] = GQLResolversParentTypes['NotificationPreferences']> = {
+  checkinReminders?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   emailNotifications?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   progressUpdates?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   pushNotifications?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
@@ -5135,6 +5143,7 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   bio?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   birthday?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   bodyMeasures?: Resolver<Array<GQLResolversTypes['UserBodyMeasure']>, ParentType, ContextType>;
+  checkinReminders?: Resolver<Maybe<GQLResolversTypes['Boolean']>, ParentType, ContextType>;
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   credentials?: Resolver<Array<GQLResolversTypes['String']>, ParentType, ContextType>;
   email?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
@@ -5154,6 +5163,7 @@ export type GQLUserProfileResolvers<ContextType = GQLContext, ParentType extends
   successStories?: Resolver<Array<GQLResolversTypes['String']>, ParentType, ContextType>;
   theme?: Resolver<GQLResolversTypes['Theme'], ParentType, ContextType>;
   timeFormat?: Resolver<GQLResolversTypes['TimeFormat'], ParentType, ContextType>;
+  timezone?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainerSince?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainingView?: Resolver<GQLResolversTypes['TrainingView'], ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;

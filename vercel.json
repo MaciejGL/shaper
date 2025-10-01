@@ -6,6 +6,12 @@
       "maxDuration": 60
     }
   },
+  "crons": [
+    {
+      "path": "/api/cron/checkin-notifications",
+      "schedule": "0 * * * *"
+    }
+  ],
   "build": {
     "env": {
       "GENERATE_SOURCEMAP": "false",

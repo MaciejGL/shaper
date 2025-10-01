@@ -55,6 +55,7 @@ type NotificationPreferences {
   systemNotifications: Boolean!
   emailNotifications: Boolean!
   pushNotifications: Boolean!
+  checkinReminders: Boolean!
 }
 
 type UserProfile {
@@ -90,6 +91,10 @@ type UserProfile {
   trainingView: TrainingView!
   hasCompletedOnboarding: Boolean!
   notificationPreferences: NotificationPreferences!
+
+  # Check-in preferences
+  timezone: String
+  checkinReminders: Boolean
 
   createdAt: String!
   updatedAt: String!
@@ -136,6 +141,7 @@ input NotificationPreferencesInput {
   systemNotifications: Boolean
   emailNotifications: Boolean
   pushNotifications: Boolean
+  checkinReminders: Boolean
 }
 
 input UpdateProfileInput {
@@ -170,6 +176,11 @@ input UpdateProfileInput {
   trainingView: TrainingView
   hasCompletedOnboarding: Boolean
   notificationPreferences: NotificationPreferencesInput
+
+  # Check-in preferences
+  timezone: String
+  checkinReminders: Boolean
+  checkinReminderTime: Int
 }
 
 input AddBodyMeasurementInput {
