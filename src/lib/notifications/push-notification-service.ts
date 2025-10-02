@@ -7,6 +7,27 @@
 import { sendPushNotificationToUsers } from '@/app/actions/push-notifications'
 
 // ================================
+// MEETINGS & SCHEDULING
+// ================================
+
+/**
+ * Send push notification for meeting reminder
+ */
+export async function notifyMeetingReminder(
+  clientId: string,
+  meetingTitle: string,
+  timeUntilText: string,
+  trainerName: string,
+) {
+  return await sendPushNotificationToUsers(
+    [clientId],
+    'Meeting Reminder',
+    `Your ${meetingTitle} with ${trainerName} is ${timeUntilText}`,
+    '/fitspace/my-trainer',
+  )
+}
+
+// ================================
 // COACHING & COLLABORATION
 // ================================
 

@@ -2023,6 +2023,7 @@ export enum GQLNotificationType {
   CoachingRequestRejected = 'COACHING_REQUEST_REJECTED',
   ExerciseNoteAdded = 'EXERCISE_NOTE_ADDED',
   ExerciseNoteReply = 'EXERCISE_NOTE_REPLY',
+  MeetingReminder = 'MEETING_REMINDER',
   Message = 'MESSAGE',
   NewMealPlanAssigned = 'NEW_MEAL_PLAN_ASSIGNED',
   NewTrainingPlanAssigned = 'NEW_TRAINING_PLAN_ASSIGNED',
@@ -3771,6 +3772,16 @@ export type GQLFitGetMyTrainerOffersQueryVariables = Exact<{
 
 
 export type GQLFitGetMyTrainerOffersQuery = { __typename?: 'Query', getClientTrainerOffers: Array<{ __typename?: 'TrainerOffer', id: string, token: string, trainerId: string, clientEmail: string, personalMessage?: string | undefined | null, status: GQLTrainerOfferStatus, createdAt: string, updatedAt: string, expiresAt: string, completedAt?: string | undefined | null, packageSummary: Array<{ __typename?: 'PackageSummaryItem', packageId: string, quantity: number, name: string }>, serviceDeliveries: Array<{ __typename?: 'ServiceDelivery', id: string, serviceType?: GQLServiceType | undefined | null, packageName: string, quantity: number, status: GQLDeliveryStatus, deliveredAt?: string | undefined | null, deliveryNotes?: string | undefined | null, createdAt: string, updatedAt: string, tasks: Array<{ __typename?: 'ServiceTask', id: string, title: string, taskType: GQLTaskType, status: GQLTaskStatus, isRequired: boolean, requiresScheduling: boolean, scheduledAt?: string | undefined | null, completedAt?: string | undefined | null, notes?: string | undefined | null, order: number }> }>, trainer: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } }> };
+
+export type GQLGetAllClientMeetingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetAllClientMeetingsQuery = { __typename?: 'Query', myUpcomingMeetings: Array<{ __typename?: 'Meeting', id: string, title: string, type: GQLMeetingType, status: GQLMeetingStatus, scheduledAt: string, duration: number, timezone: string, locationType: GQLLocationType, address?: string | undefined | null, meetingLink?: string | undefined | null, description?: string | undefined | null, notes?: string | undefined | null, createdAt: string, coach: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } }> };
+
+export type GQLGetMyMeetingsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetMyMeetingsQuery = { __typename?: 'Query', myUpcomingMeetings: Array<{ __typename?: 'Meeting', id: string, title: string, type: GQLMeetingType, status: GQLMeetingStatus, scheduledAt: string, duration: number, timezone: string, locationType: GQLLocationType, address?: string | undefined | null, meetingLink?: string | undefined | null, description?: string | undefined | null, notes?: string | undefined | null, createdAt: string, coach: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null } }> };
 
 export type GQLGetMyMacroTargetsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -6418,6 +6429,142 @@ useInfiniteFitGetMyTrainerOffersQuery.getKey = (variables: GQLFitGetMyTrainerOff
 
 
 useFitGetMyTrainerOffersQuery.fetcher = (variables: GQLFitGetMyTrainerOffersQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitGetMyTrainerOffersQuery, GQLFitGetMyTrainerOffersQueryVariables>(FitGetMyTrainerOffersDocument, variables, options);
+
+export const GetAllClientMeetingsDocument = `
+    query GetAllClientMeetings {
+  myUpcomingMeetings {
+    id
+    title
+    type
+    status
+    scheduledAt
+    duration
+    timezone
+    locationType
+    address
+    meetingLink
+    description
+    notes
+    coach {
+      id
+      firstName
+      lastName
+      image
+    }
+    createdAt
+  }
+}
+    `;
+
+export const useGetAllClientMeetingsQuery = <
+      TData = GQLGetAllClientMeetingsQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetAllClientMeetingsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetAllClientMeetingsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetAllClientMeetingsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetAllClientMeetingsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetAllClientMeetings'] : ['GetAllClientMeetings', variables],
+    queryFn: fetchData<GQLGetAllClientMeetingsQuery, GQLGetAllClientMeetingsQueryVariables>(GetAllClientMeetingsDocument, variables),
+    ...options
+  }
+    )};
+
+useGetAllClientMeetingsQuery.getKey = (variables?: GQLGetAllClientMeetingsQueryVariables) => variables === undefined ? ['GetAllClientMeetings'] : ['GetAllClientMeetings', variables];
+
+export const useInfiniteGetAllClientMeetingsQuery = <
+      TData = InfiniteData<GQLGetAllClientMeetingsQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetAllClientMeetingsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetAllClientMeetingsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetAllClientMeetingsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetAllClientMeetingsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetAllClientMeetings.infinite'] : ['GetAllClientMeetings.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetAllClientMeetingsQuery, GQLGetAllClientMeetingsQueryVariables>(GetAllClientMeetingsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetAllClientMeetingsQuery.getKey = (variables?: GQLGetAllClientMeetingsQueryVariables) => variables === undefined ? ['GetAllClientMeetings.infinite'] : ['GetAllClientMeetings.infinite', variables];
+
+
+useGetAllClientMeetingsQuery.fetcher = (variables?: GQLGetAllClientMeetingsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetAllClientMeetingsQuery, GQLGetAllClientMeetingsQueryVariables>(GetAllClientMeetingsDocument, variables, options);
+
+export const GetMyMeetingsDocument = `
+    query GetMyMeetings {
+  myUpcomingMeetings {
+    id
+    title
+    type
+    status
+    scheduledAt
+    duration
+    timezone
+    locationType
+    address
+    meetingLink
+    description
+    notes
+    coach {
+      id
+      firstName
+      lastName
+      image
+    }
+    createdAt
+  }
+}
+    `;
+
+export const useGetMyMeetingsQuery = <
+      TData = GQLGetMyMeetingsQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetMyMeetingsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetMyMeetingsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetMyMeetingsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetMyMeetingsQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetMyMeetings'] : ['GetMyMeetings', variables],
+    queryFn: fetchData<GQLGetMyMeetingsQuery, GQLGetMyMeetingsQueryVariables>(GetMyMeetingsDocument, variables),
+    ...options
+  }
+    )};
+
+useGetMyMeetingsQuery.getKey = (variables?: GQLGetMyMeetingsQueryVariables) => variables === undefined ? ['GetMyMeetings'] : ['GetMyMeetings', variables];
+
+export const useInfiniteGetMyMeetingsQuery = <
+      TData = InfiniteData<GQLGetMyMeetingsQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetMyMeetingsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetMyMeetingsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetMyMeetingsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetMyMeetingsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetMyMeetings.infinite'] : ['GetMyMeetings.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetMyMeetingsQuery, GQLGetMyMeetingsQueryVariables>(GetMyMeetingsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetMyMeetingsQuery.getKey = (variables?: GQLGetMyMeetingsQueryVariables) => variables === undefined ? ['GetMyMeetings.infinite'] : ['GetMyMeetings.infinite', variables];
+
+
+useGetMyMeetingsQuery.fetcher = (variables?: GQLGetMyMeetingsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMyMeetingsQuery, GQLGetMyMeetingsQueryVariables>(GetMyMeetingsDocument, variables, options);
 
 export const GetMyMacroTargetsDocument = `
     query GetMyMacroTargets {

@@ -1,0 +1,23 @@
+query GetAllClientMeetings {
+  myUpcomingMeetings {
+    id
+    title
+    type
+    status
+    scheduledAt
+    duration
+    timezone
+    locationType
+    address
+    meetingLink
+    description
+    notes
+    coach {
+      id
+      firstName
+      lastName
+      image
+    }
+    createdAt
+  }
+}

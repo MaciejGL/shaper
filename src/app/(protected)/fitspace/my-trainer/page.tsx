@@ -1,6 +1,6 @@
 'use client'
 
-import { Calendar, Clock, MessageSquare, UserCheck, Users } from 'lucide-react'
+import { Clock, MessageSquare, UserCheck, Users } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 
@@ -12,13 +12,7 @@ import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawe
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 import {
@@ -36,6 +30,7 @@ import { useScrollToFromParams } from '@/hooks/use-scroll-to'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
+import { ClientMeetingsSection } from './components/client-meetings-section'
 import { ClientServiceDeliveriesSection } from './components/client-service-deliveries-section'
 import { SubscriptionInfoSection } from './components/subscription-info-section'
 import { TrainerSharedNotesSection } from './components/trainer-shared-notes-section'
@@ -187,25 +182,9 @@ function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
           </Button>
         </div>
         <TabsContent value="from-trainer" className="space-y-4">
-          <Card borderless>
-            <CardContent>
-              {/* Scheduled Sessions */}
-              <div className="flex flex-col gap-2 opacity-50">
-                <h3 className="text-lg font-semibold">
-                  Scheduled Sessions - coming soon
-                </h3>
-                <p>Available sessions this month: 0</p>
-                <p className="text-sm text-muted-foreground">
-                  You have no scheduled sessions with {trainer.name}.
-                </p>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button iconStart={<Calendar />} disabled>
-                Schedule Session
-              </Button>
-            </CardFooter>
-          </Card>
+          {/* Scheduled Meetings */}
+          <ClientMeetingsSection />
+
           {/* Trainer Shared Notes Section */}
           <div id="trainer-notes-section">
             <TrainerSharedNotesSection />

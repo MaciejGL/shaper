@@ -103,6 +103,9 @@ model User {
   coachMeetings       Meeting[] @relation("CoachMeetings")
   traineeMeetings     Meeting[] @relation("TraineeMeetings")
 
+  // Reminder tracking
+  remindersSent       ReminderSent[]
+
   @@index([trainerId])
   @@index([stripeCustomerId])
   @@index([trainerId, role])  // For trainer-client relationship queries
@@ -934,6 +937,24 @@ model Meeting {
   @@index([status])
   @@index([serviceDeliveryId])
   @@index([serviceTaskId])
+  @@index([scheduledAt, status]) // For cron job queries
+}
+
+// Generic reminder tracking - reusable for any reminder type
+model ReminderSent {
+  id           String   @id @default(uuid())
+  entityType   String   // 'MEETING', 'CHECKIN', 'WORKOUT', 'MEAL_PREP', etc.
+  entityId     String   // ID of the meeting, checkin schedule, workout, etc.
+  reminderType String   // '24h', '1h', '1w', '1d', 'weekly', etc.
+  userId       String   // Who received the reminder
+  sentAt       DateTime @default(now())
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([entityType, entityId, reminderType, userId]) // Atomic uniqueness - prevents race conditions
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([sentAt])
 }
 
 enum MeetingType {
