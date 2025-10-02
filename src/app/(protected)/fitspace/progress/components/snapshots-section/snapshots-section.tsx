@@ -145,8 +145,8 @@ export function SnapshotsSection() {
                           src={latestSnapshot.image1Url}
                           alt="Latest progress snapshot"
                           className="w-full h-full object-cover"
-                          width={100}
-                          height={200}
+                          width={300}
+                          height={600}
                         />
                       ) : (
                         <div className="text-center text-muted-foreground">
@@ -184,8 +184,8 @@ export function SnapshotsSection() {
                           src={previousSnapshot.image1Url}
                           alt="Previous progress snapshot"
                           className="w-full h-full object-cover"
-                          width={100}
-                          height={200}
+                          width={300}
+                          height={600}
                         />
                       ) : (
                         <div className="text-center text-muted-foreground">

@@ -198,6 +198,7 @@ export function ProgressImageGallery({
           className="max-w-4xl p-0 h-max max-md:rounded-none"
           dialogTitle="Progress Photos"
           withCloseButton={false}
+          fullScreen
         >
           <DialogClose asChild>
             <Button
@@ -225,6 +226,9 @@ export function ProgressImageGallery({
                           src={imageUrl}
                           alt={`Progress Photo ${index + 1}`}
                           fill
+                          fetchPriority="high"
+                          loading="eager"
+                          quality={100}
                           sizes="(max-width: 768px) 100vw, 90vw"
                           className={cn(
                             'object-cover transition-opacity duration-300',
