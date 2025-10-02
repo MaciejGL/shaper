@@ -101,11 +101,16 @@ export function PushNotificationManager({
         // Support pattern: hypertro://?url=https://... (open exact URL in WebView)
         const urlParam = (parsed.queryParams?.url as string) || undefined
         if (urlParam) {
+          // Ensure we use the full URL with domain to prevent default redirects
+          const fullUrl = urlParam.startsWith('http')
+            ? urlParam
+            : `https://www.hypro.app${urlParam.startsWith('/') ? '' : '/'}${urlParam}`
+
           if (isReady()) {
-            navigateToPath(urlParam)
+            navigateToPath(fullUrl)
           } else {
             setTimeout(() => {
-              if (isReady()) navigateToPath(urlParam)
+              if (isReady()) navigateToPath(fullUrl)
             }, 800)
           }
           return

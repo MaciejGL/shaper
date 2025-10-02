@@ -127,7 +127,11 @@ function HyproAppContent({ authToken }: HyproAppProps) {
           '📱 App opened from notification, navigating to:',
           notificationUrl,
         )
-        setInitialWebUrl(notificationUrl)
+        // Ensure we use the full URL with domain to prevent default redirects
+        const fullNotificationUrl = notificationUrl.startsWith('http')
+          ? notificationUrl
+          : `https://www.hypro.app${notificationUrl.startsWith('/') ? '' : '/'}${notificationUrl}`
+        setInitialWebUrl(fullNotificationUrl)
         return // Don't check deep links if we have notification URL
       }
 
@@ -137,7 +141,13 @@ function HyproAppContent({ authToken }: HyproAppProps) {
       try {
         const parsed = Linking.parse(url)
         const urlParam = (parsed.queryParams?.url as string) || undefined
-        if (urlParam) setInitialWebUrl(urlParam)
+        if (urlParam) {
+          // Ensure we use the full URL with domain to prevent default redirects
+          const fullUrl = urlParam.startsWith('http')
+            ? urlParam
+            : `https://www.hypro.app${urlParam.startsWith('/') ? '' : '/'}${urlParam}`
+          setInitialWebUrl(fullUrl)
+        }
       } catch {}
     }
 
