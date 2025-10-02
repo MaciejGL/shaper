@@ -99,6 +99,10 @@ model User {
   // Client survey relation
   clientSurvey           ClientSurvey?
 
+  // Meeting relations
+  coachMeetings       Meeting[] @relation("CoachMeetings")
+  traineeMeetings     Meeting[] @relation("TraineeMeetings")
+
   @@index([trainerId])
   @@index([stripeCustomerId])
   @@index([trainerId, role])  // For trainer-client relationship queries
@@ -836,6 +840,7 @@ model ServiceDelivery {
   trainer User          @relation("TrainerDeliveries", fields: [trainerId], references: [id])
   client  User          @relation("ClientDeliveries", fields: [clientId], references: [id])
   tasks   ServiceTask[]
+  meetings Meeting[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -869,6 +874,7 @@ model ServiceTask {
   metadata           Json?
 
   serviceDelivery ServiceDelivery @relation(fields: [serviceDeliveryId], references: [id], onDelete: Cascade)
+  meetings        Meeting[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -885,6 +891,71 @@ enum DeliveryStatus {
   IN_PROGRESS // Trainer has started working on delivery
   COMPLETED // Service fully delivered to client
   CANCELLED // Service delivery cancelled/refunded
+}
+
+// Meeting system models
+model Meeting {
+  id                String       @id @default(uuid())
+  coachId           String
+  traineeId         String
+  type              MeetingType
+  status            MeetingStatus @default(PENDING)
+  
+  // Scheduling
+  scheduledAt       DateTime
+  duration          Int          // minutes
+  timezone          String
+  
+  // Location (for in-person)
+  locationType      LocationType
+  address           String?
+  meetingLink       String?      // For virtual meetings
+  
+  // Details
+  title             String
+  description       String?
+  notes             String?
+  
+  // Service delivery link
+  serviceDeliveryId String?
+  serviceTaskId     String?
+  
+  // Relations
+  coach             User         @relation("CoachMeetings", fields: [coachId], references: [id])
+  trainee           User         @relation("TraineeMeetings", fields: [traineeId], references: [id])
+  serviceDelivery   ServiceDelivery? @relation(fields: [serviceDeliveryId], references: [id])
+  serviceTask       ServiceTask? @relation(fields: [serviceTaskId], references: [id])
+  
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  @@index([coachId, scheduledAt])
+  @@index([traineeId, scheduledAt])
+  @@index([status])
+  @@index([serviceDeliveryId])
+  @@index([serviceTaskId])
+}
+
+enum MeetingType {
+  INITIAL_CONSULTATION  // First meeting
+  IN_PERSON_TRAINING    // Ongoing in-person coaching
+  CHECK_IN              // Progress check-in
+  PLAN_REVIEW           // Training plan review
+}
+
+enum MeetingStatus {
+  PENDING      // Proposed but not confirmed
+  CONFIRMED    // Both parties confirmed
+  COMPLETED    // Meeting happened
+  CANCELLED    // Meeting cancelled
+  RESCHEDULED  // Moved to different time
+}
+
+enum LocationType {
+  VIRTUAL      // Online (Google Meet, Zoom, etc.)
+  COACH_LOCATION  // Coach's gym/studio
+  TRAINEE_LOCATION   // Trainee's home/preferred gym
+  OTHER        // Custom location
 }
 
 // Location for teams and users
