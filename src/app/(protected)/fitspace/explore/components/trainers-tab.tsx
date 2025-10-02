@@ -14,6 +14,7 @@ import {
   useCancelCoachingRequestMutation,
   useCreateCoachingRequestMutation,
   useGetFeaturedTrainersQuery,
+  useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
 
 type FeaturedTrainer =
@@ -27,10 +28,6 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
   const [selectedTrainer, setSelectedTrainer] =
     useState<FeaturedTrainer | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
-  const [hasRequestedCoaching, setHasRequestedCoaching] = useState(false)
-  const [coachingRequestId, setCoachingRequestId] = useState<string | null>(
-    null,
-  )
 
   const {
     isModalOpen,
@@ -52,10 +49,23 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
       staleTime: 5 * 60 * 1000, // 5 minutes - match ISR revalidation
     },
   )
+
+  const { data: coachingRequestsData, refetch: refetchCoachingRequests } =
+    useMyCoachingRequestsQuery()
+
   const createCoachingRequestMutation = useCreateCoachingRequestMutation()
   const cancelCoachingRequestMutation = useCancelCoachingRequestMutation()
 
   const trainers = data?.getFeaturedTrainers || []
+  const coachingRequests = coachingRequestsData?.coachingRequests || []
+
+  // Find pending request for the selected trainer
+  const pendingRequestForSelectedTrainer = selectedTrainer
+    ? coachingRequests.find(
+        (req) =>
+          req.recipient.id === selectedTrainer.id && req.status === 'PENDING',
+      )
+    : null
 
   const handleTrainerClick = (trainer: FeaturedTrainer) => {
     setSelectedTrainer(trainer)
@@ -68,26 +78,27 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
       `${trainer.profile?.firstName || ''} ${trainer.profile?.lastName || ''}`.trim() ||
       'Trainer'
 
-    const result = await createCoachingRequestMutation.mutateAsync({
+    await createCoachingRequestMutation.mutateAsync({
       recipientEmail: trainer.email,
       message: `Hi ${trainerName}, I'm interested in your coaching services. I'd love to discuss how you can help me achieve my fitness goals.`,
     })
 
-    setHasRequestedCoaching(true)
-    setCoachingRequestId(result.createCoachingRequest.id)
+    // Refetch coaching requests to update the banner
+    await refetchCoachingRequests()
+
     // Open survey modal after successful request
     openSurvey()
   }
 
   const handleWithdrawRequest = async () => {
-    if (!coachingRequestId) return
+    if (!pendingRequestForSelectedTrainer) return
 
     await cancelCoachingRequestMutation.mutateAsync({
-      id: coachingRequestId,
+      id: pendingRequestForSelectedTrainer.id,
     })
 
-    setHasRequestedCoaching(false)
-    setCoachingRequestId(null)
+    // Refetch coaching requests to update the UI
+    await refetchCoachingRequests()
   }
 
   const handleCompleteSurvey = () => {
@@ -131,7 +142,7 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
         onClose={() => setIsDrawerOpen(false)}
         showRequestCoaching={true}
         onRequestCoaching={handleRequestCoaching}
-        hasRequestedCoaching={hasRequestedCoaching}
+        hasRequestedCoaching={!!pendingRequestForSelectedTrainer}
         onWithdrawRequest={handleWithdrawRequest}
         isWithdrawing={cancelCoachingRequestMutation.isPending}
         showCompleteSurvey={!isCompleted}

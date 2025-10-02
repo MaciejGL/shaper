@@ -13,6 +13,7 @@ import {
 import { useState } from 'react'
 
 import { CoachingInfoModal } from '@/components/coaching-info-modal/coaching-info-modal'
+import { PendingCoachingRequestBanner } from '@/components/pending-coaching-request-banner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -101,6 +102,10 @@ export function TrainerDetailsDrawer({
     >
       <DrawerContent dialogTitle={`${trainerName} - Trainer Details`}>
         <div className="p-4 space-y-8 overflow-y-auto">
+          {hasRequestedCoaching && (
+            <PendingCoachingRequestBanner trainerName={trainerName} />
+          )}
+
           {/* Header */}
           <div className="flex items-center gap-4">
             <Avatar className="size-20">

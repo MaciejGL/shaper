@@ -7,6 +7,7 @@ import { useState } from 'react'
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { MessengerModal } from '@/components/messenger-modal/messenger-modal'
+import { PendingCoachingRequestBanner } from '@/components/pending-coaching-request-banner'
 import { TrainerCard } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Badge } from '@/components/ui/badge'
@@ -233,6 +234,15 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
 
   return (
     <div className="space-y-6">
+      {/* Pending Request Banner */}
+      {pendingRequests.length > 0 && (
+        <PendingCoachingRequestBanner
+          trainerName={
+            pendingRequests[0].recipient.name || 'Your selected trainer'
+          }
+        />
+      )}
+
       {/* Status Card */}
       <Card borderless>
         <CardContent className="p-6 text-center">
