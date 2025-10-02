@@ -35,9 +35,10 @@ export function useMessengerData(
       { messagesPerChat: messagesPerPage },
       {
         enabled: isOpen,
-        staleTime: 30000, // 30 seconds - data is fresh for 30s
-        refetchOnWindowFocus: false,
-        refetchInterval: isOpen ? 10000 : false, // Only refetch when modal is open
+        staleTime: 2000, // 2 seconds - keep data fresh for quick updates
+        refetchOnWindowFocus: true, // Refetch when user returns to tab
+        refetchInterval: isOpen ? 3000 : false, // 3 seconds - much faster polling
+        refetchIntervalInBackground: false, // Don't poll when tab is inactive
       },
     )
 
