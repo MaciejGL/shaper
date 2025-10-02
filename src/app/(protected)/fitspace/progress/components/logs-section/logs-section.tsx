@@ -57,7 +57,7 @@ export function LogsSection() {
               iconStart={<Plus />}
               disabled={!hasPremium}
             >
-              Add Logs
+              Log
             </Button>
           </AddMeasurementModal>
         </CardHeader>

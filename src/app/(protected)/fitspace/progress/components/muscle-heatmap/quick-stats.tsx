@@ -44,7 +44,7 @@ export function QuickStats({
   return (
     <div className="grid grid-cols-3 gap-2 text-center">
       <div className="space-y-2">
-        <div className="text-sm font-medium">Overfocused</div>
+        <div className="text-sm font-medium">Primary Focus</div>
         <div className="flex flex-col gap-1">
           {overfocused.map(([muscleName, intensity]) => (
             <Badge
@@ -58,7 +58,7 @@ export function QuickStats({
         </div>
       </div>
       <div className="space-y-2">
-        <div className="text-sm font-medium">Balanced</div>
+        <div className="text-sm font-medium">Well-Balanced</div>
         <div className="flex flex-col gap-1">
           {balanced.map(([muscleName, intensity]) => (
             <Badge
@@ -72,7 +72,7 @@ export function QuickStats({
         </div>
       </div>
       <div className="space-y-2">
-        <div className="text-sm font-medium">Underfocused</div>
+        <div className="text-sm font-medium">Light Focus</div>
         <div className="flex flex-col gap-1">
           {underfocused.map(([muscleName, intensity]) => (
             <Badge

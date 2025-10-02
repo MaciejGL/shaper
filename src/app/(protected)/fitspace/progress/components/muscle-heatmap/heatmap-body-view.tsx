@@ -109,7 +109,7 @@ export function HeatmapBodyView({
   return (
     <div className="relative">
       <Tabs defaultValue="front">
-        <TabsList className="mx-auto mb-4 border border-border grid grid-cols-[1fr_auto_1fr]">
+        <TabsList className="mx-auto border border-border grid grid-cols-[1fr_auto_1fr]">
           <TabsTrigger value="front">Front</TabsTrigger>
           <TabsTrigger value="swap" disabled>
             <ArrowLeftRight className="size-3" />

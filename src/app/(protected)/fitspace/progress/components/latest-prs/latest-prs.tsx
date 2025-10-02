@@ -27,7 +27,7 @@ export function LatestPRs() {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Trophy className="h-5 w-5 text-amber-500" />
-            Latest Personal Records
+            Latest PRs
           </CardTitle>
           <Button
             variant="tertiary"

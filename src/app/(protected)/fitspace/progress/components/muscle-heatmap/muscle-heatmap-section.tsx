@@ -5,7 +5,13 @@ import { Activity } from 'lucide-react'
 import { useState } from 'react'
 
 import { PremiumGate } from '@/components/premium-gate'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 
 import { HeatmapBodyView } from './heatmap-body-view'
@@ -41,25 +47,26 @@ export function MuscleHeatmapSection() {
 
   return (
     <Card borderless>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-orange-500" />
-          Muscle Focus Heatmap
+          Muscle Heatmap
         </CardTitle>
+        <CardDescription>
+          Muscle stress and intensity over the last 30 days.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <PremiumGate feature="Muscle Focus Heatmap" compact showPartialContent>
           <div>
             {/* Body Heatmap View */}
-            <div className="flex justify-center">
-              <HeatmapBodyView
-                muscleIntensity={muscleIntensity}
-                selectedMuscle={selectedMuscle}
-                onMuscleClick={handleMuscleClick}
-                groupedMuscleData={groupedMuscleData}
-                disableEmptyLabels={true}
-              />
-            </div>
+            <HeatmapBodyView
+              muscleIntensity={muscleIntensity}
+              selectedMuscle={selectedMuscle}
+              onMuscleClick={handleMuscleClick}
+              groupedMuscleData={groupedMuscleData}
+              disableEmptyLabels={true}
+            />
 
             {/* Selected Muscle Details */}
             <AnimatePresence>

@@ -25,9 +25,9 @@ export default function ProgressPage() {
         <CheckinScheduleSection />
 
         <BodyMeasurementsProvider>
-          <SnapshotsSection />
-
           <LogsSection />
+
+          <SnapshotsSection />
         </BodyMeasurementsProvider>
 
         <LatestPRs />
