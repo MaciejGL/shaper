@@ -1,0 +1,32 @@
+query GetMyClientSurvey {
+  getMyClientSurvey {
+    id
+    userId
+    data
+    version
+    createdAt
+    updatedAt
+  }
+}
+
+query GetClientSurveyForTrainee($traineeId: ID!) {
+  getClientSurveyForTrainee(traineeId: $traineeId) {
+    id
+    userId
+    data
+    version
+    createdAt
+    updatedAt
+  }
+}
+
+mutation UpsertClientSurvey($data: ClientSurveyDataInput!) {
+  upsertClientSurvey(data: $data) {
+    id
+    userId
+    data
+    version
+    createdAt
+    updatedAt
+  }
+}

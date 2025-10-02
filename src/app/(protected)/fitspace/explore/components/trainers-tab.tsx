@@ -28,8 +28,15 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [hasRequestedCoaching, setHasRequestedCoaching] = useState(false)
 
-  const { isModalOpen, isCompleted, openSurvey, closeSurvey, handleSubmit } =
-    useClientSurvey()
+  const {
+    isModalOpen,
+    isCompleted,
+    existingSurvey,
+    openSurvey,
+    closeSurvey,
+    handleSubmit,
+    isSubmitting,
+  } = useClientSurvey()
 
   const { data, isLoading } = useGetFeaturedTrainersQuery(
     { limit: 30 },
@@ -108,15 +115,18 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
         showRequestCoaching={true}
         onRequestCoaching={handleRequestCoaching}
         hasRequestedCoaching={hasRequestedCoaching}
-        // showCompleteSurvey={hasRequestedCoaching && !isCompleted}
         showCompleteSurvey={!isCompleted}
         onCompleteSurvey={handleCompleteSurvey}
+        showRetakeAssessment={isCompleted}
+        onRetakeAssessment={handleCompleteSurvey}
       />
 
       <ClientSurveyModal
         open={isModalOpen}
         onClose={closeSurvey}
         onSubmit={handleSubmit}
+        existingSurvey={existingSurvey}
+        isSubmitting={isSubmitting}
       />
     </>
   )

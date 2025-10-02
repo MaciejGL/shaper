@@ -31,6 +31,8 @@ interface TrainerDetailsDrawerProps {
   hasRequestedCoaching?: boolean
   showCompleteSurvey?: boolean
   onCompleteSurvey?: () => void
+  showRetakeAssessment?: boolean
+  onRetakeAssessment?: () => void
   direction?: 'bottom' | 'right'
 }
 
@@ -43,6 +45,8 @@ export function TrainerDetailsDrawer({
   hasRequestedCoaching = false,
   showCompleteSurvey = false,
   onCompleteSurvey,
+  showRetakeAssessment = false,
+  onRetakeAssessment,
   direction = 'bottom',
 }: TrainerDetailsDrawerProps) {
   const [isRequestingCoaching, setIsRequestingCoaching] = useState(false)
@@ -278,6 +282,18 @@ export function TrainerDetailsDrawer({
                         iconStart={<Sparkles />}
                       >
                         Complete Fitness Assessment
+                      </Button>
+                    )}
+
+                    {showRetakeAssessment && onRetakeAssessment && (
+                      <Button
+                        onClick={onRetakeAssessment}
+                        className="w-full"
+                        size="lg"
+                        variant="tertiary"
+                        iconStart={<Sparkles />}
+                      >
+                        Retake Assessment
                       </Button>
                     )}
                   </div>

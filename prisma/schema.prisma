@@ -96,6 +96,9 @@ model User {
   createdMeals           Meal[]          @relation("CreatedMeals")
   createdIngredients     Ingredient[]    @relation("CreatedIngredients")
 
+  // Client survey relation
+  clientSurvey           ClientSurvey?
+
   @@index([trainerId])
   @@index([stripeCustomerId])
   @@index([trainerId, role])  // For trainer-client relationship queries
@@ -1191,4 +1194,18 @@ model NutritionPlanMealIngredient {
   @@unique([nutritionPlanMealId, mealIngredientId])
   @@index([nutritionPlanMealId])
   @@index([mealIngredientId])
+}
+
+model ClientSurvey {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  data      Json     // Stores survey data as JSON for flexibility
+  version   Int      @default(1) // Schema version for future migrations
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([updatedAt])
 }

@@ -1,0 +1,57 @@
+type ClientSurvey {
+  id: ID!
+  userId: ID!
+  data: JSON!
+  version: Int!
+  createdAt: String!
+  updatedAt: String!
+  user: User!
+}
+
+input ClientSurveyDataInput {
+  exerciseFrequency: String
+  exerciseTypes: [String!]
+  otherExerciseType: String
+  trainingDuration: String
+  currentFitnessLevel: String
+
+  primaryGoal: String
+  otherPrimaryGoal: String
+  secondaryGoal: String
+  otherSecondaryGoal: String
+  hasDeadline: Boolean
+  deadline: String
+
+  motivationLevel: Int
+  preferredDuration: String
+  preferredLocation: String
+  lovedExercises: String
+  hatedExercises: String
+  hasInjuries: Boolean
+  injuries: String
+
+  cuisineTypes: [String!]
+  otherCuisine: String
+  hasAllergies: Boolean
+  allergies: String
+  dietQuality: String
+  tracksNutrition: String
+  supplements: [String!]
+  otherSupplement: String
+
+  sleepHours: String
+  hasSleepIssues: Boolean
+
+  biggestChallenge: String
+  otherChallenge: String
+  additionalInfo: String
+}
+
+type Query {
+  getMyClientSurvey: ClientSurvey
+  getClientSurveyForTrainee(traineeId: ID!): ClientSurvey
+}
+
+extend type Mutation {
+  upsertClientSurvey(data: ClientSurveyDataInput!): ClientSurvey!
+}

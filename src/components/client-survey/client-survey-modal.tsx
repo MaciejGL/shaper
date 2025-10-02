@@ -34,17 +34,27 @@ interface ClientSurveyModalProps {
   open: boolean
   onClose: () => void
   onSubmit?: (data: ClientSurveyData) => Promise<void>
+  existingSurvey?: ClientSurveyData
+  isSubmitting?: boolean
 }
 
 export function ClientSurveyModal({
   open,
   onClose,
   onSubmit,
+  existingSurvey,
+  isSubmitting: externalIsSubmitting = false,
 }: ClientSurveyModalProps) {
   const [currentStep, setCurrentStep] = useState<Step>('welcome')
   const [data, setData] = useState<ClientSurveyData>(INITIAL_SURVEY_DATA)
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Initialize data with existing survey when it's available
+  useEffect(() => {
+    if (existingSurvey && open) {
+      setData(existingSurvey)
+    }
+  }, [existingSurvey, open])
 
   const currentStepIndex = useMemo(
     () => STEPS.findIndex((step) => step === currentStep),
@@ -97,14 +107,11 @@ export function ClientSurveyModal({
       return
     }
 
-    setIsSubmitting(true)
     try {
       await onSubmit(data)
-      onClose()
+      // onClose is called by the hook after successful submission
     } catch (error) {
       console.error('Error submitting survey:', error)
-    } finally {
-      setIsSubmitting(false)
     }
   }, [data, onSubmit, onClose])
 
@@ -194,8 +201,8 @@ export function ClientSurveyModal({
             {isLastStep ? (
               <Button
                 onClick={handleSubmit}
-                disabled={isSubmitting}
-                loading={isSubmitting}
+                disabled={externalIsSubmitting}
+                loading={externalIsSubmitting}
                 iconStart={<CheckCircle />}
               >
                 Complete Survey

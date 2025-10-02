@@ -14,6 +14,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  JSON: { input: any; output: any; }
 };
 
 export enum GQLActivityLevel {
@@ -326,6 +327,51 @@ export type GQLCheckinStatus = {
   isCheckinDue: Scalars['Boolean']['output'];
   nextCheckinDate?: Maybe<Scalars['String']['output']>;
   schedule?: Maybe<GQLCheckinSchedule>;
+};
+
+export type GQLClientSurvey = {
+  __typename?: 'ClientSurvey';
+  createdAt: Scalars['String']['output'];
+  data: Scalars['JSON']['output'];
+  id: Scalars['ID']['output'];
+  updatedAt: Scalars['String']['output'];
+  user: GQLUser;
+  userId: Scalars['ID']['output'];
+  version: Scalars['Int']['output'];
+};
+
+export type GQLClientSurveyDataInput = {
+  additionalInfo?: InputMaybe<Scalars['String']['input']>;
+  allergies?: InputMaybe<Scalars['String']['input']>;
+  biggestChallenge?: InputMaybe<Scalars['String']['input']>;
+  cuisineTypes?: InputMaybe<Array<Scalars['String']['input']>>;
+  currentFitnessLevel?: InputMaybe<Scalars['String']['input']>;
+  deadline?: InputMaybe<Scalars['String']['input']>;
+  dietQuality?: InputMaybe<Scalars['String']['input']>;
+  exerciseFrequency?: InputMaybe<Scalars['String']['input']>;
+  exerciseTypes?: InputMaybe<Array<Scalars['String']['input']>>;
+  hasAllergies?: InputMaybe<Scalars['Boolean']['input']>;
+  hasDeadline?: InputMaybe<Scalars['Boolean']['input']>;
+  hasInjuries?: InputMaybe<Scalars['Boolean']['input']>;
+  hasSleepIssues?: InputMaybe<Scalars['Boolean']['input']>;
+  hatedExercises?: InputMaybe<Scalars['String']['input']>;
+  injuries?: InputMaybe<Scalars['String']['input']>;
+  lovedExercises?: InputMaybe<Scalars['String']['input']>;
+  motivationLevel?: InputMaybe<Scalars['Int']['input']>;
+  otherChallenge?: InputMaybe<Scalars['String']['input']>;
+  otherCuisine?: InputMaybe<Scalars['String']['input']>;
+  otherExerciseType?: InputMaybe<Scalars['String']['input']>;
+  otherPrimaryGoal?: InputMaybe<Scalars['String']['input']>;
+  otherSecondaryGoal?: InputMaybe<Scalars['String']['input']>;
+  otherSupplement?: InputMaybe<Scalars['String']['input']>;
+  preferredDuration?: InputMaybe<Scalars['String']['input']>;
+  preferredLocation?: InputMaybe<Scalars['String']['input']>;
+  primaryGoal?: InputMaybe<Scalars['String']['input']>;
+  secondaryGoal?: InputMaybe<Scalars['String']['input']>;
+  sleepHours?: InputMaybe<Scalars['String']['input']>;
+  supplements?: InputMaybe<Array<Scalars['String']['input']>>;
+  tracksNutrition?: InputMaybe<Scalars['String']['input']>;
+  trainingDuration?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GQLCoachingRequest = {
@@ -1114,6 +1160,7 @@ export type GQLMutation = {
   updateTrainingWeekDetails: Scalars['Boolean']['output'];
   updateUserFeatured: GQLAdminUserListItem;
   updateUserRole: GQLAdminUserListItem;
+  upsertClientSurvey: GQLClientSurvey;
 };
 
 
@@ -1819,6 +1866,11 @@ export type GQLMutationUpdateUserRoleArgs = {
   input: GQLUpdateUserRoleInput;
 };
 
+
+export type GQLMutationUpsertClientSurveyArgs = {
+  data: GQLClientSurveyDataInput;
+};
+
 export type GQLMyPlansPayload = {
   __typename?: 'MyPlansPayload';
   activePlan?: Maybe<GQLTrainingPlan>;
@@ -2078,6 +2130,7 @@ export type GQLQuery = {
   getClientActivePlan?: Maybe<GQLTrainingPlan>;
   getClientMacroTargets?: Maybe<GQLMacroTarget>;
   getClientNutritionPlans: Array<GQLNutritionPlan>;
+  getClientSurveyForTrainee?: Maybe<GQLClientSurvey>;
   getClientTrainerOffers: Array<GQLTrainerOffer>;
   getClientTrainingPlans: Array<GQLTrainingPlan>;
   getExercises: GQLGetExercisesResponse;
@@ -2086,6 +2139,7 @@ export type GQLQuery = {
   getFeaturedTrainers: Array<GQLPublicTrainer>;
   getMessengerInitialData: GQLMessengerInitialData;
   getMyChats: Array<GQLChat>;
+  getMyClientSurvey?: Maybe<GQLClientSurvey>;
   getMyMacroTargets?: Maybe<GQLMacroTarget>;
   getMyPlansOverview: GQLMyPlansPayload;
   getMyPlansOverviewFull: GQLMyPlansPayload;
@@ -2228,6 +2282,11 @@ export type GQLQueryGetClientMacroTargetsArgs = {
 
 export type GQLQueryGetClientNutritionPlansArgs = {
   clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetClientSurveyForTraineeArgs = {
+  traineeId: Scalars['ID']['input'];
 };
 
 
@@ -4775,6 +4834,25 @@ export type GQLMarkAllNotificationsAsReadMutationVariables = Exact<{
 
 
 export type GQLMarkAllNotificationsAsReadMutation = { __typename?: 'Mutation', markAllNotificationsRead: Array<{ __typename?: 'Notification', id: string }> };
+
+export type GQLGetMyClientSurveyQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLGetMyClientSurveyQuery = { __typename?: 'Query', getMyClientSurvey?: { __typename?: 'ClientSurvey', id: string, userId: string, data: any, version: number, createdAt: string, updatedAt: string } | undefined | null };
+
+export type GQLGetClientSurveyForTraineeQueryVariables = Exact<{
+  traineeId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetClientSurveyForTraineeQuery = { __typename?: 'Query', getClientSurveyForTrainee?: { __typename?: 'ClientSurvey', id: string, userId: string, data: any, version: number, createdAt: string, updatedAt: string } | undefined | null };
+
+export type GQLUpsertClientSurveyMutationVariables = Exact<{
+  data: GQLClientSurveyDataInput;
+}>;
+
+
+export type GQLUpsertClientSurveyMutation = { __typename?: 'Mutation', upsertClientSurvey: { __typename?: 'ClientSurvey', id: string, userId: string, data: any, version: number, createdAt: string, updatedAt: string } };
 
 export type GQLGetOrCreateChatQueryVariables = Exact<{
   partnerId: Scalars['ID']['input'];
@@ -14032,6 +14110,147 @@ useMarkAllNotificationsAsReadMutation.getKey = () => ['MarkAllNotificationsAsRea
 
 
 useMarkAllNotificationsAsReadMutation.fetcher = (variables: GQLMarkAllNotificationsAsReadMutationVariables, options?: RequestInit['headers']) => fetchData<GQLMarkAllNotificationsAsReadMutation, GQLMarkAllNotificationsAsReadMutationVariables>(MarkAllNotificationsAsReadDocument, variables, options);
+
+export const GetMyClientSurveyDocument = `
+    query GetMyClientSurvey {
+  getMyClientSurvey {
+    id
+    userId
+    data
+    version
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useGetMyClientSurveyQuery = <
+      TData = GQLGetMyClientSurveyQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetMyClientSurveyQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetMyClientSurveyQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetMyClientSurveyQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetMyClientSurveyQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetMyClientSurvey'] : ['GetMyClientSurvey', variables],
+    queryFn: fetchData<GQLGetMyClientSurveyQuery, GQLGetMyClientSurveyQueryVariables>(GetMyClientSurveyDocument, variables),
+    ...options
+  }
+    )};
+
+useGetMyClientSurveyQuery.getKey = (variables?: GQLGetMyClientSurveyQueryVariables) => variables === undefined ? ['GetMyClientSurvey'] : ['GetMyClientSurvey', variables];
+
+export const useInfiniteGetMyClientSurveyQuery = <
+      TData = InfiniteData<GQLGetMyClientSurveyQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetMyClientSurveyQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetMyClientSurveyQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetMyClientSurveyQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetMyClientSurveyQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetMyClientSurvey.infinite'] : ['GetMyClientSurvey.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetMyClientSurveyQuery, GQLGetMyClientSurveyQueryVariables>(GetMyClientSurveyDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetMyClientSurveyQuery.getKey = (variables?: GQLGetMyClientSurveyQueryVariables) => variables === undefined ? ['GetMyClientSurvey.infinite'] : ['GetMyClientSurvey.infinite', variables];
+
+
+useGetMyClientSurveyQuery.fetcher = (variables?: GQLGetMyClientSurveyQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMyClientSurveyQuery, GQLGetMyClientSurveyQueryVariables>(GetMyClientSurveyDocument, variables, options);
+
+export const GetClientSurveyForTraineeDocument = `
+    query GetClientSurveyForTrainee($traineeId: ID!) {
+  getClientSurveyForTrainee(traineeId: $traineeId) {
+    id
+    userId
+    data
+    version
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useGetClientSurveyForTraineeQuery = <
+      TData = GQLGetClientSurveyForTraineeQuery,
+      TError = unknown
+    >(
+      variables: GQLGetClientSurveyForTraineeQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetClientSurveyForTraineeQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetClientSurveyForTraineeQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetClientSurveyForTraineeQuery, TError, TData>(
+      {
+    queryKey: ['GetClientSurveyForTrainee', variables],
+    queryFn: fetchData<GQLGetClientSurveyForTraineeQuery, GQLGetClientSurveyForTraineeQueryVariables>(GetClientSurveyForTraineeDocument, variables),
+    ...options
+  }
+    )};
+
+useGetClientSurveyForTraineeQuery.getKey = (variables: GQLGetClientSurveyForTraineeQueryVariables) => ['GetClientSurveyForTrainee', variables];
+
+export const useInfiniteGetClientSurveyForTraineeQuery = <
+      TData = InfiniteData<GQLGetClientSurveyForTraineeQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetClientSurveyForTraineeQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetClientSurveyForTraineeQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetClientSurveyForTraineeQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetClientSurveyForTraineeQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetClientSurveyForTrainee.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetClientSurveyForTraineeQuery, GQLGetClientSurveyForTraineeQueryVariables>(GetClientSurveyForTraineeDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetClientSurveyForTraineeQuery.getKey = (variables: GQLGetClientSurveyForTraineeQueryVariables) => ['GetClientSurveyForTrainee.infinite', variables];
+
+
+useGetClientSurveyForTraineeQuery.fetcher = (variables: GQLGetClientSurveyForTraineeQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetClientSurveyForTraineeQuery, GQLGetClientSurveyForTraineeQueryVariables>(GetClientSurveyForTraineeDocument, variables, options);
+
+export const UpsertClientSurveyDocument = `
+    mutation UpsertClientSurvey($data: ClientSurveyDataInput!) {
+  upsertClientSurvey(data: $data) {
+    id
+    userId
+    data
+    version
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useUpsertClientSurveyMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpsertClientSurveyMutation, TError, GQLUpsertClientSurveyMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpsertClientSurveyMutation, TError, GQLUpsertClientSurveyMutationVariables, TContext>(
+      {
+    mutationKey: ['UpsertClientSurvey'],
+    mutationFn: (variables?: GQLUpsertClientSurveyMutationVariables) => fetchData<GQLUpsertClientSurveyMutation, GQLUpsertClientSurveyMutationVariables>(UpsertClientSurveyDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpsertClientSurveyMutation.getKey = () => ['UpsertClientSurvey'];
+
+
+useUpsertClientSurveyMutation.fetcher = (variables: GQLUpsertClientSurveyMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpsertClientSurveyMutation, GQLUpsertClientSurveyMutationVariables>(UpsertClientSurveyDocument, variables, options);
 
 export const GetOrCreateChatDocument = `
     query GetOrCreateChat($partnerId: ID!) {

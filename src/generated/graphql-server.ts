@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo } from 'graphql';
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
 import { GQLContext } from '@/types/gql-context';
 export type Maybe<T> = T | undefined | null;
 export type InputMaybe<T> = T | undefined | null;
@@ -16,6 +16,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
+  JSON: { input: any; output: any; }
 };
 
 export enum GQLActivityLevel {
@@ -328,6 +329,51 @@ export type GQLCheckinStatus = {
   isCheckinDue: EntireFieldWrapper<Scalars['Boolean']['output']>;
   nextCheckinDate?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   schedule?: EntireFieldWrapper<Maybe<GQLCheckinSchedule>>;
+};
+
+export type GQLClientSurvey = {
+  __typename?: 'ClientSurvey';
+  createdAt: EntireFieldWrapper<Scalars['String']['output']>;
+  data: EntireFieldWrapper<Scalars['JSON']['output']>;
+  id: EntireFieldWrapper<Scalars['ID']['output']>;
+  updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
+  user: EntireFieldWrapper<GQLUser>;
+  userId: EntireFieldWrapper<Scalars['ID']['output']>;
+  version: EntireFieldWrapper<Scalars['Int']['output']>;
+};
+
+export type GQLClientSurveyDataInput = {
+  additionalInfo?: InputMaybe<Scalars['String']['input']>;
+  allergies?: InputMaybe<Scalars['String']['input']>;
+  biggestChallenge?: InputMaybe<Scalars['String']['input']>;
+  cuisineTypes?: InputMaybe<Array<Scalars['String']['input']>>;
+  currentFitnessLevel?: InputMaybe<Scalars['String']['input']>;
+  deadline?: InputMaybe<Scalars['String']['input']>;
+  dietQuality?: InputMaybe<Scalars['String']['input']>;
+  exerciseFrequency?: InputMaybe<Scalars['String']['input']>;
+  exerciseTypes?: InputMaybe<Array<Scalars['String']['input']>>;
+  hasAllergies?: InputMaybe<Scalars['Boolean']['input']>;
+  hasDeadline?: InputMaybe<Scalars['Boolean']['input']>;
+  hasInjuries?: InputMaybe<Scalars['Boolean']['input']>;
+  hasSleepIssues?: InputMaybe<Scalars['Boolean']['input']>;
+  hatedExercises?: InputMaybe<Scalars['String']['input']>;
+  injuries?: InputMaybe<Scalars['String']['input']>;
+  lovedExercises?: InputMaybe<Scalars['String']['input']>;
+  motivationLevel?: InputMaybe<Scalars['Int']['input']>;
+  otherChallenge?: InputMaybe<Scalars['String']['input']>;
+  otherCuisine?: InputMaybe<Scalars['String']['input']>;
+  otherExerciseType?: InputMaybe<Scalars['String']['input']>;
+  otherPrimaryGoal?: InputMaybe<Scalars['String']['input']>;
+  otherSecondaryGoal?: InputMaybe<Scalars['String']['input']>;
+  otherSupplement?: InputMaybe<Scalars['String']['input']>;
+  preferredDuration?: InputMaybe<Scalars['String']['input']>;
+  preferredLocation?: InputMaybe<Scalars['String']['input']>;
+  primaryGoal?: InputMaybe<Scalars['String']['input']>;
+  secondaryGoal?: InputMaybe<Scalars['String']['input']>;
+  sleepHours?: InputMaybe<Scalars['String']['input']>;
+  supplements?: InputMaybe<Array<Scalars['String']['input']>>;
+  tracksNutrition?: InputMaybe<Scalars['String']['input']>;
+  trainingDuration?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GQLCoachingRequest = {
@@ -1116,6 +1162,7 @@ export type GQLMutation = {
   updateTrainingWeekDetails: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateUserFeatured: EntireFieldWrapper<GQLAdminUserListItem>;
   updateUserRole: EntireFieldWrapper<GQLAdminUserListItem>;
+  upsertClientSurvey: EntireFieldWrapper<GQLClientSurvey>;
 };
 
 
@@ -1821,6 +1868,11 @@ export type GQLMutationUpdateUserRoleArgs = {
   input: GQLUpdateUserRoleInput;
 };
 
+
+export type GQLMutationUpsertClientSurveyArgs = {
+  data: GQLClientSurveyDataInput;
+};
+
 export type GQLMyPlansPayload = {
   __typename?: 'MyPlansPayload';
   activePlan?: EntireFieldWrapper<Maybe<GQLTrainingPlan>>;
@@ -2080,6 +2132,7 @@ export type GQLQuery = {
   getClientActivePlan?: EntireFieldWrapper<Maybe<GQLTrainingPlan>>;
   getClientMacroTargets?: EntireFieldWrapper<Maybe<GQLMacroTarget>>;
   getClientNutritionPlans: EntireFieldWrapper<Array<GQLNutritionPlan>>;
+  getClientSurveyForTrainee?: EntireFieldWrapper<Maybe<GQLClientSurvey>>;
   getClientTrainerOffers: EntireFieldWrapper<Array<GQLTrainerOffer>>;
   getClientTrainingPlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
   getExercises: EntireFieldWrapper<GQLGetExercisesResponse>;
@@ -2088,6 +2141,7 @@ export type GQLQuery = {
   getFeaturedTrainers: EntireFieldWrapper<Array<GQLPublicTrainer>>;
   getMessengerInitialData: EntireFieldWrapper<GQLMessengerInitialData>;
   getMyChats: EntireFieldWrapper<Array<GQLChat>>;
+  getMyClientSurvey?: EntireFieldWrapper<Maybe<GQLClientSurvey>>;
   getMyMacroTargets?: EntireFieldWrapper<Maybe<GQLMacroTarget>>;
   getMyPlansOverview: EntireFieldWrapper<GQLMyPlansPayload>;
   getMyPlansOverviewFull: EntireFieldWrapper<GQLMyPlansPayload>;
@@ -2230,6 +2284,11 @@ export type GQLQueryGetClientMacroTargetsArgs = {
 
 export type GQLQueryGetClientNutritionPlansArgs = {
   clientId: Scalars['ID']['input'];
+};
+
+
+export type GQLQueryGetClientSurveyForTraineeArgs = {
+  traineeId: Scalars['ID']['input'];
 };
 
 
@@ -3537,6 +3596,8 @@ export type GQLResolversTypes = {
   CheckinFrequency: GQLCheckinFrequency;
   CheckinSchedule: ResolverTypeWrapper<GQLCheckinSchedule>;
   CheckinStatus: ResolverTypeWrapper<GQLCheckinStatus>;
+  ClientSurvey: ResolverTypeWrapper<GQLClientSurvey>;
+  ClientSurveyDataInput: GQLClientSurveyDataInput;
   CoachingRequest: ResolverTypeWrapper<GQLCoachingRequest>;
   CoachingRequestStatus: GQLCoachingRequestStatus;
   CompleteCheckinInput: GQLCompleteCheckinInput;
@@ -3598,6 +3659,7 @@ export type GQLResolversTypes = {
   Int: ResolverTypeWrapper<Scalars['Int']['output']>;
   InvitationStatus: GQLInvitationStatus;
   InviteTeamMemberInput: GQLInviteTeamMemberInput;
+  JSON: ResolverTypeWrapper<Scalars['JSON']['output']>;
   Location: ResolverTypeWrapper<GQLLocation>;
   LogSetInput: GQLLogSetInput;
   MacroDistribution: ResolverTypeWrapper<GQLMacroDistribution>;
@@ -3766,6 +3828,8 @@ export type GQLResolversParentTypes = {
   CheckinCompletion: GQLCheckinCompletion;
   CheckinSchedule: GQLCheckinSchedule;
   CheckinStatus: GQLCheckinStatus;
+  ClientSurvey: GQLClientSurvey;
+  ClientSurveyDataInput: GQLClientSurveyDataInput;
   CoachingRequest: GQLCoachingRequest;
   CompleteCheckinInput: GQLCompleteCheckinInput;
   CopyExercisesFromDayInput: GQLCopyExercisesFromDayInput;
@@ -3817,6 +3881,7 @@ export type GQLResolversParentTypes = {
   Ingredient: GQLIngredient;
   Int: Scalars['Int']['output'];
   InviteTeamMemberInput: GQLInviteTeamMemberInput;
+  JSON: Scalars['JSON']['output'];
   Location: GQLLocation;
   LogSetInput: GQLLogSetInput;
   MacroDistribution: GQLMacroDistribution;
@@ -4103,6 +4168,17 @@ export type GQLCheckinStatusResolvers<ContextType = GQLContext, ParentType exten
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type GQLClientSurveyResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['ClientSurvey'] = GQLResolversParentTypes['ClientSurvey']> = {
+  createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  data?: Resolver<GQLResolversTypes['JSON'], ParentType, ContextType>;
+  id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  user?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
+  userId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  version?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type GQLCoachingRequestResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CoachingRequest'] = GQLResolversParentTypes['CoachingRequest']> = {
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
@@ -4262,6 +4338,10 @@ export type GQLIngredientResolvers<ContextType = GQLContext, ParentType extends 
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
+
+export interface GQLJsonScalarConfig extends GraphQLScalarTypeConfig<GQLResolversTypes['JSON'], any> {
+  name: 'JSON';
+}
 
 export type GQLLocationResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['Location'] = GQLResolversParentTypes['Location']> = {
   city?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
@@ -4543,6 +4623,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateTrainingWeekDetails?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateTrainingWeekDetailsArgs, 'input'>>;
   updateUserFeatured?: Resolver<GQLResolversTypes['AdminUserListItem'], ParentType, ContextType, RequireFields<GQLMutationUpdateUserFeaturedArgs, 'input'>>;
   updateUserRole?: Resolver<GQLResolversTypes['AdminUserListItem'], ParentType, ContextType, RequireFields<GQLMutationUpdateUserRoleArgs, 'input'>>;
+  upsertClientSurvey?: Resolver<GQLResolversTypes['ClientSurvey'], ParentType, ContextType, RequireFields<GQLMutationUpsertClientSurveyArgs, 'data'>>;
 };
 
 export type GQLMyPlansPayloadResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['MyPlansPayload'] = GQLResolversParentTypes['MyPlansPayload']> = {
@@ -4773,6 +4854,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getClientActivePlan?: Resolver<Maybe<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientActivePlanArgs, 'clientId'>>;
   getClientMacroTargets?: Resolver<Maybe<GQLResolversTypes['MacroTarget']>, ParentType, ContextType, RequireFields<GQLQueryGetClientMacroTargetsArgs, 'clientId'>>;
   getClientNutritionPlans?: Resolver<Array<GQLResolversTypes['NutritionPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientNutritionPlansArgs, 'clientId'>>;
+  getClientSurveyForTrainee?: Resolver<Maybe<GQLResolversTypes['ClientSurvey']>, ParentType, ContextType, RequireFields<GQLQueryGetClientSurveyForTraineeArgs, 'traineeId'>>;
   getClientTrainerOffers?: Resolver<Array<GQLResolversTypes['TrainerOffer']>, ParentType, ContextType, RequireFields<GQLQueryGetClientTrainerOffersArgs, 'clientEmail' | 'trainerId'>>;
   getClientTrainingPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, RequireFields<GQLQueryGetClientTrainingPlansArgs, 'clientId'>>;
   getExercises?: Resolver<GQLResolversTypes['GetExercisesResponse'], ParentType, ContextType>;
@@ -4781,6 +4863,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getFeaturedTrainers?: Resolver<Array<GQLResolversTypes['PublicTrainer']>, ParentType, ContextType, Partial<GQLQueryGetFeaturedTrainersArgs>>;
   getMessengerInitialData?: Resolver<GQLResolversTypes['MessengerInitialData'], ParentType, ContextType, Partial<GQLQueryGetMessengerInitialDataArgs>>;
   getMyChats?: Resolver<Array<GQLResolversTypes['Chat']>, ParentType, ContextType>;
+  getMyClientSurvey?: Resolver<Maybe<GQLResolversTypes['ClientSurvey']>, ParentType, ContextType>;
   getMyMacroTargets?: Resolver<Maybe<GQLResolversTypes['MacroTarget']>, ParentType, ContextType>;
   getMyPlansOverview?: Resolver<GQLResolversTypes['MyPlansPayload'], ParentType, ContextType>;
   getMyPlansOverviewFull?: Resolver<GQLResolversTypes['MyPlansPayload'], ParentType, ContextType>;
@@ -5279,6 +5362,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   CheckinCompletion?: GQLCheckinCompletionResolvers<ContextType>;
   CheckinSchedule?: GQLCheckinScheduleResolvers<ContextType>;
   CheckinStatus?: GQLCheckinStatusResolvers<ContextType>;
+  ClientSurvey?: GQLClientSurveyResolvers<ContextType>;
   CoachingRequest?: GQLCoachingRequestResolvers<ContextType>;
   CopyNutritionPlanPayload?: GQLCopyNutritionPlanPayloadResolvers<ContextType>;
   CreateNutritionPlanPayload?: GQLCreateNutritionPlanPayloadResolvers<ContextType>;
@@ -5295,6 +5379,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   GetWorkoutNavigationPayload?: GQLGetWorkoutNavigationPayloadResolvers<ContextType>;
   Image?: GQLImageResolvers<ContextType>;
   Ingredient?: GQLIngredientResolvers<ContextType>;
+  JSON?: GraphQLScalarType;
   Location?: GQLLocationResolvers<ContextType>;
   MacroDistribution?: GQLMacroDistributionResolvers<ContextType>;
   MacroTarget?: GQLMacroTargetResolvers<ContextType>;

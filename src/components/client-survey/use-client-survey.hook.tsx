@@ -1,12 +1,47 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { toast } from 'sonner'
+
+import {
+  useGetMyClientSurveyQuery,
+  useUpsertClientSurveyMutation,
+} from '@/generated/graphql-client'
 
 import { ClientSurveyData } from './types'
 
 export function useClientSurvey() {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isCompleted, setIsCompleted] = useState(false)
+  const queryClient = useQueryClient()
+
+  // Fetch existing survey if any
+  const { data: existingSurvey } = useGetMyClientSurveyQuery(
+    {},
+    {
+      enabled: isModalOpen, // Only fetch when modal is open
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  )
+
+  const upsertMutation = useUpsertClientSurveyMutation({
+    onSuccess: () => {
+      toast.success('Survey saved successfully!')
+      // Invalidate to refetch
+      queryClient.invalidateQueries({
+        queryKey: useGetMyClientSurveyQuery.getKey(),
+      })
+    },
+    onError: (error: Error) => {
+      console.error('Error saving survey:', error)
+      toast.error('Failed to save survey. Please try again.')
+    },
+  })
+
+  const isCompleted = Boolean(existingSurvey?.getMyClientSurvey)
+  const surveyData = existingSurvey?.getMyClientSurvey?.data as
+    | ClientSurveyData
+    | undefined
 
   const openSurvey = () => {
     setIsModalOpen(true)
@@ -17,20 +52,17 @@ export function useClientSurvey() {
   }
 
   const handleSubmit = async (data: ClientSurveyData) => {
-    // TODO: Implement API call to save survey data
-    // This will be connected to GraphQL mutation in later phase
-    // eslint-disable-next-line no-console
-    console.log('Survey submitted:', data)
-
-    setIsCompleted(true)
+    await upsertMutation.mutateAsync({ data })
     closeSurvey()
   }
 
   return {
     isModalOpen,
     isCompleted,
+    existingSurvey: surveyData,
     openSurvey,
     closeSurvey,
     handleSubmit,
+    isSubmitting: upsertMutation.isPending,
   }
 }
