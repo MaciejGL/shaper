@@ -11,6 +11,7 @@ import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawe
 import { Card, CardContent } from '@/components/ui/card'
 import {
   GQLGetFeaturedTrainersQuery,
+  useCancelCoachingRequestMutation,
   useCreateCoachingRequestMutation,
   useGetFeaturedTrainersQuery,
 } from '@/generated/graphql-client'
@@ -27,6 +28,9 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
     useState<FeaturedTrainer | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [hasRequestedCoaching, setHasRequestedCoaching] = useState(false)
+  const [coachingRequestId, setCoachingRequestId] = useState<string | null>(
+    null,
+  )
 
   const {
     isModalOpen,
@@ -49,6 +53,7 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
     },
   )
   const createCoachingRequestMutation = useCreateCoachingRequestMutation()
+  const cancelCoachingRequestMutation = useCancelCoachingRequestMutation()
 
   const trainers = data?.getFeaturedTrainers || []
 
@@ -63,14 +68,26 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
       `${trainer.profile?.firstName || ''} ${trainer.profile?.lastName || ''}`.trim() ||
       'Trainer'
 
-    await createCoachingRequestMutation.mutateAsync({
+    const result = await createCoachingRequestMutation.mutateAsync({
       recipientEmail: trainer.email,
       message: `Hi ${trainerName}, I'm interested in your coaching services. I'd love to discuss how you can help me achieve my fitness goals.`,
     })
 
     setHasRequestedCoaching(true)
+    setCoachingRequestId(result.createCoachingRequest.id)
     // Open survey modal after successful request
     openSurvey()
+  }
+
+  const handleWithdrawRequest = async () => {
+    if (!coachingRequestId) return
+
+    await cancelCoachingRequestMutation.mutateAsync({
+      id: coachingRequestId,
+    })
+
+    setHasRequestedCoaching(false)
+    setCoachingRequestId(null)
   }
 
   const handleCompleteSurvey = () => {
@@ -115,6 +132,8 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
         showRequestCoaching={true}
         onRequestCoaching={handleRequestCoaching}
         hasRequestedCoaching={hasRequestedCoaching}
+        onWithdrawRequest={handleWithdrawRequest}
+        isWithdrawing={cancelCoachingRequestMutation.isPending}
         showCompleteSurvey={!isCompleted}
         onCompleteSurvey={handleCompleteSurvey}
         showRetakeAssessment={isCompleted}

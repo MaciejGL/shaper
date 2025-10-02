@@ -8,6 +8,7 @@ import {
   FlameIcon,
   Mail,
   Sparkles,
+  XCircle,
 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -29,6 +30,8 @@ interface TrainerDetailsDrawerProps {
   showRequestCoaching?: boolean
   onRequestCoaching?: (trainer: TrainerData) => Promise<void>
   hasRequestedCoaching?: boolean
+  onWithdrawRequest?: () => Promise<void>
+  isWithdrawing?: boolean
   showCompleteSurvey?: boolean
   onCompleteSurvey?: () => void
   showRetakeAssessment?: boolean
@@ -43,6 +46,8 @@ export function TrainerDetailsDrawer({
   showRequestCoaching = false,
   onRequestCoaching,
   hasRequestedCoaching = false,
+  onWithdrawRequest,
+  isWithdrawing = false,
   showCompleteSurvey = false,
   onCompleteSurvey,
   showRetakeAssessment = false,
@@ -242,16 +247,6 @@ export function TrainerDetailsDrawer({
                   )}
 
                   <div className="space-y-3">
-                    <Button
-                      onClick={() => setShowCoachingInfo(true)}
-                      variant="tertiary"
-                      className="w-full"
-                      size="lg"
-                      iconStart={<BookOpenCheck />}
-                    >
-                      Learn How Coaching Works
-                    </Button>
-
                     {!hasRequestedTrainer && (
                       <Button
                         onClick={handleRequestCoaching}
@@ -278,7 +273,7 @@ export function TrainerDetailsDrawer({
                         onClick={onCompleteSurvey}
                         className="w-full"
                         size="lg"
-                        variant="secondary"
+                        variant="default"
                         iconStart={<Sparkles />}
                       >
                         Complete Fitness Assessment
@@ -296,6 +291,30 @@ export function TrainerDetailsDrawer({
                         Retake Assessment
                       </Button>
                     )}
+
+                    {hasRequestedCoaching && onWithdrawRequest && (
+                      <Button
+                        onClick={onWithdrawRequest}
+                        className="w-full"
+                        size="lg"
+                        variant="destructive"
+                        loading={isWithdrawing}
+                        disabled={isWithdrawing}
+                        iconStart={<XCircle />}
+                      >
+                        Withdraw Request
+                      </Button>
+                    )}
+
+                    <Button
+                      onClick={() => setShowCoachingInfo(true)}
+                      variant="tertiary"
+                      className="w-full"
+                      size="lg"
+                      iconStart={<BookOpenCheck />}
+                    >
+                      Learn How Coaching Works
+                    </Button>
                   </div>
                 </div>
               )}

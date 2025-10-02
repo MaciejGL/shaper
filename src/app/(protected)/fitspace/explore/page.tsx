@@ -70,7 +70,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
           />
         </TabsContent>
 
-        <TabsContent value="trainers" className="mt-6">
+        <TabsContent value="trainers" className="mt-2">
           <TrainersTab
             initialTrainers={trainersData?.getFeaturedTrainers || []}
           />

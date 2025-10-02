@@ -19,7 +19,6 @@ export function useClientSurvey() {
   const { data: existingSurvey } = useGetMyClientSurveyQuery(
     {},
     {
-      enabled: isModalOpen, // Only fetch when modal is open
       staleTime: 5 * 60 * 1000, // 5 minutes
     },
   )
