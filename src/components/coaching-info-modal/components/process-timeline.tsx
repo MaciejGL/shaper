@@ -6,48 +6,37 @@ import { cn } from '@/lib/utils'
 const journeySteps = [
   {
     step: 1,
-    title: 'Request Coaching',
-    description: 'Submit your request and complete survey.',
+    title: 'Chat with your trainer',
+    description:
+      'Free consultation to discuss your goals and find the perfect fit.',
     image: '/coaching-info/person-filling-out-form-on-phone.jpg',
-    badge: 'Free & Non-Binding',
+    badge: 'Free & Easy',
   },
   {
     step: 2,
-    title: 'Trainer Review',
-    description: 'Trainer reviews submission and contacts you.',
-    image: '/coaching-info/trainer-reviewing-client-profile-on-tablet.jpg',
-    badge: '24-48h',
+    title: 'Receive your custom offer',
+    description:
+      'Get a personalized coaching package with pricing tailored to your needs.',
+    image: '/coaching-info/trainer-creating-workout-plan-on-computer.jpg',
+    badge: 'Custom Pricing',
   },
   {
     step: 3,
-    title: 'Free Consultation',
-    description: '30-minute call to discuss your needs and expectations.',
-    image: '/coaching-info/video-call-between-trainer-and-client.jpg',
-    badge: '30min',
+    title: 'Start your journey',
+    description:
+      'Accept the offer and your trainer will create your personalized workout plans.',
+    image: '/coaching-info/person-making-secure-payment-on-phone.jpg',
+    badge: 'Secure Payment',
   },
   {
     step: 4,
-    title: 'Custom Proposal',
-    description: 'Personalized offer tailored to your needs and preferences.',
-    image: '/coaching-info/trainer-creating-workout-plan-on-computer.jpg',
-    badge: 'Custom',
-  },
-  {
-    step: 5,
-    title: 'Accept & Pay',
-    description: 'Review proposal and pay when ready to commit.',
-    image: '/coaching-info/person-making-secure-payment-on-phone.jpg',
-    badge: 'Secure',
-  },
-  {
-    step: 6,
-    title: 'Start Training',
-    description: 'Begin your personalized coaching program with your trainer.',
+    title: 'Train with ongoing support',
+    description:
+      'Follow your plan, track progress, and get continuous adjustments from your trainer.',
     image: '/coaching-info/person-working-out-with-trainer-guidance.jpg',
-    badge: 'Go!',
+    badge: 'Always There',
   },
 ]
-
 export function ProcessTimeline() {
   return (
     <div className="space-y-6">
