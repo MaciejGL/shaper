@@ -29,7 +29,7 @@ const textareaVariants = cva(
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
   TextareaProps & VariantProps<typeof textareaVariants>
->(({ className, error, label, id, variant = 'default', ...props }, ref) => {
+>(({ className, error, label, id, variant = 'ghost', ...props }, ref) => {
   return (
     <div className="space-y-1 w-full">
       {label && (

@@ -3,6 +3,8 @@
 import { User } from 'lucide-react'
 import { useState } from 'react'
 
+import { ClientSurveyModal } from '@/components/client-survey/client-survey-modal'
+import { useClientSurvey } from '@/components/client-survey/use-client-survey.hook'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { TrainerCard, TrainerData } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
@@ -24,6 +26,10 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
   const [selectedTrainer, setSelectedTrainer] =
     useState<FeaturedTrainer | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [hasRequestedCoaching, setHasRequestedCoaching] = useState(false)
+
+  const { isModalOpen, isCompleted, openSurvey, closeSurvey, handleSubmit } =
+    useClientSurvey()
 
   const { data, isLoading } = useGetFeaturedTrainersQuery(
     { limit: 30 },
@@ -54,6 +60,14 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
       recipientEmail: trainer.email,
       message: `Hi ${trainerName}, I'm interested in your coaching services. I'd love to discuss how you can help me achieve my fitness goals.`,
     })
+
+    setHasRequestedCoaching(true)
+    // Open survey modal after successful request
+    openSurvey()
+  }
+
+  const handleCompleteSurvey = () => {
+    openSurvey()
   }
 
   if (isLoading) {
@@ -93,6 +107,16 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
         onClose={() => setIsDrawerOpen(false)}
         showRequestCoaching={true}
         onRequestCoaching={handleRequestCoaching}
+        hasRequestedCoaching={hasRequestedCoaching}
+        // showCompleteSurvey={hasRequestedCoaching && !isCompleted}
+        showCompleteSurvey={!isCompleted}
+        onCompleteSurvey={handleCompleteSurvey}
+      />
+
+      <ClientSurveyModal
+        open={isModalOpen}
+        onClose={closeSurvey}
+        onSubmit={handleSubmit}
       />
     </>
   )

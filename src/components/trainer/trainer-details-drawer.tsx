@@ -28,6 +28,9 @@ interface TrainerDetailsDrawerProps {
   onClose: () => void
   showRequestCoaching?: boolean
   onRequestCoaching?: (trainer: TrainerData) => Promise<void>
+  hasRequestedCoaching?: boolean
+  showCompleteSurvey?: boolean
+  onCompleteSurvey?: () => void
   direction?: 'bottom' | 'right'
 }
 
@@ -37,6 +40,9 @@ export function TrainerDetailsDrawer({
   onClose,
   showRequestCoaching = false,
   onRequestCoaching,
+  hasRequestedCoaching = false,
+  showCompleteSurvey = false,
+  onCompleteSurvey,
   direction = 'bottom',
 }: TrainerDetailsDrawerProps) {
   const [isRequestingCoaching, setIsRequestingCoaching] = useState(false)
@@ -76,7 +82,7 @@ export function TrainerDetailsDrawer({
     (trainer.profile?.firstName?.charAt(0) || '') +
     (trainer.profile?.lastName?.charAt(0) || '')
 
-  const hasRequestedTrainer = Boolean(user?.trainerId)
+  const hasRequestedTrainer = Boolean(user?.trainerId) || hasRequestedCoaching
 
   return (
     <Drawer
@@ -260,6 +266,18 @@ export function TrainerDetailsDrawer({
                         {trainer.isAtCapacity
                           ? 'Trainer at Capacity'
                           : 'Request Coaching'}
+                      </Button>
+                    )}
+
+                    {showCompleteSurvey && onCompleteSurvey && (
+                      <Button
+                        onClick={onCompleteSurvey}
+                        className="w-full"
+                        size="lg"
+                        variant="secondary"
+                        iconStart={<Sparkles />}
+                      >
+                        Complete Fitness Assessment
                       </Button>
                     )}
                   </div>
