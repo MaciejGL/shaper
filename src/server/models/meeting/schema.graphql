@@ -1,0 +1,105 @@
+enum MeetingType {
+  INITIAL_CONSULTATION # First meeting
+  IN_PERSON_TRAINING # Ongoing in-person coaching
+  CHECK_IN # Progress check-in
+  PLAN_REVIEW # Training plan review
+}
+
+enum MeetingStatus {
+  PENDING # Proposed but not confirmed
+  CONFIRMED # Both parties confirmed
+  COMPLETED # Meeting happened
+  CANCELLED # Meeting cancelled
+  RESCHEDULED # Moved to different time
+}
+
+enum LocationType {
+  VIRTUAL # Online (Google Meet, Zoom, etc.)
+  COACH_LOCATION # Coach's gym/studio
+  TRAINEE_LOCATION # Trainee's home/preferred gym
+  OTHER # Custom location
+}
+
+type Meeting {
+  id: ID!
+  coachId: ID!
+  traineeId: ID!
+  type: MeetingType!
+  status: MeetingStatus!
+
+  # Scheduling
+  scheduledAt: String!
+  duration: Int! # minutes
+  timezone: String!
+
+  # Location
+  locationType: LocationType!
+  address: String
+  meetingLink: String # For virtual meetings
+  # Details
+  title: String!
+  description: String
+  notes: String
+
+  # Service delivery link (optional)
+  serviceDeliveryId: ID
+  serviceTaskId: ID
+
+  # Relations
+  coach: UserPublic!
+  trainee: UserPublic!
+  serviceDelivery: ServiceDelivery
+  serviceTask: ServiceTask
+
+  createdAt: String!
+  updatedAt: String!
+}
+
+input CreateMeetingInput {
+  traineeId: ID!
+  type: MeetingType!
+  scheduledAt: String!
+  duration: Int!
+  timezone: String!
+  locationType: LocationType!
+  address: String
+  meetingLink: String
+  title: String!
+  description: String
+  serviceDeliveryId: ID
+  serviceTaskId: ID
+}
+
+input UpdateMeetingInput {
+  type: MeetingType
+  status: MeetingStatus
+  scheduledAt: String
+  duration: Int
+  timezone: String
+  locationType: LocationType
+  address: String
+  meetingLink: String
+  title: String
+  description: String
+  notes: String
+}
+
+type Query {
+  # Get upcoming meetings for current user (as coach or trainee)
+  myUpcomingMeetings: [Meeting!]!
+  # Get meetings for a specific trainee (coach only)
+  getTraineeMeetings(traineeId: ID!): [Meeting!]!
+  # Get meetings for a service delivery
+  getServiceDeliveryMeetings(serviceDeliveryId: ID!): [Meeting!]!
+}
+
+type Mutation {
+  # Create a new meeting
+  createMeeting(input: CreateMeetingInput!): Meeting!
+  # Update meeting details
+  updateMeeting(meetingId: ID!, input: UpdateMeetingInput!): Meeting!
+  # Confirm a pending meeting (for trainee)
+  confirmMeeting(meetingId: ID!): Meeting!
+  # Cancel a meeting
+  cancelMeeting(meetingId: ID!, reason: String): Meeting!
+}

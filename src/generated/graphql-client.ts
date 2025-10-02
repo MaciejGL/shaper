@@ -503,6 +503,21 @@ export type GQLCreateMealInput = {
   servings?: InputMaybe<Scalars['Int']['input']>;
 };
 
+export type GQLCreateMeetingInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  duration: Scalars['Int']['input'];
+  locationType: GQLLocationType;
+  meetingLink?: InputMaybe<Scalars['String']['input']>;
+  scheduledAt: Scalars['String']['input'];
+  serviceDeliveryId?: InputMaybe<Scalars['ID']['input']>;
+  serviceTaskId?: InputMaybe<Scalars['ID']['input']>;
+  timezone: Scalars['String']['input'];
+  title: Scalars['String']['input'];
+  traineeId: Scalars['ID']['input'];
+  type: GQLMeetingType;
+};
+
 export type GQLCreateNoteInput = {
   note: Scalars['String']['input'];
   relatedTo?: InputMaybe<Scalars['ID']['input']>;
@@ -864,6 +879,13 @@ export type GQLLocation = {
   id: Scalars['ID']['output'];
 };
 
+export enum GQLLocationType {
+  CoachLocation = 'COACH_LOCATION',
+  Other = 'OTHER',
+  TraineeLocation = 'TRAINEE_LOCATION',
+  Virtual = 'VIRTUAL'
+}
+
 export type GQLLogSetInput = {
   loggedReps?: InputMaybe<Scalars['Int']['input']>;
   loggedWeight?: InputMaybe<Scalars['Float']['input']>;
@@ -929,6 +951,47 @@ export type GQLMealIngredient = {
   macros: GQLMacroTotals;
   order: Scalars['Int']['output'];
 };
+
+export type GQLMeeting = {
+  __typename?: 'Meeting';
+  address?: Maybe<Scalars['String']['output']>;
+  coach: GQLUserPublic;
+  coachId: Scalars['ID']['output'];
+  createdAt: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  duration: Scalars['Int']['output'];
+  id: Scalars['ID']['output'];
+  locationType: GQLLocationType;
+  meetingLink?: Maybe<Scalars['String']['output']>;
+  notes?: Maybe<Scalars['String']['output']>;
+  scheduledAt: Scalars['String']['output'];
+  serviceDelivery?: Maybe<GQLServiceDelivery>;
+  serviceDeliveryId?: Maybe<Scalars['ID']['output']>;
+  serviceTask?: Maybe<GQLServiceTask>;
+  serviceTaskId?: Maybe<Scalars['ID']['output']>;
+  status: GQLMeetingStatus;
+  timezone: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+  trainee: GQLUserPublic;
+  traineeId: Scalars['ID']['output'];
+  type: GQLMeetingType;
+  updatedAt: Scalars['String']['output'];
+};
+
+export enum GQLMeetingStatus {
+  Cancelled = 'CANCELLED',
+  Completed = 'COMPLETED',
+  Confirmed = 'CONFIRMED',
+  Pending = 'PENDING',
+  Rescheduled = 'RESCHEDULED'
+}
+
+export enum GQLMeetingType {
+  CheckIn = 'CHECK_IN',
+  InitialConsultation = 'INITIAL_CONSULTATION',
+  InPersonTraining = 'IN_PERSON_TRAINING',
+  PlanReview = 'PLAN_REVIEW'
+}
 
 export type GQLMessage = {
   __typename?: 'Message';
@@ -1041,10 +1104,12 @@ export type GQLMutation = {
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
   cancelCoaching: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
+  cancelMeeting: GQLMeeting;
   clearTodaysWorkout: Scalars['Boolean']['output'];
   clearUserSessions: Scalars['Boolean']['output'];
   closePlan: Scalars['Boolean']['output'];
   completeCheckin: GQLCheckinCompletion;
+  confirmMeeting: GQLMeeting;
   copyExercisesFromDay: Scalars['Boolean']['output'];
   copyNutritionPlan: GQLCopyNutritionPlanPayload;
   createBodyProgressLog: GQLBodyProgressLog;
@@ -1056,6 +1121,7 @@ export type GQLMutation = {
   createFavouriteWorkout: GQLFavouriteWorkout;
   createIngredient: GQLIngredient;
   createMeal: GQLMeal;
+  createMeeting: GQLMeeting;
   createNote: GQLNote;
   createNoteReply: GQLNote;
   createNotification: GQLNotification;
@@ -1140,6 +1206,7 @@ export type GQLMutation = {
   updateIngredient: GQLIngredient;
   updateMeal: GQLMeal;
   updateMealIngredient: GQLMealIngredient;
+  updateMeeting: GQLMeeting;
   updateNote: GQLNote;
   updateNotification: GQLNotification;
   updateNutritionPlan: GQLNutritionPlan;
@@ -1272,6 +1339,12 @@ export type GQLMutationCancelCoachingRequestArgs = {
 };
 
 
+export type GQLMutationCancelMeetingArgs = {
+  meetingId: Scalars['ID']['input'];
+  reason?: InputMaybe<Scalars['String']['input']>;
+};
+
+
 export type GQLMutationClearUserSessionsArgs = {
   userId: Scalars['ID']['input'];
 };
@@ -1284,6 +1357,11 @@ export type GQLMutationClosePlanArgs = {
 
 export type GQLMutationCompleteCheckinArgs = {
   input: GQLCompleteCheckinInput;
+};
+
+
+export type GQLMutationConfirmMeetingArgs = {
+  meetingId: Scalars['ID']['input'];
 };
 
 
@@ -1335,6 +1413,11 @@ export type GQLMutationCreateIngredientArgs = {
 
 export type GQLMutationCreateMealArgs = {
   input: GQLCreateMealInput;
+};
+
+
+export type GQLMutationCreateMeetingArgs = {
+  input: GQLCreateMeetingInput;
 };
 
 
@@ -1758,6 +1841,12 @@ export type GQLMutationUpdateMealIngredientArgs = {
 };
 
 
+export type GQLMutationUpdateMeetingArgs = {
+  input: GQLUpdateMeetingInput;
+  meetingId: Scalars['ID']['input'];
+};
+
+
 export type GQLMutationUpdateNoteArgs = {
   input: GQLUpdateNoteInput;
 };
@@ -2153,10 +2242,12 @@ export type GQLQuery = {
   getPackageTemplate?: Maybe<GQLPackageTemplate>;
   getPublicTrainingPlans: Array<GQLTrainingPlan>;
   getQuickWorkoutPlan: GQLTrainingPlan;
+  getServiceDeliveryMeetings: Array<GQLMeeting>;
   getServiceDeliveryTasks: Array<GQLServiceTask>;
   getSubscriptionStats: GQLSubscriptionStats;
   getTemplates: Array<GQLTrainingPlan>;
   getTotalUnreadCount: Scalars['Int']['output'];
+  getTraineeMeetings: Array<GQLMeeting>;
   getTrainerDeliveries: Array<GQLServiceDelivery>;
   getTrainerTasks: Array<GQLServiceTask>;
   getTrainingExercise?: Maybe<GQLTrainingExercise>;
@@ -2176,6 +2267,7 @@ export type GQLQuery = {
   myClients: Array<GQLUserPublic>;
   myTeams: Array<GQLTeam>;
   myTrainer?: Maybe<GQLUserPublic>;
+  myUpcomingMeetings: Array<GQLMeeting>;
   note?: Maybe<GQLNote>;
   noteReplies: Array<GQLNote>;
   notes: Array<GQLNote>;
@@ -2338,6 +2430,11 @@ export type GQLQueryGetPublicTrainingPlansArgs = {
 };
 
 
+export type GQLQueryGetServiceDeliveryMeetingsArgs = {
+  serviceDeliveryId: Scalars['ID']['input'];
+};
+
+
 export type GQLQueryGetServiceDeliveryTasksArgs = {
   serviceDeliveryId: Scalars['ID']['input'];
 };
@@ -2346,6 +2443,11 @@ export type GQLQueryGetServiceDeliveryTasksArgs = {
 export type GQLQueryGetTemplatesArgs = {
   draft?: InputMaybe<Scalars['Boolean']['input']>;
   limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQueryGetTraineeMeetingsArgs = {
+  traineeId: Scalars['ID']['input'];
 };
 
 
@@ -3101,6 +3203,20 @@ export type GQLUpdateMealInput = {
   name?: InputMaybe<Scalars['String']['input']>;
   preparationTime?: InputMaybe<Scalars['Int']['input']>;
   servings?: InputMaybe<Scalars['Int']['input']>;
+};
+
+export type GQLUpdateMeetingInput = {
+  address?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  duration?: InputMaybe<Scalars['Int']['input']>;
+  locationType?: InputMaybe<GQLLocationType>;
+  meetingLink?: InputMaybe<Scalars['String']['input']>;
+  notes?: InputMaybe<Scalars['String']['input']>;
+  scheduledAt?: InputMaybe<Scalars['String']['input']>;
+  status?: InputMaybe<GQLMeetingStatus>;
+  timezone?: InputMaybe<Scalars['String']['input']>;
+  title?: InputMaybe<Scalars['String']['input']>;
+  type?: InputMaybe<GQLMeetingType>;
 };
 
 export type GQLUpdateNoteInput = {
