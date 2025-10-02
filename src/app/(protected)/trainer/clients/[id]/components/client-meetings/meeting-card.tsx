@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import {
   Calendar,
+  CalendarPlus,
   CheckCircle2,
   Clock,
   MapPin,
@@ -17,7 +18,7 @@ import { toast } from 'sonner'
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import {
   GQLGetTraineeMeetingsQuery,
   GQLMeetingStatus,
@@ -26,6 +27,7 @@ import {
   useUpdateMeetingMutation,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
+import { addToCalendar } from '@/utils/calendar-utils'
 
 type Meeting = NonNullable<
   GQLGetTraineeMeetingsQuery['getTraineeMeetings']
@@ -257,6 +259,46 @@ export function MeetingCard({
           </p>
         )}
       </CardContent>
+
+      {/* Footer with Add to Calendar button */}
+      <CardFooter className="gap-2">
+        {/* Add to Calendar Button */}
+        <Button
+          size="sm"
+          variant="outline"
+          className="flex-1"
+          iconStart={<CalendarPlus />}
+          onClick={() =>
+            addToCalendar({
+              title: meeting.title,
+              description: meeting.description,
+              scheduledAt: meeting.scheduledAt,
+              duration: meeting.duration,
+              address: meeting.address,
+              meetingLink: meeting.meetingLink,
+              locationType: meeting.locationType,
+            })
+          }
+        >
+          Add to Calendar
+        </Button>
+
+        {/* Join Button for Virtual Meetings */}
+        {isUpcoming &&
+          meeting.status !== 'CANCELLED' &&
+          meeting.locationType === 'VIRTUAL' &&
+          meeting.meetingLink && (
+            <Button
+              size="sm"
+              variant="default"
+              className="flex-1"
+              iconStart={<Video />}
+              onClick={() => window.open(meeting.meetingLink!, '_blank')}
+            >
+              Join
+            </Button>
+          )}
+      </CardFooter>
     </Card>
   )
 }

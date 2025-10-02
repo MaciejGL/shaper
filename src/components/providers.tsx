@@ -10,6 +10,7 @@ import type * as React from 'react'
 import { NavigationProvider } from '@/context/navigation-context'
 import { getQueryClient } from '@/lib/get-query-client'
 
+import { ActivityHeartbeat } from './activity-heartbeat'
 import { ConfirmationModalProvider } from './confirmation-modal'
 import { SidebarProvider } from './ui/sidebar'
 import { Toaster } from './ui/sonner'
@@ -31,6 +32,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         delay={500}
       >
         <SessionProvider>
+          <ActivityHeartbeat />
           <NuqsAdapter>
             <NavigationProvider>
               <ConfirmationModalProvider>

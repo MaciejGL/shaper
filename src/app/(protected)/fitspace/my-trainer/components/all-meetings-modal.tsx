@@ -17,8 +17,7 @@ import {
   useGetAllClientMeetingsQuery,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
-
-import { addToCalendar } from './calendar-utils'
+import { addToCalendar } from '@/utils/calendar-utils'
 
 type Meeting = NonNullable<
   GQLGetAllClientMeetingsQuery['myUpcomingMeetings']

@@ -105,17 +105,19 @@ export async function sendMessage(
   const senderName = context.user?.user.profile?.firstName || 'Someone'
 
   // Only send push notification if user is not currently active
-  const recentActivity = await prisma.mobilePushToken.findFirst({
+  // Check if user has been active in the last 2 minutes
+  const activeToken = await prisma.mobilePushToken.findFirst({
     where: {
       userId: recipientId,
       pushNotificationsEnabled: true,
       lastActiveAt: {
-        lt: new Date(Date.now() - 2 * 60 * 1000), // Not active in last 2 minutes
+        gte: new Date(Date.now() - 2 * 60 * 1000), // Active within last 2 minutes
       },
     },
   })
 
-  if (recentActivity) {
+  // Only send push if user is NOT actively using the app
+  if (!activeToken) {
     await sendPushForNotification(
       recipientId,
       GQLNotificationType.Message,

@@ -18,9 +18,9 @@ import {
   useGetMyMeetingsQuery,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
+import { addToCalendar } from '@/utils/calendar-utils'
 
 import { AllMeetingsDrawer } from './all-meetings-modal'
-import { addToCalendar } from './calendar-utils'
 
 type Meeting = NonNullable<GQLGetMyMeetingsQuery['myUpcomingMeetings']>[number]
 
