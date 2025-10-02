@@ -17,7 +17,7 @@ import { toast } from 'sonner'
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   GQLGetTraineeMeetingsQuery,
   GQLMeetingStatus,
@@ -131,88 +131,88 @@ export function MeetingCard({
   const isUpcoming = meetingDate >= new Date() && meeting.status !== 'CANCELLED'
 
   return (
-    <Card borderless className={cn(isPast && 'opacity-75')}>
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <h4 className="font-semibold">{meeting.title}</h4>
+    <Card borderless className={cn('py-3', isPast && 'opacity-75')}>
+      <CardContent className="space-y-2">
+        {/* Header Row */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <h4 className="font-semibold text-sm truncate">
+                {meeting.title}
+              </h4>
               <Badge
                 variant="secondary"
-                className={cn('text-xs', STATUS_COLORS[meeting.status])}
+                className={cn(
+                  'text-xs shrink-0',
+                  STATUS_COLORS[meeting.status],
+                )}
               >
                 {meeting.status}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {MEETING_TYPE_LABELS[meeting.type]}
             </p>
           </div>
 
           {/* Action Buttons */}
           {isUpcoming && meeting.status !== 'CANCELLED' && (
-            <div className="flex gap-2">
+            <div className="flex gap-1 shrink-0">
               {meeting.status === 'COMPLETED' ? (
                 <Button
-                  size="sm"
-                  variant="outline"
+                  size="icon-sm"
+                  variant="ghost"
                   onClick={handleReopen}
                   disabled={isUpdating}
-                  iconStart={<RotateCcw className="h-4 w-4" />}
-                >
-                  Undo
-                </Button>
+                  iconOnly={<RotateCcw />}
+                />
               ) : (
                 <>
                   <Button
-                    size="sm"
-                    variant="outline"
+                    size="icon-sm"
+                    variant="ghost"
                     onClick={handleComplete}
                     disabled={isUpdating}
-                    iconStart={<CheckCircle2 className="h-4 w-4" />}
-                  >
-                    Complete
-                  </Button>
+                    iconOnly={<CheckCircle2 />}
+                  />
                   <Button
-                    size="sm"
-                    variant="outline"
+                    size="icon-sm"
+                    variant="ghost"
                     onClick={handleCancel}
                     disabled={isUpdating}
-                    iconStart={<XCircle className="h-4 w-4" />}
-                  >
-                    Cancel
-                  </Button>
+                    iconOnly={<XCircle />}
+                  />
                 </>
               )}
             </div>
           )}
         </div>
-      </CardHeader>
 
-      <CardContent className="space-y-3">
-        {/* Date & Time */}
-
-        <div className="flex items-center gap-2 text-sm">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span>{format(meetingDate, 'EEEE, MMMM d, yyyy')}</span>
-        </div>
-
-        <div className="flex items-center gap-2 text-sm">
-          <Clock className="h-4 w-4 text-muted-foreground" />
-          <span>
-            {format(meetingDate, 'h:mm a')} • {meeting.duration} minutes
-          </span>
+        {/* Date & Time combined */}
+        <div className="flex items-center gap-3 text-sm">
+          <div className="flex items-center gap-1.5">
+            <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs">
+              {format(meetingDate, 'MMM d, yyyy')}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+            <span className="text-xs">
+              {format(meetingDate, 'h:mm a')} • {meeting.duration}min
+            </span>
+          </div>
         </div>
 
         {/* Location */}
         {meeting.locationType === 'VIRTUAL' && meeting.meetingLink && (
-          <div className="flex items-center gap-2 text-sm">
-            <Video className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <Video className="h-3.5 w-3.5 text-muted-foreground" />
             <a
               href={meeting.meetingLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-xs text-primary hover:underline truncate"
             >
               Join Virtual Meeting
             </a>
@@ -220,13 +220,13 @@ export function MeetingCard({
         )}
 
         {meeting.locationType !== 'VIRTUAL' && meeting.address && (
-          <div className="flex items-center gap-2 text-sm">
-            <MapPin className="h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-1.5 text-sm">
+            <MapPin className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
             <a
               href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(meeting.address)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary hover:underline"
+              className="text-xs text-primary hover:underline truncate"
             >
               {meeting.address}
             </a>
@@ -235,27 +235,26 @@ export function MeetingCard({
 
         {/* Description */}
         {meeting.description && (
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-xs text-muted-foreground line-clamp-2">
             {meeting.description}
           </p>
         )}
 
         {/* Notes */}
         {meeting.notes && (
-          <div className="mt-3 p-3 bg-muted/50 rounded-md">
-            <p className="text-xs font-medium mb-1">Notes:</p>
-            <p className="text-sm whitespace-pre-wrap">{meeting.notes}</p>
+          <div className="p-2 bg-muted/50 rounded">
+            <p className="text-xs text-muted-foreground line-clamp-2">
+              {meeting.notes}
+            </p>
           </div>
         )}
 
         {/* Linked Service */}
         {meeting.serviceDelivery && (
-          <div className="mt-3 pt-3 border-t">
-            <p className="text-xs text-muted-foreground">
-              Linked to: {meeting.serviceDelivery.packageName}
-              {meeting.serviceTask && ` • ${meeting.serviceTask.title}`}
-            </p>
-          </div>
+          <p className="text-xs text-muted-foreground pt-1 border-t">
+            {meeting.serviceDelivery.packageName}
+            {meeting.serviceTask && ` • ${meeting.serviceTask.title}`}
+          </p>
         )}
       </CardContent>
     </Card>

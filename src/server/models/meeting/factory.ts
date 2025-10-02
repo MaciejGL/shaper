@@ -1,3 +1,5 @@
+import { format } from 'date-fns'
+
 import {
   GQLCreateMeetingInput,
   GQLUpdateMeetingInput,
@@ -7,6 +9,89 @@ import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
 import Meeting from './model'
+
+// Helper function to send meeting notification via messenger
+async function sendMeetingNotification(
+  trainerId: string,
+  traineeId: string,
+  meeting: {
+    title: string
+    type: string
+    scheduledAt: Date
+    duration: number
+    locationType: string
+    address: string | null
+    meetingLink: string | null
+  },
+) {
+  try {
+    // Get or create chat between trainer and trainee
+    let chat = await prisma.chat.findFirst({
+      where: {
+        trainerId,
+        clientId: traineeId,
+      },
+    })
+
+    if (!chat) {
+      chat = await prisma.chat.create({
+        data: {
+          trainerId,
+          clientId: traineeId,
+        },
+      })
+    }
+
+    // Format meeting details message
+    const meetingDate = format(meeting.scheduledAt, 'EEEE, MMMM d, yyyy')
+    const meetingTime = format(meeting.scheduledAt, 'h:mm a')
+
+    const meetingTypeLabels: Record<string, string> = {
+      INITIAL_CONSULTATION: 'Initial Consultation',
+      IN_PERSON_TRAINING: 'In-Person Training',
+      CHECK_IN: 'Check-In',
+      PLAN_REVIEW: 'Plan Review',
+    }
+
+    let locationInfo = ''
+    if (meeting.locationType === 'VIRTUAL' && meeting.meetingLink) {
+      locationInfo = `📍 Location: Virtual Meeting\n🔗 Join here: ${meeting.meetingLink}`
+    } else if (meeting.address) {
+      locationInfo = `📍 Location: ${meeting.address}`
+    }
+
+    const messageContent = `🗓️ New Meeting Scheduled
+
+${meeting.title}
+${meetingTypeLabels[meeting.type] || meeting.type}
+
+📅 Date: ${meetingDate}
+⏰ Time: ${meetingTime}
+⏱️ Duration: ${meeting.duration} minutes
+
+${locationInfo}
+
+Looking forward to seeing you!`
+
+    // Send the message
+    await prisma.message.create({
+      data: {
+        chatId: chat.id,
+        senderId: trainerId,
+        content: messageContent,
+      },
+    })
+
+    // Update chat's updatedAt timestamp
+    await prisma.chat.update({
+      where: { id: chat.id },
+      data: { updatedAt: new Date() },
+    })
+  } catch (error) {
+    // Log error but don't fail the meeting creation
+    console.error('Failed to send meeting notification:', error)
+  }
+}
 
 export async function createMeeting(
   input: GQLCreateMeetingInput,
@@ -61,13 +146,15 @@ export async function createMeeting(
     }
   }
 
+  const scheduledAt = new Date(input.scheduledAt)
+
   const meeting = await prisma.meeting.create({
     data: {
       coachId: currentUserId,
       traineeId: input.traineeId,
       type: input.type,
       status: 'PENDING',
-      scheduledAt: new Date(input.scheduledAt),
+      scheduledAt,
       duration: input.duration,
       timezone: input.timezone,
       locationType: input.locationType,
@@ -105,6 +192,17 @@ export async function createMeeting(
       },
       serviceTask: true,
     },
+  })
+
+  // Send automatic notification via messenger
+  await sendMeetingNotification(currentUserId, input.traineeId, {
+    title: input.title,
+    type: input.type,
+    scheduledAt,
+    duration: input.duration,
+    locationType: input.locationType,
+    address: input.address || null,
+    meetingLink: input.meetingLink || null,
   })
 
   return new Meeting(meeting, context)
