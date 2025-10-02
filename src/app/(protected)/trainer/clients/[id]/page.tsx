@@ -4,13 +4,14 @@ import { User } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { use } from 'react'
 
-import '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useGetClientByIdQuery } from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../components/dashboard-header'
 
 import { ClientActivePlan } from './components/client-active-plan'
+import { ClientAssessment } from './components/client-assessment'
 import { ClientInfo } from './components/client-info/client-info'
 import { ClientMeasurements } from './components/client-measurements'
 import { ClientNotes } from './components/client-notes/client-notes'
@@ -68,6 +69,7 @@ export default function ClientDetailPage({
         icon={User}
         prevSegment={{ label: 'Clients', href: '/trainer/clients' }}
       />
+
       <Tabs
         value={activeTab}
         onValueChange={(value) => setActiveTab(value as typeof activeTab)}
@@ -104,11 +106,18 @@ export default function ClientDetailPage({
 
         <TabsContent value="info">
           <div className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_4fr] gap-6">
-            <ClientInfo
-              client={client}
-              clientName={clientName}
-              activePlan={activePlan}
-            />
+            <div className="col-span-full">
+              <ClientInfo
+                client={client}
+                clientName={clientName}
+                activePlan={activePlan}
+              />
+            </div>
+            <Card borderless>
+              <CardContent>
+                <ClientAssessment clientId={client.id} />
+              </CardContent>
+            </Card>
             <ClientNotes clientId={client.id} />
           </div>
         </TabsContent>

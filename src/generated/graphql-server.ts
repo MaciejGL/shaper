@@ -355,6 +355,7 @@ export type GQLClientSurveyDataInput = {
   hasAllergies?: InputMaybe<Scalars['Boolean']['input']>;
   hasDeadline?: InputMaybe<Scalars['Boolean']['input']>;
   hasInjuries?: InputMaybe<Scalars['Boolean']['input']>;
+  hasRecentBloodTests?: InputMaybe<Scalars['Boolean']['input']>;
   hasSleepIssues?: InputMaybe<Scalars['Boolean']['input']>;
   hatedExercises?: InputMaybe<Scalars['String']['input']>;
   injuries?: InputMaybe<Scalars['String']['input']>;

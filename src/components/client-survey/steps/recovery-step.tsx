@@ -54,6 +54,22 @@ export function RecoveryStep({ data, onChange }: RecoveryStepProps) {
             ]}
           />
         </div>
+
+        <div className="space-y-3">
+          <Label>
+            Have you had blood work done recently for vitamins and minerals?
+          </Label>
+          <RadioButtons
+            value={data.hasRecentBloodTests ? 'yes' : 'no'}
+            onValueChange={(value) =>
+              onChange({ hasRecentBloodTests: value === 'yes' })
+            }
+            options={[
+              { value: 'yes', label: 'Yes' },
+              { value: 'no', label: 'No' },
+            ]}
+          />
+        </div>
       </div>
     </div>
   )

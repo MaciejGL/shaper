@@ -1,4 +1,8 @@
-import { Card, CardContent } from '@/components/ui/card'
+import { RulerIcon, WeightIcon } from 'lucide-react'
+import { Calendar } from 'lucide-react'
+
+import { Card, CardContent, CardDescription } from '@/components/ui/card'
+import { HeightDisplay } from '@/components/ui/height-display'
 import { GQLGetClientByIdQuery } from '@/generated/graphql-client'
 
 import { ClientAllergies } from './client-allergies'
@@ -12,13 +16,40 @@ type ClientInfoProps = {
 }
 
 export function ClientInfo({ client, clientName }: ClientInfoProps) {
-  return (
-    <Card borderless className="lg:col-spans-1" variant="gradient">
-      <ClientCardHeader client={client} clientName={clientName} />
+  const age = client.birthday
+    ? new Date().getFullYear() - new Date(client.birthday).getFullYear()
+    : null
 
-      <CardContent className="space-y-4">
-        <ClientGoals goals={client.goals} />
-        <ClientAllergies allergies={client.allergies} />
+  return (
+    <Card borderless variant="gradient">
+      <CardContent className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_4fr] gap-6 items-center">
+        <ClientCardHeader client={client} clientName={clientName} />
+
+        <div className="flex flex-col gap-2 space-y-2">
+          <div className="">
+            <h4 className="font-medium mb-2">Personal Info</h4>
+            <CardDescription className="flex flex-wrap gap-4 mt-2">
+              <div className="flex items-center gap-2">
+                <WeightIcon className="h-4 w-4" />
+                {client.currentWeight} kg
+              </div>
+              <div className="flex items-center gap-2">
+                <RulerIcon className="h-4 w-4" />
+                <HeightDisplay heightInCm={client.height} />
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                {age ? `${age} years old` : ''}
+              </div>
+            </CardDescription>
+          </div>
+          <div className="">
+            <ClientGoals goals={client.goals} />
+          </div>
+          <div className="">
+            <ClientAllergies allergies={client.allergies} />
+          </div>
+        </div>
       </CardContent>
     </Card>
   )

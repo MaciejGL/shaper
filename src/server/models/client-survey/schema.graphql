@@ -41,6 +41,7 @@ input ClientSurveyDataInput {
 
   sleepHours: String
   hasSleepIssues: Boolean
+  hasRecentBloodTests: Boolean
 
   biggestChallenge: String
   otherChallenge: String

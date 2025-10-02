@@ -5,7 +5,7 @@ import { translateGoal } from '@/utils/goals'
 export function ClientGoals({ goals }: { goals: GQLGoal[] }) {
   if (!goals || goals.length === 0) {
     return (
-      <div className="pt-2">
+      <div>
         <h4 className="font-medium mb-2">Goals</h4>
         <div className="text-sm text-muted-foreground">No goals set.</div>
       </div>
@@ -13,7 +13,7 @@ export function ClientGoals({ goals }: { goals: GQLGoal[] }) {
   }
 
   return (
-    <div className="pt-2">
+    <div>
       <h4 className="font-medium mb-2">Goals</h4>
       <div className="flex flex-wrap gap-2">
         {goals.map((goal) => (
