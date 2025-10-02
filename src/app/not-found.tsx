@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 export default function NotFound() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-background">
-      <Card className="w-full max-w-md" variant="gradient">
+      <Card className="w-full max-w-md" variant="tertiary">
         <CardContent className="flex flex-col items-center text-center p-8 space-y-6">
           <div className="relative">
             <Image

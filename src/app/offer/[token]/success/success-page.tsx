@@ -152,7 +152,7 @@ export function SuccessPage({
           </Card>
 
           {/* Service Included */}
-          <Card variant="gradient" className="p-6 mb-8 text-left">
+          <Card variant="tertiary" className="p-6 mb-8 text-left">
             <h4 className="font-semibold text-gray-900 mb-3">
               Your {packageSummary.length === 1 ? 'Package' : 'Bundle'}{' '}
               Includes:

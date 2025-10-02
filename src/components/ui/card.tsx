@@ -5,20 +5,17 @@ import { cn } from '@/lib/utils'
 
 const cardVariants = cva(
   cn(
-    'text-card-foreground flex flex-col gap-6 rounded-lg py-4 relative shadow-xs bg-card border border-border  transition-[border] duration-200 shadow-xs',
+    'text-card-foreground flex flex-col gap-6 rounded-xl py-4 relative bg-card border border-border transition-[border,shadow] duration-200',
   ),
   {
     variants: {
       variant: {
         secondary:
-          'bg-card border-0 dark:shadow-none shadow-xs border-border dark:border-border/50 border',
-        tertiary: 'border-0 shadow-xs bg-card-on-card',
-        gradient:
-          'border-zinc-200 dark:border-zinc-800 bg-gradient-to-br from-white via-white to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800',
-        premium: cn(
-          'bg-gradient-to-br border-0 shadow-sm text-primary-foreground [&_svg]:text-primary-foreground',
-          'border-zinc-200 dark:border-amber-500 bg-gradient-to-br from-white via-white to-zinc-200 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-800',
-        ),
+          'bg-card border-border shadow-[inset_0_1px_2px_rgba(0,0,0,0.05),0_1px_3px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2),0_2px_4px_rgba(0,0,0,0.3)]',
+        tertiary:
+          'border-0 bg-card-on-card shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]',
+        premium:
+          'relative bg-card border-[1px] border-transparent bg-origin-border [background-clip:padding-box,border-box] [background-image:linear-gradient(var(--card),var(--card)),linear-gradient(135deg,rgb(245_158_11),rgb(251_146_60),rgb(249_115_22))] dark:[background-image:linear-gradient(var(--card),var(--card)),linear-gradient(135deg,rgb(251_191_36),rgb(251_146_60),rgb(251_146_60))] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2),0_8px_24px_rgba(0,0,0,0.4)]',
       },
     },
     defaultVariants: {

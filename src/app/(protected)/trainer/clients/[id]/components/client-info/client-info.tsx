@@ -21,7 +21,7 @@ export function ClientInfo({ client, clientName }: ClientInfoProps) {
     : null
 
   return (
-    <Card borderless variant="gradient">
+    <Card borderless variant="tertiary">
       <CardContent className="grid grid-cols-1 @3xl/client-detail-page:grid-cols-[3fr_4fr] gap-6 items-center">
         <ClientCardHeader client={client} clientName={clientName} />
 
