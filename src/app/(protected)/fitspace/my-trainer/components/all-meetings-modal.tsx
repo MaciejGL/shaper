@@ -62,7 +62,6 @@ export function AllMeetingsDrawer({
   const allMeetings = data?.myUpcomingMeetings || []
 
   // Separate meetings into upcoming and past
-  const now = new Date()
   const upcomingMeetings = allMeetings.filter(
     (meeting) => !isPast(new Date(meeting.scheduledAt)),
   )

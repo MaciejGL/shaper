@@ -4,7 +4,7 @@
  */
 import { useNetInfo } from '@react-native-community/netinfo'
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
-import { ScrollView, StyleSheet } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import { WebView } from 'react-native-webview'
 
 import { APP_CONFIG } from '../config/app-config'
@@ -100,6 +100,39 @@ function setupNativeAppAPI(): string {
         }));
       }
     };
+    
+    // Back button handler setup
+    window.addEventListener('message', function(event) {
+      if (event.data === 'native_back_button') {
+        // Check if any modal or drawer is open
+        const isModalOpen = document.querySelector('[data-state="open"][data-slot="dialog-content"]') !== null ||
+                           document.querySelector('[data-state="open"][data-slot="drawer-content"]') !== null ||
+                           document.querySelector('[data-state="open"][data-slot="sheet-content"]') !== null;
+        
+        if (isModalOpen) {
+          // Close the modal by clicking overlay or close button
+          const overlay = document.querySelector('[data-slot="dialog-overlay"]') ||
+                         document.querySelector('[data-slot="drawer-overlay"]') ||
+                         document.querySelector('[data-slot="sheet-overlay"]');
+          
+          if (overlay && overlay instanceof HTMLElement) {
+            overlay.click();
+          }
+          
+          // Notify native that we handled the back button
+          window.ReactNativeWebView?.postMessage(JSON.stringify({
+            type: 'back_button_handled',
+            handled: true
+          }));
+        } else {
+          // Let native handle it (navigate back or exit)
+          window.ReactNativeWebView?.postMessage(JSON.stringify({
+            type: 'back_button_handled',
+            handled: false
+          }));
+        }
+      }
+    });
   `
 }
 
@@ -217,6 +250,7 @@ export interface EnhancedWebViewRef {
   reload: () => void
   goBack: () => void
   goForward: () => void
+  handleBackButton: () => Promise<boolean>
 }
 
 interface EnhancedWebViewProps {
@@ -228,6 +262,7 @@ interface EnhancedWebViewProps {
   onRequestPushPermission?: () => void
   onCheckPushPermissions?: () => void
   onDisablePushPermissions?: () => void
+  onBackButtonHandled?: (handled: boolean) => void
 }
 
 export const EnhancedWebView = forwardRef<
@@ -244,6 +279,7 @@ export const EnhancedWebView = forwardRef<
       onRequestPushPermission,
       onCheckPushPermissions,
       onDisablePushPermissions,
+      onBackButtonHandled,
     },
     ref,
   ) => {
@@ -256,6 +292,9 @@ export const EnhancedWebView = forwardRef<
     const retryTimeoutRef = useRef<number | null>(null)
     const isRetryingRef = useRef(false)
     const retryAttemptsRef = useRef(0)
+    const backButtonResolveRef = useRef<((handled: boolean) => void) | null>(
+      null,
+    )
 
     // Network connectivity monitoring
     const netInfo = useNetInfo()
@@ -353,6 +392,30 @@ export const EnhancedWebView = forwardRef<
       goForward: () => {
         webViewRef.current?.goForward()
       },
+
+      handleBackButton: () => {
+        return new Promise<boolean>((resolve) => {
+          backButtonResolveRef.current = resolve
+
+          // Send message to web app to check and handle back button
+          webViewRef.current?.injectJavaScript(`
+            (function() {
+              window.dispatchEvent(new MessageEvent('message', {
+                data: 'native_back_button'
+              }));
+              true;
+            })();
+          `)
+
+          // Timeout after 300ms if no response
+          setTimeout(() => {
+            if (backButtonResolveRef.current === resolve) {
+              backButtonResolveRef.current = null
+              resolve(false)
+            }
+          }, 300)
+        })
+      },
     }))
 
     // Retry connection handler with loop prevention
@@ -412,6 +475,14 @@ export const EnhancedWebView = forwardRef<
 
           case 'auth_token':
             onAuthToken?.(message.token)
+            break
+
+          case 'back_button_handled':
+            if (backButtonResolveRef.current) {
+              backButtonResolveRef.current(message.handled)
+              backButtonResolveRef.current = null
+            }
+            onBackButtonHandled?.(message.handled)
             break
 
           default:
@@ -483,11 +554,7 @@ export const EnhancedWebView = forwardRef<
     }
 
     return (
-      <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.scrollContent}
-        scrollEnabled={false}
-      >
+      <View style={styles.container}>
         <WebView
           ref={webViewRef}
           source={{ uri: initialUrl || APP_CONFIG.WEB_URL }}
@@ -534,16 +601,13 @@ export const EnhancedWebView = forwardRef<
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
         />
-      </ScrollView>
+      </View>
     )
   },
 )
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-  },
-  scrollContent: {
     flex: 1,
   },
   webview: {

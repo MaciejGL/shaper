@@ -7,7 +7,7 @@ import * as Linking from 'expo-linking'
 import * as Notifications from 'expo-notifications'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState } from 'react'
-import { AppState, StyleSheet } from 'react-native'
+import { AppState, BackHandler, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { useThemeManager } from '../hooks/use-theme-manager'
@@ -114,6 +114,33 @@ function HyproAppContent({ authToken }: HyproAppProps) {
   const [initialWebUrl, setInitialWebUrl] = useState<string | undefined>(
     undefined,
   )
+
+  // Handle Android back button to close modals/drawers instead of exiting app
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        // Ask WebView to handle the back button
+        if (webViewRef.current?.handleBackButton) {
+          webViewRef.current.handleBackButton().then((handled) => {
+            if (!handled) {
+              // If WebView didn't handle it (no modal open), allow default behavior
+              // This will navigate back in history or exit app
+              if (webViewRef.current?.goBack) {
+                webViewRef.current.goBack()
+              }
+            }
+          })
+          // Always prevent default while we check with WebView
+          return true
+        }
+        // If WebView ref not ready, allow default behavior
+        return false
+      },
+    )
+
+    return () => backHandler.remove()
+  }, [webViewRef])
 
   useEffect(() => {
     const checkInitialNavigation = async () => {
