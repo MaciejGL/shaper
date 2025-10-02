@@ -97,7 +97,7 @@ export function PlansTab({
         </div>
 
         {availablePlans.length > 0 && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <p className="text-base font-medium">Training Templates</p>
             {availablePlans.map((plan) => (
               <PlanCard key={plan.id} plan={plan} onClick={handlePlanClick} />
@@ -106,7 +106,7 @@ export function PlansTab({
         )}
 
         {completedPlans.length > 0 && (
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-4">
             <p className="text-base font-medium">Completed</p>
             {completedPlans.map((plan) => (
               <PlanCard key={plan.id} plan={plan} onClick={handlePlanClick} />

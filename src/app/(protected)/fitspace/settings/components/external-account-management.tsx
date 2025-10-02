@@ -44,9 +44,7 @@ export function ExternalAccountManagement() {
             <Settings className="w-5 h-5 text-white" />
           </div>
           <div>
-            <CardTitle className="text-xl">
-              Manage Account &amp; Subscriptions
-            </CardTitle>
+            <CardTitle>Manage Account &amp; Subscriptions</CardTitle>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Manage subscriptions, billing, and account data
             </p>
@@ -56,8 +54,8 @@ export function ExternalAccountManagement() {
       <CardContent className="pt-0 flex justify-center">
         <Button
           onClick={handleOpenAccountManagement}
-          size="lg"
           iconEnd={<ExternalLink />}
+          className="w-full"
         >
           Open Account Management
         </Button>

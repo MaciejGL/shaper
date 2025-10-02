@@ -1,6 +1,7 @@
 'use client'
 
 import { Calendar, Clock, MessageSquare, UserCheck, Users } from 'lucide-react'
+import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
 
 import { useConfirmationModalContext } from '@/components/confirmation-modal'
@@ -18,6 +19,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useUser } from '@/context/user-context'
 import {
   GQLGetMyTrainerQuery,
@@ -83,7 +85,18 @@ interface TrainerViewProps {
   refetchRequests: () => void
 }
 
+enum Tab {
+  FromTrainer = 'from-trainer',
+  PurchasedServices = 'purchased-services',
+}
+
 function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
+  const [tab, setTab] = useQueryState<Tab>(
+    'tab',
+    parseAsStringEnum<Tab>([Tab.FromTrainer, Tab.PurchasedServices])
+      .withDefault(Tab.FromTrainer)
+      .withOptions({ clearOnDefault: true }),
+  )
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
   const { openModal } = useConfirmationModalContext()
@@ -157,57 +170,65 @@ function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
         onClose={() => setIsDrawerOpen(false)}
         showRequestCoaching={false}
       />
-
-      {/* Trainer Shared Notes Section */}
-      <div id="trainer-notes-section">
-        <TrainerSharedNotesSection />
-      </div>
-
-      <Card borderless>
-        <CardContent>
-          {/* Scheduled Sessions */}
-          <div className="flex flex-col gap-2 opacity-50">
-            <h3 className="text-lg font-semibold">
-              Scheduled Sessions - coming soon
-            </h3>
-            <p>Available sessions this month: 0</p>
-            <p className="text-sm text-muted-foreground">
-              You have no scheduled sessions with {trainer.name}.
-            </p>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button iconStart={<Calendar />} disabled>
-            Schedule Session
+      <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
+        <div className="flex items-center justify-between">
+          <TabsList>
+            <TabsTrigger value="from-trainer">From Trainer</TabsTrigger>
+            <TabsTrigger value="purchased-services">
+              Purchased Services
+            </TabsTrigger>
+          </TabsList>
+          <Button
+            iconOnly={<MessageSquare />}
+            onClick={handleSendMessage}
+            variant="tertiary"
+          >
+            Contact Trainer
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+        <TabsContent value="from-trainer" className="space-y-4">
+          <Card borderless>
+            <CardContent>
+              {/* Scheduled Sessions */}
+              <div className="flex flex-col gap-2 opacity-50">
+                <h3 className="text-lg font-semibold">
+                  Scheduled Sessions - coming soon
+                </h3>
+                <p>Available sessions this month: 0</p>
+                <p className="text-sm text-muted-foreground">
+                  You have no scheduled sessions with {trainer.name}.
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+              <Button iconStart={<Calendar />} disabled>
+                Schedule Session
+              </Button>
+            </CardFooter>
+          </Card>
+          {/* Trainer Shared Notes Section */}
+          <div id="trainer-notes-section">
+            <TrainerSharedNotesSection />
+          </div>
+        </TabsContent>
+        <TabsContent value="purchased-services" className="space-y-4">
+          {/* Service Deliveries Section */}
+          <ClientServiceDeliveriesSection trainerId={trainer.id} />
 
-      {/* Service Deliveries Section */}
-      <ClientServiceDeliveriesSection trainerId={trainer.id} />
+          {/* Subscription Information */}
+          <SubscriptionInfoSection />
+          <Button
+            className="w-full"
+            size="lg"
+            variant="tertiary"
+            onClick={handleCancelCoaching}
+          >
+            Cancel Coaching
+          </Button>
+        </TabsContent>
+      </Tabs>
 
-      {/* Subscription Information */}
-      <SubscriptionInfoSection />
-
-      <div className="grid grid-cols-2 gap-2">
-        <Button
-          className="w-full"
-          size="lg"
-          variant="tertiary"
-          onClick={handleCancelCoaching}
-        >
-          Cancel Coaching
-        </Button>
-
-        <Button
-          className="w-full"
-          size="lg"
-          iconStart={<MessageSquare />}
-          onClick={handleSendMessage}
-        >
-          Contact Trainer
-        </Button>
-      </div>
+      <div className="grid grid-cols-2 gap-2"></div>
 
       {/* Messenger Modal */}
       <MessengerModal

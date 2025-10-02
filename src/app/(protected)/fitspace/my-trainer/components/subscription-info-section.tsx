@@ -151,11 +151,7 @@ export function SubscriptionInfoSection() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-start justify-between">
-          <div className="space-y-2">
-            <p className="text-sm text-muted-foreground">
-              {subscriptionInfo.description}
-            </p>
-
+          <div className="space-y-4">
             {nextBilling && (
               <div className="space-y-1">
                 <p className="text-sm font-medium text-foreground">
@@ -170,6 +166,9 @@ export function SubscriptionInfoSection() {
                 </p>
               </div>
             )}
+            <p className="text-sm text-muted-foreground">
+              {subscriptionInfo.description}
+            </p>
 
             {subscriptionData?.status === 'TRIAL' &&
               subscriptionData?.expiresAt && (

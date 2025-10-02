@@ -4,7 +4,10 @@ import { LayoutList } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useFitspaceMyPlansQuery } from '@/generated/graphql-client'
+import {
+  useFitspaceMyPlansQuery,
+  useGetCheckinStatusQuery,
+} from '@/generated/graphql-client'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
 
@@ -32,6 +35,7 @@ export default function MyPlansPage() {
   } = usePlanAction()
 
   const { data, isLoading: isLoadingPlans } = useFitspaceMyPlansQuery()
+  const { data: checkinData } = useGetCheckinStatusQuery()
   const activePlan = data?.getMyPlansOverviewFull?.activePlan
   const availablePlans = data?.getMyPlansOverviewFull?.availablePlans
   const completedPlans = data?.getMyPlansOverviewFull?.completedPlans
@@ -85,6 +89,7 @@ export default function MyPlansPage() {
         isLoading={
           isActivatingPlan || isPausingPlan || isClosingPlan || isDeletingPlan
         }
+        hasCheckinSchedule={checkinData?.checkinStatus?.hasSchedule}
       />
     </div>
   )

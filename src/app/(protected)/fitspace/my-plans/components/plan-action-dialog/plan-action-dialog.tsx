@@ -1,9 +1,11 @@
 import { formatDate } from 'date-fns'
+import { AnimatePresence, motion } from 'framer-motion'
 import { BicepsFlexed, BookmarkXIcon, Trash } from 'lucide-react'
 import { Pause } from 'lucide-react'
 import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -14,8 +16,13 @@ import {
 import { DialogHeader } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { WeekPicker } from '@/components/week-picker'
-import { GQLTrainingPlan } from '@/generated/graphql-client'
+import {
+  GQLCheckinFrequency,
+  GQLTrainingPlan,
+} from '@/generated/graphql-client'
 
+import { CheckinScheduleForm } from '../../../progress/components/checkin-schedule/schedule-setup-modal'
+import { CheckinScheduleFormData } from '../../../progress/components/checkin-schedule/types'
 import { PlanAction } from '../../types'
 
 interface PlanActionDialogProps {
@@ -26,8 +33,13 @@ interface PlanActionDialogProps {
     GQLTrainingPlan,
     'title' | 'weekCount' | 'totalWorkouts' | 'id' | 'startDate'
   > | null
-  onConfirm: (data: { startDate?: Date }) => void
+  onConfirm: (data: {
+    startDate?: Date
+    scheduleCheckins?: boolean
+    checkinSchedule?: CheckinScheduleFormData
+  }) => void
   isLoading: boolean
+  hasCheckinSchedule?: boolean
 }
 
 export function PlanActionDialog({
@@ -37,8 +49,16 @@ export function PlanActionDialog({
   plan,
   onConfirm,
   isLoading,
+  hasCheckinSchedule = false,
 }: PlanActionDialogProps) {
   const [startDate, setStartDate] = useState<Date | undefined>(undefined)
+  const [scheduleCheckins, setScheduleCheckins] = useState(false)
+  const [checkinSchedule, setCheckinSchedule] =
+    useState<CheckinScheduleFormData>({
+      frequency: GQLCheckinFrequency.Weekly,
+      dayOfWeek: 0, // Sunday
+      dayOfMonth: 1,
+    })
 
   if (!action || !plan) return null
 
@@ -95,7 +115,7 @@ export function PlanActionDialog({
         </DialogHeader>
 
         {action === 'activate' && !isPaused && (
-          <div className="space-y-4 py-4">
+          <div className="space-y-8 py-4">
             {/* Start Date Selection */}
             <div className="space-y-2">
               <Label htmlFor="start-date">Training Start Week</Label>
@@ -111,6 +131,58 @@ export function PlanActionDialog({
                 </div>
               )}
             </div>
+
+            {/* Check-in Schedule Option */}
+            {!hasCheckinSchedule && (
+              <div>
+                <div className="flex items-center space-x-2 pb-1">
+                  <Checkbox
+                    id="schedule-checkins"
+                    checked={scheduleCheckins}
+                    onCheckedChange={(checked) =>
+                      setScheduleCheckins(checked as boolean)
+                    }
+                  />
+                  <Label
+                    htmlFor="schedule-checkins"
+                    className="text-base font-medium"
+                  >
+                    Check-ins
+                  </Label>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Schedule check-ins to track your progress with measurements
+                  and photos
+                </p>
+
+                {/* Animated Check-in Schedule Form */}
+                <AnimatePresence mode="wait">
+                  {scheduleCheckins && (
+                    <motion.div
+                      key="checkin-schedule-form"
+                      className="overflow-hidden"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{
+                        duration: 0.2,
+                        type: 'spring',
+                        stiffness: 200,
+                        damping: 25,
+                      }}
+                    >
+                      <div className="p-3 mt-2 rounded-lg bg-card-on-card">
+                        <CheckinScheduleForm
+                          formData={checkinSchedule}
+                          onFormDataChange={setCheckinSchedule}
+                          showPreview={false}
+                        />
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
             {/* Plan Preview */}
             <div className="space-y-2">
@@ -153,7 +225,13 @@ export function PlanActionDialog({
             Cancel
           </Button>
           <Button
-            onClick={() => onConfirm({ startDate })}
+            onClick={() =>
+              onConfirm({
+                startDate,
+                scheduleCheckins: scheduleCheckins ? true : undefined,
+                checkinSchedule: scheduleCheckins ? checkinSchedule : undefined,
+              })
+            }
             disabled={action === 'activate' && !startDate && !isPaused}
             loading={isLoading}
           >

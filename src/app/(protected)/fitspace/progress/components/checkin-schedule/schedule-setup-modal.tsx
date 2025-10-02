@@ -24,6 +24,7 @@ import {
   GQLCheckinFrequency,
   GQLCheckinSchedule,
 } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
 
 import {
   CheckinScheduleFormData,
@@ -31,6 +32,135 @@ import {
   FREQUENCY_LABELS,
 } from './types'
 import { useCheckinScheduleOperations } from './use-checkin-schedule'
+
+interface CheckinScheduleFormProps {
+  formData: CheckinScheduleFormData
+  onFormDataChange: (data: CheckinScheduleFormData) => void
+  showPreview?: boolean
+  className?: string
+}
+
+export function CheckinScheduleForm({
+  formData,
+  onFormDataChange,
+  showPreview = true,
+  className = '',
+}: CheckinScheduleFormProps) {
+  return (
+    <div className={cn('space-y-4', className)}>
+      {/* Frequency Selection */}
+      <div className="space-y-2">
+        <Label htmlFor="frequency">How often?</Label>
+        <Select
+          value={formData.frequency}
+          onValueChange={(value) =>
+            onFormDataChange({
+              ...formData,
+              frequency: value as GQLCheckinFrequency,
+            })
+          }
+        >
+          <SelectTrigger variant="tertiary" className="w-full">
+            <SelectValue placeholder="Select frequency" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(FREQUENCY_LABELS).map(([value, label]) => (
+              <SelectItem key={value} value={value}>
+                {label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Day Selection */}
+      {formData.frequency !== GQLCheckinFrequency.Monthly ? (
+        <div className="space-y-2">
+          <Label htmlFor="dayOfWeek">Which day?</Label>
+          <Select
+            value={formData.dayOfWeek?.toString()}
+            onValueChange={(value) =>
+              onFormDataChange({
+                ...formData,
+                dayOfWeek: parseInt(value),
+              })
+            }
+          >
+            <SelectTrigger variant="tertiary" className="w-full">
+              <SelectValue placeholder="Select day" />
+            </SelectTrigger>
+            <SelectContent>
+              {DAY_OF_WEEK_LABELS.map((day, index) => (
+                <SelectItem key={index} value={index.toString()}>
+                  {day}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <Label htmlFor="dayOfMonth">Which day of the month?</Label>
+          <Select
+            value={formData.dayOfMonth?.toString()}
+            onValueChange={(value) =>
+              onFormDataChange({
+                ...formData,
+                dayOfMonth: parseInt(value),
+              })
+            }
+          >
+            <SelectTrigger variant="tertiary" className="w-full">
+              <SelectValue placeholder="Select day" />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 30 }, (_, i) => i + 1).map((day) => (
+                <SelectItem key={day} value={day.toString()}>
+                  {day}
+                  {day === 1
+                    ? 'st'
+                    : day === 2
+                      ? 'nd'
+                      : day === 3
+                        ? 'rd'
+                        : 'th'}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
+
+      {/* Preview */}
+      {showPreview && (
+        <div className="rounded-lg bg-muted/50 p-3">
+          <p className="text-sm font-medium">Schedule Preview:</p>
+          <p className="text-sm text-muted-foreground">
+            {FREQUENCY_LABELS[formData.frequency]}
+            {formData.frequency !== GQLCheckinFrequency.Monthly &&
+              formData.dayOfWeek !== undefined && (
+                <> on {DAY_OF_WEEK_LABELS[formData.dayOfWeek]}</>
+              )}
+            {formData.frequency === GQLCheckinFrequency.Monthly &&
+              formData.dayOfMonth && (
+                <>
+                  {' '}
+                  on the {formData.dayOfMonth}
+                  {formData.dayOfMonth === 1
+                    ? 'st'
+                    : formData.dayOfMonth === 2
+                      ? 'nd'
+                      : formData.dayOfMonth === 3
+                        ? 'rd'
+                        : 'th'}
+                </>
+              )}
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}
 
 interface ScheduleSetupModalProps {
   open: boolean
@@ -119,115 +249,12 @@ export function ScheduleSetupModal({
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="space-y-4 px-4">
-            {/* Frequency Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="frequency">How often?</Label>
-              <Select
-                value={formData.frequency}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    frequency: value as GQLCheckinFrequency,
-                  }))
-                }
-              >
-                <SelectTrigger variant="tertiary" className="w-full">
-                  <SelectValue placeholder="Select frequency" />
-                </SelectTrigger>
-                <SelectContent>
-                  {Object.entries(FREQUENCY_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Day Selection */}
-            {formData.frequency !== GQLCheckinFrequency.Monthly ? (
-              <div className="space-y-2">
-                <Label htmlFor="dayOfWeek">Which day?</Label>
-                <Select
-                  value={formData.dayOfWeek?.toString()}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      dayOfWeek: parseInt(value),
-                    }))
-                  }
-                >
-                  <SelectTrigger variant="tertiary" className="w-full">
-                    <SelectValue placeholder="Select day" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DAY_OF_WEEK_LABELS.map((day, index) => (
-                      <SelectItem key={index} value={index.toString()}>
-                        {day}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label htmlFor="dayOfMonth">Which day of the month?</Label>
-                <Select
-                  value={formData.dayOfMonth?.toString()}
-                  onValueChange={(value) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      dayOfMonth: parseInt(value),
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select day" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                      <SelectItem key={day} value={day.toString()}>
-                        {day}
-                        {day === 1
-                          ? 'st'
-                          : day === 2
-                            ? 'nd'
-                            : day === 3
-                              ? 'rd'
-                              : 'th'}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* Preview */}
-            <div className="rounded-lg bg-muted/50 p-3">
-              <p className="text-sm font-medium">Schedule Preview:</p>
-              <p className="text-sm text-muted-foreground">
-                {FREQUENCY_LABELS[formData.frequency]}
-                {formData.frequency !== GQLCheckinFrequency.Monthly &&
-                  formData.dayOfWeek !== undefined && (
-                    <> on {DAY_OF_WEEK_LABELS[formData.dayOfWeek]}</>
-                  )}
-                {formData.frequency === GQLCheckinFrequency.Monthly &&
-                  formData.dayOfMonth && (
-                    <>
-                      {' '}
-                      on the {formData.dayOfMonth}
-                      {formData.dayOfMonth === 1
-                        ? 'st'
-                        : formData.dayOfMonth === 2
-                          ? 'nd'
-                          : formData.dayOfMonth === 3
-                            ? 'rd'
-                            : 'th'}
-                    </>
-                  )}
-              </p>
-            </div>
+          <div className="px-4">
+            <CheckinScheduleForm
+              formData={formData}
+              onFormDataChange={setFormData}
+              showPreview={true}
+            />
           </div>
 
           <DrawerFooter className="py-4 mb-4">
