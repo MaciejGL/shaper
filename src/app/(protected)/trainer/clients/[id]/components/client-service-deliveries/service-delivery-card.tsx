@@ -30,6 +30,8 @@ interface ServiceDeliveryCardProps {
   tasks: TaskWithDelivery[]
   onTaskStatusChange: (taskId: string, newStatus: string) => void
   updatingTaskId: string | null
+  clientId?: string
+  clientName?: string
 }
 
 export function ServiceDeliveryCard({
@@ -37,6 +39,8 @@ export function ServiceDeliveryCard({
   tasks,
   onTaskStatusChange,
   updatingTaskId,
+  clientId,
+  clientName,
 }: ServiceDeliveryCardProps) {
   const completedTasks = tasks.filter(
     (task) => task.status === 'COMPLETED',
@@ -86,6 +90,9 @@ export function ServiceDeliveryCard({
               task={task}
               onStatusChange={onTaskStatusChange}
               isUpdating={updatingTaskId === task.id}
+              clientId={clientId}
+              clientName={clientName}
+              serviceDeliveryId={delivery.id}
             />
           ))}
         </div>

@@ -1,0 +1,61 @@
+query GetTraineeMeetings($traineeId: ID!) {
+  getTraineeMeetings(traineeId: $traineeId) {
+    id
+    type
+    status
+    scheduledAt
+    duration
+    timezone
+    locationType
+    address
+    meetingLink
+    title
+    description
+    notes
+    trainee {
+      id
+      firstName
+      lastName
+      email
+    }
+    serviceDelivery {
+      id
+      packageName
+    }
+    serviceTask {
+      id
+      title
+    }
+    createdAt
+    updatedAt
+  }
+}
+
+mutation CreateMeeting($input: CreateMeetingInput!) {
+  createMeeting(input: $input) {
+    id
+    type
+    status
+    scheduledAt
+    duration
+    locationType
+    title
+  }
+}
+
+mutation UpdateMeeting($meetingId: ID!, $input: UpdateMeetingInput!) {
+  updateMeeting(meetingId: $meetingId, input: $input) {
+    id
+    status
+    scheduledAt
+    notes
+  }
+}
+
+mutation CancelMeeting($meetingId: ID!, $reason: String) {
+  cancelMeeting(meetingId: $meetingId, reason: $reason) {
+    id
+    status
+    notes
+  }
+}

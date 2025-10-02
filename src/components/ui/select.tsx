@@ -47,7 +47,7 @@ const selectTriggerVariants = cva(
       },
     },
     defaultVariants: {
-      variant: 'default',
+      variant: 'secondary',
       size: 'md',
     },
   },
@@ -57,7 +57,7 @@ function SelectTrigger({
   className,
   children,
   size = 'md',
-  variant = 'default',
+  variant = 'secondary',
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> &
   VariantProps<typeof selectTriggerVariants>) {

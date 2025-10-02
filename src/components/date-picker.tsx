@@ -23,6 +23,7 @@ type DatePickerProps = {
   className?: string
   dateFormat?: string
   buttonProps?: React.ComponentProps<typeof Button>
+  disabled?: React.ComponentProps<typeof Calendar>['disabled']
 }
 
 export function DatePicker({
@@ -32,6 +33,7 @@ export function DatePicker({
   className,
   dateFormat = 'd. MMM yyyy',
   buttonProps,
+  disabled,
 }: DatePickerProps) {
   const { preferences } = useUserPreferences()
   const [open, setOpen] = React.useState(false)
@@ -67,6 +69,7 @@ export function DatePicker({
               defaultMonth={date}
               captionLayout="dropdown"
               weekStartsOn={preferences.weekStartsOn}
+              disabled={disabled}
               onSelect={(date) => {
                 setDate(date)
                 setOpen(false)

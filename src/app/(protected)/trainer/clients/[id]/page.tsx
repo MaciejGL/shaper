@@ -14,6 +14,7 @@ import { ClientActivePlan } from './components/client-active-plan'
 import { ClientAssessment } from './components/client-assessment'
 import { ClientInfo } from './components/client-info/client-info'
 import { ClientMeasurements } from './components/client-measurements'
+import { ClientMeetings } from './components/client-meetings/client-meetings'
 import { ClientNotes } from './components/client-notes/client-notes'
 import { ClientNutrition } from './components/client-nutrition/client-nutrition'
 import { ClientServiceDeliveries } from './components/client-service-deliveries/client-service-deliveries'
@@ -101,6 +102,9 @@ export default function ClientDetailPage({
             <TabsTrigger size="lg" value="tasks">
               Task Management
             </TabsTrigger>
+            <TabsTrigger size="lg" value="meetings">
+              Meetings
+            </TabsTrigger>
           </TabsList>
         </div>
 
@@ -161,6 +165,10 @@ export default function ClientDetailPage({
             clientId={client.id}
             clientName={clientName}
           />
+        </TabsContent>
+
+        <TabsContent value="meetings">
+          <ClientMeetings clientId={client.id} clientName={clientName} />
         </TabsContent>
       </Tabs>
     </div>

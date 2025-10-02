@@ -4235,6 +4235,36 @@ export type GQLClientBodyProgressLogsQueryVariables = Exact<{
 
 export type GQLClientBodyProgressLogsQuery = { __typename?: 'Query', clientBodyProgressLogs: Array<{ __typename?: 'BodyProgressLog', id: string, loggedAt: string, notes?: string | undefined | null, shareWithTrainer: boolean, createdAt: string, updatedAt: string, image1?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image2?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null, image3?: { __typename?: 'OptimizedImage', thumbnail?: string | undefined | null, medium?: string | undefined | null, large?: string | undefined | null, url?: string | undefined | null } | undefined | null }> };
 
+export type GQLGetTraineeMeetingsQueryVariables = Exact<{
+  traineeId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLGetTraineeMeetingsQuery = { __typename?: 'Query', getTraineeMeetings: Array<{ __typename?: 'Meeting', id: string, type: GQLMeetingType, status: GQLMeetingStatus, scheduledAt: string, duration: number, timezone: string, locationType: GQLLocationType, address?: string | undefined | null, meetingLink?: string | undefined | null, title: string, description?: string | undefined | null, notes?: string | undefined | null, createdAt: string, updatedAt: string, trainee: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string }, serviceDelivery?: { __typename?: 'ServiceDelivery', id: string, packageName: string } | undefined | null, serviceTask?: { __typename?: 'ServiceTask', id: string, title: string } | undefined | null }> };
+
+export type GQLCreateMeetingMutationVariables = Exact<{
+  input: GQLCreateMeetingInput;
+}>;
+
+
+export type GQLCreateMeetingMutation = { __typename?: 'Mutation', createMeeting: { __typename?: 'Meeting', id: string, type: GQLMeetingType, status: GQLMeetingStatus, scheduledAt: string, duration: number, locationType: GQLLocationType, title: string } };
+
+export type GQLUpdateMeetingMutationVariables = Exact<{
+  meetingId: Scalars['ID']['input'];
+  input: GQLUpdateMeetingInput;
+}>;
+
+
+export type GQLUpdateMeetingMutation = { __typename?: 'Mutation', updateMeeting: { __typename?: 'Meeting', id: string, status: GQLMeetingStatus, scheduledAt: string, notes?: string | undefined | null } };
+
+export type GQLCancelMeetingMutationVariables = Exact<{
+  meetingId: Scalars['ID']['input'];
+  reason?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GQLCancelMeetingMutation = { __typename?: 'Mutation', cancelMeeting: { __typename?: 'Meeting', id: string, status: GQLMeetingStatus, notes?: string | undefined | null } };
+
 export type GQLGetTrainerServiceDeliveriesQueryVariables = Exact<{
   trainerId: Scalars['ID']['input'];
 }>;
@@ -9715,6 +9745,172 @@ useInfiniteClientBodyProgressLogsQuery.getKey = (variables: GQLClientBodyProgres
 
 
 useClientBodyProgressLogsQuery.fetcher = (variables: GQLClientBodyProgressLogsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLClientBodyProgressLogsQuery, GQLClientBodyProgressLogsQueryVariables>(ClientBodyProgressLogsDocument, variables, options);
+
+export const GetTraineeMeetingsDocument = `
+    query GetTraineeMeetings($traineeId: ID!) {
+  getTraineeMeetings(traineeId: $traineeId) {
+    id
+    type
+    status
+    scheduledAt
+    duration
+    timezone
+    locationType
+    address
+    meetingLink
+    title
+    description
+    notes
+    trainee {
+      id
+      firstName
+      lastName
+      email
+    }
+    serviceDelivery {
+      id
+      packageName
+    }
+    serviceTask {
+      id
+      title
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useGetTraineeMeetingsQuery = <
+      TData = GQLGetTraineeMeetingsQuery,
+      TError = unknown
+    >(
+      variables: GQLGetTraineeMeetingsQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetTraineeMeetingsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetTraineeMeetingsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetTraineeMeetingsQuery, TError, TData>(
+      {
+    queryKey: ['GetTraineeMeetings', variables],
+    queryFn: fetchData<GQLGetTraineeMeetingsQuery, GQLGetTraineeMeetingsQueryVariables>(GetTraineeMeetingsDocument, variables),
+    ...options
+  }
+    )};
+
+useGetTraineeMeetingsQuery.getKey = (variables: GQLGetTraineeMeetingsQueryVariables) => ['GetTraineeMeetings', variables];
+
+export const useInfiniteGetTraineeMeetingsQuery = <
+      TData = InfiniteData<GQLGetTraineeMeetingsQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetTraineeMeetingsQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetTraineeMeetingsQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetTraineeMeetingsQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetTraineeMeetingsQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? ['GetTraineeMeetings.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetTraineeMeetingsQuery, GQLGetTraineeMeetingsQueryVariables>(GetTraineeMeetingsDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetTraineeMeetingsQuery.getKey = (variables: GQLGetTraineeMeetingsQueryVariables) => ['GetTraineeMeetings.infinite', variables];
+
+
+useGetTraineeMeetingsQuery.fetcher = (variables: GQLGetTraineeMeetingsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetTraineeMeetingsQuery, GQLGetTraineeMeetingsQueryVariables>(GetTraineeMeetingsDocument, variables, options);
+
+export const CreateMeetingDocument = `
+    mutation CreateMeeting($input: CreateMeetingInput!) {
+  createMeeting(input: $input) {
+    id
+    type
+    status
+    scheduledAt
+    duration
+    locationType
+    title
+  }
+}
+    `;
+
+export const useCreateMeetingMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateMeetingMutation, TError, GQLCreateMeetingMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateMeetingMutation, TError, GQLCreateMeetingMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateMeeting'],
+    mutationFn: (variables?: GQLCreateMeetingMutationVariables) => fetchData<GQLCreateMeetingMutation, GQLCreateMeetingMutationVariables>(CreateMeetingDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateMeetingMutation.getKey = () => ['CreateMeeting'];
+
+
+useCreateMeetingMutation.fetcher = (variables: GQLCreateMeetingMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateMeetingMutation, GQLCreateMeetingMutationVariables>(CreateMeetingDocument, variables, options);
+
+export const UpdateMeetingDocument = `
+    mutation UpdateMeeting($meetingId: ID!, $input: UpdateMeetingInput!) {
+  updateMeeting(meetingId: $meetingId, input: $input) {
+    id
+    status
+    scheduledAt
+    notes
+  }
+}
+    `;
+
+export const useUpdateMeetingMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateMeetingMutation, TError, GQLUpdateMeetingMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateMeetingMutation, TError, GQLUpdateMeetingMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateMeeting'],
+    mutationFn: (variables?: GQLUpdateMeetingMutationVariables) => fetchData<GQLUpdateMeetingMutation, GQLUpdateMeetingMutationVariables>(UpdateMeetingDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateMeetingMutation.getKey = () => ['UpdateMeeting'];
+
+
+useUpdateMeetingMutation.fetcher = (variables: GQLUpdateMeetingMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMeetingMutation, GQLUpdateMeetingMutationVariables>(UpdateMeetingDocument, variables, options);
+
+export const CancelMeetingDocument = `
+    mutation CancelMeeting($meetingId: ID!, $reason: String) {
+  cancelMeeting(meetingId: $meetingId, reason: $reason) {
+    id
+    status
+    notes
+  }
+}
+    `;
+
+export const useCancelMeetingMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCancelMeetingMutation, TError, GQLCancelMeetingMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCancelMeetingMutation, TError, GQLCancelMeetingMutationVariables, TContext>(
+      {
+    mutationKey: ['CancelMeeting'],
+    mutationFn: (variables?: GQLCancelMeetingMutationVariables) => fetchData<GQLCancelMeetingMutation, GQLCancelMeetingMutationVariables>(CancelMeetingDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCancelMeetingMutation.getKey = () => ['CancelMeeting'];
+
+
+useCancelMeetingMutation.fetcher = (variables: GQLCancelMeetingMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCancelMeetingMutation, GQLCancelMeetingMutationVariables>(CancelMeetingDocument, variables, options);
 
 export const GetTrainerServiceDeliveriesDocument = `
     query GetTrainerServiceDeliveries($trainerId: ID!) {

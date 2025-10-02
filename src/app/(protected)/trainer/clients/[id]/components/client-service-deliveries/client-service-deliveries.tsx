@@ -83,6 +83,8 @@ export function ClientServiceDeliveries({
             tasks={tasks}
             onTaskStatusChange={handleTaskStatusChange}
             updatingTaskId={updatingTaskId}
+            clientId={clientId}
+            clientName={clientName}
           />
         ))}
       </div>
