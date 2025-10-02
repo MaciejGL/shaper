@@ -17,12 +17,12 @@ export function WebViewLoading({ progress = 0 }: WebViewLoadingProps) {
   const [displayProgress, setDisplayProgress] = React.useState(0)
   const [animationComplete, setAnimationComplete] = React.useState(false)
 
-  // Optimized linear progress animation: 0 to 100% in 300ms
+  // Linear progress animation: 0 to 100% in 500ms
   React.useEffect(() => {
     // Start the linear animation immediately
     Animated.timing(progressAnim, {
       toValue: 1, // 100%
-      duration: 300, // Reduced from 500ms to 300ms for faster loading
+      duration: 800, // 500ms animation duration
       useNativeDriver: true,
     }).start(() => {
       // Animation complete - stay at 100%

@@ -166,15 +166,24 @@ export function CheckinDrawer({ open, onOpenChange }: CheckinDrawerProps) {
 
           <DrawerFooter>
             <div className="flex items-center justify-between gap-3">
-              <Button
-                variant="tertiary"
-                onClick={handlePrev}
-                disabled={!canGoPrev}
-                className="flex-1"
-                iconStart={<ArrowLeft />}
-              >
-                Previous
-              </Button>
+              {canGoPrev ? (
+                <Button
+                  variant="tertiary"
+                  onClick={handlePrev}
+                  className="flex-1"
+                  iconStart={<ArrowLeft />}
+                >
+                  Previous
+                </Button>
+              ) : (
+                <Button
+                  variant="tertiary"
+                  onClick={handleClose}
+                  className="flex-1"
+                >
+                  Close
+                </Button>
+              )}
 
               {canGoNext && (
                 <Button

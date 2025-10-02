@@ -174,22 +174,21 @@ export function SubscriptionManagementSection() {
                 )}
             </div>
           </div>
-
-          <div className="flex flex-col gap-2">
-            {hasActiveSubscription && (
-              <Button
-                onClick={handleManageSubscription}
-                variant="secondary"
-                className="w-full"
-              >
-                <CreditCard className="h-4 w-4 mr-2" />
-                Manage Billing & Payment
-                <ExternalLink className="h-4 w-4 ml-2" />
-              </Button>
-            )}
-          </div>
         </CardContent>
       </Card>
+      <div className="flex flex-col gap-2">
+        {hasActiveSubscription && (
+          <Button
+            onClick={handleManageSubscription}
+            variant="secondary"
+            className="w-full"
+            iconStart={<CreditCard />}
+            iconEnd={<ExternalLink />}
+          >
+            Manage Billing & Payment
+          </Button>
+        )}
+      </div>
     </div>
   )
 }
