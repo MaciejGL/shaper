@@ -1839,28 +1839,42 @@ export const createQuickWorkout = async (
     throw new GraphQLError('Quick workout plan not found')
   }
 
-  // get plans todays day - Find the actual day using scheduledAt
-  const today = startOfToday()
+  // Get the target day - either by dayId or today's date
+  let currentDay
 
-  // Find the current week first
-  const currentWeekData = fullPlan.weeks.find((week) => {
-    if (!week.scheduledAt) {
-      return false
+  if (input.dayId) {
+    // Use specified day if provided
+    currentDay = fullPlan.weeks
+      .flatMap((week) => week.days)
+      .find((day) => day.id === input.dayId)
+
+    if (!currentDay) {
+      throw new GraphQLError('Specified day not found')
     }
-    return isSameWeek(week.scheduledAt, weekStart)
-  })
+  } else {
+    // Otherwise use today's day - Find the actual day using scheduledAt
+    const today = startOfToday()
 
-  if (!currentWeekData) {
-    throw new GraphQLError('Current week not found')
-  }
+    // Find the current week first
+    const currentWeekData = fullPlan.weeks.find((week) => {
+      if (!week.scheduledAt) {
+        return false
+      }
+      return isSameWeek(week.scheduledAt, weekStart)
+    })
 
-  // Then find the actual day within that week using scheduledAt
-  const currentDay = currentWeekData.days.find(
-    (d) => d.scheduledAt && isSameDay(d.scheduledAt, today),
-  )
+    if (!currentWeekData) {
+      throw new GraphQLError('Current week not found')
+    }
 
-  if (!currentDay) {
-    throw new GraphQLError('Day not found')
+    // Then find the actual day within that week using scheduledAt
+    currentDay = currentWeekData.days.find(
+      (d) => d.scheduledAt && isSameDay(d.scheduledAt, today),
+    )
+
+    if (!currentDay) {
+      throw new GraphQLError('Day not found')
+    }
   }
 
   // If replaceExisting is true, remove all current extra exercises

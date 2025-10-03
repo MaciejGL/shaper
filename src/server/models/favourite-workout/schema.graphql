@@ -104,6 +104,7 @@ input UpdateFavouriteWorkoutSetInput {
 input StartWorkoutFromFavouriteInput {
   favouriteWorkoutId: ID!
   replaceExisting: Boolean = true
+  dayId: ID # Optional: if provided, add to this specific day; otherwise add to today
 }
 
 extend type Query {

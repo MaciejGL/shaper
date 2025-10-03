@@ -561,6 +561,7 @@ export type GQLCreatePushSubscriptionInput = {
 };
 
 export type GQLCreateQuickWorkoutInput = {
+  dayId?: InputMaybe<Scalars['ID']['input']>;
   exercises: Array<GQLQuickWorkoutExerciseInput>;
   replaceExisting: Scalars['Boolean']['input'];
 };
@@ -2809,6 +2810,7 @@ export type GQLSetMacroTargetsInput = {
 };
 
 export type GQLStartWorkoutFromFavouriteInput = {
+  dayId?: InputMaybe<Scalars['ID']['input']>;
   favouriteWorkoutId: Scalars['ID']['input'];
   replaceExisting?: InputMaybe<Scalars['Boolean']['input']>;
 };

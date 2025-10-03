@@ -16,10 +16,9 @@ import {
 import { useTrackWorkoutSession } from '@/hooks/use-track-workout-session'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
-import { QuickWorkout } from '../../quick-workout/quick-workout'
-
 import { AddSingleExercise } from './add-single-exercise'
 import { ClearWorkoutModal } from './clear-workout-modal'
+import { EmptyWorkoutOptions } from './empty-workout-options'
 import { Exercise } from './exercise'
 import { RestDay } from './rest-day'
 import { WorkoutActions } from './workout-actions'
@@ -84,14 +83,11 @@ export function Exercises({
     return (
       <div className="mt-4">
         {isQuickWorkout ? (
-          <div className="space-y-4">
-            <QuickWorkout hideProgress={true} />
-            <div className="mt-4">
-              <AddSingleExercise dayId={day.id} variant="card" />
-            </div>
-          </div>
+          <EmptyWorkoutOptions dayId={day.id} />
         ) : (
-          <QuickWorkout hideProgress={true} />
+          <div className="text-center py-8 text-muted-foreground">
+            <p>No exercises scheduled for this day</p>
+          </div>
         )}
       </div>
     )

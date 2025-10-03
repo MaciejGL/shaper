@@ -101,6 +101,7 @@ type Mutation {
 input CreateQuickWorkoutInput {
   exercises: [QuickWorkoutExerciseInput!]!
   replaceExisting: Boolean! # Whether to replace current exercises or add to them
+  dayId: ID # Optional - if provided, adds to specific day; otherwise uses today
 }
 
 input QuickWorkoutExerciseInput {

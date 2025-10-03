@@ -1,6 +1,6 @@
 'use client'
 
-import { BookmarkIcon, ChevronRight } from 'lucide-react'
+import { BookmarkIcon, Plus } from 'lucide-react'
 import { useState } from 'react'
 
 import { StateCard } from '@/components/state-card'
@@ -18,6 +18,7 @@ import {
   GQLGetFavouriteWorkoutsQuery,
   useGetFavouriteWorkoutsQuery,
 } from '@/generated/graphql-client'
+import { cn } from '@/lib/utils'
 
 interface FavouritesStepProps {
   onSelectFavourite: (favouriteId: string) => void
@@ -63,14 +64,9 @@ export function FavouritesStep({
       <div className="space-y-3">
         {favourites.map((favourite: FavouriteWorkout) => (
           <Card
-            borderless
+            // borderless
             key={favourite.id}
-            className={`cursor-pointer transition-all ${
-              selectedFavouriteId === favourite.id
-                ? 'ring-2 ring-primary bg-primary/5'
-                : 'hover:bg-muted/50'
-            } ${isStarting ? 'opacity-50 pointer-events-none' : ''}`}
-            onClick={() => !isStarting && handleSelectFavourite(favourite.id)}
+            className={cn('cursor-pointer transition-all')}
           >
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -90,11 +86,9 @@ export function FavouritesStep({
                     e.stopPropagation()
                     handleSelectFavourite(favourite.id)
                   }}
-                  iconEnd={<ChevronRight />}
+                  iconEnd={<Plus />}
                 >
-                  {isStarting && selectedFavouriteId === favourite.id
-                    ? 'Adding...'
-                    : 'Add to Today'}
+                  Add
                 </Button>
               </div>
             </CardHeader>

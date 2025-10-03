@@ -251,6 +251,7 @@ function ExerciseList({
             return (
               <Card
                 key={exercise.id}
+                variant="tertiary"
                 borderless
                 className="cursor-pointer transition-all hover:scale-[1.01]"
                 onClick={() =>
@@ -276,9 +277,9 @@ function ExerciseList({
                         )}
                     </div>
                     <Button
-                      size="sm"
-                      variant="outline"
-                      iconStart={<PlusIcon />}
+                      size="icon-md"
+                      variant="ghost"
+                      iconOnly={<PlusIcon />}
                       onClick={(e) => {
                         e.stopPropagation()
                         onSelectExercise(exercise.id)

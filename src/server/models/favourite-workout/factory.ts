@@ -249,7 +249,7 @@ export async function startWorkoutFromFavourite(
   userId: string,
 ): Promise<string> {
   const { input } = args
-  const { favouriteWorkoutId, replaceExisting } = input
+  const { favouriteWorkoutId, replaceExisting, dayId } = input
 
   // Get the favourite workout with all its exercises and sets
   const favouriteWorkout = await prisma.favouriteWorkout.findFirst({
@@ -340,99 +340,122 @@ export async function startWorkoutFromFavourite(
     }
   }
 
-  // Get today and find current week
-  const today = new Date()
-  const weekStart = getUTCWeekStart(today)
+  // If dayId is provided, use that specific day; otherwise use today
+  let targetDay
 
-  // Check if current week exists, create if not
-  const hasCurrentWeek = quickWorkoutPlan.weeks.some((week) => {
-    if (!week.scheduledAt) {
-      return false
+  if (dayId) {
+    // User specified a particular day - find it directly
+    targetDay = await prisma.trainingDay.findFirst({
+      where: {
+        id: dayId,
+        week: {
+          planId: quickWorkoutPlan.id,
+        },
+      },
+      include: {
+        week: true,
+      },
+    })
+
+    if (!targetDay) {
+      throw new Error('Specified day not found or access denied')
     }
-    return isSameWeek(week.scheduledAt, weekStart)
-  })
+  } else {
+    // No dayId provided - find today's workout day (legacy behavior)
+    const today = new Date()
+    const weekStart = getUTCWeekStart(today)
 
-  if (!hasCurrentWeek) {
-    console.info(
-      '[startWorkoutFromFavourite] Creating new week for current period',
-    )
+    // Check if current week exists, create if not
+    const hasCurrentWeek = quickWorkoutPlan.weeks.some((week) => {
+      if (!week.scheduledAt) {
+        return false
+      }
+      return isSameWeek(week.scheduledAt, weekStart)
+    })
 
-    // Create a new week for the current period
-    await prisma.trainingWeek.create({
-      data: {
-        planId: quickWorkoutPlan.id,
-        weekNumber: getISOWeek(weekStart),
-        name: `Week ${getISOWeek(weekStart)}`,
-        scheduledAt: weekStart,
-        isExtra: true,
-        days: {
-          createMany: {
-            data: Array.from({ length: 7 }, (_, i) => ({
-              dayOfWeek: i,
-              isRestDay: false,
-              isExtra: true,
-              scheduledAt: addDays(weekStart, i),
-            })),
+    if (!hasCurrentWeek) {
+      console.info(
+        '[startWorkoutFromFavourite] Creating new week for current period',
+      )
+
+      // Create a new week for the current period
+      await prisma.trainingWeek.create({
+        data: {
+          planId: quickWorkoutPlan.id,
+          weekNumber: getISOWeek(weekStart),
+          name: `Week ${getISOWeek(weekStart)}`,
+          scheduledAt: weekStart,
+          isExtra: true,
+          days: {
+            createMany: {
+              data: Array.from({ length: 7 }, (_, i) => ({
+                dayOfWeek: i,
+                isRestDay: false,
+                isExtra: true,
+                scheduledAt: addDays(weekStart, i),
+              })),
+            },
+          },
+        },
+      })
+    }
+
+    // Always reload the plan with days after week handling
+    const planWithDays = await prisma.trainingPlan.findFirst({
+      where: {
+        createdById: userId,
+        assignedToId: userId,
+        isTemplate: false,
+        isDraft: false,
+      },
+      include: {
+        weeks: {
+          include: {
+            days: true,
           },
         },
       },
     })
-  }
 
-  // Always reload the plan with days after week handling
-  const planWithDays = await prisma.trainingPlan.findFirst({
-    where: {
-      createdById: userId,
-      assignedToId: userId,
-      isTemplate: false,
-      isDraft: false,
-    },
-    include: {
-      weeks: {
-        include: {
-          days: true,
-        },
-      },
-    },
-  })
-
-  if (!planWithDays) {
-    throw new Error('Failed to reload quick workout plan')
-  }
-
-  // Find the current week based on scheduledAt
-  const currentWeek = planWithDays.weeks.find((week) => {
-    if (!week.scheduledAt) {
-      return false
+    if (!planWithDays) {
+      throw new Error('Failed to reload quick workout plan')
     }
-    return isSameWeek(week.scheduledAt, weekStart)
-  })
 
-  if (!currentWeek) {
-    throw new Error(
-      'Current week not found in quick workout plan after creation',
-    )
+    // Find the current week based on scheduledAt
+    const currentWeek = planWithDays.weeks.find((week) => {
+      if (!week.scheduledAt) {
+        return false
+      }
+      return isSameWeek(week.scheduledAt, weekStart)
+    })
+
+    if (!currentWeek) {
+      throw new Error(
+        'Current week not found in quick workout plan after creation',
+      )
+    }
+
+    // Convert JavaScript day (Sunday=0) to training day (Monday=0)
+    const jsDay = today.getDay() // 0=Sunday, 1=Monday, ..., 6=Saturday
+    const trainingDay = jsDay === 0 ? 6 : jsDay - 1 // 0=Monday, 1=Tuesday, ..., 6=Sunday
+
+    // Find today's workout day
+    targetDay = currentWeek.days.find((day) => day.dayOfWeek === trainingDay)
   }
 
-  // Convert JavaScript day (Sunday=0) to training day (Monday=0)
-  const jsDay = today.getDay() // 0=Sunday, 1=Monday, ..., 6=Saturday
-  const trainingDay = jsDay === 0 ? 6 : jsDay - 1 // 0=Monday, 1=Tuesday, ..., 6=Sunday
-
-  // Find today's workout day
-  const todaysWorkout = currentWeek.days.find(
-    (day) => day.dayOfWeek === trainingDay,
-  )
-
-  if (!todaysWorkout) {
-    throw new Error('No workout day found for today')
+  if (!targetDay) {
+    throw new Error('No workout day found')
   }
+
+  // Get the day's scheduledAt or use current date
+  const dayScheduledAt = targetDay.scheduledAt || new Date()
 
   await prisma.$transaction(async (tx) => {
-    // Set today's workout as scheduled for today
+    // Update the target day
     await tx.trainingDay.update({
-      where: { id: todaysWorkout.id },
+      where: { id: targetDay.id },
       data: {
-        scheduledAt: today,
+        scheduledAt: dayScheduledAt,
         isRestDay: false, // Ensure it's not marked as rest day
       },
     })
@@ -440,7 +463,7 @@ export async function startWorkoutFromFavourite(
     // If replacing existing, delete current exercises
     if (replaceExisting) {
       await tx.trainingExercise.deleteMany({
-        where: { dayId: todaysWorkout.id },
+        where: { dayId: targetDay.id },
       })
     }
 
@@ -456,7 +479,7 @@ export async function startWorkoutFromFavourite(
           instructions: favExercise.instructions,
           tips: favExercise.tips,
           difficulty: favExercise.difficulty,
-          dayId: todaysWorkout.id,
+          dayId: targetDay.id,
           sets: {
             create: favExercise.sets.map((set) => ({
               order: set.order,
@@ -472,6 +495,21 @@ export async function startWorkoutFromFavourite(
     }
   })
 
+  // Get the week for the return value
+  const weekId = targetDay.weekId
+
+  if (!weekId) {
+    // If we still don't have weekId, fetch it
+    const dayWithWeek = await prisma.trainingDay.findUnique({
+      where: { id: targetDay.id },
+      include: { week: true },
+    })
+    if (!dayWithWeek?.week) {
+      throw new Error('Week not found for target day')
+    }
+    return `${quickWorkoutPlan.id}|${dayWithWeek.week.id}|${targetDay.id}`
+  }
+
   // Return navigation info: planId|weekId|dayId
-  return `${planWithDays.id}|${currentWeek.id}|${todaysWorkout.id}`
+  return `${quickWorkoutPlan.id}|${weekId}|${targetDay.id}`
 }
