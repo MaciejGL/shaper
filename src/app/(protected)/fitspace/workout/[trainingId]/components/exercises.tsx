@@ -17,6 +17,7 @@ import { useTrackWorkoutSession } from '@/hooks/use-track-workout-session'
 import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { AddSingleExercise } from './add-single-exercise'
+import { AddToFavouritesButton } from './add-to-favourites-button'
 import { ClearWorkoutModal } from './clear-workout-modal'
 import { EmptyWorkoutOptions } from './empty-workout-options'
 import { Exercise } from './exercise'
@@ -135,6 +136,7 @@ export function Exercises({
         {isQuickWorkout && day.id && (
           <div className="space-y-3 py-4">
             <AddSingleExercise dayId={day.id} variant="button" />
+            <AddToFavouritesButton day={day} />
             <ClearWorkoutModal dayId={day.id} />
           </div>
         )}
