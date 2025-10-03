@@ -24,7 +24,7 @@ interface EmptyWorkoutOptionsProps {
 }
 
 export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
-  const { hasPremium: hasPremiumAccess } = useUser()
+  const { hasPremium: hasPremiumAccess, isLoading: isLoadingUser } = useUser()
   const [showAiWizard, setShowAiWizard] = useState(false)
   const [showFavourites, setShowFavourites] = useState(false)
 
@@ -73,7 +73,7 @@ export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
                       Generate based on your preferences
                     </CardDescription>
                   </div>
-                  {!hasPremiumAccess ? (
+                  {!hasPremiumAccess && !isLoadingUser ? (
                     <ButtonLink
                       href="/fitspace/settings/subscription"
                       size="xs"

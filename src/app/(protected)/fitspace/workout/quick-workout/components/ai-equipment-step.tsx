@@ -35,7 +35,7 @@ export function AiEquipmentStep({ data, onDataChange }: AiEquipmentStepProps) {
           selectedEquipment={data.selectedEquipment}
           onEquipmentToggle={handleEquipmentToggle}
           equipment={allEquipment}
-          variant="cards"
+          variant="grid"
         />
       </motion.div>
     </div>

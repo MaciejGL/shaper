@@ -40,8 +40,8 @@ export function EquipmentFilters({
                 <Image
                   alt={equipmentItem}
                   src={equipmentImages[equipmentItem]}
-                  width={80}
-                  height={80}
+                  width={100}
+                  height={100}
                   priority
                   className="object-contain size-full overflow-hidden"
                 />
@@ -72,29 +72,46 @@ export function EquipmentFilters({
 
   if (variant === 'grid') {
     return (
-      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
         {equipment.map((equipmentItem) => (
           <Button
             key={equipmentItem}
             onClick={() => onEquipmentToggle(equipmentItem)}
             variant={
-              selectedEquipment.includes(equipmentItem) ? 'default' : 'outline'
+              selectedEquipment.includes(equipmentItem)
+                ? 'default'
+                : 'secondary'
             }
-            className="h-16 flex flex-col gap-1 p-2"
+            className="size-full flex flex-col gap-0 p-0 overflow-hidden relative"
           >
-            <div className="relative h-8 w-8">
+            <div className="relative size-full">
               <Image
                 alt={equipmentItem}
                 src={equipmentImages[equipmentItem]}
-                fill
-                sizes="(max-width: 640px) 25vw, 16.67vw"
+                width={200}
+                height={200}
                 priority
-                className="object-cover rounded-lg overflow-hidden"
+                className="object-cover overflow-hidden size-full"
               />
             </div>
-            <span className="text-xs leading-tight">
+            <span className="text-xs leading-tight py-1">
               {translateEquipment(equipmentItem)?.split(' ')[0]}
             </span>
+
+            <AnimatePresence>
+              {selectedEquipment.includes(equipmentItem) && (
+                <motion.div
+                  key={`${equipmentItem}-check`}
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.1 }}
+                  className="absolute top-1 right-1 z-[10000] flex items-center justify-center size-5 bg-primary text-primary-foreground rounded-full shadow-lg"
+                >
+                  <CheckIcon className="!size-3" />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </Button>
         ))}
       </div>
