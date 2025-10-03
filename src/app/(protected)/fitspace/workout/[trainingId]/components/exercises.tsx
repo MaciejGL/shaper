@@ -79,8 +79,6 @@ export function Exercises({
     return <RestDay />
   }
 
-  console.log(exercises)
-
   if (isEmptyWorkout) {
     return (
       <div className="mt-4">

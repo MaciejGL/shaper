@@ -139,8 +139,8 @@ export function QuickWorkoutAiWizard({
           aiExercise.sets?.map((aiSet, setIndex) => ({
             order: setIndex + 1,
             reps: aiSet?.reps || null,
-            minReps: null,
-            maxReps: null,
+            minReps: aiSet?.minReps || null,
+            maxReps: aiSet?.maxReps || null,
             rpe: aiSet?.rpe || null,
             weight: null,
           })) || [],

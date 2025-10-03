@@ -158,10 +158,6 @@ export function ExerciseSet({
 
           // Auto-hide after 4 seconds
           setTimeout(() => setPRData(null), 5000)
-
-          console.info(
-            `🏆 Personal Record! +${improvement.toFixed(1)}% improvement`,
-          )
         }
 
         // Timer logic
@@ -344,13 +340,13 @@ export function ExerciseSet({
                   ? sharedLayoutAdvancedStyles
                   : sharedLayoutSimpleStyles,
                 'pb-0.5 pt-1 leading-none',
-                set.isExtra && 'opacity-0',
+                set.isExtra && !repRange && 'opacity-0 h-0',
               )}
             >
               <div />
               <div />
               <div className="text-[0.75rem] text-muted-foreground text-center">
-                {set.isExtra ? 'Extra' : repRange}
+                {set.isExtra && !repRange ? 'Extra' : repRange}
               </div>
               <div className="text-[0.75rem] text-muted-foreground text-center">
                 {set.weight ? toDisplayWeight(set.weight)?.toFixed(1) : ''}
