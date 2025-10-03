@@ -5,6 +5,7 @@ import {
   BookmarkIcon,
   ChevronRight,
   ListTodoIcon,
+  PlusIcon,
   SparklesIcon,
 } from 'lucide-react'
 
@@ -23,6 +24,7 @@ export interface WorkoutCreationLandingProps {
   onSelectManual: () => void
   onSelectAI: () => void
   onSelectFavourites?: () => void
+  onSelectSingleExercise?: () => void
   className?: string
 }
 
@@ -30,6 +32,7 @@ export function WorkoutCreationLanding({
   onSelectManual,
   onSelectAI,
   onSelectFavourites,
+  onSelectSingleExercise,
   className,
 }: WorkoutCreationLandingProps) {
   const { hasPremium: hasPremiumAccess } = useUser()
@@ -111,6 +114,40 @@ export function WorkoutCreationLanding({
                   iconOnly={<ChevronRight />}
                 >
                   Select Favourite
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Single Exercise Option - Only show if onSelectSingleExercise is provided */}
+      {onSelectSingleExercise && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.125 }}
+        >
+          <Card
+            borderless
+            className="cursor-pointer transition-all"
+            onClick={onSelectSingleExercise}
+          >
+            <CardContent>
+              <div className="flex items-center">
+                <div className="p-2 mr-3 bg-card-on-card rounded-lg">
+                  <PlusIcon className="size-5" />
+                </div>
+                <div className="flex-1">
+                  <CardTitle className="text-lg">Add Single Exercise</CardTitle>
+                  <CardDescription>Add one exercise at a time</CardDescription>
+                </div>
+                <Button
+                  onClick={onSelectSingleExercise}
+                  variant="link"
+                  iconOnly={<ChevronRight />}
+                >
+                  Add Exercise
                 </Button>
               </div>
             </CardContent>

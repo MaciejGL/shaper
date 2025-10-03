@@ -27,23 +27,28 @@ export function ClearWorkoutModal({
   const { mutate: clearWorkout, isPending: isClearing } =
     useClearWorkoutDay(dayId)
 
-  const handleConfirm = () => {
-    clearWorkout(
-      { dayId },
-      {
-        onSuccess: () => {
-          setOpen(false)
-          onSuccess?.()
+  const handleConfirm = async () => {
+    try {
+      await clearWorkout(
+        { dayId },
+        {
+          onSuccess: () => {
+            setOpen(false)
+            onSuccess?.()
+          },
         },
-      },
-    )
+      )
+    } catch (error) {
+      // Error handling is done in the hook
+      console.error('Failed to clear workout:', error)
+    }
   }
 
   return (
     <>
       <Button
         variant="destructive"
-        size="sm"
+        size="md"
         onClick={() => setOpen(true)}
         iconStart={<Trash2 />}
         className="w-full"

@@ -53,6 +53,7 @@ export function ExerciseMetadata({
   onTimerComplete,
 }: ExerciseMetadataProps) {
   const [isSwapExerciseOpen, setIsSwapExerciseOpen] = useState(false)
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [selectedSubstituteId, setSelectedSubstituteId] = useState<
     string | null
   >(null)
@@ -86,6 +87,12 @@ export function ExerciseMetadata({
     setSelectedSubstituteId(null)
   }
 
+  const handleRemoveClick = async (e: React.MouseEvent) => {
+    e.preventDefault() // Prevent dropdown from closing
+    await handleRemoveExercise()
+    setIsDropdownOpen(false) // Close dropdown after successful removal
+  }
+
   const isSuperset =
     exercise.type === GQLExerciseType.Superset_1A ||
     exercise.type === GQLExerciseType.Superset_1B
@@ -100,7 +107,7 @@ export function ExerciseMetadata({
         <div className="flex gap-2 ml-auto">
           <ExerciseDetailDrawer exercise={exercise} />
           <ExerciseNotebook exercise={exercise} />
-          <DropdownMenu>
+          <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <DropdownMenuTrigger
               asChild
               className={cn(
@@ -123,8 +130,9 @@ export function ExerciseMetadata({
               )}
               {exercise.isExtra && (
                 <DropdownMenuItem
-                  onClick={handleRemoveExercise}
+                  onClick={handleRemoveClick}
                   loading={isRemoving}
+                  disabled={isRemoving}
                 >
                   <TrashIcon /> Remove exercise
                 </DropdownMenuItem>

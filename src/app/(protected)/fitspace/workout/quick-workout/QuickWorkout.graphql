@@ -394,3 +394,17 @@ mutation FitspaceAddExercisesToQuickWorkout(
 mutation FitspaceClearWorkoutDay($dayId: ID!) {
   clearWorkoutDay(dayId: $dayId)
 }
+
+# Add single exercise to workout day
+mutation FitspaceAddSingleExerciseToDay($dayId: ID!, $exerciseBaseId: ID!) {
+  addSingleExerciseToDay(dayId: $dayId, exerciseBaseId: $exerciseBaseId) {
+    id
+    name
+    baseId
+    sets {
+      id
+      order
+      reps
+    }
+  }
+}

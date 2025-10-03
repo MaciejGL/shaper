@@ -1098,6 +1098,7 @@ export type GQLMutation = {
   addSet: EntireFieldWrapper<GQLExerciseSet>;
   addSetExerciseForm: EntireFieldWrapper<GQLExerciseSet>;
   addSetToExercise: EntireFieldWrapper<Scalars['ID']['output']>;
+  addSingleExerciseToDay: EntireFieldWrapper<GQLTrainingExercise>;
   addSubstituteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   addTeamLocation: EntireFieldWrapper<GQLTeam>;
   addTrainingWeek: EntireFieldWrapper<Scalars['ID']['output']>;
@@ -1303,6 +1304,12 @@ export type GQLMutationAddSetExerciseFormArgs = {
 
 export type GQLMutationAddSetToExerciseArgs = {
   input: GQLAddSetToExerciseInput;
+};
+
+
+export type GQLMutationAddSingleExerciseToDayArgs = {
+  dayId: Scalars['ID']['input'];
+  exerciseBaseId: Scalars['ID']['input'];
 };
 
 
@@ -4662,6 +4669,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   addSet?: Resolver<GQLResolversTypes['ExerciseSet'], ParentType, ContextType, RequireFields<GQLMutationAddSetArgs, 'exerciseId'>>;
   addSetExerciseForm?: Resolver<GQLResolversTypes['ExerciseSet'], ParentType, ContextType, RequireFields<GQLMutationAddSetExerciseFormArgs, 'input'>>;
   addSetToExercise?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAddSetToExerciseArgs, 'input'>>;
+  addSingleExerciseToDay?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationAddSingleExerciseToDayArgs, 'dayId' | 'exerciseBaseId'>>;
   addSubstituteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationAddSubstituteExerciseArgs, 'input'>>;
   addTeamLocation?: Resolver<GQLResolversTypes['Team'], ParentType, ContextType, RequireFields<GQLMutationAddTeamLocationArgs, 'input'>>;
   addTrainingWeek?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType, RequireFields<GQLMutationAddTrainingWeekArgs, 'input'>>;

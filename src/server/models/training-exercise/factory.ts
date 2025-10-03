@@ -368,6 +368,94 @@ export const addAiExerciseToWorkout = async (
   return new TrainingExercise(trainingExercise, context)
 }
 
+export const addSingleExerciseToDay = async (
+  dayId: string,
+  exerciseBaseId: string,
+  context: GQLContext,
+) => {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  // Find the day and verify access
+  const day = await prisma.trainingDay.findUnique({
+    where: { id: dayId },
+    include: {
+      week: {
+        include: {
+          plan: {
+            select: {
+              assignedToId: true,
+              createdById: true,
+            },
+          },
+        },
+      },
+      exercises: {
+        orderBy: { order: 'asc' },
+      },
+    },
+  })
+
+  if (!day) {
+    throw new GraphQLError('Training day not found')
+  }
+
+  // Verify this is the user's quick workout (created by them and assigned to them)
+  const plan = day.week.plan
+  if (plan.assignedToId !== user.user.id || plan.createdById !== user.user.id) {
+    throw new GraphQLError('Can only add exercises to your own quick workout')
+  }
+
+  // Find the base exercise
+  const baseExercise = await prisma.baseExercise.findUnique({
+    where: { id: exerciseBaseId },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      additionalInstructions: true,
+      instructions: true,
+      tips: true,
+      type: true,
+      difficulty: true,
+    },
+  })
+
+  if (!baseExercise) {
+    throw new GraphQLError('Exercise not found')
+  }
+
+  // Create training exercise with one set
+  const trainingExercise = await prisma.trainingExercise.create({
+    data: {
+      baseId: baseExercise.id,
+      dayId: day.id,
+      name: baseExercise.name,
+      order: day.exercises.length + 1,
+      description: baseExercise.description,
+      instructions: baseExercise.instructions,
+      tips: baseExercise.tips,
+      difficulty: baseExercise.difficulty,
+      additionalInstructions: baseExercise.additionalInstructions,
+      isExtra: true,
+      sets: {
+        create: {
+          order: 1,
+          isExtra: true,
+          reps: 10, // Default 10 reps
+        },
+      },
+    },
+    include: {
+      sets: true,
+    },
+  })
+
+  return new TrainingExercise(trainingExercise, context)
+}
+
 export const removeExerciseFromWorkout = async (
   exerciseId: string,
   context: GQLContext,
@@ -474,8 +562,6 @@ export const clearWorkoutDay = async (dayId: string, context: GQLContext) => {
       exercises: true,
     },
   })
-
-  console.log('day', day)
 
   if (!day) {
     throw new GraphQLError('Workout day not found')

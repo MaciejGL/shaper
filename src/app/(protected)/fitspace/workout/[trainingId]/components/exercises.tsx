@@ -18,6 +18,7 @@ import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { QuickWorkout } from '../../quick-workout/quick-workout'
 
+import { AddSingleExercise } from './add-single-exercise'
 import { ClearWorkoutModal } from './clear-workout-modal'
 import { Exercise } from './exercise'
 import { RestDay } from './rest-day'
@@ -82,7 +83,16 @@ export function Exercises({
   if (isEmptyWorkout) {
     return (
       <div className="mt-4">
-        <QuickWorkout hideProgress={true} />
+        {isQuickWorkout ? (
+          <div className="space-y-4">
+            <QuickWorkout hideProgress={true} />
+            <div className="mt-4">
+              <AddSingleExercise dayId={day.id} variant="card" />
+            </div>
+          </div>
+        ) : (
+          <QuickWorkout hideProgress={true} />
+        )}
       </div>
     )
   }
@@ -126,13 +136,13 @@ export function Exercises({
             previousDayLogs={previousDayLogs}
           />
         ))}
-        <WorkoutActions />
-
         {isQuickWorkout && day.id && (
-          <div className="pt-4">
+          <div className="space-y-3 py-4">
+            <AddSingleExercise dayId={day.id} variant="button" />
             <ClearWorkoutModal dayId={day.id} />
           </div>
         )}
+        <WorkoutActions />
       </div>
     </div>
   )

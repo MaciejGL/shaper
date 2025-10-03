@@ -113,6 +113,25 @@ const WorkoutDay = ({
       ? (dayData as GQLFitspaceGetWorkoutDayQuery).getWorkoutDay
       : (dayData as GQLFitspaceGetQuickWorkoutDayQuery).getQuickWorkoutDay
 
+  // Normalize Quick Workout data to match getWorkoutDay structure for consistent cache handling
+  const normalizedInitialData = useMemo(():
+    | GQLFitspaceGetWorkoutDayQuery
+    | undefined => {
+    if (!dayData) return undefined
+
+    if ('getWorkoutDay' in dayData) {
+      return dayData as GQLFitspaceGetWorkoutDayQuery
+    }
+
+    // Transform Quick Workout data to getWorkoutDay format
+    const quickWorkoutData = dayData as GQLFitspaceGetQuickWorkoutDayQuery
+    if (!quickWorkoutData.getQuickWorkoutDay) return undefined
+
+    return {
+      getWorkoutDay: quickWorkoutData.getQuickWorkoutDay,
+    }
+  }, [dayData])
+
   const navigationData =
     queryClient.getQueryData<GQLFitspaceGetWorkoutNavigationQuery>([
       'navigation',
@@ -174,15 +193,14 @@ const WorkoutDay = ({
       dayId: dayId ?? '',
     },
     {
-      initialData: isRestDay
-        ? restDayData
-        : initialDay
-          ? (dayData as GQLFitspaceGetWorkoutDayQuery | undefined)
-          : undefined,
+      initialData: isRestDay ? restDayData : normalizedInitialData,
       initialDataUpdatedAt: hasDataForCurrentDay || isRestDay ? Date.now() : 0,
-      enabled: !!dayId && !hasDataForCurrentDay && !isRestDay, // Disable if rest day
-      refetchOnMount: false,
+      // Keep query enabled to subscribe to cache updates from optimistic mutations
+      enabled: !!dayId,
+      // But prevent unnecessary network requests when we have data
+      refetchOnMount: !hasDataForCurrentDay && !isRestDay,
       refetchOnWindowFocus: false,
+      staleTime: hasDataForCurrentDay || isRestDay ? Infinity : 0,
     },
   )
 

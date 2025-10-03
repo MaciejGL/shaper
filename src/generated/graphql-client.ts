@@ -1096,6 +1096,7 @@ export type GQLMutation = {
   addSet: GQLExerciseSet;
   addSetExerciseForm: GQLExerciseSet;
   addSetToExercise: Scalars['ID']['output'];
+  addSingleExerciseToDay: GQLTrainingExercise;
   addSubstituteExercise: Scalars['Boolean']['output'];
   addTeamLocation: GQLTeam;
   addTrainingWeek: Scalars['ID']['output'];
@@ -1301,6 +1302,12 @@ export type GQLMutationAddSetExerciseFormArgs = {
 
 export type GQLMutationAddSetToExerciseArgs = {
   input: GQLAddSetToExerciseInput;
+};
+
+
+export type GQLMutationAddSingleExerciseToDayArgs = {
+  dayId: Scalars['ID']['input'];
+  exerciseBaseId: Scalars['ID']['input'];
 };
 
 
@@ -4179,6 +4186,14 @@ export type GQLFitspaceClearWorkoutDayMutationVariables = Exact<{
 
 
 export type GQLFitspaceClearWorkoutDayMutation = { __typename?: 'Mutation', clearWorkoutDay: boolean };
+
+export type GQLFitspaceAddSingleExerciseToDayMutationVariables = Exact<{
+  dayId: Scalars['ID']['input'];
+  exerciseBaseId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLFitspaceAddSingleExerciseToDayMutation = { __typename?: 'Mutation', addSingleExerciseToDay: { __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null }> } };
 
 export type GQLGetClientsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -9451,6 +9466,39 @@ useFitspaceClearWorkoutDayMutation.getKey = () => ['FitspaceClearWorkoutDay'];
 
 
 useFitspaceClearWorkoutDayMutation.fetcher = (variables: GQLFitspaceClearWorkoutDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceClearWorkoutDayMutation, GQLFitspaceClearWorkoutDayMutationVariables>(FitspaceClearWorkoutDayDocument, variables, options);
+
+export const FitspaceAddSingleExerciseToDayDocument = `
+    mutation FitspaceAddSingleExerciseToDay($dayId: ID!, $exerciseBaseId: ID!) {
+  addSingleExerciseToDay(dayId: $dayId, exerciseBaseId: $exerciseBaseId) {
+    id
+    name
+    baseId
+    sets {
+      id
+      order
+      reps
+    }
+  }
+}
+    `;
+
+export const useFitspaceAddSingleExerciseToDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceAddSingleExerciseToDayMutation, TError, GQLFitspaceAddSingleExerciseToDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceAddSingleExerciseToDayMutation, TError, GQLFitspaceAddSingleExerciseToDayMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceAddSingleExerciseToDay'],
+    mutationFn: (variables?: GQLFitspaceAddSingleExerciseToDayMutationVariables) => fetchData<GQLFitspaceAddSingleExerciseToDayMutation, GQLFitspaceAddSingleExerciseToDayMutationVariables>(FitspaceAddSingleExerciseToDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceAddSingleExerciseToDayMutation.getKey = () => ['FitspaceAddSingleExerciseToDay'];
+
+
+useFitspaceAddSingleExerciseToDayMutation.fetcher = (variables: GQLFitspaceAddSingleExerciseToDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceAddSingleExerciseToDayMutation, GQLFitspaceAddSingleExerciseToDayMutationVariables>(FitspaceAddSingleExerciseToDayDocument, variables, options);
 
 export const GetClientsDocument = `
     query GetClients($limit: Int, $offset: Int, $trainerId: ID) {

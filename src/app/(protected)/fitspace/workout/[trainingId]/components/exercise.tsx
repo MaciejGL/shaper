@@ -30,6 +30,9 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
   // Timer state management - only one timer can be active at a time
   const [activeTimerSetId, setActiveTimerSetId] = useState<string | null>(null)
 
+  // Track removing state
+  const [isRemoving, setIsRemoving] = useState(false)
+
   // Track current input values for sets
   const [setsLogs, setSetsLogs] = useState<
     Record<string, { weight: string; reps: string }>
@@ -106,19 +109,62 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
       },
     })
 
-  const { mutateAsync: removeExercise, isPending: isRemoving } =
-    useFitspaceRemoveExerciseFromWorkoutMutation({
-      onSuccess: () => {
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutDayQuery.getKey({
-            dayId: dayId ?? '',
-          }),
-        })
-        invalidateQuery({
-          queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
-        })
-      },
-    })
+  const { mutateAsync: removeExerciseMutation } =
+    useFitspaceRemoveExerciseFromWorkoutMutation()
+
+  const { optimisticMutate: removeExerciseOptimistic } = useOptimisticMutation<
+    GQLFitspaceGetWorkoutDayQuery,
+    boolean,
+    { exerciseId: string }
+  >({
+    queryKey: useFitspaceGetWorkoutDayQuery.getKey({ dayId: dayId ?? '' }),
+    mutationFn: async ({ exerciseId }) => {
+      const result = await removeExerciseMutation({ exerciseId })
+      return result.removeExerciseFromWorkout
+    },
+    updateFn: (oldData, { exerciseId }) => {
+      // Optimistically remove the exercise from the cache
+      if (!oldData?.getWorkoutDay?.day) return oldData
+
+      return {
+        ...oldData,
+        getWorkoutDay: {
+          ...oldData.getWorkoutDay,
+          day: {
+            ...oldData.getWorkoutDay.day,
+            exercises: oldData.getWorkoutDay.day.exercises.filter(
+              (ex) => ex.id !== exerciseId,
+            ),
+          },
+        },
+      }
+    },
+    onSuccess: () => {
+      // Invalidate navigation to update counts (for both trainer plans and quick workouts)
+      invalidateQuery({
+        queryKey: useFitspaceGetWorkoutNavigationQuery.getKey({ trainingId }),
+      })
+      invalidateQuery({
+        queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+      })
+      invalidateQuery({
+        queryKey: ['navigation'],
+      })
+      setIsRemoving(false)
+    },
+    onError: () => {
+      // On error, revert by invalidating the day query (for both types)
+      invalidateQuery({
+        queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+          dayId: dayId ?? '',
+        }),
+      })
+      invalidateQuery({
+        queryKey: ['FitspaceGetQuickWorkoutDay'],
+      })
+      setIsRemoving(false)
+    },
+  })
 
   const handleMarkAsCompleted = async (checked: boolean) => {
     try {
@@ -172,9 +218,16 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
   }
 
   const handleRemoveExercise = async () => {
-    await removeExercise({
-      exerciseId: exercise.id,
-    })
+    setIsRemoving(true)
+    try {
+      await removeExerciseOptimistic({
+        exerciseId: exercise.id,
+      })
+    } catch (error) {
+      console.error('Failed to remove exercise:', error)
+      setIsRemoving(false)
+      // Error handling is done in useOptimisticMutation
+    }
   }
 
   // Timer management functions
