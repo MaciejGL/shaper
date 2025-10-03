@@ -1105,8 +1105,8 @@ export type GQLMutation = {
   cancelCoaching: Scalars['Boolean']['output'];
   cancelCoachingRequest?: Maybe<GQLCoachingRequest>;
   cancelMeeting: GQLMeeting;
-  clearTodaysWorkout: Scalars['Boolean']['output'];
   clearUserSessions: Scalars['Boolean']['output'];
+  clearWorkoutDay: Scalars['Boolean']['output'];
   closePlan: Scalars['Boolean']['output'];
   completeCheckin: GQLCheckinCompletion;
   confirmMeeting: GQLMeeting;
@@ -1347,6 +1347,11 @@ export type GQLMutationCancelMeetingArgs = {
 
 export type GQLMutationClearUserSessionsArgs = {
   userId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationClearWorkoutDayArgs = {
+  dayId: Scalars['ID']['input'];
 };
 
 
@@ -4080,11 +4085,6 @@ export type GQLFitspaceRemoveExerciseFromWorkoutMutationVariables = Exact<{
 
 export type GQLFitspaceRemoveExerciseFromWorkoutMutation = { __typename?: 'Mutation', removeExerciseFromWorkout: boolean };
 
-export type GQLFitspaceClearTodaysWorkoutMutationVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GQLFitspaceClearTodaysWorkoutMutation = { __typename?: 'Mutation', clearTodaysWorkout: boolean };
-
 export type GQLFitspaceAddSetMutationVariables = Exact<{
   exerciseId: Scalars['ID']['input'];
 }>;
@@ -4172,6 +4172,13 @@ export type GQLFitspaceAddExercisesToQuickWorkoutMutationVariables = Exact<{
 
 
 export type GQLFitspaceAddExercisesToQuickWorkoutMutation = { __typename?: 'Mutation', addExercisesToQuickWorkout: { __typename?: 'TrainingPlan', id: string, title: string, isDraft: boolean, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, order: number, isExtra: boolean, baseId?: string | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, minReps?: number | undefined | null, maxReps?: number | undefined | null, reps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
+
+export type GQLFitspaceClearWorkoutDayMutationVariables = Exact<{
+  dayId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLFitspaceClearWorkoutDayMutation = { __typename?: 'Mutation', clearWorkoutDay: boolean };
 
 export type GQLGetClientsQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -8670,30 +8677,6 @@ useFitspaceRemoveExerciseFromWorkoutMutation.getKey = () => ['FitspaceRemoveExer
 
 useFitspaceRemoveExerciseFromWorkoutMutation.fetcher = (variables: GQLFitspaceRemoveExerciseFromWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceRemoveExerciseFromWorkoutMutation, GQLFitspaceRemoveExerciseFromWorkoutMutationVariables>(FitspaceRemoveExerciseFromWorkoutDocument, variables, options);
 
-export const FitspaceClearTodaysWorkoutDocument = `
-    mutation FitspaceClearTodaysWorkout {
-  clearTodaysWorkout
-}
-    `;
-
-export const useFitspaceClearTodaysWorkoutMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLFitspaceClearTodaysWorkoutMutation, TError, GQLFitspaceClearTodaysWorkoutMutationVariables, TContext>) => {
-    
-    return useMutation<GQLFitspaceClearTodaysWorkoutMutation, TError, GQLFitspaceClearTodaysWorkoutMutationVariables, TContext>(
-      {
-    mutationKey: ['FitspaceClearTodaysWorkout'],
-    mutationFn: (variables?: GQLFitspaceClearTodaysWorkoutMutationVariables) => fetchData<GQLFitspaceClearTodaysWorkoutMutation, GQLFitspaceClearTodaysWorkoutMutationVariables>(FitspaceClearTodaysWorkoutDocument, variables)(),
-    ...options
-  }
-    )};
-
-useFitspaceClearTodaysWorkoutMutation.getKey = () => ['FitspaceClearTodaysWorkout'];
-
-
-useFitspaceClearTodaysWorkoutMutation.fetcher = (variables?: GQLFitspaceClearTodaysWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceClearTodaysWorkoutMutation, GQLFitspaceClearTodaysWorkoutMutationVariables>(FitspaceClearTodaysWorkoutDocument, variables, options);
-
 export const FitspaceAddSetDocument = `
     mutation FitspaceAddSet($exerciseId: ID!) {
   addSet(exerciseId: $exerciseId) {
@@ -9444,6 +9427,30 @@ useFitspaceAddExercisesToQuickWorkoutMutation.getKey = () => ['FitspaceAddExerci
 
 
 useFitspaceAddExercisesToQuickWorkoutMutation.fetcher = (variables: GQLFitspaceAddExercisesToQuickWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceAddExercisesToQuickWorkoutMutation, GQLFitspaceAddExercisesToQuickWorkoutMutationVariables>(FitspaceAddExercisesToQuickWorkoutDocument, variables, options);
+
+export const FitspaceClearWorkoutDayDocument = `
+    mutation FitspaceClearWorkoutDay($dayId: ID!) {
+  clearWorkoutDay(dayId: $dayId)
+}
+    `;
+
+export const useFitspaceClearWorkoutDayMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLFitspaceClearWorkoutDayMutation, TError, GQLFitspaceClearWorkoutDayMutationVariables, TContext>) => {
+    
+    return useMutation<GQLFitspaceClearWorkoutDayMutation, TError, GQLFitspaceClearWorkoutDayMutationVariables, TContext>(
+      {
+    mutationKey: ['FitspaceClearWorkoutDay'],
+    mutationFn: (variables?: GQLFitspaceClearWorkoutDayMutationVariables) => fetchData<GQLFitspaceClearWorkoutDayMutation, GQLFitspaceClearWorkoutDayMutationVariables>(FitspaceClearWorkoutDayDocument, variables)(),
+    ...options
+  }
+    )};
+
+useFitspaceClearWorkoutDayMutation.getKey = () => ['FitspaceClearWorkoutDay'];
+
+
+useFitspaceClearWorkoutDayMutation.fetcher = (variables: GQLFitspaceClearWorkoutDayMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceClearWorkoutDayMutation, GQLFitspaceClearWorkoutDayMutationVariables>(FitspaceClearWorkoutDayDocument, variables, options);
 
 export const GetClientsDocument = `
     query GetClients($limit: Int, $offset: Int, $trainerId: ID) {

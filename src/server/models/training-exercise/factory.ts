@@ -451,89 +451,52 @@ export const removeExerciseFromWorkout = async (
   return true
 }
 
-export const clearTodaysWorkout = async (context: GQLContext) => {
+export const clearWorkoutDay = async (dayId: string, context: GQLContext) => {
   const user = context.user
   if (!user) {
     throw new GraphQLError('User not found')
   }
 
-  // Find the user's quick workout plan
-  const quickWorkoutPlan = await prisma.trainingPlan.findFirst({
-    where: {
-      assignedToId: user.user.id,
-      createdById: user.user.id,
-    },
+  // Find the day and verify access
+  const day = await prisma.trainingDay.findUnique({
+    where: { id: dayId },
     include: {
-      weeks: {
+      week: {
         include: {
-          days: {
-            include: {
-              exercises: {
-                where: {
-                  isExtra: true,
-                },
-                orderBy: {
-                  order: 'asc',
-                },
-              },
+          plan: {
+            select: {
+              assignedToId: true,
+              createdById: true,
             },
           },
         },
       },
+      exercises: true,
     },
   })
 
-  if (!quickWorkoutPlan) {
-    throw new GraphQLError('Quick workout plan not found')
+  console.log('day', day)
+
+  if (!day) {
+    throw new GraphQLError('Workout day not found')
   }
 
-  // Find today's day using the same logic as getTodaysWorkoutExercises
-  const today = startOfToday()
-  const todaysDay = quickWorkoutPlan.weeks
-    .flatMap((week) => week.days)
-    .find((day) => day.scheduledAt && isSameDay(day.scheduledAt, today))
-
-  if (!todaysDay) {
-    throw new GraphQLError("Today's workout day not found")
+  // Verify this is the user's quick workout (created by them and assigned to them)
+  const plan = day.week.plan
+  if (plan.assignedToId !== user.user.id || plan.createdById !== user.user.id) {
+    throw new GraphQLError('Access denied')
   }
 
-  if (todaysDay.exercises.length === 0) {
+  if (day.exercises.length === 0) {
     return true // Nothing to clear
   }
 
-  // Remove all exercises from today's workout in a transaction
-  await prisma.$transaction(async (tx) => {
-    await tx.trainingExercise.deleteMany({
-      where: {
-        dayId: todaysDay.id,
-        isExtra: true,
-      },
-    })
+  // Remove all extra exercises from this day in a transaction
 
-    // Check if all exercises are removed and mark day as completed if needed
-    const remainingExercises = await tx.trainingExercise.findMany({
-      where: {
-        dayId: todaysDay.id,
-      },
-    })
-
-    if (remainingExercises.length === 0) {
-      await tx.trainingDay.update({
-        where: { id: todaysDay.id },
-        data: { completedAt: null },
-      })
-    }
-
-    const allExercisesCompleted = remainingExercises.every(
-      (exercise) => exercise.completedAt,
-    )
-
-    if (allExercisesCompleted) {
-      await tx.trainingDay.update({
-        where: { id: todaysDay.id },
-        data: { completedAt: new Date() },
-      })
-    }
+  await prisma.trainingExercise.deleteMany({
+    where: {
+      dayId: day.id,
+    },
   })
 
   return true

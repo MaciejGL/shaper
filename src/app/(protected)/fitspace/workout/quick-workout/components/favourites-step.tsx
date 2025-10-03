@@ -92,7 +92,9 @@ export function FavouritesStep({
                   }}
                   iconEnd={<ChevronRight />}
                 >
-                  Start
+                  {isStarting && selectedFavouriteId === favourite.id
+                    ? 'Adding...'
+                    : 'Add to Today'}
                 </Button>
               </div>
             </CardHeader>

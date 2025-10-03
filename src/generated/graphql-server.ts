@@ -1107,8 +1107,8 @@ export type GQLMutation = {
   cancelCoaching: EntireFieldWrapper<Scalars['Boolean']['output']>;
   cancelCoachingRequest?: EntireFieldWrapper<Maybe<GQLCoachingRequest>>;
   cancelMeeting: EntireFieldWrapper<GQLMeeting>;
-  clearTodaysWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
   clearUserSessions: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  clearWorkoutDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   closePlan: EntireFieldWrapper<Scalars['Boolean']['output']>;
   completeCheckin: EntireFieldWrapper<GQLCheckinCompletion>;
   confirmMeeting: EntireFieldWrapper<GQLMeeting>;
@@ -1349,6 +1349,11 @@ export type GQLMutationCancelMeetingArgs = {
 
 export type GQLMutationClearUserSessionsArgs = {
   userId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationClearWorkoutDayArgs = {
+  dayId: Scalars['ID']['input'];
 };
 
 
@@ -4666,8 +4671,8 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   cancelCoaching?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   cancelCoachingRequest?: Resolver<Maybe<GQLResolversTypes['CoachingRequest']>, ParentType, ContextType, RequireFields<GQLMutationCancelCoachingRequestArgs, 'id'>>;
   cancelMeeting?: Resolver<GQLResolversTypes['Meeting'], ParentType, ContextType, RequireFields<GQLMutationCancelMeetingArgs, 'meetingId'>>;
-  clearTodaysWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   clearUserSessions?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationClearUserSessionsArgs, 'userId'>>;
+  clearWorkoutDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationClearWorkoutDayArgs, 'dayId'>>;
   closePlan?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationClosePlanArgs, 'planId'>>;
   completeCheckin?: Resolver<GQLResolversTypes['CheckinCompletion'], ParentType, ContextType, RequireFields<GQLMutationCompleteCheckinArgs, 'input'>>;
   confirmMeeting?: Resolver<GQLResolversTypes['Meeting'], ParentType, ContextType, RequireFields<GQLMutationConfirmMeetingArgs, 'meetingId'>>;

@@ -323,10 +323,6 @@ mutation FitspaceRemoveExerciseFromWorkout($exerciseId: ID!) {
   removeExerciseFromWorkout(exerciseId: $exerciseId)
 }
 
-mutation FitspaceClearTodaysWorkout {
-  clearTodaysWorkout
-}
-
 mutation FitspaceAddSet($exerciseId: ID!) {
   addSet(exerciseId: $exerciseId) {
     id

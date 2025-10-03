@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useUser } from '@/context/user-context'
@@ -52,9 +53,24 @@ export function QuickWorkout({
     isPending: isStartingFromFavourite,
   } = useStartWorkoutFromFavourite()
 
-  // Create workout mutation
+  // Create workout mutation with cache invalidation
+  const queryClient = useQueryClient()
   const { mutateAsync: createQuickWorkout, isPending: isCreatingWorkout } =
-    useFitspaceCreateQuickWorkoutMutation()
+    useFitspaceCreateQuickWorkoutMutation({
+      onSuccess: async () => {
+        // Invalidate all Quick Workout related queries to refresh the data
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: ['navigation'] }),
+          queryClient.invalidateQueries({
+            queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ['FitspaceGetQuickWorkoutDay'],
+          }),
+          queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
+        ])
+      },
+    })
 
   // Data fetching
   const { data: exercisesData } = useFitspaceGetExercisesQuery()

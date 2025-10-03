@@ -389,3 +389,8 @@ mutation FitspaceAddExercisesToQuickWorkout(
     }
   }
 }
+
+# Clear workout day by ID (remove all exercises from specified day)
+mutation FitspaceClearWorkoutDay($dayId: ID!) {
+  clearWorkoutDay(dayId: $dayId)
+}

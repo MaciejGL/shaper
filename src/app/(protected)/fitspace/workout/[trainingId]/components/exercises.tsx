@@ -18,6 +18,7 @@ import { formatWorkoutType } from '@/lib/workout/workout-type-to-label'
 
 import { QuickWorkout } from '../../quick-workout/quick-workout'
 
+import { ClearWorkoutModal } from './clear-workout-modal'
 import { Exercise } from './exercise'
 import { RestDay } from './rest-day'
 import { WorkoutActions } from './workout-actions'
@@ -27,9 +28,14 @@ interface ExercisesProps {
   previousDayLogs?: NonNullable<
     GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
   >['previousDayLogs']
+  isQuickWorkout?: boolean
 }
 
-export function Exercises({ day, previousDayLogs }: ExercisesProps) {
+export function Exercises({
+  day,
+  previousDayLogs,
+  isQuickWorkout = false,
+}: ExercisesProps) {
   const { preferences, setTrainingView } = useUserPreferences()
 
   const isActive = day?.exercises.some((ex) =>
@@ -46,74 +52,88 @@ export function Exercises({ day, previousDayLogs }: ExercisesProps) {
   useTrackWorkoutSession(day?.id, isActive, isCompleted)
   if (!day) return <div>No day data available</div>
 
-  const completedExercises = day.exercises.filter(
+  // Derived state
+  const exercises = day.exercises
+  const hasExercises = exercises.length > 0
+  const isEmptyWorkout = !hasExercises && !day.isRestDay
+  const hasNamedWorkoutType =
+    day.workoutType && day.workoutType !== GQLWorkoutType.Custom
+
+  const completedExercises = exercises.filter(
     (exercise) => exercise.completedAt,
   ).length
 
-  const completedSets = day.exercises.reduce((acc, exercise) => {
+  const completedSets = exercises.reduce((acc, exercise) => {
     return acc + exercise.sets.filter((set) => set.completedAt).length
   }, 0)
 
-  const totalSets = day.exercises.reduce((acc, exercise) => {
+  const totalSets = exercises.reduce((acc, exercise) => {
     return acc + exercise.sets.length
   }, 0)
 
-  const progressPercentage = (completedSets / totalSets) * 100
-  const exercises = day.exercises
+  const progressPercentage =
+    totalSets > 0 ? (completedSets / totalSets) * 100 : 0
 
-  const isEmptyQuickWorkout = day.exercises.length === 0 && !day.isRestDay
+  // Early returns for special states
+  if (day.isRestDay) {
+    return <RestDay />
+  }
 
+  if (isEmptyWorkout) {
+    return (
+      <div className="mt-4">
+        <QuickWorkout hideProgress={true} />
+      </div>
+    )
+  }
+
+  // Main workout view
   return (
     <div>
-      {!day.isRestDay && !isEmptyQuickWorkout && (
-        <div className="flex flex-col py-3 space-y-2 w-full">
-          <div className="grid grid-flow-col gap-2 bg-background">
-            {day.workoutType && day.workoutType !== GQLWorkoutType.Custom && (
-              <p className="text-lg">{formatWorkoutType(day.workoutType)}</p>
-            )}
+      <div className="flex flex-col py-3 space-y-2 w-full">
+        <div className="grid grid-flow-col gap-2 bg-background">
+          {hasNamedWorkoutType && (
+            <p className="text-lg">{formatWorkoutType(day.workoutType!)}</p>
+          )}
 
-            <Label className="flex items-center justify-center gap-2  whitespace-nowrap rounded-md p-1.5 bg-secondary dark:bg-muted-foreground/10 w-full">
-              <Switch
-                checked={preferences.trainingView === GQLTrainingView.Advanced}
-                onCheckedChange={() =>
-                  setTrainingView(
-                    preferences.trainingView === GQLTrainingView.Advanced
-                      ? GQLTrainingView.Simple
-                      : GQLTrainingView.Advanced,
-                  )
-                }
-              />
-              Logging Mode
-            </Label>
-
-            {exercises.length > 0 && (
-              <ExercisesCompleted
-                completedExercises={completedExercises}
-                totalExercises={exercises.length}
-              />
-            )}
-          </div>
-          {exercises.length > 0 && <Progress value={progressPercentage} />}
-        </div>
-      )}
-      {day.isRestDay ? <RestDay /> : null}
-      {isEmptyQuickWorkout ? (
-        <div className="mt-4">
-          <QuickWorkout hideProgress={true} />
-        </div>
-      ) : null}
-      {day.exercises.length > 0 && (
-        <div className="space-y-3">
-          {day.exercises.map((exercise) => (
-            <Exercise
-              key={exercise.id}
-              exercise={exercise}
-              previousDayLogs={previousDayLogs}
+          <Label className="flex items-center justify-center gap-2 whitespace-nowrap rounded-md p-1.5 bg-secondary dark:bg-muted-foreground/10 w-full">
+            <Switch
+              checked={preferences.trainingView === GQLTrainingView.Advanced}
+              onCheckedChange={() =>
+                setTrainingView(
+                  preferences.trainingView === GQLTrainingView.Advanced
+                    ? GQLTrainingView.Simple
+                    : GQLTrainingView.Advanced,
+                )
+              }
             />
-          ))}
-          <WorkoutActions />
+            Logging Mode
+          </Label>
+
+          <ExercisesCompleted
+            completedExercises={completedExercises}
+            totalExercises={exercises.length}
+          />
         </div>
-      )}
+        <Progress value={progressPercentage} />
+      </div>
+
+      <div className="space-y-3">
+        {exercises.map((exercise) => (
+          <Exercise
+            key={exercise.id}
+            exercise={exercise}
+            previousDayLogs={previousDayLogs}
+          />
+        ))}
+        <WorkoutActions />
+
+        {isQuickWorkout && day.id && (
+          <div className="pt-4">
+            <ClearWorkoutModal dayId={day.id} />
+          </div>
+        )}
+      </div>
     </div>
   )
 }

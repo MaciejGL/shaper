@@ -65,6 +65,7 @@ export function WorkoutPageClientNew({
   trainingId,
 }: WorkoutPageClientNewProps) {
   const [dayId] = useQueryState('day')
+  const isQuickWorkout = trainingId === 'quick-workout'
 
   return (
     <div>
@@ -75,7 +76,11 @@ export function WorkoutPageClientNew({
         />
       </Suspense>
       <Suspense fallback={<SkeletonExercises />}>
-        <WorkoutDay dayId={dayId} dayDataPromise={dayPromise} />
+        <WorkoutDay
+          dayId={dayId}
+          dayDataPromise={dayPromise}
+          isQuickWorkout={isQuickWorkout}
+        />
       </Suspense>
     </div>
   )
@@ -84,6 +89,7 @@ export function WorkoutPageClientNew({
 const WorkoutDay = ({
   dayId,
   dayDataPromise,
+  isQuickWorkout = false,
 }: {
   dayId: string | null
   dayDataPromise: Promise<
@@ -96,6 +102,7 @@ const WorkoutDay = ({
         error: string
       }
   >
+  isQuickWorkout?: boolean
 }) => {
   const { data: dayData } = use(dayDataPromise)
   const queryClient = useQueryClient()
@@ -200,6 +207,7 @@ const WorkoutDay = ({
                 dayDataQuery?.getWorkoutDay?.previousDayLogs ??
                 initialDay?.previousDayLogs
               }
+              isQuickWorkout={isQuickWorkout}
             />
           )
         )}

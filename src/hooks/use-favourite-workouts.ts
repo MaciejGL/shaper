@@ -63,36 +63,54 @@ export function useStartWorkoutFromFavourite() {
 
       // Parse the return format: planId|weekId|dayId
       const parts = data.startWorkoutFromFavourite.split('|')
-      let planId: string
 
-      if (parts.length === 3) {
-        planId = parts[0]
-      } else {
-        // Fallback to old format (just plan ID)
-        planId = data.startWorkoutFromFavourite
-      }
-
-      // Invalidate and wait for the specific workout query to refetch
-      await queryClient.invalidateQueries({
-        queryKey: ['FitspaceGetWorkout', { trainingId: planId }],
-      })
-      await queryClient.refetchQueries({
-        queryKey: ['FitspaceGetWorkout', { trainingId: planId }],
-      })
-
-      // Also invalidate other queries
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] }),
-        queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
-      ])
-
-      // Now navigate with fresh data guaranteed
       if (parts.length === 3) {
         const [, weekId, dayId] = parts
+
+        // Invalidate Quick Workout queries to ensure fresh data
+        await Promise.all([
+          // Invalidate navigation query (uses custom 'navigation' key in wrapper)
+          queryClient.invalidateQueries({
+            queryKey: ['navigation'],
+          }),
+          // Invalidate the specific day query
+          queryClient.invalidateQueries({
+            queryKey: ['FitspaceGetQuickWorkoutDay', { dayId }],
+          }),
+          // Invalidate other related queries
+          queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] }),
+          queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
+          queryClient.invalidateQueries({
+            queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+          }),
+        ])
+
+        // Prefetch the data before navigation to ensure it's ready
+        await Promise.all([
+          queryClient.refetchQueries({
+            queryKey: ['navigation'],
+          }),
+          queryClient.refetchQueries({
+            queryKey: ['FitspaceGetQuickWorkoutDay', { dayId }],
+          }),
+        ])
+
+        // Navigate with the correct week and day parameters
         router.push(
           `/fitspace/workout/quick-workout?week=${weekId}&day=${dayId}`,
         )
       } else {
+        // Fallback to old format (just plan ID) - shouldn't happen with new backend
+        const planId = data.startWorkoutFromFavourite
+
+        await Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: ['FitspaceGetWorkout', { trainingId: planId }],
+          }),
+          queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] }),
+          queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
+        ])
+
         router.push(`/fitspace/workout/quick-workout`)
       }
     },
