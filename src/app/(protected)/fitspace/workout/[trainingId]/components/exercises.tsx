@@ -134,10 +134,17 @@ export function Exercises({
           />
         ))}
         {isQuickWorkout && day.id && (
-          <div className="space-y-3 py-4">
-            <AddSingleExercise dayId={day.id} variant="button" />
-            <AddToFavouritesButton day={day} />
-            <ClearWorkoutModal dayId={day.id} />
+          <div className="grid grid-cols-2 gap-2 py-4">
+            <div className="col-span-full">
+              <AddSingleExercise dayId={day.id} variant="button" />
+            </div>
+
+            <div>
+              <ClearWorkoutModal dayId={day.id} />
+            </div>
+            <div>
+              <AddToFavouritesButton day={day} />
+            </div>
           </div>
         )}
         <WorkoutActions />
