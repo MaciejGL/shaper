@@ -102,7 +102,6 @@ function ExerciseCard({
   const { exercise, sets } = workoutExercise
   const firstImage = exercise.images?.at(0)
 
-  console.log(sets)
   // Handle drag start with proper event prevention
   const handleDragStart = (e: React.PointerEvent) => {
     e.preventDefault() // Prevent default browser behavior

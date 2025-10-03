@@ -21,6 +21,7 @@ import { cn } from '@/lib/utils'
 
 import { useWorkoutPrefetch } from '../hooks/use-workout-prefetch'
 
+import { getDefaultSelection } from './navigation-utils'
 import { NavigationDay, NavigationPlan } from './workout-page.client'
 
 interface NavigationProps {
@@ -130,50 +131,6 @@ function DaySelector({ plan }: { plan: NavigationPlan }) {
       ))}
     </div>
   )
-}
-
-// Helper function to determine default week and day selection
-export function getDefaultSelection(plan?: NavigationPlan) {
-  if (!plan) return { weekId: null, dayId: null }
-  if (!plan.weeks.length) return { weekId: null, dayId: null }
-
-  // Try to find the current week based on start date and schedule
-  const now = new Date()
-  const planStartDate = plan.startDate ? new Date(plan.startDate) : now
-
-  // Calculate which week we should be in based on plan start date
-  const daysSinceStart = Math.floor(
-    (now.getTime() - planStartDate.getTime()) / (1000 * 60 * 60 * 24),
-  )
-  const expectedWeekIndex = Math.max(0, Math.floor(daysSinceStart / 7))
-
-  // Find the appropriate week
-  let defaultWeek =
-    plan.weeks[Math.min(expectedWeekIndex, plan.weeks.length - 1)]
-
-  // If we calculated beyond available weeks, use the last week
-  if (!defaultWeek) {
-    defaultWeek = plan.weeks[plan.weeks.length - 1]
-  }
-
-  // Find the appropriate day in that week
-  // Convert JavaScript day to training system format
-  // JavaScript: 0=Sunday, 1=Monday, ..., 6=Saturday
-  // Training system: 0=Monday, 1=Tuesday, ..., 6=Sunday
-  const jsDay = now.getDay()
-  const trainingDay = jsDay === 0 ? 6 : jsDay - 1
-  let defaultDay = defaultWeek.days.find((day) => day.dayOfWeek === trainingDay)
-
-  // If no matching day, find the first non-completed day, or first day
-  if (!defaultDay) {
-    defaultDay =
-      defaultWeek.days.find((day) => !day.completedAt) || defaultWeek.days[0]
-  }
-
-  return {
-    weekId: defaultWeek.id,
-    dayId: defaultDay?.id || null,
-  }
 }
 
 function WeekSelector({ plan }: { plan: NavigationPlan }) {

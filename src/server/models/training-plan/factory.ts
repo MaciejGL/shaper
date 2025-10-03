@@ -49,6 +49,7 @@ import TrainingDay from '../training-day/model'
 import { duplicatePlan, getFullPlanById } from '../training-utils.server'
 
 import TrainingPlan from './model'
+import { ensureQuickWorkoutWeeks } from './quick-workout-utils'
 
 export async function getTrainingPlanById(
   args: GQLQueryGetTrainingPlanByIdArgs,
@@ -2196,6 +2197,422 @@ export async function getWorkoutDay(
   const seenBaseIds = new Set<string>()
   const previousExercises = allPreviousExercises.filter((exercise) => {
     if (!exercise.baseId || seenBaseIds.has(exercise.baseId)) {
+      return false
+    }
+    if (exercise.sets.length === 0) {
+      return false
+    }
+    if (
+      exercise.sets.every(
+        (set) => set.log?.reps === null && set.log?.weight === null,
+      )
+    ) {
+      return false
+    }
+    seenBaseIds.add(exercise.baseId)
+    return true
+  })
+
+  await cache.set(cacheKey, previousExercises)
+  const previousLogsByExerciseName =
+    await getPreviousLogsByExerciseName(previousExercises)
+
+  return {
+    day: new TrainingDay(day, context),
+    previousDayLogs: previousLogsByExerciseName,
+  }
+}
+
+export async function getQuickWorkoutNavigation(context: GQLContext) {
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  // Find user's Quick Workout plan
+  const quickWorkoutPlan = await prisma.trainingPlan.findFirst({
+    where: {
+      assignedToId: user.user.id,
+      createdById: user.user.id,
+    },
+    select: { id: true },
+  })
+
+  if (!quickWorkoutPlan) {
+    return null
+  }
+
+  // Ensure current week + buffer exist
+  await ensureQuickWorkoutWeeks(quickWorkoutPlan.id, 4)
+
+  // Fetch plan with navigation data (lightweight query)
+  const plan = await prisma.trainingPlan.findUnique({
+    where: { id: quickWorkoutPlan.id },
+    include: {
+      weeks: {
+        orderBy: { weekNumber: 'asc' },
+        include: {
+          days: {
+            orderBy: { dayOfWeek: 'asc' },
+            select: {
+              id: true,
+              dayOfWeek: true,
+              isRestDay: true,
+              completedAt: true,
+              scheduledAt: true,
+              exercises: {
+                select: {
+                  id: true,
+                  completedAt: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!plan) {
+    console.warn(
+      '⚠️ getQuickWorkoutNavigation: Plan not found after ensureQuickWorkoutWeeks',
+    )
+    return null
+  }
+
+  const result = {
+    plan: new TrainingPlan(plan, context),
+  }
+
+  console.info('✅ getQuickWorkoutNavigation returning:', {
+    planId: plan.id,
+    weeksCount: plan.weeks.length,
+    firstWeekDaysCount: plan.weeks[0]?.days?.length,
+  })
+
+  return result
+}
+
+export async function getQuickWorkoutDay(
+  args: GQLQueryGetWorkoutDayArgs,
+  context: GQLContext,
+) {
+  const { dayId } = args
+  const user = context.user
+  if (!user) {
+    throw new GraphQLError('User not found')
+  }
+
+  // Find user's Quick Workout plan
+  const quickWorkoutPlan = await prisma.trainingPlan.findFirst({
+    where: {
+      assignedToId: user.user.id,
+      createdById: user.user.id,
+    },
+    select: { id: true },
+  })
+
+  console.info('quickWorkoutPlan', quickWorkoutPlan)
+  if (!quickWorkoutPlan) {
+    throw new GraphQLError('Quick workout not found')
+  }
+
+  // Ensure current week + buffer exist
+  await ensureQuickWorkoutWeeks(quickWorkoutPlan.id, 4)
+
+  // Debug: Check what weeks exist
+  const weeksDebug = await prisma.trainingWeek.findMany({
+    where: { planId: quickWorkoutPlan.id },
+    select: {
+      id: true,
+      weekNumber: true,
+      scheduledAt: true,
+      days: {
+        select: {
+          id: true,
+          dayOfWeek: true,
+          scheduledAt: true,
+        },
+      },
+    },
+    orderBy: { weekNumber: 'asc' },
+  })
+  console.info(
+    '📊 Weeks in database:',
+    weeksDebug.map((w) => ({
+      weekNumber: w.weekNumber,
+      scheduledAt: w.scheduledAt?.toISOString(),
+      daysCount: w.days.length,
+      dayOfWeeks: w.days.map((d) => d.dayOfWeek),
+    })),
+  )
+
+  let day
+
+  if (dayId) {
+    // Direct lookup by dayId
+    day = await prisma.trainingDay.findUnique({
+      where: { id: dayId },
+      include: {
+        week: {
+          include: {
+            plan: {
+              select: {
+                id: true,
+                assignedToId: true,
+                createdById: true,
+                active: true,
+                weeks: {
+                  select: {
+                    weekNumber: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        exercises: {
+          orderBy: { order: 'asc' },
+          include: {
+            substitutedBy: {
+              include: {
+                base: {
+                  include: {
+                    muscleGroups: true,
+                  },
+                },
+                sets: {
+                  include: { log: true },
+                  orderBy: { order: 'asc' },
+                },
+              },
+            },
+            substitutes: true,
+            base: {
+              include: {
+                images: true,
+                muscleGroups: true,
+                substitutes: {
+                  include: {
+                    substitute: true,
+                  },
+                },
+              },
+            },
+            logs: true,
+            sets: {
+              include: { log: true },
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
+      },
+    })
+  } else {
+    // Find today's day by dayOfWeek in current week
+    const todayDayOfWeek = (new Date().getUTCDay() + 6) % 7
+    const weekStart = getWeekStartUTC(new Date(), 'UTC', 1)
+
+    console.info('🔍 Looking for day:', {
+      planId: quickWorkoutPlan.id,
+      weekStart: weekStart.toISOString(),
+      todayDayOfWeek,
+    })
+
+    // Find week by date range instead of exact timestamp to handle timezone differences
+    const weekEnd = new Date(weekStart)
+    weekEnd.setUTCDate(weekEnd.getUTCDate() + 7)
+
+    day = await prisma.trainingDay.findFirst({
+      where: {
+        week: {
+          planId: quickWorkoutPlan.id,
+          scheduledAt: {
+            gte: weekStart,
+            lt: weekEnd,
+          },
+        },
+        dayOfWeek: todayDayOfWeek,
+      },
+      include: {
+        week: {
+          include: {
+            plan: {
+              select: {
+                id: true,
+                assignedToId: true,
+                createdById: true,
+                active: true,
+                weeks: {
+                  select: {
+                    weekNumber: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        exercises: {
+          orderBy: { order: 'asc' },
+          include: {
+            substitutedBy: {
+              include: {
+                base: {
+                  include: {
+                    muscleGroups: true,
+                  },
+                },
+                sets: {
+                  include: { log: true },
+                  orderBy: { order: 'asc' },
+                },
+              },
+            },
+            substitutes: true,
+            base: {
+              include: {
+                images: true,
+                muscleGroups: true,
+                substitutes: {
+                  include: {
+                    substitute: true,
+                  },
+                },
+              },
+            },
+            logs: true,
+            sets: {
+              include: { log: true },
+              orderBy: { order: 'asc' },
+            },
+          },
+        },
+      },
+    })
+  }
+
+  console.info('day', day ? `Found day ${day.id}` : 'null')
+
+  if (!day) {
+    throw new GraphQLError('Day not found')
+  }
+
+  console.info('✅ Found day:', {
+    dayId: day.id,
+    dayOfWeek: day.dayOfWeek,
+    exercisesCount: day.exercises.length,
+  })
+
+  // Verify access
+  const plan = day.week.plan
+  if (plan.assignedToId !== user.user.id || plan.createdById !== user.user.id) {
+    throw new GraphQLError('Access denied')
+  }
+
+  // Fetch previous exercise logs
+  const currentWeekNumber = day.week.weekNumber
+  const currentDayOfWeek = day.dayOfWeek
+
+  const exerciseBaseIds = day.exercises
+    .map((ex) => ex.baseId)
+    .filter((baseId) => baseId !== null)
+  const exerciseIds = day.exercises.map((ex) => ex.id)
+
+  const cacheKey = cache.keys.exercises.previousExercises(plan.id, day.id)
+
+  const cached = await cache.get<
+    Prisma.TrainingExerciseGetPayload<{
+      select: {
+        id: true
+        name: true
+        baseId: true
+        completedAt: true
+        sets: {
+          include: {
+            log: true
+          }
+        }
+        day: {
+          select: {
+            week: {
+              select: {
+                weekNumber: true
+              }
+            }
+            dayOfWeek: true
+          }
+        }
+      }
+    }>[]
+  >(cacheKey)
+
+  if (cached) {
+    return {
+      day: new TrainingDay(day, context),
+      previousDayLogs: await getPreviousLogsByExerciseName(cached),
+    }
+  }
+
+  // Find all previous exercises with matching baseIds
+  const allPreviousExercises = await prisma.trainingExercise.findMany({
+    where: {
+      baseId: { in: exerciseBaseIds },
+      id: { notIn: exerciseIds },
+      completedAt: { not: null },
+      day: {
+        OR: [
+          // Previous weeks
+          {
+            week: {
+              planId: plan.id,
+              weekNumber: { lt: currentWeekNumber },
+            },
+          },
+          // Same week, earlier days
+          {
+            week: {
+              planId: plan.id,
+              weekNumber: currentWeekNumber,
+            },
+            dayOfWeek: { lt: currentDayOfWeek },
+          },
+        ],
+      },
+    },
+    select: {
+      id: true,
+      name: true,
+      baseId: true,
+      completedAt: true,
+      sets: {
+        include: {
+          log: true,
+        },
+      },
+      day: {
+        select: {
+          week: {
+            select: {
+              weekNumber: true,
+            },
+          },
+          dayOfWeek: true,
+        },
+      },
+    },
+    orderBy: [
+      { day: { week: { weekNumber: 'desc' } } },
+      { day: { dayOfWeek: 'desc' } },
+    ],
+  })
+
+  // Group by baseId and keep only the most recent occurrence
+  const seenBaseIds = new Set<string>()
+  const previousExercises = allPreviousExercises.filter((exercise) => {
+    if (!exercise.baseId) {
+      return false
+    }
+    if (seenBaseIds.has(exercise.baseId)) {
       return false
     }
     if (exercise.sets.length === 0) {

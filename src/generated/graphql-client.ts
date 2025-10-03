@@ -2242,6 +2242,8 @@ export type GQLQuery = {
   getOrCreateChat: GQLChat;
   getPackageTemplate?: Maybe<GQLPackageTemplate>;
   getPublicTrainingPlans: Array<GQLTrainingPlan>;
+  getQuickWorkoutDay?: Maybe<GQLGetWorkoutDayPayload>;
+  getQuickWorkoutNavigation?: Maybe<GQLGetWorkoutNavigationPayload>;
   getQuickWorkoutPlan: GQLTrainingPlan;
   getServiceDeliveryMeetings: Array<GQLMeeting>;
   getServiceDeliveryTasks: Array<GQLServiceTask>;
@@ -2428,6 +2430,11 @@ export type GQLQueryGetPackageTemplateArgs = {
 
 export type GQLQueryGetPublicTrainingPlansArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQueryGetQuickWorkoutDayArgs = {
+  dayId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -4100,6 +4107,18 @@ export type GQLFitspaceSwapExerciseMutationVariables = Exact<{
 
 export type GQLFitspaceSwapExerciseMutation = { __typename?: 'Mutation', swapExercise: { __typename?: 'Substitute', id: string } };
 
+export type GQLFitspaceGetQuickWorkoutNavigationQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GQLFitspaceGetQuickWorkoutNavigationQuery = { __typename?: 'Query', getQuickWorkoutNavigation?: { __typename?: 'GetWorkoutNavigationPayload', plan: { __typename?: 'TrainingPlan', id: string, title: string, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, completedAt?: string | undefined | null }> }> }> } } | undefined | null };
+
+export type GQLFitspaceGetQuickWorkoutDayQueryVariables = Exact<{
+  dayId?: InputMaybe<Scalars['ID']['input']>;
+}>;
+
+
+export type GQLFitspaceGetQuickWorkoutDayQuery = { __typename?: 'Query', getQuickWorkoutDay?: { __typename?: 'GetWorkoutDayPayload', day: { __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, workoutType?: GQLWorkoutType | undefined | null, startedAt?: string | undefined | null, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, duration?: number | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, restSeconds?: number | undefined | null, tempo?: string | undefined | null, warmupSets?: number | undefined | null, description?: string | undefined | null, tips?: Array<string> | undefined | null, difficulty?: string | undefined | null, instructions?: Array<string> | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, order: number, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, isExtra: boolean, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, order: number }>, substitutedBy?: { __typename?: 'Substitute', id: string, name: string, instructions?: Array<string> | undefined | null, additionalInstructions?: string | undefined | null, type?: GQLExerciseType | undefined | null, videoUrl?: string | undefined | null, completedAt?: string | undefined | null, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> } | undefined | null, substitutes: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, substitute: { __typename?: 'BaseExercise', id: string, name: string } }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null, isExtra: boolean, completedAt?: string | undefined | null, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, rpe?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> }> }, previousDayLogs: Array<{ __typename?: 'PreviousExerciseLog', id: string, exerciseName: string, baseId?: string | undefined | null, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, log?: { __typename?: 'ExerciseSetLog', id: string, weight?: number | undefined | null, reps?: number | undefined | null, createdAt: string } | undefined | null }> }> } | undefined | null };
+
 export type GQLQuickWorkoutExercisesQueryVariables = Exact<{
   where?: InputMaybe<GQLExerciseWhereInput>;
 }>;
@@ -4110,7 +4129,7 @@ export type GQLQuickWorkoutExercisesQuery = { __typename?: 'Query', publicExerci
 export type GQLFitspaceGetUserQuickWorkoutPlanQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLFitspaceGetUserQuickWorkoutPlanQuery = { __typename?: 'Query', getQuickWorkoutPlan: { __typename?: 'TrainingPlan', id: string, title: string, weeks: Array<{ __typename?: 'TrainingWeek', id: string, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, order: number, completedAt?: string | undefined | null, equipment?: GQLEquipment | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
+export type GQLFitspaceGetUserQuickWorkoutPlanQuery = { __typename?: 'Query', getQuickWorkoutPlan: { __typename?: 'TrainingPlan', id: string, title: string, startDate?: string | undefined | null, weeks: Array<{ __typename?: 'TrainingWeek', id: string, weekNumber: number, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, days: Array<{ __typename?: 'TrainingDay', id: string, dayOfWeek: number, isRestDay: boolean, completedAt?: string | undefined | null, scheduledAt?: string | undefined | null, exercises: Array<{ __typename?: 'TrainingExercise', id: string, name: string, baseId?: string | undefined | null, order: number, completedAt?: string | undefined | null, equipment?: GQLEquipment | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, alias?: string | undefined | null, groupSlug: string }>, sets: Array<{ __typename?: 'ExerciseSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> }> }> } };
 
 export type GQLFitspaceCreateQuickWorkoutMutationVariables = Exact<{
   input: GQLCreateQuickWorkoutInput;
@@ -8751,6 +8770,233 @@ useFitspaceSwapExerciseMutation.getKey = () => ['FitspaceSwapExercise'];
 
 useFitspaceSwapExerciseMutation.fetcher = (variables: GQLFitspaceSwapExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceSwapExerciseMutation, GQLFitspaceSwapExerciseMutationVariables>(FitspaceSwapExerciseDocument, variables, options);
 
+export const FitspaceGetQuickWorkoutNavigationDocument = `
+    query FitspaceGetQuickWorkoutNavigation {
+  getQuickWorkoutNavigation {
+    plan {
+      id
+      title
+      startDate
+      weeks {
+        id
+        weekNumber
+        completedAt
+        scheduledAt
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          completedAt
+          scheduledAt
+          exercises {
+            id
+            completedAt
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+export const useFitspaceGetQuickWorkoutNavigationQuery = <
+      TData = GQLFitspaceGetQuickWorkoutNavigationQuery,
+      TError = unknown
+    >(
+      variables?: GQLFitspaceGetQuickWorkoutNavigationQueryVariables,
+      options?: Omit<UseQueryOptions<GQLFitspaceGetQuickWorkoutNavigationQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitspaceGetQuickWorkoutNavigationQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLFitspaceGetQuickWorkoutNavigationQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['FitspaceGetQuickWorkoutNavigation'] : ['FitspaceGetQuickWorkoutNavigation', variables],
+    queryFn: fetchData<GQLFitspaceGetQuickWorkoutNavigationQuery, GQLFitspaceGetQuickWorkoutNavigationQueryVariables>(FitspaceGetQuickWorkoutNavigationDocument, variables),
+    ...options
+  }
+    )};
+
+useFitspaceGetQuickWorkoutNavigationQuery.getKey = (variables?: GQLFitspaceGetQuickWorkoutNavigationQueryVariables) => variables === undefined ? ['FitspaceGetQuickWorkoutNavigation'] : ['FitspaceGetQuickWorkoutNavigation', variables];
+
+export const useInfiniteFitspaceGetQuickWorkoutNavigationQuery = <
+      TData = InfiniteData<GQLFitspaceGetQuickWorkoutNavigationQuery>,
+      TError = unknown
+    >(
+      variables: GQLFitspaceGetQuickWorkoutNavigationQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLFitspaceGetQuickWorkoutNavigationQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitspaceGetQuickWorkoutNavigationQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLFitspaceGetQuickWorkoutNavigationQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['FitspaceGetQuickWorkoutNavigation.infinite'] : ['FitspaceGetQuickWorkoutNavigation.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLFitspaceGetQuickWorkoutNavigationQuery, GQLFitspaceGetQuickWorkoutNavigationQueryVariables>(FitspaceGetQuickWorkoutNavigationDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteFitspaceGetQuickWorkoutNavigationQuery.getKey = (variables?: GQLFitspaceGetQuickWorkoutNavigationQueryVariables) => variables === undefined ? ['FitspaceGetQuickWorkoutNavigation.infinite'] : ['FitspaceGetQuickWorkoutNavigation.infinite', variables];
+
+
+useFitspaceGetQuickWorkoutNavigationQuery.fetcher = (variables?: GQLFitspaceGetQuickWorkoutNavigationQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetQuickWorkoutNavigationQuery, GQLFitspaceGetQuickWorkoutNavigationQueryVariables>(FitspaceGetQuickWorkoutNavigationDocument, variables, options);
+
+export const FitspaceGetQuickWorkoutDayDocument = `
+    query FitspaceGetQuickWorkoutDay($dayId: ID) {
+  getQuickWorkoutDay(dayId: $dayId) {
+    day {
+      id
+      dayOfWeek
+      isRestDay
+      workoutType
+      startedAt
+      completedAt
+      scheduledAt
+      duration
+      exercises {
+        id
+        name
+        baseId
+        restSeconds
+        tempo
+        warmupSets
+        description
+        tips
+        difficulty
+        instructions
+        additionalInstructions
+        type
+        order
+        videoUrl
+        images {
+          id
+          thumbnail
+          medium
+          order
+        }
+        completedAt
+        isExtra
+        substitutedBy {
+          id
+          name
+          instructions
+          additionalInstructions
+          type
+          videoUrl
+          completedAt
+          baseId
+          sets {
+            id
+            order
+            reps
+            minReps
+            maxReps
+            weight
+            rpe
+            isExtra
+            completedAt
+            log {
+              id
+              weight
+              rpe
+              reps
+              createdAt
+            }
+          }
+        }
+        substitutes {
+          id
+          substitute {
+            id
+            name
+          }
+        }
+        muscleGroups {
+          id
+          alias
+          groupSlug
+        }
+        sets {
+          id
+          order
+          reps
+          minReps
+          maxReps
+          weight
+          rpe
+          isExtra
+          completedAt
+          log {
+            id
+            weight
+            rpe
+            reps
+            createdAt
+          }
+        }
+      }
+    }
+    previousDayLogs {
+      id
+      exerciseName
+      baseId
+      sets {
+        id
+        order
+        log {
+          id
+          weight
+          reps
+          createdAt
+        }
+      }
+    }
+  }
+}
+    `;
+
+export const useFitspaceGetQuickWorkoutDayQuery = <
+      TData = GQLFitspaceGetQuickWorkoutDayQuery,
+      TError = unknown
+    >(
+      variables?: GQLFitspaceGetQuickWorkoutDayQueryVariables,
+      options?: Omit<UseQueryOptions<GQLFitspaceGetQuickWorkoutDayQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLFitspaceGetQuickWorkoutDayQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLFitspaceGetQuickWorkoutDayQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['FitspaceGetQuickWorkoutDay'] : ['FitspaceGetQuickWorkoutDay', variables],
+    queryFn: fetchData<GQLFitspaceGetQuickWorkoutDayQuery, GQLFitspaceGetQuickWorkoutDayQueryVariables>(FitspaceGetQuickWorkoutDayDocument, variables),
+    ...options
+  }
+    )};
+
+useFitspaceGetQuickWorkoutDayQuery.getKey = (variables?: GQLFitspaceGetQuickWorkoutDayQueryVariables) => variables === undefined ? ['FitspaceGetQuickWorkoutDay'] : ['FitspaceGetQuickWorkoutDay', variables];
+
+export const useInfiniteFitspaceGetQuickWorkoutDayQuery = <
+      TData = InfiniteData<GQLFitspaceGetQuickWorkoutDayQuery>,
+      TError = unknown
+    >(
+      variables: GQLFitspaceGetQuickWorkoutDayQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLFitspaceGetQuickWorkoutDayQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLFitspaceGetQuickWorkoutDayQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLFitspaceGetQuickWorkoutDayQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['FitspaceGetQuickWorkoutDay.infinite'] : ['FitspaceGetQuickWorkoutDay.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLFitspaceGetQuickWorkoutDayQuery, GQLFitspaceGetQuickWorkoutDayQueryVariables>(FitspaceGetQuickWorkoutDayDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteFitspaceGetQuickWorkoutDayQuery.getKey = (variables?: GQLFitspaceGetQuickWorkoutDayQueryVariables) => variables === undefined ? ['FitspaceGetQuickWorkoutDay.infinite'] : ['FitspaceGetQuickWorkoutDay.infinite', variables];
+
+
+useFitspaceGetQuickWorkoutDayQuery.fetcher = (variables?: GQLFitspaceGetQuickWorkoutDayQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetQuickWorkoutDayQuery, GQLFitspaceGetQuickWorkoutDayQueryVariables>(FitspaceGetQuickWorkoutDayDocument, variables, options);
+
 export const QuickWorkoutExercisesDocument = `
     query QuickWorkoutExercises($where: ExerciseWhereInput) {
   publicExercises(where: $where) {
@@ -8856,13 +9102,17 @@ export const FitspaceGetUserQuickWorkoutPlanDocument = `
   getQuickWorkoutPlan {
     id
     title
+    startDate
     weeks {
       id
+      weekNumber
+      completedAt
       scheduledAt
       days {
         id
         dayOfWeek
         isRestDay
+        completedAt
         scheduledAt
         exercises {
           id

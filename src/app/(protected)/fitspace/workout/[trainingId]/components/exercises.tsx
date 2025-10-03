@@ -61,9 +61,11 @@ export function Exercises({ day, previousDayLogs }: ExercisesProps) {
   const progressPercentage = (completedSets / totalSets) * 100
   const exercises = day.exercises
 
+  const isEmptyQuickWorkout = day.exercises.length === 0 && !day.isRestDay
+
   return (
     <div>
-      {!day.isRestDay && (
+      {!day.isRestDay && !isEmptyQuickWorkout && (
         <div className="flex flex-col py-3 space-y-2 w-full">
           <div className="grid grid-flow-col gap-2 bg-background">
             {day.workoutType && day.workoutType !== GQLWorkoutType.Custom && (
@@ -95,8 +97,10 @@ export function Exercises({ day, previousDayLogs }: ExercisesProps) {
         </div>
       )}
       {day.isRestDay ? <RestDay /> : null}
-      {day.exercises.length === 0 && !day.isRestDay ? (
-        <QuickWorkout hideProgress={true} />
+      {isEmptyQuickWorkout ? (
+        <div className="mt-4">
+          <QuickWorkout hideProgress={true} />
+        </div>
       ) : null}
       {day.exercises.length > 0 && (
         <div className="space-y-3">

@@ -2244,6 +2244,8 @@ export type GQLQuery = {
   getOrCreateChat: EntireFieldWrapper<GQLChat>;
   getPackageTemplate?: EntireFieldWrapper<Maybe<GQLPackageTemplate>>;
   getPublicTrainingPlans: EntireFieldWrapper<Array<GQLTrainingPlan>>;
+  getQuickWorkoutDay?: EntireFieldWrapper<Maybe<GQLGetWorkoutDayPayload>>;
+  getQuickWorkoutNavigation?: EntireFieldWrapper<Maybe<GQLGetWorkoutNavigationPayload>>;
   getQuickWorkoutPlan: EntireFieldWrapper<GQLTrainingPlan>;
   getServiceDeliveryMeetings: EntireFieldWrapper<Array<GQLMeeting>>;
   getServiceDeliveryTasks: EntireFieldWrapper<Array<GQLServiceTask>>;
@@ -2430,6 +2432,11 @@ export type GQLQueryGetPackageTemplateArgs = {
 
 export type GQLQueryGetPublicTrainingPlansArgs = {
   limit?: InputMaybe<Scalars['Int']['input']>;
+};
+
+
+export type GQLQueryGetQuickWorkoutDayArgs = {
+  dayId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -5034,6 +5041,8 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   getOrCreateChat?: Resolver<GQLResolversTypes['Chat'], ParentType, ContextType, RequireFields<GQLQueryGetOrCreateChatArgs, 'partnerId'>>;
   getPackageTemplate?: Resolver<Maybe<GQLResolversTypes['PackageTemplate']>, ParentType, ContextType, RequireFields<GQLQueryGetPackageTemplateArgs, 'id'>>;
   getPublicTrainingPlans?: Resolver<Array<GQLResolversTypes['TrainingPlan']>, ParentType, ContextType, Partial<GQLQueryGetPublicTrainingPlansArgs>>;
+  getQuickWorkoutDay?: Resolver<Maybe<GQLResolversTypes['GetWorkoutDayPayload']>, ParentType, ContextType, Partial<GQLQueryGetQuickWorkoutDayArgs>>;
+  getQuickWorkoutNavigation?: Resolver<Maybe<GQLResolversTypes['GetWorkoutNavigationPayload']>, ParentType, ContextType>;
   getQuickWorkoutPlan?: Resolver<GQLResolversTypes['TrainingPlan'], ParentType, ContextType>;
   getServiceDeliveryMeetings?: Resolver<Array<GQLResolversTypes['Meeting']>, ParentType, ContextType, RequireFields<GQLQueryGetServiceDeliveryMeetingsArgs, 'serviceDeliveryId'>>;
   getServiceDeliveryTasks?: Resolver<Array<GQLResolversTypes['ServiceTask']>, ParentType, ContextType, RequireFields<GQLQueryGetServiceDeliveryTasksArgs, 'serviceDeliveryId'>>;

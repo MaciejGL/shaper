@@ -19,7 +19,7 @@ import { useKeyboardVisible } from '@/hooks/use-keyboard-visible'
 import { tryOpenAppDeepLink } from '@/lib/deep-links'
 import { cn } from '@/lib/utils'
 
-import { getDefaultSelection } from '../workout/[trainingId]/components/navigation'
+import { getDefaultSelection } from '../workout/[trainingId]/components/navigation-utils'
 
 export function MobileNav() {
   const pathname = usePathname()

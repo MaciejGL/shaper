@@ -1,3 +1,144 @@
+# Get Quick Workout navigation
+query FitspaceGetQuickWorkoutNavigation {
+  getQuickWorkoutNavigation {
+    plan {
+      id
+      title
+      startDate
+      weeks {
+        id
+        weekNumber
+        completedAt
+        scheduledAt
+        days {
+          id
+          dayOfWeek
+          isRestDay
+          completedAt
+          scheduledAt
+          exercises {
+            id
+            completedAt
+          }
+        }
+      }
+    }
+  }
+}
+
+# Get Quick Workout day
+query FitspaceGetQuickWorkoutDay($dayId: ID) {
+  getQuickWorkoutDay(dayId: $dayId) {
+    day {
+      id
+      dayOfWeek
+      isRestDay
+      workoutType
+      startedAt
+      completedAt
+      scheduledAt
+      duration
+      exercises {
+        id
+        name
+        baseId
+        restSeconds
+        tempo
+        warmupSets
+        description
+        tips
+        difficulty
+        instructions
+        additionalInstructions
+        type
+        order
+        videoUrl
+        images {
+          id
+          thumbnail
+          medium
+          order
+        }
+        completedAt
+        isExtra
+        substitutedBy {
+          id
+          name
+          instructions
+          additionalInstructions
+          type
+          videoUrl
+          completedAt
+          baseId
+          sets {
+            id
+            order
+            reps
+            minReps
+            maxReps
+            weight
+            rpe
+            isExtra
+            completedAt
+            log {
+              id
+              weight
+              rpe
+              reps
+              createdAt
+            }
+          }
+        }
+        substitutes {
+          id
+          substitute {
+            id
+            name
+          }
+        }
+        muscleGroups {
+          id
+          alias
+          groupSlug
+        }
+        sets {
+          id
+          order
+          reps
+          minReps
+          maxReps
+          weight
+          rpe
+          isExtra
+          completedAt
+          log {
+            id
+            weight
+            rpe
+            reps
+            createdAt
+          }
+        }
+      }
+    }
+    previousDayLogs {
+      id
+      exerciseName
+      baseId
+      sets {
+        id
+        order
+        log {
+          id
+          weight
+          reps
+          createdAt
+        }
+      }
+    }
+  }
+}
+
 # Get public exercises only - clients can't access user exercises
 query QuickWorkoutExercises($where: ExerciseWhereInput) {
   publicExercises(where: $where) {
@@ -61,14 +202,18 @@ query FitspaceGetUserQuickWorkoutPlan {
   getQuickWorkoutPlan {
     id
     title
+    startDate
 
     weeks {
       id
+      weekNumber
+      completedAt
       scheduledAt
       days {
         id
         dayOfWeek
         isRestDay
+        completedAt
         scheduledAt
         exercises {
           id

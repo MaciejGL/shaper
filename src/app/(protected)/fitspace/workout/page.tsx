@@ -32,19 +32,18 @@ export default async function SessionPage() {
     },
   })
 
-  const quickWorkoutId = activePlans.find(
+  const quickWorkout = activePlans.find(
     (plan) => plan.assignedToId === userId && plan.createdById === userId,
   )
   const trainingFromTrainer = activePlans.find(
     (plan) => plan.assignedToId === userId && plan.createdById !== userId,
   )
 
-  console.log({ quickWorkoutId, trainingFromTrainer, activePlans })
-
+  // Priority: Trainer-assigned plan > Quick Workout > My Plans
   if (trainingFromTrainer) {
     return redirect(`/fitspace/workout/${trainingFromTrainer.id}`)
-  } else if (quickWorkoutId) {
-    return redirect(`/fitspace/workout/${quickWorkoutId.id}`)
+  } else if (quickWorkout) {
+    return redirect('/fitspace/workout/quick-workout')
   } else {
     return redirect('/fitspace/my-plans')
   }

@@ -63,6 +63,7 @@ export function FavouritesStep({
       <div className="space-y-3">
         {favourites.map((favourite: FavouriteWorkout) => (
           <Card
+            borderless
             key={favourite.id}
             className={`cursor-pointer transition-all ${
               selectedFavouriteId === favourite.id

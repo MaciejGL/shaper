@@ -89,9 +89,11 @@ export function useStartWorkoutFromFavourite() {
       // Now navigate with fresh data guaranteed
       if (parts.length === 3) {
         const [, weekId, dayId] = parts
-        router.push(`/fitspace/workout/${planId}?week=${weekId}&day=${dayId}`)
+        router.push(
+          `/fitspace/workout/quick-workout?week=${weekId}&day=${dayId}`,
+        )
       } else {
-        router.push(`/fitspace/workout/${planId}`)
+        router.push(`/fitspace/workout/quick-workout`)
       }
     },
   })

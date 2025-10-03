@@ -6,6 +6,7 @@ import { Suspense, use, useMemo } from 'react'
 
 import { WorkoutProvider } from '@/context/workout-context/workout-context'
 import {
+  GQLFitspaceGetQuickWorkoutDayQuery,
   GQLFitspaceGetWorkoutDayQuery,
   GQLFitspaceGetWorkoutNavigationQuery,
   useFitspaceGetWorkoutDayQuery,
@@ -30,6 +31,10 @@ export type WorkoutDayData = NonNullable<
   GQLFitspaceGetWorkoutDayQuery['getWorkoutDay']
 >['day']
 
+type DayData =
+  | GQLFitspaceGetWorkoutDayQuery
+  | GQLFitspaceGetQuickWorkoutDayQuery
+
 type WorkoutPageClientNewProps = {
   navigationPromise: Promise<
     | {
@@ -43,7 +48,7 @@ type WorkoutPageClientNewProps = {
   >
   dayPromise: Promise<
     | {
-        data: GQLFitspaceGetWorkoutDayQuery
+        data: DayData
         error: null
       }
     | {
@@ -83,7 +88,7 @@ const WorkoutDay = ({
   dayId: string | null
   dayDataPromise: Promise<
     | {
-        data: GQLFitspaceGetWorkoutDayQuery
+        data: DayData
         error: null
       }
     | {
@@ -94,6 +99,12 @@ const WorkoutDay = ({
 }) => {
   const { data: dayData } = use(dayDataPromise)
   const queryClient = useQueryClient()
+
+  // Handle both getWorkoutDay (trainer plans) and getQuickWorkoutDay (quick workouts)
+  const initialDay =
+    'getWorkoutDay' in (dayData ?? {})
+      ? (dayData as GQLFitspaceGetWorkoutDayQuery).getWorkoutDay
+      : (dayData as GQLFitspaceGetQuickWorkoutDayQuery).getQuickWorkoutDay
 
   const navigationData =
     queryClient.getQueryData<GQLFitspaceGetWorkoutNavigationQuery>([
@@ -113,13 +124,12 @@ const WorkoutDay = ({
   // Check if we have any data (initial or cached) for the current dayId
   const hasDataForCurrentDay = useMemo(() => {
     if (isRestDay) return true // Rest days are always available (hardcoded)
-    const hasInitialData =
-      dayData?.getWorkoutDay?.day?.id === dayId && dayData?.getWorkoutDay
+    const hasInitialData = initialDay?.day?.id === dayId && initialDay
     const hasCachedData =
       dayId &&
       queryClient.getQueryData(useFitspaceGetWorkoutDayQuery.getKey({ dayId }))
     return hasInitialData || !!hasCachedData
-  }, [dayData, dayId, queryClient, isRestDay])
+  }, [initialDay, dayId, queryClient, isRestDay])
 
   // Rest day data
   const restDayData = useMemo(() => {
@@ -157,7 +167,11 @@ const WorkoutDay = ({
       dayId: dayId ?? '',
     },
     {
-      initialData: isRestDay ? restDayData : (dayData ?? undefined),
+      initialData: isRestDay
+        ? restDayData
+        : initialDay
+          ? (dayData as GQLFitspaceGetWorkoutDayQuery | undefined)
+          : undefined,
       initialDataUpdatedAt: hasDataForCurrentDay || isRestDay ? Date.now() : 0,
       enabled: !!dayId && !hasDataForCurrentDay && !isRestDay, // Disable if rest day
       refetchOnMount: false,
@@ -171,7 +185,7 @@ const WorkoutDay = ({
     <WorkoutProvider
       exercises={
         dayDataQuery?.getWorkoutDay?.day?.exercises ??
-        dayData?.getWorkoutDay?.day?.exercises ??
+        initialDay?.day?.exercises ??
         []
       }
     >
@@ -179,14 +193,12 @@ const WorkoutDay = ({
         {isLoadingNewDay ? (
           <SkeletonExercises />
         ) : (
-          (dayDataQuery?.getWorkoutDay?.day ?? dayData?.getWorkoutDay?.day) && (
+          (dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day) && (
             <Exercises
-              day={
-                dayDataQuery?.getWorkoutDay?.day ?? dayData?.getWorkoutDay?.day
-              }
+              day={dayDataQuery?.getWorkoutDay?.day ?? initialDay?.day}
               previousDayLogs={
                 dayDataQuery?.getWorkoutDay?.previousDayLogs ??
-                dayData?.getWorkoutDay?.previousDayLogs
+                initialDay?.previousDayLogs
               }
             />
           )

@@ -1,13 +1,20 @@
 'use client'
 
+import { useQueryState } from 'nuqs'
 import { startTransition, use, useEffect, useState } from 'react'
 
 import {
+  GQLFitspaceGetQuickWorkoutNavigationQuery,
   GQLFitspaceGetWorkoutNavigationQuery,
   useFitspaceGetWorkoutNavigationQuery,
 } from '@/generated/graphql-client'
 
 import { Navigation } from './navigation'
+import { getDefaultSelection } from './navigation-utils'
+
+type NavigationData =
+  | GQLFitspaceGetWorkoutNavigationQuery
+  | GQLFitspaceGetQuickWorkoutNavigationQuery
 
 export const NavigationWrapper = ({
   navigationDataPromise,
@@ -15,7 +22,7 @@ export const NavigationWrapper = ({
 }: {
   navigationDataPromise: Promise<
     | {
-        data: GQLFitspaceGetWorkoutNavigationQuery
+        data: NavigationData
         error: null
       }
     | {
@@ -26,7 +33,53 @@ export const NavigationWrapper = ({
   trainingId: string
 }) => {
   const [allWeeks, setAllWeeks] = useState(false)
-  const { data: navigationData } = use(navigationDataPromise)
+  const [weekId, setWeekId] = useQueryState('week')
+  const [dayId, setDayId] = useQueryState('day')
+
+  const { data: navigationData, error: navigationError } = use(
+    navigationDataPromise,
+  )
+
+  // Handle both getWorkoutNavigation (trainer plans) and getQuickWorkoutNavigation (quick workouts)
+  const initialPlan =
+    'getWorkoutNavigation' in (navigationData ?? {})
+      ? (navigationData as GQLFitspaceGetWorkoutNavigationQuery)
+          .getWorkoutNavigation?.plan
+      : (navigationData as GQLFitspaceGetQuickWorkoutNavigationQuery)
+          .getQuickWorkoutNavigation?.plan
+
+  const queryType =
+    'getWorkoutNavigation' in (navigationData ?? {}) ? 'trainer' : 'quick'
+
+  console.info('🎨 NavigationWrapper received:', {
+    hasData: !!navigationData,
+    hasPlan: !!initialPlan,
+    weeksCount: initialPlan?.weeks?.length,
+    error: navigationError,
+    trainingId,
+    queryType,
+  })
+
+  // Auto-select today's day on initial load if no URL parameters
+  useEffect(() => {
+    if (!weekId && !dayId && initialPlan) {
+      const { weekId: defaultWeekId, dayId: defaultDayId } =
+        getDefaultSelection(initialPlan)
+
+      console.info('🎯 Auto-selecting default day:', {
+        defaultWeekId,
+        defaultDayId,
+      })
+
+      if (defaultWeekId && defaultDayId) {
+        startTransition(() => {
+          setWeekId(defaultWeekId)
+          setDayId(defaultDayId)
+        })
+      }
+    }
+  }, [weekId, dayId, initialPlan, setWeekId, setDayId])
+
   const { data: navigationDataQuery, refetch } =
     useFitspaceGetWorkoutNavigationQuery(
       {
@@ -54,12 +107,14 @@ export const NavigationWrapper = ({
     return () => clearTimeout(timeout)
   }, [trainingId, navigationDataQuery, refetch])
 
-  return (
-    <Navigation
-      plan={
-        navigationDataQuery?.getWorkoutNavigation?.plan ??
-        navigationData?.getWorkoutNavigation?.plan
-      }
-    />
-  )
+  const finalPlan =
+    navigationDataQuery?.getWorkoutNavigation?.plan ?? initialPlan
+
+  console.info('🎨 NavigationWrapper rendering:', {
+    hasFinalPlan: !!finalPlan,
+    weeksCount: finalPlan?.weeks?.length,
+    firstWeekDaysCount: finalPlan?.weeks?.[0]?.days?.length,
+  })
+
+  return <Navigation plan={finalPlan} />
 }
