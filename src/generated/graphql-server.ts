@@ -1206,6 +1206,7 @@ export type GQLMutation = {
   updateExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateExerciseForm: EntireFieldWrapper<GQLTrainingExercise>;
   updateExerciseSet: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  updateFavouriteExerciseSets: EntireFieldWrapper<Scalars['Boolean']['output']>;
   updateFavouriteWorkout: EntireFieldWrapper<GQLFavouriteWorkout>;
   updateIngredient: EntireFieldWrapper<GQLIngredient>;
   updateMeal: EntireFieldWrapper<GQLMeal>;
@@ -1831,6 +1832,12 @@ export type GQLMutationUpdateExerciseFormArgs = {
 
 export type GQLMutationUpdateExerciseSetArgs = {
   input: GQLUpdateExerciseSetInput;
+};
+
+
+export type GQLMutationUpdateFavouriteExerciseSetsArgs = {
+  exerciseId: Scalars['ID']['input'];
+  setCount: Scalars['Int']['input'];
 };
 
 
@@ -4778,6 +4785,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   updateExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseArgs, 'id' | 'input'>>;
   updateExerciseForm?: Resolver<GQLResolversTypes['TrainingExercise'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseFormArgs, 'input'>>;
   updateExerciseSet?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateExerciseSetArgs, 'input'>>;
+  updateFavouriteExerciseSets?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationUpdateFavouriteExerciseSetsArgs, 'exerciseId' | 'setCount'>>;
   updateFavouriteWorkout?: Resolver<GQLResolversTypes['FavouriteWorkout'], ParentType, ContextType, RequireFields<GQLMutationUpdateFavouriteWorkoutArgs, 'input'>>;
   updateIngredient?: Resolver<GQLResolversTypes['Ingredient'], ParentType, ContextType, RequireFields<GQLMutationUpdateIngredientArgs, 'id' | 'input'>>;
   updateMeal?: Resolver<GQLResolversTypes['Meal'], ParentType, ContextType, RequireFields<GQLMutationUpdateMealArgs, 'id' | 'input'>>;

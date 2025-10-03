@@ -1204,6 +1204,7 @@ export type GQLMutation = {
   updateExercise: Scalars['Boolean']['output'];
   updateExerciseForm: GQLTrainingExercise;
   updateExerciseSet: Scalars['Boolean']['output'];
+  updateFavouriteExerciseSets: Scalars['Boolean']['output'];
   updateFavouriteWorkout: GQLFavouriteWorkout;
   updateIngredient: GQLIngredient;
   updateMeal: GQLMeal;
@@ -1829,6 +1830,12 @@ export type GQLMutationUpdateExerciseFormArgs = {
 
 export type GQLMutationUpdateExerciseSetArgs = {
   input: GQLUpdateExerciseSetInput;
+};
+
+
+export type GQLMutationUpdateFavouriteExerciseSetsArgs = {
+  exerciseId: Scalars['ID']['input'];
+  setCount: Scalars['Int']['input'];
 };
 
 
@@ -3690,6 +3697,14 @@ export type GQLUpdateFavouriteWorkoutMutationVariables = Exact<{
 
 
 export type GQLUpdateFavouriteWorkoutMutation = { __typename?: 'Mutation', updateFavouriteWorkout: { __typename?: 'FavouriteWorkout', id: string, title: string, description?: string | undefined | null, updatedAt: string, exercises: Array<{ __typename?: 'FavouriteWorkoutExercise', id: string, name: string, order: number, baseId?: string | undefined | null, restSeconds?: number | undefined | null, instructions?: Array<string> | undefined | null, sets: Array<{ __typename?: 'FavouriteWorkoutSet', id: string, order: number, reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, weight?: number | undefined | null, rpe?: number | undefined | null }> }> } };
+
+export type GQLUpdateFavouriteExerciseSetsMutationVariables = Exact<{
+  exerciseId: Scalars['ID']['input'];
+  setCount: Scalars['Int']['input'];
+}>;
+
+
+export type GQLUpdateFavouriteExerciseSetsMutation = { __typename?: 'Mutation', updateFavouriteExerciseSets: boolean };
 
 export type GQLDeleteFavouriteWorkoutMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5801,6 +5816,30 @@ useUpdateFavouriteWorkoutMutation.getKey = () => ['UpdateFavouriteWorkout'];
 
 
 useUpdateFavouriteWorkoutMutation.fetcher = (variables: GQLUpdateFavouriteWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateFavouriteWorkoutMutation, GQLUpdateFavouriteWorkoutMutationVariables>(UpdateFavouriteWorkoutDocument, variables, options);
+
+export const UpdateFavouriteExerciseSetsDocument = `
+    mutation UpdateFavouriteExerciseSets($exerciseId: ID!, $setCount: Int!) {
+  updateFavouriteExerciseSets(exerciseId: $exerciseId, setCount: $setCount)
+}
+    `;
+
+export const useUpdateFavouriteExerciseSetsMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateFavouriteExerciseSetsMutation, TError, GQLUpdateFavouriteExerciseSetsMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateFavouriteExerciseSetsMutation, TError, GQLUpdateFavouriteExerciseSetsMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateFavouriteExerciseSets'],
+    mutationFn: (variables?: GQLUpdateFavouriteExerciseSetsMutationVariables) => fetchData<GQLUpdateFavouriteExerciseSetsMutation, GQLUpdateFavouriteExerciseSetsMutationVariables>(UpdateFavouriteExerciseSetsDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateFavouriteExerciseSetsMutation.getKey = () => ['UpdateFavouriteExerciseSets'];
+
+
+useUpdateFavouriteExerciseSetsMutation.fetcher = (variables: GQLUpdateFavouriteExerciseSetsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateFavouriteExerciseSetsMutation, GQLUpdateFavouriteExerciseSetsMutationVariables>(UpdateFavouriteExerciseSetsDocument, variables, options);
 
 export const DeleteFavouriteWorkoutDocument = `
     mutation DeleteFavouriteWorkout($id: ID!) {

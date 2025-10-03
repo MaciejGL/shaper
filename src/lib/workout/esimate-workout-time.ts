@@ -6,8 +6,9 @@ export function estimateWorkoutTime(
   })[],
 ): number {
   const setLength = 60
+  const fallbackRestTime = 90
   const restTime = exercises.reduce(
-    (sum, exercise) => sum + (exercise.restSeconds ?? 0),
+    (sum, exercise) => sum + (exercise.restSeconds ?? fallbackRestTime),
     0,
   )
 
@@ -16,6 +17,6 @@ export function estimateWorkoutTime(
     (sum, exercise) => sum + exercise.sets.length + (exercise.warmupSets ?? 0),
     0,
   )
-  const totalTime = totalSets * setLength + restTime
+  const totalTime = totalSets * (setLength + restTime)
   return Math.round(totalTime / 60) // minutes
 }

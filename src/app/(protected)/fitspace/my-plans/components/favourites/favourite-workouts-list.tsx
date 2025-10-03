@@ -10,7 +10,7 @@ import { useUser } from '@/context/user-context'
 import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
 import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 
-import { CreateFavouriteModal } from './create-favourite-modal'
+import { CreateEmptyFavouriteDrawer } from './create-empty-favourite-drawer'
 import { FavouriteWorkoutCard } from './favourite-workout-card'
 
 interface FavouriteWorkoutsListProps {
@@ -19,11 +19,6 @@ interface FavouriteWorkoutsListProps {
   >
   loading: boolean
   onStartWorkout: (favouriteId: string) => void
-  onEditWorkout: (
-    favourite: NonNullable<
-      NonNullable<GQLGetFavouriteWorkoutsQuery>['getFavouriteWorkouts']
-    >[number],
-  ) => void
   onDeleteWorkout: (favouriteId: string) => void
   onRefetch: () => void
   workoutStatus: WorkoutStatusAnalysis
@@ -34,7 +29,6 @@ export function FavouriteWorkoutsList({
   favouriteWorkouts,
   loading,
   onStartWorkout,
-  onEditWorkout,
   onDeleteWorkout,
   onRefetch,
   workoutStatus,
@@ -86,7 +80,7 @@ export function FavouriteWorkoutsList({
               key={favourite.id}
               favourite={favourite}
               onStart={() => onStartWorkout(favourite.id)}
-              onEdit={() => onEditWorkout(favourite)}
+              onRefetch={onRefetch}
               onDelete={() => onDeleteWorkout(favourite.id)}
               workoutStatus={workoutStatus}
               isLoading={isStarting}
@@ -95,16 +89,13 @@ export function FavouriteWorkoutsList({
         </div>
       )}
 
-      {isCreateModalOpen && (
-        <CreateFavouriteModal
-          open={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
-          onSuccess={() => {
-            setIsCreateModalOpen(false)
-            onRefetch()
-          }}
-        />
-      )}
+      <CreateEmptyFavouriteDrawer
+        open={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={() => {
+          onRefetch()
+        }}
+      />
     </div>
   )
 }

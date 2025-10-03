@@ -9,6 +9,7 @@ import {
   getFavouriteWorkout,
   getFavouriteWorkouts,
   startWorkoutFromFavourite,
+  updateFavouriteExerciseSets,
   updateFavouriteWorkout,
 } from './factory'
 
@@ -63,6 +64,16 @@ export const Mutation: GQLMutationResolvers = {
     }
 
     return await updateFavouriteWorkout(input, user.user.id, context)
+  },
+
+  updateFavouriteExerciseSets: async (_, { exerciseId, setCount }, context) => {
+    const user = context.user
+
+    if (!user?.user?.id) {
+      throw new Error('User not authenticated')
+    }
+
+    return await updateFavouriteExerciseSets(exerciseId, setCount, user.user.id)
   },
 
   deleteFavouriteWorkout: async (_, { id }, context) => {

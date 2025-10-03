@@ -228,6 +228,74 @@ export async function updateFavouriteWorkout(
   return new FavouriteWorkout(updatedWorkout, context)
 }
 
+// Update set count for a specific exercise (fast, lightweight mutation)
+export async function updateFavouriteExerciseSets(
+  exerciseId: string,
+  setCount: number,
+  userId: string,
+): Promise<boolean> {
+  if (setCount < 1) {
+    throw new Error('Set count must be at least 1')
+  }
+
+  // Verify ownership and get current sets
+  const exercise = await prisma.favouriteWorkoutExercise.findFirst({
+    where: {
+      id: exerciseId,
+      favouriteWorkout: {
+        createdById: userId,
+      },
+    },
+    include: {
+      sets: {
+        orderBy: { order: 'asc' },
+      },
+    },
+  })
+
+  if (!exercise) {
+    throw new Error('Exercise not found or access denied')
+  }
+
+  const currentSetCount = exercise.sets.length
+
+  if (setCount === currentSetCount) {
+    return true // No change needed
+  }
+
+  if (setCount > currentSetCount) {
+    // Add new sets
+    const setsToAdd = setCount - currentSetCount
+    const lastSet = exercise.sets[exercise.sets.length - 1]
+
+    await prisma.favouriteWorkoutSet.createMany({
+      data: Array.from({ length: setsToAdd }, (_, i) => ({
+        exerciseId,
+        order: currentSetCount + i,
+        reps: lastSet?.reps || null,
+        minReps: lastSet?.minReps || null,
+        maxReps: lastSet?.maxReps || null,
+        weight: lastSet?.weight || null,
+        rpe: lastSet?.rpe || null,
+      })),
+    })
+  } else {
+    // Remove sets from the end
+    const setsToRemove = currentSetCount - setCount
+    const setIdsToRemove = exercise.sets
+      .slice(-setsToRemove)
+      .map((set) => set.id)
+
+    await prisma.favouriteWorkoutSet.deleteMany({
+      where: {
+        id: { in: setIdsToRemove },
+      },
+    })
+  }
+
+  return true
+}
+
 // Delete a favourite workout
 export async function deleteFavouriteWorkout(
   id: string,

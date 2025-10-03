@@ -2,10 +2,7 @@
 
 import { useState } from 'react'
 
-import {
-  GQLFavouriteWorkout,
-  GQLGetFavouriteWorkoutsQuery,
-} from '@/generated/graphql-client'
+import { GQLFavouriteWorkout } from '@/generated/graphql-client'
 import {
   useFavouriteWorkoutOperations,
   useFavouriteWorkoutStatus,
@@ -13,16 +10,12 @@ import {
 } from '@/hooks/use-favourite-workouts'
 
 import { DeleteFavouriteDialog } from '../favourites/delete-favourite-dialog'
-import { EditFavouriteModal } from '../favourites/edit-favourite-modal'
 import { FavouriteWorkoutsList } from '../favourites/favourite-workouts-list'
 import { ReplacementConfirmationDialog } from '../favourites/replacement-confirmation-dialog'
 
 export function EnhancedQuickWorkoutTab() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [favouriteToDelete, setFavouriteToDelete] =
-    useState<GQLFavouriteWorkout | null>(null)
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
-  const [favouriteToEdit, setFavouriteToEdit] =
     useState<GQLFavouriteWorkout | null>(null)
   const [replacementDialogOpen, setReplacementDialogOpen] = useState(false)
   const [pendingFavouriteId, setPendingFavouriteId] = useState<string | null>(
@@ -89,15 +82,6 @@ export function EnhancedQuickWorkoutTab() {
     setPendingFavouriteId(null)
   }
 
-  const handleEditFavourite = (
-    favourite: NonNullable<
-      NonNullable<GQLGetFavouriteWorkoutsQuery>['getFavouriteWorkouts']
-    >[number],
-  ) => {
-    setFavouriteToEdit(favourite as GQLFavouriteWorkout)
-    setEditDialogOpen(true)
-  }
-
   const handleDeleteFavourite = (favouriteId: string) => {
     // Find the favourite to delete
     const favourite = favouriteWorkouts?.getFavouriteWorkouts.find(
@@ -126,18 +110,12 @@ export function EnhancedQuickWorkoutTab() {
     setFavouriteToDelete(null)
   }
 
-  const handleCloseEditDialog = () => {
-    setEditDialogOpen(false)
-    setFavouriteToEdit(null)
-  }
-
   return (
     <div className="space-y-6">
       <FavouriteWorkoutsList
         favouriteWorkouts={favouriteWorkouts?.getFavouriteWorkouts ?? []}
         loading={isLoadingFavourites}
         onStartWorkout={handleStartFromFavourite}
-        onEditWorkout={handleEditFavourite}
         onDeleteWorkout={handleDeleteFavourite}
         onRefetch={refetch}
         workoutStatus={workoutStatus}
@@ -151,17 +129,6 @@ export function EnhancedQuickWorkoutTab() {
         onClose={handleCloseDeleteDialog}
         onConfirm={handleConfirmDelete}
         isDeleting={favouriteOperations.isDeleting}
-      />
-
-      {/* Edit Favourite Modal */}
-      <EditFavouriteModal
-        open={editDialogOpen}
-        favourite={favouriteToEdit}
-        onClose={handleCloseEditDialog}
-        onSuccess={() => {
-          refetch()
-          handleCloseEditDialog()
-        }}
       />
 
       {/* Replacement Confirmation Dialog */}
