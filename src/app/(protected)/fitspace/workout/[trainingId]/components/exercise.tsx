@@ -126,15 +126,25 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
       // Optimistically remove the exercise from the cache
       if (!oldData?.getWorkoutDay?.day) return oldData
 
+      const remainingExercises = oldData.getWorkoutDay.day.exercises.filter(
+        (ex) => ex.id !== exerciseId,
+      )
+
+      // Day is completed only if all remaining exercises are completed
+      const allExercisesCompleted =
+        remainingExercises.length > 0 &&
+        remainingExercises.every((ex) => ex.completedAt !== null)
+
       return {
         ...oldData,
         getWorkoutDay: {
           ...oldData.getWorkoutDay,
           day: {
             ...oldData.getWorkoutDay.day,
-            exercises: oldData.getWorkoutDay.day.exercises.filter(
-              (ex) => ex.id !== exerciseId,
-            ),
+            exercises: remainingExercises,
+            completedAt: allExercisesCompleted
+              ? oldData.getWorkoutDay.day.completedAt
+              : null,
           },
         },
       }

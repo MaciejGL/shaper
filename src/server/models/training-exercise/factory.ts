@@ -453,6 +453,12 @@ export const addSingleExerciseToDay = async (
     },
   })
 
+  // Mark day as incomplete since we added a new uncompleted exercise
+  await prisma.trainingDay.update({
+    where: { id: day.id },
+    data: { completedAt: null },
+  })
+
   return new TrainingExercise(trainingExercise, context)
 }
 
@@ -521,20 +527,19 @@ export const removeExerciseFromWorkout = async (
     },
   })
 
-  const allExercisesCompleted = day?.exercises.every(
-    (exercise) => exercise.completedAt,
-  )
-
-  if (allExercisesCompleted) {
-    await prisma.trainingDay.update({
-      where: { id: workout.id },
-      data: { completedAt: new Date() },
-    })
-  }
-
   if (!day) {
     throw new Error('Day not found')
   }
+
+  // Update day completion status based on remaining exercises
+  const allExercisesCompleted =
+    day.exercises.length > 0 &&
+    day.exercises.every((exercise) => exercise.completedAt)
+
+  await prisma.trainingDay.update({
+    where: { id: workout.id },
+    data: { completedAt: allExercisesCompleted ? new Date() : null },
+  })
 
   return true
 }
