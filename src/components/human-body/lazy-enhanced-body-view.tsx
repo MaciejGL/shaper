@@ -1,6 +1,6 @@
 'use client'
 
-import { Loader2 } from 'lucide-react'
+import { ArrowLeftRight, Loader2 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { ComponentType } from 'react'
 
@@ -22,6 +22,9 @@ export function BodyViewSkeleton() {
         <Tabs className="flex space-x-1">
           <TabsList>
             <TabsTrigger value="front">Front</TabsTrigger>
+            <TabsTrigger value="swap" disabled>
+              <ArrowLeftRight className="size-3" />
+            </TabsTrigger>
             <TabsTrigger value="back">Back</TabsTrigger>
           </TabsList>
         </Tabs>

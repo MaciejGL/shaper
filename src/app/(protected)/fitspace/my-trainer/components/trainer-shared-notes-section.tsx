@@ -34,7 +34,7 @@ export function TrainerSharedNotesSection() {
       <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <SectionIcon icon={MessageSquare} size="sm" variant="sky" />
+            <SectionIcon icon={MessageSquare} size="xs" variant="sky" />
             Notes from trainer
             <Button variant="ghost" size="xs" className="ml-auto" disabled>
               View All
@@ -53,7 +53,7 @@ export function TrainerSharedNotesSection() {
       <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <SectionIcon icon={MessageSquare} size="sm" />
+            <SectionIcon icon={MessageSquare} size="xs" />
             Trainer Notes
           </CardTitle>
         </CardHeader>
@@ -74,7 +74,7 @@ export function TrainerSharedNotesSection() {
       <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <SectionIcon icon={MessageSquare} size="sm" />
+            <SectionIcon icon={MessageSquare} size="xs" />
             Trainer Notes
           </CardTitle>
         </CardHeader>
@@ -98,7 +98,7 @@ export function TrainerSharedNotesSection() {
     <Card borderless>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <SectionIcon icon={MessageSquare} size="sm" variant="sky" />
+          <SectionIcon icon={MessageSquare} size="xs" variant="sky" />
           Notes from trainer
           <Button
             variant="ghost"

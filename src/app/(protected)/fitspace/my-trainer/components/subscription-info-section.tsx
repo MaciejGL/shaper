@@ -47,7 +47,7 @@ export function SubscriptionInfoSection() {
       <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <SectionIcon icon={SparklesIcon} size="sm" variant="amber" />
+            <SectionIcon icon={SparklesIcon} size="xs" variant="amber" />
             Subscription
           </CardTitle>
         </CardHeader>
@@ -128,7 +128,7 @@ export function SubscriptionInfoSection() {
         <CardTitle className="flex items-center gap-2">
           <div className="flex items-center gap-2 justify-between w-full">
             <div className="flex items-center gap-2">
-              <SectionIcon icon={SparklesIcon} size="sm" variant="amber" />
+              <SectionIcon icon={SparklesIcon} size="xs" variant="amber" />
               <h3 className="text-lg font-semibold">
                 {subscriptionInfo.title}
               </h3>

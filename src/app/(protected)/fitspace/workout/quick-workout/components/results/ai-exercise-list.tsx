@@ -102,6 +102,7 @@ function ExerciseCard({
   const { exercise, sets } = workoutExercise
   const firstImage = exercise.images?.at(0)
 
+  console.log(sets)
   // Handle drag start with proper event prevention
   const handleDragStart = (e: React.PointerEvent) => {
     e.preventDefault() // Prevent default browser behavior
@@ -169,7 +170,11 @@ function ExerciseCard({
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span>
-                    {sets.length} sets x {sets[0]?.reps || 0} reps
+                    {sets.length} sets x{' '}
+                    {sets[0]?.minReps && sets[0]?.maxReps
+                      ? `${sets[0].minReps}-${sets[0].maxReps}`
+                      : sets[0]?.reps || 0}{' '}
+                    reps
                   </span>
                 </div>
               </div>

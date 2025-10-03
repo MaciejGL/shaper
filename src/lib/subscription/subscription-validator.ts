@@ -286,7 +286,7 @@ export class SubscriptionValidator {
           sub.status.toString() === 'CANCELLED' &&
           new Date(sub.endDate) > new Date(),
       ),
-      trainingPlanLimit: hasPremium ? -1 : 1, // Unlimited for premium, 1 for free
+      trainingPlanLimit: hasPremium ? 999 : 1, // Unlimited for premium, 1 for free
       usageTrackers: [], // Simplified: no usage tracking
     }
   }

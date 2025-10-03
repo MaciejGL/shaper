@@ -14,8 +14,16 @@ export default async function SessionPage() {
 
   const activePlans = await prisma.trainingPlan.findMany({
     where: {
-      assignedToId: userId,
-      active: true,
+      OR: [
+        {
+          assignedToId: userId,
+          active: true,
+        },
+        {
+          createdById: userId,
+          assignedToId: userId,
+        },
+      ],
     },
     select: {
       id: true,
@@ -30,6 +38,8 @@ export default async function SessionPage() {
   const trainingFromTrainer = activePlans.find(
     (plan) => plan.assignedToId === userId && plan.createdById !== userId,
   )
+
+  console.log({ quickWorkoutId, trainingFromTrainer, activePlans })
 
   if (trainingFromTrainer) {
     return redirect(`/fitspace/workout/${trainingFromTrainer.id}`)

@@ -2838,6 +2838,8 @@ export type GQLSubstitute = {
 
 export type GQLSuggestedSets = {
   __typename?: 'SuggestedSets';
+  maxReps?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
+  minReps?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   reps?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   rpe?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
 };
@@ -5180,6 +5182,8 @@ export type GQLSubstituteResolvers<ContextType = GQLContext, ParentType extends 
 };
 
 export type GQLSuggestedSetsResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['SuggestedSets'] = GQLResolversParentTypes['SuggestedSets']> = {
+  maxReps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
+  minReps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   reps?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   rpe?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

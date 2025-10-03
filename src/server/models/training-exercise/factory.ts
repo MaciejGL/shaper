@@ -758,45 +758,114 @@ export const generateAiWorkout = async (
     repFocus,
   } = input
 
-  /* 1. Build AI prompt based on user preferences */
-  const muscleGroupsText =
+  /* 1. Enhanced AI prompt based on user preferences */
+  const muscleGroupsCondition =
     selectedMuscleGroups.length > 0
-      ? `Target muscle groups: ${selectedMuscleGroups.join(', ')}`
-      : 'Target all muscle groups for a full-body workout'
+      ? `🎯 SPECIFIC MUSCLE FOCUS: Target ONLY these muscle groups: ${selectedMuscleGroups.join(', ')}
+⚠️ CRITICAL: Do NOT include any exercises that primarily target other muscle groups. Every exercise must directly work at least one of the selected muscles.`
+      : `🎯 FULL-BODY WORKOUT: Include exercises for all major muscle groups with balanced distribution:
+   - Upper Body: Chest, Back, Shoulders, Arms (Biceps/Triceps)
+   - Lower Body: Quads, Hamstrings, Glutes, Calves
+   - Core: Abs, Obliques, Lower Back`
 
-  const equipmentText =
+  const equipmentCondition =
     selectedEquipment.length > 0
-      ? `Available equipment: ${selectedEquipment.join(', ')}`
-      : 'Use bodyweight exercises and suggest equipment alternatives'
+      ? `🏋️ EQUIPMENT REQUIRED: Use ONLY equipment from this list: ${selectedEquipment.join(', ')}
+   ⚠️ Always match exercises to available equipment. Prefer bodyweight alternatives when equipment is limited.`
+      : `🏋️ EQUIPMENT FLEXIBILITY: Prioritize bodyweight exercises, suggest equipment alternatives when beneficial.`
 
-  /* Parse RPE and rep focus for the prompt */
+  // Enhanced rep ranges and intensity
+  const intensityMapping = {
+    STRENGTH: {
+      reps: '3-8',
+      sets: `${Math.min(maxSetsPerExercise, 5)}-5`,
+      description: 'Heavy loads, longer rest periods',
+      progression: 'Linear progression with weight increases',
+    },
+    HYPERTROPHY: {
+      reps: '8-15',
+      sets: `${Math.min(maxSetsPerExercise, 4)}-4`,
+      description: 'Moderate loads, moderate rest',
+      progression: 'Increasing volume over time',
+    },
+    ENDURANCE: {
+      reps: '12-20',
+      sets: `2-${maxSetsPerExercise}`,
+      description: 'Lighter loads, shorter rest',
+      progression: 'Increasing reps or reducing rest time',
+    },
+  }
+
+  const intensity = intensityMapping[repFocus]
+
+  // RPE explanation
   const rpeText = rpeRange.replace('RPE_', '').replace('_', '-')
-  const repFocusText = repFocus.toLowerCase()
-  const repRangeText =
-    repFocus === 'STRENGTH'
-      ? '3-8 reps'
-      : repFocus === 'HYPERTROPHY'
-        ? '8-12 reps'
-        : '12-20 reps'
+  const rpeValue = rpeText === '6-7' ? 7 : rpeText === '7-8' ? 8 : 9
+  const rpeExplanation = {
+    '6-7': 'Light to moderate intensity. You can maintain conversation easily.',
+    '7-8': 'Moderate to hard intensity. Somewhat hard to talk.',
+    '8-10': 'Hard to maximum intensity. Very difficult to talk.',
+  }
 
-  /* 2. Create assistant thread with workout generation prompt using dedicated assistant */
+  const trainerPreference = context.user?.user.trainerId
+    ? `👨‍💼 TRAINER PRIORITY: Prioritize exercises created by trainer ID: ${context.user.user.trainerId}. These exercises are professionally curated and optimized.`
+    : '👨‍💼 GENERAL EXERCISES: Use publicly available exercises from various trainers.'
+
+  /* 2. Professional workout generation prompt */
   const thread = await createAssistantThread(
     [
       {
         role: 'user',
-        content: `Generate a complete workout plan with the following requirements:
-      
-${muscleGroupsText}
-${equipmentText}
-- Number of exercises: ${exerciseCount}
-- Maximum sets per exercise: ${maxSetsPerExercise}
-- Target RPE range: ${rpeText} (Rate of Perceived Exertion)
-- Training focus: ${repFocusText} with ${repRangeText}
-- User trainer ID: ${context.user?.user.trainerId || 'none'}
+        content: `🏋️ PROFESSIONAL WORKOUT GENERATION REQUEST
 
-CRITICAL RESTRICTION: ${selectedMuscleGroups.length > 0 ? `You MUST ONLY select exercises that target these specific muscle groups: ${selectedMuscleGroups.join(', ')}. ABSOLUTELY NO EXERCISES for other muscle groups like legs, shoulders, back, core, etc. unless they are specifically in the selected list. For example, if user selected "chest, biceps" then NO leg exercises, NO back exercises, NO shoulder exercises - ONLY chest and biceps exercises. Every single exercise must primarily target one of: ${selectedMuscleGroups.join(', ')}.` : 'Create a full-body workout targeting all major muscle groups.'}
+${muscleGroupsCondition}
 
-Generate the workout based on these preferences.`,
+${equipmentCondition}
+
+📊 WORKOUT PARAMETERS:
+• Exercise Count: ${exerciseCount} exercises
+• Sets per Exercise: ${maxSetsPerExercise} maximum
+• Rep Range: ${intensity.reps} reps per set
+• Target Sets: ${intensity.sets} sets
+• Intensity (RPE): ${rpeText} - ${rpeExplanation[rpeText as keyof typeof rpeExplanation]}
+• Training Type: ${repFocus.toLowerCase()} training (${intensity.description})
+
+${trainerPreference}
+
+🎯 QUALITY REQUIREMENTS:
+1. **Exercise Selection**: Choose exercises that maximize training stimulus for the target muscles
+2. **Progressive Overload**: Design sets/reps that allow progression over multiple sessions
+3. **Movement Quality**: Prioritize exercises with full range of motion and proper muscle activation
+4. **Balance**: Distribute training load appropriately across selected muscle groups
+5. **Equipment Utilization**: Make optimal use of available equipment
+6. **User Experience**: Ensure exercises are performable and safe for general fitness levels
+
+📝 RESPONSE FORMAT:
+Provide exactly ${exerciseCount} exercises in this JSON format:
+{
+  "exercises": [
+    {
+      "id": "exercise_uuid_from_database",
+      "createdBy": "creator_user_id_from_database",
+      "sets": ${Math.min(maxSetsPerExercise, 4)},
+      "minReps": 8,
+      "maxReps": 10,
+      "rpe": ${rpeValue},
+      "explanation": "Brief rationale for exercise selection (1-2 sentences)"
+    }
+  ],
+  "summary": "Workout overview: main focus areas and training approach",
+  "reasoning": "Professional explanation of exercise selection logic and programming rationale"
+}
+
+⚠️ CRITICAL REP RANGE RULES:
+- Rep ranges must be NARROW (2-4 reps difference maximum)
+- ${repFocus === 'STRENGTH' ? 'Strength examples: 3-5, 4-6, 5-8 reps' : repFocus === 'HYPERTROPHY' ? 'Hypertrophy examples: 8-10, 10-12, 12-15 reps' : 'Endurance examples: 12-15, 15-18, 18-20 reps'}
+- Compound exercises: Use lower rep ranges within the target
+- Isolation exercises: Use higher rep ranges within the target
+- NEVER use wide ranges like 8-15 or 3-12
+
+🔥 CRITICAL: Only select exercises from the available exercise database. Each exercise ID must correspond to an actual exercise in the system.`,
       },
     ],
     QUICK_WORKOUT_ASSISTANT_ID,
@@ -810,7 +879,8 @@ Generate the workout based on these preferences.`,
       id: string
       createdBy: string
       sets: number
-      reps: number
+      minReps: number
+      maxReps: number
       rpe: number
       explanation: string
     }[]
@@ -821,27 +891,40 @@ Generate the workout based on these preferences.`,
   try {
     aiResponse = parseAssistantJsonResponse(assistantReply)
 
-    // Ensure required fields exist, even if empty
-    if (!aiResponse.exercises) {
-      aiResponse.exercises = []
+    // Validate response structure
+    if (!aiResponse || typeof aiResponse !== 'object') {
+      throw new Error('Invalid response structure')
     }
-    if (typeof aiResponse.summary !== 'string') {
-      aiResponse.summary = ''
+
+    if (!Array.isArray(aiResponse.exercises)) {
+      throw new Error('Missing or invalid exercises array')
     }
-    if (typeof aiResponse.reasoning !== 'string') {
-      aiResponse.reasoning = ''
+
+    // Ensure required fields exist and are valid
+    if (!aiResponse.summary || typeof aiResponse.summary !== 'string') {
+      aiResponse.summary = 'AI-generated workout'
     }
+    if (!aiResponse.reasoning || typeof aiResponse.reasoning !== 'string') {
+      aiResponse.reasoning = 'Professional exercise selection'
+    }
+
+    console.info(
+      `[AI_WORKOUT] Successfully parsed response with ${aiResponse.exercises.length} exercises`,
+    )
   } catch (error) {
     console.error('[AI_WORKOUT] Failed to parse AI response:', error)
     console.error(
-      '[AI_WORKOUT] Raw response that failed to parse:',
-      assistantReply,
+      '[AI_WORKOUT] Raw response:',
+      assistantReply?.substring(0, 500) + '...',
     )
-    throw new GraphQLError('Failed to parse AI response. Please try again.')
+    throw new GraphQLError('AI response format invalid. Please try again.')
   }
-  console.info('aiResponse', aiResponse)
-  /* 4. Validate and hydrate exercises from database */
+
+  /* 4. Enhanced validation and hydration of exercises from database */
   const requestedExerciseIds = aiResponse.exercises.map((e) => e.id)
+  console.info(
+    `[AI_WORKOUT] Looking up exercise IDs: ${requestedExerciseIds.join(', ')}`,
+  )
 
   const baseExercises = await prisma.baseExercise.findMany({
     where: {
@@ -849,13 +932,39 @@ Generate the workout based on these preferences.`,
       OR: [
         {
           isPublic: true,
-          ...getExerciseVersionWhereClause(), // Apply environment version filter to public exercises
+          ...getExerciseVersionWhereClause(),
         },
-        { createdById: context.user?.user.trainerId }, // Trainer's exercises (if user has a trainer)
+        {
+          createdById: context.user?.user.trainerId,
+          ...getExerciseVersionWhereClause(),
+        }, // Trainer's exercises (if user has a trainer)
       ],
     },
-    include: { muscleGroups: { include: { category: true } } },
+    include: {
+      muscleGroups: { include: { category: true } },
+      secondaryMuscleGroups: { include: { category: true } },
+    },
   })
+
+  console.info(
+    `[AI_WORKOUT] Found ${baseExercises.length} valid exercises from database`,
+  )
+
+  // Validate that all requested exercises were found
+  const foundIds = baseExercises.map((ex) => ex.id)
+  const missingIds = requestedExerciseIds.filter((id) => !foundIds.includes(id))
+
+  if (missingIds.length > 0) {
+    console.warn(`[AI_WORKOUT] Missing exercise IDs: ${missingIds.join(', ')}`)
+    // Filter out exercises that don't exist in database
+    aiResponse.exercises = aiResponse.exercises.filter((ex) =>
+      foundIds.includes(ex.id),
+    )
+  }
+
+  if (aiResponse.exercises.length === 0) {
+    throw new GraphQLError('No valid exercises found. Please try again.')
+  }
 
   console.info('requestedExerciseIds', requestedExerciseIds)
   console.info('baseExercises', baseExercises)
@@ -866,40 +975,105 @@ Generate the workout based on these preferences.`,
     )
   }
 
-  /* 5. Map AI response to final workout structure */
-  const workoutExercises = baseExercises
-    .map((exercise, index) => {
-      const aiExercise = aiResponse.exercises.find((e) => e.id === exercise.id)
-      if (!aiExercise) {
+  /* 5. Enhanced mapping of AI response to final workout structure */
+  const workoutExercises = aiResponse.exercises
+    .map((aiExercise, index) => {
+      const baseExercise = baseExercises.find((ex) => ex.id === aiExercise.id)
+      if (!baseExercise) {
+        console.warn(
+          `[AI_WORKOUT] Exercise ${aiExercise.id} not found in database`,
+        )
         return null
       }
 
+      // Validate sets count
+      const setsCount = Math.min(
+        Math.max(1, aiExercise.sets),
+        maxSetsPerExercise,
+      )
+
+      // Use AI-provided minReps and maxReps directly
+      console.info(`[AI_WORKOUT] Processing exercise ${aiExercise.id}:`, {
+        minReps: aiExercise.minReps,
+        maxReps: aiExercise.maxReps,
+        sets: aiExercise.sets,
+        rpe: aiExercise.rpe,
+      })
+
+      // Validate and use AI-provided values
+      const minReps = Math.max(1, Math.min(50, aiExercise.minReps || 8))
+      const maxReps = Math.max(
+        minReps,
+        Math.min(50, aiExercise.maxReps || minReps + 4),
+      )
+      const rpe = Math.max(1, Math.min(10, aiExercise.rpe || 8))
+
+      console.info(
+        `[AI_WORKOUT] Using reps range for ${aiExercise.id}: ${minReps}-${maxReps}, RPE: ${rpe}`,
+      )
+
       return {
-        exercise: new BaseExercise(exercise, context),
-        sets: Array.from({ length: aiExercise.sets }).map(() => ({
-          reps: aiExercise.reps,
-          rpe: aiExercise.rpe,
+        exercise: new BaseExercise(baseExercise, context),
+        sets: Array.from({ length: setsCount }, (_, setIndex) => ({
+          reps: minReps, // Use minReps as the primary display value
+          minReps: minReps,
+          maxReps: maxReps,
+          rpe: rpe,
+          order: setIndex + 1,
         })),
-        order: index + 1, // Generate order since it's not in the AI response
+        order: index + 1,
+        aiMeta: {
+          explanation:
+            aiExercise.explanation || `Selected for muscle group targeting`,
+          summary: aiResponse.summary || '',
+          reasoning: aiResponse.reasoning || '',
+        },
       }
     })
     .filter((exercise) => exercise !== null)
-    .sort((a, b) => (a?.order ?? 0) - (b?.order ?? 0)) // Ensure proper ordering
 
-  // Calculate duration based on sets: 45s per set + 90s break between sets
-  // Sum all sets across all exercises, then apply the formula
+  // Enhanced duration calculation based on training type
+  const intensityMultiplier = {
+    STRENGTH: 1.5, // Longer rest between heavy sets
+    HYPERTROPHY: 1.2, // Moderate rest
+    ENDURANCE: 0.8, // Shorter rest
+  }
+
   const totalSets = workoutExercises.reduce(
     (sum, exercise) => sum + (exercise?.sets.length ?? 0),
     0,
   )
-  const estimatedDuration = Math.round(totalSets * 0.75 + (totalSets - 1) * 1.5) // 45s per set + 90s break (in minutes)
+
+  const baseTimePerSet = 0.75 // 45 seconds
+  const restTimeBetweenSets = 1.5 * intensityMultiplier[repFocus] // 90s adjusted for intensity
+
+  const estimatedDuration = Math.round(
+    totalSets * baseTimePerSet + (totalSets - 1) * restTimeBetweenSets,
+  )
+
+  // If no valid exercises found, provide fallback
+  if (workoutExercises.length === 0) {
+    throw new GraphQLError(
+      'Unable to generate workout with selected criteria. Please adjust your preferences.',
+    )
+  }
 
   const finalResult = {
     exercises: workoutExercises,
     totalDuration: estimatedDuration,
+    aiMetadata: {
+      summary: aiResponse.summary,
+      reasoning: aiResponse.reasoning,
+      selectedMuscleGroups,
+      selectedEquipment,
+      repFocus,
+      rpeRange,
+    },
   }
 
-  console.info('finalResult', finalResult)
+  console.info(
+    `[AI_WORKOUT] Generated workout with ${workoutExercises.length} exercises, ~${estimatedDuration} minutes`,
+  )
 
   return finalResult
 }

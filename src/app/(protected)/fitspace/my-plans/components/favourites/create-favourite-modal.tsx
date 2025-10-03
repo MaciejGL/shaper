@@ -251,8 +251,8 @@ export function CreateFavouriteModal({
                 variant="secondary"
                 placeholder="e.g., Morning Push Routine"
                 value={title}
+                tabIndex={-1}
                 onChange={(e) => setTitle(e.target.value)}
-                autoFocus={false}
               />
             </div>
 

@@ -46,7 +46,7 @@ export function ClientServiceDeliveriesSection({
       <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <SectionIcon icon={Package} size="sm" variant="green" />
+            <SectionIcon icon={Package} size="xs" variant="green" />
             Purchased Services
           </CardTitle>
         </CardHeader>
@@ -62,7 +62,7 @@ export function ClientServiceDeliveriesSection({
       <Card borderless>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <SectionIcon icon={Package} size="sm" variant="green" />
+            <SectionIcon icon={Package} size="xs" variant="green" />
             No services purchased yet
           </CardTitle>
         </CardHeader>
@@ -81,7 +81,7 @@ export function ClientServiceDeliveriesSection({
     <Card borderless>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <SectionIcon icon={Package} size="sm" variant="green" />
+          <SectionIcon icon={Package} size="xs" variant="green" />
           Purchased Training Packages
         </CardTitle>
       </CardHeader>

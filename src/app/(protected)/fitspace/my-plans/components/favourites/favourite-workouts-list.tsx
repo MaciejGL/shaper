@@ -59,7 +59,7 @@ export function FavouriteWorkoutsList({
     )
   }
 
-  const hasReachedLimit = favouriteWorkouts.length >= (hasPremium ? -1 : 3)
+  const hasReachedLimit = favouriteWorkouts.length >= (hasPremium ? 999 : 3)
 
   return (
     <div className="space-y-4">
@@ -95,14 +95,16 @@ export function FavouriteWorkoutsList({
         </div>
       )}
 
-      <CreateFavouriteModal
-        open={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSuccess={() => {
-          setIsCreateModalOpen(false)
-          onRefetch()
-        }}
-      />
+      {isCreateModalOpen && (
+        <CreateFavouriteModal
+          open={isCreateModalOpen}
+          onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={() => {
+            setIsCreateModalOpen(false)
+            onRefetch()
+          }}
+        />
+      )}
     </div>
   )
 }

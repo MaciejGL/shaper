@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { SectionIcon } from '@/components/ui/section-icon'
 import {
   GQLGetMyMeetingsQuery,
   useGetMyMeetingsQuery,
@@ -69,7 +70,18 @@ export function ClientMeetingsSection() {
     return (
       <Card borderless>
         <CardHeader>
-          <CardTitle className="text-base">Scheduled Meetings</CardTitle>
+          <div className="flex items-center gap-2">
+            <SectionIcon icon={Calendar} size="xs" />
+            <CardTitle>Meetings</CardTitle>
+            <Button
+              variant="ghost"
+              size="xs"
+              className="ml-auto"
+              onClick={() => setShowAllMeetings(true)}
+            >
+              View All
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">Loading meetings...</p>
@@ -82,7 +94,18 @@ export function ClientMeetingsSection() {
     return (
       <Card borderless>
         <CardHeader>
-          <CardTitle className="text-base">Scheduled Meetings</CardTitle>
+          <div className="flex items-center gap-2">
+            <SectionIcon icon={Calendar} size="xs" />
+            <CardTitle>Meetings</CardTitle>
+            <Button
+              variant="ghost"
+              size="xs"
+              className="ml-auto"
+              onClick={() => setShowAllMeetings(true)}
+            >
+              View All
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
@@ -97,8 +120,9 @@ export function ClientMeetingsSection() {
     <>
       <Card borderless>
         <CardHeader>
-          <CardTitle className="text-base flex items-center gap-2">
-            Scheduled Meetings
+          <div className="flex items-center gap-2">
+            <SectionIcon icon={Calendar} size="xs" />
+            <CardTitle>Meetings</CardTitle>
             <Button
               variant="ghost"
               size="xs"
@@ -107,7 +131,7 @@ export function ClientMeetingsSection() {
             >
               View All
             </Button>
-          </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="space-y-3">
           {meetings.map((meeting: Meeting) => {

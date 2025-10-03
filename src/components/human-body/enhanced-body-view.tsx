@@ -1,5 +1,7 @@
 'use client'
 
+import { ArrowLeftRight } from 'lucide-react'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 
@@ -67,6 +69,9 @@ export function EnhancedBodyView({
     <Tabs defaultValue="front">
       <TabsList className="mx-auto">
         <TabsTrigger value="front">Front</TabsTrigger>
+        <TabsTrigger value="swap" disabled>
+          <ArrowLeftRight className="size-3" />
+        </TabsTrigger>
         <TabsTrigger value="back">Back</TabsTrigger>
       </TabsList>
 

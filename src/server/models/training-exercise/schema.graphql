@@ -53,6 +53,8 @@ type TrainingExercise {
 
 type SuggestedSets {
   reps: Int
+  minReps: Int
+  maxReps: Int
   rpe: Int
 }
 

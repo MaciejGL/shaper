@@ -175,6 +175,8 @@ mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
       }
       sets {
         reps
+        minReps
+        maxReps
         rpe
       }
       order

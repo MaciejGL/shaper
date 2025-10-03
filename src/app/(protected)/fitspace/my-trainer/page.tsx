@@ -167,7 +167,7 @@ function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
         showRequestCoaching={false}
       />
       <Tabs value={tab} onValueChange={(value) => setTab(value as Tab)}>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-2">
           <TabsList>
             <TabsTrigger value="from-trainer">From Trainer</TabsTrigger>
             <TabsTrigger value="purchased-services">

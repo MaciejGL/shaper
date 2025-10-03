@@ -399,6 +399,8 @@ export function EditFavouriteModal({
                 placeholder="e.g., Morning Push Routine"
                 value={title}
                 variant="secondary"
+                autoFocus={false}
+                tabIndex={-1}
                 onChange={(e) => {
                   setTitle(e.target.value)
                   setDirty(true)

@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion'
 import { CheckIcon } from 'lucide-react'
-import { CldImage } from 'next-cloudinary'
+import Image from 'next/image'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -37,16 +37,12 @@ export function EquipmentFilters({
           >
             <CardContent className="flex flex-row items-center gap-2 h-20 p-0">
               <div className="h-20 w-20 overflow-hidden relative">
-                <CldImage
+                <Image
                   alt={equipmentItem}
                   src={equipmentImages[equipmentItem]}
-                  fill
-                  sizes="80px"
-                  quality={50}
-                  fetchPriority="high"
-                  crop="auto"
-                  placeholder="blur"
-                  blurDataURL={equipmentImages[equipmentItem]}
+                  width={80}
+                  height={80}
+                  priority
                   className="object-contain size-full overflow-hidden"
                 />
               </div>
@@ -86,16 +82,14 @@ export function EquipmentFilters({
             }
             className="h-16 flex flex-col gap-1 p-2"
           >
-            <div>
-              <CldImage
+            <div className="relative h-8 w-8">
+              <Image
                 alt={equipmentItem}
                 src={equipmentImages[equipmentItem]}
                 fill
                 sizes="(max-width: 640px) 25vw, 16.67vw"
-                quality={75}
-                fetchPriority="high"
-                crop="fill"
-                className="object-cover w-full h-full rounded-lg overflow-hidden"
+                priority
+                className="object-cover rounded-lg overflow-hidden"
               />
             </div>
             <span className="text-xs leading-tight">
@@ -120,16 +114,16 @@ export function EquipmentFilters({
           size="sm"
           className="gap-2"
         >
-          <CldImage
-            alt={equipmentItem}
-            src={equipmentImages[equipmentItem]}
-            fill
-            sizes="32px"
-            quality={75}
-            fetchPriority="high"
-            crop="fill"
-            className="object-cover w-full h-full rounded-lg overflow-hidden"
-          />
+          <div className="relative h-6 w-6">
+            <Image
+              alt={equipmentItem}
+              src={equipmentImages[equipmentItem]}
+              fill
+              sizes="32px"
+              priority
+              className="object-cover rounded-lg overflow-hidden"
+            />
+          </div>
           {translateEquipment(equipmentItem)}
         </Button>
       ))}
