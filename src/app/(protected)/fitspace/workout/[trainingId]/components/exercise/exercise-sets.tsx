@@ -43,6 +43,7 @@ export function ExerciseSets({
   const queryClient = useQueryClient()
   const { preferences } = useUserPreferences()
   const invalidateQuery = useInvalidateQuery()
+  const [isRemovingSet, setIsRemovingSet] = useState(false)
   // Initialize state with current log values for each set
   const [setsLogs, setSetsLogs] = useState<
     Record<string, { weight: string; reps: string }>
@@ -185,6 +186,21 @@ export function ExerciseSets({
     })
   }
 
+  const handleRemoveLastSet = async () => {
+    const exerciseSets = exercise.substitutedBy?.sets || exercise.sets
+    // Find the last extra set
+    const lastExtraSet = [...exerciseSets].reverse().find((set) => set.isExtra)
+
+    if (lastExtraSet) {
+      setIsRemovingSet(true)
+      try {
+        await removeSet({ setId: lastExtraSet.id })
+      } finally {
+        setIsRemovingSet(false)
+      }
+    }
+  }
+
   const handleRepsChange = (reps: string, setId: string) => {
     setSetsLogs((prev) => ({
       ...prev,
@@ -265,14 +281,34 @@ export function ExerciseSets({
         {isAdvancedView && (
           <div
             className={cn(
-              'grid grid-cols-1 items-center justify-items-center gap-2 my-2 border-t border-border pt-2',
+              'grid grid-cols-1 items-center justify-items-center gap-2 mt-2 border-t border-border',
+              exercise.sets.length > 1 &&
+                exercise.sets.some((set) => set.isExtra) &&
+                'grid-cols-[1fr_1px_1fr]',
             )}
           >
+            {exercise.sets.some((set) => set.isExtra) &&
+              exercise.sets.length > 1 && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="xs"
+                    iconStart={<PlusIcon />}
+                    className="w-max my-2"
+                    loading={isRemovingSet}
+                    disabled={isRemovingSet}
+                    onClick={handleRemoveLastSet}
+                  >
+                    Remove Last Set
+                  </Button>
+                  <div className="h-full w-[1px] bg-border" />
+                </>
+              )}
             <Button
               variant="ghost"
               size="xs"
               iconStart={<PlusIcon />}
-              className="w-max"
+              className="w-max my-2"
               loading={isAddingSet}
               onClick={handleAddSet}
             >

@@ -444,7 +444,7 @@ export const addSingleExerciseToDay = async (
         create: {
           order: 1,
           isExtra: true,
-          reps: 10, // Default 10 reps
+          reps: null,
         },
       },
     },
