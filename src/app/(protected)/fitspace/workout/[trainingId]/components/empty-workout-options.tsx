@@ -37,85 +37,118 @@ export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
         </p>
         {/* AI Quick Workout Generator */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
+          key={`empty-workout-options-${dayId}`}
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: {
+              opacity: 1,
+              transition: {
+                staggerChildren: 0.05,
+              },
+            },
+          }}
+          className="grid gap-4"
         >
-          <Card
-            borderless
-            className="cursor-pointer transition-all hover:scale-[1.01]"
-            onClick={() => setShowAiWizard(true)}
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 10 },
+              visible: { opacity: 1, y: 0 },
+            }}
           >
-            <CardContent>
-              <div className="flex items-center">
-                <div className="p-2 mr-3 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-lg">
-                  <SparklesIcon className="size-5 text-purple-500" />
+            <Card
+              borderless
+              className="cursor-pointer transition-all hover:scale-[1.01]"
+              onClick={() => hasPremiumAccess && setShowAiWizard(true)}
+            >
+              <CardContent>
+                <div className="flex items-center">
+                  <div className="p-2 mr-3 bg-gradient-to-br from-yellow-500 to-amber-600 rounded-lg">
+                    <SparklesIcon className="size-4 text-white" />
+                  </div>
+                  <div className="flex-1 pr-2">
+                    <CardTitle className="text-lg">Quick Workout</CardTitle>
+                    <CardDescription>
+                      Generate based on your preferences
+                    </CardDescription>
+                  </div>
+                  {!hasPremiumAccess ? (
+                    <ButtonLink
+                      href="/fitspace/settings/subscription"
+                      size="xs"
+                      variant="gradient"
+                    >
+                      Upgrade
+                    </ButtonLink>
+                  ) : (
+                    <Button
+                      variant="link"
+                      size="icon-sm"
+                      iconOnly={<ChevronRight />}
+                    >
+                      Generate
+                    </Button>
+                  )}
                 </div>
-                <div className="flex-1 pr-2">
-                  <CardTitle className="text-lg">Quick Workout</CardTitle>
-                  <CardDescription>
-                    Generate full workout based on your preferences
-                  </CardDescription>
-                </div>
-                {!hasPremiumAccess ? (
-                  <ButtonLink
-                    href="/fitspace/settings/subscription"
-                    size="xs"
-                    variant="gradient"
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* From Favourites */}
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 10 },
+              visible: { opacity: 1, y: 0 },
+            }}
+          >
+            <Card
+              borderless
+              className="cursor-pointer transition-all hover:scale-[1.01]"
+              onClick={() => setShowFavourites(true)}
+            >
+              <CardContent>
+                <div className="flex items-center">
+                  <div className="p-2 mr-3 bg-card-on-card rounded-lg">
+                    <BookmarkIcon className="size-5" />
+                  </div>
+                  <div className="flex-1">
+                    <CardTitle className="text-lg">From Favourites</CardTitle>
+                    <CardDescription>
+                      Select from your saved workouts
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant="link"
+                    size="icon-sm"
+                    iconOnly={<ChevronRight />}
                   >
-                    Upgrade
-                  </ButtonLink>
-                ) : (
-                  <Button variant="link" iconOnly={<ChevronRight />}>
-                    Generate
+                    Select
                   </Button>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-        {/* From Favourites */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          <Card
-            borderless
-            className="cursor-pointer transition-all hover:scale-[1.01]"
-            onClick={() => setShowFavourites(true)}
+          <motion.p
+            variants={{
+              hidden: { opacity: 0, y: 10 },
+              visible: { opacity: 1, y: 0 },
+            }}
+            className="text-sm text-muted-foreground text-center"
           >
-            <CardContent>
-              <div className="flex items-center">
-                <div className="p-2 mr-3 bg-card-on-card rounded-lg">
-                  <BookmarkIcon className="size-5" />
-                </div>
-                <div className="flex-1">
-                  <CardTitle className="text-lg">From Favourites</CardTitle>
-                  <CardDescription>
-                    Select from your saved workouts
-                  </CardDescription>
-                </div>
-                <Button variant="link" iconOnly={<ChevronRight />}>
-                  Select
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+            or start from a single exercise
+          </motion.p>
 
-        <p className="text-sm text-muted-foreground text-center">
-          or start from a single exercise
-        </p>
-
-        {/* Add Single Exercise */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-        >
-          <AddSingleExercise dayId={dayId} variant="card" />
+          {/* Add Single Exercise */}
+          <motion.div
+            variants={{
+              hidden: { opacity: 0, y: 10 },
+              visible: { opacity: 1, y: 0 },
+            }}
+          >
+            <AddSingleExercise dayId={dayId} variant="card" />
+          </motion.div>
         </motion.div>
       </div>
 

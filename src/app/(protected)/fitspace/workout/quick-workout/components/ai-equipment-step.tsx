@@ -26,7 +26,6 @@ export function AiEquipmentStep({ data, onDataChange }: AiEquipmentStepProps) {
 
   return (
     <div className="space-y-6">
-      {/* Equipment filters */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -38,23 +37,6 @@ export function AiEquipmentStep({ data, onDataChange }: AiEquipmentStepProps) {
           equipment={allEquipment}
           variant="cards"
         />
-      </motion.div>
-
-      {/* Help text */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.2 }}
-        className="text-center text-sm text-muted-foreground bg-card p-4 rounded-lg"
-      >
-        Select the equipment you have available. We will create a workout using
-        only your selected equipment.
-        {data.selectedEquipment.length === 0 && (
-          <div className="mt-2 text-xs opacity-80">
-            You can also skip this step to let us include bodyweight exercises
-            and suggest equipment alternatives.
-          </div>
-        )}
       </motion.div>
     </div>
   )

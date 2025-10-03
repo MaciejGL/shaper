@@ -31,7 +31,7 @@ export function MaxSetsControl({
       transition={{ duration: 0.07, delay: 0.03 }}
       className={className}
     >
-      <Card className={className}>
+      <Card borderless className={className}>
         <CardContent>
           <div className="space-y-2">
             <Label htmlFor="max-sets" className="text-sm font-medium">

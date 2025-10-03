@@ -73,7 +73,7 @@ export function AiResultsStep({
 
 function LoadingState({ inputData }: { inputData: AiWorkoutInputData }) {
   return (
-    <div className="space-y-6 text-center">
+    <div className="space-y-6 text-center flex-center h-full">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -90,7 +90,7 @@ function LoadingState({ inputData }: { inputData: AiWorkoutInputData }) {
             Generating your workout...
           </span>
         </div>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm mb-12">
           We are analyzing your preferences and selecting the best exercises for
           you.
         </p>
@@ -123,15 +123,18 @@ function ErrorState({
   }, [error])
 
   return (
-    <div className="space-y-4 text-center flex flex-col items-center justify-center">
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold text-destructive">
-          Failed to generate workout
+    <div className="space-y-4 text-center flex flex-col items-center justify-center flex-center h-full">
+      <div className="space-y-2 mb-12">
+        <h3 className="text-lg font-semibold text-foreground">
+          Oops! We couldn't generate your workout
         </h3>
-        <p className="text-muted-foreground">{error}</p>
+        <p className="text-muted-foreground text-sm">
+          We were unable to generate a workout for you. Please try again. If the
+          problem persists, please to adjust your preferences and try again.
+        </p>
       </div>
       {onRetry && (
-        <Button onClick={onRetry} variant="outline">
+        <Button onClick={onRetry} variant="tertiary">
           Try Again
         </Button>
       )}
@@ -141,11 +144,12 @@ function ErrorState({
 
 function EmptyState() {
   return (
-    <div className="space-y-4 text-center">
+    <div className="space-y-4 text-center flex flex-col items-center justify-center flex-center h-full">
       <div className="space-y-2">
-        <h3 className="text-lg font-semibold">No workout generated</h3>
-        <p className="text-muted-foreground">
-          Please go back and adjust your preferences.
+        <h3 className="text-lg font-semibold">Nothing to show yet</h3>
+        <p className="text-muted-foreground text-sm">
+          Your filters might be too picky. Head back and loosen things up - or
+          maybe our AI is on a coffee break ☕
         </p>
       </div>
     </div>

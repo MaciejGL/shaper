@@ -31,7 +31,7 @@ export function ExerciseCountControl({
       transition={{ duration: 0.07, delay: 0.03 }}
       className={className}
     >
-      <Card>
+      <Card borderless>
         <CardContent>
           <div className="space-y-2">
             <Label htmlFor="exercise-count" className="text-sm font-medium">

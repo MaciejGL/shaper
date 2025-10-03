@@ -165,7 +165,7 @@ export function AddSingleExercise({
                 <CardTitle className="text-lg">Add Single Exercise</CardTitle>
                 <CardDescription>Add one exercise at a time</CardDescription>
               </div>
-              <Button variant="link" iconOnly={<PlusIcon />}>
+              <Button variant="link" size="icon-sm" iconOnly={<PlusIcon />}>
                 Add Exercise
               </Button>
             </div>

@@ -112,22 +112,12 @@ function ExerciseCard({
 
   return (
     <div className="flex gap-2 items-center">
-      {isDraggable && dragControls && (
-        <div
-          className="flex-shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-manipulation select-none"
-          onPointerDown={handleDragStart}
-          style={{
-            touchAction: 'none', // Completely disable touch actions on drag handle
-            userSelect: 'none', // Prevent text selection
-          }}
-        >
-          <Grip className="h-4 w-4" />
-        </div>
-      )}
       <Card
+        borderless
+        variant="tertiary"
         className={cn(
           'group/exercise-card p-0 border-b border-t-0 overflow-hidden flex-1 rounded-none pr-2',
-          isDraggable && 'rounded-md border',
+          isDraggable && 'rounded-lg',
           'bg-card hover:border-primary/20 transition-all duration-200',
           isDraggable && 'hover:shadow-lg',
         )}
@@ -189,20 +179,27 @@ function ExerciseCard({
               )}
 
               {/* Primary muscle groups - limit to 3 and show +count if more */}
-              {exercise.muscleGroups.slice(0, 2).map((group) => (
+              {exercise.muscleGroups.slice(0, 1).map((group) => (
                 <Badge key={group.id} variant="muscle" size="2xs">
                   {group.alias}
                 </Badge>
               ))}
-              {exercise.muscleGroups.length > 2 && (
-                <Badge variant="muscle" size="2xs">
-                  +{exercise.muscleGroups.length - 2}
-                </Badge>
-              )}
             </div>
           </div>
         </CardContent>
       </Card>
+      {isDraggable && dragControls && (
+        <div
+          className="flex-shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-manipulation select-none"
+          onPointerDown={handleDragStart}
+          style={{
+            touchAction: 'none', // Completely disable touch actions on drag handle
+            userSelect: 'none', // Prevent text selection
+          }}
+        >
+          <Grip className="h-4 w-4" />
+        </div>
+      )}
     </div>
   )
 }

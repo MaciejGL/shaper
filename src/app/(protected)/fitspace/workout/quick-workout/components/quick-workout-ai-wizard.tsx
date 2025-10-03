@@ -1,6 +1,9 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { ChevronRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { useQueryState } from 'nuqs'
 import { useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -15,6 +18,7 @@ import {
 import {
   useFitspaceCreateQuickWorkoutMutation,
   useFitspaceGetExercisesQuery,
+  useFitspaceGetWorkoutDayQuery,
 } from '@/generated/graphql-client'
 
 import { useAiWorkoutGeneration } from '../hooks/use-ai-workout-generation'
@@ -38,6 +42,9 @@ export function QuickWorkoutAiWizard({
   dayId,
 }: QuickWorkoutAiWizardProps) {
   const [currentStep, setCurrentStep] = useState<AiStep>('muscle-groups')
+  const queryClient = useQueryClient()
+  const router = useRouter()
+  const [dayIdFromUrl] = useQueryState('day')
 
   const {
     aiInputData,
@@ -62,20 +69,37 @@ export function QuickWorkoutAiWizard({
     )
   }, [exercisesData])
 
-  const queryClient = useQueryClient()
   const { mutateAsync: createQuickWorkout, isPending: isCreatingWorkout } =
     useFitspaceCreateQuickWorkoutMutation({
       onSuccess: async () => {
+        // Invalidate the ACTUAL query that the component uses
+        const currentDayId = dayIdFromUrl || dayId
+        const queryKeyToInvalidate = useFitspaceGetWorkoutDayQuery.getKey({
+          dayId: currentDayId,
+        })
+
+        // Invalidate queries to refresh the data
         await Promise.all([
+          queryClient.invalidateQueries({ queryKey: queryKeyToInvalidate }),
           queryClient.invalidateQueries({ queryKey: ['navigation'] }),
           queryClient.invalidateQueries({
             queryKey: ['FitspaceGetQuickWorkoutNavigation'],
           }),
+          queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
           queryClient.invalidateQueries({
             queryKey: ['FitspaceGetQuickWorkoutDay'],
           }),
-          queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
         ])
+
+        // Refetch the day query to ensure fresh data
+        await queryClient.refetchQueries({
+          queryKey: queryKeyToInvalidate,
+        })
+
+        // Refresh server components
+        router.refresh()
+
+        // Close the sheet
         onClose()
       },
     })
@@ -99,8 +123,8 @@ export function QuickWorkoutAiWizard({
   }
 
   const handleGenerate = async () => {
-    await handleGenerateAiWorkout()
     setCurrentStep('results')
+    await handleGenerateAiWorkout()
   }
 
   const handleAccept = async () => {
@@ -152,9 +176,9 @@ export function QuickWorkoutAiWizard({
   const getStepDescription = () => {
     switch (currentStep) {
       case 'muscle-groups':
-        return 'Choose which muscles to target'
+        return 'Choose which muscles to target or skip this step to let us choose the best full-body workout for you.'
       case 'equipment':
-        return 'Select available equipment'
+        return 'Select available or preferred equipment'
       case 'parameters':
         return 'Customize your workout intensity'
       case 'results':
@@ -168,14 +192,14 @@ export function QuickWorkoutAiWizard({
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-2xl overflow-y-auto"
+        className="w-full sm:max-w-2xl overflow-y-auto gap-0"
       >
         <SheetHeader>
           <SheetTitle>{getStepTitle()}</SheetTitle>
           <SheetDescription>{getStepDescription()}</SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto p-4">
           {currentStep === 'muscle-groups' && (
             <AiMuscleGroupsStep
               muscleGroups={allMuscleGroups}
@@ -207,35 +231,48 @@ export function QuickWorkoutAiWizard({
           )}
         </div>
 
-        <SheetFooter className="border-t pt-4 mt-6">
+        <SheetFooter className="">
           {currentStep === 'muscle-groups' && (
-            <Button
-              onClick={handleNext}
-              disabled={aiInputData.selectedMuscleGroups.length === 0}
-              className="w-full"
-            >
-              Next: Equipment
-            </Button>
+            <div className="flex gap-2 w-full">
+              <Button variant="tertiary" onClick={onClose} className="flex-1">
+                Close
+              </Button>
+              <Button
+                onClick={handleNext}
+                className="flex-1"
+                iconEnd={<ChevronRight />}
+              >
+                Equipment
+              </Button>
+            </div>
           )}
 
           {currentStep === 'equipment' && (
             <div className="flex gap-2 w-full">
-              <Button variant="outline" onClick={handleBack} className="flex-1">
+              <Button
+                variant="tertiary"
+                onClick={handleBack}
+                className="flex-1"
+              >
                 Back
               </Button>
               <Button
                 onClick={handleNext}
-                disabled={aiInputData.selectedEquipment.length === 0}
                 className="flex-1"
+                iconEnd={<ChevronRight />}
               >
-                Next: Parameters
+                Workout Parameters
               </Button>
             </div>
           )}
 
           {currentStep === 'parameters' && (
             <div className="flex gap-2 w-full">
-              <Button variant="outline" onClick={handleBack} className="flex-1">
+              <Button
+                variant="tertiary"
+                onClick={handleBack}
+                className="flex-1"
+              >
                 Back
               </Button>
               <Button
@@ -252,7 +289,7 @@ export function QuickWorkoutAiWizard({
           {currentStep === 'results' && !isGeneratingAiWorkout && (
             <div className="flex gap-2 w-full">
               <Button
-                variant="outline"
+                variant="tertiary"
                 onClick={handleBack}
                 disabled={isCreatingWorkout}
                 className="flex-1"
@@ -266,7 +303,7 @@ export function QuickWorkoutAiWizard({
                   disabled={isCreatingWorkout}
                   className="flex-1"
                 >
-                  {isCreatingWorkout ? 'Adding...' : 'Start Workout'}
+                  Start Workout
                 </Button>
               )}
             </div>

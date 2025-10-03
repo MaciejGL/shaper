@@ -32,7 +32,7 @@ const RPE_OPTIONS = [
   },
   {
     value: '8-10' as RpeRange,
-    label: 'Very Challenging',
+    label: 'No Pain, No Gain',
     description: 'Near maximum effort',
   },
 ]
@@ -49,7 +49,7 @@ export function RpeRangeSelector({
       transition={{ duration: 0.07, delay: 0.03 }}
       className={className}
     >
-      <Card>
+      <Card borderless>
         <CardHeader>
           <CardTitle className="text-lg font-semibold">
             Workout Intensity (RPE)
