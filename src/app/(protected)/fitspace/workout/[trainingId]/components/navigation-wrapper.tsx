@@ -36,9 +36,7 @@ export const NavigationWrapper = ({
   const [weekId, setWeekId] = useQueryState('week')
   const [dayId, setDayId] = useQueryState('day')
 
-  const { data: navigationData, error: navigationError } = use(
-    navigationDataPromise,
-  )
+  const { data: navigationData } = use(navigationDataPromise)
 
   // Handle both getWorkoutNavigation (trainer plans) and getQuickWorkoutNavigation (quick workouts)
   const initialPlan =
@@ -47,18 +45,6 @@ export const NavigationWrapper = ({
           .getWorkoutNavigation?.plan
       : (navigationData as GQLFitspaceGetQuickWorkoutNavigationQuery)
           .getQuickWorkoutNavigation?.plan
-
-  const queryType =
-    'getWorkoutNavigation' in (navigationData ?? {}) ? 'trainer' : 'quick'
-
-  console.info('🎨 NavigationWrapper received:', {
-    hasData: !!navigationData,
-    hasPlan: !!initialPlan,
-    weeksCount: initialPlan?.weeks?.length,
-    error: navigationError,
-    trainingId,
-    queryType,
-  })
 
   // Auto-select today's day on initial load if no URL parameters
   useEffect(() => {
@@ -109,12 +95,6 @@ export const NavigationWrapper = ({
 
   const finalPlan =
     navigationDataQuery?.getWorkoutNavigation?.plan ?? initialPlan
-
-  console.info('🎨 NavigationWrapper rendering:', {
-    hasFinalPlan: !!finalPlan,
-    weeksCount: finalPlan?.weeks?.length,
-    firstWeekDaysCount: finalPlan?.weeks?.[0]?.days?.length,
-  })
 
   return <Navigation plan={finalPlan} />
 }
