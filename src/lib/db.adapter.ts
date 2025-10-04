@@ -1,19 +1,34 @@
 import { PrismaPg } from '@prisma/adapter-pg'
+import { attachDatabasePool } from '@vercel/functions'
+import { Pool } from 'pg'
 
 import { PrismaClient } from '@/generated/prisma/client'
 
-// Alternative approach: Using PrismaPg adapter directly (like Nordvik project)
-// Only use this if you need custom SSL or connection handling
+// Vercel Fluid compute pattern with connection pooling
+// attachDatabasePool ensures idle connections close before function suspension
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
+  pool: Pool | undefined
 }
 
 function createPrismaClient(): PrismaClient {
-  const adapter = new PrismaPg({
+  // Create pool with connection limit - Vercel will manage lifecycle
+  const pool = new Pool({
     connectionString: process.env.DATABASE_URL!,
-    ssl: { rejectUnauthorized: false },
+    max: 3, // Low per-instance limit for serverless (3 × ~10 instances = ~30 total)
+    min: 0, // Allow full closure when idle
+    idleTimeoutMillis: 10000, // 10s - close idle connections quickly
+    connectionTimeoutMillis: 10000,
   })
+
+  // Attach pool to Vercel Fluid for proper cleanup before suspension
+  attachDatabasePool(pool)
+
+  // Store pool globally to prevent recreation
+  globalForPrisma.pool = pool
+
+  const adapter = new PrismaPg(pool)
 
   return new PrismaClient({
     adapter,
