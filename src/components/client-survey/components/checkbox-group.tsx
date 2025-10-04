@@ -28,9 +28,12 @@ export function CheckboxGroup({
       {options.map((option) => (
         <Button
           key={option.value}
-          variant={value.includes(option.value) ? 'default' : 'tertiary'}
+          variant="variantless"
           onClick={() => toggleOption(option.value)}
-          className="h-auto p-3 justify-start gap-2"
+          className={cn(
+            'h-auto p-3 justify-start gap-2 bg-card-on-card dark:hover:bg-card-on-card/80 hover:bg-primary/10',
+            value.includes(option.value) && 'bg-primary/20',
+          )}
           iconStart={
             value.includes(option.value) ? (
               <CheckSquareIcon />

@@ -152,7 +152,15 @@ export function ClientAssessment({ clientId }: ClientAssessmentProps) {
     },
     {
       question: 'Tracks nutrition',
-      answer: survey.tracksNutrition || 'Not specified',
+      answer: survey.tracksNutrition
+        ? survey.tracksNutrition === 'closely'
+          ? 'Yes, closely'
+          : survey.tracksNutrition === 'sometimes'
+            ? 'Sometimes'
+            : survey.tracksNutrition === 'never'
+              ? 'No'
+              : survey.tracksNutrition
+        : 'Not specified',
     },
     {
       question: 'Current supplements',

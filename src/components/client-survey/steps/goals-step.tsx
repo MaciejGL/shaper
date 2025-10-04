@@ -1,3 +1,5 @@
+import { AnimatePresence, motion } from 'framer-motion'
+
 import { RadioButtons } from '@/components/radio-buttons'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -41,46 +43,86 @@ export function GoalsStep({ data, onChange }: GoalsStepProps) {
       </div>
 
       <div className="space-y-6">
-        <div className="space-y-3">
-          <Label>What is your PRIMARY fitness goal?</Label>
+        <div>
+          <Label className="mb-3">
+            <p>What is your PRIMARY fitness goal?</p>
+          </Label>
           <RadioButtons
             value={data.primaryGoal}
             onValueChange={(value) => onChange({ primaryGoal: value })}
             options={PRIMARY_GOAL_OPTIONS}
             columns={1}
           />
-          {data.primaryGoal === 'primary-goal-other' && (
-            <Input
-              id="other-primary-goal"
-              placeholder="Please specify..."
-              value={data.otherPrimaryGoal || ''}
-              onChange={(e) => onChange({ otherPrimaryGoal: e.target.value })}
-              variant="secondary"
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {data.primaryGoal === 'primary-goal-other' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{
+                  duration: 0.2,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 25,
+                }}
+              >
+                <div className="pt-1">
+                  <Input
+                    id="other-primary-goal"
+                    placeholder="Please specify..."
+                    value={data.otherPrimaryGoal || ''}
+                    onChange={(e) =>
+                      onChange({ otherPrimaryGoal: e.target.value })
+                    }
+                    variant="secondary"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <div className="space-y-3">
-          <Label>What is your SECONDARY goal? (Optional)</Label>
+        <div>
+          <Label className="mb-3">
+            What is your SECONDARY goal? (Optional)
+          </Label>
           <RadioButtons
             value={data.secondaryGoal}
             onValueChange={(value) => onChange({ secondaryGoal: value })}
             options={SECONDARY_GOAL_OPTIONS}
             columns={1}
           />
-          {data.secondaryGoal === 'secondary-goal-other' && (
-            <Input
-              id="other-secondary-goal"
-              placeholder="Please specify..."
-              value={data.otherSecondaryGoal || ''}
-              onChange={(e) => onChange({ otherSecondaryGoal: e.target.value })}
-              variant="secondary"
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {data.secondaryGoal === 'secondary-goal-other' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{
+                  duration: 0.2,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 25,
+                }}
+              >
+                <div className="pt-1">
+                  <Input
+                    id="other-secondary-goal"
+                    placeholder="Please specify..."
+                    value={data.otherSecondaryGoal || ''}
+                    onChange={(e) =>
+                      onChange({ otherSecondaryGoal: e.target.value })
+                    }
+                    variant="secondary"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <div className="space-y-3">
-          <Label className="flex flex-col items-start gap-1">
+        <div>
+          <Label className="flex flex-col items-start gap-1 mb-3">
             Do you have a specific deadline or event?
             <p className="text-xs text-muted-foreground font-normal">
               (e.g., competition, wedding, marathon)
@@ -96,15 +138,31 @@ export function GoalsStep({ data, onChange }: GoalsStepProps) {
               { value: 'no', label: 'No' },
             ]}
           />
-          {data.hasDeadline && (
-            <Input
-              id="deadline"
-              placeholder="Describe your deadline or event..."
-              value={data.deadline || ''}
-              onChange={(e) => onChange({ deadline: e.target.value })}
-              variant="secondary"
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {data.hasDeadline && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{
+                  duration: 0.2,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 25,
+                }}
+              >
+                <div className="pt-1">
+                  <Input
+                    id="deadline"
+                    placeholder="Describe your deadline or event..."
+                    value={data.deadline || ''}
+                    onChange={(e) => onChange({ deadline: e.target.value })}
+                    variant="secondary"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

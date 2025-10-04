@@ -1,3 +1,5 @@
+import { AnimatePresence, motion } from 'framer-motion'
+
 import { RadioButtons } from '@/components/radio-buttons'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -100,8 +102,8 @@ export function PreferencesStep({ data, onChange }: PreferencesStepProps) {
           />
         </div>
 
-        <div className="space-y-3">
-          <Label>
+        <div>
+          <Label className="mb-3">
             Do you have any injuries or medical conditions we should know about?
           </Label>
           <RadioButtons
@@ -114,15 +116,31 @@ export function PreferencesStep({ data, onChange }: PreferencesStepProps) {
               { value: 'no', label: 'No' },
             ]}
           />
-          {data.hasInjuries && (
-            <Textarea
-              id="injuries"
-              placeholder="Please describe any injuries or conditions..."
-              value={data.injuries || ''}
-              onChange={(e) => onChange({ injuries: e.target.value })}
-              rows={3}
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {data.hasInjuries && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{
+                  duration: 0.2,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 25,
+                }}
+              >
+                <div className="pt-1">
+                  <Textarea
+                    id="injuries"
+                    placeholder="Please describe any injuries or conditions..."
+                    value={data.injuries || ''}
+                    onChange={(e) => onChange({ injuries: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

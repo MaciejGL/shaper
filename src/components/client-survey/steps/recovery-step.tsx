@@ -44,29 +44,32 @@ export function RecoveryStep({ data, onChange }: RecoveryStepProps) {
             </p>
           </Label>
           <RadioButtons
-            value={data.hasSleepIssues ? 'yes' : 'no'}
+            value={data.hasSleepIssues ? 'yes-sleep' : 'no-sleep'}
             onValueChange={(value) =>
-              onChange({ hasSleepIssues: value === 'yes' })
+              onChange({ hasSleepIssues: value === 'yes-sleep' })
             }
             options={[
-              { value: 'yes', label: 'Yes' },
-              { value: 'no', label: 'No' },
+              { value: 'yes-sleep', label: 'Yes' },
+              { value: 'no-sleep', label: 'No' },
             ]}
           />
         </div>
 
         <div className="space-y-3">
-          <Label>
-            Have you had blood work done recently for vitamins and minerals?
+          <Label className="flex flex-col items-start gap-1">
+            Have you had blood work done recently?
+            <p className="text-xs text-muted-foreground font-normal">
+              (e.g., vitamins and minerals)
+            </p>
           </Label>
           <RadioButtons
-            value={data.hasRecentBloodTests ? 'yes' : 'no'}
+            value={data.hasRecentBloodTests ? 'yes-blood' : 'no-blood'}
             onValueChange={(value) =>
-              onChange({ hasRecentBloodTests: value === 'yes' })
+              onChange({ hasRecentBloodTests: value === 'yes-blood' })
             }
             options={[
-              { value: 'yes', label: 'Yes' },
-              { value: 'no', label: 'No' },
+              { value: 'yes-blood', label: 'Yes' },
+              { value: 'no-blood', label: 'No' },
             ]}
           />
         </div>

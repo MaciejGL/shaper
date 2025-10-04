@@ -61,7 +61,7 @@ export function RadioButtons<T extends string>({
   return (
     <div className={cn('space-y-3', className)}>
       <RadioGroup
-        className={cn('grid gap-2', `grid-cols-${columns}`)}
+        className={cn('grid gap-1', `grid-cols-${columns}`)}
         value={value}
         onValueChange={onValueChange}
       >
@@ -71,8 +71,8 @@ export function RadioButtons<T extends string>({
             htmlFor={option.value}
             className={cn(
               'flex items-center gap-2 px-4 py-3 rounded-md cursor-pointer transition-colors',
-              'bg-card-on-card dark:hover:bg-card-on-card/80',
-              value === option.value && 'bg-primary/10',
+              'bg-card-on-card dark:hover:bg-card-on-card/80 hover:bg-primary/10',
+              value === option.value && 'bg-primary/20',
               itemClassName,
             )}
           >

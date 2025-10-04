@@ -1,3 +1,5 @@
+import { AnimatePresence, motion } from 'framer-motion'
+
 import { RadioButtons } from '@/components/radio-buttons'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -40,7 +42,7 @@ const DIET_QUALITY_OPTIONS = [
 const TRACKING_OPTIONS = [
   { value: 'closely', label: 'Yes, closely' },
   { value: 'sometimes', label: 'Sometimes' },
-  { value: 'no', label: 'No' },
+  { value: 'never', label: 'No' },
 ]
 
 const SUPPLEMENT_OPTIONS = [
@@ -66,8 +68,8 @@ export function NutritionStep({ data, onChange }: NutritionStepProps) {
       </div>
 
       <div className="space-y-6">
-        <div className="space-y-3">
-          <Label className="flex flex-col items-start gap-1">
+        <div>
+          <Label className="flex flex-col items-start gap-1 mb-3">
             What type of cuisine do you typically enjoy?
             <p className="text-xs text-muted-foreground font-normal">
               (select all that apply)
@@ -78,19 +80,37 @@ export function NutritionStep({ data, onChange }: NutritionStepProps) {
             value={data.cuisineTypes}
             onChange={(value) => onChange({ cuisineTypes: value })}
           />
-          {data.cuisineTypes.includes('cuisine-other') && (
-            <Input
-              id="other-cuisine"
-              placeholder="Please specify..."
-              value={data.otherCuisine || ''}
-              onChange={(e) => onChange({ otherCuisine: e.target.value })}
-              variant="secondary"
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {data.cuisineTypes.includes('cuisine-other') && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{
+                  duration: 0.2,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 25,
+                }}
+              >
+                <div className="pt-1">
+                  <Input
+                    id="other-cuisine"
+                    placeholder="Please specify..."
+                    value={data.otherCuisine || ''}
+                    onChange={(e) => onChange({ otherCuisine: e.target.value })}
+                    variant="secondary"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
-        <div className="space-y-3">
-          <Label>Do you have any food allergies or intolerances?</Label>
+        <div>
+          <Label className="mb-3">
+            Do you have any food allergies or intolerances?
+          </Label>
           <RadioButtons
             value={data.hasAllergies ? 'yes' : 'no'}
             onValueChange={(value) =>
@@ -101,15 +121,31 @@ export function NutritionStep({ data, onChange }: NutritionStepProps) {
               { value: 'no', label: 'No' },
             ]}
           />
-          {data.hasAllergies && (
-            <Textarea
-              id="allergies"
-              placeholder="Please list your allergies or intolerances (e.g., gluten, dairy, nuts)..."
-              value={data.allergies || ''}
-              onChange={(e) => onChange({ allergies: e.target.value })}
-              rows={3}
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {data.hasAllergies && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{
+                  duration: 0.2,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 25,
+                }}
+              >
+                <div className="pt-1">
+                  <Textarea
+                    id="allergies"
+                    placeholder="Please list your allergies or intolerances (e.g., gluten, dairy, nuts)..."
+                    value={data.allergies || ''}
+                    onChange={(e) => onChange({ allergies: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="space-y-3">
@@ -131,8 +167,8 @@ export function NutritionStep({ data, onChange }: NutritionStepProps) {
           />
         </div>
 
-        <div className="space-y-3">
-          <Label className="flex flex-col items-start gap-1">
+        <div>
+          <Label className="flex flex-col items-start gap-1 mb-3">
             Do you currently take any supplements?
             <p className="text-xs text-muted-foreground font-normal">
               (select all that apply)
@@ -143,15 +179,33 @@ export function NutritionStep({ data, onChange }: NutritionStepProps) {
             value={data.supplements}
             onChange={(value) => onChange({ supplements: value })}
           />
-          {data.supplements.includes('supplement-other') && (
-            <Input
-              id="other-supplement"
-              placeholder="Please specify..."
-              value={data.otherSupplement || ''}
-              onChange={(e) => onChange({ otherSupplement: e.target.value })}
-              variant="secondary"
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {data.supplements.includes('supplement-other') && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{
+                  duration: 0.2,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 25,
+                }}
+              >
+                <div className="pt-1">
+                  <Input
+                    id="other-supplement"
+                    placeholder="Please specify..."
+                    value={data.otherSupplement || ''}
+                    onChange={(e) =>
+                      onChange({ otherSupplement: e.target.value })
+                    }
+                    variant="secondary"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>

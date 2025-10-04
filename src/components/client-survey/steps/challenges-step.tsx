@@ -1,3 +1,5 @@
+import { AnimatePresence, motion } from 'framer-motion'
+
 import { RadioButtons } from '@/components/radio-buttons'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -30,8 +32,8 @@ export function ChallengesStep({ data, onChange }: ChallengesStepProps) {
       </div>
 
       <div className="space-y-6">
-        <div className="space-y-3">
-          <Label>
+        <div>
+          <Label className="mb-3">
             What's your biggest challenge in reaching your fitness goals?
           </Label>
           <RadioButtons
@@ -39,15 +41,33 @@ export function ChallengesStep({ data, onChange }: ChallengesStepProps) {
             onValueChange={(value) => onChange({ biggestChallenge: value })}
             options={CHALLENGE_OPTIONS}
           />
-          {data.biggestChallenge === 'challenge-other' && (
-            <Input
-              id="other-challenge"
-              placeholder="Please specify..."
-              value={data.otherChallenge || ''}
-              onChange={(e) => onChange({ otherChallenge: e.target.value })}
-              variant="secondary"
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {data.biggestChallenge === 'challenge-other' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{
+                  duration: 0.2,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 25,
+                }}
+              >
+                <div className="pt-1">
+                  <Input
+                    id="other-challenge"
+                    placeholder="Please specify..."
+                    value={data.otherChallenge || ''}
+                    onChange={(e) =>
+                      onChange({ otherChallenge: e.target.value })
+                    }
+                    variant="secondary"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="space-y-2">

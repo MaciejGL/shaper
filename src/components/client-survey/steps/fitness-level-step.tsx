@@ -1,3 +1,5 @@
+import { AnimatePresence, motion } from 'framer-motion'
+
 import { RadioButtons } from '@/components/radio-buttons'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -72,8 +74,8 @@ export function FitnessLevelStep({ data, onChange }: FitnessLevelStepProps) {
           />
         </div>
 
-        <div className="space-y-3">
-          <Label className="flex flex-col items-start gap-1">
+        <div>
+          <Label className="flex flex-col items-start gap-1 mb-3">
             <p>What type of exercise do you currently do?</p>
             <p className="text-xs text-muted-foreground font-normal">
               (select all that apply)
@@ -84,15 +86,34 @@ export function FitnessLevelStep({ data, onChange }: FitnessLevelStepProps) {
             value={data.exerciseTypes}
             onChange={(value) => onChange({ exerciseTypes: value })}
           />
-          {data.exerciseTypes.includes('exercise-other') && (
-            <Input
-              id="other-exercise-type"
-              placeholder="Please specify..."
-              value={data.otherExerciseType || ''}
-              onChange={(e) => onChange({ otherExerciseType: e.target.value })}
-              variant="secondary"
-            />
-          )}
+          <AnimatePresence mode="wait">
+            {data.exerciseTypes.includes('exercise-other') && (
+              <motion.div
+                key="other-exercise-type"
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{
+                  duration: 0.2,
+                  type: 'spring',
+                  stiffness: 200,
+                  damping: 25,
+                }}
+              >
+                <div className="pt-1">
+                  <Input
+                    id="other-exercise-type"
+                    placeholder="Please specify..."
+                    value={data.otherExerciseType || ''}
+                    onChange={(e) =>
+                      onChange({ otherExerciseType: e.target.value })
+                    }
+                    variant="secondary"
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <div className="space-y-3">
