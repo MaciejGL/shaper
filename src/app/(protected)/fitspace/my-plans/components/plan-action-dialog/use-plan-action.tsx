@@ -15,7 +15,7 @@ import {
 } from '@/generated/graphql-client'
 import { queryInvalidation } from '@/lib/query-invalidation'
 
-import { PlanAction, PlanTab } from '../../types'
+import { PlanAction } from '../../types'
 
 export function usePlanAction() {
   const [dialogState, setDialogState] = useState<{
