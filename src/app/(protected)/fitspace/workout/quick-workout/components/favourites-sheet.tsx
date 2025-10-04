@@ -36,8 +36,6 @@ export function FavouritesSheet({
       onSuccess: async () => {
         // Use centralized query invalidation for starting workout from favourite
         await queryInvalidation.favouriteWorkoutStart(queryClient)
-        // Small delay to ensure server components can refetch (important for production)
-        await new Promise((resolve) => setTimeout(resolve, 100))
 
         // Refresh server components
         router.refresh()

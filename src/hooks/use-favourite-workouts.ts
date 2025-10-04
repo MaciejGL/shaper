@@ -62,15 +62,9 @@ export function useStartWorkoutFromFavourite() {
 
       const parts = data.startWorkoutFromFavourite.split('|')
 
-      // Ensure all cache updates complete before navigation
       await queryInvalidation.favouriteWorkoutStart(queryClient)
-      // Small delay to ensure server components can refetch (important for production)
-      await new Promise((resolve) => setTimeout(resolve, 100))
 
       startTransition(() => {
-        // Refresh BEFORE navigation to ensure server components have fresh data
-        router.refresh()
-
         if (parts.length === 3) {
           const [, weekId, dayId] = parts
           router.push(
@@ -79,6 +73,8 @@ export function useStartWorkoutFromFavourite() {
         } else {
           router.push(`/fitspace/workout/quick-workout`)
         }
+
+        router.refresh()
       })
     },
   })

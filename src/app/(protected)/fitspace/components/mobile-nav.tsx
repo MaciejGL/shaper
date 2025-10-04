@@ -13,12 +13,9 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
-import { useFitspaceGetWorkoutNavigationQuery } from '@/generated/graphql-client'
 import { useKeyboardVisible } from '@/hooks/use-keyboard-visible'
 import { tryOpenAppDeepLink } from '@/lib/deep-links'
 import { cn } from '@/lib/utils'
-
-import { getDefaultSelection } from '../workout/[trainingId]/components/navigation-utils'
 
 export function MobileNav() {
   const pathname = usePathname()
@@ -29,38 +26,16 @@ export function MobileNav() {
     null,
   )
 
-  // Subscribe to navigation cache updates (will trigger re-render when cache changes)
-  const { data: workoutNavigationQuery } = useFitspaceGetWorkoutNavigationQuery(
-    { trainingId: '', allWeeks: false },
-    {
-      queryKey: ['navigation'],
-      refetchOnMount: false, // Use cache on mount
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      // enabled: true by default, so it WILL refetch when invalidated
-    },
-  )
-
-  const plan = workoutNavigationQuery?.getWorkoutNavigation?.plan
-  const trainingId = plan?.id
-  const { weekId, dayId } = getDefaultSelection(plan)
-
   useEffect(() => {
     setClickedItem(null)
     setPendingNavigation(null)
   }, [pathname])
 
   const navItems = useMemo(() => {
-    // Use stable workout URL during hydration to prevent hydration mismatch
-    const workoutHref = trainingId
-      ? `/fitspace/workout/${trainingId}?weekId=${weekId || ''}&dayId=${dayId || ''}`
-      : '/fitspace/workout' // Fallback to plans page when no training data available
-
     return [
       {
         id: 'workout',
-        href: workoutHref,
+        href: '/fitspace/workout',
         icon: Dumbbell,
         label: 'Workout',
         prefetch: true,
@@ -101,7 +76,7 @@ export function MobileNav() {
         prefetch: true,
       },
     ]
-  }, [trainingId, weekId, dayId])
+  }, [])
 
   // Hide navigation when keyboard is visible
   if (isKeyboardVisible) {
