@@ -114,21 +114,22 @@ export const queryInvalidation = {
   },
 
   /**
-   * Aggressively invalidate all workout and plan queries with 'all' refetch type
-   * Use when plan state changes (activate/pause/close/delete) to ensure fresh data on navigation
+   * Handle plan state changes (activate/pause/close/delete)
+   * Removes old trainer plan queries to avoid "Plan is not active" errors
+   * Only invalidates plans and navigation - does NOT touch quick workout day queries
    */
   planStateChange: async (queryClient: QueryClient) => {
+    // Remove ALL workout day queries (both trainer plan and quick workout)
+    // This prevents "Plan is not active" errors when trying to refetch paused plan queries
+    queryClient.removeQueries({
+      queryKey: ['FitspaceGetWorkoutDay'],
+      exact: false,
+    })
+
+    // Invalidate only plans and navigation - let quick workout pages refetch their own data when mounted
     await Promise.all([
       queryClient.invalidateQueries({
         queryKey: ['navigation'],
-        refetchType: 'all',
-      }),
-      queryClient.invalidateQueries({
-        queryKey: ['FitspaceGetQuickWorkoutNavigation'],
-        refetchType: 'all',
-      }),
-      queryClient.invalidateQueries({
-        queryKey: ['FitspaceGetWorkoutDay'],
         refetchType: 'all',
       }),
       queryClient.invalidateQueries({
