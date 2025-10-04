@@ -13,7 +13,6 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { formatDistanceToNow } from 'date-fns'
 import {
   ChevronRight,
   Clock,
@@ -94,10 +93,6 @@ export function FavouriteWorkoutCard({
       favouriteId: favourite.id,
       exercises: favourite.exercises,
     })
-
-  const createdAgo = formatDistanceToNow(new Date(favourite.createdAt), {
-    addSuffix: true,
-  })
 
   const hasMuscleGroups = uniqueMuscleGroups.length > 0
   const hasExercises = favourite.exercises.length > 0
