@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { PlusIcon, SparklesIcon } from 'lucide-react'
+import { ChevronRight, PlusIcon, SparklesIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { ButtonLink } from '@/components/ui/button-link'
@@ -24,7 +24,7 @@ export function EmptyFavouriteOptions({
   onOpenAddExercise,
   hasExercises = false,
 }: EmptyFavouriteOptionsProps) {
-  const { hasPremium: hasPremiumAccess } = useUser()
+  const { hasPremium: hasPremiumAccess, isLoading: isLoadingUser } = useUser()
 
   return (
     <div className="space-y-4">
@@ -40,21 +40,22 @@ export function EmptyFavouriteOptions({
           transition={{ duration: 0.3 }}
         >
           <Card
+            variant="premium"
             className="cursor-pointer transition-all"
             onClick={hasPremiumAccess ? onOpenAiWizard : undefined}
           >
             <CardContent>
               <div className="flex items-center">
-                <div className="p-2 mr-3 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-lg">
-                  <SparklesIcon className="size-5 text-purple-500" />
+                <div className="p-2 mr-3 bg-gradient-to-br from-amber-500/20 to-amber-500/20 rounded-lg">
+                  <SparklesIcon className="size-5 text-amber-500" />
                 </div>
                 <div className="flex-1 pr-2">
-                  <CardTitle className="text-lg">Generate with AI</CardTitle>
+                  <CardTitle className="text-lg">Generate Workout</CardTitle>
                   <CardDescription>
-                    Let AI create a workout based on your preferences
+                    Let us create a workout based on your preferences
                   </CardDescription>
                 </div>
-                {!hasPremiumAccess ? (
+                {!hasPremiumAccess && !isLoadingUser ? (
                   <ButtonLink
                     href="/fitspace/settings/subscription"
                     size="xs"
@@ -63,7 +64,7 @@ export function EmptyFavouriteOptions({
                     Upgrade
                   </ButtonLink>
                 ) : (
-                  <Button variant="link" iconOnly={<SparklesIcon />}>
+                  <Button variant="link" iconOnly={<ChevronRight />}>
                     Generate
                   </Button>
                 )}
@@ -80,6 +81,7 @@ export function EmptyFavouriteOptions({
         transition={{ duration: 0.3, delay: 0.1 }}
       >
         <Card
+          variant="tertiary"
           className="cursor-pointer transition-all"
           onClick={onOpenAddExercise}
         >
@@ -94,7 +96,7 @@ export function EmptyFavouriteOptions({
                   Build your template one exercise at a time
                 </CardDescription>
               </div>
-              <Button variant="link" iconOnly={<PlusIcon />}>
+              <Button variant="link" iconOnly={<ChevronRight />}>
                 Add
               </Button>
             </div>

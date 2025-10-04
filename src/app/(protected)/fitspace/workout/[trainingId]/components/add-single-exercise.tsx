@@ -29,6 +29,7 @@ import {
   useFitspaceGetExercisesQuery,
   useFitspaceGetWorkoutDayQuery,
 } from '@/generated/graphql-client'
+import { queryInvalidation } from '@/lib/query-invalidation'
 
 type Exercise = NonNullable<
   NonNullable<GQLFitspaceGetExercisesQuery['getExercises']>['publicExercises']
@@ -72,22 +73,13 @@ export function AddSingleExercise({
   const { mutate: addExercise, isPending: isAdding } =
     useFitspaceAddSingleExerciseToDayMutation({
       onSuccess: async () => {
-        // Invalidate the ACTUAL query that the component uses
+        // Invalidate all workout-related queries
+        await queryInvalidation.workoutAndPlans(queryClient)
+
+        // Refetch the specific day query to ensure fresh data
         const queryKeyToInvalidate = useFitspaceGetWorkoutDayQuery.getKey({
           dayId: dayIdFromUrl || dayId,
         })
-
-        // Invalidate queries to refresh the data
-        await Promise.all([
-          queryClient.invalidateQueries({ queryKey: queryKeyToInvalidate }),
-          queryClient.invalidateQueries({ queryKey: ['navigation'] }),
-          queryClient.invalidateQueries({
-            queryKey: ['FitspaceGetQuickWorkoutNavigation'],
-          }),
-          queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
-        ])
-
-        // Refetch the day query to ensure fresh data
         await queryClient.refetchQueries({
           queryKey: queryKeyToInvalidate,
         })

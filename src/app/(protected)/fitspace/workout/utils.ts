@@ -50,3 +50,25 @@ export const getWeekRange = (week: NavigationWeek, plan: NavigationPlan) => {
 
   return { weekStart, weekEnd }
 }
+
+export const getSetRange = (set?: {
+  minReps?: number | null
+  maxReps?: number | null
+  reps?: number | null
+}) => {
+  if (!set) return null
+  switch (true) {
+    case typeof set.minReps === 'number' &&
+      typeof set.maxReps === 'number' &&
+      set.minReps === set.maxReps:
+      return `${set.minReps}`
+    case typeof set.minReps === 'number' && typeof set.maxReps === 'number':
+      return `${set.minReps}-${set.maxReps}`
+    case typeof set.minReps === 'number':
+      return `${set.minReps}`
+    case typeof set.maxReps === 'number':
+      return `${set.maxReps}`
+    default:
+      return set.reps
+  }
+}

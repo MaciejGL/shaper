@@ -15,7 +15,7 @@ const cardVariants = cva(
         tertiary:
           'border-0 bg-card-on-card shadow-[inset_0_1px_2px_rgba(0,0,0,0.05)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2)]',
         premium:
-          'relative bg-card border-[1px] border-transparent bg-origin-border [background-clip:padding-box,border-box] [background-image:linear-gradient(var(--card),var(--card)),linear-gradient(135deg,rgb(245_158_11),rgb(251_146_60),rgb(249_115_22))] dark:[background-image:linear-gradient(var(--card),var(--card)),linear-gradient(135deg,rgb(251_191_36),rgb(251_146_60),rgb(251_146_60))] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2),0_8px_24px_rgba(0,0,0,0.4)]',
+          'relative bg-card border-[2px] dark:border-[1px] border-transparent bg-origin-border [background-clip:padding-box,border-box] [background-image:linear-gradient(var(--card),var(--card)),linear-gradient(135deg,rgb(245_158_11),rgb(251_146_60),rgb(249_115_22))] dark:[background-image:linear-gradient(var(--card),var(--card)),linear-gradient(135deg,rgb(251_191_36),rgb(251_146_60),rgb(251_146_60))] shadow-[inset_0_1px_2px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.08)] dark:shadow-[inset_0_1px_2px_rgba(0,0,0,0.2),0_8px_24px_rgba(0,0,0,0.4)]',
       },
     },
     defaultVariants: {

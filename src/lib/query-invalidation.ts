@@ -1,0 +1,122 @@
+import { QueryClient } from '@tanstack/react-query'
+
+/**
+ * Centralized query invalidation utilities
+ * Single source of truth for all query invalidation patterns
+ *
+ * @example
+ * ```typescript
+ * import { queryInvalidation } from '@/lib/query-invalidation'
+ *
+ * // In a mutation's onSuccess callback:
+ * const mutation = useSomeMutation({
+ *   onSuccess: async () => {
+ *     // Invalidate all workout-related queries
+ *     await queryInvalidation.workout(queryClient)
+ *
+ *     // Or invalidate both workouts and plans
+ *     await queryInvalidation.workoutAndPlans(queryClient)
+ *
+ *     // Or invalidate just favourites
+ *     await queryInvalidation.favourites(queryClient)
+ *   }
+ * })
+ * ```
+ */
+
+export const queryInvalidation = {
+  /**
+   * Invalidate all workout-related queries
+   */
+  workout: async (queryClient: QueryClient) => {
+    await Promise.all([
+      // Invalidate all workout day queries (prefix match)
+      queryClient.invalidateQueries({
+        queryKey: ['FitspaceGetWorkoutDay'],
+        refetchType: 'all', // Refetch both active and inactive queries
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['FitspaceGetWorkout'],
+        refetchType: 'all',
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['navigation'],
+        refetchType: 'all',
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+        refetchType: 'all',
+      }),
+    ])
+  },
+
+  /**
+   * Invalidate workout navigation queries only
+   */
+  workoutNavigation: async (queryClient: QueryClient) => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['navigation'] }),
+      queryClient.invalidateQueries({
+        queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+      }),
+    ])
+  },
+
+  /**
+   * Invalidate all workout day queries
+   */
+  workoutDays: async (queryClient: QueryClient) => {
+    await queryClient.invalidateQueries({
+      queryKey: ['FitspaceGetWorkoutDay'],
+    })
+  },
+
+  /**
+   * Invalidate specific workout day by ID
+   */
+  workoutDay: async (queryClient: QueryClient, dayId: string) => {
+    await queryClient.invalidateQueries({
+      queryKey: ['FitspaceGetWorkoutDay', { dayId }],
+    })
+  },
+
+  /**
+   * Invalidate all plans-related queries
+   */
+  plans: async (queryClient: QueryClient) => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] }),
+      queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
+    ])
+  },
+
+  /**
+   * Invalidate favourite workouts
+   */
+  favourites: async (queryClient: QueryClient) => {
+    await queryClient.invalidateQueries({ queryKey: ['GetFavouriteWorkouts'] })
+  },
+
+  /**
+   * Invalidate all workout and plan-related queries
+   * Use when changes affect both workouts and plans
+   */
+  workoutAndPlans: async (queryClient: QueryClient) => {
+    await Promise.all([
+      queryInvalidation.workout(queryClient),
+      queryInvalidation.plans(queryClient),
+    ])
+  },
+
+  /**
+   * Invalidate everything related to favourites and workouts
+   * Use when starting a workout from favourite
+   */
+  favouriteWorkoutStart: async (queryClient: QueryClient) => {
+    await Promise.all([
+      queryInvalidation.workout(queryClient),
+      queryInvalidation.plans(queryClient),
+      queryInvalidation.favourites(queryClient),
+    ])
+  },
+}

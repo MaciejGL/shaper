@@ -100,7 +100,7 @@ export function ConfirmationModal({
           <Button
             onClick={handleCancel}
             disabled={isLoading}
-            variant="secondary"
+            variant="tertiary"
           >
             {cancelText}
           </Button>

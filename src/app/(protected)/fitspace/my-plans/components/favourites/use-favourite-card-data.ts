@@ -12,11 +12,13 @@ type FavouriteWorkout = NonNullable<
 interface UseFavouriteCardDataProps {
   favourite: FavouriteWorkout
   workoutStatus: WorkoutStatusAnalysis
+  isStarting?: boolean
 }
 
 export function useFavouriteCardData({
   favourite,
   workoutStatus,
+  isStarting = false,
 }: UseFavouriteCardDataProps) {
   const totalExercises = favourite.exercises.length
   const totalSets = favourite.exercises.reduce(
@@ -49,33 +51,33 @@ export function useFavouriteCardData({
     subtext?: string
     loading: boolean
   } => {
-    if (workoutStatus.canStart) {
+    if (!workoutStatus.canStart) {
       return {
         disabled: true,
         variant: 'tertiary',
         text: 'Start',
         subtext:
           'You have an active training plan. Complete or pause your plan first, then use quick workouts for extra training.',
-        loading: false,
+        loading: isStarting,
       }
     }
 
     if (workoutStatus.needsConfirmation) {
       return {
-        disabled: false,
+        disabled: isStarting,
         variant: 'tertiary',
         text: 'Replace & Start',
         subtext:
           'You have a workout planned for today. Starting a favourite will replace it.',
-        loading: false,
+        loading: isStarting,
       }
     }
 
     return {
-      disabled: false,
+      disabled: isStarting,
       variant: 'default',
       text: 'Start Workout',
-      loading: false,
+      loading: isStarting,
     }
   }
 

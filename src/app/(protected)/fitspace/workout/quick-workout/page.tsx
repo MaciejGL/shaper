@@ -21,11 +21,13 @@ export default async function QuickWorkoutPage({
     gqlServerFetch<GQLFitspaceGetQuickWorkoutNavigationQuery>(
       FitspaceGetQuickWorkoutNavigationDocument,
       {},
+      { cache: 'no-store' },
     )
 
   const dayPromise = gqlServerFetch<GQLFitspaceGetQuickWorkoutDayQuery>(
     FitspaceGetQuickWorkoutDayDocument,
     { dayId: dayId || undefined },
+    { cache: 'no-store' },
   )
 
   return (

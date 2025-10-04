@@ -67,7 +67,7 @@ export function ClearWorkoutModal({
           </DialogHeader>
           <DialogFooter>
             <Button
-              variant="outline"
+              variant="tertiary"
               onClick={() => setOpen(false)}
               disabled={isClearing}
             >

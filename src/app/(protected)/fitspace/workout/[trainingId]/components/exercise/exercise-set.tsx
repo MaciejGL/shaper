@@ -30,6 +30,7 @@ import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 import { cn } from '@/lib/utils'
 import { calculateEstimated1RM } from '@/utils/one-rm-calculator'
 
+import { getSetRange } from '../../../utils'
 import { ExerciseWeightInput } from '../exercise-weight-input'
 import { createOptimisticSetUpdate } from '../optimistic-updates'
 
@@ -195,22 +196,7 @@ export function ExerciseSet({
     return () => debouncedUpdate.cancel()
   }, [reps, weight, debouncedUpdate])
 
-  const repRange = useMemo(() => {
-    switch (true) {
-      case typeof set.minReps === 'number' &&
-        typeof set.maxReps === 'number' &&
-        set.minReps === set.maxReps:
-        return `${set.minReps}`
-      case typeof set.minReps === 'number' && typeof set.maxReps === 'number':
-        return `${set.minReps}-${set.maxReps}`
-      case typeof set.minReps === 'number':
-        return `${set.minReps}`
-      case typeof set.maxReps === 'number':
-        return `${set.maxReps}`
-      default:
-        return set.reps
-    }
-  }, [set.minReps, set.maxReps, set.reps])
+  const repRange = useMemo(() => getSetRange(set), [set])
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,

@@ -1,6 +1,6 @@
 'use client'
 
-import { BookmarkIcon, Plus } from 'lucide-react'
+import { BookmarkIcon, Clock, Dot, Play } from 'lucide-react'
 import { useState } from 'react'
 
 import { StateCard } from '@/components/state-card'
@@ -10,6 +10,7 @@ import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
@@ -19,6 +20,9 @@ import {
   useGetFavouriteWorkoutsQuery,
 } from '@/generated/graphql-client'
 import { cn } from '@/lib/utils'
+import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
+
+import { getSetRange } from '../../utils'
 
 interface FavouritesStepProps {
   onSelectFavourite: (favouriteId: string) => void
@@ -62,22 +66,42 @@ export function FavouritesStep({
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        {favourites.map((favourite: FavouriteWorkout) => (
-          <Card
-            // borderless
-            key={favourite.id}
-            className={cn('cursor-pointer transition-all')}
-          >
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
+        {favourites.map((favourite: FavouriteWorkout) => {
+          const estimatedTime = estimateWorkoutTime(favourite.exercises)
+          return (
+            <Card
+              key={favourite.id}
+              className={cn('cursor-pointer transition-all')}
+            >
+              <CardHeader className="space-y-2">
+                <div className="flex justify-between">
                   <CardTitle className="text-base">{favourite.title}</CardTitle>
-                  {favourite.description && (
-                    <CardDescription className="mt-1">
-                      {favourite.description}
-                    </CardDescription>
+                  {estimatedTime > 0 && (
+                    <Badge variant="secondary">
+                      <Clock className="w-3 h-3 mr-1" />~{estimatedTime}
+                      min
+                    </Badge>
                   )}
                 </div>
+                {favourite.description && (
+                  <CardDescription className="mt-1">
+                    {favourite.description}
+                  </CardDescription>
+                )}
+              </CardHeader>
+
+              <CardContent className="pt-0 pb-4 space-y-4">
+                {/* Exercise Preview */}
+                <div className="space-y-1">
+                  <div className="text-sm flex flex-col gap-1">
+                    {favourite.exercises.map((exercise) => (
+                      <ExerciseItem key={exercise.id} exercise={exercise} />
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+
+              <CardFooter className="grid justify-end">
                 <Button
                   size="sm"
                   disabled={isStarting}
@@ -86,29 +110,38 @@ export function FavouritesStep({
                     e.stopPropagation()
                     handleSelectFavourite(favourite.id)
                   }}
-                  iconEnd={<Plus />}
+                  iconEnd={<Play className="fill-secondary stroke-secondary" />}
                 >
-                  Add
+                  Start Workout
                 </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-                {favourite.exercises && favourite.exercises.length > 0 && (
-                  <>
-                    <div className="flex flex-col gap-1">
-                      {favourite.exercises.map((exercise, index: number) => (
-                        <Badge key={index} variant="secondary" size="lg">
-                          {index + 1}. {exercise.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardFooter>
+            </Card>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function ExerciseItem({
+  exercise,
+}: {
+  exercise: FavouriteWorkout['exercises'][0]
+}) {
+  const repRange = getSetRange(exercise.sets.at(0))
+  return (
+    <div
+      key={exercise.id}
+      className="grid grid-cols-[minmax(14px,auto)_1fr] items-center gap-2"
+    >
+      <div className="text-sm text-muted-foreground">{exercise.order}</div>
+      <div className="p-2 bg-card-on-card rounded-md">
+        <p>{exercise.name}</p>
+        <div className="flex items-center text-sm text-muted-foreground">
+          <p>{exercise.sets.length} sets</p>
+          {repRange && <Dot />}
+          {repRange && <p>{repRange} reps</p>}
+        </div>
       </div>
     </div>
   )

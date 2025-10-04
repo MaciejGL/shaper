@@ -20,6 +20,7 @@ import {
   useFitspaceGetExercisesQuery,
   useFitspaceGetWorkoutDayQuery,
 } from '@/generated/graphql-client'
+import { queryInvalidation } from '@/lib/query-invalidation'
 
 import { useAiWorkoutGeneration } from '../hooks/use-ai-workout-generation'
 
@@ -72,26 +73,14 @@ export function QuickWorkoutAiWizard({
   const { mutateAsync: createQuickWorkout, isPending: isCreatingWorkout } =
     useFitspaceCreateQuickWorkoutMutation({
       onSuccess: async () => {
-        // Invalidate the ACTUAL query that the component uses
+        // Invalidate all workout-related queries
+        await queryInvalidation.workoutAndPlans(queryClient)
+
+        // Refetch the specific day query to ensure fresh data
         const currentDayId = dayIdFromUrl || dayId
         const queryKeyToInvalidate = useFitspaceGetWorkoutDayQuery.getKey({
           dayId: currentDayId,
         })
-
-        // Invalidate queries to refresh the data
-        await Promise.all([
-          queryClient.invalidateQueries({ queryKey: queryKeyToInvalidate }),
-          queryClient.invalidateQueries({ queryKey: ['navigation'] }),
-          queryClient.invalidateQueries({
-            queryKey: ['FitspaceGetQuickWorkoutNavigation'],
-          }),
-          queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
-          queryClient.invalidateQueries({
-            queryKey: ['FitspaceGetQuickWorkoutDay'],
-          }),
-        ])
-
-        // Refetch the day query to ensure fresh data
         await queryClient.refetchQueries({
           queryKey: queryKeyToInvalidate,
         })

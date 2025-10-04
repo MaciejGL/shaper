@@ -64,7 +64,7 @@ export function FavouriteWorkoutCard({
   onRefetch,
   onDelete,
   workoutStatus,
-  isLoading: _isLoading, // eslint-disable-line @typescript-eslint/no-unused-vars
+  isLoading,
 }: FavouriteWorkoutCardProps) {
   const [showAiWizard, setShowAiWizard] = useState(false)
   const [showAddExercise, setShowAddExercise] = useState(false)
@@ -86,7 +86,7 @@ export function FavouriteWorkoutCard({
     uniqueMuscleGroups,
     estimatedMinutes: estimatedTime,
     buttonProps,
-  } = useFavouriteCardData({ favourite, workoutStatus })
+  } = useFavouriteCardData({ favourite, workoutStatus, isStarting: isLoading })
 
   // Get mutation handlers
   const { handleAddSet, handleRemoveSet, handleRemoveExercise, handleDragEnd } =
@@ -102,6 +102,9 @@ export function FavouriteWorkoutCard({
   const hasMuscleGroups = uniqueMuscleGroups.length > 0
   const hasExercises = favourite.exercises.length > 0
   const showBadges = hasMuscleGroups || hasExercises
+
+  const showCardHeader =
+    favourite.description || totalSets > 0 || estimatedTime > 0
 
   return (
     <>
@@ -146,37 +149,29 @@ export function FavouriteWorkoutCard({
           </AccordionTrigger>
 
           <AccordionContent>
-            <div>
-              <CardHeader className="py-5 border-t space-y-2">
-                <div className="flex justify-between">
-                  {favourite.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {favourite.description}
-                    </p>
-                  )}
-
-                  <div className="flex gap-1 flex-wrap">
-                    <Badge variant="secondary">{totalSets} sets</Badge>
-                    {estimatedTime > 0 && (
-                      <Badge variant="secondary">
-                        <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
-                      </Badge>
+            <div className="border-t pt-4">
+              {showCardHeader && (
+                <CardHeader className="space-y-2 pb-4">
+                  <div className="flex justify-between">
+                    {favourite.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {favourite.description}
+                      </p>
                     )}
+
+                    <div className="flex gap-1 flex-wrap">
+                      {totalSets > 0 && (
+                        <Badge variant="secondary">{totalSets} sets</Badge>
+                      )}
+                      {estimatedTime > 0 && (
+                        <Badge variant="secondary">
+                          <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    className="ml-auto"
-                    iconOnly={<Edit />}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setShowEditMetadata(true)
-                    }}
-                  >
-                    Edit
-                  </Button>
-                </div>
-              </CardHeader>
+                </CardHeader>
+              )}
 
               <CardContent className="pt-0 pb-4 space-y-4">
                 {isEmpty ? (
@@ -228,20 +223,18 @@ export function FavouriteWorkoutCard({
                     </div>
                   </>
                 )}
-                <span className="text-xs text-muted-foreground">
-                  Created {createdAgo}
-                </span>
               </CardContent>
-              <CardFooter className="grid grid-cols-[1fr_auto] gap-2 border-t [.border-t]:pt-4">
+              <CardFooter className="grid grid-cols-[auto_auto_1fr] gap-2 border-t [.border-t]:pt-4">
                 {buttonProps.subtext && (
                   <Alert
-                    className="flex items-center gap-2 col-span-2"
+                    className="flex items-center gap-2 col-span-full"
                     variant="warning"
                     withoutTitle
                   >
                     <AlertDescription>{buttonProps.subtext}</AlertDescription>
                   </Alert>
                 )}
+
                 <Button
                   size="icon-sm"
                   onClick={onDelete}
@@ -250,6 +243,18 @@ export function FavouriteWorkoutCard({
                 >
                   Delete
                 </Button>
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  className="ml-auto"
+                  iconOnly={<Edit />}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setShowEditMetadata(true)
+                  }}
+                >
+                  Edit
+                </Button>
 
                 {!isEmpty && (
                   <Button
@@ -257,6 +262,7 @@ export function FavouriteWorkoutCard({
                     size="sm"
                     variant={buttonProps.variant}
                     disabled={buttonProps.disabled}
+                    loading={buttonProps.loading}
                     iconEnd={<ChevronRight />}
                     className="ml-auto"
                   >

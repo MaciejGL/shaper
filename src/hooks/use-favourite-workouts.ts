@@ -1,6 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { isToday } from 'date-fns'
 import { useRouter } from 'next/navigation'
+import { startTransition } from 'react'
 
 import {
   GQLCreateFavouriteWorkoutInput,
@@ -15,6 +16,7 @@ import {
   useStartWorkoutFromFavouriteMutation,
   useUpdateFavouriteWorkoutMutation,
 } from '@/generated/graphql-client'
+import { queryInvalidation } from '@/lib/query-invalidation'
 
 export function useFavouriteWorkouts() {
   return useGetFavouriteWorkoutsQuery()
@@ -24,9 +26,8 @@ export function useCreateFavouriteWorkout() {
   const queryClient = useQueryClient()
 
   return useCreateFavouriteWorkoutMutation({
-    onSuccess: () => {
-      // Invalidate and refetch favourites list
-      queryClient.invalidateQueries({ queryKey: ['GetFavouriteWorkouts'] })
+    onSuccess: async () => {
+      await queryInvalidation.favourites(queryClient)
     },
   })
 }
@@ -35,9 +36,8 @@ export function useUpdateFavouriteWorkout() {
   const queryClient = useQueryClient()
 
   return useUpdateFavouriteWorkoutMutation({
-    onSuccess: () => {
-      // Invalidate and refetch favourites list
-      queryClient.invalidateQueries({ queryKey: ['GetFavouriteWorkouts'] })
+    onSuccess: async () => {
+      await queryInvalidation.favourites(queryClient)
     },
   })
 }
@@ -46,9 +46,8 @@ export function useDeleteFavouriteWorkout() {
   const queryClient = useQueryClient()
 
   return useDeleteFavouriteWorkoutMutation({
-    onSuccess: () => {
-      // Invalidate and refetch favourites list
-      queryClient.invalidateQueries({ queryKey: ['GetFavouriteWorkouts'] })
+    onSuccess: async () => {
+      await queryInvalidation.favourites(queryClient)
     },
   })
 }
@@ -61,68 +60,31 @@ export function useStartWorkoutFromFavourite() {
     onSuccess: async (data) => {
       if (!data.startWorkoutFromFavourite) return
 
-      // Parse the return format: planId|weekId|dayId
       const parts = data.startWorkoutFromFavourite.split('|')
 
-      if (parts.length === 3) {
-        const [, weekId, dayId] = parts
+      await queryInvalidation.favouriteWorkoutStart(queryClient)
 
-        // Invalidate Quick Workout queries to ensure fresh data
-        await Promise.all([
-          // Invalidate navigation query (uses custom 'navigation' key in wrapper)
-          queryClient.invalidateQueries({
-            queryKey: ['navigation'],
-          }),
-          // Invalidate the specific day query
-          queryClient.invalidateQueries({
-            queryKey: ['FitspaceGetQuickWorkoutDay', { dayId }],
-          }),
-          // Invalidate other related queries
-          queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] }),
-          queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
-          queryClient.invalidateQueries({
-            queryKey: ['FitspaceGetQuickWorkoutNavigation'],
-          }),
-        ])
+      startTransition(() => {
+        if (parts.length === 3) {
+          const [, weekId, dayId] = parts
+          router.push(
+            `/fitspace/workout/quick-workout?week=${weekId}&day=${dayId}`,
+          )
+        } else {
+          router.push(`/fitspace/workout/quick-workout`)
+        }
 
-        // Prefetch the data before navigation to ensure it's ready
-        await Promise.all([
-          queryClient.refetchQueries({
-            queryKey: ['navigation'],
-          }),
-          queryClient.refetchQueries({
-            queryKey: ['FitspaceGetQuickWorkoutDay', { dayId }],
-          }),
-        ])
-
-        // Navigate with the correct week and day parameters
-        router.push(
-          `/fitspace/workout/quick-workout?week=${weekId}&day=${dayId}`,
-        )
-      } else {
-        // Fallback to old format (just plan ID) - shouldn't happen with new backend
-        const planId = data.startWorkoutFromFavourite
-
-        await Promise.all([
-          queryClient.invalidateQueries({
-            queryKey: ['FitspaceGetWorkout', { trainingId: planId }],
-          }),
-          queryClient.invalidateQueries({ queryKey: ['FitspaceMyPlans'] }),
-          queryClient.invalidateQueries({ queryKey: ['GetQuickWorkoutPlan'] }),
-        ])
-
-        router.push(`/fitspace/workout/quick-workout`)
-      }
+        router.refresh()
+      })
     },
   })
 }
 
-// Types for workout status analysis
 export type WorkoutStatus =
-  | 'can-start' // No active plan or rest day - can start favourite workout
-  | 'has-workout' // Has existing workout today - needs confirmation
-  | 'active-plan-workout' // Active plan with workout today - should disable
-  | 'rest-day' // Rest day in active plan - can start with confirmation
+  | 'can-start'
+  | 'has-workout'
+  | 'active-plan-workout'
+  | 'rest-day'
 
 export interface WorkoutStatusAnalysis {
   status: WorkoutStatus
@@ -148,7 +110,6 @@ export function useFavouriteWorkoutStatus(): WorkoutStatusAnalysis {
   const activePlan = plansData?.getMyPlansOverviewFull?.activePlan
   const quickWorkoutPlan = plansData?.getMyPlansOverviewFull?.quickWorkoutPlan
 
-  // If user has an active assigned plan (from trainer/premade), always disable favourite workouts
   if (activePlan) {
     return {
       status: 'active-plan-workout',
@@ -160,9 +121,7 @@ export function useFavouriteWorkoutStatus(): WorkoutStatusAnalysis {
     }
   }
 
-  // No active assigned plan - check quick workout plan for today's schedule
   if (quickWorkoutPlan?.weeks) {
-    // Check if today has exercises in quick workout plan
     const todaysDay = quickWorkoutPlan.weeks
       .flatMap((week) => week.days)
       .find((day) => day.scheduledAt && isToday(new Date(day.scheduledAt)))
@@ -179,7 +138,6 @@ export function useFavouriteWorkoutStatus(): WorkoutStatusAnalysis {
     }
   }
 
-  // No active plan and no quick workout scheduled for today - ready to start
   return {
     status: 'can-start',
     canStart: true,
@@ -196,24 +154,20 @@ export function useFavouriteWorkoutOperations() {
   const startFromFavouriteMutation = useStartWorkoutFromFavourite()
 
   return {
-    // Create operation
     createFavourite: (input: GQLCreateFavouriteWorkoutInput) =>
       createMutation.mutateAsync({ input }),
     isCreating: createMutation.isPending,
     createError: createMutation.error,
 
-    // Update operation
     updateFavourite: (input: GQLUpdateFavouriteWorkoutInput) =>
       updateMutation.mutateAsync({ input }),
     isUpdating: updateMutation.isPending,
     updateError: updateMutation.error,
 
-    // Delete operation
     deleteFavourite: (id: string) => deleteMutation.mutateAsync({ id }),
     isDeleting: deleteMutation.isPending,
     deleteError: deleteMutation.error,
 
-    // Start from favourite operation
     startFromFavourite: (input: GQLStartWorkoutFromFavouriteInput) =>
       startFromFavouriteMutation.mutateAsync({ input }),
     isStarting: startFromFavouriteMutation.isPending,
@@ -225,7 +179,7 @@ export function useFavouriteWorkoutOperations() {
 export interface FavouriteWorkoutExerciseData {
   exerciseId: string
   order: number
-  name: string // Required field - should always be provided
+  name: string
   baseId?: string
   restSeconds?: number
   description?: string
@@ -249,7 +203,6 @@ export interface FavouriteWorkoutWizardData {
   exercises: FavouriteWorkoutExerciseData[]
 }
 
-// Hook for creating favourite workout from wizard data (manual flow)
 export function useCreateFavouriteFromManual() {
   const { createFavourite, isCreating, createError } =
     useFavouriteWorkoutOperations()
@@ -262,15 +215,13 @@ export function useCreateFavouriteFromManual() {
       throw new Error('No exercises selected')
     }
 
-    // Transform manual selection to favourite workout format
     const exercises = selectedExerciseObjects.map((exercise, index) => ({
-      name: exercise.name, // Use actual exercise name
+      name: exercise.name,
       order: index + 1,
       baseId: exercise.id,
       restSeconds: null,
       instructions: null,
       sets: [
-        // Create default sets for manual selection
         {
           order: 1,
           reps: null,
@@ -315,20 +266,18 @@ export function useCreateFavouriteFromManual() {
   }
 }
 
-// Hook for creating favourite workout from AI data
 export function useCreateFavouriteFromAI() {
   const { createFavourite, isCreating, createError } =
     useFavouriteWorkoutOperations()
 
   const createFromAI = async (
     workoutData: Pick<FavouriteWorkoutWizardData, 'title' | 'description'>,
-    aiWorkoutResult: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout'], // AI workout result type from existing system
+    aiWorkoutResult: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout'],
   ): Promise<string> => {
     if (!aiWorkoutResult?.exercises || aiWorkoutResult.exercises.length === 0) {
       throw new Error('No AI workout result available')
     }
 
-    // Transform AI workout data to favourite workout format
     const exercises = aiWorkoutResult.exercises.map(
       (aiExercise, index: number) => ({
         name: aiExercise.exercise.name,
@@ -340,10 +289,10 @@ export function useCreateFavouriteFromAI() {
           aiExercise.sets?.map((aiSet, setIndex: number) => ({
             order: setIndex + 1,
             reps: aiSet?.reps || null,
-            minReps: null, // AI doesn't provide min/max, just target reps
+            minReps: null,
             maxReps: null,
             rpe: aiSet?.rpe || null,
-            weight: null, // User will set this later
+            weight: null,
           })) || [],
       }),
     )
@@ -365,7 +314,6 @@ export function useCreateFavouriteFromAI() {
   }
 }
 
-// Hook for updating favourite workout (for edit functionality)
 export function useUpdateFavouriteFromWizard() {
   const { updateFavourite, isUpdating, updateError } =
     useFavouriteWorkoutOperations()
@@ -379,7 +327,7 @@ export function useUpdateFavouriteFromWizard() {
       title: workoutData.title,
       description: workoutData.description || null,
       exercises: workoutData.exercises.map((exercise) => ({
-        name: exercise.name, // Exercise name should always be provided from the wizard now
+        name: exercise.name,
         order: exercise.order,
         baseId: exercise.baseId || null,
         restSeconds: exercise.restSeconds || null,

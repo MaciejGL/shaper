@@ -5,18 +5,19 @@ export function estimateWorkoutTime(
     sets: Pick<GQLExerciseSet, 'id'>[]
   })[],
 ): number {
-  const setLength = 60
-  const fallbackRestTime = 90
-  const restTime = exercises.reduce(
-    (sum, exercise) => sum + (exercise.restSeconds ?? fallbackRestTime),
-    0,
-  )
+  const setLength = 60 // seconds
+  const fallbackRestTime = 90 // seconds
 
-  // Rough estimate: 2-3 minutes per set + rest time
-  const totalSets = exercises.reduce(
-    (sum, exercise) => sum + exercise.sets.length + (exercise.warmupSets ?? 0),
-    0,
-  )
-  const totalTime = totalSets * (setLength + restTime)
-  return Math.round(totalTime / 60) // minutes
+  const totalTimeInSeconds = exercises.reduce((sum, exercise) => {
+    const restTime = exercise.restSeconds ?? fallbackRestTime
+    const totalSets = exercise.sets.length + (exercise.warmupSets ?? 0)
+
+    // Time for all sets + rest time between sets (no rest after last set)
+    const exerciseTime =
+      totalSets * setLength + Math.max(0, totalSets - 1) * restTime
+
+    return sum + exerciseTime
+  }, 0)
+
+  return Math.round(totalTimeInSeconds / 60) // convert to minutes
 }
