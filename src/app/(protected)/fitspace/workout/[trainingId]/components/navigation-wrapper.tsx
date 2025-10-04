@@ -46,26 +46,6 @@ export const NavigationWrapper = ({
       : (navigationData as GQLFitspaceGetQuickWorkoutNavigationQuery)
           .getQuickWorkoutNavigation?.plan
 
-  // Auto-select today's day on initial load if no URL parameters
-  useEffect(() => {
-    if (!weekId && !dayId && initialPlan) {
-      const { weekId: defaultWeekId, dayId: defaultDayId } =
-        getDefaultSelection(initialPlan)
-
-      console.info('🎯 Auto-selecting default day:', {
-        defaultWeekId,
-        defaultDayId,
-      })
-
-      if (defaultWeekId && defaultDayId) {
-        startTransition(() => {
-          setWeekId(defaultWeekId)
-          setDayId(defaultDayId)
-        })
-      }
-    }
-  }, [weekId, dayId, initialPlan, setWeekId, setDayId])
-
   const { data: navigationDataQuery, refetch } =
     useFitspaceGetWorkoutNavigationQuery(
       {
@@ -79,6 +59,31 @@ export const NavigationWrapper = ({
         enabled: !!trainingId, // Disable if we have fresh initial data
       },
     )
+
+  // Auto-select today's day on initial load if no URL parameters
+  // Use fresh client-side data if available, fallback to initial server data
+  useEffect(() => {
+    const planToUse =
+      navigationDataQuery?.getWorkoutNavigation?.plan ?? initialPlan
+
+    if (!weekId && !dayId && planToUse) {
+      const { weekId: defaultWeekId, dayId: defaultDayId } =
+        getDefaultSelection(planToUse)
+
+      console.info('🎯 Auto-selecting default day:', {
+        defaultWeekId,
+        defaultDayId,
+        usingFreshData: !!navigationDataQuery?.getWorkoutNavigation?.plan,
+      })
+
+      if (defaultWeekId && defaultDayId) {
+        startTransition(() => {
+          setWeekId(defaultWeekId)
+          setDayId(defaultDayId)
+        })
+      }
+    }
+  }, [weekId, dayId, initialPlan, navigationDataQuery, setWeekId, setDayId])
 
   useEffect(() => {
     let timeout: NodeJS.Timeout
