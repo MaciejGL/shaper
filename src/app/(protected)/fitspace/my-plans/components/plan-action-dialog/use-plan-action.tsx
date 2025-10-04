@@ -38,9 +38,13 @@ export function usePlanAction() {
   const { mutateAsync: activatePlan, isPending: isActivatingPlan } =
     useActivatePlanMutation({
       onSuccess: async () => {
+        // Ensure all cache updates complete before navigation
         await queryInvalidation.workoutAndPlans(queryClient)
+        // Small delay to ensure server components can refetch
+        await new Promise((resolve) => setTimeout(resolve, 100))
         router.refresh()
-        router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
+        // Use replace to avoid back button issues with stale cache
+        router.replace(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
       onError: () => {
         toast.error('Failed to activate plan, please try again.')
@@ -49,9 +53,13 @@ export function usePlanAction() {
   const { mutateAsync: pausePlan, isPending: isPausingPlan } =
     usePausePlanMutation({
       onSuccess: async () => {
+        // Ensure all cache updates complete before navigation
         await queryInvalidation.workoutAndPlans(queryClient)
+        // Small delay to ensure server components can refetch
+        await new Promise((resolve) => setTimeout(resolve, 100))
         router.refresh()
-        router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
+        // Use replace to avoid back button issues with stale cache
+        router.replace(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
       onError: () => {
         toast.error('Failed to pause plan, please try again.')
@@ -60,9 +68,13 @@ export function usePlanAction() {
   const { mutateAsync: closePlan, isPending: isClosingPlan } =
     useClosePlanMutation({
       onSuccess: async () => {
+        // Ensure all cache updates complete before navigation
         await queryInvalidation.workoutAndPlans(queryClient)
+        // Small delay to ensure server components can refetch
+        await new Promise((resolve) => setTimeout(resolve, 100))
         router.refresh()
-        router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
+        // Use replace to avoid back button issues with stale cache
+        router.replace(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
       onError: () => {
         toast.error('Failed to close plan, please try again.')
@@ -71,7 +83,10 @@ export function usePlanAction() {
   const { mutateAsync: deletePlan, isPending: isDeletingPlan } =
     useDeletePlanMutation({
       onSuccess: async () => {
+        // Ensure all cache updates complete before navigation
         await queryInvalidation.workoutAndPlans(queryClient)
+        // Small delay to ensure server components can refetch
+        await new Promise((resolve) => setTimeout(resolve, 100))
         router.refresh()
       },
       onError: () => {
