@@ -238,9 +238,10 @@ export const markSetAsCompleted = async (
     }
   }
 
+  // 2. Mark set as completed in database
   await markSetAsCompletedRelatedData(setId, reps, weight)
 
-  // 2. Check if this is a personal record (only if we have weight and reps)
+  // 3. Check if this is a personal record (only if we have weight and reps)
   let prInfo = { isPersonalRecord: false, improvement: 0 }
   if (reps && weight && userId) {
     try {
@@ -283,14 +284,6 @@ export const updateSetLog = async (args: GQLMutationUpdateSetLogArgs) => {
   })
 
   if (!set.log) return null
-
-  if (set.completedAt) {
-    await markSetAsCompletedRelatedData(setId)
-  }
-
-  if (!set.completedAt) {
-    await unmarkSetCompletedRelatedData(setId)
-  }
 
   return new ExerciseSetLog(set.log)
 }

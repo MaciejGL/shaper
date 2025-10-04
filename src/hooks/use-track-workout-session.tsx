@@ -1,5 +1,4 @@
-import { useEffect } from 'react'
-import { useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 
 import { useFitspaceLogWorkoutProgressMutation } from '@/generated/graphql-client'
 
@@ -14,18 +13,20 @@ export function useTrackWorkoutSession(
 ) {
   const intervalRef = useRef<NodeJS.Timeout | number | null>(null)
   const lastTickRef = useRef<number>(Date.now())
+  const isPageVisible = useRef<boolean>(true)
 
   const { mutateAsync: logWorkoutProgress } =
     useFitspaceLogWorkoutProgressMutation({
       onError: (error) => {
+        // Only log errors, don't throw - network issues are expected
         console.info('Failed to send workout progress tick', error)
       },
     })
 
-  const sendTick = async () => {
-    if (!dayId) return
+  const sendTick = useCallback(async () => {
+    if (!dayId || !isPageVisible.current) return
 
-    // Check for inactivity - if user hasn't done anything for 10+ minutes, don't send tick
+    // Check for inactivity - if user hasn't done anything for 5+ minutes, don't send tick
     const now = Date.now()
     const timeSinceLastActivity = lastActivityTimestamp
       ? now - lastActivityTimestamp
@@ -33,9 +34,12 @@ export function useTrackWorkoutSession(
 
     if (timeSinceLastActivity > INACTIVITY_THRESHOLD) {
       console.info(
-        'Auto-pausing workout tracking due to inactivity (>10 minutes)',
+        'Auto-pausing workout tracking due to inactivity (>5 minutes)',
       )
-      if (intervalRef.current) clearInterval(intervalRef.current)
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
       return
     }
 
@@ -46,44 +50,81 @@ export function useTrackWorkoutSession(
       })
       lastTickRef.current = now
     } catch (e) {
-      console.error('Failed to send workout progress tick', e)
+      // Silently handle errors - they're already logged by onError
+      // This prevents unhandled promise rejections
     }
-  }
+  }, [dayId, lastActivityTimestamp, logWorkoutProgress])
 
+  // Main interval effect
   useEffect(() => {
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+
+    // Don't start interval if conditions aren't met
     if (!isActive || isCompleted || !dayId) {
-      if (intervalRef.current) clearInterval(intervalRef.current)
       return
     }
 
+    // Start new interval
     intervalRef.current = setInterval(() => {
       sendTick()
     }, TICK_INTERVAL * 1000)
 
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isActive, isCompleted, dayId, lastActivityTimestamp])
+  }, [isActive, isCompleted, dayId, sendTick])
 
+  // Visibility and unload handling
   useEffect(() => {
+    if (!isActive || isCompleted || !dayId) {
+      return
+    }
+
     const handleVisibility = () => {
       if (document.visibilityState === 'hidden') {
-        sendTick() // Final tick on tab switch (optional)
+        // Stop ticks when page is hidden to avoid failed requests
+        isPageVisible.current = false
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current)
+          intervalRef.current = null
+        }
+      } else if (document.visibilityState === 'visible') {
+        // Resume ticks when page becomes visible again
+        isPageVisible.current = true
+        if (isActive && !isCompleted && !intervalRef.current) {
+          intervalRef.current = setInterval(() => {
+            sendTick()
+          }, TICK_INTERVAL * 1000)
+        }
       }
     }
 
-    if (isActive && !isCompleted) {
-      document.addEventListener('visibilitychange', handleVisibility)
-      window.addEventListener('beforeunload', () => sendTick())
+    const handleBeforeUnload = () => {
+      // Send final tick synchronously before page unloads
+      if (dayId && isPageVisible.current) {
+        // Use sendBeacon for reliable delivery on page unload
+        const body = JSON.stringify({
+          query: `mutation { logWorkoutProgress(dayId: "${dayId}", tick: ${TICK_INTERVAL}) }`,
+        })
+        navigator.sendBeacon('/api/graphql', body)
+      }
     }
+
+    document.addEventListener('visibilitychange', handleVisibility)
+    window.addEventListener('beforeunload', handleBeforeUnload)
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility)
-      window.removeEventListener('beforeunload', () => sendTick())
+      window.removeEventListener('beforeunload', handleBeforeUnload)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dayId, isCompleted])
+  }, [dayId, isActive, isCompleted, sendTick])
 
   return {}
 }

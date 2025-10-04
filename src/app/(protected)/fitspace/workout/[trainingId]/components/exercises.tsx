@@ -39,18 +39,37 @@ export function Exercises({
 }: ExercisesProps) {
   const { preferences, setTrainingView } = useUserPreferences()
 
-  const isActive = day?.exercises.some((ex) =>
-    ex.sets.some((set) => {
-      if (!set.log?.createdAt || (!set.log?.reps && !set.log?.weight)) {
-        return false
-      }
-      const logCreatedAt = new Date(set.log.createdAt)
-      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000)
-      return logCreatedAt >= fiveMinutesAgo
-    }),
-  )
+  // Calculate last activity timestamp from most recent set log
+  const lastActivityTimestamp = React.useMemo(() => {
+    if (!day?.exercises) return undefined
+
+    let mostRecentTimestamp = 0
+
+    day.exercises.forEach((ex) => {
+      ex.sets.forEach((set) => {
+        if (set.log?.createdAt) {
+          const logTime = new Date(set.log.createdAt).getTime()
+          if (logTime > mostRecentTimestamp) {
+            mostRecentTimestamp = logTime
+          }
+        }
+      })
+    })
+
+    return mostRecentTimestamp > 0 ? mostRecentTimestamp : undefined
+  }, [day?.exercises])
+
+  // Determine if workout is currently active (user logged something in last 5 minutes)
+  const isActive = React.useMemo(() => {
+    if (!lastActivityTimestamp) return false
+    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000
+    return lastActivityTimestamp >= fiveMinutesAgo
+  }, [lastActivityTimestamp])
+
   const isCompleted = day?.completedAt ? true : false
-  useTrackWorkoutSession(day?.id, isActive, isCompleted)
+
+  useTrackWorkoutSession(day?.id, isActive, isCompleted, lastActivityTimestamp)
+
   if (!day) return <div>No day data available</div>
 
   // Derived state

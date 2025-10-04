@@ -216,9 +216,15 @@ export function Exercise({ exercise, previousDayLogs }: ExerciseProps) {
           })
         })
 
-        // Fire and forget - don't wait for database calls
+        // ✅ Only sync cache on error - optimistic updates handle success case
         Promise.all(setCompletionPromises).catch((error) => {
           console.error('Failed to save set completions:', error)
+          // On error, sync with server to fix inconsistencies
+          invalidateQuery({
+            queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+              dayId: dayId ?? '',
+            }),
+          })
         })
       }
     } catch (error) {

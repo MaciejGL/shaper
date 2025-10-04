@@ -2284,12 +2284,6 @@ export async function getQuickWorkoutNavigation(context: GQLContext) {
     plan: new TrainingPlan(plan, context),
   }
 
-  console.info('✅ getQuickWorkoutNavigation returning:', {
-    planId: plan.id,
-    weeksCount: plan.weeks.length,
-    firstWeekDaysCount: plan.weeks[0]?.days?.length,
-  })
-
   return result
 }
 
@@ -2312,40 +2306,12 @@ export async function getQuickWorkoutDay(
     select: { id: true },
   })
 
-  console.info('quickWorkoutPlan', quickWorkoutPlan)
   if (!quickWorkoutPlan) {
     throw new GraphQLError('Quick workout not found')
   }
 
   // Ensure current week + buffer exist
   await ensureQuickWorkoutWeeks(quickWorkoutPlan.id, 4)
-
-  // Debug: Check what weeks exist
-  const weeksDebug = await prisma.trainingWeek.findMany({
-    where: { planId: quickWorkoutPlan.id },
-    select: {
-      id: true,
-      weekNumber: true,
-      scheduledAt: true,
-      days: {
-        select: {
-          id: true,
-          dayOfWeek: true,
-          scheduledAt: true,
-        },
-      },
-    },
-    orderBy: { weekNumber: 'asc' },
-  })
-  console.info(
-    '📊 Weeks in database:',
-    weeksDebug.map((w) => ({
-      weekNumber: w.weekNumber,
-      scheduledAt: w.scheduledAt?.toISOString(),
-      daysCount: w.days.length,
-      dayOfWeeks: w.days.map((d) => d.dayOfWeek),
-    })),
-  )
 
   let day
 
@@ -2491,17 +2457,9 @@ export async function getQuickWorkoutDay(
     })
   }
 
-  console.info('day', day ? `Found day ${day.id}` : 'null')
-
   if (!day) {
     throw new GraphQLError('Day not found')
   }
-
-  console.info('✅ Found day:', {
-    dayId: day.id,
-    dayOfWeek: day.dayOfWeek,
-    exercisesCount: day.exercises.length,
-  })
 
   // Verify access
   const plan = day.week.plan

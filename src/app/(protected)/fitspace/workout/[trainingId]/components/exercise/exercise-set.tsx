@@ -167,7 +167,15 @@ export function ExerciseSet({
         }
         setSkipTimer(false)
       },
-      onError: () => {
+      onError: (error, variables) => {
+        console.error('Failed to mark set as completed:', error, variables)
+
+        // On error, sync cache with server to fix inconsistencies
+        queryClient.invalidateQueries({
+          queryKey: useFitspaceGetWorkoutDayQuery.getKey({
+            dayId: dayId ?? '',
+          }),
+        })
         // Reset timer states on error
         setSkipTimer(false)
       },
@@ -239,6 +247,8 @@ export function ExerciseSet({
   const handleToggleSetCompletion = useCallback(
     async (isDoubleClick = false) => {
       const willBeCompleted = !set.completedAt
+      const repsValue = reps ? +reps : previousSetRepsLog || null
+      const weightValue = weight ? +weight : previousSetWeightLog || null
 
       // Set skip timer flag for double clicks
       if (isDoubleClick) {
@@ -256,8 +266,8 @@ export function ExerciseSet({
         await markSetAsCompletedOptimistic({
           setId: set.id,
           completed: willBeCompleted,
-          reps: reps ? +reps : previousSetRepsLog || null,
-          weight: weight ? +weight : previousSetWeightLog || null,
+          reps: repsValue,
+          weight: weightValue,
         })
       } catch (error) {
         console.error('Failed to toggle set completion:', error)
