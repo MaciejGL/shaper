@@ -66,58 +66,64 @@ export function FavouritesStep({
   return (
     <div className="space-y-6">
       <div className="space-y-3">
-        {favourites.map((favourite: FavouriteWorkout) => {
-          const estimatedTime = estimateWorkoutTime(favourite.exercises)
-          return (
-            <Card
-              key={favourite.id}
-              className={cn('cursor-pointer transition-all')}
-            >
-              <CardHeader className="space-y-2">
-                <div className="flex justify-between">
-                  <CardTitle className="text-base">{favourite.title}</CardTitle>
-                  {estimatedTime > 0 && (
-                    <Badge variant="secondary">
-                      <Clock className="w-3 h-3 mr-1" />~{estimatedTime}
-                      min
-                    </Badge>
-                  )}
-                </div>
-                {favourite.description && (
-                  <CardDescription className="mt-1">
-                    {favourite.description}
-                  </CardDescription>
-                )}
-              </CardHeader>
-
-              <CardContent className="pt-0 pb-4 space-y-4">
-                {/* Exercise Preview */}
-                <div className="space-y-1">
-                  <div className="text-sm flex flex-col gap-1">
-                    {favourite.exercises.map((exercise) => (
-                      <ExerciseItem key={exercise.id} exercise={exercise} />
-                    ))}
+        {favourites
+          .filter((favourite) => favourite.exercises.length > 0)
+          .map((favourite: FavouriteWorkout) => {
+            const estimatedTime = estimateWorkoutTime(favourite.exercises)
+            return (
+              <Card
+                key={favourite.id}
+                className={cn('cursor-pointer transition-all')}
+              >
+                <CardHeader className="space-y-2">
+                  <div className="flex justify-between">
+                    <CardTitle className="text-base">
+                      {favourite.title}
+                    </CardTitle>
+                    {estimatedTime > 0 && (
+                      <Badge variant="secondary">
+                        <Clock className="w-3 h-3 mr-1" />~{estimatedTime}
+                        min
+                      </Badge>
+                    )}
                   </div>
-                </div>
-              </CardContent>
+                  {favourite.description && (
+                    <CardDescription className="mt-1">
+                      {favourite.description}
+                    </CardDescription>
+                  )}
+                </CardHeader>
 
-              <CardFooter className="grid justify-end">
-                <Button
-                  size="sm"
-                  disabled={isStarting}
-                  loading={isStarting && selectedFavouriteId === favourite.id}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleSelectFavourite(favourite.id)
-                  }}
-                  iconEnd={<Play className="fill-secondary stroke-secondary" />}
-                >
-                  Start Workout
-                </Button>
-              </CardFooter>
-            </Card>
-          )
-        })}
+                <CardContent className="pt-0 pb-4 space-y-4">
+                  {/* Exercise Preview */}
+                  <div className="space-y-1">
+                    <div className="text-sm flex flex-col gap-1">
+                      {favourite.exercises.map((exercise) => (
+                        <ExerciseItem key={exercise.id} exercise={exercise} />
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+
+                <CardFooter className="grid justify-end">
+                  <Button
+                    size="sm"
+                    disabled={isStarting}
+                    loading={isStarting && selectedFavouriteId === favourite.id}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleSelectFavourite(favourite.id)
+                    }}
+                    iconEnd={
+                      <Play className="fill-secondary stroke-secondary" />
+                    }
+                  >
+                    Start Workout
+                  </Button>
+                </CardFooter>
+              </Card>
+            )
+          })}
       </div>
     </div>
   )
