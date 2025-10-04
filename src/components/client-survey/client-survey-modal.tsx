@@ -139,7 +139,7 @@ export function ClientSurveyModal({
       >
         {/* Progress Bar - Hide on welcome step */}
         {!isWelcomeStep && (
-          <div className="px-6 pt-6 pb-3">
+          <div className="pl-6 pr-12 py-5">
             <Progress value={progress} className="h-2" />
           </div>
         )}
@@ -184,7 +184,7 @@ export function ClientSurveyModal({
         {!isWelcomeStep && (
           <div
             className={cn(
-              'flex gap-2 p-6 pt-3 border-t',
+              'flex gap-2 px-6 py-3 border-t',
               currentStepIndex === 1 ? 'justify-end' : 'justify-between',
             )}
           >
