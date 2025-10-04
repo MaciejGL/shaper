@@ -1,8 +1,9 @@
 'use client'
 
-import { BookmarkIcon, Clock, Dot, Play } from 'lucide-react'
+import { BookmarkIcon, ChevronRight, Clock, Dot } from 'lucide-react'
 import { useState } from 'react'
 
+import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { StateCard } from '@/components/state-card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -14,7 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
   GQLGetFavouriteWorkoutsQuery,
   useGetFavouriteWorkoutsQuery,
@@ -49,24 +49,11 @@ export function FavouritesStep({
     onSelectFavourite(favouriteId)
   }
 
-  if (isLoading) {
-    return <FavouritesStepSkeleton />
-  }
-
-  if (favourites.length === 0) {
-    return (
-      <StateCard
-        title="No Favourite Workouts"
-        description="You haven't saved any favourite workouts yet. Create and save some workouts to see them here."
-        Icon={BookmarkIcon}
-      />
-    )
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="space-y-3">
-        {favourites
+    <div className="space-y-3">
+      {isLoading && <LoadingSkeleton count={4} variant="lg" />}
+      {!isLoading &&
+        favourites
           .filter((favourite) => favourite.exercises.length > 0)
           .map((favourite: FavouriteWorkout) => {
             const estimatedTime = estimateWorkoutTime(favourite.exercises)
@@ -95,7 +82,6 @@ export function FavouritesStep({
                 </CardHeader>
 
                 <CardContent className="pt-0 pb-4 space-y-4">
-                  {/* Exercise Preview */}
                   <div className="space-y-1">
                     <div className="text-sm flex flex-col gap-1">
                       {favourite.exercises.map((exercise) => (
@@ -114,9 +100,7 @@ export function FavouritesStep({
                       e.stopPropagation()
                       handleSelectFavourite(favourite.id)
                     }}
-                    iconEnd={
-                      <Play className="fill-secondary stroke-secondary" />
-                    }
+                    iconEnd={<ChevronRight />}
                   >
                     Start Workout
                   </Button>
@@ -124,7 +108,13 @@ export function FavouritesStep({
               </Card>
             )
           })}
-      </div>
+      {!isLoading && favourites.length === 0 && (
+        <StateCard
+          title="No Favourite Workouts"
+          description="You haven't saved any favourite workouts yet. Create and save some workouts to see them here."
+          Icon={BookmarkIcon}
+        />
+      )}
     </div>
   )
 }
@@ -148,44 +138,6 @@ function ExerciseItem({
           {repRange && <Dot />}
           {repRange && <p>{repRange} reps</p>}
         </div>
-      </div>
-    </div>
-  )
-}
-
-function FavouritesStepSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <Skeleton className="h-7 w-48 mx-auto" />
-        <Skeleton className="h-4 w-64 mx-auto" />
-      </div>
-
-      <div className="space-y-3">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <Card key={index}>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-5 w-32" />
-                  <Skeleton className="h-4 w-48" />
-                </div>
-                <Skeleton className="h-9 w-16" />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-4 w-1" />
-                <div className="flex gap-1">
-                  <Skeleton className="h-5 w-16" />
-                  <Skeleton className="h-5 w-12" />
-                  <Skeleton className="h-5 w-14" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
       </div>
     </div>
   )

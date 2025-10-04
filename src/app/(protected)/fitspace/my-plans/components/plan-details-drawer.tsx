@@ -5,6 +5,7 @@ import {
   Calendar,
   CheckCircle,
   Loader,
+  Trash,
   Users,
 } from 'lucide-react'
 
@@ -81,6 +82,7 @@ export function PlanDetailsDrawer({
               disabled={isButtonLoading}
               onClick={() => onAction('delete', plan)}
               className="mr-auto"
+              iconOnly={<Trash />}
             >
               Delete
             </Button>
@@ -92,17 +94,25 @@ export function PlanDetailsDrawer({
             {!isCompleted && (
               <Button
                 onClick={() => onAction(isActive ? 'pause' : 'activate', plan)}
+                variant={isActive ? 'secondary' : 'default'}
                 disabled={isButtonLoading}
-                className="flex items-center gap-2"
               >
                 {isActive ? 'Pause' : isPaused ? 'Resume' : 'Activate'}
               </Button>
+            )}
+            {plan.startDate && plan.endDate && plan.active && (
+              <ButtonLink
+                href={`/fitspace/workout/${plan.id}`}
+                iconEnd={<ArrowRightIcon />}
+              >
+                Go to Plan
+              </ButtonLink>
             )}
           </div>
         }
       >
         <div className="space-y-6">
-          {plan.startDate && plan.endDate && plan.active ? (
+          {/* {plan.startDate && plan.endDate && plan.active ? (
             <ButtonLink
               href={`/fitspace/workout/${plan.id}`}
               className="w-full"
@@ -118,7 +128,7 @@ export function PlanDetailsDrawer({
             >
               {plan.startDate ? 'Resume' : 'Activate'}
             </Button>
-          )}
+          )} */}
           {plan.startDate && plan.endDate && (
             <div className="space-y-2">
               {/* Progress Overview */}

@@ -43,11 +43,6 @@ export default async function SessionPage() {
     (plan) => plan.assignedToId === userId && plan.createdById !== userId,
   )
 
-  console.log('WORKOUT PAGE', {
-    quickWorkout: quickWorkout?.id,
-    trainingFromTrainer: trainingFromTrainer?.id,
-  })
-
   // Priority: Trainer-assigned plan > Quick Workout > My Plans
   if (trainingFromTrainer) {
     return redirect(`/fitspace/workout/${trainingFromTrainer.id}`)
