@@ -4,11 +4,10 @@ import { useCallback, useMemo } from 'react'
 
 import {
   GQLGetFavouriteWorkoutsQuery,
-  GQLUpdateFavouriteWorkoutMutation,
   useRemoveFavouriteExerciseMutation,
   useUpdateFavouriteExerciseSetsMutation,
+  useUpdateFavouriteExercisesOrderMutation,
 } from '@/generated/graphql-client'
-import { useUpdateFavouriteWorkout } from '@/hooks/use-favourite-workouts'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
 
 type FavouriteExercise = NonNullable<
@@ -27,10 +26,11 @@ export function useFavouriteCardMutations({
   exercises,
 }: UseFavouriteCardMutationsProps) {
   const queryClient = useQueryClient()
-  const { mutateAsync: updateFavourite } = useUpdateFavouriteWorkout()
   const { mutateAsync: updateExerciseSets } =
     useUpdateFavouriteExerciseSetsMutation()
   const { mutateAsync: removeExercise } = useRemoveFavouriteExerciseMutation()
+  const { mutateAsync: updateExercisesOrder } =
+    useUpdateFavouriteExercisesOrderMutation()
 
   const queryKey = useMemo(() => ['GetFavouriteWorkouts'], [])
 
@@ -130,13 +130,15 @@ export function useFavouriteCardMutations({
   const { optimisticMutate: reorderExercisesOptimistic } =
     useOptimisticMutation<
       GQLGetFavouriteWorkoutsQuery,
-      GQLUpdateFavouriteWorkoutMutation,
+      unknown,
       {
         reorderedExercises: typeof exercises
-      } & Parameters<typeof updateFavourite>[0]
+        exerciseOrders: { exerciseId: string; order: number }[]
+      }
     >({
       queryKey,
-      mutationFn: ({ input }) => updateFavourite({ input }),
+      mutationFn: ({ exerciseOrders }) =>
+        updateExercisesOrder({ favouriteId, exerciseOrders }),
       updateFn: (oldData, { reorderedExercises }) => {
         if (!oldData?.getFavouriteWorkouts) return oldData
 
@@ -206,32 +208,18 @@ export function useFavouriteCardMutations({
       const [movedExercise] = reorderedExercises.splice(oldIndex, 1)
       reorderedExercises.splice(newIndex, 0, movedExercise)
 
-      // Map to the format expected by the mutation with updated order values
-      const exercisesInput = reorderedExercises.map((ex, index) => ({
-        name: ex.name,
-        order: index,
-        baseId: ex.baseId || undefined,
-        restSeconds: ex.restSeconds || null,
-        instructions: ex.instructions || [],
-        sets: ex.sets.map((s) => ({
-          order: s.order,
-          reps: s.reps || null,
-          minReps: s.minReps || null,
-          maxReps: s.maxReps || null,
-          weight: s.weight || null,
-          rpe: s.rpe || null,
-        })),
+      // Create exercise orders array (only IDs and new order values)
+      const exerciseOrders = reorderedExercises.map((ex, index) => ({
+        exerciseId: ex.id,
+        order: index + 1,
       }))
 
       reorderExercisesOptimistic({
         reorderedExercises,
-        input: {
-          id: favouriteId,
-          exercises: exercisesInput,
-        },
+        exerciseOrders,
       })
     },
-    [exercises, favouriteId, reorderExercisesOptimistic],
+    [exercises, reorderExercisesOptimistic],
   )
 
   return {

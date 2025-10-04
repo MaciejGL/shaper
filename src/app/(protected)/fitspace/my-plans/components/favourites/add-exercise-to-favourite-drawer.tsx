@@ -228,33 +228,6 @@ function ExerciseList({
     })
   }, [exercises, deferredSearchQuery])
 
-  if (isLoading) {
-    return (
-      <div className="px-4 pb-4">
-        <LoadingSkeleton count={8} />
-      </div>
-    )
-  }
-
-  if (filteredExercises.length === 0) {
-    return (
-      <div className="px-4 pb-4">
-        <div className="px-4 pb-3 pt-1">
-          <Input
-            id="search-exercises"
-            placeholder="Search by name or muscle group..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            iconStart={<SearchIcon />}
-          />
-        </div>
-        <div className="text-center py-8 text-muted-foreground">
-          {searchQuery ? 'No exercises found' : 'No exercises available'}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 pb-3 pt-1 flex-shrink-0">
@@ -268,17 +241,27 @@ function ExerciseList({
       </div>
 
       <div className="flex-1 min-h-0">
-        <Virtuoso
-          data={filteredExercises}
-          style={{ height: '100%' }}
-          itemContent={(index, exercise) => {
-            const isThisExerciseAdding = addingExerciseId === exercise.id
-            const isAnyExerciseAdding = isAdding
-            const isAlreadyAdded = addedExerciseIds.has(exercise.id)
-            const isDisabled = !canAddMore || isAlreadyAdded
+        {isLoading && (
+          <div className="px-4 pb-4 space-y-2">
+            <LoadingSkeleton count={8} variant="sm" cardVariant="tertiary" />
+          </div>
+        )}
+        {!isLoading && filteredExercises.length === 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            {searchQuery ? 'No exercises found' : 'No exercises available'}
+          </div>
+        )}
+        {!isLoading && filteredExercises.length > 0 && (
+          <Virtuoso
+            data={filteredExercises}
+            style={{ height: '100%' }}
+            itemContent={(index, exercise) => {
+              const isThisExerciseAdding = addingExerciseId === exercise.id
+              const isAnyExerciseAdding = isAdding
+              const isAlreadyAdded = addedExerciseIds.has(exercise.id)
+              const isDisabled = !canAddMore || isAlreadyAdded
 
-            return (
-              <div className="pb-2">
+              return (
                 <Card
                   variant="tertiary"
                   borderless
@@ -336,13 +319,15 @@ function ExerciseList({
                     </div>
                   </CardContent>
                 </Card>
-              </div>
-            )
-          }}
-          components={{
-            List: (props) => <div {...props} className="px-4 pb-4 space-y-2" />,
-          }}
-        />
+              )
+            }}
+            components={{
+              List: (props) => (
+                <div {...props} className="px-4 pb-4 space-y-2" />
+              ),
+            }}
+          />
+        )}
       </div>
     </div>
   )

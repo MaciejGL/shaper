@@ -168,6 +168,17 @@ mutation UpdateFavouriteExerciseSets($exerciseId: ID!, $setCount: Int!) {
   updateFavouriteExerciseSets(exerciseId: $exerciseId, setCount: $setCount)
 }
 
+# Reorder exercises (lightweight, instant - only updates order)
+mutation UpdateFavouriteExercisesOrder(
+  $favouriteId: ID!
+  $exerciseOrders: [ExerciseOrderInput!]!
+) {
+  updateFavouriteExercisesOrder(
+    favouriteId: $favouriteId
+    exerciseOrders: $exerciseOrders
+  )
+}
+
 mutation RemoveFavouriteExercise($exerciseId: ID!) {
   removeFavouriteExercise(exerciseId: $exerciseId)
 }

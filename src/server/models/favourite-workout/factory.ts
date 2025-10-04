@@ -285,7 +285,7 @@ export async function updateFavouriteExerciseSets(
     await prisma.favouriteWorkoutSet.createMany({
       data: Array.from({ length: setsToAdd }, (_, i) => ({
         exerciseId,
-        order: currentSetCount + i,
+        order: currentSetCount + i + 1,
         reps: lastSet?.reps || null,
         minReps: lastSet?.minReps || null,
         maxReps: lastSet?.maxReps || null,
@@ -306,6 +306,50 @@ export async function updateFavouriteExerciseSets(
       },
     })
   }
+
+  return true
+}
+
+// Update exercise order (fast, lightweight mutation - only updates order field)
+export async function updateFavouriteExercisesOrder(
+  favouriteId: string,
+  exerciseOrders: { exerciseId: string; order: number }[],
+  userId: string,
+): Promise<boolean> {
+  // Verify ownership
+  const favourite = await prisma.favouriteWorkout.findFirst({
+    where: {
+      id: favouriteId,
+      createdById: userId,
+    },
+    include: {
+      exercises: true,
+    },
+  })
+
+  if (!favourite) {
+    throw new Error('Favourite workout not found or access denied')
+  }
+
+  // Verify all exercise IDs belong to this favourite
+  const exerciseIds = new Set(favourite.exercises.map((ex) => ex.id))
+  const invalidExercises = exerciseOrders.filter(
+    (eo) => !exerciseIds.has(eo.exerciseId),
+  )
+
+  if (invalidExercises.length > 0) {
+    throw new Error('Invalid exercise IDs provided')
+  }
+
+  // Update all exercise orders in a transaction
+  await prisma.$transaction(
+    exerciseOrders.map(({ exerciseId, order }) =>
+      prisma.favouriteWorkoutExercise.update({
+        where: { id: exerciseId },
+        data: { order },
+      }),
+    ),
+  )
 
   return true
 }

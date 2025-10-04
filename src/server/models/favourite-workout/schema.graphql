@@ -125,6 +125,12 @@ extend type Mutation {
   # Update set count for a specific exercise (fast, no debounce needed)
   updateFavouriteExerciseSets(exerciseId: ID!, setCount: Int!): Boolean!
 
+  # Reorder exercises (fast, lightweight - only updates order field)
+  updateFavouriteExercisesOrder(
+    favouriteId: ID!
+    exerciseOrders: [ExerciseOrderInput!]!
+  ): Boolean!
+
   # Remove a single exercise from favourite (fast, lightweight)
   removeFavouriteExercise(exerciseId: ID!): Boolean!
 
@@ -133,4 +139,9 @@ extend type Mutation {
 
   # Start a workout from a favourite (copy to quick workout plan)
   startWorkoutFromFavourite(input: StartWorkoutFromFavouriteInput!): ID!
+}
+
+input ExerciseOrderInput {
+  exerciseId: ID!
+  order: Int!
 }

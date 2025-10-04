@@ -108,7 +108,7 @@ export function FavouriteWorkoutCard({
           value="body-fat-estimation-guide"
           className="bg-card rounded-lg"
         >
-          <AccordionTrigger className="flex items-center justify-between w-full p-4 text-left hover:bg-card-on-card/80 dark:hover:bg-card-on-card/80 transition-colors">
+          <AccordionTrigger className="flex items-center justify-between w-full p-4 text-left transition-colors">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-medium truncate">
@@ -179,7 +179,6 @@ export function FavouriteWorkoutCard({
                     {/* Exercise Preview */}
                     <div className="space-y-1">
                       <h4 className="text-sm font-medium">Exercises</h4>
-
                       <DndContext
                         sensors={sensors}
                         collisionDetection={closestCenter}
@@ -225,6 +224,7 @@ export function FavouriteWorkoutCard({
                     className="flex items-center gap-2 col-span-full"
                     variant="warning"
                     withoutTitle
+                    size="sm"
                   >
                     <AlertDescription>{buttonProps.subtext}</AlertDescription>
                   </Alert>

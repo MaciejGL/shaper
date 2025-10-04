@@ -36,7 +36,7 @@ export function useUpdateFavouriteWorkout() {
   const queryClient = useQueryClient()
 
   return useUpdateFavouriteWorkoutMutation({
-    onSuccess: async () => {
+    onError: async () => {
       await queryInvalidation.favourites(queryClient)
     },
   })

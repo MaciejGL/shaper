@@ -14,9 +14,14 @@ const alertVariants = cva(
         destructive: 'bg-card-on-card text-foreground border-border',
         success: 'bg-card-on-card text-foreground border-border',
       },
+      size: {
+        default: '',
+        sm: 'py-1.5 px-3',
+      },
     },
     defaultVariants: {
       variant: 'default',
+      size: 'default',
     },
   },
 )
@@ -43,6 +48,7 @@ function Alert({
   className,
   withoutTitle,
   variant,
+  size,
   ...props
 }: React.ComponentProps<'div'> &
   VariantProps<typeof alertVariants> & { withoutTitle?: boolean }) {
@@ -50,7 +56,7 @@ function Alert({
     <div
       data-slot="alert"
       role="alert"
-      className={cn(alertVariants({ variant }), className)}
+      className={cn(alertVariants({ variant, size }), className)}
       {...props}
     >
       <div className={cn(dotVariants({ variant }), withoutTitle && 'mt-0')} />

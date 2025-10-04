@@ -56,8 +56,7 @@ export function useFavouriteCardData({
         disabled: true,
         variant: 'tertiary',
         text: 'Start',
-        subtext:
-          'You have an active training plan. Complete or pause your plan first, then use quick workouts for extra training.',
+        subtext: "Can't be activated because you have an active training plan.",
         loading: isStarting,
       }
     }
