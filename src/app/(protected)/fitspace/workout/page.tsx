@@ -3,6 +3,10 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/getUser'
 
+// Force dynamic rendering - never cache this redirect logic
+// Critical for accurate workout routing after plan status changes
+export const dynamic = 'force-dynamic'
+
 export default async function SessionPage() {
   // Query active training plans directly
   const user = await getCurrentUser()

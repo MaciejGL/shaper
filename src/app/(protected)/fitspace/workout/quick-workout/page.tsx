@@ -8,6 +8,9 @@ import { gqlServerFetch } from '@/lib/gqlServerFetch'
 
 import { WorkoutPageClientNew } from '../[trainingId]/components/workout-page.client'
 
+// Force dynamic rendering - quick workout changes frequently
+export const dynamic = 'force-dynamic'
+
 interface QuickWorkoutPageProps {
   searchParams: Promise<{ day?: string }>
 }
