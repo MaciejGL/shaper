@@ -3,6 +3,7 @@ import { attachDatabasePool } from '@vercel/functions'
 import { Pool } from 'pg'
 
 import { PrismaClient } from '@/generated/prisma/client'
+import { createDetailedQueryLogger } from '@/lib/prisma-query-logger'
 
 // Vercel Fluid compute pattern with connection pooling
 // attachDatabasePool ensures idle connections close before function suspension
@@ -30,7 +31,7 @@ function createPrismaClient(): PrismaClient {
 
   const adapter = new PrismaPg(pool)
 
-  return new PrismaClient({
+  const basePrisma = new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
     transactionOptions: {
@@ -38,6 +39,11 @@ function createPrismaClient(): PrismaClient {
       timeout: 20000,
     },
   })
+
+  // Add query logger extension (only active in development)
+  const extendedPrisma = basePrisma.$extends(createDetailedQueryLogger())
+
+  return extendedPrisma as PrismaClient
 }
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient()
