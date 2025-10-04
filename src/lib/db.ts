@@ -22,15 +22,16 @@ const isDevRuntime =
   process.env.NODE_ENV === 'development' && !process.env.NEXT_PHASE
 
 const DATABASE_CONFIG = {
-  // PRODUCTION SCALE: Optimized for 2,000+ active users
+  // SERVERLESS-OPTIMIZED: Lower connections per instance to prevent pooler exhaustion
+  // With multiple serverless instances (5-10 concurrent), total connections = instances × MAX_CONNECTIONS
   // Build-time: Use minimal connections since it's temporary
   MAX_CONNECTIONS: isBuildTime
     ? 2
     : parseInt(process.env.DATABASE_MAX_CONNECTIONS || '10'),
   MIN_CONNECTIONS: isBuildTime
     ? 1
-    : parseInt(process.env.DATABASE_MIN_CONNECTIONS || '1'),
-  IDLE_TIMEOUT: parseInt(process.env.DATABASE_IDLE_TIMEOUT || '30000'), // 30s - less aggressive
+    : parseInt(process.env.DATABASE_MIN_CONNECTIONS || '0'), // Changed from 1 to 0 to allow full idle closure
+  IDLE_TIMEOUT: parseInt(process.env.DATABASE_IDLE_TIMEOUT || '10000'), // Reduced from 30s to 10s for faster cleanup
   CONNECTION_TIMEOUT: parseInt(
     process.env.DATABASE_CONNECTION_TIMEOUT || '10000', // 10s - more realistic
   ),
@@ -38,7 +39,7 @@ const DATABASE_CONFIG = {
     process.env.DATABASE_TRANSACTION_TIMEOUT || '30000', // 30s - for complex GraphQL queries
   ),
   MAX_WAIT: parseInt(process.env.DATABASE_MAX_WAIT || '10000'), // 10s - give users time
-  MAX_USES: isBuildTime ? 100 : 2000, // Lower reuse during build
+  MAX_USES: isBuildTime ? 100 : 7500, // Increased from 2000 - reuse connections more aggressively
 } as const
 
 // Create connection pool optimized for Supabase with PgBouncer
@@ -78,9 +79,8 @@ function getConnectionPool(): Pool {
       idleTimeoutMillis: DATABASE_CONFIG.IDLE_TIMEOUT,
       connectionTimeoutMillis: DATABASE_CONFIG.CONNECTION_TIMEOUT,
       maxUses: DATABASE_CONFIG.MAX_USES,
-      allowExitOnIdle: true,
-      keepAlive: true,
-      keepAliveInitialDelayMillis: 10000,
+      allowExitOnIdle: true, // Critical for serverless - allows process to exit when idle
+      keepAlive: false, // Disabled for serverless - we want connections to close quickly
     })
 
     // Attach the pool to ensure idle connections close before suspension
