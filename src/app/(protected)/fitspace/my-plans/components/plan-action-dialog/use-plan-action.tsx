@@ -38,7 +38,8 @@ export function usePlanAction() {
   const { mutateAsync: activatePlan, isPending: isActivatingPlan } =
     useActivatePlanMutation({
       onSuccess: async () => {
-        await queryInvalidation.workoutAndPlans(queryClient)
+        // Aggressively invalidate all workout-related queries to ensure fresh data on navigation
+        await queryInvalidation.planStateChange(queryClient)
         router.refresh()
         router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
@@ -49,7 +50,8 @@ export function usePlanAction() {
   const { mutateAsync: pausePlan, isPending: isPausingPlan } =
     usePausePlanMutation({
       onSuccess: async () => {
-        await queryInvalidation.workoutAndPlans(queryClient)
+        // Aggressively invalidate all workout-related queries to ensure fresh data on navigation
+        await queryInvalidation.planStateChange(queryClient)
         router.refresh()
         router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
@@ -60,7 +62,8 @@ export function usePlanAction() {
   const { mutateAsync: closePlan, isPending: isClosingPlan } =
     useClosePlanMutation({
       onSuccess: async () => {
-        await queryInvalidation.workoutAndPlans(queryClient)
+        // Aggressively invalidate all workout-related queries to ensure fresh data on navigation
+        await queryInvalidation.planStateChange(queryClient)
         router.refresh()
         router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
@@ -71,8 +74,10 @@ export function usePlanAction() {
   const { mutateAsync: deletePlan, isPending: isDeletingPlan } =
     useDeletePlanMutation({
       onSuccess: async () => {
-        await queryInvalidation.workoutAndPlans(queryClient)
+        // Aggressively invalidate all workout-related queries to ensure fresh data on navigation
+        await queryInvalidation.planStateChange(queryClient)
         router.refresh()
+        router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
       onError: () => {
         toast.error('Failed to delete plan, please try again.')

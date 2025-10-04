@@ -114,6 +114,31 @@ export const queryInvalidation = {
   },
 
   /**
+   * Aggressively invalidate all workout and plan queries with 'all' refetch type
+   * Use when plan state changes (activate/pause/close/delete) to ensure fresh data on navigation
+   */
+  planStateChange: async (queryClient: QueryClient) => {
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ['navigation'],
+        refetchType: 'all',
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+        refetchType: 'all',
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['FitspaceGetWorkoutDay'],
+        refetchType: 'all',
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['FitspaceMyPlans'],
+        refetchType: 'all',
+      }),
+    ])
+  },
+
+  /**
    * Invalidate everything related to favourites and workouts
    * Use when starting a workout from favourite
    * Removes old trainer plan queries and aggressively refetches quick workout data
