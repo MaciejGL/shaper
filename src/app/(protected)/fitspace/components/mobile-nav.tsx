@@ -1,6 +1,5 @@
 'use client'
 
-import { useQueryClient } from '@tanstack/react-query'
 import {
   Dumbbell,
   LayoutList,
@@ -14,7 +13,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 
 import { useMobileApp } from '@/components/mobile-app-bridge'
-import { GQLFitspaceGetWorkoutNavigationQuery } from '@/generated/graphql-client'
+import { useFitspaceGetWorkoutNavigationQuery } from '@/generated/graphql-client'
 import { useKeyboardVisible } from '@/hooks/use-keyboard-visible'
 import { tryOpenAppDeepLink } from '@/lib/deep-links'
 import { cn } from '@/lib/utils'
@@ -30,17 +29,23 @@ export function MobileNav() {
     null,
   )
 
-  const queryClient = useQueryClient()
-
-  const workoutNavigationQuery =
-    queryClient.getQueryData<GQLFitspaceGetWorkoutNavigationQuery>([
-      'navigation',
-    ])
-
-  const trainingId = workoutNavigationQuery?.getWorkoutNavigation?.plan?.id
-  const { weekId, dayId } = getDefaultSelection(
-    workoutNavigationQuery?.getWorkoutNavigation?.plan,
+  // Subscribe to navigation cache updates (will trigger re-render when cache changes)
+  const { data: workoutNavigationQuery } = useFitspaceGetWorkoutNavigationQuery(
+    { trainingId: '', allWeeks: false },
+    {
+      queryKey: ['navigation'],
+      refetchOnMount: false, // Use cache on mount
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      // enabled: true by default, so it WILL refetch when invalidated
+    },
   )
+
+  const plan = workoutNavigationQuery?.getWorkoutNavigation?.plan
+  const trainingId = plan?.id
+  const { weekId, dayId } = getDefaultSelection(plan)
+
   useEffect(() => {
     setClickedItem(null)
     setPendingNavigation(null)

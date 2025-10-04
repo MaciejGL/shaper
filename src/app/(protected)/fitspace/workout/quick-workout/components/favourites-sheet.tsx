@@ -11,10 +11,8 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
-import {
-  useFitspaceGetWorkoutDayQuery,
-  useStartWorkoutFromFavouriteMutation,
-} from '@/generated/graphql-client'
+import { useStartWorkoutFromFavouriteMutation } from '@/generated/graphql-client'
+import { queryInvalidation } from '@/lib/query-invalidation'
 
 import { FavouritesStep } from './favourites-step'
 
@@ -36,36 +34,11 @@ export function FavouritesSheet({
   const { mutateAsync: startFromFavourite, isPending: isStarting } =
     useStartWorkoutFromFavouriteMutation({
       onSuccess: async () => {
-        // If we have a dayId (from empty-workout-options), invalidate that specific day's query
-        if (dayId || dayIdFromUrl) {
-          const currentDayId = dayIdFromUrl || dayId
-          const queryKeyToInvalidate = useFitspaceGetWorkoutDayQuery.getKey({
-            dayId: currentDayId,
-          })
+        // Use centralized query invalidation for starting workout from favourite
+        await queryInvalidation.favouriteWorkoutStart(queryClient)
 
-          // Invalidate queries to refresh the data
-          await Promise.all([
-            queryClient.invalidateQueries({ queryKey: queryKeyToInvalidate }),
-            queryClient.invalidateQueries({ queryKey: ['navigation'] }),
-            queryClient.invalidateQueries({
-              queryKey: ['FitspaceGetQuickWorkoutNavigation'],
-            }),
-            queryClient.invalidateQueries({
-              queryKey: ['GetQuickWorkoutPlan'],
-            }),
-            queryClient.invalidateQueries({
-              queryKey: ['FitspaceGetQuickWorkoutDay'],
-            }),
-          ])
-
-          // Refetch the day query to ensure fresh data
-          await queryClient.refetchQueries({
-            queryKey: queryKeyToInvalidate,
-          })
-
-          // Refresh server components
-          router.refresh()
-        }
+        // Refresh server components
+        router.refresh()
 
         // Close the drawer
         onClose()

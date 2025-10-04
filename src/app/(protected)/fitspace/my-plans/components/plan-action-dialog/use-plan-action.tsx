@@ -11,11 +11,9 @@ import {
   useClosePlanMutation,
   useCreateCheckinScheduleMutation,
   useDeletePlanMutation,
-  useFitspaceGetActivePlanIdQuery,
-  useFitspaceGetCurrentWorkoutIdQuery,
-  useFitspaceMyPlansQuery,
   usePausePlanMutation,
 } from '@/generated/graphql-client'
+import { queryInvalidation } from '@/lib/query-invalidation'
 
 import { PlanAction, PlanTab } from '../../types'
 
@@ -36,28 +34,11 @@ export function usePlanAction() {
   const router = useRouter()
 
   const queryClient = useQueryClient()
-  const invalidateQueries = () => {
-    queryClient.invalidateQueries({
-      queryKey: useFitspaceMyPlansQuery.getKey(),
-    })
-    queryClient.invalidateQueries({
-      queryKey: useFitspaceGetCurrentWorkoutIdQuery.getKey(),
-    })
-    queryClient.invalidateQueries({
-      queryKey: useFitspaceGetActivePlanIdQuery.getKey(),
-    })
-    // if (dialogState.plan?.id) {
-    //   queryClient.invalidateQueries({
-    //     queryKey: useGetTrainingPlanPreviewByIdQuery.getKey({
-    //       id: dialogState.plan.id,
-    //     }),
-    //   })
-    // }
-  }
+
   const { mutateAsync: activatePlan, isPending: isActivatingPlan } =
     useActivatePlanMutation({
-      onSuccess: () => {
-        invalidateQueries()
+      onSuccess: async () => {
+        await queryInvalidation.workoutAndPlans(queryClient)
         router.refresh()
         router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
@@ -67,8 +48,9 @@ export function usePlanAction() {
     })
   const { mutateAsync: pausePlan, isPending: isPausingPlan } =
     usePausePlanMutation({
-      onSuccess: () => {
-        invalidateQueries()
+      onSuccess: async () => {
+        await queryInvalidation.workoutAndPlans(queryClient)
+        router.refresh()
         router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
       onError: () => {
@@ -77,8 +59,9 @@ export function usePlanAction() {
     })
   const { mutateAsync: closePlan, isPending: isClosingPlan } =
     useClosePlanMutation({
-      onSuccess: () => {
-        invalidateQueries()
+      onSuccess: async () => {
+        await queryInvalidation.workoutAndPlans(queryClient)
+        router.refresh()
         router.push(`/fitspace/my-plans?tab=${PlanTab.Plans}`)
       },
       onError: () => {
@@ -87,8 +70,9 @@ export function usePlanAction() {
     })
   const { mutateAsync: deletePlan, isPending: isDeletingPlan } =
     useDeletePlanMutation({
-      onSuccess: () => {
-        invalidateQueries()
+      onSuccess: async () => {
+        await queryInvalidation.workoutAndPlans(queryClient)
+        router.refresh()
       },
       onError: () => {
         toast.error('Failed to delete plan, please try again.')

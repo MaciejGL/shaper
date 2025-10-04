@@ -27,25 +27,30 @@ import { QueryClient } from '@tanstack/react-query'
 export const queryInvalidation = {
   /**
    * Invalidate all workout-related queries
+   * @param refetchType - 'active' only refetches currently observed queries (default, avoids errors from paused plans),
+   *                      'all' refetches everything including background queries
    */
-  workout: async (queryClient: QueryClient) => {
+  workout: async (
+    queryClient: QueryClient,
+    refetchType: 'active' | 'all' = 'active',
+  ) => {
     await Promise.all([
       // Invalidate all workout day queries (prefix match)
       queryClient.invalidateQueries({
         queryKey: ['FitspaceGetWorkoutDay'],
-        refetchType: 'all', // Refetch both active and inactive queries
+        refetchType,
       }),
       queryClient.invalidateQueries({
         queryKey: ['FitspaceGetWorkout'],
-        refetchType: 'all',
+        refetchType,
       }),
       queryClient.invalidateQueries({
         queryKey: ['navigation'],
-        refetchType: 'all',
+        refetchType,
       }),
       queryClient.invalidateQueries({
         queryKey: ['FitspaceGetQuickWorkoutNavigation'],
-        refetchType: 'all',
+        refetchType,
       }),
     ])
   },
@@ -111,10 +116,30 @@ export const queryInvalidation = {
   /**
    * Invalidate everything related to favourites and workouts
    * Use when starting a workout from favourite
+   * Removes old trainer plan queries and aggressively refetches quick workout data
    */
   favouriteWorkoutStart: async (queryClient: QueryClient) => {
+    // Remove old trainer plan workout day queries to avoid "Plan is not active" errors
+    // when they try to refetch
+    queryClient.removeQueries({
+      queryKey: ['FitspaceGetWorkoutDay'],
+      exact: false,
+    })
+
+    // Aggressively refetch all navigation and quick workout queries
     await Promise.all([
-      queryInvalidation.workout(queryClient),
+      queryClient.invalidateQueries({
+        queryKey: ['navigation'],
+        refetchType: 'all',
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['FitspaceGetQuickWorkoutNavigation'],
+        refetchType: 'all',
+      }),
+      queryClient.invalidateQueries({
+        queryKey: ['FitspaceGetQuickWorkoutDay'],
+        refetchType: 'all',
+      }),
       queryInvalidation.plans(queryClient),
       queryInvalidation.favourites(queryClient),
     ])

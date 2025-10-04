@@ -102,7 +102,7 @@ export function PlanDetailsDrawer({
         }
       >
         <div className="space-y-6">
-          {plan.startDate && plan.endDate ? (
+          {plan.startDate && plan.endDate && plan.active ? (
             <ButtonLink
               href={`/fitspace/workout/${plan.id}`}
               className="w-full"
@@ -114,9 +114,9 @@ export function PlanDetailsDrawer({
             <Button
               onClick={() => onAction('activate', plan)}
               disabled={isButtonLoading}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 w-full"
             >
-              Activate
+              {plan.startDate ? 'Resume' : 'Activate'}
             </Button>
           )}
           {plan.startDate && plan.endDate && (

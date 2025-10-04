@@ -15,6 +15,7 @@ query FitspaceMyPlans {
       startDate
       endDate
       updatedAt
+      active
 
       weeks {
         id
@@ -57,6 +58,7 @@ query FitspaceMyPlans {
       completedWorkoutsDays
       adherence
       updatedAt
+      active
 
       weeks {
         id
@@ -104,6 +106,7 @@ query FitspaceMyPlans {
       updatedAt
       focusTags
       targetGoals
+      active
 
       weeks {
         id
@@ -154,6 +157,7 @@ query FitspaceMyPlans {
       difficulty
       totalWorkouts
       rating
+      active
       userReview {
         id
         rating

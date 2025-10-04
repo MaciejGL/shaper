@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
@@ -8,9 +9,11 @@ import {
 } from '@/generated/graphql-client'
 import { useInvalidateQuery } from '@/lib/invalidate-query'
 import { useOptimisticMutation } from '@/lib/optimistic-mutations'
+import { queryInvalidation } from '@/lib/query-invalidation'
 
 export function useClearWorkoutDay(dayId: string) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const invalidateQuery = useInvalidateQuery()
   const [isClearing, setIsClearing] = useState(false)
 
@@ -43,14 +46,10 @@ export function useClearWorkoutDay(dayId: string) {
         },
       }
     },
-    onSuccess: () => {
-      // Invalidate navigation to update counts
-      invalidateQuery({
-        queryKey: ['navigation'],
-      })
-      invalidateQuery({
-        queryKey: ['FitspaceGetQuickWorkoutNavigation'],
-      })
+    onSuccess: async () => {
+      // Invalidate workout navigation and plans to update counts and favourite workout status
+      await queryInvalidation.workoutNavigation(queryClient)
+      await queryInvalidation.plans(queryClient)
       setIsClearing(false)
       router.refresh()
     },
