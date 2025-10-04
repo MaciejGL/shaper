@@ -168,6 +168,10 @@ mutation UpdateFavouriteExerciseSets($exerciseId: ID!, $setCount: Int!) {
   updateFavouriteExerciseSets(exerciseId: $exerciseId, setCount: $setCount)
 }
 
+mutation RemoveFavouriteExercise($exerciseId: ID!) {
+  removeFavouriteExercise(exerciseId: $exerciseId)
+}
+
 # Delete a favourite workout
 mutation DeleteFavouriteWorkout($id: ID!) {
   deleteFavouriteWorkout(id: $id)

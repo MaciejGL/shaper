@@ -3,6 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { PlusIcon, SearchIcon } from 'lucide-react'
 import { useCallback, useDeferredValue, useMemo, useState } from 'react'
+import { Virtuoso } from 'react-virtuoso'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
 import { Badge } from '@/components/ui/badge'
@@ -82,13 +83,26 @@ export function AddExerciseToFavouriteDrawer({
   const { mutateAsync: updateFavourite, isPending: isAdding } =
     useUpdateFavouriteWorkout()
 
+  const MAX_EXERCISES = 12
+
+  const currentExerciseCount =
+    favouriteData?.getFavouriteWorkout?.exercises?.length || 0
+  const canAddMore = currentExerciseCount < MAX_EXERCISES
+
   const handleSelectExercise = useCallback(
     async (exerciseId: string, exerciseName: string) => {
+      const currentExercises =
+        favouriteData?.getFavouriteWorkout?.exercises || []
+
+      // Check limit
+      if (currentExercises.length >= MAX_EXERCISES) {
+        console.warn('Maximum exercise limit reached')
+        return
+      }
+
       setAddingExerciseId(exerciseId)
 
       try {
-        const currentExercises =
-          favouriteData?.getFavouriteWorkout?.exercises || []
         const maxOrder =
           currentExercises.length > 0
             ? Math.max(...currentExercises.map((ex) => ex.order))
@@ -146,13 +160,13 @@ export function AddExerciseToFavouriteDrawer({
         })
 
         setAddingExerciseId(null)
-        onClose()
+        // Don't close drawer - let user add more exercises
       } catch (error) {
         console.error('Failed to add exercise:', error)
         setAddingExerciseId(null)
       }
     },
-    [favouriteId, favouriteData, updateFavourite, queryClient, onClose],
+    [favouriteId, favouriteData, updateFavourite, queryClient],
   )
 
   return (
@@ -161,7 +175,9 @@ export function AddExerciseToFavouriteDrawer({
         <DrawerHeader>
           <DrawerTitle>Add Exercise</DrawerTitle>
           <DrawerDescription>
-            Select an exercise to add to your template
+            {canAddMore
+              ? `Select an exercise to add to your template (${currentExerciseCount}/${MAX_EXERCISES})`
+              : `Maximum limit reached (${MAX_EXERCISES} exercises)`}
           </DrawerDescription>
         </DrawerHeader>
         <ExerciseList
@@ -171,6 +187,7 @@ export function AddExerciseToFavouriteDrawer({
           isLoading={isLoading}
           addingExerciseId={addingExerciseId}
           addedExerciseIds={addedExerciseIds}
+          canAddMore={canAddMore}
         />
       </DrawerContent>
     </Drawer>
@@ -184,6 +201,7 @@ function ExerciseList({
   isLoading,
   addingExerciseId,
   addedExerciseIds,
+  canAddMore,
 }: {
   exercises: Exercise[]
   onSelectExercise: (id: string, name: string) => void
@@ -191,6 +209,7 @@ function ExerciseList({
   isLoading: boolean
   addingExerciseId: string | null
   addedExerciseIds: Set<string>
+  canAddMore: boolean
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   const deferredSearchQuery = useDeferredValue(searchQuery)
@@ -209,9 +228,36 @@ function ExerciseList({
     })
   }, [exercises, deferredSearchQuery])
 
+  if (isLoading) {
+    return (
+      <div className="px-4 pb-4">
+        <LoadingSkeleton count={8} />
+      </div>
+    )
+  }
+
+  if (filteredExercises.length === 0) {
+    return (
+      <div className="px-4 pb-4">
+        <div className="px-4 pb-3 pt-1">
+          <Input
+            id="search-exercises"
+            placeholder="Search by name or muscle group..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            iconStart={<SearchIcon />}
+          />
+        </div>
+        <div className="text-center py-8 text-muted-foreground">
+          {searchQuery ? 'No exercises found' : 'No exercises available'}
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex flex-col overflow-hidden">
-      <div className="px-4 pb-3 pt-1">
+    <div className="flex flex-col h-full">
+      <div className="px-4 pb-3 pt-1 flex-shrink-0">
         <Input
           id="search-exercises"
           placeholder="Search by name or muscle group..."
@@ -221,81 +267,82 @@ function ExerciseList({
         />
       </div>
 
-      <div className="px-4 pb-4 overflow-y-auto space-y-2">
-        {isLoading ? (
-          <LoadingSkeleton count={8} />
-        ) : filteredExercises.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            {searchQuery ? 'No exercises found' : 'No exercises available'}
-          </div>
-        ) : (
-          filteredExercises.map((exercise) => {
+      <div className="flex-1 min-h-0">
+        <Virtuoso
+          data={filteredExercises}
+          style={{ height: '100%' }}
+          itemContent={(index, exercise) => {
             const isThisExerciseAdding = addingExerciseId === exercise.id
             const isAnyExerciseAdding = isAdding
             const isAlreadyAdded = addedExerciseIds.has(exercise.id)
+            const isDisabled = !canAddMore || isAlreadyAdded
 
             return (
-              <Card
-                key={exercise.id}
-                variant="tertiary"
-                borderless
-                className={
-                  isAlreadyAdded
-                    ? 'opacity-60 cursor-not-allowed'
-                    : 'cursor-pointer transition-all hover:scale-[1.01]'
-                }
-                onClick={() =>
-                  !isAnyExerciseAdding &&
-                  !isAlreadyAdded &&
-                  onSelectExercise(exercise.id, exercise.name)
-                }
-              >
-                <CardContent>
-                  <div className="flex items-center">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <CardTitle className="text-base">
-                          {exercise.name}
-                        </CardTitle>
-                        {isAlreadyAdded && (
-                          <Badge variant="secondary" size="sm">
-                            Added
-                          </Badge>
-                        )}
+              <div className="pb-2">
+                <Card
+                  variant="tertiary"
+                  borderless
+                  className={
+                    isDisabled
+                      ? 'opacity-60 cursor-not-allowed'
+                      : 'cursor-pointer transition-all hover:scale-[1.01]'
+                  }
+                  onClick={() =>
+                    !isAnyExerciseAdding &&
+                    !isDisabled &&
+                    onSelectExercise(exercise.id, exercise.name)
+                  }
+                >
+                  <CardContent>
+                    <div className="flex items-center">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-base">
+                            {exercise.name}
+                          </CardTitle>
+                          {isAlreadyAdded && (
+                            <Badge variant="secondary" size="sm">
+                              Added
+                            </Badge>
+                          )}
+                        </div>
+                        {exercise.muscleGroups &&
+                          exercise.muscleGroups.length > 0 && (
+                            <CardDescription>
+                              {exercise.muscleGroups
+                                .map((mg) => mg.alias)
+                                .filter((alias): alias is string =>
+                                  Boolean(alias),
+                                )
+                                .join(', ')}
+                            </CardDescription>
+                          )}
                       </div>
-                      {exercise.muscleGroups &&
-                        exercise.muscleGroups.length > 0 && (
-                          <CardDescription>
-                            {exercise.muscleGroups
-                              .map((mg) => mg.alias)
-                              .filter((alias): alias is string =>
-                                Boolean(alias),
-                              )
-                              .join(', ')}
-                          </CardDescription>
-                        )}
+                      <Button
+                        size="icon-md"
+                        variant="ghost"
+                        iconOnly={<PlusIcon />}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (!isDisabled) {
+                            onSelectExercise(exercise.id, exercise.name)
+                          }
+                        }}
+                        disabled={isAnyExerciseAdding || isDisabled}
+                        loading={isThisExerciseAdding}
+                      >
+                        Add
+                      </Button>
                     </div>
-                    <Button
-                      size="icon-md"
-                      variant="ghost"
-                      iconOnly={<PlusIcon />}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (!isAlreadyAdded) {
-                          onSelectExercise(exercise.id, exercise.name)
-                        }
-                      }}
-                      disabled={isAnyExerciseAdding || isAlreadyAdded}
-                      loading={isThisExerciseAdding}
-                    >
-                      Add
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
             )
-          })
-        )}
+          }}
+          components={{
+            List: (props) => <div {...props} className="px-4 pb-4 space-y-2" />,
+          }}
+        />
       </div>
     </div>
   )

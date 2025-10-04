@@ -1175,6 +1175,7 @@ export type GQLMutation = {
   removeAllExercisesFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeExerciseFromDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeExerciseFromWorkout: EntireFieldWrapper<Scalars['Boolean']['output']>;
+  removeFavouriteExercise: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeIngredientFromMeal: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeMealFromNutritionPlanDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   removeNutritionPlanDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
@@ -1675,6 +1676,11 @@ export type GQLMutationRemoveExerciseFromDayArgs = {
 
 
 export type GQLMutationRemoveExerciseFromWorkoutArgs = {
+  exerciseId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveFavouriteExerciseArgs = {
   exerciseId: Scalars['ID']['input'];
 };
 
@@ -4754,6 +4760,7 @@ export type GQLMutationResolvers<ContextType = GQLContext, ParentType extends GQ
   removeAllExercisesFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveAllExercisesFromDayArgs, 'input'>>;
   removeExerciseFromDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveExerciseFromDayArgs, 'exerciseId'>>;
   removeExerciseFromWorkout?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveExerciseFromWorkoutArgs, 'exerciseId'>>;
+  removeFavouriteExercise?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveFavouriteExerciseArgs, 'exerciseId'>>;
   removeIngredientFromMeal?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveIngredientFromMealArgs, 'id'>>;
   removeMealFromNutritionPlanDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveMealFromNutritionPlanDayArgs, 'planMealId'>>;
   removeNutritionPlanDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType, RequireFields<GQLMutationRemoveNutritionPlanDayArgs, 'dayId'>>;

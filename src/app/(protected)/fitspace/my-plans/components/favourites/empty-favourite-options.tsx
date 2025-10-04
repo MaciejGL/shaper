@@ -40,8 +40,7 @@ export function EmptyFavouriteOptions({
           transition={{ duration: 0.3 }}
         >
           <Card
-            borderless
-            className="cursor-pointer transition-all hover:scale-[1.01]"
+            className="cursor-pointer transition-all"
             onClick={hasPremiumAccess ? onOpenAiWizard : undefined}
           >
             <CardContent>
@@ -81,8 +80,7 @@ export function EmptyFavouriteOptions({
         transition={{ duration: 0.3, delay: 0.1 }}
       >
         <Card
-          borderless
-          className="cursor-pointer transition-all hover:scale-[1.01]"
+          className="cursor-pointer transition-all"
           onClick={onOpenAddExercise}
         >
           <CardContent>

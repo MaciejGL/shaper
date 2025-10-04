@@ -21,7 +21,7 @@ const alertVariants = cva(
   },
 )
 
-const dotVariants = cva('size-2 rounded-full mt-2 shrink-0', {
+const dotVariants = cva('size-2 rounded-full mt-2 mr-1.5 shrink-0', {
   variants: {
     variant: {
       default: 'bg-foreground/40 shadow-sm',
@@ -41,9 +41,11 @@ const dotVariants = cva('size-2 rounded-full mt-2 shrink-0', {
 
 function Alert({
   className,
+  withoutTitle,
   variant,
   ...props
-}: React.ComponentProps<'div'> & VariantProps<typeof alertVariants>) {
+}: React.ComponentProps<'div'> &
+  VariantProps<typeof alertVariants> & { withoutTitle?: boolean }) {
   return (
     <div
       data-slot="alert"
@@ -51,7 +53,7 @@ function Alert({
       className={cn(alertVariants({ variant }), className)}
       {...props}
     >
-      <div className={cn(dotVariants({ variant }))} />
+      <div className={cn(dotVariants({ variant }), withoutTitle && 'mt-0')} />
       {props.children}
     </div>
   )

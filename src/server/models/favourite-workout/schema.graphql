@@ -125,6 +125,9 @@ extend type Mutation {
   # Update set count for a specific exercise (fast, no debounce needed)
   updateFavouriteExerciseSets(exerciseId: ID!, setCount: Int!): Boolean!
 
+  # Remove a single exercise from favourite (fast, lightweight)
+  removeFavouriteExercise(exerciseId: ID!): Boolean!
+
   # Delete a favourite workout
   deleteFavouriteWorkout(id: ID!): Boolean!
 

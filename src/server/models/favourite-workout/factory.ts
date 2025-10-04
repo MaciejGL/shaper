@@ -86,6 +86,13 @@ export async function createFavouriteWorkout(
   userId: string,
   context: GQLContext,
 ): Promise<FavouriteWorkout> {
+  const MAX_EXERCISES = 12
+
+  // Validate exercise limit
+  if (input.exercises.length > MAX_EXERCISES) {
+    throw new Error(`Maximum ${MAX_EXERCISES} exercises allowed per workout`)
+  }
+
   const favouriteWorkout = await prisma.favouriteWorkout.create({
     data: {
       title: input.title,
@@ -141,6 +148,8 @@ export async function updateFavouriteWorkout(
   userId: string,
   context: GQLContext,
 ): Promise<FavouriteWorkout> {
+  const MAX_EXERCISES = 12
+
   // Verify ownership
   const existingWorkout = await prisma.favouriteWorkout.findFirst({
     where: {
@@ -151,6 +160,11 @@ export async function updateFavouriteWorkout(
 
   if (!existingWorkout) {
     throw new Error('Favourite workout not found or access denied')
+  }
+
+  // Validate exercise limit
+  if (input.exercises && input.exercises.length > MAX_EXERCISES) {
+    throw new Error(`Maximum ${MAX_EXERCISES} exercises allowed per workout`)
   }
 
   // Handle updates with transaction for consistency
@@ -292,6 +306,35 @@ export async function updateFavouriteExerciseSets(
       },
     })
   }
+
+  return true
+}
+
+// Remove a single exercise from favourite (fast, lightweight mutation)
+export async function removeFavouriteExercise(
+  exerciseId: string,
+  userId: string,
+): Promise<boolean> {
+  // Verify ownership
+  const exercise = await prisma.favouriteWorkoutExercise.findFirst({
+    where: {
+      id: exerciseId,
+      favouriteWorkout: {
+        createdById: userId,
+      },
+    },
+  })
+
+  if (!exercise) {
+    throw new Error('Exercise not found or access denied')
+  }
+
+  // Delete the exercise (cascade will handle sets)
+  await prisma.favouriteWorkoutExercise.delete({
+    where: {
+      id: exerciseId,
+    },
+  })
 
   return true
 }

@@ -2,7 +2,6 @@
 
 import {
   DndContext,
-  DragEndEvent,
   PointerSensor,
   closestCenter,
   useSensor,
@@ -14,7 +13,6 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useQueryClient } from '@tanstack/react-query'
 import { formatDistanceToNow } from 'date-fns'
 import {
   ChevronRight,
@@ -26,7 +24,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import { AnimateNumber } from '@/components/animate-number'
 import {
@@ -35,25 +33,19 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import {
-  GQLGetFavouriteWorkoutsQuery,
-  GQLUpdateFavouriteWorkoutMutation,
-  useUpdateFavouriteExerciseSetsMutation,
-} from '@/generated/graphql-client'
-import {
-  WorkoutStatusAnalysis,
-  useUpdateFavouriteWorkout,
-} from '@/hooks/use-favourite-workouts'
-import { useOptimisticMutation } from '@/lib/optimistic-mutations'
-import { estimateWorkoutTime } from '@/lib/workout/esimate-workout-time'
+import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
+import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 
 import { AddExerciseToFavouriteDrawer } from './add-exercise-to-favourite-drawer'
 import { EditFavouriteMetadataDrawer } from './edit-favourite-metadata-drawer'
 import { EmptyFavouriteOptions } from './empty-favourite-options'
 import { FavouriteAiWizard } from './favourite-ai-wizard'
+import { useFavouriteCardData } from './use-favourite-card-data'
+import { useFavouriteCardMutations } from './use-favourite-card-mutations'
 
 interface FavouriteWorkoutCardProps {
   favourite: NonNullable<
@@ -72,15 +64,11 @@ export function FavouriteWorkoutCard({
   onRefetch,
   onDelete,
   workoutStatus,
-  isLoading,
+  isLoading: _isLoading, // eslint-disable-line @typescript-eslint/no-unused-vars
 }: FavouriteWorkoutCardProps) {
   const [showAiWizard, setShowAiWizard] = useState(false)
   const [showAddExercise, setShowAddExercise] = useState(false)
   const [showEditMetadata, setShowEditMetadata] = useState(false)
-
-  const queryClient = useQueryClient()
-  const { mutateAsync: updateFavourite } = useUpdateFavouriteWorkout()
-  const queryKey = useMemo(() => ['GetFavouriteWorkouts'], [])
 
   // Drag and drop sensors
   const sensors = useSensors(
@@ -91,286 +79,29 @@ export function FavouriteWorkoutCard({
     }),
   )
 
-  const totalExercises = favourite.exercises.length
-  const totalSets = favourite.exercises.reduce(
-    (sum, exercise) => sum + exercise.sets.length,
-    0,
-  )
-  const isEmpty = totalExercises === 0
+  // Get computed data (totalSets, isEmpty, uniqueMuscleGroups, estimatedMinutes, buttonProps)
+  const {
+    totalSets,
+    isEmpty,
+    uniqueMuscleGroups,
+    estimatedMinutes: estimatedTime,
+    buttonProps,
+  } = useFavouriteCardData({ favourite, workoutStatus })
 
-  // Create a simplified exercise structure for time estimation
-  const exercisesForEstimation = favourite.exercises.map((exercise) => ({
-    restSeconds: exercise.restSeconds,
-    warmupSets: 0,
-    sets: exercise.sets.map((set) => ({ id: set.id })),
-  }))
-
-  const estimatedTime = estimateWorkoutTime(exercisesForEstimation)
+  // Get mutation handlers
+  const { handleAddSet, handleRemoveSet, handleRemoveExercise, handleDragEnd } =
+    useFavouriteCardMutations({
+      favouriteId: favourite.id,
+      exercises: favourite.exercises,
+    })
 
   const createdAgo = formatDistanceToNow(new Date(favourite.createdAt), {
     addSuffix: true,
   })
 
-  // Determine button state based on workout status
-  const getStartButtonProps = () => {
-    if (!workoutStatus.canStart) {
-      return {
-        disabled: true,
-        variant: 'secondary' as const,
-        text: 'Not Available',
-      }
-    }
-
-    if (workoutStatus.needsConfirmation) {
-      return {
-        disabled: false,
-        variant: 'secondary' as const,
-        text: 'Replace & Start',
-        loading: isLoading,
-      }
-    }
-
-    return {
-      disabled: false,
-      variant: 'default' as const,
-      text: 'Start Workout',
-      loading: isLoading,
-    }
-  }
-
-  const buttonProps = getStartButtonProps()
-
-  // Lightweight mutation for updating set counts (instant, no debounce needed)
-  const { mutateAsync: updateExerciseSets } =
-    useUpdateFavouriteExerciseSetsMutation()
-
-  const { optimisticMutate: updateSetCountOptimistic } = useOptimisticMutation<
-    GQLGetFavouriteWorkoutsQuery,
-    unknown,
-    { exerciseId: string; setCount: number }
-  >({
-    queryKey,
-    mutationFn: ({ exerciseId, setCount }) =>
-      updateExerciseSets({ exerciseId, setCount }),
-    updateFn: (oldData, { exerciseId, setCount }) => {
-      if (!oldData?.getFavouriteWorkouts) return oldData
-
-      return {
-        ...oldData,
-        getFavouriteWorkouts: oldData.getFavouriteWorkouts.map((fav) => {
-          if (fav.id !== favourite.id) return fav
-
-          return {
-            ...fav,
-            exercises: fav.exercises.map((ex) => {
-              if (ex.id !== exerciseId) return ex
-
-              const currentSetCount = ex.sets.length
-
-              if (setCount > currentSetCount) {
-                // Add sets
-                const setsToAdd = setCount - currentSetCount
-                const lastSet = ex.sets[ex.sets.length - 1]
-                const maxOrder =
-                  ex.sets.length > 0
-                    ? Math.max(...ex.sets.map((s) => s.order))
-                    : 0
-
-                const newSets = Array.from({ length: setsToAdd }, (_, i) => ({
-                  id: `temp-${Date.now()}-${i}`,
-                  order: maxOrder + i + 1,
-                  reps: lastSet?.reps || null,
-                  minReps: lastSet?.minReps || null,
-                  maxReps: lastSet?.maxReps || null,
-                  weight: lastSet?.weight || null,
-                  rpe: lastSet?.rpe || null,
-                }))
-
-                return {
-                  ...ex,
-                  sets: [...ex.sets, ...newSets],
-                }
-              } else if (setCount < currentSetCount) {
-                // Remove sets
-                return {
-                  ...ex,
-                  sets: ex.sets.slice(0, setCount),
-                }
-              }
-
-              return ex
-            }),
-          }
-        }),
-      }
-    },
-    onError: async () => {
-      await queryClient.invalidateQueries({ queryKey })
-    },
-  })
-
-  // Handle adding a set to an exercise
-  const handleAddSet = useCallback(
-    (exerciseId: string) => {
-      const exercise = favourite.exercises.find((ex) => ex.id === exerciseId)
-      if (!exercise) return
-
-      const newSetCount = exercise.sets.length + 1
-      updateSetCountOptimistic({ exerciseId, setCount: newSetCount })
-    },
-    [favourite.exercises, updateSetCountOptimistic],
-  )
-
-  // Handle removing a set from an exercise
-  const handleRemoveSet = useCallback(
-    (exerciseId: string) => {
-      const exercise = favourite.exercises.find((ex) => ex.id === exerciseId)
-      if (!exercise || exercise.sets.length <= 1) return
-
-      const newSetCount = exercise.sets.length - 1
-      updateSetCountOptimistic({ exerciseId, setCount: newSetCount })
-    },
-    [favourite.exercises, updateSetCountOptimistic],
-  )
-
-  // Optimistic mutation for removing an exercise
-  const { optimisticMutate: removeExerciseOptimistic } = useOptimisticMutation<
-    GQLGetFavouriteWorkoutsQuery,
-    GQLUpdateFavouriteWorkoutMutation,
-    { exerciseId: string } & Parameters<typeof updateFavourite>[0]
-  >({
-    queryKey,
-    mutationFn: ({ input }) => updateFavourite({ input }),
-    updateFn: (oldData, { exerciseId }) => {
-      if (!oldData?.getFavouriteWorkouts) return oldData
-
-      return {
-        ...oldData,
-        getFavouriteWorkouts: oldData.getFavouriteWorkouts.map((fav) => {
-          if (fav.id !== favourite.id) return fav
-
-          return {
-            ...fav,
-            exercises: fav.exercises.filter((ex) => ex.id !== exerciseId),
-          }
-        }),
-      }
-    },
-    onError: async () => {
-      await queryClient.invalidateQueries({ queryKey })
-    },
-  })
-
-  // Handle removing an exercise from the favourite
-  const handleRemoveExercise = (exerciseId: string) => {
-    const exercises = favourite.exercises
-      .filter((ex) => ex.id !== exerciseId)
-      .map((ex) => ({
-        name: ex.name,
-        order: ex.order,
-        baseId: ex.baseId || undefined,
-        restSeconds: ex.restSeconds || null,
-        instructions: ex.instructions || [],
-        sets: ex.sets.map((s) => ({
-          order: s.order,
-          reps: s.reps || null,
-          minReps: s.minReps || null,
-          maxReps: s.maxReps || null,
-          weight: s.weight || null,
-          rpe: s.rpe || null,
-        })),
-      }))
-
-    removeExerciseOptimistic({
-      exerciseId,
-      input: {
-        id: favourite.id,
-        exercises,
-      },
-    })
-  }
-
-  // Optimistic mutation for reordering exercises
-  const { optimisticMutate: reorderExercisesOptimistic } =
-    useOptimisticMutation<
-      GQLGetFavouriteWorkoutsQuery,
-      GQLUpdateFavouriteWorkoutMutation,
-      {
-        reorderedExercises: typeof favourite.exercises
-      } & Parameters<typeof updateFavourite>[0]
-    >({
-      queryKey,
-      mutationFn: ({ input }) => updateFavourite({ input }),
-      updateFn: (oldData, { reorderedExercises }) => {
-        if (!oldData?.getFavouriteWorkouts) return oldData
-
-        return {
-          ...oldData,
-          getFavouriteWorkouts: oldData.getFavouriteWorkouts.map((fav) => {
-            if (fav.id !== favourite.id) return fav
-
-            return {
-              ...fav,
-              exercises: reorderedExercises,
-            }
-          }),
-        }
-      },
-      onError: async () => {
-        await queryClient.invalidateQueries({ queryKey })
-      },
-    })
-
-  // Handle drag end for reordering exercises
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
-
-    if (!over || active.id === over.id) return
-
-    const oldIndex = favourite.exercises.findIndex((ex) => ex.id === active.id)
-    const newIndex = favourite.exercises.findIndex((ex) => ex.id === over.id)
-
-    if (oldIndex === -1 || newIndex === -1) return
-
-    // Create a new array with reordered exercises
-    const reorderedExercises = [...favourite.exercises]
-    const [movedExercise] = reorderedExercises.splice(oldIndex, 1)
-    reorderedExercises.splice(newIndex, 0, movedExercise)
-
-    // Map to the format expected by the mutation with updated order values
-    const exercises = reorderedExercises.map((ex, index) => ({
-      name: ex.name,
-      order: index, // Update order based on new position
-      baseId: ex.baseId || undefined,
-      restSeconds: ex.restSeconds || null,
-      instructions: ex.instructions || [],
-      sets: ex.sets.map((s) => ({
-        order: s.order,
-        reps: s.reps || null,
-        minReps: s.minReps || null,
-        maxReps: s.maxReps || null,
-        weight: s.weight || null,
-        rpe: s.rpe || null,
-      })),
-    }))
-
-    reorderExercisesOptimistic({
-      reorderedExercises,
-      input: {
-        id: favourite.id,
-        exercises,
-      },
-    })
-  }
-
-  // Get unique muscle groups by filtering duplicates based on ID
-  const uniqueMuscleGroups = favourite.exercises
-    .flatMap((exercise) => exercise.base?.muscleGroups ?? [])
-    .filter(
-      (muscleGroup, index, array) =>
-        array.findIndex((mg) => mg.groupSlug === muscleGroup.groupSlug) ===
-        index,
-    )
+  const hasMuscleGroups = uniqueMuscleGroups.length > 0
+  const hasExercises = favourite.exercises.length > 0
+  const showBadges = hasMuscleGroups || hasExercises
 
   return (
     <>
@@ -381,63 +112,69 @@ export function FavouriteWorkoutCard({
         >
           <AccordionTrigger className="flex items-center justify-between w-full p-4 text-left hover:bg-card-on-card/80 dark:hover:bg-card-on-card/80 transition-colors">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2">
                 <h3 className="text-base font-medium truncate">
                   {favourite.title}
                 </h3>
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  iconOnly={<Edit />}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setShowEditMetadata(true)
-                  }}
-                >
-                  Edit
-                </Button>
               </div>
-              <div className="flex items-center gap-1">
-                {favourite.exercises.length > 0 && (
-                  <Badge variant="secondary" size="sm">
-                    {favourite.exercises.length} exercises
-                  </Badge>
-                )}
-                {uniqueMuscleGroups.length > 0 &&
-                  uniqueMuscleGroups.slice(0, 2).map((muscleGroup) => (
-                    <Badge
-                      key={muscleGroup?.id}
-                      variant="muscle"
-                      size="sm"
-                      className="capitalize"
-                    >
-                      {muscleGroup?.groupSlug}
+              {showBadges && (
+                <div className="flex items-center gap-1 mt-2">
+                  {hasExercises && (
+                    <Badge variant="secondary" size="sm">
+                      {favourite.exercises.length} exercises
                     </Badge>
-                  ))}
-                {uniqueMuscleGroups.length > 2 && (
-                  <Badge variant="muscle" size="sm">
-                    +{uniqueMuscleGroups.length - 2}
-                  </Badge>
-                )}
-              </div>
+                  )}
+                  {hasMuscleGroups &&
+                    uniqueMuscleGroups.slice(0, 2).map((muscleGroup) => (
+                      <Badge
+                        key={muscleGroup?.id}
+                        variant="muscle"
+                        size="sm"
+                        className="capitalize"
+                      >
+                        {muscleGroup?.groupSlug}
+                      </Badge>
+                    ))}
+                  {hasMuscleGroups && uniqueMuscleGroups.length > 2 && (
+                    <Badge variant="muscle" size="sm">
+                      +{uniqueMuscleGroups.length - 2}
+                    </Badge>
+                  )}
+                </div>
+              )}
             </div>
           </AccordionTrigger>
 
           <AccordionContent>
             <div>
               <CardHeader className="py-5 border-t space-y-2">
-                {favourite.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {favourite.description}
-                  </p>
-                )}
-                <div className="flex gap-1 flex-wrap">
-                  <Badge variant="secondary">{totalSets} sets</Badge>
-                  {estimatedTime > 0 && (
-                    <Badge variant="secondary">
-                      <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
-                    </Badge>
+                <div className="flex justify-between">
+                  {favourite.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {favourite.description}
+                    </p>
                   )}
+
+                  <div className="flex gap-1 flex-wrap">
+                    <Badge variant="secondary">{totalSets} sets</Badge>
+                    {estimatedTime > 0 && (
+                      <Badge variant="secondary">
+                        <Clock className="w-3 h-3 mr-1" />~{estimatedTime}min
+                      </Badge>
+                    )}
+                  </div>
+                  <Button
+                    size="icon-sm"
+                    variant="ghost"
+                    className="ml-auto"
+                    iconOnly={<Edit />}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setShowEditMetadata(true)
+                    }}
+                  >
+                    Edit
+                  </Button>
                 </div>
               </CardHeader>
 
@@ -495,7 +232,16 @@ export function FavouriteWorkoutCard({
                   Created {createdAgo}
                 </span>
               </CardContent>
-              <CardFooter className="flex gap-2 border-t [.border-t]:pt-4">
+              <CardFooter className="grid grid-cols-[1fr_auto] gap-2 border-t [.border-t]:pt-4">
+                {buttonProps.subtext && (
+                  <Alert
+                    className="flex items-center gap-2 col-span-2"
+                    variant="warning"
+                    withoutTitle
+                  >
+                    <AlertDescription>{buttonProps.subtext}</AlertDescription>
+                  </Alert>
+                )}
                 <Button
                   size="icon-sm"
                   onClick={onDelete}
@@ -505,7 +251,7 @@ export function FavouriteWorkoutCard({
                   Delete
                 </Button>
 
-                {!isEmpty && !buttonProps.disabled && (
+                {!isEmpty && (
                   <Button
                     onClick={onStart}
                     size="sm"
@@ -604,7 +350,7 @@ function SortableExerciseItem({
       <Card
         borderless
         variant="tertiary"
-        className="flex-1 p-2 rounded-md gap-3"
+        className="flex-1 p-2 rounded-md gap-3 shadow-none"
       >
         <CardHeader className="flex items-center justify-between p-0">
           <p className="justify-start whitespace-normal font-medium text-base">
@@ -627,7 +373,7 @@ function SortableExerciseItem({
           <div className="flex items-center gap-0.5 shrink-0">
             <div className="grid grid-cols-[1fr_auto] items-center gap-4 ml-auto">
               <p>Sets</p>
-              <div className="grid grid-cols-3 items-center gap-0.5 bg-card rounded-lg p-1">
+              <div className="grid grid-cols-3 items-center gap-0.5 bg-card rounded-lg p-0.5">
                 <Button
                   size="icon-sm"
                   variant="tertiary"

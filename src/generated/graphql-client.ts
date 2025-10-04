@@ -1173,6 +1173,7 @@ export type GQLMutation = {
   removeAllExercisesFromDay: Scalars['Boolean']['output'];
   removeExerciseFromDay: Scalars['Boolean']['output'];
   removeExerciseFromWorkout: Scalars['Boolean']['output'];
+  removeFavouriteExercise: Scalars['Boolean']['output'];
   removeIngredientFromMeal: Scalars['Boolean']['output'];
   removeMealFromNutritionPlanDay: Scalars['Boolean']['output'];
   removeNutritionPlanDay: Scalars['Boolean']['output'];
@@ -1673,6 +1674,11 @@ export type GQLMutationRemoveExerciseFromDayArgs = {
 
 
 export type GQLMutationRemoveExerciseFromWorkoutArgs = {
+  exerciseId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationRemoveFavouriteExerciseArgs = {
   exerciseId: Scalars['ID']['input'];
 };
 
@@ -3705,6 +3711,13 @@ export type GQLUpdateFavouriteExerciseSetsMutationVariables = Exact<{
 
 
 export type GQLUpdateFavouriteExerciseSetsMutation = { __typename?: 'Mutation', updateFavouriteExerciseSets: boolean };
+
+export type GQLRemoveFavouriteExerciseMutationVariables = Exact<{
+  exerciseId: Scalars['ID']['input'];
+}>;
+
+
+export type GQLRemoveFavouriteExerciseMutation = { __typename?: 'Mutation', removeFavouriteExercise: boolean };
 
 export type GQLDeleteFavouriteWorkoutMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -5840,6 +5853,30 @@ useUpdateFavouriteExerciseSetsMutation.getKey = () => ['UpdateFavouriteExerciseS
 
 
 useUpdateFavouriteExerciseSetsMutation.fetcher = (variables: GQLUpdateFavouriteExerciseSetsMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateFavouriteExerciseSetsMutation, GQLUpdateFavouriteExerciseSetsMutationVariables>(UpdateFavouriteExerciseSetsDocument, variables, options);
+
+export const RemoveFavouriteExerciseDocument = `
+    mutation RemoveFavouriteExercise($exerciseId: ID!) {
+  removeFavouriteExercise(exerciseId: $exerciseId)
+}
+    `;
+
+export const useRemoveFavouriteExerciseMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLRemoveFavouriteExerciseMutation, TError, GQLRemoveFavouriteExerciseMutationVariables, TContext>) => {
+    
+    return useMutation<GQLRemoveFavouriteExerciseMutation, TError, GQLRemoveFavouriteExerciseMutationVariables, TContext>(
+      {
+    mutationKey: ['RemoveFavouriteExercise'],
+    mutationFn: (variables?: GQLRemoveFavouriteExerciseMutationVariables) => fetchData<GQLRemoveFavouriteExerciseMutation, GQLRemoveFavouriteExerciseMutationVariables>(RemoveFavouriteExerciseDocument, variables)(),
+    ...options
+  }
+    )};
+
+useRemoveFavouriteExerciseMutation.getKey = () => ['RemoveFavouriteExercise'];
+
+
+useRemoveFavouriteExerciseMutation.fetcher = (variables: GQLRemoveFavouriteExerciseMutationVariables, options?: RequestInit['headers']) => fetchData<GQLRemoveFavouriteExerciseMutation, GQLRemoveFavouriteExerciseMutationVariables>(RemoveFavouriteExerciseDocument, variables, options);
 
 export const DeleteFavouriteWorkoutDocument = `
     mutation DeleteFavouriteWorkout($id: ID!) {
