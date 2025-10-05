@@ -23,24 +23,57 @@ export const findInPersonDiscountPercentage = (
 }
 
 /**
+ * Checks if bundle contains both meal plan and training plan packages
+ * Returns 20% discount if both are present
+ */
+export const findMealTrainingBundleDiscount = (
+  packages: TrainerPackage[],
+): number => {
+  const hasMealPlan = packages.some((pkg) => pkg.serviceType === 'meal_plan')
+  const hasTrainingPlan = packages.some(
+    (pkg) => pkg.serviceType === 'workout_plan',
+  )
+
+  if (hasMealPlan && hasTrainingPlan) {
+    return 20 // 20% discount for meal + training bundle
+  }
+
+  return 0
+}
+
+/**
+ * Checks if a package is a meal or training plan
+ */
+export const isMealOrTrainingPackage = (pkg: TrainerPackage): boolean => {
+  return pkg.serviceType === 'meal_plan' || pkg.serviceType === 'workout_plan'
+}
+
+/**
  * Calculates the discounted amount based on bundle context
  *
  * Applies discount if:
- * 1. Package contains 'IN_PERSON_MEETING' service type
- * 2. Bundle contains a 'coaching_complete' package with discount metadata
+ * 1. Package contains 'IN_PERSON_MEETING' service type + coaching_complete bundle
+ * 2. Package is meal_plan or workout_plan + both are in bundle (20% off)
  */
 export const getDiscountedAmount = (
   pkg: TrainerPackage,
   bundleDiscount: number = 0,
+  mealTrainingDiscount: number = 0,
 ): number => {
   if (!pkg.pricing) return 0
 
   // Check if package has IN_PERSON_MEETING service type
   const hasInPersonService = pkg.serviceType === 'in_person_meeting'
 
-  // Apply discount if package has in-person service and bundle has discount
+  // Apply in-person discount if package has in-person service and bundle has discount
   if (hasInPersonService && bundleDiscount > 0) {
     const discountMultiplier = (100 - bundleDiscount) / 100
+    return Math.round(pkg.pricing.amount * discountMultiplier)
+  }
+
+  // Apply meal+training bundle discount
+  if (isMealOrTrainingPackage(pkg) && mealTrainingDiscount > 0) {
+    const discountMultiplier = (100 - mealTrainingDiscount) / 100
     return Math.round(pkg.pricing.amount * discountMultiplier)
   }
 
@@ -49,12 +82,13 @@ export const getDiscountedAmount = (
 
 /**
  * Formats a price with currency symbol and handles different pricing types
- * Applies in-person discount based on bundle context
+ * Applies bundle discounts based on context
  */
 export const formatPrice = (
   pkg: TrainerPackage,
   quantity: number = 1,
   bundleDiscount: number = 0,
+  mealTrainingDiscount: number = 0,
 ): string => {
   if (!pkg.pricing) return 'Price TBD'
 
@@ -66,7 +100,11 @@ export const formatPrice = (
   }
 
   const symbol = symbols[pkg.pricing.currency] || pkg.pricing.currency
-  const discountedAmount = getDiscountedAmount(pkg, bundleDiscount)
+  const discountedAmount = getDiscountedAmount(
+    pkg,
+    bundleDiscount,
+    mealTrainingDiscount,
+  )
   const baseValue = (discountedAmount / 100).toFixed(2)
   const totalValue = ((discountedAmount * quantity) / 100).toFixed(2)
 
@@ -118,16 +156,21 @@ export const allowsQuantitySelection = (pkg: TrainerPackage): boolean => {
 }
 
 /**
- * Checks if a package qualifies for in-person discount in the current bundle
+ * Checks if a package qualifies for any discount in the current bundle
  */
-export const hasInPersonDiscount = (
+export const hasAnyDiscount = (
   pkg: TrainerPackage,
   bundleDiscount: number = 0,
+  mealTrainingDiscount: number = 0,
 ): boolean => {
   if (!pkg.serviceType) return false
   const hasInPersonService = pkg.serviceType === 'in_person_meeting'
+  const isMealOrTraining = isMealOrTrainingPackage(pkg)
 
-  return hasInPersonService && bundleDiscount > 0
+  return (
+    (hasInPersonService && bundleDiscount > 0) ||
+    (isMealOrTraining && mealTrainingDiscount > 0)
+  )
 }
 
 /**
@@ -136,11 +179,20 @@ export const hasInPersonDiscount = (
 export const getDiscountPercentage = (
   pkg: TrainerPackage,
   bundleDiscount: number = 0,
+  mealTrainingDiscount: number = 0,
 ): number => {
   // Check if package has IN_PERSON_MEETING service type
   const hasInPersonService = pkg.serviceType === 'in_person_meeting'
+  if (hasInPersonService && bundleDiscount > 0) {
+    return bundleDiscount
+  }
 
-  return hasInPersonService && bundleDiscount > 0 ? bundleDiscount : 0
+  // Check if package is meal or training plan
+  if (isMealOrTrainingPackage(pkg) && mealTrainingDiscount > 0) {
+    return mealTrainingDiscount
+  }
+
+  return 0
 }
 
 /**
@@ -190,7 +242,7 @@ export const formatOriginalPrice = (
 
 /**
  * Calculates the total cost breakdown for a bundle of selected packages
- * Applies in-person discount from coaching_complete packages to in_person_meeting packages
+ * Applies all applicable discounts (in-person, meal+training bundle)
  */
 export const calculateBundleTotal = (
   selectedPackages: SelectedPackageItem[],
@@ -201,8 +253,11 @@ export const calculateBundleTotal = (
     (item) => item.package.pricing?.type === 'subscription',
   )
 
-  // Find the discount percentage from coaching_complete packages in the bundle
+  // Find applicable discounts from the bundle
   const bundleDiscount = findInPersonDiscountPercentage(
+    selectedPackages.map((item) => item.package),
+  )
+  const mealTrainingDiscount = findMealTrainingBundleDiscount(
     selectedPackages.map((item) => item.package),
   )
 
@@ -211,7 +266,11 @@ export const calculateBundleTotal = (
     if (!pricing) return
 
     // Apply discount based on bundle context
-    const discountedAmount = getDiscountedAmount(item.package, bundleDiscount)
+    const discountedAmount = getDiscountedAmount(
+      item.package,
+      bundleDiscount,
+      mealTrainingDiscount,
+    )
     const itemTotal = (discountedAmount * item.quantity) / 100 // Convert from cents
 
     if (pricing.type === 'one-time') {
@@ -239,8 +298,11 @@ export const calculateDiscountAmount = (
   let originalTotal = 0
   let discountedTotal = 0
 
-  // Find the discount percentage from coaching_complete packages in the bundle
+  // Find applicable discounts from the bundle
   const bundleDiscount = findInPersonDiscountPercentage(
+    selectedPackages.map((item) => item.package),
+  )
+  const mealTrainingDiscount = findMealTrainingBundleDiscount(
     selectedPackages.map((item) => item.package),
   )
 
@@ -253,7 +315,11 @@ export const calculateDiscountAmount = (
     originalTotal += originalAmount
 
     // Calculate discounted amount
-    const discountedAmount = getDiscountedAmount(item.package, bundleDiscount)
+    const discountedAmount = getDiscountedAmount(
+      item.package,
+      bundleDiscount,
+      mealTrainingDiscount,
+    )
     const discountedAmountTotal = (discountedAmount * item.quantity) / 100
     discountedTotal += discountedAmountTotal
   })

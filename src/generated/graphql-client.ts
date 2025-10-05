@@ -379,6 +379,7 @@ export type GQLCoachingRequest = {
   __typename?: 'CoachingRequest';
   createdAt: Scalars['String']['output'];
   id: Scalars['ID']['output'];
+  interestedServices?: Maybe<Array<Scalars['String']['output']>>;
   message?: Maybe<Scalars['String']['output']>;
   recipient: GQLUser;
   sender: GQLUser;
@@ -1407,6 +1408,7 @@ export type GQLMutationCreateCheckinScheduleArgs = {
 
 
 export type GQLMutationCreateCoachingRequestArgs = {
+  interestedServices?: InputMaybe<Array<Scalars['String']['input']>>;
   message?: InputMaybe<Scalars['String']['input']>;
   recipientEmail: Scalars['String']['input'];
 };
@@ -4255,14 +4257,6 @@ export type GQLGetClientsQueryVariables = Exact<{
 
 export type GQLGetClientsQuery = { __typename?: 'Query', myClients: Array<{ __typename?: 'UserPublic', id: string, email: string, firstName?: string | undefined | null, lastName?: string | undefined | null, image?: string | undefined | null, role: GQLUserRole, updatedAt: string, createdAt: string, activePlan?: { __typename?: 'TrainingPlan', id: string, title: string, description?: string | undefined | null, weekCount: number, startDate?: string | undefined | null, endDate?: string | undefined | null, lastSessionActivity?: string | undefined | null, progress?: number | undefined | null } | undefined | null }> };
 
-export type GQLCreateCoachingRequestMutationVariables = Exact<{
-  recipientEmail: Scalars['String']['input'];
-  message?: InputMaybe<Scalars['String']['input']>;
-}>;
-
-
-export type GQLCreateCoachingRequestMutation = { __typename?: 'Mutation', createCoachingRequest: { __typename?: 'CoachingRequest', id: string } };
-
 export type GQLGetClientMacroTargetsQueryVariables = Exact<{
   clientId: Scalars['ID']['input'];
 }>;
@@ -4878,7 +4872,7 @@ export type GQLMyCoachingRequestQueryVariables = Exact<{
 }>;
 
 
-export type GQLMyCoachingRequestQuery = { __typename?: 'Query', coachingRequest?: { __typename?: 'CoachingRequest', id: string, message?: string | undefined | null, createdAt: string, updatedAt: string, status: GQLCoachingRequestStatus, recipient: { __typename?: 'User', id: string, name?: string | undefined | null, email: string }, sender: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } } | undefined | null };
+export type GQLMyCoachingRequestQuery = { __typename?: 'Query', coachingRequest?: { __typename?: 'CoachingRequest', id: string, message?: string | undefined | null, interestedServices?: Array<string> | undefined | null, createdAt: string, updatedAt: string, status: GQLCoachingRequestStatus, recipient: { __typename?: 'User', id: string, name?: string | undefined | null, email: string }, sender: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } } | undefined | null };
 
 export type GQLAcceptCoachingRequestMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -4900,6 +4894,15 @@ export type GQLCancelCoachingRequestMutationVariables = Exact<{
 
 
 export type GQLCancelCoachingRequestMutation = { __typename?: 'Mutation', cancelCoachingRequest?: { __typename?: 'CoachingRequest', id: string } | undefined | null };
+
+export type GQLCreateCoachingRequestMutationVariables = Exact<{
+  recipientEmail: Scalars['String']['input'];
+  message?: InputMaybe<Scalars['String']['input']>;
+  interestedServices?: InputMaybe<Array<Scalars['String']['input']> | Scalars['String']['input']>;
+}>;
+
+
+export type GQLCreateCoachingRequestMutation = { __typename?: 'Mutation', createCoachingRequest: { __typename?: 'CoachingRequest', id: string, interestedServices?: Array<string> | undefined | null } };
 
 export type GQLGetNotesQueryVariables = Exact<{
   relatedTo?: InputMaybe<Scalars['ID']['input']>;
@@ -9697,32 +9700,6 @@ useInfiniteGetClientsQuery.getKey = (variables?: GQLGetClientsQueryVariables) =>
 
 useGetClientsQuery.fetcher = (variables?: GQLGetClientsQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetClientsQuery, GQLGetClientsQueryVariables>(GetClientsDocument, variables, options);
 
-export const CreateCoachingRequestDocument = `
-    mutation CreateCoachingRequest($recipientEmail: String!, $message: String) {
-  createCoachingRequest(recipientEmail: $recipientEmail, message: $message) {
-    id
-  }
-}
-    `;
-
-export const useCreateCoachingRequestMutation = <
-      TError = unknown,
-      TContext = unknown
-    >(options?: UseMutationOptions<GQLCreateCoachingRequestMutation, TError, GQLCreateCoachingRequestMutationVariables, TContext>) => {
-    
-    return useMutation<GQLCreateCoachingRequestMutation, TError, GQLCreateCoachingRequestMutationVariables, TContext>(
-      {
-    mutationKey: ['CreateCoachingRequest'],
-    mutationFn: (variables?: GQLCreateCoachingRequestMutationVariables) => fetchData<GQLCreateCoachingRequestMutation, GQLCreateCoachingRequestMutationVariables>(CreateCoachingRequestDocument, variables)(),
-    ...options
-  }
-    )};
-
-useCreateCoachingRequestMutation.getKey = () => ['CreateCoachingRequest'];
-
-
-useCreateCoachingRequestMutation.fetcher = (variables: GQLCreateCoachingRequestMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateCoachingRequestMutation, GQLCreateCoachingRequestMutationVariables>(CreateCoachingRequestDocument, variables, options);
-
 export const GetClientMacroTargetsDocument = `
     query GetClientMacroTargets($clientId: ID!) {
   getClientMacroTargets(clientId: $clientId) {
@@ -13478,6 +13455,7 @@ export const MyCoachingRequestDocument = `
   coachingRequest(id: $id) {
     id
     message
+    interestedServices
     createdAt
     updatedAt
     status
@@ -13614,6 +13592,37 @@ useCancelCoachingRequestMutation.getKey = () => ['CancelCoachingRequest'];
 
 
 useCancelCoachingRequestMutation.fetcher = (variables: GQLCancelCoachingRequestMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCancelCoachingRequestMutation, GQLCancelCoachingRequestMutationVariables>(CancelCoachingRequestDocument, variables, options);
+
+export const CreateCoachingRequestDocument = `
+    mutation CreateCoachingRequest($recipientEmail: String!, $message: String, $interestedServices: [String!]) {
+  createCoachingRequest(
+    recipientEmail: $recipientEmail
+    message: $message
+    interestedServices: $interestedServices
+  ) {
+    id
+    interestedServices
+  }
+}
+    `;
+
+export const useCreateCoachingRequestMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateCoachingRequestMutation, TError, GQLCreateCoachingRequestMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateCoachingRequestMutation, TError, GQLCreateCoachingRequestMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateCoachingRequest'],
+    mutationFn: (variables?: GQLCreateCoachingRequestMutationVariables) => fetchData<GQLCreateCoachingRequestMutation, GQLCreateCoachingRequestMutationVariables>(CreateCoachingRequestDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateCoachingRequestMutation.getKey = () => ['CreateCoachingRequest'];
+
+
+useCreateCoachingRequestMutation.fetcher = (variables: GQLCreateCoachingRequestMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateCoachingRequestMutation, GQLCreateCoachingRequestMutationVariables>(CreateCoachingRequestDocument, variables, options);
 
 export const GetNotesDocument = `
     query GetNotes($relatedTo: ID) {

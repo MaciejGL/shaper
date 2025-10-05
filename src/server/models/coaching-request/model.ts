@@ -65,4 +65,8 @@ export default class CoachingRequest implements GQLCoachingRequest {
 
     return new User(user, this.context)
   }
+
+  get interestedServices() {
+    return this.data.interestedServices
+  }
 }

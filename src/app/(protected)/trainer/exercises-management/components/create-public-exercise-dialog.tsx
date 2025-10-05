@@ -196,7 +196,7 @@ export function CreatePublicExerciseDialog({
               }
               placeholder="e.g., Barbell Bench Press"
               required
-              error={isNameTakenError}
+              errorMessage={isNameTakenError}
             />
             {isNameTakenError && (
               <p className="text-sm text-red-500">{isNameTakenError}</p>

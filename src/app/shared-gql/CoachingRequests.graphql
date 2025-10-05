@@ -22,6 +22,7 @@ query MyCoachingRequest($id: ID!) {
   coachingRequest(id: $id) {
     id
     message
+    interestedServices
     createdAt
     updatedAt
     status
@@ -53,5 +54,20 @@ mutation RejectCoachingRequest($id: ID!) {
 mutation CancelCoachingRequest($id: ID!) {
   cancelCoachingRequest(id: $id) {
     id
+  }
+}
+
+mutation CreateCoachingRequest(
+  $recipientEmail: String!
+  $message: String
+  $interestedServices: [String!]
+) {
+  createCoachingRequest(
+    recipientEmail: $recipientEmail
+    message: $message
+    interestedServices: $interestedServices
+  ) {
+    id
+    interestedServices
   }
 }

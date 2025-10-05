@@ -8,10 +8,10 @@ import { GQLContext } from '@/types/gql-context'
 import {
   acceptCoachingRequest,
   cancelCoachingRequest,
+  createCoachingRequest,
   getCoachingRequest,
   getCoachingRequests,
   rejectCoachingRequest,
-  upsertCoachingRequest,
 } from './factory'
 
 export const Query: GQLQueryResolvers<GQLContext> = {
@@ -40,10 +40,11 @@ export const Mutation: GQLMutationResolvers = {
       throw new Error('User not found')
     }
 
-    return upsertCoachingRequest({
+    return createCoachingRequest({
       senderId: user.user.id,
       recipientEmail: args.recipientEmail,
       message: args.message,
+      interestedServices: args.interestedServices,
       context,
     })
   },

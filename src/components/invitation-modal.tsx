@@ -1,9 +1,9 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
   ArrowRight,
-  Calendar,
   CheckCircle,
   Clock,
   Heart,
@@ -12,8 +12,8 @@ import {
   User,
   UserPlus,
   Users,
-  X,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 
@@ -28,9 +28,14 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+import { useUser } from '@/context/user-context'
 import {
+  GQLUserRole,
   useAcceptCoachingRequestMutation,
+  useGetMyTrainerQuery,
   useMyCoachingRequestQuery,
+  useMyCoachingRequestsQuery,
   useRejectCoachingRequestMutation,
 } from '@/generated/graphql-client'
 
@@ -46,60 +51,57 @@ export function TrainingInvitationModal({
   onClose,
 }: TrainingInvitationProps) {
   const [modalState, setModalState] = useState<ModalState>('invitation')
+  const queryClient = useQueryClient()
   const { data } = useMyCoachingRequestQuery({ id: relatedItemId })
   const { mutate: acceptCoachingRequest, isPending: isAccepting } =
     useAcceptCoachingRequestMutation({
       onSuccess: () => {
+        // Invalidate queries to refresh my-trainer page
+        queryClient.invalidateQueries({
+          queryKey: useGetMyTrainerQuery.getKey(),
+        })
+        queryClient.invalidateQueries({
+          queryKey: useMyCoachingRequestsQuery.getKey(),
+        })
         toast.success('Coaching request accepted')
         setModalState('success')
       },
-      // onError: () => toast.error('Failed to accept coaching request'),
     })
   const { mutate: rejectCoachingRequest, isPending: isRejecting } =
     useRejectCoachingRequestMutation({
       onSuccess: () => {
+        // Invalidate coaching requests query
+        queryClient.invalidateQueries({
+          queryKey: useMyCoachingRequestsQuery.getKey(),
+        })
         toast.success('Coaching request declined')
         setModalState('declined')
       },
-      // onError: () => toast.error('Failed to reject coaching request'),
     })
 
   const handleAccept = () => acceptCoachingRequest({ id: relatedItemId })
   const handleDecline = () => rejectCoachingRequest({ id: relatedItemId })
 
-  const { sender, message } = data?.coachingRequest || {}
+  const { sender, message, interestedServices } = data?.coachingRequest || {}
   const senderName = sender?.name
   const senderEmail = sender?.email
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="w-full max-w-md"
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent
+        dialogTitle="Coaching Invitation"
+        className="max-w-md p-0 gap-0"
       >
         {modalState === 'invitation' && (
-          <Card>
-            <div className="absolute top-4 right-4">
-              <Button
-                variant="ghost"
-                onClick={onClose}
-                size="md"
-                iconOnly={<X className="" />}
-              >
-                <span className="sr-only">Close</span>
-              </Button>
-            </div>
+          <>
             <InvitationHeader senderName={senderName} />
             <CardContent className="pb-4">
               <SenderInfo
                 senderName={senderName}
                 senderEmail={senderEmail}
                 message={message}
+                interestedServices={interestedServices}
               />
-              <InvitationBenefits />
             </CardContent>
             <InvitationActions
               onAccept={handleAccept}
@@ -107,18 +109,22 @@ export function TrainingInvitationModal({
               isAccepting={isAccepting}
               isRejecting={isRejecting}
             />
-          </Card>
+          </>
         )}
 
         {modalState === 'success' && (
-          <SuccessCard senderName={senderName} onClose={onClose} />
+          <SuccessCard
+            senderName={senderName}
+            senderId={sender?.id}
+            onClose={onClose}
+          />
         )}
 
         {modalState === 'declined' && (
           <DeclinedCard senderName={senderName} onClose={onClose} />
         )}
-      </motion.div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -129,10 +135,10 @@ function InvitationHeader({ senderName }: { senderName?: string | null }) {
         <Badge>New Invitation</Badge>
       </div>
       <CardTitle className="text-2xl font-bold">
-        {senderName ? `Connect with ${senderName}` : 'Training Invitation'}
+        {senderName ? 'Coaching Request' : 'Training Invitation'}
       </CardTitle>
-      <CardDescription className="text-base mt-1">
-        You've been invited to start a fitness journey
+      <CardDescription className="text-sm mt-1">
+        You've been invited to start a fitness journey with {senderName}
       </CardDescription>
     </CardHeader>
   )
@@ -142,58 +148,61 @@ function SenderInfo({
   senderName,
   senderEmail,
   message,
+  interestedServices,
 }: {
   senderName?: string | null
   senderEmail?: string | null
   message?: string | null
+  interestedServices?: string[] | null
 }) {
-  return (
-    <div className="flex items-start gap-4 p-4 rounded-lg bg-background mb-6">
-      <Avatar className="h-12 w-12 border-2 shadow-sm">
-        <AvatarImage src="/placeholder.svg?key=ebzsn" alt="Trainer" />
-        <AvatarFallback className="bg-muted-foreground">
-          <User className="h-6 w-6" />
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex-1">
-        {senderName && (
-          <h3 className="font-semibold text-foreground">{senderName}</h3>
-        )}
-        {senderEmail && (
-          <p className="text-sm text-foreground">{senderEmail}</p>
-        )}
-        {message && (
-          <div className="mt-2 text-sm text-muted-foreground">
-            <p className="font-medium text-foreground">Message:</p>
-            <p>{message}</p>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
+  const serviceLabels: Record<string, string> = {
+    meal_plan: 'Meal Plan',
+    workout_plan: 'Training Plan',
+    coaching_complete: 'Full Coaching',
+    in_person_meeting: 'In-Person Training',
+  }
 
-function InvitationBenefits() {
   return (
-    <div className="space-y-3">
-      <div className="flex items-center gap-3 text-sm">
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted-foreground">
-          <CheckCircle className="h-4 w-4" />
+    <div className="space-y-4 mb-6">
+      <Card
+        borderless
+        className="flex flex-row items-start gap-4 p-4 rounded-lg"
+      >
+        <Avatar className="h-12 w-12 border-2 shadow-sm">
+          <AvatarImage src="/placeholder.svg?key=ebzsn" alt="Trainer" />
+          <AvatarFallback>
+            <User className="h-6 w-6" />
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1">
+          {senderName && (
+            <h3 className="font-semibold text-foreground">{senderName}</h3>
+          )}
+          {senderEmail && (
+            <p className="text-sm text-muted-foreground">{senderEmail}</p>
+          )}
         </div>
-        <span>Personalized training programs</span>
-      </div>
-      <div className="flex items-center gap-3 text-sm">
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted-foreground">
-          <Calendar className="h-4 w-4" />
+      </Card>
+
+      {interestedServices && interestedServices.length > 0 && (
+        <div>
+          <p className="font-medium text-sm mb-2">Interested in:</p>
+          <div className="flex flex-wrap gap-2">
+            {interestedServices.map((service) => (
+              <Badge key={service} variant="secondary">
+                {serviceLabels[service] || service}
+              </Badge>
+            ))}
+          </div>
         </div>
-        <span>Flexible scheduling options</span>
-      </div>
-      <div className="flex items-center gap-3 text-sm">
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted-foreground">
-          <ArrowRight className="h-4 w-4" />
+      )}
+
+      {message && (
+        <div>
+          <p className="font-medium text-sm mb-1">Message:</p>
+          <p className="text-sm text-muted-foreground">{message}</p>
         </div>
-        <span>Start your fitness journey today</span>
-      </div>
+      )}
     </div>
   )
 }
@@ -210,7 +219,7 @@ function InvitationActions({
   isRejecting: boolean
 }) {
   return (
-    <CardFooter className="flex gap-3 py-3 border-t">
+    <CardFooter className="flex gap-3 pb-3 border-t">
       <Button
         variant="outline"
         onClick={onDecline}
@@ -233,27 +242,29 @@ function InvitationActions({
 
 function SuccessCard({
   senderName,
+  senderId,
   onClose,
 }: {
   senderName?: string | null
+  senderId?: string | null
   onClose: () => void
 }) {
+  const { user } = useUser()
+  const router = useRouter()
+
+  const handleClose = () => {
+    if (user?.role === GQLUserRole.Trainer) {
+      router.push(`/trainer/clients/${senderId}`)
+    }
+    if (user?.role === GQLUserRole.Client) {
+      router.push(`/fitspace/my-trainer`)
+    }
+    onClose()
+  }
+
   return (
-    <Card className="relative overflow-hidden">
-      {/* Success gradient background */}
-
+    <Card borderless className="relative overflow-hidden">
       <div className="relative">
-        <div className="absolute top-4 right-4">
-          <Button
-            variant="ghost"
-            onClick={onClose}
-            size="md"
-            iconOnly={<X className="" />}
-          >
-            <span className="sr-only">Close</span>
-          </Button>
-        </div>
-
         <CardHeader className="text-center pt-8 pb-6">
           <motion.div
             initial={{ scale: 0 }}
@@ -314,7 +325,11 @@ function SuccessCard({
         </CardContent>
 
         <CardFooter className="pt-6">
-          <Button onClick={onClose} className="w-full" iconEnd={<ArrowRight />}>
+          <Button
+            onClick={handleClose}
+            className="w-full"
+            iconEnd={<ArrowRight />}
+          >
             Start Training Together
           </Button>
         </CardFooter>
@@ -331,22 +346,10 @@ function DeclinedCard({
   onClose: () => void
 }) {
   return (
-    <Card className="relative overflow-hidden">
-      {/* Declined gradient background */}
+    <Card borderless className="relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-gray-50 dark:from-slate-950/20 dark:to-gray-950/20" />
 
       <div className="relative">
-        <div className="absolute top-4 right-4">
-          <Button
-            variant="ghost"
-            onClick={onClose}
-            size="md"
-            iconOnly={<X className="" />}
-          >
-            <span className="sr-only">Close</span>
-          </Button>
-        </div>
-
         <CardHeader className="text-center pt-8 pb-6">
           <motion.div
             initial={{ scale: 0 }}

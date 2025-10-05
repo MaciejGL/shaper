@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionIcon, SectionIconProps } from '@/components/ui/section-icon'
 import { useOfferPrices } from '@/hooks/use-offer-prices'
+import { DISCOUNT_CONFIG, DISCOUNT_LABELS } from '@/lib/stripe/discount-config'
 import { cn } from '@/lib/utils'
 
 interface ServiceOffer {
@@ -36,7 +37,7 @@ const serviceOffers: ServiceOffer[] = [
       'Everything from workout + meal plans',
       'Bi-Weekly video check-ins',
       '1x in-person training session a month',
-      '-50% off for additional 1x in-person training session',
+      `-${DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO}% off for additional 1x in-person training session`,
       'Plan adjustments based on progress',
       'Premium access',
       'Unlimited messaging support',
@@ -47,6 +48,23 @@ const serviceOffers: ServiceOffer[] = [
     variant: 'amber',
   },
   {
+    id: 'meal-training-bundle',
+    title: 'Meal + Training Bundle',
+    description:
+      'Get both custom workout and nutrition plans together with a special discount.',
+    features: [
+      'Custom 4-week+ workout program',
+      '7-day meal plan with recipes',
+      'Fitness & nutrition assessment',
+      'Shopping list & macro guidelines',
+      `${DISCOUNT_CONFIG.MEAL_TRAINING_BUNDLE}% bundle discount`,
+    ],
+    duration: 'One-time',
+    icon: Notebook,
+    badge: DISCOUNT_LABELS.MEAL_TRAINING_BUNDLE,
+    variant: 'green',
+  },
+  {
     id: 'workout-plan',
     title: 'Custom Workout Plan',
     description:
@@ -54,7 +72,6 @@ const serviceOffers: ServiceOffer[] = [
     features: ['Initial fitness assessment', '4-week custom workout program'],
     duration: 'One-time',
     icon: Notebook,
-    badge: 'Most Popular',
     variant: 'green',
   },
   {
@@ -95,10 +112,10 @@ export function OffersSection() {
   const { prices, isLoading } = useOfferPrices()
 
   const cardVariant = (offer: ServiceOffer) => {
-    if (offer.badge === 'Most Popular')
-      return cn('outline outline-primary dark:outline-primary shadow-lg')
     if (offer.badge === 'Best Value')
       return cn('outline outline-amber-500 dark:outline-amber-500 shadow-lg')
+    if (offer.badge === DISCOUNT_LABELS.MEAL_TRAINING_BUNDLE)
+      return cn('outline outline-green-500 dark:outline-green-500 shadow-lg')
     return ''
   }
 

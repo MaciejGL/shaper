@@ -402,7 +402,7 @@ function KanbanExerciseSets({
                     type="number"
                     placeholder="Max"
                     min="1"
-                    error={
+                    errorMessage={
                       set.minReps && set.maxReps && set.minReps > set.maxReps
                         ? 'Max reps must be greater than min reps'
                         : undefined

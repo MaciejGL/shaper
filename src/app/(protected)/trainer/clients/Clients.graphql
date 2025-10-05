@@ -20,9 +20,3 @@ query GetClients($limit: Int, $offset: Int, $trainerId: ID) {
     }
   }
 }
-
-mutation CreateCoachingRequest($recipientEmail: String!, $message: String) {
-  createCoachingRequest(recipientEmail: $recipientEmail, message: $message) {
-    id
-  }
-}

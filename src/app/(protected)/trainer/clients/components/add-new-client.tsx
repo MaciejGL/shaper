@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { UserPlus2Icon } from 'lucide-react'
 import type React from 'react'
 import { useState } from 'react'
@@ -19,13 +20,21 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { useCreateCoachingRequestMutation } from '@/generated/graphql-client'
+import {
+  useCreateCoachingRequestMutation,
+  useMyCoachingRequestsQuery,
+} from '@/generated/graphql-client'
 
 export function AddClientModal() {
   const [open, setOpen] = useState(false)
+  const queryClient = useQueryClient()
   const { mutateAsync: createCoachingRequest, isPending } =
     useCreateCoachingRequestMutation({
       onSuccess: () => {
+        // Invalidate coaching requests query to refresh the list
+        queryClient.invalidateQueries({
+          queryKey: useMyCoachingRequestsQuery.getKey(),
+        })
         toast.success('Coaching request sent')
       },
     })
@@ -69,10 +78,15 @@ export function AddClientModal() {
       })
 
       setFormData({ email: '', message: '' })
-      toast.success('Coaching request sent to client.')
       setOpen(false)
     } catch (error) {
-      console.error(error)
+      console.error('Error sending coaching request:', error)
+      // Show error message to user
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : 'Failed to send invitation. Please try again.'
+      toast.error(errorMessage)
     }
   }
 
@@ -95,13 +109,14 @@ export function AddClientModal() {
                 Email
               </Label>
               <Input
-                error={errors.email?.[0]}
+                errorMessage={errors.email?.[0]}
                 id="email"
                 name="email"
                 type="email"
                 placeholder="client@example.com"
                 value={formData.email}
                 onChange={handleChange}
+                disabled={isPending}
               />
             </div>
             <div className="grid gap-2">
@@ -109,13 +124,14 @@ export function AddClientModal() {
                 Invitation Message
               </Label>
               <Textarea
-                error={errors.message?.[0]}
+                errorMessage={errors.message?.[0]}
                 id="message"
                 name="message"
                 placeholder="Write a personal message to your client..."
                 value={formData.message}
                 onChange={handleChange}
                 className="min-h-[100px]"
+                disabled={isPending}
               />
             </div>
           </div>

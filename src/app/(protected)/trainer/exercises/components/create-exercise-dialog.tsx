@@ -284,7 +284,7 @@ export function CreateExerciseDialog({
               }
               placeholder="e.g., Barbell Bench Press"
               required
-              error={
+              errorMessage={
                 isNameTakenError?.level === 'user'
                   ? isNameTakenError.error
                   : undefined

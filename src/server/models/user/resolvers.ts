@@ -1,4 +1,5 @@
 import {
+  GQLCoachingRequestStatus,
   GQLMutationResolvers,
   GQLNotificationType,
   GQLQueryResolvers,
@@ -221,18 +222,27 @@ export const Query: GQLQueryResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
-    if (!user.user.trainerId) {
+    // Fetch fresh user data from DB to get latest trainerId
+    // Context user may have stale trainerId from session
+    const currentUser = await prisma.user.findUnique({
+      where: { id: user.user.id },
+      select: { trainerId: true },
+    })
+
+    if (!currentUser?.trainerId) {
       return null
     }
 
-    const cacheKey = `my-trainer:user-id:${user.user.id}:user-trainer-id:${user.user.trainerId}`
+    const trainerId = currentUser.trainerId
+
+    const cacheKey = `my-trainer:user-id:${user.user.id}:user-trainer-id:${trainerId}`
     const cachedTrainer = await getFromCache<UserWithIncludes>(cacheKey)
     if (cachedTrainer) {
       return new PublicTrainer(cachedTrainer, context)
     }
 
     const trainer = await prisma.user.findUnique({
-      where: { id: user.user.trainerId },
+      where: { id: trainerId },
       include: {
         profile: true,
         _count: {
@@ -853,6 +863,30 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
             },
           },
         })
+
+        // Find the latest coaching request between user and trainer to maintain audit trail
+        const latestCoachingRequest = await tx.coachingRequest.findFirst({
+          where: {
+            OR: [
+              { senderId: userId, recipientId: trainerId },
+              { senderId: trainerId, recipientId: userId },
+            ],
+          },
+          orderBy: { createdAt: 'desc' },
+        })
+
+        // Create CANCELLED coaching request record for audit trail
+        if (latestCoachingRequest) {
+          await tx.coachingRequest.create({
+            data: {
+              senderId: latestCoachingRequest.senderId,
+              recipientId: latestCoachingRequest.recipientId,
+              message: latestCoachingRequest.message,
+              interestedServices: latestCoachingRequest.interestedServices,
+              status: GQLCoachingRequestStatus.Cancelled,
+            },
+          })
+        }
       })
 
       // Create notification for the trainer

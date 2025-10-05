@@ -9,7 +9,8 @@ type InputProps = Omit<React.ComponentProps<'input'>, 'size'> & {
   iconEnd?: React.ReactNode
   label?: string
   id: string
-  error?: string
+  errorMessage?: string
+  error?: boolean
   size?: 'sm' | 'md'
 }
 
@@ -46,6 +47,7 @@ export function Input({
   type,
   label,
   id,
+  errorMessage,
   error,
   size = 'md',
   variant = 'secondary',
@@ -70,7 +72,7 @@ export function Input({
           type={type}
           id={id}
           data-slot="input"
-          data-error={error}
+          data-error={errorMessage ?? error}
           className={cn(
             inputVariants({ size, variant }),
             { 'pl-10': iconStart, 'pr-10': iconEnd },
@@ -85,6 +87,10 @@ export function Input({
           </div>
         )}
       </div>
+
+      {errorMessage && (
+        <p className="text-sm text-destructive">{errorMessage}</p>
+      )}
     </div>
   )
 }

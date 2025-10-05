@@ -381,6 +381,7 @@ export type GQLCoachingRequest = {
   __typename?: 'CoachingRequest';
   createdAt: EntireFieldWrapper<Scalars['String']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
+  interestedServices?: EntireFieldWrapper<Maybe<Array<Scalars['String']['output']>>>;
   message?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   recipient: EntireFieldWrapper<GQLUser>;
   sender: EntireFieldWrapper<GQLUser>;
@@ -1409,6 +1410,7 @@ export type GQLMutationCreateCheckinScheduleArgs = {
 
 
 export type GQLMutationCreateCoachingRequestArgs = {
+  interestedServices?: InputMaybe<Array<Scalars['String']['input']>>;
   message?: InputMaybe<Scalars['String']['input']>;
   recipientEmail: Scalars['String']['input'];
 };
@@ -4360,6 +4362,7 @@ export type GQLClientSurveyResolvers<ContextType = GQLContext, ParentType extend
 export type GQLCoachingRequestResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['CoachingRequest'] = GQLResolversParentTypes['CoachingRequest']> = {
   createdAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
+  interestedServices?: Resolver<Maybe<Array<GQLResolversTypes['String']>>, ParentType, ContextType>;
   message?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   recipient?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;
   sender?: Resolver<GQLResolversTypes['User'], ParentType, ContextType>;

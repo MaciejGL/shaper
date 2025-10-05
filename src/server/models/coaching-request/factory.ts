@@ -15,12 +15,34 @@ import {
   notifyCoachingRequestAccepted,
   notifyCoachingRequestRejected,
 } from '@/lib/notifications/push-notification-service'
+import { clearCachePattern } from '@/lib/redis'
 import { UserWithSession } from '@/types/UserWithSession'
 import { GQLContext } from '@/types/gql-context'
 
 import { createNotification } from '../notification/factory'
 
 import CoachingRequest from './model'
+
+/**
+ * Helper function to get the latest coaching request between two users
+ * Checks both sender/receiver combinations
+ */
+async function getLatestCoachingRequestBetweenUsers(
+  userId1: string,
+  userId2: string,
+) {
+  return prisma.coachingRequest.findFirst({
+    where: {
+      OR: [
+        { senderId: userId1, recipientId: userId2 },
+        { senderId: userId2, recipientId: userId1 },
+      ],
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  })
+}
 
 export async function getCoachingRequest({
   id,
@@ -62,136 +84,98 @@ export async function getCoachingRequests({
   })
 }
 
-export async function upsertCoachingRequest({
+export async function createCoachingRequest({
   senderId,
   recipientEmail,
   message,
+  interestedServices,
   context,
 }: {
   senderId: string
   recipientEmail: string
   message?: string | null
+  interestedServices?: string[] | null
   context: GQLContext
 }) {
-  const existingCoachingRequest = await prisma.coachingRequest.findFirst({
-    where: {
-      recipient: { email: recipientEmail },
-      senderId,
-    },
-    include: {
-      recipient: {
-        select: {
-          profile: {
-            select: {
-              firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      },
-    },
+  const recipient = await prisma.user.findUnique({
+    where: { email: recipientEmail },
   })
 
-  if (existingCoachingRequest) {
-    if (existingCoachingRequest.status === GQLCoachingRequestStatus.Accepted) {
-      throw new GraphQLError(
-        `You already have been connected with this person.`,
-      )
-    }
+  if (!recipient) {
+    console.error(
+      `[CoachingRequest] User with email: ${recipientEmail} does not exist.`,
+    )
+    throw new GraphQLError(`User with email: ${recipientEmail} does not exist.`)
+  }
 
-    if (existingCoachingRequest.status === GQLCoachingRequestStatus.Rejected) {
-      throw new GraphQLError(
-        `Your request has been rejected by this person. You can't send another request to them. They will need to send you a new request.`,
-      )
-    }
+  // Check latest request between these users
+  const latestRequest = await getLatestCoachingRequestBetweenUsers(
+    senderId,
+    recipient.id,
+  )
 
-    try {
-      const updatedCoachingRequest = await prisma.coachingRequest.update({
-        where: {
-          id: existingCoachingRequest.id,
-          OR: [
-            { status: GQLCoachingRequestStatus.Pending },
-            { status: GQLCoachingRequestStatus.Cancelled },
-          ],
-        },
-        data: {
-          message,
-          status: GQLCoachingRequestStatus.Pending,
-        },
-      })
+  // Prevent creating new request if latest is pending
+  if (latestRequest?.status === GQLCoachingRequestStatus.Pending) {
+    throw new GraphQLError(
+      `You already have a pending request with this person.`,
+    )
+  }
 
-      return new CoachingRequest(updatedCoachingRequest, context)
-    } catch (error) {
-      console.error(
-        `[CoachingRequest] Error updating coaching request: ${error}`,
-      )
-      throw new GraphQLError(
-        'Something went wrong with updating your request. Please try again.',
-      )
-    }
-  } else {
-    const recipient = await prisma.user.findUnique({
-      where: { email: recipientEmail },
+  // Prevent re-requesting if you were rejected (they need to initiate)
+  if (
+    latestRequest?.status === GQLCoachingRequestStatus.Rejected &&
+    latestRequest.senderId === senderId
+  ) {
+    throw new GraphQLError(
+      `Your request has been rejected. They will need to send you a new request.`,
+    )
+  }
+
+  try {
+    const coachingRequest = await prisma.coachingRequest.create({
+      data: {
+        recipientId: recipient.id,
+        senderId,
+        message,
+        interestedServices: interestedServices || undefined,
+        status: GQLCoachingRequestStatus.Pending,
+      },
     })
 
-    // TODO: Maybe send an email to the recipient with template to download the app.
+    const sender = await prisma.user.findUnique({
+      where: { id: senderId },
+      include: {
+        profile: true,
+      },
+    })
 
-    if (!recipient) {
-      console.error(
-        `[CoachingRequest] User with email: ${recipientEmail} does not exist.`,
-      )
-      throw new GraphQLError(
-        `User with email: ${recipientEmail} does not exist.`,
-      )
-    }
+    const senderName =
+      sender?.profile?.firstName &&
+      sender?.profile?.lastName &&
+      `${sender?.profile?.firstName} ${sender?.profile?.lastName}`
 
-    try {
-      const coachingRequest = await prisma.coachingRequest.create({
-        data: {
-          recipientId: recipient.id,
-          senderId,
-          message,
-          status: GQLCoachingRequestStatus.Pending,
-        },
-      })
+    await createNotification(
+      {
+        userId: recipient.id,
+        message: `You have a new coaching request${
+          senderName ? ` from ${senderName}.` : '.'
+        }`,
+        type: GQLNotificationType.CoachingRequest,
+        createdBy: senderId,
+        relatedItemId: coachingRequest.id,
+      },
+      context,
+    )
 
-      const sender = await prisma.user.findUnique({
-        where: { id: senderId },
-        include: {
-          profile: true,
-        },
-      })
+    // Send push notification
+    await notifyCoachingRequest(recipient.id, senderName || 'Someone')
 
-      const senderName =
-        sender?.profile?.firstName &&
-        sender?.profile?.lastName &&
-        `${sender?.profile?.firstName} ${sender?.profile?.lastName}`
-
-      await createNotification(
-        {
-          userId: recipient.id,
-          message: `You have a new coaching request${
-            senderName ? ` from ${senderName}.` : '.'
-          }`,
-          type: GQLNotificationType.CoachingRequest,
-          createdBy: senderId,
-          relatedItemId: coachingRequest.id,
-        },
-        context,
-      )
-
-      // Send push notification
-      await notifyCoachingRequest(recipient.id, senderName || 'Someone')
-
-      return new CoachingRequest(coachingRequest, context)
-    } catch (error) {
-      console.error(
-        `[CoachingRequest] Error creating coaching request: ${error}`,
-      )
-      throw new GraphQLError(
-        'Something went wrong with creating your request. Please try again.',
-      )
-    }
+    return new CoachingRequest(coachingRequest, context)
+  } catch (error) {
+    console.error(`[CoachingRequest] Error creating coaching request: ${error}`)
+    throw new GraphQLError(
+      'Something went wrong with creating your request. Please try again.',
+    )
   }
 }
 
@@ -207,59 +191,60 @@ export async function acceptCoachingRequest({
   context: GQLContext
 }) {
   try {
-    const coachingRequest = await prisma.coachingRequest.update({
-      where: {
-        id,
-        status: GQLCoachingRequestStatus.Pending,
-        recipientId,
-      },
+    // Find the original request to validate
+    const originalRequest = await prisma.coachingRequest.findUnique({
+      where: { id },
       include: {
-        sender: {
-          select: {
-            name: true,
-          },
-        },
-      },
-      data: {
-        status: GQLCoachingRequestStatus.Accepted,
+        sender: { select: { name: true } },
       },
     })
 
-    // If Sender is a Coach, connect Client to Coach.
+    if (!originalRequest) {
+      throw new GraphQLError('Coaching request not found')
+    }
+
+    if (originalRequest.recipientId !== recipientId) {
+      throw new GraphQLError('You are not the recipient of this request')
+    }
+
+    if (originalRequest.status !== GQLCoachingRequestStatus.Pending) {
+      throw new GraphQLError('This request is no longer pending')
+    }
+
+    // Create new accepted record
+    const coachingRequest = await prisma.coachingRequest.create({
+      data: {
+        senderId: originalRequest.senderId,
+        recipientId: originalRequest.recipientId,
+        message: originalRequest.message,
+        interestedServices: originalRequest.interestedServices,
+        status: GQLCoachingRequestStatus.Accepted,
+      },
+      include: {
+        sender: { select: { name: true } },
+      },
+    })
+
+    // Connect trainer and client relationship
     if (recipientRole === GQLUserRole.Trainer) {
       await prisma.user.update({
         where: { id: recipientId },
-        data: {
-          clients: {
-            connect: { id: coachingRequest.senderId },
-          },
-        },
+        data: { clients: { connect: { id: coachingRequest.senderId } } },
       })
       await prisma.user.update({
         where: { id: coachingRequest.senderId },
-        data: {
-          trainer: {
-            connect: { id: recipientId },
-          },
-        },
+        data: { trainer: { connect: { id: recipientId } } },
       })
     }
 
-    // If Sender is a Client, connect Coach to Client.
     if (recipientRole === GQLUserRole.Client) {
       await prisma.user.update({
         where: { id: recipientId },
-        data: {
-          trainer: { connect: { id: coachingRequest.senderId } },
-        },
+        data: { trainer: { connect: { id: coachingRequest.senderId } } },
       })
       await prisma.user.update({
         where: { id: coachingRequest.senderId },
-        data: {
-          clients: {
-            connect: { id: recipientId },
-          },
-        },
+        data: { clients: { connect: { id: recipientId } } },
       })
     }
 
@@ -274,35 +259,37 @@ export async function acceptCoachingRequest({
       context,
     )
 
-    // Send push notification
     await notifyCoachingRequestAccepted(
       coachingRequest.senderId,
       coachingRequest.sender?.name || 'Someone',
     )
 
-    // Invalidate access control cache for both users since their relationship changed
+    // Invalidate access control cache and trainer cache for both users
+    const trainerId =
+      recipientRole === GQLUserRole.Trainer
+        ? recipientId
+        : coachingRequest.senderId
+    const clientId =
+      recipientRole === GQLUserRole.Client
+        ? recipientId
+        : coachingRequest.senderId
+
     await Promise.all([
-      invalidateTrainerAccessCache(
-        recipientRole === GQLUserRole.Trainer
-          ? recipientId
-          : coachingRequest.senderId,
-      ),
-      invalidateClientAccessCache(
-        recipientRole === GQLUserRole.Client
-          ? recipientId
-          : coachingRequest.senderId,
-      ),
+      invalidateTrainerAccessCache(trainerId),
+      invalidateClientAccessCache(clientId),
+      // Invalidate getMyTrainer cache for the client - pattern match all keys
+      clearCachePattern(`my-trainer:user-id:${clientId}:*`),
     ])
 
-    return coachingRequest
-      ? new CoachingRequest(coachingRequest, context)
-      : null
+    return new CoachingRequest(coachingRequest, context)
   } catch (error) {
     console.error(
       `[CoachingRequest] Error accepting coaching request: ${error}`,
     )
     throw new GraphQLError(
-      'Something went wrong with accepting your request. Please try again.',
+      error instanceof GraphQLError
+        ? error.message
+        : 'Something went wrong with accepting your request. Please try again.',
     )
   }
 }
@@ -317,20 +304,42 @@ export async function cancelCoachingRequest({
   context: GQLContext
 }) {
   try {
-    const coachingRequest = await prisma.coachingRequest.update({
-      where: { id, senderId, status: GQLCoachingRequestStatus.Pending },
-      data: { status: GQLCoachingRequestStatus.Cancelled },
+    const originalRequest = await prisma.coachingRequest.findUnique({
+      where: { id },
     })
 
-    return coachingRequest
-      ? new CoachingRequest(coachingRequest, context)
-      : null
+    if (!originalRequest) {
+      throw new GraphQLError('Coaching request not found')
+    }
+
+    if (originalRequest.senderId !== senderId) {
+      throw new GraphQLError('You are not the sender of this request')
+    }
+
+    if (originalRequest.status !== GQLCoachingRequestStatus.Pending) {
+      throw new GraphQLError('This request is no longer pending')
+    }
+
+    // Create new cancelled record
+    const coachingRequest = await prisma.coachingRequest.create({
+      data: {
+        senderId: originalRequest.senderId,
+        recipientId: originalRequest.recipientId,
+        message: originalRequest.message,
+        interestedServices: originalRequest.interestedServices,
+        status: GQLCoachingRequestStatus.Cancelled,
+      },
+    })
+
+    return new CoachingRequest(coachingRequest, context)
   } catch (error) {
     console.error(
       `[CoachingRequest] Error cancelling coaching request: ${error}`,
     )
     throw new GraphQLError(
-      'Something went wrong with cancelling your request. Please try again.',
+      error instanceof GraphQLError
+        ? error.message
+        : 'Something went wrong with cancelling your request. Please try again.',
     )
   }
 }
@@ -345,16 +354,37 @@ export async function rejectCoachingRequest({
   context: GQLContext
 }) {
   try {
-    const coachingRequest = await prisma.coachingRequest.update({
-      where: { id, recipientId, status: GQLCoachingRequestStatus.Pending },
+    const originalRequest = await prisma.coachingRequest.findUnique({
+      where: { id },
       include: {
-        sender: {
-          select: {
-            name: true,
-          },
-        },
+        sender: { select: { name: true } },
       },
-      data: { status: GQLCoachingRequestStatus.Rejected },
+    })
+
+    if (!originalRequest) {
+      throw new GraphQLError('Coaching request not found')
+    }
+
+    if (originalRequest.recipientId !== recipientId) {
+      throw new GraphQLError('You are not the recipient of this request')
+    }
+
+    if (originalRequest.status !== GQLCoachingRequestStatus.Pending) {
+      throw new GraphQLError('This request is no longer pending')
+    }
+
+    // Create new rejected record
+    const coachingRequest = await prisma.coachingRequest.create({
+      data: {
+        senderId: originalRequest.senderId,
+        recipientId: originalRequest.recipientId,
+        message: originalRequest.message,
+        interestedServices: originalRequest.interestedServices,
+        status: GQLCoachingRequestStatus.Rejected,
+      },
+      include: {
+        sender: { select: { name: true } },
+      },
     })
 
     await createNotification(
@@ -368,19 +398,20 @@ export async function rejectCoachingRequest({
       context,
     )
 
-    // Send push notification
     await notifyCoachingRequestRejected(
       coachingRequest.senderId,
       coachingRequest.sender?.name || 'Someone',
     )
 
-    return coachingRequest
-      ? new CoachingRequest(coachingRequest, context)
-      : null
+    return new CoachingRequest(coachingRequest, context)
   } catch (error) {
     console.error(
       `[CoachingRequest] Error rejecting coaching request: ${error}`,
     )
-    throw new GraphQLError('Something went wrong with rejecting your request.')
+    throw new GraphQLError(
+      error instanceof GraphQLError
+        ? error.message
+        : 'Something went wrong with rejecting your request.',
+    )
   }
 }

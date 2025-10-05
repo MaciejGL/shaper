@@ -20,7 +20,7 @@ import {
   formatPrice,
   getDiscountPercentage,
   getServiceDescription,
-  hasInPersonDiscount,
+  hasAnyDiscount,
 } from './utils'
 
 /**
@@ -33,6 +33,7 @@ export function PackageCard({
   onToggle,
   onUpdateQuantity,
   bundleDiscount = 0,
+  mealTrainingDiscount = 0,
 }: PackageCardProps) {
   return (
     <Card
@@ -103,7 +104,7 @@ export function PackageCard({
           </div>
         )}
         <div className="text-right ml-auto">
-          {hasInPersonDiscount(pkg, bundleDiscount) ? (
+          {hasAnyDiscount(pkg, bundleDiscount, mealTrainingDiscount) ? (
             <div className="flex flex-col items-end gap-1">
               <span className="text-xs text-muted-foreground line-through">
                 {formatOriginalPrice(pkg, selectedItem?.quantity || 1)}
@@ -113,20 +114,31 @@ export function PackageCard({
                   variant="secondary"
                   className="text-xs bg-green-100 text-green-700"
                 >
-                  {getDiscountPercentage(pkg, bundleDiscount)}% off
+                  {getDiscountPercentage(
+                    pkg,
+                    bundleDiscount,
+                    mealTrainingDiscount,
+                  )}
+                  % off
                 </Badge>
                 <span className="text-sm text-green-600 font-medium">
                   {formatPrice(
                     pkg,
                     selectedItem?.quantity || 1,
                     bundleDiscount,
+                    mealTrainingDiscount,
                   )}
                 </span>
               </div>
             </div>
           ) : (
             <span className="text-sm text-green-600 font-medium">
-              {formatPrice(pkg, selectedItem?.quantity || 1, bundleDiscount)}
+              {formatPrice(
+                pkg,
+                selectedItem?.quantity || 1,
+                bundleDiscount,
+                mealTrainingDiscount,
+              )}
             </span>
           )}
         </div>

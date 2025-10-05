@@ -10,7 +10,10 @@ import {
   SendOfferFormProps,
   TrainerPackage,
 } from './types'
-import { findInPersonDiscountPercentage } from './utils'
+import {
+  findInPersonDiscountPercentage,
+  findMealTrainingBundleDiscount,
+} from './utils'
 
 export function SendOfferForm({
   trainerId,
@@ -129,6 +132,9 @@ export function SendOfferForm({
   const bundleDiscount = findInPersonDiscountPercentage(
     selectedPackages.map((item) => item.package),
   )
+  const mealTrainingDiscount = findMealTrainingBundleDiscount(
+    selectedPackages.map((item) => item.package),
+  )
 
   return (
     <div className="space-y-6">
@@ -154,6 +160,7 @@ export function SendOfferForm({
         onRetry={fetchPackages}
         clientName={clientName}
         bundleDiscount={bundleDiscount}
+        mealTrainingDiscount={mealTrainingDiscount}
       />
 
       {/* Bundle Summary & Send */}

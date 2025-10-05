@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils'
 import { Label } from './label'
 
 type TextareaProps = React.ComponentProps<'textarea'> & {
-  error?: string
+  errorMessage?: string
+  error?: boolean
   label?: string
   id: string
 }
@@ -29,25 +30,33 @@ const textareaVariants = cva(
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
   TextareaProps & VariantProps<typeof textareaVariants>
->(({ className, error, label, id, variant = 'ghost', ...props }, ref) => {
-  return (
-    <div className="space-y-1 w-full">
-      {label && (
-        <Label htmlFor={id} className="text-sm font-medium">
-          {label}
-        </Label>
-      )}
-      <textarea
-        ref={ref}
-        id={id}
-        data-slot="textarea"
-        data-error={error}
-        className={cn(textareaVariants({ variant }), className)}
-        {...props}
-      />
-    </div>
-  )
-})
+>(
+  (
+    { className, errorMessage, error, label, id, variant = 'ghost', ...props },
+    ref,
+  ) => {
+    return (
+      <div className="space-y-1 w-full">
+        {label && (
+          <Label htmlFor={id} className="text-sm font-medium">
+            {label}
+          </Label>
+        )}
+        <textarea
+          ref={ref}
+          id={id}
+          data-slot="textarea"
+          data-error={errorMessage ?? error}
+          className={cn(textareaVariants({ variant }), className)}
+          {...props}
+        />
+        {errorMessage && (
+          <p className="text-sm text-destructive">{errorMessage}</p>
+        )}
+      </div>
+    )
+  },
+)
 
 Textarea.displayName = 'Textarea'
 

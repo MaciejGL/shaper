@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
-import { createInPersonDiscountIfEligible } from '@/lib/stripe/discount-utils'
+import {
+  createInPersonDiscountIfEligible,
+  createMealTrainingBundleDiscountIfEligible,
+} from '@/lib/stripe/discount-utils'
 import {
   type PayoutDestination,
   type RevenueCalculation,
@@ -210,15 +213,27 @@ export async function POST(request: NextRequest) {
       quantity: item.quantity,
     }))
 
-    // Apply 50% discount to in-person sessions if bundle contains coaching combo
+    // Apply discounts based on bundle combinations
     const discounts = []
-    const discount = await createInPersonDiscountIfEligible(
+
+    // Apply 50% discount to in-person sessions if bundle contains coaching combo
+    const inPersonDiscount = await createInPersonDiscountIfEligible(
       checkoutItems,
       hasCoachingCombo,
       offerToken,
     )
-    if (discount) {
-      discounts.push(discount)
+    if (inPersonDiscount) {
+      discounts.push(inPersonDiscount)
+    }
+
+    // Apply 20% discount to meal+training bundle if both are present
+    const mealTrainingDiscount =
+      await createMealTrainingBundleDiscountIfEligible(
+        checkoutItems,
+        offerToken,
+      )
+    if (mealTrainingDiscount) {
+      discounts.push(mealTrainingDiscount)
     }
 
     // Setup revenue sharing for trainer payments (payment mode only)

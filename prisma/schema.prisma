@@ -242,15 +242,16 @@ model CheckinCompletion {
 }
 
 model CoachingRequest {
-  id          String   @id @default(uuid())
-  senderId    String
-  recipientId String
-  status      String   @default("PENDING")
-  message     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  recipient   User     @relation("ReceivedRequests", fields: [recipientId], references: [id])
-  sender      User     @relation("SentRequests", fields: [senderId], references: [id])
+  id                 String   @id @default(uuid())
+  senderId           String
+  recipientId        String
+  status             String   @default("PENDING")
+  message            String?
+  interestedServices String[] @default([]) // Array of service types client is interested in
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  recipient          User     @relation("ReceivedRequests", fields: [recipientId], references: [id])
+  sender             User     @relation("SentRequests", fields: [senderId], references: [id])
 
   @@index([senderId])
   @@index([recipientId])

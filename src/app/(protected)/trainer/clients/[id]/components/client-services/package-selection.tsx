@@ -25,6 +25,7 @@ export function PackageSelection({
   onRetry,
   clientName,
   bundleDiscount = 0,
+  mealTrainingDiscount = 0,
 }: PackageSelectionProps) {
   const isPackageSelected = (packageId: string): boolean => {
     return selectedPackages.some((item) => item.packageId === packageId)
@@ -76,6 +77,7 @@ export function PackageSelection({
                   onToggle={onTogglePackage}
                   onUpdateQuantity={onUpdateQuantity}
                   bundleDiscount={bundleDiscount}
+                  mealTrainingDiscount={mealTrainingDiscount}
                 />
               )
             })}

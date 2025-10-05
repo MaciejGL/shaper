@@ -1,6 +1,7 @@
 'use client'
 
 import { DialogTitle, DialogTrigger } from '@radix-ui/react-dialog'
+import { useQueryClient } from '@tanstack/react-query'
 import { PlusIcon } from 'lucide-react'
 import React from 'react'
 import { toast } from 'sonner'
@@ -24,6 +25,7 @@ import { Textarea } from '@/components/ui/textarea'
 import {
   useCreateCoachingRequestMutation,
   useGetClientsQuery,
+  useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
 import { GQLUser } from '@/generated/graphql-client'
 
@@ -83,13 +85,25 @@ function AddNewClientButton() {
   const [isOpen, setIsOpen] = React.useState(false)
   const [message, setMessage] = React.useState('')
   const [email, setEmail] = React.useState('')
+  const queryClient = useQueryClient()
   const { mutate: createCoachingRequest, isPending } =
     useCreateCoachingRequestMutation({
       onSuccess: () => {
+        // Invalidate coaching requests query to refresh the list
+        queryClient.invalidateQueries({
+          queryKey: useMyCoachingRequestsQuery.getKey(),
+        })
         toast.success('Request has been sent to the client.')
         setIsOpen(false)
         setEmail('')
         setMessage('')
+      },
+      onError: (error) => {
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Failed to send invitation. Please try again.'
+        toast.error(errorMessage)
       },
     })
 
@@ -117,6 +131,7 @@ function AddNewClientButton() {
             autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            disabled={isPending}
           />
           <label htmlFor="message" className="text-sm">
             Message
@@ -126,6 +141,7 @@ function AddNewClientButton() {
             placeholder="Message"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
+            disabled={isPending}
           />
         </div>
         <DialogFooter>

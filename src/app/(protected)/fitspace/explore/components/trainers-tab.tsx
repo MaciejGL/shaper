@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { ClientSurveyModal } from '@/components/client-survey/client-survey-modal'
 import { useClientSurvey } from '@/components/client-survey/use-client-survey.hook'
 import { LoadingSkeleton } from '@/components/loading-skeleton'
+import { ServiceInterestSelector } from '@/components/service-interest-selector/service-interest-selector'
 import { TrainerCard, TrainerData } from '@/components/trainer/trainer-card'
 import { TrainerDetailsDrawer } from '@/components/trainer/trainer-details-drawer'
 import { Card, CardContent } from '@/components/ui/card'
@@ -28,6 +29,9 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
   const [selectedTrainer, setSelectedTrainer] =
     useState<FeaturedTrainer | null>(null)
   const [isDrawerOpen, setIsDrawerOpen] = useState(false)
+  const [showServiceSelector, setShowServiceSelector] = useState(false)
+  const [trainerForRequest, setTrainerForRequest] =
+    useState<TrainerData | null>(null)
 
   const {
     isModalOpen,
@@ -59,13 +63,28 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
   const trainers = data?.getFeaturedTrainers || []
   const coachingRequests = coachingRequestsData?.coachingRequests || []
 
-  // Find pending request for the selected trainer
-  const pendingRequestForSelectedTrainer = selectedTrainer
-    ? coachingRequests.find(
-        (req) =>
-          req.recipient.id === selectedTrainer.id && req.status === 'PENDING',
-      )
+  // Helper to get latest request between current user and another user
+  const getLatestRequestWithUser = (userId: string) => {
+    const requestsWithUser = coachingRequests.filter(
+      (req) => req.recipient.id === userId || req.sender.id === userId,
+    )
+    // Sort by createdAt descending to get the most recent
+    return requestsWithUser.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )[0]
+  }
+
+  // Find latest request for the selected trainer
+  const latestRequestForSelectedTrainer = selectedTrainer
+    ? getLatestRequestWithUser(selectedTrainer.id)
     : null
+
+  // Check if there's a pending request for the selected trainer
+  const pendingRequestForSelectedTrainer =
+    latestRequestForSelectedTrainer?.status === 'PENDING'
+      ? latestRequestForSelectedTrainer
+      : null
 
   const handleTrainerClick = (trainer: FeaturedTrainer) => {
     setSelectedTrainer(trainer)
@@ -73,18 +92,28 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
   }
 
   const handleRequestCoaching = async (trainer: TrainerData) => {
-    const trainerName =
-      trainer.name ||
-      `${trainer.profile?.firstName || ''} ${trainer.profile?.lastName || ''}`.trim() ||
-      'Trainer'
+    setTrainerForRequest(trainer)
+    setShowServiceSelector(true)
+    setIsDrawerOpen(false)
+  }
+
+  const handleConfirmRequest = async (interests: string[], message: string) => {
+    if (!trainerForRequest) return
 
     await createCoachingRequestMutation.mutateAsync({
-      recipientEmail: trainer.email,
-      message: `Hi ${trainerName}, I'm interested in your coaching services. I'd love to discuss how you can help me achieve my fitness goals.`,
+      recipientEmail: trainerForRequest.email,
+      message,
+      interestedServices: interests.length > 0 ? interests : undefined,
     })
 
     // Refetch coaching requests to update the banner
     await refetchCoachingRequests()
+
+    setShowServiceSelector(false)
+    setTrainerForRequest(null)
+
+    // Reopen the drawer to show updated state
+    setIsDrawerOpen(true)
 
     // Open survey modal after successful request
     openSurvey()
@@ -158,6 +187,20 @@ export function TrainersTab({ initialTrainers = [] }: TrainersTabProps) {
         existingSurvey={existingSurvey}
         isSubmitting={isSubmitting}
       />
+
+      {trainerForRequest && (
+        <ServiceInterestSelector
+          open={showServiceSelector}
+          onOpenChange={setShowServiceSelector}
+          onConfirm={handleConfirmRequest}
+          trainerName={
+            trainerForRequest.name ||
+            `${trainerForRequest.profile?.firstName || ''} ${trainerForRequest.profile?.lastName || ''}`.trim() ||
+            'Trainer'
+          }
+          isLoading={createCoachingRequestMutation.isPending}
+        />
+      )}
     </>
   )
 }

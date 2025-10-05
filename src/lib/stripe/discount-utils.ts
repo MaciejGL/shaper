@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 
 import { GQLServiceType } from '@/generated/graphql-client'
 
+import { DISCOUNT_CONFIG, DISCOUNT_TYPES } from './discount-config'
 import { getStripePricingInfo } from './pricing-utils'
 import { stripe } from './stripe'
 import { CheckoutItem, PackageWithDiscount } from './types'
@@ -27,23 +28,56 @@ export function findInPersonDiscountPercentage(
 }
 
 /**
+ * Checks if bundle contains both meal plan and training plan packages
+ * Returns configured bundle discount percentage if both are present
+ */
+export function findMealTrainingBundleDiscount(
+  packages: PackageWithDiscount[],
+): number {
+  const hasMealPlan = packages.some((pkg) => pkg.serviceType === 'meal_plan')
+  const hasTrainingPlan = packages.some(
+    (pkg) => pkg.serviceType === 'workout_plan',
+  )
+
+  if (hasMealPlan && hasTrainingPlan) {
+    return DISCOUNT_CONFIG.MEAL_TRAINING_BUNDLE
+  }
+
+  return 0
+}
+
+/**
+ * Checks if a package qualifies for meal+training bundle discount
+ */
+export function isMealOrTrainingPackage(pkg: PackageWithDiscount): boolean {
+  return pkg.serviceType === 'meal_plan' || pkg.serviceType === 'workout_plan'
+}
+
+/**
  * Calculates the discounted amount based on bundle context
  *
  * Applies discount if:
- * 1. Package contains 'in_person_meeting' service type
- * 2. Bundle contains a 'coaching_complete' package with discount metadata
+ * 1. Package contains 'in_person_meeting' service type + coaching_complete bundle
+ * 2. Package is meal_plan or workout_plan + both are in bundle (20% off)
  */
 export function getDiscountedAmount(
   pkg: PackageWithDiscount,
   originalAmount: number,
   bundleDiscount: number = 0,
+  mealTrainingDiscount: number = 0,
 ): number {
   // Check if package has IN_PERSON_MEETING service type
   const hasInPersonService = pkg.serviceType === 'in_person_meeting'
 
-  // Apply discount if package has in-person service and bundle has discount
+  // Apply in-person discount if package has in-person service and bundle has discount
   if (hasInPersonService && bundleDiscount > 0) {
     const discountMultiplier = (100 - bundleDiscount) / 100
+    return Math.round(originalAmount * discountMultiplier)
+  }
+
+  // Apply meal+training bundle discount
+  if (isMealOrTrainingPackage(pkg) && mealTrainingDiscount > 0) {
+    const discountMultiplier = (100 - mealTrainingDiscount) / 100
     return Math.round(originalAmount * discountMultiplier)
   }
 
@@ -134,6 +168,21 @@ export function findInPersonPackages(
 }
 
 /**
+ * Finds packages that are meal or training plans from checkout items
+ */
+export function findMealAndTrainingPackages(
+  checkoutItems: CheckoutItem[],
+): CheckoutItem[] {
+  return checkoutItems.filter((item) => {
+    const metadata = (item.package.metadata as Record<string, unknown>) || {}
+    return (
+      metadata.service_type === 'meal_plan' ||
+      metadata.service_type === 'workout_plan'
+    )
+  })
+}
+
+/**
  * Gets Stripe product IDs from price IDs
  */
 export async function getProductIdsFromPrices(
@@ -158,22 +207,24 @@ export async function getProductIdsFromPrices(
 }
 
 /**
- * Creates a coupon for 50% discount on in-person sessions when coaching combo is present
+ * Creates a coupon for in-person sessions discount when coaching combo is present
  */
 export async function createInPersonCoachingComboCoupon(
   productIds: string[],
   offerToken: string,
 ): Promise<Stripe.Coupon> {
+  const discountPercent = DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO
+
   return await stripe.coupons.create({
-    percent_off: 50,
+    percent_off: discountPercent,
     duration: 'once',
-    name: 'In-Person Sessions 50% Off',
+    name: `In-Person Sessions ${discountPercent}% Off`,
     applies_to: {
       products: productIds,
     },
     metadata: {
       source: 'trainer_offer',
-      discountType: 'in_person_coaching_combo',
+      discountType: DISCOUNT_TYPES.IN_PERSON_COACHING_COMBO,
       offerToken,
     },
   })
@@ -211,6 +262,71 @@ export async function createInPersonDiscountIfEligible(
 
   // Create the coupon
   const coupon = await createInPersonCoachingComboCoupon(productIds, offerToken)
+
+  return { coupon: coupon.id }
+}
+
+/**
+ * Creates a coupon for meal+training bundle with configured discount
+ */
+export async function createMealTrainingBundleCoupon(
+  productIds: string[],
+  offerToken: string,
+): Promise<Stripe.Coupon> {
+  const discountPercent = DISCOUNT_CONFIG.MEAL_TRAINING_BUNDLE
+
+  return await stripe.coupons.create({
+    percent_off: discountPercent,
+    duration: 'once',
+    name: `Meal + Training Bundle ${discountPercent}% Off`,
+    applies_to: {
+      products: productIds,
+    },
+    metadata: {
+      source: 'trainer_offer',
+      discountType: DISCOUNT_TYPES.MEAL_TRAINING_BUNDLE,
+      offerToken,
+    },
+  })
+}
+
+/**
+ * Creates discount coupon for meal+training bundle if both are present
+ */
+export async function createMealTrainingBundleDiscountIfEligible(
+  checkoutItems: CheckoutItem[],
+  offerToken: string,
+): Promise<{ coupon: string } | null> {
+  const mealAndTrainingPackages = findMealAndTrainingPackages(checkoutItems)
+
+  // Check if we have both meal and training plans
+  const hasMealPlan = mealAndTrainingPackages.some((item) => {
+    const metadata = (item.package.metadata as Record<string, unknown>) || {}
+    return metadata.service_type === 'meal_plan'
+  })
+
+  const hasTrainingPlan = mealAndTrainingPackages.some((item) => {
+    const metadata = (item.package.metadata as Record<string, unknown>) || {}
+    return metadata.service_type === 'workout_plan'
+  })
+
+  if (!hasMealPlan || !hasTrainingPlan) {
+    return null
+  }
+
+  // Get product IDs from price IDs
+  const priceIds = mealAndTrainingPackages
+    .map((pkg) => pkg.package.stripePriceId)
+    .filter(Boolean)
+
+  const productIds = await getProductIdsFromPrices(priceIds)
+
+  if (productIds.length === 0) {
+    return null
+  }
+
+  // Create the coupon
+  const coupon = await createMealTrainingBundleCoupon(productIds, offerToken)
 
   return { coupon: coupon.id }
 }

@@ -1,31 +1,33 @@
 enum CoachingRequestStatus {
-	PENDING
-	ACCEPTED
-	REJECTED
-	CANCELLED
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
 }
 
 type CoachingRequest {
-	id: ID!
-	sender: User!
-	recipient: User!
-	status: CoachingRequestStatus!
-	message: String
-	createdAt: String!
-	updatedAt: String!
+  id: ID!
+  sender: User!
+  recipient: User!
+  status: CoachingRequestStatus!
+  message: String
+  interestedServices: [String!]
+  createdAt: String!
+  updatedAt: String!
 }
 
 type Query {
-	coachingRequest(id: ID!): CoachingRequest
-	coachingRequests: [CoachingRequest!]!
+  coachingRequest(id: ID!): CoachingRequest
+  coachingRequests: [CoachingRequest!]!
 }
 
 type Mutation {
-	createCoachingRequest(
-		recipientEmail: String!
-		message: String
-	): CoachingRequest!
-	acceptCoachingRequest(id: ID!): CoachingRequest
-	rejectCoachingRequest(id: ID!): CoachingRequest
-	cancelCoachingRequest(id: ID!): CoachingRequest
+  createCoachingRequest(
+    recipientEmail: String!
+    message: String
+    interestedServices: [String!]
+  ): CoachingRequest!
+  acceptCoachingRequest(id: ID!): CoachingRequest
+  rejectCoachingRequest(id: ID!): CoachingRequest
+  cancelCoachingRequest(id: ID!): CoachingRequest
 }

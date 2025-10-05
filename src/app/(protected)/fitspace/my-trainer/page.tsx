@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import { Clock, MessageSquare, UserCheck, Users } from 'lucide-react'
 import { parseAsStringEnum, useQueryState } from 'nuqs'
 import { useState } from 'react'
@@ -19,14 +20,12 @@ import { useUser } from '@/context/user-context'
 import {
   GQLGetMyTrainerQuery,
   GQLMyCoachingRequestsQuery,
-  GQLTrainerOfferStatus,
   useCancelCoachingMutation,
   useFitGetMyTrainerOffersQuery,
   useGetMyTrainerQuery,
   useGetTrainerSharedNotesLimitedQuery,
   useMyCoachingRequestsQuery,
 } from '@/generated/graphql-client'
-import { useCurrentSubscription } from '@/hooks/use-current-subscription'
 import { useScrollToFromParams } from '@/hooks/use-scroll-to'
 
 import { DashboardHeader } from '../../trainer/components/dashboard-header'
@@ -39,8 +38,7 @@ import { TrainerSharedNotesSection } from './components/trainer-shared-notes-sec
 type CoachingRequest = GQLMyCoachingRequestsQuery['coachingRequests'][0]
 
 export default function MyTrainerPage() {
-  const { data: requestsData, refetch: refetchRequests } =
-    useMyCoachingRequestsQuery()
+  const { data: requestsData } = useMyCoachingRequestsQuery()
 
   const coachingRequests = requestsData?.coachingRequests || []
 
@@ -65,9 +63,7 @@ export default function MyTrainerPage() {
           <LoadingSkeleton count={4} variant="lg" />
         </div>
       )}
-      {!isLoadingTrainer && trainer && (
-        <TrainerView trainer={trainer} refetchRequests={refetchRequests} />
-      )}
+      {!isLoadingTrainer && trainer && <TrainerView trainer={trainer} />}
 
       {!isLoadingTrainer && !trainer && (
         <NoTrainerView requests={coachingRequests} />
@@ -78,7 +74,6 @@ export default function MyTrainerPage() {
 
 interface TrainerViewProps {
   trainer: NonNullable<GQLGetMyTrainerQuery['getMyTrainer']>
-  refetchRequests: () => void
 }
 
 enum Tab {
@@ -86,7 +81,7 @@ enum Tab {
   PurchasedServices = 'purchased-services',
 }
 
-function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
+function TrainerView({ trainer }: TrainerViewProps) {
   const [tab, setTab] = useQueryState<Tab>(
     'tab',
     parseAsStringEnum<Tab>([Tab.FromTrainer, Tab.PurchasedServices])
@@ -97,22 +92,8 @@ function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
   const { openModal } = useConfirmationModalContext()
   const { user } = useUser()
+  const queryClient = useQueryClient()
 
-  // Get refetch functions for all queries that need to be refreshed
-  const { refetch: refetchTrainer } = useGetMyTrainerQuery()
-  const { refetch: refetchTrainerOffers } = useFitGetMyTrainerOffersQuery(
-    {
-      clientEmail: user?.email || '',
-      trainerId: trainer.id,
-      status: GQLTrainerOfferStatus.Paid,
-    },
-    {
-      enabled: !!user?.email,
-    },
-  )
-  const { refetch: refetchTrainerNotes } =
-    useGetTrainerSharedNotesLimitedQuery()
-  const { refetch: refetchSubscription } = useCurrentSubscription(user?.id)
   const { mutateAsync: cancelCoaching } = useCancelCoachingMutation()
 
   const handleCancelCoaching = () => {
@@ -130,14 +111,22 @@ function TrainerView({ trainer, refetchRequests }: TrainerViewProps) {
       onConfirm: async () => {
         try {
           await cancelCoaching({})
-          // Refetch all data to update the UI
-          await Promise.all([
-            refetchTrainer(),
-            refetchRequests(),
-            refetchTrainerOffers(),
-            refetchTrainerNotes(),
-            refetchSubscription(),
-          ])
+          // Invalidate all related queries to update the UI
+          await queryClient.invalidateQueries({
+            queryKey: useGetMyTrainerQuery.getKey(),
+          })
+          await queryClient.invalidateQueries({
+            queryKey: useMyCoachingRequestsQuery.getKey(),
+          })
+          await queryClient.invalidateQueries({
+            queryKey: useFitGetMyTrainerOffersQuery.getKey({
+              clientEmail: user?.email || '',
+              trainerId: trainer.id,
+            }),
+          })
+          await queryClient.invalidateQueries({
+            queryKey: useGetTrainerSharedNotesLimitedQuery.getKey(),
+          })
         } catch (error) {
           console.error('Failed to cancel coaching:', error)
           throw error // Re-throw to prevent modal from closing
@@ -225,10 +214,45 @@ interface NoTrainerViewProps {
 }
 
 function NoTrainerView({ requests }: NoTrainerViewProps) {
-  const pendingRequests = requests.filter(
+  const { user } = useUser()
+  const currentUserId = user?.id
+
+  // Group requests by recipient/sender to find latest status with each person
+  const getLatestRequestWithTrainer = (trainerId: string) => {
+    const requestsWithTrainer = requests.filter(
+      (req) => req.recipient.id === trainerId || req.sender.id === trainerId,
+    )
+    return requestsWithTrainer.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    )[0]
+  }
+
+  // Get unique trainer IDs from all requests (the person who is NOT the current user)
+  const trainerIds = [
+    ...new Set(
+      requests
+        .map((req) => {
+          if (req.sender.id === currentUserId) return req.recipient.id
+          if (req.recipient.id === currentUserId) return req.sender.id
+          return null
+        })
+        .filter((id): id is string => id !== null),
+    ),
+  ]
+
+  // Get latest request for each trainer
+  const latestRequests = trainerIds
+    .map((trainerId) => getLatestRequestWithTrainer(trainerId))
+    .filter(Boolean)
+
+  const pendingRequests = latestRequests.filter(
     (request) => request.status === 'PENDING',
   )
-  const rejectedRequests = requests.filter(
+  const cancelledRequests = latestRequests.filter(
+    (request) => request.status === 'CANCELLED',
+  )
+  const rejectedRequests = latestRequests.filter(
     (request) => request.status === 'REJECTED',
   )
 
@@ -259,6 +283,22 @@ function NoTrainerView({ requests }: NoTrainerViewProps) {
                 <Clock className="h-3 w-3 mr-1" />
                 Waiting for response
               </Badge>
+            </>
+          ) : cancelledRequests.length > 0 ? (
+            <>
+              <h2 className="text-lg font-semibold mb-2">Coaching Cancelled</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                You have cancelled your coaching relationship. If you had an
+                active subscription, you will keep access until the end of your
+                billing period.
+              </p>
+              <ButtonLink
+                href="/fitspace/explore?tab=trainers"
+                className="mt-2"
+                iconStart={<Users />}
+              >
+                Find a New Trainer
+              </ButtonLink>
             </>
           ) : (
             <>
