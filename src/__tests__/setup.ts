@@ -19,6 +19,9 @@ vi.mock('@/lib/stripe/stripe', () => ({
     paymentIntents: {
       retrieve: vi.fn(),
     },
+    charges: {
+      retrieve: vi.fn(),
+    },
     webhooks: {
       constructEvent: vi.fn(),
     },
@@ -30,6 +33,7 @@ vi.mock('@/lib/db', () => ({
   prisma: {
     user: {
       findUnique: vi.fn(),
+      findMany: vi.fn(),
       create: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
@@ -60,6 +64,15 @@ vi.mock('@/lib/db', () => ({
       updateMany: vi.fn(),
       delete: vi.fn(),
     },
+    serviceDelivery: {
+      findFirst: vi.fn(),
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      updateMany: vi.fn(),
+      delete: vi.fn(),
+    },
   },
 }))
 
@@ -71,5 +84,8 @@ vi.mock('@/lib/email/send-mail', () => ({
     subscriptionDeleted: vi.fn(),
     subscriptionCreated: vi.fn(),
     subscriptionWelcome: vi.fn(),
+    refundNotification: vi.fn(),
+    disputeAlert: vi.fn(),
+    offerExpired: vi.fn(),
   },
 }))
