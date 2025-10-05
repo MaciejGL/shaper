@@ -4,6 +4,7 @@ import { render } from '@react-email/render'
 import { resend } from './resend'
 import { DisputeAlertEmail } from './templates/dispute-alert-email'
 import { EmailChangeOtp } from './templates/email-change-otp'
+import { OfferExpiredEmail } from './templates/offer-expired-email'
 import { OtpEmail } from './templates/otp-email'
 import { RefundNotificationEmail } from './templates/refund-notification-email'
 import {
@@ -410,6 +411,38 @@ export const sendEmail = {
       from: FROM_EMAIL,
       to,
       subject: `🚨 URGENT: Payment Dispute - ${amount} ${currency} (Evidence due: ${evidenceDueBy})`,
+      html,
+    })
+  },
+
+  // Offer expired notification (for trainers)
+  offerExpired: async (
+    to: string,
+    {
+      trainerName,
+      clientEmail,
+      bundleDescription,
+      expiresAt,
+    }: {
+      trainerName: string
+      clientEmail: string
+      bundleDescription: string
+      expiresAt: string
+    },
+  ) => {
+    const html = await render(
+      <OfferExpiredEmail
+        trainerName={trainerName}
+        clientEmail={clientEmail}
+        bundleDescription={bundleDescription}
+        expiresAt={expiresAt}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Offer expired - ${clientEmail} did not complete payment`,
       html,
     })
   },
