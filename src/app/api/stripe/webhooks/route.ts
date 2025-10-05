@@ -4,12 +4,12 @@ import Stripe from 'stripe'
 import { STRIPE_WEBHOOK_EVENTS } from '@/lib/stripe/config'
 import { stripe } from '@/lib/stripe/stripe'
 
+import { handleChargeRefunded } from './handlers/charge-refunded'
 import { handleCheckoutCompleted } from './handlers/checkout-completed'
 import { handleCheckoutExpired } from './handlers/checkout-expired'
 import { handleCustomerDeleted } from './handlers/customer-deleted'
+import { handleDisputeCreated } from './handlers/dispute-created'
 import { handlePaymentFailed } from './handlers/payment-failed'
-import { handlePaymentIntentFailed } from './handlers/payment-intent-failed'
-import { handlePaymentIntentSucceeded } from './handlers/payment-intent-succeeded'
 import { handlePaymentSucceeded } from './handlers/payment-succeeded'
 import { handleSubscriptionCreated } from './handlers/subscription-created'
 import { handleSubscriptionDeleted } from './handlers/subscription-deleted'
@@ -78,20 +78,20 @@ export async function POST(request: NextRequest) {
         await handleCheckoutExpired(event.data.object)
         break
 
-      case STRIPE_WEBHOOK_EVENTS.PAYMENT_INTENT_SUCCEEDED:
-        await handlePaymentIntentSucceeded(event.data.object)
-        break
-
-      case STRIPE_WEBHOOK_EVENTS.PAYMENT_INTENT_FAILED:
-        await handlePaymentIntentFailed(event.data.object)
-        break
-
       case STRIPE_WEBHOOK_EVENTS.TRIAL_WILL_END:
         await handleTrialWillEnd(event.data.object)
         break
 
       case STRIPE_WEBHOOK_EVENTS.CUSTOMER_DELETED:
         await handleCustomerDeleted(event.data.object)
+        break
+
+      case STRIPE_WEBHOOK_EVENTS.CHARGE_REFUNDED:
+        await handleChargeRefunded(event.data.object)
+        break
+
+      case STRIPE_WEBHOOK_EVENTS.DISPUTE_CREATED:
+        await handleDisputeCreated(event.data.object)
         break
 
       default:

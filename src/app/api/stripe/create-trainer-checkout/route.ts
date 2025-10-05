@@ -231,8 +231,6 @@ export async function POST(request: NextRequest) {
     let revenue: RevenueCalculation = {
       totalAmount: 0,
       applicationFeeAmount: 0,
-      trainerPayoutAmount: 0,
-      stripeFeeAmount: 0,
     }
 
     if (offer.trainerId) {
@@ -240,12 +238,9 @@ export async function POST(request: NextRequest) {
 
       if (payout.connectedAccountId) {
         revenue = await calculateRevenueSharing(lineItems)
+        const platformFeePercent = COMMISSION_CONFIG.PLATFORM_PERCENTAGE
         console.info(
-          `💰 Revenue sharing: ${payout.displayName} → Platform: ${revenue.applicationFeeAmount / 100}, Trainer: ${revenue.trainerPayoutAmount / 100}, Stripe fees: ${revenue.stripeFeeAmount / 100}
-${JSON.stringify(lineItems, null, 2)}
-${JSON.stringify(payout, null, 2)}
-${JSON.stringify(revenue, null, 2)}
-`,
+          `💰 Revenue sharing enabled: ${payout.displayName} → Platform: ${platformFeePercent}% (${revenue.applicationFeeAmount / 100} NOK)`,
         )
       }
     }
@@ -294,9 +289,7 @@ ${JSON.stringify(revenue, null, 2)}
         // Revenue sharing info
         revenueShareEnabled: (!!payout.connectedAccountId).toString(),
         payoutDestination: payout.displayName,
-        platformFeeAmount: revenue.applicationFeeAmount.toString(),
-        trainerPayoutAmount: revenue.trainerPayoutAmount.toString(),
-        stripeFeeAmount: revenue.stripeFeeAmount.toString(),
+        platformFeePercent: COMMISSION_CONFIG.PLATFORM_PERCENTAGE.toString(),
       },
       // For subscriptions, include trainer assignment and revenue sharing
       ...(mode === 'subscription' && {

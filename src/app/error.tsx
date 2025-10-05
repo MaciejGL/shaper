@@ -66,7 +66,7 @@ export default function Error({
             </ButtonLink>
           </div>
 
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-muted-foreground text-center">
             If this problem persists, please contact support with the error ID
             above.
           </div>

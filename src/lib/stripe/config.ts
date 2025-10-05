@@ -49,7 +49,8 @@ export const STRIPE_WEBHOOK_EVENTS = {
   // Customer events
   CUSTOMER_DELETED: 'customer.deleted',
 
-  // Dispute events
+  // Refund and dispute events
+  CHARGE_REFUNDED: 'charge.refunded',
   DISPUTE_CREATED: 'charge.dispute.created',
   PAYMENT_ACTION_REQUIRED: 'invoice.payment_action_required',
 } as const
@@ -71,10 +72,10 @@ export const STRIPE_PRODUCTS = {
   IN_PERSON_SESSION: process.env.STRIPE_PRICE_IN_PERSON_SESSION,
 } as const
 
-// Commission Configuration: Trainers get 90% minus Stripe fees, Platform takes 10%
+// Commission Configuration: Trainers get 88% after fees, Platform takes 12%
 export const COMMISSION_CONFIG = {
-  PLATFORM_PERCENTAGE: 10, // Platform commission percentage
-  TRAINER_PERCENTAGE: 90, // Trainer base percentage (before Stripe fees)
+  PLATFORM_PERCENTAGE: 12, // Platform commission percentage (10% base + 2% operational)
+  TRAINER_PERCENTAGE: 88, // Trainer percentage after platform fee
 
   // Stripe fee configuration (trainers cover these)
   STRIPE_FEES: {
@@ -95,8 +96,8 @@ export const COMMISSION_CONFIG = {
 
   // Product-specific commission settings (if needed for different rates)
   PRODUCT_COMMISSION: {
-    TRAINER_SERVICES: 10, // 10% platform commission for all trainer services
-    COACHING_PACKAGES: 10, // 10% platform commission for coaching
+    TRAINER_SERVICES: 12, // 12% platform commission for all trainer services
+    COACHING_PACKAGES: 12, // 12% platform commission for coaching
     PLATFORM_PREMIUM: 0, // No commission on platform subscriptions
   },
 } as const

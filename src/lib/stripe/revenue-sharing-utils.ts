@@ -14,8 +14,6 @@ export type PayoutDestination = {
 export type RevenueCalculation = {
   totalAmount: number
   applicationFeeAmount: number
-  trainerPayoutAmount: number
-  stripeFeeAmount: number // Stripe fees (deducted from trainer payout)
 }
 
 /**
@@ -69,7 +67,8 @@ export async function getPayoutDestination(
 }
 
 /**
- * Calculates revenue split amounts (10% platform fee, 90% trainer minus Stripe fees)
+ * Calculates revenue split amounts for payment mode (one-time payments)
+ * Note: Stripe automatically handles processing fees - we just calculate platform fee
  */
 export async function calculateRevenueSharing(
   lineItems: Stripe.Checkout.SessionCreateParams.LineItem[],
@@ -88,31 +87,23 @@ export async function calculateRevenueSharing(
     }
   }
 
-  // Calculate platform fee (10% of total)
+  // Calculate platform fee (12% of total)
+  // Stripe will automatically deduct processing fees before calculating this percentage
   const applicationFeeAmount = Math.round(
     totalAmount * (COMMISSION_CONFIG.PLATFORM_PERCENTAGE / 100),
   )
 
-  // Calculate Stripe fees (trainer pays these)
-  const stripeFeePercentage =
-    totalAmount * (COMMISSION_CONFIG.STRIPE_FEES.DEFAULT_PERCENTAGE / 100)
-  const stripeFeeFixed = COMMISSION_CONFIG.STRIPE_FEES.DEFAULT_FIXED_FEE
-  const stripeFeeAmount = Math.round(stripeFeePercentage + stripeFeeFixed)
-
-  // Trainer gets: Total - Platform fee - Stripe fees
-  const trainerPayoutAmount =
-    totalAmount - applicationFeeAmount - stripeFeeAmount
-
   return {
     totalAmount,
-    applicationFeeAmount, // Platform keeps full 10%
-    trainerPayoutAmount, // Trainer gets remainder after platform fee and Stripe fees
-    stripeFeeAmount, // Track Stripe fees for transparency
+    applicationFeeAmount, // Platform receives 12%
+    // Trainer receives remainder automatically via Stripe Connect
+    // Stripe handles all fee calculations and transfers
   }
 }
 
 /**
  * Creates payment intent data with revenue sharing configuration
+ * Stripe handles all fee calculations and transfers automatically
  */
 export function createPaymentIntentData(
   payout: PayoutDestination,
@@ -125,17 +116,14 @@ export function createPaymentIntentData(
 
   return {
     application_fee_amount: revenue.applicationFeeAmount,
-    on_behalf_of: payout.connectedAccountId,
     transfer_data: {
       destination: payout.connectedAccountId,
     },
     metadata: {
       trainerId,
-      platformFeeAmount: revenue.applicationFeeAmount.toString(),
-      trainerPayoutAmount: revenue.trainerPayoutAmount.toString(),
-      stripeFeeAmount: revenue.stripeFeeAmount.toString(),
-      revenueShareApplied: 'true',
+      platformFeePercent: COMMISSION_CONFIG.PLATFORM_PERCENTAGE.toString(),
       payoutDestination: payout.displayName,
+      revenueShareApplied: 'true',
     },
   }
 }

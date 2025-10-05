@@ -2,8 +2,10 @@
 import { render } from '@react-email/render'
 
 import { resend } from './resend'
+import { DisputeAlertEmail } from './templates/dispute-alert-email'
 import { EmailChangeOtp } from './templates/email-change-otp'
 import { OtpEmail } from './templates/otp-email'
+import { RefundNotificationEmail } from './templates/refund-notification-email'
 import {
   GracePeriodEndingEmail,
   PaymentFailedEmail,
@@ -320,6 +322,94 @@ export const sendEmail = {
       from: FROM_EMAIL,
       to,
       subject: `${inviterName} invited you to join the ${teamName} team`,
+      html,
+    })
+  },
+
+  // Refund notification (for trainers)
+  refundNotification: async (
+    to: string,
+    {
+      trainerName,
+      clientName,
+      packageName,
+      refundAmount,
+      currency,
+      refundReason,
+    }: {
+      trainerName: string
+      clientName: string
+      packageName: string
+      refundAmount: string
+      currency: string
+      refundReason: string
+    },
+  ) => {
+    const html = await render(
+      <RefundNotificationEmail
+        trainerName={trainerName}
+        clientName={clientName}
+        packageName={packageName}
+        refundAmount={refundAmount}
+        currency={currency}
+        refundReason={refundReason}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `Refund processed for ${clientName} - ${packageName}`,
+      html,
+    })
+  },
+
+  // Dispute alert (for admins)
+  disputeAlert: async (
+    to: string,
+    {
+      adminName,
+      disputeId,
+      chargeId,
+      amount,
+      currency,
+      reason,
+      evidenceDueBy,
+      trainerName,
+      clientName,
+      stripeDashboardUrl,
+    }: {
+      adminName: string | null
+      disputeId: string
+      chargeId: string
+      amount: string
+      currency: string
+      reason: string
+      evidenceDueBy: string
+      trainerName?: string
+      clientName?: string
+      stripeDashboardUrl: string
+    },
+  ) => {
+    const html = await render(
+      <DisputeAlertEmail
+        adminName={adminName}
+        disputeId={disputeId}
+        chargeId={chargeId}
+        amount={amount}
+        currency={currency}
+        reason={reason}
+        evidenceDueBy={evidenceDueBy}
+        trainerName={trainerName}
+        clientName={clientName}
+        stripeDashboardUrl={stripeDashboardUrl}
+      />,
+    )
+
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to,
+      subject: `🚨 URGENT: Payment Dispute - ${amount} ${currency} (Evidence due: ${evidenceDueBy})`,
       html,
     })
   },
