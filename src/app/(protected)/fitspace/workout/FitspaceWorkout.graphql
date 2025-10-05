@@ -103,7 +103,6 @@ query FitspaceGetWorkoutDay($dayId: ID) {
       startedAt
       completedAt
       scheduledAt
-      duration
 
       exercises {
         id

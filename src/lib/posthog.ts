@@ -41,7 +41,7 @@ export async function initPostHog(): Promise<PostHog | null> {
       autocapture: true,
       disable_session_recording: false,
       verbose: false,
-      enable_recording_console_log: false,
+      enable_recording_console_log: true,
       loaded: (posthog: PostHog) => {
         // Only enable debug mode in development
 

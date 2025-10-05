@@ -224,25 +224,31 @@ class DatabaseMonitor {
 // Export singleton instance
 export const dbMonitor = new DatabaseMonitor()
 
-// Minimal monitoring - let Supavisor handle connection management
-// Only check for genuine database problems every 15 minutes
-setInterval(
-  async () => {
-    const isHealthy = await dbMonitor.healthCheck()
+// ONLY run monitoring intervals in development
+// Production serverless environments should not have long-running intervals
+if (process.env.NODE_ENV === 'development') {
+  // Minimal monitoring - let Supavisor handle connection management
+  // Only check for genuine database problems every 15 minutes
+  setInterval(
+    async () => {
+      const isHealthy = await dbMonitor.healthCheck()
 
-    // Only check connections if health check fails or periodically
-    if (!isHealthy || Math.random() < 0.25) {
-      // 25% chance = every ~1 hour on average
-      await dbMonitor.checkConnections()
-    }
-  },
-  15 * 60 * 1000, // Every 15 minutes - dramatically reduced frequency
-)
+      // Only check connections if health check fails or periodically
+      if (!isHealthy || Math.random() < 0.25) {
+        // 25% chance = every ~1 hour on average
+        await dbMonitor.checkConnections()
+      }
+    },
+    15 * 60 * 1000, // Every 15 minutes - dramatically reduced frequency
+  )
 
-// Check for deadlocks occasionally (these are serious and Supavisor can't prevent them)
-setInterval(
-  async () => {
-    await dbMonitor.checkDeadlocks()
-  },
-  30 * 60 * 1000, // Every 30 minutes
-)
+  // Check for deadlocks occasionally (these are serious and Supavisor can't prevent them)
+  setInterval(
+    async () => {
+      await dbMonitor.checkDeadlocks()
+    },
+    30 * 60 * 1000, // Every 30 minutes
+  )
+
+  console.info('[DB-MONITOR] Development monitoring intervals started')
+}

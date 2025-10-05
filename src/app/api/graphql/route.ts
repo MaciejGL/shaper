@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     dbMonitor.trackQuery(executionTime, `GraphQL-POST-${operationName}-END`)
 
     // Log slow GraphQL operations specifically
-    if (executionTime > 1000) {
+    if (executionTime > 2000) {
       console.warn(`[SLOW-GRAPHQL] ${operationName}: ${executionTime}ms`)
     }
 
