@@ -2940,6 +2940,7 @@ export type GQLTeam = {
   memberCount: EntireFieldWrapper<Scalars['Int']['output']>;
   members: EntireFieldWrapper<Array<GQLTeamMember>>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
+  platformFeePercent: EntireFieldWrapper<Scalars['Float']['output']>;
   stripeConnectedAccountId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   updatedAt: EntireFieldWrapper<Scalars['String']['output']>;
 };
@@ -5252,6 +5253,7 @@ export type GQLTeamResolvers<ContextType = GQLContext, ParentType extends GQLRes
   memberCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   members?: Resolver<Array<GQLResolversTypes['TeamMember']>, ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  platformFeePercent?: Resolver<GQLResolversTypes['Float'], ParentType, ContextType>;
   stripeConnectedAccountId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   updatedAt?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;

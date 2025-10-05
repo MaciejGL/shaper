@@ -134,6 +134,10 @@ export default class Team implements GQLTeam {
     return !!this.data.stripeConnectedAccountId
   }
 
+  get platformFeePercent() {
+    return this.data.platformFeePercent
+  }
+
   get createdAt() {
     return this.data.createdAt.toISOString()
   }

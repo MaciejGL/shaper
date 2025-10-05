@@ -1010,6 +1010,7 @@ model Team {
   // Stripe Connect integration for team-based payouts
   stripeConnectedAccountId String? @unique // For receiving team revenue share
   stripeCustomerId         String? @unique // For team-level purchases (if needed)
+  platformFeePercent       Float   @default(12) // Platform fee percentage (e.g., 12 = 12%)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

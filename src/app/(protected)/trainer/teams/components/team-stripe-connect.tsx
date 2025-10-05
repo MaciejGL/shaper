@@ -135,7 +135,10 @@ export function TeamStripeConnect({ team }: TeamStripeConnectProps) {
             <div className="p-4 rounded-lg border bg-muted/20">
               <h4 className="text-sm font-medium mb-2">What you'll get:</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Receive 90% of all team service payments</li>
+                <li>
+                  • Receive {100 - (team.platformFeePercent || 12)}% of all team
+                  service payments
+                </li>
                 <li>• Automatic daily transfers to your bank account</li>
                 <li>• Full payment analytics and reporting</li>
                 <li>• Secure payment processing for all currencies</li>

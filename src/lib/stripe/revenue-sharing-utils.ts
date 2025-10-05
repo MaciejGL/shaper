@@ -9,6 +9,7 @@ export type PayoutDestination = {
   connectedAccountId: string | null
   destination: 'team' | 'individual' | 'none'
   displayName: string
+  platformFeePercent: number // Custom fee for this team/trainer
 }
 
 export type RevenueCalculation = {
@@ -18,6 +19,7 @@ export type RevenueCalculation = {
 
 /**
  * Determines where trainer payments should be sent (team takes priority)
+ * Returns the payout destination AND the custom platform fee for that team/trainer
  */
 export async function getPayoutDestination(
   trainerId: string,
@@ -33,6 +35,7 @@ export async function getPayoutDestination(
               id: true,
               name: true,
               stripeConnectedAccountId: true,
+              platformFeePercent: true, // Get custom fee for this team
             },
           },
         },
@@ -48,6 +51,7 @@ export async function getPayoutDestination(
       connectedAccountId: team.stripeConnectedAccountId,
       destination: 'team',
       displayName: `team:${team.name}`,
+      platformFeePercent: team.platformFeePercent, // Use team's custom fee
     }
   }
 
@@ -56,6 +60,7 @@ export async function getPayoutDestination(
       connectedAccountId: trainerWithTeam.stripeConnectedAccountId,
       destination: 'individual',
       displayName: 'individual',
+      platformFeePercent: COMMISSION_CONFIG.PLATFORM_PERCENTAGE, // Default 12% for individuals
     }
   }
 
@@ -63,15 +68,19 @@ export async function getPayoutDestination(
     connectedAccountId: null,
     destination: 'none',
     displayName: 'none',
+    platformFeePercent: COMMISSION_CONFIG.PLATFORM_PERCENTAGE, // Default if no account
   }
 }
 
 /**
  * Calculates revenue split amounts for payment mode (one-time payments)
  * Note: Stripe automatically handles processing fees - we just calculate platform fee
+ * @param lineItems - Items being purchased
+ * @param platformFeePercent - Custom platform fee percentage for this team/trainer
  */
 export async function calculateRevenueSharing(
   lineItems: Stripe.Checkout.SessionCreateParams.LineItem[],
+  platformFeePercent: number,
 ): Promise<RevenueCalculation> {
   let totalAmount = 0
 
@@ -87,15 +96,15 @@ export async function calculateRevenueSharing(
     }
   }
 
-  // Calculate platform fee (12% of total)
+  // Calculate platform fee using custom percentage for this team
   // Stripe will automatically deduct processing fees before calculating this percentage
   const applicationFeeAmount = Math.round(
-    totalAmount * (COMMISSION_CONFIG.PLATFORM_PERCENTAGE / 100),
+    totalAmount * (platformFeePercent / 100),
   )
 
   return {
     totalAmount,
-    applicationFeeAmount, // Platform receives 12%
+    applicationFeeAmount, // Platform receives custom %
     // Trainer receives remainder automatically via Stripe Connect
     // Stripe handles all fee calculations and transfers
   }
@@ -121,7 +130,7 @@ export function createPaymentIntentData(
     },
     metadata: {
       trainerId,
-      platformFeePercent: COMMISSION_CONFIG.PLATFORM_PERCENTAGE.toString(),
+      platformFeePercent: payout.platformFeePercent.toString(), // Use custom fee
       payoutDestination: payout.displayName,
       revenueShareApplied: 'true',
     },

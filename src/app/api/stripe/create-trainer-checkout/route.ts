@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
-import { COMMISSION_CONFIG } from '@/lib/stripe/config'
 import { createInPersonDiscountIfEligible } from '@/lib/stripe/discount-utils'
 import {
   type PayoutDestination,
@@ -227,6 +226,7 @@ export async function POST(request: NextRequest) {
       connectedAccountId: null,
       destination: 'none',
       displayName: 'none',
+      platformFeePercent: 12, // Default fee
     }
     let revenue: RevenueCalculation = {
       totalAmount: 0,
@@ -237,10 +237,12 @@ export async function POST(request: NextRequest) {
       payout = await getPayoutDestination(offer.trainerId)
 
       if (payout.connectedAccountId) {
-        revenue = await calculateRevenueSharing(lineItems)
-        const platformFeePercent = COMMISSION_CONFIG.PLATFORM_PERCENTAGE
+        revenue = await calculateRevenueSharing(
+          lineItems,
+          payout.platformFeePercent,
+        )
         console.info(
-          `💰 Revenue sharing enabled: ${payout.displayName} → Platform: ${platformFeePercent}% (${revenue.applicationFeeAmount / 100} NOK)`,
+          `💰 Revenue sharing enabled: ${payout.displayName} → Platform: ${payout.platformFeePercent}% (${revenue.applicationFeeAmount / 100} NOK)`,
         )
       }
     }
@@ -289,7 +291,7 @@ export async function POST(request: NextRequest) {
         // Revenue sharing info
         revenueShareEnabled: (!!payout.connectedAccountId).toString(),
         payoutDestination: payout.displayName,
-        platformFeePercent: COMMISSION_CONFIG.PLATFORM_PERCENTAGE.toString(),
+        platformFeePercent: payout.platformFeePercent.toString(),
       },
       // For subscriptions, include trainer assignment and revenue sharing
       ...(mode === 'subscription' && {
@@ -298,7 +300,7 @@ export async function POST(request: NextRequest) {
           trial_period_days: undefined,
           // Add revenue sharing for subscriptions using application_fee_percent
           ...(payout.connectedAccountId && {
-            application_fee_percent: COMMISSION_CONFIG.PLATFORM_PERCENTAGE, // 10%
+            application_fee_percent: payout.platformFeePercent, // Use custom fee
             transfer_data: {
               destination: payout.connectedAccountId,
             },
@@ -317,8 +319,7 @@ export async function POST(request: NextRequest) {
             // Revenue sharing info for subscriptions
             revenueShareEnabled: (!!payout.connectedAccountId).toString(),
             payoutDestination: payout.displayName,
-            platformFeePercent:
-              COMMISSION_CONFIG.PLATFORM_PERCENTAGE.toString(),
+            platformFeePercent: payout.platformFeePercent.toString(),
           },
         },
       }),

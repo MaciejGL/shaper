@@ -8,6 +8,7 @@ query MyTeams {
     updatedAt
     hasStripeConnect
     stripeConnectedAccountId
+    platformFeePercent
     locations {
       id
       city

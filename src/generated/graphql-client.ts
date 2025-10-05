@@ -2938,6 +2938,7 @@ export type GQLTeam = {
   memberCount: Scalars['Int']['output'];
   members: Array<GQLTeamMember>;
   name: Scalars['String']['output'];
+  platformFeePercent: Scalars['Float']['output'];
   stripeConnectedAccountId?: Maybe<Scalars['String']['output']>;
   updatedAt: Scalars['String']['output'];
 };
@@ -4599,7 +4600,7 @@ export type GQLUpdateTrainerCapacityMutation = { __typename?: 'Mutation', update
 export type GQLMyTeamsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLMyTeamsQuery = { __typename?: 'Query', myTeams: Array<{ __typename?: 'Team', id: string, name: string, memberCount: number, isAdmin: boolean, createdAt: string, updatedAt: string, hasStripeConnect: boolean, stripeConnectedAccountId?: string | undefined | null, locations: Array<{ __typename?: 'Location', id: string, city: string, country: string, countryCode: string }>, members: Array<{ __typename?: 'TeamMember', id: string, role: GQLTeamRole, joinedAt: string, user: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, image?: string | undefined | null } }> }> };
+export type GQLMyTeamsQuery = { __typename?: 'Query', myTeams: Array<{ __typename?: 'Team', id: string, name: string, memberCount: number, isAdmin: boolean, createdAt: string, updatedAt: string, hasStripeConnect: boolean, stripeConnectedAccountId?: string | undefined | null, platformFeePercent: number, locations: Array<{ __typename?: 'Location', id: string, city: string, country: string, countryCode: string }>, members: Array<{ __typename?: 'TeamMember', id: string, role: GQLTeamRole, joinedAt: string, user: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string, image?: string | undefined | null } }> }> };
 
 export type GQLTeamInvitationsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -12116,6 +12117,7 @@ export const MyTeamsDocument = `
     updatedAt
     hasStripeConnect
     stripeConnectedAccountId
+    platformFeePercent
     locations {
       id
       city
