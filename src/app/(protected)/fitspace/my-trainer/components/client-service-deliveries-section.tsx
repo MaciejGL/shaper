@@ -4,12 +4,15 @@ import { formatDate } from 'date-fns'
 import { Package } from 'lucide-react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
 import { useUser } from '@/context/user-context'
@@ -28,68 +31,236 @@ export function ClientServiceDeliveriesSection({
   trainerId,
 }: ClientServiceDeliveriesSectionProps) {
   const { user } = useUser()
-  const { data, isLoading } = useFitGetMyTrainerOffersQuery(
-    {
-      clientEmail: user?.email || '',
-      trainerId,
-      status: GQLTrainerOfferStatus.Paid,
-    },
-    {
-      enabled: !!user?.email,
-    },
-  )
 
-  const trainerOffers = data?.getClientTrainerOffers || []
+  // Query for pending offers (need payment)
+  const { data: pendingData, isLoading: pendingLoading } =
+    useFitGetMyTrainerOffersQuery(
+      {
+        clientEmail: user?.email || '',
+        trainerId,
+        status: GQLTrainerOfferStatus.Pending,
+      },
+      {
+        enabled: !!user?.email,
+      },
+    )
+
+  // Query for paid offers
+  const { data: paidData, isLoading: paidLoading } =
+    useFitGetMyTrainerOffersQuery(
+      {
+        clientEmail: user?.email || '',
+        trainerId,
+        status: GQLTrainerOfferStatus.Paid,
+      },
+      {
+        enabled: !!user?.email,
+      },
+    )
+
+  const pendingOffers = pendingData?.getClientTrainerOffers || []
+  const paidOffers = paidData?.getClientTrainerOffers || []
+
+  const isLoading = pendingLoading || paidLoading
 
   if (isLoading) {
     return (
-      <Card borderless>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <SectionIcon icon={Package} size="xs" variant="green" />
-            Purchased Services
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <LoadingSkeleton count={3} withBorder />
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <Card borderless>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <SectionIcon icon={Package} size="xs" variant="green" />
+              Loading...
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <LoadingSkeleton count={3} withBorder />
+          </CardContent>
+        </Card>
+      </div>
     )
   }
 
-  if (trainerOffers.length === 0) {
-    return (
-      <Card borderless>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <SectionIcon icon={Package} size="xs" variant="green" />
-            No services purchased yet
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
-              No training packages purchased yet.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    )
+  return (
+    <div className="space-y-4">
+      {/* Pending Offers Section */}
+      {pendingOffers.length > 0 && <PendingOffersCard offers={pendingOffers} />}
+
+      {/* Paid Offers Section */}
+      {paidOffers.length > 0 ? (
+        <Card borderless>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <SectionIcon icon={Package} size="xs" variant="green" />
+              Purchased Training Packages
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Accordion
+              type="single"
+              collapsible
+              className="w-full flex flex-col gap-2"
+            >
+              {paidOffers.map((offer) => (
+                <TrainerOfferItem key={offer.id} offer={offer} />
+              ))}
+            </Accordion>
+          </CardContent>
+        </Card>
+      ) : (
+        pendingOffers.length === 0 && (
+          <Card borderless>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <SectionIcon icon={Package} size="xs" variant="green" />
+                No services purchased yet
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  No training packages purchased yet.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )
+      )}
+    </div>
+  )
+}
+
+interface PendingOffersCardProps {
+  offers: GQLFitGetMyTrainerOffersQuery['getClientTrainerOffers']
+}
+
+function PendingOffersCard({ offers }: PendingOffersCardProps) {
+  const { isNativeApp } = useMobileApp()
+
+  const handleOpenOffer = (offerUrl: string) => {
+    if (isNativeApp) {
+      // Force external browser opening for native app
+      const opened = window.open(
+        offerUrl,
+        '_blank',
+        'noopener,noreferrer,external=true',
+      )
+
+      if (!opened) {
+        // Fallback: create link element
+        const link = document.createElement('a')
+        link.href = offerUrl
+        link.target = '_blank'
+        link.rel = 'noopener noreferrer external'
+        link.style.display = 'none'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+    } else {
+      window.open(offerUrl, '_blank', 'noopener,noreferrer')
+    }
   }
 
   return (
     <Card borderless>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <SectionIcon icon={Package} size="xs" variant="green" />
-          Purchased Training Packages
+          <SectionIcon icon={Package} size="xs" variant="orange" />
+          New Offers
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Accordion type="single" collapsible className="w-full">
-          {trainerOffers.map((offer) => (
-            <TrainerOfferItem key={offer.id} offer={offer} />
-          ))}
+        <Accordion
+          type="single"
+          collapsible
+          className="w-full flex flex-col gap-2"
+        >
+          {offers.map((offer) => {
+            const packageName =
+              offer.packageSummary.length === 1
+                ? offer.packageSummary[0].name
+                : 'Training Package'
+
+            return (
+              <AccordionItem
+                key={offer.id}
+                value={offer.id}
+                className="bg-card-on-card px-4 rounded-md border-none"
+              >
+                <AccordionTrigger className="hover:no-underline flex justify-between items-center">
+                  <div className="flex items-center justify-between w-full pr-4">
+                    <div className="flex items-center gap-3">
+                      <div className="text-left">
+                        <h3 className="font-medium text-base">
+                          {packageName.replaceAll('[TEST]', ' ')}
+                        </h3>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          <Badge variant="primary" className="mr-2">
+                            Pending Payment
+                          </Badge>
+                          Created{' '}
+                          <span className="font-medium">
+                            {formatDate(
+                              new Date(offer.createdAt),
+                              'd. MMM yyyy',
+                            )}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+
+                <AccordionContent>
+                  <div className="space-y-4 pb-4">
+                    <div>
+                      <h4 className="font-medium text-sm text-muted-foreground mb-3">
+                        What's included in this package:
+                      </h4>
+
+                      {offer.packageSummary.map((item) => {
+                        const showQuantity = item.quantity > 1
+                        return (
+                          <div key={item.packageId} className="mb-2">
+                            <h5 className="font-medium text-sm">
+                              {item.name.replaceAll('[TEST]', ' ')}
+                              {showQuantity && (
+                                <span className="text-muted-foreground font-normal">
+                                  {' '}
+                                  (×{item.quantity})
+                                </span>
+                              )}
+                            </h5>
+                          </div>
+                        )
+                      })}
+                    </div>
+
+                    {offer.personalMessage && (
+                      <div className="mt-4 p-3 bg-muted/30 rounded-lg">
+                        <p className="text-sm text-muted-foreground font-medium mb-1">
+                          Message from your trainer:
+                        </p>
+                        <p className="text-sm italic">
+                          "{offer.personalMessage}"
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="pt-2">
+                      <Button
+                        onClick={() => handleOpenOffer(`/offer/${offer.token}`)}
+                        className="w-full"
+                      >
+                        Proceed to Payment
+                      </Button>
+                    </div>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            )
+          })}
         </Accordion>
       </CardContent>
     </Card>
@@ -135,10 +306,16 @@ function TrainerOfferItem({ offer }: TrainerOfferItemProps) {
     },
     {} as Record<GQLServiceType, GroupedDelivery>,
   )
+
+  const totalQuantity = Object.values(groupedDeliveries).reduce(
+    (acc, delivery) => acc + delivery.quantity,
+    0,
+  )
+
   return (
     <AccordionItem
       value={offer.id}
-      className="not-last:border-b bg-card-on-card px-4 rounded-md"
+      className="bg-card-on-card px-4 rounded-md border-none"
     >
       <AccordionTrigger className="hover:no-underline flex justify-between items-center">
         <div className="flex items-center justify-between w-full pr-4">
@@ -147,7 +324,10 @@ function TrainerOfferItem({ offer }: TrainerOfferItemProps) {
               <h3 className="font-medium text-base">
                 {packageName.replaceAll('[TEST]', ' ')}
               </h3>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-muted-foreground mt-1">
+                <Badge variant="secondary" className="mr-2">
+                  {totalQuantity} item{totalQuantity > 1 ? 's' : ''}
+                </Badge>
                 Purchased{' '}
                 <span className="font-medium">
                   {formatDate(new Date(offer.createdAt), 'd. MMM yyyy')}

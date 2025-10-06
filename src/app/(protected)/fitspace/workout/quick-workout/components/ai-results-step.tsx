@@ -73,7 +73,7 @@ export function AiResultsStep({
 
 function LoadingState({ inputData }: { inputData: AiWorkoutInputData }) {
   return (
-    <div className="space-y-6 text-center flex-center h-full">
+    <div className="space-y-6 text-center h-full">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

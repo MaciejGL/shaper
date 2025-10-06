@@ -72,9 +72,9 @@ export const STRIPE_PRODUCTS = {
   IN_PERSON_SESSION: process.env.STRIPE_PRICE_IN_PERSON_SESSION,
 } as const
 
-// Commission Configuration: Trainers get 88% after fees, Platform takes 12%
+// Commission Configuration: Trainers get 88% after fees, Platform takes 11%
 export const COMMISSION_CONFIG = {
-  PLATFORM_PERCENTAGE: 12, // Platform commission percentage (10% base + 2% operational)
+  PLATFORM_PERCENTAGE: 11, // Platform commission percentage (10% base + 1% operational)
   TRAINER_PERCENTAGE: 88, // Trainer percentage after platform fee
 
   // Stripe fee configuration (trainers cover these)

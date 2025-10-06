@@ -38,12 +38,15 @@ export function SuccessPage({
 
   const packageIds = packageSummary.map((item) => item.packageId).join(',')
   // ✅ Use bulletproof deep link utility with query parameters
-  const appDeepLink = createDeepLink('fitspace/workout', {
-    token: offer.token,
-    trainer: offer.trainerId,
-    packages: packageIds,
-  })
-  const url = `${getBaseUrl()}/fitspace/workout`
+  const appDeepLink = createDeepLink(
+    'fitspace/my-trainer?tab=purchased-services',
+    {
+      token: offer.token,
+      trainer: offer.trainerId,
+      packages: packageIds,
+    },
+  )
+  const url = `${getBaseUrl()}/fitspace/my-trainer?tab=purchased-services`
 
   const handleReturnToApp = useCallback(() => {
     // Try to open the mobile app with deep link
@@ -83,141 +86,149 @@ export function SuccessPage({
   }
 
   return (
-    <div className="min-h-screen mx-auto flex-center">
-      <div className="max-w-2xl mx-auto px-4 py-12">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          {/* Success Icon */}
-          <div className="flex-center">
-            <BiggyIcon icon={CheckIcon} variant="success" />
-          </div>
+    <div className="dark bg-background size-full">
+      <div className="min-h-screen mx-auto flex-center">
+        <div className="max-w-2xl w-full md:py-12">
+          <div className="rounded-lg shadow-lg px-4 py-8 text-center bg-background">
+            {/* Success Icon */}
+            <div className="flex-center mb-6">
+              <BiggyIcon icon={CheckIcon} variant="success" />
+            </div>
 
-          {/* Success Message */}
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
-            Payment Successful!
-          </h1>
+            {/* Success Message */}
+            <h1 className="text-xl font-bold text-foreground mb-4">
+              Payment Successful!
+            </h1>
 
-          <p className="text-lg text-gray-700 mb-6">
-            Congratulations! You've successfully purchased{' '}
-            {packageSummary.length === 1 ? (
-              <strong>{packageSummary[0].name}</strong>
-            ) : (
-              <strong>
-                a training bundle ({packageSummary.length} packages)
-              </strong>
-            )}{' '}
-            from {trainerName}.
-          </p>
+            <p className="text-base text-muted-foreground mb-6">
+              Congratulations! You've successfully purchased{' '}
+              {packageSummary.length === 1 ? (
+                <strong>{packageSummary[0].name}</strong>
+              ) : (
+                <strong>
+                  a training bundle ({packageSummary.length} packages)
+                </strong>
+              )}{' '}
+              from {trainerName}.
+            </p>
 
-          {/* Package Details */}
-          <Card className="p-6 mb-8 text-left">
-            <h3 className="font-semibold text-gray-900 mb-4">
+            {/* Package Details */}
+            <h3 className="font-semibold text-foreground mb-4 mt-12">
               What happens next:
             </h3>
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 shrink-0 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="font-medium text-gray-900">
-                    Trainer Notification
-                  </p>
-                  <p className="text-gray-600 text-sm">
-                    {trainerName} has been notified of your purchase and will
-                    reach out within 24 hours.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 shrink-0 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="font-medium text-gray-900">Service Delivery</p>
-                  <p className="text-gray-600 text-sm">
-                    Your personalized training materials will be prepared and
-                    delivered through the app.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start space-x-3">
-                <div className="w-2 h-2 shrink-0 bg-green-500 rounded-full mt-2"></div>
-                <div>
-                  <p className="font-medium text-gray-900">Get Started</p>
-                  <p className="text-gray-600 text-sm">
-                    Check your email and the Hypro app for updates and next
-                    steps.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Service Included */}
-          <Card variant="tertiary" className="p-6 mb-8 text-left">
-            <h4 className="font-semibold text-gray-900 mb-3">
-              Your {packageSummary.length === 1 ? 'Package' : 'Bundle'}{' '}
-              Includes:
-            </h4>
-            {packageSummary.length === 1 ? (
-              // Single package - show services directly
-              <div className="space-y-2">
-                {packageSummary[0]?.serviceType && (
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <span className="text-gray-700">
-                      {serviceLabels[packageSummary[0].serviceType]}
-                      {packageSummary[0].quantity > 1 &&
-                        ` (${packageSummary[0].quantity}x)`}
-                    </span>
-                  </div>
-                )}
-              </div>
-            ) : (
-              packageSummary.map((packageItem) => (
-                // Multiple packages - show grouped by package
-                <div key={packageItem.packageId}>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                    <h5 className="font-medium text-gray-800">
-                      {packageItem.name}
-                    </h5>
-                    {packageItem.quantity > 1 && (
-                      <Badge variant="outline">x{packageItem.quantity}</Badge>
-                    )}
+            <Card variant="tertiary" className="p-4 mb-8 text-left">
+              <div className="space-y-3">
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 shrink-0 bg-green-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium text-foreground">
+                      Trainer Notification
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      {trainerName} has been notified of your purchase and will
+                      reach out within 24 hours.
+                    </p>
                   </div>
                 </div>
-              ))
-            )}
-          </Card>
 
-          {/* Mobile App Redirect */}
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 shrink-0 bg-green-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium text-foreground">
+                      Service Delivery
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      Your personalized training materials will be prepared and
+                      delivered through the app.
+                    </p>
+                  </div>
+                </div>
 
-          <div className="mb-6">
-            <p className="text-gray-600 mb-4">
-              Redirecting you back to the Hypro app in {countdown} seconds...
-            </p>
-          </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-2 h-2 shrink-0 bg-green-500 rounded-full mt-2"></div>
+                  <div>
+                    <p className="font-medium text-foreground">Get Started</p>
+                    <p className="text-muted-foreground text-sm">
+                      Check notifications in Hypro app for updates and next
+                      steps.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Card>
 
-          <Button onClick={handleReturnToApp} size="lg" className="w-full mb-6">
-            Return to App Now
-          </Button>
+            {/* Service Included */}
+            <Card variant="tertiary" className="p-4 mb-8 text-left">
+              <h4 className="font-semibold text-foreground mb-3">
+                Your {packageSummary.length === 1 ? 'Package' : 'Bundle'}{' '}
+                Includes:
+              </h4>
+              {packageSummary.length === 1 ? (
+                // Single package - show services directly
+                <div className="space-y-1">
+                  {packageSummary[0]?.serviceType && (
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-sm text-foreground">
+                        {serviceLabels[packageSummary[0].serviceType]}
+                        {packageSummary[0].quantity > 1 &&
+                          ` (${packageSummary[0].quantity}x)`}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                packageSummary.map((packageItem) => (
+                  // Multiple packages - show grouped by package
+                  <div key={packageItem.packageId}>
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <h5 className="text-sm text-foreground">
+                        {packageItem.name}
+                      </h5>
+                      {packageItem.quantity > 1 && (
+                        <Badge variant="outline">x{packageItem.quantity}</Badge>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </Card>
 
-          {/* Support */}
-          <div className="pt-6 border-t">
-            <p className="text-sm text-gray-500">
-              Questions? Contact {trainerName} directly or email{' '}
-              <a
-                href="mailto:support@hypertro.com"
-                className="text-blue-600 hover:underline"
-              >
-                support@hypertro.com
-              </a>
-            </p>
+            {/* Mobile App Redirect */}
 
-            {sessionId && (
-              <p className="text-xs text-gray-400 mt-2">
-                Payment ID: {sessionId}
+            <div className="mb-6">
+              <p className="text-muted-foreground mb-4">
+                Redirecting you back to the Hypro app in {countdown} seconds...
               </p>
-            )}
+            </div>
+
+            <Button
+              onClick={handleReturnToApp}
+              size="lg"
+              className="w-full mb-6"
+            >
+              Return to App Now
+            </Button>
+
+            {/* Support */}
+            <div className="pt-6 border-t">
+              <p className="text-sm text-muted-foreground">
+                Questions? Contact {trainerName} directly or email{' '}
+                <a
+                  href="mailto:support@hypertro.com"
+                  className="text-blue-600 hover:underline"
+                >
+                  support@hypertro.com
+                </a>
+              </p>
+
+              {sessionId && (
+                <p className="text-xs text-muted-foreground mt-2">
+                  Payment ID: {sessionId}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

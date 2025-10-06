@@ -45,22 +45,25 @@ export async function getPayoutDestination(
   })
 
   // Priority: Team account > Individual trainer account
-  if (trainerWithTeam?.teamMemberships[0]?.team?.stripeConnectedAccountId) {
-    const team = trainerWithTeam.teamMemberships[0].team
+  const team = trainerWithTeam?.teamMemberships[0]?.team
+  if (team?.stripeConnectedAccountId) {
     return {
       connectedAccountId: team.stripeConnectedAccountId,
       destination: 'team',
       displayName: `team:${team.name}`,
-      platformFeePercent: team.platformFeePercent, // Use team's custom fee
+      platformFeePercent:
+        team.platformFeePercent || COMMISSION_CONFIG.PLATFORM_PERCENTAGE, // Use team's custom fee
     }
   }
 
   if (trainerWithTeam?.stripeConnectedAccountId) {
     return {
-      connectedAccountId: trainerWithTeam.stripeConnectedAccountId,
+      connectedAccountId: trainerWithTeam?.stripeConnectedAccountId,
       destination: 'individual',
       displayName: 'individual',
-      platformFeePercent: COMMISSION_CONFIG.PLATFORM_PERCENTAGE, // Default 12% for individuals
+      platformFeePercent:
+        trainerWithTeam.teamMemberships[0]?.team?.platformFeePercent ||
+        COMMISSION_CONFIG.PLATFORM_PERCENTAGE, // Default 11%  for individuals
     }
   }
 

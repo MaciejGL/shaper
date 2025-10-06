@@ -27,8 +27,6 @@ import { cn } from '@/lib/utils'
 import { createScrollUrl } from '@/lib/utils/scroll-to'
 import type { UserWithSession } from '@/types/UserWithSession'
 
-import { useMobileApp } from '../mobile-app-bridge'
-
 import { NotificationItem } from './notification-item'
 import { NotificationNavbar } from './types'
 
@@ -51,32 +49,6 @@ const useNotifications = (
     mutateAsync: markAllNotificationsAsRead,
     isPending: isMarkingAllNotificationsAsRead,
   } = useMarkAllNotificationsAsReadMutation()
-  const { isNativeApp } = useMobileApp()
-
-  const handleOpenOffer = (offerUrl: string) => {
-    if (isNativeApp) {
-      // Force external browser opening for native app
-      const opened = window.open(
-        offerUrl,
-        '_blank',
-        'noopener,noreferrer,external=true',
-      )
-
-      if (!opened) {
-        // Fallback: create link element
-        const link = document.createElement('a')
-        link.href = offerUrl
-        link.target = '_blank'
-        link.rel = 'noopener noreferrer external'
-        link.style.display = 'none'
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-      }
-    } else {
-      window.open(offerUrl, '_blank', 'noopener,noreferrer')
-    }
-  }
 
   const unreadCount = notifications.filter((n) => !n.read).length
 
@@ -105,7 +77,7 @@ const useNotifications = (
       notification.type === GQLNotificationType.TrainerOfferReceived &&
       notification.link
     ) {
-      handleOpenOffer(notification.link)
+      router.push(notification.link)
     }
 
     if (notification.type === GQLNotificationType.TrainerNoteShared) {

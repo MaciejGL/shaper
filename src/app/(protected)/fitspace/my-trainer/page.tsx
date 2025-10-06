@@ -53,7 +53,7 @@ export default function MyTrainerPage() {
   return (
     <div className="container-hypertro mx-auto max-w-md">
       <DashboardHeader
-        title="My Trainer"
+        title="Coaching"
         icon={UserCheck}
         variant="blue"
         className="mb-6"

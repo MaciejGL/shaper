@@ -181,10 +181,10 @@ export function QuickWorkoutAiWizard({
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-2xl overflow-y-auto gap-0 "
+        className="w-full sm:max-w-2xl overflow-y-auto gap-0 !border-none "
       >
         <div className="flex-1 overflow-y-auto p-4">
-          <SheetHeader className="py-8">
+          <SheetHeader className="py-8 mb-4">
             <SheetTitle className="text-center">{getStepTitle()}</SheetTitle>
             <SheetDescription className="text-center">
               {getStepDescription()}
@@ -222,7 +222,7 @@ export function QuickWorkoutAiWizard({
           )}
         </div>
 
-        <SheetFooter className="">
+        <SheetFooter className=" border-t">
           {currentStep === 'muscle-groups' && (
             <div className="flex gap-2 w-full">
               <Button variant="tertiary" onClick={onClose} className="flex-1">

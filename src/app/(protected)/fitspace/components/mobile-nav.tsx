@@ -98,7 +98,7 @@ export function MobileNav() {
         id: 'trainer',
         href: '/fitspace/my-trainer',
         icon: UserCheck,
-        label: 'Trainer',
+        label: 'Coaching',
         prefetch: true,
       },
       {

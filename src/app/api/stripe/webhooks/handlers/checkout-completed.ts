@@ -4,6 +4,7 @@ import { generateTasks } from '@/constants/task-templates'
 import { PackageTemplate, Prisma, ServiceType } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { User } from '@/lib/getUser'
+import { getPayoutDestination } from '@/lib/stripe/revenue-sharing-utils'
 import { stripe } from '@/lib/stripe/stripe'
 import { createSupportChatForUser } from '@/lib/support-chat'
 
@@ -248,6 +249,11 @@ async function handlePaymentCheckout(
     )
   }
 
+  // Handle trainer revenue sharing for one-time payments (multi-currency)
+  if (trainerId && paymentIntent.amount > 0) {
+    await handleTrainerPayout(trainerId, paymentIntent, session.id, offerToken)
+  }
+
   console.info(
     `✅ Payment processed: ${user.email} → ${deliveryTasks.length} delivery tasks created (${paymentIntent.amount / 100} ${paymentIntent.currency.toUpperCase()})`,
   )
@@ -437,5 +443,69 @@ async function markOfferCompleted(
     console.info(`🎯 Marked trainer offer ${offerToken} as PAID (${mode} mode)`)
   } catch (error) {
     console.error('Failed to mark offer as completed:', error)
+  }
+}
+
+/**
+ * Handle trainer payout for one-time payments with multi-currency support
+ * This is called AFTER payment succeeds, when we know the actual currency charged
+ */
+async function handleTrainerPayout(
+  trainerId: string,
+  paymentIntent: Stripe.PaymentIntent,
+  sessionId: string,
+  offerToken?: string,
+) {
+  try {
+    // Get trainer's payout configuration (includes team-specific platformFeePercent)
+    const payout = await getPayoutDestination(trainerId)
+
+    if (!payout.connectedAccountId) {
+      console.info(
+        `⚠️ Trainer ${trainerId} has no connected account - skipping payout`,
+      )
+      return
+    }
+
+    // Calculate platform fee using team/trainer's custom percentage
+    const chargedAmount = paymentIntent.amount // In smallest currency unit (cents/øre)
+    const platformFee = Math.round(
+      chargedAmount * (payout.platformFeePercent / 100),
+    )
+    const trainerAmount = chargedAmount - platformFee
+
+    // Get the charge ID from the payment intent for application fee tracking
+    const charge = paymentIntent.latest_charge as string
+
+    // Create transfer to trainer's connected account in the actual currency charged
+    const transfer = await stripe.transfers.create({
+      amount: trainerAmount,
+      currency: paymentIntent.currency,
+      destination: payout.connectedAccountId,
+      source_transaction: charge, // Link to original charge for better tracking
+      transfer_group: sessionId,
+      description: `Payout to ${payout.displayName} (${100 - payout.platformFeePercent}% of ${chargedAmount / 100} ${paymentIntent.currency.toUpperCase()})`,
+      metadata: {
+        trainerId,
+        paymentIntentId: paymentIntent.id,
+        offerToken: offerToken || '',
+        platformFeePercent: payout.platformFeePercent.toString(),
+        platformFeeAmount: platformFee.toString(),
+        chargedAmount: chargedAmount.toString(),
+        chargedCurrency: paymentIntent.currency.toUpperCase(),
+        // These fields help with reporting and reconciliation
+        feeType: 'platform_commission',
+        originalCharge: charge,
+      },
+    })
+
+    console.info(
+      `💰 Transfer created: ${trainerAmount / 100} ${paymentIntent.currency.toUpperCase()} → ${payout.displayName} | Platform keeps: ${platformFee / 100} ${paymentIntent.currency.toUpperCase()} (${payout.platformFeePercent}%)`,
+    )
+
+    return transfer
+  } catch (error) {
+    console.error('Failed to create trainer payout:', error)
+    // Don't throw - payment already succeeded, we'll handle payout manually if needed
   }
 }

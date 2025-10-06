@@ -1,15 +1,26 @@
 'use client'
 
 import { JsonValue } from '@prisma/client/runtime/client'
-import { CheckCircle, CreditCard, Shield } from 'lucide-react'
-import { useState } from 'react'
+import { CheckCircle, Clock, CreditCard, Shield } from 'lucide-react'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 
+import { BiggyIcon } from '@/components/biggy-icon'
+import { useMobileApp } from '@/components/mobile-app-bridge'
 import { CoachingServiceTerms } from '@/components/subscription/coaching-service-terms'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { createDeepLink } from '@/lib/deep-links'
+import { getBaseUrl } from '@/lib/get-base-url'
 import { PackageSummaryItem } from '@/types/trainer-offer'
 
 interface BundleOfferPageProps {
@@ -19,6 +30,7 @@ interface BundleOfferPageProps {
     trainerId: string
     clientEmail: string
     personalMessage: string | null
+    expiresAt: Date
     trainer: {
       name: string | null
       image: string | null
@@ -41,6 +53,7 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
   const [showTermsDialog, setShowTermsDialog] = useState(false)
   const [hasAgreedToTerms, setHasAgreedToTerms] = useState(false)
   const [showTermsError, setShowTermsError] = useState(false)
+  const { isNativeApp } = useMobileApp()
 
   const packageSummary = offer.packageSummary as unknown as PackageSummaryItem[]
 
@@ -110,17 +123,83 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
     }
   }
 
+  const appDeepLink = createDeepLink(
+    'fitspace/my-trainer?tab=purchased-services',
+  )
+  const url = `${getBaseUrl()}/fitspace/my-trainer?tab=purchased-services`
+
+  const handleReturnToApp = useCallback(() => {
+    // Try to open the mobile app with deep link
+    if (isNativeApp) {
+      // Already in mobile app, navigate within app
+      window.location.href = appDeepLink
+    } else {
+      // On web browser, try to open mobile app via deep link
+      try {
+        window.location.href = appDeepLink
+        // Fallback to web if mobile app doesn't respond
+        setTimeout(() => {
+          window.open(url, '_blank')
+        }, 1000)
+      } catch {
+        window.open(url, '_blank')
+      }
+    }
+  }, [appDeepLink, isNativeApp, url])
+
+  // Check if offer is expired
+  if (offer.expiresAt < new Date()) {
+    return (
+      <div className="dark min-h-screen w-full bg-background">
+        <div className="container-hypertro mx-auto max-w-md">
+          <div className="flex items-center justify-center min-h-screen p-4">
+            <Card borderless variant="secondary" className="w-full text-center">
+              <CardHeader>
+                <div className="flex-center w-full">
+                  <BiggyIcon icon={Clock} variant="default" />
+                </div>
+                <h1 className="text-xl font-semibold text-foreground">
+                  Offer Expired
+                </h1>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <p className="text-muted-foreground">
+                    This training offer has expired. Please contact your trainer
+                    for a new offer.
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Offers are valid for 72 hours from creation.
+                  </p>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button
+                  onClick={handleReturnToApp}
+                  size="lg"
+                  className="w-full"
+                >
+                  Return to App
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen mx-auto flex-center">
+    <div className="dark bg-background min-h-screen w-full flex-center">
       <div className="container-hypertro mx-auto max-w-lg">
         {/* Header */}
-        <div className="py-6 px-4">
+        <div className="pt-12 pb-6 px-4 text-center">
           <h1 className="text-2xl font-bold text-foreground">Training Offer</h1>
           <p className="text-muted-foreground">from {trainerName}</p>
         </div>
 
         <div className="space-y-6 p-4">
-          <Card variant="secondary">
+          <Card borderless variant="secondary">
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-4">
                 <Avatar className="size-16">
@@ -166,7 +245,11 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
 
           {/* Personal Message */}
           {offer.personalMessage && (
-            <Card variant="secondary" className="border-l-4 border-l-primary">
+            <Card
+              borderless
+              variant="secondary"
+              className="border-l-4 border-l-primary"
+            >
               <CardContent>
                 <p className="text-primary font-medium text-sm mb-2">
                   Personal message from {trainerName}:
@@ -177,7 +260,7 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
           )}
 
           {/* Bundle Details */}
-          <Card variant="secondary">
+          <Card borderless variant="secondary">
             <CardHeader>
               <CardTitle className="text-xl">Training Offer</CardTitle>
             </CardHeader>
@@ -187,11 +270,11 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
                 {packageSummary.map((item) => (
                   <div
                     key={item.packageId}
-                    className="border-l-2 border-green-500/30 pl-4 space-y-3"
+                    className="border-l-2 border-green-500 pl-4 space-y-2"
                   >
                     <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-foreground text-lg">
-                        {item.name}
+                      <h4 className="font-semibold text-foreground text-base">
+                        {item.name.replaceAll('[TEST]', ' ')}
                       </h4>
                       {item.quantity > 1 && (
                         <Badge variant="outline">x {item.quantity}</Badge>
@@ -200,7 +283,7 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
 
                     {item.description && (
                       <p className="text-muted-foreground text-sm">
-                        {item.description}
+                        {item.description.replaceAll('[TEST ENVIRONMENT]', ' ')}
                       </p>
                     )}
                   </div>
@@ -210,16 +293,15 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
           </Card>
 
           {/* Terms Agreement & Checkout */}
-          <div className="space-y-4">
+          <div className="space-y-3">
             {/* Terms Agreement Checkbox */}
-            <div className="flex items-start space-x-3">
-              <input
-                type="checkbox"
+            <div className="flex items-start space-x-3 my-8">
+              <Checkbox
                 id="terms-agreement"
                 checked={hasAgreedToTerms}
-                onChange={(e) => {
-                  setHasAgreedToTerms(e.target.checked)
-                  if (e.target.checked) {
+                onCheckedChange={(checked) => {
+                  setHasAgreedToTerms(checked === true)
+                  if (checked === true) {
                     setShowTermsError(false)
                   }
                 }}
@@ -229,7 +311,7 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
               />
               <label
                 htmlFor="terms-agreement"
-                className="text-sm text-muted-foreground leading-5"
+                className="text-sm text-foreground leading-5 max-w-[50ch]"
               >
                 I agree to the{' '}
                 <button
@@ -292,10 +374,18 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
                 </>
               )}
             </Button>
+            <Button
+              onClick={handleReturnToApp}
+              size="lg"
+              className="w-full"
+              variant="tertiary"
+            >
+              Return to App
+            </Button>
           </div>
 
           {/* Trust indicators */}
-          <div className="text-center space-y-3">
+          <div className="text-center space-y-3 mt-20">
             <p className="text-sm text-muted-foreground">
               Secure payment powered by Stripe
             </p>

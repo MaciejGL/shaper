@@ -2,15 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
+import { COMMISSION_CONFIG } from '@/lib/stripe/config'
 import {
   createInPersonDiscountIfEligible,
   createMealTrainingBundleDiscountIfEligible,
 } from '@/lib/stripe/discount-utils'
 import {
   type PayoutDestination,
-  type RevenueCalculation,
-  calculateRevenueSharing,
-  createPaymentIntentData,
   getPayoutDestination,
 } from '@/lib/stripe/revenue-sharing-utils'
 import { stripe } from '@/lib/stripe/stripe'
@@ -236,115 +234,78 @@ export async function POST(request: NextRequest) {
       discounts.push(mealTrainingDiscount)
     }
 
-    // Setup revenue sharing for trainer payments (payment mode only)
+    // Setup revenue sharing (subscriptions: at checkout, one-time: in webhook)
     let payout: PayoutDestination = {
       connectedAccountId: null,
       destination: 'none',
       displayName: 'none',
-      platformFeePercent: 12, // Default fee
-    }
-    let revenue: RevenueCalculation = {
-      totalAmount: 0,
-      applicationFeeAmount: 0,
+      platformFeePercent: COMMISSION_CONFIG.PLATFORM_PERCENTAGE,
     }
 
-    if (offer.trainerId) {
+    if (offer.trainerId && hasSubscription) {
       payout = await getPayoutDestination(offer.trainerId)
-
       if (payout.connectedAccountId) {
-        revenue = await calculateRevenueSharing(
-          lineItems,
-          payout.platformFeePercent,
-        )
         console.info(
-          `💰 Revenue sharing enabled: ${payout.displayName} → Platform: ${payout.platformFeePercent}% (${revenue.applicationFeeAmount / 100} NOK)`,
+          `💰 Revenue sharing: ${payout.displayName} → ${payout.platformFeePercent}%`,
         )
       }
     }
 
-    // Create checkout session with trainer assignment
+    // Build session metadata
+    const sessionMetadata = {
+      offerToken,
+      trainerId: offer.trainerId,
+      userId: user.id,
+      clientEmail,
+      source: 'trainer_offer',
+      bundleItemCount: checkoutItems.length.toString(),
+      originalItemCount: offer_items.length.toString(),
+      hasCoachingCombo: hasCoachingCombo.toString(),
+      inPersonDiscount: hasCoachingCombo ? '50' : '0',
+      hasDiscountCoupon: (hasCoachingCombo && discounts.length > 0).toString(),
+      bundlePackages: checkoutItems
+        .slice(0, 3)
+        .map((item) => item.package.name)
+        .join(', '),
+      revenueShareEnabled: (!!payout.connectedAccountId).toString(),
+      payoutDestination: payout.displayName,
+      platformFeePercent: payout.platformFeePercent.toString(),
+    }
+
+    // Create checkout session
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
       line_items: lineItems,
       mode,
-      // Apply bundle discount as coupon (preserves adaptive pricing)
       ...(discounts.length > 0 && { discounts }),
-      // Allow promotion codes only if we don't have our own discounts
       ...(discounts.length === 0 && { allow_promotion_codes: true }),
-      ...(mode === 'payment' &&
-        payout.connectedAccountId && {
-          payment_intent_data: createPaymentIntentData(
-            payout,
-            revenue,
-            offer.trainerId,
-          ),
-        }),
       success_url:
         successUrl ||
         `${process.env.NEXT_PUBLIC_APP_URL}/offer/${offerToken}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:
         cancelUrl || `${process.env.NEXT_PUBLIC_APP_URL}/offer/${offerToken}`,
-      metadata: {
-        offerToken,
-        trainerId: offer.trainerId,
-        userId: user.id,
-        clientEmail,
-        source: 'trainer_offer',
-        bundleItemCount: checkoutItems.length.toString(),
-        originalItemCount: offer_items.length.toString(),
-        hasCoachingCombo: hasCoachingCombo.toString(),
-        inPersonDiscount: hasCoachingCombo ? '50' : '0',
-        hasDiscountCoupon: (
-          hasCoachingCombo && discounts.length > 0
-        ).toString(),
-        // Include first few package names for reference (charged items only)
-        bundlePackages: checkoutItems
-          .slice(0, 3)
-          .map((item) => item.package.name)
-          .join(', '),
-        // Revenue sharing info
-        revenueShareEnabled: (!!payout.connectedAccountId).toString(),
-        payoutDestination: payout.displayName,
-        platformFeePercent: payout.platformFeePercent.toString(),
-      },
-      // For subscriptions, include trainer assignment and revenue sharing
-      ...(mode === 'subscription' && {
-        subscription_data: {
-          // Coaching subscriptions should never have trials (trainers need immediate payment)
-          trial_period_days: undefined,
-          // Add revenue sharing for subscriptions using application_fee_percent
-          ...(payout.connectedAccountId && {
-            application_fee_percent: payout.platformFeePercent, // Use custom fee
+      metadata: sessionMetadata,
+      // Subscription revenue sharing - uses application_fee_percent (works with any currency)
+      ...(mode === 'subscription' &&
+        payout.connectedAccountId && {
+          subscription_data: {
+            trial_period_days: undefined,
+            application_fee_percent: payout.platformFeePercent,
             transfer_data: {
               destination: payout.connectedAccountId,
             },
-          }),
-          metadata: {
-            offerToken,
-            trainerId: offer.trainerId,
-            userId: user.id,
-            source: 'trainer_offer',
-            bundleItemCount: checkoutItems.length.toString(),
-            hasCoachingCombo: hasCoachingCombo.toString(),
-            inPersonDiscount: hasCoachingCombo ? '50' : '0',
-            hasDiscountCoupon: (
-              hasCoachingCombo && discounts.length > 0
-            ).toString(),
-            // Revenue sharing info for subscriptions
-            revenueShareEnabled: (!!payout.connectedAccountId).toString(),
-            payoutDestination: payout.displayName,
-            platformFeePercent: payout.platformFeePercent.toString(),
+            metadata: sessionMetadata,
           },
-        },
-      }),
-      // These settings help Stripe detect location for adaptive pricing
-      billing_address_collection: 'required', // Changed from 'auto' to 'required'
+        }),
+      // NOTE: One-time payment revenue sharing is handled in webhook
+      // Reason: payment_intent_data.application_fee_amount requires fixed amount (locks to USD)
+      // Multi-currency requires knowing actual charged currency (available in webhook)
+      billing_address_collection: 'required',
       customer_update: {
         address: 'auto',
         name: 'auto',
       },
-      // Prevent multiple payments for same offer
       client_reference_id: offerToken,
     })
 
