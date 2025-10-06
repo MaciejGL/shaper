@@ -1,6 +1,7 @@
 'use client'
 
 import { useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import { Suspense, use, useMemo } from 'react'
 
@@ -106,12 +107,13 @@ const WorkoutDay = ({
 }) => {
   const { data: dayData } = use(dayDataPromise)
   const queryClient = useQueryClient()
+  const router = useRouter()
 
   // Handle both getWorkoutDay (trainer plans) and getQuickWorkoutDay (quick workouts)
   const initialDay =
     'getWorkoutDay' in (dayData ?? {})
-      ? (dayData as GQLFitspaceGetWorkoutDayQuery).getWorkoutDay
-      : (dayData as GQLFitspaceGetQuickWorkoutDayQuery).getQuickWorkoutDay
+      ? (dayData as GQLFitspaceGetWorkoutDayQuery)?.getWorkoutDay
+      : (dayData as GQLFitspaceGetQuickWorkoutDayQuery)?.getQuickWorkoutDay
 
   // Normalize Quick Workout data to match getWorkoutDay structure for consistent cache handling
   const normalizedInitialData = useMemo(():
@@ -125,7 +127,7 @@ const WorkoutDay = ({
 
     // Transform Quick Workout data to getWorkoutDay format
     const quickWorkoutData = dayData as GQLFitspaceGetQuickWorkoutDayQuery
-    if (!quickWorkoutData.getQuickWorkoutDay) return undefined
+    if (!quickWorkoutData?.getQuickWorkoutDay) return undefined
 
     return {
       getWorkoutDay: quickWorkoutData.getQuickWorkoutDay,
@@ -201,10 +203,15 @@ const WorkoutDay = ({
       refetchOnMount: !hasDataForCurrentDay && !isRestDay,
       refetchOnWindowFocus: false,
       staleTime: hasDataForCurrentDay || isRestDay ? Infinity : 0,
+      retry: false,
     },
   )
 
   const isLoadingNewDay = isFetching && !hasDataForCurrentDay && !isRestDay
+
+  if (!isFetching && !hasDataForCurrentDay && !isRestDay && !dayDataQuery) {
+    router.replace('/fitspace/workout')
+  }
 
   return (
     <WorkoutProvider

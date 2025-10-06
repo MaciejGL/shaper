@@ -2052,6 +2052,7 @@ export async function getWorkoutDay(
   }
 
   // Find all previous exercises with matching baseIds (single query)
+  // First, try to find exercises within the same plan
   const allPreviousExercises = await prisma.trainingExercise.findMany({
     where: {
       baseId: { in: exerciseBaseIds },
@@ -2125,6 +2126,75 @@ export async function getWorkoutDay(
     seenBaseIds.add(exercise.baseId)
     return true
   })
+
+  // Fallback: Find exercises from ANY plan for baseIds not found in current plan
+  const missingBaseIds = exerciseBaseIds.filter(
+    (baseId) => !seenBaseIds.has(baseId),
+  )
+
+  if (missingBaseIds.length > 0) {
+    const fallbackExercises = await prisma.trainingExercise.findMany({
+      where: {
+        baseId: { in: missingBaseIds },
+        id: { notIn: exerciseIds },
+        completedAt: { not: null },
+        day: {
+          week: {
+            plan: {
+              assignedToId: context.user?.user.id,
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        baseId: true,
+        completedAt: true,
+        sets: {
+          where: {
+            log: { isNot: null },
+          },
+          include: {
+            log: true,
+          },
+          orderBy: {
+            order: 'asc',
+          },
+        },
+        day: {
+          select: {
+            week: {
+              select: {
+                weekNumber: true,
+              },
+            },
+            dayOfWeek: true,
+          },
+        },
+      },
+      orderBy: [{ completedAt: 'desc' }],
+    })
+
+    // Add fallback exercises that meet the criteria
+    for (const exercise of fallbackExercises) {
+      if (!exercise.baseId || seenBaseIds.has(exercise.baseId)) {
+        continue
+      }
+      if (exercise.sets.length === 0) {
+        continue
+      }
+      if (
+        exercise.sets.every(
+          (set) => set.log?.reps === null && set.log?.weight === null,
+        )
+      ) {
+        continue
+      }
+      seenBaseIds.add(exercise.baseId)
+      previousExercises.push(exercise)
+    }
+  }
 
   await cache.set(cacheKey, previousExercises)
 
