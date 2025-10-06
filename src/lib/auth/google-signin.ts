@@ -20,7 +20,6 @@ import {
   validateGoogleProfile,
 } from '../google-profile-mapper'
 
-import { ensureQuickWorkout } from './ensure-quick-workout'
 import { GoogleAccount, GoogleJWTProfile } from './types'
 
 /**
@@ -142,12 +141,6 @@ export async function handleGoogleSignIn(
       console.info(
         `Created new user with profile from Google OAuth: ${newUser.email}`,
       )
-
-      // Create Quick Workout plan for new user in background
-      ensureQuickWorkout(newUser.id).catch((err) =>
-        console.error('Failed to create Quick Workout:', err),
-      )
-
       return true
     }
   } catch (error) {

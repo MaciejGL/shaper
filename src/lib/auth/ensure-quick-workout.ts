@@ -2,7 +2,6 @@
  * Ensures user has a Quick Workout plan created
  * This is called on first login to set up the default workout plan
  */
-
 import { addDays, getISOWeek } from 'date-fns'
 
 import { prisma } from '@/lib/db'
@@ -49,7 +48,9 @@ export async function ensureQuickWorkout(userId: string): Promise<boolean> {
     }
 
     // Create Quick Workout plan
-    console.info(`[ensureQuickWorkout] Creating Quick Workout for user ${userId}`)
+    console.info(
+      `[ensureQuickWorkout] Creating Quick Workout for user ${userId}`,
+    )
 
     const weekStart = getUTCWeekStart()
 
@@ -65,7 +66,7 @@ export async function ensureQuickWorkout(userId: string): Promise<boolean> {
         weeks: {
           create: {
             name: `Week ${getISOWeek(weekStart)}`,
-            weekNumber: 1,
+            weekNumber: getISOWeek(weekStart),
             isExtra: true,
             scheduledAt: weekStart,
             days: {
@@ -96,4 +97,3 @@ export async function ensureQuickWorkout(userId: string): Promise<boolean> {
     return false
   }
 }
-

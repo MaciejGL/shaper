@@ -10,7 +10,6 @@ import { UserWithSession } from '@/types/UserWithSession'
 import { createUserLoaders } from '../loaders/user.loader'
 
 import { handleAppleSignIn } from './apple-signin'
-import { ensureQuickWorkout } from './ensure-quick-workout'
 import { handleGoogleSignIn } from './google-signin'
 
 export const authOptions = {
@@ -152,11 +151,6 @@ export const authOptions = {
             console.info(
               'Created new user with profile from Google One Tap:',
               payload.email,
-            )
-
-            // Create Quick Workout plan for new user in background
-            ensureQuickWorkout(user.id).catch((err) =>
-              console.error('Failed to create Quick Workout:', err),
             )
           } else {
             // Update existing user info if needed

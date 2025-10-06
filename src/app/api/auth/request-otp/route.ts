@@ -1,7 +1,6 @@
 import { randomInt } from 'crypto'
 import { NextResponse } from 'next/server'
 
-import { ensureQuickWorkout } from '@/lib/auth/ensure-quick-workout'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
 
@@ -21,7 +20,6 @@ export async function POST(req: Request) {
     include: { profile: { select: { firstName: true, lastName: true } } },
   })
 
-  let isNewUser = false
   if (!user) {
     user = await prisma.user.create({
       data: {
@@ -35,19 +33,11 @@ export async function POST(req: Request) {
       },
       include: { profile: { select: { firstName: true, lastName: true } } },
     })
-    isNewUser = true
   }
 
   await prisma.userSession.create({
     data: { userId: user.id, otp, expiresAt },
   })
-
-  // Create Quick Workout for new users in background
-  if (isNewUser) {
-    ensureQuickWorkout(user.id).catch((err) =>
-      console.error('Failed to create Quick Workout:', err),
-    )
-  }
 
   // Only send email for non-demo accounts
   if (!isDemoAccount) {
