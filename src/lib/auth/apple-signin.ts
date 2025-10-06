@@ -18,6 +18,7 @@ import {
   validateAppleProfile,
 } from '../apple-profile-mapper'
 
+import { ensureQuickWorkout } from './ensure-quick-workout'
 import { AppleJWTProfile } from './types'
 
 /**
@@ -108,6 +109,12 @@ export async function handleAppleSignIn(
       console.info(
         `Created new user with profile from Apple OAuth: ${newUser.email}`,
       )
+
+      // Create Quick Workout plan for new user in background
+      ensureQuickWorkout(newUser.id).catch((err) =>
+        console.error('Failed to create Quick Workout:', err),
+      )
+
       return true
     }
   } catch (error) {

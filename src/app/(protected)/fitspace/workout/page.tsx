@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
+import { ensureQuickWorkout } from '@/lib/auth/ensure-quick-workout'
 import { prisma } from '@/lib/db'
 import { getCurrentUser } from '@/lib/getUser'
 
@@ -26,6 +27,7 @@ export default async function SessionPage() {
         {
           createdById: userId,
           assignedToId: userId,
+          title: 'Quick Workout',
         },
       ],
     },
@@ -36,12 +38,31 @@ export default async function SessionPage() {
     },
   })
 
-  const quickWorkout = activePlans.find(
+  let quickWorkout = activePlans.find(
     (plan) => plan.assignedToId === userId && plan.createdById === userId,
   )
   const trainingFromTrainer = activePlans.find(
     (plan) => plan.assignedToId === userId && plan.createdById !== userId,
   )
+
+  // If no Quick Workout exists, create it now
+  if (!quickWorkout && !trainingFromTrainer) {
+    await ensureQuickWorkout(userId)
+    // Reload to get the newly created Quick Workout
+    const plans = await prisma.trainingPlan.findMany({
+      where: {
+        createdById: userId,
+        assignedToId: userId,
+        title: 'Quick Workout',
+      },
+      select: {
+        id: true,
+        assignedToId: true,
+        createdById: true,
+      },
+    })
+    quickWorkout = plans[0]
+  }
 
   // Priority: Trainer-assigned plan > Quick Workout > My Plans
   if (trainingFromTrainer) {
