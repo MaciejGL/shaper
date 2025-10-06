@@ -113,7 +113,7 @@ describe('Revenue Sharing Utils', () => {
         connectedAccountId: 'acct_individual123',
         destination: 'individual',
         displayName: 'individual',
-        platformFeePercent: 12, // Default for individuals
+        platformFeePercent: 11, // Default for individuals
       })
     })
 
@@ -132,7 +132,7 @@ describe('Revenue Sharing Utils', () => {
         connectedAccountId: null,
         destination: 'none',
         displayName: 'none',
-        platformFeePercent: 12, // Default even when no account
+        platformFeePercent: 11, // Default even when no account
       })
     })
 
