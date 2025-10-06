@@ -16,11 +16,7 @@ type GetWorkoutDayPayload {
 }
 
 type Query {
-  getWorkoutNavigation(
-    trainingId: ID
-    weekId: ID
-    allWeeks: Boolean
-  ): GetWorkoutNavigationPayload
+  getWorkoutNavigation(trainingId: ID): GetWorkoutNavigationPayload
   getQuickWorkoutNavigation: GetWorkoutNavigationPayload
   getWorkoutDay(dayId: ID): GetWorkoutDayPayload
   getQuickWorkoutDay(dayId: ID): GetWorkoutDayPayload

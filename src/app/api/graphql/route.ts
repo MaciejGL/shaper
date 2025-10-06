@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
       // If we can't parse, continue with 'Unknown'
     }
 
-    console.info(`[GraphQL-POST-START] ${operationName}`)
+    console.info(`\x1b[34m[GraphQL]\x1b[0m ${operationName}`)
     const response = await yoga.handleRequest(request, {
       req: request,
     })
@@ -77,9 +77,14 @@ export async function POST(request: NextRequest) {
     const executionTime = Date.now() - startTime
     dbMonitor.trackQuery(executionTime, `GraphQL-POST-${operationName}-END`)
 
+    const responseDuration =
+      process.env.NODE_ENV === 'development' ? 1000 : 2000
+
     // Log slow GraphQL operations specifically
-    if (executionTime > 2000) {
-      console.warn(`[SLOW-GRAPHQL] ${operationName}: ${executionTime}ms`)
+    if (executionTime > responseDuration) {
+      console.warn(
+        `\x1b[33m[SLOW-GRAPHQL]\x1b[0m ${operationName}: ${executionTime}ms`,
+      )
     }
 
     return response
@@ -88,7 +93,10 @@ export async function POST(request: NextRequest) {
     const executionTime = Date.now() - startTime
     dbMonitor.trackQuery(executionTime, `GraphQL-POST-ERROR-${operationName}`)
 
-    console.error(`[GRAPHQL-ERROR] ${operationName}: ${executionTime}ms`, error)
+    console.error(
+      `\x1b[31m[GRAPHQL-ERROR]\x1b[0m ${operationName}: ${executionTime}ms`,
+      error,
+    )
     throw error
   }
 }

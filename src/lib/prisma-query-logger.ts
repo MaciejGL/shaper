@@ -100,7 +100,7 @@ function logQueryExecution({
 
   // Main query log
   console.info(
-    `${mainEmoji}  [PRISMA] ${queryName} ${timingEmoji} ${totalDuration}ms`,
+    `\x1b[36m[PRISMA]\x1b[0m ${queryName} ${timingEmoji} ${totalDuration}ms ${mainEmoji}`,
   )
 
   if (error) {
@@ -336,7 +336,7 @@ function logDetailedQueryExecution({
   const timingEmoji = getTimingEmoji(totalDuration)
 
   console.info(
-    `${mainEmoji}  [PRISMA] ${queryName} ${timingEmoji} ${totalDuration}ms`,
+    `\x1b[36m[PRISMA]\x1b[0m ${queryName} ${timingEmoji} ${totalDuration}ms ${mainEmoji}`,
   )
 
   if (error) {

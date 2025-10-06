@@ -1,7 +1,7 @@
 'use client'
 
 import { useQueryState } from 'nuqs'
-import { startTransition, use, useEffect, useState } from 'react'
+import { startTransition, use, useEffect } from 'react'
 
 import {
   GQLFitspaceGetQuickWorkoutNavigationQuery,
@@ -32,7 +32,6 @@ export const NavigationWrapper = ({
   >
   trainingId: string
 }) => {
-  const [allWeeks, setAllWeeks] = useState(false)
   const [weekId, setWeekId] = useQueryState('week')
   const [dayId, setDayId] = useQueryState('day')
 
@@ -46,19 +45,17 @@ export const NavigationWrapper = ({
       : (navigationData as GQLFitspaceGetQuickWorkoutNavigationQuery)
           .getQuickWorkoutNavigation?.plan
 
-  const { data: navigationDataQuery, refetch } =
-    useFitspaceGetWorkoutNavigationQuery(
-      {
-        trainingId,
-        allWeeks,
-      },
-      {
-        queryKey: ['navigation'],
-        initialData: navigationData ?? undefined,
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        enabled: !!trainingId, // Disable if we have fresh initial data
-      },
-    )
+  const { data: navigationDataQuery } = useFitspaceGetWorkoutNavigationQuery(
+    {
+      trainingId,
+    },
+    {
+      queryKey: ['navigation'],
+      initialData: navigationData ?? undefined,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      enabled: !!trainingId, // Disable if we have fresh initial data
+    },
+  )
 
   // Auto-select today's day on initial load if no URL parameters
   // Use fresh client-side data if available, fallback to initial server data
@@ -84,19 +81,6 @@ export const NavigationWrapper = ({
       }
     }
   }, [weekId, dayId, initialPlan, navigationDataQuery, setWeekId, setDayId])
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout
-    if (navigationDataQuery?.getWorkoutNavigation?.plan) {
-      timeout = setTimeout(() => {
-        startTransition(() => {
-          setAllWeeks(true)
-          refetch()
-        })
-      }, 1000)
-    }
-    return () => clearTimeout(timeout)
-  }, [trainingId, navigationDataQuery, refetch])
 
   const finalPlan =
     navigationDataQuery?.getWorkoutNavigation?.plan ?? initialPlan

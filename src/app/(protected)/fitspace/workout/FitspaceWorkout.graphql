@@ -205,16 +205,8 @@ query FitspaceGetWorkoutDay($dayId: ID) {
   }
 }
 
-query FitspaceGetWorkoutNavigation(
-  $trainingId: ID!
-  $weekId: ID
-  $allWeeks: Boolean
-) {
-  getWorkoutNavigation(
-    trainingId: $trainingId
-    weekId: $weekId
-    allWeeks: $allWeeks
-  ) {
+query FitspaceGetWorkoutNavigation($trainingId: ID!) {
+  getWorkoutNavigation(trainingId: $trainingId) {
     plan {
       id
       startDate

@@ -384,6 +384,8 @@ model TrainingDay {
   @@index([completedAt])
   @@index([weekId])
   @@index([weekId, dayOfWeek])
+  @@index([scheduledAt])
+  @@index([weekId, scheduledAt])
 }
 
 model TrainingExercise {
@@ -420,9 +422,10 @@ model TrainingExercise {
   @@index([dayId, order])
   @@index([baseId, dayId])
   @@index([substitutedById])
-  @@index([name, completedAt]) // For name filtering + completed check
-  @@index([dayId, name, completedAt]) // Combined filter
-  @@index([name, dayId]) // Alternative approach
+  @@index([name, completedAt])
+  @@index([dayId, name, completedAt])
+  @@index([name, dayId])
+  @@index([baseId, completedAt])
 }
 
 model ExerciseSet {
@@ -526,6 +529,8 @@ model BaseExercise {
   @@index([difficulty])
   @@index([isPremium])
   @@index([createdById])
+  @@index([isPublic])
+  @@index([isPublic, isPremium])
 }
 
 model Image {

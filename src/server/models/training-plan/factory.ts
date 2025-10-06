@@ -51,6 +51,9 @@ import { duplicatePlan, getFullPlanById } from '../training-utils.server'
 import TrainingPlan from './model'
 import { ensureQuickWorkoutWeeks } from './quick-workout-utils'
 
+// Debug performance logging
+const DEBUG_PERF = process.env.NODE_ENV === 'development'
+
 export async function getTrainingPlanById(
   args: GQLQueryGetTrainingPlanByIdArgs,
   context: GQLContext,
@@ -1808,7 +1811,7 @@ export async function getWorkoutNavigation(
   args: GQLQueryGetWorkoutNavigationArgs,
   context: GQLContext,
 ) {
-  const { trainingId, weekId, allWeeks } = args
+  const { trainingId } = args
   const user = context.user
   if (!user) {
     throw new Error('User not found')
@@ -1833,10 +1836,6 @@ export async function getWorkoutNavigation(
         },
         include: {
           days: {
-            where: {
-              // If fetchRestDays is true, fetch rest days, not only default current week.
-              weekId: allWeeks ? undefined : (weekId ?? undefined),
-            },
             orderBy: {
               dayOfWeek: 'asc',
             },
@@ -1878,7 +1877,6 @@ export async function getWorkoutNavigation(
             orderBy: {
               dayOfWeek: 'asc',
             },
-            // Only include essential day data for navigation
             select: {
               id: true,
               dayOfWeek: true,
@@ -1919,72 +1917,32 @@ export async function getWorkoutDay(
   args: GQLQueryGetWorkoutDayArgs,
   context: GQLContext,
 ) {
+  /* eslint-disable no-console */
   const { dayId } = args
   const user = context.user
   if (!user) {
     throw new GraphQLError('User not found')
   }
 
-  // Get the target day with all data in one efficient query
-  let day
-
-  if (dayId) {
-    // Direct lookup by dayId
-    day = await prisma.trainingDay.findUnique({
-      where: { id: dayId },
+  const WORKOUT_DAY_INCLUDE = {
+    week: {
+      select: {
+        planId: true,
+        weekNumber: true,
+      },
+    },
+    exercises: {
+      orderBy: {
+        order: 'asc',
+      },
       include: {
-        week: {
+        substitutedBy: {
           include: {
-            plan: {
-              select: {
-                id: true,
-                assignedToId: true,
-                createdById: true,
-                active: true,
-                weeks: {
-                  select: {
-                    weekNumber: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        exercises: {
-          orderBy: {
-            order: 'asc',
-          },
-          include: {
-            substitutedBy: {
-              include: {
-                base: {
-                  include: {
-                    muscleGroups: true,
-                  },
-                },
-                sets: {
-                  include: {
-                    log: true,
-                  },
-                  orderBy: {
-                    order: 'asc',
-                  },
-                },
-              },
-            },
-            substitutes: true,
             base: {
               include: {
-                images: true,
                 muscleGroups: true,
-                substitutes: {
-                  include: {
-                    substitute: true,
-                  },
-                },
               },
             },
-            logs: true,
             sets: {
               include: {
                 log: true,
@@ -1995,11 +1953,46 @@ export async function getWorkoutDay(
             },
           },
         },
+        substitutes: true,
+        base: {
+          include: {
+            images: true,
+            muscleGroups: true,
+            substitutes: {
+              include: {
+                substitute: true,
+              },
+            },
+          },
+        },
+        sets: {
+          include: {
+            log: true,
+          },
+          orderBy: {
+            order: 'asc',
+          },
+        },
       },
+    },
+  } satisfies Prisma.TrainingDayInclude
+
+  // Get the target day with all data in one efficient query
+  let day
+  const timerPrefix = `getWorkoutDay-${dayId || 'today'}`
+
+  if (dayId) {
+    // Direct lookup by dayId
+    if (DEBUG_PERF) console.time(`${timerPrefix}-findUnique`)
+    day = await prisma.trainingDay.findUnique({
+      where: { id: dayId, week: { plan: { assignedToId: user.user.id } } },
+      include: WORKOUT_DAY_INCLUDE,
     })
+    if (DEBUG_PERF) console.timeEnd(`${timerPrefix}-findUnique`)
   } else {
     // Find today's scheduled day with all data
     const todayUTC = getTodayUTC('UTC')
+    if (DEBUG_PERF) console.time(`${timerPrefix}-findFirst`)
 
     day = await prisma.trainingDay.findFirst({
       where: {
@@ -2011,71 +2004,9 @@ export async function getWorkoutDay(
         },
         scheduledAt: todayUTC,
       },
-      include: {
-        week: {
-          include: {
-            plan: {
-              select: {
-                id: true,
-                assignedToId: true,
-                createdById: true,
-                active: true,
-                weeks: {
-                  select: {
-                    weekNumber: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-        exercises: {
-          orderBy: {
-            order: 'asc',
-          },
-          include: {
-            substitutedBy: {
-              include: {
-                base: {
-                  include: {
-                    muscleGroups: true,
-                  },
-                },
-                sets: {
-                  include: {
-                    log: true,
-                  },
-                  orderBy: {
-                    order: 'asc',
-                  },
-                },
-              },
-            },
-            substitutes: true,
-            base: {
-              include: {
-                images: true,
-                muscleGroups: true,
-                substitutes: {
-                  include: {
-                    substitute: true,
-                  },
-                },
-              },
-            },
-            logs: true,
-            sets: {
-              include: {
-                log: true,
-              },
-              orderBy: {
-                order: 'asc',
-              },
-            },
-          },
-        },
-      },
+      include: WORKOUT_DAY_INCLUDE,
     })
+    if (DEBUG_PERF) console.timeEnd(`${timerPrefix}-findFirst`)
   }
 
   if (!day) {
@@ -2083,15 +2014,7 @@ export async function getWorkoutDay(
   }
 
   // Check if user has access to this day
-  const plan = day.week.plan
-  if (plan.assignedToId !== user.user.id) {
-    throw new GraphQLError('Access denied')
-  }
-
-  // For assigned plans, require the plan to be active
-  if (plan.createdById !== user.user.id && !plan.active) {
-    throw new GraphQLError('Plan is not active')
-  }
+  const planId = day.week.planId
 
   // Fetch previous exercise logs for all exercises in this day
   const currentWeekNumber = day.week.weekNumber
@@ -2103,8 +2026,9 @@ export async function getWorkoutDay(
     .filter((baseId) => baseId !== null)
   const exerciseIds = day.exercises.map((ex) => ex.id)
 
-  const cacheKey = cache.keys.exercises.previousExercises(plan.id, day.id)
+  const cacheKey = cache.keys.exercises.previousExercises(planId, day.id)
 
+  if (DEBUG_PERF) console.time(`${timerPrefix}-cache-get`)
   const cached = await cache.get<
     Prisma.TrainingExerciseGetPayload<{
       select: {
@@ -2130,33 +2054,39 @@ export async function getWorkoutDay(
       }
     }>[]
   >(cacheKey)
+  if (DEBUG_PERF) console.timeEnd(`${timerPrefix}-cache-get`)
 
+  // ✅ USE the cache if available
   if (cached) {
+    if (DEBUG_PERF) console.info(`[CACHE] HIT - ${timerPrefix}`)
+    const previousDayLogs = await getPreviousLogsByExerciseName(cached)
     return {
       day: new TrainingDay(day, context),
-      previousDayLogs: await getPreviousLogsByExerciseName(cached),
+      previousDayLogs,
     }
   }
 
+  if (DEBUG_PERF) console.info(`[CACHE] MISS - ${timerPrefix}`)
+  if (DEBUG_PERF) console.time(`${timerPrefix}-db-query`)
   // Find all previous exercises with matching baseIds (single query)
   const allPreviousExercises = await prisma.trainingExercise.findMany({
     where: {
       baseId: { in: exerciseBaseIds },
-      id: { notIn: exerciseIds }, // Exclude current day's exercises
-      completedAt: { not: null }, // Only completed exercises with logs
+      id: { notIn: exerciseIds },
+      completedAt: { not: null },
       day: {
         OR: [
           // Previous weeks
           {
             week: {
-              planId: plan.id,
+              planId: planId,
               weekNumber: { lt: currentWeekNumber },
             },
           },
           // Same week but earlier days
           {
             week: {
-              planId: plan.id,
+              planId: planId,
               weekNumber: currentWeekNumber,
             },
             dayOfWeek: { lt: currentDayOfWeek },
@@ -2193,7 +2123,9 @@ export async function getWorkoutDay(
     },
     orderBy: [{ completedAt: 'desc' }],
   })
+  if (DEBUG_PERF) console.timeEnd(`${timerPrefix}-db-query`)
 
+  if (DEBUG_PERF) console.time(`${timerPrefix}-filter-dedupe`)
   const seenBaseIds = new Set<string>()
   const previousExercises = allPreviousExercises.filter((exercise) => {
     if (!exercise.baseId || seenBaseIds.has(exercise.baseId)) {
@@ -2212,14 +2144,27 @@ export async function getWorkoutDay(
     seenBaseIds.add(exercise.baseId)
     return true
   })
+  if (DEBUG_PERF) console.timeEnd(`${timerPrefix}-filter-dedupe`)
 
+  // Log payload size before caching
+  if (DEBUG_PERF) {
+    const payloadSize = JSON.stringify(previousExercises).length
+    console.info(
+      `[CACHE] ${timerPrefix} - Payload size: ${(payloadSize / 1024).toFixed(2)} KB`,
+    )
+  }
+
+  if (DEBUG_PERF) console.time(`${timerPrefix}-cache-set`)
   await cache.set(cacheKey, previousExercises)
-  const previousLogsByExerciseName =
-    await getPreviousLogsByExerciseName(previousExercises)
+  if (DEBUG_PERF) console.timeEnd(`${timerPrefix}-cache-set`)
+
+  if (DEBUG_PERF) console.time(`${timerPrefix}-transform`)
+  const previousDayLogs = await getPreviousLogsByExerciseName(previousExercises)
+  if (DEBUG_PERF) console.timeEnd(`${timerPrefix}-transform`)
 
   return {
     day: new TrainingDay(day, context),
-    previousDayLogs: previousLogsByExerciseName,
+    previousDayLogs,
   }
 }
 

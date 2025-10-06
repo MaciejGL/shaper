@@ -1,131 +1,46 @@
-import Redis from 'ioredis'
+import { Redis } from '@upstash/redis'
 
-// Use global to persist Redis connection across module reloads in development
+// Use global to persist Redis client across module reloads in development
 declare global {
-  var __redis: Redis | undefined
-  var __redisConnected: boolean | undefined
-  var __redisConnecting: boolean | undefined
+  var __upstashRedis: Redis | undefined
 }
 
 /**
- * Create single Redis instance with proper configuration
- * Uses global variable to persist across Next.js module reloads
- * Prevents race conditions during connection initialization
+ * Get Upstash Redis client
+ * Uses HTTP-based REST API - no connection management needed
  */
 function getRedisClient(): Redis | null {
-  // Only connect if Redis URL is provided
-  if (!process.env.REDIS_URL) {
+  // Check if Upstash environment variables are set
+  if (
+    !process.env.UPSTASH_KV_REST_API_URL ||
+    !process.env.UPSTASH_KV_REST_API_TOKEN
+  ) {
+    console.warn('[REDIS] Upstash environment variables not configured')
     return null
   }
 
-  // Return existing global connection if available
-  if (global.__redis) {
-    return global.__redis
+  // Return existing global client if available
+  if (global.__upstashRedis) {
+    return global.__upstashRedis
   }
 
-  // Prevent multiple connections during initial setup
-  if (global.__redisConnecting) {
-    console.warn('[REDIS] Connection already in progress, skipping...')
-    return null
-  }
-
-  // Create new connection if none exists
+  // Create new Upstash Redis client
   try {
-    console.info('[REDIS] Creating new Redis connection...')
-    global.__redisConnecting = true
+    console.info('[REDIS] Creating Upstash Redis client...')
 
-    const client = new Redis(process.env.REDIS_URL, {
-      maxRetriesPerRequest: 2,
-      lazyConnect: false,
-      keepAlive: 30000,
-      connectTimeout: 10000,
-      commandTimeout: 5000,
+    const client = new Redis({
+      url: process.env.UPSTASH_KV_REST_API_URL,
+      token: process.env.UPSTASH_KV_REST_API_TOKEN,
     })
 
-    // Set up event handlers
-    client.on('ready', () => {
-      console.info('[REDIS] Connection ready')
-      global.__redisConnected = true
-      global.__redisConnecting = false
-    })
-
-    client.on('connect', () => {
-      console.info('[REDIS] Connected successfully')
-      global.__redisConnected = true
-      global.__redisConnecting = false
-    })
-
-    client.on('error', (error: Error) => {
-      console.error('[REDIS] Connection error:', error.message)
-      global.__redisConnected = false
-      global.__redisConnecting = false
-    })
-
-    client.on('close', () => {
-      console.warn('[REDIS] Connection closed')
-      global.__redisConnected = false
-      global.__redisConnecting = false
-    })
-
-    client.on('reconnecting', (time: number) => {
-      console.info(`[REDIS] Reconnecting in ${time}ms...`)
-      global.__redisConnected = false
-      global.__redisConnecting = true
-    })
-
-    client.on('end', () => {
-      console.warn('[REDIS] Connection ended')
-      global.__redisConnected = false
-      global.__redisConnecting = false
-      global.__redis = undefined
-    })
-
-    // Store in global for reuse - do this immediately to prevent race conditions
-    global.__redis = client
-    global.__redisConnected = false // Will be set to true on 'ready' event
+    // Store in global for reuse
+    global.__upstashRedis = client
+    console.info('[REDIS] Upstash Redis client ready')
 
     return client
   } catch (error) {
-    console.error('[REDIS] Failed to create Redis client:', error)
-    global.__redisConnecting = false
+    console.error('[REDIS] Failed to create Upstash Redis client:', error)
     return null
-  }
-}
-
-/**
- * Ensure Redis connection is established
- * Waits for connection if currently connecting
- */
-async function ensureConnection(client: Redis): Promise<boolean> {
-  // If already connected, return immediately
-  if (global.__redisConnected) {
-    return true
-  }
-
-  // If currently connecting, wait a bit for the connection to establish
-  if (global.__redisConnecting) {
-    let attempts = 0
-    const maxAttempts = 50 // 5 seconds max wait
-
-    while (global.__redisConnecting && attempts < maxAttempts) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      attempts++
-
-      if (global.__redisConnected) {
-        return true
-      }
-    }
-  }
-
-  // Test connection if not connected
-  try {
-    await client.ping()
-    global.__redisConnected = true
-    return true
-  } catch (error) {
-    console.error('[REDIS] Connection test failed:', error)
-    global.__redisConnected = false
-    return false
   }
 }
 
@@ -138,20 +53,18 @@ async function getFromCache<T>(key: string): Promise<T | null> {
     return null
   }
 
-  // Ensure connection before operation
-  const connected = await ensureConnection(client)
-  if (!connected) {
-    return null
-  }
-
   try {
-    const value = await client.get(key)
+    const value = await client.get<string>(key)
 
     if (value) {
-      return JSON.parse(value)
-    } else {
-      return null
+      // Upstash returns parsed JSON if it's valid JSON, otherwise string
+      // We need to handle both cases
+      if (typeof value === 'string') {
+        return JSON.parse(value)
+      }
+      return value as T
     }
+    return null
   } catch (error) {
     console.error(`[REDIS] GET error for ${key}:`, error)
     return null
@@ -171,14 +84,9 @@ async function setInCache<T>(
     return
   }
 
-  // Ensure connection before operation
-  const connected = await ensureConnection(client)
-  if (!connected) {
-    return
-  }
-
   try {
     const serialized = JSON.stringify(value)
+    // Use SETEX: set key with expiration
     await client.setex(key, ttlSeconds, serialized)
   } catch (error) {
     console.error(`[REDIS] SET error for ${key}:`, error)
@@ -192,14 +100,11 @@ async function existsInCache(key: string): Promise<boolean> {
   const client = getRedisClient()
   if (!client) return false
 
-  const connected = await ensureConnection(client)
-  if (!connected) return false
-
   try {
     const result = await client.exists(key)
     return result === 1
   } catch (error) {
-    console.error('Redis EXISTS error:', error)
+    console.error('[REDIS] EXISTS error:', error)
     return false
   }
 }
@@ -211,13 +116,10 @@ async function deleteFromCache(key: string): Promise<void> {
   const client = getRedisClient()
   if (!client) return
 
-  const connected = await ensureConnection(client)
-  if (!connected) return
-
   try {
     await client.del(key)
   } catch (error) {
-    console.error('Redis DEL error:', error)
+    console.error('[REDIS] DEL error:', error)
   }
 }
 
@@ -228,16 +130,13 @@ async function clearCachePattern(pattern: string): Promise<void> {
   const client = getRedisClient()
   if (!client) return
 
-  const connected = await ensureConnection(client)
-  if (!connected) return
-
   try {
     const keys = await client.keys(pattern)
     if (keys.length > 0) {
       await client.del(...keys)
     }
   } catch (error) {
-    console.error('Redis CLEAR PATTERN error:', error)
+    console.error('[REDIS] CLEAR PATTERN error:', error)
   }
 }
 
@@ -250,26 +149,20 @@ function getRedisStatus(): {
   client: boolean
 } {
   return {
-    connected: global.__redisConnected || false,
-    connecting: global.__redisConnecting || false,
-    client: global.__redis !== undefined,
+    connected: global.__upstashRedis !== undefined,
+    connecting: false, // HTTP-based, no connection state
+    client: global.__upstashRedis !== undefined,
   }
 }
 
 /**
  * Close Redis connection gracefully
+ * Note: Upstash uses HTTP, no persistent connections to close
  */
 async function closeRedis(): Promise<void> {
-  if (global.__redis) {
-    try {
-      await global.__redis.quit()
-      console.info('[REDIS] Connection closed gracefully')
-    } catch (error) {
-      console.error('[REDIS] Error during close:', error)
-    } finally {
-      global.__redis = undefined
-      global.__redisConnected = false
-    }
+  if (global.__upstashRedis) {
+    global.__upstashRedis = undefined
+    console.info('[REDIS] Upstash client cleared')
   }
 }
 

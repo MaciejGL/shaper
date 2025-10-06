@@ -2541,9 +2541,7 @@ export type GQLQueryGetWorkoutInfoArgs = {
 
 
 export type GQLQueryGetWorkoutNavigationArgs = {
-  allWeeks?: InputMaybe<Scalars['Boolean']['input']>;
   trainingId?: InputMaybe<Scalars['ID']['input']>;
-  weekId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 

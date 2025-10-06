@@ -2539,9 +2539,7 @@ export type GQLQueryGetWorkoutInfoArgs = {
 
 
 export type GQLQueryGetWorkoutNavigationArgs = {
-  allWeeks?: InputMaybe<Scalars['Boolean']['input']>;
   trainingId?: InputMaybe<Scalars['ID']['input']>;
-  weekId?: InputMaybe<Scalars['ID']['input']>;
 };
 
 
@@ -4070,8 +4068,6 @@ export type GQLFitspaceGetWorkoutDayQuery = { __typename?: 'Query', getWorkoutDa
 
 export type GQLFitspaceGetWorkoutNavigationQueryVariables = Exact<{
   trainingId: Scalars['ID']['input'];
-  weekId?: InputMaybe<Scalars['ID']['input']>;
-  allWeeks?: InputMaybe<Scalars['Boolean']['input']>;
 }>;
 
 
@@ -8495,12 +8491,8 @@ useInfiniteFitspaceGetWorkoutDayQuery.getKey = (variables?: GQLFitspaceGetWorkou
 useFitspaceGetWorkoutDayQuery.fetcher = (variables?: GQLFitspaceGetWorkoutDayQueryVariables, options?: RequestInit['headers']) => fetchData<GQLFitspaceGetWorkoutDayQuery, GQLFitspaceGetWorkoutDayQueryVariables>(FitspaceGetWorkoutDayDocument, variables, options);
 
 export const FitspaceGetWorkoutNavigationDocument = `
-    query FitspaceGetWorkoutNavigation($trainingId: ID!, $weekId: ID, $allWeeks: Boolean) {
-  getWorkoutNavigation(
-    trainingId: $trainingId
-    weekId: $weekId
-    allWeeks: $allWeeks
-  ) {
+    query FitspaceGetWorkoutNavigation($trainingId: ID!) {
+  getWorkoutNavigation(trainingId: $trainingId) {
     plan {
       id
       startDate

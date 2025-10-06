@@ -20,7 +20,7 @@ export default async function WorkoutPage({
   params,
   searchParams,
 }: WorkoutPageProps) {
-  const [{ trainingId }, { day: dayId, week: weekId }] = await Promise.all([
+  const [{ trainingId }, { day: dayId }] = await Promise.all([
     params,
     searchParams,
   ])
@@ -28,7 +28,7 @@ export default async function WorkoutPage({
   const navigationPromise =
     gqlServerFetch<GQLFitspaceGetWorkoutNavigationQuery>(
       FitspaceGetWorkoutNavigationDocument,
-      { trainingId, weekId: weekId || undefined, allWeeks: false },
+      { trainingId },
     )
   const dayPromise = gqlServerFetch<GQLFitspaceGetWorkoutDayQuery>(
     FitspaceGetWorkoutDayDocument,

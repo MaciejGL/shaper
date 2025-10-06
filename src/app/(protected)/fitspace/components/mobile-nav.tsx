@@ -28,10 +28,11 @@ export function MobileNav() {
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(
     null,
   )
+  const [isHydrated, setIsHydrated] = useState(false)
 
   // Subscribe to navigation cache updates (will trigger re-render when cache changes)
   const { data: workoutNavigationQuery } = useFitspaceGetWorkoutNavigationQuery(
-    { trainingId: '', allWeeks: false },
+    { trainingId: '' },
     {
       queryKey: ['navigation'],
       refetchOnMount: false, // Use cache on mount
@@ -42,9 +43,16 @@ export function MobileNav() {
     },
   )
 
-  const plan = workoutNavigationQuery?.getWorkoutNavigation?.plan
+  // Only use query data after hydration to prevent hydration mismatch
+  const plan = isHydrated
+    ? workoutNavigationQuery?.getWorkoutNavigation?.plan
+    : undefined
   const trainingId = plan?.id
   const { weekId, dayId } = getDefaultSelection(plan)
+
+  useEffect(() => {
+    setIsHydrated(true)
+  }, [])
 
   useEffect(() => {
     setClickedItem(null)
