@@ -122,14 +122,25 @@ export async function handleGoogleSignIn(
         newUserData.image = getHighResGoogleProfilePicture(newUserData.image)
       }
 
+      // Create User and UserProfile together in a transaction
       const newUser = await prisma.user.create({
         data: {
           ...newUserData,
           role: 'CLIENT', // Default role for new users
+          profile: {
+            create: {
+              firstName: sanitizedProfile.given_name || '',
+              lastName: sanitizedProfile.family_name || '',
+              timezone: newUserData.timezone,
+              avatarUrl: newUserData.image,
+            },
+          },
         },
       })
 
-      console.info(`Created new user from Google OAuth: ${newUser.email}`)
+      console.info(
+        `Created new user with profile from Google OAuth: ${newUser.email}`,
+      )
       return true
     }
   } catch (error) {

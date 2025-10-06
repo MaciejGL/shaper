@@ -129,19 +129,29 @@ export const authOptions = {
           let user = await loaders.getCurrentUser.load(payload.email)
 
           if (!user) {
-            // Create new user if doesn't exist
+            // Create new user with profile if doesn't exist
             user = await prisma.user.create({
               data: {
                 email: payload.email,
                 name: payload.name || '',
                 image: payload.picture,
                 googleId: payload.sub,
+                profile: {
+                  create: {
+                    firstName: '',
+                    lastName: '',
+                    avatarUrl: payload.picture,
+                  },
+                },
               },
               include: {
                 profile: true,
               },
             })
-            console.info('Created new user from Google One Tap:', payload.email)
+            console.info(
+              'Created new user with profile from Google One Tap:',
+              payload.email,
+            )
           } else {
             // Update existing user info if needed
             const updateData: Partial<{

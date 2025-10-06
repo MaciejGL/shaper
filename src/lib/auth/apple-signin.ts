@@ -90,14 +90,24 @@ export async function handleAppleSignIn(
       // Create new user with Apple profile data
       const newUserData = mapAppleProfileToUser(sanitizedProfile)
 
+      // Create User and UserProfile together in a transaction
       const newUser = await prisma.user.create({
         data: {
           ...newUserData,
           role: 'CLIENT', // Default role for new users
+          profile: {
+            create: {
+              firstName: sanitizedProfile.name?.firstName || '',
+              lastName: sanitizedProfile.name?.lastName || '',
+              timezone: newUserData.timezone,
+            },
+          },
         },
       })
 
-      console.info(`Created new user from Apple OAuth: ${newUser.email}`)
+      console.info(
+        `Created new user with profile from Apple OAuth: ${newUser.email}`,
+      )
       return true
     }
   } catch (error) {

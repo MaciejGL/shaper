@@ -25,6 +25,18 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     // If no profile exists, create one with defaults (handles legacy users)
     if (!userProfile) {
+      // First verify the User record exists before creating a profile
+      const userExists = await prisma.user.findUnique({
+        where: { id: userSession.user.id },
+      })
+
+      if (!userExists) {
+        console.error(
+          `❌ [PROFILE-RESOLVER] User record not found for userId: ${userSession.user.id}`,
+        )
+        throw new Error('User not found')
+      }
+
       console.info(
         `📝 [PROFILE-RESOLVER] Creating missing profile for user ${userSession.user.id}`,
       )
@@ -439,18 +451,30 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     const { email, ...rest } = input
 
-    const emailToUpdate = (email || userSession?.user?.email).trim()
-    if (!emailToUpdate) {
-      throw new Error('Email not found')
+    // Check if User record exists first
+    const userExists = await prisma.user.findUnique({
+      where: { id: userSession.user.id },
+    })
+
+    if (!userExists) {
+      console.warn(
+        `⚠️ [UPDATE-PROFILE] User record not found for userId: ${userSession.user.id}, updating UserProfile only`,
+      )
     }
 
     // Build data object with only provided fields
-    const updateData: Prisma.UserProfileUpdateInput = {
-      user: {
-        update: {
-          email: emailToUpdate,
-        },
-      },
+    const updateData: Prisma.UserProfileUpdateInput = {}
+
+    // Only try to update User email if User record exists and email is provided
+    if (userExists && email) {
+      const emailToUpdate = email.trim()
+      if (emailToUpdate) {
+        updateData.user = {
+          update: {
+            email: emailToUpdate,
+          },
+        }
+      }
     }
 
     // Only update fields that are explicitly provided
@@ -536,8 +560,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     })
 
     // Invalidate cache so navbar/UI gets fresh data immediately
-    if (userSession?.user?.email) {
-      invalidateUserCache(userSession.user.email)
+    // Only invalidate if User record exists and has email
+    if (userExists?.email) {
+      invalidateUserCache(userExists.email)
     }
 
     return new UserProfile(userProfile)
