@@ -465,18 +465,6 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     // Build data object with only provided fields
     const updateData: Prisma.UserProfileUpdateInput = {}
 
-    // Only try to update User email if User record exists and email is provided
-    if (userExists && email) {
-      const emailToUpdate = email.trim()
-      if (emailToUpdate) {
-        updateData.user = {
-          update: {
-            email: emailToUpdate,
-          },
-        }
-      }
-    }
-
     // Only update fields that are explicitly provided
     if (rest.firstName !== undefined)
       updateData.firstName = rest.firstName || null
@@ -551,9 +539,26 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     if (rest.checkinReminders !== undefined)
       updateData.checkinReminders = rest.checkinReminders
 
-    const userProfile = await prisma.userProfile.update({
+    // If email update was requested and User exists, update it separately
+    if (userExists && email) {
+      const emailToUpdate = email.trim()
+      if (emailToUpdate && emailToUpdate !== userExists.email) {
+        await prisma.user.update({
+          where: { id: userExists.id },
+          data: { email: emailToUpdate },
+        })
+      }
+    }
+
+    // Use upsert to create profile if it doesn't exist (handles legacy users)
+    const userProfile = await prisma.userProfile.upsert({
       where: { userId: userSession?.user?.id },
-      data: updateData,
+      create: {
+        userId: userSession.user.id,
+        firstName: rest.firstName || '',
+        lastName: rest.lastName || '',
+      },
+      update: updateData,
       include: {
         user: true,
       },
