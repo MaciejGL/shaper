@@ -182,7 +182,7 @@ export function WorkoutSummaryDrawer({
       await markWorkoutAsCompleted({ dayId: dayId! })
       onComplete?.()
       onOpenChange(false)
-      router.push('/fitspace/my-plans')
+      router.push('/fitspace/progress')
     } catch (error) {
       console.error(error)
     }
