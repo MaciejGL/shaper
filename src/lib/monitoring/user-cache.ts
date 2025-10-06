@@ -136,27 +136,60 @@ async function readAndDisplayCacheStats(): Promise<void> {
 // Initialization
 // ============================================================================
 
+// Singleton pattern to prevent multiple initializations
+let isInitialized = false
+let productionInterval: NodeJS.Timeout | null = null
+let developmentInterval: NodeJS.Timeout | null = null
+
 /**
  * Initialize monitoring based on environment
  * - Production: Write to Redis every 2 minutes
  * - Development: Read from Redis every minute
  */
 export function initializeUserCacheMonitoring(): void {
+  // Prevent multiple initializations
+  if (isInitialized) {
+    return
+  }
+
+  isInitialized = true
+
   if (process.env.NODE_ENV === 'production') {
     // Production: Write to Redis every 2 minutes
     console.info(
       '📊 [USER CACHE] Production monitoring: Writing stats to Redis every 2 minutes',
     )
     setTimeout(writeCacheStatsToRedis, 2000) // Start after 2 seconds
-    setInterval(writeCacheStatsToRedis, PRODUCTION_WRITE_INTERVAL)
+    productionInterval = setInterval(
+      writeCacheStatsToRedis,
+      PRODUCTION_WRITE_INTERVAL,
+    )
   } else {
     // Development: Read from Redis every minute
     console.info(
       '📊 [USER CACHE] Development monitoring: Reading stats from Redis every minute',
     )
     setTimeout(readAndDisplayCacheStats, 2000) // Start after 2 seconds
-    setInterval(readAndDisplayCacheStats, DEVELOPMENT_READ_INTERVAL)
+    developmentInterval = setInterval(
+      readAndDisplayCacheStats,
+      DEVELOPMENT_READ_INTERVAL,
+    )
   }
+}
+
+/**
+ * Clean up intervals (useful for testing or manual cleanup)
+ */
+export function cleanupUserCacheMonitoring(): void {
+  if (productionInterval) {
+    clearInterval(productionInterval)
+    productionInterval = null
+  }
+  if (developmentInterval) {
+    clearInterval(developmentInterval)
+    developmentInterval = null
+  }
+  isInitialized = false
 }
 
 // Auto-initialize when module is imported
