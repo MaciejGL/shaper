@@ -1,17 +1,30 @@
 /**
  * User Cache Monitoring
  *
- * Provides real-time monitoring and logging of user cache statistics.
- * Only active in development environment.
+ * Production-safe monitoring system:
+ * - Production: Writes cache stats to Redis every 2 minutes
+ * - Development: Reads from Redis every minute to display in terminal
  */
 import { getUserCacheStats } from '../getUser'
+import { getFromCache, setInCache } from '../redis'
 
 // ============================================================================
-// Calculations
+// Configuration
 // ============================================================================
 
 const BYTES_PER_ENTRY = 4096 // ~4KB per entry (user object + profile + session)
 const BYTES_TO_MB = 1024 * 1024 // 1,048,576 bytes in a MB
+
+// Production: Write cache stats to Redis every 2 minutes
+const PRODUCTION_WRITE_INTERVAL = 2 * 60 * 1000 // 2 minutes
+// Development: Read from Redis every minute
+const DEVELOPMENT_READ_INTERVAL = 2 * 60 * 1000 // 2 minutes
+
+const CACHE_STATS_KEY = 'user-cache-stats'
+
+// ============================================================================
+// Calculations
+// ============================================================================
 
 function calculateUtilization(size: number, maxSize: number): number {
   return (size / maxSize) * 100
@@ -25,8 +38,12 @@ function estimateMemoryMB(size: number): number {
 // Formatting
 // ============================================================================
 
-function formatCacheStats(): string {
-  const stats = getUserCacheStats()
+function formatCacheStats(stats: {
+  size: number
+  maxSize: number
+  expired: number
+  pending: number
+}): string {
   const utilization = calculateUtilization(stats.size, stats.maxSize)
   const memoryMB = estimateMemoryMB(stats.size)
 
@@ -48,11 +65,71 @@ function formatCacheStats(): string {
 }
 
 // ============================================================================
-// Logging
+// Production: Write to Redis
 // ============================================================================
 
-function logCacheStats(): void {
-  console.info(formatCacheStats())
+/**
+ * Write current cache stats to Redis
+ * Called every 2 minutes in production
+ */
+async function writeCacheStatsToRedis(): Promise<void> {
+  try {
+    const stats = getUserCacheStats()
+    const statsWithTimestamp = {
+      ...stats,
+      timestamp: Date.now(),
+      environment: 'production',
+    }
+
+    await setInCache(CACHE_STATS_KEY, statsWithTimestamp, 300) // 5 minute TTL
+  } catch (error) {
+    console.error('❌ Failed to write cache stats to Redis:', error)
+  }
+}
+
+// ============================================================================
+// Development: Read from Redis
+// ============================================================================
+
+/**
+ * Read cache stats from Redis and display in terminal
+ * Called every minute in development
+ */
+async function readAndDisplayCacheStats(): Promise<void> {
+  try {
+    const cachedStats = (await getFromCache(CACHE_STATS_KEY)) as {
+      size: number
+      maxSize: number
+      expired: number
+      pending: number
+      timestamp: number
+      environment: string
+    } | null
+
+    if (cachedStats) {
+      const stats = {
+        size: cachedStats.size,
+        maxSize: cachedStats.maxSize,
+        expired: cachedStats.expired,
+        pending: cachedStats.pending,
+      }
+
+      const age = Date.now() - cachedStats.timestamp
+      const ageSeconds = Math.floor(age / 1000)
+
+      const gray = '\x1b[90m'
+      const reset = '\x1b[0m'
+
+      console.info(
+        formatCacheStats(stats) +
+          ` ${gray}(from prod, ${ageSeconds}s ago)${reset}`,
+      )
+    } else {
+      console.info('📊 [USER CACHE] No production stats available')
+    }
+  } catch (error) {
+    console.error('❌ Failed to read cache stats from Redis:', error)
+  }
 }
 
 // ============================================================================
@@ -60,19 +137,26 @@ function logCacheStats(): void {
 // ============================================================================
 
 /**
- * Start monitoring user cache in development
- * Logs stats every 30 seconds
+ * Initialize monitoring based on environment
+ * - Production: Write to Redis every 2 minutes
+ * - Development: Read from Redis every minute
  */
 export function initializeUserCacheMonitoring(): void {
-  if (process.env.NODE_ENV !== 'development') {
-    return
+  if (process.env.NODE_ENV === 'production') {
+    // Production: Write to Redis every 2 minutes
+    console.info(
+      '📊 [USER CACHE] Production monitoring: Writing stats to Redis every 2 minutes',
+    )
+    setTimeout(writeCacheStatsToRedis, 2000) // Start after 2 seconds
+    setInterval(writeCacheStatsToRedis, PRODUCTION_WRITE_INTERVAL)
+  } else {
+    // Development: Read from Redis every minute
+    console.info(
+      '📊 [USER CACHE] Development monitoring: Reading stats from Redis every minute',
+    )
+    setTimeout(readAndDisplayCacheStats, 2000) // Start after 2 seconds
+    setInterval(readAndDisplayCacheStats, DEVELOPMENT_READ_INTERVAL)
   }
-
-  // Log after server settles
-  setTimeout(logCacheStats, 2000)
-
-  // Then log every 30 seconds
-  setInterval(logCacheStats, 30 * 1000)
 }
 
 // Auto-initialize when module is imported
