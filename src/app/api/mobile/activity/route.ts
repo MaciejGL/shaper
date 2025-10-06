@@ -1,7 +1,8 @@
+import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 
+import { authOptions } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
-import { getCurrentUser } from '@/lib/getUser'
 
 /**
  * Activity Heartbeat Endpoint
@@ -12,12 +13,14 @@ import { getCurrentUser } from '@/lib/getUser'
 
 export async function POST() {
   try {
-    const currentUser = await getCurrentUser()
-    if (!currentUser) {
+    // Use lightweight session check (no DB query) - userId is in JWT
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = currentUser.user.id
+    // userId is properly typed from NextAuth module augmentation
+    const userId = session.user.id
 
     // Update lastActiveAt for all user's mobile push tokens
     await prisma.mobilePushToken.updateMany({

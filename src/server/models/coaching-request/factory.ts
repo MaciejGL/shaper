@@ -10,6 +10,7 @@ import {
   invalidateTrainerAccessCache,
 } from '@/lib/access-control'
 import { prisma } from '@/lib/db'
+import { invalidateUserCache } from '@/lib/getUser'
 import {
   notifyCoachingRequest,
   notifyCoachingRequestAccepted,
@@ -227,25 +228,41 @@ export async function acceptCoachingRequest({
 
     // Connect trainer and client relationship
     if (recipientRole === GQLUserRole.Trainer) {
-      await prisma.user.update({
-        where: { id: recipientId },
-        data: { clients: { connect: { id: coachingRequest.senderId } } },
-      })
-      await prisma.user.update({
-        where: { id: coachingRequest.senderId },
-        data: { trainer: { connect: { id: recipientId } } },
-      })
+      const [, client] = await Promise.all([
+        prisma.user.update({
+          where: { id: recipientId },
+          data: { clients: { connect: { id: coachingRequest.senderId } } },
+        }),
+        prisma.user.update({
+          where: { id: coachingRequest.senderId },
+          data: { trainer: { connect: { id: recipientId } } },
+          select: { email: true },
+        }),
+      ])
+
+      // Invalidate client cache so they see new trainer immediately
+      if (client.email) {
+        invalidateUserCache(client.email)
+      }
     }
 
     if (recipientRole === GQLUserRole.Client) {
-      await prisma.user.update({
-        where: { id: recipientId },
-        data: { trainer: { connect: { id: coachingRequest.senderId } } },
-      })
-      await prisma.user.update({
-        where: { id: coachingRequest.senderId },
-        data: { clients: { connect: { id: recipientId } } },
-      })
+      const [client] = await Promise.all([
+        prisma.user.update({
+          where: { id: recipientId },
+          data: { trainer: { connect: { id: coachingRequest.senderId } } },
+          select: { email: true },
+        }),
+        prisma.user.update({
+          where: { id: coachingRequest.senderId },
+          data: { clients: { connect: { id: recipientId } } },
+        }),
+      ])
+
+      // Invalidate client cache so they see new trainer immediately
+      if (client.email) {
+        invalidateUserCache(client.email)
+      }
     }
 
     await createNotification(

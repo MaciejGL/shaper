@@ -2292,12 +2292,6 @@ export async function getQuickWorkoutDay(
     const todayDayOfWeek = (new Date().getUTCDay() + 6) % 7
     const weekStart = getWeekStartUTC(new Date(), 'UTC', 1)
 
-    console.info('🔍 Looking for day:', {
-      planId: quickWorkoutPlan.id,
-      weekStart: weekStart.toISOString(),
-      todayDayOfWeek,
-    })
-
     // Find week by date range instead of exact timestamp to handle timezone differences
     const weekEnd = new Date(weekStart)
     weekEnd.setUTCDate(weekEnd.getUTCDate() + 7)

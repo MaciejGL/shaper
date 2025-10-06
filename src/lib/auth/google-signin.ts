@@ -10,7 +10,6 @@ import { Account, Profile } from 'next-auth'
 
 import { prisma } from '@/lib/db'
 
-import { invalidateUserCache } from '../getUser'
 import {
   type GoogleProfile,
   type GoogleAccount as GoogleProfileMapperAccount,
@@ -106,9 +105,6 @@ export async function handleGoogleSignIn(
         where: { id: existingUser.id },
         data: mapGoogleAccountForLinking(sanitizedProfile, mappedAccount),
       })
-
-      // Invalidate user cache to ensure fresh data
-      await invalidateUserCache(existingUser.email)
 
       console.info(
         `Linked Google account to existing user: ${existingUser.email}`,

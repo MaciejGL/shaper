@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 
 import { prisma } from '@/lib/db'
-import { invalidateUserCache } from '@/lib/getUser'
 import { getCurrentUser } from '@/lib/getUser'
 
 export async function POST(req: Request) {
@@ -80,10 +79,6 @@ export async function POST(req: Request) {
     await prisma.userSession.deleteMany({
       where: { userId: currentUser.user.id },
     })
-
-    // Invalidate user cache for both old and new email
-    await invalidateUserCache(currentUser.user.email)
-    await invalidateUserCache(newEmail)
 
     console.info('Email change completed successfully:', {
       userId: currentUser.user.id,

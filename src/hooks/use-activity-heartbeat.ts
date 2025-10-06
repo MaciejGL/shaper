@@ -35,10 +35,13 @@ export function useActivityHeartbeat(isAuthenticated: boolean) {
   const startHeartbeat = useCallback(() => {
     if (intervalRef.current || !isAuthenticated) return
 
-    // Send immediately
-    sendHeartbeat()
+    // Delay first heartbeat by 5 seconds to not block page load
+    setTimeout(() => {
+      if (!isAuthenticated) return
+      sendHeartbeat()
+    }, 5000)
 
-    // Then send every 60 seconds
+    // Then send every 2 minutes
     intervalRef.current = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL)
   }, [isAuthenticated, sendHeartbeat])
 

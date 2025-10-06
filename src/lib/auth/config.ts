@@ -7,7 +7,6 @@ import GoogleProvider, { GoogleProfile } from 'next-auth/providers/google'
 import { prisma } from '@/lib/db'
 import { UserWithSession } from '@/types/UserWithSession'
 
-import { invalidateUserCache } from '../getUser'
 import { createUserLoaders } from '../loaders/user.loader'
 
 import { handleAppleSignIn } from './apple-signin'
@@ -263,8 +262,16 @@ export const authOptions = {
     },
     async jwt({ token, user }) {
       // Persist user data in the token
-      if (user) {
-        token.user = user
+      if (user && user.email) {
+        token.user = {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+          role: (user as UserWithSession['user']).role,
+          profile: (user as UserWithSession['user']).profile,
+          trainerId: (user as UserWithSession['user']).trainerId,
+        }
       }
       return token
     },
@@ -274,14 +281,6 @@ export const authOptions = {
         session.user = token.user
       }
       return session
-    },
-  },
-
-  events: {
-    async signOut({ session }) {
-      if (session.user?.email) {
-        await invalidateUserCache(session.user.email)
-      }
     },
   },
 } satisfies NextAuthOptions

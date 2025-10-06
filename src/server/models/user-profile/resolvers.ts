@@ -535,8 +535,10 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       },
     })
 
-    // Invalidate Redis cache so navbar gets fresh data immediately
-    await invalidateUserCache(emailToUpdate)
+    // Invalidate cache so navbar/UI gets fresh data immediately
+    if (userSession?.user?.email) {
+      invalidateUserCache(userSession.user.email)
+    }
 
     return new UserProfile(userProfile)
   },

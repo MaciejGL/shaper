@@ -53,7 +53,10 @@ export const NavigationWrapper = ({
       queryKey: ['navigation'],
       initialData: navigationData ?? undefined,
       staleTime: 1000 * 60 * 5, // 5 minutes
-      enabled: !!trainingId, // Disable if we have fresh initial data
+      enabled: !!trainingId,
+      // Prevent immediate refetch when we have server-provided initial data
+      refetchOnMount: !navigationData,
+      refetchOnWindowFocus: false,
     },
   )
 

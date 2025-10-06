@@ -17,7 +17,6 @@ import {
   sanitizeAppleProfile,
   validateAppleProfile,
 } from '../apple-profile-mapper'
-import { invalidateUserCache } from '../getUser'
 
 import { AppleJWTProfile } from './types'
 
@@ -82,9 +81,6 @@ export async function handleAppleSignIn(
         where: { id: existingUser.id },
         data: mapAppleAccountForLinking(sanitizedProfile),
       })
-
-      // Invalidate user cache to ensure fresh data
-      await invalidateUserCache(existingUser.email)
 
       console.info(
         `Linked Apple account to existing user: ${existingUser.email}`,
