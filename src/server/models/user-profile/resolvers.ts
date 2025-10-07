@@ -444,23 +444,12 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
 export const Mutation: GQLMutationResolvers<GQLContext> = {
   updateProfile: async (_parent, { input }, context) => {
-    const userSession = context.user
-    if (!userSession) {
+    const user = context.user?.user
+    if (!user) {
       throw new Error('User not found')
     }
 
     const { email, ...rest } = input
-
-    // Check if User record exists first
-    const userExists = await prisma.user.findUnique({
-      where: { id: userSession.user.id },
-    })
-
-    if (!userExists) {
-      console.warn(
-        `⚠️ [UPDATE-PROFILE] User record not found for userId: ${userSession.user.id}, updating UserProfile only`,
-      )
-    }
 
     // Build data object with only provided fields
     const updateData: Prisma.UserProfileUpdateInput = {}
@@ -540,11 +529,11 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       updateData.checkinReminders = rest.checkinReminders
 
     // If email update was requested and User exists, update it separately
-    if (userExists && email) {
+    if (user && email) {
       const emailToUpdate = email.trim()
-      if (emailToUpdate && emailToUpdate !== userExists.email) {
+      if (emailToUpdate && emailToUpdate !== user.email) {
         await prisma.user.update({
-          where: { id: userExists.id },
+          where: { id: user.id },
           data: { email: emailToUpdate },
         })
       }
@@ -552,9 +541,9 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Use upsert to create profile if it doesn't exist (handles legacy users)
     const userProfile = await prisma.userProfile.upsert({
-      where: { userId: userSession?.user?.id },
+      where: { userId: user.id },
       create: {
-        userId: userSession.user.id,
+        userId: user.id,
         firstName: rest.firstName || '',
         lastName: rest.lastName || '',
       },
@@ -566,8 +555,8 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
 
     // Invalidate cache so navbar/UI gets fresh data immediately
     // Only invalidate if User record exists and has email
-    if (userExists?.email) {
-      invalidateUserCache(userExists.email)
+    if (user?.email) {
+      invalidateUserCache(user.email)
     }
 
     return new UserProfile(userProfile)

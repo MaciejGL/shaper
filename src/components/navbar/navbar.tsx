@@ -18,6 +18,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
+import { UserContextType, useUser } from '@/context/user-context'
 import {
   GQLUserRole,
   useGetTotalUnreadCountQuery,
@@ -55,11 +56,11 @@ import { NotificationBell } from './notification-bell'
 import { SwapAccountButton } from './swap-account'
 
 // Custom hook to get total unread message count
-function useUnreadMessageCount(user?: UserWithSession | null) {
+function useUnreadMessageCount(user?: UserContextType['user'] | null) {
   const [enableQuery, setEnableQuery] = useState(false)
 
   useEffect(() => {
-    if (user?.user?.id) {
+    if (user?.id) {
       // Delay the query by 3 seconds to let more critical queries load first
       const timer = setTimeout(() => {
         setEnableQuery(true)
@@ -67,17 +68,17 @@ function useUnreadMessageCount(user?: UserWithSession | null) {
 
       return () => clearTimeout(timer)
     }
-  }, [user?.user?.id])
+  }, [user?.id])
 
   const { data: notifications } = useNotificationsQuery(
     {
-      userId: user!.user.id!,
+      userId: user!.id!,
       skip: 0,
       take: 10,
     },
     {
       enabled: enableQuery,
-      refetchInterval: 100000,
+      refetchInterval: 6 * 60 * 1000, // 6 minutes
     },
   )
 
@@ -85,7 +86,7 @@ function useUnreadMessageCount(user?: UserWithSession | null) {
     {},
     {
       enabled: enableQuery,
-      refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
+      refetchInterval: 60 * 1000, // Refetch every 60 seconds for real-time updates
     },
   )
 
@@ -104,7 +105,8 @@ export const Navbar = ({
 }) => {
   const pathname = usePathname()
   const { isVisible } = useScrollVisibility({ initialVisible: true })
-  const { totalUnreadCount, notifications } = useUnreadMessageCount(user)
+  const { user: userContext } = useUser()
+  const { totalUnreadCount, notifications } = useUnreadMessageCount(userContext)
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
 
   const isTrainer = user?.user?.role === GQLUserRole.Trainer
@@ -167,8 +169,8 @@ export const Navbar = ({
                   )}
                 </div>
               )}
-            {user ? (
-              <NavbarUser user={user} />
+            {userContext ? (
+              <NavbarUser user={userContext} />
             ) : (
               <div className="h-[60px] rounded-full animate-pulse" />
             )}
@@ -188,7 +190,7 @@ export const Navbar = ({
   )
 }
 
-function NavbarUser({ user }: { user?: UserWithSession | null }) {
+function NavbarUser({ user }: { user?: UserContextType['user'] | null }) {
   const pathname = usePathname()
   const isActiveLink = (path: string) => pathname === path
 
@@ -204,18 +206,18 @@ function NavbarUser({ user }: { user?: UserWithSession | null }) {
     )
   }
 
-  if (user?.user?.role === 'TRAINER') {
+  if (user?.role === 'TRAINER') {
     return <TrainerNavbar user={user} />
   }
 
-  if (user?.user?.role === 'CLIENT') {
+  if (user?.role === 'CLIENT') {
     return <ClientNavbar user={user} />
   }
 
   return null
 }
 
-function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
+function TrainerNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const isProduction = process.env.NODE_ENV === 'production'
   const [isMessengerOpen, setIsMessengerOpen] = useState(false)
   const [selectedPartnerId, setSelectedPartnerId] = useState<
@@ -247,13 +249,13 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
             <DrawerHeader>
               <div className="flex flex-col items-center gap-2">
                 <UserAvatar
-                  imageUrl={user?.user.profile?.avatarUrl}
-                  firstName={user?.user.profile?.firstName ?? ''}
-                  lastName={user?.user.profile?.lastName ?? ''}
-                  sex={user?.user.profile?.sex}
+                  imageUrl={user?.profile?.avatarUrl}
+                  firstName={user?.profile?.firstName ?? ''}
+                  lastName={user?.profile?.lastName ?? ''}
+                  sex={user?.profile?.sex}
                   withFallbackAvatar
                 />
-                <div>{user?.user.email}</div>
+                <div>{user?.email}</div>
               </div>
             </DrawerHeader>
             <div className="border-b w-full my-4" />
@@ -316,7 +318,7 @@ function TrainerNavbar({ user }: { user?: UserWithSession | null }) {
   )
 }
 
-function ClientNavbar({ user }: { user?: UserWithSession | null }) {
+function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const { isNativeApp } = useMobileApp()
   const [isOpen, setIsOpen] = useState(false)
   const isProduction = process.env.NODE_ENV === 'production'
@@ -357,10 +359,10 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
             <UserAvatar
               className="size-8"
               withFallbackAvatar
-              imageUrl={user?.user.profile?.avatarUrl}
-              firstName={user?.user.profile?.firstName ?? ''}
-              lastName={user?.user.profile?.lastName ?? ''}
-              sex={user?.user.profile?.sex}
+              imageUrl={user?.profile?.avatarUrl}
+              firstName={user?.profile?.firstName ?? ''}
+              lastName={user?.profile?.lastName ?? ''}
+              sex={user?.profile?.sex}
             />
           }
         />
@@ -373,18 +375,16 @@ function ClientNavbar({ user }: { user?: UserWithSession | null }) {
           <div className="flex items-center gap-2 p-4">
             <UserAvatar
               className="size-12"
-              imageUrl={user?.user.profile?.avatarUrl}
-              firstName={user?.user.profile?.firstName ?? ''}
-              lastName={user?.user.profile?.lastName ?? ''}
-              sex={user?.user.profile?.sex}
+              imageUrl={user?.profile?.avatarUrl}
+              firstName={user?.profile?.firstName ?? ''}
+              lastName={user?.profile?.lastName ?? ''}
+              sex={user?.profile?.sex}
             />
             <div className="flex flex-col gap-1">
               <p className="text-sm font-medium">
-                {user?.user.profile?.firstName} {user?.user.profile?.lastName}
+                {user?.profile?.firstName} {user?.profile?.lastName}
               </p>
-              <p className="text-sm text-muted-foreground">
-                {user?.user.email}
-              </p>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
           </div>
           <DropdownMenuSeparator />

@@ -87,7 +87,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 export function NutritionPlanViewerLoading() {
   return (
     <div className="space-y-4">
-      <Tabs value="loading">
+      <Tabs value="0">
         <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 overflow-x-auto hide-scrollbar">
           <TabsList>
             {Array.from({ length: 7 }).map((_, index) => (
@@ -102,8 +102,8 @@ export function NutritionPlanViewerLoading() {
           </TabsList>
         </div>
 
-        <TabsContent value="loading">
-          <div className="space-y-4">
+        <TabsContent value="0">
+          <div className="space-y-6 mt-4">
             <DayMealsHeader loading />
             <div className="space-y-2">
               <LoadingSkeleton variant="sm" count={3} />

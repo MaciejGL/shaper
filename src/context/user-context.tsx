@@ -12,7 +12,7 @@ import {
 } from '@/generated/graphql-client'
 import { useSyncTimezone } from '@/hooks/use-sync-timezone'
 
-interface UserContextType {
+export interface UserContextType {
   session: ReturnType<typeof useSession>
   user: GQLUserBasicQuery['userBasic']
   subscription:

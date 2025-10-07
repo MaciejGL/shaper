@@ -126,7 +126,7 @@ export const authOptions = {
           const loaders = createUserLoaders()
 
           // Check if user exists
-          let user = await loaders.getCurrentUser.load(payload.email)
+          let user = await loaders.userBasic.load(payload.email)
 
           if (!user) {
             // Create new user with profile if doesn't exist

@@ -26,7 +26,7 @@ export default function NutritionPage() {
   // Show empty state only when not loading and no data
   if (!macroTargets && !isLoading) {
     return (
-      <div className="container mx-auto py-8">
+      <div className="container-hypertro mx-auto py-8">
         <EmptyStateCard
           title="Macro targets not set"
           description={`${user?.trainerId ? 'Your trainer is working on your personalized macro targets' : 'You can request a trainer to set your macro targets'}`}
@@ -47,7 +47,7 @@ export default function NutritionPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container-hypertro mx-auto py-8">
       <div className="space-y-8">
         <div>
           <div className="flex items-center gap-2 mb-2">
