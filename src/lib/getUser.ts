@@ -61,21 +61,21 @@ function createCacheKey(email: string, sessionExpires: string): string {
   return `${email}:${sessionExpires}`
 }
 
-function getCachedUser(cacheKey: string): UserWithSession | null {
-  const cached = userCache.get(cacheKey)
-  const now = Date.now()
+// function getCachedUser(cacheKey: string): UserWithSession | null {
+//   const cached = userCache.get(cacheKey)
+//   const now = Date.now()
 
-  if (cached && cached.expires > now) {
-    return cached.data
-  }
+//   if (cached && cached.expires > now) {
+//     return cached.data
+//   }
 
-  // Clean up expired entry
-  if (cached && cached.expires <= now) {
-    userCache.delete(cacheKey)
-  }
+//   // Clean up expired entry
+//   if (cached && cached.expires <= now) {
+//     userCache.delete(cacheKey)
+//   }
 
-  return null
-}
+//   return null
+// }
 
 function setCachedUser(cacheKey: string, user: UserWithSession): void {
   // Evict oldest entry if cache is full
@@ -202,11 +202,11 @@ export async function getCurrentUser(): Promise<
   const cacheKey = createCacheKey(session.user.email, session.expires)
 
   // 1. Check cache
-  const cachedUser = getCachedUser(cacheKey)
-  if (cachedUser) {
-    console.info(`[USER-CACHE] HIT for ${session.user.email}`)
-    return cachedUser
-  }
+  // const cachedUser = getCachedUser(cacheKey)
+  // if (cachedUser) {
+  //   console.info(`[USER-CACHE] HIT for ${session.user.email}`)
+  //   return cachedUser
+  // }
 
   console.info(
     `[USER-CACHE] MISS for ${session.user.email}, cache size: ${userCache.size}`,
