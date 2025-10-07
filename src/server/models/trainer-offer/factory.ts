@@ -47,13 +47,16 @@ export async function getClientTrainerOffers(
     clientEmail,
   }
 
-  if (status && status.length > 0) {
-    // Handle array of statuses
-    where.status = status.length === 1 ? status[0] : { in: status }
-  }
-
-  // For clients, only show paid offers by default (what they actually purchased)
-  if (isClient && !status) {
+  // Handle status filter - can be array of statuses
+  if (status && Array.isArray(status) && status.length > 0) {
+    if (status.length === 1) {
+      where.status = status[0] as string
+    } else {
+      // For multiple statuses, use OR condition
+      where.OR = status.map((s: string) => ({ status: s }))
+    }
+  } else if (isClient) {
+    // For clients without status filter, only show paid offers
     where.status = 'PAID'
   }
 

@@ -45,6 +45,8 @@ export function ClientServiceDeliveriesSection({
       },
       {
         enabled: !!user?.email,
+        refetchOnMount: 'always',
+        staleTime: 0, // Always fetch fresh data
       },
     )
 
@@ -58,6 +60,8 @@ export function ClientServiceDeliveriesSection({
       },
       {
         enabled: !!user?.email,
+        refetchOnMount: 'always',
+        staleTime: 0, // Always fetch fresh data
       },
     )
 

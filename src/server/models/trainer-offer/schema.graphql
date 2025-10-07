@@ -40,7 +40,7 @@ type TrainerOffer {
 
 type Query {
   # Get trainer offers for a specific client and trainer
-  # status can be a single status or array of statuses to filter by
+  # status can be a single status or array of statuses
   getClientTrainerOffers(
     clientEmail: String!
     trainerId: ID!
