@@ -157,7 +157,6 @@ function PendingOffersCard({ offers }: PendingOffersCardProps) {
         // Continue without token - user may need to login
       }
 
-      return null
       // Force external browser opening for native app
       const opened = window.open(
         finalOfferUrl,
