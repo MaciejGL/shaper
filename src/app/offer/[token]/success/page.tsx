@@ -1,5 +1,7 @@
+import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
 
+import { authOptions } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
 
 import { SuccessPage } from './success-page'
@@ -25,7 +27,12 @@ export default async function OfferSuccessPage({
     },
   })
 
-  if (!offer) {
+  const serverSession = await getServerSession(authOptions)
+  console.warn('[Success Page] Server session:', {
+    email: serverSession?.user?.email,
+  })
+
+  if (!offer || !serverSession) {
     notFound()
   }
 

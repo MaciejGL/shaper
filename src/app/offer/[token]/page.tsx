@@ -1,5 +1,7 @@
+import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
 
+import { authOptions } from '@/lib/auth/config'
 import { prisma } from '@/lib/db'
 
 import { OfferPage } from './offer-page'
@@ -26,7 +28,12 @@ export default async function TrainerOfferPage({
     },
   })
 
-  if (!offer) {
+  const serverSession = await getServerSession(authOptions)
+  console.warn('[Offer Page] Server session:', {
+    email: serverSession?.user?.email,
+  })
+
+  if (!offer || !serverSession) {
     notFound()
   }
 
