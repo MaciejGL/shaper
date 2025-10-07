@@ -11,7 +11,6 @@ import { createUserLoaders } from '../loaders/user.loader'
 
 import { handleAppleSignIn } from './apple-signin'
 import { handleGoogleSignIn } from './google-signin'
-import { verifySessionToken } from './session-token'
 
 export const authOptions = {
   providers: [
@@ -188,33 +187,6 @@ export const authOptions = {
           console.error('Google One Tap verification failed:', error)
           return null
         }
-      },
-    }),
-    // Session Token Provider - for mobile webview to external browser transfers
-    CredentialsProvider({
-      id: 'session-token',
-      name: 'Session Token',
-      credentials: {
-        token: {
-          label: 'Session Token',
-          type: 'text',
-        },
-      },
-      async authorize(credentials) {
-        const { token } = credentials ?? {}
-        if (!token) return null
-
-        // Verify and decode the session token
-        const email = verifySessionToken(token)
-        if (!email) return null
-
-        // Load user by email (includes profile automatically)
-        const loaders = createUserLoaders()
-        const user = await loaders.getCurrentUser.load(email)
-
-        if (!user) return null
-
-        return user as UserWithSession['user']
       },
     }),
   ],
