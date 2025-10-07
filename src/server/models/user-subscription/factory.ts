@@ -38,13 +38,25 @@ export async function getMySubscriptions(
  */
 export async function getMySubscriptionStatus(context: GQLContext) {
   if (!context.user?.user) {
+    console.error('[getMySubscriptionStatus] No user in context')
     throw new Error('Authentication required')
   }
 
+  const userId = context.user.user.id
+  console.info(`[getMySubscriptionStatus] Fetching for userId: ${userId}`)
+
   const status = await subscriptionValidator.getUserSubscriptionStatus(
-    context.user.user.id,
+    userId,
     context,
   )
+
+  console.info('[getMySubscriptionStatus] Status result:', {
+    userId,
+    hasPremium: status.hasPremium,
+    trainerId: status.trainerId,
+    subscriptionEndDate: status.subscriptionEndDate,
+    activeCount: status.activeSubscriptions?.length || 0,
+  })
 
   // Use the UserSubscriptionStatus model
   return new UserSubscriptionStatus(status, context)

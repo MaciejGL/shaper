@@ -57,6 +57,7 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
       },
     )
 
+  console.info('[UserContext] subscriptionData', subscriptionData)
   // Clear user query cache when user logs out
   useEffect(() => {
     if (session.status === 'unauthenticated') {

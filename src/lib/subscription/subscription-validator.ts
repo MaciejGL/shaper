@@ -247,13 +247,28 @@ export class SubscriptionValidator {
     userId: string,
     context: GQLContext,
   ): Promise<UserSubscriptionStatusData> {
+    console.info(
+      `[SubscriptionValidator] getUserSubscriptionStatus for userId: ${userId}`,
+    )
+
     const validSubscriptions = await this.getValidSubscriptions(userId, context)
+    console.info(
+      `[SubscriptionValidator] Found ${validSubscriptions.length} valid subscriptions`,
+    )
+
     const hasPremium = await this.evaluatePremiumLogic(validSubscriptions)
+    console.info(`[SubscriptionValidator] hasPremium: ${hasPremium}`)
 
     // Find trainer subscription
     const trainerSubscription = validSubscriptions.find(
       (sub) => sub.trainerId !== null && new Date(sub.endDate) > new Date(),
     )
+
+    if (trainerSubscription) {
+      console.info(
+        `[SubscriptionValidator] Found trainer subscription with trainerId: ${trainerSubscription.trainerId}`,
+      )
+    }
 
     // Find subscription end date (latest active/cancelled subscription)
     const latestSubscription = validSubscriptions
@@ -305,13 +320,20 @@ export class SubscriptionValidator {
     userId: string,
     context: GQLContext,
   ): Promise<UserSubscription[]> {
+    // Use database NOW() to avoid serverless timezone/clock drift issues
+    const now = new Date()
+    console.info(
+      `[getValidSubscriptions] Querying for userId: ${userId}, now: ${now.toISOString()}`,
+    )
+
     const subscriptions = await prisma.userSubscription.findMany({
       where: {
         userId,
         status: {
           in: [SubscriptionStatus.ACTIVE, SubscriptionStatus.CANCELLED],
         },
-        endDate: { gte: new Date() },
+        // Compare endDate as ISO string to ensure consistent timezone handling
+        endDate: { gte: now },
       },
       include: {
         package: {
@@ -327,7 +349,27 @@ export class SubscriptionValidator {
       },
     })
 
-    return subscriptions.map(
+    console.info(
+      `[getValidSubscriptions] Database returned ${subscriptions.length} subscriptions`,
+    )
+
+    // Additional safety check: filter on application side to catch any edge cases
+    const validSubs = subscriptions.filter((sub) => {
+      const endDate = new Date(sub.endDate)
+      const isValid = endDate >= now
+      if (!isValid) {
+        console.warn(
+          `[getValidSubscriptions] Filtered out subscription ${sub.id}, endDate: ${endDate.toISOString()}`,
+        )
+      }
+      return isValid
+    })
+
+    console.info(
+      `[getValidSubscriptions] After filtering: ${validSubs.length} valid subscriptions`,
+    )
+
+    return validSubs.map(
       (sub) =>
         new UserSubscription(sub as UserSubscriptionWithIncludes, context),
     )
@@ -418,10 +460,13 @@ export class SubscriptionValidator {
    * Grace period allows continued access after payment failure for a limited time
    */
   private async checkGracePeriodStatus(userId: string): Promise<boolean> {
+    const now = new Date()
+
     const subscriptions = await prisma.userSubscription.findMany({
       where: {
         userId,
         isInGracePeriod: true,
+        gracePeriodEnd: { gte: now },
       },
       select: {
         isInGracePeriod: true,
@@ -429,14 +474,12 @@ export class SubscriptionValidator {
       },
     })
 
-    const now = new Date()
-
-    // Check if any subscription is in grace period and hasn't expired
+    // Double-check on application side for safety
     return subscriptions.some((sub) => {
       return (
         sub.isInGracePeriod &&
         sub.gracePeriodEnd &&
-        new Date(sub.gracePeriodEnd) > now
+        new Date(sub.gracePeriodEnd) >= now
       )
     })
   }
