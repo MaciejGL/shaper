@@ -57,8 +57,8 @@ const pendingPromises = new Map<string, Promise<UserWithSession | null>>()
 // Cache Helper Functions
 // ============================================================================
 
-function createCacheKey(email: string, sessionExpires: string): string {
-  return `${email}:${sessionExpires}`
+function createCacheKey(email: string): string {
+  return `${email}`
 }
 
 function getCachedUser(cacheKey: string): UserWithSession | null {
@@ -199,7 +199,7 @@ export async function getCurrentUser(): Promise<
     return null
   }
 
-  const cacheKey = createCacheKey(session.user.email, session.expires)
+  const cacheKey = createCacheKey(session.user.email)
 
   // 1. Check cache
   const cachedUser = getCachedUser(cacheKey)
