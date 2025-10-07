@@ -39,6 +39,10 @@ async function getLatestCoachingRequestBetweenUsers(
         { senderId: userId2, recipientId: userId1 },
       ],
     },
+    include: {
+      sender: { select: { name: true } },
+      recipient: { select: { name: true } },
+    },
     orderBy: {
       createdAt: 'desc',
     },
@@ -59,6 +63,10 @@ export async function getCoachingRequest({
       id,
       OR: [{ senderId: user?.user?.id }, { recipientId: user?.user?.id }],
     },
+    include: {
+      sender: { select: { name: true } },
+      recipient: { select: { name: true } },
+    },
   })
 
   return coachingRequest ? new CoachingRequest(coachingRequest, context) : null
@@ -77,6 +85,10 @@ export async function getCoachingRequests({
     },
     orderBy: {
       createdAt: 'desc',
+    },
+    include: {
+      sender: { select: { name: true } },
+      recipient: { select: { name: true } },
     },
   })
 
@@ -346,6 +358,9 @@ export async function cancelCoachingRequest({
         interestedServices: originalRequest.interestedServices,
         status: GQLCoachingRequestStatus.Cancelled,
       },
+      include: {
+        sender: { select: { name: true } },
+      },
     })
 
     return new CoachingRequest(coachingRequest, context)
@@ -401,6 +416,7 @@ export async function rejectCoachingRequest({
       },
       include: {
         sender: { select: { name: true } },
+        recipient: { select: { name: true } },
       },
     })
 
