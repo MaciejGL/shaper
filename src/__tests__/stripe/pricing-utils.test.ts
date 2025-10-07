@@ -101,6 +101,9 @@ describe('Stripe Pricing Utils', () => {
 
     it('should return null when Stripe API fails', async () => {
       // Arrange
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
       vi.mocked(mockStripe.stripe.prices.retrieve).mockRejectedValue(
         new Error('Price not found'),
       )
@@ -110,6 +113,12 @@ describe('Stripe Pricing Utils', () => {
 
       // Assert
       expect(result).toBeNull()
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'Error fetching Stripe price:',
+        expect.any(Error),
+      )
+
+      consoleErrorSpy.mockRestore()
     })
   })
 
@@ -162,6 +171,9 @@ describe('Stripe Pricing Utils', () => {
 
     it('should handle mix of successful and failed price fetches', async () => {
       // Arrange
+      const consoleErrorSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {})
       const mockPrice = {
         id: 'price_1',
         unit_amount: 1000,
@@ -187,6 +199,9 @@ describe('Stripe Pricing Utils', () => {
         },
         invalid_price: null,
       })
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
+
+      consoleErrorSpy.mockRestore()
     })
 
     it('should process large batches without rate limit issues', async () => {
