@@ -78,6 +78,35 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
     setIsLoading(true)
 
     try {
+      // Generate session token if in native app
+      let sessionToken: string | null = null
+      if (isNativeApp) {
+        try {
+          const tokenResponse = await fetch(
+            '/api/auth/generate-session-token',
+            {
+              method: 'POST',
+            },
+          )
+          if (tokenResponse.ok) {
+            const tokenData = await tokenResponse.json()
+            sessionToken = tokenData.sessionToken
+          }
+        } catch (error) {
+          console.error('Failed to generate session token:', error)
+        }
+      }
+
+      // Prepare success and cancel URLs with session token if available
+      let successUrl = `${window.location.origin}/offer/${offer.token}/success`
+      let cancelUrl = window.location.href
+
+      if (sessionToken) {
+        successUrl += `?session_token=${encodeURIComponent(sessionToken)}`
+        const cancelSeparator = cancelUrl.includes('?') ? '&' : '?'
+        cancelUrl += `${cancelSeparator}session_token=${encodeURIComponent(sessionToken)}`
+      }
+
       // Create Stripe checkout session for bundle
       const response = await fetch('/api/stripe/create-trainer-checkout', {
         method: 'POST',
@@ -86,8 +115,8 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
           offerToken: offer.token,
           clientEmail,
           // Return URLs for web checkout
-          successUrl: `${window.location.origin}/offer/${offer.token}/success`,
-          cancelUrl: window.location.href,
+          successUrl,
+          cancelUrl,
         }),
       })
 

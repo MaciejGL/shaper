@@ -137,11 +137,30 @@ interface PendingOffersCardProps {
 function PendingOffersCard({ offers }: PendingOffersCardProps) {
   const { isNativeApp } = useMobileApp()
 
-  const handleOpenOffer = (offerUrl: string) => {
+  const handleOpenOffer = async (offerUrl: string) => {
+    let finalOfferUrl = offerUrl
+
+    // If in native app, fetch session token and append to URL
     if (isNativeApp) {
+      try {
+        const response = await fetch('/api/auth/generate-session-token', {
+          method: 'POST',
+        })
+
+        if (response.ok) {
+          const { sessionToken } = await response.json()
+          const separator = offerUrl.includes('?') ? '&' : '?'
+          finalOfferUrl = `${offerUrl}${separator}session_token=${encodeURIComponent(sessionToken)}`
+        }
+      } catch (error) {
+        console.error('Failed to generate session token:', error)
+        // Continue without token - user may need to login
+      }
+
+      return null
       // Force external browser opening for native app
       const opened = window.open(
-        offerUrl,
+        finalOfferUrl,
         '_blank',
         'noopener,noreferrer,external=true',
       )
@@ -149,7 +168,7 @@ function PendingOffersCard({ offers }: PendingOffersCardProps) {
       if (!opened) {
         // Fallback: create link element
         const link = document.createElement('a')
-        link.href = offerUrl
+        link.href = finalOfferUrl
         link.target = '_blank'
         link.rel = 'noopener noreferrer external'
         link.style.display = 'none'
@@ -158,7 +177,7 @@ function PendingOffersCard({ offers }: PendingOffersCardProps) {
         document.body.removeChild(link)
       }
     } else {
-      window.open(offerUrl, '_blank', 'noopener,noreferrer')
+      window.open(finalOfferUrl, '_blank', 'noopener,noreferrer')
     }
   }
 

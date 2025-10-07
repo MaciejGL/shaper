@@ -33,6 +33,7 @@ export function SuccessPage({
 }: SuccessPageProps) {
   const [countdown, setCountdown] = useState(30)
   const { isNativeApp } = useMobileApp()
+  const [isGeneratingToken, setIsGeneratingToken] = useState(false)
 
   const packageSummary = offer.packageSummary as unknown as PackageSummaryItem[]
 
@@ -46,9 +47,27 @@ export function SuccessPage({
       packages: packageIds,
     },
   )
-  const url = `${getBaseUrl()}/fitspace/my-trainer?tab=purchased-services`
+  const baseUrl = `${getBaseUrl()}/fitspace/my-trainer?tab=purchased-services`
 
-  const handleReturnToApp = useCallback(() => {
+  const handleReturnToApp = useCallback(async () => {
+    // Generate session token if not in native app (external browser scenario)
+    let url = baseUrl
+    if (!isNativeApp) {
+      setIsGeneratingToken(true)
+      try {
+        const response = await fetch('/api/auth/generate-session-token', {
+          method: 'POST',
+        })
+        if (response.ok) {
+          const { sessionToken } = await response.json()
+          url += `&session_token=${encodeURIComponent(sessionToken)}`
+        }
+      } catch (error) {
+        console.error('Failed to generate session token:', error)
+      }
+      setIsGeneratingToken(false)
+    }
+
     // Try to open the mobile app with deep link
     if (isNativeApp) {
       // Already in mobile app, navigate within app
@@ -65,7 +84,7 @@ export function SuccessPage({
         window.open(url, '_blank')
       }
     }
-  }, [appDeepLink, isNativeApp, url])
+  }, [appDeepLink, isNativeApp, baseUrl])
 
   // Auto-redirect countdown for mobile
   useEffect(() => {
@@ -207,6 +226,8 @@ export function SuccessPage({
               onClick={handleReturnToApp}
               size="lg"
               className="w-full mb-6"
+              loading={isGeneratingToken}
+              disabled={isGeneratingToken}
             >
               Return to App Now
             </Button>
