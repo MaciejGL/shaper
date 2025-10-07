@@ -152,12 +152,12 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
     }
   }
 
-  const appDeepLink = createDeepLink(
-    'fitspace/my-trainer?tab=purchased-services',
-  )
-  const url = `${getBaseUrl()}/fitspace/my-trainer?tab=purchased-services`
-
   const handleReturnToApp = useCallback(() => {
+    const appDeepLink = createDeepLink(
+      'fitspace/my-trainer?tab=purchased-services',
+    )
+    const url = `${getBaseUrl()}/fitspace/my-trainer?tab=purchased-services`
+
     // Try to open the mobile app with deep link
     if (isNativeApp) {
       // Already in mobile app, navigate within app
@@ -174,7 +174,7 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
         window.open(url, '_blank')
       }
     }
-  }, [appDeepLink, isNativeApp, url])
+  }, [isNativeApp])
 
   // Check if offer is expired
   if (offer.expiresAt < new Date()) {

@@ -37,19 +37,18 @@ export function SuccessPage({
 
   const packageSummary = offer.packageSummary as unknown as PackageSummaryItem[]
 
-  const packageIds = packageSummary.map((item) => item.packageId).join(',')
-  // ✅ Use bulletproof deep link utility with query parameters
-  const appDeepLink = createDeepLink(
-    'fitspace/my-trainer?tab=purchased-services',
-    {
-      token: offer.token,
-      trainer: offer.trainerId,
-      packages: packageIds,
-    },
-  )
-  const baseUrl = `${getBaseUrl()}/fitspace/my-trainer?tab=purchased-services`
-
   const handleReturnToApp = useCallback(async () => {
+    const packageIds = packageSummary.map((item) => item.packageId).join(',')
+    const appDeepLink = createDeepLink(
+      'fitspace/my-trainer?tab=purchased-services',
+      {
+        token: offer.token,
+        trainer: offer.trainerId,
+        packages: packageIds,
+      },
+    )
+    const baseUrl = `${getBaseUrl()}/fitspace/my-trainer?tab=purchased-services`
+
     // Generate session token if not in native app (external browser scenario)
     let url = baseUrl
     if (!isNativeApp) {
@@ -84,7 +83,7 @@ export function SuccessPage({
         window.open(url, '_blank')
       }
     }
-  }, [appDeepLink, isNativeApp, baseUrl])
+  }, [isNativeApp, offer.token, offer.trainerId, packageSummary])
 
   // Auto-redirect countdown for mobile
   useEffect(() => {
