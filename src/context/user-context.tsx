@@ -35,13 +35,17 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
 
   // Automatically sync timezone when user logs in
 
+  // Enable queries based on actual session data, NOT status string
+  // Status can be 'loading' while session.data already exists (mobile webview issue)
+  const hasSessionData = Boolean(session.data?.user?.email)
+  const isDefinitelyLoggedOut = session.status === 'unauthenticated'
+
   const { data, isLoading: isLoadingUserBasic } = useUserBasicQuery(
     {},
     {
       initialData,
-      enabled:
-        session.status === 'authenticated' &&
-        Boolean(session.data?.user?.email),
+      enabled: hasSessionData && !isDefinitelyLoggedOut,
+      staleTime: 20 * 60 * 1000, // 20 minutes
       refetchOnWindowFocus: true, // Refetch when window regains focus
       placeholderData: (previousData) => previousData, // Keep data visible during session transitions
     },
@@ -56,9 +60,8 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   } = useGetMySubscriptionStatusQuery(
     {},
     {
-      enabled:
-        session.status === 'authenticated' &&
-        Boolean(session.data?.user?.email),
+      enabled: hasSessionData && !isDefinitelyLoggedOut,
+      staleTime: 10 * 60 * 1000, // 10 minutes
       refetchOnWindowFocus: true, // Refetch when window regains focus
       placeholderData: (previousData) => previousData, // Keep data visible during session transitions
     },
@@ -69,6 +72,8 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     isLoading: isLoadingSubscription,
     hasError: !!subscriptionError,
     sessionStatus: session.status,
+    hasSessionData,
+    queryEnabled: hasSessionData && !isDefinitelyLoggedOut,
   })
 
   if (subscriptionError) {

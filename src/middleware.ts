@@ -19,9 +19,13 @@ import { verifySessionToken } from '@/lib/auth/session-token'
  * - /account-management
  */
 
+export const runtime = 'nodejs'
+
 export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
   const sessionToken = searchParams.get('session_token')
+
+  console.warn('[MIDDLEWARE] Session token', sessionToken)
 
   // Only process external pages
   const isExternal =
