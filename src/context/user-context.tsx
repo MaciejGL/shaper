@@ -42,9 +42,7 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
       enabled:
         session.status === 'authenticated' &&
         Boolean(session.data?.user?.email),
-      staleTime: 2 * 60 * 1000, // 2 minutes (reduced from 10 minutes)
-      refetchOnWindowFocus: true, // Refetch when window regains focus
-      refetchOnMount: 'always', // Always refetch when component mounts
+      staleTime: 20 * 60 * 1000, // 20 minutes
     },
   )
 
@@ -57,9 +55,7 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
         enabled:
           session.status === 'authenticated' &&
           Boolean(session.data?.user?.email),
-        staleTime: 1 * 60 * 1000, // 1 minute (reduced from 5 minutes)
-        refetchOnWindowFocus: true, // Refetch when window regains focus
-        refetchOnMount: 'always', // Always refetch when component mounts
+        staleTime: 10 * 60 * 1000, // 10 minutes - refresh more frequently for premium status
       },
     )
 
