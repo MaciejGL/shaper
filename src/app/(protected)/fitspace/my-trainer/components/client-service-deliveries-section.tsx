@@ -45,8 +45,8 @@ export function ClientServiceDeliveriesSection({
       },
       {
         enabled: !!user?.email,
-        refetchOnMount: 'always',
-        staleTime: 0, // Always fetch fresh data
+        refetchOnWindowFocus: true, // Refetch when window gains focus
+        staleTime: 2 * 60 * 1000, // 2 minutes
       },
     )
 
@@ -60,8 +60,8 @@ export function ClientServiceDeliveriesSection({
       },
       {
         enabled: !!user?.email,
-        refetchOnMount: 'always',
-        staleTime: 0, // Always fetch fresh data
+        refetchOnWindowFocus: true, // Refetch when window gains focus
+        staleTime: 2 * 60 * 1000, // 2 minutes
       },
     )
 
