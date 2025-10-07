@@ -39,9 +39,12 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     {},
     {
       initialData,
-      enabled: session.status !== 'unauthenticated',
+      enabled:
+        session.status === 'authenticated' &&
+        Boolean(session.data?.user?.email),
       staleTime: 20 * 60 * 1000, // 20 minutes
       refetchOnWindowFocus: true, // Refetch when window regains focus
+      placeholderData: (previousData) => previousData, // Keep data visible during session transitions
     },
   )
 
@@ -54,9 +57,12 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   } = useGetMySubscriptionStatusQuery(
     {},
     {
-      enabled: session.status !== 'unauthenticated',
+      enabled:
+        session.status === 'authenticated' &&
+        Boolean(session.data?.user?.email),
       staleTime: 10 * 60 * 1000, // 10 minutes - refresh more frequently for premium status
       refetchOnWindowFocus: true, // Refetch when window regains focus
+      placeholderData: (previousData) => previousData, // Keep data visible during session transitions
     },
   )
 

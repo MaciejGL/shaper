@@ -36,23 +36,40 @@ export async function middleware(request: NextRequest) {
     process.env.NODE_ENV === 'production'
       ? '__Secure-next-auth.session-token'
       : 'next-auth.session-token'
-  const hasCookie = request.cookies.get(cookieName)
+  const existingCookie = request.cookies.get(cookieName)
 
-  if (hasCookie) {
-    // Already authenticated, just clean URL
-    const cleanUrl = new URL(request.url)
-    cleanUrl.searchParams.delete('session_token')
-    return NextResponse.redirect(cleanUrl)
-  }
-
-  // Verify token and restore JWT in ONE step
+  // Verify token first
   const tokenData = verifySessionToken(sessionToken)
   if (!tokenData) {
     // Invalid token - redirect to error page
-    console.error('Invalid or expired session token')
+    console.error('[MIDDLEWARE] Invalid or expired session token')
     return NextResponse.redirect(
       new URL('/auth/error?error=SessionExpired', request.url),
     )
+  }
+
+  if (existingCookie) {
+    // Already has a cookie - check if it's the SAME JWT
+    if (existingCookie.value === tokenData.originalJwt) {
+      // Same JWT, just clean URL without setting cookie again
+      console.info('[MIDDLEWARE] JWT already set, skipping restore')
+      const cleanUrl = new URL(request.url)
+      cleanUrl.searchParams.delete('session_token')
+      return NextResponse.redirect(cleanUrl)
+    } else {
+      // Different JWT - this is the problematic case!
+      console.warn(
+        '[MIDDLEWARE] Different JWT detected, keeping existing cookie to prevent corruption',
+        {
+          email: tokenData.email,
+          pathname,
+        },
+      )
+      // Keep existing cookie, don't overwrite
+      const cleanUrl = new URL(request.url)
+      cleanUrl.searchParams.delete('session_token')
+      return NextResponse.redirect(cleanUrl)
+    }
   }
 
   console.warn('🔓 [MIDDLEWARE] Restoring session JWT:', {
