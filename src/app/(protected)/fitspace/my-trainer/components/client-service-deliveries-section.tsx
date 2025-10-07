@@ -45,8 +45,9 @@ export function ClientServiceDeliveriesSection({
       },
       {
         enabled: !!user?.email,
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 1 * 60 * 1000, // 1 minute (reduced from 5 minutes)
         refetchOnWindowFocus: true, // Refetch when window regains focus
+        refetchOnMount: 'always', // Always refetch when component mounts
       },
     )
 
@@ -60,8 +61,9 @@ export function ClientServiceDeliveriesSection({
       },
       {
         enabled: !!user?.email,
-        staleTime: 5 * 60 * 1000, // 5 minutes
+        staleTime: 1 * 60 * 1000, // 1 minute (reduced from 5 minutes)
         refetchOnWindowFocus: true, // Refetch when window regains focus
+        refetchOnMount: 'always', // Always refetch when component mounts
       },
     )
 
