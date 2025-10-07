@@ -37,14 +37,14 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(cleanUrl)
   }
 
-  // No session - redirect to NextAuth signin with session token
+  // No session - redirect to session token authentication endpoint
   const callbackUrl = request.url.split('?')[0] // URL without query params
 
-  const signInUrl = new URL('/api/auth/signin/session-token', request.url)
-  signInUrl.searchParams.set('token', sessionToken)
-  signInUrl.searchParams.set('callbackUrl', callbackUrl)
+  const authUrl = new URL('/api/auth/session-token-auth', request.url)
+  authUrl.searchParams.set('token', sessionToken)
+  authUrl.searchParams.set('callbackUrl', callbackUrl)
 
-  return NextResponse.redirect(signInUrl)
+  return NextResponse.redirect(authUrl)
 }
 
 export const config = {
