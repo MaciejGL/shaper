@@ -70,6 +70,7 @@ export function ClientsTabs() {
     { trainerId: user?.id || '' },
     {
       enabled: !!user?.id,
+      placeholderData: (previousData) => previousData,
     },
   )
 
@@ -77,6 +78,7 @@ export function ClientsTabs() {
     { trainerId: user?.id || '' },
     {
       enabled: !!user?.id,
+      placeholderData: (previousData) => previousData,
     },
   )
 

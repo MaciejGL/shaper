@@ -48,6 +48,7 @@ export function useServiceDeliveries(clientId: string, userId: string) {
       { trainerId: userId },
       {
         enabled: !!userId,
+        placeholderData: (previousData) => previousData,
       },
     )
 
@@ -55,6 +56,7 @@ export function useServiceDeliveries(clientId: string, userId: string) {
     { trainerId: userId },
     {
       enabled: !!userId,
+      placeholderData: (previousData) => previousData,
     },
   )
 

@@ -47,6 +47,7 @@ export function ClientServiceDeliveriesSection({
         enabled: !!user?.email,
         staleTime: 5 * 60 * 1000, // 5 minutes
         refetchOnWindowFocus: true, // Refetch when window regains focus
+        placeholderData: (previousData) => previousData, // Maintain data during session transitions
       },
     )
 
@@ -62,6 +63,7 @@ export function ClientServiceDeliveriesSection({
         enabled: !!user?.email,
         staleTime: 5 * 60 * 1000, // 5 minutes
         refetchOnWindowFocus: true, // Refetch when window regains focus
+        placeholderData: (previousData) => previousData, // Maintain data during session transitions
       },
     )
 
