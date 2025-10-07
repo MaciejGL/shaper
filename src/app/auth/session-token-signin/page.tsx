@@ -2,18 +2,15 @@
 
 import { signIn } from 'next-auth/react'
 import { useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 import { SessionTokenExpired } from '@/components/session-token-expired'
 
 /**
- * Session Token Signin Page
- *
- * This page handles automatic signin using session tokens.
- * It extracts the token from URL params and uses NextAuth's signIn
- * to create a proper session.
+ * Session Token Signin Content Component
+ * Separated to allow Suspense boundary wrapping
  */
-export default function SessionTokenSigninPage() {
+function SessionTokenSigninContent() {
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
   const callbackUrl = searchParams.get('callbackUrl') || '/fitspace'
@@ -69,5 +66,29 @@ export default function SessionTokenSigninPage() {
         </p>
       </div>
     </div>
+  )
+}
+
+/**
+ * Session Token Signin Page
+ *
+ * This page handles automatic signin using session tokens.
+ * It extracts the token from URL params and uses NextAuth's signIn
+ * to create a proper session.
+ */
+export default function SessionTokenSigninPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex-center bg-background">
+          <div className="text-center space-y-4">
+            <div className="animate-spin size-12 border-4 border-primary border-t-transparent rounded-full mx-auto" />
+            <h2 className="text-xl font-semibold">Loading...</h2>
+          </div>
+        </div>
+      }
+    >
+      <SessionTokenSigninContent />
+    </Suspense>
   )
 }
