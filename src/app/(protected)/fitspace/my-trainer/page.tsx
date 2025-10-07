@@ -60,7 +60,8 @@ export default function MyTrainerPage() {
       />
       {isLoadingTrainer && (
         <div className="space-y-4">
-          <LoadingSkeleton count={4} variant="lg" />
+          <LoadingSkeleton count={1} variant="sm" />
+          <LoadingSkeleton count={2} variant="lg" />
         </div>
       )}
       {!isLoadingTrainer && trainer && <TrainerView trainer={trainer} />}

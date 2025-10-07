@@ -207,7 +207,7 @@ export async function getProductIdsFromPrices(
 }
 
 /**
- * Creates a coupon for in-person sessions discount when coaching combo is present
+ * Creates a coupon for in-person sessions discount when premium coaching is present
  */
 export async function createInPersonCoachingComboCoupon(
   productIds: string[],
@@ -231,7 +231,7 @@ export async function createInPersonCoachingComboCoupon(
 }
 
 /**
- * Creates discount coupon for in-person sessions if coaching combo is present
+ * Creates discount coupon for in-person sessions if premium coaching is present
  */
 export async function createInPersonDiscountIfEligible(
   checkoutItems: CheckoutItem[],

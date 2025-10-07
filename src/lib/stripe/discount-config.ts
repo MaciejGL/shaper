@@ -5,7 +5,7 @@
 
 export const DISCOUNT_CONFIG = {
   /**
-   * In-Person Sessions discount when Coaching Combo package is present
+   * In-Person Sessions discount when Premium Coaching package is present
    * Default: 50%
    */
   IN_PERSON_COACHING_COMBO: 50,
@@ -30,7 +30,7 @@ export const DISCOUNT_TYPES = {
  * Human-readable discount labels for UI display
  */
 export const DISCOUNT_LABELS = {
-  IN_PERSON_COACHING_COMBO: `${DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO}% off with Coaching Combo`,
+  IN_PERSON_COACHING_COMBO: `${DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO}% off with Premium Coaching`,
   MEAL_TRAINING_BUNDLE: `Save ${DISCOUNT_CONFIG.MEAL_TRAINING_BUNDLE}%`,
   MEAL_TRAINING_BUNDLE_SHORT: `${DISCOUNT_CONFIG.MEAL_TRAINING_BUNDLE}% off`,
 } as const

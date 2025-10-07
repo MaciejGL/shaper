@@ -30,9 +30,9 @@ interface ServiceOffer {
 const serviceOffers: ServiceOffer[] = [
   {
     id: 'coaching-combo',
-    title: 'Full Coaching Package',
+    title: 'Premium Coaching Package',
     description:
-      'Complete coaching experience with ongoing support, plan adjustments, and regular check-ins.',
+      'Premium Coaching experience with ongoing support, plan adjustments, and regular check-ins.',
     features: [
       'Everything from workout + meal plans',
       'Bi-Weekly video check-ins',

@@ -113,7 +113,7 @@ export function OfferCard({ offer, formatRelativeDate }: OfferCardProps) {
     const mapping: Record<string, string> = {
       WORKOUT_PLAN: 'Workout Plan',
       MEAL_PLAN: 'Meal Plan',
-      COACHING_COMPLETE: 'Complete Coaching',
+      COACHING_COMPLETE: 'Premium Coaching',
       IN_PERSON_MEETING: 'In-Person Session',
       PREMIUM_ACCESS: 'Premium Access',
     }

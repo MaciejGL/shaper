@@ -10,6 +10,7 @@ import { addMonths } from 'date-fns'
 import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
+import { STRIPE_PRODUCTS } from '@/lib/stripe/config'
 import { UserSubscriptionStatusData } from '@/server/models/user-subscription-status/model'
 import UserSubscription, {
   UserSubscriptionWithIncludes,
@@ -20,6 +21,29 @@ import { SubscriptionStatus } from '@/types/subscription'
 import { stripe } from '../stripe/stripe'
 
 export class SubscriptionValidator {
+  /**
+   * Get price IDs that grant premium access
+   * These are stable identifiers from environment variables
+   */
+  private getPremiumPriceIds(): string[] {
+    const premiumPriceIds: string[] = []
+
+    // Premium subscriptions
+    if (STRIPE_PRODUCTS.PREMIUM_MONTHLY) {
+      premiumPriceIds.push(STRIPE_PRODUCTS.PREMIUM_MONTHLY)
+    }
+    if (STRIPE_PRODUCTS.PREMIUM_YEARLY) {
+      premiumPriceIds.push(STRIPE_PRODUCTS.PREMIUM_YEARLY)
+    }
+
+    // Complete Coaching Combo includes premium access
+    if (STRIPE_PRODUCTS.COACHING_COMBO) {
+      premiumPriceIds.push(STRIPE_PRODUCTS.COACHING_COMBO)
+    }
+
+    return premiumPriceIds
+  }
+
   /**
    * PRIMARY METHOD: Fast local premium access check
    * Use this for 99% of subscription checks (UI, content access, etc.)
@@ -77,6 +101,8 @@ export class SubscriptionValidator {
   private async evaluatePremiumLogic(
     subscriptions: UserSubscription[],
   ): Promise<boolean> {
+    const premiumPriceIds = this.getPremiumPriceIds()
+
     // Check each subscription by fetching package data from database
     for (const sub of subscriptions) {
       const isNotExpired = new Date(sub.endDate) > new Date()
@@ -86,21 +112,13 @@ export class SubscriptionValidator {
       // Get package data from database
       const packageTemplate = await prisma.packageTemplate.findUnique({
         where: { id: sub.packageId },
-        select: { name: true },
+        select: { stripePriceId: true },
       })
 
-      if (!packageTemplate) continue
+      if (!packageTemplate?.stripePriceId) continue
 
-      const packageName = packageTemplate.name.toLowerCase()
-
-      // Traditional premium subscription
-      const hasPremiumSubscription = packageName.includes('premium')
-
-      // Complete Coaching Combo includes premium access
-      const hasCoachingCombo =
-        packageName.includes('coaching') && packageName.includes('combo')
-
-      if (hasPremiumSubscription || hasCoachingCombo) {
+      // Check if this package's price ID grants premium access
+      if (premiumPriceIds.includes(packageTemplate.stripePriceId)) {
         return true
       }
     }
@@ -138,21 +156,12 @@ export class SubscriptionValidator {
   private stripeSubscriptionGrantsPremium(
     subscription: Stripe.Subscription,
   ): boolean {
+    const premiumPriceIds = this.getPremiumPriceIds()
+
     // Check if any line item grants premium access
     return subscription.items.data.some((item) => {
-      const productName =
-        item.price.nickname?.toLowerCase() ||
-        item.price.product?.toString().toLowerCase() ||
-        ''
-
-      // Traditional premium subscription
-      const hasPremiumSubscription = productName.includes('premium')
-
-      // Complete Coaching Combo includes premium access
-      const hasCoachingCombo =
-        productName.includes('coaching') && productName.includes('combo')
-
-      return hasPremiumSubscription || hasCoachingCombo
+      // Use stable price ID instead of fragile product names
+      return premiumPriceIds.includes(item.price.id)
     })
   }
 

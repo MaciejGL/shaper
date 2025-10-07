@@ -70,31 +70,33 @@ export function ClientServiceDeliveriesSection({
 
   const isLoading = pendingLoading || paidLoading
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <Card borderless>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <SectionIcon icon={Package} size="xs" variant="green" />
-              Loading...
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <LoadingSkeleton count={3} withBorder />
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-4">
       {/* Pending Offers Section */}
-      {pendingOffers.length > 0 && <PendingOffersCard offers={pendingOffers} />}
+      {isLoading ? (
+        <Card borderless>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <SectionIcon icon={Package} size="xs" variant="orange" />
+              New Offers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Accordion
+              type="single"
+              collapsible
+              className="w-full flex flex-col gap-2"
+            >
+              <LoadingSkeleton count={1} cardVariant="tertiary" variant="sm" />
+            </Accordion>
+          </CardContent>
+        </Card>
+      ) : (
+        <PendingOffersCard offers={pendingOffers} />
+      )}
 
       {/* Paid Offers Section */}
-      {paidOffers.length > 0 ? (
+      {isLoading ? (
         <Card borderless>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -108,32 +110,62 @@ export function ClientServiceDeliveriesSection({
               collapsible
               className="w-full flex flex-col gap-2"
             >
-              {paidOffers.map((offer) => (
-                <TrainerOfferItem key={offer.id} offer={offer} />
-              ))}
+              <LoadingSkeleton count={3} cardVariant="tertiary" variant="sm" />
             </Accordion>
           </CardContent>
         </Card>
       ) : (
-        pendingOffers.length === 0 && (
-          <Card borderless>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <SectionIcon icon={Package} size="xs" variant="green" />
-                No services purchased yet
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground">
-                  No training packages purchased yet.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        )
+        <PurchasedOffersCard offers={paidOffers} />
       )}
     </div>
+  )
+}
+
+function PurchasedOffersCard({
+  offers,
+}: {
+  offers: GQLFitGetMyTrainerOffersQuery['getClientTrainerOffers']
+}) {
+  if (offers.length === 0) {
+    return (
+      <Card borderless>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <SectionIcon icon={Package} size="xs" variant="green" />
+            No services purchased yet
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center">
+            <p className="text-sm text-muted-foreground">
+              No training packages purchased yet.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card borderless>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <SectionIcon icon={Package} size="xs" variant="green" />
+          Purchased Training Packages
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Accordion
+          type="single"
+          collapsible
+          className="w-full flex flex-col gap-2"
+        >
+          {offers.map((offer) => (
+            <TrainerOfferItem key={offer.id} offer={offer} />
+          ))}
+        </Accordion>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -185,6 +217,10 @@ function PendingOffersCard({ offers }: PendingOffersCardProps) {
     } else {
       window.open(finalOfferUrl, '_blank', 'noopener,noreferrer')
     }
+  }
+
+  if (offers.length === 0) {
+    return null
   }
 
   return (
@@ -421,7 +457,7 @@ const SERVICE_PLANS_INCLUDE: Record<
   }
 > = {
   [GQLServiceType.CoachingComplete]: {
-    title: 'Complete Coaching Program',
+    title: 'Premium Coaching Program',
     items: [
       'Training Plan',
       'Nutrition Plan',

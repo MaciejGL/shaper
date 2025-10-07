@@ -71,7 +71,7 @@ export function SubscriptionManagementSection() {
     ) {
       return {
         type: 'Coaching',
-        title: 'Complete Coaching',
+        title: 'Premium Coaching',
         description:
           'Full access to training plans, nutrition plans, and coaching sessions.',
         canUpgrade: true, // Can upgrade to Premium

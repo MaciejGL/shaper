@@ -27,7 +27,7 @@ export default function AccountManagementPage() {
           </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="space-y-8 container-hypertro mx-auto">
           {/* Subscription Management Section */}
           <Card borderless variant="secondary">
             <CardHeader className="pb-6">

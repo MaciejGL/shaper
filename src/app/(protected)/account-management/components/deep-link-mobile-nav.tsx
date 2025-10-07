@@ -41,7 +41,7 @@ export function DeepLinkMobileNav() {
         id: 'meals',
         href: '/fitspace/meal-plan',
         icon: SaladIcon,
-        label: 'Meals',
+        label: 'Nutrition',
         prefetch: true,
       },
       {
@@ -55,7 +55,7 @@ export function DeepLinkMobileNav() {
         id: 'trainer',
         href: '/fitspace/my-trainer',
         icon: UserCheck,
-        label: 'Trainer',
+        label: 'Coaching',
         prefetch: true,
       },
       {

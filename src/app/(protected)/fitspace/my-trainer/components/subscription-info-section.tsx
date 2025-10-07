@@ -1,5 +1,6 @@
 'use client'
 
+import { format } from 'date-fns'
 import { CreditCard, SparklesIcon } from 'lucide-react'
 
 import { LoadingSkeleton } from '@/components/loading-skeleton'
@@ -9,10 +10,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
 import { useUser } from '@/context/user-context'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
+import { STRIPE_PRODUCTS } from '@/lib/stripe/constants'
 
 export function SubscriptionInfoSection() {
   const { user } = useUser()
-  const { data: subscriptionData, isLoading } = useCurrentSubscription(user?.id)
+  const { data: subscriptionData, isLoading } = useCurrentSubscription(
+    user?.id,
+    {
+      priceId: STRIPE_PRODUCTS.COACHING_COMBO, // Show only Premium Coaching subscription
+    },
+  )
   const { isNativeApp } = useMobileApp()
 
   const handleManageSubscription = () => {
@@ -67,13 +74,10 @@ export function SubscriptionInfoSection() {
       }
     }
 
-    const packageName = subscriptionData.subscription.package.name
+    const stripePriceId = subscriptionData.subscription.package.stripePriceId
 
-    // Check for Complete Coaching subscription
-    if (
-      packageName.toLowerCase().includes('complete') ||
-      packageName.toLowerCase().includes('coaching')
-    ) {
+    // Check subscription type using stable price IDs
+    if (stripePriceId === STRIPE_PRODUCTS.COACHING_COMBO) {
       return {
         title: 'Complete Coaching',
         description:
@@ -82,8 +86,10 @@ export function SubscriptionInfoSection() {
       }
     }
 
-    // Check for Premium subscription
-    if (packageName.toLowerCase().includes('premium')) {
+    if (
+      stripePriceId === STRIPE_PRODUCTS.PREMIUM_MONTHLY ||
+      stripePriceId === STRIPE_PRODUCTS.PREMIUM_YEARLY
+    ) {
       return {
         title: 'Premium',
         description: 'Premium platform access with enhanced features.',
@@ -91,9 +97,9 @@ export function SubscriptionInfoSection() {
       }
     }
 
-    // Default case
+    // Default case - use package name as fallback
     return {
-      title: packageName,
+      title: subscriptionData.subscription.package.name,
       description: 'Active subscription with premium features.',
       status: 'active' as const,
     }
@@ -113,7 +119,7 @@ export function SubscriptionInfoSection() {
     const isYearly = duration === 'YEARLY'
 
     return {
-      date: endDate.toLocaleDateString(),
+      date: format(endDate, 'MMM d, yyyy'), // e.g., "Nov 3, 2025"
       period: isMonthly ? 'Monthly' : isYearly ? 'Yearly' : duration,
     }
   }

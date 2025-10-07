@@ -19,6 +19,7 @@ export interface CurrentSubscription {
     package: {
       name: string
       duration: string
+      stripePriceId?: string | null
     }
     stripeSubscriptionId?: string
     isCancelledButActive?: boolean
@@ -37,15 +38,31 @@ export interface CurrentSubscription {
   } | null
 }
 
-export function useCurrentSubscription(userId?: string) {
+export function useCurrentSubscription(
+  userId?: string,
+  options?: {
+    type?: 'coaching' | 'platform'
+    priceId?: string
+  },
+) {
   return useQuery<CurrentSubscription>({
-    queryKey: ['current-subscription', userId],
+    queryKey: ['current-subscription', userId, options?.type, options?.priceId],
     queryFn: async () => {
       if (!userId) throw new Error('User ID required')
 
-      const response = await fetch(
-        `/api/stripe/subscription-status?userId=${userId}`,
+      const url = new URL(
+        '/api/stripe/subscription-status',
+        window.location.origin,
       )
+      url.searchParams.set('userId', userId)
+      if (options?.type) {
+        url.searchParams.set('type', options.type)
+      }
+      if (options?.priceId) {
+        url.searchParams.set('priceId', options.priceId)
+      }
+
+      const response = await fetch(url.toString())
       if (!response.ok) {
         throw new Error('Failed to fetch subscription status')
       }

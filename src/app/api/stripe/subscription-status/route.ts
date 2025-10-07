@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
-import { SUBSCRIPTION_HELPERS } from '@/lib/stripe/config'
+import { STRIPE_PRODUCTS, SUBSCRIPTION_HELPERS } from '@/lib/stripe/config'
 import { stripe } from '@/lib/stripe/stripe'
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
+    const subscriptionType = searchParams.get('type') // 'coaching' or 'platform'
+    const priceId = searchParams.get('priceId') // Filter by specific Stripe price ID
 
     if (!userId) {
       return NextResponse.json(
@@ -45,45 +47,107 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Find the most recent active/pending subscription for display
-    const primarySubscription = subscriptions[0]
+    // Check cancellation status for all subscriptions to prioritize correctly
+    // Also get the correct end date from Stripe for cancelled subscriptions
+    const subscriptionsWithCancellation = await Promise.all(
+      subscriptions.map(async (sub) => {
+        let isCancelledButActive = false
+        let stripeEndDate = sub.endDate // Use database endDate as fallback
 
-    // Check if subscription is cancelled but still active (cancel_at_period_end)
-    let isCancelledButActive = false
-    if (primarySubscription.stripeSubscriptionId) {
-      try {
-        const stripeSubscription = await stripe.subscriptions.retrieve(
-          primarySubscription.stripeSubscriptionId,
-        )
-        isCancelledButActive = stripeSubscription.cancel_at_period_end || false
-      } catch (error) {
-        console.error('Error retrieving Stripe subscription:', error)
-        // Continue without cancellation status if Stripe call fails
-      }
+        if (sub.stripeSubscriptionId) {
+          try {
+            const stripeSubscription = await stripe.subscriptions.retrieve(
+              sub.stripeSubscriptionId,
+            )
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const stripeSub = stripeSubscription as any
+            isCancelledButActive = stripeSub.cancel_at_period_end || false
+
+            // For cancelled subscriptions, use Stripe's current_period_end as source of truth
+            if (isCancelledButActive && stripeSub.current_period_end) {
+              stripeEndDate = new Date(stripeSub.current_period_end * 1000)
+            }
+          } catch (error) {
+            console.error('Error retrieving Stripe subscription:', error)
+          }
+        }
+        return { ...sub, isCancelledButActive, stripeEndDate }
+      }),
+    )
+
+    // Filter subscriptions based on type or specific price ID
+    let filteredSubscriptions = subscriptionsWithCancellation
+
+    if (priceId) {
+      // Filter by specific Stripe price ID (most precise)
+      filteredSubscriptions = subscriptionsWithCancellation.filter(
+        (sub) => sub.package.stripePriceId === priceId,
+      )
+    } else if (subscriptionType === 'coaching') {
+      // Only coaching subscriptions (with trainerId)
+      filteredSubscriptions = subscriptionsWithCancellation.filter(
+        (sub) => sub.trainerId !== null,
+      )
+    } else if (subscriptionType === 'platform') {
+      // Only platform subscriptions (no trainerId)
+      filteredSubscriptions = subscriptionsWithCancellation.filter(
+        (sub) => sub.trainerId === null,
+      )
+    }
+
+    // If no subscriptions match the filter, return early
+    if (filteredSubscriptions.length === 0) {
+      return NextResponse.json({
+        hasPremiumAccess: false,
+        status: 'NO_SUBSCRIPTION',
+        subscription: null,
+        trial: null,
+        gracePeriod: null,
+      })
+    }
+
+    // Find the best subscription to display:
+    // 1. Prioritize active non-cancelled subscriptions
+    // 2. Then active cancelled subscriptions
+    // 3. Finally, most recent by creation date
+    const primarySubscription =
+      filteredSubscriptions.find(
+        (sub) => !sub.isCancelledButActive && now <= sub.stripeEndDate,
+      ) ||
+      filteredSubscriptions.find(
+        (sub) => sub.isCancelledButActive && now <= sub.stripeEndDate,
+      ) ||
+      filteredSubscriptions[0]
+
+    const isCancelledButActive = primarySubscription.isCancelledButActive
+
+    // Get premium price IDs from environment variables
+    const premiumPriceIds: string[] = []
+    if (STRIPE_PRODUCTS.PREMIUM_MONTHLY) {
+      premiumPriceIds.push(STRIPE_PRODUCTS.PREMIUM_MONTHLY)
+    }
+    if (STRIPE_PRODUCTS.PREMIUM_YEARLY) {
+      premiumPriceIds.push(STRIPE_PRODUCTS.PREMIUM_YEARLY)
+    }
+    if (STRIPE_PRODUCTS.COACHING_COMBO) {
+      premiumPriceIds.push(STRIPE_PRODUCTS.COACHING_COMBO)
     }
 
     // Check if user has premium access from ANY subscription
     const hasPremiumAccess = subscriptions.some((sub) => {
-      const packageName = sub.package.name.toLowerCase()
-
       // For trial subscriptions, check trialEnd; for regular subscriptions, check endDate
       const effectiveEndDate =
         sub.isTrialActive && sub.trialEnd ? sub.trialEnd : sub.endDate
       const isNotExpired = now <= effectiveEndDate
 
-      // Premium access granted by:
-      // 1. Traditional premium subscription
-      const hasPremiumSubscription =
-        packageName.includes('premium') && isNotExpired
-
-      // 2. Complete Coaching Combo (includes premium access)
-      const hasCoachingCombo =
-        packageName.includes('coaching') &&
-        packageName.includes('combo') &&
+      // Check if this subscription grants premium access using stable price IDs
+      const grantsPremiumAccess =
+        sub.package.stripePriceId &&
+        premiumPriceIds.includes(sub.package.stripePriceId) &&
         isNotExpired
 
       return (
-        (hasPremiumSubscription || hasCoachingCombo) &&
+        grantsPremiumAccess &&
         SUBSCRIPTION_HELPERS.canAccess(
           sub.status,
           sub.isTrialActive || false,
@@ -108,10 +172,11 @@ export async function GET(request: NextRequest) {
 
     // Check if subscription is still valid
     // For trial subscriptions, check trialEnd; for regular subscriptions, check endDate
+    // For cancelled subscriptions, use Stripe's end date as source of truth
     const effectiveEndDate =
       subscription.isTrialActive && subscription.trialEnd
         ? subscription.trialEnd
-        : subscription.endDate
+        : primarySubscription.stripeEndDate
     const isSubscriptionValid =
       subscription.status === SubscriptionStatus.ACTIVE &&
       now <= effectiveEndDate
@@ -166,6 +231,7 @@ export async function GET(request: NextRequest) {
         package: {
           name: subscription.package.name,
           duration: subscription.package.duration,
+          stripePriceId: subscription.package.stripePriceId,
         },
         stripeSubscriptionId: subscription.stripeSubscriptionId,
         isCancelledButActive,
