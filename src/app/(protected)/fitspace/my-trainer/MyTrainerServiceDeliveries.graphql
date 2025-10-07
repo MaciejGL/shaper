@@ -1,7 +1,7 @@
 query FitGetMyTrainerOffers(
   $clientEmail: String!
   $trainerId: ID!
-  $status: TrainerOfferStatus
+  $status: [TrainerOfferStatus!]
 ) {
   getClientTrainerOffers(
     clientEmail: $clientEmail

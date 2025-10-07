@@ -32,13 +32,16 @@ export function ClientServiceDeliveriesSection({
 }: ClientServiceDeliveriesSectionProps) {
   const { user } = useUser()
 
-  // Query for pending offers (need payment)
+  // Query for pending AND processing offers (need payment or in checkout)
   const { data: pendingData, isLoading: pendingLoading } =
     useFitGetMyTrainerOffersQuery(
       {
         clientEmail: user?.email || '',
         trainerId,
-        status: GQLTrainerOfferStatus.Pending,
+        status: [
+          GQLTrainerOfferStatus.Pending,
+          GQLTrainerOfferStatus.Processing,
+        ],
       },
       {
         enabled: !!user?.email,
@@ -51,7 +54,7 @@ export function ClientServiceDeliveriesSection({
       {
         clientEmail: user?.email || '',
         trainerId,
-        status: GQLTrainerOfferStatus.Paid,
+        status: [GQLTrainerOfferStatus.Paid],
       },
       {
         enabled: !!user?.email,

@@ -2430,7 +2430,7 @@ export type GQLQueryGetClientSurveyForTraineeArgs = {
 
 export type GQLQueryGetClientTrainerOffersArgs = {
   clientEmail: Scalars['String']['input'];
-  status?: InputMaybe<GQLTrainerOfferStatus>;
+  status?: InputMaybe<Array<GQLTrainerOfferStatus>>;
   trainerId: Scalars['ID']['input'];
 };
 
@@ -3008,7 +3008,8 @@ export enum GQLTrainerOfferStatus {
   Cancelled = 'CANCELLED',
   Expired = 'EXPIRED',
   Paid = 'PAID',
-  Pending = 'PENDING'
+  Pending = 'PENDING',
+  Processing = 'PROCESSING'
 }
 
 export type GQLTrainingDay = {

@@ -47,11 +47,12 @@ export async function getClientTrainerOffers(
     clientEmail,
   }
 
-  if (status) {
-    where.status = status
+  if (status && status.length > 0) {
+    // Handle array of statuses
+    where.status = status.length === 1 ? status[0] : { in: status }
   }
 
-  // For clients, only show paid offers (what they actually purchased)
+  // For clients, only show paid offers by default (what they actually purchased)
   if (isClient && !status) {
     where.status = 'PAID'
   }

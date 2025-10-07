@@ -1,5 +1,6 @@
 enum TrainerOfferStatus {
   PENDING
+  PROCESSING
   PAID
   EXPIRED
   CANCELLED
@@ -38,10 +39,11 @@ type TrainerOffer {
 }
 
 type Query {
-  # Get paid trainer offers for a specific client and trainer
+  # Get trainer offers for a specific client and trainer
+  # status can be a single status or array of statuses to filter by
   getClientTrainerOffers(
     clientEmail: String!
     trainerId: ID!
-    status: TrainerOfferStatus
+    status: [TrainerOfferStatus!]
   ): [TrainerOffer!]!
 }

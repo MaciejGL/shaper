@@ -2428,7 +2428,7 @@ export type GQLQueryGetClientSurveyForTraineeArgs = {
 
 export type GQLQueryGetClientTrainerOffersArgs = {
   clientEmail: Scalars['String']['input'];
-  status?: InputMaybe<GQLTrainerOfferStatus>;
+  status?: InputMaybe<Array<GQLTrainerOfferStatus>>;
   trainerId: Scalars['ID']['input'];
 };
 
@@ -3006,7 +3006,8 @@ export enum GQLTrainerOfferStatus {
   Cancelled = 'CANCELLED',
   Expired = 'EXPIRED',
   Paid = 'PAID',
-  Pending = 'PENDING'
+  Pending = 'PENDING',
+  Processing = 'PROCESSING'
 }
 
 export type GQLTrainingDay = {
@@ -3839,7 +3840,7 @@ export type GQLCancelCoachingMutation = { __typename?: 'Mutation', cancelCoachin
 export type GQLFitGetMyTrainerOffersQueryVariables = Exact<{
   clientEmail: Scalars['String']['input'];
   trainerId: Scalars['ID']['input'];
-  status?: InputMaybe<GQLTrainerOfferStatus>;
+  status?: InputMaybe<Array<GQLTrainerOfferStatus> | GQLTrainerOfferStatus>;
 }>;
 
 
@@ -6507,7 +6508,7 @@ useCancelCoachingMutation.getKey = () => ['CancelCoaching'];
 useCancelCoachingMutation.fetcher = (variables?: GQLCancelCoachingMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCancelCoachingMutation, GQLCancelCoachingMutationVariables>(CancelCoachingDocument, variables, options);
 
 export const FitGetMyTrainerOffersDocument = `
-    query FitGetMyTrainerOffers($clientEmail: String!, $trainerId: ID!, $status: TrainerOfferStatus) {
+    query FitGetMyTrainerOffers($clientEmail: String!, $trainerId: ID!, $status: [TrainerOfferStatus!]) {
   getClientTrainerOffers(
     clientEmail: $clientEmail
     trainerId: $trainerId
