@@ -19,9 +19,6 @@ export const createUserLoaders = () => ({
     )
     const users = await prisma.user.findMany({
       where: { email: { in: emails as string[] } },
-      include: {
-        profile: true,
-      },
     })
 
     const map = new Map(users.map((u) => [u.email, u]))

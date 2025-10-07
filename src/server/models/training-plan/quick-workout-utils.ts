@@ -29,11 +29,6 @@ export async function ensureQuickWorkoutWeeks(
   const currentWeekStart = getWeekStartUTC(new Date(), 'UTC', 1)
   const weeksToCreate: { weekStart: Date; weekNumber: number }[] = []
 
-  console.info(
-    '📅 ensureQuickWorkoutWeeks - currentWeekStart:',
-    currentWeekStart.toISOString(),
-  )
-
   // Check current week + N weeks ahead
   for (let i = 0; i <= weeksAhead; i++) {
     const targetWeekStart = addWeeks(currentWeekStart, i)
@@ -54,14 +49,6 @@ export async function ensureQuickWorkoutWeeks(
 
   // Batch create all missing weeks with their days
   if (weeksToCreate.length > 0) {
-    console.info(
-      '✨ Creating weeks:',
-      weeksToCreate.map((w) => ({
-        weekNumber: w.weekNumber,
-        weekStart: w.weekStart.toISOString(),
-      })),
-    )
-
     await Promise.all(
       weeksToCreate.map((week) =>
         prisma.trainingWeek.create({
@@ -85,9 +72,6 @@ export async function ensureQuickWorkoutWeeks(
         }),
       ),
     )
-    console.info(`✅ Created ${weeksToCreate.length} weeks with 7 days each`)
-  } else {
-    console.info('✓ All weeks already exist')
   }
 }
 

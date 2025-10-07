@@ -79,9 +79,6 @@ export class SubscriptionValidator {
       ])
 
       if (localResult !== stripeValid) {
-        console.warn(
-          `Subscription sync mismatch for user ${userId}: local=${localResult}, stripe=${stripeValid}`,
-        )
         // Trigger sync to fix discrepancy
         await this.syncUserSubscriptions(userId)
         return stripeValid // Use Stripe as source of truth
@@ -256,28 +253,14 @@ export class SubscriptionValidator {
     userId: string,
     context: GQLContext,
   ): Promise<UserSubscriptionStatusData> {
-    console.info(
-      `[SubscriptionValidator] getUserSubscriptionStatus for userId: ${userId}`,
-    )
-
     const validSubscriptions = await this.getValidSubscriptions(userId, context)
-    console.info(
-      `[SubscriptionValidator] Found ${validSubscriptions.length} valid subscriptions`,
-    )
 
     const hasPremium = await this.evaluatePremiumLogic(validSubscriptions)
-    console.info(`[SubscriptionValidator] hasPremium: ${hasPremium}`)
 
     // Find trainer subscription
     const trainerSubscription = validSubscriptions.find(
       (sub) => sub.trainerId !== null && new Date(sub.endDate) > new Date(),
     )
-
-    if (trainerSubscription) {
-      console.info(
-        `[SubscriptionValidator] Found trainer subscription with trainerId: ${trainerSubscription.trainerId}`,
-      )
-    }
 
     // Find subscription end date (latest active/cancelled subscription)
     const latestSubscription = validSubscriptions
@@ -331,9 +314,6 @@ export class SubscriptionValidator {
   ): Promise<UserSubscription[]> {
     // Use database NOW() to avoid serverless timezone/clock drift issues
     const now = new Date()
-    console.info(
-      `[getValidSubscriptions] Querying for userId: ${userId}, now: ${now.toISOString()}`,
-    )
 
     const subscriptions = await prisma.userSubscription.findMany({
       where: {
@@ -358,25 +338,13 @@ export class SubscriptionValidator {
       },
     })
 
-    console.info(
-      `[getValidSubscriptions] Database returned ${subscriptions.length} subscriptions`,
-    )
-
     // Additional safety check: filter on application side to catch any edge cases
     const validSubs = subscriptions.filter((sub) => {
       const endDate = new Date(sub.endDate)
       const isValid = endDate >= now
-      if (!isValid) {
-        console.warn(
-          `[getValidSubscriptions] Filtered out subscription ${sub.id}, endDate: ${endDate.toISOString()}`,
-        )
-      }
+
       return isValid
     })
-
-    console.info(
-      `[getValidSubscriptions] After filtering: ${validSubs.length} valid subscriptions`,
-    )
 
     return validSubs.map(
       (sub) =>
