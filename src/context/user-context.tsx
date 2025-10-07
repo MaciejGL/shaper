@@ -33,35 +33,6 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const session = useSession()
   const queryClient = useQueryClient()
 
-  // Invalidate user cache when page becomes visible (user returns from external browser)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (
-        document.visibilityState === 'visible' &&
-        session.status === 'authenticated'
-      ) {
-        // Invalidate user queries to refetch fresh data
-        // This ensures premium status and offers are up-to-date after external purchases
-        queryClient.invalidateQueries({
-          predicate: (query) => {
-            const queryKey = query.queryKey
-            return (
-              Array.isArray(queryKey) &&
-              (queryKey.includes('userBasic') ||
-                queryKey.includes('GetMySubscriptionStatus') ||
-                queryKey.includes('FitGetMyTrainerOffers'))
-            )
-          },
-        })
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-    }
-  }, [session.status, queryClient])
-
   // Automatically sync timezone when user logs in
 
   const { data, isLoading: isLoadingUserBasic } = useUserBasicQuery(
@@ -71,7 +42,8 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
       enabled:
         session.status === 'authenticated' &&
         Boolean(session.data?.user?.email),
-      staleTime: 5 * 60 * 1000, // 5 minutes - reduced for more frequent updates
+      staleTime: 10 * 60 * 1000, // 10 minutes
+      refetchOnWindowFocus: true, // Refetch when window regains focus
     },
   )
 
@@ -84,7 +56,8 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
         enabled:
           session.status === 'authenticated' &&
           Boolean(session.data?.user?.email),
-        staleTime: 2 * 60 * 1000, // 2 minutes - refresh frequently for premium status changes
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        refetchOnWindowFocus: true, // Refetch when window regains focus
       },
     )
 
