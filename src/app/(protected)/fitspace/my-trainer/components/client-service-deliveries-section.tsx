@@ -65,9 +65,6 @@ export function ClientServiceDeliveriesSection({
       },
     )
 
-  console.info('[ClientServiceDeliveriesSection] paidData', paidData)
-  console.info('[ClientServiceDeliveriesSection] pendingData', pendingData)
-
   const pendingOffers = pendingData?.getClientTrainerOffers || []
   const paidOffers = paidData?.getClientTrainerOffers || []
 

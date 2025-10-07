@@ -28,9 +28,6 @@ export default async function OfferSuccessPage({
   })
 
   const serverSession = await getServerSession(authOptions)
-  console.warn('[Success Page] Server session:', {
-    email: serverSession?.user?.email,
-  })
 
   if (!offer || !serverSession) {
     notFound()

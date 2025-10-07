@@ -67,15 +67,6 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     },
   )
 
-  console.warn('[UserContext] Subscription query state', {
-    hasData: !!subscriptionData,
-    isLoading: isLoadingSubscription,
-    hasError: !!subscriptionError,
-    sessionStatus: session.status,
-    hasSessionData,
-    queryEnabled: hasSessionData && !isDefinitelyLoggedOut,
-  })
-
   if (subscriptionError) {
     console.error('[UserContext] Subscription query error', subscriptionError)
   }

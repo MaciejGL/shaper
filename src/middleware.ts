@@ -25,8 +25,6 @@ export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
   const sessionToken = searchParams.get('session_token')
 
-  console.warn('[MIDDLEWARE] Session token', sessionToken)
-
   // Only process external pages
   const isExternal =
     pathname.startsWith('/offer/') || pathname === '/account-management'
@@ -61,14 +59,6 @@ export async function middleware(request: NextRequest) {
       cleanUrl.searchParams.delete('session_token')
       return NextResponse.redirect(cleanUrl)
     } else {
-      // Different JWT - this is the problematic case!
-      console.warn(
-        '[MIDDLEWARE] Different JWT detected, keeping existing cookie to prevent corruption',
-        {
-          email: tokenData.email,
-          pathname,
-        },
-      )
       // Keep existing cookie, don't overwrite
       const cleanUrl = new URL(request.url)
       cleanUrl.searchParams.delete('session_token')

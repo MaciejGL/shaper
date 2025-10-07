@@ -29,9 +29,6 @@ export default async function TrainerOfferPage({
   })
 
   const serverSession = await getServerSession(authOptions)
-  console.warn('[Offer Page] Server session:', {
-    email: serverSession?.user?.email,
-  })
 
   if (!offer || !serverSession) {
     notFound()

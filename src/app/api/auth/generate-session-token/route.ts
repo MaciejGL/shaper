@@ -47,13 +47,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Session error' }, { status: 500 })
     }
 
-    console.warn('🔐 Transferring session JWT:', {
-      email: user.user.email,
-      jwtExp: jwtToken.exp
-        ? new Date(Number(jwtToken.exp) * 1000).toISOString()
-        : 'none',
-    })
-
     // Generate session token containing the ORIGINAL JWT
     const sessionToken = generateSessionToken(user.user.email, rawJwt)
 
