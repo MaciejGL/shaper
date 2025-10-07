@@ -40,8 +40,8 @@ async function getLatestCoachingRequestBetweenUsers(
       ],
     },
     include: {
-      sender: { select: { name: true } },
-      recipient: { select: { name: true } },
+      sender: { select: { id: true, name: true, email: true } },
+      recipient: { select: { id: true, name: true, email: true } },
     },
     orderBy: {
       createdAt: 'desc',
@@ -64,8 +64,8 @@ export async function getCoachingRequest({
       OR: [{ senderId: user?.user?.id }, { recipientId: user?.user?.id }],
     },
     include: {
-      sender: { select: { name: true } },
-      recipient: { select: { name: true } },
+      sender: { select: { id: true, name: true, email: true } },
+      recipient: { select: { id: true, name: true, email: true } },
     },
   })
 
@@ -87,8 +87,8 @@ export async function getCoachingRequests({
       createdAt: 'desc',
     },
     include: {
-      sender: { select: { name: true } },
-      recipient: { select: { name: true } },
+      sender: { select: { id: true, name: true, email: true } },
+      recipient: { select: { id: true, name: true, email: true } },
     },
   })
 
@@ -208,7 +208,8 @@ export async function acceptCoachingRequest({
     const originalRequest = await prisma.coachingRequest.findUnique({
       where: { id },
       include: {
-        sender: { select: { name: true } },
+        sender: { select: { id: true, name: true, email: true } },
+        recipient: { select: { id: true, name: true, email: true } },
       },
     })
 
@@ -234,7 +235,8 @@ export async function acceptCoachingRequest({
         status: GQLCoachingRequestStatus.Accepted,
       },
       include: {
-        sender: { select: { name: true } },
+        sender: { select: { id: true, name: true, email: true } },
+        recipient: { select: { id: true, name: true, email: true } },
       },
     })
 
@@ -359,7 +361,8 @@ export async function cancelCoachingRequest({
         status: GQLCoachingRequestStatus.Cancelled,
       },
       include: {
-        sender: { select: { name: true } },
+        sender: { select: { id: true, name: true, email: true } },
+        recipient: { select: { id: true, name: true, email: true } },
       },
     })
 
@@ -389,7 +392,8 @@ export async function rejectCoachingRequest({
     const originalRequest = await prisma.coachingRequest.findUnique({
       where: { id },
       include: {
-        sender: { select: { name: true } },
+        sender: { select: { id: true, name: true, email: true } },
+        recipient: { select: { id: true, name: true, email: true } },
       },
     })
 
@@ -415,8 +419,8 @@ export async function rejectCoachingRequest({
         status: GQLCoachingRequestStatus.Rejected,
       },
       include: {
-        sender: { select: { name: true } },
-        recipient: { select: { name: true } },
+        sender: { select: { id: true, name: true, email: true } },
+        recipient: { select: { id: true, name: true, email: true } },
       },
     })
 

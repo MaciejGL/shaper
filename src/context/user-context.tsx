@@ -39,10 +39,9 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     {},
     {
       initialData,
-      enabled:
-        session.status === 'authenticated' &&
-        Boolean(session.data?.user?.email),
+      enabled: session.status !== 'unauthenticated',
       staleTime: 20 * 60 * 1000, // 20 minutes
+      refetchOnWindowFocus: true, // Refetch when window regains focus
     },
   )
 
@@ -52,10 +51,9 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
     useGetMySubscriptionStatusQuery(
       {},
       {
-        enabled:
-          session.status === 'authenticated' &&
-          Boolean(session.data?.user?.email),
+        enabled: session.status !== 'unauthenticated',
         staleTime: 10 * 60 * 1000, // 10 minutes - refresh more frequently for premium status
+        refetchOnWindowFocus: true, // Refetch when window regains focus
       },
     )
 
@@ -96,11 +94,15 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   const subscription = subscriptionData?.getMySubscriptionStatus
   const hasPremium = subscription?.hasPremium ?? false
 
+  // Return cached data even during loading state to prevent UI flickering
+  // Only clear data when explicitly unauthenticated
+  const shouldShowData = session.status !== 'unauthenticated'
+
   const contextValue: UserContextType = {
     session,
-    user: session.status === 'authenticated' ? data?.userBasic : undefined,
-    subscription: session.status === 'authenticated' ? subscription : undefined,
-    hasPremium: session.status === 'authenticated' ? hasPremium : false,
+    user: shouldShowData ? data?.userBasic : undefined,
+    subscription: shouldShowData ? subscription : undefined,
+    hasPremium: shouldShowData ? hasPremium : false,
     isLoading:
       session.status === 'loading' ||
       isLoadingUserBasic ||

@@ -2,15 +2,23 @@ import {
   GQLCoachingRequest,
   GQLCoachingRequestStatus,
 } from '@/generated/graphql-server'
-import { CoachingRequest as PrismaCoachingRequest } from '@/generated/prisma/client'
+import {
+  CoachingRequest as PrismaCoachingRequest,
+  User as PrismaUser,
+} from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
 import User from '../user/model'
 
+type CoachingRequestWithRelations = PrismaCoachingRequest & {
+  sender?: Pick<PrismaUser, 'id' | 'name' | 'email'> | null
+  recipient?: Pick<PrismaUser, 'id' | 'name' | 'email'> | null
+}
+
 export default class CoachingRequest implements GQLCoachingRequest {
   constructor(
-    protected data: PrismaCoachingRequest,
+    protected data: CoachingRequestWithRelations,
     protected context: GQLContext,
   ) {}
 
@@ -35,6 +43,12 @@ export default class CoachingRequest implements GQLCoachingRequest {
   }
 
   async recipient() {
+    // Use preloaded data if available
+    if (this.data.recipient) {
+      return new User(this.data.recipient as PrismaUser, this.context)
+    }
+
+    // Fallback to database query if not preloaded
     console.error(
       `[CoachingRequest] Making database query for recipient user in request ${this.id}. This could cause N+1 queries.`,
     )
@@ -51,6 +65,12 @@ export default class CoachingRequest implements GQLCoachingRequest {
   }
 
   async sender() {
+    // Use preloaded data if available
+    if (this.data.sender) {
+      return new User(this.data.sender as PrismaUser, this.context)
+    }
+
+    // Fallback to database query if not preloaded
     console.error(
       `[CoachingRequest] Making database query for sender user in request ${this.id}. This could cause N+1 queries.`,
     )
