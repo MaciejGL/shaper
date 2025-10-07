@@ -47,17 +47,29 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
 
   useSyncTimezone(data?.userBasic?.profile?.timezone ?? undefined)
 
-  const { data: subscriptionData, isLoading: isLoadingSubscription } =
-    useGetMySubscriptionStatusQuery(
-      {},
-      {
-        enabled: session.status !== 'unauthenticated',
-        staleTime: 10 * 60 * 1000, // 10 minutes - refresh more frequently for premium status
-        refetchOnWindowFocus: true, // Refetch when window regains focus
-      },
-    )
+  const {
+    data: subscriptionData,
+    isLoading: isLoadingSubscription,
+    error: subscriptionError,
+  } = useGetMySubscriptionStatusQuery(
+    {},
+    {
+      enabled: session.status !== 'unauthenticated',
+      staleTime: 10 * 60 * 1000, // 10 minutes - refresh more frequently for premium status
+      refetchOnWindowFocus: true, // Refetch when window regains focus
+    },
+  )
 
-  console.info('[UserContext] subscriptionData', subscriptionData)
+  console.warn('[UserContext] Subscription query state', {
+    hasData: !!subscriptionData,
+    isLoading: isLoadingSubscription,
+    hasError: !!subscriptionError,
+    sessionStatus: session.status,
+  })
+
+  if (subscriptionError) {
+    console.error('[UserContext] Subscription query error', subscriptionError)
+  }
   // Clear user query cache when user logs out
   useEffect(() => {
     if (session.status === 'unauthenticated') {
