@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 
+import { verifySessionToken } from '@/lib/auth/session-token'
+
 /**
  * Middleware for Session Token Authentication
  *
- * Intercepts requests to specific pages and checks for session_token query parameter.
- * If found and no active session exists, redirects to NextAuth callback to establish session.
- * Removes token from URL after processing to prevent reuse.
+ * Intercepts requests to external pages with session_token parameter.
+ * Verifies token and restores the original JWT cookie in a single step.
+ *
+ * Flow:
+ * 1. Check for session_token in URL
+ * 2. If session already exists, just clean URL
+ * 3. If no session, verify token and restore JWT cookie
+ * 4. Redirect to clean URL (token removed)
  *
  * Protected routes:
  * - /offer/*
@@ -16,35 +23,57 @@ export async function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
   const sessionToken = searchParams.get('session_token')
 
-  // Only process routes that need session token handling
-  const isProtectedRoute =
+  // Only process external pages
+  const isExternal =
     pathname.startsWith('/offer/') || pathname === '/account-management'
 
-  if (!isProtectedRoute || !sessionToken) {
+  if (!isExternal || !sessionToken) {
     return NextResponse.next()
   }
 
-  // Check if user already has a session cookie
-  const sessionCookie = request.cookies.get('next-auth.session-token')
-  const secureSessionCookie = request.cookies.get(
-    '__Secure-next-auth.session-token',
-  )
+  // Check if already has session cookie
+  const cookieName =
+    process.env.NODE_ENV === 'production'
+      ? '__Secure-next-auth.session-token'
+      : 'next-auth.session-token'
+  const hasCookie = request.cookies.get(cookieName)
 
-  if (sessionCookie || secureSessionCookie) {
-    // User already has a session, just remove token from URL to prevent reuse
+  if (hasCookie) {
+    // Already authenticated, just clean URL
     const cleanUrl = new URL(request.url)
     cleanUrl.searchParams.delete('session_token')
     return NextResponse.redirect(cleanUrl)
   }
 
-  // No session - redirect to session token authentication endpoint
-  const callbackUrl = request.url.split('?')[0] // URL without query params
+  // Verify token and restore JWT in ONE step
+  const tokenData = verifySessionToken(sessionToken)
+  if (!tokenData) {
+    // Invalid token - redirect to error page
+    console.error('Invalid or expired session token')
+    return NextResponse.redirect(
+      new URL('/auth/error?error=SessionExpired', request.url),
+    )
+  }
 
-  const authUrl = new URL('/api/auth/session-token-auth', request.url)
-  authUrl.searchParams.set('token', sessionToken)
-  authUrl.searchParams.set('callbackUrl', callbackUrl)
+  console.warn('🔓 [MIDDLEWARE] Restoring session JWT:', {
+    email: tokenData.email,
+    pathname,
+  })
 
-  return NextResponse.redirect(authUrl)
+  // Create response with cleaned URL
+  const cleanUrl = new URL(request.url)
+  cleanUrl.searchParams.delete('session_token')
+  const response = NextResponse.redirect(cleanUrl)
+
+  // Restore the original JWT cookie
+  response.cookies.set(cookieName, tokenData.originalJwt, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/',
+  })
+
+  return response
 }
 
 export const config = {
