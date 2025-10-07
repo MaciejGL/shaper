@@ -80,7 +80,7 @@ async function createVectorStoreForAssistant(
       },
     })
 
-    console.log(
+    console.info(
       `[VECTOR_STORE] Successfully created vector store: ${vectorStore.id}`,
     )
     return vectorStore.id
@@ -114,7 +114,7 @@ export async function POST() {
       throw new Error('No public base exercises found')
     }
 
-    console.log(
+    console.info(
       `[EXERCISE_VECTOR_UPLOAD] Found ${baseExercises.length} public exercises`,
     )
 

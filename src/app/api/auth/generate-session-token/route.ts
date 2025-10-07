@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 import { generateSessionToken } from '@/lib/auth/session-token'
 import { getCurrentUser } from '@/lib/getUser'
@@ -14,7 +14,7 @@ import { getCurrentUser } from '@/lib/getUser'
  * - Returns signed JWT valid for 1 hour
  * - Can only be called by authenticated users
  */
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Verify user is authenticated
     const user = await getCurrentUser()
