@@ -208,9 +208,9 @@ export const authOptions = {
         const email = verifySessionToken(token)
         if (!email) return null
 
-        // Load user by email
+        // Load user by email (includes profile automatically)
         const loaders = createUserLoaders()
-        const user = await loaders.authSession.load(email)
+        const user = await loaders.getCurrentUser.load(email)
 
         if (!user) return null
 
