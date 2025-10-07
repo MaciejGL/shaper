@@ -5,6 +5,7 @@ import { Crown, Lock, Sparkles } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
+import { cn } from '@/lib/utils'
 
 import { ButtonLink } from './ui/button-link'
 
@@ -14,6 +15,7 @@ interface PremiumGateProps {
   description?: string
   showPartialContent?: boolean
   compact?: boolean
+  className?: string
 }
 
 export function PremiumGate({
@@ -22,6 +24,7 @@ export function PremiumGate({
   description,
   showPartialContent = false,
   compact = false,
+  className,
 }: PremiumGateProps) {
   const { hasPremium, isLoading } = useUser()
 
@@ -32,7 +35,7 @@ export function PremiumGate({
 
   // Show premium gate
   return (
-    <div className="container mx-auto max-w-md p-4">
+    <div className={cn('container mx-auto max-w-md p-4', className)}>
       {/* Show partial content if allowed */}
       {showPartialContent && (
         <div className="mb-6 opacity-50 pointer-events-none relative">
@@ -46,12 +49,12 @@ export function PremiumGate({
       <Card className="border-2 border-dashed border-primary/20">
         <CardHeader className="text-center pb-4">
           {!compact && (
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center mb-4">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mb-4">
               <Lock className="w-8 h-8 text-white" />
             </div>
           )}
           <CardTitle className="flex items-center justify-center gap-2">
-            <Crown className="w-5 h-5 text-purple-600" />
+            <Crown className="w-5 h-5 text-amber-600" />
             Premium Feature
           </CardTitle>
           {!compact && (
@@ -73,19 +76,19 @@ export function PremiumGate({
               <h4 className="font-semibold text-sm">Premium includes:</h4>
               <div className="grid grid-cols-1 gap-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
                   <span>Unlimited training plans</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
                   <span>Full meal plan access</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
                   <span>Premium exercise library</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-purple-500 rounded-full" />
+                  <div className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
                   <span>Advanced analytics</span>
                 </div>
               </div>

@@ -73,7 +73,7 @@ export function CheckinScheduleSection() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <PremiumGate feature="Schedule Check-ins" compact>
+            <PremiumGate feature="Schedule Check-ins" compact className="p-0">
               <CardDescription className="text-muted-foreground">
                 Set up regular reminders to track your progress with
                 measurements and photos.
