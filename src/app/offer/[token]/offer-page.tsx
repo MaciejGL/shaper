@@ -335,7 +335,7 @@ export function OfferPage({ offer, clientEmail }: BundleOfferPageProps) {
                   }
                 }}
                 className={`mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary ${
-                  showTermsError ? 'border-red-500 ring-red-500' : ''
+                  showTermsError ? 'border-amber-500 ring-amber-500' : ''
                 }`}
               />
               <label

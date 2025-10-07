@@ -138,8 +138,19 @@ setInterval(cleanupExpiredCacheEntries, CLEANUP_INTERVAL)
 async function fetchUserFromDatabase(
   email: string,
 ): Promise<UserWithSession['user'] | null> {
+  console.info(`[USER-DB] Fetching user from database: ${email}`)
   const loaders = createUserLoaders()
-  return loaders.getCurrentUser.load(email)
+  const user = await loaders.getCurrentUser.load(email)
+
+  if (!user) {
+    console.warn(`[USER-DB] User not found in database: ${email}`)
+  } else {
+    console.info(
+      `[USER-DB] User found: ${email}, trainerId: ${user.trainerId || 'none'}`,
+    )
+  }
+
+  return user
 }
 
 function createUserWithSession(
@@ -193,16 +204,23 @@ export async function getCurrentUser(): Promise<
   // 1. Check cache
   const cachedUser = getCachedUser(cacheKey)
   if (cachedUser) {
+    console.info(`[USER-CACHE] HIT for ${session.user.email}`)
     return cachedUser
   }
+
+  console.info(
+    `[USER-CACHE] MISS for ${session.user.email}, cache size: ${userCache.size}`,
+  )
 
   // 2. Check if already fetching (race condition protection)
   const pendingPromise = getPendingPromise(cacheKey)
   if (pendingPromise) {
+    console.info(`[USER-CACHE] PENDING fetch for ${session.user.email}`)
     return pendingPromise
   }
 
   // 3. Fetch and cache
+  console.info(`[USER-CACHE] FETCHING from DB for ${session.user.email}`)
   const fetchPromise = fetchAndCacheUser(session.user.email, session, cacheKey)
   setPendingPromise(cacheKey, fetchPromise)
 
