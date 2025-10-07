@@ -12,16 +12,13 @@ const STATIC_ASSETS = [
 
 // Install: Cache only essential static assets
 self.addEventListener('install', (event) => {
-  console.log('🚀 SW installing (production-safe)')
   self.skipWaiting()
 
   const cacheStaticAssets = async () => {
     try {
       const cache = await caches.open(STATIC_CACHE_NAME)
       await cache.addAll(STATIC_ASSETS)
-      console.log('✅ Static assets cached')
     } catch (error) {
-      console.warn('Failed to cache static assets:', error)
       // Don't fail installation - app works fine without cached icons
     }
   }
@@ -31,8 +28,6 @@ self.addEventListener('install', (event) => {
 
 // Activate: Clean old caches only
 self.addEventListener('activate', (event) => {
-  console.log('✅ SW activated (production-safe), version:', CACHE_VERSION)
-
   const cleanup = async () => {
     try {
       await self.clients.claim()
@@ -46,15 +41,10 @@ self.addEventListener('activate', (event) => {
               name.startsWith('hypertro-static-') && name !== STATIC_CACHE_NAME,
           )
           .map((name) => {
-            console.log('🗑️ Deleting old static cache:', name)
             return caches.delete(name)
           }),
       )
-
-      console.log('🧹 Cache cleanup complete')
-    } catch (error) {
-      console.warn('Cache cleanup failed:', error)
-    }
+    } catch (error) {}
   }
 
   event.waitUntil(cleanup())
@@ -83,7 +73,6 @@ self.addEventListener('fetch', (event) => {
 
   // ⚡ Let ALL pages bypass service worker (mobile-safe)
   if (!isStaticAsset) {
-    console.log('🌐 Bypassing SW for page:', url.pathname)
     return // Browser handles normally
   }
 
@@ -110,8 +99,6 @@ const handleStaticAsset = async (request) => {
 
     return response
   } catch (error) {
-    console.warn('Static asset failed:', new URL(request.url).pathname, error)
-
     // For static assets, just let it fail naturally
     // Don't try to serve offline pages for missing images/CSS
     throw error
