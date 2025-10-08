@@ -92,9 +92,15 @@ export default function AITrainingPage() {
         },
       })
 
+      // Use first variant for admin training (we just need one example)
+      const firstVariant = result.generateAiWorkout.variants[0]
+      if (!firstVariant) {
+        throw new Error('No workout variant returned')
+      }
+
       // Transform to our format
       const workout: WorkoutOutput = {
-        exercises: result.generateAiWorkout.exercises.map((ex) => {
+        exercises: firstVariant.exercises.map((ex) => {
           // Get first set for defaults (all sets should have same reps/RPE in training data)
           const firstSet = ex.sets[0] || { minReps: 8, maxReps: 15, rpe: 7 }
 
@@ -111,14 +117,18 @@ export default function AITrainingPage() {
             muscleGroups: ex.exercise.muscleGroups.map((m) => m.name),
           }
         }),
-        summary: 'AI-generated workout',
-        reasoning: 'Review and improve this workout before saving',
+        summary: firstVariant.summary || 'Generated workout',
+        reasoning:
+          firstVariant.reasoning ||
+          'Review and improve this workout before saving',
       }
 
       setGeneratedWorkout(workout)
       setEditedWorkout(workout)
 
-      toast.success(`Workout generated (${workout.exercises.length} exercises)`)
+      toast.success(
+        `Workout generated (${workout.exercises.length} exercises from ${firstVariant.name})`,
+      )
     } catch (error) {
       console.error('Error generating workout:', error)
       toast.error(error instanceof Error ? error.message : 'Unknown error')

@@ -79,7 +79,7 @@ export function EquipmentFilters({
             onClick={() => onEquipmentToggle(equipmentItem)}
             variant={
               selectedEquipment.includes(equipmentItem)
-                ? 'default'
+                ? 'secondary'
                 : 'secondary'
             }
             className="size-full flex flex-col gap-0 p-0 overflow-hidden relative"
@@ -106,7 +106,7 @@ export function EquipmentFilters({
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                   transition={{ duration: 0.1 }}
-                  className="absolute top-1 right-1 z-[10000] flex items-center justify-center size-5 bg-primary text-primary-foreground rounded-full shadow-lg"
+                  className="absolute top-1 right-1 z-[10000] flex items-center justify-center size-5 bg-black/80 text-white rounded-full shadow-lg"
                 >
                   <CheckIcon className="!size-3" />
                 </motion.div>

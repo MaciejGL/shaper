@@ -198,7 +198,14 @@ type AiWorkoutExercise {
   order: Int!
 }
 
-type AiWorkoutResult {
+type AiWorkoutVariant {
+  name: String!
   exercises: [AiWorkoutExercise!]!
   totalDuration: Int
+  summary: String!
+  reasoning: String!
+}
+
+type AiWorkoutResult {
+  variants: [AiWorkoutVariant!]!
 }

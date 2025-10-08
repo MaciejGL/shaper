@@ -1,7 +1,7 @@
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Sparkles } from 'lucide-react'
 import posthog from 'posthog-js'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 
 import { Button } from '@/components/ui/button'
 import { GQLFitspaceGenerateAiWorkoutMutation } from '@/generated/graphql-client'
@@ -9,45 +9,32 @@ import { GQLFitspaceGenerateAiWorkoutMutation } from '@/generated/graphql-client
 import type { AiWorkoutInputData } from '../hooks/use-ai-workout-generation'
 
 import { WorkoutSummary } from './controls/workout-summary'
-import { AiExerciseList } from './results/ai-exercise-list'
+import { useRotatingAiMessages } from './hooks/use-rotating-ai-messages'
+import { WorkoutVariantTabs } from './results/workout-variant-tabs'
 
 interface AiResultsStepProps {
   data: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout'] | null
   inputData: AiWorkoutInputData
+  selectedVariantIndex: number
+  onSelectVariant: (index: number) => void
   isLoading?: boolean
   error?: string | null
   onRetry?: () => void
   onExercisesReorder?: (
-    exercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'],
+    exercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['variants'][number]['exercises'],
   ) => void
 }
 
 export function AiResultsStep({
   data,
   inputData,
+  selectedVariantIndex,
+  onSelectVariant,
   isLoading = false,
   error = null,
   onRetry,
   onExercisesReorder,
 }: AiResultsStepProps) {
-  const [exercises, setExercises] = useState<
-    GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises']
-  >([])
-
-  // Update local exercises state when data changes
-  useEffect(() => {
-    if (data?.exercises) {
-      setExercises(data.exercises)
-    }
-  }, [data?.exercises])
-
-  const handleReorderExercises = (
-    reorderedExercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'],
-  ) => {
-    setExercises(reorderedExercises)
-    onExercisesReorder?.(reorderedExercises)
-  }
-
   if (isLoading) {
     return <LoadingState inputData={inputData} />
   }
@@ -56,22 +43,25 @@ export function AiResultsStep({
     return <ErrorState error={error} onRetry={onRetry} />
   }
 
-  if (!data) {
+  if (!data || !data.variants || data.variants.length === 0) {
     return <EmptyState />
   }
 
   return (
     <div className="space-y-6">
-      {/* Exercise List */}
-      <AiExerciseList
-        exercises={exercises}
-        onReorderExercises={handleReorderExercises}
+      <WorkoutVariantTabs
+        variants={data.variants}
+        selectedIndex={selectedVariantIndex}
+        onSelectVariant={onSelectVariant}
+        onReorderExercises={onExercisesReorder}
       />
     </div>
   )
 }
 
 function LoadingState({ inputData }: { inputData: AiWorkoutInputData }) {
+  const currentMessage = useRotatingAiMessages()
+
   return (
     <div className="space-y-6 text-center h-full">
       <motion.div
@@ -90,10 +80,20 @@ function LoadingState({ inputData }: { inputData: AiWorkoutInputData }) {
             Generating your workout...
           </span>
         </div>
-        <p className="text-muted-foreground text-sm mb-12">
-          We are analyzing your preferences and selecting the best exercises for
-          you.
-        </p>
+        <div className="relative h-12 mb-12">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={currentMessage}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.5, ease: 'easeInOut' }}
+              className="text-muted-foreground text-sm absolute inset-0 flex items-center justify-center"
+            >
+              {currentMessage}
+            </motion.p>
+          </AnimatePresence>
+        </div>
         {/* Summary */}
         {inputData && (
           <WorkoutSummary

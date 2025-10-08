@@ -837,7 +837,7 @@ export const generateAiWorkout = async (
   // Enhanced rep ranges and intensity
   const intensityMapping = {
     STRENGTH: {
-      reps: '3-8',
+      reps: '4-8',
       sets: `${Math.min(maxSetsPerExercise, 5)}-5`,
       description: 'Heavy loads, longer rest periods',
       progression: 'Linear progression with weight increases',
@@ -899,24 +899,41 @@ ${trainerPreference}
 4. **Balance**: Distribute training load appropriately across selected muscle groups
 5. **Equipment Utilization**: Make optimal use of available equipment
 6. **User Experience**: Ensure exercises are performable and safe for general fitness levels
+7. **Exercise Mix**: Mix compound and isolation exercises appropriately
+8. **Muscle Distribution**: Ensure proper muscle group distribution
+
+🔄 IMPORTANT: Create 2 DIFFERENT workout variants with different exercise selections for variety. Each variant should offer a unique approach while meeting all requirements.
 
 📝 RESPONSE FORMAT:
-Provide exactly ${exerciseCount} exercises in this JSON format:
+Provide 2 workout variants in this JSON format:
 {
-  "exercises": [
+  "workouts": [
     {
-      "id": "exercise_uuid_from_database",
-      "createdBy": "creator_user_id_from_database",
-      "sets": ${Math.min(maxSetsPerExercise, 4)},
-      "minReps": 8,
-      "maxReps": 10,
-      "rpe": ${rpeValue},
-      "explanation": "Brief rationale for exercise selection (1-2 sentences)"
+      "name": "Variant A",
+      "exercises": [
+        {
+          "id": "exercise_uuid_from_database",
+          "createdBy": "creator_user_id_from_database",
+          "sets": ${Math.min(maxSetsPerExercise, 4)},
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": ${rpeValue},
+          "explanation": "Brief rationale for exercise selection (1-2 sentences)"
+        }
+      ],
+      "summary": "Workout overview: main focus areas and training approach",
+      "reasoning": "Professional explanation of exercise selection logic and programming rationale"
+    },
+    {
+      "name": "Variant B",
+      "exercises": [...],
+      "summary": "...",
+      "reasoning": "..."
     }
-  ],
-  "summary": "Workout overview: main focus areas and training approach",
-  "reasoning": "Professional explanation of exercise selection logic and programming rationale"
+  ]
 }
+
+Each variant must have exactly ${exerciseCount} exercises.
 
 ⚠️ CRITICAL REP RANGE RULES:
 - Rep ranges must be NARROW (2-4 reps difference maximum)
@@ -934,7 +951,8 @@ Provide exactly ${exerciseCount} exercises in this JSON format:
   /* 3. Get and parse assistant response */
   const assistantReply = await getLastAssistantMessage(thread.id)
 
-  let aiResponse: {
+  type WorkoutVariant = {
+    name: string
     exercises: {
       id: string
       createdBy: string
@@ -948,6 +966,10 @@ Provide exactly ${exerciseCount} exercises in this JSON format:
     reasoning: string
   }
 
+  let aiResponse: {
+    workouts: WorkoutVariant[]
+  }
+
   try {
     aiResponse = parseAssistantJsonResponse(assistantReply)
 
@@ -956,20 +978,32 @@ Provide exactly ${exerciseCount} exercises in this JSON format:
       throw new Error('Invalid response structure')
     }
 
-    if (!Array.isArray(aiResponse.exercises)) {
-      throw new Error('Missing or invalid exercises array')
+    if (
+      !Array.isArray(aiResponse.workouts) ||
+      aiResponse.workouts.length !== 2
+    ) {
+      throw new Error('Expected 2 workout variants in response')
     }
 
-    // Ensure required fields exist and are valid
-    if (!aiResponse.summary || typeof aiResponse.summary !== 'string') {
-      aiResponse.summary = 'AI-generated workout'
-    }
-    if (!aiResponse.reasoning || typeof aiResponse.reasoning !== 'string') {
-      aiResponse.reasoning = 'Professional exercise selection'
+    // Validate each workout variant
+    for (const workout of aiResponse.workouts) {
+      if (!Array.isArray(workout.exercises)) {
+        throw new Error('Missing or invalid exercises array in workout variant')
+      }
+      // Ensure required fields exist and are valid
+      if (!workout.summary || typeof workout.summary !== 'string') {
+        workout.summary = 'AI-generated workout'
+      }
+      if (!workout.reasoning || typeof workout.reasoning !== 'string') {
+        workout.reasoning = 'Professional exercise selection'
+      }
+      if (!workout.name || typeof workout.name !== 'string') {
+        workout.name = 'Workout Variant'
+      }
     }
 
     console.info(
-      `[AI_WORKOUT] Successfully parsed response with ${aiResponse.exercises.length} exercises`,
+      `[AI_WORKOUT] Successfully parsed response with 2 variants (${aiResponse.workouts[0].exercises.length} and ${aiResponse.workouts[1].exercises.length} exercises)`,
     )
   } catch (error) {
     console.error('[AI_WORKOUT] Failed to parse AI response:', error)
@@ -981,14 +1015,17 @@ Provide exactly ${exerciseCount} exercises in this JSON format:
   }
 
   /* 4. Enhanced validation and hydration of exercises from database */
-  const requestedExerciseIds = aiResponse.exercises.map((e) => e.id)
+  // Collect all exercise IDs from both variants
+  const allExerciseIds = aiResponse.workouts.flatMap((workout) =>
+    workout.exercises.map((e) => e.id),
+  )
   console.info(
-    `[AI_WORKOUT] Looking up exercise IDs: ${requestedExerciseIds.join(', ')}`,
+    `[AI_WORKOUT] Looking up exercise IDs from both variants: ${allExerciseIds.join(', ')}`,
   )
 
   const baseExercises = await prisma.baseExercise.findMany({
     where: {
-      id: { in: requestedExerciseIds },
+      id: { in: allExerciseIds },
       OR: [
         {
           isPublic: true,
@@ -1012,22 +1049,22 @@ Provide exactly ${exerciseCount} exercises in this JSON format:
 
   // Validate that all requested exercises were found
   const foundIds = baseExercises.map((ex) => ex.id)
-  const missingIds = requestedExerciseIds.filter((id) => !foundIds.includes(id))
+  const missingIds = allExerciseIds.filter((id) => !foundIds.includes(id))
 
   if (missingIds.length > 0) {
     console.warn(`[AI_WORKOUT] Missing exercise IDs: ${missingIds.join(', ')}`)
-    // Filter out exercises that don't exist in database
-    aiResponse.exercises = aiResponse.exercises.filter((ex) =>
-      foundIds.includes(ex.id),
-    )
+    // Filter out exercises that don't exist in database from each workout
+    for (const workout of aiResponse.workouts) {
+      workout.exercises = workout.exercises.filter((ex) =>
+        foundIds.includes(ex.id),
+      )
+    }
   }
 
-  if (aiResponse.exercises.length === 0) {
+  // Ensure both workouts have at least some valid exercises
+  if (aiResponse.workouts.every((w) => w.exercises.length === 0)) {
     throw new GraphQLError('No valid exercises found. Please try again.')
   }
-
-  console.info('requestedExerciseIds', requestedExerciseIds)
-  console.info('baseExercises', baseExercises)
 
   if (baseExercises.length === 0) {
     throw new GraphQLError(
@@ -1036,61 +1073,74 @@ Provide exactly ${exerciseCount} exercises in this JSON format:
   }
 
   /* 5. Enhanced mapping of AI response to final workout structure */
-  const workoutExercises = aiResponse.exercises
-    .map((aiExercise, index) => {
-      const baseExercise = baseExercises.find((ex) => ex.id === aiExercise.id)
-      if (!baseExercise) {
-        console.warn(
-          `[AI_WORKOUT] Exercise ${aiExercise.id} not found in database`,
+  // Helper function to map a workout variant
+  const mapWorkoutVariant = (workout: WorkoutVariant) => {
+    const workoutExercises = workout.exercises
+      .map((aiExercise, index) => {
+        const baseExercise = baseExercises.find((ex) => ex.id === aiExercise.id)
+        if (!baseExercise) {
+          console.warn(
+            `[AI_WORKOUT] Exercise ${aiExercise.id} not found in database`,
+          )
+          return null
+        }
+
+        // Validate sets count
+        const setsCount = Math.min(
+          Math.max(1, aiExercise.sets),
+          maxSetsPerExercise,
         )
-        return null
-      }
 
-      // Validate sets count
-      const setsCount = Math.min(
-        Math.max(1, aiExercise.sets),
-        maxSetsPerExercise,
-      )
+        // Use AI-provided minReps and maxReps directly
+        console.info(`[AI_WORKOUT] Processing exercise ${aiExercise.id}:`, {
+          minReps: aiExercise.minReps,
+          maxReps: aiExercise.maxReps,
+          sets: aiExercise.sets,
+          rpe: aiExercise.rpe,
+        })
 
-      // Use AI-provided minReps and maxReps directly
-      console.info(`[AI_WORKOUT] Processing exercise ${aiExercise.id}:`, {
-        minReps: aiExercise.minReps,
-        maxReps: aiExercise.maxReps,
-        sets: aiExercise.sets,
-        rpe: aiExercise.rpe,
+        // Validate and use AI-provided values
+        const minReps = Math.max(1, Math.min(50, aiExercise.minReps || 8))
+        const maxReps = Math.max(
+          minReps,
+          Math.min(50, aiExercise.maxReps || minReps + 4),
+        )
+        const rpe = Math.max(1, Math.min(10, aiExercise.rpe || 8))
+
+        console.info(
+          `[AI_WORKOUT] Using reps range for ${aiExercise.id}: ${minReps}-${maxReps}, RPE: ${rpe}`,
+        )
+
+        return {
+          exercise: new BaseExercise(baseExercise, context),
+          sets: Array.from({ length: setsCount }, (_, setIndex) => ({
+            reps: minReps, // Use minReps as the primary display value
+            minReps: minReps,
+            maxReps: maxReps,
+            rpe: rpe,
+            order: setIndex + 1,
+          })),
+          order: index + 1,
+          aiMeta: {
+            explanation:
+              aiExercise.explanation || `Selected for muscle group targeting`,
+            summary: workout.summary || '',
+            reasoning: workout.reasoning || '',
+          },
+        }
       })
+      .filter((exercise) => exercise !== null)
 
-      // Validate and use AI-provided values
-      const minReps = Math.max(1, Math.min(50, aiExercise.minReps || 8))
-      const maxReps = Math.max(
-        minReps,
-        Math.min(50, aiExercise.maxReps || minReps + 4),
-      )
-      const rpe = Math.max(1, Math.min(10, aiExercise.rpe || 8))
+    return workoutExercises
+  }
 
-      console.info(
-        `[AI_WORKOUT] Using reps range for ${aiExercise.id}: ${minReps}-${maxReps}, RPE: ${rpe}`,
-      )
-
-      return {
-        exercise: new BaseExercise(baseExercise, context),
-        sets: Array.from({ length: setsCount }, (_, setIndex) => ({
-          reps: minReps, // Use minReps as the primary display value
-          minReps: minReps,
-          maxReps: maxReps,
-          rpe: rpe,
-          order: setIndex + 1,
-        })),
-        order: index + 1,
-        aiMeta: {
-          explanation:
-            aiExercise.explanation || `Selected for muscle group targeting`,
-          summary: aiResponse.summary || '',
-          reasoning: aiResponse.reasoning || '',
-        },
-      }
-    })
-    .filter((exercise) => exercise !== null)
+  // Map both workout variants
+  const variants = aiResponse.workouts.map((workout) => ({
+    name: workout.name,
+    exercises: mapWorkoutVariant(workout),
+    summary: workout.summary,
+    reasoning: workout.reasoning,
+  }))
 
   // Enhanced duration calculation based on training type
   const intensityMultiplier = {
@@ -1099,31 +1149,42 @@ Provide exactly ${exerciseCount} exercises in this JSON format:
     ENDURANCE: 0.8, // Shorter rest
   }
 
-  const totalSets = workoutExercises.reduce(
-    (sum, exercise) => sum + (exercise?.sets.length ?? 0),
-    0,
-  )
-
   const baseTimePerSet = 0.75 // 45 seconds
   const restTimeBetweenSets = 1.5 * intensityMultiplier[repFocus] // 90s adjusted for intensity
 
-  const estimatedDuration = Math.round(
-    totalSets * baseTimePerSet + (totalSets - 1) * restTimeBetweenSets,
-  )
+  // Calculate duration for each variant
+  const variantsWithDuration = variants.map((variant) => {
+    const totalSets = variant.exercises.reduce(
+      (sum, exercise) => sum + (exercise?.sets.length ?? 0),
+      0,
+    )
 
-  // If no valid exercises found, provide fallback
-  if (workoutExercises.length === 0) {
+    const estimatedDuration = Math.round(
+      totalSets * baseTimePerSet + (totalSets - 1) * restTimeBetweenSets,
+    )
+
+    return {
+      ...variant,
+      totalDuration: estimatedDuration,
+    }
+  })
+
+  // If no valid exercises found in either variant, provide fallback
+  if (variantsWithDuration.every((v) => v.exercises.length === 0)) {
     throw new GraphQLError(
       'Unable to generate workout with selected criteria. Please adjust your preferences.',
     )
   }
 
   const finalResult = {
-    exercises: workoutExercises,
-    totalDuration: estimatedDuration,
+    variants: variantsWithDuration.map((variant) => ({
+      name: variant.name,
+      exercises: variant.exercises,
+      totalDuration: variant.totalDuration,
+      summary: variant.summary,
+      reasoning: variant.reasoning,
+    })),
     aiMetadata: {
-      summary: aiResponse.summary,
-      reasoning: aiResponse.reasoning,
       selectedMuscleGroups,
       selectedEquipment,
       repFocus,
@@ -1132,7 +1193,7 @@ Provide exactly ${exerciseCount} exercises in this JSON format:
   }
 
   console.info(
-    `[AI_WORKOUT] Generated workout with ${workoutExercises.length} exercises, ~${estimatedDuration} minutes`,
+    `[AI_WORKOUT] Generated 2 workout variants with ${variantsWithDuration[0].exercises.length} and ${variantsWithDuration[1].exercises.length} exercises`,
   )
 
   return finalResult

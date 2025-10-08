@@ -12,10 +12,14 @@ import { cn } from '@/lib/utils'
 import { translateEquipment } from '@/utils/translate-equipment'
 
 interface AiExerciseListProps {
-  exercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises']
+  exercises: NonNullable<
+    GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['variants']
+  >[number]['exercises']
   className?: string
   onReorderExercises?: (
-    exercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'],
+    exercises: NonNullable<
+      GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['variants']
+    >[number]['exercises'],
   ) => void
 }
 
@@ -64,7 +68,9 @@ export function AiExerciseList({
 }
 
 interface DraggableExerciseItemProps {
-  workoutExercise: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'][number]
+  workoutExercise: NonNullable<
+    GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['variants']
+  >[number]['exercises'][number]
 }
 
 function DraggableExerciseItem({
@@ -89,7 +95,9 @@ function DraggableExerciseItem({
 }
 
 interface ExerciseCardProps {
-  workoutExercise: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'][number]
+  workoutExercise: NonNullable<
+    GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['variants']
+  >[number]['exercises'][number]
   isDraggable?: boolean
   dragControls?: DragControls
 }

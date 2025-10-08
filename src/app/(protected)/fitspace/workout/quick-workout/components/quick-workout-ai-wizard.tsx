@@ -50,9 +50,12 @@ export function QuickWorkoutAiWizard({
   const {
     aiInputData,
     aiWorkoutResult,
+    selectedVariant,
+    selectedVariantIndex,
     aiGenerationError,
     isGeneratingAiWorkout,
     setAiInputData,
+    setSelectedVariantIndex,
     handleGenerateAiWorkout,
     handleRetryAiGeneration,
     handleExercisesReorder,
@@ -117,11 +120,11 @@ export function QuickWorkoutAiWizard({
   }
 
   const handleAccept = async () => {
-    if (!aiWorkoutResult) return
+    if (!selectedVariant) return
 
     try {
-      // Transform AI workout data to the format expected by createQuickWorkout
-      const exercises = aiWorkoutResult.exercises.map((aiExercise, index) => ({
+      // Transform selected variant to the format expected by createQuickWorkout
+      const exercises = selectedVariant.exercises.map((aiExercise, index) => ({
         exerciseId: aiExercise.exercise.id,
         order: index + 1,
         sets:
@@ -214,6 +217,8 @@ export function QuickWorkoutAiWizard({
             <AiResultsStep
               data={aiWorkoutResult}
               inputData={aiInputData}
+              selectedVariantIndex={selectedVariantIndex}
+              onSelectVariant={setSelectedVariantIndex}
               isLoading={isGeneratingAiWorkout}
               error={aiGenerationError}
               onRetry={handleRetryAiGeneration}
@@ -222,7 +227,7 @@ export function QuickWorkoutAiWizard({
           )}
         </div>
 
-        <SheetFooter className=" border-t">
+        <SheetFooter className=" border-t empty:hidden">
           {currentStep === 'muscle-groups' && (
             <div className="flex gap-2 w-full">
               <Button variant="tertiary" onClick={onClose} className="flex-1">

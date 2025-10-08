@@ -1,21 +1,26 @@
 mutation AdminGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
   generateAiWorkout(input: $input) {
-    exercises {
-      exercise {
-        id
-        name
-        equipment
-        muscleGroups {
+    variants {
+      name
+      summary
+      reasoning
+      totalDuration
+      exercises {
+        exercise {
+          id
           name
+          equipment
+          muscleGroups {
+            name
+          }
         }
+        sets {
+          minReps
+          maxReps
+          rpe
+        }
+        order
       }
-      sets {
-        minReps
-        maxReps
-        rpe
-      }
-      order
     }
-    totalDuration
   }
 }

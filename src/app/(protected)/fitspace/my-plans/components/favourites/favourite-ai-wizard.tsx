@@ -43,9 +43,12 @@ export function FavouriteAiWizard({
   const {
     aiInputData,
     aiWorkoutResult,
+    selectedVariant,
+    selectedVariantIndex,
     aiGenerationError,
     isGeneratingAiWorkout,
     setAiInputData,
+    setSelectedVariantIndex,
     handleGenerateAiWorkout,
     handleRetryAiGeneration,
     handleExercisesReorder,
@@ -90,11 +93,11 @@ export function FavouriteAiWizard({
   }
 
   const handleAccept = async () => {
-    if (!aiWorkoutResult) return
+    if (!selectedVariant) return
 
     try {
-      // Transform AI workout data to favourite format
-      const exercises = aiWorkoutResult.exercises.map((aiExercise, index) => ({
+      // Transform selected variant to favourite format
+      const exercises = selectedVariant.exercises.map((aiExercise, index) => ({
         name: aiExercise.exercise.name,
         order: index + 1,
         baseId: aiExercise.exercise.id,
@@ -138,7 +141,7 @@ export function FavouriteAiWizard({
       case 'parameters':
         return 'Workout Parameters'
       case 'results':
-        return `${favouriteTitle} - AI Generated`
+        return `${favouriteTitle} - Generated Workout`
       default:
         return 'Generate Workout'
     }
@@ -194,6 +197,8 @@ export function FavouriteAiWizard({
             <AiResultsStep
               data={aiWorkoutResult}
               inputData={aiInputData}
+              selectedVariantIndex={selectedVariantIndex}
+              onSelectVariant={setSelectedVariantIndex}
               isLoading={isGeneratingAiWorkout}
               error={aiGenerationError}
               onRetry={handleRetryAiGeneration}

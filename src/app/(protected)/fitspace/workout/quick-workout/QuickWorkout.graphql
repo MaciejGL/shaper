@@ -296,38 +296,42 @@ mutation FitspaceCreateQuickWorkout($input: CreateQuickWorkoutInput!) {
   }
 }
 
-# Generate AI workout (existing)
+# Generate AI workout (with 2 variants)
 mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
   generateAiWorkout(input: $input) {
-    exercises {
-      exercise {
-        id
-        name
-        description
-        videoUrl
-        equipment
-        images {
+    variants {
+      name
+      summary
+      reasoning
+      totalDuration
+      exercises {
+        exercise {
           id
-          thumbnail
-          medium
-          order
+          name
+          description
+          videoUrl
+          equipment
+          images {
+            id
+            thumbnail
+            medium
+            order
+          }
+          muscleGroups {
+            id
+            alias
+            groupSlug
+          }
         }
-        muscleGroups {
-          id
-          alias
-          groupSlug
+        sets {
+          reps
+          minReps
+          maxReps
+          rpe
         }
+        order
       }
-      sets {
-        reps
-        minReps
-        maxReps
-        rpe
-      }
-      order
     }
-
-    totalDuration
   }
 }
 

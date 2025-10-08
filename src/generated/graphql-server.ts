@@ -200,7 +200,15 @@ export type GQLAiWorkoutExercise = {
 
 export type GQLAiWorkoutResult = {
   __typename?: 'AiWorkoutResult';
+  variants: EntireFieldWrapper<Array<GQLAiWorkoutVariant>>;
+};
+
+export type GQLAiWorkoutVariant = {
+  __typename?: 'AiWorkoutVariant';
   exercises: EntireFieldWrapper<Array<GQLAiWorkoutExercise>>;
+  name: EntireFieldWrapper<Scalars['String']['output']>;
+  reasoning: EntireFieldWrapper<Scalars['String']['output']>;
+  summary: EntireFieldWrapper<Scalars['String']['output']>;
   totalDuration?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
 };
 
@@ -3753,6 +3761,7 @@ export type GQLResolversTypes = {
   AiMeta: ResolverTypeWrapper<GQLAiMeta>;
   AiWorkoutExercise: ResolverTypeWrapper<GQLAiWorkoutExercise>;
   AiWorkoutResult: ResolverTypeWrapper<GQLAiWorkoutResult>;
+  AiWorkoutVariant: ResolverTypeWrapper<GQLAiWorkoutVariant>;
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
   BaseExercise: ResolverTypeWrapper<GQLBaseExercise>;
   BaseExerciseSubstitute: ResolverTypeWrapper<GQLBaseExerciseSubstitute>;
@@ -3993,6 +4002,7 @@ export type GQLResolversParentTypes = {
   AiMeta: GQLAiMeta;
   AiWorkoutExercise: GQLAiWorkoutExercise;
   AiWorkoutResult: GQLAiWorkoutResult;
+  AiWorkoutVariant: GQLAiWorkoutVariant;
   AssignTrainingPlanToClientInput: GQLAssignTrainingPlanToClientInput;
   BaseExercise: GQLBaseExercise;
   BaseExerciseSubstitute: GQLBaseExerciseSubstitute;
@@ -4233,7 +4243,15 @@ export type GQLAiWorkoutExerciseResolvers<ContextType = GQLContext, ParentType e
 };
 
 export type GQLAiWorkoutResultResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiWorkoutResult'] = GQLResolversParentTypes['AiWorkoutResult']> = {
+  variants?: Resolver<Array<GQLResolversTypes['AiWorkoutVariant']>, ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type GQLAiWorkoutVariantResolvers<ContextType = GQLContext, ParentType extends GQLResolversParentTypes['AiWorkoutVariant'] = GQLResolversParentTypes['AiWorkoutVariant']> = {
   exercises?: Resolver<Array<GQLResolversTypes['AiWorkoutExercise']>, ParentType, ContextType>;
+  name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  reasoning?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
+  summary?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   totalDuration?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
@@ -5576,6 +5594,7 @@ export type GQLResolvers<ContextType = GQLContext> = {
   AiMeta?: GQLAiMetaResolvers<ContextType>;
   AiWorkoutExercise?: GQLAiWorkoutExerciseResolvers<ContextType>;
   AiWorkoutResult?: GQLAiWorkoutResultResolvers<ContextType>;
+  AiWorkoutVariant?: GQLAiWorkoutVariantResolvers<ContextType>;
   BaseExercise?: GQLBaseExerciseResolvers<ContextType>;
   BaseExerciseSubstitute?: GQLBaseExerciseSubstituteResolvers<ContextType>;
   BodyProgressLog?: GQLBodyProgressLogResolvers<ContextType>;

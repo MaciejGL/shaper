@@ -31,10 +31,11 @@ export function useAiWorkoutGeneration() {
     repFocus: 'hypertrophy',
   })
 
-  // AI generation state
+  // AI generation state - now handles variants
   const [aiWorkoutResult, setAiWorkoutResult] = useState<
     GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout'] | null
   >(null)
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState<number>(0)
   const [aiGenerationError, setAiGenerationError] = useState<string | null>(
     null,
   )
@@ -44,6 +45,7 @@ export function useAiWorkoutGeneration() {
     useFitspaceGenerateAiWorkoutMutation({
       onSuccess: (data) => {
         setAiWorkoutResult(data.generateAiWorkout)
+        setSelectedVariantIndex(0) // Default to first variant
         setAiGenerationError(null)
       },
       onError: () => {
@@ -90,27 +92,39 @@ export function useAiWorkoutGeneration() {
     handleGenerateAiWorkout()
   }
 
-  // Handle exercise reordering
+  // Handle exercise reordering for selected variant
   const handleExercisesReorder = (
-    exercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['exercises'],
+    exercises: GQLFitspaceGenerateAiWorkoutMutation['generateAiWorkout']['variants'][number]['exercises'],
   ) => {
-    if (aiWorkoutResult) {
+    if (aiWorkoutResult && aiWorkoutResult.variants) {
+      const updatedVariants = [...aiWorkoutResult.variants]
+      updatedVariants[selectedVariantIndex] = {
+        ...updatedVariants[selectedVariantIndex],
+        exercises: exercises,
+      }
       setAiWorkoutResult({
         ...aiWorkoutResult,
-        exercises: exercises,
+        variants: updatedVariants,
       })
     }
   }
+
+  // Get currently selected variant
+  const selectedVariant =
+    aiWorkoutResult?.variants?.[selectedVariantIndex] || null
 
   return {
     // State
     aiInputData,
     aiWorkoutResult,
+    selectedVariant,
+    selectedVariantIndex,
     aiGenerationError,
     isGeneratingAiWorkout,
 
     // Actions
     setAiInputData,
+    setSelectedVariantIndex,
     handleGenerateAiWorkout,
     handleRetryAiGeneration,
     handleExercisesReorder,

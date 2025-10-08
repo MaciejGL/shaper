@@ -198,7 +198,15 @@ export type GQLAiWorkoutExercise = {
 
 export type GQLAiWorkoutResult = {
   __typename?: 'AiWorkoutResult';
+  variants: Array<GQLAiWorkoutVariant>;
+};
+
+export type GQLAiWorkoutVariant = {
+  __typename?: 'AiWorkoutVariant';
   exercises: Array<GQLAiWorkoutExercise>;
+  name: Scalars['String']['output'];
+  reasoning: Scalars['String']['output'];
+  summary: Scalars['String']['output'];
   totalDuration?: Maybe<Scalars['Int']['output']>;
 };
 
@@ -3683,7 +3691,7 @@ export type GQLAdminGenerateAiWorkoutMutationVariables = Exact<{
 }>;
 
 
-export type GQLAdminGenerateAiWorkoutMutation = { __typename?: 'Mutation', generateAiWorkout: { __typename?: 'AiWorkoutResult', totalDuration?: number | undefined | null, exercises: Array<{ __typename?: 'AiWorkoutExercise', order: number, exercise: { __typename?: 'BaseExercise', id: string, name: string, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', name: string }> }, sets: Array<{ __typename?: 'SuggestedSets', minReps?: number | undefined | null, maxReps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null> }> } };
+export type GQLAdminGenerateAiWorkoutMutation = { __typename?: 'Mutation', generateAiWorkout: { __typename?: 'AiWorkoutResult', variants: Array<{ __typename?: 'AiWorkoutVariant', name: string, summary: string, reasoning: string, totalDuration?: number | undefined | null, exercises: Array<{ __typename?: 'AiWorkoutExercise', order: number, exercise: { __typename?: 'BaseExercise', id: string, name: string, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', name: string }> }, sets: Array<{ __typename?: 'SuggestedSets', minReps?: number | undefined | null, maxReps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null> }> }> } };
 
 export type GQLGetPublicTrainingPlansQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -4207,7 +4215,7 @@ export type GQLFitspaceGenerateAiWorkoutMutationVariables = Exact<{
 }>;
 
 
-export type GQLFitspaceGenerateAiWorkoutMutation = { __typename?: 'Mutation', generateAiWorkout: { __typename?: 'AiWorkoutResult', totalDuration?: number | undefined | null, exercises: Array<{ __typename?: 'AiWorkoutExercise', order: number, exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null> }> } };
+export type GQLFitspaceGenerateAiWorkoutMutation = { __typename?: 'Mutation', generateAiWorkout: { __typename?: 'AiWorkoutResult', variants: Array<{ __typename?: 'AiWorkoutVariant', name: string, summary: string, reasoning: string, totalDuration?: number | undefined | null, exercises: Array<{ __typename?: 'AiWorkoutExercise', order: number, exercise: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, videoUrl?: string | undefined | null, equipment?: GQLEquipment | undefined | null, images: Array<{ __typename?: 'Image', id: string, thumbnail?: string | undefined | null, medium?: string | undefined | null, order: number }>, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, alias?: string | undefined | null, groupSlug: string }> }, sets: Array<{ __typename?: 'SuggestedSets', reps?: number | undefined | null, minReps?: number | undefined | null, maxReps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null> }> }> } };
 
 export type GQLCreateQuickWorkoutPlanMutationVariables = Exact<{
   input: GQLCreateTrainingPlanInput;
@@ -5433,23 +5441,28 @@ useUpdateUserFeaturedMutation.fetcher = (variables: GQLUpdateUserFeaturedMutatio
 export const AdminGenerateAiWorkoutDocument = `
     mutation AdminGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
   generateAiWorkout(input: $input) {
-    exercises {
-      exercise {
-        id
-        name
-        equipment
-        muscleGroups {
+    variants {
+      name
+      summary
+      reasoning
+      totalDuration
+      exercises {
+        exercise {
+          id
           name
+          equipment
+          muscleGroups {
+            name
+          }
         }
+        sets {
+          minReps
+          maxReps
+          rpe
+        }
+        order
       }
-      sets {
-        minReps
-        maxReps
-        rpe
-      }
-      order
     }
-    totalDuration
   }
 }
     `;
@@ -9431,34 +9444,39 @@ useFitspaceCreateQuickWorkoutMutation.fetcher = (variables: GQLFitspaceCreateQui
 export const FitspaceGenerateAiWorkoutDocument = `
     mutation FitspaceGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
   generateAiWorkout(input: $input) {
-    exercises {
-      exercise {
-        id
-        name
-        description
-        videoUrl
-        equipment
-        images {
+    variants {
+      name
+      summary
+      reasoning
+      totalDuration
+      exercises {
+        exercise {
           id
-          thumbnail
-          medium
-          order
+          name
+          description
+          videoUrl
+          equipment
+          images {
+            id
+            thumbnail
+            medium
+            order
+          }
+          muscleGroups {
+            id
+            alias
+            groupSlug
+          }
         }
-        muscleGroups {
-          id
-          alias
-          groupSlug
+        sets {
+          reps
+          minReps
+          maxReps
+          rpe
         }
+        order
       }
-      sets {
-        reps
-        minReps
-        maxReps
-        rpe
-      }
-      order
     }
-    totalDuration
   }
 }
     `;
