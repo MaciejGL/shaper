@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import {
   calculateTrainerPlanWeekIndex,
@@ -387,6 +387,10 @@ describe('navigation-utils', () => {
     })
 
     it('selects correct week for Trainer Plan based on start date', () => {
+      // Mock the current date to Oct 3, 2025 (2 days after start date)
+      vi.useFakeTimers()
+      vi.setSystemTime(new Date('2025-10-03T12:00:00Z'))
+
       const plan: NavigationPlan = {
         id: '1',
         startDate: '2025-10-01T00:00:00Z', // Oct 1, 2025
@@ -459,6 +463,8 @@ describe('navigation-utils', () => {
       // Test should work regardless of current date - just check it found a valid day
       expect(result.dayId).toBeTruthy()
       expect(['d1', 'd2', 'd3', 'd4', 'd5']).toContain(result.dayId)
+
+      vi.useRealTimers()
     })
   })
 })
