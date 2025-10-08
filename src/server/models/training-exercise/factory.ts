@@ -11,6 +11,7 @@ import {
   GQLAddAiExerciseToWorkoutInput,
   GQLAddSetExerciseFormInput,
   GQLCreateQuickWorkoutInput,
+  GQLEquipment,
   GQLGenerateAiWorkoutInput,
   GQLUpdateExerciseFormInput,
   GQLWorkoutSessionEvent,
@@ -717,7 +718,9 @@ export const getAiExerciseSuggestions = async (
   }
 
   // Check if user has premium access for AI features
-  const hasPremium = await checkPremiumAccess(user.user.id)
+  // Skip check for trainers (including admins) - they can use AI for training/testing
+  const isTrainer = user.user.role === 'TRAINER'
+  const hasPremium = isTrainer || (await checkPremiumAccess(user.user.id))
   if (!hasPremium) {
     throw new GraphQLError(
       'Premium subscription required for AI exercise suggestions',
@@ -796,7 +799,9 @@ export const generateAiWorkout = async (
   }
 
   // Check if user has premium access for AI features
-  const hasPremium = await checkPremiumAccess(user.user.id)
+  // Skip check for trainers (including admins) - they can use AI for training/testing
+  const isTrainer = user.user.role === 'TRAINER'
+  const hasPremium = isTrainer || (await checkPremiumAccess(user.user.id))
   if (!hasPremium) {
     throw new GraphQLError(
       'Premium subscription required for AI workout generation',
@@ -822,11 +827,12 @@ export const generateAiWorkout = async (
    - Lower Body: Quads, Hamstrings, Glutes, Calves
    - Core: Abs, Obliques, Lower Back`
 
+  const hasBodyweight = selectedEquipment.includes(GQLEquipment.Bodyweight)
   const equipmentCondition =
     selectedEquipment.length > 0
       ? `🏋️ EQUIPMENT REQUIRED: Use ONLY equipment from this list: ${selectedEquipment.join(', ')}
-   ⚠️ Always match exercises to available equipment. Prefer bodyweight alternatives when equipment is limited.`
-      : `🏋️ EQUIPMENT FLEXIBILITY: Prioritize bodyweight exercises, suggest equipment alternatives when beneficial.`
+   ⚠️ Always match exercises to available equipment. ${hasBodyweight ? 'Bodyweight exercises are allowed and encouraged.' : 'Do NOT use bodyweight exercises unless explicitly included.'}`
+      : `🏋️ EQUIPMENT FLEXIBILITY: Use any available equipment (Barbell, Dumbbell, Cable, Machine, Kettlebell, Band, EZ Bar, Smith Machine, Trap Bar, Bench). Avoid bodyweight-only exercises unless they complement the workout (e.g., planks for core). Prioritize equipment-based exercises for better progression tracking.`
 
   // Enhanced rep ranges and intensity
   const intensityMapping = {

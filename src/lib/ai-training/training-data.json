@@ -1,0 +1,4549 @@
+[
+  {
+    "id": "example-1759943979146",
+    "createdAt": "2025-10-08T17:19:39.146Z",
+    "input": {
+      "selectedMuscleGroups": [
+        "Chest",
+        "Shoulders",
+        "Triceps"
+      ],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_8_10",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "d8805489-d047-4686-b603-28516da470b6",
+          "name": "Barbell Bench Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 9,
+          "explanation": "",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ]
+        },
+        {
+          "id": "cmb9rksjt001muhkpm7udm6hk",
+          "name": "Incline Dumbbell Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 9,
+          "explanation": "",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ]
+        },
+        {
+          "id": "cmbhpcrfc00i0uhebwf6lijk1",
+          "name": "Paused Assisted Dip",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 15,
+          "rpe": 9,
+          "explanation": "",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Triceps Brachii",
+            "Deltoid Anterior"
+          ]
+        },
+        {
+          "id": "cmb9sh6gs001uuhqrmg3o9u20",
+          "name": "Overhead Cable Triceps Extension",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 9,
+          "explanation": "",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ]
+        },
+        {
+          "id": "cmb9sh6oe001vuhqrsl7lg22c",
+          "name": "Close Grip Push-Up",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 10,
+          "explanation": "",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ]
+        }
+      ],
+      "summary": "AI-generated workout",
+      "reasoning": "Review and improve this workout before saving"
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759946678728",
+    "createdAt": "2025-10-08T18:04:38.728Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "d8805489-d047-4686-b603-28516da470b6",
+          "name": "Barbell Bench Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "The Barbell Bench Press is a compound exercise targeting the chest, shoulders, and triceps, ideal for building upper body strength.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ]
+        },
+        {
+          "id": "cmb9qq3a2002luhbnag7vdkkx",
+          "name": "Dumbbell Shoulder Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "The Dumbbell Shoulder Press targets the shoulders and triceps, promoting balanced shoulder development and stability.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ]
+        },
+        {
+          "id": "272f2832-eb83-413d-b778-a0be27aad99f",
+          "name": "Dips",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 10,
+          "maxReps": 15,
+          "rpe": 9,
+          "explanation": "Weighted Dips are an effective compound movement for the chest, shoulders, and triceps, enhancing upper body strength.",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ]
+        },
+        {
+          "id": "567ac01c-7c50-4044-9994-abdfd92695ae",
+          "name": "Low Cable Chest fly",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 9,
+          "explanation": "The Low-to-High Cable Flye isolates the upper chest, providing a focused contraction and stretch for muscle growth.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ]
+        },
+        {
+          "id": "3e5c0211-fe16-4614-ba82-400ff1a43fe4",
+          "name": "Dumbbell Overhead Triceps Extension",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 9,
+          "explanation": "The Dumbbell Isolateral Skull Crusher targets the triceps, allowing for unilateral training and balanced development.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ]
+        },
+        {
+          "id": "152b4bbf-d1f2-4291-84bf-29298e08f6a3",
+          "name": "Seated Side Lateral Raise",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 9,
+          "explanation": "Dumbbell Lateral Raises focus on the lateral deltoids, enhancing shoulder width and definition.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Lateral"
+          ]
+        },
+        {
+          "id": "cmb9qq7zu0037uhbnxl1gy6c5",
+          "name": "Ab Wheel Rollout",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 12,
+          "rpe": 9,
+          "explanation": "The Ab Wheel Rollout is a core exercise that strengthens the abdominals and stabilizers, improving core stability.",
+          "equipment": "OTHER",
+          "muscleGroups": [
+            "Rectus Abdominis",
+            "Transverse Abdominis"
+          ]
+        }
+      ],
+      "summary": "A push-focused workout targeting the chest, shoulders, triceps, and core with a mix of compound and isolation exercises.",
+      "reasoning": "This workout begins with compound movements like the Barbell Bench Press and Dumbbell Shoulder Press to maximize strength and muscle recruitment. Isolation exercises such as the Cable Flye and Lateral Raise follow to target specific muscles for hypertrophy. The inclusion of core work with the Ab Wheel Rollout ensures balanced development and functional strength. The rep and set scheme is designed for progressive overload, with a mix of low-rep strength work and higher-rep hypertrophy work."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759947159406",
+    "createdAt": "2025-10-08T18:12:39.406Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmbgv950h01acuhunxcu3w8q9",
+          "name": "Cross-Body Lat Pull-Around",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 15,
+          "maxReps": 20,
+          "rpe": 6,
+          "explanation": "This exercise targets the lats and helps in developing unilateral strength and muscle balance.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ]
+        },
+        {
+          "id": "18a4fa79-1b3c-49d7-821a-26b68ae90e34",
+          "name": "Close Grip Pulldown",
+          "createdBy": "system",
+          "sets": 4,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "A compound movement focusing on the latissimus dorsi, enhancing back width and strength.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ]
+        },
+        {
+          "id": "cmb9qpv2t001kuhbnf4kc3cay",
+          "name": "Chest Supported Row",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "This machine exercise isolates the upper back, allowing for controlled movement and muscle engagement.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ]
+        },
+        {
+          "id": "cmbhp9k7h00hwuhebo0117w5m",
+          "name": "Cable Reverse Flye",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 8,
+          "explanation": "Targets the rear delts and upper back, crucial for shoulder health and posture improvement.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Rhomboids",
+            "Deltoid Posterior"
+          ]
+        },
+        {
+          "id": "cmb9qpyew001zuhbn5z0ct2cu",
+          "name": "Reverse Curl",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 9,
+          "explanation": "Focuses on the brachialis and forearms, enhancing arm size and strength.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Brachialis",
+            "Forearm Flexors"
+          ]
+        },
+        {
+          "id": "cmbgyw7m9007fuhebt4b56tsw",
+          "name": "Bottom-2/3 Constant Tension Preacher Curl",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 9,
+          "explanation": "Targets the biceps brachii, promoting peak contraction and muscle growth.",
+          "equipment": "EZ_BAR",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ]
+        },
+        {
+          "id": "cmbgvdpmn01aguhunnlcsbfim",
+          "name": "Hammer Preacher Curl",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 9,
+          "explanation": "Isolates the biceps, allowing for focused tension and hypertrophy.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ]
+        }
+      ],
+      "summary": "A comprehensive pull workout focusing on back and bicep development through a mix of compound and isolation exercises.",
+      "reasoning": "The workout begins with compound movements to engage larger muscle groups and maximize strength output. It progresses to isolation exercises to target specific muscles for hypertrophy. The rep ranges and RPE are structured to ensure progressive overload, promoting muscle growth and endurance. The use of both machines and free weights allows for a balanced approach to muscle activation and joint health."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759947942735",
+    "createdAt": "2025-10-08T18:25:42.735Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9rktmb001nuhkp08fpd5im",
+          "name": "Deadlift",
+          "createdBy": "system",
+          "sets": 4,
+          "minReps": 4,
+          "maxReps": 6,
+          "rpe": 8,
+          "explanation": "The Deadlift is a fundamental compound movement that targets the posterior chain, including the glutes, hamstrings, and lower back. It is included for its ability to build overall strength and power.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Erector Spinae"
+          ]
+        },
+        {
+          "id": "cmb9qpzjn0024uhbnd1i74k6w",
+          "name": "Front Squat",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 7,
+          "explanation": "The Front Squat emphasizes the quadriceps and core stability. It is included to complement the posterior chain focus of the deadlift, providing a balanced leg workout.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Quadriceps"
+          ]
+        },
+        {
+          "id": "cmb9qpztf0025uhbngt4723mz",
+          "name": "Leg Press",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "This exercise targets the quadriceps and glutes unilaterally, helping to address any muscle imbalances and improve leg strength symmetry.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Quadriceps",
+            "Gluteus Maximus"
+          ]
+        },
+        {
+          "id": "038b5858-ce22-4377-bdf6-79ee37ba5bab",
+          "name": "Single leg extension ",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 9,
+          "explanation": "The Single-Leg Leg Extension isolates the quadriceps, providing a high-rep hypertrophy stimulus to enhance muscle growth and endurance.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Quadriceps"
+          ]
+        },
+        {
+          "id": "b1624628-e799-4ed7-a7e5-568a3787aa5c",
+          "name": "Bodyweight Bulgarian Split Squat",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 9,
+          "explanation": "This exercise targets the hamstrings and glutes, focusing on stability and balance, which is crucial for overall leg development.",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus",
+            "Gluteus Medius",
+            "Gluteus Minimus",
+            "Adductors",
+            "Hip Abductors"
+          ]
+        },
+        {
+          "id": "cmb9qq25e002guhbnmqg5vlmn",
+          "name": "Seated Calf Raise",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 9,
+          "explanation": "The Seated Calf Raise isolates the calf muscles, providing a high-rep stimulus to promote muscle growth and endurance in the lower legs.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Gastrocnemius"
+          ]
+        }
+      ],
+      "summary": "This workout focuses on building strength and hypertrophy in the lower body through a combination of compound and isolation exercises.",
+      "reasoning": "The workout begins with compound movements like the Deadlift and Front Squat to maximize strength gains in the major muscle groups. This is followed by unilateral exercises to address muscle imbalances and enhance stability. Isolation exercises are included to target specific muscles for hypertrophy. The rep ranges and RPE are structured to balance strength and muscle endurance, promoting progressive overload and muscle growth."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759948923016",
+    "createdAt": "2025-10-08T18:42:03.016Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9qpzc40023uhbnq83mjl8o",
+          "name": "Barbell Squat",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 5,
+          "maxReps": 5,
+          "rpe": 7,
+          "explanation": "The barbell squat is a fundamental compound exercise that targets the quadriceps, hamstrings, and glutes, providing a strong foundation for leg strength and development.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ]
+        },
+        {
+          "id": "cmbgvael101aduhunz6ejii8p",
+          "name": "Snatch-Grip RDL",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "The Romanian deadlift focuses on the hamstrings and glutes, complementing the squat by emphasizing the posterior chain and improving hip hinge mechanics.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Erector Spinae",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ]
+        },
+        {
+          "id": "cmb9qq147002buhbnbawrd0qo",
+          "name": "Barbell Hip Thrust",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 6,
+          "explanation": "Hip thrusts are excellent for isolating the glutes, enhancing glute strength and hypertrophy, which is crucial for overall lower body power.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Glutes"
+          ]
+        },
+        {
+          "id": "cmb9qq08o0027uhbn25oyifm2",
+          "name": "Walking Lunges",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 10,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Walking lunges with dumbbells target the quadriceps, hamstrings, and glutes, while also improving balance and coordination.",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Quads",
+            "Hams",
+            "Glutes"
+          ]
+        },
+        {
+          "id": "afb153d4-4bac-454f-9150-5b63956a729b",
+          "name": "Lying leg curl",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Seated leg curls target the hamstrings, providing balance to the quadriceps work and reducing the risk of injury by strengthening the posterior leg muscles.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Hamstrings",
+            "Gluteus Maximus"
+          ]
+        },
+        {
+          "id": "3ba9c739-ccf7-4ace-b63c-a0a28e2baf6a",
+          "name": "Standing One-Leg Calf Raise With Dumbbell",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "Standing calf raises focus on the calf muscles, crucial for lower leg strength and stability, enhancing performance in both athletic and everyday activities.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Gastrocnemius"
+          ]
+        }
+      ],
+      "summary": "This workout focuses on comprehensive leg development, targeting major muscle groups through a combination of compound and isolation exercises.",
+      "reasoning": "The workout begins with compound exercises like the squat and Romanian deadlift to build foundational strength and engage multiple muscle groups. Isolation exercises like leg extensions and curls follow to target specific muscles for balanced development. The inclusion of calf raises ensures complete lower leg training. The set and rep scheme promotes both strength and hypertrophy, with RPEs set to encourage progressive overload while managing fatigue."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759949306353",
+    "createdAt": "2025-10-08T18:48:26.353Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9n9djx001juhfuz3r84iiz",
+          "name": "Close Grip Bench Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 6,
+          "rpe": 8,
+          "explanation": "The close-grip bench press targets the triceps, chest, and shoulders, focusing on triceps strength.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Chest",
+            "Inner Chest",
+            "Triceps"
+          ]
+        },
+        {
+          "id": "cmb9qq32b002kuhbnwlx4ajq6",
+          "name": "Barbell Overhead Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "The overhead press is a compound movement that targets the shoulders and triceps, enhancing shoulder stability and strength.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Front Delts",
+            "Side Delts"
+          ]
+        },
+        {
+          "id": "cmb9rksjt001muhkpm7udm6hk",
+          "name": "Incline Dumbbell Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "The incline press emphasizes the upper chest and shoulders, promoting balanced chest development.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Chest",
+            "Inner Chest"
+          ]
+        },
+        {
+          "id": "cmb9n9btl001cuhfu9fwazts3",
+          "name": "Pec Deck Machine",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "The pec deck is an isolation exercise that targets the chest, allowing for focused muscle contraction.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Chest"
+          ]
+        },
+        {
+          "id": "cmb9qq50c002tuhbnpx6u4dse",
+          "name": "Cable Lateral Raise",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "Lateral raises target the lateral deltoids, contributing to shoulder width and definition.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Side Delts"
+          ]
+        },
+        {
+          "id": "cmb9sh74j001xuhqriqtzfeld",
+          "name": "Cable Triceps Kickbacks",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 20,
+          "maxReps": 20,
+          "rpe": 8,
+          "explanation": "Triceps kickbacks isolate the triceps, enhancing arm definition and strength.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps"
+          ]
+        },
+        {
+          "id": "cmb9qq63d002yuhbney21wsx7",
+          "name": "Crunch",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 9,
+          "explanation": "Bicycle crunches engage the core, particularly the obliques, for improved abdominal strength.",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Rectus Abdominis"
+          ]
+        }
+      ],
+      "summary": "A push workout focusing on compound movements for strength and isolation exercises for muscle definition.",
+      "reasoning": "This workout is structured to begin with compound exercises, such as the close-grip bench press and overhead press, to maximize strength gains when energy levels are highest. It progresses to isolation exercises like the pec deck and cable lateral raise to target specific muscles for hypertrophy. The inclusion of triceps and core exercises ensures balanced development of the upper body, with a focus on the chest, shoulders, and triceps."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759949491508",
+    "createdAt": "2025-10-08T18:51:31.508Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "18a4fa79-1b3c-49d7-821a-26b68ae90e34",
+          "name": "Close Grip Pulldown",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "This exercise targets the lats and biceps, and the neutral grip allows for a comfortable wrist position, reducing strain.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ]
+        },
+        {
+          "id": "cmb9sgvlp001euhqrkwc04r0c",
+          "name": "Seated Cable Row",
+          "createdBy": "system",
+          "sets": 4,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Focusing on the upper back, this variation emphasizes the rear delts and rhomboids with elbows out.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ]
+        },
+        {
+          "id": "5c6ff560-4144-4388-b5f6-bb56b355d3bc",
+          "name": "Cable lat pullover",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7.5,
+          "explanation": "This isolation movement targets the lats, providing a stretch and contraction that enhances lat width.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ]
+        },
+        {
+          "id": "ac581f83-f907-475e-aa95-6c2d2a6ad6d6",
+          "name": "Barbell Shrug",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "The snatch grip increases trap activation, and the shrug focuses on trap development.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Traps"
+          ]
+        },
+        {
+          "id": "cmbhp9k7h00hwuhebo0117w5m",
+          "name": "Cable Reverse Flye",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 8,
+          "explanation": "Targets the rear delts and upper back, crucial for shoulder health and posture.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Rhomboids",
+            "Deltoid Posterior"
+          ]
+        },
+        {
+          "id": "b3632a56-0b08-4e68-9cdd-b8e2ff48481b",
+          "name": "Single-Arm Cable Curl",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 8,
+          "explanation": "This exercise isolates the biceps, allowing for focused contraction and improved arm symmetry.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Biceps",
+            "Brachialis",
+            "Brachioradialis"
+          ]
+        },
+        {
+          "id": "cmb9qpwey001quhbnpx5y5pbk",
+          "name": "Hammer Curl",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "Targets the brachialis and brachioradialis, contributing to forearm and upper arm thickness.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Brachialis",
+            "Forearm Flexors"
+          ]
+        }
+      ],
+      "summary": "This pull workout emphasizes back and bicep development with a mix of compound and isolation exercises.",
+      "reasoning": "The workout begins with compound exercises to target the larger muscle groups of the back, ensuring maximum strength and muscle recruitment. Isolation exercises follow to refine and develop specific areas such as the biceps and rear delts. The use of cables allows for constant tension, enhancing muscle activation. The rep ranges and RPE are structured to balance hypertrophy and endurance, promoting muscle growth and endurance."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759949646708",
+    "createdAt": "2025-10-08T18:54:06.708Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmbgv950h01acuhunxcu3w8q9",
+          "name": "Cross-Body Lat Pull-Around",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "This exercise targets the lats and upper back, focusing on the cross-body movement to enhance muscle engagement and range of motion.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ]
+        },
+        {
+          "id": "cmbgvk7zw01ajuhunmyw1wype",
+          "name": "Low Incline Smith Machine Chest Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "The low incline angle emphasizes the upper chest and shoulders, while the Smith machine provides stability for controlled pressing.",
+          "equipment": "SMITH_MACHINE",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Pectoralis Minor",
+            "Deltoid Anterior"
+          ]
+        },
+        {
+          "id": "cmbgyrccs0079uhebleh5rbhw",
+          "name": "Machine Hip Adduction",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "This exercise targets the inner thigh muscles, crucial for stabilizing the hips and improving overall leg strength.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Adductors"
+          ]
+        },
+        {
+          "id": "cmbgytq0s007cuhebq4h5ofu2",
+          "name": "Leg Press Calf Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 8,
+          "rpe": 7,
+          "explanation": "A compound movement focusing on the quadriceps, glutes, and hamstrings, providing a foundation for lower body strength.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Gastrocnemius"
+          ]
+        },
+        {
+          "id": "cmbhp9k7h00hwuhebo0117w5m",
+          "name": "Cable Reverse Flye",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "Targets the rear deltoids and upper back, improving posture and shoulder stability.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Rhomboids",
+            "Deltoid Posterior"
+          ]
+        },
+        {
+          "id": "cmb9qq7s00036uhbnbahtr87o",
+          "name": "Cable Crunch",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "Focuses on the rectus abdominis, enhancing core strength and stability.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Rectus Abdominis"
+          ]
+        }
+      ],
+      "summary": "This full-body workout includes a mix of compound and isolation exercises targeting the upper body, lower body, and core.",
+      "reasoning": "The workout begins with compound movements like the Cross-Body Lat Pull-Around and Low Incline Smith Machine Press to engage multiple muscle groups and build strength. Isolation exercises such as Machine Hip Adduction and Cable Crunch are included to target specific muscles for balanced development. The inclusion of static stretches post-exercise aids in flexibility and recovery."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759949771254",
+    "createdAt": "2025-10-08T18:56:11.254Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9qq3a2002luhbnag7vdkkx",
+          "name": "Dumbbell Shoulder Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "The Dumbbell Shoulder Press is a compound movement targeting the deltoids, promoting shoulder strength and stability.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ]
+        },
+        {
+          "id": "cmbgvael101aduhunz6ejii8p",
+          "name": "Snatch-Grip RDL",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 8,
+          "maxReps": 8,
+          "rpe": 7,
+          "explanation": "The Snatch-Grip RDL focuses on the posterior chain, particularly the hamstrings and glutes, enhancing lower body strength and flexibility.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Erector Spinae",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ]
+        },
+        {
+          "id": "cmb9qpv2t001kuhbnf4kc3cay",
+          "name": "Chest Supported Row",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "This exercise targets the upper back muscles, improving posture and back strength with reduced lower back strain.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ]
+        },
+        {
+          "id": "cmbgvdpmn01aguhunnlcsbfim",
+          "name": "Hammer Preacher Curl",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "The Hammer Preacher Curl isolates the biceps, emphasizing the brachialis for arm thickness and strength.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ]
+        },
+        {
+          "id": "cmbgvgej301aiuhun25l1ebou",
+          "name": "Cuffed Behind-The-Back Lateral Raise",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "This isolation exercise targets the lateral deltoids, enhancing shoulder width and definition.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ]
+        },
+        {
+          "id": "cmbgvmgmd01aluhunrhfh54nv",
+          "name": "Overhead Cable Triceps Extension (Bar)",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "This exercise focuses on the triceps, promoting arm strength and muscle endurance.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ]
+        }
+      ],
+      "summary": "A full-body workout targeting major muscle groups with a mix of compound and isolation exercises.",
+      "reasoning": "This workout balances compound and isolation exercises to target major muscle groups effectively. Starting with compound movements like the Dumbbell Shoulder Press and Snatch-Grip RDL allows for maximum energy expenditure on multi-joint exercises, promoting overall strength. Isolation exercises like the Hammer Preacher Curl and Cuffed Behind-The-Back Lateral Raise focus on specific muscles for hypertrophy. The rep range and set scheme are designed to enhance muscle endurance and strength, while the inclusion of varied equipment ensures a comprehensive full-body workout."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759949862258",
+    "createdAt": "2025-10-08T18:57:42.258Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "b2132b91-21ab-42ee-9423-3ff5857814a9",
+          "name": "Pull Up with a Supinated Grip",
+          "createdBy": "system",
+          "sets": 4,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "The assisted pull-up is included to target the back and biceps, providing a compound movement to enhance upper body pulling strength.",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ]
+        },
+        {
+          "id": "cmbhpcrfc00i0uhebwf6lijk1",
+          "name": "Paused Assisted Dip",
+          "createdBy": "system",
+          "sets": 4,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "This exercise targets the triceps, chest, and shoulders, complementing the pull-up by focusing on pushing muscles.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Triceps Brachii",
+            "Deltoid Anterior"
+          ]
+        },
+        {
+          "id": "afb153d4-4bac-454f-9150-5b63956a729b",
+          "name": "Lying leg curl",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "The leg curl isolates the hamstrings, balancing the leg workout by focusing on the posterior chain.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Hamstrings",
+            "Gluteus Maximus"
+          ]
+        },
+        {
+          "id": "cmb9qq0wl002auhbnmx5og2pj",
+          "name": "Leg Extension",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "Leg extensions target the quadriceps, providing an isolation movement to enhance knee extension strength.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Quads"
+          ]
+        },
+        {
+          "id": "cmbhpa0p400hxuhebbilcu54f",
+          "name": "Cable Paused Shrug-In",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "This exercise focuses on the trapezius muscles, improving shoulder stability and posture.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Trapezius"
+          ]
+        },
+        {
+          "id": "cmbgyx44v007huhebyk3nrtkg",
+          "name": "Roman Chair Leg Raise",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 20,
+          "rpe": 7,
+          "explanation": "Leg raises on the Roman chair target the core, enhancing abdominal strength and stability.",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Rectus Abdominis",
+            "Obliques"
+          ]
+        }
+      ],
+      "summary": "This full-body workout includes compound and isolation exercises to target major muscle groups, ensuring balanced development.",
+      "reasoning": "The workout is structured to begin with compound movements (pull-ups and dips) to engage multiple muscle groups, followed by isolation exercises (leg curls and extensions) to target specific muscles. This approach maximizes muscle recruitment and promotes balanced strength development. The inclusion of core and shoulder stability exercises ensures comprehensive conditioning."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759949948794",
+    "createdAt": "2025-10-08T18:59:08.794Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "afb153d4-4bac-454f-9150-5b63956a729b",
+          "name": "Lying leg curl",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "Targets the hamstrings in isolation, crucial for knee flexion and balancing quad-dominant exercises.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Hamstrings",
+            "Gluteus Maximus"
+          ]
+        },
+        {
+          "id": "f3292b21-2a84-4ed2-8079-224bc2e2ebed",
+          "name": "Hack Squat",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 4,
+          "maxReps": 8,
+          "rpe": 7,
+          "explanation": "A compound movement focusing on the quadriceps, glutes, and calves, promoting overall leg development.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Quadriceps"
+          ]
+        },
+        {
+          "id": "567ac01c-7c50-4044-9994-abdfd92695ae",
+          "name": "Low Cable Chest fly",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "Isolates the chest muscles, particularly the pectorals, enhancing chest definition and strength.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ]
+        },
+        {
+          "id": "cmbhp7mfr00huuhebzks7nikz",
+          "name": "Lean-Back Lat Pulldown",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the latissimus dorsi, aiding in back width and upper body pulling strength.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ]
+        },
+        {
+          "id": "cmbgytq0s007cuhebq4h5ofu2",
+          "name": "Leg Press Calf Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "Focuses on the calves, crucial for lower leg strength and stability.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Gastrocnemius"
+          ]
+        },
+        {
+          "id": "cmbhp9k7h00hwuhebo0117w5m",
+          "name": "Cable Reverse Flye",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "Targets the rear deltoids and upper back, essential for shoulder stability and posture.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Rhomboids",
+            "Deltoid Posterior"
+          ]
+        }
+      ],
+      "summary": "A full-body workout targeting major muscle groups with a mix of compound and isolation exercises.",
+      "reasoning": "This full-body workout is structured to balance compound movements like the Hack Squat and Lat Pulldown with isolation exercises such as the Lying Leg Curl and Cable Reverse Flye. The sequence begins with larger muscle groups to maximize energy and strength, followed by isolation work to refine and target specific areas. The rep ranges and set schemes are designed to promote hypertrophy and strength, while techniques like partials and static stretches enhance muscle activation and flexibility."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759950496531",
+    "createdAt": "2025-10-08T19:08:16.531Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9sgvlp001euhqrkwc04r0c",
+          "name": "Seated Cable Row",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "This exercise targets the latissimus dorsi, providing a strong stimulus for back development. The use of long-length partials enhances muscle activation and endurance in the lats.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ]
+        },
+        {
+          "id": "cmb9rksjt001muhkpm7udm6hk",
+          "name": "Incline Dumbbell Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "Aimed at targeting the upper chest and shoulders, this exercise helps in developing the upper pectoral muscles. The incline position emphasizes the clavicular head of the pectoralis major.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Chest",
+            "Inner Chest"
+          ]
+        },
+        {
+          "id": "afb153d4-4bac-454f-9150-5b63956a729b",
+          "name": "Lying leg curl",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "This isolation exercise focuses on the hamstrings, crucial for knee flexion and overall leg development. Long-length partials increase time under tension, enhancing muscle growth.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Hamstrings",
+            "Gluteus Maximus"
+          ]
+        },
+        {
+          "id": "26559bad-a9ac-42c3-9032-58c83e31595d",
+          "name": "Smith machine squats",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 4,
+          "maxReps": 8,
+          "rpe": 7,
+          "explanation": "A compound movement that targets the quadriceps, glutes, and core. The Smith machine provides stability, allowing for focus on form and progressive overload.",
+          "equipment": "SMITH_MACHINE",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ]
+        },
+        {
+          "id": "cmbhp9k7h00hwuhebo0117w5m",
+          "name": "Cable Reverse Flye",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "This exercise targets the posterior deltoids and upper back, crucial for shoulder health and posture. Integrated partials increase muscle activation and endurance.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Rhomboids",
+            "Deltoid Posterior"
+          ]
+        },
+        {
+          "id": "cmb9qq63d002yuhbney21wsx7",
+          "name": "Crunch",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "Targets the rectus abdominis, enhancing core strength and stability. Myo-reps technique increases intensity and muscle fatigue, promoting abdominal muscle growth.",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Rectus Abdominis"
+          ]
+        }
+      ],
+      "summary": "This full-body workout incorporates compound and isolation exercises to target major muscle groups, enhancing strength and muscle growth.",
+      "reasoning": "The workout begins with compound movements like the Smith Machine Squat and Low Incline DB Press to maximize energy and strength output. Isolation exercises such as the Lying Leg Curl and Reverse Pec Deck are included to target specific muscles for balanced development. Techniques like long-length partials and myo-reps are employed to increase intensity and muscle activation, promoting hypertrophy and endurance."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759950605188",
+    "createdAt": "2025-10-08T19:10:05.188Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmbgvgej301aiuhun25l1ebou",
+          "name": "Cuffed Behind-The-Back Lateral Raise",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "This exercise targets the lateral deltoids, providing isolation to enhance shoulder width and definition.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ]
+        },
+        {
+          "id": "cmb9qpu7j001guhbnqyf17ma5",
+          "name": "T-Bar Row (Machine)",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "Combines rowing for back thickness with shrugs for upper trap development, supporting overall upper back strength.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Rhomboids"
+          ]
+        },
+        {
+          "id": "cmbhpawbo00hyuheb4qvwg6tt",
+          "name": "Machine Shoulder Press",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "A compound movement focusing on the anterior deltoids, promoting shoulder strength and hypertrophy.",
+          "equipment": "SMITH_MACHINE",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ]
+        },
+        {
+          "id": "3ba9c739-ccf7-4ace-b63c-a0a28e2baf6a",
+          "name": "Standing One-Leg Calf Raise With Dumbbell",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the gastrocnemius muscle, essential for calf development and lower leg strength.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Gastrocnemius"
+          ]
+        },
+        {
+          "id": "cmb9qq0h10028uhbn796a43ww",
+          "name": "Romanian Deadlift",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "Focuses on the posterior chain, emphasizing hamstring and glute engagement with controlled eccentric loading.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Hams",
+            "Glutes"
+          ]
+        },
+        {
+          "id": "cmb9qpwmr001ruhbncm8funac",
+          "name": "Concentration Curl",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "Isolates the biceps for peak contraction and hypertrophy, enhancing arm aesthetics.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ]
+        },
+        {
+          "id": "cmbgvmgmd01aluhunrhfh54nv",
+          "name": "Overhead Cable Triceps Extension (Bar)",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "Targets the long head of the triceps, crucial for overall arm size and strength.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ]
+        }
+      ],
+      "summary": "A comprehensive full-body workout targeting major muscle groups with a mix of compound and isolation exercises.",
+      "reasoning": "This workout is structured to cover all major muscle groups in a balanced manner. It begins with shoulder isolation to pre-fatigue the deltoids, followed by compound back and shoulder exercises to build strength and mass. Calf raises ensure lower leg development, while the Romanian deadlift variation emphasizes the posterior chain. The session concludes with arm supersets to maximize hypertrophy and endurance. The use of intensity techniques like myo-reps and drop sets promotes progressive overload and muscle adaptation."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759951063358",
+    "createdAt": "2025-10-08T19:17:43.358Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9qptfa001duhbn3bse0jfh",
+          "name": "Lat Pulldown Bar",
+          "createdBy": "system",
+          "sets": 4,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "This exercise targets the lats and mid-back, providing a compound movement to engage multiple muscle groups in the upper body.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Lats"
+          ]
+        },
+        {
+          "id": "cmb9n9erc001ouhfurv1swmuo",
+          "name": "Chest Press Machine",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "The decline angle emphasizes the lower part of the chest, ensuring balanced development across the pectoral muscles.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Chest"
+          ]
+        },
+        {
+          "id": "25d8afe1-6e4c-4700-8b6b-0a5b20755621",
+          "name": "Machine Hip Abduction",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "This exercise targets the gluteus medius and minimus, important for hip stability and lateral movement.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Gluteus Maximus",
+            "Gluteus Medius",
+            "Gluteus Minimus"
+          ]
+        },
+        {
+          "id": "cmbgyrccs0079uhebleh5rbhw",
+          "name": "Machine Hip Adduction",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "Focusing on the inner thigh muscles, this exercise complements the hip abduction for balanced hip strength.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Adductors"
+          ]
+        },
+        {
+          "id": "152b4bbf-d1f2-4291-84bf-29298e08f6a3",
+          "name": "Seated Side Lateral Raise",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the lateral deltoids, contributing to shoulder width and overall upper body aesthetics.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Lateral"
+          ]
+        },
+        {
+          "id": "cmb9qq7ki0035uhbn8cp2l93s",
+          "name": "Russian Twist",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 10,
+          "maxReps": 20,
+          "rpe": 7,
+          "explanation": "Engages the obliques and core, enhancing rotational strength and stability.",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Obliques"
+          ]
+        }
+      ],
+      "summary": "A full-body workout targeting major muscle groups with a mix of compound and isolation exercises.",
+      "reasoning": "This workout is structured to provide a balanced approach to full-body training. Starting with compound movements like the lat pulldown and chest press ensures major muscle groups are engaged early when energy levels are highest. Isolation exercises for the hips, quads, and shoulders follow, allowing for targeted muscle development. The inclusion of core work with the Russian Twist ensures comprehensive muscle engagement, promoting overall strength and stability. The rep ranges and set structures are designed to promote hypertrophy and endurance, with a focus on progressive overload through intensity techniques like long-length partials."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759951260692",
+    "createdAt": "2025-10-08T19:21:00.692Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "afb153d4-4bac-454f-9150-5b63956a729b",
+          "name": "Lying leg curl",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "This exercise targets the hamstrings, providing isolation work to complement compound movements.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Hamstrings",
+            "Gluteus Maximus"
+          ]
+        },
+        {
+          "id": "cmbhpm3os00i6uhebqyz1sy00",
+          "name": "Smith Machine Lunge",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 8,
+          "rpe": 7,
+          "explanation": "The Smith Machine Lunge is a compound movement focusing on the quads, glutes, and hamstrings, promoting lower body strength.",
+          "equipment": "SMITH_MACHINE",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ]
+        },
+        {
+          "id": "cmb9n9btl001cuhfu9fwazts3",
+          "name": "Pec Deck Machine",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "This exercise isolates the chest muscles, enhancing pectoral development and complementing compound chest exercises.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Chest"
+          ]
+        },
+        {
+          "id": "cmb9qpueq001huhbnw66pal0r",
+          "name": "Cable Row",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "A compound back exercise that targets the lats and upper back, promoting a balanced upper body.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Lats",
+            "Rhomboids"
+          ]
+        },
+        {
+          "id": "cmb9qq1xz002fuhbnb4abd5gn",
+          "name": "Standing Calf Raise",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "This exercise focuses on the calves, ensuring lower leg development and strength.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Calves"
+          ]
+        },
+        {
+          "id": "cmb9n9ce1001euhfu5ve9t1az",
+          "name": "Incline Cable Fly",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the rear deltoids, enhancing shoulder stability and posture.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Chest",
+            "Inner Chest"
+          ]
+        }
+      ],
+      "summary": "A full-body workout targeting major muscle groups with a mix of compound and isolation exercises.",
+      "reasoning": "This full-body workout is structured to target all major muscle groups, promoting balanced development. Compound exercises like the Smith Machine Lunge and Overhand Cable Row are prioritized for overall strength, while isolation exercises such as the Pec Deck and Rear Delt Cable Flye ensure specific muscle engagement. The rep range and set scheme are designed to promote hypertrophy, and the inclusion of techniques like dropsets and integrated partials enhances muscle fatigue and growth."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "example-1759951717024",
+    "createdAt": "2025-10-08T19:28:37.024Z",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9n9erc001ouhfurv1swmuo",
+          "name": "Chest Press Machine",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "The chest press machine is used to target the pectoral muscles in a controlled manner, allowing for a focus on muscle contraction without the need for stabilization.",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Chest"
+          ]
+        },
+        {
+          "id": "cmb9sh3k1001ouhqrsl8wu52a",
+          "name": "EZ-Bar Skullcrusher",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "This exercise targets the triceps, providing an effective way to build arm strength and size through isolation.",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ]
+        },
+        {
+          "id": "cmbgyu8j7007duhebyskxl83b",
+          "name": "Bayesian Cable Curl",
+          "createdBy": "system",
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 7,
+          "explanation": "The Bayesian curl is used to target the biceps with a focus on the long head, utilizing cable tension for constant resistance.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ]
+        },
+        {
+          "id": "cmbhpp4nz00ibuhebgfvnoc7f",
+          "name": "Triceps Diverging Pressdown (Long Rope or 2 Ropes)",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "This exercise isolates the triceps, allowing for a full range of motion and effective muscle engagement.",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ]
+        },
+        {
+          "id": "cmb9qpwey001quhbnpx5y5pbk",
+          "name": "Hammer Curl",
+          "createdBy": "system",
+          "sets": 2,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 7,
+          "explanation": "Hammer curls target the brachialis and brachioradialis, contributing to overall arm thickness and strength.",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Brachialis",
+            "Forearm Flexors"
+          ]
+        }
+      ],
+      "summary": "A full-body workout focusing on the chest, triceps, and biceps using a combination of compound and isolation exercises.",
+      "reasoning": "This workout is structured to target major upper body muscle groups with a mix of machine and free weight exercises. Starting with compound movements like the chest press machine allows for engaging multiple muscles, followed by isolation exercises such as the pec deck and skull crushers to focus on specific muscles. The inclusion of both triceps and biceps exercises ensures balanced arm development. The rep ranges are designed to promote hypertrophy, while the use of machines and cables provides stability and constant tension."
+    },
+    "notes": "",
+    "approved": true
+  },
+  {
+    "id": "bulk-1759952511021-2hy4akcoe",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9rktmb001nuhkp08fpd5im",
+          "name": "Deadlift",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Erector Spinae"
+          ],
+          "sets": 4,
+          "minReps": 4,
+          "maxReps": 6,
+          "rpe": 9,
+          "explanation": "Deadlifts engage the posterior chain, building strength in the back, glutes, and hamstrings.",
+          "matched": true
+        },
+        {
+          "id": "d8805489-d047-4686-b603-28516da470b6",
+          "name": "Barbell Bench Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 4,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 9,
+          "explanation": "Barbell bench press targets the chest, triceps, and shoulders, crucial for upper body strength.",
+          "matched": true
+        },
+        {
+          "id": "f72ba45d-0e40-4616-8123-553aae717547",
+          "name": "Barbell Row",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Barbell rows develop the upper back and lats, improving posture and pulling strength.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpzjn0024uhbnd1i74k6w",
+          "name": "Front Squat",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Quadriceps"
+          ],
+          "sets": 4,
+          "minReps": 4,
+          "maxReps": 6,
+          "rpe": 9,
+          "explanation": "Front squats emphasize the quads and core, promoting strength and stability in the lower body.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq4ss002suhbnkyqw1dgx",
+          "name": "Seated Dumbbell Overhead Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "This exercise targets the shoulders and triceps, enhancing upper body pressing power.",
+          "matched": true
+        }
+      ],
+      "summary": "A well-rounded strength workout focusing on foundational lifts to build overall strength.",
+      "reasoning": "This workout combines compound lifts for all major muscle groups, ensuring balanced development and strength gains. Warm-up sets should be done to prepare the body for heavy lifts."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T19:41:51.021Z"
+  },
+  {
+    "id": "bulk-1759952511021-0e2go8e0c",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9qpzc40023uhbnq83mjl8o",
+          "name": "Barbell Squat",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 4,
+          "minReps": 5,
+          "maxReps": 7,
+          "rpe": 9,
+          "explanation": "Barbell squats are fundamental for lower body strength, targeting quads, glutes, and core.",
+          "matched": true
+        },
+        {
+          "id": "0dcfc470-6181-41c7-9aef-b833abeeae13",
+          "name": "Incline Dumbbell Bench Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "This variation places more emphasis on the upper chest and shoulders.",
+          "matched": true
+        },
+        {
+          "id": "b2132b91-21ab-42ee-9423-3ff5857814a9",
+          "name": "Pull Up with a Supinated Grip",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ],
+          "sets": 3,
+          "minReps": 4,
+          "maxReps": 6,
+          "rpe": 9,
+          "explanation": "Pull-ups are excellent for developing the lats and biceps, contributing to upper body pulling strength.",
+          "matched": true
+        },
+        {
+          "id": "fc34123f-e951-4bfd-9a2a-26e0725eb398",
+          "name": "Dumbbell Deadlift",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus",
+            "Gluteus Medius",
+            "Gluteus Minimus"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "This exercise focuses on the posterior chain, enhancing lower body strength and stability.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq4ss002suhbnkyqw1dgx",
+          "name": "Seated Dumbbell Overhead Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Targets the shoulders and triceps, important for overhead strength.",
+          "matched": true
+        }
+      ],
+      "summary": "A comprehensive session designed to hit all major muscle groups with a focus on strength.",
+      "reasoning": "This workout uses compound movements to maximize muscle engagement and strength development. A proper warm-up is essential to safely handle heavy weights."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T19:41:51.021Z"
+  },
+  {
+    "id": "bulk-1759952511021-vvax8g9fo",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9rkvev001ruhkp0vgdlxpd",
+          "name": "Trap Bar Deadlift",
+          "equipment": "TRAP_BAR",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 4,
+          "minReps": 5,
+          "maxReps": 7,
+          "rpe": 9,
+          "explanation": "Trap bar deadlifts are great for building lower body and back strength with less strain on the lower back.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq32b002kuhbnwlx4ajq6",
+          "name": "Barbell Overhead Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "This exercise enhances shoulder and core strength, crucial for upper body stability.",
+          "matched": true
+        },
+        {
+          "id": "c28a8602-da85-46a8-bdb3-1c4402487241",
+          "name": "Bent-Over Lateral Raise",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Posterior"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "Focuses on the rear delts and upper back for balanced shoulder development.",
+          "matched": true
+        },
+        {
+          "id": "cmb9rksbw001luhkps75y2qu9",
+          "name": "Dumbbell Bench Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Pectoralis Major"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Targets the chest, shoulders, and triceps, essential for upper body pressing strength.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpw6o001puhbne3czmruq",
+          "name": "Barbell Curl",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Builds bicep strength, important for upper body pulling movements.",
+          "matched": true
+        }
+      ],
+      "summary": "An effective strength workout that targets major muscle groups through compound exercises.",
+      "reasoning": "Incorporates multi-joint movements to engage large muscle groups effectively. Warm-up is crucial to prepare joints and muscles for heavy lifting."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T19:41:51.021Z"
+  },
+  {
+    "id": "bulk-1759952511021-i2hwq4il7",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9qq0h10028uhbn796a43ww",
+          "name": "Romanian Deadlift",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 4,
+          "minReps": 5,
+          "maxReps": 7,
+          "rpe": 9,
+          "explanation": "Targets the hamstrings and glutes, essential for posterior chain development.",
+          "matched": true
+        },
+        {
+          "id": "d3e4fdc1-b8c2-4b8a-851d-ca1b2571280c",
+          "name": "Seated Barbell Shoulder Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Develops shoulder strength and stability, crucial for overhead pressing.",
+          "matched": true
+        },
+        {
+          "id": "f72ba45d-0e40-4616-8123-553aae717547",
+          "name": "Barbell Row",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Strengthens the upper back and lats, important for pulling exercises.",
+          "matched": true
+        },
+        {
+          "id": "cmb9rkqiq001duhkpia6yw8vj",
+          "name": "Incline Dumbbell Fly",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "Targets the chest, enhancing muscle development and flexibility.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq08o0027uhbn25oyifm2",
+          "name": "Dumbbel Walking Lunges",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Enhances leg strength and stability, engaging quads, glutes, and hamstrings.",
+          "matched": true
+        }
+      ],
+      "summary": "A balanced workout focusing on strength and stabilization of major muscle groups.",
+      "reasoning": "Integrates exercises that promote strength and functional movement patterns. A thorough warm-up is key to prevent injuries and optimize performance."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T19:41:51.021Z"
+  },
+  {
+    "id": "bulk-1759952511021-t3lwgbnfm",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "d8805489-d047-4686-b603-28516da470b6",
+          "name": "Barbell Bench Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 4,
+          "minReps": 5,
+          "maxReps": 7,
+          "rpe": 9,
+          "explanation": "Focuses on upper body strength, targeting the chest, triceps, and shoulders.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpzc40023uhbnq83mjl8o",
+          "name": "Barbell Squat",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 4,
+          "minReps": 5,
+          "maxReps": 7,
+          "rpe": 9,
+          "explanation": "Squats are essential for building lower body strength and core stability.",
+          "matched": true
+        },
+        {
+          "id": "b2132b91-21ab-42ee-9423-3ff5857814a9",
+          "name": "Pull Up with a Supinated Grip",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ],
+          "sets": 3,
+          "minReps": 4,
+          "maxReps": 6,
+          "rpe": 9,
+          "explanation": "Pull-ups enhance upper back and bicep strength, crucial for pulling movements.",
+          "matched": true
+        },
+        {
+          "id": "3e5c0211-fe16-4614-ba82-400ff1a43fe4",
+          "name": "Dumbbell Overhead Triceps Extension",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "Targets the triceps, important for arm strength and stability in pressing exercises.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq4ss002suhbnkyqw1dgx",
+          "name": "Seated Dumbbell Overhead Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Builds shoulder strength and stability, essential for overhead movements.",
+          "matched": true
+        }
+      ],
+      "summary": "Comprehensive strength workout focusing on compound lifts for full-body engagement.",
+      "reasoning": "Uses a mix of compound and isolation exercises to target all major muscle groups. Proper warm-up sets are necessary to handle the heavy loads safely."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T19:41:51.021Z"
+  },
+  {
+    "id": "bulk-1759952511021-ds1jbegut",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9rktmb001nuhkp08fpd5im",
+          "name": "Deadlift",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Erector Spinae"
+          ],
+          "sets": 4,
+          "minReps": 4,
+          "maxReps": 6,
+          "rpe": 9,
+          "explanation": "Deadlifts are key for building overall back, leg, and core strength.",
+          "matched": true
+        },
+        {
+          "id": "0dcfc470-6181-41c7-9aef-b833abeeae13",
+          "name": "Incline Dumbbell Bench Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Engages the upper chest and shoulders, essential for balanced upper body strength.",
+          "matched": true
+        },
+        {
+          "id": "f72ba45d-0e40-4616-8123-553aae717547",
+          "name": "Barbell Row",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Targets the upper back and lats, improving posture and pulling power.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq32b002kuhbnwlx4ajq6",
+          "name": "Barbell Overhead Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Strengthens the shoulders and core, critical for overhead stability.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq08o0027uhbn25oyifm2",
+          "name": "Dumbbel Walking Lunges",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Enhances leg strength and stability, engaging multiple lower body muscles.",
+          "matched": true
+        }
+      ],
+      "summary": "A full-body session designed to build strength through key compound movements.",
+      "reasoning": "Emphasizes multi-joint exercises to ensure comprehensive muscle development. Warm-up activities are crucial to prime the body for lifting."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T19:41:51.021Z"
+  },
+  {
+    "id": "bulk-1759952511021-tdj0pw0dw",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9qq0h10028uhbn796a43ww",
+          "name": "Romanian Deadlift",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Hams",
+            "Glutes"
+          ],
+          "sets": 4,
+          "minReps": 5,
+          "maxReps": 7,
+          "rpe": 9,
+          "explanation": "Provides a safer alternative for building lower body and back strength compared to traditional deadlifts.",
+          "matched": true
+        },
+        {
+          "id": "cmb9rksbw001luhkps75y2qu9",
+          "name": "Dumbbell Bench Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Pectoralis Major"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Targets the chest and triceps, crucial for upper body pushing strength.",
+          "matched": true
+        },
+        {
+          "id": "b2132b91-21ab-42ee-9423-3ff5857814a9",
+          "name": "Pull Up with a Supinated Grip",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ],
+          "sets": 3,
+          "minReps": 4,
+          "maxReps": 6,
+          "rpe": 9,
+          "explanation": "Focuses on the lats and biceps, essential for upper body pulling power.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq32b002kuhbnwlx4ajq6",
+          "name": "Barbell Overhead Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Develops shoulder and core strength, key for overhead lifting movements.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpw6o001puhbne3czmruq",
+          "name": "Barbell Curl",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Strengthens the biceps, important for arm strength and aesthetics.",
+          "matched": true
+        }
+      ],
+      "summary": "A well-rounded strength workout focusing on compound lifts and overall muscle engagement.",
+      "reasoning": "Incorporates exercises that target major muscle groups through compound movements. A thorough warm-up is essential to maximize performance and prevent injuries."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T19:41:51.021Z"
+  },
+  {
+    "id": "bulk-1759952511021-b1bwl7gly",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9qq0h10028uhbn796a43ww",
+          "name": "Romanian Deadlift",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 4,
+          "minReps": 5,
+          "maxReps": 7,
+          "rpe": 9,
+          "explanation": "Emphasizes hamstring and glute strength, crucial for posterior chain development.",
+          "matched": true
+        },
+        {
+          "id": "cmb9rkr1o001fuhkp9srs3wfl",
+          "name": "Incline Bench Press (Barbell)",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Targets the upper chest and shoulders, promoting balanced upper body strength.",
+          "matched": true
+        },
+        {
+          "id": "d3e4fdc1-b8c2-4b8a-851d-ca1b2571280c",
+          "name": "Seated Barbell Shoulder Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Enhances shoulder strength, important for overhead lifting stability.",
+          "matched": true
+        },
+        {
+          "id": "f72ba45d-0e40-4616-8123-553aae717547",
+          "name": "Barbell Row",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Builds upper back and lat strength, crucial for pulling movements.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq08o0027uhbn25oyifm2",
+          "name": "Dumbbel Walking Lunges",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Aids in developing leg strength and stability, engaging several lower body muscles.",
+          "matched": true
+        }
+      ],
+      "summary": "A strength-focused workout utilizing compound lifts to target all major muscle groups.",
+      "reasoning": "Focuses on multi-joint exercises that engage large muscle groups, promoting overall strength. Warm-up sets are critical to prepare the body for intense lifting."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T19:41:51.021Z"
+  },
+  {
+    "id": "bulk-1759952511021-grzlumha5",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9rkvev001ruhkp0vgdlxpd",
+          "name": "Trap Bar Deadlift",
+          "equipment": "TRAP_BAR",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 4,
+          "minReps": 5,
+          "maxReps": 7,
+          "rpe": 9,
+          "explanation": "Builds lower body and back strength, offering a safer alternative to traditional deadlifts.",
+          "matched": true
+        },
+        {
+          "id": "0dcfc470-6181-41c7-9aef-b833abeeae13",
+          "name": "Incline Dumbbell Bench Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Targets the upper chest and shoulders, promoting balanced upper body strength.",
+          "matched": true
+        },
+        {
+          "id": "b2132b91-21ab-42ee-9423-3ff5857814a9",
+          "name": "Pull Up with a Supinated Grip",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ],
+          "sets": 3,
+          "minReps": 4,
+          "maxReps": 6,
+          "rpe": 9,
+          "explanation": "Enhances upper back and bicep strength, crucial for pulling movements.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq4ss002suhbnkyqw1dgx",
+          "name": "Seated Dumbbell Overhead Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Builds shoulder strength and stability, essential for overhead exercises.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpw6o001puhbne3czmruq",
+          "name": "Barbell Curl",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Focuses on the biceps, contributing to arm strength and aesthetics.",
+          "matched": true
+        }
+      ],
+      "summary": "An effective strength workout focusing on compound exercises to engage all major muscle groups.",
+      "reasoning": "Incorporates multi-joint movements for comprehensive muscle activation. A proper warm-up is crucial to prepare the body for heavy lifts and prevent injuries."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T19:41:51.021Z"
+  },
+  {
+    "id": "bulk-1759952511021-7qjwdny3i",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9rkvev001ruhkp0vgdlxpd",
+          "name": "Trap Bar Deadlift",
+          "equipment": "TRAP_BAR",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 4,
+          "minReps": 5,
+          "maxReps": 7,
+          "rpe": 9,
+          "explanation": "Builds lower body and back strength, offering a safer alternative to traditional deadlifts.",
+          "matched": true
+        },
+        {
+          "id": "0dcfc470-6181-41c7-9aef-b833abeeae13",
+          "name": "Incline Dumbbell Bench Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Targets the upper chest and shoulders, promoting balanced upper body strength.",
+          "matched": true
+        },
+        {
+          "id": "b2132b91-21ab-42ee-9423-3ff5857814a9",
+          "name": "Pull Up with a Supinated Grip",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ],
+          "sets": 3,
+          "minReps": 4,
+          "maxReps": 6,
+          "rpe": 9,
+          "explanation": "Enhances upper back and bicep strength, crucial for pulling movements.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq4ss002suhbnkyqw1dgx",
+          "name": "Seated Dumbbell Overhead Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Builds shoulder strength and stability, essential for overhead exercises.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpw6o001puhbne3czmruq",
+          "name": "Barbell Curl",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 6,
+          "maxReps": 8,
+          "rpe": 8,
+          "explanation": "Focuses on the biceps, contributing to arm strength and aesthetics.",
+          "matched": true
+        }
+      ],
+      "summary": "An effective strength workout focusing on compound exercises to engage all major muscle groups.",
+      "reasoning": "Incorporates multi-joint movements for comprehensive muscle activation. A proper warm-up is crucial to prepare the body for heavy lifts and prevent injuries."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T19:41:51.021Z"
+  },
+  {
+    "id": "bulk-1759954586756-tnczar017",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9qpzc40023uhbnq83mjl8o",
+          "name": "Barbell Squat",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "A compound exercise targeting the lower body, particularly the quadriceps and glutes.",
+          "matched": true
+        },
+        {
+          "id": "cmb9rksbw001luhkps75y2qu9",
+          "name": "Dumbbell Bench Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Pectoralis Major"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the chest and triceps, providing upper body strength and hypertrophy.",
+          "matched": true
+        },
+        {
+          "id": "cmb9sgvlp001euhqrkwc04r0c",
+          "name": "Seated Cable Row",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Engages the back muscles, enhancing posture and pulling strength.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq3a2002luhbnag7vdkkx",
+          "name": "Dumbbell Shoulder Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Focuses on the deltoids, promoting shoulder stability and hypertrophy.",
+          "matched": true
+        }
+      ],
+      "summary": "A balanced full body workout focusing on major muscle groups with compound movements.",
+      "reasoning": "Designed to target major muscle groups for hypertrophy using compound exercises for overall strength and muscle growth."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:16:26.756Z"
+  },
+  {
+    "id": "bulk-1759954586756-xax0b7sug",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9rktmb001nuhkp08fpd5im",
+          "name": "Deadlift",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Erector Spinae"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "An essential lift for building lower back, glute, and hamstring strength.",
+          "matched": true
+        },
+        {
+          "id": "0dcfc470-6181-41c7-9aef-b833abeeae13",
+          "name": "Incline Dumbbell Bench Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the upper chest and shoulders, adding variety to chest workouts.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qptfa001duhbn3bse0jfh",
+          "name": "Lat Pulldown Bar",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Focuses on the latissimus dorsi, building width in the back.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpztf0025uhbngt4723mz",
+          "name": "Leg Press",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Quadriceps",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "A lower body exercise emphasizing quadriceps and glutes.",
+          "matched": true
+        }
+      ],
+      "summary": "A comprehensive full body session designed to build muscle mass efficiently.",
+      "reasoning": "Incorporates major lifts for a balanced approach to hypertrophy, ensuring all major muscle groups are engaged."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:16:26.756Z"
+  },
+  {
+    "id": "bulk-1759954586756-cidzfc3zt",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9rkvev001ruhkp0vgdlxpd",
+          "name": "Trap Bar Deadlift",
+          "equipment": "TRAP_BAR",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "Provides leg and back development with reduced lower back strain.",
+          "matched": true
+        },
+        {
+          "id": "a89f38fc-beee-47c9-8e83-213c04ceca41",
+          "name": "Dumbbell Step Up",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Quadriceps",
+            "Gluteus Maximus",
+            "Gluteus Medius",
+            "Gluteus Minimus"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Enhances unilateral leg strength and balance, targeting the quadriceps and glutes.",
+          "matched": true
+        },
+        {
+          "id": "f72ba45d-0e40-4616-8123-553aae717547",
+          "name": "Barbell Row",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "Strengthens the upper back and improves pulling power.",
+          "matched": true
+        },
+        {
+          "id": "3e5c0211-fe16-4614-ba82-400ff1a43fe4",
+          "name": "Dumbbell Overhead Triceps Extension",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 8,
+          "explanation": "Isolation exercise for the triceps, enhancing arm strength.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq63d002yuhbney21wsx7",
+          "name": "Crunch",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Rectus Abdominis"
+          ],
+          "sets": 3,
+          "minReps": 15,
+          "maxReps": 20,
+          "rpe": 7,
+          "explanation": "Targets the abdominal muscles for core strength and definition.",
+          "matched": true
+        }
+      ],
+      "summary": "Focused on developing full body strength and hypertrophy with both compound and isolation exercises.",
+      "reasoning": "Combines compound and isolation exercises to ensure muscle growth across all major areas, including core stabilization."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:16:26.756Z"
+  },
+  {
+    "id": "bulk-1759954586756-9tpsfcii7",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "26559bad-a9ac-42c3-9032-58c83e31595d",
+          "name": "Smith machine squats",
+          "equipment": "SMITH_MACHINE",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Provides stability and focus on the quadriceps and glutes.",
+          "matched": true
+        },
+        {
+          "id": "d8805489-d047-4686-b603-28516da470b6",
+          "name": "Barbell Bench Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "A classic chest exercise that also targets the triceps and shoulders.",
+          "matched": true
+        },
+        {
+          "id": "cmbhp7mfr00huuhebzks7nikz",
+          "name": "Lean-Back Lat Pulldown",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Aids in building a wide back and improving lat strength.",
+          "matched": true
+        },
+        {
+          "id": "5c2fb302-8fd9-4bd1-aced-5e7d4a01715c",
+          "name": "Dumbbell Shrugs",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Trapezius"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the trapezius muscles, contributing to a strong upper back.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq6ij0030uhbny0smdgkb",
+          "name": "Plank",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Transverse Abdominis"
+          ],
+          "sets": 3,
+          "minReps": 30,
+          "maxReps": 60,
+          "rpe": 7,
+          "explanation": "Core stabilization exercise that builds endurance and strength.",
+          "matched": true
+        }
+      ],
+      "summary": "A synergistic workout that incorporates stability and strength for hypertrophy.",
+      "reasoning": "This selection allows for balanced muscle growth and endurance, emphasizing compound lifts for maximum hypertrophy."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:16:26.756Z"
+  },
+  {
+    "id": "bulk-1759954586756-9ndf8gdtt",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9qq0h10028uhbn796a43ww",
+          "name": "Romanian Deadlift",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "Focuses on the posterior chain, particularly the hamstrings and glutes.",
+          "matched": true
+        },
+        {
+          "id": "cmb9rksbw001luhkps75y2qu9",
+          "name": "Dumbbell Bench Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Pectoralis Major"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Provides chest and triceps development with greater range of motion.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpu7j001guhbnqyf17ma5",
+          "name": "T-Bar Row (Machine)",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the mid-back, improving posture and pulling strength.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq50c002tuhbnpx6u4dse",
+          "name": "Cable Lateral Raise",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Side Delts"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Isolates the shoulders, contributing to a balanced upper body.",
+          "matched": true
+        },
+        {
+          "id": "751eab28-26b1-41d2-a7c9-a8d83399920d",
+          "name": "Lying Triceps Extension EZ bar",
+          "equipment": "EZ_BAR",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the triceps, enhancing arm definition and strength.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq8eh0039uhbn94xjms5l",
+          "name": "Flutter Kicks",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Rectus Abdominis"
+          ],
+          "sets": 3,
+          "minReps": 15,
+          "maxReps": 20,
+          "rpe": 7,
+          "explanation": "Engages the core and lower abdominal muscles for endurance.",
+          "matched": true
+        }
+      ],
+      "summary": "A diverse workout focusing on posterior chain and upper body strength.",
+      "reasoning": "Combines compound and isolation exercises for comprehensive muscle development and core stability."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:16:26.756Z"
+  },
+  {
+    "id": "bulk-1759954586756-cvkr3dlmz",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmbgvael101aduhunz6ejii8p",
+          "name": "Snatch-Grip RDL",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Erector Spinae",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "Engages the entire posterior chain, enhancing lower back and hamstring strength.",
+          "matched": true
+        },
+        {
+          "id": "cmbhpdgoc00i1uheb95zu3o4q",
+          "name": "Low-Incline Dumbbell Flye",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Deltoid Anterior"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Provides an intense stretch and contraction for the chest muscles.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpueq001huhbnw66pal0r",
+          "name": "Cable Row",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Strengthens the upper back and biceps, improving posture.",
+          "matched": true
+        },
+        {
+          "id": "3e5c0211-fe16-4614-ba82-400ff1a43fe4",
+          "name": "Dumbbell Overhead Triceps Extension",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the triceps, enhancing arm strength and definition.",
+          "matched": true
+        },
+        {
+          "id": "a1070b2b-5f3d-425d-b103-f158d194d83b",
+          "name": "Dumbbell Front Raise",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Isolates the front deltoids, enhancing shoulder definition.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq6qb0031uhbnjah03kjs",
+          "name": "Side Plank",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Obliques",
+            "Transverse Abdominis"
+          ],
+          "sets": 3,
+          "minReps": 30,
+          "maxReps": 60,
+          "rpe": 7,
+          "explanation": "Strengthens the oblique muscles, improving core stability.",
+          "matched": true
+        }
+      ],
+      "summary": "A synergistic full body workout focusing on both strength and definition.",
+      "reasoning": "Targets major muscle groups with a combination of compound and isolation exercises, ensuring balanced hypertrophy."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:16:26.756Z"
+  },
+  {
+    "id": "bulk-1759954586756-amfv8a64f",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9qpzc40023uhbnq83mjl8o",
+          "name": "Barbell Squat",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "Core lower body exercise for strength and hypertrophy of quadriceps and glutes.",
+          "matched": true
+        },
+        {
+          "id": "0dcfc470-6181-41c7-9aef-b833abeeae13",
+          "name": "Incline Dumbbell Bench Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Focuses on upper chest and shoulder strength, promoting hypertrophy.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qptfa001duhbn3bse0jfh",
+          "name": "Lat Pulldown Bar",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Develops back width and overall muscle mass.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpueq001huhbnw66pal0r",
+          "name": "Cable Row",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Enhances back thickness and pulling strength.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq3a2002luhbnag7vdkkx",
+          "name": "Dumbbell Shoulder Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the deltoids, promoting shoulder stability and growth.",
+          "matched": true
+        },
+        {
+          "id": "cmbgvmy7e01amuhun5gm9phwv",
+          "name": "Triceps Pressdown (Straight Bar)",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Isolates the triceps for arm strength and hypertrophy.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq63d002yuhbney21wsx7",
+          "name": "Crunch",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Rectus Abdominis"
+          ],
+          "sets": 3,
+          "minReps": 15,
+          "maxReps": 20,
+          "rpe": 7,
+          "explanation": "Strengthens the abdominal muscles, improving core stability.",
+          "matched": true
+        }
+      ],
+      "summary": "A comprehensive workout targeting all major muscle groups for balanced development.",
+      "reasoning": "Incorporates both compound and isolation exercises to ensure complete muscle engagement and growth."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:16:26.756Z"
+  },
+  {
+    "id": "bulk-1759954586756-9kwos5rl1",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmbhpm3os00i6uhebqyz1sy00",
+          "name": "Smith Machine Lunge",
+          "equipment": "SMITH_MACHINE",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Enhances leg strength and balance, targeting the quadriceps and glutes.",
+          "matched": true
+        },
+        {
+          "id": "d8805489-d047-4686-b603-28516da470b6",
+          "name": "Barbell Bench Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Serratus Anterior",
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "Classic chest exercise that also targets the triceps and shoulders.",
+          "matched": true
+        },
+        {
+          "id": "5c6ff560-4144-4388-b5f6-bb56b355d3bc",
+          "name": "Cable lat pullover",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the lats, contributing to a well-rounded back.",
+          "matched": true
+        },
+        {
+          "id": "5c2fb302-8fd9-4bd1-aced-5e7d4a01715c",
+          "name": "Dumbbell Shrugs",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Trapezius"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Focuses on the trapezius muscles, enhancing upper back strength.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq4ss002suhbnkyqw1dgx",
+          "name": "Seated Dumbbell Overhead Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Strengthens the shoulders, improving upper body stability.",
+          "matched": true
+        },
+        {
+          "id": "3e5c0211-fe16-4614-ba82-400ff1a43fe4",
+          "name": "Dumbbell Overhead Triceps Extension",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Isolates the triceps, enhancing arm strength and definition.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq7560033uhbnqgal6ssz",
+          "name": "Hanging Leg Raise",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Rectus Abdominis"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the lower abdominals, improving core strength.",
+          "matched": true
+        }
+      ],
+      "summary": "A thorough workout designed for full body muscular development and endurance.",
+      "reasoning": "Combines compound movements with isolation exercises for a complete hypertrophy routine."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:16:26.756Z"
+  },
+  {
+    "id": "bulk-1759954586756-oxjvxdctu",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9rktmb001nuhkp08fpd5im",
+          "name": "Deadlift",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Trapezius",
+            "Erector Spinae"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 8,
+          "explanation": "A full body exercise that emphasizes the posterior chain.",
+          "matched": true
+        },
+        {
+          "id": "cmb9rkr1o001fuhkp9srs3wfl",
+          "name": "Incline Bench Press (Barbell)",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the upper chest and shoulders, promoting hypertrophy.",
+          "matched": true
+        },
+        {
+          "id": "cmbhp66ty00hsuhebv6kdk0vn",
+          "name": "Super-ROM Overhand Cable Row",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Enhances back thickness and pulling strength.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq3a2002luhbnag7vdkkx",
+          "name": "Dumbbell Shoulder Press",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the deltoids, promoting shoulder stability and growth.",
+          "matched": true
+        },
+        {
+          "id": null,
+          "name": "Triceps Pressdown (V-Bar)",
+          "equipment": null,
+          "muscleGroups": [],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Isolates the triceps for arm strength and hypertrophy.",
+          "matched": false
+        },
+        {
+          "id": "ca2a599b-b11e-4468-a6bd-3c54558b9d87",
+          "name": "Crunch Machine",
+          "equipment": "MACHINE",
+          "muscleGroups": [
+            "Rectus Abdominis",
+            "Obliques",
+            "Transverse Abdominis"
+          ],
+          "sets": 3,
+          "minReps": 15,
+          "maxReps": 20,
+          "rpe": 7,
+          "explanation": "Targets the abdominal muscles for core strength and definition.",
+          "matched": true
+        },
+        {
+          "id": "251ae794-fd1c-4e7d-9e49-d3ccb1fc1104",
+          "name": "Dumbbell Bent Over Rows",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Strengthens the upper back and biceps, improving posture.",
+          "matched": true
+        },
+        {
+          "id": "a89f38fc-beee-47c9-8e83-213c04ceca41",
+          "name": "Dumbbell Step Up",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Quadriceps",
+            "Gluteus Maximus",
+            "Gluteus Medius",
+            "Gluteus Minimus"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Enhances unilateral leg strength and balance, targeting the quadriceps and glutes.",
+          "matched": true
+        }
+      ],
+      "summary": "An intense workout targeting all major muscle groups with a focus on hypertrophy.",
+      "reasoning": "Incorporates compound lifts and accessory exercises for complete muscle engagement and growth."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:16:26.756Z"
+  },
+  {
+    "id": "bulk-1759954586756-km593hnlp",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "26559bad-a9ac-42c3-9032-58c83e31595d",
+          "name": "Smith machine squats",
+          "equipment": "SMITH_MACHINE",
+          "muscleGroups": [
+            "Quadriceps",
+            "Hamstrings",
+            "Gluteus Maximus"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Provides stability and focus on the quadriceps and glutes.",
+          "matched": true
+        },
+        {
+          "id": "cmb9sh7d4001yuhqrktypnp94",
+          "name": "Reverse Grip Triceps Pushdown",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the triceps with a unique grip for enhanced muscle activation.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq32b002kuhbnwlx4ajq6",
+          "name": "Barbell Overhead Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Deltoid Anterior",
+            "Deltoid Lateral"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Strengthens the shoulders and upper body, promoting hypertrophy.",
+          "matched": true
+        },
+        {
+          "id": "cmb9sgvlp001euhqrkwc04r0c",
+          "name": "Seated Cable Row",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Engages the back muscles, enhancing posture and pulling strength.",
+          "matched": true
+        },
+        {
+          "id": "567ac01c-7c50-4044-9994-abdfd92695ae",
+          "name": "Low Cable Chest fly",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Pectoralis Minor"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Isolates the chest muscles, providing a thorough stretch and contraction.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpyew001zuhbn5z0ct2cu",
+          "name": "Reverse Curl",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Brachialis",
+            "Forearm Flexors"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the forearms and biceps, enhancing grip strength.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq7560033uhbnqgal6ssz",
+          "name": "Hanging Leg Raise",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Rectus Abdominis"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the lower abdominals, improving core strength.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qq6ij0030uhbny0smdgkb",
+          "name": "Plank",
+          "equipment": "BODYWEIGHT",
+          "muscleGroups": [
+            "Transverse Abdominis"
+          ],
+          "sets": 3,
+          "minReps": 30,
+          "maxReps": 60,
+          "rpe": 7,
+          "explanation": "Core stabilization exercise that builds endurance and strength.",
+          "matched": true
+        }
+      ],
+      "summary": "A holistic full body workout that focuses on major muscle groups with balanced intensity.",
+      "reasoning": "Combines compound movements with isolation exercises to ensure comprehensive muscle development and endurance."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:16:26.756Z"
+  },
+  {
+    "id": "bulk-1759955001353-1zs9x7bd1",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9qpwmr001ruhbncm8funac",
+          "name": "Concentration Curl",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the biceps with a focus on isolation and peak contraction.",
+          "matched": true
+        },
+        {
+          "id": "cmbgvmy7e01amuhun5gm9phwv",
+          "name": "Triceps Pressdown (Straight Bar)",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Works the triceps, emphasizing the long head for balanced development.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpwey001quhbnpx5y5pbk",
+          "name": "Hammer Curl",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Brachialis",
+            "Forearm Flexors"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Engages the brachialis and forearms, adding thickness to the upper arm.",
+          "matched": true
+        },
+        {
+          "id": "cmb9sh74j001xuhqriqtzfeld",
+          "name": "Cable Triceps Kickbacks",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Isolates the triceps with a focus on the lateral head.",
+          "matched": true
+        }
+      ],
+      "summary": "A balanced arms workout focusing on biceps and triceps isolation to enhance hypertrophy.",
+      "reasoning": "This workout emphasizes isolation exercises to maximize muscle engagement and hypertrophy."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:23:21.353Z"
+  },
+  {
+    "id": "bulk-1759955001353-ba89fk7uq",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "3e5c0211-fe16-4614-ba82-400ff1a43fe4",
+          "name": "Dumbbell Overhead Triceps Extension",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the long head of the triceps for maximum stretch.",
+          "matched": true
+        },
+        {
+          "id": "cmbhpppuv00icuheba7cnrmnz",
+          "name": "Incline DB Stretch-Curl",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Enhances biceps stretch and contraction, focusing on peak contraction.",
+          "matched": true
+        },
+        {
+          "id": "cmb9sh4g9001ruhqrdiqya25y",
+          "name": "Cable Rope Tricep Pushdown",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Engages the triceps with varied grip for balanced development.",
+          "matched": true
+        },
+        {
+          "id": "5c7e237d-892f-4350-af44-cdda2141ff96",
+          "name": "Reverse Barbell Curl",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Biceps Brachii",
+            "Brachialis",
+            "Brachioradialis"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Focuses on brachialis and forearm extensors, adding arm thickness.",
+          "matched": true
+        }
+      ],
+      "summary": "This workout combines biceps and triceps exercises with a focus on stretch and contraction.",
+      "reasoning": "Incorporates exercises that promote stretch and contraction for optimal hypertrophy."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:23:21.353Z"
+  },
+  {
+    "id": "bulk-1759955001353-ose20o6eq",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "751eab28-26b1-41d2-a7c9-a8d83399920d",
+          "name": "Lying Triceps Extension EZ bar",
+          "equipment": "EZ_BAR",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 9,
+          "explanation": "Provides a deep stretch on the triceps, focusing on the long head.",
+          "matched": true
+        },
+        {
+          "id": "cf2d2b7e-fdf2-408b-82f9-1d111655e2d9",
+          "name": "Alternating Dumbbell Curl",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Biceps Brachii",
+            "Brachialis",
+            "Brachioradialis"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Promotes unilateral biceps work, improving symmetry and balance.",
+          "matched": true
+        },
+        {
+          "id": null,
+          "name": "Triceps Pushdown (EZ-Bar)",
+          "equipment": null,
+          "muscleGroups": [],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the triceps with an emphasis on the medial head.",
+          "matched": false
+        },
+        {
+          "id": null,
+          "name": "Incline Bench Dumbbell Curl",
+          "equipment": null,
+          "muscleGroups": [],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Engages the long head of the biceps for enhanced peak.",
+          "matched": false
+        },
+        {
+          "id": "cmb9qpz2c0022uhbnb6zknxr1",
+          "name": "Reverse Wrist Curl",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Forearm Flexors"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Strengthens forearm extensors for balanced arm development.",
+          "matched": true
+        }
+      ],
+      "summary": "A comprehensive arm workout focusing on both biceps and triceps with forearm engagement.",
+      "reasoning": "Utilizes a mix of unilateral and bilateral movements for balanced hypertrophy."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:23:21.353Z"
+  },
+  {
+    "id": "bulk-1759955001353-711mnanrq",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmb9sh6gs001uuhqrmg3o9u20",
+          "name": "Overhead Cable Triceps Extension",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Maximizes triceps stretch and contraction, focusing on the long head.",
+          "matched": true
+        },
+        {
+          "id": null,
+          "name": "Cable Hammer Curl",
+          "equipment": null,
+          "muscleGroups": [],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the brachialis and biceps for enhanced arm thickness.",
+          "matched": false
+        },
+        {
+          "id": "cmb9n9djx001juhfuz3r84iiz",
+          "name": "Close Grip Bench Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Pectoralis Major",
+            "Pectoralis Minor",
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 9,
+          "explanation": "Focuses on triceps with compound movement for strength and size.",
+          "matched": true
+        },
+        {
+          "id": "29f2c9a2-ee7b-4269-8d46-fe76f3a20678",
+          "name": "Supinated Grip Seated Cable Row",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Latissimus Dorsi",
+            "Rhomboids",
+            "Biceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Engages the biceps as a supporting muscle in a compound movement.",
+          "matched": true
+        },
+        {
+          "id": "cmb9sh3ch001nuhqr2kelypgd",
+          "name": "Overhead Tricep Extension (Dumbbell)",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Isolates the triceps, allowing for maximum stretch and contraction.",
+          "matched": true
+        },
+        {
+          "id": null,
+          "name": "Barbell Wrist Curl",
+          "equipment": null,
+          "muscleGroups": [],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Enhances forearm strength and grip, supporting overall arm development.",
+          "matched": false
+        }
+      ],
+      "summary": "Focuses on triceps and biceps with a mix of compound and isolation exercises.",
+      "reasoning": "Combines varied grips and positions for comprehensive arm training."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:23:21.353Z"
+  },
+  {
+    "id": "bulk-1759955001353-nzg5rex0v",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmbhpo4ve00i9uhebw13uwv6s",
+          "name": "Cable Skull Crusher",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 8,
+          "maxReps": 10,
+          "rpe": 9,
+          "explanation": "Targets the triceps with a focus on the long head and contraction.",
+          "matched": true
+        },
+        {
+          "id": "580a8a31-885b-4095-99b7-bad748db906a",
+          "name": "Standing High Cable Curl",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Biceps Brachii",
+            "Brachialis",
+            "Brachioradialis"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Engages the biceps with constant tension throughout the movement.",
+          "matched": true
+        },
+        {
+          "id": "558e2464-bc6b-4425-b46e-983d5c0a9214",
+          "name": "Triceps Pressdown (EZ-Bar)",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Isolates the triceps, focusing on the lateral head for definition.",
+          "matched": true
+        },
+        {
+          "id": "cmbgvdpmn01aguhunnlcsbfim",
+          "name": "Hammer Preacher Curl",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the brachialis and biceps for enhanced thickness.",
+          "matched": true
+        },
+        {
+          "id": "cmb9sh3rq001puhqrupke5nni",
+          "name": "Overhead Tricep Extension (Cable)",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Focuses on the triceps with maximum stretch and contraction.",
+          "matched": true
+        },
+        {
+          "id": "5c7e237d-892f-4350-af44-cdda2141ff96",
+          "name": "Reverse Barbell Curl",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Biceps Brachii",
+            "Brachialis",
+            "Brachioradialis"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Engages the forearms and brachialis for balanced arm development.",
+          "matched": true
+        },
+        {
+          "id": "9c123d0c-1fe3-41e1-acfe-00cd6ea15a32",
+          "name": "Single-Arm Cable Triceps Extension with Supinated Grip",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Isolates the triceps with a unique grip for enhanced engagement.",
+          "matched": true
+        }
+      ],
+      "summary": "An arm workout with a focus on diverse tricep and bicep exercises for hypertrophy.",
+      "reasoning": "Incorporates a variety of grips and angles to ensure comprehensive muscle activation."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:23:21.353Z"
+  },
+  {
+    "id": "bulk-1759955001353-n7ntcx76q",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "cmbhp9k7h00hwuhebo0117w5m",
+          "name": "Cable Reverse Flye",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Rhomboids",
+            "Deltoid Posterior"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Engages rear delts and triceps, enhancing arm and shoulder development.",
+          "matched": true
+        },
+        {
+          "id": "cmbhpojq300iauhebfhf33zvy",
+          "name": "Kneeling Overhead Cable Curl",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Focuses on biceps with an overhead grip for maximum tension.",
+          "matched": true
+        },
+        {
+          "id": "302ef2a6-ee3c-462d-8379-08daec763868",
+          "name": "Triceps Pushdown (V-Bar)",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the triceps with an emphasis on the lateral head.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpw6o001puhbne3czmruq",
+          "name": "Barbell Curl",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Classic bicep builder focusing on overall arm thickness.",
+          "matched": true
+        },
+        {
+          "id": "cmbgvmgmd01aluhunrhfh54nv",
+          "name": "Overhead Cable Triceps Extension (Bar)",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Isolates the triceps, allowing for maximum stretch and contraction.",
+          "matched": true
+        },
+        {
+          "id": "cmb9qpz2c0022uhbnb6zknxr1",
+          "name": "Reverse Wrist Curl",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Forearm Flexors"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Strengthens forearm extensors for balanced arm development.",
+          "matched": true
+        },
+        {
+          "id": "3e5c0211-fe16-4614-ba82-400ff1a43fe4",
+          "name": "Dumbbell Overhead Triceps Extension",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the long head of the triceps for maximum stretch.",
+          "matched": true
+        },
+        {
+          "id": "cmb9sh696001tuhqri0xldaxj",
+          "name": "Cable Rope Hammer Curl",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Brachialis",
+            "Forearm Flexors"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the brachialis and biceps for enhanced thickness.",
+          "matched": true
+        }
+      ],
+      "summary": "A diverse arm workout targeting biceps, triceps, and forearms with varied angles.",
+      "reasoning": "Incorporates multiple angles and equipment to ensure comprehensive arm hypertrophy."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:23:21.353Z"
+  },
+  {
+    "id": "bulk-1759955001353-gem2etyod",
+    "input": {
+      "selectedMuscleGroups": [],
+      "selectedEquipment": [],
+      "exerciseCount": 5,
+      "maxSetsPerExercise": 3,
+      "rpeRange": "RPE_7_8",
+      "repFocus": "HYPERTROPHY"
+    },
+    "output": {
+      "exercises": [
+        {
+          "id": "8df03365-623b-4bd7-aa06-a5aa74a58f6c",
+          "name": "Seated Barbell French Press",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the triceps with a focus on the long head.",
+          "matched": true
+        },
+        {
+          "id": "cmbhpppuv00icuheba7cnrmnz",
+          "name": "Incline DB Stretch-Curl",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Biceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Enhances biceps stretch and contraction, focusing on peak contraction.",
+          "matched": true
+        },
+        {
+          "id": "cmb9sh74j001xuhqriqtzfeld",
+          "name": "Cable Triceps Kickbacks",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Isolates the triceps with a focus on the lateral head.",
+          "matched": true
+        },
+        {
+          "id": "5c7e237d-892f-4350-af44-cdda2141ff96",
+          "name": "Reverse Barbell Curl",
+          "equipment": "BARBELL",
+          "muscleGroups": [
+            "Biceps Brachii",
+            "Brachialis",
+            "Brachioradialis"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Focuses on brachialis and forearm extensors, adding arm thickness.",
+          "matched": true
+        },
+        {
+          "id": "cmbgvmgmd01aluhunrhfh54nv",
+          "name": "Overhead Cable Triceps Extension (Bar)",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Isolates the triceps, allowing for maximum stretch and contraction.",
+          "matched": true
+        },
+        {
+          "id": "cmb9sh696001tuhqri0xldaxj",
+          "name": "Cable Rope Hammer Curl",
+          "equipment": "CABLE",
+          "muscleGroups": [
+            "Brachialis",
+            "Forearm Flexors"
+          ],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Targets the brachialis and biceps for enhanced thickness.",
+          "matched": true
+        },
+        {
+          "id": "3e5c0211-fe16-4614-ba82-400ff1a43fe4",
+          "name": "Dumbbell Overhead Triceps Extension",
+          "equipment": "DUMBBELL",
+          "muscleGroups": [
+            "Triceps Brachii"
+          ],
+          "sets": 3,
+          "minReps": 10,
+          "maxReps": 12,
+          "rpe": 8,
+          "explanation": "Targets the long head of the triceps for maximum stretch.",
+          "matched": true
+        },
+        {
+          "id": null,
+          "name": "Wrist Roller",
+          "equipment": null,
+          "muscleGroups": [],
+          "sets": 3,
+          "minReps": 12,
+          "maxReps": 15,
+          "rpe": 7,
+          "explanation": "Strengthens forearms, improving grip and overall arm strength.",
+          "matched": false
+        }
+      ],
+      "summary": "A well-rounded arm workout focusing on triceps, biceps, and forearms for hypertrophy.",
+      "reasoning": "Combines a variety of exercises to ensure comprehensive muscle development and balance."
+    },
+    "approved": true,
+    "createdAt": "2025-10-08T20:23:21.353Z"
+  }
+]

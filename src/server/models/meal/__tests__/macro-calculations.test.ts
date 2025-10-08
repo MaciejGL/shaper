@@ -186,6 +186,7 @@ describe('Macro Calculations', () => {
           stripeCustomerId: null,
           createdAt: new Date(),
           updatedAt: new Date(),
+          platformFeePercent: 0,
         },
         ingredients: [
           {
@@ -273,6 +274,7 @@ describe('Macro Calculations', () => {
           stripeCustomerId: null,
           createdAt: new Date(),
           updatedAt: new Date(),
+          platformFeePercent: 0,
         },
         ingredients: [],
       }
@@ -317,6 +319,7 @@ describe('Macro Calculations', () => {
           stripeCustomerId: null,
           createdAt: new Date(),
           updatedAt: new Date(),
+          platformFeePercent: 0,
         },
         ingredients: [
           {
@@ -382,6 +385,7 @@ describe('Macro Calculations', () => {
           stripeCustomerId: null,
           createdAt: new Date(),
           updatedAt: new Date(),
+          platformFeePercent: 0,
         },
         ingredients: [
           {

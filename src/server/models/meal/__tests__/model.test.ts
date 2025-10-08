@@ -56,6 +56,7 @@ describe('Meal Model', () => {
         stripeCustomerId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
+        platformFeePercent: 0,
       },
       ingredients: [
         {

@@ -13,6 +13,10 @@
  * - Cache automatically handles filtering, version filtering, and TTL
  * - Falls back to database on cache miss or Redis unavailability
  *
+ * CACHE BYPASS:
+ * - Set SKIP_BASE_EXERCISE_CACHE=true to bypass cache (useful for AI training/testing)
+ * - When enabled, all queries go directly to the database
+ *
  * CACHE KEYS:
  * - base-exercises:public:all - All public exercises (no filters)
  * - base-exercises:public:filtered:{hash} - Filtered public exercises
@@ -30,6 +34,11 @@ import { getFromCache, setInCache } from '@/lib/redis'
 
 // Cache TTL: 24 hours for public exercises (very static)
 const CACHE_TTL = 24 * 60 * 60 // 24 hours in seconds
+
+// Environment variable to skip cache (useful for AI training/testing)
+const SKIP_CACHE =
+  process.env.SKIP_BASE_EXERCISE_CACHE === 'true' ||
+  process.env.SKIP_BASE_EXERCISE_CACHE === '1'
 
 // Cache key prefixes
 const CACHE_KEYS = {
@@ -136,10 +145,17 @@ async function fetchPublicExercisesFromDB(
 /**
  * Get public exercises with cache-first approach
  * Falls back to database if cache miss
+ * Skips cache if SKIP_BASE_EXERCISE_CACHE env var is set
  */
 export async function getPublicExercises(
   where?: GQLExerciseWhereInput | null,
 ): Promise<CachedBaseExercise[]> {
+  // Skip cache if environment variable is set
+  if (SKIP_CACHE) {
+    console.info('[BASE_EXERCISE_CACHE] Cache SKIPPED (env var set)')
+    return fetchPublicExercisesFromDB(where)
+  }
+
   const filterHash = generateFilterHash(where)
   const cacheKey = where
     ? `${CACHE_KEYS.PUBLIC_FILTERED}:${filterHash}`
@@ -174,10 +190,37 @@ export async function getPublicExercises(
 
 /**
  * Get a single public exercise by ID with cache-first approach
+ * Skips cache if SKIP_BASE_EXERCISE_CACHE env var is set
  */
 export async function getPublicExerciseById(
   id: string,
 ): Promise<CachedBaseExercise | null> {
+  // Skip cache if environment variable is set
+  if (SKIP_CACHE) {
+    console.info(
+      '[BASE_EXERCISE_CACHE] Cache SKIPPED for single exercise (env var set)',
+    )
+    return prisma.baseExercise.findUnique({
+      where: {
+        id,
+        isPublic: true,
+      },
+      include: {
+        images: true,
+        muscleGroups: {
+          include: {
+            category: true,
+          },
+        },
+        secondaryMuscleGroups: {
+          include: {
+            category: true,
+          },
+        },
+      },
+    })
+  }
+
   const cacheKey = `${CACHE_KEYS.PUBLIC_SINGLE}:${id}`
 
   try {
@@ -243,8 +286,14 @@ export async function getPublicExerciseById(
 /**
  * Utility function to warm up the cache with all public exercises
  * Can be called during application startup or scheduled jobs
+ * Skips if SKIP_BASE_EXERCISE_CACHE env var is set
  */
 export async function warmUpPublicExercisesCache(): Promise<void> {
+  if (SKIP_CACHE) {
+    console.info('[BASE_EXERCISE_CACHE] Cache warm-up skipped (env var set)')
+    return
+  }
+
   try {
     console.info('[BASE_EXERCISE_CACHE] Warming up cache...')
     await getPublicExercises() // This will cache all public exercises

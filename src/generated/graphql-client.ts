@@ -3678,6 +3678,13 @@ export type GQLUpdateUserFeaturedMutationVariables = Exact<{
 
 export type GQLUpdateUserFeaturedMutation = { __typename?: 'Mutation', updateUserFeatured: { __typename?: 'AdminUserListItem', id: string, featured: boolean } };
 
+export type GQLAdminGenerateAiWorkoutMutationVariables = Exact<{
+  input: GQLGenerateAiWorkoutInput;
+}>;
+
+
+export type GQLAdminGenerateAiWorkoutMutation = { __typename?: 'Mutation', generateAiWorkout: { __typename?: 'AiWorkoutResult', totalDuration?: number | undefined | null, exercises: Array<{ __typename?: 'AiWorkoutExercise', order: number, exercise: { __typename?: 'BaseExercise', id: string, name: string, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', name: string }> }, sets: Array<{ __typename?: 'SuggestedSets', minReps?: number | undefined | null, maxReps?: number | undefined | null, rpe?: number | undefined | null } | undefined | null> }> } };
+
 export type GQLGetPublicTrainingPlansQueryVariables = Exact<{
   limit?: InputMaybe<Scalars['Int']['input']>;
 }>;
@@ -5422,6 +5429,48 @@ useUpdateUserFeaturedMutation.getKey = () => ['UpdateUserFeatured'];
 
 
 useUpdateUserFeaturedMutation.fetcher = (variables: GQLUpdateUserFeaturedMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateUserFeaturedMutation, GQLUpdateUserFeaturedMutationVariables>(UpdateUserFeaturedDocument, variables, options);
+
+export const AdminGenerateAiWorkoutDocument = `
+    mutation AdminGenerateAiWorkout($input: GenerateAiWorkoutInput!) {
+  generateAiWorkout(input: $input) {
+    exercises {
+      exercise {
+        id
+        name
+        equipment
+        muscleGroups {
+          name
+        }
+      }
+      sets {
+        minReps
+        maxReps
+        rpe
+      }
+      order
+    }
+    totalDuration
+  }
+}
+    `;
+
+export const useAdminGenerateAiWorkoutMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLAdminGenerateAiWorkoutMutation, TError, GQLAdminGenerateAiWorkoutMutationVariables, TContext>) => {
+    
+    return useMutation<GQLAdminGenerateAiWorkoutMutation, TError, GQLAdminGenerateAiWorkoutMutationVariables, TContext>(
+      {
+    mutationKey: ['AdminGenerateAiWorkout'],
+    mutationFn: (variables?: GQLAdminGenerateAiWorkoutMutationVariables) => fetchData<GQLAdminGenerateAiWorkoutMutation, GQLAdminGenerateAiWorkoutMutationVariables>(AdminGenerateAiWorkoutDocument, variables)(),
+    ...options
+  }
+    )};
+
+useAdminGenerateAiWorkoutMutation.getKey = () => ['AdminGenerateAiWorkout'];
+
+
+useAdminGenerateAiWorkoutMutation.fetcher = (variables: GQLAdminGenerateAiWorkoutMutationVariables, options?: RequestInit['headers']) => fetchData<GQLAdminGenerateAiWorkoutMutation, GQLAdminGenerateAiWorkoutMutationVariables>(AdminGenerateAiWorkoutDocument, variables, options);
 
 export const GetPublicTrainingPlansDocument = `
     query GetPublicTrainingPlans($limit: Int) {

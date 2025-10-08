@@ -48,6 +48,7 @@ describe('Meal Integration Tests', () => {
       stripeCustomerId: null,
       createdAt: new Date(),
       updatedAt: new Date(),
+      platformFeePercent: 0,
     }
 
     mockIngredient1 = {
