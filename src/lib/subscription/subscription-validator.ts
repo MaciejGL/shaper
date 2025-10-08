@@ -109,13 +109,24 @@ export class SubscriptionValidator {
       // Get package data from database
       const packageTemplate = await prisma.packageTemplate.findUnique({
         where: { id: sub.packageId },
-        select: { stripePriceId: true },
+        select: { stripePriceId: true, metadata: true, name: true },
       })
 
-      if (!packageTemplate?.stripePriceId) continue
+      if (!packageTemplate) continue
 
-      // Check if this package's price ID grants premium access
-      if (premiumPriceIds.includes(packageTemplate.stripePriceId)) {
+      // Check for lifetime premium (admin-granted, no Stripe price ID)
+      const metadata = packageTemplate.metadata as {
+        isLifetime?: boolean
+      } | null
+      if (metadata?.isLifetime === true) {
+        return true
+      }
+
+      // Check by Stripe price ID for regular subscriptions
+      if (
+        packageTemplate.stripePriceId &&
+        premiumPriceIds.includes(packageTemplate.stripePriceId)
+      ) {
         return true
       }
     }

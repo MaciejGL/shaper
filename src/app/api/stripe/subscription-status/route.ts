@@ -140,6 +140,12 @@ export async function GET(request: NextRequest) {
         sub.isTrialActive && sub.trialEnd ? sub.trialEnd : sub.endDate
       const isNotExpired = now <= effectiveEndDate
 
+      // Check for lifetime premium (admin-granted, no Stripe price ID)
+      const metadata = sub.package.metadata as { isLifetime?: boolean } | null
+      if (metadata?.isLifetime === true && isNotExpired) {
+        return true
+      }
+
       // Check if this subscription grants premium access using stable price IDs
       const grantsPremiumAccess =
         sub.package.stripePriceId &&
