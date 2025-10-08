@@ -114,15 +114,19 @@ async function readAndDisplayCacheStats(): Promise<void> {
         pending: cachedStats.pending,
       }
 
-      const age = Date.now() - cachedStats.timestamp
-      const ageSeconds = Math.floor(age / 1000)
+      const timestamp = new Date(cachedStats.timestamp)
+      const timeFormatted = timestamp.toLocaleTimeString('en-GB', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      })
 
       const gray = '\x1b[90m'
       const reset = '\x1b[0m'
 
       console.info(
-        formatCacheStats(stats) +
-          ` ${gray}(from prod, ${ageSeconds}s ago)${reset}`,
+        formatCacheStats(stats) + ` ${gray}(${timeFormatted})${reset}`,
       )
     } else {
       console.info('📊 [USER CACHE] No production stats available')
