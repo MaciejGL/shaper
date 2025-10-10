@@ -49,7 +49,6 @@ export const generateAiWorkoutFineTuned = async (
     selectedEquipment,
     exerciseCount,
     maxSetsPerExercise,
-    rpeRange,
     repFocus,
   } = input
 
@@ -64,18 +63,15 @@ export const generateAiWorkoutFineTuned = async (
       ? `Available equipment: ${selectedEquipment.join(', ')}`
       : 'Use any available equipment or bodyweight'
 
-  const rpeText = rpeRange.replace('RPE_', '').replace('_', '-')
-
   const userMessage = `Create a workout with the following requirements:
 
 ${muscleGroupsText}
 ${equipmentText}
 Exercise count: ${exerciseCount}
 Max sets per exercise: ${maxSetsPerExercise}
-RPE range: ${rpeText}
 Training focus: ${repFocus}
 
-Provide a professional workout program with exercise selection, sets, reps, and RPE values.`
+Provide a professional workout program with exercise selection, sets, and reps.`
 
   /* 2. Call fine-tuned model */
   console.info(
@@ -89,7 +85,6 @@ Provide a professional workout program with exercise selection, sets, reps, and 
       sets: number
       minReps: number
       maxReps: number
-      rpe: number
       explanation: string
     }[]
     summary: string
@@ -187,7 +182,6 @@ Provide a professional workout program with exercise selection, sets, reps, and 
         order: setIndex,
         minReps: aiExercise.minReps,
         maxReps: aiExercise.maxReps,
-        rpe: aiExercise.rpe,
       }))
 
       return {
@@ -243,7 +237,6 @@ Provide a professional workout program with exercise selection, sets, reps, and 
       selectedMuscleGroups,
       selectedEquipment,
       repFocus,
-      rpeRange,
     },
   }
 

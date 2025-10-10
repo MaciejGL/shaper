@@ -811,7 +811,6 @@ export type GQLGenerateAiWorkoutInput = {
   exerciseCount: Scalars['Int']['input'];
   maxSetsPerExercise: Scalars['Int']['input'];
   repFocus: GQLRepFocus;
-  rpeRange: GQLRpeRange;
   selectedEquipment: Array<GQLEquipment>;
   selectedMuscleGroups: Array<Scalars['String']['input']>;
   workoutSubType?: InputMaybe<Scalars['String']['input']>;
@@ -2763,12 +2762,6 @@ export type GQLReview = {
   rating: Scalars['Int']['output'];
   updatedAt: Scalars['String']['output'];
 };
-
-export enum GQLRpeRange {
-  Rpe_6_7 = 'RPE_6_7',
-  Rpe_7_8 = 'RPE_7_8',
-  Rpe_8_10 = 'RPE_8_10'
-}
 
 export type GQLSendMessageInput = {
   chatId: Scalars['ID']['input'];

@@ -7,7 +7,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { GQLEquipment } from '@/generated/graphql-client'
-import type { RepFocus, RpeRange, WorkoutInput } from '@/lib/ai-training/types'
+import type { RepFocus, WorkoutInput } from '@/lib/ai-training/types'
 
 interface ParametersFormProps {
   input: WorkoutInput
@@ -142,26 +142,6 @@ export function ParametersForm({ input, onChange }: ParametersFormProps) {
                 {sets} sets
               </SelectItem>
             ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* RPE Range */}
-      <div>
-        <Label htmlFor="rpeRange">RPE Range</Label>
-        <Select
-          value={input.rpeRange}
-          onValueChange={(value) =>
-            onChange({ ...input, rpeRange: value as RpeRange })
-          }
-        >
-          <SelectTrigger id="rpeRange">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="RPE_6_7">RPE 6-7 (Moderate)</SelectItem>
-            <SelectItem value="RPE_7_8">RPE 7-8 (Challenging)</SelectItem>
-            <SelectItem value="RPE_8_10">RPE 8-10 (Very Hard)</SelectItem>
           </SelectContent>
         </Select>
       </div>

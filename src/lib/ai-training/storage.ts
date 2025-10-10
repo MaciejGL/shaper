@@ -120,7 +120,6 @@ function formatWorkoutRequest(input: {
   selectedEquipment: GQLEquipment[]
   exerciseCount: number
   maxSetsPerExercise: number
-  rpeRange: string
   repFocus: string
 }): string {
   const muscleGroupsText =
@@ -133,18 +132,15 @@ function formatWorkoutRequest(input: {
       ? `Available equipment: ${input.selectedEquipment.join(', ')}${input.selectedEquipment.includes(GQLEquipment.Bodyweight) ? '' : ' (avoid bodyweight exercises)'}`
       : 'Use any available equipment (Barbell, Dumbbell, Cable, Machine, Kettlebell, Band, EZ Bar, Smith Machine, Trap Bar, Bench) - avoid bodyweight-only exercises'
 
-  const rpeText = input.rpeRange.replace('RPE_', '').replace('_', '-')
-
   return `Create a workout with the following requirements:
 
 ${muscleGroupsText}
 ${equipmentText}
 Exercise count: ${input.exerciseCount}
 Max sets per exercise: ${input.maxSetsPerExercise}
-RPE range: ${rpeText}
 Training focus: ${input.repFocus}
 
-Provide a professional workout program with exercise selection, sets, reps, and RPE values.`
+Provide a professional workout program with exercise selection, sets, and reps.`
 }
 
 /**

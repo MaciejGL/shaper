@@ -24,6 +24,35 @@ export async function createAssistantThread(
 }
 
 /**
+ * Creates a new OpenAI assistant thread and runs it with streaming for faster responses
+ * Recommended for time-sensitive operations (targets <30s response time)
+ */
+export async function createAssistantThreadWithStreaming(
+  messages: AssistantMessage[],
+  assistantId: string = ASSISTANT_ID,
+): Promise<string> {
+  const thread = await openai.beta.threads.create()
+
+  const stream = openai.beta.threads.runs.stream(thread.id, {
+    assistant_id: assistantId,
+    additional_messages: messages,
+  })
+
+  let content = ''
+
+  for await (const event of stream) {
+    if (event.event === 'thread.message.delta') {
+      const delta = event.data.delta.content?.[0]
+      if (delta?.type === 'text' && delta.text?.value) {
+        content += delta.text.value
+      }
+    }
+  }
+
+  return content.trim()
+}
+
+/**
  * Extracts the last message from an assistant thread
  */
 export async function getLastAssistantMessage(threadId: string) {
@@ -41,36 +70,49 @@ export async function getLastAssistantMessage(threadId: string) {
  * Parses JSON from assistant response, handling cases where it's wrapped in backticks or markdown code blocks
  */
 export function parseAssistantJsonResponse(response: string) {
+  if (!response || response.trim().length === 0) {
+    throw new Error('Assistant returned empty response')
+  }
+
   try {
-    const json = JSON.parse(response)
-    return json
+    return JSON.parse(response)
   } catch (err) {
-    console.error(err)
-  }
+    // Clean the response by removing markdown code blocks
+    let cleanedResponse = response.trim()
 
-  // Clean the response by removing markdown code blocks and extra whitespace
-  let cleanedResponse = response.trim()
-
-  // Remove markdown code block markers (```json ... ``` or ``` ... ```)
-  const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/
-  const codeBlockMatch = cleanedResponse.match(codeBlockRegex)
-  if (codeBlockMatch) {
-    cleanedResponse = codeBlockMatch[1].trim()
-  }
-
-  // If markdown removal didn't work, try the legacy approach for arrays
-  if (!codeBlockMatch) {
-    const jsonStart = response.indexOf('[')
-    const jsonEnd = response.lastIndexOf(']')
-    if (jsonStart !== -1 && jsonEnd !== -1) {
-      cleanedResponse = response.slice(jsonStart, jsonEnd + 1)
+    // Remove markdown code block markers (```json ... ``` or ``` ... ```)
+    const codeBlockRegex = /```(?:json)?\s*([\s\S]*?)\s*```/
+    const codeBlockMatch = cleanedResponse.match(codeBlockRegex)
+    if (codeBlockMatch) {
+      cleanedResponse = codeBlockMatch[1].trim()
     }
-  }
 
-  try {
-    return JSON.parse(cleanedResponse)
-  } catch (err) {
-    console.error('Failed to parse cleaned response:', cleanedResponse)
-    throw new Error('Assistant response was not valid JSON')
+    // Try to find JSON object or array markers
+    if (!codeBlockMatch) {
+      const objectStart = response.indexOf('{')
+      const objectEnd = response.lastIndexOf('}')
+      const arrayStart = response.indexOf('[')
+      const arrayEnd = response.lastIndexOf(']')
+
+      if (
+        objectStart !== -1 &&
+        objectEnd !== -1 &&
+        (arrayStart === -1 || objectStart < arrayStart)
+      ) {
+        cleanedResponse = response.slice(objectStart, objectEnd + 1)
+      } else if (arrayStart !== -1 && arrayEnd !== -1) {
+        cleanedResponse = response.slice(arrayStart, arrayEnd + 1)
+      }
+    }
+
+    try {
+      return JSON.parse(cleanedResponse)
+    } catch (err) {
+      console.error(
+        'Failed to parse AI response. Preview:',
+        response.substring(0, 500),
+      )
+      throw new Error('Assistant response was not valid JSON')
+    }
   }
 }

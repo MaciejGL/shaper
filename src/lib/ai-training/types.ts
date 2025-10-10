@@ -4,7 +4,6 @@
 import type { GQLEquipment } from '@/generated/graphql-client'
 
 export type RepFocus = 'STRENGTH' | 'HYPERTROPHY' | 'ENDURANCE'
-export type RpeRange = 'RPE_6_7' | 'RPE_7_8' | 'RPE_8_10'
 
 /**
  * Input parameters for generating a workout
@@ -14,7 +13,6 @@ export interface WorkoutInput {
   selectedEquipment: GQLEquipment[]
   exerciseCount: number
   maxSetsPerExercise: number
-  rpeRange: RpeRange
   repFocus: RepFocus
 }
 
@@ -28,7 +26,6 @@ export interface TrainingExercise {
   sets: number
   minReps: number
   maxReps: number
-  rpe: number
   explanation: string
   equipment?: string
   muscleGroups?: string[]

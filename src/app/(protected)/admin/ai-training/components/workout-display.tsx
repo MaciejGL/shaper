@@ -16,9 +16,6 @@ export function WorkoutDisplay({ workout }: WorkoutDisplayProps) {
             <h3 className="font-semibold">
               {index + 1}. {exercise.name}
             </h3>
-            <span className="text-sm text-muted-foreground">
-              RPE {exercise.rpe}
-            </span>
           </div>
 
           <div className="flex gap-4 text-sm">

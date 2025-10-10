@@ -253,23 +253,6 @@ export function WorkoutEditor({ workout, onChange }: WorkoutEditorProps) {
                         className="h-8"
                       />
                     </div>
-                    <div>
-                      <Label className="text-xs">RPE</Label>
-                      <Input
-                        id={`rpe-${index}`}
-                        type="number"
-                        value={exercise.rpe}
-                        onChange={(e) =>
-                          updateExercise(index, {
-                            rpe: parseFloat(e.target.value) || 7,
-                          })
-                        }
-                        min={1}
-                        max={10}
-                        step={0.5}
-                        className="h-8"
-                      />
-                    </div>
                   </div>
 
                   {/* Explanation */}

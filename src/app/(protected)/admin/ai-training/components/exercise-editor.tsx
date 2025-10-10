@@ -85,21 +85,6 @@ export function ExerciseEditor({ exercises, onChange }: ExerciseEditorProps) {
             </div>
 
             <div>
-              <Label>RPE</Label>
-              <Input
-                id={`rpe-${index}`}
-                type="number"
-                value={exercise.rpe}
-                onChange={(e) =>
-                  updateExercise(index, { rpe: parseInt(e.target.value) })
-                }
-                min={1}
-                max={10}
-                step={0.5}
-              />
-            </div>
-
-            <div>
               <Label>Min Reps</Label>
               <Input
                 id={`min-reps-${index}`}

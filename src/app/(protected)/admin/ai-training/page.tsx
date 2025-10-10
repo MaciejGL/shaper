@@ -17,13 +17,11 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import {
   GQLRepFocus,
-  GQLRpeRange,
   useAdminGenerateAiWorkoutMutation,
 } from '@/generated/graphql-client'
 // Remove direct import - use API instead
 import type {
   RepFocus,
-  RpeRange,
   TrainingExample,
   WorkoutInput,
   WorkoutOutput,
@@ -54,7 +52,6 @@ export default function AITrainingPage() {
     selectedEquipment: [],
     exerciseCount: 5,
     maxSetsPerExercise: 3,
-    rpeRange: 'RPE_7_8' as RpeRange,
     repFocus: 'HYPERTROPHY' as RepFocus,
   })
 
@@ -69,12 +66,6 @@ export default function AITrainingPage() {
   const handleGenerateWorkout = async () => {
     try {
       // Map frontend types to GraphQL enum values
-      const rpeRangeMap: Record<RpeRange, GQLRpeRange> = {
-        RPE_6_7: GQLRpeRange.Rpe_6_7,
-        RPE_7_8: GQLRpeRange.Rpe_7_8,
-        RPE_8_10: GQLRpeRange.Rpe_8_10,
-      }
-
       const repFocusMap: Record<RepFocus, GQLRepFocus> = {
         STRENGTH: GQLRepFocus.Strength,
         HYPERTROPHY: GQLRepFocus.Hypertrophy,
@@ -87,7 +78,6 @@ export default function AITrainingPage() {
           selectedEquipment: workoutInput.selectedEquipment,
           exerciseCount: workoutInput.exerciseCount,
           maxSetsPerExercise: workoutInput.maxSetsPerExercise,
-          rpeRange: rpeRangeMap[workoutInput.rpeRange],
           repFocus: repFocusMap[workoutInput.repFocus],
         },
       })

@@ -177,7 +177,7 @@ export function BulkWorkoutGenerator({
           <p className="font-semibold mb-2">What this generates:</p>
           <ul className="list-disc list-inside space-y-1 text-muted-foreground">
             <li>10 different workout examples of the selected type</li>
-            <li>Each with appropriate exercises, sets, reps, and RPE</li>
+            <li>Each with appropriate exercises, sets, and reps</li>
             <li>Professional reasoning and explanations</li>
             <li>Ready for review and approval in the editor</li>
           </ul>

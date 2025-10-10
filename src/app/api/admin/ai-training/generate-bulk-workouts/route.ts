@@ -74,12 +74,6 @@ export async function POST(request: NextRequest) {
       ENDURANCE: '12-20 reps',
     }
 
-    const rpeRanges = {
-      STRENGTH: '8-10',
-      HYPERTROPHY: '7-9',
-      ENDURANCE: '6-8',
-    }
-
     // Use GPT-4 to generate 10 workout examples
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -148,7 +142,6 @@ Other Rules:
 - Use appropriate rep ranges: ${repRanges[trainingFocus as TrainingFocus]}
 - For multicoumpound exercises, use the lower rep range within the target
 - For isolation exercises, use the higher rep range within the target
-- Use appropriate RPE ranges: ${rpeRanges[trainingFocus as TrainingFocus]}
 - Follow the exact exercise count distribution specified above
 - Include proper warm-up considerations in reasoning
 - Generate professional, varied workouts that demonstrate different approaches
@@ -161,7 +154,7 @@ Other Rules:
           role: 'user',
           content: `${workoutTypePrompts[workoutType as WorkoutType]}
 
-Training Focus: ${trainingFocus} (${repRanges[trainingFocus as TrainingFocus]}, RPE ${rpeRanges[trainingFocus as TrainingFocus]})
+Training Focus: ${trainingFocus} (${repRanges[trainingFocus as TrainingFocus]})
 
 ${customPrompt ? `Additional Instructions: ${customPrompt}` : ''}
 

@@ -12,7 +12,6 @@ import {
   addSingleExerciseToDay,
   clearWorkoutDay,
   createQuickWorkout,
-  generateAiWorkout,
   getAiExerciseSuggestions,
   getTrainingExercise,
   removeExerciseFromWorkout,
@@ -21,6 +20,7 @@ import {
   swapExercise,
   updateExerciseForm,
 } from './factory'
+import { generateAiWorkout } from './generate-ai-workout'
 
 export const Query: GQLQueryResolvers = {
   getTrainingExercise: async (_, { id }, context) => {

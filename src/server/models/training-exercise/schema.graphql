@@ -171,12 +171,6 @@ input UpdateExerciseSetFormInput {
   rpe: Int
 }
 
-enum RpeRange {
-  RPE_6_7
-  RPE_7_8
-  RPE_8_10
-}
-
 enum RepFocus {
   STRENGTH
   HYPERTROPHY
@@ -190,7 +184,6 @@ input GenerateAiWorkoutInput {
   selectedEquipment: [Equipment!]!
   exerciseCount: Int!
   maxSetsPerExercise: Int!
-  rpeRange: RpeRange!
   repFocus: RepFocus!
 }
 

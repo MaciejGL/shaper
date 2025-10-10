@@ -4,11 +4,9 @@ import {
   GQLEquipment,
   GQLFitspaceGenerateAiWorkoutMutation,
   GQLRepFocus,
-  GQLRpeRange,
   useFitspaceGenerateAiWorkoutMutation,
 } from '@/generated/graphql-client'
 
-export type RpeRange = '6-7' | '7-8' | '8-10'
 export type RepFocus = 'strength' | 'hypertrophy' | 'endurance'
 
 export type WorkoutType =
@@ -34,7 +32,6 @@ export interface AiWorkoutInputData {
   selectedEquipment: GQLEquipment[]
   exerciseCount: number
   maxSetsPerExercise: number
-  rpeRange: RpeRange
   repFocus: RepFocus
 }
 
@@ -47,7 +44,6 @@ export function useAiWorkoutGeneration() {
     selectedEquipment: [],
     exerciseCount: 5,
     maxSetsPerExercise: 3,
-    rpeRange: '7-8',
     repFocus: 'hypertrophy',
   })
 
@@ -78,12 +74,6 @@ export function useAiWorkoutGeneration() {
   const handleGenerateAiWorkout = async () => {
     try {
       // Map frontend types to GraphQL enum values
-      const rpeRangeMap: Record<RpeRange, GQLRpeRange> = {
-        '6-7': GQLRpeRange.Rpe_6_7,
-        '7-8': GQLRpeRange.Rpe_7_8,
-        '8-10': GQLRpeRange.Rpe_8_10,
-      }
-
       const repFocusMap: Record<RepFocus, GQLRepFocus> = {
         strength: GQLRepFocus.Strength,
         hypertrophy: GQLRepFocus.Hypertrophy,
@@ -98,7 +88,6 @@ export function useAiWorkoutGeneration() {
           selectedEquipment: aiInputData.selectedEquipment,
           exerciseCount: aiInputData.exerciseCount,
           maxSetsPerExercise: aiInputData.maxSetsPerExercise,
-          rpeRange: rpeRangeMap[aiInputData.rpeRange],
           repFocus: repFocusMap[aiInputData.repFocus],
         },
       })
