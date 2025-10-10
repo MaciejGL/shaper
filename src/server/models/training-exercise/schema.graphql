@@ -184,6 +184,8 @@ enum RepFocus {
 }
 
 input GenerateAiWorkoutInput {
+  workoutType: String
+  workoutSubType: String
   selectedMuscleGroups: [String!]!
   selectedEquipment: [Equipment!]!
   exerciseCount: Int!

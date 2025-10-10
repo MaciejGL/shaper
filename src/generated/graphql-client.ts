@@ -814,6 +814,8 @@ export type GQLGenerateAiWorkoutInput = {
   rpeRange: GQLRpeRange;
   selectedEquipment: Array<GQLEquipment>;
   selectedMuscleGroups: Array<Scalars['String']['input']>;
+  workoutSubType?: InputMaybe<Scalars['String']['input']>;
+  workoutType?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type GQLGetExercisesResponse = {

@@ -2,7 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { ChevronRight } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -13,13 +13,12 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { useFitspaceGetExercisesQuery } from '@/generated/graphql-client'
 import { useUpdateFavouriteWorkout } from '@/hooks/use-favourite-workouts'
 
 import { AiEquipmentStep } from '../../../workout/quick-workout/components/ai-equipment-step'
-import { AiMuscleGroupsStep } from '../../../workout/quick-workout/components/ai-muscle-groups-step'
 import { AiParametersStep } from '../../../workout/quick-workout/components/ai-parameters-step'
 import { AiResultsStep } from '../../../workout/quick-workout/components/ai-results-step'
+import { AiWorkoutTypeStep } from '../../../workout/quick-workout/components/ai-workout-type-step'
 import { useAiWorkoutGeneration } from '../../../workout/quick-workout/hooks/use-ai-workout-generation'
 
 interface FavouriteAiWizardProps {
@@ -29,7 +28,7 @@ interface FavouriteAiWizardProps {
   favouriteTitle: string
 }
 
-type AiStep = 'muscle-groups' | 'equipment' | 'parameters' | 'results'
+type AiStep = 'workout-type' | 'equipment' | 'parameters' | 'results'
 
 export function FavouriteAiWizard({
   open,
@@ -37,7 +36,7 @@ export function FavouriteAiWizard({
   favouriteId,
   favouriteTitle,
 }: FavouriteAiWizardProps) {
-  const [currentStep, setCurrentStep] = useState<AiStep>('muscle-groups')
+  const [currentStep, setCurrentStep] = useState<AiStep>('workout-type')
   const queryClient = useQueryClient()
 
   const {
@@ -54,23 +53,11 @@ export function FavouriteAiWizard({
     handleExercisesReorder,
   } = useAiWorkoutGeneration()
 
-  // Fetch exercises data for muscle groups
-  const { data: exercisesData } = useFitspaceGetExercisesQuery()
-
-  // Muscle groups data
-  const allMuscleGroups = useMemo(() => {
-    return (
-      exercisesData?.muscleGroupCategories?.flatMap(
-        (category) => category.muscles,
-      ) || []
-    )
-  }, [exercisesData])
-
   const { mutateAsync: updateFavourite, isPending: isUpdating } =
     useUpdateFavouriteWorkout()
 
   const handleNext = () => {
-    if (currentStep === 'muscle-groups') {
+    if (currentStep === 'workout-type') {
       setCurrentStep('equipment')
     } else if (currentStep === 'equipment') {
       setCurrentStep('parameters')
@@ -79,7 +66,7 @@ export function FavouriteAiWizard({
 
   const handleBack = () => {
     if (currentStep === 'equipment') {
-      setCurrentStep('muscle-groups')
+      setCurrentStep('workout-type')
     } else if (currentStep === 'parameters') {
       setCurrentStep('equipment')
     } else if (currentStep === 'results') {
@@ -134,8 +121,8 @@ export function FavouriteAiWizard({
 
   const getStepTitle = () => {
     switch (currentStep) {
-      case 'muscle-groups':
-        return 'Select Muscle Groups'
+      case 'workout-type':
+        return 'Choose Workout Type'
       case 'equipment':
         return 'Select Equipment'
       case 'parameters':
@@ -149,8 +136,8 @@ export function FavouriteAiWizard({
 
   const getStepDescription = () => {
     switch (currentStep) {
-      case 'muscle-groups':
-        return 'Choose which muscles to target'
+      case 'workout-type':
+        return 'Choose your workout style for personalized exercise selection'
       case 'equipment':
         return 'Select available equipment'
       case 'parameters':
@@ -174,9 +161,8 @@ export function FavouriteAiWizard({
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto p-4">
-          {currentStep === 'muscle-groups' && (
-            <AiMuscleGroupsStep
-              muscleGroups={allMuscleGroups}
+          {currentStep === 'workout-type' && (
+            <AiWorkoutTypeStep
               data={aiInputData}
               onDataChange={setAiInputData}
             />
@@ -208,7 +194,7 @@ export function FavouriteAiWizard({
         </div>
 
         <SheetFooter className="">
-          {currentStep === 'muscle-groups' && (
+          {currentStep === 'workout-type' && (
             <div className="flex gap-2 w-full">
               <Button variant="tertiary" onClick={onClose} className="flex-1">
                 Close
@@ -217,6 +203,11 @@ export function FavouriteAiWizard({
                 onClick={handleNext}
                 className="flex-1"
                 iconEnd={<ChevronRight />}
+                disabled={
+                  !aiInputData.workoutType ||
+                  (aiInputData.workoutType !== 'fullbody' &&
+                    !aiInputData.workoutSubType)
+                }
               >
                 Equipment
               </Button>

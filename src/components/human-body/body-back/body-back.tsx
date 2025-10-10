@@ -22,6 +22,7 @@ export function BackBodyView({
   isRegionSelected,
   handleRegionClick,
   hasMuscleData,
+  hideLabels = false,
 }: BodyViewProps) {
   const Y_OFFSET = 20
   const LEFT_LABEL_OFFSET = 13
@@ -147,15 +148,16 @@ export function BackBodyView({
           <Hamstrings getPathProps={getPathProps} />
           <Calves getPathProps={getPathProps} />
 
-          {Object.entries(config).map(([key, value]) => (
-            <ConnectionLine
-              key={key}
-              muscleX={value.muscleX}
-              muscleY={value.muscleY}
-              labelX={value.labelX}
-              labelY={value.labelY}
-            />
-          ))}
+          {!hideLabels &&
+            Object.entries(config).map(([key, value]) => (
+              <ConnectionLine
+                key={key}
+                muscleX={value.muscleX}
+                muscleY={value.muscleY}
+                labelX={value.labelX}
+                labelY={value.labelY}
+              />
+            ))}
         </g>
 
         <defs>
@@ -164,16 +166,17 @@ export function BackBodyView({
           </clipPath>
         </defs>
       </svg>
-      {Object.entries(config).map(([label, value]) => (
-        <MuscleLabel
-          key={label}
-          label={label}
-          value={value}
-          isRegionSelected={isRegionSelected}
-          handleRegionClick={handleRegionClick}
-          hasMuscleData={hasMuscleData}
-        />
-      ))}
+      {!hideLabels &&
+        Object.entries(config).map(([label, value]) => (
+          <MuscleLabel
+            key={label}
+            label={label}
+            value={value}
+            isRegionSelected={isRegionSelected}
+            handleRegionClick={handleRegionClick}
+            hasMuscleData={hasMuscleData}
+          />
+        ))}
     </div>
   )
 }

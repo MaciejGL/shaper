@@ -809,6 +809,8 @@ export const generateAiWorkout = async (
   }
 
   const {
+    workoutType,
+    workoutSubType,
     selectedMuscleGroups,
     selectedEquipment,
     exerciseCount,
@@ -817,10 +819,81 @@ export const generateAiWorkout = async (
     repFocus,
   } = input
 
-  /* 1. Enhanced AI prompt based on user preferences */
-  const muscleGroupsCondition =
-    selectedMuscleGroups.length > 0
-      ? `🎯 SPECIFIC MUSCLE FOCUS: Target ONLY these muscle groups: ${selectedMuscleGroups.join(', ')}
+  /* 1. Determine muscle groups based on workout type */
+  let targetMuscleGroups = selectedMuscleGroups
+  let workoutTypeContext = ''
+
+  // Map workout types to muscle groups and context
+  if (workoutType && workoutSubType) {
+    const workoutTypeMapping: Record<string, Record<string, string[]>> = {
+      'push-pull-legs': {
+        push: ['Chest', 'Shoulders', 'Triceps'],
+        pull: ['Lats', 'Upper Back', 'Traps', 'Biceps'],
+        legs: ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Inner Thighs'],
+      },
+      'upper-lower': {
+        upper: [
+          'Chest',
+          'Lats',
+          'Upper Back',
+          'Traps',
+          'Shoulders',
+          'Biceps',
+          'Triceps',
+          'Forearms',
+          'Abs',
+          'Obliques',
+          'LowerBack',
+        ],
+        lower: ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Inner Thighs'],
+      },
+      split: {
+        chest: ['Chest', 'Triceps'],
+        back: ['Lats', 'Upper Back', 'Traps', 'Biceps'],
+        legs: ['Quads', 'Hamstrings', 'Glutes', 'Calves', 'Inner Thighs'],
+        shoulders: ['Shoulders', 'Abs', 'Obliques'],
+        arms: ['Biceps', 'Triceps', 'Forearms'],
+      },
+    }
+
+    const workoutTypeDescriptions: Record<string, Record<string, string>> = {
+      'push-pull-legs': {
+        push: 'PUSH workout focusing on pressing movements for chest, shoulders, and triceps',
+        pull: 'PULL workout focusing on pulling movements for lats, upper back, traps, and biceps',
+        legs: 'LEG workout focusing on lower body with compound and isolation movements',
+      },
+      'upper-lower': {
+        upper:
+          'UPPER BODY workout targeting all upper body muscle groups with balanced distribution',
+        lower:
+          'LOWER BODY workout targeting all lower body muscle groups with compound and accessory movements',
+      },
+      split: {
+        chest: 'CHEST & TRICEPS day focusing on pressing movements',
+        back: 'BACK & BICEPS day focusing on pulling movements for lats, upper back, traps, and biceps',
+        legs: 'LEG DAY focusing on quads, hamstrings, glutes, and calves',
+        shoulders: 'SHOULDERS & ABS day with emphasis on deltoids and core',
+        arms: 'ARM DAY focusing on biceps, triceps, and forearms',
+      },
+    }
+
+    if (workoutTypeMapping[workoutType]?.[workoutSubType]) {
+      targetMuscleGroups = workoutTypeMapping[workoutType][workoutSubType]
+      workoutTypeContext =
+        workoutTypeDescriptions[workoutType]?.[workoutSubType] || ''
+    }
+  } else if (workoutType === 'fullbody') {
+    workoutTypeContext =
+      'FULL BODY workout with balanced distribution across all major muscle groups'
+  }
+
+  /* 2. Enhanced AI prompt based on workout type and preferences */
+  const muscleGroupsCondition = workoutTypeContext
+    ? `🎯 WORKOUT TYPE: ${workoutTypeContext.toUpperCase()}
+Target these muscle groups: ${targetMuscleGroups.join(', ')}
+⚠️ CRITICAL: Focus on the specified muscle groups for this workout type. Every exercise must directly work at least one of the selected muscles.`
+    : targetMuscleGroups.length > 0
+      ? `🎯 SPECIFIC MUSCLE FOCUS: Target ONLY these muscle groups: ${targetMuscleGroups.join(', ')}
 ⚠️ CRITICAL: Do NOT include any exercises that primarily target other muscle groups. Every exercise must directly work at least one of the selected muscles.`
       : `🎯 FULL-BODY WORKOUT: Include exercises for all major muscle groups with balanced distribution:
    - Upper Body: Chest, Back, Shoulders, Arms (Biceps/Triceps)

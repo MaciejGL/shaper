@@ -22,6 +22,7 @@ export function FrontBodyView({
   isRegionSelected,
   handleRegionClick,
   hasMuscleData,
+  hideLabels = false,
 }: BodyViewProps) {
   const Y_OFFSET = 20
   const LEFT_LABEL_OFFSET = 15
@@ -157,15 +158,16 @@ export function FrontBodyView({
           <Quads getPathProps={getPathProps} />
           <Shins getPathProps={getPathProps} />
 
-          {Object.entries(config).map(([key, value]) => (
-            <ConnectionLine
-              key={key}
-              muscleX={value.muscleX}
-              muscleY={value.muscleY}
-              labelX={value.labelX}
-              labelY={value.labelY}
-            />
-          ))}
+          {!hideLabels &&
+            Object.entries(config).map(([key, value]) => (
+              <ConnectionLine
+                key={key}
+                muscleX={value.muscleX}
+                muscleY={value.muscleY}
+                labelX={value.labelX}
+                labelY={value.labelY}
+              />
+            ))}
         </g>
         <defs>
           <clipPath id="clip0_1191_2882">
@@ -173,16 +175,17 @@ export function FrontBodyView({
           </clipPath>
         </defs>
       </svg>
-      {Object.entries(config).map(([label, value]) => (
-        <MuscleLabel
-          key={label}
-          label={label}
-          value={value}
-          isRegionSelected={isRegionSelected}
-          handleRegionClick={handleRegionClick}
-          hasMuscleData={hasMuscleData}
-        />
-      ))}
+      {!hideLabels &&
+        Object.entries(config).map(([label, value]) => (
+          <MuscleLabel
+            key={label}
+            label={label}
+            value={value}
+            isRegionSelected={isRegionSelected}
+            handleRegionClick={handleRegionClick}
+            hasMuscleData={hasMuscleData}
+          />
+        ))}
     </div>
   )
 }

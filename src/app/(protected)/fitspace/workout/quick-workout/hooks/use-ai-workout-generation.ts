@@ -11,7 +11,25 @@ import {
 export type RpeRange = '6-7' | '7-8' | '8-10'
 export type RepFocus = 'strength' | 'hypertrophy' | 'endurance'
 
+export type WorkoutType =
+  | 'fullbody'
+  | 'push-pull-legs'
+  | 'upper-lower'
+  | 'split'
+export type WorkoutSubType =
+  | 'push'
+  | 'pull'
+  | 'legs'
+  | 'upper'
+  | 'lower'
+  | 'chest'
+  | 'back'
+  | 'shoulders'
+  | 'arms'
+
 export interface AiWorkoutInputData {
+  workoutType: WorkoutType | null
+  workoutSubType: WorkoutSubType | null
   selectedMuscleGroups: string[]
   selectedEquipment: GQLEquipment[]
   exerciseCount: number
@@ -23,6 +41,8 @@ export interface AiWorkoutInputData {
 export function useAiWorkoutGeneration() {
   // AI workout input state
   const [aiInputData, setAiInputData] = useState<AiWorkoutInputData>({
+    workoutType: null,
+    workoutSubType: null,
     selectedMuscleGroups: [],
     selectedEquipment: [],
     exerciseCount: 5,
@@ -72,6 +92,8 @@ export function useAiWorkoutGeneration() {
 
       await generateAiWorkout({
         input: {
+          workoutType: aiInputData.workoutType,
+          workoutSubType: aiInputData.workoutSubType,
           selectedMuscleGroups: aiInputData.selectedMuscleGroups,
           selectedEquipment: aiInputData.selectedEquipment,
           exerciseCount: aiInputData.exerciseCount,
