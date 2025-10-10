@@ -30,7 +30,7 @@ export function WorkoutVariantTabs({
         value={selectedIndex.toString()}
         onValueChange={(value) => onSelectVariant(parseInt(value))}
       >
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-2 border dark:border-0">
           {variants.map((variant, index) => (
             <TabsTrigger key={index} value={index.toString()}>
               {variant.name}
@@ -42,26 +42,25 @@ export function WorkoutVariantTabs({
           <TabsContent
             key={index}
             value={index.toString()}
-            className="space-y-4"
+            className="space-y-4 overflow-visible -mx-4 px-4"
           >
+            {/* Exercise List */}
+            <AiExerciseList
+              exercises={variant.exercises}
+              onReorderExercises={onReorderExercises}
+            />
             {/* Workout Summary */}
             {variant.summary && (
-              <div className="bg-card p-4 rounded-lg">
+              <div className="p-4 bg-card-on-card rounded-lg">
                 <p className="text-sm text-muted-foreground">
                   {variant.summary}
                 </p>
               </div>
             )}
 
-            {/* Exercise List */}
-            <AiExerciseList
-              exercises={variant.exercises}
-              onReorderExercises={onReorderExercises}
-            />
-
             {/* Duration */}
             {variant.totalDuration && (
-              <div className="text-sm text-muted-foreground text-center">
+              <div className="text-sm text-muted-foreground">
                 Estimated duration: ~{variant.totalDuration} minutes
               </div>
             )}

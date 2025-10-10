@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Sparkles } from 'lucide-react'
+import { Dumbbell, Sparkles } from 'lucide-react'
 import posthog from 'posthog-js'
 import { useEffect } from 'react'
 
+import { EmptyStateCard } from '@/components/empty-state-card'
 import { Button } from '@/components/ui/button'
 import { GQLFitspaceGenerateAiWorkoutMutation } from '@/generated/graphql-client'
 
@@ -63,7 +64,7 @@ function LoadingState({ inputData }: { inputData: AiWorkoutInputData }) {
   const currentMessage = useRotatingAiMessages()
 
   return (
-    <div className="space-y-6 text-center h-full">
+    <div className="space-y-6 text-center h-full mt-[20%]">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -99,9 +100,9 @@ function LoadingState({ inputData }: { inputData: AiWorkoutInputData }) {
           <WorkoutSummary
             exerciseCount={inputData.exerciseCount}
             maxSetsPerExercise={inputData.maxSetsPerExercise}
-            rpeRange={inputData.rpeRange}
             repFocus={inputData.repFocus}
-            selectedMuscleGroups={inputData.selectedMuscleGroups}
+            workoutType={inputData.workoutType}
+            workoutSubType={inputData.workoutSubType}
             selectedEquipment={inputData.selectedEquipment}
           />
         )}
@@ -123,7 +124,7 @@ function ErrorState({
   }, [error])
 
   return (
-    <div className="space-y-4 text-center flex flex-col items-center justify-center flex-center h-full">
+    <div className="space-y-4 text-center flex flex-col items-center justify-center flex-center mt-[20%]">
       <div className="space-y-2 mb-12">
         <h3 className="text-lg font-semibold text-foreground">
           Oops! We couldn't generate your workout
@@ -144,14 +145,12 @@ function ErrorState({
 
 function EmptyState() {
   return (
-    <div className="space-y-4 text-center flex flex-col items-center justify-center flex-center h-full">
-      <div className="space-y-2">
-        <h3 className="text-lg font-semibold">Nothing to show yet</h3>
-        <p className="text-muted-foreground text-sm">
-          Your filters might be too picky. Head back and loosen things up - or
-          maybe our AI is on a coffee break ☕
-        </p>
-      </div>
+    <div className="space-y-4 text-center flex flex-col mt-[20%]">
+      <EmptyStateCard
+        title="Nothing to show yet"
+        description="Your filters might be too picky. Head back and loosen things up - or maybe our AI is on a coffee break ☕"
+        icon={Dumbbell}
+      />
     </div>
   )
 }

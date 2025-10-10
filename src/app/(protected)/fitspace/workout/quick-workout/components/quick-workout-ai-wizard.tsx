@@ -171,10 +171,10 @@ export function QuickWorkoutAiWizard({
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-2xl overflow-y-auto gap-0 !border-none "
+        className="w-full sm:max-w-2xl overflow-y-auto gap-0 bg-white dark:bg-background"
       >
         <div className="flex-1 overflow-y-auto p-4">
-          <SheetHeader className="py-8 mb-4">
+          <SheetHeader className="pt-8 pb-4 mb-4">
             <SheetTitle className="text-center">{getStepTitle()}</SheetTitle>
             <SheetDescription className="text-center">
               {getStepDescription()}

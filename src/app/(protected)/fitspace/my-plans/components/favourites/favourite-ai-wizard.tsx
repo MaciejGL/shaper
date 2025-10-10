@@ -153,11 +153,13 @@ export function FavouriteAiWizard({
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent
         side="right"
-        className="w-full sm:max-w-2xl overflow-y-auto gap-0"
+        className="w-full sm:max-w-2xl overflow-y-auto gap-0 bg-white dark:bg-background"
       >
-        <SheetHeader>
-          <SheetTitle>{getStepTitle()}</SheetTitle>
-          <SheetDescription>{getStepDescription()}</SheetDescription>
+        <SheetHeader className="pb-4 pt-12 mb-4">
+          <SheetTitle className="text-center">{getStepTitle()}</SheetTitle>
+          <SheetDescription className="text-center">
+            {getStepDescription()}
+          </SheetDescription>
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto p-4">

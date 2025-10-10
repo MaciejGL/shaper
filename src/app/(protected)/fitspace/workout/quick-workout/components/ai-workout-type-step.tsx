@@ -1,16 +1,22 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, ChevronUp } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import React, { useEffect, useMemo, useState } from 'react'
 
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { cn } from '@/lib/utils'
+import { AnimateChangeInHeight } from '@/components/animations/animated-height-change'
+import { RadioButtons } from '@/components/radio-buttons'
+import { Button } from '@/components/ui/button'
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+} from '@/components/ui/carousel'
+import { RadioGroup } from '@/components/ui/radio-group'
 
 import type {
   AiWorkoutInputData,
   WorkoutSubType,
-  WorkoutType,
 } from '../hooks/use-ai-workout-generation'
 import { WORKOUT_TYPE_OPTIONS } from '../types/workout-types'
 
@@ -25,38 +31,66 @@ export function AiWorkoutTypeStep({
   data,
   onDataChange,
 }: AiWorkoutTypeStepProps) {
-  const [expandedType, setExpandedType] = useState<WorkoutType | null>(
-    data.workoutType,
-  )
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>()
+  const [currentIndex, setCurrentIndex] = useState(0)
 
-  const handleWorkoutTypeSelect = (type: WorkoutType) => {
-    const option = WORKOUT_TYPE_OPTIONS.find((opt) => opt.id === type)
+  const currentTypeIndex = useMemo(() => {
+    if (!data.workoutType) return 0
+    return WORKOUT_TYPE_OPTIONS.findIndex((opt) => opt.id === data.workoutType)
+  }, [data.workoutType])
 
-    if (!option) return
+  const currentOption = WORKOUT_TYPE_OPTIONS[currentTypeIndex]
 
-    // If no sub-types, select immediately
-    if (!option.hasSubTypes) {
-      onDataChange({
-        ...data,
-        workoutType: type,
-        workoutSubType: null,
-      })
-      setExpandedType(null)
-      return
+  // Sync carousel with data changes
+  useEffect(() => {
+    if (carouselApi && currentTypeIndex !== currentIndex) {
+      carouselApi.scrollTo(currentTypeIndex, false)
+      setCurrentIndex(currentTypeIndex)
+    }
+  }, [carouselApi, currentTypeIndex, currentIndex])
+
+  // Track carousel position and update data
+  useEffect(() => {
+    if (!carouselApi) return
+
+    const onSelect = () => {
+      const selectedIndex = carouselApi.selectedScrollSnap()
+      setCurrentIndex(selectedIndex)
+
+      const newOption = WORKOUT_TYPE_OPTIONS[selectedIndex]
+      const newType = newOption.id
+
+      // Auto-select first sub-type if available
+      const firstSubType =
+        newOption.hasSubTypes && newOption.subTypes
+          ? newOption.subTypes[0].id
+          : null
+
+      // Only update if actually changed
+      if (
+        data.workoutType !== newType ||
+        data.workoutSubType !== firstSubType
+      ) {
+        onDataChange({
+          ...data,
+          workoutType: newType,
+          workoutSubType: firstSubType,
+        })
+      }
     }
 
-    // If has sub-types, expand to show options
-    if (expandedType === type) {
-      setExpandedType(null)
-    } else {
-      setExpandedType(type)
-      // Clear sub-type selection when changing main type
-      onDataChange({
-        ...data,
-        workoutType: type,
-        workoutSubType: null,
-      })
+    carouselApi.on('select', onSelect)
+    return () => {
+      carouselApi.off('select', onSelect)
     }
+  }, [carouselApi, data, onDataChange])
+
+  const handlePrevious = () => {
+    carouselApi?.scrollPrev()
+  }
+
+  const handleNext = () => {
+    carouselApi?.scrollNext()
   }
 
   const handleSubTypeSelect = (subType: WorkoutSubType) => {
@@ -66,159 +100,135 @@ export function AiWorkoutTypeStep({
     })
   }
 
-  const isTypeSelected = (type: WorkoutType) => {
-    return data.workoutType === type
-  }
+  // Get muscle groups for selected sub-type or full body
+  const selectedMuscleGroups = useMemo(() => {
+    if (!currentOption.hasSubTypes) {
+      // Full body - show all major muscle groups
+      return [
+        'Chest',
+        'Lats',
+        'Upper Back',
+        'Traps',
+        'Shoulders',
+        'Biceps',
+        'Triceps',
+        'Forearms',
+        'Abs',
+        'Obliques',
+        'LowerBack',
+        'Quads',
+        'Hamstrings',
+        'Glutes',
+        'Calves',
+        'Inner Thighs',
+      ]
+    }
 
-  const isSubTypeSelected = (subType: WorkoutSubType) => {
-    return data.workoutSubType === subType
-  }
+    if (data.workoutSubType && currentOption.subTypes) {
+      const subType = currentOption.subTypes.find(
+        (st) => st.id === data.workoutSubType,
+      )
+      return subType?.muscleGroups || []
+    }
+
+    return []
+  }, [currentOption, data.workoutSubType])
+
+  // Optional: Get color based on workout type
+  const heatmapColor = useMemo(() => {
+    // You can customize colors for different workout types with any Tailwind class
+    const colorMap: Record<string, string> = {
+      fullbody: 'fill-orange-500 dark:fill-amber-700',
+      'push-pull-legs': 'fill-orange-500 dark:fill-amber-700',
+      'upper-lower': 'fill-orange-500 dark:fill-amber-700',
+      split: 'fill-orange-500 dark:fill-amber-700',
+    }
+    return data.workoutType
+      ? colorMap[data.workoutType] || 'fill-orange-500 dark:fill-amber-700'
+      : 'fill-orange-500 dark:fill-amber-700'
+  }, [data.workoutType])
 
   return (
-    <div className="space-y-4">
-      <div className="text-center mb-6">
-        <p className="text-sm text-muted-foreground">
-          Select your workout type to generate a personalized routine
-        </p>
-      </div>
+    <div>
+      {/* Workout Type Carousel */}
+      <div className="flex flex-col">
+        <div className="flex items-center justify-between flex-1 bg-card-on-card rounded-lg">
+          <Button
+            variant="ghost"
+            size="icon-lg"
+            onClick={handlePrevious}
+            className="shrink-0"
+          >
+            <ChevronLeft className="size-5" />
+          </Button>
 
-      <div className="space-y-3">
-        {WORKOUT_TYPE_OPTIONS.map((option) => (
-          <div key={option.id} className="space-y-2">
-            {/* Main Workout Type */}
-            <button
-              onClick={() => handleWorkoutTypeSelect(option.id)}
-              className={cn(
-                'w-full text-left rounded-lg border-2 p-4 transition-all',
-                'hover:border-primary/50',
-                isTypeSelected(option.id)
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border bg-card',
-              )}
+          <div className="flex-1 overflow-hidden">
+            <Carousel
+              setApi={setCarouselApi}
+              opts={{
+                loop: true,
+                align: 'center',
+              }}
             >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={cn(
-                        'size-5 rounded-full border-2 flex items-center justify-center',
-                        isTypeSelected(option.id)
-                          ? 'border-primary bg-primary'
-                          : 'border-border',
-                      )}
-                    >
-                      {isTypeSelected(option.id) && (
-                        <div className="size-2 rounded-full bg-primary-foreground" />
-                      )}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{option.label}</h3>
-                      <p className="text-sm text-muted-foreground">
+              <CarouselContent>
+                {WORKOUT_TYPE_OPTIONS.map((option) => (
+                  <CarouselItem
+                    key={option.id}
+                    className="flex items-center justify-center"
+                  >
+                    <div className="text-center py-1">
+                      <h3 className="font-semibold text-lg">{option.label}</h3>
+                      <p className="text-xs text-muted-foreground">
                         {option.description}
                       </p>
                     </div>
-                  </div>
-                </div>
-                {option.hasSubTypes && (
-                  <div className="ml-2">
-                    {expandedType === option.id ? (
-                      <ChevronUp className="size-5 text-muted-foreground" />
-                    ) : (
-                      <ChevronDown className="size-5 text-muted-foreground" />
-                    )}
-                  </div>
-                )}
-              </div>
-            </button>
-
-            {/* Sub-types with Heatmaps */}
-            <AnimatePresence>
-              {option.hasSubTypes &&
-                expandedType === option.id &&
-                option.subTypes && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="overflow-hidden"
-                  >
-                    <div className="ml-4 sm:ml-8 space-y-2 pt-2">
-                      <RadioGroup
-                        value={data.workoutSubType || ''}
-                        onValueChange={(value) =>
-                          handleSubTypeSelect(value as WorkoutSubType)
-                        }
-                      >
-                        {option.subTypes.map((subType) => (
-                          <label
-                            key={subType.id}
-                            htmlFor={subType.id}
-                            className={cn(
-                              'block rounded-lg border-2 p-3 sm:p-4 transition-all cursor-pointer',
-                              'hover:border-primary/50',
-                              isSubTypeSelected(subType.id)
-                                ? 'border-primary bg-primary/5'
-                                : 'border-border bg-card',
-                            )}
-                          >
-                            <div className="flex items-start gap-3">
-                              <RadioGroupItem
-                                value={subType.id}
-                                id={subType.id}
-                                className="mt-1"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-medium">
-                                  {subType.label}
-                                </div>
-                                <div className="text-xs text-muted-foreground mt-1">
-                                  {subType.muscleGroups.join(', ')}
-                                </div>
-
-                                {/* Show heatmap when selected */}
-                                <AnimatePresence>
-                                  {isSubTypeSelected(subType.id) && (
-                                    <motion.div
-                                      initial={{ height: 0, opacity: 0 }}
-                                      animate={{ height: 'auto', opacity: 1 }}
-                                      exit={{ height: 0, opacity: 0 }}
-                                      transition={{ duration: 0.2 }}
-                                      className="overflow-hidden"
-                                    >
-                                      <WorkoutTypeHeatmap
-                                        muscleGroups={subType.muscleGroups}
-                                      />
-                                    </motion.div>
-                                  )}
-                                </AnimatePresence>
-                              </div>
-                            </div>
-                          </label>
-                        ))}
-                      </RadioGroup>
-                    </div>
-                  </motion.div>
-                )}
-            </AnimatePresence>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
           </div>
-        ))}
+
+          <Button
+            variant="ghost"
+            size="icon-lg"
+            onClick={handleNext}
+            iconOnly={<ChevronRight />}
+            className="shrink-0"
+          >
+            Next
+          </Button>
+        </div>
+        <AnimateChangeInHeight className="mt-2">
+          {currentOption.hasSubTypes && currentOption.subTypes && (
+            <RadioGroup
+              value={data.workoutSubType || ''}
+              onValueChange={(value) =>
+                handleSubTypeSelect(value as WorkoutSubType)
+              }
+            >
+              <RadioButtons
+                value={data.workoutSubType || ''}
+                onValueChange={(value) =>
+                  handleSubTypeSelect(value as WorkoutSubType)
+                }
+                options={currentOption.subTypes.map((subType) => ({
+                  value: subType.id,
+                  label: subType.label,
+                }))}
+                columns={2}
+              />
+            </RadioGroup>
+          )}
+        </AnimateChangeInHeight>
       </div>
 
-      {/* Help text */}
-      <div className="text-center text-sm text-muted-foreground bg-muted p-4 rounded-lg mt-6">
-        {!data.workoutType ? (
-          'Select a workout type to continue'
-        ) : data.workoutType === 'fullbody' ? (
-          'Full body workout selected. Continue to set equipment and parameters.'
-        ) : !data.workoutSubType ? (
-          'Select a specific workout focus to continue'
-        ) : (
-          <>
-            <strong>{data.workoutSubType.toUpperCase()}</strong> workout
-            selected. Continue to set equipment and parameters.
-          </>
-        )}
+      {/* Dynamic Heatmap - Always Visible */}
+      <div className="py-4 mt-2">
+        <WorkoutTypeHeatmap
+          key={`${data.workoutType}-${data.workoutSubType}`}
+          muscleGroups={selectedMuscleGroups}
+          colorClassName={heatmapColor}
+        />
       </div>
     </div>
   )

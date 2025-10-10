@@ -78,9 +78,7 @@ export function EquipmentFilters({
             key={equipmentItem}
             onClick={() => onEquipmentToggle(equipmentItem)}
             variant={
-              selectedEquipment.includes(equipmentItem)
-                ? 'secondary'
-                : 'secondary'
+              selectedEquipment.includes(equipmentItem) ? 'outline' : 'outline'
             }
             className="size-full flex flex-col gap-0 p-0 overflow-hidden relative"
           >

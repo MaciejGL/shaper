@@ -33,14 +33,14 @@ export function AiExerciseList({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
-      className={cn('space-y-4', className)}
+      className={cn('space-y-2', className)}
     >
       {onReorderExercises ? (
         <Reorder.Group
           axis="y"
           values={exercises}
           onReorder={onReorderExercises}
-          className="space-y-3 touch-manipulation"
+          className="space-y-2 touch-manipulation"
         >
           {exercises.map((workoutExercise) => (
             <DraggableExerciseItem
@@ -126,7 +126,7 @@ function ExerciseCard({
         className={cn(
           'group/exercise-card p-0 border-b border-t-0 overflow-hidden flex-1 rounded-none pr-2',
           isDraggable && 'rounded-lg',
-          'bg-card hover:border-primary/20 transition-all duration-200',
+          'hover:border-primary/20 transition-all duration-200',
           isDraggable && 'hover:shadow-lg',
         )}
       >
@@ -194,20 +194,20 @@ function ExerciseCard({
               ))}
             </div>
           </div>
+          {isDraggable && dragControls && (
+            <div
+              className="flex-shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-manipulation select-none"
+              onPointerDown={handleDragStart}
+              style={{
+                touchAction: 'none', // Completely disable touch actions on drag handle
+                userSelect: 'none', // Prevent text selection
+              }}
+            >
+              <Grip className="h-4 w-4" />
+            </div>
+          )}
         </CardContent>
       </Card>
-      {isDraggable && dragControls && (
-        <div
-          className="flex-shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-manipulation select-none"
-          onPointerDown={handleDragStart}
-          style={{
-            touchAction: 'none', // Completely disable touch actions on drag handle
-            userSelect: 'none', // Prevent text selection
-          }}
-        >
-          <Grip className="h-4 w-4" />
-        </div>
-      )}
     </div>
   )
 }

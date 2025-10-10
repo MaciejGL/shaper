@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 
+import { RadioButtons } from '@/components/radio-buttons'
 import {
   Card,
   CardContent,
@@ -9,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { RadioOption } from '@/components/ui/radio-option'
 
 import type { RpeRange } from '../../hooks/use-ai-workout-generation'
 
@@ -49,7 +49,7 @@ export function RpeRangeSelector({
       transition={{ duration: 0.07, delay: 0.03 }}
       className={className}
     >
-      <Card borderless>
+      <Card borderless variant="tertiary">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">
             Workout Intensity (RPE)
@@ -61,20 +61,12 @@ export function RpeRangeSelector({
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {RPE_OPTIONS.map((option) => (
-              <RadioOption
-                key={option.value}
-                value={option.value}
-                selectedValue={value}
-                onChange={onChange}
-                label={option.label}
-                description={option.description}
-                suffix={`(${option.value})`}
-                name="rpeRange"
-                variant="default"
-                className="py-2"
-              />
-            ))}
+            <RadioButtons
+              value={value}
+              onValueChange={onChange}
+              options={RPE_OPTIONS}
+              columns={1}
+            />
           </div>
         </CardContent>
       </Card>

@@ -5,14 +5,19 @@ import { motion } from 'framer-motion'
 import { StatsItem } from '@/components/stats-item'
 import { GQLEquipment } from '@/generated/graphql-client'
 
-import type { RepFocus, RpeRange } from '../../hooks/use-ai-workout-generation'
+import type {
+  RepFocus,
+  WorkoutSubType,
+  WorkoutType,
+} from '../../hooks/use-ai-workout-generation'
+import { WORKOUT_TYPE_OPTIONS } from '../../types/workout-types'
 
 interface WorkoutSummaryProps {
   exerciseCount: number
   maxSetsPerExercise: number
-  rpeRange: RpeRange
   repFocus: RepFocus
-  selectedMuscleGroups: string[]
+  workoutType: WorkoutType | null
+  workoutSubType: WorkoutSubType | null
   selectedEquipment: GQLEquipment[]
   className?: string
 }
@@ -20,23 +25,28 @@ interface WorkoutSummaryProps {
 export function WorkoutSummary({
   exerciseCount,
   maxSetsPerExercise,
-  rpeRange,
   repFocus,
-  selectedMuscleGroups,
+  workoutType,
+  workoutSubType,
   selectedEquipment,
   className,
 }: WorkoutSummaryProps) {
-  const rpeRangeText = () => {
-    switch (rpeRange) {
-      case '6-7':
-        return 'Moderate'
-      case '7-8':
-        return 'Challenging'
-      case '8-10':
-        return 'No Pain, No Gain'
-      default:
-        return ''
+  const getWorkoutTypeLabel = () => {
+    if (!workoutType) return 'Not selected'
+
+    const workoutOption = WORKOUT_TYPE_OPTIONS.find(
+      (opt) => opt.id === workoutType,
+    )
+    if (!workoutOption) return 'Not selected'
+
+    if (!workoutSubType || !workoutOption.hasSubTypes) {
+      return workoutOption.label
     }
+
+    const subTypeOption = workoutOption.subTypes?.find(
+      (sub) => sub.id === workoutSubType,
+    )
+    return subTypeOption ? subTypeOption.label : workoutOption.label
   }
 
   return (
@@ -47,15 +57,16 @@ export function WorkoutSummary({
       className={className}
     >
       <div className="grid grid-cols-2 gap-2">
-        <StatsItem value={rpeRangeText()} label="Intensity" />
+        <div className="col-span-2">
+          <StatsItem value={getWorkoutTypeLabel()} label="Workout type" />
+        </div>
         <StatsItem
           value={<p className="capitalize">{repFocus}</p>}
           label="Workout focus"
         />
+        <StatsItem value={selectedEquipment.length} label="Equipment" />
         <StatsItem value={exerciseCount} label="Exercises" />
         <StatsItem value={maxSetsPerExercise} label="Sets per exercise" />
-        <StatsItem value={selectedMuscleGroups.length} label="Muscle groups" />
-        <StatsItem value={selectedEquipment.length} label="Equipment" />
       </div>
     </motion.div>
   )

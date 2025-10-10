@@ -5,14 +5,17 @@ import { FrontBodyView } from '@/components/human-body/body-front/body-front'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/lib/utils'
 
-import { getIntensityColor } from '../../../progress/constants/heatmap-colors'
 import { LABEL_TO_GROUP_MAPPING } from '../../../progress/constants/muscle-groups'
 
 interface WorkoutTypeHeatmapProps {
   muscleGroups: string[]
+  colorClassName?: string
 }
 
-export function WorkoutTypeHeatmap({ muscleGroups }: WorkoutTypeHeatmapProps) {
+export function WorkoutTypeHeatmap({
+  muscleGroups,
+  colorClassName = 'fill-primary',
+}: WorkoutTypeHeatmapProps) {
   // Create muscle intensity data for heatmap visualization
   const muscleIntensity = useMemo(() => {
     const intensity: Record<string, number> = {}
@@ -42,7 +45,7 @@ export function WorkoutTypeHeatmap({ muscleGroups }: WorkoutTypeHeatmapProps) {
     return {
       className: cn(
         'transition-all duration-200 pointer-events-none',
-        getIntensityColor(intensity),
+        intensity > 0 ? colorClassName : 'fill-muted',
       ),
       onClick: () => {},
     }
@@ -53,9 +56,9 @@ export function WorkoutTypeHeatmap({ muscleGroups }: WorkoutTypeHeatmapProps) {
   const hasMuscleData = () => true
 
   return (
-    <div className="py-2 sm:py-3 -mx-2 sm:mx-0">
+    <div>
       <Tabs defaultValue="front">
-        <TabsList className="mx-auto border border-border grid grid-cols-[1fr_auto_1fr] w-fit scale-90 sm:scale-100">
+        <TabsList className="mx-auto border dark:border-0 border-border grid grid-cols-[1fr_auto_1fr]">
           <TabsTrigger value="front" className="text-xs sm:text-sm">
             Front
           </TabsTrigger>

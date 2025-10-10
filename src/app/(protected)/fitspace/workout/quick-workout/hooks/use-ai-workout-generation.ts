@@ -41,7 +41,7 @@ export interface AiWorkoutInputData {
 export function useAiWorkoutGeneration() {
   // AI workout input state
   const [aiInputData, setAiInputData] = useState<AiWorkoutInputData>({
-    workoutType: null,
+    workoutType: 'fullbody',
     workoutSubType: null,
     selectedMuscleGroups: [],
     selectedEquipment: [],
