@@ -1,6 +1,6 @@
 'use client'
 
-import { format, isPast } from 'date-fns'
+import { format, isPast, isToday } from 'date-fns'
 import { Calendar, CalendarPlus, Clock, MapPin, Video } from 'lucide-react'
 import { useState } from 'react'
 
@@ -55,15 +55,15 @@ export function ClientMeetingsSection() {
 
   const allMeetings = data?.myUpcomingMeetings || []
 
-  // Show meetings that are upcoming OR past but not completed/cancelled
+  // Show meetings from today and future, excluding completed/cancelled
   const meetings = allMeetings.filter((meeting) => {
     const meetingDate = new Date(meeting.scheduledAt)
-    const isUpcoming = !isPast(meetingDate)
+    const isFromTodayOrFuture = isToday(meetingDate) || !isPast(meetingDate)
     const isActive =
       meeting.status !== 'COMPLETED' && meeting.status !== 'CANCELLED'
 
-    // Show if upcoming, or if past but still pending/confirmed
-    return isUpcoming || isActive
+    // Show if from today/future and not completed/cancelled
+    return isFromTodayOrFuture && isActive
   })
 
   if (isLoading) {

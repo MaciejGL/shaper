@@ -1,6 +1,6 @@
 'use client'
 
-import { format, isPast } from 'date-fns'
+import { format, isPast, isToday } from 'date-fns'
 import { Calendar, CalendarPlus, Clock, MapPin, Video } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
@@ -60,12 +60,16 @@ export function AllMeetingsDrawer({
 
   const allMeetings = data?.myUpcomingMeetings || []
 
-  // Separate meetings into upcoming and past
-  const upcomingMeetings = allMeetings.filter(
-    (meeting) => !isPast(new Date(meeting.scheduledAt)),
-  )
+  // Separate meetings into upcoming and past (today's meetings are in upcoming)
+  const upcomingMeetings = allMeetings.filter((meeting) => {
+    const meetingDate = new Date(meeting.scheduledAt)
+    return isToday(meetingDate) || !isPast(meetingDate)
+  })
   const pastMeetings = allMeetings
-    .filter((meeting) => isPast(new Date(meeting.scheduledAt)))
+    .filter((meeting) => {
+      const meetingDate = new Date(meeting.scheduledAt)
+      return !isToday(meetingDate) && isPast(meetingDate)
+    })
     .sort(
       (a, b) =>
         new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime(),
@@ -73,7 +77,7 @@ export function AllMeetingsDrawer({
 
   const renderMeeting = (meeting: Meeting) => {
     const meetingDate = new Date(meeting.scheduledAt)
-    const isPastMeeting = isPast(meetingDate)
+    const isPastMeeting = !isToday(meetingDate) && isPast(meetingDate)
 
     return (
       <Card
@@ -153,11 +157,30 @@ export function AllMeetingsDrawer({
           )}
         </CardContent>
 
-        <CardFooter className="gap-2 p-3 pt-0">
-          {/* Join Button for Virtual Meetings */}
-          {!isPastMeeting &&
-            meeting.locationType === 'VIRTUAL' &&
-            meeting.meetingLink && (
+        {!isPastMeeting && (
+          <CardFooter className="gap-2 p-3 pt-0">
+            {/* Add to Calendar Button */}
+            <Button
+              size="sm"
+              variant="tertiary"
+              className="flex-1"
+              iconStart={<CalendarPlus />}
+              onClick={() =>
+                addToCalendar({
+                  title: meeting.title,
+                  description: meeting.description,
+                  scheduledAt: meeting.scheduledAt,
+                  duration: meeting.duration,
+                  address: meeting.address,
+                  meetingLink: meeting.meetingLink,
+                  locationType: meeting.locationType,
+                })
+              }
+            >
+              Add to Calendar
+            </Button>
+            {/* Join Button for Virtual Meetings */}
+            {meeting.locationType === 'VIRTUAL' && meeting.meetingLink && (
               <Button
                 size="sm"
                 variant="default"
@@ -168,28 +191,8 @@ export function AllMeetingsDrawer({
                 Join
               </Button>
             )}
-
-          {/* Add to Calendar Button */}
-          <Button
-            size="sm"
-            variant="outline"
-            className="flex-1"
-            iconStart={<CalendarPlus />}
-            onClick={() =>
-              addToCalendar({
-                title: meeting.title,
-                description: meeting.description,
-                scheduledAt: meeting.scheduledAt,
-                duration: meeting.duration,
-                address: meeting.address,
-                meetingLink: meeting.meetingLink,
-                locationType: meeting.locationType,
-              })
-            }
-          >
-            Add to Calendar
-          </Button>
-        </CardFooter>
+          </CardFooter>
+        )}
       </Card>
     )
   }

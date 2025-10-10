@@ -425,12 +425,17 @@ export async function myUpcomingMeetings(
   }
 
   const now = new Date()
+  const startOfToday = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  )
 
   const meetings = await prisma.meeting.findMany({
     where: {
       OR: [{ coachId: currentUserId }, { traineeId: currentUserId }],
       scheduledAt: {
-        gte: now, // Only future meetings
+        gte: startOfToday, // Show meetings from start of today
       },
       status: {
         in: ['PENDING', 'CONFIRMED'], // Exclude completed/cancelled
