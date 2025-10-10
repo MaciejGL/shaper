@@ -2,6 +2,7 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import { ChevronRight } from 'lucide-react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
 import { useState } from 'react'
@@ -15,6 +16,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { EQUIPMENT_OPTIONS, equipmentImages } from '@/constants/equipment'
 import {
   useFitspaceCreateQuickWorkoutMutation,
   useFitspaceGetWorkoutDayQuery,
@@ -173,6 +175,28 @@ export function QuickWorkoutAiWizard({
         side="right"
         className="w-full sm:max-w-2xl overflow-y-auto gap-0 bg-white dark:bg-background"
       >
+        {/* Invisible focus trap - captures initial focus to prevent button auto-focus */}
+        <div
+          tabIndex={0}
+          className="sr-only"
+          aria-hidden="true"
+          onFocus={(e) => e.currentTarget.blur()}
+        />
+
+        {/* Hidden preloader for equipment images - loads images into cache */}
+        <div className="hidden">
+          {EQUIPMENT_OPTIONS.map((equipment) => (
+            <Image
+              key={equipment.value}
+              src={equipmentImages[equipment.value]}
+              alt={equipment.label}
+              width={200}
+              height={200}
+              priority
+            />
+          ))}
+        </div>
+
         <div className="flex-1 overflow-y-auto p-4">
           <SheetHeader className="pt-8 pb-4 mb-4">
             <SheetTitle className="text-center">{getStepTitle()}</SheetTitle>

@@ -152,15 +152,16 @@ export function AiWorkoutTypeStep({
     <div>
       {/* Workout Type Carousel */}
       <div className="flex flex-col">
-        <div className="flex items-center justify-between flex-1 bg-card-on-card rounded-lg">
-          <Button
-            variant="ghost"
-            size="icon-lg"
-            onClick={handlePrevious}
-            className="shrink-0"
-          >
-            <ChevronLeft className="size-5" />
-          </Button>
+        <div className="flex justify-between bg-card-on-card rounded-lg">
+          <div>
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              onClick={handlePrevious}
+              className="shrink-0 h-full"
+              iconOnly={<ChevronLeft />}
+            />
+          </div>
 
           <div className="flex-1 overflow-hidden">
             <Carousel
@@ -188,15 +189,15 @@ export function AiWorkoutTypeStep({
             </Carousel>
           </div>
 
-          <Button
-            variant="ghost"
-            size="icon-lg"
-            onClick={handleNext}
-            iconOnly={<ChevronRight />}
-            className="shrink-0"
-          >
-            Next
-          </Button>
+          <div>
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              onClick={handleNext}
+              iconOnly={<ChevronRight />}
+              className="shrink-0 h-full"
+            />
+          </div>
         </div>
         <AnimateChangeInHeight className="mt-2">
           {currentOption.hasSubTypes && currentOption.subTypes && (
