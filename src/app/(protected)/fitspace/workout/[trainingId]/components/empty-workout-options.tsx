@@ -155,6 +155,7 @@ export function EmptyWorkoutOptions({ dayId }: EmptyWorkoutOptionsProps) {
       {/* AI Wizard Sheet */}
       {showAiWizard && (
         <QuickWorkoutAiWizard
+          mode="quick-workout"
           open={showAiWizard}
           onClose={() => setShowAiWizard(false)}
           dayId={dayId}

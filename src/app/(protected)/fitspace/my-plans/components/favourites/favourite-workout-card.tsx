@@ -39,10 +39,11 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { GQLGetFavouriteWorkoutsQuery } from '@/generated/graphql-client'
 import { WorkoutStatusAnalysis } from '@/hooks/use-favourite-workouts'
 
+import { QuickWorkoutAiWizard } from '../../../workout/quick-workout/components/quick-workout-ai-wizard'
+
 import { AddExerciseToFavouriteDrawer } from './add-exercise-to-favourite-drawer'
 import { EditFavouriteMetadataDrawer } from './edit-favourite-metadata-drawer'
 import { EmptyFavouriteOptions } from './empty-favourite-options'
-import { FavouriteAiWizard } from './favourite-ai-wizard'
 import { useFavouriteCardData } from './use-favourite-card-data'
 import { useFavouriteCardMutations } from './use-favourite-card-mutations'
 
@@ -272,7 +273,8 @@ export function FavouriteWorkoutCard({
 
       {/* AI Wizard */}
       {showAiWizard && (
-        <FavouriteAiWizard
+        <QuickWorkoutAiWizard
+          mode="favourite"
           open={showAiWizard}
           onClose={() => setShowAiWizard(false)}
           favouriteId={favourite.id}

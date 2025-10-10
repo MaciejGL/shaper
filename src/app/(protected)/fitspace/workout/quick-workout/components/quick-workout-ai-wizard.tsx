@@ -21,6 +21,7 @@ import {
   useFitspaceCreateQuickWorkoutMutation,
   useFitspaceGetWorkoutDayQuery,
 } from '@/generated/graphql-client'
+import { useUpdateFavouriteWorkout } from '@/hooks/use-favourite-workouts'
 import { queryInvalidation } from '@/lib/query-invalidation'
 
 import { useAiWorkoutGeneration } from '../hooks/use-ai-workout-generation'
@@ -30,19 +31,25 @@ import { AiParametersStep } from './ai-parameters-step'
 import { AiResultsStep } from './ai-results-step'
 import { AiWorkoutTypeStep } from './ai-workout-type-step'
 
-interface QuickWorkoutAiWizardProps {
-  open: boolean
-  onClose: () => void
-  dayId: string
-}
+type QuickWorkoutAiWizardProps =
+  | {
+      mode: 'quick-workout'
+      open: boolean
+      onClose: () => void
+      dayId: string
+    }
+  | {
+      mode: 'favourite'
+      open: boolean
+      onClose: () => void
+      favouriteId: string
+      favouriteTitle: string
+    }
 
 type AiStep = 'workout-type' | 'equipment' | 'parameters' | 'results'
 
-export function QuickWorkoutAiWizard({
-  open,
-  onClose,
-  dayId,
-}: QuickWorkoutAiWizardProps) {
+export function QuickWorkoutAiWizard(props: QuickWorkoutAiWizardProps) {
+  const { open, onClose } = props
   const [currentStep, setCurrentStep] = useState<AiStep>('workout-type')
   const queryClient = useQueryClient()
   const router = useRouter()
@@ -70,13 +77,15 @@ export function QuickWorkoutAiWizard({
         await queryInvalidation.workoutAndPlans(queryClient)
 
         // Refetch the specific day query to ensure fresh data
-        const currentDayId = dayIdFromUrl || dayId
-        const queryKeyToInvalidate = useFitspaceGetWorkoutDayQuery.getKey({
-          dayId: currentDayId,
-        })
-        await queryClient.refetchQueries({
-          queryKey: queryKeyToInvalidate,
-        })
+        if (props.mode === 'quick-workout') {
+          const currentDayId = dayIdFromUrl || props.dayId
+          const queryKeyToInvalidate = useFitspaceGetWorkoutDayQuery.getKey({
+            dayId: currentDayId,
+          })
+          await queryClient.refetchQueries({
+            queryKey: queryKeyToInvalidate,
+          })
+        }
 
         // Refresh server components
         router.refresh()
@@ -85,6 +94,9 @@ export function QuickWorkoutAiWizard({
         onClose()
       },
     })
+
+  const { mutateAsync: updateFavourite, isPending: isUpdating } =
+    useUpdateFavouriteWorkout()
 
   const scrollToTop = () => {
     if (scrollContainerRef.current) {
@@ -125,30 +137,68 @@ export function QuickWorkoutAiWizard({
     if (!selectedVariant) return
 
     try {
-      // Transform selected variant to the format expected by createQuickWorkout
-      const exercises = selectedVariant.exercises.map((aiExercise, index) => ({
-        exerciseId: aiExercise.exercise.id,
-        order: index + 1,
-        sets:
-          aiExercise.sets?.map((aiSet, setIndex) => ({
-            order: setIndex + 1,
-            reps: aiSet?.reps || null,
-            minReps: aiSet?.minReps || null,
-            maxReps: aiSet?.maxReps || null,
-            rpe: aiSet?.rpe || null,
-            weight: null,
-          })) || [],
-      }))
+      if (props.mode === 'quick-workout') {
+        // Transform selected variant to the format expected by createQuickWorkout
+        const exercises = selectedVariant.exercises.map(
+          (aiExercise, index) => ({
+            exerciseId: aiExercise.exercise.id,
+            order: index + 1,
+            sets:
+              aiExercise.sets?.map((aiSet, setIndex) => ({
+                order: setIndex + 1,
+                reps: aiSet?.reps || null,
+                minReps: aiSet?.minReps || null,
+                maxReps: aiSet?.maxReps || null,
+                rpe: aiSet?.rpe || null,
+                weight: null,
+              })) || [],
+          }),
+        )
 
-      await createQuickWorkout({
-        input: {
-          exercises,
-          replaceExisting: true,
-          dayId, // Add to the specific day the user is viewing
-        },
-      })
+        await createQuickWorkout({
+          input: {
+            exercises,
+            replaceExisting: true,
+            dayId: props.dayId,
+          },
+        })
+      } else {
+        // Transform selected variant to favourite format
+        const exercises = selectedVariant.exercises.map(
+          (aiExercise, index) => ({
+            name: aiExercise.exercise.name,
+            order: index + 1,
+            baseId: aiExercise.exercise.id,
+            restSeconds: null,
+            instructions: null,
+            sets:
+              aiExercise.sets?.map((aiSet, setIndex) => ({
+                order: setIndex + 1,
+                reps: aiSet?.reps || null,
+                minReps: aiSet?.minReps || null,
+                maxReps: aiSet?.maxReps || null,
+                rpe: aiSet?.rpe || null,
+                weight: null,
+              })) || [],
+          }),
+        )
+
+        await updateFavourite({
+          input: {
+            id: props.favouriteId,
+            exercises,
+          },
+        })
+
+        // Invalidate favourite queries
+        await queryClient.invalidateQueries({
+          queryKey: ['GetFavouriteWorkouts'],
+        })
+
+        onClose()
+      }
     } catch (error) {
-      console.error('Failed to create workout:', error)
+      console.error('Failed to save workout:', error)
     }
   }
 
@@ -161,7 +211,9 @@ export function QuickWorkoutAiWizard({
       case 'parameters':
         return 'Workout Parameters'
       case 'results':
-        return 'Your Workout'
+        return props.mode === 'favourite'
+          ? `${props.favouriteTitle} - Generated Workout`
+          : 'Your Workout'
       default:
         return 'Quick Workout'
     }
@@ -172,15 +224,26 @@ export function QuickWorkoutAiWizard({
       case 'workout-type':
         return 'Choose your workout style for personalized exercise selection'
       case 'equipment':
-        return 'Select available or preferred equipment'
+        return props.mode === 'favourite'
+          ? 'Select available equipment'
+          : 'Select available or preferred equipment'
       case 'parameters':
-        return 'Customize your workout intensity'
+        return props.mode === 'favourite'
+          ? 'Customize workout intensity'
+          : 'Customize your workout intensity'
       case 'results':
-        return 'Review and start your workout'
+        return props.mode === 'favourite'
+          ? 'Review and save your workout'
+          : 'Review and start your workout'
       default:
         return ''
     }
   }
+
+  const isPending =
+    props.mode === 'quick-workout' ? isCreatingWorkout : isUpdating
+  const finalButtonText =
+    props.mode === 'favourite' ? 'Save to Template' : 'Start Workout'
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
@@ -315,7 +378,7 @@ export function QuickWorkoutAiWizard({
               <Button
                 variant="tertiary"
                 onClick={handleBack}
-                disabled={isCreatingWorkout}
+                disabled={isPending}
                 className="flex-1"
               >
                 Back
@@ -323,11 +386,11 @@ export function QuickWorkoutAiWizard({
               {aiWorkoutResult && (
                 <Button
                   onClick={handleAccept}
-                  loading={isCreatingWorkout}
-                  disabled={isCreatingWorkout}
+                  loading={isPending}
+                  disabled={isPending}
                   className="flex-1"
                 >
-                  Start Workout
+                  {finalButtonText}
                 </Button>
               )}
             </div>
