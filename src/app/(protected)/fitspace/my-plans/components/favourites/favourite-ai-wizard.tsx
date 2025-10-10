@@ -3,7 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { ChevronRight } from 'lucide-react'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -40,6 +40,7 @@ export function FavouriteAiWizard({
 }: FavouriteAiWizardProps) {
   const [currentStep, setCurrentStep] = useState<AiStep>('workout-type')
   const queryClient = useQueryClient()
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   const {
     aiInputData,
@@ -58,12 +59,22 @@ export function FavouriteAiWizard({
   const { mutateAsync: updateFavourite, isPending: isUpdating } =
     useUpdateFavouriteWorkout()
 
+  const scrollToTop = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      })
+    }
+  }
+
   const handleNext = () => {
     if (currentStep === 'workout-type') {
       setCurrentStep('equipment')
     } else if (currentStep === 'equipment') {
       setCurrentStep('parameters')
     }
+    scrollToTop()
   }
 
   const handleBack = () => {
@@ -74,10 +85,12 @@ export function FavouriteAiWizard({
     } else if (currentStep === 'results') {
       setCurrentStep('parameters')
     }
+    scrollToTop()
   }
 
   const handleGenerate = async () => {
     setCurrentStep('results')
+    scrollToTop()
     await handleGenerateAiWorkout()
   }
 
@@ -186,7 +199,7 @@ export function FavouriteAiWizard({
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4">
           {currentStep === 'workout-type' && (
             <AiWorkoutTypeStep
               data={aiInputData}

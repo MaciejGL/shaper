@@ -5,7 +5,7 @@ import { ChevronRight } from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useQueryState } from 'nuqs'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -47,6 +47,7 @@ export function QuickWorkoutAiWizard({
   const queryClient = useQueryClient()
   const router = useRouter()
   const [dayIdFromUrl] = useQueryState('day')
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   const {
     aiInputData,
@@ -85,12 +86,22 @@ export function QuickWorkoutAiWizard({
       },
     })
 
+  const scrollToTop = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      })
+    }
+  }
+
   const handleNext = () => {
     if (currentStep === 'workout-type') {
       setCurrentStep('equipment')
     } else if (currentStep === 'equipment') {
       setCurrentStep('parameters')
     }
+    scrollToTop()
   }
 
   const handleBack = () => {
@@ -101,10 +112,12 @@ export function QuickWorkoutAiWizard({
     } else if (currentStep === 'results') {
       setCurrentStep('parameters')
     }
+    scrollToTop()
   }
 
   const handleGenerate = async () => {
     setCurrentStep('results')
+    scrollToTop()
     await handleGenerateAiWorkout()
   }
 
@@ -197,7 +210,7 @@ export function QuickWorkoutAiWizard({
           ))}
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-4">
           <SheetHeader className="pt-8 pb-4 mb-4">
             <SheetTitle className="text-center">{getStepTitle()}</SheetTitle>
             <SheetDescription className="text-center">
