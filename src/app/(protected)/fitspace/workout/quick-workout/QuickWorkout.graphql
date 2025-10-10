@@ -16,10 +16,7 @@ query FitspaceGetQuickWorkoutNavigation {
           isRestDay
           completedAt
           scheduledAt
-          exercises {
-            id
-            completedAt
-          }
+          exercisesCount
         }
       }
     }

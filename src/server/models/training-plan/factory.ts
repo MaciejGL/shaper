@@ -1843,6 +1843,11 @@ export async function getWorkoutNavigation(
               isRestDay: true,
               completedAt: true,
               scheduledAt: true,
+              _count: {
+                select: {
+                  exercises: true,
+                },
+              },
             },
           },
         },

@@ -3029,6 +3029,7 @@ export type GQLTrainingDay = {
   dayOfWeek: EntireFieldWrapper<Scalars['Int']['output']>;
   duration?: EntireFieldWrapper<Maybe<Scalars['Int']['output']>>;
   exercises: EntireFieldWrapper<Array<GQLTrainingExercise>>;
+  exercisesCount: EntireFieldWrapper<Scalars['Int']['output']>;
   id: EntireFieldWrapper<Scalars['ID']['output']>;
   isRestDay: EntireFieldWrapper<Scalars['Boolean']['output']>;
   personalRecords?: EntireFieldWrapper<Maybe<Array<GQLPersonalRecord>>>;
@@ -5324,6 +5325,7 @@ export type GQLTrainingDayResolvers<ContextType = GQLContext, ParentType extends
   dayOfWeek?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   duration?: Resolver<Maybe<GQLResolversTypes['Int']>, ParentType, ContextType>;
   exercises?: Resolver<Array<GQLResolversTypes['TrainingExercise']>, ParentType, ContextType>;
+  exercisesCount?: Resolver<GQLResolversTypes['Int'], ParentType, ContextType>;
   id?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   isRestDay?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   personalRecords?: Resolver<Maybe<Array<GQLResolversTypes['PersonalRecord']>>, ParentType, ContextType>;

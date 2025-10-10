@@ -42,6 +42,9 @@ export default class TrainingDay implements GQLTrainingDay {
             })
           | null
       })[]
+      _count?: {
+        exercises: number
+      }
     },
     protected context: GQLContext,
   ) {}
@@ -98,6 +101,18 @@ export default class TrainingDay implements GQLTrainingDay {
       )
       throw new GraphQLError('No exercises found for day')
     }
+  }
+
+  get exercisesCount() {
+    // If we have the count from Prisma, use it
+    if (this.data._count?.exercises !== undefined) {
+      return this.data._count.exercises
+    }
+    // Fallback to array length if exercises are loaded
+    if (this.data.exercises) {
+      return this.data.exercises.length
+    }
+    return 0
   }
 
   async duration() {

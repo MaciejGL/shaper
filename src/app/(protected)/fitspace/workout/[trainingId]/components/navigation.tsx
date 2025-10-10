@@ -1,26 +1,17 @@
 'use client'
 
 import { formatDate } from 'date-fns'
-import { BadgeCheckIcon, ChevronLeft } from 'lucide-react'
-import { ChevronRight } from 'lucide-react'
 import { useQueryState } from 'nuqs'
 import { useEffect, useMemo } from 'react'
 
 import { getDayName } from '@/app/(protected)/trainer/trainings/creator/utils'
-import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { useUserPreferences } from '@/context/user-preferences-context'
-import { formatWeekRange, sortDaysForDisplay } from '@/lib/date-utils'
+import { sortDaysForDisplay } from '@/lib/date-utils'
 import { cn } from '@/lib/utils'
 
 import { useWorkoutPrefetch } from '../hooks/use-workout-prefetch'
 
+import { CalendarWeekSelector } from './calendar-week-selector'
 import { getDefaultSelection } from './navigation-utils'
 import { NavigationDay, NavigationPlan } from './workout-page.client'
 
@@ -134,7 +125,6 @@ function DaySelector({ plan }: { plan: NavigationPlan }) {
 }
 
 function WeekSelector({ plan }: { plan: NavigationPlan }) {
-  const { preferences } = useUserPreferences()
   const { weekId: defaultWeekId, dayId: defaultDayId } = useMemo(
     () => getDefaultSelection(plan),
     [plan],
@@ -147,12 +137,10 @@ function WeekSelector({ plan }: { plan: NavigationPlan }) {
   const effectiveWeekId = activeWeekId || defaultWeekId
   const effectiveDayId = activeDayId || defaultDayId
 
-  // Prefetch navigation data with rest days for smooth week switching
-
   // Prefetch workout data with 10s delay for better performance
   useWorkoutPrefetch(plan, effectiveWeekId)
 
-  // Initialize defaults on first load - USE useEffect instead of useMemo
+  // Initialize defaults on first load
   useEffect(() => {
     if (!activeWeekId && defaultWeekId) {
       setActiveWeekId(defaultWeekId)
@@ -172,103 +160,22 @@ function WeekSelector({ plan }: { plan: NavigationPlan }) {
   const weeks = plan.weeks
   const activeWeek = weeks.find((week) => week.id === effectiveWeekId)
 
-  const handleWeekChange = (type: 'prev' | 'next') => {
-    const currentWeekIndex = weeks.findIndex(
-      (week) => week.id === effectiveWeekId,
-    )
-    const currentActiveDayOfWeek =
-      activeWeek?.days.find((day) => day.id === effectiveDayId)?.dayOfWeek ?? 0
-
-    if (type === 'prev' && currentWeekIndex > 0) {
-      const newWeek = weeks[currentWeekIndex - 1]
-      const newDay =
-        newWeek.days.find((day) => day.dayOfWeek === currentActiveDayOfWeek) ||
-        newWeek.days[0]
-      setActiveWeekId(newWeek.id)
-      setActiveDayId(newDay.id)
-    } else if (type === 'next' && currentWeekIndex < weeks.length - 1) {
-      const newWeek = weeks[currentWeekIndex + 1]
-      const newDay =
-        newWeek.days.find((day) => day.dayOfWeek === currentActiveDayOfWeek) ||
-        newWeek.days[0]
-      setActiveWeekId(newWeek.id)
-      setActiveDayId(newDay.id)
-    }
-  }
-
-  const currentWeekIndex = weeks.findIndex(
-    (week) => week.id === effectiveWeekId,
-  )
-  const hasPrevWeek = currentWeekIndex > 0
-  const hasNextWeek = currentWeekIndex < weeks.length - 1
-
-  const handleWeekSelect = (weekId: string) => {
-    const newWeek = weeks.find((week) => week.id === weekId)
-    if (!newWeek) return
-
+  const handleWeekDaySelect = (weekId: string, dayId: string) => {
     setActiveWeekId(weekId)
-    // When changing weeks, try to keep the same day of week, or pick first day
-    const currentActiveDayOfWeek =
-      activeWeek?.days.find((day) => day.id === effectiveDayId)?.dayOfWeek ?? 0
-    const newDay =
-      newWeek.days.find((day) => day.dayOfWeek === currentActiveDayOfWeek) ||
-      newWeek.days[0]
-    setActiveDayId(newDay.id)
+    setActiveDayId(dayId)
   }
 
   if (!activeWeek) return null
 
   return (
-    <div className="flex justify-between gap-2">
-      <Button
-        iconOnly={<ChevronLeft />}
-        disabled={!hasPrevWeek}
-        size="icon-sm"
-        variant="tertiary"
-        onClick={() => handleWeekChange('prev')}
+    <div className="flex justify-between">
+      <CalendarWeekSelector
+        plan={plan}
+        activeWeekId={effectiveWeekId}
+        activeDayId={effectiveDayId}
+        onWeekDaySelect={handleWeekDaySelect}
       />
-      <Select
-        onValueChange={handleWeekSelect}
-        value={effectiveWeekId ?? undefined}
-      >
-        <SelectTrigger
-          suppressHydrationWarning
-          size="sm"
-          variant="tertiary"
-          className="[&_svg]:data-[icon=mark]:size-3.5 truncate text-sm font-medium flex items-center gap-2 w-full"
-        >
-          <SelectValue placeholder="Select a workout" />
-        </SelectTrigger>
-        <SelectContent>
-          {weeks.map((week) => (
-            <SelectItem key={week.id} value={week.id}>
-              Week {week.weekNumber}{' '}
-              {week.completedAt ? (
-                <BadgeCheckIcon
-                  data-icon="mark"
-                  className="text-green-500 size-3"
-                />
-              ) : (
-                week.scheduledAt && (
-                  <span className="text-muted-foreground text-xs ml-2">
-                    {formatWeekRange(
-                      week.scheduledAt,
-                      preferences.weekStartsOn,
-                    )}
-                  </span>
-                )
-              )}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Button
-        iconOnly={<ChevronRight />}
-        size="icon-sm"
-        variant="tertiary"
-        onClick={() => handleWeekChange('next')}
-        disabled={!hasNextWeek}
-      />
+      {/* Add Select for Quick Workout and Preassigned plan if available */}
     </div>
   )
 }

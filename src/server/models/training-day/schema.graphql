@@ -28,6 +28,7 @@ type TrainingDay {
   completedAt: String
   scheduledAt: String
   exercises: [TrainingExercise!]!
+  exercisesCount: Int!
   personalRecords: [PersonalRecord!]
 
   trainingWeekId: ID!
