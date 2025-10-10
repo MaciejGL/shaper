@@ -1777,26 +1777,38 @@ export const addExercisesToQuickWorkout = async (
   })
 
   if (!hasCurrentWeek) {
-    // create a new week
-    await prisma.trainingWeek.create({
-      data: {
-        planId: quickWorkoutPlan.id,
-        weekNumber: currentWeek,
-        name: `Week ${currentWeek}`,
-        scheduledAt: weekStart,
-        isExtra: true,
-        days: {
-          createMany: {
-            data: Array.from({ length: 7 }, (_, i) => ({
-              dayOfWeek: i,
-              isRestDay: false,
-              isExtra: true,
-              scheduledAt: addDays(weekStart, i),
-            })),
+    // create a new week - wrap in try-catch to handle race condition
+    try {
+      await prisma.trainingWeek.create({
+        data: {
+          planId: quickWorkoutPlan.id,
+          weekNumber: currentWeek,
+          name: `Week ${currentWeek}`,
+          scheduledAt: weekStart,
+          isExtra: true,
+          days: {
+            createMany: {
+              data: Array.from({ length: 7 }, (_, i) => ({
+                dayOfWeek: i,
+                isRestDay: false,
+                isExtra: true,
+                scheduledAt: addDays(weekStart, i),
+              })),
+            },
           },
         },
-      },
-    })
+      })
+    } catch (error) {
+      // Ignore unique constraint errors - week was created by another request
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code !== 'P2002'
+      ) {
+        throw error
+      }
+    }
   }
 
   const fullPlan = await getFullPlanById(quickWorkoutPlan.id)
@@ -1951,26 +1963,38 @@ export const createQuickWorkout = async (
   })
 
   if (!hasCurrentWeek) {
-    // create a new week
-    await prisma.trainingWeek.create({
-      data: {
-        planId: quickWorkoutPlan.id,
-        weekNumber: currentWeek,
-        name: `Week ${currentWeek}`,
-        scheduledAt: weekStart,
-        isExtra: true,
-        days: {
-          createMany: {
-            data: Array.from({ length: 7 }, (_, i) => ({
-              dayOfWeek: i,
-              isRestDay: false,
-              isExtra: true,
-              scheduledAt: addDays(weekStart, i),
-            })),
+    // create a new week - wrap in try-catch to handle race condition
+    try {
+      await prisma.trainingWeek.create({
+        data: {
+          planId: quickWorkoutPlan.id,
+          weekNumber: currentWeek,
+          name: `Week ${currentWeek}`,
+          scheduledAt: weekStart,
+          isExtra: true,
+          days: {
+            createMany: {
+              data: Array.from({ length: 7 }, (_, i) => ({
+                dayOfWeek: i,
+                isRestDay: false,
+                isExtra: true,
+                scheduledAt: addDays(weekStart, i),
+              })),
+            },
           },
         },
-      },
-    })
+      })
+    } catch (error) {
+      // Ignore unique constraint errors - week was created by another request
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code !== 'P2002'
+      ) {
+        throw error
+      }
+    }
   }
 
   const fullPlan = await getFullPlanById(quickWorkoutPlan.id)

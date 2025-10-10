@@ -48,8 +48,9 @@ export async function ensureQuickWorkoutWeeks(
   }
 
   // Batch create all missing weeks with their days
+  // Use allSettled to handle race conditions where weeks might be created by concurrent requests
   if (weeksToCreate.length > 0) {
-    await Promise.all(
+    await Promise.allSettled(
       weeksToCreate.map((week) =>
         prisma.trainingWeek.create({
           data: {

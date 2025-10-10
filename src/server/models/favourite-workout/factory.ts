@@ -533,26 +533,38 @@ export async function startWorkoutFromFavourite(
         '[startWorkoutFromFavourite] Creating new week for current period',
       )
 
-      // Create a new week for the current period
-      await prisma.trainingWeek.create({
-        data: {
-          planId: quickWorkoutPlan.id,
-          weekNumber: getISOWeek(weekStart),
-          name: `Week ${getISOWeek(weekStart)}`,
-          scheduledAt: weekStart,
-          isExtra: true,
-          days: {
-            createMany: {
-              data: Array.from({ length: 7 }, (_, i) => ({
-                dayOfWeek: i,
-                isRestDay: false,
-                isExtra: true,
-                scheduledAt: addDays(weekStart, i),
-              })),
+      // Create a new week for the current period - wrap in try-catch to handle race condition
+      try {
+        await prisma.trainingWeek.create({
+          data: {
+            planId: quickWorkoutPlan.id,
+            weekNumber: getISOWeek(weekStart),
+            name: `Week ${getISOWeek(weekStart)}`,
+            scheduledAt: weekStart,
+            isExtra: true,
+            days: {
+              createMany: {
+                data: Array.from({ length: 7 }, (_, i) => ({
+                  dayOfWeek: i,
+                  isRestDay: false,
+                  isExtra: true,
+                  scheduledAt: addDays(weekStart, i),
+                })),
+              },
             },
           },
-        },
-      })
+        })
+      } catch (error) {
+        // Ignore unique constraint errors - week was created by another request
+        if (
+          error &&
+          typeof error === 'object' &&
+          'code' in error &&
+          error.code !== 'P2002'
+        ) {
+          throw error
+        }
+      }
     }
 
     // Always reload the plan with days after week handling
