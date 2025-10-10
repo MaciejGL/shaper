@@ -104,6 +104,9 @@ function DrawerContent({
           <div className="bg-primary/5 mx-auto mt-2 hidden h-1 w-[70px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
         )}
         {children}
+        {grabber && (
+          <div className="bg-primary/5 mx-auto my-2 hidden h-1 w-[70px] shrink-0 rounded-full group-data-[vaul-drawer-direction=top]/drawer-content:block" />
+        )}
       </DrawerPrimitive.Content>
     </DrawerPortal>
   )
