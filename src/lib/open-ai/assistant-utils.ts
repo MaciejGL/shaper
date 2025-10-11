@@ -13,7 +13,7 @@ export async function createAssistantThread(
   messages: AssistantMessage[],
   assistantId: string = ASSISTANT_ID,
 ) {
-  const thread = await openai.beta.threads.create()
+  const thread = await openai.beta.threads.create({})
 
   await openai.beta.threads.runs.createAndPoll(thread.id, {
     assistant_id: assistantId,
@@ -31,7 +31,7 @@ export async function createAssistantThreadWithStreaming(
   messages: AssistantMessage[],
   assistantId: string = ASSISTANT_ID,
 ): Promise<string> {
-  const thread = await openai.beta.threads.create()
+  const thread = await openai.beta.threads.create({})
 
   const stream = openai.beta.threads.runs.stream(thread.id, {
     assistant_id: assistantId,
