@@ -46,9 +46,10 @@ export async function GET() {
       stripeLookupKey: template.stripeLookupKey,
       trainerId: template.trainerId,
       trainer: template.trainer,
+      services: [], // Services are not directly stored, derived from metadata
       activeSubscriptions: template._count.subscriptions,
-      createdAt: template.createdAt,
-      updatedAt: template.updatedAt,
+      createdAt: template.createdAt.toISOString(),
+      updatedAt: template.updatedAt.toISOString(),
     }))
 
     return NextResponse.json({

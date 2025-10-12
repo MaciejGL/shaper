@@ -45,6 +45,7 @@ interface StripeProduct {
     } | null
     type: string
     active: boolean
+    lookup_key: string | null
   }[]
 }
 
@@ -55,7 +56,7 @@ interface DatabaseProduct {
   duration: string
   isActive: boolean
   stripeProductId: string | null
-  stripePriceId: string | null
+  stripeLookupKey: string | null
   trainerId: string | null
   trainer: {
     id: string
@@ -88,7 +89,7 @@ interface UnifiedProduct {
   dbDescription?: string | null
   dbActive?: boolean
   dbDuration?: string
-  dbStripePriceId?: string | null
+  dbStripeLookupKey?: string | null
   dbTrainer?: DatabaseProduct['trainer']
   dbServices?: DatabaseProduct['services']
   dbActiveSubscriptions?: number
@@ -161,7 +162,7 @@ export function UnifiedProductManagement() {
           dbDescription: matchingDbProduct?.description,
           dbActive: matchingDbProduct?.isActive,
           dbDuration: matchingDbProduct?.duration,
-          dbStripePriceId: matchingDbProduct?.stripePriceId,
+          dbStripeLookupKey: matchingDbProduct?.stripeLookupKey,
           dbTrainer: matchingDbProduct?.trainer,
           dbServices: matchingDbProduct?.services,
           dbActiveSubscriptions: matchingDbProduct?.activeSubscriptions,
@@ -186,7 +187,7 @@ export function UnifiedProductManagement() {
             dbDescription: dbProduct.description,
             dbActive: dbProduct.isActive,
             dbDuration: dbProduct.duration,
-            dbStripePriceId: dbProduct.stripePriceId,
+            dbStripeLookupKey: dbProduct.stripeLookupKey,
             dbTrainer: dbProduct.trainer,
             dbServices: dbProduct.services,
             dbActiveSubscriptions: dbProduct.activeSubscriptions,
@@ -277,15 +278,17 @@ export function UnifiedProductManagement() {
         : '[TEST ENVIRONMENT] Test product for development'
       : stripeProduct.description || null
 
-    // Get the primary price ID (first active price)
-    const expectedStripePriceId =
-      stripeProduct.prices.length > 0 ? stripeProduct.prices[0].id : null
+    // Get the primary price lookup key (first active price)
+    const expectedLookupKey =
+      stripeProduct.prices.length > 0
+        ? stripeProduct.prices[0].lookup_key
+        : null
 
     // Check all important fields for sync status
     const nameMatches = dbProduct.name === expectedDbName
     const descriptionMatches = dbProduct.description === expectedDbDescription
     const activeMatches = dbProduct.isActive === stripeProduct.active
-    const priceMatches = dbProduct.stripePriceId === expectedStripePriceId
+    const lookupKeyMatches = dbProduct.stripeLookupKey === expectedLookupKey
     const stripeIdMatches = dbProduct.stripeProductId === stripeProduct.id
 
     // Must have all key fields matching to be considered synced
@@ -293,7 +296,7 @@ export function UnifiedProductManagement() {
       nameMatches &&
       descriptionMatches &&
       activeMatches &&
-      priceMatches &&
+      lookupKeyMatches &&
       stripeIdMatches
 
     // Debug logging for out-of-sync products
@@ -306,9 +309,9 @@ export function UnifiedProductManagement() {
         expectedDescription: expectedDbDescription,
         actualDescription: dbProduct.description,
         activeMatches: activeMatches,
-        priceMatches: priceMatches,
-        expectedPriceId: expectedStripePriceId,
-        actualPriceId: dbProduct.stripePriceId,
+        lookupKeyMatches: lookupKeyMatches,
+        expectedLookupKey: expectedLookupKey,
+        actualLookupKey: dbProduct.stripeLookupKey,
         stripeIdMatches: stripeIdMatches,
       })
     }

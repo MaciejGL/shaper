@@ -1,41 +1,41 @@
 import { GQLServiceType } from '@/generated/graphql-client'
+import { DISCOUNT_CONFIG } from '@/lib/stripe/discount-config'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 import { SelectedPackageItem, TrainerPackage } from './types'
 
 /**
  * Finds the in-person discount percentage from packages in a bundle
- * Looks for packages with 'coaching_complete' serviceType that have discount metadata
+ * Returns the discount if Premium Coaching package is present
  */
 export const findInPersonDiscountPercentage = (
   packages: TrainerPackage[],
 ): number => {
-  for (const pkg of packages) {
-    // Check if this is a coaching_complete package with discount metadata
-    if (pkg.serviceType === 'coaching_complete') {
-      const discountPercentage = pkg.packageSummary?.addon_discount_in_person
-      if (discountPercentage && Number(discountPercentage) > 0) {
-        return Number(discountPercentage)
-      }
-    }
-  }
+  // Check if bundle contains Premium Coaching package by lookup key
+  const hasCoaching = packages.some(
+    (pkg) => pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+  )
 
-  return 0
+  // Return the configured discount if coaching is present
+  return hasCoaching ? DISCOUNT_CONFIG.IN_PERSON_COACHING_COMBO : 0
 }
 
 /**
  * Checks if bundle contains both meal plan and training plan packages
- * Returns 20% discount if both are present
+ * Returns the configured discount if both are present
  */
 export const findMealTrainingBundleDiscount = (
   packages: TrainerPackage[],
 ): number => {
-  const hasMealPlan = packages.some((pkg) => pkg.serviceType === 'meal_plan')
+  const hasMealPlan = packages.some(
+    (pkg) => pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.NUTRITION_PLAN,
+  )
   const hasTrainingPlan = packages.some(
-    (pkg) => pkg.serviceType === 'workout_plan',
+    (pkg) => pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.WORKOUT_PLAN,
   )
 
   if (hasMealPlan && hasTrainingPlan) {
-    return 20 // 20% discount for meal + training bundle
+    return DISCOUNT_CONFIG.MEAL_TRAINING_BUNDLE
   }
 
   return 0
@@ -45,15 +45,18 @@ export const findMealTrainingBundleDiscount = (
  * Checks if a package is a meal or training plan
  */
 export const isMealOrTrainingPackage = (pkg: TrainerPackage): boolean => {
-  return pkg.serviceType === 'meal_plan' || pkg.serviceType === 'workout_plan'
+  return (
+    pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.NUTRITION_PLAN ||
+    pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.WORKOUT_PLAN
+  )
 }
 
 /**
  * Calculates the discounted amount based on bundle context
  *
  * Applies discount if:
- * 1. Package contains 'IN_PERSON_MEETING' service type + coaching_complete bundle
- * 2. Package is meal_plan or workout_plan + both are in bundle (20% off)
+ * 1. Package is in-person session + coaching package in bundle
+ * 2. Package is meal/workout plan + both are in bundle
  */
 export const getDiscountedAmount = (
   pkg: TrainerPackage,
@@ -62,11 +65,12 @@ export const getDiscountedAmount = (
 ): number => {
   if (!pkg.pricing) return 0
 
-  // Check if package has IN_PERSON_MEETING service type
-  const hasInPersonService = pkg.serviceType === 'in_person_meeting'
+  // Check if package is in-person session by lookup key
+  const isInPersonSession =
+    pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION
 
-  // Apply in-person discount if package has in-person service and bundle has discount
-  if (hasInPersonService && bundleDiscount > 0) {
+  // Apply in-person discount if package is in-person and bundle has discount
+  if (isInPersonSession && bundleDiscount > 0) {
     const discountMultiplier = (100 - bundleDiscount) / 100
     return Math.round(pkg.pricing.amount * discountMultiplier)
   }
@@ -163,12 +167,12 @@ export const hasAnyDiscount = (
   bundleDiscount: number = 0,
   mealTrainingDiscount: number = 0,
 ): boolean => {
-  if (!pkg.serviceType) return false
-  const hasInPersonService = pkg.serviceType === 'in_person_meeting'
+  const isInPersonSession =
+    pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION
   const isMealOrTraining = isMealOrTrainingPackage(pkg)
 
   return (
-    (hasInPersonService && bundleDiscount > 0) ||
+    (isInPersonSession && bundleDiscount > 0) ||
     (isMealOrTraining && mealTrainingDiscount > 0)
   )
 }
@@ -181,9 +185,10 @@ export const getDiscountPercentage = (
   bundleDiscount: number = 0,
   mealTrainingDiscount: number = 0,
 ): number => {
-  // Check if package has IN_PERSON_MEETING service type
-  const hasInPersonService = pkg.serviceType === 'in_person_meeting'
-  if (hasInPersonService && bundleDiscount > 0) {
+  // Check if package is in-person session by lookup key
+  const isInPersonSession =
+    pkg.stripeLookupKey === STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION
+  if (isInPersonSession && bundleDiscount > 0) {
     return bundleDiscount
   }
 

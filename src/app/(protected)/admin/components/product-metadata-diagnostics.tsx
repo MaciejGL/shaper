@@ -112,27 +112,13 @@ export function ProductMetadataDiagnostics() {
           'in_person_session',
           'premium_access',
         ]
-        if (!validServiceTypes.includes(metadata.service_type)) {
+        // Case-insensitive comparison
+        const normalizedServiceType = metadata.service_type.toLowerCase()
+        if (!validServiceTypes.includes(normalizedServiceType)) {
           validation.errors.push(
             `Invalid service_type: ${metadata.service_type}. Must be one of: ${validServiceTypes.join(', ')}`,
           )
         }
-      }
-
-      // Check optional but recommended fields
-      if (!metadata.commission_percentage) {
-        validation.warnings.push(
-          'Missing recommended field: commission_percentage (should be "10")',
-        )
-      }
-
-      if (
-        validation.productType === 'trainer_coaching' &&
-        !metadata.grants_premium
-      ) {
-        validation.warnings.push(
-          'Missing recommended field: grants_premium (should be "true" for coaching)',
-        )
       }
 
       validation.isValid = validation.errors.length === 0
@@ -210,7 +196,8 @@ export function ProductMetadataDiagnostics() {
         </Button>
       </DialogTrigger>
       <DialogContent
-        className="max-w-4xl max-h-[80vh] overflow-y-auto"
+        className="overflow-y-auto"
+        fullScreen
         dialogTitle="Product Metadata Diagnostics"
       >
         <DialogHeader>

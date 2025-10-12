@@ -357,9 +357,12 @@ async function createSingleServiceDelivery({
     const packageMetadata = packageTemplate.metadata as Record<string, unknown>
     const serviceTypeString = packageMetadata?.service_type as string
 
+    // Normalize to lowercase for case-insensitive comparison
+    const normalizedServiceType = serviceTypeString?.toLowerCase()
+
     // Map string to ServiceType enum
     const serviceType = (() => {
-      switch (serviceTypeString) {
+      switch (normalizedServiceType) {
         case StripeServiceType.COACHING_COMPLETE:
           return ServiceType.COACHING_COMPLETE
         case StripeServiceType.WORKOUT_PLAN:

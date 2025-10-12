@@ -158,28 +158,26 @@ export function mapServiceType(
 }
 
 /**
- * Finds packages that are in-person sessions from checkout items
+ * Finds packages that are in-person sessions by lookup key
  */
 export function findInPersonPackages(
   checkoutItems: CheckoutItem[],
 ): CheckoutItem[] {
   return checkoutItems.filter((item) => {
-    const metadata = (item.package.metadata as Record<string, unknown>) || {}
-    return metadata.service_type === 'in_person_meeting'
+    return item.package.stripeLookupKey === 'in_person_session'
   })
 }
 
 /**
- * Finds packages that are meal or training plans from checkout items
+ * Finds packages that are meal or training plans by lookup key
  */
 export function findMealAndTrainingPackages(
   checkoutItems: CheckoutItem[],
 ): CheckoutItem[] {
   return checkoutItems.filter((item) => {
-    const metadata = (item.package.metadata as Record<string, unknown>) || {}
     return (
-      metadata.service_type === 'meal_plan' ||
-      metadata.service_type === 'workout_plan'
+      item.package.stripeLookupKey === 'nutrition_plan' ||
+      item.package.stripeLookupKey === 'workout_plan'
     )
   })
 }
@@ -311,16 +309,14 @@ export async function createMealTrainingBundleDiscountIfEligible(
 ): Promise<{ coupon: string } | null> {
   const mealAndTrainingPackages = findMealAndTrainingPackages(checkoutItems)
 
-  // Check if we have both meal and training plans
-  const hasMealPlan = mealAndTrainingPackages.some((item) => {
-    const metadata = (item.package.metadata as Record<string, unknown>) || {}
-    return metadata.service_type === 'meal_plan'
-  })
+  // Check if we have both meal and training plans by lookup key
+  const hasMealPlan = mealAndTrainingPackages.some(
+    (item) => item.package.stripeLookupKey === 'nutrition_plan',
+  )
 
-  const hasTrainingPlan = mealAndTrainingPackages.some((item) => {
-    const metadata = (item.package.metadata as Record<string, unknown>) || {}
-    return metadata.service_type === 'workout_plan'
-  })
+  const hasTrainingPlan = mealAndTrainingPackages.some(
+    (item) => item.package.stripeLookupKey === 'workout_plan',
+  )
 
   if (!hasMealPlan || !hasTrainingPlan) {
     return null

@@ -4,7 +4,6 @@
  * This is the single source of truth for all Stripe price lookup keys.
  * Lookup keys allow us to change prices in Stripe dashboard without code deployment.
  */
-import { stripe } from './stripe'
 
 // Centralized lookup keys - single source of truth
 export const STRIPE_LOOKUP_KEYS = {
@@ -53,6 +52,8 @@ export function getPremiumLookupKeys(): string[] {
 export async function resolveLookupKeyToPrice(
   lookupKey: string,
 ): Promise<string | null> {
+  const { stripe } = await import('./stripe')
+
   try {
     const prices = await stripe.prices.list({
       lookup_keys: [lookupKey],
@@ -78,6 +79,8 @@ export async function resolveLookupKeyToPrice(
 export async function resolvePriceIdToLookupKey(
   priceId: string,
 ): Promise<string | null> {
+  const { stripe } = await import('./stripe')
+
   try {
     const price = await stripe.prices.retrieve(priceId)
 
