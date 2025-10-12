@@ -29,13 +29,10 @@ export async function GET(request: NextRequest) {
     // Build where clause
     const conditions: Prisma.BaseExerciseWhereInput[] = []
 
-    // Search filter
+    // Search filter - name only
     if (search) {
       conditions.push({
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } },
-        ],
+        name: { contains: search, mode: 'insensitive' },
       })
     }
 
@@ -184,6 +181,11 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        _count: {
+          select: {
+            trainingExercises: true,
+          },
+        },
         createdAt: true,
         updatedAt: true,
         createdBy: {
@@ -199,19 +201,16 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: [
-        { isPremium: 'desc' }, // Premium first
-        { version: 'desc' }, // V2 before V1
-        { name: 'asc' },
-      ],
+      orderBy: [{ name: 'asc' }],
       skip,
       take: limit,
     })
 
-    // Transform the response to flatten substitute structure
+    // Transform the response to flatten substitute structure and add usage count
     const transformedExercises = exercises.map((exercise) => ({
       ...exercise,
       substitutes: exercise.substitutes?.map((sub) => sub.substitute) || [],
+      relatedCount: exercise._count.trainingExercises,
     }))
 
     return NextResponse.json({

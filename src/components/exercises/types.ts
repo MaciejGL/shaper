@@ -42,6 +42,7 @@ export interface Exercise {
     name: string
     equipment: string
   }[]
+  relatedCount?: number
 }
 
 export interface ExerciseUpdate {

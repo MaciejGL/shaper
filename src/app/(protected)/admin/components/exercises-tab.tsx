@@ -145,10 +145,12 @@ export function ExercisesTab() {
   const [brokenExerciseName, setBrokenExerciseName] = useState('')
   const [correctBaseExerciseName, setCorrectBaseExerciseName] = useState('')
 
-  const fetchStats = async () => {
+  const fetchStats = async (showLoading = true) => {
     try {
-      setLoading(true)
-      setError(null)
+      if (showLoading) {
+        setLoading(true)
+        setError(null)
+      }
       const [statsResponse, descriptionResponse, brokenExercisesResponse] =
         await Promise.all([
           fetch('/api/admin/exercises/stats'),
@@ -177,9 +179,15 @@ export function ExercisesTab() {
       // Clear single fix states when refreshing data
       setSingleFixes({})
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred')
+      if (showLoading) {
+        setError(err instanceof Error ? err.message : 'Unknown error occurred')
+      } else {
+        console.warn('Background stats update failed:', err)
+      }
     } finally {
-      setLoading(false)
+      if (showLoading) {
+        setLoading(false)
+      }
     }
   }
 
@@ -471,7 +479,7 @@ export function ExercisesTab() {
                 <span>No imports yet</span>
               )}
             </div>
-            <Button onClick={fetchStats} size="sm" variant="ghost">
+            <Button onClick={() => fetchStats()} size="sm" variant="ghost">
               <RefreshCw className="h-4 w-4 mr-1" />
               Refresh
             </Button>
@@ -1004,8 +1012,8 @@ export function ExercisesTab() {
       <ExerciseEditor
         apiEndpoint="/api/admin/exercises/list"
         updateEndpoint="/api/admin/exercises/update"
-        deleteEndpoint="/api/admin/exercises/update"
-        onStatsUpdate={fetchStats}
+        deleteEndpoint="/api/admin/exercises"
+        onStatsUpdate={() => fetchStats(false)}
       />
 
       {/* Difficulty & Equipment Breakdown */}

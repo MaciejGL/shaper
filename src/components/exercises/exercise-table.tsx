@@ -1,7 +1,16 @@
 'use client'
 
-import { AlertTriangle, Check, ImageIcon, Play, Trash2, X } from 'lucide-react'
-import { useState } from 'react'
+import {
+  AlertTriangle,
+  ArrowDown,
+  ArrowUp,
+  Check,
+  ImageIcon,
+  Play,
+  Trash2,
+  X,
+} from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Badge } from '@/components/ui/badge'
@@ -50,6 +59,30 @@ export function ExerciseTable({
   )
   const [editingName, setEditingName] = useState('')
   const [savingName, setSavingName] = useState(false)
+
+  // State for sorting
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc' | null>(null)
+
+  // Sort exercises by name
+  const sortedExercises = useMemo(() => {
+    if (!sortOrder) return exercises
+
+    return [...exercises].sort((a, b) => {
+      const comparison = a.name.localeCompare(b.name, undefined, {
+        sensitivity: 'base',
+      })
+      return sortOrder === 'asc' ? comparison : -comparison
+    })
+  }, [exercises, sortOrder])
+
+  // Toggle sort order
+  const handleSortByName = () => {
+    setSortOrder((current) => {
+      if (current === null) return 'asc'
+      if (current === 'asc') return 'desc'
+      return null
+    })
+  }
 
   // Handle toggle changes with immediate save
   const handleToggleChange = async (
@@ -153,8 +186,12 @@ export function ExerciseTable({
         if (onNameUpdate && originalExercise) {
           onNameUpdate(exerciseId, originalExercise.name)
         }
-        throw new Error('Failed to update exercise name')
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(errorData.error || 'Failed to update exercise name')
       }
+
+      const result = await response.json()
+      console.info('Exercise name updated successfully:', result)
 
       toast.success('Exercise name updated')
       setEditingExerciseId(null)
@@ -173,18 +210,28 @@ export function ExerciseTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[300px]">Name</TableHead>
+              <TableHead className="w-[300px]">
+                <button
+                  onClick={handleSortByName}
+                  className="flex items-center gap-2 hover:text-foreground transition-colors"
+                >
+                  Name
+                  {sortOrder === 'asc' && <ArrowUp className="h-4 w-4" />}
+                  {sortOrder === 'desc' && <ArrowDown className="h-4 w-4" />}
+                </button>
+              </TableHead>
               <TableHead className="w-[80px] text-center">Video</TableHead>
               <TableHead className="w-[80px] text-center">Images</TableHead>
               <TableHead className="w-[100px] text-center">Public</TableHead>
               <TableHead className="w-[100px] text-center">Premium</TableHead>
               <TableHead className="w-[120px]">Creator</TableHead>
               <TableHead className="w-[100px]">Status</TableHead>
+              <TableHead className="w-[80px] text-center">Related</TableHead>
               <TableHead className="w-[80px] text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {exercises.map((exercise) => {
+            {sortedExercises.map((exercise) => {
               const hasVideo = !!exercise.videoUrl?.trim()
               const imageCount = exercise.images?.length || 0
               const hasDuplicate = hasSimilarPublicExercise(exercise)
@@ -323,6 +370,12 @@ export function ExerciseTable({
                   </TableCell>
 
                   <TableCell className="text-center">
+                    <Badge variant="secondary" className="text-xs">
+                      {exercise.relatedCount || 0}
+                    </Badge>
+                  </TableCell>
+
+                  <TableCell className="text-center">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -336,10 +389,10 @@ export function ExerciseTable({
               )
             })}
 
-            {exercises.length === 0 && (
+            {sortedExercises.length === 0 && (
               <TableRow>
                 <TableCell
-                  colSpan={8}
+                  colSpan={9}
                   className="text-center py-8 text-muted-foreground"
                 >
                   No exercises found matching your filters

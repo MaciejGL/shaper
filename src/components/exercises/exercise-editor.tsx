@@ -400,19 +400,38 @@ export function ExerciseEditor({
 
   const deleteExercise = async (exercise: Exercise) => {
     try {
-      const response = await fetch(deleteEndpoint, {
+      const response = await fetch(`${deleteEndpoint}/${exercise.id}`, {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ exerciseId: exercise.id }),
       })
 
       if (!response.ok) {
-        throw new Error('Failed to delete exercise')
+        const errorData = await response.json().catch(() => ({}))
+
+        if (response.status === 409 && errorData.details) {
+          // Exercise is in use
+          const { trainingPlans, favouriteWorkouts } = errorData.details
+          const usageDetails = []
+          if (trainingPlans > 0)
+            usageDetails.push(`${trainingPlans} training plan(s)`)
+          if (favouriteWorkouts > 0)
+            usageDetails.push(`${favouriteWorkouts} favourite workout(s)`)
+
+          throw new Error(
+            `Cannot delete "${exercise.name}". It's being used in ${usageDetails.join(' and ')}.`,
+          )
+        }
+
+        throw new Error(errorData.error || 'Failed to delete exercise')
       }
 
       // Close dialog and show success toast
       setDeleteConfirm({ isOpen: false, exercise: null })
       toast.success(`Successfully deleted "${exercise.name}"`)
+
+      // Optimistically remove from UI immediately
+      setAllExercises((prev) => prev.filter((ex) => ex.id !== exercise.id))
+      setTotalItems((prev) => prev - 1)
 
       // Check if we need to go back a page (if this was the last item on current page)
       const itemsOnCurrentPage = exercises.length
@@ -420,12 +439,12 @@ export function ExerciseEditor({
 
       if (shouldGoToPreviousPage) {
         setCurrentPage(currentPage - 1)
+      } else {
+        // Silently refetch in background to sync with server
+        silentRefreshExercises()
       }
 
-      // Use silent refresh to maintain consistency and current view/pagination
-      await silentRefreshExercises()
-
-      // Trigger stats update only for deletion (significant change)
+      // Trigger stats update in background (don't await)
       onStatsUpdate?.()
     } catch (err) {
       toast.error(
