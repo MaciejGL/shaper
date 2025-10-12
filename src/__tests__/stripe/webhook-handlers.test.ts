@@ -141,8 +141,14 @@ describe('Stripe Webhook Handlers', () => {
       const packageTemplate = {
         id: 'pkg_123',
         name: 'Test Package',
-        stripePriceId: 'price_test123',
+        stripeLookupKey: 'test_lookup_key',
       }
+
+      // Mock stripe.prices.retrieve to return price with lookup_key
+      vi.mocked(mockStripe.stripe.prices.retrieve).mockResolvedValue({
+        id: 'price_test123',
+        lookup_key: 'test_lookup_key',
+      } as any)
 
       vi.mocked(mockPrisma.prisma.user.findUnique).mockResolvedValue(
         user as any,
@@ -168,6 +174,7 @@ describe('Stripe Webhook Handlers', () => {
             packageId: 'pkg_123',
             status: 'ACTIVE',
             stripeSubscriptionId: 'sub_test123',
+            stripeLookupKey: 'test_lookup_key',
           }),
         }),
       )
@@ -181,7 +188,16 @@ describe('Stripe Webhook Handlers', () => {
         status: 'trialing',
       })
       const user = createMockUser()
-      const packageTemplate = { id: 'pkg_123', stripePriceId: 'price_test123' }
+      const packageTemplate = {
+        id: 'pkg_123',
+        stripeLookupKey: 'test_lookup_key',
+      }
+
+      // Mock stripe.prices.retrieve to return price with lookup_key
+      vi.mocked(mockStripe.stripe.prices.retrieve).mockResolvedValue({
+        id: 'price_test123',
+        lookup_key: 'test_lookup_key',
+      } as any)
 
       vi.mocked(mockPrisma.prisma.user.findUnique).mockResolvedValue(
         user as any,

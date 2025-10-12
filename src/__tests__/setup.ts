@@ -10,6 +10,7 @@ vi.mock('@/lib/stripe/stripe', () => ({
     },
     prices: {
       retrieve: vi.fn(),
+      list: vi.fn(),
     },
     checkout: {
       sessions: {

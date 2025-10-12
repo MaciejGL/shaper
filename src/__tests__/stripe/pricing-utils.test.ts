@@ -24,12 +24,12 @@ describe('Stripe Pricing Utils', () => {
         type: 'one_time',
         recurring: null,
       }
-      vi.mocked(mockStripe.stripe.prices.retrieve).mockResolvedValue(
-        mockPrice as any,
-      )
+      vi.mocked(mockStripe.stripe.prices.list).mockResolvedValue({
+        data: [mockPrice],
+      } as any)
 
       // Act
-      const result = await getStripePricingInfo('price_123')
+      const result = await getStripePricingInfo('lookup_key_123')
 
       // Assert
       expect(result).toEqual({
@@ -38,9 +38,10 @@ describe('Stripe Pricing Utils', () => {
         type: 'one-time',
         recurring: null,
       })
-      expect(mockStripe.stripe.prices.retrieve).toHaveBeenCalledWith(
-        'price_123',
-      )
+      expect(mockStripe.stripe.prices.list).toHaveBeenCalledWith({
+        lookup_keys: ['lookup_key_123'],
+        limit: 1,
+      })
     })
 
     it('should return pricing info for recurring subscription', async () => {
@@ -55,12 +56,12 @@ describe('Stripe Pricing Utils', () => {
           interval_count: 1,
         },
       }
-      vi.mocked(mockStripe.stripe.prices.retrieve).mockResolvedValue(
-        mockPrice as any,
-      )
+      vi.mocked(mockStripe.stripe.prices.list).mockResolvedValue({
+        data: [mockPrice],
+      } as any)
 
       // Act
-      const result = await getStripePricingInfo('price_456')
+      const result = await getStripePricingInfo('lookup_key_456')
 
       // Assert
       expect(result).toEqual({
@@ -83,12 +84,12 @@ describe('Stripe Pricing Utils', () => {
         type: 'one_time',
         recurring: null,
       }
-      vi.mocked(mockStripe.stripe.prices.retrieve).mockResolvedValue(
-        mockPrice as any,
-      )
+      vi.mocked(mockStripe.stripe.prices.list).mockResolvedValue({
+        data: [mockPrice],
+      } as any)
 
       // Act
-      const result = await getStripePricingInfo('price_free')
+      const result = await getStripePricingInfo('lookup_key_free')
 
       // Assert
       expect(result).toEqual({
@@ -104,12 +105,12 @@ describe('Stripe Pricing Utils', () => {
       const consoleErrorSpy = vi
         .spyOn(console, 'error')
         .mockImplementation(() => {})
-      vi.mocked(mockStripe.stripe.prices.retrieve).mockRejectedValue(
+      vi.mocked(mockStripe.stripe.prices.list).mockRejectedValue(
         new Error('Price not found'),
       )
 
       // Act
-      const result = await getStripePricingInfo('invalid_price')
+      const result = await getStripePricingInfo('invalid_lookup_key')
 
       // Assert
       expect(result).toBeNull()
@@ -142,22 +143,25 @@ describe('Stripe Pricing Utils', () => {
         },
       ]
 
-      vi.mocked(mockStripe.stripe.prices.retrieve)
-        .mockResolvedValueOnce(mockPrices[0] as any)
-        .mockResolvedValueOnce(mockPrices[1] as any)
+      vi.mocked(mockStripe.stripe.prices.list)
+        .mockResolvedValueOnce({ data: [mockPrices[0]] } as any)
+        .mockResolvedValueOnce({ data: [mockPrices[1]] } as any)
 
       // Act
-      const result = await getMultipleStripePrices(['price_1', 'price_2'])
+      const result = await getMultipleStripePrices([
+        'lookup_key_1',
+        'lookup_key_2',
+      ])
 
       // Assert
       expect(result).toEqual({
-        price_1: {
+        lookup_key_1: {
           amount: 1000,
           currency: 'USD',
           type: 'one-time',
           recurring: null,
         },
-        price_2: {
+        lookup_key_2: {
           amount: 2000,
           currency: 'EUR',
           type: 'subscription',
@@ -182,22 +186,25 @@ describe('Stripe Pricing Utils', () => {
         recurring: null,
       }
 
-      vi.mocked(mockStripe.stripe.prices.retrieve)
-        .mockResolvedValueOnce(mockPrice as any)
+      vi.mocked(mockStripe.stripe.prices.list)
+        .mockResolvedValueOnce({ data: [mockPrice] } as any)
         .mockRejectedValueOnce(new Error('Price not found'))
 
       // Act
-      const result = await getMultipleStripePrices(['price_1', 'invalid_price'])
+      const result = await getMultipleStripePrices([
+        'lookup_key_1',
+        'invalid_lookup_key',
+      ])
 
       // Assert
       expect(result).toEqual({
-        price_1: {
+        lookup_key_1: {
           amount: 1000,
           currency: 'USD',
           type: 'one-time',
           recurring: null,
         },
-        invalid_price: null,
+        invalid_lookup_key: null,
       })
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1)
 
@@ -206,7 +213,7 @@ describe('Stripe Pricing Utils', () => {
 
     it('should process large batches without rate limit issues', async () => {
       // Arrange
-      const priceIds = Array.from({ length: 25 }, (_, i) => `price_${i}`)
+      const lookupKeys = Array.from({ length: 25 }, (_, i) => `lookup_key_${i}`)
       const mockPrice = {
         id: 'price_0',
         unit_amount: 1000,
@@ -215,16 +222,16 @@ describe('Stripe Pricing Utils', () => {
         recurring: null,
       }
 
-      vi.mocked(mockStripe.stripe.prices.retrieve).mockResolvedValue(
-        mockPrice as any,
-      )
+      vi.mocked(mockStripe.stripe.prices.list).mockResolvedValue({
+        data: [mockPrice],
+      } as any)
 
       // Act
-      const result = await getMultipleStripePrices(priceIds)
+      const result = await getMultipleStripePrices(lookupKeys)
 
       // Assert
       expect(Object.keys(result)).toHaveLength(25)
-      expect(mockStripe.stripe.prices.retrieve).toHaveBeenCalledTimes(25)
+      expect(mockStripe.stripe.prices.list).toHaveBeenCalledTimes(25)
     })
 
     it('should return empty object for empty input', async () => {
@@ -233,7 +240,7 @@ describe('Stripe Pricing Utils', () => {
 
       // Assert
       expect(result).toEqual({})
-      expect(mockStripe.stripe.prices.retrieve).not.toHaveBeenCalled()
+      expect(mockStripe.stripe.prices.list).not.toHaveBeenCalled()
     })
   })
 })

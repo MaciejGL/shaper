@@ -76,7 +76,7 @@ describe('Premium Access Logic', () => {
       const packageTemplate = createMockPackage({
         id: 'pkg_coaching_combo',
         name: 'Complete Coaching Combo',
-        stripePriceId: MOCK_PRICE_IDS.COACHING_COMBO,
+        stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_COACHING,
       })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
