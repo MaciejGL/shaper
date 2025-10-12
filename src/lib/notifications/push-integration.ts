@@ -61,7 +61,9 @@ export async function sendPushForNotification(
           userId,
           message,
           'soon',
-          additionalData?.trainerName || 'your trainer',
+          additionalData?.trainerName ||
+            additionalData?.clientName ||
+            'your meeting',
         )
 
       case GQLNotificationType.CoachingRequest:

@@ -67,6 +67,11 @@ export async function getNutritionPlanById(id: string): Promise<
           })[]
           createdBy: PrismaUser
         }
+        ingredientOverrides?: (PrismaNutritionPlanMealIngredient & {
+          mealIngredient: PrismaMealIngredient & {
+            ingredient: PrismaIngredient
+          }
+        })[]
       })[]
     })[]
   }
@@ -94,6 +99,15 @@ export async function getNutritionPlanById(id: string): Promise<
               orderIndex: 'asc',
             },
             include: {
+              ingredientOverrides: {
+                include: {
+                  mealIngredient: {
+                    include: {
+                      ingredient: true,
+                    },
+                  },
+                },
+              },
               meal: {
                 include: {
                   createdBy: {
@@ -183,6 +197,11 @@ export async function getClientNutritionPlans(clientId: string): Promise<
             ingredient: PrismaIngredient
           })[]
         }
+        ingredientOverrides?: (PrismaNutritionPlanMealIngredient & {
+          mealIngredient: PrismaMealIngredient & {
+            ingredient: PrismaIngredient
+          }
+        })[]
       })[]
     })[]
   })[]
@@ -208,6 +227,15 @@ export async function getClientNutritionPlans(clientId: string): Promise<
               orderIndex: 'asc',
             },
             include: {
+              ingredientOverrides: {
+                include: {
+                  mealIngredient: {
+                    include: {
+                      ingredient: true,
+                    },
+                  },
+                },
+              },
               meal: {
                 include: {
                   ingredients: {
@@ -595,6 +623,11 @@ export async function copyNutritionPlan(
           })[]
           createdBy?: PrismaUser
         }
+        ingredientOverrides?: (PrismaNutritionPlanMealIngredient & {
+          mealIngredient: PrismaMealIngredient & {
+            ingredient: PrismaIngredient
+          }
+        })[]
       })[]
     })[]
   }
@@ -654,6 +687,15 @@ export async function copyNutritionPlan(
               orderIndex: 'asc',
             },
             include: {
+              ingredientOverrides: {
+                include: {
+                  mealIngredient: {
+                    include: {
+                      ingredient: true,
+                    },
+                  },
+                },
+              },
               meal: {
                 include: {
                   ingredients: {
@@ -691,6 +733,11 @@ export async function addDayToNutritionPlan(
   PrismaNutritionPlanDay & {
     meals: (PrismaNutritionPlanMeal & {
       meal: PrismaMeal
+      ingredientOverrides?: (PrismaNutritionPlanMealIngredient & {
+        mealIngredient: PrismaMealIngredient & {
+          ingredient: PrismaIngredient
+        }
+      })[]
     })[]
   }
 > {
@@ -740,6 +787,15 @@ export async function addDayToNutritionPlan(
           orderIndex: 'asc',
         },
         include: {
+          ingredientOverrides: {
+            include: {
+              mealIngredient: {
+                include: {
+                  ingredient: true,
+                },
+              },
+            },
+          },
           meal: {
             include: {
               ingredients: {
@@ -877,6 +933,11 @@ export async function addMealToNutritionPlanDay(
         ingredient: PrismaIngredient
       })[]
     }
+    ingredientOverrides?: (PrismaNutritionPlanMealIngredient & {
+      mealIngredient: PrismaMealIngredient & {
+        ingredient: PrismaIngredient
+      }
+    })[]
   }
 > {
   // Check access through plan
@@ -1074,6 +1135,11 @@ export async function reorderNutritionPlanDayMeals(
 ): Promise<
   (PrismaNutritionPlanMeal & {
     meal: PrismaMeal
+    ingredientOverrides?: (PrismaNutritionPlanMealIngredient & {
+      mealIngredient: PrismaMealIngredient & {
+        ingredient: PrismaIngredient
+      }
+    })[]
   })[]
 > {
   // Check access through plan
@@ -1120,6 +1186,15 @@ export async function reorderNutritionPlanDayMeals(
     where: { nutritionPlanDayId: dayId },
     orderBy: { orderIndex: 'asc' },
     include: {
+      ingredientOverrides: {
+        include: {
+          mealIngredient: {
+            include: {
+              ingredient: true,
+            },
+          },
+        },
+      },
       meal: {
         include: {
           ingredients: {

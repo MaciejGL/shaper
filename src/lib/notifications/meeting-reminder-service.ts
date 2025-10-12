@@ -90,72 +90,130 @@ export async function sendMeetingReminders(): Promise<MeetingReminderResult> {
         continue
       }
 
-      // Atomic check: try to mark reminder as sent
-      // If already sent, skip this reminder
-      const shouldSend = await markReminderAsSent({
-        entityType: 'MEETING',
-        entityId: meeting.id,
-        reminderType,
-        userId: meeting.traineeId,
-      })
-
-      if (!shouldSend) {
-        continue // Already sent, skip
-      }
-
       // Format meeting details
       const trainerName =
         meeting.coach.profile?.firstName && meeting.coach.profile?.lastName
           ? `${meeting.coach.profile.firstName} ${meeting.coach.profile.lastName}`
           : meeting.coach.name || 'Your trainer'
 
+      const clientName =
+        meeting.trainee.profile?.firstName && meeting.trainee.profile?.lastName
+          ? `${meeting.trainee.profile.firstName} ${meeting.trainee.profile.lastName}`
+          : meeting.trainee.name || 'Your client'
+
       const meetingDate = format(meetingTime, 'EEEE, MMM d')
       const meetingTimeStr = format(meetingTime, 'h:mm a')
-
       const timeUntilText = reminderType === '24h' ? 'tomorrow' : 'in 1 hour'
-      const message =
-        reminderType === '24h'
-          ? `Your ${meeting.title} with ${trainerName} is tomorrow at ${meetingTimeStr}`
-          : `Your ${meeting.title} with ${trainerName} starts in 1 hour!`
 
-      try {
-        // Create in-app notification
-        await prisma.notification.create({
-          data: {
-            userId: meeting.traineeId,
-            createdBy: meeting.coachId,
-            type: GQLNotificationType.MeetingReminder,
-            message: `${meeting.title} ${timeUntilText} - ${meetingDate} at ${meetingTimeStr}`,
-            link: '/fitspace/my-trainer',
-            relatedItemId: meeting.id, // Link to meeting for future reference
-            metadata: {
-              meetingId: meeting.id,
-              reminderType,
-              meetingTitle: meeting.title,
-              scheduledAt: meeting.scheduledAt.toISOString(),
+      // Send notification to CLIENT
+      const shouldSendToClient = await markReminderAsSent({
+        entityType: 'MEETING',
+        entityId: meeting.id,
+        reminderType,
+        userId: meeting.traineeId,
+      })
+
+      if (shouldSendToClient) {
+        const clientMessage =
+          reminderType === '24h'
+            ? `Your ${meeting.title} with ${trainerName} is tomorrow at ${meetingTimeStr}`
+            : `Your ${meeting.title} with ${trainerName} starts in 1 hour!`
+
+        try {
+          // Create in-app notification for client
+          await prisma.notification.create({
+            data: {
+              userId: meeting.traineeId,
+              createdBy: meeting.coachId,
+              type: GQLNotificationType.MeetingReminder,
+              message: `${meeting.title} ${timeUntilText} - ${meetingDate} at ${meetingTimeStr}`,
+              link: '/fitspace/my-trainer',
+              relatedItemId: meeting.id,
+              metadata: {
+                meetingId: meeting.id,
+                reminderType,
+                meetingTitle: meeting.title,
+                scheduledAt: meeting.scheduledAt.toISOString(),
+              },
             },
-          },
-        })
+          })
 
-        // Send push notification
-        await sendPushForNotification(
-          meeting.traineeId,
-          GQLNotificationType.MeetingReminder,
-          message,
-          '/fitspace/my-trainer',
-          {
-            trainerName,
-          },
-        )
+          // Send push notification to client
+          await sendPushForNotification(
+            meeting.traineeId,
+            GQLNotificationType.MeetingReminder,
+            clientMessage,
+            '/fitspace/my-trainer',
+            {
+              trainerName,
+            },
+          )
 
-        notificationsSent++
-        console.info(
-          `✅ Sent ${reminderType} reminder for meeting ${meeting.id} to ${meeting.traineeId}`,
-        )
-      } catch (error) {
-        const errorMsg = `Failed to send ${reminderType} reminder for meeting ${meeting.id}: ${error}`
-        console.error(errorMsg)
-        errors.push(errorMsg)
+          notificationsSent++
+          console.info(
+            `✅ Sent ${reminderType} reminder for meeting ${meeting.id} to client ${meeting.traineeId}`,
+          )
+        } catch (error) {
+          const errorMsg = `Failed to send ${reminderType} reminder for meeting ${meeting.id} to client: ${error}`
+          console.error(errorMsg)
+          errors.push(errorMsg)
+        }
+      }
+
+      // Send notification to TRAINER
+      const shouldSendToTrainer = await markReminderAsSent({
+        entityType: 'MEETING',
+        entityId: meeting.id,
+        reminderType,
+        userId: meeting.coachId,
+      })
+
+      if (shouldSendToTrainer) {
+        const trainerMessage =
+          reminderType === '24h'
+            ? `Your ${meeting.title} with ${clientName} is tomorrow at ${meetingTimeStr}`
+            : `Your ${meeting.title} with ${clientName} starts in 1 hour!`
+
+        try {
+          // Create in-app notification for trainer
+          await prisma.notification.create({
+            data: {
+              userId: meeting.coachId,
+              createdBy: meeting.traineeId,
+              type: GQLNotificationType.MeetingReminder,
+              message: `${meeting.title} ${timeUntilText} - ${meetingDate} at ${meetingTimeStr}`,
+              link: `/trainer/clients/${meeting.traineeId}?tab=meetings`,
+              relatedItemId: meeting.id,
+              metadata: {
+                meetingId: meeting.id,
+                reminderType,
+                meetingTitle: meeting.title,
+                scheduledAt: meeting.scheduledAt.toISOString(),
+                clientId: meeting.traineeId,
+              },
+            },
+          })
+
+          // Send push notification to trainer
+          await sendPushForNotification(
+            meeting.coachId,
+            GQLNotificationType.MeetingReminder,
+            trainerMessage,
+            `/trainer/clients/${meeting.traineeId}?tab=meetings`,
+            {
+              clientName,
+            },
+          )
+
+          notificationsSent++
+          console.info(
+            `✅ Sent ${reminderType} reminder for meeting ${meeting.id} to trainer ${meeting.coachId}`,
+          )
+        } catch (error) {
+          const errorMsg = `Failed to send ${reminderType} reminder for meeting ${meeting.id} to trainer: ${error}`
+          console.error(errorMsg)
+          errors.push(errorMsg)
+        }
       }
     }
 
