@@ -48,7 +48,7 @@ interface TrainerOffer {
   personalMessage: string | null
   clientEmail: string
   services: { serviceType: string; quantity: number }[]
-  stripePriceId: string | null
+  stripeLookupKey: string | null
 }
 
 export function OfferHistory({ clientId, trainerId }: OfferHistoryProps) {

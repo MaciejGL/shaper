@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
         name: true,
         description: true,
         duration: true,
-        stripePriceId: true,
+        stripeLookupKey: true,
         trainerId: true,
       },
     })
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if package has Stripe configuration
-    if (!packageTemplate.stripePriceId) {
+    if (!packageTemplate.stripeLookupKey) {
       return NextResponse.json(
         { error: 'Package is not configured for Stripe payments' },
         { status: 400 },
@@ -120,15 +120,30 @@ export async function POST(request: NextRequest) {
       hasUsedTrialInDB ||
       (stripeCustomer as Stripe.Customer).metadata?.hasUsedTrial === 'true'
 
-    // Use the single price ID (Stripe handles multi-currency automatically)
-    const priceId = packageTemplate.stripePriceId
+    // Get lookup key and resolve to price ID
+    const lookupKey = packageTemplate.stripeLookupKey
 
-    if (!priceId) {
+    if (!lookupKey) {
       return NextResponse.json(
-        { error: 'No valid price ID found for this package' },
+        { error: 'No valid lookup key found for this package' },
         { status: 400 },
       )
     }
+
+    // Resolve lookup key to actual price ID for Stripe API
+    const prices = await stripe.prices.list({
+      lookup_keys: [lookupKey],
+      limit: 1,
+    })
+
+    if (prices.data.length === 0) {
+      return NextResponse.json(
+        { error: `No price found for lookup key: ${lookupKey}` },
+        { status: 400 },
+      )
+    }
+
+    const priceId = prices.data[0].id
 
     // Create checkout session
     const checkoutSession = await stripe.checkout.sessions.create({

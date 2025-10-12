@@ -35,7 +35,7 @@ interface OfferItem {
       serviceType: string
       quantity: number
     }[]
-    stripePriceId?: string
+    stripeLookupKey?: string
   }
   pricing: OfferPricing
 }

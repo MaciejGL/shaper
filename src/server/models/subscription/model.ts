@@ -70,8 +70,8 @@ export class PackageTemplate implements GQLPackageTemplate {
     }
   }
 
-  get stripePriceId() {
-    return this.data.stripePriceId
+  get stripeLookupKey() {
+    return this.data.stripeLookupKey
   }
 
   get stripeProductId() {

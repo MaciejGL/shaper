@@ -10,14 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { SectionIcon } from '@/components/ui/section-icon'
 import { useUser } from '@/context/user-context'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
-import { STRIPE_PRODUCTS } from '@/lib/stripe/constants'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 export function SubscriptionInfoSection() {
   const { user } = useUser()
   const { data: subscriptionData, isLoading } = useCurrentSubscription(
     user?.id,
     {
-      priceId: STRIPE_PRODUCTS.COACHING_COMBO, // Show only Premium Coaching subscription
+      lookupKey: STRIPE_LOOKUP_KEYS.PREMIUM_COACHING, // Show only Premium Coaching subscription
     },
   )
   const { isNativeApp } = useMobileApp()
@@ -74,10 +74,11 @@ export function SubscriptionInfoSection() {
       }
     }
 
-    const stripePriceId = subscriptionData.subscription.package.stripePriceId
+    const stripeLookupKey =
+      subscriptionData.subscription.package.stripeLookupKey
 
-    // Check subscription type using stable price IDs
-    if (stripePriceId === STRIPE_PRODUCTS.COACHING_COMBO) {
+    // Check subscription type using lookup keys
+    if (stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING) {
       return {
         title: 'Complete Coaching',
         description:
@@ -87,8 +88,8 @@ export function SubscriptionInfoSection() {
     }
 
     if (
-      stripePriceId === STRIPE_PRODUCTS.PREMIUM_MONTHLY ||
-      stripePriceId === STRIPE_PRODUCTS.PREMIUM_YEARLY
+      stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_MONTHLY ||
+      stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY
     ) {
       return {
         title: 'Premium',

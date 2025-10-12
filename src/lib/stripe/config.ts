@@ -2,9 +2,9 @@ import { Currency, SubscriptionStatus } from '@/generated/prisma/client'
 
 // Subscription Configuration
 export const SUBSCRIPTION_CONFIG = {
-  // Trial period duration (14 days in milliseconds)
-  TRIAL_PERIOD_DAYS: 14,
-  TRIAL_PERIOD_MS: 14 * 24 * 60 * 60 * 1000,
+  // Trial period duration (7 days in milliseconds)
+  TRIAL_PERIOD_DAYS: 7,
+  TRIAL_PERIOD_MS: 7 * 24 * 60 * 60 * 1000,
 
   // Grace period after failed payment (3 days in milliseconds)
   GRACE_PERIOD_DAYS: 3,
@@ -55,22 +55,7 @@ export const STRIPE_WEBHOOK_EVENTS = {
   PAYMENT_ACTION_REQUIRED: 'invoice.payment_action_required',
 } as const
 
-// Stripe Product Configuration (Method 2 - Single Price per Product)
-export const STRIPE_PRODUCTS = {
-  // Platform subscriptions
-  PREMIUM_MONTHLY: process.env.STRIPE_PRICE_PREMIUM_MONTHLY,
-  PREMIUM_YEARLY: process.env.STRIPE_PRICE_PREMIUM_YEARLY,
-
-  // Trainer one-time services
-  MEAL_PLAN: process.env.STRIPE_PRICE_MEAL_PLAN,
-  WORKOUT_PLAN: process.env.STRIPE_PRICE_WORKOUT_PLAN,
-
-  // Trainer recurring services
-  COACHING_COMBO: process.env.STRIPE_PRICE_COACHING_COMBO,
-
-  // Add-on services
-  IN_PERSON_SESSION: process.env.STRIPE_PRICE_IN_PERSON_SESSION,
-} as const
+// Stripe lookup keys are now centralized in @/lib/stripe/lookup-keys
 
 // Commission Configuration: Trainers get 88% after fees, Platform takes 11%
 export const COMMISSION_CONFIG = {

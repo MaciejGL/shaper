@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 
 import { SubscriptionStatus } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
-import { STRIPE_PRODUCTS, SUBSCRIPTION_HELPERS } from '@/lib/stripe/config'
+import { SUBSCRIPTION_HELPERS } from '@/lib/stripe/config'
+import { getPremiumLookupKeys } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 
 export async function GET(request: NextRequest) {
@@ -10,7 +11,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get('userId')
     const subscriptionType = searchParams.get('type') // 'coaching' or 'platform'
-    const priceId = searchParams.get('priceId') // Filter by specific Stripe price ID
+    const lookupKey = searchParams.get('lookupKey') // Filter by specific Stripe lookup key
 
     if (!userId) {
       return NextResponse.json(
@@ -75,13 +76,13 @@ export async function GET(request: NextRequest) {
       }),
     )
 
-    // Filter subscriptions based on type or specific price ID
+    // Filter subscriptions based on type or specific lookup key
     let filteredSubscriptions = subscriptionsWithCancellation
 
-    if (priceId) {
-      // Filter by specific Stripe price ID (most precise)
+    if (lookupKey) {
+      // Filter by specific Stripe lookup key (most precise)
       filteredSubscriptions = subscriptionsWithCancellation.filter(
-        (sub) => sub.package.stripePriceId === priceId,
+        (sub) => sub.package.stripeLookupKey === lookupKey,
       )
     } else if (subscriptionType === 'coaching') {
       // Only coaching subscriptions (with trainerId)
@@ -121,17 +122,8 @@ export async function GET(request: NextRequest) {
 
     const isCancelledButActive = primarySubscription.isCancelledButActive
 
-    // Get premium price IDs from environment variables
-    const premiumPriceIds: string[] = []
-    if (STRIPE_PRODUCTS.PREMIUM_MONTHLY) {
-      premiumPriceIds.push(STRIPE_PRODUCTS.PREMIUM_MONTHLY)
-    }
-    if (STRIPE_PRODUCTS.PREMIUM_YEARLY) {
-      premiumPriceIds.push(STRIPE_PRODUCTS.PREMIUM_YEARLY)
-    }
-    if (STRIPE_PRODUCTS.COACHING_COMBO) {
-      premiumPriceIds.push(STRIPE_PRODUCTS.COACHING_COMBO)
-    }
+    // Get premium lookup keys
+    const premiumLookupKeys = getPremiumLookupKeys()
 
     // Check if user has premium access from ANY subscription
     const hasPremiumAccess = subscriptions.some((sub) => {
@@ -140,16 +132,16 @@ export async function GET(request: NextRequest) {
         sub.isTrialActive && sub.trialEnd ? sub.trialEnd : sub.endDate
       const isNotExpired = now <= effectiveEndDate
 
-      // Check for lifetime premium (admin-granted, no Stripe price ID)
+      // Check for lifetime premium (admin-granted, no Stripe lookup key)
       const metadata = sub.package.metadata as { isLifetime?: boolean } | null
       if (metadata?.isLifetime === true && isNotExpired) {
         return true
       }
 
-      // Check if this subscription grants premium access using stable price IDs
+      // Check if this subscription grants premium access using lookup keys
       const grantsPremiumAccess =
-        sub.package.stripePriceId &&
-        premiumPriceIds.includes(sub.package.stripePriceId) &&
+        sub.package.stripeLookupKey &&
+        premiumLookupKeys.includes(sub.package.stripeLookupKey) &&
         isNotExpired
 
       return (
@@ -237,7 +229,7 @@ export async function GET(request: NextRequest) {
         package: {
           name: subscription.package.name,
           duration: subscription.package.duration,
-          stripePriceId: subscription.package.stripePriceId,
+          stripeLookupKey: subscription.package.stripeLookupKey,
         },
         stripeSubscriptionId: subscription.stripeSubscriptionId,
         isCancelledButActive,

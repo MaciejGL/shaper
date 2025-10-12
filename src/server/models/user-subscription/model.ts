@@ -63,8 +63,8 @@ export default class UserSubscription implements GQLUserSubscription {
     return this.data.stripeSubscriptionId
   }
 
-  get stripePriceId() {
-    return this.data.stripePriceId
+  get stripeLookupKey() {
+    return this.data.stripeLookupKey
   }
 
   get mockPaymentStatus() {

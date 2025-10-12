@@ -4,7 +4,7 @@ export interface TrainerPackage {
   id: string
   name: string
   description: string | null
-  stripePriceId: string | null
+  stripeLookupKey: string | null
   pricing: {
     amount: number
     currency: string

@@ -80,7 +80,7 @@ export async function fetchOfferData(input: CreateOfferInput) {
   const packageTemplates = await prisma.packageTemplate.findMany({
     where: {
       id: { in: packageIds },
-      stripePriceId: { not: null }, // Must have Stripe integration
+      stripeLookupKey: { not: null }, // Must have Stripe integration
     },
   })
 
@@ -111,7 +111,7 @@ export function createPackageSummary(
       quantity: pkg.quantity,
       name: template.name,
       description: template.description,
-      stripePriceId: template.stripePriceId,
+      stripeLookupKey: template.stripeLookupKey,
     }
   })
 }

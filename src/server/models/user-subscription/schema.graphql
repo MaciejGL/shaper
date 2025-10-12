@@ -10,7 +10,7 @@ type UserSubscription {
 
   # Stripe integration (source of truth for payment)
   stripeSubscriptionId: String
-  stripePriceId: String
+  stripeLookupKey: String
 
   # Computed fields
   isActive: Boolean!

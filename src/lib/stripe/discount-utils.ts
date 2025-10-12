@@ -105,15 +105,17 @@ export async function createDiscountedLineItem(
   quantity: number,
   discountedAmount: number,
 ): Promise<Stripe.Checkout.SessionCreateParams.LineItem> {
-  if (!pkg.stripePriceId) {
-    throw new Error(`Package ${pkg.name} does not have a valid Stripe price ID`)
+  if (!pkg.stripeLookupKey) {
+    throw new Error(
+      `Package ${pkg.name} does not have a valid Stripe lookup key`,
+    )
   }
 
   // Get original pricing info to preserve subscription details
-  const originalPrice = await getStripePricingInfo(pkg.stripePriceId)
+  const originalPrice = await getStripePricingInfo(pkg.stripeLookupKey)
 
   if (!originalPrice) {
-    throw new Error(`Could not retrieve pricing for ${pkg.stripePriceId}`)
+    throw new Error(`Could not retrieve pricing for ${pkg.stripeLookupKey}`)
   }
 
   return {
@@ -183,22 +185,32 @@ export function findMealAndTrainingPackages(
 }
 
 /**
- * Gets Stripe product IDs from price IDs
+ * Gets Stripe product IDs from lookup keys
  */
-export async function getProductIdsFromPrices(
-  priceIds: (string | null | undefined)[],
+export async function getProductIdsFromLookupKeys(
+  lookupKeys: (string | null | undefined)[],
 ): Promise<string[]> {
   const productIds: string[] = []
 
-  for (const priceId of priceIds) {
-    if (priceId) {
+  for (const lookupKey of lookupKeys) {
+    if (lookupKey) {
       try {
-        const price = await stripe.prices.retrieve(priceId)
-        if (typeof price.product === 'string') {
-          productIds.push(price.product)
+        const prices = await stripe.prices.list({
+          lookup_keys: [lookupKey],
+          limit: 1,
+        })
+
+        if (prices.data.length > 0) {
+          const price = prices.data[0]
+          if (typeof price.product === 'string') {
+            productIds.push(price.product)
+          }
         }
       } catch (error) {
-        console.warn(`Failed to retrieve product for price ${priceId}:`, error)
+        console.warn(
+          `Failed to retrieve product for lookup key ${lookupKey}:`,
+          error,
+        )
       }
     }
   }
@@ -249,12 +261,12 @@ export async function createInPersonDiscountIfEligible(
     return null
   }
 
-  // Get product IDs from price IDs
-  const priceIds = inPersonPackages
-    .map((pkg) => pkg.package.stripePriceId)
+  // Get product IDs from lookup keys
+  const lookupKeys = inPersonPackages
+    .map((pkg) => pkg.package.stripeLookupKey)
     .filter(Boolean)
 
-  const productIds = await getProductIdsFromPrices(priceIds)
+  const productIds = await getProductIdsFromLookupKeys(lookupKeys)
 
   if (productIds.length === 0) {
     return null
@@ -314,12 +326,12 @@ export async function createMealTrainingBundleDiscountIfEligible(
     return null
   }
 
-  // Get product IDs from price IDs
-  const priceIds = mealAndTrainingPackages
-    .map((pkg) => pkg.package.stripePriceId)
+  // Get product IDs from lookup keys
+  const lookupKeys = mealAndTrainingPackages
+    .map((pkg) => pkg.package.stripeLookupKey)
     .filter(Boolean)
 
-  const productIds = await getProductIdsFromPrices(priceIds)
+  const productIds = await getProductIdsFromLookupKeys(lookupKeys)
 
   if (productIds.length === 0) {
     return null

@@ -7,6 +7,7 @@ import {
   createInPersonDiscountIfEligible,
   createMealTrainingBundleDiscountIfEligible,
 } from '@/lib/stripe/discount-utils'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 import {
   type PayoutDestination,
   getPayoutDestination,
@@ -143,9 +144,9 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Validate that all packages in bundle have valid Stripe price IDs
+    // Validate that all packages in bundle have valid Stripe lookup keys
     for (const item of offer_items) {
-      if (!item.package.stripePriceId) {
+      if (!item.package.stripeLookupKey) {
         return NextResponse.json(
           {
             error: `Package "${item.package.name}" is not configured for payments`,
@@ -153,33 +154,34 @@ export async function POST(request: NextRequest) {
           { status: 400 },
         )
       }
-      // Additional validation to ensure price ID is a valid string
+      // Additional validation to ensure lookup key is a valid string
       if (
-        typeof item.package.stripePriceId !== 'string' ||
-        item.package.stripePriceId.trim() === ''
+        typeof item.package.stripeLookupKey !== 'string' ||
+        item.package.stripeLookupKey.trim() === ''
       ) {
         return NextResponse.json(
           {
-            error: `Package "${item.package.name}" has invalid price ID: ${item.package.stripePriceId}`,
+            error: `Package "${item.package.name}" has invalid lookup key: ${item.package.stripeLookupKey}`,
           },
           { status: 400 },
         )
       }
     }
 
-    // Check if Complete Coaching Combo is in the bundle
-    const hasCoachingCombo = offer_items.some((item) => {
-      const packageName = item.package.name?.toLowerCase() || ''
-      return packageName.includes('coaching') && packageName.includes('combo')
-    })
+    // Check if Premium Coaching is in the bundle (includes premium access)
+    const hasPremiumCoaching = offer_items.some(
+      (item) =>
+        item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+    )
 
-    // Filter out premium subscriptions if coaching combo is present (premium is included)
+    // Filter out standalone premium subscriptions if premium coaching is present
     const checkoutItems = offer_items.filter((item) => {
-      const packageName = item.package.name?.toLowerCase() || ''
-      const isPremium = packageName.includes('premium')
+      const isPremiumSubscription =
+        item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_MONTHLY ||
+        item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY
 
-      // Exclude premium if coaching combo is present (premium access is included)
-      return !(isPremium && hasCoachingCombo)
+      // Exclude premium subscriptions if premium coaching is present (premium access is included)
+      return !(isPremiumSubscription && hasPremiumCoaching)
     })
 
     // Validate we still have items to checkout
@@ -205,11 +207,26 @@ export async function POST(request: NextRequest) {
 
     const mode = hasSubscription ? 'subscription' : 'payment'
 
-    // Use original price IDs for all items (enables adaptive pricing)
-    const lineItems = checkoutItems.map((item) => ({
-      price: item.package.stripePriceId!,
-      quantity: item.quantity,
-    }))
+    // Resolve lookup keys to price IDs for all items
+    const lineItems = await Promise.all(
+      checkoutItems.map(async (item) => {
+        const prices = await stripe.prices.list({
+          lookup_keys: [item.package.stripeLookupKey!],
+          limit: 1,
+        })
+
+        if (prices.data.length === 0) {
+          throw new Error(
+            `No price found for lookup key: ${item.package.stripeLookupKey}`,
+          )
+        }
+
+        return {
+          price: prices.data[0].id,
+          quantity: item.quantity,
+        }
+      }),
+    )
 
     // Apply discounts based on bundle combinations
     const discounts = []
@@ -217,7 +234,7 @@ export async function POST(request: NextRequest) {
     // Apply 50% discount to in-person sessions if bundle contains coaching combo
     const inPersonDiscount = await createInPersonDiscountIfEligible(
       checkoutItems,
-      hasCoachingCombo,
+      hasPremiumCoaching,
       offerToken,
     )
     if (inPersonDiscount) {
@@ -260,9 +277,11 @@ export async function POST(request: NextRequest) {
       source: 'trainer_offer',
       bundleItemCount: checkoutItems.length.toString(),
       originalItemCount: offer_items.length.toString(),
-      hasCoachingCombo: hasCoachingCombo.toString(),
-      inPersonDiscount: hasCoachingCombo ? '50' : '0',
-      hasDiscountCoupon: (hasCoachingCombo && discounts.length > 0).toString(),
+      hasCoachingCombo: hasPremiumCoaching.toString(),
+      inPersonDiscount: hasPremiumCoaching ? '50' : '0',
+      hasDiscountCoupon: (
+        hasPremiumCoaching && discounts.length > 0
+      ).toString(),
       bundlePackages: checkoutItems
         .slice(0, 3)
         .map((item) => item.package.name)
@@ -330,9 +349,11 @@ export async function POST(request: NextRequest) {
         : `Bundle (${checkoutItems.length} packages)`
 
     const premiumIncluded =
-      hasCoachingCombo &&
-      offer_items.some((item) =>
-        item.package.name?.toLowerCase().includes('premium'),
+      hasPremiumCoaching &&
+      offer_items.some(
+        (item) =>
+          item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_MONTHLY ||
+          item.package.stripeLookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY,
       )
 
     return NextResponse.json({
@@ -342,13 +363,13 @@ export async function POST(request: NextRequest) {
       bundleDescription,
       itemCount: checkoutItems.length,
       originalItemCount: offer_items.length,
-      hasCoachingCombo,
+      hasCoachingCombo: hasPremiumCoaching,
       premiumIncluded,
       trainerName: offer.trainer.profile?.firstName || offer.trainer.name,
-      inPersonDiscount: hasCoachingCombo ? 50 : 0,
-      hasDiscountCoupon: hasCoachingCombo && discounts.length > 0,
+      inPersonDiscount: hasPremiumCoaching ? 50 : 0,
+      hasDiscountCoupon: hasPremiumCoaching && discounts.length > 0,
       discountDescription:
-        hasCoachingCombo && discounts.length > 0
+        hasPremiumCoaching && discounts.length > 0
           ? '50% off In-Person Sessions'
           : null,
     })

@@ -1,7 +1,7 @@
 generator client {
   provider        = "prisma-client"
   output          = "../src/generated/prisma"
-  previewFeatures = ["queryCompiler", "driverAdapters"]
+  previewFeatures = ["driverAdapters", "queryCompiler"]
 }
 
 datasource db {
@@ -10,105 +10,69 @@ datasource db {
 }
 
 model User {
-  id               String            @id @default(uuid())
-  email            String            @unique
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  image            String?
-  name             String?
-  role             String            @default("CLIENT")
-  trainerId        String?
-  featured         Boolean           @default(false)
-  capacity         Int? // Maximum number of clients trainer can have
-  BaseExercise     BaseExercise[]
-  receivedRequests CoachingRequest[] @relation("ReceivedRequests")
-  sentRequests     CoachingRequest[] @relation("SentRequests")
-
+  id                       String               @id @default(uuid())
+  email                    String               @unique
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  image                    String?
+  name                     String?
+  role                     String               @default("CLIENT")
+  trainerId                String?
+  featured                 Boolean              @default(false)
+  stripeCustomerId         String?              @unique
+  stripeConnectedAccountId String?              @unique
+  capacity                 Int?
+  googleAccessToken        String?
+  googleId                 String?              @unique
+  googleRefreshToken       String?
+  locale                   String?
+  timezone                 String?
+  appleId                  String?              @unique
+  BaseExercise             BaseExercise[]
+  clientChats              Chat[]               @relation("ClientChats")
+  trainerChats             Chat[]               @relation("TrainerChats")
+  clientSurvey             ClientSurvey?
+  receivedRequests         CoachingRequest[]    @relation("ReceivedRequests")
+  sentRequests             CoachingRequest[]    @relation("SentRequests")
   exerciseLogs             ExerciseLog[]
-  createdFavouriteWorkouts FavouriteWorkout[] @relation("CreatedFavouriteWorkouts")
-
-  mobilePushTokens     MobilePushToken[]
-  createdNotes         Note[]             @relation("CreatedNotes")
-  createdNotifications Notification[]     @relation("NotificationCreator")
-  notifications        Notification[]
-  pushSubscriptions    PushSubscription[]
-  reviews              Review[]
-  assignedPlans        TrainingPlan[]     @relation("AssignedPlans")
-  createdPlans         TrainingPlan[]     @relation("CreatedPlans")
-
-  trainer  User?         @relation("TrainerClients", fields: [trainerId], references: [id])
-  clients  User[]        @relation("TrainerClients")
-  profile  UserProfile?
-  sessions UserSession[]
-
-  // Stripe integration
-  stripeCustomerId         String? @unique
-  stripeConnectedAccountId String? @unique // For trainer revenue sharing
-
-  // Google OAuth integration
-  googleId           String? @unique
-  googleAccessToken  String?
-  googleRefreshToken String?
-
-  // Apple OAuth integration
-  appleId String? @unique
-
-  locale   String?
-  timezone String?
-
-  // Subscription relations
-  subscriptions       UserSubscription[] @relation("UserSubscriptions")
-  trainerPackages     PackageTemplate[]  @relation("TrainerPackages")
-  clientSubscriptions UserSubscription[] @relation("TrainerSubscriptions")
-
-  // Trainer offer relations
-  sentOffers TrainerOffer[] @relation("TrainerOffers")
-
-  // Service delivery relations
-  trainerDeliveries ServiceDelivery[] @relation("TrainerDeliveries")
-  clientDeliveries  ServiceDelivery[] @relation("ClientDeliveries")
-
-  // Team relations
-  teamMemberships     TeamMember[]
-  sentTeamInvitations TeamInvitation[] @relation("SentTeamInvitations")
-
-  // Location relations
-  locations UserLocation[]
-
-  // Terms agreement relations
-  termsAgreements UserTermsAgreement[]
-
-  // Messenger relations
-  trainerChats Chat[]    @relation("TrainerChats")
-  clientChats  Chat[]    @relation("ClientChats")
-  sentMessages Message[] @relation("SentMessages")
-
-  // Macro tracking relations
-  macroTargets    MacroTarget[] @relation("ClientMacroTargets")
-  setMacroTargets MacroTarget[] @relation("TrainerMacroTargets")
-
-  // Personal records
-  personalRecords PersonalRecord[]
-
-  // Meal planning relations
-  createdNutritionPlans  NutritionPlan[] @relation("TrainerNutritionPlans")
-  assignedNutritionPlans NutritionPlan[] @relation("ClientNutritionPlans")
-  createdMeals           Meal[]          @relation("CreatedMeals")
-  createdIngredients     Ingredient[]    @relation("CreatedIngredients")
-
-  // Client survey relation
-  clientSurvey ClientSurvey?
-
-  // Meeting relations
-  coachMeetings   Meeting[] @relation("CoachMeetings")
-  traineeMeetings Meeting[] @relation("TraineeMeetings")
-
-  // Reminder tracking
-  remindersSent ReminderSent[]
+  createdFavouriteWorkouts FavouriteWorkout[]   @relation("CreatedFavouriteWorkouts")
+  createdIngredients       Ingredient[]         @relation("CreatedIngredients")
+  macroTargets             MacroTarget?         @relation("ClientMacroTargets")
+  setMacroTargets          MacroTarget[]        @relation("TrainerMacroTargets")
+  createdMeals             Meal[]               @relation("CreatedMeals")
+  coachMeetings            Meeting[]            @relation("CoachMeetings")
+  traineeMeetings          Meeting[]            @relation("TraineeMeetings")
+  sentMessages             Message[]            @relation("SentMessages")
+  mobilePushTokens         MobilePushToken[]
+  createdNotes             Note[]               @relation("CreatedNotes")
+  createdNotifications     Notification[]       @relation("NotificationCreator")
+  notifications            Notification[]
+  assignedNutritionPlans   NutritionPlan[]      @relation("ClientNutritionPlans")
+  createdNutritionPlans    NutritionPlan[]      @relation("TrainerNutritionPlans")
+  trainerPackages          PackageTemplate[]    @relation("TrainerPackages")
+  personalRecords          PersonalRecord[]
+  pushSubscriptions        PushSubscription[]
+  remindersSent            ReminderSent[]
+  reviews                  Review[]
+  clientDeliveries         ServiceDelivery[]    @relation("ClientDeliveries")
+  trainerDeliveries        ServiceDelivery[]    @relation("TrainerDeliveries")
+  sentTeamInvitations      TeamInvitation[]     @relation("SentTeamInvitations")
+  teamMemberships          TeamMember[]
+  sentOffers               TrainerOffer[]       @relation("TrainerOffers")
+  assignedPlans            TrainingPlan[]       @relation("AssignedPlans")
+  createdPlans             TrainingPlan[]       @relation("CreatedPlans")
+  trainer                  User?                @relation("TrainerClients", fields: [trainerId], references: [id])
+  clients                  User[]               @relation("TrainerClients")
+  locations                UserLocation[]
+  profile                  UserProfile?
+  sessions                 UserSession[]
+  clientSubscriptions      UserSubscription[]   @relation("TrainerSubscriptions")
+  subscriptions            UserSubscription[]   @relation("UserSubscriptions")
+  termsAgreements          UserTermsAgreement[]
 
   @@index([trainerId])
   @@index([stripeCustomerId])
-  @@index([trainerId, role]) // For trainer-client relationship queries
+  @@index([trainerId, role])
   @@index([googleId])
   @@index([appleId])
 }
@@ -148,21 +112,21 @@ model UserProfile {
   progressUpdates        Boolean?          @default(true)
   pushNotifications      Boolean?          @default(false)
   systemNotifications    Boolean?          @default(true)
-  checkinReminders       Boolean?          @default(true)
-  timezone               String?           @default("UTC")
   theme                  String?           @default("system")
   timeFormat             String?           @default("24h")
   weightUnit             String?           @default("kg")
   workoutReminders       Boolean?          @default(true)
   trainingView           String?           @default("advanced")
-  hasCompletedOnboarding Boolean?          @default(false)
   credentials            String[]          @default([])
   specialization         String[]          @default([])
   successStories         String[]          @default([])
   trainerSince           DateTime?
-  bodyMeasures           UserBodyMeasure[]
+  hasCompletedOnboarding Boolean?          @default(false)
+  checkinReminders       Boolean?          @default(true)
+  timezone               String?           @default("UTC")
   bodyProgressLogs       BodyProgressLog[]
   checkinSchedule        CheckinSchedule?
+  bodyMeasures           UserBodyMeasure[]
   user                   User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
@@ -184,24 +148,23 @@ model UserBodyMeasure {
   calfRight          Float?
   thighLeft          Float?
   thighRight         Float?
-  userProfile        UserProfile         @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
   checkinCompletions CheckinCompletion[]
+  userProfile        UserProfile         @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
 
   @@index([userProfileId])
 }
 
 model BodyProgressLog {
-  id               String   @id @default(uuid())
-  userProfileId    String
-  loggedAt         DateTime @default(now())
-  notes            String?
-  image1Url        String? // Front view
-  image2Url        String? // Side view  
-  image3Url        String? // Back view
-  shareWithTrainer Boolean  @default(false)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-
+  id                 String              @id @default(uuid())
+  userProfileId      String
+  loggedAt           DateTime            @default(now())
+  notes              String?
+  image1Url          String?
+  image2Url          String?
+  image3Url          String?
+  shareWithTrainer   Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
   userProfile        UserProfile         @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
   checkinCompletions CheckinCompletion[]
 
@@ -210,32 +173,30 @@ model BodyProgressLog {
 }
 
 model CheckinSchedule {
-  id            String   @id @default(uuid())
-  userProfileId String   @unique
-  frequency     String // 'weekly', 'biweekly', 'monthly'
-  dayOfWeek     Int? // 0-6 for weekly (0=Sunday)
-  dayOfMonth    Int? // 1-31 for monthly
-  isActive      Boolean  @default(true)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  userProfile UserProfile         @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
-  completions CheckinCompletion[]
+  id            String              @id @default(uuid())
+  userProfileId String              @unique
+  frequency     String
+  dayOfWeek     Int?
+  dayOfMonth    Int?
+  isActive      Boolean             @default(true)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  completions   CheckinCompletion[]
+  userProfile   UserProfile         @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
 
   @@index([userProfileId])
   @@index([isActive])
 }
 
 model CheckinCompletion {
-  id            String   @id @default(uuid())
+  id            String           @id @default(uuid())
   scheduleId    String
-  completedAt   DateTime @default(now())
-  measurementId String? // Link to UserBodyMeasure
-  progressLogId String? // Link to BodyProgressLog
-
-  schedule    CheckinSchedule  @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  measurement UserBodyMeasure? @relation(fields: [measurementId], references: [id], onDelete: SetNull)
-  progressLog BodyProgressLog? @relation(fields: [progressLogId], references: [id], onDelete: SetNull)
+  completedAt   DateTime         @default(now())
+  measurementId String?
+  progressLogId String?
+  measurement   UserBodyMeasure? @relation(fields: [measurementId], references: [id])
+  progressLog   BodyProgressLog? @relation(fields: [progressLogId], references: [id])
+  schedule      CheckinSchedule  @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
 
   @@index([scheduleId])
   @@index([completedAt])
@@ -247,9 +208,9 @@ model CoachingRequest {
   recipientId        String
   status             String   @default("PENDING")
   message            String?
-  interestedServices String[] @default([]) // Array of service types client is interested in
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
+  interestedServices String[] @default([])
   recipient          User     @relation("ReceivedRequests", fields: [recipientId], references: [id])
   sender             User     @relation("SentRequests", fields: [senderId], references: [id])
 
@@ -334,8 +295,7 @@ model TrainingPlan {
   createdBy    User           @relation("CreatedPlans", fields: [createdById], references: [id])
   template     TrainingPlan?  @relation("Template", fields: [templateId], references: [id])
   templates    TrainingPlan[] @relation("Template")
-
-  weeks TrainingWeek[]
+  weeks        TrainingWeek[]
 
   @@index([completedAt])
   @@index([assignedToId])
@@ -376,10 +336,10 @@ model TrainingDay {
   workoutType     String?
   scheduledAt     DateTime?
   isExtra         Boolean               @default(false)
+  personalRecords PersonalRecord[]
   week            TrainingWeek          @relation(fields: [weekId], references: [id], onDelete: Cascade)
   exercises       TrainingExercise[]
   events          WorkoutSessionEvent[]
-  personalRecords PersonalRecord[]
 
   @@index([completedAt])
   @@index([weekId])
@@ -477,21 +437,20 @@ model ExerciseSetLog {
 }
 
 model PersonalRecord {
-  id             String   @id @default(uuid())
+  id             String       @id @default(uuid())
   userId         String
   baseExerciseId String
-  dayId          String // Track which workout day generated this PR
   estimated1RM   Float
   weight         Float
   reps           Int
-  achievedAt     DateTime @default(now())
-  createdAt      DateTime @default(now())
+  achievedAt     DateTime     @default(now())
+  createdAt      DateTime     @default(now())
+  dayId          String
+  baseExercise   BaseExercise @relation(fields: [baseExerciseId], references: [id])
+  day            TrainingDay  @relation(fields: [dayId], references: [id])
+  user           User         @relation(fields: [userId], references: [id])
 
-  user         User         @relation(fields: [userId], references: [id])
-  baseExercise BaseExercise @relation(fields: [baseExerciseId], references: [id])
-  day          TrainingDay  @relation(fields: [dayId], references: [id])
-
-  @@unique([userId, baseExerciseId, dayId]) // Prevent duplicate PRs per workout day
+  @@unique([userId, baseExerciseId, dayId])
   @@index([userId])
   @@index([baseExerciseId])
   @@index([userId, baseExerciseId])
@@ -520,10 +479,10 @@ model BaseExercise {
   substitutedBy             BaseExerciseSubstitute[]   @relation("SubstituteExercise")
   favouriteWorkoutExercises FavouriteWorkoutExercise[]
   images                    Image[]                    @relation("ExerciseImages")
+  personalRecords           PersonalRecord[]
   trainingExercises         TrainingExercise[]
   muscleGroups              MuscleGroup[]              @relation("ExerciseMuscleGroups")
   secondaryMuscleGroups     MuscleGroup[]              @relation("ExerciseSecondaryMuscleGroups")
-  personalRecords           PersonalRecord[]
 
   @@index([version])
   @@index([difficulty])
@@ -536,14 +495,14 @@ model BaseExercise {
 model Image {
   id         String       @id @default(uuid())
   url        String
-  thumbnail  String? // Optimized thumbnail version ~150px
-  medium     String? // Optimized medium version ~400px  
-  large      String? // Optimized large version ~800px
   order      Int          @default(0)
   entityType String
   entityId   String
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
+  large      String?
+  medium     String?
+  thumbnail  String?
   exercise   BaseExercise @relation("ExerciseImages", fields: [entityId], references: [id], map: "exercise_image_fk")
 
   @@index([entityType, entityId])
@@ -658,9 +617,9 @@ model FavouriteWorkoutExercise {
   restSeconds            Int?
   additionalInstructions String?
   description            String?
-  instructions           String[]
-  tips                   String[]
   difficulty             String?
+  tips                   String[]
+  instructions           String[]
   base                   BaseExercise?         @relation(fields: [baseId], references: [id])
   favouriteWorkout       FavouriteWorkout      @relation(fields: [favouriteWorkoutId], references: [id], onDelete: Cascade)
   sets                   FavouriteWorkoutSet[]
@@ -683,77 +642,53 @@ model FavouriteWorkoutSet {
   @@index([exerciseId])
 }
 
-// Subscription System Models
-
 model PackageTemplate {
-  id          String               @id @default(uuid())
-  name        String // "Training + Coaching", "Full Combo", etc.
-  description String?
-  duration    SubscriptionDuration
-  isActive    Boolean              @default(true)
-
-  // Stripe integration
-  stripeProductId String? // Maps to Stripe product
-  stripePriceId   String? // Single price ID (Stripe handles multi-currency)
-
-  // Who can offer this package (null = general premium, specific = trainer package)
-  trainerId String?
-  trainer   User?   @relation("TrainerPackages", fields: [trainerId], references: [id])
-
-  // Stripe metadata for business logic (commission rates, service types, etc.)
-  metadata Json?
-
-  // Purchased subscriptions
-  subscriptions UserSubscription[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String               @id @default(uuid())
+  name            String
+  description     String?
+  duration        SubscriptionDuration
+  isActive        Boolean              @default(true)
+  trainerId       String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  stripeProductId String?
+  stripeLookupKey String?
+  metadata        Json?
+  trainer         User?                @relation("TrainerPackages", fields: [trainerId], references: [id])
+  subscriptions   UserSubscription[]
 
   @@index([trainerId])
   @@index([isActive])
   @@index([duration])
   @@index([stripeProductId])
-  @@index([stripePriceId])
   @@index([metadata], type: Gin)
+  @@index([stripeLookupKey])
 }
 
 model UserSubscription {
-  id        String  @id @default(uuid())
-  userId    String
-  packageId String
-  trainerId String? // null for premium, specific for trainer packages
-
-  status    SubscriptionStatus @default(ACTIVE)
-  startDate DateTime
-  endDate   DateTime
-
-  // Trial management (14 days)
-  trialStart    DateTime?
-  trialEnd      DateTime?
-  isTrialActive Boolean   @default(false)
-
-  // Grace period management (3 days after failed payment)
-  gracePeriodEnd  DateTime?
-  isInGracePeriod Boolean   @default(false)
-
-  // Payment retry tracking
-  failedPaymentRetries Int       @default(0)
-  lastPaymentAttempt   DateTime?
-
-  // Stripe integration
+  id                   String             @id @default(uuid())
+  userId               String
+  packageId            String
+  trainerId            String?
+  status               SubscriptionStatus @default(ACTIVE)
+  startDate            DateTime
+  endDate              DateTime
   stripeSubscriptionId String?
-  stripePriceId        String?
-
-  // Mock payment tracking (until Stripe integration)
-  mockPaymentStatus String? @default("COMPLETED") // PENDING, COMPLETED, FAILED
-  mockTransactionId String? // Internal transaction ID
-
-  user    User            @relation("UserSubscriptions", fields: [userId], references: [id])
-  package PackageTemplate @relation(fields: [packageId], references: [id])
-  trainer User?           @relation("TrainerSubscriptions", fields: [trainerId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  stripeLookupKey      String?
+  mockPaymentStatus    String?            @default("COMPLETED")
+  mockTransactionId    String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  failedPaymentRetries Int                @default(0)
+  gracePeriodEnd       DateTime?
+  isInGracePeriod      Boolean            @default(false)
+  isTrialActive        Boolean            @default(false)
+  lastPaymentAttempt   DateTime?
+  trialEnd             DateTime?
+  trialStart           DateTime?
+  package              PackageTemplate    @relation(fields: [packageId], references: [id])
+  trainer              User?              @relation("TrainerSubscriptions", fields: [trainerId], references: [id])
+  user                 User               @relation("UserSubscriptions", fields: [userId], references: [id])
 
   @@index([userId])
   @@index([trainerId])
@@ -766,7 +701,422 @@ model UserSubscription {
   @@index([isInGracePeriod])
 }
 
-// Enums for Subscription System
+model TrainerOffer {
+  id                      String    @id @default(uuid())
+  token                   String    @unique
+  trainerId               String
+  clientEmail             String
+  personalMessage         String?
+  status                  String    @default("PENDING")
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+  expiresAt               DateTime
+  completedAt             DateTime?
+  packageSummary          Json?
+  stripeCheckoutSessionId String?   @unique
+  stripePaymentIntentId   String?   @unique
+  trainer                 User      @relation("TrainerOffers", fields: [trainerId], references: [id])
+
+  @@index([token])
+  @@index([trainerId])
+  @@index([clientEmail])
+  @@index([status])
+  @@index([expiresAt])
+  @@index([createdAt])
+  @@index([stripeCheckoutSessionId])
+  @@index([stripePaymentIntentId])
+}
+
+model ServiceDelivery {
+  id                    String         @id @default(uuid())
+  stripePaymentIntentId String
+  trainerId             String
+  clientId              String
+  serviceType           ServiceType
+  packageName           String
+  quantity              Int            @default(1)
+  status                DeliveryStatus @default(PENDING)
+  deliveredAt           DateTime?
+  deliveryNotes         String?
+  metadata              Json?
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+  disputeStatus         String?
+  disputedAt            DateTime?
+  refundReason          String?
+  refundedAt            DateTime?
+  meetings              Meeting[]
+  client                User           @relation("ClientDeliveries", fields: [clientId], references: [id])
+  trainer               User           @relation("TrainerDeliveries", fields: [trainerId], references: [id])
+  tasks                 ServiceTask[]
+
+  @@index([trainerId])
+  @@index([clientId])
+  @@index([stripePaymentIntentId])
+  @@index([status])
+  @@index([serviceType])
+  @@index([createdAt])
+}
+
+model ServiceTask {
+  id                 String          @id @default(uuid())
+  serviceDeliveryId  String
+  templateId         String
+  title              String
+  taskType           String
+  status             String          @default("PENDING")
+  order              Int             @default(0)
+  isRequired         Boolean         @default(true)
+  completedAt        DateTime?
+  notes              String?
+  requiresScheduling Boolean         @default(false)
+  scheduledAt        DateTime?
+  estimatedDuration  Int?
+  isRecurring        Boolean         @default(false)
+  intervalDays       Int?
+  recurrenceCount    Int?
+  metadata           Json?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  meetings           Meeting[]
+  serviceDelivery    ServiceDelivery @relation(fields: [serviceDeliveryId], references: [id], onDelete: Cascade)
+
+  @@index([serviceDeliveryId])
+  @@index([status])
+  @@index([templateId])
+  @@index([scheduledAt])
+}
+
+model Meeting {
+  id                String           @id @default(uuid())
+  coachId           String
+  traineeId         String
+  type              MeetingType
+  status            MeetingStatus    @default(PENDING)
+  scheduledAt       DateTime
+  duration          Int
+  timezone          String
+  locationType      LocationType
+  address           String?
+  meetingLink       String?
+  title             String
+  description       String?
+  notes             String?
+  serviceDeliveryId String?
+  serviceTaskId     String?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  coach             User             @relation("CoachMeetings", fields: [coachId], references: [id])
+  serviceDelivery   ServiceDelivery? @relation(fields: [serviceDeliveryId], references: [id])
+  serviceTask       ServiceTask?     @relation(fields: [serviceTaskId], references: [id])
+  trainee           User             @relation("TraineeMeetings", fields: [traineeId], references: [id])
+
+  @@index([coachId, scheduledAt])
+  @@index([traineeId, scheduledAt])
+  @@index([status])
+  @@index([serviceDeliveryId])
+  @@index([serviceTaskId])
+  @@index([scheduledAt, status])
+}
+
+model ReminderSent {
+  id           String   @id @default(uuid())
+  entityType   String
+  entityId     String
+  reminderType String
+  userId       String
+  sentAt       DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([entityType, entityId, reminderType, userId])
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([sentAt])
+}
+
+model Location {
+  id          String         @id @default(uuid())
+  city        String
+  country     String
+  countryCode String         @db.Char(2)
+  teams       TeamLocation[]
+  users       UserLocation[]
+
+  @@unique([city, country])
+  @@index([city])
+}
+
+model Team {
+  id                       String           @id @default(uuid())
+  name                     String
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+  stripeConnectedAccountId String?          @unique
+  stripeCustomerId         String?          @unique
+  platformFeePercent       Float            @default(12)
+  meals                    Meal[]
+  invitations              TeamInvitation[]
+  locations                TeamLocation[]
+  members                  TeamMember[]
+}
+
+model TeamMember {
+  id       String   @id @default(uuid())
+  teamId   String
+  userId   String
+  role     String   @default("MEMBER")
+  joinedAt DateTime @default(now())
+  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+model TeamInvitation {
+  id           String   @id @default(uuid())
+  teamId       String
+  invitedEmail String
+  invitedById  String
+  status       String   @default("PENDING")
+  createdAt    DateTime @default(now())
+  invitedBy    User     @relation("SentTeamInvitations", fields: [invitedById], references: [id])
+  team         Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, invitedEmail])
+  @@index([teamId])
+  @@index([invitedEmail])
+  @@index([invitedById])
+}
+
+model UserLocation {
+  id         String   @id @default(uuid())
+  userId     String
+  locationId String
+  createdAt  DateTime @default(now())
+  location   Location @relation(fields: [locationId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, locationId])
+  @@index([userId])
+  @@index([locationId])
+}
+
+model TeamLocation {
+  id         String   @id @default(uuid())
+  teamId     String
+  locationId String
+  createdAt  DateTime @default(now())
+  location   Location @relation(fields: [locationId], references: [id])
+  team       Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, locationId])
+  @@index([teamId])
+  @@index([locationId])
+}
+
+model UserTermsAgreement {
+  id       String   @id @default(uuid())
+  userId   String
+  version  String
+  offerId  String?
+  agreedAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([version])
+  @@index([agreedAt])
+}
+
+model Chat {
+  id        String    @id @default(uuid())
+  trainerId String
+  clientId  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  client    User      @relation("ClientChats", fields: [clientId], references: [id])
+  trainer   User      @relation("TrainerChats", fields: [trainerId], references: [id])
+  messages  Message[]
+
+  @@unique([trainerId, clientId])
+  @@index([trainerId])
+  @@index([clientId])
+}
+
+model Message {
+  id        String    @id @default(uuid())
+  chatId    String
+  senderId  String
+  content   String
+  imageUrl  String?
+  isEdited  Boolean   @default(false)
+  isDeleted Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  chat      Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender    User      @relation("SentMessages", fields: [senderId], references: [id])
+
+  @@index([chatId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@index([chatId, senderId, readAt])
+  @@index([chatId, createdAt(sort: Desc)])
+  @@index([senderId, readAt])
+}
+
+model MacroTarget {
+  id        String   @id @default(uuid())
+  clientId  String   @unique
+  trainerId String
+  calories  Int?
+  protein   Float?
+  carbs     Float?
+  fat       Float?
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  client    User     @relation("ClientMacroTargets", fields: [clientId], references: [id], onDelete: Cascade)
+  trainer   User     @relation("TrainerMacroTargets", fields: [trainerId], references: [id])
+
+  @@index([clientId])
+  @@index([trainerId])
+}
+
+model NutritionPlan {
+  id                 String             @id @default(uuid())
+  name               String
+  description        String?
+  trainerId          String
+  clientId           String
+  isSharedWithClient Boolean            @default(false)
+  sharedAt           DateTime?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  client             User               @relation("ClientNutritionPlans", fields: [clientId], references: [id], onDelete: Cascade)
+  trainer            User               @relation("TrainerNutritionPlans", fields: [trainerId], references: [id], onDelete: Cascade)
+  days               NutritionPlanDay[]
+
+  @@index([trainerId, clientId])
+  @@index([trainerId, isSharedWithClient])
+  @@index([clientId, isSharedWithClient])
+  @@index([trainerId, clientId, isSharedWithClient])
+  @@index([sharedAt])
+  @@index([updatedAt])
+}
+
+model NutritionPlanDay {
+  id              String              @id @default(uuid())
+  nutritionPlanId String
+  dayNumber       Int
+  name            String
+  createdAt       DateTime            @default(now())
+  nutritionPlan   NutritionPlan       @relation(fields: [nutritionPlanId], references: [id], onDelete: Cascade)
+  meals           NutritionPlanMeal[]
+
+  @@unique([nutritionPlanId, dayNumber])
+  @@index([nutritionPlanId, dayNumber])
+}
+
+model Meal {
+  id              String              @id @default(uuid())
+  name            String
+  description     String?
+  instructions    String[]            @default([])
+  preparationTime Int?
+  cookingTime     Int?
+  servings        Int?
+  createdById     String
+  teamId          String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  createdBy       User                @relation("CreatedMeals", fields: [createdById], references: [id])
+  team            Team?               @relation(fields: [teamId], references: [id])
+  ingredients     MealIngredient[]
+  planMeals       NutritionPlanMeal[]
+
+  @@index([teamId, createdAt])
+  @@index([teamId, name])
+  @@index([createdById, createdAt])
+  @@index([teamId, name, createdAt])
+}
+
+model Ingredient {
+  id              String           @id @default(uuid())
+  name            String
+  proteinPer100g  Float            @default(0)
+  carbsPer100g    Float            @default(0)
+  fatPer100g      Float            @default(0)
+  caloriesPer100g Float            @default(0)
+  createdById     String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  createdBy       User             @relation("CreatedIngredients", fields: [createdById], references: [id])
+  mealIngredients MealIngredient[]
+
+  @@index([createdById, createdAt])
+  @@index([name])
+}
+
+model MealIngredient {
+  id            String                        @id @default(uuid())
+  mealId        String
+  ingredientId  String
+  grams         Float
+  orderIndex    Int                           @default(0)
+  createdAt     DateTime                      @default(now())
+  ingredient    Ingredient                    @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+  meal          Meal                          @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  planOverrides NutritionPlanMealIngredient[]
+
+  @@unique([mealId, ingredientId])
+  @@index([mealId, orderIndex])
+  @@index([ingredientId])
+  @@index([mealId])
+}
+
+model NutritionPlanMeal {
+  id                  String                        @id @default(uuid())
+  nutritionPlanDayId  String
+  mealId              String
+  orderIndex          Int                           @default(0)
+  createdAt           DateTime                      @default(now())
+  meal                Meal                          @relation(fields: [mealId], references: [id], onDelete: Cascade)
+  nutritionPlanDay    NutritionPlanDay              @relation(fields: [nutritionPlanDayId], references: [id], onDelete: Cascade)
+  ingredientOverrides NutritionPlanMealIngredient[]
+
+  @@index([nutritionPlanDayId, orderIndex])
+  @@index([mealId])
+  @@index([nutritionPlanDayId])
+}
+
+model NutritionPlanMealIngredient {
+  id                  String            @id @default(uuid())
+  nutritionPlanMealId String
+  mealIngredientId    String
+  grams               Float
+  createdAt           DateTime          @default(now())
+  mealIngredient      MealIngredient    @relation(fields: [mealIngredientId], references: [id], onDelete: Cascade)
+  nutritionPlanMeal   NutritionPlanMeal @relation(fields: [nutritionPlanMealId], references: [id], onDelete: Cascade)
+
+  @@unique([nutritionPlanMealId, mealIngredientId])
+  @@index([nutritionPlanMealId])
+  @@index([mealIngredientId])
+}
+
+model ClientSurvey {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  data      Json
+  version   Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([updatedAt])
+}
 
 enum ServiceType {
   WORKOUT_PLAN
@@ -794,526 +1144,31 @@ enum Currency {
   USD
 }
 
-model TrainerOffer {
-  id              String  @id @default(uuid())
-  token           String  @unique // Unique token for secure offer links
-  trainerId       String
-  clientEmail     String
-  personalMessage String?
-  status          String  @default("PENDING") // PENDING, PAID, EXPIRED, CANCELLED
-
-  // Stripe integration - links to checkout session when paid
-  stripeCheckoutSessionId String? @unique
-  stripePaymentIntentId   String? @unique
-
-  // Package summary for display (JSON array of {packageId, quantity, name})
-  packageSummary Json? // Lightweight summary for UI, full data in Stripe
-
-  // Timestamps
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  expiresAt   DateTime // Offers expire after 24 hours
-  completedAt DateTime?
-
-  // Relations
-  trainer User @relation("TrainerOffers", fields: [trainerId], references: [id])
-
-  @@index([token])
-  @@index([trainerId])
-  @@index([clientEmail])
-  @@index([status])
-  @@index([expiresAt])
-  @@index([createdAt])
-  @@index([stripeCheckoutSessionId])
-  @@index([stripePaymentIntentId])
-}
-
-// Service delivery tracking - what trainers need to deliver to clients
-model ServiceDelivery {
-  id                    String      @id @default(uuid())
-  stripePaymentIntentId String // Links to Stripe payment for payment verification
-  trainerId             String
-  clientId              String
-  serviceType           ServiceType
-  packageName           String
-  quantity              Int         @default(1)
-
-  // Delivery status and progress
-  status        DeliveryStatus @default(PENDING)
-  deliveredAt   DateTime?
-  deliveryNotes String?
-
-  // Refund tracking
-  refundedAt   DateTime?
-  refundReason String?
-
-  // Dispute tracking
-  disputedAt    DateTime?
-  disputeStatus String? // needs_response, under_review, won, lost
-
-  // Optional metadata for specific delivery details
-  metadata Json? // Can store meeting details, plan IDs, etc.
-
-  // Relations
-  trainer  User          @relation("TrainerDeliveries", fields: [trainerId], references: [id])
-  client   User          @relation("ClientDeliveries", fields: [clientId], references: [id])
-  tasks    ServiceTask[]
-  meetings Meeting[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([trainerId])
-  @@index([clientId])
-  @@index([stripePaymentIntentId])
-  @@index([status])
-  @@index([serviceType])
-  @@index([createdAt])
-}
-
-// Service task for individual deliverables within a service delivery
-model ServiceTask {
-  id                 String    @id @default(uuid())
-  serviceDeliveryId  String
-  templateId         String
-  title              String
-  taskType           String
-  status             String    @default("PENDING")
-  order              Int       @default(0)
-  isRequired         Boolean   @default(true)
-  completedAt        DateTime?
-  notes              String?
-  requiresScheduling Boolean   @default(false)
-  scheduledAt        DateTime?
-  estimatedDuration  Int?
-  isRecurring        Boolean   @default(false)
-  intervalDays       Int?
-  recurrenceCount    Int?
-  metadata           Json?
-
-  serviceDelivery ServiceDelivery @relation(fields: [serviceDeliveryId], references: [id], onDelete: Cascade)
-  meetings        Meeting[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([serviceDeliveryId])
-  @@index([status])
-  @@index([templateId])
-  @@index([scheduledAt])
-}
-
-// Delivery status enum
 enum DeliveryStatus {
-  PENDING // Service purchased but not yet delivered
-  IN_PROGRESS // Trainer has started working on delivery
-  COMPLETED // Service fully delivered to client
-  CANCELLED // Service delivery cancelled/refunded
-}
-
-// Meeting system models
-model Meeting {
-  id        String        @id @default(uuid())
-  coachId   String
-  traineeId String
-  type      MeetingType
-  status    MeetingStatus @default(PENDING)
-
-  // Scheduling
-  scheduledAt DateTime
-  duration    Int // minutes
-  timezone    String
-
-  // Location (for in-person)
-  locationType LocationType
-  address      String?
-  meetingLink  String? // For virtual meetings
-
-  // Details
-  title       String
-  description String?
-  notes       String?
-
-  // Service delivery link
-  serviceDeliveryId String?
-  serviceTaskId     String?
-
-  // Relations
-  coach           User             @relation("CoachMeetings", fields: [coachId], references: [id])
-  trainee         User             @relation("TraineeMeetings", fields: [traineeId], references: [id])
-  serviceDelivery ServiceDelivery? @relation(fields: [serviceDeliveryId], references: [id])
-  serviceTask     ServiceTask?     @relation(fields: [serviceTaskId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([coachId, scheduledAt])
-  @@index([traineeId, scheduledAt])
-  @@index([status])
-  @@index([serviceDeliveryId])
-  @@index([serviceTaskId])
-  @@index([scheduledAt, status]) // For cron job queries
-}
-
-// Generic reminder tracking - reusable for any reminder type
-model ReminderSent {
-  id           String   @id @default(uuid())
-  entityType   String // 'MEETING', 'CHECKIN', 'WORKOUT', 'MEAL_PREP', etc.
-  entityId     String // ID of the meeting, checkin schedule, workout, etc.
-  reminderType String // '24h', '1h', '1w', '1d', 'weekly', etc.
-  userId       String // Who received the reminder
-  sentAt       DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([entityType, entityId, reminderType, userId]) // Atomic uniqueness - prevents race conditions
-  @@index([entityType, entityId])
-  @@index([userId])
-  @@index([sentAt])
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
 
 enum MeetingType {
-  INITIAL_CONSULTATION // First meeting
-  IN_PERSON_TRAINING // Ongoing in-person coaching
-  CHECK_IN // Progress check-in
-  PLAN_REVIEW // Training plan review
+  INITIAL_CONSULTATION
+  IN_PERSON_TRAINING
+  CHECK_IN
+  PLAN_REVIEW
 }
 
 enum MeetingStatus {
-  PENDING // Proposed but not confirmed
-  CONFIRMED // Both parties confirmed
-  COMPLETED // Meeting happened
-  CANCELLED // Meeting cancelled
-  RESCHEDULED // Moved to different time
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
 }
 
 enum LocationType {
-  VIRTUAL // Online (Google Meet, Zoom, etc.)
-  COACH_LOCATION // Coach's gym/studio
-  TRAINEE_LOCATION // Trainee's home/preferred gym
-  OTHER // Custom location
-}
-
-// Location for teams and users
-model Location {
-  id          String @id @default(uuid())
-  city        String
-  country     String
-  countryCode String @db.Char(2)
-
-  teams TeamLocation[]
-  users UserLocation[]
-
-  @@unique([city, country])
-  @@index([city])
-}
-
-// Team model
-model Team {
-  id   String @id @default(uuid())
-  name String
-
-  // Stripe Connect integration for team-based payouts
-  stripeConnectedAccountId String? @unique // For receiving team revenue share
-  stripeCustomerId         String? @unique // For team-level purchases (if needed)
-  platformFeePercent       Float   @default(12) // Platform fee percentage (e.g., 12 = 12%)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  locations   TeamLocation[]
-  members     TeamMember[]
-  invitations TeamInvitation[]
-
-  // Meal planning relations
-  meals Meal[]
-}
-
-// Team membership
-model TeamMember {
-  id       String   @id @default(uuid())
-  teamId   String
-  userId   String
-  role     String   @default("MEMBER") // ADMIN, MEMBER
-  joinedAt DateTime @default(now())
-
-  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([teamId, userId])
-  @@index([teamId])
-  @@index([userId])
-}
-
-// Team invitations
-model TeamInvitation {
-  id           String   @id @default(uuid())
-  teamId       String
-  invitedEmail String
-  invitedById  String
-  status       String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
-  createdAt    DateTime @default(now())
-
-  team      Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  invitedBy User @relation("SentTeamInvitations", fields: [invitedById], references: [id])
-
-  @@unique([teamId, invitedEmail])
-  @@index([teamId])
-  @@index([invitedEmail])
-  @@index([invitedById])
-}
-
-// User locations (many-to-many)
-model UserLocation {
-  id         String   @id @default(uuid())
-  userId     String
-  locationId String
-  createdAt  DateTime @default(now())
-
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  location Location @relation(fields: [locationId], references: [id])
-
-  @@unique([userId, locationId])
-  @@index([userId])
-  @@index([locationId])
-}
-
-// Team locations (many-to-many)
-model TeamLocation {
-  id         String   @id @default(uuid())
-  teamId     String
-  locationId String
-  createdAt  DateTime @default(now())
-
-  team     Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  location Location @relation(fields: [locationId], references: [id])
-
-  @@unique([teamId, locationId])
-  @@index([teamId])
-  @@index([locationId])
-}
-
-// Simple terms agreement tracking
-model UserTermsAgreement {
-  id       String   @id @default(uuid())
-  userId   String
-  version  String // e.g., "v1.0", "2024-12-01"
-  offerId  String? // Optional: link to specific offer
-  agreedAt DateTime @default(now())
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([version])
-  @@index([agreedAt])
-}
-
-// Messenger System Models
-
-model Chat {
-  id        String   @id @default(uuid())
-  trainerId String
-  clientId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  trainer  User      @relation("TrainerChats", fields: [trainerId], references: [id])
-  client   User      @relation("ClientChats", fields: [clientId], references: [id])
-  messages Message[]
-
-  @@unique([trainerId, clientId])
-  @@index([trainerId])
-  @@index([clientId])
-}
-
-model Message {
-  id        String    @id @default(uuid())
-  chatId    String
-  senderId  String
-  content   String
-  imageUrl  String? // For future image support
-  isEdited  Boolean   @default(false)
-  isDeleted Boolean   @default(false)
-  readAt    DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  chat   Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  sender User @relation("SentMessages", fields: [senderId], references: [id])
-
-  @@index([chatId])
-  @@index([senderId])
-  @@index([createdAt])
-  @@index([chatId, senderId, readAt]) // For unread message queries
-  @@index([chatId, createdAt(sort: Desc)]) // For message ordering
-  @@index([senderId, readAt]) // For user's unread messages across all chats
-}
-
-model MacroTarget {
-  id        String @id @default(uuid())
-  clientId  String @unique // One macro target per client
-  trainerId String // Who set these targets
-
-  // Daily macro targets
-  calories Int? // Daily calorie target
-  protein  Float? // Daily protein target (grams)
-  carbs    Float? // Daily carbohydrate target (grams)  
-  fat      Float? // Daily fat target (grams)
-
-  notes String? // Optional notes from trainer
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  client  User @relation("ClientMacroTargets", fields: [clientId], references: [id], onDelete: Cascade)
-  trainer User @relation("TrainerMacroTargets", fields: [trainerId], references: [id])
-
-  @@index([clientId])
-  @@index([trainerId])
-}
-
-// Meal Planning System Models
-
-model NutritionPlan {
-  id                 String    @id @default(uuid())
-  name               String
-  description        String?
-  trainerId          String
-  clientId           String
-  isSharedWithClient Boolean   @default(false)
-  sharedAt           DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-
-  trainer User               @relation("TrainerNutritionPlans", fields: [trainerId], references: [id], onDelete: Cascade)
-  client  User               @relation("ClientNutritionPlans", fields: [clientId], references: [id], onDelete: Cascade)
-  days    NutritionPlanDay[]
-
-  @@index([trainerId, clientId])
-  @@index([trainerId, isSharedWithClient])
-  @@index([clientId, isSharedWithClient])
-  @@index([trainerId, clientId, isSharedWithClient])
-  @@index([sharedAt])
-  @@index([updatedAt])
-}
-
-model NutritionPlanDay {
-  id              String   @id @default(uuid())
-  nutritionPlanId String
-  dayNumber       Int
-  name            String
-  createdAt       DateTime @default(now())
-
-  nutritionPlan NutritionPlan       @relation(fields: [nutritionPlanId], references: [id], onDelete: Cascade)
-  meals         NutritionPlanMeal[]
-
-  @@unique([nutritionPlanId, dayNumber])
-  @@index([nutritionPlanId, dayNumber])
-}
-
-model Meal {
-  id              String   @id @default(uuid())
-  name            String
-  description     String?
-  instructions    String[] @default([])
-  preparationTime Int? // minutes
-  cookingTime     Int? // minutes
-  servings        Int?
-  createdById     String
-  teamId          String?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  createdBy   User                @relation("CreatedMeals", fields: [createdById], references: [id])
-  team        Team?               @relation(fields: [teamId], references: [id], onDelete: SetNull)
-  ingredients MealIngredient[]
-  planMeals   NutritionPlanMeal[]
-
-  @@index([teamId, createdAt])
-  @@index([teamId, name])
-  @@index([createdById, createdAt])
-  @@index([teamId, name, createdAt])
-}
-
-model Ingredient {
-  id              String   @id @default(uuid())
-  name            String
-  proteinPer100g  Float    @default(0)
-  carbsPer100g    Float    @default(0)
-  fatPer100g      Float    @default(0)
-  caloriesPer100g Float    @default(0)
-  createdById     String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-
-  createdBy       User             @relation("CreatedIngredients", fields: [createdById], references: [id])
-  mealIngredients MealIngredient[]
-
-  @@index([createdById, createdAt])
-  @@index([name])
-}
-
-model MealIngredient {
-  id           String   @id @default(uuid())
-  mealId       String
-  ingredientId String
-  grams        Float
-  orderIndex   Int      @default(0)
-  createdAt    DateTime @default(now())
-
-  meal          Meal                          @relation(fields: [mealId], references: [id], onDelete: Cascade)
-  ingredient    Ingredient                    @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
-  planOverrides NutritionPlanMealIngredient[]
-
-  @@unique([mealId, ingredientId])
-  @@index([mealId, orderIndex])
-  @@index([ingredientId])
-  @@index([mealId])
-}
-
-model NutritionPlanMeal {
-  id                 String   @id @default(uuid())
-  nutritionPlanDayId String
-  mealId             String
-  orderIndex         Int      @default(0)
-  createdAt          DateTime @default(now())
-
-  nutritionPlanDay    NutritionPlanDay              @relation(fields: [nutritionPlanDayId], references: [id], onDelete: Cascade)
-  meal                Meal                          @relation(fields: [mealId], references: [id], onDelete: Cascade)
-  ingredientOverrides NutritionPlanMealIngredient[]
-
-  @@index([nutritionPlanDayId, orderIndex])
-  @@index([mealId])
-  @@index([nutritionPlanDayId])
-}
-
-model NutritionPlanMealIngredient {
-  id                  String   @id @default(uuid())
-  nutritionPlanMealId String
-  mealIngredientId    String
-  grams               Float
-  createdAt           DateTime @default(now())
-
-  nutritionPlanMeal NutritionPlanMeal @relation(fields: [nutritionPlanMealId], references: [id], onDelete: Cascade)
-  mealIngredient    MealIngredient    @relation(fields: [mealIngredientId], references: [id], onDelete: Cascade)
-
-  @@unique([nutritionPlanMealId, mealIngredientId])
-  @@index([nutritionPlanMealId])
-  @@index([mealIngredientId])
-}
-
-model ClientSurvey {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  data      Json // Stores survey data as JSON for flexibility
-  version   Int      @default(1) // Schema version for future migrations
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([updatedAt])
+  VIRTUAL
+  COACH_LOCATION
+  TRAINEE_LOCATION
+  OTHER
 }

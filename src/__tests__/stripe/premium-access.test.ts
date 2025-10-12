@@ -4,21 +4,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { SubscriptionStatus } from '@/types/subscription'
 
-// Mock Stripe price IDs (matching environment variables)
-const MOCK_PRICE_IDS = {
-  PREMIUM_MONTHLY: 'price_test_premium_monthly',
-  PREMIUM_YEARLY: 'price_test_premium_yearly',
-  COACHING_COMBO: 'price_test_coaching_combo',
-  MEAL_PLAN: 'price_test_meal_plan',
-  WORKOUT_PLAN: 'price_test_workout_plan',
+// Mock Stripe lookup keys
+const MOCK_LOOKUP_KEYS = {
+  PREMIUM_MONTHLY: 'premium_monthly',
+  PREMIUM_YEARLY: 'premium_yearly',
+  PREMIUM_COACHING: 'premium_coaching',
+  NUTRITION_PLAN: 'nutrition_plan',
+  WORKOUT_PLAN: 'workout_plan',
 }
-
-// Mock environment variables before importing modules
-vi.stubEnv('STRIPE_PRICE_PREMIUM_MONTHLY', MOCK_PRICE_IDS.PREMIUM_MONTHLY)
-vi.stubEnv('STRIPE_PRICE_PREMIUM_YEARLY', MOCK_PRICE_IDS.PREMIUM_YEARLY)
-vi.stubEnv('STRIPE_PRICE_COACHING_COMBO', MOCK_PRICE_IDS.COACHING_COMBO)
-vi.stubEnv('STRIPE_PRICE_MEAL_PLAN', MOCK_PRICE_IDS.MEAL_PLAN)
-vi.stubEnv('STRIPE_PRICE_WORKOUT_PLAN', MOCK_PRICE_IDS.WORKOUT_PLAN)
 
 // Import the class to test
 const { subscriptionValidator } = await import(
@@ -31,7 +24,7 @@ const mockPrisma = await import('@/lib/db')
 const createMockPackage = (overrides: any = {}) => ({
   id: 'pkg_premium',
   name: 'Premium Membership',
-  stripePriceId: MOCK_PRICE_IDS.PREMIUM_MONTHLY, // Default to a premium price ID
+  stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY, // Default to a premium lookup key
   ...overrides,
 })
 
@@ -142,7 +135,7 @@ describe('Premium Access Logic', () => {
       const packageTemplate = createMockPackage({
         id: 'pkg_basic',
         name: 'Basic Workout Plan',
-        stripePriceId: MOCK_PRICE_IDS.WORKOUT_PLAN, // Non-premium price ID
+        stripeLookupKey: MOCK_LOOKUP_KEYS.WORKOUT_PLAN, // Non-premium lookup key
       })
 
       vi.mocked(mockPrisma.prisma.userSubscription.findMany).mockResolvedValue([
@@ -200,12 +193,12 @@ describe('Premium Access Logic', () => {
         .mockResolvedValueOnce({
           id: 'pkg_basic',
           name: 'Basic Workout',
-          stripePriceId: MOCK_PRICE_IDS.WORKOUT_PLAN,
+          stripeLookupKey: MOCK_LOOKUP_KEYS.WORKOUT_PLAN,
         } as any)
         .mockResolvedValueOnce({
           id: 'pkg_premium',
           name: 'Premium Membership',
-          stripePriceId: MOCK_PRICE_IDS.PREMIUM_MONTHLY,
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
         } as any)
 
       // Act
@@ -367,7 +360,7 @@ describe('Premium Access Logic', () => {
         {
           id: 'pkg_premium',
           name: 'Premium Membership',
-          stripePriceId: MOCK_PRICE_IDS.PREMIUM_MONTHLY,
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
         } as any,
       )
 
@@ -490,12 +483,12 @@ describe('Premium Access Logic', () => {
         .mockResolvedValueOnce({
           id: 'pkg_premium',
           name: 'Premium Membership',
-          stripePriceId: MOCK_PRICE_IDS.PREMIUM_MONTHLY,
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
         } as any)
         .mockResolvedValueOnce({
           id: 'pkg_premium',
           name: 'Premium Membership',
-          stripePriceId: MOCK_PRICE_IDS.PREMIUM_MONTHLY,
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
         } as any)
 
       // Act
@@ -546,12 +539,12 @@ describe('Premium Access Logic', () => {
         .mockResolvedValueOnce({
           id: 'pkg_premium',
           name: 'Premium Membership',
-          stripePriceId: MOCK_PRICE_IDS.PREMIUM_MONTHLY,
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_MONTHLY,
         } as any)
         .mockResolvedValueOnce({
           id: 'pkg_coaching_combo',
           name: 'Complete Coaching Combo',
-          stripePriceId: MOCK_PRICE_IDS.COACHING_COMBO,
+          stripeLookupKey: MOCK_LOOKUP_KEYS.PREMIUM_COACHING,
         } as any)
 
       // Act

@@ -19,7 +19,7 @@ export interface CurrentSubscription {
     package: {
       name: string
       duration: string
-      stripePriceId?: string | null
+      stripeLookupKey?: string | null
     }
     stripeSubscriptionId?: string
     isCancelledButActive?: boolean
@@ -42,11 +42,16 @@ export function useCurrentSubscription(
   userId?: string,
   options?: {
     type?: 'coaching' | 'platform'
-    priceId?: string
+    lookupKey?: string
   },
 ) {
   return useQuery<CurrentSubscription>({
-    queryKey: ['current-subscription', userId, options?.type, options?.priceId],
+    queryKey: [
+      'current-subscription',
+      userId,
+      options?.type,
+      options?.lookupKey,
+    ],
     queryFn: async () => {
       if (!userId) throw new Error('User ID required')
 
@@ -58,8 +63,8 @@ export function useCurrentSubscription(
       if (options?.type) {
         url.searchParams.set('type', options.type)
       }
-      if (options?.priceId) {
-        url.searchParams.set('priceId', options.priceId)
+      if (options?.lookupKey) {
+        url.searchParams.set('lookupKey', options.lookupKey)
       }
 
       const response = await fetch(url.toString())

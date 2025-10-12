@@ -10,7 +10,10 @@ import { addMonths } from 'date-fns'
 import Stripe from 'stripe'
 
 import { prisma } from '@/lib/db'
-import { STRIPE_PRODUCTS } from '@/lib/stripe/config'
+import {
+  getPremiumLookupKeys,
+  resolvePriceIdToLookupKey,
+} from '@/lib/stripe/lookup-keys'
 import { UserSubscriptionStatusData } from '@/server/models/user-subscription-status/model'
 import UserSubscription, {
   UserSubscriptionWithIncludes,
@@ -21,29 +24,6 @@ import { SubscriptionStatus } from '@/types/subscription'
 import { stripe } from '../stripe/stripe'
 
 export class SubscriptionValidator {
-  /**
-   * Get price IDs that grant premium access
-   * These are stable identifiers from environment variables
-   */
-  private getPremiumPriceIds(): string[] {
-    const premiumPriceIds: string[] = []
-
-    // Premium subscriptions
-    if (STRIPE_PRODUCTS.PREMIUM_MONTHLY) {
-      premiumPriceIds.push(STRIPE_PRODUCTS.PREMIUM_MONTHLY)
-    }
-    if (STRIPE_PRODUCTS.PREMIUM_YEARLY) {
-      premiumPriceIds.push(STRIPE_PRODUCTS.PREMIUM_YEARLY)
-    }
-
-    // Complete Coaching Combo includes premium access
-    if (STRIPE_PRODUCTS.COACHING_COMBO) {
-      premiumPriceIds.push(STRIPE_PRODUCTS.COACHING_COMBO)
-    }
-
-    return premiumPriceIds
-  }
-
   /**
    * PRIMARY METHOD: Fast local premium access check
    * Use this for 99% of subscription checks (UI, content access, etc.)
@@ -98,7 +78,7 @@ export class SubscriptionValidator {
   private async evaluatePremiumLogic(
     subscriptions: UserSubscription[],
   ): Promise<boolean> {
-    const premiumPriceIds = this.getPremiumPriceIds()
+    const premiumLookupKeys = getPremiumLookupKeys()
 
     // Check each subscription by fetching package data from database
     for (const sub of subscriptions) {
@@ -109,12 +89,12 @@ export class SubscriptionValidator {
       // Get package data from database
       const packageTemplate = await prisma.packageTemplate.findUnique({
         where: { id: sub.packageId },
-        select: { stripePriceId: true, metadata: true, name: true },
+        select: { stripeLookupKey: true, metadata: true, name: true },
       })
 
       if (!packageTemplate) continue
 
-      // Check for lifetime premium (admin-granted, no Stripe price ID)
+      // Check for lifetime premium (admin-granted, no Stripe lookup key)
       const metadata = packageTemplate.metadata as {
         isLifetime?: boolean
       } | null
@@ -122,10 +102,10 @@ export class SubscriptionValidator {
         return true
       }
 
-      // Check by Stripe price ID for regular subscriptions
+      // Check by Stripe lookup key for regular subscriptions
       if (
-        packageTemplate.stripePriceId &&
-        premiumPriceIds.includes(packageTemplate.stripePriceId)
+        packageTemplate.stripeLookupKey &&
+        premiumLookupKeys.includes(packageTemplate.stripeLookupKey)
       ) {
         return true
       }
@@ -153,24 +133,32 @@ export class SubscriptionValidator {
       limit: 100,
     })
 
-    return subscriptions.data.some((sub) => {
-      return this.stripeSubscriptionGrantsPremium(sub)
-    })
+    // Check each subscription for premium access
+    for (const sub of subscriptions.data) {
+      const isPremium = await this.stripeSubscriptionGrantsPremium(sub)
+      if (isPremium) return true
+    }
+
+    return false
   }
 
   /**
    * Check if a Stripe subscription grants premium access
    */
-  private stripeSubscriptionGrantsPremium(
+  private async stripeSubscriptionGrantsPremium(
     subscription: Stripe.Subscription,
-  ): boolean {
-    const premiumPriceIds = this.getPremiumPriceIds()
+  ): Promise<boolean> {
+    const premiumLookupKeys = getPremiumLookupKeys()
 
     // Check if any line item grants premium access
-    return subscription.items.data.some((item) => {
-      // Use stable price ID instead of fragile product names
-      return premiumPriceIds.includes(item.price.id)
-    })
+    for (const item of subscription.items.data) {
+      const lookupKey = await resolvePriceIdToLookupKey(item.price.id)
+      if (lookupKey && premiumLookupKeys.includes(lookupKey)) {
+        return true
+      }
+    }
+
+    return false
   }
 
   /**

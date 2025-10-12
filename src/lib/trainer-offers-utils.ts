@@ -82,21 +82,21 @@ export async function fetchTrainerOffers(
 }
 
 /**
- * Extracts unique price IDs from offers and fetches pricing data from Stripe
+ * Extracts unique lookup keys from offers and fetches pricing data from Stripe
  */
 export async function fetchOfferPricingData(
   offers: Awaited<ReturnType<typeof fetchTrainerOffers>>,
 ) {
-  // Get unique price IDs from packageSummary for Stripe lookup
-  const priceIds = offers
+  // Get unique lookup keys from packageSummary for Stripe lookup
+  const lookupKeys = offers
     .flatMap((offer) => {
       const packageSummary = offer.packageSummary as PackageSummary | null
-      return packageSummary?.map((item) => item.stripePriceId) || []
+      return packageSummary?.map((item) => item.stripeLookupKey) || []
     })
-    .filter((id): id is string => Boolean(id))
+    .filter((key): key is string => Boolean(key))
 
   // Fetch pricing data from Stripe
-  return priceIds.length > 0 ? await getMultipleStripePrices(priceIds) : {}
+  return lookupKeys.length > 0 ? await getMultipleStripePrices(lookupKeys) : {}
 }
 
 /**
@@ -122,7 +122,7 @@ function createFallbackOfferItem(
     personalMessage: offer.personalMessage,
     clientEmail: offer.clientEmail,
     services: [],
-    stripePriceId: null,
+    stripeLookupKey: null,
     quantity: 1, // Default quantity for fallback
   }
 }
@@ -137,8 +137,8 @@ function createOfferItemFromPackage(
   pricingData: Awaited<ReturnType<typeof fetchOfferPricingData>>,
   totalPackages: number,
 ) {
-  const stripePriceId = packageItem.stripePriceId
-  const pricing = stripePriceId ? pricingData[stripePriceId] : null
+  const stripeLookupKey = packageItem.stripeLookupKey
+  const pricing = stripeLookupKey ? pricingData[stripeLookupKey] : null
 
   return {
     id: totalPackages === 1 ? offer.id : `${offer.id}-item-${index}`,
@@ -159,7 +159,7 @@ function createOfferItemFromPackage(
     services: packageItem.serviceType
       ? [{ serviceType: packageItem.serviceType }]
       : [],
-    stripePriceId: packageItem.stripePriceId,
+    stripeLookupKey: packageItem.stripeLookupKey,
     quantity: packageItem.quantity,
   }
 }

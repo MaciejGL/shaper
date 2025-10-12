@@ -29,13 +29,13 @@ interface StripePriceData {
   }
 }
 
-export function useStripePrice(priceId: string | null) {
+export function useStripePrice(lookupKey: string | null) {
   const [data, setData] = useState<StripePriceData | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!priceId) {
+    if (!lookupKey) {
       setData(null)
       setIsLoading(false)
       setError(null)
@@ -47,7 +47,7 @@ export function useStripePrice(priceId: string | null) {
       setError(null)
 
       try {
-        const priceData = await getStripePriceData(priceId)
+        const priceData = await getStripePriceData(lookupKey)
         setData(priceData)
       } catch (err) {
         setError(
@@ -60,18 +60,18 @@ export function useStripePrice(priceId: string | null) {
     }
 
     fetchPrice()
-  }, [priceId])
+  }, [lookupKey])
 
   return {
     priceData: data,
     isLoading,
     error,
     refetch: () => {
-      if (priceId) {
+      if (lookupKey) {
         const fetchPrice = async () => {
           setIsLoading(true)
           try {
-            const priceData = await getStripePriceData(priceId)
+            const priceData = await getStripePriceData(lookupKey)
             setData(priceData)
           } catch (err) {
             setError(

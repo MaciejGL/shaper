@@ -39,17 +39,26 @@ function formatCurrency(amount: number | null, currency: string): string {
 }
 
 export async function getStripePriceData(
-  priceId: string,
+  lookupKey: string,
 ): Promise<StripePriceData | null> {
   try {
-    if (!priceId) {
+    if (!lookupKey) {
       return null
     }
 
-    // Fetch price with currency options expanded
-    const price = await stripe.prices.retrieve(priceId, {
-      expand: ['currency_options'],
+    // Fetch price by lookup key
+    const prices = await stripe.prices.list({
+      lookup_keys: [lookupKey],
+      limit: 1,
+      expand: ['data.currency_options'],
     })
+
+    if (prices.data.length === 0) {
+      console.warn(`No price found for lookup key: ${lookupKey}`)
+      return null
+    }
+
+    const price = prices.data[0]
 
     return {
       price: {

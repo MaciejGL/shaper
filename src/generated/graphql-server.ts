@@ -2178,7 +2178,7 @@ export type GQLPackageTemplate = {
   isActive: EntireFieldWrapper<Scalars['Boolean']['output']>;
   name: EntireFieldWrapper<Scalars['String']['output']>;
   serviceType?: EntireFieldWrapper<Maybe<GQLServiceType>>;
-  stripePriceId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  stripeLookupKey?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   stripeProductId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainer?: EntireFieldWrapper<Maybe<GQLUser>>;
   trainerId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
@@ -3578,7 +3578,7 @@ export type GQLUserSubscription = {
   packageId: EntireFieldWrapper<Scalars['ID']['output']>;
   startDate: EntireFieldWrapper<Scalars['String']['output']>;
   status: EntireFieldWrapper<GQLSubscriptionStatus>;
-  stripePriceId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
+  stripeLookupKey?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   stripeSubscriptionId?: EntireFieldWrapper<Maybe<Scalars['String']['output']>>;
   trainer?: EntireFieldWrapper<Maybe<GQLUser>>;
   trainerId?: EntireFieldWrapper<Maybe<Scalars['ID']['output']>>;
@@ -4987,7 +4987,7 @@ export type GQLPackageTemplateResolvers<ContextType = GQLContext, ParentType ext
   isActive?: Resolver<GQLResolversTypes['Boolean'], ParentType, ContextType>;
   name?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   serviceType?: Resolver<Maybe<GQLResolversTypes['ServiceType']>, ParentType, ContextType>;
-  stripePriceId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  stripeLookupKey?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   stripeProductId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainer?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
   trainerId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;
@@ -5532,7 +5532,7 @@ export type GQLUserSubscriptionResolvers<ContextType = GQLContext, ParentType ex
   packageId?: Resolver<GQLResolversTypes['ID'], ParentType, ContextType>;
   startDate?: Resolver<GQLResolversTypes['String'], ParentType, ContextType>;
   status?: Resolver<GQLResolversTypes['SubscriptionStatus'], ParentType, ContextType>;
-  stripePriceId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
+  stripeLookupKey?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   stripeSubscriptionId?: Resolver<Maybe<GQLResolversTypes['String']>, ParentType, ContextType>;
   trainer?: Resolver<Maybe<GQLResolversTypes['User']>, ParentType, ContextType>;
   trainerId?: Resolver<Maybe<GQLResolversTypes['ID']>, ParentType, ContextType>;

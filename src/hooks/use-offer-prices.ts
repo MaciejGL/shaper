@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react'
 
 import { getStripePriceData } from '@/actions/stripe-actions'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
-// Stripe price IDs for each offer - REPLACE WITH YOUR REAL PRICE IDS
-const OFFER_PRICE_IDS = {
-  'coaching-combo': process.env.NEXT_PUBLIC_STRIPE_PRICE_COACHING_COMBO!,
-  'workout-plan': process.env.NEXT_PUBLIC_STRIPE_PRICE_WORKOUT_PLAN!,
-  'meal-plan': process.env.NEXT_PUBLIC_STRIPE_PRICE_MEAL_PLAN!,
-  'in-person': process.env.NEXT_PUBLIC_STRIPE_PRICE_IN_PERSON_SESSION!,
+// Map offer slugs to lookup keys
+const OFFER_LOOKUP_KEY_MAP = {
+  'premium-coaching': STRIPE_LOOKUP_KEYS.PREMIUM_COACHING,
+  'workout-plan': STRIPE_LOOKUP_KEYS.WORKOUT_PLAN,
+  'nutrition-plan': STRIPE_LOOKUP_KEYS.NUTRITION_PLAN,
+  'in-person': STRIPE_LOOKUP_KEYS.IN_PERSON_SESSION,
 } as const
 
 // Country to currency mapping
@@ -66,9 +67,9 @@ export function useOfferPrices(): OfferPrices {
       COUNTRY_CURRENCY[country as keyof typeof COUNTRY_CURRENCY] || 'USD'
 
     const offers = await Promise.all(
-      Object.entries(OFFER_PRICE_IDS).map(async ([offerId, priceId]) => {
+      Object.entries(OFFER_LOOKUP_KEY_MAP).map(async ([offerId, lookupKey]) => {
         try {
-          const priceData = await getStripePriceData(priceId)
+          const priceData = await getStripePriceData(lookupKey)
           if (!priceData) return { offerId, price: null }
 
           // Get localized price if available

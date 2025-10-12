@@ -51,7 +51,7 @@ type PackageTemplate {
 
   # Stripe integration
   stripeProductId: String
-  stripePriceId: String
+  stripeLookupKey: String
 
   # Trainer assignment
   trainerId: ID

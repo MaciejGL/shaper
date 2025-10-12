@@ -11,10 +11,21 @@ interface PricingInfo {
 }
 
 export async function getStripePricingInfo(
-  priceId: string,
+  lookupKey: string,
 ): Promise<PricingInfo | null> {
   try {
-    const price = await stripe.prices.retrieve(priceId)
+    // Fetch price by lookup key
+    const prices = await stripe.prices.list({
+      lookup_keys: [lookupKey],
+      limit: 1,
+    })
+
+    if (prices.data.length === 0) {
+      console.warn(`No price found for lookup key: ${lookupKey}`)
+      return null
+    }
+
+    const price = prices.data[0]
 
     return {
       amount: price.unit_amount || 0,
@@ -34,22 +45,22 @@ export async function getStripePricingInfo(
 }
 
 export async function getMultipleStripePrices(
-  priceIds: string[],
+  lookupKeys: string[],
 ): Promise<Record<string, PricingInfo | null>> {
   const results: Record<string, PricingInfo | null> = {}
 
   // Process in batches to avoid rate limits
   const batchSize = 10
-  for (let i = 0; i < priceIds.length; i += batchSize) {
-    const batch = priceIds.slice(i, i + batchSize)
-    const batchPromises = batch.map(async (priceId) => {
-      const pricing = await getStripePricingInfo(priceId)
-      return { priceId, pricing }
+  for (let i = 0; i < lookupKeys.length; i += batchSize) {
+    const batch = lookupKeys.slice(i, i + batchSize)
+    const batchPromises = batch.map(async (lookupKey) => {
+      const pricing = await getStripePricingInfo(lookupKey)
+      return { lookupKey, pricing }
     })
 
     const batchResults = await Promise.all(batchPromises)
-    batchResults.forEach(({ priceId, pricing }) => {
-      results[priceId] = pricing
+    batchResults.forEach(({ lookupKey, pricing }) => {
+      results[lookupKey] = pricing
     })
   }
 

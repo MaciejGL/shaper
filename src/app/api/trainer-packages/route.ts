@@ -15,7 +15,7 @@ export async function GET() {
     const packageTemplates = await prisma.packageTemplate.findMany({
       where: {
         isActive: true,
-        stripePriceId: { not: null }, // Must have Stripe integration
+        stripeLookupKey: { not: null }, // Must have Stripe integration
         OR: [
           {
             metadata: {
@@ -54,9 +54,19 @@ export async function GET() {
       packageTemplates.map(async (template) => {
         let pricing = null
 
-        if (template.stripePriceId) {
+        if (template.stripeLookupKey) {
           try {
-            const price = await stripe.prices.retrieve(template.stripePriceId)
+            const prices = await stripe.prices.list({
+              lookup_keys: [template.stripeLookupKey],
+              limit: 1,
+            })
+            const price = prices.data[0]
+
+            if (!price) {
+              throw new Error(
+                `No price found for lookup key: ${template.stripeLookupKey}`,
+              )
+            }
 
             // For multi-currency prices, we'll show the primary currency
             pricing = {
@@ -72,7 +82,7 @@ export async function GET() {
             }
           } catch (error) {
             console.warn(
-              `Failed to fetch pricing for ${template.stripePriceId}:`,
+              `Failed to fetch pricing for ${template.stripeLookupKey}:`,
               error,
             )
           }
@@ -86,7 +96,7 @@ export async function GET() {
           id: template.id,
           name: template.name,
           description: template.description,
-          stripePriceId: template.stripePriceId,
+          stripeLookupKey: template.stripeLookupKey,
           pricing,
           serviceCategory,
           serviceType,

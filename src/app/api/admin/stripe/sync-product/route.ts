@@ -121,12 +121,24 @@ export async function POST(request: NextRequest) {
       where: { stripeProductId: product.id },
     })
 
-    // Use the first active price (single price ID approach)
-    const stripePriceId = prices.data.length > 0 ? prices.data[0].id : null
+    // Extract lookup key from the first active price
+    const firstPrice = prices.data.length > 0 ? prices.data[0] : null
 
-    if (!stripePriceId) {
+    if (!firstPrice) {
       return NextResponse.json(
         { error: 'No active prices found for this product' },
+        { status: 400 },
+      )
+    }
+
+    const stripeLookupKey = firstPrice.lookup_key
+
+    if (!stripeLookupKey) {
+      return NextResponse.json(
+        {
+          error:
+            'Price does not have a lookup key. Please set a lookup key in Stripe dashboard.',
+        },
         { status: 400 },
       )
     }
@@ -143,7 +155,7 @@ export async function POST(request: NextRequest) {
       name: `${productNamePrefix}${product.name}`,
       description,
       isActive: product.active,
-      stripePriceId,
+      stripeLookupKey,
       metadata: product.metadata, // Store all Stripe metadata
     }
 
@@ -177,7 +189,7 @@ export async function POST(request: NextRequest) {
         name: packageTemplate.name,
         duration: packageTemplate.duration,
         stripeProductId: packageTemplate.stripeProductId,
-        stripePriceId: packageTemplate.stripePriceId,
+        stripeLookupKey: packageTemplate.stripeLookupKey,
         metadata: packageTemplate.metadata,
       },
       prices: prices.data.length,

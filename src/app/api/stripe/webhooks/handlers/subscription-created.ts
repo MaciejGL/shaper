@@ -8,6 +8,7 @@ import {
 } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { sendEmail } from '@/lib/email/send-mail'
+import { resolvePriceIdToLookupKey } from '@/lib/stripe/lookup-keys'
 import { stripe } from '@/lib/stripe/stripe'
 import { createSupportChatForUser } from '@/lib/support-chat'
 
@@ -62,12 +63,20 @@ export async function handleSubscriptionCreated(
       packageTemplate.trainerId || undefined,
     )
 
+    // Resolve price ID to lookup key
+    const lookupKey = await resolvePriceIdToLookupKey(priceId)
+
+    if (!lookupKey) {
+      console.error(`Could not resolve price ID ${priceId} to lookup key`)
+      return
+    }
+
     // Create new subscription record
     await createUserSubscription({
       user,
       packageTemplate,
       subscription,
-      priceId,
+      lookupKey,
       startDate,
       endDate,
       trialStart,
@@ -179,7 +188,7 @@ async function createUserSubscription({
   user,
   packageTemplate,
   subscription,
-  priceId,
+  lookupKey,
   startDate,
   endDate,
   trialStart,
@@ -190,7 +199,7 @@ async function createUserSubscription({
   user: User & { profile?: UserProfile | null }
   packageTemplate: PackageTemplate
   subscription: Stripe.Subscription
-  priceId: string
+  lookupKey: string
   startDate: Date
   endDate: Date
   trialStart: Date | null
@@ -207,7 +216,7 @@ async function createUserSubscription({
       startDate,
       endDate,
       stripeSubscriptionId: subscription.id,
-      stripePriceId: priceId,
+      stripeLookupKey: lookupKey,
 
       // Trial period setup
       trialStart,

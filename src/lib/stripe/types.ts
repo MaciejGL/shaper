@@ -4,7 +4,7 @@ export interface CheckoutItem {
   package: {
     id: string
     name?: string | null
-    stripePriceId?: string | null
+    stripeLookupKey?: string | null
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: any // Use any to handle JsonValue from Prisma
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,7 +15,7 @@ export interface CheckoutItem {
 export interface PackageWithDiscount {
   id: string
   name: string
-  stripePriceId: string | null
+  stripeLookupKey: string | null
   metadata: Record<string, unknown> | null
   serviceType?: string | null
 }

@@ -4,6 +4,7 @@ import { generateTasks } from '@/constants/task-templates'
 import { PackageTemplate, Prisma, ServiceType } from '@/generated/prisma/client'
 import { prisma } from '@/lib/db'
 import { User } from '@/lib/getUser'
+import { resolvePriceIdToLookupKey } from '@/lib/stripe/lookup-keys'
 import { getPayoutDestination } from '@/lib/stripe/revenue-sharing-utils'
 import { stripe } from '@/lib/stripe/stripe'
 import { createSupportChatForUser } from '@/lib/support-chat'
@@ -283,6 +284,14 @@ async function createServiceDeliveriesForPayment(
       continue
     }
 
+    // Resolve price ID to lookup key
+    const lookupKey = await resolvePriceIdToLookupKey(priceId)
+
+    if (!lookupKey) {
+      console.error(`Could not resolve price ID ${priceId} to lookup key`)
+      continue
+    }
+
     const packageTemplate = await findPackageByStripePriceId(priceId)
 
     if (!packageTemplate) {
@@ -307,7 +316,7 @@ async function createServiceDeliveriesForPayment(
           metadata: {
             checkoutSessionId: session.id,
             offerToken: offerToken || null,
-            stripePriceId: priceId,
+            stripeLookupKey: lookupKey,
             lineItemIndex: lineItems.indexOf(lineItem),
             mode: 'payment',
             deliveryIndex: i + 1,
@@ -370,7 +379,7 @@ async function createSingleServiceDelivery({
       console.error(
         `[createSingleServiceDelivery] No service type found for package: ${packageTemplate.name} variables: 
         {
-        priceId: ${packageTemplate.stripePriceId}, 
+        priceId: ${packageTemplate.stripeLookupKey}, 
         serviceTypeString: ${serviceTypeString}, 
         packageMetadata: ${JSON.stringify(packageMetadata)},
         stripePaymentIntentId: ${stripePaymentIntentId},

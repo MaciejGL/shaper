@@ -9,7 +9,7 @@ export interface PackageSummaryItem {
   quantity: number
   name: string
   description?: string | null
-  stripePriceId?: string | null
+  stripeLookupKey?: string | null
   // Simplified service info from metadata
   serviceType?: ServiceType | null
   serviceCategory?: string

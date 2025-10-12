@@ -27,7 +27,7 @@ query GetMySubscriptions {
     startDate
     endDate
     stripeSubscriptionId
-    stripePriceId
+    stripeLookupKey
     isActive
     daysUntilExpiry
     packageId
@@ -109,7 +109,7 @@ query GetActivePackageTemplates($trainerId: ID) {
     duration
     isActive
     stripeProductId
-    stripePriceId
+    stripeLookupKey
     trainerId
     serviceType
     createdAt

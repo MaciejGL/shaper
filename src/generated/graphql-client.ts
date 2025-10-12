@@ -2176,7 +2176,7 @@ export type GQLPackageTemplate = {
   isActive: Scalars['Boolean']['output'];
   name: Scalars['String']['output'];
   serviceType?: Maybe<GQLServiceType>;
-  stripePriceId?: Maybe<Scalars['String']['output']>;
+  stripeLookupKey?: Maybe<Scalars['String']['output']>;
   stripeProductId?: Maybe<Scalars['String']['output']>;
   trainer?: Maybe<GQLUser>;
   trainerId?: Maybe<Scalars['ID']['output']>;
@@ -3576,7 +3576,7 @@ export type GQLUserSubscription = {
   packageId: Scalars['ID']['output'];
   startDate: Scalars['String']['output'];
   status: GQLSubscriptionStatus;
-  stripePriceId?: Maybe<Scalars['String']['output']>;
+  stripeLookupKey?: Maybe<Scalars['String']['output']>;
   stripeSubscriptionId?: Maybe<Scalars['String']['output']>;
   trainer?: Maybe<GQLUser>;
   trainerId?: Maybe<Scalars['ID']['output']>;
@@ -5028,7 +5028,7 @@ export type GQLCheckPremiumAccessQuery = { __typename?: 'Query', checkPremiumAcc
 export type GQLGetMySubscriptionsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetMySubscriptionsQuery = { __typename?: 'Query', getMySubscriptions: Array<{ __typename?: 'UserSubscription', id: string, userId: string, packageId: string, trainerId?: string | undefined | null, status: GQLSubscriptionStatus, startDate: string, endDate: string, stripeSubscriptionId?: string | undefined | null, stripePriceId?: string | undefined | null, isActive: boolean, daysUntilExpiry: number, createdAt: string, updatedAt: string, trainer?: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } | undefined | null }> };
+export type GQLGetMySubscriptionsQuery = { __typename?: 'Query', getMySubscriptions: Array<{ __typename?: 'UserSubscription', id: string, userId: string, packageId: string, trainerId?: string | undefined | null, status: GQLSubscriptionStatus, startDate: string, endDate: string, stripeSubscriptionId?: string | undefined | null, stripeLookupKey?: string | undefined | null, isActive: boolean, daysUntilExpiry: number, createdAt: string, updatedAt: string, trainer?: { __typename?: 'User', id: string, name?: string | undefined | null, email: string } | undefined | null }> };
 
 export type GQLGetMyServiceDeliveriesQueryVariables = Exact<{
   status?: InputMaybe<GQLDeliveryStatus>;
@@ -5059,7 +5059,7 @@ export type GQLGetActivePackageTemplatesQueryVariables = Exact<{
 }>;
 
 
-export type GQLGetActivePackageTemplatesQuery = { __typename?: 'Query', getActivePackageTemplates: Array<{ __typename?: 'PackageTemplate', id: string, name: string, description?: string | undefined | null, duration: GQLSubscriptionDuration, isActive: boolean, stripeProductId?: string | undefined | null, stripePriceId?: string | undefined | null, trainerId?: string | undefined | null, serviceType?: GQLServiceType | undefined | null, createdAt: string, updatedAt: string }> };
+export type GQLGetActivePackageTemplatesQuery = { __typename?: 'Query', getActivePackageTemplates: Array<{ __typename?: 'PackageTemplate', id: string, name: string, description?: string | undefined | null, duration: GQLSubscriptionDuration, isActive: boolean, stripeProductId?: string | undefined | null, stripeLookupKey?: string | undefined | null, trainerId?: string | undefined | null, serviceType?: GQLServiceType | undefined | null, createdAt: string, updatedAt: string }> };
 
 export type GQLAssignTemplateToSelfMutationVariables = Exact<{
   planId: Scalars['ID']['input'];
@@ -14576,7 +14576,7 @@ export const GetMySubscriptionsDocument = `
     startDate
     endDate
     stripeSubscriptionId
-    stripePriceId
+    stripeLookupKey
     isActive
     daysUntilExpiry
     packageId
@@ -14798,7 +14798,7 @@ export const GetActivePackageTemplatesDocument = `
     duration
     isActive
     stripeProductId
-    stripePriceId
+    stripeLookupKey
     trainerId
     serviceType
     createdAt

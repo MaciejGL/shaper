@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
 import { useCurrentSubscription } from '@/hooks/use-current-subscription'
+import { STRIPE_LOOKUP_KEYS } from '@/lib/stripe/lookup-keys'
 
 export function SubscriptionManagementSection() {
   const { user } = useUser()
@@ -62,13 +63,11 @@ export function SubscriptionManagementSection() {
       }
     }
 
+    const lookupKey = subscriptionData.subscription.package.stripeLookupKey
     const packageName = subscriptionData.subscription.package.name
 
-    // Check for Complete Coaching subscription
-    if (
-      packageName.toLowerCase().includes('complete') ||
-      packageName.toLowerCase().includes('coaching')
-    ) {
+    // Check for Premium Coaching subscription
+    if (lookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_COACHING) {
       return {
         type: 'Coaching',
         title: 'Premium Coaching',
@@ -79,7 +78,10 @@ export function SubscriptionManagementSection() {
     }
 
     // Check for Premium subscription
-    if (packageName.toLowerCase().includes('premium')) {
+    if (
+      lookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_MONTHLY ||
+      lookupKey === STRIPE_LOOKUP_KEYS.PREMIUM_YEARLY
+    ) {
       return {
         type: 'Premium',
         title: 'Premium',

@@ -43,7 +43,7 @@ export async function GET() {
       duration: template.duration,
       isActive: template.isActive,
       stripeProductId: template.stripeProductId,
-      stripePriceId: template.stripePriceId,
+      stripeLookupKey: template.stripeLookupKey,
       trainerId: template.trainerId,
       trainer: template.trainer,
       activeSubscriptions: template._count.subscriptions,
