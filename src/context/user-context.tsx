@@ -107,7 +107,7 @@ export function UserProvider({ children, initialData }: UserProviderProps) {
   }, [session.status, queryClient])
 
   const subscription = subscriptionData?.getMySubscriptionStatus
-  const hasPremium = subscription?.hasPremium ?? false
+  const hasPremium = subscription?.hasPremium ?? true
 
   // Return cached data even during loading state to prevent UI flickering
   // Only clear data when explicitly unauthenticated

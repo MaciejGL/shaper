@@ -1,3 +1,6 @@
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
+import { Button } from '@/components/ui/button'
+import { useUser } from '@/context/user-context'
 import { useWeightConversion } from '@/hooks/use-weight-conversion'
 
 import { AddMeasurementModal } from './add-measurement-modal'
@@ -8,6 +11,7 @@ import { Section } from './section'
 import { StatCard } from './stat-card'
 
 export function MeasurementsOverview({ className }: { className?: string }) {
+  const { hasPremium } = useUser()
   const {
     bodyMeasures,
     getLatestMeasurement,
@@ -32,7 +36,20 @@ export function MeasurementsOverview({ className }: { className?: string }) {
   return (
     <Section
       title="Body Measurements"
-      action={<AddMeasurementModal onSuccess={onMeasurementAdded} />}
+      action={
+        <PremiumButtonWrapper
+          hasPremium={hasPremium}
+          tooltipText="Upgrade to log measurements"
+        >
+          {hasPremium ? (
+            <AddMeasurementModal onSuccess={onMeasurementAdded} />
+          ) : (
+            <Button size="sm" disabled={!hasPremium}>
+              Log
+            </Button>
+          )}
+        </PremiumButtonWrapper>
+      }
     >
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
         <MeasurementCategoryDrawer

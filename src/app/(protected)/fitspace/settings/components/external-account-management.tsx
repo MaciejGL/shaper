@@ -1,66 +1,18 @@
 'use client'
 
 import { ExternalLink, Settings } from 'lucide-react'
-import { useState } from 'react'
-import { toast } from 'sonner'
 
-import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { useOpenUrl } from '@/hooks/use-open-url'
 
 export function ExternalAccountManagement() {
-  const { isNativeApp } = useMobileApp()
-  const [isLoading, setIsLoading] = useState(false)
+  const { openUrl, isLoading } = useOpenUrl({
+    errorMessage: 'Failed to open account management',
+  })
 
-  const handleOpenAccountManagement = async () => {
-    setIsLoading(true)
-
-    try {
-      let accountManagementUrl = `${window.location.origin}/account-management`
-
-      // If in native app, fetch session token and append to URL
-      if (isNativeApp) {
-        try {
-          const response = await fetch('/api/auth/generate-session-token', {
-            method: 'POST',
-          })
-
-          if (response.ok) {
-            const { sessionToken } = await response.json()
-            accountManagementUrl += `?session_token=${encodeURIComponent(sessionToken)}`
-          }
-        } catch (error) {
-          console.error('Failed to generate session token:', error)
-          // Continue without token - user may need to login
-        }
-
-        // Force external browser opening for native app
-        const opened = window.open(
-          accountManagementUrl,
-          '_blank',
-          'noopener,noreferrer,external=true',
-        )
-
-        if (!opened) {
-          // Fallback: create link element
-          const link = document.createElement('a')
-          link.href = accountManagementUrl
-          link.target = '_blank'
-          link.rel = 'noopener noreferrer external'
-          link.style.display = 'none'
-          document.body.appendChild(link)
-          link.click()
-          document.body.removeChild(link)
-        }
-      } else {
-        window.open(accountManagementUrl, '_blank', 'noopener,noreferrer')
-      }
-    } catch (error) {
-      console.error('Error opening account management:', error)
-      toast.error('Failed to open account management')
-    } finally {
-      setIsLoading(false)
-    }
+  const handleOpenAccountManagement = () => {
+    openUrl('/account-management')
   }
 
   return (

@@ -3,7 +3,9 @@
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
 
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
+import { useUser } from '@/context/user-context'
 
 import { Section } from '../section'
 
@@ -13,6 +15,7 @@ import { CreateProgressLogDialog } from './create-progress-log-dialog'
 interface BodyProgressContentProps {}
 
 export function BodyProgressContent({}: BodyProgressContentProps) {
+  const { hasPremium } = useUser()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editLog, setEditLog] = useState<{
     id: string
@@ -48,14 +51,20 @@ export function BodyProgressContent({}: BodyProgressContentProps) {
     <Section
       title="Body Snapshot Timeline"
       action={
-        <Button
-          onClick={() => setIsCreateDialogOpen(true)}
-          variant="default"
-          size="sm"
-          iconOnly={<Plus />}
+        <PremiumButtonWrapper
+          hasPremium={hasPremium}
+          tooltipText="Upgrade to add progress logs"
         >
-          Add Progress Log
-        </Button>
+          <Button
+            onClick={() => setIsCreateDialogOpen(true)}
+            variant="default"
+            size="sm"
+            iconOnly={<Plus />}
+            disabled={!hasPremium}
+          >
+            Add Progress Log
+          </Button>
+        </PremiumButtonWrapper>
       }
     >
       <div className="space-y-6">

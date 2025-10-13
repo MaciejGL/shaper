@@ -3,6 +3,7 @@
 import { List, Plus, Weight } from 'lucide-react'
 import { useState } from 'react'
 
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -49,16 +50,27 @@ export function LogsSection() {
             <Weight className="h-5 w-5 text-blue-500" />
             Body Measurements
           </CardTitle>
-          <AddMeasurementModal onSuccess={onMeasurementAdded}>
-            <Button
-              variant="default"
-              size="sm"
-              iconStart={<Plus />}
-              disabled={!hasPremium}
-            >
-              Log
-            </Button>
-          </AddMeasurementModal>
+          <PremiumButtonWrapper
+            hasPremium={hasPremium}
+            tooltipText="Upgrade to log measurements"
+          >
+            {hasPremium ? (
+              <AddMeasurementModal onSuccess={onMeasurementAdded}>
+                <Button variant="default" size="sm" iconStart={<Plus />}>
+                  Log
+                </Button>
+              </AddMeasurementModal>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                iconStart={<Plus />}
+                disabled={!hasPremium}
+              >
+                Log
+              </Button>
+            )}
+          </PremiumButtonWrapper>
         </CardHeader>
         <MeasurementChart
           measurements={bodyMeasures}

@@ -4,6 +4,7 @@ import { Camera, Images, Pen, Plus } from 'lucide-react'
 import Image from 'next/image'
 import { useState } from 'react'
 
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -80,15 +81,20 @@ export function SnapshotsSection() {
             <Camera className="h-5 w-5 text-purple-500" />
             Progress Snapshots
           </CardTitle>
-          <Button
-            variant="default"
-            size="sm"
-            iconStart={<Plus />}
-            onClick={() => setIsCreateDialogOpen(true)}
-            disabled={!hasPremium}
+          <PremiumButtonWrapper
+            hasPremium={hasPremium}
+            tooltipText="Upgrade to add snapshots"
           >
-            Add
-          </Button>
+            <Button
+              variant="default"
+              size="sm"
+              iconStart={<Plus />}
+              onClick={() => setIsCreateDialogOpen(true)}
+              disabled={!hasPremium}
+            >
+              Add
+            </Button>
+          </PremiumButtonWrapper>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">

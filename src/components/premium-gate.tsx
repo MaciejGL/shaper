@@ -2,12 +2,13 @@
 
 import { Crown, Lock, Sparkles } from 'lucide-react'
 
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useUser } from '@/context/user-context'
+import { useOpenUrl } from '@/hooks/use-open-url'
 import { cn } from '@/lib/utils'
 
-import { ButtonLink } from './ui/button-link'
+import { Badge } from './ui/badge'
+import { Button } from './ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 
 interface PremiumGateProps {
   children: React.ReactNode
@@ -27,10 +28,17 @@ export function PremiumGate({
   className,
 }: PremiumGateProps) {
   const { hasPremium, isLoading } = useUser()
+  const { openUrl, isLoading: isOpeningUrl } = useOpenUrl({
+    errorMessage: 'Failed to open subscription plans',
+  })
 
   // If user has premium access, show the content
   if (hasPremium || isLoading) {
     return children
+  }
+
+  const handleViewPlans = () => {
+    openUrl('/account-management')
   }
 
   // Show premium gate
@@ -47,7 +55,7 @@ export function PremiumGate({
       )}
 
       <Card className="border-2 border-dashed border-primary/20">
-        <CardHeader className="text-center pb-4">
+        <CardHeader className="text-center">
           {!compact && (
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center mb-4">
               <Lock className="w-8 h-8 text-white" />
@@ -95,17 +103,19 @@ export function PremiumGate({
             </div>
           )}
 
-          {!compact && (
-            <div className="pt-4 space-y-3">
-              <ButtonLink
-                href="/fitspace/settings"
-                className="w-full"
-                iconStart={<Crown />}
-              >
-                Upgrade to Premium
-              </ButtonLink>
-            </div>
-          )}
+          <div className="pt-4 space-y-3">
+            <Button
+              onClick={handleViewPlans}
+              className="w-full"
+              size={compact ? 'sm' : 'lg'}
+              iconStart={<Crown />}
+              variant="gradient"
+              loading={isOpeningUrl}
+              disabled={isOpeningUrl}
+            >
+              View Plans
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

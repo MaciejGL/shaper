@@ -3,6 +3,7 @@
 import { Camera } from 'lucide-react'
 import { useState } from 'react'
 
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 import {
   Drawer,
@@ -11,6 +12,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer'
+import { useUser } from '@/context/user-context'
 
 import { BodyProgressTimeline } from '../body-progress/body-progress-timeline'
 import { CreateProgressLogDialog } from '../body-progress/create-progress-log-dialog'
@@ -24,6 +26,7 @@ export function SnapshotTimelineDrawer({
   isOpen,
   onOpenChange,
 }: SnapshotTimelineDrawerProps) {
+  const { hasPremium } = useUser()
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [editLog, setEditLog] = useState<{
     id: string
@@ -75,14 +78,21 @@ export function SnapshotTimelineDrawer({
         </div>
 
         <DrawerFooter>
-          <Button
-            onClick={() => setIsCreateDialogOpen(true)}
-            variant="default"
-            size="sm"
-            iconStart={<Camera />}
+          <PremiumButtonWrapper
+            hasPremium={hasPremium}
+            tooltipText="Upgrade to add snapshots"
           >
-            Add Snapshot
-          </Button>
+            <Button
+              onClick={() => setIsCreateDialogOpen(true)}
+              variant="default"
+              size="sm"
+              iconStart={<Camera />}
+              disabled={!hasPremium}
+              className="w-full"
+            >
+              Add Snapshot
+            </Button>
+          </PremiumButtonWrapper>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

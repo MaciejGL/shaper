@@ -4,6 +4,7 @@ import { formatDistanceToNow, isToday } from 'date-fns'
 import { Calendar, Check, Clock, MoreVertical } from 'lucide-react'
 import { useState } from 'react'
 
+import { PremiumButtonWrapper } from '@/components/premium-button-wrapper'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -76,16 +77,21 @@ export function CheckinScheduleSection() {
               Set up regular reminders to track your progress with measurements
               and photos.
             </CardDescription>
-            <Button
-              onClick={() => setShowSetupModal(true)}
-              iconStart={<Calendar />}
-              className="w-full"
-              size="sm"
-              variant="tertiary"
-              disabled={!hasPremium}
+            <PremiumButtonWrapper
+              hasPremium={hasPremium}
+              tooltipText="Upgrade to schedule check-ins"
             >
-              Schedule Check-ins
-            </Button>
+              <Button
+                onClick={() => setShowSetupModal(true)}
+                iconStart={<Calendar />}
+                className="w-full"
+                size="sm"
+                variant="tertiary"
+                disabled={!hasPremium}
+              >
+                Schedule Check-ins
+              </Button>
+            </PremiumButtonWrapper>
           </CardContent>
         </Card>
 
@@ -230,13 +236,18 @@ export function CheckinScheduleSection() {
           {/* Action Buttons */}
           {shouldShowCheckinButton && (
             <div className="flex gap-2">
-              <Button
-                onClick={() => setShowCheckinDrawer(true)}
-                className="w-full"
-                disabled={!hasPremium}
+              <PremiumButtonWrapper
+                hasPremium={hasPremium}
+                tooltipText="Premium feature - Upgrade to complete check-ins"
               >
-                Start Check-in
-              </Button>
+                <Button
+                  onClick={() => setShowCheckinDrawer(true)}
+                  className="w-full"
+                  disabled={!hasPremium}
+                >
+                  Start Check-in
+                </Button>
+              </PremiumButtonWrapper>
             </div>
           )}
         </CardContent>
