@@ -269,6 +269,13 @@ export async function completeCheckin(
   input: GQLCompleteCheckinInput,
   context: GQLContext,
 ): Promise<CheckinCompletion> {
+  // Check premium access - required for completing check-ins
+  const { checkPremiumAccess } = await import('../subscription/factory')
+  const hasPremium = await checkPremiumAccess(context)
+  if (!hasPremium) {
+    throw new Error('Premium subscription required to complete check-ins')
+  }
+
   const userProfile = await prisma.userProfile.findUnique({
     where: { userId },
     include: { checkinSchedule: true },

@@ -185,6 +185,15 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       throw new Error('User not authenticated')
     }
 
+    // Check premium access - required for creating check-in schedules
+    const { checkPremiumAccess } = await import('../subscription/factory')
+    const hasPremium = await checkPremiumAccess(context)
+    if (!hasPremium) {
+      throw new Error(
+        'Premium subscription required to create check-in schedules',
+      )
+    }
+
     return await createCheckinSchedule(userSession.user.id, input)
   },
 
@@ -192,6 +201,15 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     const userSession = context.user
     if (!userSession) {
       throw new Error('User not authenticated')
+    }
+
+    // Check premium access - required for updating check-in schedules
+    const { checkPremiumAccess } = await import('../subscription/factory')
+    const hasPremium = await checkPremiumAccess(context)
+    if (!hasPremium) {
+      throw new Error(
+        'Premium subscription required to update check-in schedules',
+      )
     }
 
     return await updateCheckinSchedule(userSession.user.id, input)

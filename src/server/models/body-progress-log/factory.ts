@@ -92,6 +92,15 @@ export async function createBodyProgressLogEntry(
   },
   context: GQLContext,
 ): Promise<BodyProgressLog> {
+  // Check premium access - required for creating new progress logs
+  const { checkPremiumAccess } = await import('../subscription/factory')
+  const hasPremium = await checkPremiumAccess(context)
+  if (!hasPremium) {
+    throw new Error(
+      'Premium subscription required to create progress snapshots',
+    )
+  }
+
   const userProfile = await prisma.userProfile.findUnique({
     where: { userId },
     include: {

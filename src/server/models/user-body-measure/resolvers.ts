@@ -145,6 +145,13 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
       throw new Error('User not found')
     }
 
+    // Check premium access - required for adding new body measurements
+    const { checkPremiumAccess } = await import('../subscription/factory')
+    const hasPremium = await checkPremiumAccess(context)
+    if (!hasPremium) {
+      throw new Error('Premium subscription required to add body measurements')
+    }
+
     const userProfile = await prisma.userProfile.findUnique({
       where: { userId: userSession?.user?.id },
     })

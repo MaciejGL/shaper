@@ -759,3 +759,38 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
     return true
   },
 }
+
+// const MUSCLES = [
+//   {
+//     group: 'Abs',
+//     muscles: ['Rectus Abdominus (abs)', 'Transverse Abdominus', 'Obliques'],
+//   },
+//   {
+//     group: 'Arms',
+//     muscles: ['Biceps', 'Triceps', 'Forearms', 'Flexors', 'Extensors'],
+//   },
+//   {
+//     group: 'Back',
+//     muscles: ['Lats', 'Traps', 'Rhomboids', 'Erector Spinae'],
+//   },
+//   {
+//     group: 'Chest',
+//     muscles: ['Pectoralis Major', 'Serratus'],
+//   },
+//   {
+//     group: 'Glutes/Hips',
+//     muscles: ['Glutes', 'Hip Abductors'],
+//   },
+//   {
+//     group: 'Legs',
+//     muscles: ['Quads', 'Hamstrings', 'Adductors', 'Calves', 'Shin'],
+//   },
+//   {
+//     group: 'Neck',
+//     muscles: ['Levator Scapulae'],
+//   },
+//   {
+//     group: 'Shoulders',
+//     muscles: ['Front Delts', 'Side Delts', 'Rear Delts', 'Rotator Cuff'],
+//   },
+// ]
