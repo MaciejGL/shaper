@@ -645,6 +645,30 @@ export async function addExerciseToDay(
   }
 
   return await prisma.$transaction(async (tx) => {
+    // Check for null baseId first
+    if (!input.baseId) {
+      throw new GraphQLError(
+        'Exercise must have a base exercise. Please create a base exercise first.',
+        { extensions: { code: 'MISSING_BASE_EXERCISE' } },
+      )
+    }
+
+    // Check for duplicate baseId on the same day
+    const existingExercise = await tx.trainingExercise.findFirst({
+      where: {
+        dayId: input.dayId,
+        baseId: input.baseId,
+      },
+      select: { id: true, name: true },
+    })
+
+    if (existingExercise) {
+      throw new GraphQLError(
+        `Exercise "${existingExercise.name}" with this base exercise already exists on this day`,
+        { extensions: { code: 'DUPLICATE_BASE_EXERCISE' } },
+      )
+    }
+
     // If inserting at a specific order position, increment order of all exercises >= input.order
     if (input.order !== undefined) {
       await tx.trainingExercise.updateMany({

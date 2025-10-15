@@ -737,9 +737,29 @@ export function useTrainingPlanMutations(trainingId?: string) {
 
     if (!day) return Promise.reject('Day not found')
 
+    // Check for null baseId
+    if (!exercise.baseId) {
+      toast.error('Exercise must have a base exercise', {
+        description: 'Please create a base exercise first',
+      })
+      return Promise.reject('Missing base exercise')
+    }
+
+    // Check for duplicate baseId
+    const currentExercises = day.exercises || []
+    const duplicateExercise = currentExercises.find(
+      (ex) => ex.baseId === exercise.baseId,
+    )
+
+    if (duplicateExercise) {
+      toast.error('Duplicate exercise not allowed', {
+        description: `"${duplicateExercise.name}" with this base exercise already exists on this day`,
+      })
+      return Promise.reject('Duplicate baseId')
+    }
+
     debouncedInvalidateQueries()
 
-    const currentExercises = day.exercises || []
     const order =
       atIndex !== undefined ? atIndex + 1 : currentExercises.length + 1
 
