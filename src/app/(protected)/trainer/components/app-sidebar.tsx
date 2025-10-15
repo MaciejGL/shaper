@@ -227,8 +227,7 @@ export function AppSidebar() {
     ],
   )
 
-  const isAdmin =
-    session?.user?.email === process.env.NEXT_PUBLIC_TEST_TRAINER_EMAIL
+  const isAdmin = session?.user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL
 
   const footerItems = [
     {

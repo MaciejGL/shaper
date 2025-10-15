@@ -108,6 +108,26 @@ interface ManualMappingState {
   } | null
 }
 
+interface BaseIdRewriteState {
+  isProcessing: boolean
+  isPreviewing: boolean
+  progress: string | null
+  error: string | null
+  previewData: {
+    exercisesToUpdate: {
+      id: string
+      name: string
+      currentBaseId: string
+      weekNumber: number
+      dayOfWeek: number
+      userEmail: string
+    }[]
+  } | null
+  lastResult: {
+    updated: number
+  } | null
+}
+
 export function ExercisesTab() {
   const [stats, setStats] = useState<ExerciseStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -144,6 +164,18 @@ export function ExercisesTab() {
 
   const [brokenExerciseName, setBrokenExerciseName] = useState('')
   const [correctBaseExerciseName, setCorrectBaseExerciseName] = useState('')
+
+  const [baseIdRewrite, setBaseIdRewrite] = useState<BaseIdRewriteState>({
+    isProcessing: false,
+    isPreviewing: false,
+    progress: null,
+    error: null,
+    previewData: null,
+    lastResult: null,
+  })
+  const [oldBaseId, setOldBaseId] = useState('')
+  const [exerciseNameFilter, setExerciseNameFilter] = useState('')
+  const [newBaseId, setNewBaseId] = useState('')
 
   const fetchStats = async (showLoading = true) => {
     try {
@@ -337,6 +369,121 @@ export function ExercisesTab() {
         error: err instanceof Error ? err.message : 'Mapping failed',
         lastResult: null,
       })
+    }
+  }
+
+  const previewBaseIdRewrite = async () => {
+    if (!oldBaseId.trim() || !newBaseId.trim()) {
+      setBaseIdRewrite((prev) => ({
+        ...prev,
+        error: 'Both old and new baseId are required',
+      }))
+      return
+    }
+
+    try {
+      setBaseIdRewrite({
+        isProcessing: false,
+        isPreviewing: true,
+        progress: 'Loading preview...',
+        error: null,
+        previewData: null,
+        lastResult: null,
+      })
+
+      const response = await fetch('/api/admin/exercises/rewrite-base-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          oldBaseId: oldBaseId.trim(),
+          newBaseId: newBaseId.trim(),
+          exerciseName: exerciseNameFilter.trim() || undefined,
+          preview: true,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to preview: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+
+      setBaseIdRewrite({
+        isProcessing: false,
+        isPreviewing: false,
+        progress: null,
+        error: null,
+        previewData: result,
+        lastResult: null,
+      })
+    } catch (err) {
+      setBaseIdRewrite({
+        isProcessing: false,
+        isPreviewing: false,
+        progress: null,
+        error: err instanceof Error ? err.message : 'Preview failed',
+        previewData: null,
+        lastResult: null,
+      })
+    }
+  }
+
+  const applyBaseIdRewrite = async () => {
+    if (!oldBaseId.trim() || !newBaseId.trim()) {
+      setBaseIdRewrite((prev) => ({
+        ...prev,
+        error: 'Both old and new baseId are required',
+      }))
+      return
+    }
+
+    try {
+      setBaseIdRewrite((prev) => ({
+        ...prev,
+        isProcessing: true,
+        progress: 'Updating exercises...',
+        error: null,
+        lastResult: null,
+      }))
+
+      const response = await fetch('/api/admin/exercises/rewrite-base-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          oldBaseId: oldBaseId.trim(),
+          newBaseId: newBaseId.trim(),
+          exerciseName: exerciseNameFilter.trim() || undefined,
+          preview: false,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Failed to update: ${response.statusText}`)
+      }
+
+      const result = await response.json()
+
+      setBaseIdRewrite({
+        isProcessing: false,
+        isPreviewing: false,
+        progress: `Successfully updated ${result.updated} exercises`,
+        error: null,
+        previewData: null,
+        lastResult: result,
+      })
+
+      // Clear form on success
+      setOldBaseId('')
+      setExerciseNameFilter('')
+      setNewBaseId('')
+    } catch (err) {
+      setBaseIdRewrite((prev) => ({
+        ...prev,
+        isProcessing: false,
+        progress: null,
+        error: err instanceof Error ? err.message : 'Update failed',
+        lastResult: null,
+      }))
     }
   }
 
@@ -835,6 +982,197 @@ export function ExercisesTab() {
                 training exercises and the name of the base exercise they should
                 link to. The system will find the base exercise and update all
                 matching training exercises with null baseId relationships.
+              </AlertDescription>
+            </Alert>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* BaseId Rewrite Tool */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <RefreshCw className="h-5 w-5" />
+            BaseId Rewrite Tool
+          </CardTitle>
+          <CardDescription>
+            Update baseId for training exercises (useful when trainer creates
+            duplicate base exercises)
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Form */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="old-base-id">Old BaseId</Label>
+                <Input
+                  id="old-base-id"
+                  value={oldBaseId}
+                  onChange={(e) => setOldBaseId(e.target.value)}
+                  placeholder="cmb9sh4g9001ruhqrdiqya25y"
+                  disabled={baseIdRewrite.isProcessing}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Current baseId to replace
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="exercise-name-filter">
+                  Exercise Name (Optional)
+                </Label>
+                <Input
+                  id="exercise-name-filter"
+                  value={exerciseNameFilter}
+                  onChange={(e) => setExerciseNameFilter(e.target.value)}
+                  placeholder="Tricep Pushdown"
+                  disabled={baseIdRewrite.isProcessing}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Filter by exact exercise name
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="new-base-id">New BaseId</Label>
+                <Input
+                  id="new-base-id"
+                  value={newBaseId}
+                  onChange={(e) => setNewBaseId(e.target.value)}
+                  placeholder="10bdb05f-d196-4bf7-8968-6df085bffb30"
+                  disabled={baseIdRewrite.isProcessing}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Target baseId to set
+                </p>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={previewBaseIdRewrite}
+                variant="outline"
+                disabled={
+                  baseIdRewrite.isPreviewing ||
+                  baseIdRewrite.isProcessing ||
+                  !oldBaseId.trim() ||
+                  !newBaseId.trim()
+                }
+                loading={baseIdRewrite.isPreviewing}
+              >
+                <AlertCircle className="h-4 w-4 mr-2" />
+                {baseIdRewrite.isPreviewing ? 'Loading...' : 'Preview Changes'}
+              </Button>
+
+              <Button
+                onClick={applyBaseIdRewrite}
+                disabled={
+                  baseIdRewrite.isPreviewing ||
+                  baseIdRewrite.isProcessing ||
+                  !oldBaseId.trim() ||
+                  !newBaseId.trim() ||
+                  !baseIdRewrite.previewData
+                }
+                loading={baseIdRewrite.isProcessing}
+              >
+                <Check className="h-4 w-4 mr-2" />
+                {baseIdRewrite.isProcessing ? 'Applying...' : 'Apply Changes'}
+              </Button>
+            </div>
+
+            {/* Preview Data */}
+            {baseIdRewrite.previewData && (
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <h5 className="font-medium text-blue-900 mb-2">
+                    Preview:{' '}
+                    {baseIdRewrite.previewData.exercisesToUpdate.length}{' '}
+                    exercises will be updated
+                  </h5>
+                  <div className="rounded-lg border bg-white max-h-60 overflow-y-auto">
+                    {baseIdRewrite.previewData.exercisesToUpdate.map(
+                      (exercise) => (
+                        <div
+                          key={exercise.id}
+                          className="flex items-center justify-between p-3 border-b last:border-b-0 text-sm"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-gray-900">
+                              {exercise.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {exercise.userEmail} • Week {exercise.weekNumber}{' '}
+                              Day {exercise.dayOfWeek}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 text-xs">
+                            <code className="px-2 py-1 bg-red-50 text-red-700 rounded">
+                              {exercise.currentBaseId.slice(0, 8)}...
+                            </code>
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <code className="px-2 py-1 bg-green-50 text-green-700 rounded">
+                              {newBaseId.slice(0, 8)}...
+                            </code>
+                          </div>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Progress */}
+            {baseIdRewrite.progress && (
+              <Alert
+                className={`${baseIdRewrite.error ? 'border-red-200' : 'border-blue-200'}`}
+              >
+                <RefreshCw className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="flex items-center gap-2">
+                    {(baseIdRewrite.isProcessing ||
+                      baseIdRewrite.isPreviewing) && (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    )}
+                    <span>{baseIdRewrite.progress}</span>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {/* Error */}
+            {baseIdRewrite.error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{baseIdRewrite.error}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Last Result */}
+            {baseIdRewrite.lastResult && (
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-green-600">
+                    {baseIdRewrite.lastResult.updated}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Exercises Updated
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Information Alert */}
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>How it works:</strong> This tool finds all training
+                exercises with the specified old baseId and updates them to use
+                the new baseId. Use the optional exercise name filter to only
+                update exercises with exact name matches. Always preview changes
+                before applying!
               </AlertDescription>
             </Alert>
           </div>

@@ -7,14 +7,14 @@ import { getCurrentUser } from '@/lib/getUser'
 export async function isAdminUser(): Promise<boolean> {
   try {
     const user = await getCurrentUser()
-    const adminEmail = process.env.NEXT_PUBLIC_TEST_TRAINER_EMAIL
+    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
 
     if (!user || !adminEmail) {
       return false
     }
 
     // Check if user email matches the admin email and user is a trainer
-    return user.user.email === adminEmail && user.user.role === 'TRAINER'
+    return user.user.email === adminEmail
   } catch (error) {
     console.error('Error checking admin access:', error)
     return false
@@ -26,17 +26,13 @@ export async function isAdminUser(): Promise<boolean> {
  */
 export async function requireAdminUser() {
   const user = await getCurrentUser()
-  const adminEmail = process.env.NEXT_PUBLIC_TEST_TRAINER_EMAIL
+  const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
 
   if (!user) {
     throw new Error('Authentication required')
   }
 
-  if (
-    !adminEmail ||
-    user.user.email !== adminEmail ||
-    user.user.role !== 'TRAINER'
-  ) {
+  if (!adminEmail || user.user.email !== adminEmail) {
     throw new Error(
       'Admin access required - only authorized admin user can access this resource',
     )
