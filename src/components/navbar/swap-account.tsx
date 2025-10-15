@@ -18,16 +18,12 @@ export const SwapAccountButton = () => {
     return null
   }
 
-  // Define the email or logic for the other account type
-  const clientEmail = process.env.NEXT_PUBLIC_TEST_CLIENT_EMAIL
-  const client2Email = process.env.NEXT_PUBLIC_TEST_CLIENT2_EMAIL
-  const client3Email = process.env.NEXT_PUBLIC_TEST_CLIENT3_EMAIL
-  const client4Email = process.env.NEXT_PUBLIC_TEST_CLIENT4_EMAIL
-  const trainerEmail = process.env.NEXT_PUBLIC_TEST_TRAINER_EMAIL
-  const trainer2Email = process.env.NEXT_PUBLIC_TEST_TRAINER2_EMAIL
-  const trainer3Email = process.env.NEXT_PUBLIC_TEST_TRAINER3_EMAIL
-  const supportEmail = process.env.NEXT_PUBLIC_TEST_SUPPORT_EMAIL
-
+  const clientEmails = JSON.parse(
+    process.env.NEXT_PUBLIC_TEST_CLIENT_EMAIL || '[]',
+  ) as string[]
+  const trainerEmails = JSON.parse(
+    process.env.NEXT_PUBLIC_TEST_TRAINER_EMAIL || '[]',
+  ) as string[]
   const handleSwap = async (email?: string) => {
     if (!email) {
       console.warn('No email provided')
@@ -39,38 +35,14 @@ export const SwapAccountButton = () => {
   }
 
   const ACCOUNTS = [
-    {
-      email: trainerEmail,
-      label: 'Maciej Trainer',
-    },
-    {
-      email: trainer2Email,
-      label: 'Trainer Fitspace',
-    },
-    {
-      email: trainer3Email,
-      label: 'Dawid Trainer',
-    },
-    {
-      email: clientEmail,
-      label: 'Maciej Client',
-    },
-    {
-      email: client2Email,
-      label: 'kukafrankie@gmail.com',
-    },
-    {
-      email: client3Email,
-      label: 'Irka Client',
-    },
-    {
-      email: client4Email,
-      label: 'Chrystyna Client',
-    },
-    {
-      email: supportEmail,
-      label: 'Support',
-    },
+    ...clientEmails.map((email) => ({
+      email,
+      label: 'Client - ' + email,
+    })),
+    ...trainerEmails.map((email) => ({
+      email,
+      label: 'Trainer - ' + email,
+    })),
   ]
 
   return (

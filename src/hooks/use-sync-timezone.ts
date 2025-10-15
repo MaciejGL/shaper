@@ -8,7 +8,7 @@ import { useUpdateProfileMutation } from '@/generated/graphql-client'
  * Simple hook to sync user's timezone on login
  */
 export function useSyncTimezone(timezone?: string) {
-  const updateProfile = useUpdateProfileMutation()
+  const { mutate: updateProfile } = useUpdateProfileMutation()
 
   useEffect(() => {
     // if (!timezone) return
@@ -16,9 +16,10 @@ export function useSyncTimezone(timezone?: string) {
     const currentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone
 
     if (timezone !== currentTimezone) {
-      updateProfile.mutate({
+      updateProfile({
         input: { timezone: currentTimezone },
       })
     }
-  }, [timezone, updateProfile])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 }

@@ -89,18 +89,24 @@ export function calculateTrainerPlanWeekIndex(
 
 /**
  * Finds the appropriate week for trainer-assigned plans based on start date
+ * Returns both the week and whether we're past the plan end
  */
 export function findTrainerPlanWeek(
   weeks: NavigationWeek[],
   planStartDate: string | null | undefined,
   now: Date,
-): NavigationWeek | undefined {
-  if (weeks.length === 0) return undefined
+): { week: NavigationWeek | undefined; isPastPlanEnd: boolean } {
+  if (weeks.length === 0) return { week: undefined, isPastPlanEnd: false }
 
   const startDate = planStartDate ? new Date(planStartDate) : now
   const weekIndex = calculateTrainerPlanWeekIndex(startDate, now)
+  const isPastPlanEnd = weekIndex >= weeks.length
 
-  return weeks[Math.min(weekIndex, weeks.length - 1)] || weeks[weeks.length - 1]
+  return {
+    week:
+      weeks[Math.min(weekIndex, weeks.length - 1)] || weeks[weeks.length - 1],
+    isPastPlanEnd,
+  }
 }
 
 /**
@@ -131,12 +137,32 @@ export function findFirstNonCompletedDay(
 }
 
 /**
+ * Finds the last day with exercises in a week
+ */
+export function findLastDayWithExercises(
+  days: NavigationDay[],
+): NavigationDay | undefined {
+  // Sort by dayOfWeek in descending order and find last non-rest day with exercises
+  const sortedDays = [...days].sort((a, b) => b.dayOfWeek - a.dayOfWeek)
+  return (
+    sortedDays.find((day) => !day.isRestDay && day.exercisesCount > 0) ||
+    sortedDays[0]
+  )
+}
+
+/**
  * Finds the appropriate day in a week based on current date
  */
 export function findDayInWeek(
   week: NavigationWeek,
   now: Date,
+  isPastPlanEnd: boolean = false,
 ): NavigationDay | undefined {
+  // If we're past the plan end, show the last day with exercises
+  if (isPastPlanEnd) {
+    return findLastDayWithExercises(week.days)
+  }
+
   const trainingDay = jsDateToTrainingDay(now)
 
   // Try to find today's day
@@ -160,18 +186,21 @@ export function getDefaultSelection(plan?: NavigationPlan) {
 
   const now = new Date()
   let defaultWeek: NavigationWeek | undefined
+  let isPastPlanEnd = false
 
   if (isQuickWorkout(plan)) {
     defaultWeek = findQuickWorkoutWeek(plan.weeks, now)
   } else {
-    defaultWeek = findTrainerPlanWeek(plan.weeks, plan.startDate, now)
+    const result = findTrainerPlanWeek(plan.weeks, plan.startDate, now)
+    defaultWeek = result.week
+    isPastPlanEnd = result.isPastPlanEnd
   }
 
   if (!defaultWeek) {
     return { weekId: null, dayId: null }
   }
 
-  const defaultDay = findDayInWeek(defaultWeek, now)
+  const defaultDay = findDayInWeek(defaultWeek, now, isPastPlanEnd)
 
   return {
     weekId: defaultWeek.id,
