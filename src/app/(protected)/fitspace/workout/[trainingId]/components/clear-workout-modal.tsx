@@ -48,10 +48,9 @@ export function ClearWorkoutModal({
     <>
       <Button
         variant="destructive"
-        size="md"
+        size="icon-md"
         onClick={() => setOpen(true)}
-        iconStart={<Trash2 />}
-        className="w-full"
+        iconOnly={<Trash2 />}
       >
         Clear All Exercises
       </Button>

@@ -39,6 +39,7 @@ fragment TrainingTemplate on TrainingPlan {
       exercises {
         id
         name
+        baseId
         restSeconds
         tempo
         warmupSets
