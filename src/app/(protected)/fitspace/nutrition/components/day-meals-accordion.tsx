@@ -70,33 +70,33 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
 
                     {/* Nutrition Information */}
                     <div>
-                      <div className="grid grid-cols-4 gap-3">
-                        <div className="text-center p-2 bg-muted/30 rounded">
-                          <div className="text-base font-semibold text-primary">
+                      <div className="grid grid-cols-4 mt-2">
+                        <div className="text-center p-2 border-r border-border/50">
+                          <div className="text-sm font-semibold text-primary">
                             {Math.round(macros?.calories || 0)}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             calories
                           </div>
                         </div>
-                        <div className="text-center p-2 bg-muted/30 rounded">
-                          <div className="text-base font-semibold text-green-600">
+                        <div className="text-center p-2 border-r border-border/50">
+                          <div className="text-sm font-semibold text-green-600">
                             {Math.round(macros?.protein || 0)}g
                           </div>
                           <div className="text-xs text-muted-foreground">
                             protein
                           </div>
                         </div>
-                        <div className="text-center p-2 bg-muted/30 rounded">
-                          <div className="text-base font-semibold text-blue-600">
+                        <div className="text-center p-2 border-r border-border/50">
+                          <div className="text-sm font-semibold text-blue-600">
                             {Math.round(macros?.carbs || 0)}g
                           </div>
                           <div className="text-xs text-muted-foreground">
                             carbs
                           </div>
                         </div>
-                        <div className="text-center p-2 bg-muted/30 rounded">
-                          <div className="text-base font-semibold text-yellow-600">
+                        <div className="text-center p-2">
+                          <div className="text-sm font-semibold text-yellow-600">
                             {Math.round(macros?.fat || 0)}g
                           </div>
                           <div className="text-xs text-muted-foreground">
@@ -108,14 +108,14 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
 
                     {/* Ingredients */}
                     <div>
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <h4 className="font-medium text-base mb-3 flex items-center gap-2">
                         Ingredients
                       </h4>
                       {meal.ingredients && meal.ingredients.length > 0 ? (
                         <div className="space-y-2">
                           {meal.ingredients
                             .sort((a, b) => a.order - b.order)
-                            .map((ingredientItem, index) => {
+                            .map((ingredientItem) => {
                               // Use override grams if available, otherwise use blueprint grams
                               const override =
                                 planMeal.ingredientOverrides?.find(
@@ -127,9 +127,10 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                               return (
                                 <div
                                   key={ingredientItem.id}
-                                  className="flex items-center gap-2 py-1 text-muted-foreground"
+                                  className="flex items-center gap-1 py-1 text-muted-foreground"
                                 >
-                                  <span>{index + 1}.</span>
+                                  {/* <Dot size={16} className="text-foreground" /> */}
+
                                   <span>{ingredientItem.ingredient.name}</span>
                                   <span className="flex-1 border-b border-dotted border-border self-end mx-1 mb-1 h-0" />
                                   <span className="text-sm text-muted-foreground">
@@ -153,17 +154,16 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                     {meal.instructions && meal.instructions.length > 0 && (
                       <>
                         <div>
-                          <h4 className="font-semibold mb-3 flex items-center gap-2">
-                            <ChefHat className="h-4 w-4 text-primary" />
-                            Cooking Instructions
+                          <h4 className="font-medium text-base mb-3 flex items-center gap-2">
+                            Directions
                           </h4>
                           <div className="space-y-3">
                             {meal.instructions.map((instruction, index) => (
-                              <div key={index} className="flex gap-3">
-                                <div className="flex-shrink-0 w-7 h-7 bg-primary/10 rounded-full flex items-center justify-center text-sm font-medium text-primary">
-                                  {index + 1}
-                                </div>
-                                <p className="text-sm leading-relaxed text-muted-foreground pt-1">
+                              <div key={index} className="flex flex-col">
+                                <span className="text-sm font-medium">
+                                  Step {index + 1}
+                                </span>
+                                <p className="text-sm leading-relaxed text-muted-foreground">
                                   {instruction}
                                 </p>
                               </div>
@@ -191,12 +191,12 @@ export function DayMealsHeader({
 }) {
   return (
     <div className="flex items-center gap-2 mb-2">
-      <SectionIcon icon={ChefHat} size="xs" variant="amber" />
+      <SectionIcon icon={ChefHat} size="sm" variant="amber" />
       <p className="text-lg font-medium">Menu</p>
       <div className="grid grid-cols-[auto_auto_auto_auto] gap-2 w-max ml-auto">
         <div
           className={cn(
-            'text-center text-sm font-medium px-1.5 py-0.5 bg-card rounded-lg',
+            'text-center text-sm font-medium px-2 py-0.5 bg-card rounded-lg',
             loading && 'masked-placeholder-text',
           )}
         >
@@ -204,28 +204,28 @@ export function DayMealsHeader({
         </div>
         <div
           className={cn(
-            'text-center text-sm font-medium px-1.5 py-0.5 bg-card rounded-lg text-blue-600',
+            'text-center text-sm font-medium px-2 py-0.5 bg-card rounded-lg text-blue-600',
             loading && 'masked-placeholder-text',
           )}
         >
-          {Math.round(day?.dailyMacros?.protein || 0)}P
+          {Math.round(day?.dailyMacros?.protein || 0)} P
         </div>
 
         <div
           className={cn(
-            'text-center text-sm font-medium px-1.5 py-0.5 bg-card rounded-lg text-green-600',
+            'text-center text-sm font-medium px-2 py-0.5 bg-card rounded-lg text-green-600',
             loading && 'masked-placeholder-text',
           )}
         >
-          {Math.round(day?.dailyMacros?.carbs || 0)}C
+          {Math.round(day?.dailyMacros?.carbs || 0)} C
         </div>
         <div
           className={cn(
-            'text-center text-sm font-medium px-1.5 py-0.5 bg-card rounded-lg text-yellow-600',
+            'text-center text-sm font-medium px-2 py-0.5 bg-card rounded-lg text-yellow-600',
             loading && 'masked-placeholder-text',
           )}
         >
-          {Math.round(day?.dailyMacros?.fat || 0)}F
+          {Math.round(day?.dailyMacros?.fat || 0)} F
         </div>
       </div>
     </div>

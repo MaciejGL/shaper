@@ -72,12 +72,12 @@ function useUnreadMessageCount(user?: UserContextType['user'] | null) {
 
   const { data: notifications } = useNotificationsQuery(
     {
-      userId: user!.id!,
+      userId: user?.id ?? '',
       skip: 0,
       take: 10,
     },
     {
-      enabled: enableQuery,
+      enabled: enableQuery && Boolean(user?.id),
       refetchInterval: 6 * 60 * 1000, // 6 minutes
     },
   )

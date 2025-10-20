@@ -133,8 +133,8 @@ export function ShoppingList({ day, planId }: ShoppingListProps) {
   return (
     <div>
       <div className="flex items-center gap-2 mb-2">
-        <SectionIcon icon={ShoppingCart} size="xs" variant="sky" />
-        Shopping List for {day.name}
+        <SectionIcon icon={ShoppingCart} size="sm" variant="sky" />
+        <p className="text-base font-medium">Shopping List</p>
       </div>
       <Card
         borderless
