@@ -1,6 +1,6 @@
 'use client'
 
-import { ChefHat, Salad } from 'lucide-react'
+import { ChefHat } from 'lucide-react'
 
 import {
   Accordion,
@@ -31,13 +31,13 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
   }
 
   return (
-    <div className="mt-4">
+    <div>
       <DayMealsHeader day={day} />
 
-      <Accordion type="single" collapsible className="space-y-2">
+      <Accordion type="multiple" className="space-y-2">
         {meals
           .sort((a, b) => a.orderIndex - b.orderIndex)
-          .map((planMeal) => {
+          .map((planMeal, index) => {
             const meal = planMeal.meal
             const macros = planMeal.adjustedMacros
 
@@ -47,10 +47,12 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                 value={planMeal.id}
                 className="rounded-lg bg-card border-none"
               >
-                <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                <AccordionTrigger className="p-4 hover:no-underline">
                   <div className="flex items-center justify-between w-full mr-4">
                     <div className="flex items-center gap-3">
-                      <span className="font-medium text-left">{meal.name}</span>
+                      <span className="text-base font-normal text-left">
+                        {`${index + 1}. ${meal.name}`}
+                      </span>
                     </div>
                   </div>
                 </AccordionTrigger>
@@ -69,7 +71,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                     {/* Nutrition Information */}
                     <div>
                       <div className="grid grid-cols-4 gap-3">
-                        <div className="text-center p-3 bg-muted/30 rounded">
+                        <div className="text-center p-2 bg-muted/30 rounded">
                           <div className="text-base font-semibold text-primary">
                             {Math.round(macros?.calories || 0)}
                           </div>
@@ -77,7 +79,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                             calories
                           </div>
                         </div>
-                        <div className="text-center p-3 bg-muted/30 rounded">
+                        <div className="text-center p-2 bg-muted/30 rounded">
                           <div className="text-base font-semibold text-green-600">
                             {Math.round(macros?.protein || 0)}g
                           </div>
@@ -85,7 +87,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                             protein
                           </div>
                         </div>
-                        <div className="text-center p-3 bg-muted/30 rounded">
+                        <div className="text-center p-2 bg-muted/30 rounded">
                           <div className="text-base font-semibold text-blue-600">
                             {Math.round(macros?.carbs || 0)}g
                           </div>
@@ -93,7 +95,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                             carbs
                           </div>
                         </div>
-                        <div className="text-center p-3 bg-muted/30 rounded">
+                        <div className="text-center p-2 bg-muted/30 rounded">
                           <div className="text-base font-semibold text-yellow-600">
                             {Math.round(macros?.fat || 0)}g
                           </div>
@@ -107,7 +109,6 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                     {/* Ingredients */}
                     <div>
                       <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <Salad className="h-4 w-4 text-primary" />
                         Ingredients
                       </h4>
                       {meal.ingredients && meal.ingredients.length > 0 ? (
@@ -126,7 +127,7 @@ export function DayMealsAccordion({ day }: DayMealsAccordionProps) {
                               return (
                                 <div
                                   key={ingredientItem.id}
-                                  className="flex items-center gap-2 py-1"
+                                  className="flex items-center gap-2 py-1 text-muted-foreground"
                                 >
                                   <span>{index + 1}.</span>
                                   <span>{ingredientItem.ingredient.name}</span>
@@ -191,11 +192,11 @@ export function DayMealsHeader({
   return (
     <div className="flex items-center gap-2 mb-2">
       <SectionIcon icon={ChefHat} size="xs" variant="amber" />
-      <p>Menu</p>
+      <p className="text-lg font-medium">Menu</p>
       <div className="grid grid-cols-[auto_auto_auto_auto] gap-2 w-max ml-auto">
         <div
           className={cn(
-            'text-center text-sm font-medium px-1 py-0.5 bg-card rounded-lg',
+            'text-center text-sm font-medium px-1.5 py-0.5 bg-card rounded-lg',
             loading && 'masked-placeholder-text',
           )}
         >
@@ -203,7 +204,7 @@ export function DayMealsHeader({
         </div>
         <div
           className={cn(
-            'text-center text-sm font-medium px-1 py-0.5 bg-card rounded-lg text-blue-600',
+            'text-center text-sm font-medium px-1.5 py-0.5 bg-card rounded-lg text-blue-600',
             loading && 'masked-placeholder-text',
           )}
         >
@@ -212,7 +213,7 @@ export function DayMealsHeader({
 
         <div
           className={cn(
-            'text-center text-sm font-medium px-1 py-0.5 bg-card rounded-lg text-green-600',
+            'text-center text-sm font-medium px-1.5 py-0.5 bg-card rounded-lg text-green-600',
             loading && 'masked-placeholder-text',
           )}
         >
@@ -220,7 +221,7 @@ export function DayMealsHeader({
         </div>
         <div
           className={cn(
-            'text-center text-sm font-medium px-1 py-0.5 bg-card rounded-lg text-yellow-600',
+            'text-center text-sm font-medium px-1.5 py-0.5 bg-card rounded-lg text-yellow-600',
             loading && 'masked-placeholder-text',
           )}
         >

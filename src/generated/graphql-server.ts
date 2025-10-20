@@ -2328,6 +2328,7 @@ export type GQLQuery = {
   notification?: EntireFieldWrapper<Maybe<GQLNotification>>;
   notifications: EntireFieldWrapper<Array<GQLNotification>>;
   nutritionPlan?: EntireFieldWrapper<Maybe<GQLNutritionPlan>>;
+  nutritionPlans: EntireFieldWrapper<Array<GQLNutritionPlan>>;
   popularIngredients: EntireFieldWrapper<Array<GQLIngredient>>;
   profile?: EntireFieldWrapper<Maybe<GQLUserProfile>>;
   publicExercises: EntireFieldWrapper<Array<GQLBaseExercise>>;
@@ -5137,6 +5138,7 @@ export type GQLQueryResolvers<ContextType = GQLContext, ParentType extends GQLRe
   notification?: Resolver<Maybe<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLQueryNotificationArgs, 'id'>>;
   notifications?: Resolver<Array<GQLResolversTypes['Notification']>, ParentType, ContextType, RequireFields<GQLQueryNotificationsArgs, 'userId'>>;
   nutritionPlan?: Resolver<Maybe<GQLResolversTypes['NutritionPlan']>, ParentType, ContextType, RequireFields<GQLQueryNutritionPlanArgs, 'id'>>;
+  nutritionPlans?: Resolver<Array<GQLResolversTypes['NutritionPlan']>, ParentType, ContextType>;
   popularIngredients?: Resolver<Array<GQLResolversTypes['Ingredient']>, ParentType, ContextType, Partial<GQLQueryPopularIngredientsArgs>>;
   profile?: Resolver<Maybe<GQLResolversTypes['UserProfile']>, ParentType, ContextType>;
   publicExercises?: Resolver<Array<GQLResolversTypes['BaseExercise']>, ParentType, ContextType, Partial<GQLQueryPublicExercisesArgs>>;

@@ -143,6 +143,8 @@ extend type Query {
   # Get client's nutrition plans (only shared ones)
   clientNutritionPlans: [NutritionPlan!]!
 
+  nutritionPlans: [NutritionPlan!]!
+
   # Get specific client's nutrition plans (for trainers)
   getClientNutritionPlans(clientId: ID!): [NutritionPlan!]!
 }

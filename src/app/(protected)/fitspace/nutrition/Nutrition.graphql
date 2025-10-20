@@ -14,7 +14,7 @@ query GetMyMacroTargets {
 }
 
 query GetMyNutritionPlans {
-  clientNutritionPlans {
+  nutritionPlans {
     id
     name
     createdAt

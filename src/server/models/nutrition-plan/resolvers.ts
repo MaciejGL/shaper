@@ -100,6 +100,13 @@ export const Query: GQLQueryResolvers<GQLContext> = {
 
     return nutritionPlans.map((plan) => new NutritionPlan(plan, context))
   },
+  nutritionPlans: async (_, __, context) => {
+    const user = requireAuth(GQLUserRole.Client, context.user)
+
+    const nutritionPlans = await getClientNutritionPlans(user.user.id)
+
+    return nutritionPlans.map((plan) => new NutritionPlan(plan, context))
+  },
 }
 
 export const Mutation: GQLMutationResolvers<GQLContext> = {

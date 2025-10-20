@@ -56,9 +56,10 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
       <Tabs value={activeDay} onValueChange={setActiveDay}>
         <div className="flex items-center gap-2 max-w-screen -mx-2 px-2 overflow-x-auto hide-scrollbar">
-          <TabsList>
+          <TabsList size="lg">
             {days.map((day) => (
               <TabsTrigger
+                size="lg"
                 key={day.id}
                 value={day.dayNumber.toString()}
                 className="flex-shrink-0"
@@ -71,7 +72,7 @@ export function NutritionPlanViewer({ planId }: NutritionPlanViewerProps) {
 
         {days.map((day) => (
           <TabsContent key={day.id} value={day.dayNumber.toString()}>
-            <div className="space-y-6">
+            <div className="space-y-12 mt-8">
               {/* Meals Accordion */}
               <DayMealsAccordion day={day} />
               {/* Shopping List */}

@@ -2326,6 +2326,7 @@ export type GQLQuery = {
   notification?: Maybe<GQLNotification>;
   notifications: Array<GQLNotification>;
   nutritionPlan?: Maybe<GQLNutritionPlan>;
+  nutritionPlans: Array<GQLNutritionPlan>;
   popularIngredients: Array<GQLIngredient>;
   profile?: Maybe<GQLUserProfile>;
   publicExercises: Array<GQLBaseExercise>;
@@ -3875,7 +3876,7 @@ export type GQLGetMyMacroTargetsQuery = { __typename?: 'Query', getMyMacroTarget
 export type GQLGetMyNutritionPlansQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GQLGetMyNutritionPlansQuery = { __typename?: 'Query', clientNutritionPlans: Array<{ __typename?: 'NutritionPlan', id: string, name: string, createdAt: string, updatedAt: string, isSharedWithClient: boolean, sharedAt?: string | undefined | null }> };
+export type GQLGetMyNutritionPlansQuery = { __typename?: 'Query', nutritionPlans: Array<{ __typename?: 'NutritionPlan', id: string, name: string, createdAt: string, updatedAt: string, isSharedWithClient: boolean, sharedAt?: string | undefined | null }> };
 
 export type GQLGetMyNutritionPlanQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6859,7 +6860,7 @@ useGetMyMacroTargetsQuery.fetcher = (variables?: GQLGetMyMacroTargetsQueryVariab
 
 export const GetMyNutritionPlansDocument = `
     query GetMyNutritionPlans {
-  clientNutritionPlans {
+  nutritionPlans {
     id
     name
     createdAt
