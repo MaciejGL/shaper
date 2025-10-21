@@ -15,7 +15,7 @@ import {
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 
 import { CLIENT_LINKS, TRAINER_LINKS } from '@/constants/user-links'
 import { UserContextType, useUser } from '@/context/user-context'
@@ -298,7 +298,11 @@ function TrainerNavbar({ user }: { user?: UserContextType['user'] | null }) {
               <div className="flex flex-col gap-2 p-4">
                 <ModeToggle />
               </div>
-              {!isProduction && <SwapAccountButton />}
+              {!isProduction && (
+                <Suspense>
+                  <SwapAccountButton />
+                </Suspense>
+              )}
             </DrawerFooter>
           </DrawerContent>
         </Drawer>
@@ -426,7 +430,11 @@ function ClientNavbar({ user }: { user?: UserContextType['user'] | null }) {
           <DropdownMenuSeparator />
           <div className="flex flex-col gap-2 px-4 py-4">
             <ModeToggle />
-            {!isProduction && <SwapAccountButton />}
+            {!isProduction && (
+              <Suspense>
+                <SwapAccountButton />
+              </Suspense>
+            )}
           </div>
         </DropdownProvider>
       </DropdownMenuContent>

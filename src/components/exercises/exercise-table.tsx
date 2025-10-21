@@ -226,7 +226,12 @@ export function ExerciseTable({
               <TableHead className="w-[100px] text-center">Premium</TableHead>
               <TableHead className="w-[120px]">Creator</TableHead>
               <TableHead className="w-[100px]">Status</TableHead>
-              <TableHead className="w-[80px] text-center">Related</TableHead>
+              <TableHead
+                className="w-[80px] text-center"
+                title="Number of training exercises using this base exercise across all plans"
+              >
+                Used In
+              </TableHead>
               <TableHead className="w-[80px] text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -370,7 +375,11 @@ export function ExerciseTable({
                   </TableCell>
 
                   <TableCell className="text-center">
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs"
+                      title={`Used in ${exercise.relatedCount || 0} training exercise${(exercise.relatedCount || 0) === 1 ? '' : 's'} across all plans`}
+                    >
                       {exercise.relatedCount || 0}
                     </Badge>
                   </TableCell>

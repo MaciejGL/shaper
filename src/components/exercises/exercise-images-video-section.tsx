@@ -57,7 +57,7 @@ export function ExerciseImagesVideoSection({
           imageType="exercise"
           currentImageUrls={currentImageUrls}
           onImagesChange={handleImagesChange}
-          maxImages={2}
+          maxImages={7}
         />
       </div>
 

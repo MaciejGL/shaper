@@ -125,7 +125,7 @@ export default function NutritionPage() {
           </Card>
         )}
       </div>
-      <div className={cn('space-y-4', hasPlans && hasMacroTargets && 'mt-8')}>
+      <div className={cn('space-y-2', hasPlans && hasMacroTargets && 'mt-4')}>
         <NutritionPlanSelector
           onPlanSelect={handlePlanSelect}
           selectedPlanId={selectedPlanId}

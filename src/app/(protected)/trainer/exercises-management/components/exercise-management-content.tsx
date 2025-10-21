@@ -52,8 +52,10 @@ export function ExerciseManagementContent() {
             Manage the public exercise library available to all users
           </p>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
-          <PlusIcon className="h-4 w-4 mr-2" />
+        <Button
+          onClick={() => setIsCreateDialogOpen(true)}
+          iconStart={<PlusIcon />}
+        >
           Add Public Exercise
         </Button>
       </div>

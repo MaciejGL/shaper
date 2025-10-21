@@ -8,10 +8,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu'
 
-export const SwapAccountButton = () => {
+export function SwapAccountButton() {
   const isProduction = process.env.NODE_ENV === 'production'
 
   if (isProduction) {
@@ -24,26 +26,24 @@ export const SwapAccountButton = () => {
   const trainerEmails = JSON.parse(
     process.env.NEXT_PUBLIC_TEST_TRAINER_EMAIL || '[]',
   ) as string[]
-  const handleSwap = async (email?: string) => {
+  const handleSwap = (email?: string) => {
     if (!email) {
       console.warn('No email provided')
       return
     }
-    await signIn('account-swap', {
+    signIn('account-swap', {
       email,
     })
   }
 
-  const ACCOUNTS = [
-    ...clientEmails.map((email) => ({
-      email,
-      label: 'Client - ' + email,
-    })),
-    ...trainerEmails.map((email) => ({
-      email,
-      label: 'Trainer - ' + email,
-    })),
-  ]
+  const CLIENTS = clientEmails.map((email) => ({
+    email,
+    label: email,
+  }))
+  const TRAINERS = trainerEmails.map((email) => ({
+    email,
+    label: email,
+  }))
 
   return (
     <div>
@@ -54,7 +54,22 @@ export const SwapAccountButton = () => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          {ACCOUNTS.map((account) => (
+          <DropdownMenuLabel className="text-lg font-medium">
+            Trainers
+          </DropdownMenuLabel>
+          {TRAINERS.map((account) => (
+            <DropdownMenuItem
+              key={account.email}
+              onClick={() => handleSwap(account.email)}
+            >
+              {account.label}
+            </DropdownMenuItem>
+          ))}
+          <DropdownMenuSeparator />
+          <DropdownMenuLabel className="text-lg font-medium">
+            Clients
+          </DropdownMenuLabel>
+          {CLIENTS.map((account) => (
             <DropdownMenuItem
               key={account.email}
               onClick={() => handleSwap(account.email)}

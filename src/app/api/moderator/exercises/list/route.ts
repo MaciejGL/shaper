@@ -34,12 +34,10 @@ export async function GET(request: NextRequest) {
 
     // Search filter
     if (search) {
-      conditions.push({
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { description: { contains: search, mode: 'insensitive' } },
-        ],
-      })
+      conditions.push(
+        { name: { contains: search, mode: 'insensitive' } },
+        // { description: { contains: search, mode: 'insensitive' } },
+      )
     }
 
     // Premium filter
@@ -199,6 +197,11 @@ export async function GET(request: NextRequest) {
             },
           },
         },
+        _count: {
+          select: {
+            trainingExercises: true,
+          },
+        },
       },
       orderBy: [
         { name: 'asc' }, // Alphabetical
@@ -207,10 +210,12 @@ export async function GET(request: NextRequest) {
       take: limit,
     })
 
-    // Transform the response to flatten substitute structure
+    // Transform the response to flatten substitute structure and add relatedCount
     const transformedExercises = exercises.map((exercise) => ({
       ...exercise,
       substitutes: exercise.substitutes?.map((sub) => sub.substitute) || [],
+      relatedCount: exercise._count.trainingExercises,
+      _count: undefined, // Remove _count from the response
     }))
 
     return NextResponse.json({
