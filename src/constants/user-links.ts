@@ -11,6 +11,7 @@ export const TRAINER_LINKS = {
     label: 'Teams',
     disabled: false,
   },
+  meals: { href: '/trainer/meals', label: 'Meals', disabled: false },
   exercises: { href: '/trainer/exercises', label: 'Exercises', disabled: true },
   exerciseManagement: {
     href: '/trainer/exercises-management',

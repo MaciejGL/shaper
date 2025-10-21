@@ -8,21 +8,29 @@ import { GQLContext } from '@/types/gql-context'
 
 import {
   addIngredientToMeal,
+  archiveMeal,
   createMeal,
   deleteMeal,
+  duplicateMeal,
   getMealById,
   getTeamMeals,
   removeIngredientFromMeal,
   reorderMealIngredients,
+  unarchiveMeal,
   updateMeal,
   updateMealIngredient,
 } from './factory'
 import Meal, { MealIngredient } from './model'
 
 export const Query: GQLQueryResolvers<GQLContext> = {
-  teamMeals: async (_, { searchQuery }, context) => {
+  teamMeals: async (_, { searchQuery, sortBy, includeArchived }, context) => {
     const user = requireAuth(GQLUserRole.Trainer, context.user)
-    const meals = await getTeamMeals(user.user.id, searchQuery || undefined)
+    const meals = await getTeamMeals(
+      user.user.id,
+      searchQuery || undefined,
+      sortBy || undefined,
+      includeArchived || undefined,
+    )
     return meals.map((meal) => new Meal(meal, context))
   },
 
@@ -49,6 +57,24 @@ export const Mutation: GQLMutationResolvers<GQLContext> = {
   deleteMeal: async (_, { id }, context) => {
     const user = requireAuth(GQLUserRole.Trainer, context.user)
     return await deleteMeal(id, user.user.id)
+  },
+
+  duplicateMeal: async (_, { id, newName }, context) => {
+    const user = requireAuth(GQLUserRole.Trainer, context.user)
+    const meal = await duplicateMeal(id, user.user.id, newName || undefined)
+    return new Meal(meal, context)
+  },
+
+  archiveMeal: async (_, { id }, context) => {
+    const user = requireAuth(GQLUserRole.Trainer, context.user)
+    const meal = await archiveMeal(id, user.user.id)
+    return new Meal(meal, context)
+  },
+
+  unarchiveMeal: async (_, { id }, context) => {
+    const user = requireAuth(GQLUserRole.Trainer, context.user)
+    const meal = await unarchiveMeal(id, user.user.id)
+    return new Meal(meal, context)
   },
 
   addIngredientToMeal: async (_, { input }, context) => {

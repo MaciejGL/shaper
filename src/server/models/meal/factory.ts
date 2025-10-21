@@ -357,6 +357,8 @@ export async function getTrainerTeam(
 export async function getTeamMeals(
   trainerId: string,
   searchQuery?: string,
+  sortBy?: 'NAME' | 'USAGE_COUNT' | 'CREATED_AT',
+  includeArchived?: boolean,
 ): Promise<
   (PrismaMeal & {
     createdBy: PrismaUser
@@ -366,10 +368,18 @@ export async function getTeamMeals(
         createdBy: PrismaUser
       }
     })[]
+    _count: {
+      planMeals: number
+    }
   })[]
 > {
   const teamId = await getTrainerTeamId(trainerId)
-  return await TeamMealLibraryService.getTeamMeals(teamId, searchQuery)
+  return await TeamMealLibraryService.getTeamMeals(
+    teamId,
+    searchQuery,
+    sortBy,
+    includeArchived,
+  )
 }
 
 /**
@@ -559,6 +569,17 @@ export async function updateMeal(
     )
   }
 
+  // Check if meal is used in any nutrition plans
+  const usageCount = await prisma.nutritionPlanMeal.count({
+    where: { mealId },
+  })
+
+  if (usageCount > 0) {
+    throw new GraphQLError(
+      'Cannot edit meal that is used in nutrition plans. Duplicate it to create an editable version.',
+    )
+  }
+
   // Check for duplicate name if name is being changed
   if (input.name && input.name !== existingMeal.name && existingMeal.teamId) {
     const duplicateMeal = await prisma.meal.findFirst({
@@ -641,11 +662,144 @@ export async function deleteMeal(
     )
   }
 
+  // Check if meal is used in any nutrition plans
+  const usageCount = await prisma.nutritionPlanMeal.count({
+    where: { mealId },
+  })
+
+  if (usageCount > 0) {
+    throw new GraphQLError(
+      `Cannot delete meal that is used in ${usageCount} nutrition plan${usageCount > 1 ? 's' : ''}. Duplicate it to create an editable version.`,
+    )
+  }
+
   await prisma.meal.delete({
     where: { id: mealId },
   })
 
   return true
+}
+
+/**
+ * Duplicate meal with all ingredients
+ */
+export async function duplicateMeal(
+  mealId: string,
+  trainerId: string,
+  newName?: string,
+): Promise<
+  PrismaMeal & {
+    createdBy: PrismaUser
+    team: PrismaTeam | null
+    ingredients: (PrismaMealIngredient & {
+      ingredient: PrismaIngredient & {
+        createdBy: PrismaUser
+      }
+    })[]
+  }
+> {
+  // Verify access to the original meal
+  const canAccess = await TeamMealLibraryService.canAccessMeal(
+    mealId,
+    trainerId,
+  )
+  if (!canAccess) {
+    throw new GraphQLError(
+      'Access denied: You can only duplicate meals you have access to',
+    )
+  }
+
+  // Fetch original meal with all ingredients
+  const originalMeal = await prisma.meal.findUnique({
+    where: { id: mealId },
+    include: {
+      ingredients: {
+        include: {
+          ingredient: {
+            include: {
+              createdBy: {
+                include: {
+                  profile: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          orderIndex: 'asc',
+        },
+      },
+    },
+  })
+
+  if (!originalMeal) {
+    throw new GraphQLError('Meal not found')
+  }
+
+  // Get trainer's team
+  const teamId = await getTrainerTeamId(trainerId)
+
+  // Generate new name
+  const duplicateName = newName || `${originalMeal.name} (Copy)`
+
+  // Check for duplicate name
+  const existingMeal = await prisma.meal.findFirst({
+    where: {
+      name: duplicateName,
+      teamId,
+    },
+  })
+
+  if (existingMeal) {
+    throw new GraphQLError('A meal with this name already exists in your team')
+  }
+
+  // Create new meal with ingredients
+  const newMeal = await prisma.meal.create({
+    data: {
+      name: duplicateName,
+      description: originalMeal.description,
+      instructions: originalMeal.instructions,
+      preparationTime: originalMeal.preparationTime,
+      cookingTime: originalMeal.cookingTime,
+      servings: originalMeal.servings,
+      createdById: trainerId,
+      teamId,
+      ingredients: {
+        create: originalMeal.ingredients.map((mi) => ({
+          ingredientId: mi.ingredientId,
+          grams: mi.grams,
+          orderIndex: mi.orderIndex,
+        })),
+      },
+    },
+    include: {
+      createdBy: {
+        include: {
+          profile: true,
+        },
+      },
+      team: true,
+      ingredients: {
+        include: {
+          ingredient: {
+            include: {
+              createdBy: {
+                include: {
+                  profile: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          orderIndex: 'asc',
+        },
+      },
+    },
+  })
+
+  return newMeal
 }
 
 /**
@@ -861,6 +1015,130 @@ export async function reorderMealIngredients(
     },
     orderBy: {
       orderIndex: 'asc',
+    },
+  })
+}
+
+/**
+ * Archive a meal
+ */
+export async function archiveMeal(
+  mealId: string,
+  trainerId: string,
+): Promise<
+  PrismaMeal & {
+    createdBy: PrismaUser
+    team: PrismaTeam | null
+    ingredients: (PrismaMealIngredient & {
+      ingredient: PrismaIngredient & {
+        createdBy: PrismaUser
+      }
+    })[]
+    _count: {
+      planMeals: number
+    }
+  }
+> {
+  const canModify = await canModifyMeal(mealId, trainerId)
+  if (!canModify) {
+    throw new GraphQLError(
+      'Access denied: You can only archive meals you created or if you are a team admin',
+    )
+  }
+
+  return await prisma.meal.update({
+    where: { id: mealId },
+    data: { archived: true },
+    include: {
+      createdBy: {
+        include: {
+          profile: true,
+        },
+      },
+      team: true,
+      ingredients: {
+        include: {
+          ingredient: {
+            include: {
+              createdBy: {
+                include: {
+                  profile: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          orderIndex: 'asc',
+        },
+      },
+      _count: {
+        select: {
+          planMeals: true,
+        },
+      },
+    },
+  })
+}
+
+/**
+ * Unarchive a meal
+ */
+export async function unarchiveMeal(
+  mealId: string,
+  trainerId: string,
+): Promise<
+  PrismaMeal & {
+    createdBy: PrismaUser
+    team: PrismaTeam | null
+    ingredients: (PrismaMealIngredient & {
+      ingredient: PrismaIngredient & {
+        createdBy: PrismaUser
+      }
+    })[]
+    _count: {
+      planMeals: number
+    }
+  }
+> {
+  const canModify = await canModifyMeal(mealId, trainerId)
+  if (!canModify) {
+    throw new GraphQLError(
+      'Access denied: You can only unarchive meals you created or if you are a team admin',
+    )
+  }
+
+  return await prisma.meal.update({
+    where: { id: mealId },
+    data: { archived: false },
+    include: {
+      createdBy: {
+        include: {
+          profile: true,
+        },
+      },
+      team: true,
+      ingredients: {
+        include: {
+          ingredient: {
+            include: {
+              createdBy: {
+                include: {
+                  profile: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          orderIndex: 'asc',
+        },
+      },
+      _count: {
+        select: {
+          planMeals: true,
+        },
+      },
     },
   })
 }

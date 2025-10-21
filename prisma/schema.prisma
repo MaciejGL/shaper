@@ -1027,6 +1027,7 @@ model Meal {
   preparationTime Int?
   cookingTime     Int?
   servings        Int?
+  archived        Boolean             @default(false)
   createdById     String
   teamId          String?
   createdAt       DateTime            @default(now())
@@ -1040,6 +1041,7 @@ model Meal {
   @@index([teamId, name])
   @@index([createdById, createdAt])
   @@index([teamId, name, createdAt])
+  @@index([teamId, archived])
 }
 
 model Ingredient {

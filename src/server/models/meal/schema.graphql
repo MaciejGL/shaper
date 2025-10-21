@@ -6,12 +6,14 @@ type Meal {
   preparationTime: Int
   cookingTime: Int
   servings: Int
+  archived: Boolean!
   ingredients: [MealIngredient!]!
   totalMacros: MacroTotals!
   createdBy: UserPublic
   team: Team
   createdAt: String!
   updatedAt: String!
+  usageCount: Int!
 }
 
 type MealIngredient {
@@ -64,9 +66,19 @@ input ReorderMealIngredientsInput {
   ingredientIds: [ID!]!
 }
 
+enum MealSortBy {
+  NAME
+  USAGE_COUNT
+  CREATED_AT
+}
+
 extend type Query {
   # Get meals for the trainer's team
-  teamMeals(searchQuery: String): [Meal!]!
+  teamMeals(
+    searchQuery: String
+    sortBy: MealSortBy
+    includeArchived: Boolean
+  ): [Meal!]!
 
   # Get a specific meal by ID (with team access control)
   meal(id: ID!): Meal
@@ -77,6 +89,9 @@ extend type Mutation {
   createMeal(input: CreateMealInput!): Meal!
   updateMeal(id: ID!, input: UpdateMealInput!): Meal!
   deleteMeal(id: ID!): Boolean!
+  duplicateMeal(id: ID!, newName: String): Meal!
+  archiveMeal(id: ID!): Meal!
+  unarchiveMeal(id: ID!): Meal!
 
   # Ingredient management within meals
   addIngredientToMeal(input: AddIngredientToMealInput!): MealIngredient!

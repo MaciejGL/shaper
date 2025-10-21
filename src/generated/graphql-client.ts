@@ -943,6 +943,7 @@ export type GQLMarkMessagesAsReadInput = {
 
 export type GQLMeal = {
   __typename?: 'Meal';
+  archived: Scalars['Boolean']['output'];
   cookingTime?: Maybe<Scalars['Int']['output']>;
   createdAt: Scalars['String']['output'];
   createdBy?: Maybe<GQLUserPublic>;
@@ -956,6 +957,7 @@ export type GQLMeal = {
   team?: Maybe<GQLTeam>;
   totalMacros: GQLMacroTotals;
   updatedAt: Scalars['String']['output'];
+  usageCount: Scalars['Int']['output'];
 };
 
 export type GQLMealIngredient = {
@@ -967,6 +969,12 @@ export type GQLMealIngredient = {
   macros: GQLMacroTotals;
   order: Scalars['Int']['output'];
 };
+
+export enum GQLMealSortBy {
+  CreatedAt = 'CREATED_AT',
+  Name = 'NAME',
+  UsageCount = 'USAGE_COUNT'
+}
 
 export type GQLMeeting = {
   __typename?: 'Meeting';
@@ -1117,6 +1125,7 @@ export type GQLMutation = {
   addTeamLocation: GQLTeam;
   addTrainingWeek: Scalars['ID']['output'];
   addUserLocation: GQLUserProfile;
+  archiveMeal: GQLMeal;
   assignTemplateToSelf: Scalars['Boolean']['output'];
   assignTrainingPlanToClient: Scalars['Boolean']['output'];
   cancelCoaching: Scalars['Boolean']['output'];
@@ -1165,6 +1174,7 @@ export type GQLMutation = {
   deleteReview: Scalars['Boolean']['output'];
   deleteTrainingPlan: Scalars['Boolean']['output'];
   deleteUserAccount: Scalars['Boolean']['output'];
+  duplicateMeal: GQLMeal;
   duplicateTrainingPlan: Scalars['ID']['output'];
   duplicateTrainingWeek: Scalars['ID']['output'];
   editMessage: GQLMessage;
@@ -1212,6 +1222,7 @@ export type GQLMutation = {
   shareNutritionPlanWithClient: GQLNutritionPlan;
   startWorkoutFromFavourite: Scalars['ID']['output'];
   swapExercise: GQLSubstitute;
+  unarchiveMeal: GQLMeal;
   unshareNutritionPlanFromClient: GQLNutritionPlan;
   updateBodyMeasurement: GQLUserBodyMeasure;
   updateBodyProgressLog: GQLBodyProgressLog;
@@ -1347,6 +1358,11 @@ export type GQLMutationAddTrainingWeekArgs = {
 
 export type GQLMutationAddUserLocationArgs = {
   input: GQLAddUserLocationInput;
+};
+
+
+export type GQLMutationArchiveMealArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -1570,6 +1586,12 @@ export type GQLMutationDeleteReviewArgs = {
 
 export type GQLMutationDeleteTrainingPlanArgs = {
   id: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationDuplicateMealArgs = {
+  id: Scalars['ID']['input'];
+  newName?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1810,6 +1832,11 @@ export type GQLMutationStartWorkoutFromFavouriteArgs = {
 export type GQLMutationSwapExerciseArgs = {
   exerciseId: Scalars['ID']['input'];
   substituteId: Scalars['ID']['input'];
+};
+
+
+export type GQLMutationUnarchiveMealArgs = {
+  id: Scalars['ID']['input'];
 };
 
 
@@ -2660,7 +2687,9 @@ export type GQLQueryTeamArgs = {
 
 
 export type GQLQueryTeamMealsArgs = {
+  includeArchived?: InputMaybe<Scalars['Boolean']['input']>;
   searchQuery?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<GQLMealSortBy>;
 };
 
 
@@ -4476,6 +4505,59 @@ export type GQLGetExerciseWithSubstitutesQueryVariables = Exact<{
 
 
 export type GQLGetExerciseWithSubstitutesQuery = { __typename?: 'Query', exercise?: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, equipment?: GQLEquipment | undefined | null, images: Array<{ __typename?: 'Image', id: string, url: string, order: number, createdAt: string }>, substitutes: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, originalId: string, substituteId: string, reason?: string | undefined | null, createdAt: string, substitute: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, groupSlug: string }> } }>, canBeSubstitutedBy: Array<{ __typename?: 'BaseExerciseSubstitute', id: string, originalId: string, substituteId: string, reason?: string | undefined | null, createdAt: string, original: { __typename?: 'BaseExercise', id: string, name: string, description?: string | undefined | null, equipment?: GQLEquipment | undefined | null, muscleGroups: Array<{ __typename?: 'MuscleGroup', id: string, name: string, groupSlug: string }> } }> } | undefined | null };
+
+export type GQLGetMealsForLibraryQueryVariables = Exact<{
+  searchQuery?: InputMaybe<Scalars['String']['input']>;
+  sortBy?: InputMaybe<GQLMealSortBy>;
+  includeArchived?: InputMaybe<Scalars['Boolean']['input']>;
+}>;
+
+
+export type GQLGetMealsForLibraryQuery = { __typename?: 'Query', teamMeals: Array<{ __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, archived: boolean, usageCount: number, createdAt: string, updatedAt: string, totalMacros: { __typename?: 'MacroTotals', protein: number, carbs: number, fat: number, calories: number }, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string, proteinPer100g: number, carbsPer100g: number, fatPer100g: number, caloriesPer100g: number } }>, createdBy?: { __typename?: 'UserPublic', id: string, firstName?: string | undefined | null, lastName?: string | undefined | null, email: string } | undefined | null }> };
+
+export type GQLCreateMealInLibraryMutationVariables = Exact<{
+  input: GQLCreateMealInput;
+}>;
+
+
+export type GQLCreateMealInLibraryMutation = { __typename?: 'Mutation', createMeal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, usageCount: number, createdAt: string, updatedAt: string, totalMacros: { __typename?: 'MacroTotals', protein: number, carbs: number, fat: number, calories: number }, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string } }> } };
+
+export type GQLUpdateMealInLibraryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  input: GQLUpdateMealInput;
+}>;
+
+
+export type GQLUpdateMealInLibraryMutation = { __typename?: 'Mutation', updateMeal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, usageCount: number, createdAt: string, updatedAt: string, totalMacros: { __typename?: 'MacroTotals', protein: number, carbs: number, fat: number, calories: number } } };
+
+export type GQLDuplicateMealInLibraryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+  newName?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GQLDuplicateMealInLibraryMutation = { __typename?: 'Mutation', duplicateMeal: { __typename?: 'Meal', id: string, name: string, description?: string | undefined | null, instructions: Array<string>, preparationTime?: number | undefined | null, cookingTime?: number | undefined | null, servings?: number | undefined | null, usageCount: number, createdAt: string, updatedAt: string, totalMacros: { __typename?: 'MacroTotals', protein: number, carbs: number, fat: number, calories: number }, ingredients: Array<{ __typename?: 'MealIngredient', id: string, grams: number, order: number, ingredient: { __typename?: 'Ingredient', id: string, name: string } }> } };
+
+export type GQLDeleteMealInLibraryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLDeleteMealInLibraryMutation = { __typename?: 'Mutation', deleteMeal: boolean };
+
+export type GQLArchiveMealInLibraryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLArchiveMealInLibraryMutation = { __typename?: 'Mutation', archiveMeal: { __typename?: 'Meal', id: string, name: string, archived: boolean, usageCount: number } };
+
+export type GQLUnarchiveMealInLibraryMutationVariables = Exact<{
+  id: Scalars['ID']['input'];
+}>;
+
+
+export type GQLUnarchiveMealInLibraryMutation = { __typename?: 'Mutation', unarchiveMeal: { __typename?: 'Meal', id: string, name: string, archived: boolean, usageCount: number } };
 
 export type GQLGetNutritionPlanQueryVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -11287,6 +11369,318 @@ useInfiniteGetExerciseWithSubstitutesQuery.getKey = (variables: GQLGetExerciseWi
 
 
 useGetExerciseWithSubstitutesQuery.fetcher = (variables: GQLGetExerciseWithSubstitutesQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetExerciseWithSubstitutesQuery, GQLGetExerciseWithSubstitutesQueryVariables>(GetExerciseWithSubstitutesDocument, variables, options);
+
+export const GetMealsForLibraryDocument = `
+    query GetMealsForLibrary($searchQuery: String, $sortBy: MealSortBy, $includeArchived: Boolean) {
+  teamMeals(
+    searchQuery: $searchQuery
+    sortBy: $sortBy
+    includeArchived: $includeArchived
+  ) {
+    id
+    name
+    description
+    instructions
+    preparationTime
+    cookingTime
+    servings
+    archived
+    usageCount
+    totalMacros {
+      protein
+      carbs
+      fat
+      calories
+    }
+    ingredients {
+      id
+      grams
+      order
+      ingredient {
+        id
+        name
+        proteinPer100g
+        carbsPer100g
+        fatPer100g
+        caloriesPer100g
+      }
+    }
+    createdBy {
+      id
+      firstName
+      lastName
+      email
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useGetMealsForLibraryQuery = <
+      TData = GQLGetMealsForLibraryQuery,
+      TError = unknown
+    >(
+      variables?: GQLGetMealsForLibraryQueryVariables,
+      options?: Omit<UseQueryOptions<GQLGetMealsForLibraryQuery, TError, TData>, 'queryKey'> & { queryKey?: UseQueryOptions<GQLGetMealsForLibraryQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useQuery<GQLGetMealsForLibraryQuery, TError, TData>(
+      {
+    queryKey: variables === undefined ? ['GetMealsForLibrary'] : ['GetMealsForLibrary', variables],
+    queryFn: fetchData<GQLGetMealsForLibraryQuery, GQLGetMealsForLibraryQueryVariables>(GetMealsForLibraryDocument, variables),
+    ...options
+  }
+    )};
+
+useGetMealsForLibraryQuery.getKey = (variables?: GQLGetMealsForLibraryQueryVariables) => variables === undefined ? ['GetMealsForLibrary'] : ['GetMealsForLibrary', variables];
+
+export const useInfiniteGetMealsForLibraryQuery = <
+      TData = InfiniteData<GQLGetMealsForLibraryQuery>,
+      TError = unknown
+    >(
+      variables: GQLGetMealsForLibraryQueryVariables,
+      options: Omit<UseInfiniteQueryOptions<GQLGetMealsForLibraryQuery, TError, TData>, 'queryKey'> & { queryKey?: UseInfiniteQueryOptions<GQLGetMealsForLibraryQuery, TError, TData>['queryKey'] }
+    ) => {
+    
+    return useInfiniteQuery<GQLGetMealsForLibraryQuery, TError, TData>(
+      (() => {
+    const { queryKey: optionsQueryKey, ...restOptions } = options;
+    return {
+      queryKey: optionsQueryKey ?? variables === undefined ? ['GetMealsForLibrary.infinite'] : ['GetMealsForLibrary.infinite', variables],
+      queryFn: (metaData) => fetchData<GQLGetMealsForLibraryQuery, GQLGetMealsForLibraryQueryVariables>(GetMealsForLibraryDocument, {...variables, ...(metaData.pageParam ?? {})})(),
+      ...restOptions
+    }
+  })()
+    )};
+
+useInfiniteGetMealsForLibraryQuery.getKey = (variables?: GQLGetMealsForLibraryQueryVariables) => variables === undefined ? ['GetMealsForLibrary.infinite'] : ['GetMealsForLibrary.infinite', variables];
+
+
+useGetMealsForLibraryQuery.fetcher = (variables?: GQLGetMealsForLibraryQueryVariables, options?: RequestInit['headers']) => fetchData<GQLGetMealsForLibraryQuery, GQLGetMealsForLibraryQueryVariables>(GetMealsForLibraryDocument, variables, options);
+
+export const CreateMealInLibraryDocument = `
+    mutation CreateMealInLibrary($input: CreateMealInput!) {
+  createMeal(input: $input) {
+    id
+    name
+    description
+    instructions
+    preparationTime
+    cookingTime
+    servings
+    usageCount
+    totalMacros {
+      protein
+      carbs
+      fat
+      calories
+    }
+    ingredients {
+      id
+      grams
+      order
+      ingredient {
+        id
+        name
+      }
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useCreateMealInLibraryMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLCreateMealInLibraryMutation, TError, GQLCreateMealInLibraryMutationVariables, TContext>) => {
+    
+    return useMutation<GQLCreateMealInLibraryMutation, TError, GQLCreateMealInLibraryMutationVariables, TContext>(
+      {
+    mutationKey: ['CreateMealInLibrary'],
+    mutationFn: (variables?: GQLCreateMealInLibraryMutationVariables) => fetchData<GQLCreateMealInLibraryMutation, GQLCreateMealInLibraryMutationVariables>(CreateMealInLibraryDocument, variables)(),
+    ...options
+  }
+    )};
+
+useCreateMealInLibraryMutation.getKey = () => ['CreateMealInLibrary'];
+
+
+useCreateMealInLibraryMutation.fetcher = (variables: GQLCreateMealInLibraryMutationVariables, options?: RequestInit['headers']) => fetchData<GQLCreateMealInLibraryMutation, GQLCreateMealInLibraryMutationVariables>(CreateMealInLibraryDocument, variables, options);
+
+export const UpdateMealInLibraryDocument = `
+    mutation UpdateMealInLibrary($id: ID!, $input: UpdateMealInput!) {
+  updateMeal(id: $id, input: $input) {
+    id
+    name
+    description
+    instructions
+    preparationTime
+    cookingTime
+    servings
+    usageCount
+    totalMacros {
+      protein
+      carbs
+      fat
+      calories
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useUpdateMealInLibraryMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUpdateMealInLibraryMutation, TError, GQLUpdateMealInLibraryMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUpdateMealInLibraryMutation, TError, GQLUpdateMealInLibraryMutationVariables, TContext>(
+      {
+    mutationKey: ['UpdateMealInLibrary'],
+    mutationFn: (variables?: GQLUpdateMealInLibraryMutationVariables) => fetchData<GQLUpdateMealInLibraryMutation, GQLUpdateMealInLibraryMutationVariables>(UpdateMealInLibraryDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUpdateMealInLibraryMutation.getKey = () => ['UpdateMealInLibrary'];
+
+
+useUpdateMealInLibraryMutation.fetcher = (variables: GQLUpdateMealInLibraryMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUpdateMealInLibraryMutation, GQLUpdateMealInLibraryMutationVariables>(UpdateMealInLibraryDocument, variables, options);
+
+export const DuplicateMealInLibraryDocument = `
+    mutation DuplicateMealInLibrary($id: ID!, $newName: String) {
+  duplicateMeal(id: $id, newName: $newName) {
+    id
+    name
+    description
+    instructions
+    preparationTime
+    cookingTime
+    servings
+    usageCount
+    totalMacros {
+      protein
+      carbs
+      fat
+      calories
+    }
+    ingredients {
+      id
+      grams
+      order
+      ingredient {
+        id
+        name
+      }
+    }
+    createdAt
+    updatedAt
+  }
+}
+    `;
+
+export const useDuplicateMealInLibraryMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDuplicateMealInLibraryMutation, TError, GQLDuplicateMealInLibraryMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDuplicateMealInLibraryMutation, TError, GQLDuplicateMealInLibraryMutationVariables, TContext>(
+      {
+    mutationKey: ['DuplicateMealInLibrary'],
+    mutationFn: (variables?: GQLDuplicateMealInLibraryMutationVariables) => fetchData<GQLDuplicateMealInLibraryMutation, GQLDuplicateMealInLibraryMutationVariables>(DuplicateMealInLibraryDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDuplicateMealInLibraryMutation.getKey = () => ['DuplicateMealInLibrary'];
+
+
+useDuplicateMealInLibraryMutation.fetcher = (variables: GQLDuplicateMealInLibraryMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDuplicateMealInLibraryMutation, GQLDuplicateMealInLibraryMutationVariables>(DuplicateMealInLibraryDocument, variables, options);
+
+export const DeleteMealInLibraryDocument = `
+    mutation DeleteMealInLibrary($id: ID!) {
+  deleteMeal(id: $id)
+}
+    `;
+
+export const useDeleteMealInLibraryMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLDeleteMealInLibraryMutation, TError, GQLDeleteMealInLibraryMutationVariables, TContext>) => {
+    
+    return useMutation<GQLDeleteMealInLibraryMutation, TError, GQLDeleteMealInLibraryMutationVariables, TContext>(
+      {
+    mutationKey: ['DeleteMealInLibrary'],
+    mutationFn: (variables?: GQLDeleteMealInLibraryMutationVariables) => fetchData<GQLDeleteMealInLibraryMutation, GQLDeleteMealInLibraryMutationVariables>(DeleteMealInLibraryDocument, variables)(),
+    ...options
+  }
+    )};
+
+useDeleteMealInLibraryMutation.getKey = () => ['DeleteMealInLibrary'];
+
+
+useDeleteMealInLibraryMutation.fetcher = (variables: GQLDeleteMealInLibraryMutationVariables, options?: RequestInit['headers']) => fetchData<GQLDeleteMealInLibraryMutation, GQLDeleteMealInLibraryMutationVariables>(DeleteMealInLibraryDocument, variables, options);
+
+export const ArchiveMealInLibraryDocument = `
+    mutation ArchiveMealInLibrary($id: ID!) {
+  archiveMeal(id: $id) {
+    id
+    name
+    archived
+    usageCount
+  }
+}
+    `;
+
+export const useArchiveMealInLibraryMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLArchiveMealInLibraryMutation, TError, GQLArchiveMealInLibraryMutationVariables, TContext>) => {
+    
+    return useMutation<GQLArchiveMealInLibraryMutation, TError, GQLArchiveMealInLibraryMutationVariables, TContext>(
+      {
+    mutationKey: ['ArchiveMealInLibrary'],
+    mutationFn: (variables?: GQLArchiveMealInLibraryMutationVariables) => fetchData<GQLArchiveMealInLibraryMutation, GQLArchiveMealInLibraryMutationVariables>(ArchiveMealInLibraryDocument, variables)(),
+    ...options
+  }
+    )};
+
+useArchiveMealInLibraryMutation.getKey = () => ['ArchiveMealInLibrary'];
+
+
+useArchiveMealInLibraryMutation.fetcher = (variables: GQLArchiveMealInLibraryMutationVariables, options?: RequestInit['headers']) => fetchData<GQLArchiveMealInLibraryMutation, GQLArchiveMealInLibraryMutationVariables>(ArchiveMealInLibraryDocument, variables, options);
+
+export const UnarchiveMealInLibraryDocument = `
+    mutation UnarchiveMealInLibrary($id: ID!) {
+  unarchiveMeal(id: $id) {
+    id
+    name
+    archived
+    usageCount
+  }
+}
+    `;
+
+export const useUnarchiveMealInLibraryMutation = <
+      TError = unknown,
+      TContext = unknown
+    >(options?: UseMutationOptions<GQLUnarchiveMealInLibraryMutation, TError, GQLUnarchiveMealInLibraryMutationVariables, TContext>) => {
+    
+    return useMutation<GQLUnarchiveMealInLibraryMutation, TError, GQLUnarchiveMealInLibraryMutationVariables, TContext>(
+      {
+    mutationKey: ['UnarchiveMealInLibrary'],
+    mutationFn: (variables?: GQLUnarchiveMealInLibraryMutationVariables) => fetchData<GQLUnarchiveMealInLibraryMutation, GQLUnarchiveMealInLibraryMutationVariables>(UnarchiveMealInLibraryDocument, variables)(),
+    ...options
+  }
+    )};
+
+useUnarchiveMealInLibraryMutation.getKey = () => ['UnarchiveMealInLibrary'];
+
+
+useUnarchiveMealInLibraryMutation.fetcher = (variables: GQLUnarchiveMealInLibraryMutationVariables, options?: RequestInit['headers']) => fetchData<GQLUnarchiveMealInLibraryMutation, GQLUnarchiveMealInLibraryMutationVariables>(UnarchiveMealInLibraryDocument, variables, options);
 
 export const GetNutritionPlanDocument = `
     query GetNutritionPlan($id: ID!) {

@@ -3,6 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import {
+  ChefHat,
   ChevronRight,
   DumbbellIcon,
   FileIcon,
@@ -216,6 +217,13 @@ export function AppSidebar() {
             },
           ]
         : []),
+      // Meals item
+      {
+        title: TRAINER_LINKS.meals.label,
+        url: TRAINER_LINKS.meals.href,
+        icon: ChefHat,
+        disabled: TRAINER_LINKS.meals.disabled,
+      },
     ],
     [
       isTeamsEnabled,

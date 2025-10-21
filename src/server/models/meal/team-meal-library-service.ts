@@ -29,11 +29,13 @@ export class TeamMealLibraryService {
   }
 
   /**
-   * Get all meals for a team with optional search
+   * Get all meals for a team with optional search and sorting
    */
   static async getTeamMeals(
     teamId: string,
     searchQuery?: string,
+    sortBy?: 'NAME' | 'USAGE_COUNT' | 'CREATED_AT',
+    includeArchived?: boolean,
   ): Promise<
     (PrismaMeal & {
       createdBy: PrismaUser
@@ -43,10 +45,15 @@ export class TeamMealLibraryService {
           createdBy: PrismaUser
         }
       })[]
+      _count: {
+        planMeals: number
+      }
     })[]
   > {
     const whereClause: Prisma.MealWhereInput = {
       teamId,
+      // By default, exclude archived meals unless explicitly requested
+      archived: includeArchived ? undefined : false,
     }
 
     // Add search functionality if query provided
@@ -65,6 +72,24 @@ export class TeamMealLibraryService {
           },
         },
       ]
+    }
+
+    // Determine sort order
+    let orderBy: Prisma.MealOrderByWithRelationInput[] = []
+
+    switch (sortBy) {
+      case 'NAME':
+        orderBy = [{ name: 'asc' }]
+        break
+      case 'USAGE_COUNT':
+        orderBy = [{ planMeals: { _count: 'desc' } }, { name: 'asc' }]
+        break
+      case 'CREATED_AT':
+        orderBy = [{ createdAt: 'desc' }, { name: 'asc' }]
+        break
+      default:
+        // Default sort by name
+        orderBy = [{ name: 'asc' }]
     }
 
     return await prisma.meal.findMany({
@@ -92,15 +117,13 @@ export class TeamMealLibraryService {
             orderIndex: 'asc',
           },
         },
+        _count: {
+          select: {
+            planMeals: true,
+          },
+        },
       },
-      orderBy: [
-        {
-          createdAt: 'desc',
-        },
-        {
-          name: 'asc',
-        },
-      ],
+      orderBy,
     })
   }
 

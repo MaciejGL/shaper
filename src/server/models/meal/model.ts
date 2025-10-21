@@ -6,6 +6,7 @@ import {
   Team as PrismaTeam,
   User as PrismaUser,
 } from '@/generated/prisma/client'
+import { prisma } from '@/lib/db'
 import { GQLContext } from '@/types/gql-context'
 
 import Ingredient, { MacroTotals } from '../ingredient/model'
@@ -67,6 +68,9 @@ export default class Meal implements GQLMeal {
           createdBy?: PrismaUser | null
         }
       })[]
+      _count?: {
+        planMeals?: number
+      }
     },
     protected context: GQLContext,
   ) {}
@@ -97,6 +101,10 @@ export default class Meal implements GQLMeal {
 
   get servings() {
     return this.data.servings || null
+  }
+
+  get archived() {
+    return this.data.archived || false
   }
 
   get createdAt() {
@@ -171,5 +179,25 @@ export default class Meal implements GQLMeal {
       fat: (baseMacros.fat * portionMultiplier * 10) / 10,
       calories: baseMacros.calories * portionMultiplier,
     }
+  }
+
+  /**
+   * Count how many nutrition plans use this meal
+   * Uses pre-fetched count if available to avoid N+1 queries
+   */
+  async usageCount(): Promise<number> {
+    // Use pre-fetched count if available
+    if (this.data._count?.planMeals !== undefined) {
+      return this.data._count.planMeals
+    }
+
+    console.warn('[Meal] Usage count not pre-fetched, querying database')
+
+    // Fallback to query if not pre-fetched
+    return await prisma.nutritionPlanMeal.count({
+      where: {
+        mealId: this.data.id,
+      },
+    })
   }
 }
