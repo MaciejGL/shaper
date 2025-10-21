@@ -206,6 +206,13 @@ export function AppSidebar() {
         icon: DumbbellIcon,
         disabled: TRAINER_LINKS.exercises.disabled,
       },
+      // Meals item
+      {
+        title: TRAINER_LINKS.meals.label,
+        url: TRAINER_LINKS.meals.href,
+        icon: ChefHat,
+        disabled: TRAINER_LINKS.meals.disabled,
+      },
       // Teams item - only show if feature flag is enabled and not loading
       ...(isTeamsEnabled && !isTeamsFeatureLoading
         ? [
@@ -217,13 +224,6 @@ export function AppSidebar() {
             },
           ]
         : []),
-      // Meals item
-      {
-        title: TRAINER_LINKS.meals.label,
-        url: TRAINER_LINKS.meals.href,
-        icon: ChefHat,
-        disabled: TRAINER_LINKS.meals.disabled,
-      },
     ],
     [
       isTeamsEnabled,

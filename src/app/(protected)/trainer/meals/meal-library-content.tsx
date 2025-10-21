@@ -13,9 +13,10 @@ import {
   parseAsStringEnum,
   useQueryStates,
 } from 'nuqs'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -28,6 +29,7 @@ import {
   GQLMealSortBy,
   useGetMealsForLibraryQuery,
 } from '@/generated/graphql-client'
+import { useDebounce } from '@/hooks/use-debounce'
 import { cn } from '@/lib/utils'
 
 import { MealCard } from './components/meal-card'
@@ -71,6 +73,24 @@ export function MealLibraryContent() {
       history: 'push',
     },
   )
+
+  // Local search state for immediate UI updates
+  const [localSearch, setLocalSearch] = useState(filters.search)
+
+  // Debounce search query by 700ms to prevent excessive API calls
+  const debouncedSearch = useDebounce(localSearch, 700)
+
+  // Update URL state when debounced search changes
+  useEffect(() => {
+    if (debouncedSearch !== filters.search) {
+      setFilters({ search: debouncedSearch, page: 1 })
+    }
+  }, [debouncedSearch, filters.search, setFilters])
+
+  // Sync local search with URL state (for browser back/forward)
+  useEffect(() => {
+    setLocalSearch(filters.search)
+  }, [filters.search])
 
   const { data, isLoading } = useGetMealsForLibraryQuery(
     {
@@ -139,60 +159,68 @@ export function MealLibraryContent() {
       </div>
 
       {/* Search, Filter, Sort, and View Toggle */}
-      <div className="flex gap-3 flex-wrap items-center">
+      <div className="flex gap-3 flex-wrap items-end">
         <div className="flex-1 min-w-[200px]">
-          <MealSearchInput
-            value={filters.search}
-            onChange={(value) => handleFilterChange('search', value)}
-          />
+          <MealSearchInput value={localSearch} onChange={setLocalSearch} />
         </div>
-        <Select
-          value={filters.archived}
-          onValueChange={(value) =>
-            handleFilterChange('archived', value as ArchivedFilter)
-          }
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Filter by status..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="active">Active Meals</SelectItem>
-            <SelectItem value="archived">Archived Meals</SelectItem>
-            <SelectItem value="all">All Meals</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
-          value={filters.usage}
-          onValueChange={(value) =>
-            handleFilterChange('usage', value as UsageFilter)
-          }
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Filter by usage..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Meals</SelectItem>
-            <SelectItem value="used">Used in Plans</SelectItem>
-            <SelectItem value="unused">Not Used</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select
-          value={filters.sort}
-          onValueChange={(value) =>
-            handleFilterChange('sort', value as GQLMealSortBy)
-          }
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Sort by..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={GQLMealSortBy.Name}>Name</SelectItem>
-            <SelectItem value={GQLMealSortBy.UsageCount}>Most Used</SelectItem>
-            <SelectItem value={GQLMealSortBy.CreatedAt}>
-              Recently Added
-            </SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="space-y-1">
+          <Label>Active/Archived</Label>
+          <Select
+            value={filters.archived}
+            onValueChange={(value) =>
+              handleFilterChange('archived', value as ArchivedFilter)
+            }
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by status..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active Meals</SelectItem>
+              <SelectItem value="archived">Archived Meals</SelectItem>
+              <SelectItem value="all">All Meals</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label>Used in Plans</Label>
+          <Select
+            value={filters.usage}
+            onValueChange={(value) =>
+              handleFilterChange('usage', value as UsageFilter)
+            }
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Filter by usage..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="used">Used in Plans</SelectItem>
+              <SelectItem value="unused">Not Used</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1">
+          <Label>Sort</Label>
+          <Select
+            value={filters.sort}
+            onValueChange={(value) =>
+              handleFilterChange('sort', value as GQLMealSortBy)
+            }
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Sort by..." />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={GQLMealSortBy.Name}>Name</SelectItem>
+              <SelectItem value={GQLMealSortBy.UsageCount}>
+                Most Used
+              </SelectItem>
+              <SelectItem value={GQLMealSortBy.CreatedAt}>
+                Recently Added
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="flex gap-1 rounded-md border p-1">
           <Button
             variant="ghost"
@@ -264,11 +292,11 @@ export function MealLibraryContent() {
           </div>
           <h3 className="text-lg font-semibold mb-2">No meals found</h3>
           <p className="text-muted-foreground mb-4 max-w-sm">
-            {filters.search
-              ? `No meals match "${filters.search}". Try a different search.`
+            {localSearch
+              ? `No meals match "${localSearch}". Try a different search.`
               : 'Create your first meal to get started with nutrition planning.'}
           </p>
-          {!filters.search && (
+          {!localSearch && (
             <Button
               iconStart={<Plus />}
               onClick={() => setIsCreateDialogOpen(true)}

@@ -27,6 +27,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import type { GQLGetMealsForLibraryQuery } from '@/generated/graphql-client'
+import { useCookingUnits } from '@/lib/cooking-units'
 
 import { ArchiveMealDialog } from './archive-meal-dialog'
 import { DeleteMealDialog } from './delete-meal-dialog'
@@ -38,6 +39,45 @@ type Meal = NonNullable<GQLGetMealsForLibraryQuery['teamMeals']>[number]
 
 interface MealsTableProps {
   meals: Meal[]
+}
+
+function IngredientsTooltip({ meal }: { meal: Meal }) {
+  const { formatIngredient } = useCookingUnits()
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <span className="text-sm text-muted-foreground cursor-pointer">
+            {meal.ingredients.length}
+          </span>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs">
+          <div className="space-y-1">
+            {meal.ingredients
+              .sort((a, b) => a.order - b.order)
+              .map((ingredientItem) => (
+                <div
+                  key={ingredientItem.id}
+                  className="flex items-center gap-1 py-1"
+                >
+                  <span className="text-xs font-medium">
+                    {ingredientItem.ingredient.name}
+                  </span>
+                  <span className="flex-1 border-b border-dotted border-border self-end mx-1 mb-1 h-0" />
+                  <span className="text-xs text-muted-foreground">
+                    {formatIngredient(
+                      ingredientItem.grams,
+                      ingredientItem.ingredient.name,
+                    )}
+                  </span>
+                </div>
+              ))}
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  )
 }
 
 function MealRowActions({ meal }: { meal: Meal }) {
@@ -171,9 +211,7 @@ export function MealsTable({ meals }: MealsTableProps) {
                   </div>
                 </TableCell>
                 <TableCell className="text-center">
-                  <span className="text-sm text-muted-foreground">
-                    {meal.ingredients.length}
-                  </span>
+                  <IngredientsTooltip meal={meal} />
                 </TableCell>
                 <TableCell className="text-right">
                   {Math.round(meal.totalMacros.calories)}
