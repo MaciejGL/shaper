@@ -56,12 +56,14 @@ export const PREMIUM_BENEFITS = [
   'Premium training plans',
   'Premium exercise library',
   'Unlimited training plans',
-  'Meal plans and recipes',
+  'Advanced analytics',
+  'Personal Record tracking',
 ] as const
 
 export const UPGRADE_BENEFITS = [
   'Premium training plans',
   'Premium exercise library',
   'Unlimited training plans',
-  'Meal plans and recipes',
+  'Advanced analytics',
+  'Personal Record tracking',
 ] as const

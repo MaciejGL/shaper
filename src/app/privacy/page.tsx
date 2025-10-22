@@ -65,21 +65,6 @@ export default async function PrivacyPolicyPage() {
                 </div>
               </div>
 
-              {/* Early Stage Disclaimer */}
-              <div className="bg-blue-50 dark:bg-blue-950/30 p-6 rounded-lg border-2 border-blue-300 dark:border-blue-700">
-                <h2 className="text-xl font-semibold mb-3 text-blue-900 dark:text-blue-100 flex items-center">
-                  🚧 Early Stage Product Notice
-                </h2>
-                <p className="text-blue-800 dark:text-blue-200 text-sm">
-                  <strong>Important:</strong> Hypro is currently in early
-                  development. Features, functionality, and data handling
-                  practices may change as we continue to develop and improve the
-                  platform. We will notify users of any significant changes to
-                  this Privacy Policy and provide appropriate migration paths
-                  for your data if needed.
-                </p>
-              </div>
-
               {/* Introduction */}
               <div>
                 <h2 className="text-2xl font-semibold mb-4 text-foreground">

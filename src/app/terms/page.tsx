@@ -65,21 +65,6 @@ export default async function TermsOfServicePage() {
                 </div>
               </div>
 
-              {/* Early Stage Disclaimer */}
-              <div className="bg-blue-50 dark:bg-blue-950/30 p-6 rounded-lg border-2 border-blue-300 dark:border-blue-700">
-                <h2 className="text-xl font-semibold mb-3 text-blue-900 dark:text-blue-100 flex items-center">
-                  🚧 Early Stage Product Notice
-                </h2>
-                <p className="text-blue-800 dark:text-blue-200 text-sm">
-                  <strong>Important:</strong> Hypro is currently in early
-                  development. Features may be modified, added, or removed
-                  during ongoing development. These Terms may be updated to
-                  reflect new functionality. We will notify users of significant
-                  changes and provide reasonable transition periods for any
-                  modifications that affect existing features.
-                </p>
-              </div>
-
               {/* Acceptance */}
               <div>
                 <h2 className="text-2xl font-semibold mb-4 text-foreground">

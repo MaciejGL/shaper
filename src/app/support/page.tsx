@@ -60,20 +60,6 @@ export default async function SupportPage() {
                 </p>
               </div>
 
-              {/* Early Stage Disclaimer */}
-              <div className="bg-blue-50 dark:bg-blue-950/30 p-6 rounded-lg border-2 border-blue-300 dark:border-blue-700">
-                <h2 className="text-xl font-semibold mb-3 text-blue-900 dark:text-blue-100 flex items-center">
-                  🚧 Early Stage Product Notice
-                </h2>
-                <p className="text-blue-800 dark:text-blue-200 text-sm">
-                  <strong>Please note:</strong> Hypro is actively under
-                  development. You may encounter bugs, changing features, or
-                  temporary limitations. We appreciate your patience and
-                  feedback as we continue to improve the platform. Report any
-                  issues to help us make Hypro better!
-                </p>
-              </div>
-
               {/* Contact Cards */}
               <div>
                 <h2 className="text-2xl font-semibold mb-6 text-foreground text-center">
