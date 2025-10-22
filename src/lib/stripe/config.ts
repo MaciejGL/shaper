@@ -32,6 +32,9 @@ export const STRIPE_WEBHOOK_EVENTS = {
   SUBSCRIPTION_CREATED: 'customer.subscription.created',
   SUBSCRIPTION_UPDATED: 'customer.subscription.updated',
   SUBSCRIPTION_DELETED: 'customer.subscription.deleted',
+  // TODO: Add support for paused and resumed subscriptions
+  SUBSCRIPTION_PAUSED: 'customer.subscription.paused',
+  SUBSCRIPTION_RESUMED: 'customer.subscription.resumed',
 
   // Payment events
   PAYMENT_SUCCEEDED: 'invoice.payment_succeeded',
@@ -60,7 +63,7 @@ export const STRIPE_WEBHOOK_EVENTS = {
 // Commission Configuration: Trainers get 88% after fees, Platform takes 11%
 export const COMMISSION_CONFIG = {
   PLATFORM_PERCENTAGE: 11, // Platform commission percentage (10% base + 1% operational)
-  TRAINER_PERCENTAGE: 88, // Trainer percentage after platform fee
+  TRAINER_PERCENTAGE: 89, // Trainer percentage after platform fee
 
   // Stripe fee configuration (trainers cover these)
   STRIPE_FEES: {

@@ -62,6 +62,16 @@ export async function POST(request: NextRequest) {
         await handleSubscriptionDeleted(event.data.object)
         break
 
+      case STRIPE_WEBHOOK_EVENTS.SUBSCRIPTION_PAUSED:
+        // TODO: Add support for paused subscriptions
+        // await handleSubscriptionPaused(event.data.object)
+        break
+
+      case STRIPE_WEBHOOK_EVENTS.SUBSCRIPTION_RESUMED:
+        // TODO: Add support for resumed subscriptions
+        // await handleSubscriptionResumed(event.data.object)
+        break
+
       case STRIPE_WEBHOOK_EVENTS.PAYMENT_SUCCEEDED:
         await handlePaymentSucceeded(event.data.object as Stripe.Invoice)
         break

@@ -17,5 +17,5 @@ if (missingVars.length > 0) {
 }
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-07-30.basil', // Using stable API version for production
+  apiVersion: '2025-09-30.clover', // Using stable API version for production
 })
