@@ -8,9 +8,12 @@ import { MobileAppBanner } from '@/components/mobile-app-banner'
 import { useMobileApp } from '@/components/mobile-app-bridge'
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
+import { useUser } from '@/context/user-context'
 import { useUserPreferences } from '@/context/user-preferences-context'
+import { GQLUserRole } from '@/generated/graphql-client'
 
 export function MobilePushSettings() {
+  const { user } = useUser()
   const { preferences, setNotifications } = useUserPreferences()
   const { isNativeApp, requestPushPermissions, disablePushPermissions } =
     useMobileApp()
@@ -18,6 +21,7 @@ export function MobilePushSettings() {
   const pushEnabled = preferences.notifications?.pushNotifications ?? false
   const checkinRemindersEnabled =
     preferences.notifications?.checkinReminders ?? true
+  const isTrainer = user?.role === GQLUserRole.Trainer
 
   const handleToggle = () => {
     if (!isNativeApp) return
@@ -25,12 +29,10 @@ export function MobilePushSettings() {
     setIsLoading(true)
 
     if (pushEnabled) {
-      // Disable: optimistic update + mobile call
       setNotifications({ pushNotifications: false })
       disablePushPermissions()
       toast.success('Push notifications disabled')
     } else {
-      // Enable: optimistic update + mobile call
       setNotifications({ pushNotifications: true })
       requestPushPermissions()
       toast.success('Push notifications enabled')
@@ -52,7 +54,6 @@ export function MobilePushSettings() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Main push notifications toggle */}
       <div className="flex flex-col gap-4 text-center">
         <div className="flex flex-col justify-center items-center gap-3">
           {pushEnabled ? (
@@ -81,8 +82,7 @@ export function MobilePushSettings() {
         </Button>
       </div>
 
-      {/* Check-in reminders toggle - only show if push notifications are enabled */}
-      {pushEnabled && (
+      {pushEnabled && !isTrainer && (
         <div className="flex items-center justify-between p-4 border border-border rounded-lg">
           <div className="flex-1">
             <p className="font-medium">Check-in Reminders</p>

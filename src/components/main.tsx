@@ -32,7 +32,7 @@ export const Main = ({
 
       <div
         className={cn('w-full grid', {
-          'md:p-2 -mt-2 overflow-hidden': isTrainer,
+          'md:p-2 md:-mt-2 overflow-hidden': isTrainer,
         })}
       >
         <div

@@ -32,12 +32,12 @@ import { NotificationNavbar } from './types'
 
 interface NotificationBellProps {
   notifications?: NotificationNavbar[]
-  user: UserWithSession['user']
+  user: { id: string } | UserWithSession['user']
 }
 
 const useNotifications = (
   notifications: NotificationNavbar[],
-  user: UserWithSession['user'],
+  user: { id: string },
 ) => {
   const [showBadge, setShowBadge] = useState(false)
   const [isOpen, setIsOpen] = useState(false)

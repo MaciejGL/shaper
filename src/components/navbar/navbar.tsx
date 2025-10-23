@@ -4,13 +4,10 @@ import { motion } from 'framer-motion'
 import {
   LogInIcon,
   LogOutIcon,
-  MenuIcon,
   MessageSquare,
-  NotebookTextIcon,
   Settings,
   Settings2Icon,
   UserRoundCogIcon,
-  Users2Icon,
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
@@ -34,13 +31,6 @@ import { ModeToggle } from '../mode-toggle'
 import { SimpleLogo } from '../simple-logo'
 import { Button } from '../ui/button'
 import { ButtonLink } from '../ui/button-link'
-import {
-  Drawer,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTrigger,
-} from '../ui/drawer'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -117,6 +107,10 @@ export const Navbar = ({
       : CLIENT_LINKS.workout.href
   const isFitspace = pathname.startsWith('/fitspace')
 
+  const showMessenger =
+    (user?.user?.role === GQLUserRole.Client && user?.user?.trainerId) ||
+    isTrainer
+
   return (
     <>
       {user && !isTrainer && <motion.div className="h-[60px]" />}
@@ -131,7 +125,7 @@ export const Navbar = ({
             'data-[visible=true]:opacity-100 data-[visible=true]:translate-y-0',
             'data-[visible=false]:opacity-0 data-[visible=false]:translate-y-[-100px] transition-all duration-200',
             'mt-[var(--safe-area-inset-top)]', // Add safe area padding for iOS PWA
-            isFitspace ? 'py-3 px-4' : 'py-0 px-0',
+            'py-3 px-4',
           )}
         >
           <div className="flex items-center gap-2">
@@ -153,22 +147,21 @@ export const Navbar = ({
             ) : (
               <div className="h-[60px]" />
             )}
-            {user?.user?.role === GQLUserRole.Client &&
-              user?.user?.trainerId && (
-                <div className="relative">
-                  <Button
-                    variant="ghost"
-                    iconOnly={<MessageSquare />}
-                    onClick={() => setIsMessengerOpen(true)}
-                    className="rounded-full"
-                  />
-                  {totalUnreadCount > 0 && (
-                    <span className="absolute top-0 right-0 bg-sky-700 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
-                      {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
-                    </span>
-                  )}
-                </div>
-              )}
+            {showMessenger && (
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  iconOnly={<MessageSquare />}
+                  onClick={() => setIsMessengerOpen(true)}
+                  className="rounded-full"
+                />
+                {totalUnreadCount > 0 && (
+                  <span className="absolute top-0 right-0 bg-sky-700 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
+                    {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
+                  </span>
+                )}
+              </div>
+            )}
             {userContext ? (
               <NavbarUser user={userContext} />
             ) : (
@@ -178,12 +171,16 @@ export const Navbar = ({
         </div>
       </div>
 
-      {/* Messenger Modal for Clients */}
-      {user?.user?.role === GQLUserRole.Client && user?.user?.trainerId && (
+      {/* Messenger Modal */}
+      {showMessenger && (
         <MessengerModal
           isOpen={isMessengerOpen}
           onClose={() => setIsMessengerOpen(false)}
-          partnerId={user.user.trainerId}
+          partnerId={
+            user?.user?.role === GQLUserRole.Client
+              ? (user.user.trainerId ?? undefined)
+              : undefined
+          }
         />
       )}
     </>
@@ -219,106 +216,80 @@ function NavbarUser({ user }: { user?: UserContextType['user'] | null }) {
 
 function TrainerNavbar({ user }: { user?: UserContextType['user'] | null }) {
   const isProduction = process.env.NODE_ENV === 'production'
-  const [isMessengerOpen, setIsMessengerOpen] = useState(false)
-  const [selectedPartnerId, setSelectedPartnerId] = useState<
-    string | undefined
-  >(undefined)
-  const { totalUnreadCount } = useUnreadMessageCount(user)
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <>
-      <div className="flex items-center gap-2">
-        <div className="relative">
-          <Button
-            variant="ghost"
-            className="rounded-full"
-            iconOnly={<MessageSquare className="size-5" />}
-            onClick={() => setIsMessengerOpen(true)}
-          />
-          {totalUnreadCount > 0 && (
-            <span className="absolute top-0 right-0 bg-amber-600 text-white text-[10px] rounded-full min-w-[14px] h-[14px] flex items-center justify-center px-1 font-medium">
-              {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
-            </span>
-          )}
-        </div>
-        <Drawer direction="right">
-          <DrawerTrigger asChild>
-            <Button variant="ghost" iconOnly={<MenuIcon />} />
-          </DrawerTrigger>
-          <DrawerContent dialogTitle="Trainer Menu">
-            <DrawerHeader>
-              <div className="flex flex-col items-center gap-2">
-                <UserAvatar
-                  imageUrl={user?.profile?.avatarUrl}
-                  firstName={user?.profile?.firstName ?? ''}
-                  lastName={user?.profile?.lastName ?? ''}
-                  sex={user?.profile?.sex}
-                  withFallbackAvatar
-                />
-                <div>{user?.email}</div>
-              </div>
-            </DrawerHeader>
-            <div className="border-b w-full my-4" />
-            <div className="flex flex-col gap-2 p-4">
-              {/* <NavLink
-            href={TRAINER_LINKS.clients.href}
-            icon={<LayoutDashboardIcon className="h-5 w-5" />}
-            label={TRAINER_LINKS.dashboard.label}
-          /> */}
-
-              <NavLink
-                href={TRAINER_LINKS.clients.href}
-                icon={<Users2Icon className="h-5 w-5" />}
-                label={TRAINER_LINKS.clients.label}
-              />
-              <NavLink
-                href={TRAINER_LINKS.trainings.href}
-                icon={<NotebookTextIcon className="h-5 w-5" />}
-                label={TRAINER_LINKS.trainings.label}
-              />
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          className="rounded-full"
+          iconOnly={
+            <UserAvatar
+              className="size-8"
+              withFallbackAvatar
+              imageUrl={user?.profile?.avatarUrl}
+              firstName={user?.profile?.firstName ?? ''}
+              lastName={user?.profile?.lastName ?? ''}
+              sex={user?.profile?.sex}
+            />
+          }
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
+        <DropdownProvider value={{ closeDropdown: () => setIsOpen(false) }}>
+          <div className="flex items-center gap-2 p-4">
+            <UserAvatar
+              className="size-12"
+              imageUrl={user?.profile?.avatarUrl}
+              firstName={user?.profile?.firstName ?? ''}
+              lastName={user?.profile?.lastName ?? ''}
+              sex={user?.profile?.sex}
+            />
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium">
+                {user?.profile?.firstName} {user?.profile?.lastName}
+              </p>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
-            <div className="border-b w-full my-4" />
-            <div className="flex flex-col gap-2 p-4">
-              <NavLink
-                href={TRAINER_LINKS.profile.href}
-                icon={<UserRoundCogIcon className="h-5 w-5" />}
-                label={TRAINER_LINKS.profile.label}
-              />
-              <NavLink
-                href="#"
-                onClick={() =>
-                  signOut({ callbackUrl: '/login', redirect: true })
-                }
-                icon={<LogOutIcon className="h-5 w-5" />}
-                label="Logout"
-              />
-            </div>
+          </div>
+          <DropdownMenuSeparator />
 
-            <DrawerFooter>
-              <div className="flex flex-col gap-2 p-4">
-                <ModeToggle />
-              </div>
-              {!isProduction && (
-                <Suspense>
-                  <SwapAccountButton />
-                </Suspense>
-              )}
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
-      </div>
+          <DropdownMenuItem asChild>
+            <NavLink
+              href={TRAINER_LINKS.profile.href}
+              icon={<UserRoundCogIcon className="size-4" />}
+              label={TRAINER_LINKS.profile.label}
+            />
+          </DropdownMenuItem>
 
-      {/* Messenger Modal */}
-      <MessengerModal
-        isOpen={isMessengerOpen}
-        onClose={() => {
-          setIsMessengerOpen(false)
-          setSelectedPartnerId(undefined)
-        }}
-        partnerId={selectedPartnerId}
-        onPartnerChange={setSelectedPartnerId}
-      />
-    </>
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem asChild>
+            <NavLink
+              href="#"
+              onClick={() => signOut({ callbackUrl: '/login', redirect: true })}
+              icon={<LogOutIcon className="size-4" />}
+              label="Logout"
+            />
+          </DropdownMenuItem>
+
+          <DropdownMenuSeparator />
+
+          <div className="flex flex-col gap-2 px-4 py-4">
+            <ModeToggle />
+            {!isProduction && (
+              <Suspense>
+                <SwapAccountButton />
+              </Suspense>
+            )}
+          </div>
+        </DropdownProvider>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 
